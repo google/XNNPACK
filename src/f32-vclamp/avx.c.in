@@ -25,6 +25,8 @@ void xnn_f32_vclamp_ukernel__avx_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
   const __m256 vmin = _mm256_load_ps(params->avx.min);
   const __m256 vmax = _mm256_load_ps(params->avx.max);
 
@@ -59,7 +61,7 @@ void xnn_f32_vclamp_ukernel__avx_u${BATCH_TILE}(
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[7] - batch));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
     __m256 vacc = _mm256_maskload_ps(input, vmask);
     vacc = _mm256_max_ps(vmin, vacc);

@@ -27,9 +27,9 @@ void xnn_f32_vhswish_ukernel__avx512f_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m512 vsixth = _mm512_set1_ps(params->avx512.sixth);
-  const __m512 vhalf = _mm512_set1_ps(params->avx512.half);
-  const __m512 vone = _mm512_set1_ps(params->avx512.one);
+  const __m512 vsixth = _mm512_set1_ps(0x1.555556p-3f);
+  const __m512 vhalf = _mm512_set1_ps(0.5f);
+  const __m512 vone = _mm512_set1_ps(1.0f);
   const __m512 vzero = _mm512_setzero_ps();
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {

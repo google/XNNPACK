@@ -29,16 +29,29 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u64_acc2(
   assert(output != NULL);
   assert(sum != NULL);
 
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
+  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
+  const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
+  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
+  const __m256 vc5 = _mm256_set1_ps(0x1.0F9F9Cp-7f);
+  const __m256 vc4 = _mm256_set1_ps(0x1.573A1Ap-5f);
+  const __m256 vc3 = _mm256_set1_ps(0x1.555A80p-3f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.FFFDC6p-2f);
+  const __m256 vc1 = _mm256_set1_ps(0x1.FFFFF6p-1f);
+  const __m256 vdenorm_cutoff = _mm256_set1_ps(-0x1.5D589Ep6f);
+
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vminus_ln2);
+  XNN_FORCE_REALIZATION(vc5);
+  XNN_FORCE_REALIZATION(vc4);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
+
   const __m256 vi_max = _mm256_broadcast_ss(max);
-  const __m256 vlog2e = _mm256_load_ps(params->avx2_rr1_p5.log2e);
-  const __m256 vmagic_bias = _mm256_load_ps(params->avx2_rr1_p5.magic_bias);
-  const __m256 vminus_ln2 = _mm256_load_ps(params->avx2_rr1_p5.minus_ln2);
-  const __m256 vc5 = _mm256_load_ps(params->avx2_rr1_p5.c5);
-  const __m256 vc4 = _mm256_load_ps(params->avx2_rr1_p5.c4);
-  const __m256 vc3 = _mm256_load_ps(params->avx2_rr1_p5.c3);
-  const __m256 vc2 = _mm256_load_ps(params->avx2_rr1_p5.c2);
-  const __m256 vc1 = _mm256_load_ps(params->avx2_rr1_p5.c1);
-  const __m256 vdenorm_cutoff = _mm256_load_ps(params->avx2_rr1_p5.denorm_cutoff);
 
   __m256 vacc0 = _mm256_setzero_ps();
   __m256 vacc1 = _mm256_setzero_ps();
@@ -215,7 +228,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u64_acc2(
   if (batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2_rr1_p5.mask_table[7] - batch));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
     const __m256 vi = _mm256_maskload_ps(input, vmask);
 

@@ -26,10 +26,15 @@ void xnn_f32_vhswish_ukernel__neon_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vsixth = vld1q_dup_f32(&params->scalar.sixth);
-  const float32x4_t vthree = vld1q_dup_f32(&params->scalar.three);
-  const int32x4_t vsix = vreinterpretq_s32_f32(vld1q_dup_f32(&params->scalar.six));
+  const float32x4_t vsixth = vdupq_n_f32(0x1.555556p-3f);
+  const float32x4_t vthree = vdupq_n_f32(3.0f);
+  const int32x4_t vsix = vreinterpretq_s32_f32(vdupq_n_f32(6.0f));
   const int32x4_t vzero = vdupq_n_s32(0);
+
+  XNN_FORCE_REALIZATION(vsixth);
+  XNN_FORCE_REALIZATION(vthree);
+  XNN_FORCE_REALIZATION(vsix);
+  // XNN_FORCE_REALIZATION(vzero);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     float32x4_t vx0123 = vld1q_f32(input); input += 4;

@@ -2861,10 +2861,15 @@ void xnn_f16_vhswish_ukernel__f16c_u16(
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vsixth = _mm256_load_ps(params->avx.sixth);
-  const __m256 vthree = _mm256_load_ps(params->avx.three);
-  const __m128i vsix = _mm_load_si128((const __m128i*) params->avx.six);
+  const __m256 vsixth = _mm256_set1_ps(0x1.554000p-3f);
+  const __m256 vthree = _mm256_set1_ps(3.0f);
+  const __m128i vsix = _mm_set1_epi16(UINT16_C(0x4600));
   const __m128i vzero = _mm_setzero_si128();
+
+  XNN_FORCE_REALIZATION(vsixth);
+  XNN_FORCE_REALIZATION(vthree);
+  XNN_FORCE_REALIZATION(vsix);
+  // XNN_FORCE_REALIZATION(vzero);
 
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
     __m256 vx01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));
@@ -3755,12 +3760,14 @@ void xnn_f32_f16_vcvt_ukernel__f16c_u16(
     size_t batch,
     const float* input,
     void* output,
-    const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const void* params)
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
+
+  static const uint32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
   uint16_t* o = (uint16_t*) output;
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
@@ -3782,7 +3789,7 @@ void xnn_f32_f16_vcvt_ukernel__f16c_u16(
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->f16c.mask_table[7] - batch));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
     const __m256 vf = _mm256_maskload_ps(input, vmask);
 

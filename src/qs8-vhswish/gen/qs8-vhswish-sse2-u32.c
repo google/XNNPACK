@@ -31,7 +31,7 @@ void xnn_qs8_vhswish_ukernel__sse2_u32(
   const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
   const __m128i vinput_scale_div = _mm_load_si128((const __m128i*) params->sse2.input_scale_div);
   const __m128i vscale_ratio = _mm_load_si128((const __m128i*) params->sse2.scale_ratio);
-  const __m128i vhalf = _mm_load_si128((const __m128i*) params->sse2.half);
+  const __m128i vhalf = _mm_set1_epi32(0x4000);
   const __m128i vzero = _mm_setzero_si128();
   for (; batch >= 32 * sizeof(int8_t); batch -= 32 * sizeof(int8_t)) {
     const __m128i vx0 = _mm_loadu_si128((const __m128i*) input);

@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert SSE == 4
-$assert not XOP or AVX
 $assert not AVX or SSE == 4
 $assert REQUANTIZATION == "FP32"
 $assert DATATYPE in ["QC8", "QS8", "QU8"]
@@ -14,14 +13,7 @@ $assert CHANNEL_TILE >= 8
 $assert KERNEL_TILE >= 2
 #include <assert.h>
 
-$if XOP:
-  #ifdef _MSC_VER
-    #include <intrin.h>
-  #else
-    #include <x86intrin.h>
-  #endif
-$else:
-  #include <immintrin.h>
+#include <immintrin.h>
 
 #include "xnnpack/dwconv.h"
 #include "xnnpack/intrinsics-polyfill.h"
@@ -31,7 +23,7 @@ $else:
 $DATATYPE_SPEC = {"QS8": "qs8", "QC8": "qs8_qc8w", "QU8": "qu8"}[DATATYPE]
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("sse2" if DATATYPE == "QU8" else "sse4")
 $PARAMS_UNION = "xnn_qs8_qc8w_conv_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
-$ISA = "xop" if XOP else "avx" if AVX else {4: "sse41"}[SSE]
+$ISA = "avx" if AVX else {4: "sse41"}[SSE]
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $_MM_CVTEPX8_EPI32 = "_mm_cvtepu8_epi32" if DATATYPE == "QU8" else "_mm_cvtepi8_epi32"
 $_MM_PACKXS_EPI16 = "_mm_packus_epi16" if DATATYPE == "QU8" else "_mm_packs_epi16"
@@ -83,10 +75,7 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERN
         i${K} += ${CHANNEL_TILE};
 
         $for C in range(0, CHANNEL_TILE, 4):
-          $if XOP:
-            vacc${ABC[C:C+4]} = _mm_macc_epi32(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}, vacc${ABC[C:C+4]});
-          $else:
-            vacc${ABC[C:C+4]} = _mm_add_epi32(vacc${ABC[C:C+4]}, _mm_mullo_epi32(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}));
+          vacc${ABC[C:C+4]} = _mm_add_epi32(vacc${ABC[C:C+4]}, _mm_mullo_epi32(vi${K}x${ABC[C:C+4]}, vk${K}x${ABC[C:C+4]}));
 
       w = (const void*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${KERNEL_TILE * CHANNEL_TILE} * sizeof(${XINT8_T}));
 
@@ -163,10 +152,7 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERN
           $if CHANNEL_TILE > 4:
             i${K} += 4;
 
-          $if XOP:
-            vacc${ABC[0:4]} = _mm_macc_epi32(vi${K}x${ABC[0:4]}, vk${K}x${ABC[0:4]}, vacc${ABC[0:4]});
-          $else:
-            vacc${ABC[0:4]} = _mm_add_epi32(vacc${ABC[0:4]}, _mm_mullo_epi32(vi${K}x${ABC[0:4]}, vk${K}x${ABC[0:4]}));
+          vacc${ABC[0:4]} = _mm_add_epi32(vacc${ABC[0:4]}, _mm_mullo_epi32(vi${K}x${ABC[0:4]}, vk${K}x${ABC[0:4]}));
 
         $if CHANNEL_TILE > 4:
           k += 4;

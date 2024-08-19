@@ -132,7 +132,6 @@ enum xnn_run_state {
 
 struct f16_f32acc_mean_params {
   union xnn_f16_f32acc_scale_params f16_f32acc_scale;
-  union xnn_f32_f16_cvt_params cvt_params;
 };
 
 struct xnn_operator {
@@ -248,7 +247,6 @@ struct xnn_operator {
     };
     union xnn_f16_chw_params f16_chw;
     union xnn_f32_chw_params f32_chw;
-    union xnn_f32_f16_cvt_params f32_f16_cvt;
     union xnn_f32_qb4w_minmax_params f32_qb4w_minmax;
     union xnn_f32_qc4w_minmax_params f32_qc4w_minmax;
     union xnn_f32_qs8_cvt_params f32_qs8_cvt;
@@ -312,8 +310,6 @@ struct xnn_operator {
     union xnn_f16_tanh_params f16_tanh;
     union xnn_f32_tanh_params f32_tanh;
   } params4;
-  size_t num_post_operation_params;
-  void* post_operation_params;
   enum xnn_operator_type type;
   struct xnn_ukernel ukernel;
 

@@ -137,20 +137,6 @@ typedef void (*xnn_f32_qc8w_gemm_relu_ukernel_fn)(
     size_t cn_stride,
     const union xnn_f32_relu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-// GEneral Matrix Multiplication with post operations
-
-typedef void (*xnn_f32_gemm_post_operation_ukernel_fn)(
-    size_t mr,
-    size_t nr,
-    size_t k,
-    const float* a,
-    size_t a_stride,
-    const float* w,
-    float* c,
-    size_t cm_stride,
-    size_t cn_stride,
-    const void* params);
-
 // GEMM: GEneral Matrix Multiplication with Min+Max activation
 
 typedef void (*xnn_bf16_gemm_minmax_ukernel_fn)(
@@ -459,22 +445,6 @@ typedef void (*xnn_f32_igemm_minmax_ukernel_fn)(
     size_t a_offset,
     const float* zero,
     const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// IGEMM: Indirect GEMM with post operations
-
-typedef void (*xnn_f32_igemm_post_operation_ukernel_fn)(
-    size_t mr,
-    size_t nr,
-    size_t kc,
-    size_t ks,
-    const float** a,
-    const float* w,
-    float* c,
-    size_t cm_stride,
-    size_t cn_stride,
-    size_t a_offset,
-    const float* zero,
-    const void* params);
 
 typedef void (*xnn_qd8_f16_qc8w_igemm_ukernel_fn)(
     size_t mr,
@@ -1836,7 +1806,7 @@ typedef void (*xnn_f32_f16_vcvt_ukernel_fn)(
     size_t batch,
     const float* input,
     void* output,
-    const union xnn_f32_f16_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const void* params);
 
 typedef void (*xnn_f32_qs8_vcvt_ukernel_fn)(
     size_t batch,
@@ -2519,9 +2489,6 @@ typedef size_t (*xnn_init_f16_qs8_cvt_params_fn)(
   int8_t output_min,
   int8_t output_max);
 
-typedef size_t (*xnn_init_f32_f16_cvt_params_fn)(
-  union xnn_f32_f16_cvt_params params[XNN_MIN_ELEMENTS(1)]);
-
 typedef size_t (*xnn_init_f32_qs8_cvt_params_fn)(
   union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
@@ -2980,44 +2947,26 @@ struct xnn_generated_code_chunk {
 
 struct xnn_hmp_dqgemm_ukernel {
   xnn_dqgemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
-#if XNN_PLATFORM_JIT
-  struct xnn_generated_code_chunk generated_code_chunk[XNN_MAX_UARCH_TYPES];
-#endif  // XNN_PLATFORM_JIT
 };
 
 struct xnn_hmp_dqgemm_bl_ukernel {
   xnn_dqgemm_bl_ukernel_fn function[XNN_MAX_UARCH_TYPES];
-#if XNN_PLATFORM_JIT
-  struct xnn_generated_code_chunk generated_code_chunk[XNN_MAX_UARCH_TYPES];
-#endif  // XNN_PLATFORM_JIT
 };
 
 struct xnn_hmp_gemm_ukernel {
   xnn_gemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
-#if XNN_PLATFORM_JIT
-  struct xnn_generated_code_chunk generated_code_chunk[XNN_MAX_UARCH_TYPES];
-#endif  // XNN_PLATFORM_JIT
 };
 
 struct xnn_hmp_dqigemm_ukernel {
   xnn_dqigemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
-#if XNN_PLATFORM_JIT
-  struct xnn_generated_code_chunk generated_code_chunk[XNN_MAX_UARCH_TYPES];
-#endif  // XNN_PLATFORM_JIT
 };
 
 struct xnn_hmp_igemm_ukernel {
   xnn_igemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
-#if XNN_PLATFORM_JIT
-  struct xnn_generated_code_chunk generated_code_chunk[XNN_MAX_UARCH_TYPES];
-#endif  // XNN_PLATFORM_JIT
 };
 
 struct xnn_hmp_qp8gemm_ukernel {
   xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn function[XNN_MAX_UARCH_TYPES];
-#if XNN_PLATFORM_JIT
-  struct xnn_generated_code_chunk generated_code_chunk[XNN_MAX_UARCH_TYPES];
-#endif  // XNN_PLATFORM_JIT
 };
 
 // Largest GEMM/IGEMM MR used in init.c is 16 (x86 AVX512AMX).
@@ -3037,17 +2986,3 @@ struct gemm_fused_ukernels {
   };
 };
 
-#if XNN_PLATFORM_JIT
-struct xnn_hmp_gemm_codegen {
-  xnn_jit_gemm_code_generator_fn function[XNN_MAX_UARCH_TYPES];
-};
-
-struct xnn_hmp_igemm_codegen {
-  xnn_jit_igemm_code_generator_fn function[XNN_MAX_UARCH_TYPES];
-};
-
-struct gemm_codegens {
-  struct xnn_hmp_gemm_codegen gemm[XNN_MAX_MR];
-  struct xnn_hmp_igemm_codegen igemm[XNN_MAX_MR];
-};
-#endif  // XNN_PLATFORM_JIT

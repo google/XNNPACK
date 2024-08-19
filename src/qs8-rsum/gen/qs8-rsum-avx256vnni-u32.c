@@ -25,6 +25,7 @@ void xnn_qs8_rsum_ukernel__avx256vnni_u32(
   assert(input != NULL);
   assert(output != NULL);
 
+
   const __m256i vone = _mm256_set1_epi8(1);
   __m256i vacc0 = _mm256_setzero_si256();
   if (XNN_UNLIKELY(batch != 0)) {

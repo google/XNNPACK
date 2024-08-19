@@ -88,8 +88,6 @@ uint32_t murmur_hash3(const void* key, size_t len, uint32_t seed)
 // builds.
 static inline size_t cache_size(struct xnn_cache* cache) {
   switch (cache->type) {
-    case xnn_cache_type_code:
-      return cache->code.size;
     case xnn_cache_type_weights:
       return cache->weights.size;
     default:
@@ -101,8 +99,6 @@ static inline size_t cache_size(struct xnn_cache* cache) {
 
 static inline void* cache_start(struct xnn_cache* cache) {
   switch (cache->type) {
-    case xnn_cache_type_code:
-      return cache->code.start;
     case xnn_cache_type_weights:
       return cache->weights.start;
     default:
@@ -123,32 +119,6 @@ enum xnn_status xnn_init_cache_with_size(struct xnn_cache* cache, size_t num_buc
   cache->type = cache_type;
   cache->num_buckets = num_buckets;
   return xnn_status_success;
-}
-
-enum xnn_status xnn_init_code_cache_with_size(struct xnn_code_cache* cache, size_t num_buckets)
-{
-  memset(cache, 0, sizeof(struct xnn_code_cache));
-  enum xnn_status status = xnn_status_success;
-  status = xnn_init_cache_with_size(&cache->cache, num_buckets, xnn_cache_type_code);
-  if (status != xnn_status_success) {
-    goto error;
-  }
-
-  status = xnn_allocate_code_memory(&cache->cache.code, XNN_DEFAULT_CODE_BUFFER_SIZE);
-  if (status != xnn_status_success) {
-    goto error;
-  }
-
-  return xnn_status_success;
-
-error:
-  xnn_release_code_cache(cache);
-  return status;
-}
-
-enum xnn_status xnn_init_code_cache(struct xnn_code_cache* cache)
-{
-  return xnn_init_code_cache_with_size(cache, XNN_CACHE_INITIAL_BUCKETS);
 }
 
 static bool cache_buckets_grow(struct xnn_cache* cache)
@@ -238,9 +208,6 @@ static bool insert(struct xnn_cache* cache, void* ptr, size_t size)
 
   // Check that ptr points into cache's buffer.
   assert((uintptr_t) ptr >= (uintptr_t) cache_start(cache));
-  if (cache->type == xnn_cache_type_code) {
-    assert((uintptr_t) ptr < (uintptr_t) cache_start(cache) + cache_size(cache));
-  }
 
   const size_t offset = (uintptr_t) ptr - (uintptr_t) cache_start(cache);
 
@@ -271,10 +238,6 @@ size_t xnn_get_or_insert_cache(struct xnn_cache* cache, void* ptr, size_t size)
 {
   const size_t found_offset = lookup_cache(cache, ptr, size);
   if (found_offset != XNN_CACHE_NOT_FOUND) {
-    if (cache->type == xnn_cache_type_code) {
-      // Found in the cache, rewind the buffer because code generators update buffer size.
-      cache->code.size -= size;
-    }
     return found_offset;
   }
 
@@ -288,21 +251,6 @@ size_t xnn_get_or_insert_cache(struct xnn_cache* cache, void* ptr, size_t size)
     return XNN_CACHE_NOT_FOUND;
   }
   return offset;
-}
-
-size_t xnn_get_or_insert_code_cache(struct xnn_code_cache* cache, void* ptr, size_t size)
-{
-  return xnn_get_or_insert_cache(&cache->cache, ptr, size);
-}
-
-enum xnn_status xnn_release_code_cache(struct xnn_code_cache* cache)
-{
-  if XNN_LIKELY(cache != NULL) {
-    assert(cache->cache.type == xnn_cache_type_code);
-    xnn_release_code_memory(&cache->cache.code);
-    xnn_release_memory(cache->cache.buckets);
-  }
-  return xnn_status_success;
 }
 
 enum xnn_status xnn_internal_init_weights_cache(

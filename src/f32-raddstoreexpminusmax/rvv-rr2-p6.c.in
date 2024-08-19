@@ -64,15 +64,15 @@ static inline vfloat32m${LMUL}_t softexp_f32m${LMUL}(
   // with a simple shift into the exponent field.
   // xmin = round(-126.5 * log(2), single, RU) ~ -87.68311309814453125
 
-  const float xmin = params->rvv_rr2_p6.x_min;
-  const float r_ln2f = params->rvv_rr2_p6.log2e;
-  const float l2uf = params->rvv_rr2_p6.ln2_hi;
-  const float l2lf = params->rvv_rr2_p6.ln2_lo;
-  const float c6 = params->rvv_rr2_p6.c6;
-  const float c5 = params->rvv_rr2_p6.c5;
-  const float c4 = params->rvv_rr2_p6.c4;
-  const float c3 = params->rvv_rr2_p6.c3;
-  const float c2 = params->rvv_rr2_p6.c2;
+  const float xmin = -0x1.5ebb82p6;
+  const float r_ln2f = 0x1.715476p+0f;
+  const float l2uf = 0x1.62E400p-1f;
+  const float l2lf = 0x1.7F7D1Cp-20f;
+  const float c6 = 0x1.6850e4p-10f;
+  const float c5 = 0x1.123bccp-7;
+  const float c4 = 0x1.555b98p-5f;
+  const float c3 = 0x1.55548ep-3f;
+  const float c2 = 0x1.fffff8p-2f;
 
   // const float xmin = -0x1.5ebb82p6;
   x = __riscv_vfmax_vf_f32m${LMUL}(x, xmin, vl);

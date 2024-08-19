@@ -229,13 +229,6 @@ ALL_SSE_MICROKERNEL_SRCS = [
     "src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-u4.c",
     "src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-u8.c",
     "src/f32-vsqrt/gen/f32-vsqrt-sse-sqrt-u16.c",
-    "src/math/f32-roundd-sse-addsub.c",
-    "src/math/f32-roundne-sse-addsub.c",
-    "src/math/f32-roundu-sse-addsub.c",
-    "src/math/f32-roundz-sse-addsub.c",
-    "src/math/f32-sqrt-sse-hh1mac.c",
-    "src/math/f32-sqrt-sse-nr1mac.c",
-    "src/math/f32-sqrt-sse-nr2mac.c",
     "src/x32-packx/x32-packx-4x-sse.c",
     "src/x32-transposec/x32-transposec-4x4-sse.c",
 ]

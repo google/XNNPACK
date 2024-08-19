@@ -30,10 +30,15 @@ void xnn_f16_vhswish_ukernel__f16c_u8(
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vsixth = _mm256_load_ps(params->avx.sixth);
-  const __m256 vthree = _mm256_load_ps(params->avx.three);
-  const __m128i vsix = _mm_load_si128((const __m128i*) params->avx.six);
+  const __m256 vsixth = _mm256_set1_ps(0x1.554000p-3f);
+  const __m256 vthree = _mm256_set1_ps(3.0f);
+  const __m128i vsix = _mm_set1_epi16(UINT16_C(0x4600));
   const __m128i vzero = _mm_setzero_si128();
+
+  XNN_FORCE_REALIZATION(vsixth);
+  XNN_FORCE_REALIZATION(vthree);
+  XNN_FORCE_REALIZATION(vsix);
+  // XNN_FORCE_REALIZATION(vzero);
 
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     __m256 vx = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));

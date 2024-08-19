@@ -27,11 +27,15 @@ void xnn_f32_qu8_vcvt_ukernel__avx512skx_u96(
   assert(input != NULL);
   assert(output != NULL);
 
+  XNN_ALIGN(64) static const uint32_t shuffle512_mask[16] = {0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15};
+
+  XNN_ALIGN(32) static const uint32_t shuffle256_mask[8] = {0, 4, 2, 6, 1, 5, 3, 7};
+
   const __m512 vscale = _mm512_load_ps(params->avx512.scale);
   const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->avx512.output_max_less_zero_point);
   const __m512i voutput_zero_point = _mm512_load_si512(params->avx512.output_zero_point);
-  const __m512i vshuffle512_mask = _mm512_load_si512(params->avx512.shuffle512_mask);
-  const __m256i vshuffle256_mask = _mm256_load_si256((const __m256i*) params->avx512.shuffle256_mask);
+  const __m512i vshuffle512_mask = _mm512_load_si512(shuffle512_mask);
+  const __m256i vshuffle256_mask = _mm256_load_si256((const __m256i*) shuffle256_mask);
   const __m512i voutput_min = _mm512_load_si512(params->avx512.output_min);
   for (; batch >= 96 * sizeof(float); batch -= 96 * sizeof(float)) {
     __m512 vx0123 = _mm512_loadu_ps(input);

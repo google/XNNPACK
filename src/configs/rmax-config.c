@@ -70,7 +70,6 @@ static void init_f32_rmax_config(void) {
       f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__avx512f_u64_acc4;
     } else if (hardware_config->use_x86_avx) {
       f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__avx_u32_acc4;
-      f32_rmax_config.init.f32 = xnn_init_f32_default_avx_params;
     } else {
       f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__sse_u16_acc4;
     }

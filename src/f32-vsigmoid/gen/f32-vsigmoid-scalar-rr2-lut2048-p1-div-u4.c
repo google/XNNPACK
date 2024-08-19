@@ -29,14 +29,14 @@ void xnn_f32_vsigmoid_ukernel__scalar_rr2_lut2048_p1_div_u4(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float vmagic_bias = params->scalar_rr2_lut2048_p1.magic_bias;
-  const float vminus_log2e = params->scalar_rr2_lut2048_p1.minus_log2e;
+  const float vmagic_bias = 0x1.800000p12f;
+  const float vminus_log2e = -0x1.715476p0f;
   const uint32_t vindex_mask = UINT32_C(0x7FF);
-  const float vln2_hi = params->scalar_rr2_lut2048_p1.ln2_hi;
-  const float vln2_lo = params->scalar_rr2_lut2048_p1.ln2_lo;
-  const float vc1 = params->scalar_rr2_lut2048_p1.c1;
-  const float vone = params->scalar_rr2_lut2048_p1.one;
-  const float vdenorm_cutoff = params->scalar_rr2_lut2048_p1.denorm_cutoff;
+  const float vln2_hi = 0x1.600000p-1f;
+  const float vln2_lo = 0x1.7217F8p-8f;
+  const float vc1 = -0x1.FFFFFEp-1f;
+  const float vone = 1.0f;
+  const float vdenorm_cutoff = 0x1.5D589Ep+6f;
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float vx0 = input[0];

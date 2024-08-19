@@ -580,19 +580,5 @@ void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark) {
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
 
 
-#if XNN_PLATFORM_JIT
-
-CodeMemoryHelper::CodeMemoryHelper() {
-  status = xnn_allocate_code_memory(&buffer, XNN_DEFAULT_CODE_BUFFER_SIZE);
-}
-
-CodeMemoryHelper::~CodeMemoryHelper() {
-  if (status == xnn_status_success) {
-    xnn_release_code_memory(&buffer);
-  }
-}
-
-#endif  // XNN_PLATFORM_JIT
-
 }  // namespace utils
 }  // namespace benchmark

@@ -25,10 +25,6 @@
 #define _GNU_SOURCE
 #endif
 
-#if XNN_ARCH_ARM && XNN_PLATFORM_JIT
-#include <sys/syscall.h>
-#endif
-
 #include <errno.h>
 #if XNN_HAS_MMAP
 #include <sys/mman.h>
@@ -170,19 +166,6 @@ static void* resize_buffer(
   return new_pointer;
 }
 
-enum xnn_status xnn_allocate_code_memory(struct xnn_code_buffer* buffer, size_t size) {
-  memset(buffer, 0, sizeof(struct xnn_code_buffer));
-  const size_t page_aligned_size = round_up_po2(size, get_page_size());
-  buffer->start = allocate_buffer(page_aligned_size);
-  if (buffer->start == NULL) {
-    return xnn_status_out_of_memory;
-  }
-
-  buffer->size = 0;
-  buffer->capacity = page_aligned_size;
-  return xnn_status_success;
-}
-
 // Releases unused memory. Will write the new capacity to `capacity`.
 static enum xnn_status release_unused_memory(size_t size, void* start, size_t* capacity) {
   // Release all unused pages.
@@ -200,7 +183,7 @@ static enum xnn_status release_unused_memory(size_t size, void* start, size_t* c
     #if XNN_PLATFORM_WINDOWS
       // We cannot selectively release pages inside the region of pages, so just decommit them.
       if (!VirtualFree((void*) unused_start, unused_capacity, MEM_DECOMMIT)) {
-        xnn_log_error("failed to unmap code/weights buffer, error code: %" PRIu32, (uint32_t) GetLastError());
+        xnn_log_error("failed to unmap weights buffer, error code: %" PRIu32, (uint32_t) GetLastError());
         return xnn_status_invalid_state;
       }
       *capacity = page_aligned_size;
@@ -212,14 +195,14 @@ static enum xnn_status release_unused_memory(size_t size, void* start, size_t* c
     #elif !XNN_PLATFORM_WEB
       // Web does not support partial unmapping.
       if (munmap((void*) unused_start, unused_capacity) == -1) {
-        xnn_log_error("failed to unmap code/weights buffer, error code: %d", errno);
+        xnn_log_error("failed to unmap weights buffer, error code: %d", errno);
         return xnn_status_invalid_state;
       }
       *capacity = page_aligned_size;
     #else
       if (unused_capacity == *capacity) {
         if (munmap((void*) unused_start, unused_capacity) == -1) {
-          xnn_log_error("failed to unmap code/weights buffer, error code: %d", errno);
+          xnn_log_error("failed to unmap weights buffer, error code: %d", errno);
           return xnn_status_invalid_state;
         } else {
           *capacity = 0;
@@ -277,106 +260,6 @@ static enum xnn_status set_memory_permission(void* start, size_t size, enum xnn_
   return xnn_status_success;
 }
 
-#if XNN_PLATFORM_WEB
-EM_JS(int, xnnLoadWasmModuleJS, (const uint8_t* code, int offset, int offset_end, int invalid_function_index), {
-    const tableOriginalSize = wasmTable.length;
-    const binary = new Uint8Array(HEAPU8.slice(code + offset, code + offset_end));
-    try {
-      var module = new WebAssembly.Module(binary);
-      var instance = new WebAssembly.Instance(module, {env : {memory: wasmMemory}});
-      for (var symName in instance.exports) {
-        var value = instance.exports[symName];
-        addFunction(value);
-      }
-      if (tableOriginalSize < wasmTable.length) {
-        return tableOriginalSize;
-      }
-      return invalid_function_index;
-    }
-    catch(error) {
-      console.log(error);
-      return invalid_function_index;
-    }
-});
-#endif // XNN_PLATFORM_WEB
-
-#if XNN_PLATFORM_JIT
-enum xnn_status xnn_finalize_code_memory(struct xnn_code_buffer* buffer) {
-  #if XNN_PLATFORM_WEB
-    return xnn_status_success;
-  #else
-    const enum xnn_status status = release_unused_memory(buffer->size, buffer->start, &buffer->capacity);
-    if (status != xnn_status_success) {
-      return status;
-    }
-
-    if (buffer->capacity == 0) {
-      return xnn_status_success;
-    }
-
-    // Flush icache, do it before changing permissions due to bugs on older ARM64 kernels.
-    #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_PLATFORM_JIT
-      #if XNN_PLATFORM_WINDOWS
-        FlushInstructionCache(GetCurrentProcess(), buffer->start, buffer->capacity);
-      #else
-        #if XNN_ARCH_ARM
-          // TODO(b/309410154): Re-enable once __ARM_NR_cacheflush is fixed
-          // why, but something broke with cl/576649879. See b/307871190.
-          syscall(__ARM_NR_cacheflush, buffer->start, (void*) ((uint8_t*) buffer->start + buffer->capacity), 0);
-        #else
-        // iOS toolchain doesn't support this, use sys_icache_invalidate, when we support iOS.
-        __builtin___clear_cache(buffer->start, (void*) ((uint8_t*) buffer->start + buffer->capacity));
-        #endif  // XNN_ARCH_ARM
-      #endif  // XNN_PLATFORM_WINDOWS
-    #endif  // (XNN_ARCH_ARM || XNN_ARCH_ARM64) && !XNN_PLATFORM_IOS
-
-    // Set permissions to RX (no write).
-    return set_memory_permission(buffer->start, buffer->size, xnn_memory_permission_read_execute);
-  #endif // XNN_PLATFORM_WEB
-}
-
-uintptr_t xnn_first_function_in_chunk_ptr(struct xnn_code_buffer* buffer, size_t offset, size_t offset_end) {
-  #if (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-    return (uintptr_t) buffer->start + offset;
-  #elif XNN_PLATFORM_WEB
-    if (offset == offset_end) {
-      return XNN_INVALID_FUNCTION_INDEX;
-    }
-    return xnnLoadWasmModuleJS(buffer->start, offset, offset_end, XNN_INVALID_FUNCTION_INDEX);
-  #endif
-}
-#endif  // XNN_PLATFORM_JIT
-
-enum xnn_status xnn_release_code_memory(struct xnn_code_buffer* buffer) {
-  if (buffer->capacity == 0) {
-    return xnn_status_success;
-  }
-  const enum xnn_status status = release_memory(buffer->start, buffer->capacity);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  memset(buffer, 0, sizeof(struct xnn_code_buffer));
-  return xnn_status_success;
-}
-
-enum xnn_status xnn_reserve_code_memory(struct xnn_code_buffer* buffer, size_t min_available_size) {
-  if (buffer->size + min_available_size <= buffer->capacity) {
-    return xnn_status_success;
-  }
-  xnn_log_debug("reserving code memory of size %zu", min_available_size);
-
-  size_t new_capacity = 0;
-  void* new_start =
-    resize_buffer(buffer->start, buffer->size, buffer->capacity, buffer->size + min_available_size, &new_capacity);
-  if (new_start == NULL) {
-    xnn_log_error("failed to reserve code memory");
-    return xnn_status_out_of_memory;
-  }
-  buffer->start = new_start;
-  buffer->capacity = new_capacity;
-  return xnn_status_success;
-}
-
 enum xnn_status xnn_allocate_weights_memory(struct xnn_weights_buffer* buffer, size_t size) {
   memset(buffer, 0, sizeof(struct xnn_weights_buffer));
   const size_t page_aligned_size = round_up_po2(size, get_page_size());
@@ -398,7 +281,7 @@ enum xnn_status xnn_release_weights_memory(struct xnn_weights_buffer* buffer) {
   if (status != xnn_status_success) {
     return status;
   }
-  memset(buffer, 0, sizeof(struct xnn_code_buffer));
+  memset(buffer, 0, sizeof(struct xnn_weights_buffer));
   return xnn_status_success;
 }
 

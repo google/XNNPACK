@@ -94,22 +94,3 @@ AARCH32_ASM_MICROKERNEL_SRCS = [
     "src/u32-filterbank-accumulate/u32-filterbank-accumulate-asm-aarch32-neon-x1.S",
     "src/u32-filterbank-accumulate/u32-filterbank-accumulate-asm-aarch32-neon-x2.S",
 ]
-
-AARCH32_JIT_MICROKERNEL_SRCS = [
-    "src/f32-gemm/gen/f32-gemm-1x8-aarch32-neon-cortex-a53.cc",
-    "src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a7.cc",
-    "src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a53.cc",
-    "src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a55.cc",
-    "src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-cortex-a75.cc",
-    "src/f32-gemm/gen/f32-gemm-4x8-aarch32-neon-ld64.cc",
-    "src/f32-igemm/gen/f32-igemm-1x8-aarch32-neon-cortex-a53.cc",
-    "src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a7.cc",
-    "src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a53.cc",
-    "src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a55.cc",
-    "src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-cortex-a75.cc",
-    "src/f32-igemm/gen/f32-igemm-4x8-aarch32-neon-ld64.cc",
-    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc",
-    "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c4-fp32-aarch32-neondot-ld64.cc",
-    "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8-fp32-aarch32-neonv8-mlal-lane-ld64.cc",
-    "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8c4-fp32-aarch32-neondot-ld64.cc",
-]
