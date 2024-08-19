@@ -11,6 +11,7 @@
 
 #include <immintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/unaligned.h"
 #include "xnnpack/vbinary.h"
@@ -29,13 +30,21 @@ void xnn_qu8_vadd_minmax_ukernel__sse41_mul32_ld32_u8(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m128i vbias = _mm_load_si128((const __m128i*) params->sse4.bias);
-  const __m128i va_multiplier = _mm_load_si128((const __m128i*) params->sse4.a_multiplier);
-  const __m128i vb_multiplier = _mm_load_si128((const __m128i*) params->sse4.b_multiplier);
-  const __m128i vshift = _mm_load_si128((const __m128i*) params->sse4.shift);
-  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse4.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse4.output_min);
-  const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse4.output_max);
+  const __m128i vbias = _mm_set1_epi32(params->scalar.bias);
+  const __m128i va_multiplier = _mm_set1_epi32(params->scalar.a_multiplier);
+  const __m128i vb_multiplier = _mm_set1_epi32(params->scalar.b_multiplier);
+  const __m128i vshift = _mm_cvtsi32_si128((int) params->scalar.shift);
+  const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->scalar.output_min);
+  const __m128i voutput_max = _mm_set1_epi8(params->scalar.output_max);
+
+  XNN_FORCE_REALIZATION(vbias);
+  XNN_FORCE_REALIZATION(va_multiplier);
+  XNN_FORCE_REALIZATION(vb_multiplier);
+  XNN_FORCE_REALIZATION(vshift);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+  XNN_FORCE_REALIZATION(voutput_max);
 
   for (; batch >= 8 * sizeof(uint8_t); batch -= 8 * sizeof(uint8_t)) {
     const __m128i va0123 = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(input_a)));

@@ -29,8 +29,8 @@ void xnn_qu8_vaddc_minmax_ukernel__scalar_u1(
   const int32_t vbias = params->scalar.bias + (int32_t) *input_b * params->scalar.b_multiplier;
   const int32_t va_multiplier = params->scalar.a_multiplier;
   const uint32_t vshift = params->scalar.shift;
-  const int32_t voutput_min_less_zero_point = params->scalar.output_min_less_zero_point;
-  const int32_t voutput_max_less_zero_point = params->scalar.output_max_less_zero_point;
+  const int32_t voutput_min = params->scalar.output_min;
+  const int32_t voutput_max = params->scalar.output_max;
   const int32_t voutput_zero_point = params->scalar.output_zero_point;
 
   do {
@@ -38,9 +38,10 @@ void xnn_qu8_vaddc_minmax_ukernel__scalar_u1(
     const int32_t vacc = vbias + va * va_multiplier;
 
     int32_t vout = math_asr_s32(vacc, vshift);
-    vout = math_max_s32(vout, voutput_min_less_zero_point);
-    vout = math_min_s32(vout, voutput_max_less_zero_point);
-    *output++ = (uint8_t) (vout + voutput_zero_point);
+    vout = vout + voutput_zero_point;
+    vout = math_max_s32(vout, voutput_min);
+    vout = math_min_s32(vout, voutput_max);
+    *output++ = (uint8_t) vout;
 
     batch -= sizeof(uint8_t);
   } while (batch != 0);

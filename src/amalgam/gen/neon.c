@@ -18134,14 +18134,14 @@ void xnn_qs8_vadd_minmax_ukernel__neon_ld64_u16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const int8x8_t va_zero_point = vld1_dup_s8(&params->neon.a_zero_point);
-  const int8x8_t vb_zero_point = vld1_dup_s8(&params->neon.b_zero_point);
-  const int32x4_t va_multiplier = vld1q_dup_s32(&params->neon.a_multiplier);
-  const int32x4_t vb_multiplier = vld1q_dup_s32(&params->neon.b_multiplier);
-  const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
-  const int8x16_t voutput_min = vld1q_dup_s8(&params->neon.output_min);
-  const int8x16_t voutput_max = vld1q_dup_s8(&params->neon.output_max);
+  const int8x8_t va_zero_point = vld1_dup_s8(&params->scalar.a_zero_point);
+  const int8x8_t vb_zero_point = vld1_dup_s8(&params->scalar.b_zero_point);
+  const int32x4_t va_multiplier = vld1q_dup_s32(&params->scalar.a_multiplier);
+  const int32x4_t vb_multiplier = vld1q_dup_s32(&params->scalar.b_multiplier);
+  const int32x4_t vright_shift = vdupq_n_s32(-params->scalar.shift);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
+  const int8x16_t voutput_min = vld1q_dup_s8(&params->scalar.output_min);
+  const int8x16_t voutput_max = vld1q_dup_s8(&params->scalar.output_max);
 
   for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
     const int8x8_t va01234567 = vld1_s8(input_a); input_a += 8;
@@ -18237,14 +18237,14 @@ void xnn_qs8_vadd_minmax_ukernel__neon_ld64_u32(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const int8x8_t va_zero_point = vld1_dup_s8(&params->neon.a_zero_point);
-  const int8x8_t vb_zero_point = vld1_dup_s8(&params->neon.b_zero_point);
-  const int32x4_t va_multiplier = vld1q_dup_s32(&params->neon.a_multiplier);
-  const int32x4_t vb_multiplier = vld1q_dup_s32(&params->neon.b_multiplier);
-  const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
-  const int8x16_t voutput_min = vld1q_dup_s8(&params->neon.output_min);
-  const int8x16_t voutput_max = vld1q_dup_s8(&params->neon.output_max);
+  const int8x8_t va_zero_point = vld1_dup_s8(&params->scalar.a_zero_point);
+  const int8x8_t vb_zero_point = vld1_dup_s8(&params->scalar.b_zero_point);
+  const int32x4_t va_multiplier = vld1q_dup_s32(&params->scalar.a_multiplier);
+  const int32x4_t vb_multiplier = vld1q_dup_s32(&params->scalar.b_multiplier);
+  const int32x4_t vright_shift = vdupq_n_s32(-params->scalar.shift);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
+  const int8x16_t voutput_min = vld1q_dup_s8(&params->scalar.output_min);
+  const int8x16_t voutput_max = vld1q_dup_s8(&params->scalar.output_max);
 
   for (; batch >= 32 * sizeof(int8_t); batch -= 32 * sizeof(int8_t)) {
     const int8x8_t va01234567 = vld1_s8(input_a); input_a += 8;
@@ -18366,15 +18366,15 @@ void xnn_qs8_vaddc_minmax_ukernel__neon_ld64_u16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const int8x8_t va_zero_point = vld1_dup_s8(&params->neon.a_zero_point);
-  const int32x4_t va_multiplier = vld1q_dup_s32(&params->neon.a_multiplier);
-  const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
-  const int8x16_t voutput_min = vld1q_dup_s8(&params->neon.output_min);
-  const int8x16_t voutput_max = vld1q_dup_s8(&params->neon.output_max);
+  const int8x8_t va_zero_point = vld1_dup_s8(&params->scalar.a_zero_point);
+  const int32x4_t va_multiplier = vld1q_dup_s32(&params->scalar.a_multiplier);
+  const int32x4_t vright_shift = vdupq_n_s32(-params->scalar.shift);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
+  const int8x16_t voutput_min = vld1q_dup_s8(&params->scalar.output_min);
+  const int8x16_t voutput_max = vld1q_dup_s8(&params->scalar.output_max);
 
-  const int32_t vxb = (int32_t) *input_b - (int32_t) params->neon.b_zero_point;
-  const int32_t vb = params->neon.b_multiplier;
+  const int32_t vxb = (int32_t) *input_b - (int32_t) params->scalar.b_zero_point;
+  const int32_t vb = params->scalar.b_multiplier;
   const int32x4_t vbias = vdupq_n_s32(vxb * vb);
 
   for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
@@ -18457,15 +18457,15 @@ void xnn_qs8_vaddc_minmax_ukernel__neon_ld64_u32(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const int8x8_t va_zero_point = vld1_dup_s8(&params->neon.a_zero_point);
-  const int32x4_t va_multiplier = vld1q_dup_s32(&params->neon.a_multiplier);
-  const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
-  const int8x16_t voutput_min = vld1q_dup_s8(&params->neon.output_min);
-  const int8x16_t voutput_max = vld1q_dup_s8(&params->neon.output_max);
+  const int8x8_t va_zero_point = vld1_dup_s8(&params->scalar.a_zero_point);
+  const int32x4_t va_multiplier = vld1q_dup_s32(&params->scalar.a_multiplier);
+  const int32x4_t vright_shift = vdupq_n_s32(-params->scalar.shift);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
+  const int8x16_t voutput_min = vld1q_dup_s8(&params->scalar.output_min);
+  const int8x16_t voutput_max = vld1q_dup_s8(&params->scalar.output_max);
 
-  const int32_t vxb = (int32_t) *input_b - (int32_t) params->neon.b_zero_point;
-  const int32_t vb = params->neon.b_multiplier;
+  const int32_t vxb = (int32_t) *input_b - (int32_t) params->scalar.b_zero_point;
+  const int32_t vb = params->scalar.b_multiplier;
   const int32x4_t vbias = vdupq_n_s32(vxb * vb);
 
   for (; batch >= 32 * sizeof(int8_t); batch -= 32 * sizeof(int8_t)) {
@@ -18737,8 +18737,8 @@ void xnn_qs8_vmul_minmax_rndnu_ukernel__neon_ld64_u16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const int8x8_t va_zero_point = vld1_dup_s8(params->rndnu_neon.a_zero_point);
-  const int8x8_t vb_zero_point = vld1_dup_s8(params->rndnu_neon.b_zero_point);
+  const int8x8_t va_zero_point = vld1_dup_s8(&params->rndnu_neon.a_zero_point);
+  const int8x8_t vb_zero_point = vld1_dup_s8(&params->rndnu_neon.b_zero_point);
   const int32x4_t vleft_pre_shift = vld1q_dup_s32(&params->rndnu_neon.left_pre_shift);
   const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
   const int32x4_t vleft_post_shift = vld1q_dup_s32(&params->rndnu_neon.left_post_shift);
@@ -18866,7 +18866,7 @@ void xnn_qs8_vmulc_minmax_rndnu_ukernel__neon_ld64_u16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const int8x8_t va_zero_point = vld1_dup_s8(params->rndnu_neon.a_zero_point);
+  const int8x8_t va_zero_point = vld1_dup_s8(&params->rndnu_neon.a_zero_point);
   const int32x4_t vleft_pre_shift = vld1q_dup_s32(&params->rndnu_neon.left_pre_shift);
   const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
   const int32x4_t vleft_post_shift = vld1q_dup_s32(&params->rndnu_neon.left_post_shift);
@@ -18875,7 +18875,7 @@ void xnn_qs8_vmulc_minmax_rndnu_ukernel__neon_ld64_u16(
   const int8x16_t voutput_max = vld1q_dup_s8(&params->rndnu_neon.output_max);
 
   const int8x8_t vb = vld1_dup_s8(input_b);
-  const int8x8_t vb_zero_point = vld1_dup_s8(params->rndnu_neon.b_zero_point);
+  const int8x8_t vb_zero_point = vld1_dup_s8(&params->rndnu_neon.b_zero_point);
   const int16x8_t vxb = vsubl_s8(vb, vb_zero_point);
   for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
     const int8x8_t va01234567 = vld1_s8(input_a); input_a += 8;
@@ -23866,14 +23866,14 @@ void xnn_qu8_vadd_minmax_ukernel__neon_ld64_u16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const uint8x8_t va_zero_point = vld1_dup_u8(&params->neon.a_zero_point);
-  const uint8x8_t vb_zero_point = vld1_dup_u8(&params->neon.b_zero_point);
-  const int32x4_t va_multiplier = vld1q_dup_s32(&params->neon.a_multiplier);
-  const int32x4_t vb_multiplier = vld1q_dup_s32(&params->neon.b_multiplier);
-  const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
-  const uint8x16_t voutput_min = vld1q_dup_u8(&params->neon.output_min);
-  const uint8x16_t voutput_max = vld1q_dup_u8(&params->neon.output_max);
+  const uint8x8_t va_zero_point = vld1_dup_u8(&params->scalar.a_zero_point);
+  const uint8x8_t vb_zero_point = vld1_dup_u8(&params->scalar.b_zero_point);
+  const int32x4_t va_multiplier = vld1q_dup_s32(&params->scalar.a_multiplier);
+  const int32x4_t vb_multiplier = vld1q_dup_s32(&params->scalar.b_multiplier);
+  const int32x4_t vright_shift = vdupq_n_s32(-params->scalar.shift);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
+  const uint8x16_t voutput_min = vld1q_dup_u8(&params->scalar.output_min);
+  const uint8x16_t voutput_max = vld1q_dup_u8(&params->scalar.output_max);
 
   for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
     const uint8x8_t va01234567 = vld1_u8(input_a); input_a += 8;
@@ -23969,14 +23969,14 @@ void xnn_qu8_vadd_minmax_ukernel__neon_ld64_u32(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const uint8x8_t va_zero_point = vld1_dup_u8(&params->neon.a_zero_point);
-  const uint8x8_t vb_zero_point = vld1_dup_u8(&params->neon.b_zero_point);
-  const int32x4_t va_multiplier = vld1q_dup_s32(&params->neon.a_multiplier);
-  const int32x4_t vb_multiplier = vld1q_dup_s32(&params->neon.b_multiplier);
-  const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
-  const uint8x16_t voutput_min = vld1q_dup_u8(&params->neon.output_min);
-  const uint8x16_t voutput_max = vld1q_dup_u8(&params->neon.output_max);
+  const uint8x8_t va_zero_point = vld1_dup_u8(&params->scalar.a_zero_point);
+  const uint8x8_t vb_zero_point = vld1_dup_u8(&params->scalar.b_zero_point);
+  const int32x4_t va_multiplier = vld1q_dup_s32(&params->scalar.a_multiplier);
+  const int32x4_t vb_multiplier = vld1q_dup_s32(&params->scalar.b_multiplier);
+  const int32x4_t vright_shift = vdupq_n_s32(-params->scalar.shift);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
+  const uint8x16_t voutput_min = vld1q_dup_u8(&params->scalar.output_min);
+  const uint8x16_t voutput_max = vld1q_dup_u8(&params->scalar.output_max);
 
   for (; batch >= 32 * sizeof(uint8_t); batch -= 32 * sizeof(uint8_t)) {
     const uint8x8_t va01234567 = vld1_u8(input_a); input_a += 8;
@@ -24098,15 +24098,15 @@ void xnn_qu8_vaddc_minmax_ukernel__neon_ld64_u16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const uint8x8_t va_zero_point = vld1_dup_u8(&params->neon.a_zero_point);
-  const int32x4_t va_multiplier = vld1q_dup_s32(&params->neon.a_multiplier);
-  const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
-  const uint8x16_t voutput_min = vld1q_dup_u8(&params->neon.output_min);
-  const uint8x16_t voutput_max = vld1q_dup_u8(&params->neon.output_max);
+  const uint8x8_t va_zero_point = vld1_dup_u8(&params->scalar.a_zero_point);
+  const int32x4_t va_multiplier = vld1q_dup_s32(&params->scalar.a_multiplier);
+  const int32x4_t vright_shift = vdupq_n_s32(-params->scalar.shift);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
+  const uint8x16_t voutput_min = vld1q_dup_u8(&params->scalar.output_min);
+  const uint8x16_t voutput_max = vld1q_dup_u8(&params->scalar.output_max);
 
-  const int32_t vxb = (int32_t) *input_b - (int32_t) params->neon.b_zero_point;
-  const int32_t vb = params->neon.b_multiplier;
+  const int32_t vxb = (int32_t) *input_b - (int32_t) params->scalar.b_zero_point;
+  const int32_t vb = params->scalar.b_multiplier;
   const int32x4_t vbias = vdupq_n_s32(vxb * vb);
 
   for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
@@ -24189,15 +24189,15 @@ void xnn_qu8_vaddc_minmax_ukernel__neon_ld64_u32(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const uint8x8_t va_zero_point = vld1_dup_u8(&params->neon.a_zero_point);
-  const int32x4_t va_multiplier = vld1q_dup_s32(&params->neon.a_multiplier);
-  const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
-  const uint8x16_t voutput_min = vld1q_dup_u8(&params->neon.output_min);
-  const uint8x16_t voutput_max = vld1q_dup_u8(&params->neon.output_max);
+  const uint8x8_t va_zero_point = vld1_dup_u8(&params->scalar.a_zero_point);
+  const int32x4_t va_multiplier = vld1q_dup_s32(&params->scalar.a_multiplier);
+  const int32x4_t vright_shift = vdupq_n_s32(-params->scalar.shift);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
+  const uint8x16_t voutput_min = vld1q_dup_u8(&params->scalar.output_min);
+  const uint8x16_t voutput_max = vld1q_dup_u8(&params->scalar.output_max);
 
-  const int32_t vxb = (int32_t) *input_b - (int32_t) params->neon.b_zero_point;
-  const int32_t vb = params->neon.b_multiplier;
+  const int32_t vxb = (int32_t) *input_b - (int32_t) params->scalar.b_zero_point;
+  const int32_t vb = params->scalar.b_multiplier;
   const int32x4_t vbias = vdupq_n_s32(vxb * vb);
 
   for (; batch >= 32 * sizeof(uint8_t); batch -= 32 * sizeof(uint8_t)) {
@@ -24469,8 +24469,8 @@ void xnn_qu8_vmul_minmax_rndnu_ukernel__neon_ld64_u16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const uint8x8_t va_zero_point = vld1_dup_u8(params->rndnu_neon.a_zero_point);
-  const uint8x8_t vb_zero_point = vld1_dup_u8(params->rndnu_neon.b_zero_point);
+  const uint8x8_t va_zero_point = vld1_dup_u8(&params->rndnu_neon.a_zero_point);
+  const uint8x8_t vb_zero_point = vld1_dup_u8(&params->rndnu_neon.b_zero_point);
   const int32x4_t vleft_pre_shift = vld1q_dup_s32(&params->rndnu_neon.left_pre_shift);
   const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
   const int32x4_t vleft_post_shift = vld1q_dup_s32(&params->rndnu_neon.left_post_shift);
@@ -24598,7 +24598,7 @@ void xnn_qu8_vmulc_minmax_rndnu_ukernel__neon_ld64_u16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const uint8x8_t va_zero_point = vld1_dup_u8(params->rndnu_neon.a_zero_point);
+  const uint8x8_t va_zero_point = vld1_dup_u8(&params->rndnu_neon.a_zero_point);
   const int32x4_t vleft_pre_shift = vld1q_dup_s32(&params->rndnu_neon.left_pre_shift);
   const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
   const int32x4_t vleft_post_shift = vld1q_dup_s32(&params->rndnu_neon.left_post_shift);
@@ -24607,7 +24607,7 @@ void xnn_qu8_vmulc_minmax_rndnu_ukernel__neon_ld64_u16(
   const uint8x16_t voutput_max = vld1q_dup_u8(&params->rndnu_neon.output_max);
 
   const uint8x8_t vb = vld1_dup_u8(input_b);
-  const uint8x8_t vb_zero_point = vld1_dup_u8(params->rndnu_neon.b_zero_point);
+  const uint8x8_t vb_zero_point = vld1_dup_u8(&params->rndnu_neon.b_zero_point);
   const int16x8_t vxb = vreinterpretq_s16_u16(vsubl_u8(vb, vb_zero_point));
   for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
     const uint8x8_t va01234567 = vld1_u8(input_a); input_a += 8;

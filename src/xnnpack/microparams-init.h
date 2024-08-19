@@ -798,20 +798,16 @@ DECLARE_INIT_U8_MINMAX_PARAMS_FUNCTION(xnn_init_u8_minmax_scalar_params)
 
 DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_add_minmax_scalar_params)
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_add_minmax_neon_params)
+  DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_add_minmax_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_add_minmax_sse2_params)
-  DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_add_minmax_sse4_mul16_params)
-  DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_add_minmax_sse4_mul32_params)
-  DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_add_minmax_avx2_params)
-  DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_add_minmax_avx512_params)
+  DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_add_minmax_scalar_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_add_minmax_wasmsimd_params)
+  DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_add_minmax_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 #if XNN_ARCH_HEXAGON
-  DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_add_minmax_hvx_params)
+  DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_add_minmax_scalar_params)
 #endif // XNN_ARCH_HEXAGON
 
 #define DECLARE_INIT_QU8_ADD_MINMAX_PARAMS_FUNCTION(fn_name)        \
@@ -827,16 +823,13 @@ DECLARE_INIT_QS8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_add_minmax_scalar_param
 
 DECLARE_INIT_QU8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_add_minmax_scalar_params)
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_QU8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_add_minmax_neon_params)
+  DECLARE_INIT_QU8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_add_minmax_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_QU8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_add_minmax_sse2_params)
-  DECLARE_INIT_QU8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_add_minmax_sse4_params)
-  DECLARE_INIT_QU8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_add_minmax_avx2_params)
-  DECLARE_INIT_QU8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_add_minmax_avx512_params)
+  DECLARE_INIT_QU8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_add_minmax_scalar_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_INIT_QU8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_add_minmax_wasmsimd_params)
+  DECLARE_INIT_QU8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_add_minmax_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
@@ -850,18 +843,17 @@ DECLARE_INIT_QU8_ADD_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_add_minmax_scalar_param
     int8_t output_min,                                           \
     int8_t output_max);
 
-DECLARE_INIT_QS8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mul_minmax_fp32_scalar_params)
+DECLARE_INIT_QS8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mul_minmax_scalar_params)
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_QS8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mul_minmax_fp32_neon_params)
-  DECLARE_INIT_QS8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mul_minmax_fp32_neonv8_params)
+  DECLARE_INIT_QS8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mul_minmax_scalar_params)
+  DECLARE_INIT_QS8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mul_minmax_scalar_params)
   DECLARE_INIT_QS8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mul_minmax_rndnu_neon_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_QS8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mul_minmax_fp32_sse2_params)
-  DECLARE_INIT_QS8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mul_minmax_fp32_sse4_params)
+  DECLARE_INIT_QS8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mul_minmax_scalar_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_INIT_QS8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mul_minmax_fp32_wasmsimd_params)
+  DECLARE_INIT_QS8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mul_minmax_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
@@ -875,17 +867,17 @@ DECLARE_INIT_QS8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mul_minmax_fp32_scalar_
     uint8_t output_min,                                          \
     uint8_t output_max);
 
-DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mul_minmax_fp32_scalar_params)
+DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mul_minmax_scalar_params)
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mul_minmax_fp32_neon_params)
-  DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mul_minmax_fp32_neonv8_params)
+  DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mul_minmax_scalar_params)
+  DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mul_minmax_scalar_params)
   DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mul_minmax_rndnu_neon_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mul_minmax_fp32_sse2_params)
+  DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mul_minmax_scalar_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mul_minmax_fp32_wasmsimd_params)
+  DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mul_minmax_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 

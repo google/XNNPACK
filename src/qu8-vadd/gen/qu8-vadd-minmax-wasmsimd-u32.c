@@ -11,6 +11,7 @@
 
 #include <wasm_simd128.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/vbinary.h"
 
 
@@ -27,13 +28,20 @@ void xnn_qu8_vadd_minmax_ukernel__wasmsimd_u32(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const v128_t vbias = wasm_v128_load64_splat(params->wasmsimd.bias);
-  const v128_t va_multiplier = wasm_v128_load64_splat(params->wasmsimd.a_multiplier);
-  const v128_t vb_multiplier = wasm_v128_load64_splat(params->wasmsimd.b_multiplier);
-  const uint32_t vshift = params->wasmsimd.shift;
-  const v128_t voutput_zero_point = wasm_v128_load64_splat(params->wasmsimd.output_zero_point);
-  const v128_t voutput_min = wasm_v128_load64_splat(params->wasmsimd.output_min);
-  const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd.output_max);
+  const v128_t vbias = wasm_v128_load32_splat(&params->scalar.bias);
+  const v128_t va_multiplier = wasm_v128_load32_splat(&params->scalar.a_multiplier);
+  const v128_t vb_multiplier = wasm_v128_load32_splat(&params->scalar.b_multiplier);
+  const uint32_t vshift = params->scalar.shift;
+  const v128_t voutput_zero_point = wasm_v128_load16_splat(&params->scalar.output_zero_point);
+  const v128_t voutput_min = wasm_v128_load8_splat(&params->scalar.output_min);
+  const v128_t voutput_max = wasm_v128_load8_splat(&params->scalar.output_max);
+
+  XNN_FORCE_REALIZATION(vbias);
+  XNN_FORCE_REALIZATION(va_multiplier);
+  XNN_FORCE_REALIZATION(vb_multiplier);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+  XNN_FORCE_REALIZATION(voutput_max);
 
   for (; batch >= 32 * sizeof(uint8_t); batch -= 32 * sizeof(uint8_t)) {
     const v128_t va01234567 = wasm_u16x8_load8x8(input_a);

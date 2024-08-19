@@ -12,10 +12,11 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <wasm_simd128.h>
 
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "xnnpack/vbinary.h"
 
 
-$PARAMS_STRUCT = REQUANTIZATION.lower() + "_wasmsimd"
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $WASM_X16X8_LOAD8X8 = {"QS8": "wasm_i16x8_load8x8", "QU8": "wasm_u16x8_load8x8"}[DATATYPE]
 $WASM_X32X4_EXTEND_LOW_X16X8 = {"QS8": "wasm_i32x4_extend_low_i16x8", "QU8": "wasm_u32x4_extend_low_u16x8"}[DATATYPE]
@@ -35,13 +36,22 @@ void xnn_${DATATYPE.lower()}_vmul_minmax_${REQUANTIZATION.lower()}_ukernel__wasm
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const v128_t va_zero_point = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.a_zero_point);
-  const v128_t vb_zero_point = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.b_zero_point);
-  const v128_t vscale = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.scale);
-  const v128_t vmagic_bias = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.magic_bias);
-  const v128_t vmagic_min = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.magic_min);
-  const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
-  const v128_t voutput_max = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.output_max);
+  const float output_min_less_zero_point = (float) ((int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point);
+  const v128_t va_zero_point = wasm_i16x8_splat(params->scalar.a_zero_point);
+  const v128_t vb_zero_point = wasm_i16x8_splat(params->scalar.b_zero_point);
+  const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
+  const v128_t vmagic_bias = wasm_f32x4_splat(12582912.0f);
+  const v128_t vmagic_min = wasm_i32x4_splat((int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point));
+  const v128_t vmagic_bias_less_output_zero_point = wasm_i32x4_splat(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
+  const v128_t voutput_max = wasm_v128_load8_splat(&params->scalar.output_max);
+
+  XNN_FORCE_REALIZATION(va_zero_point);
+  XNN_FORCE_REALIZATION(vb_zero_point);
+  XNN_FORCE_REALIZATION(vscale);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vmagic_min);
+  XNN_FORCE_REALIZATION(vmagic_bias_less_output_zero_point);
+  XNN_FORCE_REALIZATION(voutput_max);
 
   for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
     const v128_t va${ABC[0:8]} = ${WASM_X16X8_LOAD8X8}(input_a);

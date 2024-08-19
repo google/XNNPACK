@@ -13,8 +13,9 @@
 #include <hexagon_protos.h>
 #include <hexagon_types.h>
 
-#include "xnnpack/vbinary.h"
 #include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/math.h"
+#include "xnnpack/vbinary.h"
 
 void xnn_qs8_vadd_minmax_ukernel__hvx_u32(
     size_t batch,
@@ -29,14 +30,14 @@ void xnn_qs8_vadd_minmax_ukernel__hvx_u32(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const HVX_Vector vbias = Q6_V_vsplat_R(*((int32_t *) &params->hvx.bias));
-  const HVX_Vector va_multiplier = Q6_V_vsplat_R(*((int32_t *) &params->hvx.a_multiplier));
-  const HVX_Vector vb_multiplier = Q6_V_vsplat_R(*((int32_t *) &params->hvx.b_multiplier));
-  const int32_t first_shift = params->hvx.first_shift;
-  const int32_t rest_shift = params->hvx.rest_shift;
-  const HVX_Vector voutput_zero_point = Q6_Vh_vsplat_R(*((int16_t *) &params->hvx.output_zero_point));
-  const HVX_Vector voutput_min = Q6_Vb_vsplat_R(*((int8_t *) &params->hvx.output_min));
-  const HVX_Vector voutput_max = Q6_Vb_vsplat_R(*((int8_t *) &params->hvx.output_max));
+  const HVX_Vector vbias = Q6_V_vsplat_R(*((int32_t *) &params->scalar.bias));
+  const HVX_Vector va_multiplier = Q6_V_vsplat_R(*((int32_t *) &params->scalar.a_multiplier));
+  const HVX_Vector vb_multiplier = Q6_V_vsplat_R(*((int32_t *) &params->scalar.b_multiplier));
+  const int32_t first_shift = params->scalar.first_shift;
+  const int32_t rest_shift = params->scalar.rest_shift;
+  const HVX_Vector voutput_zero_point = Q6_Vh_vsplat_R(*((int16_t *) &params->scalar.output_zero_point));
+  const HVX_Vector voutput_min = Q6_Vb_vsplat_R(*((int8_t *) &params->scalar.output_min));
+  const HVX_Vector voutput_max = Q6_Vb_vsplat_R(*((int8_t *) &params->scalar.output_max));
 
   for (; batch >= 32 * sizeof(int8_t); batch -= 32 * sizeof(int8_t)) {
     HVX_Vector va0 = *((HVX_UVector*)input_a);
