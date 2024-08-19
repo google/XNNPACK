@@ -26,8 +26,9 @@ void xnn_f32_qs8_vcvt_ukernel__hvx_u96(
   const HVX_Vector vscale = xnn_set1_f32(params->scalar.scale);
   const HVX_Vector vmagic_bias = xnn_set1_f32(12582912.0f);
   const HVX_Vector vmagic_bias_less_zero_point = Q6_V_vsplat_R(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
-  const HVX_Vector voutput_min = Q6_Vb_vsplat_R(params->hvx.output_min);
-  const HVX_Vector voutput_max = Q6_Vb_vsplat_R(params->hvx.output_max);
+  const HVX_Vector voutput_min = Q6_Vb_vsplat_R(params->scalar.output_min);
+  const HVX_Vector voutput_max = Q6_Vb_vsplat_R(params->scalar.output_max);
+  XNN_FORCE_REALIZATION(vmagic_bias);
   for (; batch >= 96 * sizeof(float); batch -= 96 * sizeof(float)) {
     HVX_Vector vx0 = xnn_loadu_f32(input);
     HVX_Vector vx1 = xnn_loadu_f32(input + 32);

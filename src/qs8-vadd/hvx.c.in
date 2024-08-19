@@ -33,8 +33,13 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__hvx_u${BATCH_TILE}(
   const HVX_Vector vbias = Q6_V_vsplat_R(*((int32_t *) &params->scalar.bias));
   const HVX_Vector va_multiplier = Q6_V_vsplat_R(*((int32_t *) &params->scalar.a_multiplier));
   const HVX_Vector vb_multiplier = Q6_V_vsplat_R(*((int32_t *) &params->scalar.b_multiplier));
-  const int32_t first_shift = params->scalar.first_shift;
-  const int32_t rest_shift = params->scalar.rest_shift;
+
+  const uint32_t shift = params->scalar.shift;
+  const int32_t first_shift = min(shift, 15);
+  const int32_t rest_shift = shift - first_shift;
+  assert(first_shift < 16);
+  assert(rest_shift < 16);
+
   const HVX_Vector voutput_zero_point = Q6_Vh_vsplat_R(*((int16_t *) &params->scalar.output_zero_point));
   const HVX_Vector voutput_min = Q6_Vb_vsplat_R(*((int8_t *) &params->scalar.output_min));
   const HVX_Vector voutput_max = Q6_Vb_vsplat_R(*((int8_t *) &params->scalar.output_max));
