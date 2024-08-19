@@ -1912,142 +1912,63 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     TARGET_LINK_LIBRARIES(bench-models PRIVATE fp16 benchmark::benchmark)
     TARGET_LINK_LIBRARIES(bench-models PRIVATE XNNPACK bench-utils)
 
-    ADD_EXECUTABLE(end2end-bench bench/end2end.cc)
-    TARGET_INCLUDE_DIRECTORIES(end2end-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(end2end-bench PRIVATE XNNPACK benchmark::benchmark bench-models bench-utils)
+    SET(LIBRARY_END2END_BENCHMARKS
+        end2end
+        f16-gemm-e2e
+        f16-dwconv-e2e
+        f32-dwconv-e2e
+        f32-gemm-e2e
+        qs8-dwconv-e2e
+        qs8-gemm-e2e
+        qu8-gemm-e2e
+        qu8-dwconv-e2e)
 
-    ADD_EXECUTABLE(f16-gemm-e2e-bench bench/f16-gemm-e2e.cc)
-    TARGET_INCLUDE_DIRECTORIES(f16-gemm-e2e-bench PRIVATE . src)
-    TARGET_LINK_LIBRARIES(f16-gemm-e2e-bench PRIVATE fp16 benchmark::benchmark)
-    TARGET_LINK_LIBRARIES(f16-gemm-e2e-bench PRIVATE XNNPACK bench-models bench-utils hardware-config logging microkernels-all microparams-init)
-
-    ADD_EXECUTABLE(f16-dwconv-e2e-bench bench/f16-dwconv-e2e.cc)
-    TARGET_INCLUDE_DIRECTORIES(f16-dwconv-e2e-bench PRIVATE . src)
-    TARGET_LINK_LIBRARIES(f16-dwconv-e2e-bench PRIVATE fp16 benchmark::benchmark)
-    TARGET_LINK_LIBRARIES(f16-dwconv-e2e-bench PRIVATE XNNPACK bench-models bench-utils hardware-config logging microkernels-all microparams-init)
-
-    ADD_EXECUTABLE(f32-dwconv-e2e-bench bench/f32-dwconv-e2e.cc)
-    TARGET_INCLUDE_DIRECTORIES(f32-dwconv-e2e-bench PRIVATE . src)
-    TARGET_LINK_LIBRARIES(f32-dwconv-e2e-bench PRIVATE benchmark::benchmark)
-    TARGET_LINK_LIBRARIES(f32-dwconv-e2e-bench PRIVATE XNNPACK bench-models bench-utils hardware-config logging microkernels-all microparams-init)
-
-    ADD_EXECUTABLE(f32-gemm-e2e-bench bench/f32-gemm-e2e.cc)
-    TARGET_INCLUDE_DIRECTORIES(f32-gemm-e2e-bench PRIVATE . src)
-    TARGET_LINK_LIBRARIES(f32-gemm-e2e-bench PRIVATE fp16 benchmark::benchmark)
-    TARGET_LINK_LIBRARIES(f32-gemm-e2e-bench PRIVATE XNNPACK bench-models bench-utils hardware-config logging microkernels-all microparams-init)
-
-    ADD_EXECUTABLE(qs8-dwconv-e2e-bench bench/qs8-dwconv-e2e.cc)
-    TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-e2e-bench PRIVATE . src)
-    TARGET_LINK_LIBRARIES(qs8-dwconv-e2e-bench PRIVATE fp16 benchmark::benchmark)
-    TARGET_LINK_LIBRARIES(qs8-dwconv-e2e-bench PRIVATE XNNPACK bench-models bench-utils hardware-config logging microkernels-all microparams-init)
-
-    ADD_EXECUTABLE(qs8-gemm-e2e-bench bench/qs8-gemm-e2e.cc)
-    TARGET_INCLUDE_DIRECTORIES(qs8-gemm-e2e-bench PRIVATE . src)
-    TARGET_LINK_LIBRARIES(qs8-gemm-e2e-bench PRIVATE fp16 benchmark::benchmark)
-    TARGET_LINK_LIBRARIES(qs8-gemm-e2e-bench PRIVATE XNNPACK bench-models bench-utils hardware-config logging microkernels-all microparams-init)
-
-    ADD_EXECUTABLE(qu8-gemm-e2e-bench bench/qu8-gemm-e2e.cc)
-    TARGET_INCLUDE_DIRECTORIES(qu8-gemm-e2e-bench PRIVATE . src)
-    TARGET_LINK_LIBRARIES(qu8-gemm-e2e-bench PRIVATE fp16 benchmark::benchmark)
-    TARGET_LINK_LIBRARIES(qu8-gemm-e2e-bench PRIVATE XNNPACK bench-models bench-utils hardware-config logging microkernels-all microparams-init)
-
-    ADD_EXECUTABLE(qu8-dwconv-e2e-bench bench/qu8-dwconv-e2e.cc)
-    TARGET_INCLUDE_DIRECTORIES(qu8-dwconv-e2e-bench PRIVATE . src)
-    TARGET_LINK_LIBRARIES(qu8-dwconv-e2e-bench PRIVATE fp16 benchmark::benchmark)
-    TARGET_LINK_LIBRARIES(qu8-dwconv-e2e-bench PRIVATE XNNPACK bench-models bench-utils hardware-config logging microkernels-all microparams-init)
+    FOREACH(BENCH ${LIBRARY_END2END_BENCHMARKS})
+      ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)
+      TARGET_INCLUDE_DIRECTORIES(${BENCH}-bench PRIVATE .)
+      TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
+        bench-models
+        bench-utils
+        benchmark::benchmark
+        fp16
+        hardware-config
+        logging microkernels-all
+        microparams-init
+        XNNPACK
+      )
+    ENDFOREACH()
 
     # ---[ Build operator-level microbenchmarks
-    ADD_EXECUTABLE(abs-bench bench/abs.cc)
-    TARGET_INCLUDE_DIRECTORIES(abs-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(abs-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
+    SET(LIBRARY_OPERATOR_BENCHMARKS
+        abs
+        average-pooling
+        bankers-rounding
+        ceiling
+        channel-shuffle
+        convert
+        convolution
+        deconvolution
+        elu
+        floor
+        global-average-pooling
+        hardswish
+        leaky-relu
+        max-pooling
+        negate
+        prelu
+        reciprocal-square-root
+        sigmoid
+        softmax
+        square
+        square-root
+        truncation
+        tanh)
 
-    ADD_EXECUTABLE(average-pooling-bench bench/average-pooling.cc)
-    TARGET_INCLUDE_DIRECTORIES(average-pooling-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(average-pooling-bench PRIVATE XNNPACK benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(bankers-rounding-bench bench/bankers-rounding.cc)
-    TARGET_INCLUDE_DIRECTORIES(bankers-rounding-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(bankers-rounding-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(ceiling-bench bench/ceiling.cc)
-    TARGET_INCLUDE_DIRECTORIES(ceiling-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(ceiling-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(channel-shuffle-bench bench/channel-shuffle.cc)
-    TARGET_INCLUDE_DIRECTORIES(channel-shuffle-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(channel-shuffle-bench PRIVATE XNNPACK benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(convert-bench bench/convert.cc)
-    TARGET_INCLUDE_DIRECTORIES(convert-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(convert-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(convolution-bench bench/convolution.cc)
-    TARGET_INCLUDE_DIRECTORIES(convolution-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(convolution-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(deconvolution-bench bench/deconvolution.cc)
-    TARGET_INCLUDE_DIRECTORIES(deconvolution-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(deconvolution-bench PRIVATE XNNPACK benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(elu-bench bench/elu.cc)
-    TARGET_INCLUDE_DIRECTORIES(elu-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(elu-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(floor-bench bench/floor.cc)
-    TARGET_INCLUDE_DIRECTORIES(floor-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(floor-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(global-average-pooling-bench bench/global-average-pooling.cc)
-    TARGET_INCLUDE_DIRECTORIES(global-average-pooling-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(global-average-pooling-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(hardswish-bench bench/hardswish.cc)
-    TARGET_INCLUDE_DIRECTORIES(hardswish-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(hardswish-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(leaky-relu-bench bench/leaky-relu.cc)
-    TARGET_INCLUDE_DIRECTORIES(leaky-relu-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(leaky-relu-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(max-pooling-bench bench/max-pooling.cc)
-    TARGET_INCLUDE_DIRECTORIES(max-pooling-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(max-pooling-bench PRIVATE XNNPACK benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(negate-bench bench/negate.cc)
-    TARGET_INCLUDE_DIRECTORIES(negate-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(negate-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(prelu-bench bench/prelu.cc)
-    TARGET_INCLUDE_DIRECTORIES(prelu-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(prelu-bench PRIVATE XNNPACK benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(reciprocal-square-root-bench bench/reciprocal-square-root.cc)
-    TARGET_INCLUDE_DIRECTORIES(reciprocal-square-root-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(reciprocal-square-root-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(sigmoid-bench bench/sigmoid.cc)
-    TARGET_INCLUDE_DIRECTORIES(sigmoid-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(sigmoid-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(softmax-bench bench/softmax.cc)
-    TARGET_INCLUDE_DIRECTORIES(softmax-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(softmax-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(square-bench bench/square.cc)
-    TARGET_INCLUDE_DIRECTORIES(square-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(square-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(square-root-bench bench/square-root.cc)
-    TARGET_INCLUDE_DIRECTORIES(square-root-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(square-root-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(truncation-bench bench/truncation.cc)
-    TARGET_INCLUDE_DIRECTORIES(truncation-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(truncation-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
-
-    ADD_EXECUTABLE(tanh-bench bench/tanh.cc)
-    TARGET_INCLUDE_DIRECTORIES(tanh-bench PRIVATE .)
-    TARGET_LINK_LIBRARIES(tanh-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
+    FOREACH(BENCH ${LIBRARY_OPERATOR_BENCHMARKS})
+      ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)
+      TARGET_INCLUDE_DIRECTORIES(${BENCH}-bench PRIVATE .)
+      TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
+    ENDFOREACH()
   ENDIF()
 
   # ---[ Build microkernel-level microbenchmarks
