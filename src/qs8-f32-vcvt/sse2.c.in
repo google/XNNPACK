@@ -29,11 +29,18 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__sse2_u${BATCH_TILE}(
   assert(output != NULL);
 
   $if DATATYPE == "QS8":
-    const __m128i vsign_mask = _mm_load_si128((const __m128i*) params->sse2.sign_mask);
-  const __m128i vmagic_exp = _mm_load_si128((const __m128i*) params->sse2.magic_exp);
-  const __m128 vmagic_bias = _mm_load_ps(params->sse2.magic_bias);
-  const __m128 vscale = _mm_load_ps(params->sse2.scale);
+    const __m128i vsign_mask = _mm_set1_epi8(UINT8_C(0x80));
+    XNN_FORCE_REALIZATION(vsign_mask);
+  const __m128i vmagic_exp = _mm_set1_epi16(UINT16_C(0x4B00));
+  $if DATATYPE == "QS8":
+    const __m128 vmagic_bias = _mm_set1_ps((float) (INT32_C(0x00800080) + (int32_t) params->scalar.zero_point));
+  $else:
+    const __m128 vmagic_bias = _mm_set1_ps((float) (INT32_C(0x00800000) + (int32_t) params->scalar.zero_point));
+  const __m128 vscale = _mm_set1_ps(params->scalar.scale);
   const __m128i vzero = _mm_setzero_si128();
+  XNN_FORCE_REALIZATION(vmagic_exp);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vscale);
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
       __m128i vx${ABC[0:8]} = _mm_loadl_epi64((const __m128i*) input);

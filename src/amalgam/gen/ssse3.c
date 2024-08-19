@@ -263,9 +263,15 @@ void xnn_qs16_qs8_vcvt_ukernel__ssse3_u16(
     0x80, 0x80, 14, 15, 0x80, 0x80, 0x80, 0x80,
   };
 
-  const __m128i vinput_bias = _mm_load_si128((const __m128i*) params->ssse3.input_bias);
-  const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->ssse3.multiplier);
-  const __m128i vbias = _mm_load_si128((const __m128i*) params->ssse3.bias);
+  const __m128i vinput_bias = _mm_set1_epi16(UINT16_C(0x8000));
+  const __m128i vmultiplier = _mm_set1_epi32(params->scalar.multiplier);
+  const __m128i vbias = _mm_set1_epi64x(
+      (int64_t) ((uint64_t) params->scalar.output_zero_point << 32) + 
+      INT64_C(0x80000000) -
+      (INT64_C(0x80000000) * (int64_t) params->scalar.multiplier));
+  XNN_FORCE_REALIZATION(vinput_bias);
+  XNN_FORCE_REALIZATION(vmultiplier);
+  XNN_FORCE_REALIZATION(vbias);
   const __m128i vshuffle01 = _mm_load_si128((const __m128i*) shuffle01);
   const __m128i vshuffle23 = _mm_load_si128((const __m128i*) shuffle23);
 
@@ -377,9 +383,12 @@ void xnn_qs8_vcvt_ukernel__ssse3_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vinput_zero_point = _mm_load_si128((const __m128i*) params->ssse3.input_zero_point);
-  const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->ssse3.multiplier);
-  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->ssse3.output_zero_point);
+  const __m128i vinput_zero_point = _mm_set1_epi16(params->scalar.input_zero_point);
+  const __m128i vmultiplier = _mm_set1_epi16(-params->scalar.multiplier);
+  const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
+  XNN_FORCE_REALIZATION(vinput_zero_point);
+  XNN_FORCE_REALIZATION(vmultiplier);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
   for (; batch >= 32 * sizeof(int8_t); batch -= 32 * sizeof(int8_t)) {
     const __m128i vx0 = _mm_loadu_si128((const __m128i*) input);
     const __m128i vx1 = _mm_loadu_si128((const __m128i*) (input + 16));
@@ -630,9 +639,12 @@ void xnn_qu8_vcvt_ukernel__ssse3_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vinput_zero_point = _mm_load_si128((const __m128i*) params->ssse3.input_zero_point);
-  const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->ssse3.multiplier);
-  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->ssse3.output_zero_point);
+  const __m128i vinput_zero_point = _mm_set1_epi16(params->scalar.input_zero_point);
+  const __m128i vmultiplier = _mm_set1_epi16(-params->scalar.multiplier);
+  const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
+  XNN_FORCE_REALIZATION(vinput_zero_point);
+  XNN_FORCE_REALIZATION(vmultiplier);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
   const __m128i vzero = _mm_setzero_si128();
   for (; batch >= 32 * sizeof(uint8_t); batch -= 32 * sizeof(uint8_t)) {
     const __m128i vx0 = _mm_loadu_si128((const __m128i*) input);

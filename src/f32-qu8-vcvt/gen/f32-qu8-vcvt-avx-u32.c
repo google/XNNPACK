@@ -29,10 +29,14 @@ void xnn_f32_qu8_vcvt_ukernel__avx_u32(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 vscale = _mm256_load_ps(params->avx.scale);
-  const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->avx.output_max_less_zero_point);
-  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->avx.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->avx.output_min);
+  const __m256 vscale = _mm256_set1_ps(params->scalar.scale);
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point));
+  const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->scalar.output_min);
+  XNN_FORCE_REALIZATION(vscale);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     __m256 vx01234567 = _mm256_loadu_ps(input);

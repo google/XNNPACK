@@ -27,10 +27,14 @@ void xnn_f32_qu8_vcvt_ukernel__sse2_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vscale = _mm_load_ps(params->sse2.scale);
-  const __m128 voutput_max_less_zero_point = _mm_load_ps(params->sse2.output_max_less_zero_point);
-  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.output_min);
+  const __m128 vscale = _mm_set1_ps(params->scalar.scale);
+  const __m128 voutput_max_less_zero_point = _mm_set1_ps((float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point));
+  const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->scalar.output_min);
+  XNN_FORCE_REALIZATION(vscale);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     __m128 vx_lo = _mm_loadu_ps(input);

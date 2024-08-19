@@ -5,67 +5,67 @@
 
 # ARM NEON
 - name: xnn_qu8_vcvt_ukernel__neon_u8
-  init: xnn_init_qu8_cvt_neon_params
+  init: xnn_init_qu8_cvt_scalar_params
 - name: xnn_qu8_vcvt_ukernel__neon_u16
-  init: xnn_init_qu8_cvt_neon_params
+  init: xnn_init_qu8_cvt_scalar_params
 - name: xnn_qu8_vcvt_ukernel__neon_u32
-  init: xnn_init_qu8_cvt_neon_params
+  init: xnn_init_qu8_cvt_scalar_params
 
 # x86 SSE2
 - name: xnn_qu8_vcvt_ukernel__sse2_u16
-  init: xnn_init_qu8_cvt_sse2_params
+  init: xnn_init_qu8_cvt_scalar_params
 - name: xnn_qu8_vcvt_ukernel__sse2_u32
-  init: xnn_init_qu8_cvt_sse2_params
+  init: xnn_init_qu8_cvt_scalar_params
 
 # x86 SSSE3
 - name: xnn_qu8_vcvt_ukernel__ssse3_u16
-  init: xnn_init_qu8_cvt_ssse3_params
+  init: xnn_init_qu8_cvt_scalar_params
 - name: xnn_qu8_vcvt_ukernel__ssse3_u32
-  init: xnn_init_qu8_cvt_ssse3_params
+  init: xnn_init_qu8_cvt_scalar_params
 
 # x86 SSE4.1 / AVX
 - name: xnn_qu8_vcvt_ukernel__avx_u8
-  init: xnn_init_qu8_cvt_ssse3_params
+  init: xnn_init_qu8_cvt_scalar_params
 - name: xnn_qu8_vcvt_ukernel__avx_u16
-  init: xnn_init_qu8_cvt_ssse3_params
+  init: xnn_init_qu8_cvt_scalar_params
 - name: xnn_qu8_vcvt_ukernel__avx_u32
-  init: xnn_init_qu8_cvt_ssse3_params
+  init: xnn_init_qu8_cvt_scalar_params
 - name: xnn_qu8_vcvt_ukernel__sse41_u8
-  init: xnn_init_qu8_cvt_ssse3_params
+  init: xnn_init_qu8_cvt_scalar_params
 - name: xnn_qu8_vcvt_ukernel__sse41_u16
-  init: xnn_init_qu8_cvt_ssse3_params
+  init: xnn_init_qu8_cvt_scalar_params
 - name: xnn_qu8_vcvt_ukernel__sse41_u32
-  init: xnn_init_qu8_cvt_ssse3_params
+  init: xnn_init_qu8_cvt_scalar_params
 
 # x86 AVX2
 - name: xnn_qu8_vcvt_ukernel__avx2_u16
-  init: xnn_init_qu8_cvt_avx2_params
+  init: xnn_init_qu8_cvt_scalar_params
 - name: xnn_qu8_vcvt_ukernel__avx2_u32
-  init: xnn_init_qu8_cvt_avx2_params
+  init: xnn_init_qu8_cvt_scalar_params
 - name: xnn_qu8_vcvt_ukernel__avx2_u64
-  init: xnn_init_qu8_cvt_avx2_params
+  init: xnn_init_qu8_cvt_scalar_params
 
 # WAsm SIMD
 - name: xnn_qu8_vcvt_ukernel__wasmsimd_u8
-  init: xnn_init_qu8_cvt_wasmsimd_params
+  init: xnn_init_qu8_cvt_scalar_params
 - name: xnn_qu8_vcvt_ukernel__wasmsimd_u16
-  init: xnn_init_qu8_cvt_wasmsimd_params
+  init: xnn_init_qu8_cvt_scalar_params
 - name: xnn_qu8_vcvt_ukernel__wasmsimd_u32
-  init: xnn_init_qu8_cvt_wasmsimd_params
+  init: xnn_init_qu8_cvt_scalar_params
 
 # WAsm Relaxed SIMD
 - name: xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_u8
-  init: xnn_init_qu8_cvt_wasmsimd_params
+  init: xnn_init_qu8_cvt_scalar_params
 - name: xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_u16
-  init: xnn_init_qu8_cvt_wasmsimd_params
+  init: xnn_init_qu8_cvt_scalar_params
 - name: xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_u32
-  init: xnn_init_qu8_cvt_wasmsimd_params
+  init: xnn_init_qu8_cvt_scalar_params
 
 # ARMv6 SIMD
 - name: xnn_qu8_vcvt_ukernel__armsimd32_u4
-  init: xnn_init_qu8_cvt_armsimd32_params
+  init: xnn_init_qu8_cvt_scalar_params
 - name: xnn_qu8_vcvt_ukernel__armsimd32_u8
-  init: xnn_init_qu8_cvt_armsimd32_params
+  init: xnn_init_qu8_cvt_scalar_params
 
 # Scalar
 - name: xnn_qu8_vcvt_ukernel__scalar_u1

@@ -30,8 +30,8 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__neon_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const int16x8_t vminus_zero_point = vreinterpretq_s16_u32(vld1q_dup_u32((const void*) params->neon.minus_zero_point));
-  const float32x4_t vscale = vld1q_dup_f32(&params->neon.scale);
+  const int16x8_t vminus_zero_point = vdupq_n_s16(-params->scalar.zero_point);
+  const float32x4_t vscale = vld1q_dup_f32(&params->scalar.scale);
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
       $for N in range(0, BATCH_TILE, 8):

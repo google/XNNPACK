@@ -27,10 +27,14 @@ void xnn_f32_qu8_vcvt_ukernel__wasmsimd_cvt_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vscale = wasm_v128_load64_splat(params->wasmsimd_cvt.scale);
-  const v128_t voutput_zero_point = wasm_v128_load64_splat(params->wasmsimd_cvt.output_zero_point);
-  const v128_t voutput_min = wasm_v128_load64_splat(params->wasmsimd_cvt.output_min);
-  const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd_cvt.output_max);
+  const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
+  const v128_t voutput_zero_point = wasm_v128_load16_splat(&params->scalar.output_zero_point);
+  const v128_t voutput_min = wasm_v128_load8_splat(&params->scalar.output_min);
+  const v128_t voutput_max = wasm_v128_load8_splat(&params->scalar.output_max);
+  XNN_FORCE_REALIZATION(vscale);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+  XNN_FORCE_REALIZATION(voutput_max);
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     v128_t vx_lo = wasm_v128_load(input);
     v128_t vx_hi = wasm_v128_load(input + 4);

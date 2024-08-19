@@ -44,14 +44,14 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neonv8_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vscale = vld1q_dup_f32(&params->neonv8.scale);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neonv8.output_zero_point);
+  const float32x4_t vscale = vld1q_dup_f32(&params->scalar.scale);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
   $if BATCH_TILE > 8:
-    const ${XINT8X16_T} voutput_min = ${VLD1Q_DUP_X8}(&params->neonv8.output_min);
-    const ${XINT8X16_T} voutput_max = ${VLD1Q_DUP_X8}(&params->neonv8.output_max);
+    const ${XINT8X16_T} voutput_min = ${VLD1Q_DUP_X8}(&params->scalar.output_min);
+    const ${XINT8X16_T} voutput_max = ${VLD1Q_DUP_X8}(&params->scalar.output_max);
   $else:
-    const ${XINT8X8_T} voutput_min = ${VLD1_DUP_X8}(&params->neonv8.output_min);
-    const ${XINT8X8_T} voutput_max = ${VLD1_DUP_X8}(&params->neonv8.output_max);
+    const ${XINT8X8_T} voutput_min = ${VLD1_DUP_X8}(&params->scalar.output_min);
+    const ${XINT8X8_T} voutput_max = ${VLD1_DUP_X8}(&params->scalar.output_max);
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       $for N in range(0, BATCH_TILE, 4):

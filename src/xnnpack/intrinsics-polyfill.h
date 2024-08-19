@@ -8,6 +8,9 @@
 #include "xnnpack/common.h"
 #include "xnnpack/unaligned.h"
 
+static XNN_INTRINSIC uint32_t broadcast2x_uint16(uint16_t x) {
+  return (uint32_t)x | ((uint32_t)x) << 16;
+}
 
 #if defined(__SSE2__)
 #include <emmintrin.h>

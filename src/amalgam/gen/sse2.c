@@ -1386,10 +1386,14 @@ void xnn_f32_qs8_vcvt_ukernel__sse2_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vscale = _mm_load_ps(params->sse2.scale);
-  const __m128 voutput_max_less_zero_point = _mm_load_ps(params->sse2.output_max_less_zero_point);
-  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.output_min);
+  const __m128 vscale = _mm_set1_ps(params->scalar.scale);
+  const __m128 voutput_max_less_zero_point = _mm_set1_ps((float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point));
+  const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi16(params->scalar.output_min);
+  XNN_FORCE_REALIZATION(vscale);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     __m128 vx0123 = _mm_loadu_ps(input);
@@ -1523,10 +1527,14 @@ void xnn_f32_qu8_vcvt_ukernel__sse2_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vscale = _mm_load_ps(params->sse2.scale);
-  const __m128 voutput_max_less_zero_point = _mm_load_ps(params->sse2.output_max_less_zero_point);
-  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.output_min);
+  const __m128 vscale = _mm_set1_ps(params->scalar.scale);
+  const __m128 voutput_max_less_zero_point = _mm_set1_ps((float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point));
+  const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->scalar.output_min);
+  XNN_FORCE_REALIZATION(vscale);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     __m128 vx0123 = _mm_loadu_ps(input);
@@ -4482,11 +4490,16 @@ void xnn_qs16_qs8_vcvt_ukernel__sse2_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vinput_bias = _mm_load_si128((const __m128i*) params->sse2.input_bias);
-  const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->sse2.multiplier);
-  const __m128i vbias = _mm_load_si128((const __m128i*) params->sse2.bias);
+  const __m128i vinput_bias = _mm_set1_epi16(UINT16_C(0x8000));
+  const __m128i vmultiplier = _mm_set1_epi32(params->scalar.multiplier);
+  const __m128i vbias = _mm_set1_epi64x(
+      (int64_t) ((uint64_t) params->scalar.output_zero_point << 32) + 
+      INT64_C(0x80000000) -
+      (INT64_C(0x80000000) * (int64_t) params->scalar.multiplier));
   const __m128i vzero = _mm_setzero_si128();
-
+  XNN_FORCE_REALIZATION(vinput_bias);
+  XNN_FORCE_REALIZATION(vmultiplier);
+  XNN_FORCE_REALIZATION(vbias);
   for (; batch >= 16 * sizeof(int16_t); batch -= 16 * sizeof(int16_t)) {
     __m128i vx0 = _mm_loadu_si128((const __m128i*) input); input += 8;
     __m128i vx2 = _mm_loadu_si128((const __m128i*) input); input += 8;
@@ -5743,11 +5756,15 @@ void xnn_qs8_f32_vcvt_ukernel__sse2_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vsign_mask = _mm_load_si128((const __m128i*) params->sse2.sign_mask);
-  const __m128i vmagic_exp = _mm_load_si128((const __m128i*) params->sse2.magic_exp);
-  const __m128 vmagic_bias = _mm_load_ps(params->sse2.magic_bias);
-  const __m128 vscale = _mm_load_ps(params->sse2.scale);
+  const __m128i vsign_mask = _mm_set1_epi8(UINT8_C(0x80));
+  XNN_FORCE_REALIZATION(vsign_mask);
+  const __m128i vmagic_exp = _mm_set1_epi16(UINT16_C(0x4B00));
+  const __m128 vmagic_bias = _mm_set1_ps((float) (INT32_C(0x00800080) + (int32_t) params->scalar.zero_point));
+  const __m128 vscale = _mm_set1_ps(params->scalar.scale);
   const __m128i vzero = _mm_setzero_si128();
+  XNN_FORCE_REALIZATION(vmagic_exp);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vscale);
   for (; batch >= 32 * sizeof(int8_t); batch -= 32 * sizeof(int8_t)) {
     __m128i vx01234567 = _mm_loadl_epi64((const __m128i*) input);
     __m128i vx89ABCDEF = _mm_loadl_epi64((const __m128i*) (input + 8));
@@ -8607,8 +8624,13 @@ void xnn_qs8_vcvt_ukernel__sse2_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->sse2.multiplier);
-  const __m128i vbias = _mm_load_si128((const __m128i*) params->sse2.bias);
+  const __m128i vmultiplier = _mm_set1_epi16(-params->scalar.multiplier);
+  const __m128i vbias = _mm_set1_epi32(
+      ((int32_t) params->scalar.output_zero_point << 8) -
+      (int32_t) params->scalar.multiplier * (int32_t) params->scalar.input_zero_point + 
+      INT32_C(0x80));
+  XNN_FORCE_REALIZATION(vmultiplier);
+  XNN_FORCE_REALIZATION(vbias);
   for (; batch >= 32 * sizeof(int8_t); batch -= 32 * sizeof(int8_t)) {
     const __m128i vx0 = _mm_loadu_si128((const __m128i*) input);
     const __m128i vx1 = _mm_loadu_si128((const __m128i*) (input + 16));
@@ -11008,10 +11030,13 @@ void xnn_qu8_f32_vcvt_ukernel__sse2_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vmagic_exp = _mm_load_si128((const __m128i*) params->sse2.magic_exp);
-  const __m128 vmagic_bias = _mm_load_ps(params->sse2.magic_bias);
-  const __m128 vscale = _mm_load_ps(params->sse2.scale);
+  const __m128i vmagic_exp = _mm_set1_epi16(UINT16_C(0x4B00));
+  const __m128 vmagic_bias = _mm_set1_ps((float) (INT32_C(0x00800000) + (int32_t) params->scalar.zero_point));
+  const __m128 vscale = _mm_set1_ps(params->scalar.scale);
   const __m128i vzero = _mm_setzero_si128();
+  XNN_FORCE_REALIZATION(vmagic_exp);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vscale);
   for (; batch >= 32 * sizeof(uint8_t); batch -= 32 * sizeof(uint8_t)) {
     __m128i vx01234567 = _mm_loadl_epi64((const __m128i*) input);
     __m128i vx89ABCDEF = _mm_loadl_epi64((const __m128i*) (input + 8));
@@ -12421,8 +12446,13 @@ void xnn_qu8_vcvt_ukernel__sse2_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->sse2.multiplier);
-  const __m128i vbias = _mm_load_si128((const __m128i*) params->sse2.bias);
+  const __m128i vmultiplier = _mm_set1_epi16(params->scalar.multiplier);
+  const __m128i vbias = _mm_set1_epi32(
+      ((int32_t) params->scalar.output_zero_point << 8) -
+      (int32_t) params->scalar.multiplier * (int32_t) params->scalar.input_zero_point + 
+      INT32_C(0x80));
+  XNN_FORCE_REALIZATION(vmultiplier);
+  XNN_FORCE_REALIZATION(vbias);
   const __m128i vzero = _mm_setzero_si128();
   for (; batch >= 32 * sizeof(uint8_t); batch -= 32 * sizeof(uint8_t)) {
     const __m128i vx0 = _mm_loadu_si128((const __m128i*) input);

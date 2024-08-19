@@ -24,7 +24,10 @@ void xnn_qu8_vcvt_ukernel__scalar_u4(
   assert(input != NULL);
   assert(output != NULL);
 
-  const int32_t vbias = params->scalar.bias;
+  const int32_t vbias = 
+      ((int32_t) params->scalar.output_zero_point << 8) -
+      (int32_t) params->scalar.multiplier * (int32_t) params->scalar.input_zero_point + 
+      INT32_C(0x80);
   const int32_t vmultiplier = params->scalar.multiplier;
   for (; batch >= 4 * sizeof(uint8_t); batch -= 4 * sizeof(uint8_t)) {
     int32_t vacc0 = input[0];

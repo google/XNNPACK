@@ -29,8 +29,10 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__avx512skx_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m512i vminus_zero_point = _mm512_load_si512(params->avx512.minus_zero_point);
-  const __m512 vscale = _mm512_load_ps(params->avx512.scale);
+  const __m512i vzero_point = _mm512_set1_epi32(params->scalar.zero_point);
+  const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
+  XNN_FORCE_REALIZATION(vzero_point);
+  XNN_FORCE_REALIZATION(vscale);
   $if BATCH_TILE > 16:
     for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
       __m512i vx${ABC[0:16]} = ${_MM512_CVTEPX8_EPI32}(_mm_loadu_si128((const __m128i*) input));
@@ -39,7 +41,7 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__avx512skx_u${BATCH_TILE}(
       input += ${BATCH_TILE};
 
       $for N in range(0, BATCH_TILE, 16):
-        vx${ABC[N:N+16]} = _mm512_add_epi32(vx${ABC[N:N+16]}, vminus_zero_point);
+        vx${ABC[N:N+16]} = _mm512_sub_epi32(vx${ABC[N:N+16]}, vzero_point);
 
       $for N in range(0, BATCH_TILE, 16):
         __m512 vy${ABC[N:N+16]} = _mm512_cvtepi32_ps(vx${ABC[N:N+16]});
@@ -54,7 +56,7 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__avx512skx_u${BATCH_TILE}(
     }
   for (; batch >= 16 * sizeof(${XINT8_T}); batch -= 16 * sizeof(${XINT8_T})) {
     __m512i vx = ${_MM512_CVTEPX8_EPI32}(_mm_loadu_si128((const __m128i*) input));
-    vx = _mm512_add_epi32(vx, vminus_zero_point);
+    vx = _mm512_sub_epi32(vx, vzero_point);
     input += 16;
 
     __m512 vy = _mm512_cvtepi32_ps(vx);
@@ -71,7 +73,7 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__avx512skx_u${BATCH_TILE}(
     const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
     __m512i vx = ${_MM512_CVTEPX8_EPI32}(_mm_maskz_loadu_epi8(vmask, input));
-    vx = _mm512_add_epi32(vx, vminus_zero_point);
+    vx = _mm512_sub_epi32(vx, vzero_point);
 
     __m512 vy = _mm512_cvtepi32_ps(vx);
     vy = _mm512_mul_ps(vy, vscale);

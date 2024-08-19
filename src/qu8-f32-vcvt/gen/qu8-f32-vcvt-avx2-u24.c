@@ -27,17 +27,19 @@ void xnn_qu8_f32_vcvt_ukernel__avx2_u24(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m256i vminus_zero_point = _mm256_load_si256((const __m256i*) params->avx.minus_zero_point);
-  const __m256 vscale = _mm256_load_ps(params->avx.scale);
+  const __m256i vzero_point = _mm256_set1_epi32(params->scalar.zero_point);
+  const __m256 vscale = _mm256_set1_ps(params->scalar.scale);
+  XNN_FORCE_REALIZATION(vzero_point);
+  XNN_FORCE_REALIZATION(vscale);
   for (; batch >= 24 * sizeof(uint8_t); batch -= 24 * sizeof(uint8_t)) {
     __m256i vx01234567 = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) input));
     __m256i vx89ABCDEF = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) (input + 8)));
     __m256i vxGHIJKLMN = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) (input + 16)));
     input += 24;
 
-    vx01234567 = _mm256_add_epi32(vx01234567, vminus_zero_point);
-    vx89ABCDEF = _mm256_add_epi32(vx89ABCDEF, vminus_zero_point);
-    vxGHIJKLMN = _mm256_add_epi32(vxGHIJKLMN, vminus_zero_point);
+    vx01234567 = _mm256_sub_epi32(vx01234567, vzero_point);
+    vx89ABCDEF = _mm256_sub_epi32(vx89ABCDEF, vzero_point);
+    vxGHIJKLMN = _mm256_sub_epi32(vxGHIJKLMN, vzero_point);
 
     __m256 vy01234567 = _mm256_cvtepi32_ps(vx01234567);
     __m256 vy89ABCDEF = _mm256_cvtepi32_ps(vx89ABCDEF);
@@ -54,7 +56,7 @@ void xnn_qu8_f32_vcvt_ukernel__avx2_u24(
   }
   for (; batch >= 8 * sizeof(uint8_t); batch -= 8 * sizeof(uint8_t)) {
     __m256i vx = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) input));
-    vx = _mm256_add_epi32(vx, vminus_zero_point);
+    vx = _mm256_sub_epi32(vx, vzero_point);
     input += 8;
 
     __m256 vy = _mm256_cvtepi32_ps(vx);
@@ -68,7 +70,7 @@ void xnn_qu8_f32_vcvt_ukernel__avx2_u24(
     assert(batch <= 7 * sizeof(uint8_t));
 
     __m256i vx = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i*) input));
-    vx = _mm256_add_epi32(vx, vminus_zero_point);
+    vx = _mm256_sub_epi32(vx, vzero_point);
 
     __m256 vy = _mm256_cvtepi32_ps(vx);
     vy = _mm256_mul_ps(vy, vscale);

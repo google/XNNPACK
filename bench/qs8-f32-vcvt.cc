@@ -21,7 +21,7 @@
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(qs8_f32_vcvt, wasmsimd_u8,
                     xnn_qs8_f32_vcvt_ukernel__wasmsimd_u8,
-                    xnn_init_qs8_f32_cvt_wasmsimd_params)
+                    xnn_init_qs8_f32_cvt_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -30,7 +30,7 @@
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(qs8_f32_vcvt, wasmsimd_u16,
                     xnn_qs8_f32_vcvt_ukernel__wasmsimd_u16,
-                    xnn_init_qs8_f32_cvt_wasmsimd_params)
+                    xnn_init_qs8_f32_cvt_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -39,7 +39,7 @@
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(qs8_f32_vcvt, wasmsimd_u24,
                     xnn_qs8_f32_vcvt_ukernel__wasmsimd_u24,
-                    xnn_init_qs8_f32_cvt_wasmsimd_params)
+                    xnn_init_qs8_f32_cvt_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -48,7 +48,7 @@
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(qs8_f32_vcvt, wasmsimd_u32,
                     xnn_qs8_f32_vcvt_ukernel__wasmsimd_u32,
-                    xnn_init_qs8_f32_cvt_wasmsimd_params)
+                    xnn_init_qs8_f32_cvt_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -57,7 +57,7 @@
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, neon_u8,
                     xnn_qs8_f32_vcvt_ukernel__neon_u8,
-                    xnn_init_qs8_f32_cvt_neon_params,
+                    xnn_init_qs8_f32_cvt_scalar_params,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
@@ -67,7 +67,7 @@
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, neon_u16,
                     xnn_qs8_f32_vcvt_ukernel__neon_u16,
-                    xnn_init_qs8_f32_cvt_neon_params,
+                    xnn_init_qs8_f32_cvt_scalar_params,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
@@ -77,7 +77,7 @@
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, neon_u24,
                     xnn_qs8_f32_vcvt_ukernel__neon_u24,
-                    xnn_init_qs8_f32_cvt_neon_params,
+                    xnn_init_qs8_f32_cvt_scalar_params,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
@@ -87,7 +87,7 @@
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, neon_u32,
                     xnn_qs8_f32_vcvt_ukernel__neon_u32,
-                    xnn_init_qs8_f32_cvt_neon_params,
+                    xnn_init_qs8_f32_cvt_scalar_params,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
@@ -97,7 +97,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, avx2_u8,
                     xnn_qs8_f32_vcvt_ukernel__avx2_u8,
-                    xnn_init_qs8_f32_cvt_avx_params,
+                    xnn_init_qs8_f32_cvt_scalar_params,
                     benchmark::utils::CheckAVX2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
@@ -107,7 +107,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, avx2_u16,
                     xnn_qs8_f32_vcvt_ukernel__avx2_u16,
-                    xnn_init_qs8_f32_cvt_avx_params,
+                    xnn_init_qs8_f32_cvt_scalar_params,
                     benchmark::utils::CheckAVX2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
@@ -117,7 +117,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, avx2_u24,
                     xnn_qs8_f32_vcvt_ukernel__avx2_u24,
-                    xnn_init_qs8_f32_cvt_avx_params,
+                    xnn_init_qs8_f32_cvt_scalar_params,
                     benchmark::utils::CheckAVX2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
@@ -127,7 +127,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, avx2_u32,
                     xnn_qs8_f32_vcvt_ukernel__avx2_u32,
-                    xnn_init_qs8_f32_cvt_avx_params,
+                    xnn_init_qs8_f32_cvt_scalar_params,
                     benchmark::utils::CheckAVX2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
@@ -137,7 +137,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, avx_u8,
                     xnn_qs8_f32_vcvt_ukernel__avx_u8,
-                    xnn_init_qs8_f32_cvt_avx_params,
+                    xnn_init_qs8_f32_cvt_scalar_params,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
@@ -147,7 +147,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, avx_u16,
                     xnn_qs8_f32_vcvt_ukernel__avx_u16,
-                    xnn_init_qs8_f32_cvt_avx_params,
+                    xnn_init_qs8_f32_cvt_scalar_params,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
@@ -157,7 +157,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, avx_u24,
                     xnn_qs8_f32_vcvt_ukernel__avx_u24,
-                    xnn_init_qs8_f32_cvt_avx_params,
+                    xnn_init_qs8_f32_cvt_scalar_params,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
@@ -167,7 +167,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, avx_u32,
                     xnn_qs8_f32_vcvt_ukernel__avx_u32,
-                    xnn_init_qs8_f32_cvt_avx_params,
+                    xnn_init_qs8_f32_cvt_scalar_params,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
@@ -177,7 +177,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, sse41_u8,
                     xnn_qs8_f32_vcvt_ukernel__sse41_u8,
-                    xnn_init_qs8_f32_cvt_sse4_params,
+                    xnn_init_qs8_f32_cvt_scalar_params,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
@@ -187,7 +187,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, sse41_u16,
                     xnn_qs8_f32_vcvt_ukernel__sse41_u16,
-                    xnn_init_qs8_f32_cvt_sse4_params,
+                    xnn_init_qs8_f32_cvt_scalar_params,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
@@ -197,7 +197,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, sse41_u24,
                     xnn_qs8_f32_vcvt_ukernel__sse41_u24,
-                    xnn_init_qs8_f32_cvt_sse4_params,
+                    xnn_init_qs8_f32_cvt_scalar_params,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
@@ -207,7 +207,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, sse41_u32,
                     xnn_qs8_f32_vcvt_ukernel__sse41_u32,
-                    xnn_init_qs8_f32_cvt_sse4_params,
+                    xnn_init_qs8_f32_cvt_scalar_params,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
@@ -217,7 +217,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, sse2_u8,
                     xnn_qs8_f32_vcvt_ukernel__sse2_u8,
-                    xnn_init_qs8_f32_cvt_sse2_params)
+                    xnn_init_qs8_f32_cvt_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -226,7 +226,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, sse2_u16,
                     xnn_qs8_f32_vcvt_ukernel__sse2_u16,
-                    xnn_init_qs8_f32_cvt_sse2_params)
+                    xnn_init_qs8_f32_cvt_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -235,7 +235,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, sse2_u24,
                     xnn_qs8_f32_vcvt_ukernel__sse2_u24,
-                    xnn_init_qs8_f32_cvt_sse2_params)
+                    xnn_init_qs8_f32_cvt_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -244,7 +244,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f32_vcvt, sse2_u32,
                     xnn_qs8_f32_vcvt_ukernel__sse2_u32,
-                    xnn_init_qs8_f32_cvt_sse2_params)
+                    xnn_init_qs8_f32_cvt_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

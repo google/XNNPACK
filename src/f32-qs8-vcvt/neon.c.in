@@ -44,15 +44,16 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neon_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vscale = vld1q_dup_f32(&params->neon.scale);
-  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->neon.magic_bias);
-  const int32x4_t vmagic_bias_less_zero_point = vld1q_dup_s32(&params->neon.magic_bias_less_zero_point);
+  const float32x4_t vscale = vld1q_dup_f32(&params->scalar.scale);
+  const float32x4_t vmagic_bias = vdupq_n_f32(12582912.0f);
+  const int32x4_t vmagic_bias_less_zero_point = vdupq_n_s32(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
   $if BATCH_TILE > 8:
-    const ${XINT8X16_T} voutput_min = ${VLD1Q_DUP_X8}(&params->neon.output_min);
-    const ${XINT8X16_T} voutput_max = ${VLD1Q_DUP_X8}(&params->neon.output_max);
+    const ${XINT8X16_T} voutput_min = ${VLD1Q_DUP_X8}(&params->scalar.output_min);
+    const ${XINT8X16_T} voutput_max = ${VLD1Q_DUP_X8}(&params->scalar.output_max);
   $else:
-    const ${XINT8X8_T} voutput_min = ${VLD1_DUP_X8}(&params->neon.output_min);
-    const ${XINT8X8_T} voutput_max = ${VLD1_DUP_X8}(&params->neon.output_max);
+    const ${XINT8X8_T} voutput_min = ${VLD1_DUP_X8}(&params->scalar.output_min);
+    const ${XINT8X8_T} voutput_max = ${VLD1_DUP_X8}(&params->scalar.output_max);
+  XNN_FORCE_REALIZATION(vmagic_bias);
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       $for N in range(0, BATCH_TILE, 4):

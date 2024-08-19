@@ -5455,82 +5455,32 @@ size_t xnn_init_qs8_mul_minmax_fp32_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-size_t xnn_init_f16_qs8_cvt_scalar_fmagic_params(
+size_t xnn_init_f16_qs8_cvt_scalar_params(
   union xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale,
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max)
 {
-  params->scalar_fmagic.scale = fp16_ieee_to_fp32_value(scale);
-  params->scalar_fmagic.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  params->scalar_fmagic.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  params->scalar_fmagic.magic_bias = 12582912.0f;
-  params->scalar_fmagic.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
-  return sizeof(params->scalar_fmagic);
+  params->scalar.scale = fp16_ieee_to_fp32_value(scale);
+  params->scalar.output_min = output_min;
+  params->scalar.output_max = output_max;
+  params->scalar.output_zero_point = output_zero_point;
+  return sizeof(params->scalar);
 }
 
-size_t xnn_init_f16_qs8_cvt_scalar_imagic_params(
-  union xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max)
-{
-  const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  params->scalar_imagic.scale = fp16_ieee_to_fp32_value(scale);
-  params->scalar_imagic.magic_bias = 12582912.0f;
-  params->scalar_imagic.magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
-  params->scalar_imagic.magic_max = (int32_t) float_as_uint32(12582912.0f + output_max_less_zero_point);
-  params->scalar_imagic.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
-  return sizeof(params->scalar_imagic);
-}
-
-size_t xnn_init_f32_qs8_cvt_scalar_fmagic_params(
+size_t xnn_init_f32_qs8_cvt_scalar_params(
   union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max)
 {
-  params->scalar_fmagic.scale = scale;
-  params->scalar_fmagic.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  params->scalar_fmagic.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  params->scalar_fmagic.magic_bias = 12582912.0f;
-  params->scalar_fmagic.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
-  return sizeof(params->scalar_fmagic);
-}
-
-size_t xnn_init_f32_qs8_cvt_scalar_imagic_params(
-  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max)
-{
-  const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  params->scalar_imagic.scale = scale;
-  params->scalar_imagic.magic_bias = 12582912.0f;
-  params->scalar_imagic.magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
-  params->scalar_imagic.magic_max = (int32_t) float_as_uint32(12582912.0f + output_max_less_zero_point);
-  params->scalar_imagic.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
-  return sizeof(params->scalar_imagic);
-}
-
-size_t xnn_init_f32_qs8_cvt_scalar_lrintf_params(
-  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max)
-{
-  params->scalar_lrintf.scale = scale;
-  params->scalar_lrintf.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  params->scalar_lrintf.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  params->scalar_lrintf.output_zero_point = (int32_t) output_zero_point;
-  return sizeof(params->scalar_lrintf);
+  params->scalar.scale = scale;
+  params->scalar.output_zero_point = (int16_t) output_zero_point;
+  params->scalar.output_min = output_min;
+  params->scalar.output_max = output_max;
+  return sizeof(params->scalar);
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -5549,409 +5499,19 @@ size_t xnn_init_f16_qs8_cvt_neonfp16arith_params(
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f32_qs8_cvt_neon_params(
-  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max)
-{
-  params->neon.scale = scale;
-  params->neon.magic_bias = 12582912.0f;
-  params->neon.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
-  params->neon.output_min = output_min;
-  params->neon.output_max = output_max;
-  return sizeof(params->neon);
-}
-
-size_t xnn_init_f32_qs8_cvt_neonv8_params(
-  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max)
-{
-  params->neonv8.scale = scale;
-  params->neonv8.output_zero_point = (int16_t) output_zero_point;
-  params->neonv8.output_min = output_min;
-  params->neonv8.output_max = output_max;
-  return sizeof(params->neonv8);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_qs8_cvt_sse2_params(
-  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max)
-{
-  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2.scale[i] = scale;
-    params->sse2.output_max_less_zero_point[i] = output_max_less_zero_point;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse2.output_zero_point[i] = (int16_t) output_zero_point;
-    params->sse2.output_min[i] = (int16_t) output_min;
-  }
-  return sizeof(params->sse2);
-}
-
-size_t xnn_init_f32_qs8_cvt_sse4_params(
-  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max)
-{
-  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse4.scale[i] = scale;
-    params->sse4.output_max_less_zero_point[i] = output_max_less_zero_point;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse4.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  for (uint32_t i = 0; i < 16; i++) {
-    params->sse4.output_min[i] = output_min;
-  }
-  return sizeof(params->sse4);
-}
-
-size_t xnn_init_f32_qs8_cvt_avx_params(
-  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max)
-{
-  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.scale[i] = scale;
-    params->avx.output_max_less_zero_point[i] = output_max_less_zero_point;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx.output_min[i] = output_min;
-  }
-  return sizeof(params->avx);
-}
-
-size_t xnn_init_f32_qs8_cvt_avx2_params(
-  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max)
-{
-  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx2.scale[i] = scale;
-    params->avx2.output_max_less_zero_point[i] = output_max_less_zero_point;
-  }
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx2.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  for (uint32_t i = 0; i < 32; i++) {
-    params->avx2.output_min[i] = output_min;
-  }
-  return sizeof(params->avx2);
-}
-
-size_t xnn_init_f32_qs8_cvt_avx512_params(
-  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max)
-{
-  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx512.scale[i] = scale;
-    params->avx512.output_max_less_zero_point[i] = output_max_less_zero_point;
-  }
-  for (uint32_t i = 0; i < 32; i++) {
-    params->avx512.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  for (uint32_t i = 0; i < 64; i++) {
-    params->avx512.output_min[i] = output_min;
-  }
-  return sizeof(params->avx512);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_f32_qs8_cvt_wasmsimd_cvt_params(
-  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max)
-{
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd_cvt.scale[i] = scale;
-  }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd_cvt.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->wasmsimd_cvt.output_min[i] = output_min;
-    params->wasmsimd_cvt.output_max[i] = output_max;
-  }
-  return sizeof(params->wasmsimd_cvt);
-}
-
-size_t xnn_init_f32_qs8_cvt_wasmsimd_magic_params(
-  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max)
-{
-  const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  const int32_t magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
-  const int32_t magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd_magic.scale[i] = scale;
-    params->wasmsimd_magic.magic_bias[i] = 12582912.0f;
-    params->wasmsimd_magic.magic_min[i] = magic_min;
-    params->wasmsimd_magic.magic_bias_less_zero_point[i] = magic_bias_less_zero_point;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->wasmsimd_magic.output_max[i] = output_max;
-  }
-  return sizeof(params->wasmsimd_magic);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-#if XNN_ARCH_HEXAGON
-size_t xnn_init_f32_qs8_cvt_hvx_params(
-  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max)
-{
-  params->hvx.scale = scale;
-  params->hvx.magic_bias = 12582912.0f;
-  params->hvx.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
-  params->hvx.output_min = output_min;
-  params->hvx.output_max = output_max;
-  return sizeof(params->hvx);
-}
-#endif  // XNN_ARCH_HEXAGON
-
-size_t xnn_init_f32_qu8_cvt_scalar_fmagic_params(
+size_t xnn_init_f32_qu8_cvt_scalar_params(
   union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   uint8_t output_zero_point,
   uint8_t output_min,
   uint8_t output_max)
 {
-  params->scalar_fmagic.scale = scale;
-  params->scalar_fmagic.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  params->scalar_fmagic.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  params->scalar_fmagic.magic_bias = 12582912.0f;
-  params->scalar_fmagic.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
-  return sizeof(params->scalar_fmagic);
+  params->scalar.scale = scale;
+  params->scalar.output_zero_point = (int16_t) output_zero_point;
+  params->scalar.output_min = output_min;
+  params->scalar.output_max = output_max;
+  return sizeof(params->scalar);
 }
-
-size_t xnn_init_f32_qu8_cvt_scalar_imagic_params(
-  union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max)
-{
-  const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  params->scalar_imagic.scale = scale;
-  params->scalar_imagic.magic_bias = 12582912.0f;
-  params->scalar_imagic.magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
-  params->scalar_imagic.magic_max = (int32_t) float_as_uint32(12582912.0f + output_max_less_zero_point);
-  params->scalar_imagic.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
-  return sizeof(params->scalar_imagic);
-}
-
-size_t xnn_init_f32_qu8_cvt_scalar_lrintf_params(
-  union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max)
-{
-  params->scalar_lrintf.scale = scale;
-  params->scalar_lrintf.output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  params->scalar_lrintf.output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  params->scalar_lrintf.output_zero_point = (int32_t) output_zero_point;
-  return sizeof(params->scalar_lrintf);
-}
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f32_qu8_cvt_neon_params(
-  union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max)
-{
-  params->neon.scale = scale;
-  params->neon.magic_bias = 12582912.0f;
-  params->neon.magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
-  params->neon.output_min = output_min;
-  params->neon.output_max = output_max;
-  return sizeof(params->neon);
-}
-
-size_t xnn_init_f32_qu8_cvt_neonv8_params(
-  union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max)
-{
-  params->neonv8.scale = scale;
-  params->neonv8.output_zero_point = (int16_t) output_zero_point;
-  params->neonv8.output_min = output_min;
-  params->neonv8.output_max = output_max;
-  return sizeof(params->neonv8);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_qu8_cvt_sse2_params(
-  union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max)
-{
-  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2.scale[i] = scale;
-    params->sse2.output_max_less_zero_point[i] = output_max_less_zero_point;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse2.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  for (uint32_t i = 0; i < 16; i++) {
-    params->sse2.output_min[i] = output_min;
-  }
-  return sizeof(params->sse2);
-}
-
-size_t xnn_init_f32_qu8_cvt_avx_params(
-  union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max)
-{
-  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.scale[i] = scale;
-    params->avx.output_max_less_zero_point[i] = output_max_less_zero_point;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx.output_min[i] = output_min;
-  }
-  return sizeof(params->avx);
-}
-
-size_t xnn_init_f32_qu8_cvt_avx2_params(
-  union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max)
-{
-  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx2.scale[i] = scale;
-    params->avx2.output_max_less_zero_point[i] = output_max_less_zero_point;
-  }
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx2.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  for (uint32_t i = 0; i < 32; i++) {
-    params->avx2.output_min[i] = output_min;
-  }
-  return sizeof(params->avx2);
-}
-
-size_t xnn_init_f32_qu8_cvt_avx512_params(
-  union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max)
-{
-  const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx512.scale[i] = scale;
-    params->avx512.output_max_less_zero_point[i] = output_max_less_zero_point;
-  }
-  for (uint32_t i = 0; i < 32; i++) {
-    params->avx512.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  for (uint32_t i = 0; i < 64; i++) {
-    params->avx512.output_min[i] = output_min;
-  }
-  return sizeof(params->avx512);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_f32_qu8_cvt_wasmsimd_cvt_params(
-  union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max)
-{
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd_cvt.scale[i] = scale;
-  }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd_cvt.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->wasmsimd_cvt.output_min[i] = output_min;
-    params->wasmsimd_cvt.output_max[i] = output_max;
-  }
-  return sizeof(params->wasmsimd_cvt);
-}
-
-size_t xnn_init_f32_qu8_cvt_wasmsimd_magic_params(
-  union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max)
-{
-  const float output_min_less_zero_point = (float) ((int32_t) output_min - (int32_t) output_zero_point);
-  const int32_t magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
-  const int32_t magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd_magic.scale[i] = scale;
-    params->wasmsimd_magic.magic_bias[i] = 12582912.0f;
-    params->wasmsimd_magic.magic_min[i] = magic_min;
-    params->wasmsimd_magic.magic_bias_less_zero_point[i] = magic_bias_less_zero_point;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->wasmsimd_magic.output_max[i] = output_max;
-  }
-  return sizeof(params->wasmsimd_magic);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 size_t xnn_init_qs8_cvt_scalar_params(
   union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
@@ -5965,137 +5525,11 @@ size_t xnn_init_qs8_cvt_scalar_params(
   const long multiplier = lrintf(256.0f * input_output_scale);
   assert(multiplier >= 1L);
   assert(multiplier <= 32768L);
-  params->scalar.bias = ((int32_t) output_zero_point << 8) - (int32_t) multiplier * (int32_t) input_zero_point + INT32_C(0x80);
+  params->scalar.input_zero_point = (int16_t) input_zero_point;
   params->scalar.multiplier = (int32_t) multiplier;
+  params->scalar.output_zero_point = (int16_t) output_zero_point;
   return sizeof(params->scalar);
 }
-
-#if XNN_ARCH_ARM
-size_t xnn_init_qs8_cvt_armsimd32_params(
-  union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  int8_t input_zero_point,
-  int8_t output_zero_point)
-{
-  assert(input_output_scale >= 0x1.0p-8);
-  assert(input_output_scale <= 0x1.0p+7);
-
-  const long multiplier = lrintf(131072.0f * input_output_scale);
-  assert(multiplier >= 512L);
-  assert(multiplier <= 16777216L);
-  const uint16_t minus_input_zero_point = -(int16_t) input_zero_point;
-  params->armsimd32.minus_input_zero_point = (uint32_t) minus_input_zero_point * UINT32_C(0x00010001);
-  params->armsimd32.multiplier = (int32_t) multiplier;
-  params->armsimd32.bias = ((int32_t) output_zero_point << 1) + INT32_C(1);
-  return sizeof(params->armsimd32);
-}
-#endif  // XNN_ARCH_ARM
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_qs8_cvt_neon_params(
-  union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  int8_t input_zero_point,
-  int8_t output_zero_point)
-{
-  assert(input_output_scale >= 0x1.0p-8);
-  assert(input_output_scale <= 0x1.0p+7);
-
-  const long multiplier = lrintf(-256.0f * input_output_scale);
-  assert(multiplier <= -1L);
-  assert(multiplier >= -32768L);
-  params->neon.input_zero_point = (int16_t) input_zero_point;
-  params->neon.multiplier = (int16_t) multiplier;
-  params->neon.output_zero_point = (int16_t) output_zero_point;
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_qs8_cvt_sse2_params(
-  union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  int8_t input_zero_point,
-  int8_t output_zero_point)
-{
-  assert(input_output_scale >= 0x1.0p-8);
-  assert(input_output_scale <= 0x1.0p+7);
-
-  const long multiplier = lrintf(-256.0f * input_output_scale);
-  assert(multiplier <= -1L);
-  assert(multiplier >= -32768L);
-  const int32_t bias = ((int32_t) output_zero_point << 8) + (int32_t) multiplier * (int32_t) input_zero_point + INT32_C(0x80);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse2.multiplier[i] = (int16_t) multiplier;
-  }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2.bias[i] = bias;
-  }
-  return sizeof(params->sse2);
-}
-
-size_t xnn_init_qs8_cvt_ssse3_params(
-  union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  int8_t input_zero_point,
-  int8_t output_zero_point)
-{
-  assert(input_output_scale >= 0x1.0p-8);
-  assert(input_output_scale <= 0x1.0p+7);
-
-  const long multiplier = lrintf(-256.0f * input_output_scale);
-  assert(multiplier <= -1L);
-  assert(multiplier >= -32768L);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->ssse3.input_zero_point[i] = (int16_t) input_zero_point;
-    params->ssse3.multiplier[i] = (int16_t) multiplier;
-    params->ssse3.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  return sizeof(params->ssse3);
-}
-
-size_t xnn_init_qs8_cvt_avx2_params(
-  union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  int8_t input_zero_point,
-  int8_t output_zero_point)
-{
-  assert(input_output_scale >= 0x1.0p-8);
-  assert(input_output_scale <= 0x1.0p+7);
-
-  const long multiplier = lrintf(-256.0f * input_output_scale);
-  assert(multiplier <= -1L);
-  assert(multiplier >= -32768L);
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx2.input_zero_point[i] = (int16_t) input_zero_point;
-    params->avx2.multiplier[i] = (int16_t) multiplier;
-    params->avx2.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  return sizeof(params->avx2);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_qs8_cvt_wasmsimd_params(
-  union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  int8_t input_zero_point,
-  int8_t output_zero_point)
-{
-  assert(input_output_scale >= 0x1.0p-8);
-  assert(input_output_scale <= 0x1.0p+7);
-
-  const long multiplier = lrintf(-256.0f * input_output_scale);
-  assert(multiplier <= -1L);
-  assert(multiplier >= -32768L);
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd.input_zero_point[i] = (int16_t) input_zero_point;
-    params->wasmsimd.multiplier[i] = (int16_t) multiplier;
-    params->wasmsimd.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  return sizeof(params->wasmsimd);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 size_t xnn_init_qs16_qs8_cvt_scalar_params(
   union xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
@@ -6109,124 +5543,9 @@ size_t xnn_init_qs16_qs8_cvt_scalar_params(
   assert(multiplier >= 1L);
   assert(multiplier <= 0x01000000L);
   params->scalar.multiplier = (int32_t) multiplier;
-  params->scalar.bias = ((int32_t) output_zero_point << 16) + INT32_C(0x8000);
+  params->scalar.output_zero_point = (int32_t) output_zero_point;
   return sizeof(params->scalar);
 }
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_qs16_qs8_cvt_neon_params(
-  union xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  int8_t output_zero_point)
-{
-  assert(input_output_scale >= 0x1.0p-16);
-  assert(input_output_scale <= 0x1.0p+8);
-
-  const long multiplier = lrintf(65536.0f * input_output_scale);
-  assert(multiplier >= 1L);
-  assert(multiplier <= 0x01000000L);
-  params->neon.multiplier = (int32_t) multiplier;
-  params->neon.output_zero_point = (int16_t) output_zero_point;
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_qs16_qs8_cvt_sse2_params(
-  union xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  int8_t output_zero_point)
-{
-  assert(input_output_scale >= 0x1.0p-16);
-  assert(input_output_scale <= 0x1.0p+8);
-
-  const long multiplier = lrintf(65536.0f * input_output_scale);
-  assert(multiplier >= 1L);
-  assert(multiplier <= 0x01000000L);
-  const int64_t bias = (int64_t) ((uint64_t) output_zero_point << 32) + INT64_C(0x80000000) -
-      (INT64_C(0x80000000) * (int64_t) multiplier);
-
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse2.input_bias[i] = UINT16_C(0x8000);
-  }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2.multiplier[i] = (int32_t) multiplier;
-  }
-  for (uint32_t i = 0; i < 2; i++) {
-    params->sse2.bias[i] = (int64_t) bias;
-  }
-  return sizeof(params->sse2);
-}
-
-size_t xnn_init_qs16_qs8_cvt_ssse3_params(
-  union xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  int8_t output_zero_point)
-{
-  assert(input_output_scale >= 0x1.0p-16);
-  assert(input_output_scale <= 0x1.0p+8);
-
-  const long multiplier = lrintf(65536.0f * input_output_scale);
-  assert(multiplier >= 1L);
-  assert(multiplier <= 0x01000000L);
-  const int64_t bias = (int64_t) ((uint64_t) output_zero_point << 32) + INT64_C(0x80000000) -
-      (INT64_C(0x80000000) * (int64_t) multiplier);
-
-  for (uint32_t i = 0; i < 8; i++) {
-    params->ssse3.input_bias[i] = UINT16_C(0x8000);
-  }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->ssse3.multiplier[i] = (int32_t) multiplier;
-  }
-  for (uint32_t i = 0; i < 2; i++) {
-    params->ssse3.bias[i] = (int64_t) bias;
-  }
-  return sizeof(params->ssse3);
-}
-
-size_t xnn_init_qs16_qs8_cvt_sse4_params(
-  union xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  int8_t output_zero_point)
-{
-  assert(input_output_scale >= 0x1.0p-16);
-  assert(input_output_scale <= 0x1.0p+8);
-
-  const long multiplier = lrintf(65536.0f * input_output_scale);
-  assert(multiplier >= 1L);
-  assert(multiplier <= 0x01000000L);
-  const int64_t bias = (int64_t) ((uint64_t) output_zero_point << 32) + INT64_C(0x80000000);
-
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse4.multiplier[i] = (int32_t) multiplier;
-  }
-  for (uint32_t i = 0; i < 2; i++) {
-    params->sse4.bias[i] = (int64_t) bias;
-  }
-  return sizeof(params->sse4);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_qs16_qs8_cvt_wasmsimd_params(
-  union xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  int8_t output_zero_point)
-{
-  assert(input_output_scale >= 0x1.0p-16);
-  assert(input_output_scale <= 0x1.0p+8);
-
-  const long multiplier = lrintf(65536.0f * input_output_scale);
-  const int64_t bias = ((int32_t) output_zero_point << 16) + INT32_C(0x8000);
-  assert(multiplier >= 1L);
-  assert(multiplier <= 0x01000000L);
-
-  params->wasmsimd.multiplier[0] = (int32_t) multiplier;
-  params->wasmsimd.multiplier[1] = (int32_t) multiplier;
-  params->wasmsimd.bias = bias;
-  return sizeof(params->wasmsimd);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 size_t xnn_init_qs8_f32_cvt_scalar_params(
   union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
@@ -6239,25 +5558,12 @@ size_t xnn_init_qs8_f32_cvt_scalar_params(
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_qs8_f32_cvt_neon_params(
-  union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t zero_point)
-{
-  params->neon.minus_zero_point[0] = -(int16_t) zero_point;
-  params->neon.minus_zero_point[1] = -(int16_t) zero_point;
-  params->neon.scale = scale;
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_qs8_f16_cvt_neonfp16arith_params(
   union xnn_qs8_f16_cvt_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale,
   int8_t zero_point)
 {
-  params->neon.minus_zero_point = -(int16_t) zero_point;
+  params->neon.zero_point = (int16_t) zero_point;
   params->neon.scale = scale;
   return sizeof(params->neon);
 }
@@ -6269,86 +5575,11 @@ size_t xnn_init_qs8_f16_cvt_avx_params(
   uint16_t scale,
   int8_t zero_point)
 {
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.minus_zero_point[i] = -(int32_t) zero_point;
-    params->avx.scale[i] = fp16_ieee_to_fp32_value(scale);
-  }
+  params->avx.zero_point = (int32_t) zero_point;
+  params->avx.scale = fp16_ieee_to_fp32_value(scale);
   return sizeof(params->avx);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_qs8_f32_cvt_sse2_params(
-  union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t zero_point)
-{
-  for (uint32_t i = 0; i < 16; i++) {
-    params->sse2.sign_mask[i] = UINT8_C(0x80);
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse2.magic_exp[i] = UINT16_C(0x4B00);
-  }
-  const float magic_bias = (float) (INT32_C(0x00800080) + (int32_t) zero_point);
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2.magic_bias[i] = magic_bias;
-    params->sse2.scale[i] = scale;
-  }
-  return sizeof(params->sse2);
-}
-
-size_t xnn_init_qs8_f32_cvt_sse4_params(
-  union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t zero_point)
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse4.minus_zero_point[i] = -(int32_t) zero_point;
-    params->sse4.scale[i] = scale;
-  }
-  return sizeof(params->sse4);
-}
-
-size_t xnn_init_qs8_f32_cvt_avx_params(
-  union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t zero_point)
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.minus_zero_point[i] = -(int32_t) zero_point;
-    params->avx.scale[i] = scale;
-  }
-  return sizeof(params->avx);
-}
-
-size_t xnn_init_qs8_f32_cvt_avx512_params(
-  union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t zero_point)
-{
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx512.minus_zero_point[i] = -(int32_t) zero_point;
-    params->avx512.scale[i] = scale;
-  }
-  return sizeof(params->avx512);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_qs8_f32_cvt_wasmsimd_params(
-  union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t zero_point)
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd.minus_zero_point[i] = -(int16_t) zero_point;
-  }
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd.scale[i] = scale;
-  }
-  return sizeof(params->wasmsimd);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 size_t xnn_init_qu8_cvt_scalar_params(
   union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
@@ -6362,137 +5593,11 @@ size_t xnn_init_qu8_cvt_scalar_params(
   const long multiplier = lrintf(256.0f * input_output_scale);
   assert(multiplier >= 1L);
   assert(multiplier <= 32768L);
-  params->scalar.bias = ((int32_t) output_zero_point << 8) - (int32_t) multiplier * (int32_t) input_zero_point + INT32_C(0x80);
+  params->scalar.input_zero_point = (uint16_t) input_zero_point;
   params->scalar.multiplier = (int32_t) multiplier;
+  params->scalar.output_zero_point = (int16_t) output_zero_point;
   return sizeof(params->scalar);
 }
-
-#if XNN_ARCH_ARM
-size_t xnn_init_qu8_cvt_armsimd32_params(
-  union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point)
-{
-  assert(input_output_scale >= 0x1.0p-8);
-  assert(input_output_scale <= 0x1.0p+7);
-
-  const long multiplier = lrintf(131072.0f * input_output_scale);
-  assert(multiplier >= 512L);
-  assert(multiplier <= 16777216L);
-  const uint16_t minus_input_zero_point = -(int16_t) input_zero_point;
-  params->armsimd32.minus_input_zero_point = (uint32_t) minus_input_zero_point * UINT32_C(0x00010001);
-  params->armsimd32.multiplier = (int32_t) multiplier;
-  params->armsimd32.bias = ((int32_t) output_zero_point << 1) + INT32_C(1);
-  return sizeof(params->armsimd32);
-}
-#endif  // XNN_ARCH_ARM
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_qu8_cvt_neon_params(
-  union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point)
-{
-  assert(input_output_scale >= 0x1.0p-8);
-  assert(input_output_scale <= 0x1.0p+7);
-
-  const long multiplier = lrintf(-256.0f * input_output_scale);
-  assert(multiplier <= -1L);
-  assert(multiplier >= -32768L);
-  params->neon.input_zero_point = (uint16_t) input_zero_point;
-  params->neon.multiplier = (int16_t) multiplier;
-  params->neon.output_zero_point = (int16_t) output_zero_point;
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_qu8_cvt_sse2_params(
-  union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point)
-{
-  assert(input_output_scale >= 0x1.0p-8);
-  assert(input_output_scale <= 0x1.0p+7);
-
-  const long multiplier = lrintf(256.0f * input_output_scale);
-  assert(multiplier >= 1L);
-  assert(multiplier <= 32768L);
-  const int32_t bias = ((int32_t) output_zero_point << 8) - (int32_t) multiplier * (int32_t) input_zero_point + INT32_C(0x80);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse2.multiplier[i] = (uint16_t) multiplier;
-  }
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2.bias[i] = bias;
-  }
-  return sizeof(params->sse2);
-}
-
-size_t xnn_init_qu8_cvt_ssse3_params(
-  union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point)
-{
-  assert(input_output_scale >= 0x1.0p-8);
-  assert(input_output_scale <= 0x1.0p+7);
-
-  const long multiplier = lrintf(-256.0f * input_output_scale);
-  assert(multiplier <= -1L);
-  assert(multiplier >= -32768L);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->ssse3.input_zero_point[i] = (uint16_t) input_zero_point;
-    params->ssse3.multiplier[i] = (int16_t) multiplier;
-    params->ssse3.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  return sizeof(params->ssse3);
-}
-
-size_t xnn_init_qu8_cvt_avx2_params(
-  union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point)
-{
-  assert(input_output_scale >= 0x1.0p-8);
-  assert(input_output_scale <= 0x1.0p+7);
-
-  const long multiplier = lrintf(-256.0f * input_output_scale);
-  assert(multiplier <= -1L);
-  assert(multiplier >= -32768L);
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx2.input_zero_point[i] = (uint16_t) input_zero_point;
-    params->avx2.multiplier[i] = (int16_t) multiplier;
-    params->avx2.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  return sizeof(params->avx2);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_qu8_cvt_wasmsimd_params(
-  union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point)
-{
-  assert(input_output_scale >= 0x1.0p-8);
-  assert(input_output_scale <= 0x1.0p+7);
-
-  const long multiplier = lrintf(-256.0f * input_output_scale);
-  assert(multiplier <= -1L);
-  assert(multiplier >= -32768L);
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd.input_zero_point[i] = (uint16_t) input_zero_point;
-    params->wasmsimd.multiplier[i] = (int16_t) multiplier;
-    params->wasmsimd.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  return sizeof(params->wasmsimd);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 size_t xnn_init_qu8_f32_cvt_scalar_params(
   union xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
@@ -6503,87 +5608,3 @@ size_t xnn_init_qu8_f32_cvt_scalar_params(
   params->scalar.scale = scale;
   return sizeof(params->scalar);
 }
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_qu8_f32_cvt_neon_params(
-  union xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t zero_point)
-{
-  params->neon.minus_zero_point[0] = -(int16_t) zero_point;
-  params->neon.minus_zero_point[1] = -(int16_t) zero_point;
-  params->neon.scale = scale;
-  return sizeof(params->neon);
-}
-
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_qu8_f32_cvt_sse2_params(
-  union xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t zero_point)
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse2.magic_exp[i] = UINT16_C(0x4B00);
-  }
-  const float magic_bias = (float) (INT32_C(0x00800000) + (int32_t) zero_point);
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse2.magic_bias[i] = magic_bias;
-    params->sse2.scale[i] = scale;
-  }
-  return sizeof(params->sse2);
-}
-
-size_t xnn_init_qu8_f32_cvt_sse4_params(
-  union xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t zero_point)
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse4.minus_zero_point[i] = -(int32_t) zero_point;
-    params->sse4.scale[i] = scale;
-  }
-  return sizeof(params->sse4);
-}
-
-size_t xnn_init_qu8_f32_cvt_avx_params(
-  union xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t zero_point)
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.minus_zero_point[i] = -(int32_t) zero_point;
-    params->avx.scale[i] = scale;
-  }
-  return sizeof(params->avx);
-}
-
-size_t xnn_init_qu8_f32_cvt_avx512_params(
-  union xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t zero_point)
-{
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx512.minus_zero_point[i] = -(int32_t) zero_point;
-    params->avx512.scale[i] = scale;
-  }
-  return sizeof(params->avx512);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_qu8_f32_cvt_wasmsimd_params(
-  union xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t zero_point)
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd.minus_zero_point[i] = -(int16_t) zero_point;
-  }
-  for (uint32_t i = 0; i < 2; i++) {
-    params->wasmsimd.scale[i] = scale;
-  }
-  return sizeof(params->wasmsimd);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

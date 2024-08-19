@@ -17,18 +17,18 @@
 
 # Scalar
 - name: xnn_f16_qs8_vcvt_ukernel__scalar_fmagic_u1
-  init: xnn_init_f16_qs8_cvt_scalar_fmagic_params
+  init: xnn_init_f16_qs8_cvt_scalar_params
 - name: xnn_f16_qs8_vcvt_ukernel__scalar_fmagic_u2
-  init: xnn_init_f16_qs8_cvt_scalar_fmagic_params
+  init: xnn_init_f16_qs8_cvt_scalar_params
 - name: xnn_f16_qs8_vcvt_ukernel__scalar_fmagic_u3
-  init: xnn_init_f16_qs8_cvt_scalar_fmagic_params
+  init: xnn_init_f16_qs8_cvt_scalar_params
 - name: xnn_f16_qs8_vcvt_ukernel__scalar_fmagic_u4
-  init: xnn_init_f16_qs8_cvt_scalar_fmagic_params
+  init: xnn_init_f16_qs8_cvt_scalar_params
 - name: xnn_f16_qs8_vcvt_ukernel__scalar_imagic_u1
-  init: xnn_init_f16_qs8_cvt_scalar_imagic_params
+  init: xnn_init_f16_qs8_cvt_scalar_params
 - name: xnn_f16_qs8_vcvt_ukernel__scalar_imagic_u2
-  init: xnn_init_f16_qs8_cvt_scalar_imagic_params
+  init: xnn_init_f16_qs8_cvt_scalar_params
 - name: xnn_f16_qs8_vcvt_ukernel__scalar_imagic_u3
-  init: xnn_init_f16_qs8_cvt_scalar_imagic_params
+  init: xnn_init_f16_qs8_cvt_scalar_params
 - name: xnn_f16_qs8_vcvt_ukernel__scalar_imagic_u4
-  init: xnn_init_f16_qs8_cvt_scalar_imagic_params
+  init: xnn_init_f16_qs8_cvt_scalar_params
