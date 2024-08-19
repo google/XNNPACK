@@ -11,6 +11,7 @@
 
 #include <immintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
@@ -47,7 +48,8 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x8c8__avx2(
   const int8_t* a0 = a;
   uint16_t* c0 = (uint16_t*) c;
 
-  const __m128i vmask = _mm_load_si128((const __m128i*) params->avx.mask);  // 0xF0
+  const __m128i vmask = _mm_set1_epi8(0xF0);
+  XNN_FORCE_REALIZATION(vmask);
   const __m256 vmin = _mm256_set1_ps(params->avx.min);
   const __m256 vmax = _mm256_set1_ps(params->avx.max);
   XNN_FORCE_REALIZATION(vmin);

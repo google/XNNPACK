@@ -16,6 +16,7 @@ $PREFETCH = 1
 
 #include <immintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
@@ -90,9 +91,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c4__$
     const __m256 voutput_min = _mm256_set1_ps(params->avxvnni.min);
     const __m256 voutput_max = _mm256_set1_ps(params->avxvnni.max);
     $if DATATYPE == "QC4":
-      const __m256i vvalue_mask = _mm256_set1_epi8(params->avxvnni.mask);  // 0xF0
+      const __m256i vvalue_mask = _mm256_set1_epi8(0xF0);
+      XNN_FORCE_REALIZATION(vvalue_mask);
       $if GFNI:
-        const __m256i vshl4 = _mm256_set1_epi64x(params->avxvnni.gfni_shl4);  // 0x01020408
+        const __m256i vshl4 = _mm256_set1_epi64x(0x01020408);
+        XNN_FORCE_REALIZATION(vshl4);
   $else:
     $if DATATYPE != "QC8":
       const __m256 vscale = _mm256_set1_ps(params->${PARAMS_STRUCT}.scale);

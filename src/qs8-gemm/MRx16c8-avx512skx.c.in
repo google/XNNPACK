@@ -78,7 +78,8 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
     const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
     const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
     $if DATATYPE == "QC4":
-      const __m256i vmask = _mm256_set1_epi8(params->scalar.mask);
+      const __m256i vmask = _mm256_set1_epi8(0xF0);
+      XNN_FORCE_REALIZATION(vmask);
   $else:
     $if DATATYPE != "QC8":
       const __m512 vscale = _mm512_load_ps(params->${PARAMS_STRUCT}.scale);

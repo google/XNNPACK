@@ -10,6 +10,7 @@ $assert DATATYPE in ["QD8", "QS8", "QC4", "QC8"]
 
 #include <immintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
@@ -82,9 +83,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
     const __m512 voutput_min = _mm512_set1_ps(params->avx512vnni.min);
     const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
     $if DATATYPE == "QC4":
-      const __m512i vvalue_mask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0xF0
+      const __m512i vvalue_mask = _mm512_set1_epi8(0xF0);
+      XNN_FORCE_REALIZATION(vvalue_mask);
       $if GFNI:
-        const __m512i vshl4 = _mm512_set1_epi64(params->avx512vnni.gfni_shl4);  // 0x01020408
+        const __m512i vshl4 = _mm512_set1_epi64(0x01020408);
+        XNN_FORCE_REALIZATION(vshl4);
   $else:
     $if DATATYPE != "QC8":
       const __m512 vscale = _mm512_load_ps(params->${PARAMS_STRUCT}.scale);

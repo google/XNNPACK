@@ -83,7 +83,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
   $if DATATYPE == "QU8":
     const v128_t vb_zero_point = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.kernel_zero_point);
   $if DATATYPE == "QC4":
-    const v128_t vmask = wasm_v128_load64_splat(params->wasmsimd.mask);  // 0xF0
+    const v128_t vmask = wasm_i8x16_const_splat(0xF0);
   do {
     $if DATATYPE in ["QD8", "QC4"]:
       const v128_t vksum0123 = wasm_v128_load(w);

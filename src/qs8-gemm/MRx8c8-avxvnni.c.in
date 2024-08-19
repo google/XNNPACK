@@ -91,13 +91,13 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
     const __m256 voutput_max = _mm256_set1_ps(params->avxvnni.max);
     $if DATATYPE in ["QC4_F16", "QC4_F32"]:
       $if VARIANT == "MADD":
-        const __m256i vmask = _mm256_set1_epi8(params->avxvnni.mask);  // 0x0F
-        assert(params->avxvnni.mask == (int8_t) 0x0F);
+        const __m256i vmask = _mm256_set1_epi8(0x0F);
       $else:
-        const __m256i vmask = _mm256_set1_epi8(params->avxvnni.mask);  // 0xF0
-        assert(params->avxvnni.mask == (int8_t) 0xF0);
+        const __m256i vmask = _mm256_set1_epi8(0xF0);
+      XNN_FORCE_REALIZATION(vmask);
       $if GFNI:
-        const __m256i vshl4 = _mm256_set1_epi64x(params->avxvnni.gfni_shl4);  // 0x01020408
+        const __m256i vshl4 = _mm256_set1_epi64x(0x01020408);
+        XNN_FORCE_REALIZATION(vmask);
   $else:
     const __m256 voutput_max_less_zero_point = _mm256_set1_ps(params->${PARAMS_STRUCT}.output_max_less_zero_point);
     const __m256i voutput_zero_point = _mm256_set1_epi32(params->${PARAMS_STRUCT}.output_zero_point);

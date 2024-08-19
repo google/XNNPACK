@@ -46,7 +46,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4c8__wasmsimd_dot16x2_ld64(
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 
-  const v128_t vmask = wasm_v128_load64_splat(params->wasmsimd.mask);  // 0xF0
+  const v128_t vmask = wasm_i8x16_const_splat(0xF0);
   do {
     const v128_t vksum0123 = wasm_v128_load(w);
     const v128_t vinput_zero_point0 = wasm_v128_load32_splat(&quantization_params[0].zero_point);
