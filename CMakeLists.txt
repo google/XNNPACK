@@ -1521,1556 +1521,282 @@ IF(XNNPACK_BUILD_TESTS)
   ENDFOREACH()
 
   # ---[ Build microkernel-level unit tests
-  ADD_EXECUTABLE(bf16-vabs-test test/bf16-vabs.cc)
-  TARGET_INCLUDE_DIRECTORIES(bf16-vabs-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(bf16-vabs-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(bf16-vabs-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME bf16-vabs-test COMMAND bf16-gemm-minmax-test)
-
-  ADD_EXECUTABLE(bf16-gemm-minmax-test test/bf16-gemm-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(bf16-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(bf16-gemm-minmax-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(bf16-gemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME bf16-gemm-minmax-test COMMAND bf16-gemm-minmax-test)
-
-  ADD_EXECUTABLE(f16-f32-vcvt-test test/f16-f32-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-f32-vcvt-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-f32-vcvt-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-f32-vcvt-test PRIVATE vcvt-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-f32-vcvt-test COMMAND f16-f32-vcvt-test)
-
-  ADD_EXECUTABLE(f16-gavgpool-cw-test test/f16-gavgpool-cw.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-gavgpool-cw-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-gavgpool-cw-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-gavgpool-cw-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-gavgpool-cw-test COMMAND f16-gavgpool-cw-test)
-
-  ADD_EXECUTABLE(f16-avgpool-minmax-test test/f16-avgpool-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-avgpool-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-avgpool-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-avgpool-minmax-test PRIVATE next-prime hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-avgpool-minmax-test COMMAND f16-avgpool-minmax-test)
-
-  ADD_EXECUTABLE(f16-conv-hwc2chw-test test/f16-conv-hwc2chw.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-conv-hwc2chw-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-conv-hwc2chw-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-conv-hwc2chw-test PRIVATE hardware-config logging microkernels-all microparams-init packing)
-  ADD_TEST(NAME f16-conv-hwc2chw-test COMMAND f16-conv-hwc2chw-test)
-
-  ADD_EXECUTABLE(f16-dwconv-minmax-multipass-test test/f16-dwconv-minmax-multipass.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-dwconv-minmax-multipass-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-dwconv-minmax-multipass-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-dwconv-minmax-multipass-test PRIVATE dwconv-microkernel-tester hardware-config logging microkernel-utils microkernels-all microparams-init packing)
-  ADD_TEST(NAME f16-dwconv-minmax-multipass-test COMMAND f16-dwconv-minmax-multipass-test)
-
-  ADD_EXECUTABLE(f16-dwconv-minmax-unipass-test test/f16-dwconv-minmax-unipass.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-dwconv-minmax-unipass-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-dwconv-minmax-unipass-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-dwconv-minmax-unipass-test PRIVATE dwconv-microkernel-tester hardware-config logging microkernels-all microparams-init packing)
-  ADD_TEST(NAME f16-dwconv-minmax-unipass-test COMMAND f16-dwconv-minmax-unipass-test)
-
-  ADD_EXECUTABLE(f16-dwconv2d-chw-test test/f16-dwconv2d-chw.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-dwconv2d-chw-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-dwconv2d-chw-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-dwconv2d-chw-test PRIVATE hardware-config logging microkernels-all microparams-init packing)
-  ADD_TEST(NAME f16-dwconv2d-chw-test COMMAND f16-dwconv2d-chw-test)
-
-  ADD_EXECUTABLE(f16-gavgpool-minmax-test test/f16-gavgpool-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-gavgpool-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-gavgpool-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-gavgpool-minmax-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-gavgpool-minmax-test COMMAND f16-gavgpool-minmax-test)
-
-  ADD_EXECUTABLE(f16-f32acc-gemm-minmax-test test/f16-f32acc-gemm-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-f32acc-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-f32acc-gemm-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-f32acc-gemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-f32acc-gemm-minmax-test COMMAND f16-f32acc-gemm-minmax-test)
-
-  ADD_EXECUTABLE(f16-gemm-minmax-test test/f16-gemm-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-gemm-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-gemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-gemm-minmax-test COMMAND f16-gemm-minmax-test)
-
-  ADD_EXECUTABLE(f16-ibilinear-chw-test test/f16-ibilinear-chw.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-ibilinear-chw-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-ibilinear-chw-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-ibilinear-chw-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME f16-ibilinear-chw-test COMMAND f16-ibilinear-chw-test)
-
-  ADD_EXECUTABLE(f16-ibilinear-test test/f16-ibilinear.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-ibilinear-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-ibilinear-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-ibilinear-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME f16-ibilinear-test COMMAND f16-ibilinear-test)
-
-  ADD_EXECUTABLE(f16-f32acc-igemm-minmax-test test/f16-f32acc-igemm-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-f32acc-igemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-f32acc-igemm-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-f32acc-igemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-f32acc-igemm-minmax-test COMMAND f16-f32acc-igemm-minmax-test)
-
-  ADD_EXECUTABLE(f16-igemm-minmax-test test/f16-igemm-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-igemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-igemm-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-igemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-igemm-minmax-test COMMAND f16-igemm-minmax-test)
-
-  ADD_EXECUTABLE(f16-maxpool-minmax-test test/f16-maxpool-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-maxpool-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-maxpool-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-maxpool-minmax-test PRIVATE next-prime hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-maxpool-minmax-test COMMAND f16-maxpool-minmax-test)
-
-  ADD_EXECUTABLE(f16-spmm-minmax-test test/f16-spmm-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-spmm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-spmm-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-spmm-minmax-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-spmm-minmax-test COMMAND f16-spmm-minmax-test)
-
-  ADD_EXECUTABLE(f16-rmax-test test/f16-rmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-rmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-rmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-rmax-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME f16-rmax-test COMMAND f16-rmax-test)
-
-  ADD_EXECUTABLE(f16-rsum-test test/f16-rsum.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-rsum-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-rsum-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-rsum-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-rsum-test COMMAND f16-rsum-test)
-
-  ADD_EXECUTABLE(f16-f32acc-rsum-test test/f16-f32acc-rsum.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-f32acc-rsum-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-f32acc-rsum-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-f32acc-rsum-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-f32acc-rsum-test COMMAND f16-f32acc-rsum-test)
-
-  ADD_EXECUTABLE(f16-vabs-test test/f16-vabs.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vabs-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vabs-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vabs-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vabs-test COMMAND f16-vabs-test)
-
-  ADD_EXECUTABLE(f16-vadd-minmax-test test/f16-vadd-minmax.cc)
-  SET_TARGET_PROPERTIES(f16-vadd-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vadd-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vadd-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vadd-minmax-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vadd-minmax-test COMMAND f16-vadd-minmax-test)
-
-  ADD_EXECUTABLE(f16-vaddc-minmax-test test/f16-vaddc-minmax.cc)
-  SET_TARGET_PROPERTIES(f16-vaddc-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vaddc-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vaddc-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vaddc-minmax-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vaddc-minmax-test COMMAND f16-vaddc-minmax-test)
-
-  ADD_EXECUTABLE(f16-vclamp-test test/f16-vclamp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vclamp-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vclamp-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vclamp-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vclamp-test COMMAND f16-vclamp-test)
-
-  ADD_EXECUTABLE(f16-vdiv-minmax-test test/f16-vdiv-minmax.cc)
-  SET_TARGET_PROPERTIES(f16-vdiv-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vdiv-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vdiv-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vdiv-minmax-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vdiv-minmax-test COMMAND f16-vdiv-minmax-test)
-
-  ADD_EXECUTABLE(f16-vdivc-minmax-test test/f16-vdivc-minmax.cc)
-  SET_TARGET_PROPERTIES(f16-vdivc-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vdivc-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vdivc-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vdivc-minmax-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vdivc-minmax-test COMMAND f16-vdivc-minmax-test)
-
-  ADD_EXECUTABLE(f16-vrdivc-minmax-test test/f16-vrdivc-minmax.cc)
-  SET_TARGET_PROPERTIES(f16-vrdivc-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vrdivc-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vrdivc-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vrdivc-minmax-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vrdivc-minmax-test COMMAND f16-vrdivc-minmax-test)
-
-  ADD_EXECUTABLE(f16-vsqrdiff-test test/f16-vsqrdiff.cc)
-  SET_TARGET_PROPERTIES(f16-vsqrdiff-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vsqrdiff-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vsqrdiff-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vsqrdiff-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vsqrdiff-test COMMAND f16-vsqrdiff-test)
-
-  ADD_EXECUTABLE(f16-vsqrdiffc-test test/f16-vsqrdiffc.cc)
-  SET_TARGET_PROPERTIES(f16-vsqrdiffc-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vsqrdiffc-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vsqrdiffc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vsqrdiffc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vsqrdiffc-test COMMAND f16-vsqrdiffc-test)
-
-  ADD_EXECUTABLE(f16-velu-test test/f16-velu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-velu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-velu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-velu-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-velu-test COMMAND f16-velu-test)
-
-  ADD_EXECUTABLE(f16-vhswish-test test/f16-vhswish.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vhswish-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vhswish-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vhswish-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vhswish-test COMMAND f16-vhswish-test)
-
-  ADD_EXECUTABLE(f16-vlrelu-test test/f16-vlrelu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vlrelu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vlrelu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vlrelu-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vlrelu-test COMMAND f16-vlrelu-test)
-
-  ADD_EXECUTABLE(f16-vmax-test test/f16-vmax.cc)
-  SET_TARGET_PROPERTIES(f16-vmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vmax-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f16-vmax-test COMMAND f16-vmax-test)
-
-  ADD_EXECUTABLE(f16-vmaxc-test test/f16-vmaxc.cc)
-  SET_TARGET_PROPERTIES(f16-vmaxc-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vmaxc-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vmaxc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vmaxc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f16-vmaxc-test COMMAND f16-vmaxc-test)
-
-  ADD_EXECUTABLE(f16-vmin-test test/f16-vmin.cc)
-  SET_TARGET_PROPERTIES(f16-vmin-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vmin-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vmin-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vmin-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f16-vmin-test COMMAND f16-vmin-test)
-
-  ADD_EXECUTABLE(f16-vminc-test test/f16-vminc.cc)
-  SET_TARGET_PROPERTIES(f16-vminc-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vminc-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vminc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vminc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f16-vminc-test COMMAND f16-vminc-test)
-
-  ADD_EXECUTABLE(f16-vmul-minmax-test test/f16-vmul-minmax.cc)
-  SET_TARGET_PROPERTIES(f16-vmul-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vmul-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vmul-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vmul-minmax-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vmul-minmax-test COMMAND f16-vmul-minmax-test)
-
-  ADD_EXECUTABLE(f16-vmulc-minmax-test test/f16-vmulc-minmax.cc)
-  SET_TARGET_PROPERTIES(f16-vmulc-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vmulc-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vmulc-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vmulc-minmax-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vmulc-minmax-test COMMAND f16-vmulc-minmax-test)
-
-  ADD_EXECUTABLE(f16-vmulcaddc-minmax-test test/f16-vmulcaddc-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vmulcaddc-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vmulcaddc-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vmulcaddc-minmax-test PRIVATE hardware-config logging microkernels-all microparams-init packing)
-  ADD_TEST(NAME f16-vmulcaddc-minmax-test COMMAND f16-vmulcaddc-minmax-test)
-
-  ADD_EXECUTABLE(f16-vneg-test test/f16-vneg.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vneg-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vneg-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
-  TARGET_LINK_LIBRARIES(f16-vneg-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vneg-test COMMAND f16-vneg-test)
-
-  ADD_EXECUTABLE(f16-pavgpool-minmax-test test/f16-pavgpool-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-pavgpool-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-pavgpool-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-pavgpool-minmax-test PRIVATE next-prime hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-pavgpool-minmax-test COMMAND f16-pavgpool-minmax-test)
-
-  ADD_EXECUTABLE(f16-prelu-test test/f16-prelu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-prelu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-prelu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-prelu-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME f16-prelu-test COMMAND f16-prelu-test)
-
-  ADD_EXECUTABLE(f16-raddstoreexpminusmax-test test/f16-raddstoreexpminusmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-raddstoreexpminusmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-raddstoreexpminusmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-raddstoreexpminusmax-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-raddstoreexpminusmax-test COMMAND f16-raddstoreexpminusmax-test)
-
-  ADD_EXECUTABLE(f16-vrndne-test test/f16-vrndne.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vrndne-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vrndne-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vrndne-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f16-vrndne-test COMMAND f16-vrndne-test)
-
-  ADD_EXECUTABLE(f16-vrndz-test test/f16-vrndz.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vrndz-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vrndz-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vrndz-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f16-vrndz-test COMMAND f16-vrndz-test)
-
-  ADD_EXECUTABLE(f16-vrndu-test test/f16-vrndu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vrndu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vrndu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vrndu-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f16-vrndu-test COMMAND f16-vrndu-test)
-
-  ADD_EXECUTABLE(f16-vrndd-test test/f16-vrndd.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vrndd-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vrndd-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vrndd-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f16-vrndd-test COMMAND f16-vrndd-test)
-
-  ADD_EXECUTABLE(f16-vrsqrt-test test/f16-vrsqrt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vrsqrt-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vrsqrt-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vrsqrt-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f16-vrsqrt-test COMMAND f16-vrsqrt-test)
-
-  ADD_EXECUTABLE(f16-vsigmoid-test test/f16-vsigmoid.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vsigmoid-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vsigmoid-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vsigmoid-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vsigmoid-test COMMAND f16-vsigmoid-test)
-
-  ADD_EXECUTABLE(f16-vsqr-test test/f16-vsqr.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vsqr-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vsqr-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vsqr-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f16-vsqr-test COMMAND f16-vsqr-test)
-
-  ADD_EXECUTABLE(f16-vsqrt-test test/f16-vsqrt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vsqrt-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vsqrt-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vsqrt-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f16-vsqrt-test COMMAND f16-vsqrt-test)
-
-  ADD_EXECUTABLE(f16-vsub-minmax-test test/f16-vsub-minmax.cc)
-  SET_TARGET_PROPERTIES(f16-vsub-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vsub-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vsub-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vsub-minmax-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vsub-minmax-test COMMAND f16-vsub-minmax-test)
-
-  ADD_EXECUTABLE(f16-vsubc-minmax-test test/f16-vsubc-minmax.cc)
-  SET_TARGET_PROPERTIES(f16-vsubc-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vsubc-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vsubc-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vsubc-minmax-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vsubc-minmax-test COMMAND f16-vsubc-minmax-test)
-
-  ADD_EXECUTABLE(f16-vrsubc-minmax-test test/f16-vrsubc-minmax.cc)
-  SET_TARGET_PROPERTIES(f16-vrsubc-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vrsubc-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vrsubc-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vrsubc-minmax-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vrsubc-minmax-test COMMAND f16-vrsubc-minmax-test)
-
-  ADD_EXECUTABLE(f16-vtanh-test test/f16-vtanh.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vtanh-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vtanh-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vtanh-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f16-vtanh-test COMMAND f16-vtanh-test)
-
-  ADD_EXECUTABLE(f32-argmaxpool-test test/f32-argmaxpool.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-argmaxpool-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-argmaxpool-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-argmaxpool-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-argmaxpool-test COMMAND f32-argmaxpool-test)
-
-  ADD_EXECUTABLE(f32-conv-hwc-test test/f32-conv-hwc.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-conv-hwc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-conv-hwc-test PRIVATE hardware-config logging microkernels-all microparams-init packing)
-  ADD_TEST(NAME f32-conv-hwc-test COMMAND f32-conv-hwc-test)
-
-  ADD_EXECUTABLE(f32-conv-hwc2chw-test test/f32-conv-hwc2chw.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc2chw-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-conv-hwc2chw-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
-  TARGET_LINK_LIBRARIES(f32-conv-hwc2chw-test PRIVATE hardware-config logging microkernels-all microparams-init packing)
-  ADD_TEST(NAME f32-conv-hwc2chw-test COMMAND f32-conv-hwc2chw-test)
-
-  ADD_EXECUTABLE(f32-dwconv2d-chw-test test/f32-dwconv2d-chw.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv2d-chw-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-dwconv2d-chw-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-dwconv2d-chw-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-dwconv2d-chw-test COMMAND f32-dwconv2d-chw-test)
-
-  ADD_EXECUTABLE(f32-dwconv-multipass-test test/f32-dwconv-multipass.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-multipass-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-dwconv-multipass-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-dwconv-multipass-test PRIVATE dwconv-microkernel-tester hardware-config logging microkernel-utils microkernels-all microparams-init packing)
-  ADD_TEST(NAME f32-dwconv-multipass-test COMMAND f32-dwconv-multipass-test)
-
-  ADD_EXECUTABLE(f32-dwconv-minmax-multipass-test test/f32-dwconv-minmax-multipass.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-minmax-multipass-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-dwconv-minmax-multipass-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-dwconv-minmax-multipass-test PRIVATE dwconv-microkernel-tester hardware-config logging microkernel-utils microkernels-all microparams-init packing)
-  ADD_TEST(NAME f32-dwconv-minmax-multipass-test COMMAND f32-dwconv-minmax-multipass-test)
-
-  ADD_EXECUTABLE(f32-dwconv-unipass-test test/f32-dwconv-unipass.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-unipass-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-dwconv-unipass-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-dwconv-unipass-test PRIVATE dwconv-microkernel-tester hardware-config logging microkernels-all microparams-init packing)
-  ADD_TEST(NAME f32-dwconv-unipass-test COMMAND f32-dwconv-unipass-test)
-
-  ADD_EXECUTABLE(f32-dwconv-minmax-unipass-test test/f32-dwconv-minmax-unipass.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-minmax-unipass-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-dwconv-minmax-unipass-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-dwconv-minmax-unipass-test PRIVATE dwconv-microkernel-tester hardware-config logging microkernels-all microparams-init packing)
-  ADD_TEST(NAME f32-dwconv-minmax-unipass-test COMMAND f32-dwconv-minmax-unipass-test)
-
-  ADD_EXECUTABLE(f32-f16-vcvt-test test/f32-f16-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-f16-vcvt-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-f16-vcvt-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-f16-vcvt-test PRIVATE vcvt-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-f16-vcvt-test COMMAND f32-f16-vcvt-test)
-
-  ADD_EXECUTABLE(qd8-f16-qc8w-gemm-minmax-test test/qd8-f16-qc8w-gemm-minmax.cc  test/qd8-f16-qc8w-gemm-minmax-2.cc test/qd8-f16-qc8w-gemm-minmax-3.cc test/qd8-f16-qc8w-gemm-minmax-4.cc)
-  TARGET_INCLUDE_DIRECTORIES(qd8-f16-qc8w-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qd8-f16-qc8w-gemm-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qd8-f16-qc8w-gemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qd8-f16-qc8w-gemm-minmax-test COMMAND qd8-f16-qc8w-gemm-minmax-test)
-
-  ADD_EXECUTABLE(f32-qs8-vcvt-test test/f32-qs8-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-qs8-vcvt-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-qs8-vcvt-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-qs8-vcvt-test PRIVATE vcvt-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-qs8-vcvt-test COMMAND f32-qs8-vcvt-test)
-
-  ADD_EXECUTABLE(f32-qu8-vcvt-test test/f32-qu8-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-qu8-vcvt-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-qu8-vcvt-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-qu8-vcvt-test PRIVATE vcvt-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-qu8-vcvt-test COMMAND f32-qu8-vcvt-test)
-
-  ADD_EXECUTABLE(f32-gavgpool-cw-test test/f32-gavgpool-cw.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-gavgpool-cw-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-gavgpool-cw-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-gavgpool-cw-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-gavgpool-cw-test COMMAND f32-gavgpool-cw-test)
-
-  ADD_EXECUTABLE(f32-gavgpool-minmax-test test/f32-gavgpool-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-gavgpool-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-gavgpool-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-gavgpool-minmax-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-gavgpool-minmax-test COMMAND f32-gavgpool-minmax-test)
-
-  ADD_EXECUTABLE(f32-gemm-test test/f32-gemm.cc test/f32-gemm-2.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-gemm-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-gemm-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-gemm-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-gemm-test COMMAND f32-gemm-test)
-
-  ADD_EXECUTABLE(f32-gemm-relu-test test/f32-gemm-relu.cc test/f32-gemm-relu-2.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-gemm-relu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-gemm-relu-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-gemm-relu-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-gemm-relu-test COMMAND f32-gemm-relu-test)
-
-  ADD_EXECUTABLE(f32-gemm-minmax-test test/f32-gemm-minmax.cc test/f32-gemm-minmax-2.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-gemm-minmax-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-gemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-gemm-minmax-test COMMAND f32-gemm-minmax-test)
-
-  ADD_EXECUTABLE(f32-gemm-goi-minmax-test test/f32-gemm-goi-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-gemm-goi-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-gemm-goi-minmax-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-gemm-goi-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-gemm-goi-minmax-test COMMAND f32-gemm-goi-minmax-test)
-
-  ADD_EXECUTABLE(f32-qc8w-gemm-test test/f32-qc8w-gemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-qc8w-gemm-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-qc8w-gemm-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-qc8w-gemm-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-qc8w-gemm-test COMMAND f32-qc8w-gemm-test)
-
-  ADD_EXECUTABLE(f32-qc8w-gemm-relu-test test/f32-qc8w-gemm-relu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-qc8w-gemm-relu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-qc8w-gemm-relu-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-qc8w-gemm-relu-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-qc8w-gemm-relu-test COMMAND f32-qc8w-gemm-relu-test)
-
-  ADD_EXECUTABLE(f32-qc8w-gemm-minmax-test test/f32-qc8w-gemm-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-qc8w-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-qc8w-gemm-minmax-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-qc8w-gemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-qc8w-gemm-minmax-test COMMAND f32-qc8w-gemm-minmax-test)
-
-  ADD_EXECUTABLE(f32-qc4w-gemm-minmax-test test/f32-qc4w-gemm-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-qc4w-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-qc4w-gemm-minmax-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-qc4w-gemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-qc4w-gemm-minmax-test COMMAND f32-qc4w-gemm-minmax-test)
-
-  ADD_EXECUTABLE(f32-gemminc-minmax-test test/f32-gemminc-minmax.cc test/f32-gemminc-minmax-2.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-gemminc-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-gemminc-minmax-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-gemminc-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-gemminc-minmax-test COMMAND f32-gemminc-minmax-test)
-
-  ADD_EXECUTABLE(f32-ibilinear-test test/f32-ibilinear.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-ibilinear-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-ibilinear-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-ibilinear-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-ibilinear-test COMMAND f32-ibilinear-test)
-
-  ADD_EXECUTABLE(f32-ibilinear-chw-test test/f32-ibilinear-chw.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-ibilinear-chw-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-ibilinear-chw-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-ibilinear-chw-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-ibilinear-chw-test COMMAND f32-ibilinear-chw-test)
-
-  ADD_EXECUTABLE(f32-igemm-test test/f32-igemm.cc test/f32-igemm-2.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-igemm-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-igemm-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-igemm-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-igemm-test COMMAND f32-igemm-test)
-
-  ADD_EXECUTABLE(f32-igemm-relu-test test/f32-igemm-relu.cc test/f32-igemm-relu-2.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-igemm-relu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-igemm-relu-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-igemm-relu-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-igemm-relu-test COMMAND f32-igemm-relu-test)
-
-  ADD_EXECUTABLE(f32-igemm-minmax-test test/f32-igemm-minmax.cc test/f32-igemm-minmax-2.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-igemm-minmax-test PRIVATE include src test)
-  IF(MINGW)
-    # Work-around for "too many sections" error
-    TARGET_COMPILE_OPTIONS(f32-igemm-minmax-test PRIVATE "$<$<NOT:$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>>:-Wa,-mbig-obj>")
-  ENDIF()
-  TARGET_LINK_LIBRARIES(f32-igemm-minmax-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-igemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-igemm-minmax-test COMMAND f32-igemm-minmax-test)
-
-  ADD_EXECUTABLE(f32-ppmm-minmax-test test/f32-ppmm-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-ppmm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-ppmm-minmax-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-ppmm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-ppmm-minmax-test COMMAND f32-ppmm-minmax-test)
-
-  ADD_EXECUTABLE(f32-prelu-test test/f32-prelu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-prelu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-prelu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-prelu-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-prelu-test COMMAND f32-prelu-test)
-
-  ADD_EXECUTABLE(f32-raddexpminusmax-test test/f32-raddexpminusmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-raddexpminusmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-raddexpminusmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-raddexpminusmax-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-raddexpminusmax-test COMMAND f32-raddexpminusmax-test)
-
-  ADD_EXECUTABLE(f32-raddextexp-test test/f32-raddextexp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-raddextexp-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-raddextexp-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-raddextexp-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-raddextexp-test COMMAND f32-raddextexp-test)
-
-  ADD_EXECUTABLE(f32-raddstoreexpminusmax-test test/f32-raddstoreexpminusmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-raddstoreexpminusmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-raddstoreexpminusmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-raddstoreexpminusmax-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-raddstoreexpminusmax-test COMMAND f32-raddstoreexpminusmax-test)
-
-  ADD_EXECUTABLE(f32-rmax-test test/f32-rmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-rmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-rmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
-  TARGET_LINK_LIBRARIES(f32-rmax-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-rmax-test COMMAND f32-rmax-test)
-
-  ADD_EXECUTABLE(f32-rmin-test test/f32-rmin.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-rmin-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-rmin-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
-  TARGET_LINK_LIBRARIES(f32-rmin-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-rmin-test COMMAND f32-rmin-test)
-
-  ADD_EXECUTABLE(f32-rminmax-test test/f32-rminmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-rminmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-rminmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
-  TARGET_LINK_LIBRARIES(f32-rminmax-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-rminmax-test COMMAND f32-rminmax-test)
-
-  ADD_EXECUTABLE(f32-rsum-test test/f32-rsum.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-rsum-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-rsum-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
-  TARGET_LINK_LIBRARIES(f32-rsum-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-rsum-test COMMAND f32-rsum-test)
-
-  ADD_EXECUTABLE(f32-spmm-minmax-test test/f32-spmm-minmax.cc test/f32-spmm-minmax-2.cc test/f32-spmm-minmax-3.cc test/f32-spmm-minmax-4.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-spmm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-spmm-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-spmm-minmax-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-spmm-minmax-test COMMAND f32-spmm-minmax-test)
-
-  ADD_EXECUTABLE(f32-vabs-test test/f32-vabs.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vabs-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vabs-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vabs-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vabs-test COMMAND f32-vabs-test)
-
-  ADD_EXECUTABLE(f32-vadd-test test/f32-vadd.cc)
-  SET_TARGET_PROPERTIES(f32-vadd-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vadd-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vadd-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vadd-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vadd-test COMMAND f32-vadd-test)
-
-  ADD_EXECUTABLE(f32-vadd-minmax-test test/f32-vadd-minmax.cc)
-  SET_TARGET_PROPERTIES(f32-vadd-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vadd-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vadd-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vadd-minmax-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vadd-minmax-test COMMAND f32-vadd-minmax-test)
-
-  ADD_EXECUTABLE(f32-vadd-relu-test test/f32-vadd-relu.cc)
-  SET_TARGET_PROPERTIES(f32-vadd-relu-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vadd-relu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vadd-relu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vadd-relu-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vadd-relu-test COMMAND f32-vadd-relu-test)
-
-  ADD_EXECUTABLE(f32-vaddc-test test/f32-vaddc.cc)
-  SET_TARGET_PROPERTIES(f32-vaddc-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vaddc-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vaddc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vaddc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vaddc-test COMMAND f32-vaddc-test)
-
-  ADD_EXECUTABLE(f32-vaddc-minmax-test test/f32-vaddc-minmax.cc)
-  SET_TARGET_PROPERTIES(f32-vaddc-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vaddc-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vaddc-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vaddc-minmax-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vaddc-minmax-test COMMAND f32-vaddc-minmax-test)
-
-  ADD_EXECUTABLE(f32-vaddc-relu-test test/f32-vaddc-relu.cc)
-  SET_TARGET_PROPERTIES(f32-vaddc-relu-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vaddc-relu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vaddc-relu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
-  TARGET_LINK_LIBRARIES(f32-vaddc-relu-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vaddc-relu-test COMMAND f32-vaddc-relu-test)
-
-  ADD_EXECUTABLE(f32-vcopysign-test test/f32-vcopysign.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vcopysign-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vcopysign-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vcopysign-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vcopysign-test COMMAND f32-vcopysign-test)
-
-  ADD_EXECUTABLE(f32-vcopysignc-test test/f32-vcopysignc.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vcopysignc-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vcopysignc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vcopysignc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vcopysignc-test COMMAND f32-vcopysignc-test)
-
-  ADD_EXECUTABLE(f32-vrcopysignc-test test/f32-vrcopysignc.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrcopysignc-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vrcopysignc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vrcopysignc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vrcopysignc-test COMMAND f32-vrcopysignc-test)
-
-
-  ADD_EXECUTABLE(s32-vmul-test test/s32-vmul.cc)
-  TARGET_INCLUDE_DIRECTORIES(s32-vmul-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(s32-vmul-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(s32-vmul-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME s32-vmul-test COMMAND s32-vmul-test)
-
-
-  ADD_EXECUTABLE(s32-vmulc-test test/s32-vmulc.cc)
-  TARGET_INCLUDE_DIRECTORIES(s32-vmulc-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(s32-vmulc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(s32-vmulc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME s32-vmulc-test COMMAND s32-vmulc-test)
-
-  ADD_EXECUTABLE(f16-vcmul-test test/f16-vcmul.cc)
-  SET_TARGET_PROPERTIES(f16-vcmul-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f16-vcmul-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-vcmul-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f16-vcmul-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME f16-vcmul-test COMMAND f16-vcmul-test)
-
-  ADD_EXECUTABLE(f32-vcmul-test test/f32-vcmul.cc)
-  SET_TARGET_PROPERTIES(f32-vcmul-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vcmul-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vcmul-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vcmul-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vcmul-test COMMAND f32-vcmul-test)
-
-  ADD_EXECUTABLE(f32-vhswish-test test/f32-vhswish.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vhswish-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vhswish-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vhswish-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vhswish-test COMMAND f32-vhswish-test)
-
-  ADD_EXECUTABLE(f32-vdiv-test test/f32-vdiv.cc)
-  SET_TARGET_PROPERTIES(f32-vdiv-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vdiv-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vdiv-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vdiv-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vdiv-test COMMAND f32-vdiv-test)
-
-  ADD_EXECUTABLE(f32-vdiv-minmax-test test/f32-vdiv-minmax.cc)
-  SET_TARGET_PROPERTIES(f32-vdiv-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vdiv-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vdiv-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vdiv-minmax-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vdiv-minmax-test COMMAND f32-vdiv-minmax-test)
-
-  ADD_EXECUTABLE(f32-vdiv-relu-test test/f32-vdiv-relu.cc)
-  SET_TARGET_PROPERTIES(f32-vdiv-relu-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vdiv-relu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vdiv-relu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vdiv-relu-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vdiv-relu-test COMMAND f32-vdiv-relu-test)
-
-  ADD_EXECUTABLE(f32-vdivc-test test/f32-vdivc.cc)
-  SET_TARGET_PROPERTIES(f32-vdivc-test PROPERTIES CXX_EXTENSIONS YES)
-  SET_TARGET_PROPERTIES(f32-vdivc-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vdivc-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vdivc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vdivc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vdivc-test COMMAND f32-vdivc-test)
-
-  ADD_EXECUTABLE(f32-vdivc-minmax-test test/f32-vdivc-minmax.cc)
-  SET_TARGET_PROPERTIES(f32-vdivc-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vdivc-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vdivc-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vdivc-minmax-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vdivc-minmax-test COMMAND f32-vdivc-minmax-test)
-
-  ADD_EXECUTABLE(f32-vdivc-relu-test test/f32-vdivc-relu.cc)
-  SET_TARGET_PROPERTIES(f32-vdivc-relu-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vdivc-relu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vdivc-relu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vdivc-relu-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vdivc-relu-test COMMAND f32-vdivc-relu-test)
-
-  ADD_EXECUTABLE(f32-vrdivc-test test/f32-vrdivc.cc)
-  SET_TARGET_PROPERTIES(f32-vrdivc-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrdivc-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vrdivc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vrdivc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vrdivc-test COMMAND f32-vrdivc-test)
-
-  ADD_EXECUTABLE(f32-vrdivc-minmax-test test/f32-vrdivc-minmax.cc)
-  SET_TARGET_PROPERTIES(f32-vrdivc-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrdivc-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vrdivc-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vrdivc-minmax-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vrdivc-minmax-test COMMAND f32-vrdivc-minmax-test)
-
-  ADD_EXECUTABLE(f32-vrdivc-relu-test test/f32-vrdivc-relu.cc)
-  SET_TARGET_PROPERTIES(f32-vrdivc-relu-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrdivc-relu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vrdivc-relu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vrdivc-relu-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vrdivc-relu-test COMMAND f32-vrdivc-relu-test)
-
-  ADD_EXECUTABLE(f32-velu-test test/f32-velu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-velu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-velu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-velu-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-velu-test COMMAND f32-velu-test)
-
-  ADD_EXECUTABLE(f32-vgelu-test test/f32-vgelu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vgelu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vgelu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vgelu-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vgelu-test COMMAND f32-vgelu-test)
-
-  ADD_EXECUTABLE(f32-vexp-test test/f32-vexp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vexp-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vexp-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vexp-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vexp-test COMMAND f32-vexp-test)
-
-  ADD_EXECUTABLE(f32-vlog-test test/f32-vlog.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vlog-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vlog-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vlog-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vlog-test COMMAND f32-vlog-test)
-
-  ADD_EXECUTABLE(f32-vmax-test test/f32-vmax.cc)
-  SET_TARGET_PROPERTIES(f32-vmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vmax-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vmax-test COMMAND f32-vmax-test)
-
-  ADD_EXECUTABLE(f32-vmaxc-test test/f32-vmaxc.cc)
-  SET_TARGET_PROPERTIES(f32-vmaxc-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vmaxc-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vmaxc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vmaxc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vmaxc-test COMMAND f32-vmaxc-test)
-
-  ADD_EXECUTABLE(f32-vmin-test test/f32-vmin.cc)
-  SET_TARGET_PROPERTIES(f32-vmin-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vmin-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vmin-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vmin-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vmin-test COMMAND f32-vmin-test)
-
-  ADD_EXECUTABLE(f32-vminc-test test/f32-vminc.cc)
-  SET_TARGET_PROPERTIES(f32-vminc-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vminc-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vminc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vminc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vminc-test COMMAND f32-vminc-test)
-
-  ADD_EXECUTABLE(f32-vmul-test test/f32-vmul.cc)
-  SET_TARGET_PROPERTIES(f32-vmul-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vmul-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vmul-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vmul-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vmul-test COMMAND f32-vmul-test)
-
-  ADD_EXECUTABLE(f32-vmul-minmax-test test/f32-vmul-minmax.cc)
-  SET_TARGET_PROPERTIES(f32-vmul-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vmul-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vmul-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vmul-minmax-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vmul-minmax-test COMMAND f32-vmul-minmax-test microparams-init)
-
-  ADD_EXECUTABLE(f32-vmul-relu-test test/f32-vmul-relu.cc)
-  SET_TARGET_PROPERTIES(f32-vmul-relu-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vmul-relu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vmul-relu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vmul-relu-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vmul-relu-test COMMAND f32-vmul-relu-test)
-
-  ADD_EXECUTABLE(f32-vmulc-test test/f32-vmulc.cc)
-  SET_TARGET_PROPERTIES(f32-vmulc-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vmulc-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vmulc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vmulc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vmulc-test COMMAND f32-vmulc-test)
-
-  ADD_EXECUTABLE(f32-vmulc-minmax-test test/f32-vmulc-minmax.cc)
-  SET_TARGET_PROPERTIES(f32-vmulc-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  SET_TARGET_PROPERTIES(f32-vmulc-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vmulc-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vmulc-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vmulc-minmax-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vmulc-minmax-test COMMAND f32-vmulc-minmax-test)
-
-  ADD_EXECUTABLE(f32-vmulc-relu-test test/f32-vmulc-relu.cc)
-  SET_TARGET_PROPERTIES(f32-vmulc-relu-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vmulc-relu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vmulc-relu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vmulc-relu-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vmulc-relu-test COMMAND f32-vmulc-relu-test)
-
-  ADD_EXECUTABLE(f32-vmulcaddc-minmax-test test/f32-vmulcaddc-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vmulcaddc-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vmulcaddc-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vmulcaddc-minmax-test PRIVATE hardware-config logging microkernels-all microparams-init packing)
-  ADD_TEST(NAME f32-vmulcaddc-minmax-test COMMAND f32-vmulcaddc-minmax-test)
-
-  ADD_EXECUTABLE(f32-vneg-test test/f32-vneg.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vneg-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vneg-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vneg-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vneg-test COMMAND f32-vneg-test)
-
-  ADD_EXECUTABLE(f32-vrelu-test test/f32-vrelu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrelu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vrelu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vrelu-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vrelu-test COMMAND f32-vrelu-test)
-
-  ADD_EXECUTABLE(f32-vrndne-test test/f32-vrndne.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrndne-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vrndne-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vrndne-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vrndne-test COMMAND f32-vrndne-test)
-
-  ADD_EXECUTABLE(f32-vrndz-test test/f32-vrndz.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrndz-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vrndz-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vrndz-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vrndz-test COMMAND f32-vrndz-test)
-
-  ADD_EXECUTABLE(f32-vrndu-test test/f32-vrndu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrndu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vrndu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vrndu-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vrndu-test COMMAND f32-vrndu-test)
-
-  ADD_EXECUTABLE(f32-vrndd-test test/f32-vrndd.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrndd-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vrndd-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vrndd-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vrndd-test COMMAND f32-vrndd-test)
-
-  ADD_EXECUTABLE(f32-vscaleexpminusmax-test test/f32-vscaleexpminusmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vscaleexpminusmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vscaleexpminusmax-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vscaleexpminusmax-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vscaleexpminusmax-test COMMAND f32-vscaleexpminusmax-test)
-
-  ADD_EXECUTABLE(f32-vscaleextexp-test test/f32-vscaleextexp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vscaleextexp-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vscaleextexp-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vscaleextexp-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vscaleextexp-test COMMAND f32-vscaleextexp-test)
-
-  ADD_EXECUTABLE(f32-vsigmoid-test test/f32-vsigmoid.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vsigmoid-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vsigmoid-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vsigmoid-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vsigmoid-test COMMAND f32-vsigmoid-test)
-
-  ADD_EXECUTABLE(f32-vsqr-test test/f32-vsqr.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vsqr-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vsqr-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vsqr-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vsqr-test COMMAND f32-vsqr-test)
-
-  ADD_EXECUTABLE(f32-vsqrdiff-test test/f32-vsqrdiff.cc)
-  SET_TARGET_PROPERTIES(f32-vsqrdiff-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vsqrdiff-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vsqrdiff-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vsqrdiff-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vsqrdiff-test COMMAND f32-vsqrdiff-test)
-
-  ADD_EXECUTABLE(f32-vsqrdiffc-test test/f32-vsqrdiffc.cc)
-  SET_TARGET_PROPERTIES(f32-vsqrdiffc-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vsqrdiffc-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vsqrdiffc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vsqrdiffc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vsqrdiffc-test COMMAND f32-vsqrdiffc-test)
-
-  ADD_EXECUTABLE(f32-vsqrt-test test/f32-vsqrt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vsqrt-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vsqrt-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vsqrt-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vsqrt-test COMMAND f32-vsqrt-test)
-
-  ADD_EXECUTABLE(f32-vrsqrt-test test/f32-vrsqrt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrsqrt-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vrsqrt-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vrsqrt-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vrsqrt-test COMMAND f32-vrsqrt-test)
-
-  ADD_EXECUTABLE(f32-vsub-test test/f32-vsub.cc)
-  SET_TARGET_PROPERTIES(f32-vsub-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vsub-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vsub-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vsub-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vsub-test COMMAND f32-vsub-test)
-
-  ADD_EXECUTABLE(f32-vsub-minmax-test test/f32-vsub-minmax.cc)
-  SET_TARGET_PROPERTIES(f32-vsub-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vsub-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vsub-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vsub-minmax-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vsub-minmax-test COMMAND f32-vsub-minmax-test)
-
-  ADD_EXECUTABLE(f32-vsub-relu-test test/f32-vsub-relu.cc)
-  SET_TARGET_PROPERTIES(f32-vsub-relu-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vsub-relu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vsub-relu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
-  TARGET_LINK_LIBRARIES(f32-vsub-relu-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vsub-relu-test COMMAND f32-vsub-relu-test)
-
-  ADD_EXECUTABLE(f32-vsubc-test test/f32-vsubc.cc)
-  SET_TARGET_PROPERTIES(f32-vsubc-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vsubc-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vsubc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vsubc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vsubc-test COMMAND f32-vsubc-test)
-
-  ADD_EXECUTABLE(f32-vsubc-minmax-test test/f32-vsubc-minmax.cc)
-  SET_TARGET_PROPERTIES(f32-vsubc-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vsubc-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vsubc-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vsubc-minmax-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vsubc-minmax-test COMMAND f32-vsubc-minmax-test)
-
-  ADD_EXECUTABLE(f32-vsubc-relu-test test/f32-vsubc-relu.cc)
-  SET_TARGET_PROPERTIES(f32-vsubc-relu-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vsubc-relu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vsubc-relu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vsubc-relu-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vsubc-relu-test COMMAND f32-vsubc-relu-test)
-
-  ADD_EXECUTABLE(f32-vrsubc-test test/f32-vrsubc.cc)
-  SET_TARGET_PROPERTIES(f32-vrsubc-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrsubc-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vrsubc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vrsubc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vrsubc-test COMMAND f32-vrsubc-test)
-
-  ADD_EXECUTABLE(f32-vrsubc-minmax-test test/f32-vrsubc-minmax.cc)
-  SET_TARGET_PROPERTIES(f32-vrsubc-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrsubc-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vrsubc-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vrsubc-minmax-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vrsubc-minmax-test COMMAND f32-vrsubc-minmax-test)
-
-  ADD_EXECUTABLE(f32-vrsubc-relu-test test/f32-vrsubc-relu.cc)
-  SET_TARGET_PROPERTIES(f32-vrsubc-relu-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrsubc-relu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vrsubc-relu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vrsubc-relu-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all)
-  ADD_TEST(NAME f32-vrsubc-relu-test COMMAND f32-vrsubc-relu-test)
-
-  ADD_EXECUTABLE(f32-vtanh-test test/f32-vtanh.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vtanh-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-vtanh-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(f32-vtanh-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME f32-vtanh-test COMMAND f32-vtanh-test)
-
-  ADD_EXECUTABLE(qd8-f32-qc8w-gemm-minmax-test test/qd8-f32-qc8w-gemm-minmax.cc  test/qd8-f32-qc8w-gemm-minmax-2.cc test/qd8-f32-qc8w-gemm-minmax-3.cc test/qd8-f32-qc8w-gemm-minmax-4.cc)
-  TARGET_INCLUDE_DIRECTORIES(qd8-f32-qc8w-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qd8-f32-qc8w-gemm-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qd8-f32-qc8w-gemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qd8-f32-qc8w-gemm-minmax-test COMMAND qd8-f32-qc8w-gemm-minmax-test)
-
-  ADD_EXECUTABLE(qd8-f16-qb4w-gemm-minmax-test test/qd8-f16-qb4w-gemm-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(qd8-f16-qb4w-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qd8-f16-qb4w-gemm-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qd8-f16-qb4w-gemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qd8-f16-qb4w-gemm-minmax-test COMMAND qd8-f16-qb4w-gemm-minmax-test)
-
-  ADD_EXECUTABLE(qd8-f16-qc4w-gemm-minmax-test test/qd8-f16-qc4w-gemm-minmax.cc  test/qd8-f16-qc4w-gemm-minmax-2.cc test/qd8-f16-qc4w-gemm-minmax-3.cc test/qd8-f16-qc4w-gemm-minmax-4.cc)
-  TARGET_INCLUDE_DIRECTORIES(qd8-f16-qc4w-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qd8-f16-qc4w-gemm-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qd8-f16-qc4w-gemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qd8-f16-qc4w-gemm-minmax-test COMMAND qd8-f16-qc4w-gemm-minmax-test)
-
-  ADD_EXECUTABLE(qd8-f32-qb4w-gemm-minmax-test test/qd8-f32-qb4w-gemm-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(qd8-f32-qb4w-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qd8-f32-qb4w-gemm-minmax-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qd8-f32-qb4w-gemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qd8-f32-qb4w-gemm-minmax-test COMMAND qd8-f32-qb4w-gemm-minmax-test)
-
-  ADD_EXECUTABLE(qd8-f32-qc4w-gemm-minmax-test test/qd8-f32-qc4w-gemm-minmax.cc  test/qd8-f32-qc4w-gemm-minmax-2.cc test/qd8-f32-qc4w-gemm-minmax-3.cc test/qd8-f32-qc4w-gemm-minmax-4.cc)
-  TARGET_INCLUDE_DIRECTORIES(qd8-f32-qc4w-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qd8-f32-qc4w-gemm-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qd8-f32-qc4w-gemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qd8-f32-qc4w-gemm-minmax-test COMMAND qd8-f32-qc4w-gemm-minmax-test)
-
-  ADD_EXECUTABLE(qd8-f32-qc8w-igemm-minmax-test test/qd8-f32-qc8w-igemm-minmax.cc  test/qd8-f32-qc8w-igemm-minmax-2.cc  test/qd8-f32-qc8w-igemm-minmax-3.cc)
-  TARGET_INCLUDE_DIRECTORIES(qd8-f32-qc8w-igemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qd8-f32-qc8w-igemm-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qd8-f32-qc8w-igemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qd8-f32-qc8w-igemm-minmax-test COMMAND qd8-f32-qc8w-igemm-minmax-test)
-
-  ADD_EXECUTABLE(qp8-f32-qc4w-gemm-minmax-test test/qp8-f32-qc4w-gemm-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(qp8-f32-qc4w-gemm-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qp8-f32-qc4w-gemm-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qp8-f32-qc4w-gemm-minmax-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qp8-f32-qc4w-gemm-minmax-test COMMAND qp8-f32-qc4w-gemm-minmax-test)
-
-  ADD_EXECUTABLE(qs8-qc8w-dwconv-minmax-multipass-fp32-test test/qs8-qc8w-dwconv-minmax-multipass-fp32.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-qc8w-dwconv-minmax-multipass-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-qc8w-dwconv-minmax-multipass-fp32-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qs8-qc8w-dwconv-minmax-multipass-fp32-test PRIVATE dwconv-microkernel-tester hardware-config logging microkernel-utils microkernels-all microparams-init packing)
-  ADD_TEST(NAME qs8-qc8w-dwconv-minmax-multipass-fp32-test COMMAND qs8-qc8w-dwconv-minmax-multipass-fp32-test)
-
-  ADD_EXECUTABLE(qs8-qc8w-dwconv-minmax-unipass-fp32-test test/qs8-qc8w-dwconv-minmax-unipass-fp32.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-qc8w-dwconv-minmax-unipass-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-qc8w-dwconv-minmax-unipass-fp32-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qs8-qc8w-dwconv-minmax-unipass-fp32-test PRIVATE dwconv-microkernel-tester hardware-config logging microkernels-all microparams-init packing)
-  ADD_TEST(NAME qs8-qc8w-dwconv-minmax-unipass-fp32-test COMMAND qs8-qc8w-dwconv-minmax-unipass-fp32-test)
-
-  ADD_EXECUTABLE(qs8-qc8w-gemm-minmax-fp32-test test/qs8-qc8w-gemm-minmax-fp32.cc test/qs8-qc8w-gemm-minmax-fp32-2.cc test/qs8-qc8w-gemm-minmax-fp32-3.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-qc8w-gemm-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-qc8w-gemm-minmax-fp32-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qs8-qc8w-gemm-minmax-fp32-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qs8-qc8w-gemm-minmax-fp32-test COMMAND qs8-qc8w-gemm-minmax-fp32-test)
-
-  ADD_EXECUTABLE(qs8-qc8w-igemm-minmax-fp32-test test/qs8-qc8w-igemm-minmax-fp32.cc test/qs8-qc8w-igemm-minmax-fp32-2.cc test/qs8-qc8w-igemm-minmax-fp32-3.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-qc8w-igemm-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-qc8w-igemm-minmax-fp32-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qs8-qc8w-igemm-minmax-fp32-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qs8-qc8w-igemm-minmax-fp32-test COMMAND qs8-qc8w-igemm-minmax-fp32-test)
-
-  ADD_EXECUTABLE(qs8-dwconv-minmax-multipass-fp32-test test/qs8-dwconv-minmax-multipass-fp32.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-minmax-multipass-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-dwconv-minmax-multipass-fp32-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
-  TARGET_LINK_LIBRARIES(qs8-dwconv-minmax-multipass-fp32-test PRIVATE dwconv-microkernel-tester hardware-config logging microkernel-utils microkernels-all microparams-init packing)
-  ADD_TEST(NAME qs8-dwconv-minmax-multipass-fp32-test COMMAND qs8-dwconv-minmax-multipass-fp32-test)
-
-  ADD_EXECUTABLE(qs8-dwconv-minmax-multipass-rndnu-test test/qs8-dwconv-minmax-multipass-rndnu.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-minmax-multipass-rndnu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-dwconv-minmax-multipass-rndnu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qs8-dwconv-minmax-multipass-rndnu-test PRIVATE dwconv-microkernel-tester hardware-config logging microkernel-utils microkernels-all microparams-init packing)
-  ADD_TEST(NAME qs8-dwconv-minmax-multipass-rndnu-test COMMAND qs8-dwconv-minmax-multipass-rndnu-test)
-
-  ADD_EXECUTABLE(qs8-dwconv-minmax-unipass-fp32-test test/qs8-dwconv-minmax-unipass-fp32.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-minmax-unipass-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-dwconv-minmax-unipass-fp32-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
-  TARGET_LINK_LIBRARIES(qs8-dwconv-minmax-unipass-fp32-test PRIVATE dwconv-microkernel-tester hardware-config logging microkernels-all microparams-init packing)
-  ADD_TEST(NAME qs8-dwconv-minmax-unipass-fp32-test COMMAND qs8-dwconv-minmax-unipass-fp32-test)
-
-  ADD_EXECUTABLE(qs8-dwconv-minmax-unipass-rndnu-test test/qs8-dwconv-minmax-unipass-rndnu.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-minmax-unipass-rndnu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-dwconv-minmax-unipass-rndnu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qs8-dwconv-minmax-unipass-rndnu-test PRIVATE dwconv-microkernel-tester hardware-config logging microkernels-all microparams-init packing)
-  ADD_TEST(NAME qs8-dwconv-minmax-unipass-rndnu-test COMMAND qs8-dwconv-minmax-unipass-rndnu-test)
-
-  ADD_EXECUTABLE(qs8-f16-vcvt-test test/qs8-f16-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-f16-vcvt-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-f16-vcvt-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qs8-f16-vcvt-test PRIVATE vcvt-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qs8-f16-vcvt-test COMMAND qs8-f16-vcvt-test)
-
-  ADD_EXECUTABLE(qs8-f32-vcvt-test test/qs8-f32-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-f32-vcvt-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-f32-vcvt-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qs8-f32-vcvt-test PRIVATE vcvt-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qs8-f32-vcvt-test COMMAND qs8-f32-vcvt-test)
-
-  ADD_EXECUTABLE(qs8-gavgpool-minmax-fp32-test test/qs8-gavgpool-minmax-fp32.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-gavgpool-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-gavgpool-minmax-fp32-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qs8-gavgpool-minmax-fp32-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qs8-gavgpool-minmax-fp32-test COMMAND qs8-gavgpool-minmax-fp32-test)
-
-  ADD_EXECUTABLE(qs8-gavgpool-minmax-rndnu-test test/qs8-gavgpool-minmax-rndnu.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-gavgpool-minmax-rndnu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-gavgpool-minmax-rndnu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
-  TARGET_LINK_LIBRARIES(qs8-gavgpool-minmax-rndnu-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qs8-gavgpool-minmax-rndnu-test COMMAND qs8-gavgpool-minmax-rndnu-test)
-
-  ADD_EXECUTABLE(qs8-requantization-test test/qs8-requantization.cc)
-  SET_TARGET_PROPERTIES(qs8-requantization-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-requantization-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-requantization-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qs8-requantization-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME qs8-requantization-test COMMAND qs8-requantization-test)
-
-  ADD_EXECUTABLE(qs8-rsum-test test/qs8-rsum.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-rsum-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-rsum-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
-  TARGET_LINK_LIBRARIES(qs8-rsum-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME qs8-rsum-test COMMAND qs8-rsum-test)
-
-  ADD_EXECUTABLE(qs8-vadd-minmax-test test/qs8-vadd-minmax.cc)
-  SET_TARGET_PROPERTIES(qs8-vadd-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-vadd-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-vadd-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qs8-vadd-minmax-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qs8-vadd-minmax-test COMMAND qs8-vadd-minmax-test)
-
-  ADD_EXECUTABLE(qs8-vaddc-minmax-test test/qs8-vaddc-minmax.cc)
-  SET_TARGET_PROPERTIES(qs8-vaddc-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-vaddc-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-vaddc-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qs8-vaddc-minmax-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qs8-vaddc-minmax-test COMMAND qs8-vaddc-minmax-test)
-
-  ADD_EXECUTABLE(qs8-vcvt-test test/qs8-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-vcvt-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-vcvt-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qs8-vcvt-test PRIVATE vcvt-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qs8-vcvt-test COMMAND qs8-vcvt-test)
-
-  ADD_EXECUTABLE(qs16-qs8-vcvt-test test/qs16-qs8-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs16-qs8-vcvt-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs16-qs8-vcvt-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qs16-qs8-vcvt-test PRIVATE vcvt-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qs16-qs8-vcvt-test COMMAND qs16-qs8-vcvt-test)
-
-  ADD_EXECUTABLE(qs8-vhswish-test test/qs8-vhswish.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-vhswish-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-vhswish-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qs8-vhswish-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qs8-vhswish-test COMMAND qs8-vhswish-test)
-
-  ADD_EXECUTABLE(qs8-vlrelu-test test/qs8-vlrelu.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-vlrelu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-vlrelu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qs8-vlrelu-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qs8-vlrelu-test COMMAND qs8-vlrelu-test)
-
-  ADD_EXECUTABLE(qs8-vmul-minmax-fp32-test test/qs8-vmul-minmax-fp32.cc)
-  SET_TARGET_PROPERTIES(qs8-vmul-minmax-fp32-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-vmul-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-vmul-minmax-fp32-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qs8-vmul-minmax-fp32-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qs8-vmul-minmax-fp32-test COMMAND qs8-vmul-minmax-fp32-test)
-
-  ADD_EXECUTABLE(qs8-vmulc-minmax-fp32-test test/qs8-vmulc-minmax-fp32.cc)
-  SET_TARGET_PROPERTIES(qs8-vmulc-minmax-fp32-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-vmulc-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-vmulc-minmax-fp32-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qs8-vmulc-minmax-fp32-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qs8-vmulc-minmax-fp32-test COMMAND qs8-vmulc-minmax-fp32-test)
-
-  ADD_EXECUTABLE(qu8-avgpool-minmax-fp32-test test/qu8-avgpool-minmax-fp32.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-avgpool-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-avgpool-minmax-fp32-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-avgpool-minmax-fp32-test PRIVATE next-prime hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qu8-avgpool-minmax-fp32-test COMMAND qu8-avgpool-minmax-fp32-test)
-
-  ADD_EXECUTABLE(qu8-dwconv-minmax-multipass-fp32-test test/qu8-dwconv-minmax-multipass-fp32.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-dwconv-minmax-multipass-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-dwconv-minmax-multipass-fp32-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-dwconv-minmax-multipass-fp32-test PRIVATE dwconv-microkernel-tester hardware-config logging microkernel-utils microkernels-all microparams-init packing)
-  ADD_TEST(NAME qu8-dwconv-minmax-multipass-fp32-test COMMAND qu8-dwconv-minmax-multipass-fp32-test)
-
-  ADD_EXECUTABLE(qu8-dwconv-minmax-multipass-rndnu-test test/qu8-dwconv-minmax-multipass-rndnu.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-dwconv-minmax-multipass-rndnu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-dwconv-minmax-multipass-rndnu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-dwconv-minmax-multipass-rndnu-test PRIVATE dwconv-microkernel-tester hardware-config logging microkernel-utils microkernels-all microparams-init packing)
-  ADD_TEST(NAME qu8-dwconv-minmax-multipass-rndnu-test COMMAND qu8-dwconv-minmax-multipass-rndnu-test)
-
-  ADD_EXECUTABLE(qu8-dwconv-minmax-unipass-fp32-test test/qu8-dwconv-minmax-unipass-fp32.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-dwconv-minmax-unipass-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-dwconv-minmax-unipass-fp32-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-dwconv-minmax-unipass-fp32-test PRIVATE dwconv-microkernel-tester hardware-config logging microkernels-all microparams-init packing)
-  ADD_TEST(NAME qu8-dwconv-minmax-unipass-fp32-test COMMAND qu8-dwconv-minmax-unipass-fp32-test)
-
-  ADD_EXECUTABLE(qu8-dwconv-minmax-unipass-rndnu-test test/qu8-dwconv-minmax-unipass-rndnu.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-dwconv-minmax-unipass-rndnu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-dwconv-minmax-unipass-rndnu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-dwconv-minmax-unipass-rndnu-test PRIVATE dwconv-microkernel-tester hardware-config logging microkernels-all microparams-init packing)
-  ADD_TEST(NAME qu8-dwconv-minmax-unipass-rndnu-test COMMAND qu8-dwconv-minmax-unipass-rndnu-test)
-
-  ADD_EXECUTABLE(qu8-f32-vcvt-test test/f32-f16-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-f32-vcvt-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-f32-vcvt-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-f32-vcvt-test PRIVATE vcvt-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qu8-f32-vcvt-test COMMAND qu8-f32-vcvt-test)
-
-  ADD_EXECUTABLE(qu8-gavgpool-minmax-fp32-test test/qu8-gavgpool-minmax-fp32.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-gavgpool-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-gavgpool-minmax-fp32-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-gavgpool-minmax-fp32-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qu8-gavgpool-minmax-fp32-test COMMAND qu8-gavgpool-minmax-fp32-test)
-
-  ADD_EXECUTABLE(qu8-gavgpool-minmax-rndnu-test test/qu8-gavgpool-minmax-rndnu.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-gavgpool-minmax-rndnu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-gavgpool-minmax-rndnu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-gavgpool-minmax-rndnu-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qu8-gavgpool-minmax-rndnu-test COMMAND qu8-gavgpool-minmax-rndnu-test)
-
-  ADD_EXECUTABLE(qu8-gemm-minmax-fp32-test test/qu8-gemm-minmax-fp32.cc test/qu8-gemm-minmax-fp32-2.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-gemm-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-gemm-minmax-fp32-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-gemm-minmax-fp32-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qu8-gemm-minmax-fp32-test COMMAND qu8-gemm-minmax-fp32-test)
-
-  ADD_EXECUTABLE(qu8-gemm-minmax-rndnu-test test/qu8-gemm-minmax-rndnu.cc test/qu8-gemm-minmax-rndnu-2.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-gemm-minmax-rndnu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-gemm-minmax-rndnu-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-gemm-minmax-rndnu-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qu8-gemm-minmax-rndnu-test COMMAND qu8-gemm-minmax-rndnu-test)
-
-  ADD_EXECUTABLE(qu8-igemm-minmax-fp32-test test/qu8-igemm-minmax-fp32.cc test/qu8-igemm-minmax-fp32-2.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-igemm-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-igemm-minmax-fp32-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-igemm-minmax-fp32-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qu8-igemm-minmax-fp32-test COMMAND qu8-igemm-minmax-fp32-test)
-
-  ADD_EXECUTABLE(qu8-igemm-minmax-rndnu-test test/qu8-igemm-minmax-rndnu.cc test/qu8-igemm-minmax-rndnu-2.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-igemm-minmax-rndnu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-igemm-minmax-rndnu-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-igemm-minmax-rndnu-test PRIVATE gemm-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qu8-igemm-minmax-rndnu-test COMMAND qu8-igemm-minmax-rndnu-test)
-
-  ADD_EXECUTABLE(qu8-requantization-test test/qu8-requantization.cc)
-  SET_TARGET_PROPERTIES(qu8-requantization-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-requantization-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-requantization-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-requantization-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME qu8-requantization-test COMMAND qu8-requantization-test)
-
-  ADD_EXECUTABLE(qu8-vadd-minmax-test test/qu8-vadd-minmax.cc)
-  SET_TARGET_PROPERTIES(qu8-vadd-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vadd-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-vadd-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
-  TARGET_LINK_LIBRARIES(qu8-vadd-minmax-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qu8-vadd-minmax-test COMMAND qu8-vadd-minmax-test)
-
-  ADD_EXECUTABLE(qu8-vaddc-minmax-test test/qu8-vaddc-minmax.cc)
-  SET_TARGET_PROPERTIES(qu8-vaddc-minmax-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vaddc-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-vaddc-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-vaddc-minmax-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qu8-vaddc-minmax-test COMMAND qu8-vaddc-minmax-test)
-
-  ADD_EXECUTABLE(qu8-vcvt-test test/qu8-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vcvt-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-vcvt-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-vcvt-test PRIVATE vcvt-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qu8-vcvt-test COMMAND qu8-vcvt-test)
-
-  ADD_EXECUTABLE(qu8-vhswish-test test/qu8-vhswish.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vhswish-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-vhswish-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-vhswish-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qu8-vhswish-test COMMAND qu8-vhswish-test)
-
-  ADD_EXECUTABLE(qu8-vlrelu-test test/qu8-vlrelu.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vlrelu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-vlrelu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-vlrelu-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qu8-vlrelu-test COMMAND qu8-vlrelu-test)
-
-  ADD_EXECUTABLE(qu8-vmul-minmax-fp32-test test/qu8-vmul-minmax-fp32.cc)
-  SET_TARGET_PROPERTIES(qu8-vmul-minmax-fp32-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vmul-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-vmul-minmax-fp32-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-vmul-minmax-fp32-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qu8-vmul-minmax-fp32-test COMMAND qu8-vmul-minmax-fp32-test)
-
-  ADD_EXECUTABLE(qu8-vmul-minmax-rndnu-test test/qu8-vmul-minmax-rndnu.cc)
-  SET_TARGET_PROPERTIES(qu8-vmul-minmax-rndnu-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vmul-minmax-rndnu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-vmul-minmax-rndnu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-vmul-minmax-rndnu-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qu8-vmul-minmax-rndnu-test COMMAND qu8-vmul-minmax-rndnu-test)
-
-  ADD_EXECUTABLE(qu8-vmulc-minmax-fp32-test test/qu8-vmulc-minmax-fp32.cc)
-  SET_TARGET_PROPERTIES(qu8-vmulc-minmax-fp32-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vmulc-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-vmulc-minmax-fp32-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-vmulc-minmax-fp32-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qu8-vmulc-minmax-fp32-test COMMAND qu8-vmulc-minmax-fp32-test)
-
-  ADD_EXECUTABLE(qu8-vmulc-minmax-rndnu-test test/qu8-vmulc-minmax-rndnu.cc)
-  SET_TARGET_PROPERTIES(qu8-vmulc-minmax-rndnu-test PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vmulc-minmax-rndnu-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qu8-vmulc-minmax-rndnu-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(qu8-vmulc-minmax-rndnu-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME qu8-vmulc-minmax-rndnu-test COMMAND qu8-vmulc-minmax-rndnu-test)
-
-  ADD_EXECUTABLE(s16-rmaxabs-test test/s16-rmaxabs.cc)
-  TARGET_INCLUDE_DIRECTORIES(s16-rmaxabs-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(s16-rmaxabs-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(s16-rmaxabs-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME s16-rmaxabs-test COMMAND s16-rmaxabs-test)
-
-  ADD_EXECUTABLE(s16-window-test test/s16-window.cc)
-  TARGET_INCLUDE_DIRECTORIES(s16-window-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(s16-window-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(s16-window-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME s16-window-test COMMAND s16-window-test)
-
-  ADD_EXECUTABLE(u32-filterbank-accumulate-test test/u32-filterbank-accumulate.cc)
-  TARGET_INCLUDE_DIRECTORIES(u32-filterbank-accumulate-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(u32-filterbank-accumulate-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(u32-filterbank-accumulate-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME u32-filterbank-accumulate-test COMMAND u32-filterbank-accumulate-test)
-
-  ADD_EXECUTABLE(u32-filterbank-subtract-test test/u32-filterbank-subtract.cc)
-  TARGET_INCLUDE_DIRECTORIES(u32-filterbank-subtract-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(u32-filterbank-subtract-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(u32-filterbank-subtract-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME u32-filterbank-subtract-test COMMAND u32-filterbank-subtract-test)
-
-  ADD_EXECUTABLE(u32-vlog-test test/u32-vlog.cc)
-  TARGET_INCLUDE_DIRECTORIES(u32-vlog-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(u32-vlog-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(u32-vlog-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME u32-vlog-test COMMAND u32-vlog-test)
-
-  ADD_EXECUTABLE(i16-vlshift-test test/i16-vlshift.cc)
-  TARGET_INCLUDE_DIRECTORIES(i16-vlshift-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(i16-vlshift-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(i16-vlshift-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME i16-vlshift-test COMMAND i16-vlshift-test)
-
-  ADD_EXECUTABLE(cs16-vsquareabs-test test/cs16-vsquareabs.cc)
-  TARGET_INCLUDE_DIRECTORIES(cs16-vsquareabs-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(cs16-vsquareabs-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(cs16-vsquareabs-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME cs16-vsquareabs-test COMMAND cs16-vsquareabs-test)
-
-  ADD_EXECUTABLE(cs16-bfly4-test test/cs16-bfly4.cc)
-  TARGET_INCLUDE_DIRECTORIES(cs16-bfly4-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(cs16-bfly4-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(cs16-bfly4-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME cs16-bfly4-test COMMAND cs16-bfly4-test)
-
-  ADD_EXECUTABLE(cs16-fftr-test test/cs16-fftr.cc)
-  TARGET_INCLUDE_DIRECTORIES(cs16-fftr-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(cs16-fftr-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(cs16-fftr-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME cs16-fftr-test COMMAND cs16-fftr-test)
-
-  ADD_EXECUTABLE(s8-ibilinear-test test/s8-ibilinear.cc)
-  TARGET_INCLUDE_DIRECTORIES(s8-ibilinear-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(s8-ibilinear-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(s8-ibilinear-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME s8-ibilinear-test COMMAND s8-ibilinear-test)
-
-  ADD_EXECUTABLE(s8-maxpool-minmax-test test/s8-maxpool-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(s8-maxpool-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(s8-maxpool-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(s8-maxpool-minmax-test PRIVATE next-prime hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME s8-maxpool-minmax-test COMMAND s8-maxpool-minmax-test)
-
-  ADD_EXECUTABLE(s8-vclamp-test test/s8-vclamp.cc)
-  TARGET_INCLUDE_DIRECTORIES(s8-vclamp-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(s8-vclamp-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(s8-vclamp-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME s8-vclamp-test COMMAND s8-vclamp-test)
-
-  ADD_EXECUTABLE(u8-lut32norm-test test/u8-lut32norm.cc)
-  TARGET_INCLUDE_DIRECTORIES(u8-lut32norm-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(u8-lut32norm-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(u8-lut32norm-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME u8-lut32norm-test COMMAND u8-lut32norm-test)
-
-  ADD_EXECUTABLE(u8-ibilinear-test test/u8-ibilinear.cc)
-  TARGET_INCLUDE_DIRECTORIES(u8-ibilinear-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(u8-ibilinear-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(u8-ibilinear-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME u8-ibilinear-test COMMAND u8-ibilinear-test)
-
-  ADD_EXECUTABLE(u8-maxpool-minmax-test test/u8-maxpool-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(u8-maxpool-minmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(u8-maxpool-minmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
-  TARGET_LINK_LIBRARIES(u8-maxpool-minmax-test PRIVATE next-prime hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME u8-maxpool-minmax-test COMMAND u8-maxpool-minmax-test)
-
-  ADD_EXECUTABLE(u8-rmax-test test/u8-rmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(u8-rmax-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(u8-rmax-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(u8-rmax-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME u8-rmax-test COMMAND u8-rmax-test)
-
-  ADD_EXECUTABLE(u8-vclamp-test test/u8-vclamp.cc)
-  TARGET_INCLUDE_DIRECTORIES(u8-vclamp-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(u8-vclamp-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(u8-vclamp-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME u8-vclamp-test COMMAND u8-vclamp-test)
-
-  ADD_EXECUTABLE(x8-transpose-test test/x8-transpose.cc)
-  TARGET_INCLUDE_DIRECTORIES(x8-transpose-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(x8-transpose-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(x8-transpose-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME x8-transpose-test COMMAND x8-transpose-test)
-
-  ADD_EXECUTABLE(x16-transpose-test test/x16-transpose.cc)
-  TARGET_INCLUDE_DIRECTORIES(x16-transpose-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(x16-transpose-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(x16-transpose-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME x16-transpose-test COMMAND x16-transpose-test)
-
-  ADD_EXECUTABLE(x24-transpose-test test/x24-transpose.cc)
-  TARGET_INCLUDE_DIRECTORIES(x24-transpose-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(x24-transpose-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(x24-transpose-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME x24-transpose-test COMMAND x24-transpose-test)
-
-  ADD_EXECUTABLE(x32-packb-test test/x32-packb.cc)
-  TARGET_INCLUDE_DIRECTORIES(x32-packb-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(x32-packb-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(x32-packb-test PRIVATE hardware-config logging microkernels-all packing)
-  ADD_TEST(NAME x32-packb-test COMMAND x32-packb-test)
-
-  ADD_EXECUTABLE(x8-packq-test test/x8-packq.cc)
-  TARGET_INCLUDE_DIRECTORIES(x8-packq-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(x8-packq-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(x8-packq-test PRIVATE packq-microkernel-tester hardware-config logging microkernels-all packing)
+  SET(MICROKERNEL_UNIT_TESTS
+    bf16-gemm-minmax
+    bf16-vabs
+    cs16-bfly4
+    cs16-fftr
+    cs16-vsquareabs
+    f16-avgpool-minmax
+    f16-conv-hwc2chw
+    f16-dwconv-minmax-multipass
+    f16-dwconv-minmax-unipass
+    f16-dwconv2d-chw
+    f16-f32-vcvt
+    f16-f32acc-gemm-minmax
+    f16-f32acc-igemm-minmax
+    f16-f32acc-rsum
+    f16-gavgpool-cw
+    f16-gavgpool-minmax
+    f16-gemm-minmax
+    f16-ibilinear-chw
+    f16-ibilinear
+    f16-igemm-minmax
+    f16-maxpool-minmax
+    f16-pavgpool-minmax
+    f16-prelu
+    f16-raddstoreexpminusmax
+    f16-rmax
+    f16-rsum
+    f16-spmm-minmax
+    f16-vabs
+    f16-vadd-minmax
+    f16-vaddc-minmax
+    f16-vclamp
+    f16-vcmul
+    f16-vdiv-minmax
+    f16-vdivc-minmax
+    f16-velu
+    f16-vhswish
+    f16-vlrelu
+    f16-vmax
+    f16-vmaxc
+    f16-vmin
+    f16-vminc
+    f16-vmul-minmax
+    f16-vmulc-minmax
+    f16-vmulcaddc-minmax
+    f16-vneg
+    f16-vrdivc-minmax
+    f16-vrndd
+    f16-vrndne
+    f16-vrndu
+    f16-vrndz
+    f16-vrsqrt
+    f16-vrsubc-minmax
+    f16-vsigmoid
+    f16-vsqr
+    f16-vsqrdiff
+    f16-vsqrdiffc
+    f16-vsqrt
+    f16-vsub-minmax
+    f16-vsubc-minmax
+    f16-vtanh
+    f32-argmaxpool
+    f32-conv-hwc
+    f32-conv-hwc2chw
+    f32-dwconv-minmax-multipass
+    f32-dwconv-minmax-unipass
+    f32-dwconv-multipass
+    f32-dwconv-unipass
+    f32-dwconv2d-chw
+    f32-f16-vcvt
+    f32-gavgpool-cw
+    f32-gavgpool-minmax
+    f32-gemm-goi-minmax
+    f32-gemm-minmax
+    f32-gemm-relu
+    f32-gemm
+    f32-gemminc-minmax
+    f32-ibilinear-chw
+    f32-ibilinear
+    f32-igemm-minmax
+    f32-igemm-relu
+    f32-igemm
+    f32-ppmm-minmax
+    f32-prelu
+    f32-qc4w-gemm-minmax
+    f32-qc8w-gemm-minmax
+    f32-qc8w-gemm-relu
+    f32-qc8w-gemm
+    f32-qs8-vcvt
+    f32-qu8-vcvt
+    f32-raddexpminusmax
+    f32-raddextexp
+    f32-raddstoreexpminusmax
+    f32-rmax
+    f32-rmin
+    f32-rminmax
+    f32-rsum
+    f32-spmm-minmax
+    f32-vabs
+    f32-vadd-minmax
+    f32-vadd-relu
+    f32-vadd
+    f32-vaddc-minmax
+    f32-vaddc-relu
+    f32-vaddc
+    f32-vcmul
+    f32-vcopysign
+    f32-vcopysignc
+    f32-vdiv-minmax
+    f32-vdiv-relu
+    f32-vdiv
+    f32-vdivc-minmax
+    f32-vdivc-relu
+    f32-vdivc
+    f32-velu
+    f32-vexp
+    f32-vgelu
+    f32-vhswish
+    f32-vlog
+    f32-vmax
+    f32-vmaxc
+    f32-vmin
+    f32-vminc
+    f32-vmul-minmax
+    f32-vmul-relu
+    f32-vmul
+    f32-vmulc-minmax
+    f32-vmulc-relu
+    f32-vmulc
+    f32-vmulcaddc-minmax
+    f32-vneg
+    f32-vrcopysignc
+    f32-vrdivc-minmax
+    f32-vrdivc-relu
+    f32-vrdivc
+    f32-vrelu
+    f32-vrndd
+    f32-vrndne
+    f32-vrndu
+    f32-vrndz
+    f32-vrsqrt
+    f32-vrsubc-minmax
+    f32-vrsubc-relu
+    f32-vrsubc
+    f32-vscaleexpminusmax
+    f32-vscaleextexp
+    f32-vsigmoid
+    f32-vsqr
+    f32-vsqrdiff
+    f32-vsqrdiffc
+    f32-vsqrt
+    f32-vsub-minmax
+    f32-vsub-relu
+    f32-vsub
+    f32-vsubc-minmax
+    f32-vsubc-relu
+    f32-vsubc
+    f32-vtanh
+    i16-vlshift
+    indirection
+    packing
+    qd8-f16-qb4w-gemm-minmax
+    qd8-f16-qc4w-gemm-minmax
+    qd8-f16-qc8w-gemm-minmax
+    qd8-f32-qb4w-gemm-minmax
+    qd8-f32-qc4w-gemm-minmax
+    qd8-f32-qc8w-gemm-minmax
+    qd8-f32-qc8w-igemm-minmax
+    qp8-f32-qc4w-gemm-minmax
+    qs16-qs8-vcvt
+    qs8-dwconv-minmax-multipass-fp32
+    qs8-dwconv-minmax-multipass-rndnu
+    qs8-dwconv-minmax-unipass-fp32
+    qs8-dwconv-minmax-unipass-rndnu
+    qs8-f16-vcvt
+    qs8-f32-vcvt
+    qs8-gavgpool-minmax-fp32
+    qs8-gavgpool-minmax-rndnu
+    qs8-qc8w-dwconv-minmax-multipass-fp32
+    qs8-qc8w-dwconv-minmax-unipass-fp32
+    qs8-qc8w-gemm-minmax-fp32
+    qs8-qc8w-igemm-minmax-fp32
+    qs8-requantization
+    qs8-rsum
+    qs8-vadd-minmax
+    qs8-vaddc-minmax
+    qs8-vcvt
+    qs8-vhswish
+    qs8-vlrelu
+    qs8-vmul-minmax-fp32
+    qs8-vmulc-minmax-fp32
+    qu8-avgpool-minmax-fp32
+    qu8-dwconv-minmax-multipass-fp32
+    qu8-dwconv-minmax-multipass-rndnu
+    qu8-dwconv-minmax-unipass-fp32
+    qu8-dwconv-minmax-unipass-rndnu
+    qu8-f32-vcvt
+    qu8-gavgpool-minmax-fp32
+    qu8-gavgpool-minmax-rndnu
+    qu8-gemm-minmax-fp32
+    qu8-gemm-minmax-rndnu
+    qu8-igemm-minmax-fp32
+    qu8-igemm-minmax-rndnu
+    qu8-requantization
+    qu8-vadd-minmax
+    qu8-vaddc-minmax
+    qu8-vcvt
+    qu8-vhswish
+    qu8-vlrelu
+    qu8-vmul-minmax-fp32
+    qu8-vmul-minmax-rndnu
+    qu8-vmulc-minmax-fp32
+    qu8-vmulc-minmax-rndnu
+    s16-rmaxabs
+    s16-window
+    s32-vmul
+    s32-vmulc
+    s8-ibilinear
+    s8-maxpool-minmax
+    s8-vclamp
+    u32-filterbank-accumulate
+    u32-filterbank-subtract
+    u32-vlog
+    u8-ibilinear
+    u8-lut32norm
+    u8-maxpool-minmax
+    u8-rmax
+    u8-vclamp
+    x16-packw
+    x16-transpose
+    x24-transpose
+    x32-packb
+    x32-packw
+    x32-packx
+    x32-transpose
+    x32-unpool
+    x32-zerob
+    x32-zip
+    x64-transpose
+    x8-lut
+    x8-packq
+    x8-packw
+    x8-transpose
+    x8-zip
+    xx-fill
+    xx-pad
+    xx-transposev)
+
+  FOREACH(TEST ${MICROKERNEL_UNIT_TESTS})
+    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
+        dwconv-microkernel-tester
+        fp16
+        gemm-microkernel-tester
+        GTest::gmock
+        GTest::gtest
+        GTest::gtest_main
+        hardware-config
+        logging
+        microkernels-all
+        microparams-init
+        packq-microkernel-tester
+        pthreadpool
+        vbinary-microkernel-tester
+        vbinaryc-microkernel-tester
+        vcvt-microkernel-tester
+        vunary-microkernel-tester
+      )
+    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+  ENDFOREACH()
+
+  # Special-case
   IF(XNNPACK_ENABLE_KLEIDIAI)
     TARGET_LINK_LIBRARIES(x8-packq-test PRIVATE kleidiai)
   ENDIF()
-  ADD_TEST(NAME x8-packq-test COMMAND x8-packq-test)
-
-  ADD_EXECUTABLE(x8-packw-test test/x8-packw.cc)
-  TARGET_INCLUDE_DIRECTORIES(x8-packw-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(x8-packw-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(x8-packw-test PRIVATE hardware-config logging microkernels-all packing)
-  ADD_TEST(NAME x8-packw-test COMMAND x8-packw-test)
-
-  ADD_EXECUTABLE(x16-packw-test test/x16-packw.cc)
-  TARGET_INCLUDE_DIRECTORIES(x16-packw-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(x16-packw-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(x16-packw-test PRIVATE hardware-config logging microkernels-all packing)
-  ADD_TEST(NAME x16-packw-test COMMAND x16-packw-test)
-
-  ADD_EXECUTABLE(x32-packw-test test/x32-packw.cc)
-  TARGET_INCLUDE_DIRECTORIES(x32-packw-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(x32-packw-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(x32-packw-test PRIVATE hardware-config logging microkernels-all packing)
-  ADD_TEST(NAME x32-packw-test COMMAND x32-packw-test)
-
-  ADD_EXECUTABLE(x32-packx-test test/x32-packx.cc)
-  TARGET_INCLUDE_DIRECTORIES(x32-packx-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(x32-packx-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(x32-packx-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME x32-packx-test COMMAND x32-packx-test)
-
-  ADD_EXECUTABLE(x32-unpool-test test/x32-unpool.cc)
-  TARGET_INCLUDE_DIRECTORIES(x32-unpool-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(x32-unpool-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(x32-unpool-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME x32-unpool-test COMMAND x32-unpool-test)
-
-  ADD_EXECUTABLE(x32-transpose-test test/x32-transpose.cc)
-  TARGET_INCLUDE_DIRECTORIES(x32-transpose-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(x32-transpose-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(x32-transpose-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME x32-transpose-test COMMAND x32-transpose-test)
-
-  ADD_EXECUTABLE(x32-zerob-test test/x32-zerob.cc)
-  TARGET_INCLUDE_DIRECTORIES(x32-zerob-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(x32-zerob-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(x32-zerob-test PRIVATE hardware-config logging microkernels-all packing)
-  ADD_TEST(NAME x32-zerob-test COMMAND x32-zerob-test)
-
-  ADD_EXECUTABLE(x32-zip-test test/x32-zip.cc)
-  TARGET_INCLUDE_DIRECTORIES(x32-zip-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(x32-zip-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(x32-zip-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME x32-zip-test COMMAND x32-zip-test)
-
-  ADD_EXECUTABLE(x64-transpose-test test/x64-transpose.cc)
-  TARGET_INCLUDE_DIRECTORIES(x64-transpose-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(x64-transpose-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(x64-transpose-test PRIVATE hardware-config logging microkernels-all microparams-init)
-  ADD_TEST(NAME x64-transpose-test COMMAND x64-transpose-test)
-
-  ADD_EXECUTABLE(x8-lut-test test/x8-lut.cc)
-  TARGET_INCLUDE_DIRECTORIES(x8-lut-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(x8-lut-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(x8-lut-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME x8-lut-test COMMAND x8-lut-test)
-
-  ADD_EXECUTABLE(x8-zip-test test/x8-zip.cc)
-  TARGET_INCLUDE_DIRECTORIES(x8-zip-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(x8-zip-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(x8-zip-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME x8-zip-test COMMAND x8-zip-test)
-
-  ADD_EXECUTABLE(xx-fill-test test/xx-fill.cc)
-  TARGET_INCLUDE_DIRECTORIES(xx-fill-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(xx-fill-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(xx-fill-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME xx-fill-test COMMAND xx-fill-test)
-
-  ADD_EXECUTABLE(xx-pad-test test/xx-pad.cc)
-  TARGET_INCLUDE_DIRECTORIES(xx-pad-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(xx-pad-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(xx-pad-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME xx-pad-test COMMAND xx-pad-test)
-
-  ADD_EXECUTABLE(xx-transposev-test test/xx-transposev.cc)
-  TARGET_INCLUDE_DIRECTORIES(xx-transposev-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(xx-transposev-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(xx-transposev-test PRIVATE hardware-config logging microkernels-all)
-  ADD_TEST(NAME xx-transposev-test COMMAND xx-transposev-test)
-
-  ADD_EXECUTABLE(packing-test test/packing.cc)
-  TARGET_INCLUDE_DIRECTORIES(packing-test PRIVATE include src)
-  TARGET_LINK_LIBRARIES(packing-test PRIVATE fp16 GTest::gmock GTest::gtest GTest::gtest_main pthreadpool)
-  TARGET_LINK_LIBRARIES(packing-test PRIVATE XNNPACK microkernel-utils operator-utils packing)
-
-  ADD_EXECUTABLE(indirection-test test/indirection.cc)
-  TARGET_INCLUDE_DIRECTORIES(indirection-test PRIVATE include src)
-  TARGET_LINK_LIBRARIES(indirection-test PRIVATE GTest::gtest GTest::gtest_main pthreadpool)
-  TARGET_LINK_LIBRARIES(indirection-test PRIVATE XNNPACK indirection)
 
   IF(XNNPACK_BUILD_LIBRARY)
     ADD_EXECUTABLE(weights-cache-test test/weights-cache.cc)
