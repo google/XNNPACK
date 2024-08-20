@@ -22024,7 +22024,7 @@ void xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_u32(
 
   const float output_min_less_zero_point = (float) ((int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point);
   const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
-  const v128_t vmagic_bias = wasm_f32x4_splat(12582912.0f);
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(12582912.0f);
   const v128_t vmagic_min = wasm_u32x4_splat(float_as_uint32(12582912.0f + output_min_less_zero_point));
   const v128_t vmagic_bias_less_zero_point = wasm_i32x4_splat(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
   const v128_t voutput_max = wasm_v128_load8_splat(&params->scalar.output_max);
@@ -22172,7 +22172,7 @@ void xnn_f32_qu8_vcvt_ukernel__wasmsimd_magic_u32(
 
   const float output_min_less_zero_point = (float) ((int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point);
   const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
-  const v128_t vmagic_bias = wasm_f32x4_splat(12582912.0f);
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(12582912.0f);
   const v128_t vmagic_min = wasm_u32x4_splat(float_as_uint32(12582912.0f + output_min_less_zero_point));
   const v128_t vmagic_bias_less_zero_point = wasm_i32x4_splat(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
   const v128_t voutput_max = wasm_v128_load8_splat(&params->scalar.output_max);
@@ -33789,7 +33789,7 @@ void xnn_qs8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_u8(
   const v128_t va_zero_point = wasm_i16x8_splat(params->scalar.a_zero_point);
   const v128_t vb_zero_point = wasm_i16x8_splat(params->scalar.b_zero_point);
   const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
-  const v128_t vmagic_bias = wasm_f32x4_splat(12582912.0f);
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(12582912.0f);
   const v128_t vmagic_min = wasm_i32x4_splat((int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point));
   const v128_t vmagic_bias_less_output_zero_point = wasm_i32x4_splat(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
   const v128_t voutput_max = wasm_v128_load8_splat(&params->scalar.output_max);
@@ -33901,7 +33901,7 @@ void xnn_qs8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_u8(
   const float output_min_less_zero_point = (float) ((int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point);
   const v128_t va_zero_point = wasm_i16x8_splat(params->scalar.a_zero_point);
   const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
-  const v128_t vmagic_bias = wasm_f32x4_splat(12582912.0f);
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(12582912.0f);
   const v128_t vmagic_min = wasm_i32x4_splat((int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point));
   const v128_t vmagic_bias_less_output_zero_point = wasm_i32x4_splat(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
   const v128_t voutput_max = wasm_v128_load8_splat(&params->scalar.output_max);
@@ -36810,7 +36810,7 @@ void xnn_qu8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_u8(
   const v128_t va_zero_point = wasm_i16x8_splat(params->scalar.a_zero_point);
   const v128_t vb_zero_point = wasm_i16x8_splat(params->scalar.b_zero_point);
   const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
-  const v128_t vmagic_bias = wasm_f32x4_splat(12582912.0f);
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(12582912.0f);
   const v128_t vmagic_min = wasm_i32x4_splat((int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point));
   const v128_t vmagic_bias_less_output_zero_point = wasm_i32x4_splat(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
   const v128_t voutput_max = wasm_v128_load8_splat(&params->scalar.output_max);
@@ -36922,7 +36922,7 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_u8(
   const float output_min_less_zero_point = (float) ((int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point);
   const v128_t va_zero_point = wasm_i16x8_splat(params->scalar.a_zero_point);
   const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
-  const v128_t vmagic_bias = wasm_f32x4_splat(12582912.0f);
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(12582912.0f);
   const v128_t vmagic_min = wasm_i32x4_splat((int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point));
   const v128_t vmagic_bias_less_output_zero_point = wasm_i32x4_splat(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
   const v128_t voutput_max = wasm_v128_load8_splat(&params->scalar.output_max);
