@@ -390,6 +390,12 @@ class AvgPoolMicrokernelTester {
     }
   }
 
+  void Test(xnn_f16_avgpool_minmax_unipass_ukernel_fn uni, xnn_f16_avgpool_minmax_multipass_ukernel_fn multi, xnn_init_f16_scaleminmax_params_fn init_params) const {
+    assert((uni != nullptr) != (multi != nullptr));
+    if (uni) Test(uni, init_params);
+    else Test(multi, init_params);
+  }
+
   void Test(xnn_f32_avgpool_minmax_unipass_ukernel_fn avgpool_minmax, xnn_init_f32_scaleminmax_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
@@ -565,6 +571,12 @@ class AvgPoolMicrokernelTester {
         }
       }
     }
+  }
+
+  void Test(xnn_f32_avgpool_minmax_unipass_ukernel_fn uni, xnn_f32_avgpool_minmax_multipass_ukernel_fn multi, xnn_init_f32_scaleminmax_params_fn init_params) const {
+    assert((uni != nullptr) != (multi != nullptr));
+    if (uni) Test(uni, init_params);
+    else Test(multi, init_params);
   }
 
   void Test(
@@ -760,6 +772,14 @@ class AvgPoolMicrokernelTester {
     }
   }
 
+  void Test(xnn_qu8_avgpool_minmax_unipass_ukernel_fn uni, xnn_qu8_avgpool_minmax_multipass_ukernel_fn multi,
+            xnn_init_qu8_avgpool_minmax_params_fn init_params,
+            xnn_qu8_requantize_fn requantize) const {
+    assert((uni != nullptr) != (multi != nullptr));
+    if (uni) Test(uni, init_params, requantize);
+    else Test(multi, init_params, requantize);
+  }
+
   void Test(xnn_f16_pavgpool_minmax_unipass_ukernel_fn pavgpool_minmax, xnn_init_f16_minmax_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
@@ -951,6 +971,13 @@ class AvgPoolMicrokernelTester {
     }
   }
 
+  void Test(xnn_f16_pavgpool_minmax_unipass_ukernel_fn uni, xnn_f16_pavgpool_minmax_multipass_ukernel_fn multi,
+          xnn_init_f16_minmax_params_fn init_params) const {
+    assert((uni != nullptr) != (multi != nullptr));
+    if (uni) Test(uni, init_params);
+    else Test(multi, init_params);
+  }
+
   void Test(xnn_f32_pavgpool_minmax_unipass_ukernel_fn pavgpool_minmax, xnn_init_f32_minmax_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
@@ -1132,6 +1159,13 @@ class AvgPoolMicrokernelTester {
         }
       }
     }
+  }
+
+  void Test(xnn_f32_pavgpool_minmax_unipass_ukernel_fn uni, xnn_f32_pavgpool_minmax_multipass_ukernel_fn multi,
+          xnn_init_f32_minmax_params_fn init_params) const {
+    assert((uni != nullptr) != (multi != nullptr));
+    if (uni) Test(uni, init_params);
+    else Test(multi, init_params);
   }
 
  private:

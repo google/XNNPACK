@@ -8,9 +8,15 @@
 tools/generate-packq-test.py --spec test/x8-packq.yaml --output-bench bench/x8-packq.cc &
 
 ### Tests for Pack Weights micro-kernels
-tools/generate-packw-test.py --spec test/x8-packw.yaml --output-bench bench/x8-packw.cc &
-tools/generate-packw-test.py --spec test/x16-packw.yaml --output-bench bench/x16-packw.cc &
-tools/generate-packw-test.py --spec test/x32-packw.yaml --output-bench bench/x32-packw.cc &
+tools/generate-packw-test.py --spec test/x8-packw.yaml --output test/x8-packw.cc --output-bench bench/x8-packw.cc &
+tools/generate-packw-test.py --spec test/x16-packw.yaml --output test/x16-packw.cc --output-bench bench/x16-packw.cc &
+tools/generate-packw-test.py --spec test/x32-packw.yaml --output test/x32-packw.cc --output-bench bench/x32-packw.cc &
+
+### Tests for Zero Bias micro-kernels
+tools/generate-packb-test.py --spec test/x32-zerob.yaml --output test/x32-zerob.cc &
+
+### Tests for Pack Bias micro-kernels
+tools/generate-packb-test.py --spec test/x32-packb.yaml --output test/x32-packb.cc &
 
 ### Tests for MaxPool micro-kernels
 tools/generate-maxpool-test.py --spec test/f32-maxpool-minmax.yaml --output test/f32-maxpool-minmax.cc &
@@ -34,10 +40,6 @@ tools/generate-gavgpool-test.py --spec test/qu8-gavgpool-minmax-rndnu.yaml --out
 ### Tests for GAvgPool CW layout micro-kernels
 tools/generate-gavgpool-cw-test.py --spec test/f16-gavgpool-cw.yaml --output test/f16-gavgpool-cw.cc &
 tools/generate-gavgpool-cw-test.py --spec test/f32-gavgpool-cw.yaml --output test/f32-gavgpool-cw.cc &
-
-### Tests for PAvgPool micro-kernels
-tools/generate-avgpool-test.py --spec test/f16-pavgpool-minmax.yaml --output test/f16-pavgpool-minmax.cc &
-tools/generate-avgpool-test.py --spec test/f32-pavgpool-minmax.yaml --output test/f32-pavgpool-minmax.cc &
 
 ### Tests for ArgMaxPool micro-kernels
 tools/generate-argmaxpool-test.py --spec test/f32-argmaxpool.yaml --output test/f32-argmaxpool.cc &
