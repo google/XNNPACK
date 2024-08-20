@@ -236,6 +236,15 @@ enum xnn_status xnn_delete_subgraph(
 #define XNN_VALUE_FLAG_EXTERNAL_OUTPUT 0x00000002
 #define XNN_VALUE_FLAG_PERSISTENT      0x00000004
 
+/// Quantized block scales for the tensor are in fp32 format.
+#define XNN_VALUE_FLAG_FP32_SCALES 0x00000008
+
+/// Quantized block scales for the tensor are in fp16 format.
+#define XNN_VALUE_FLAG_FP16_SCALES 0x00000010
+
+/// Quantized block scales for the tensor are in bf16 format.
+#define XNN_VALUE_FLAG_BF16_SCALES 0x00000020
+
 #define XNN_INVALID_VALUE_ID UINT32_MAX
 
 /// Type of elements in a Value object.
@@ -273,8 +282,8 @@ enum xnn_datatype {
   /// 32-bit signed integers.
   xnn_datatype_int32 = 11,
   /// Quantized 4-bit signed integer with shared per-channel-block quantization
-  /// parameters.
-  xnn_datatype_qbint4 = 12,
+  /// parameters (bf16 format).
+  xnn_datatype_qbint4_bf16 = 12,
 };
 
 /// Define a tensor-type Value and add it to a Subgraph.
@@ -423,11 +432,12 @@ enum xnn_status xnn_define_channelwise_quantized_tensor_value_v2(
 ///                     number of input channel element per output channel.
 ///                     For Fully connected operators with 2d filters of size [output_channels, input_channels],
 ///                     expecting number of scale values to be = output_channels * (input_channels / block_size).
+/// @param flags - binary features of the Value. Supported values are XNN_VALUE_FLAG_BF16_SCALES.
 enum xnn_status xnn_define_blockwise_quantized_tensor_value(
   xnn_subgraph_t subgraph,
   enum xnn_datatype datatype,
   int32_t zero_point,
-  const uint16_t* scale,
+  const void* scale,
   size_t num_dims,
   size_t channel_dim,
   size_t block_size,

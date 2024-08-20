@@ -174,7 +174,7 @@ static enum xnn_status create_fully_connected_operator(
             weights_cache,
             &opdata->operator_objects[0]);
           break;
-        case xnn_datatype_qbint4:
+        case xnn_datatype_qbint4_bf16:
           status = xnn_create_fully_connected_nc_qd8_f16_qb4w(
             input_channels,
             output_channels,
@@ -235,7 +235,7 @@ static enum xnn_status create_fully_connected_operator(
             weights_cache,
             &opdata->operator_objects[0]);
           break;
-        case xnn_datatype_qbint4:
+        case xnn_datatype_qbint4_bf16:
           status = xnn_create_fully_connected_nc_qd8_f32_qb4w(
             input_channels,
             output_channels,
@@ -795,7 +795,7 @@ static inline enum xnn_compute_type validate_datatypes_with_bias(
         return xnn_compute_type_qd8_to_fp16;
       }
       break;
-    case xnn_datatype_qbint4:
+    case xnn_datatype_qbint4_bf16:
       if (input_datatype == xnn_datatype_qdint8 &&
           bias_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32)
@@ -882,7 +882,7 @@ static inline enum xnn_compute_type validate_datatypes_without_bias(
         return xnn_compute_type_qd8_to_fp16;
       }
       break;
-    case xnn_datatype_qbint4:
+    case xnn_datatype_qbint4_bf16:
       if (input_datatype == xnn_datatype_qdint8 && output_datatype == xnn_datatype_fp32) {
         return xnn_compute_type_qd8_to_fp32;
       } else if (input_datatype == xnn_datatype_qdint8 && output_datatype == xnn_datatype_fp16) {
@@ -1010,7 +1010,7 @@ enum xnn_status xnn_define_fully_connected(
   switch (kernel_value->datatype) {
     case xnn_datatype_fp32:
       break;
-    case xnn_datatype_qbint4:
+    case xnn_datatype_qbint4_bf16:
     case xnn_datatype_qcint4:
       if (kernel_value->quantization.zero_point != 8 && kernel_value->quantization.zero_point != 0) {
         xnn_log_error(
@@ -1054,7 +1054,7 @@ enum xnn_status xnn_define_fully_connected(
     }
   }
 
-  const bool is_blockwise_quantized = kernel_value->datatype == xnn_datatype_qbint4;
+  const bool is_blockwise_quantized = kernel_value->datatype == xnn_datatype_qbint4_bf16;
 
   if (is_blockwise_quantized) {
     // TODO: Unsupported features
