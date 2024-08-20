@@ -1350,8 +1350,7 @@ IF(XNNPACK_BUILD_TESTS)
       next-prime
       pthreadpool
       vunary-microkernel-tester
-      XNNPACK
-    )
+      XNNPACK)
     ADD_SHARDED_TEST(${TEST}-test 10)
   ENDFOREACH()
 
@@ -1372,8 +1371,7 @@ IF(XNNPACK_BUILD_TESTS)
         GTest::gmock
         GTest::gtest
         GTest::gtest_main
-        XNNPACK
-      )
+        XNNPACK)
       ADD_SHARDED_TEST(${TEST}-test 10)
     ENDFOREACH()
 
@@ -1419,7 +1417,6 @@ IF(XNNPACK_BUILD_TESTS)
         tanh-nc
         truncation-nc
         unpooling-nhwc)
-
     FOREACH(TEST ${LIBRARY_UNIT_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
       TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
@@ -1442,7 +1439,6 @@ IF(XNNPACK_BUILD_TESTS)
         runtime
         subgraph-nchw
         workspace)
-
     FOREACH(TEST ${LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
       TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
@@ -1517,7 +1513,6 @@ IF(XNNPACK_BUILD_TESTS)
         tanh
         transpose-reshape
         unpooling-2d)
-
     FOREACH(TEST ${LIBRARY_SUBGRAPH_UNIT_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
       TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
@@ -1538,7 +1533,6 @@ IF(XNNPACK_BUILD_TESTS)
       slice-normalization
       reduce-normalization
       transpose-normalization)
-
   FOREACH(TEST ${NORMALIZATION_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
@@ -1797,7 +1791,6 @@ IF(XNNPACK_BUILD_TESTS)
     xx-fill
     xx-pad
     xx-transposev)
-
   FOREACH(TEST ${MICROKERNEL_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
@@ -1817,8 +1810,7 @@ IF(XNNPACK_BUILD_TESTS)
         vbinary-microkernel-tester
         vbinaryc-microkernel-tester
         vcvt-microkernel-tester
-        vunary-microkernel-tester
-      )
+        vunary-microkernel-tester)
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
   ENDFOREACH()
 
@@ -1951,7 +1943,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
         qs8-gemm-e2e
         qu8-gemm-e2e
         qu8-dwconv-e2e)
-
     FOREACH(BENCH ${LIBRARY_END2END_BENCHMARKS})
       ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)
       TARGET_INCLUDE_DIRECTORIES(${BENCH}-bench PRIVATE .)
@@ -1963,8 +1954,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
         hardware-config
         logging microkernels-all
         microparams-init
-        XNNPACK
-      )
+        XNNPACK)
     ENDFOREACH()
 
     # ---[ Build operator-level microbenchmarks
@@ -1992,7 +1982,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
         square-root
         truncation
         tanh)
-
     FOREACH(BENCH ${LIBRARY_OPERATOR_BENCHMARKS})
       ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)
       TARGET_INCLUDE_DIRECTORIES(${BENCH}-bench PRIVATE .)
@@ -2136,7 +2125,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       x8-packw
       x8-transpose
       xx-transposev)
-
   FOREACH(BENCH ${MICROKERNEL_BENCHMARKS})
     TARGET_INCLUDE_DIRECTORIES(${BENCH}-bench PRIVATE . include src)
     TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
@@ -2146,8 +2134,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       logging
       microkernels-all
       microparams-init
-      pthreadpool
-    )
+      pthreadpool)
   ENDFOREACH()
 
   # Special-case
