@@ -1339,8 +1339,19 @@ IF(XNNPACK_BUILD_TESTS)
   FOREACH(TEST ${SHARDED_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
-    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
-    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE XNNPACK vunary-microkernel-tester next-prime hardware-config logging microkernels-all microparams-init)
+    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
+      fp16
+      GTest::gtest
+      GTest::gtest_main
+      hardware-config
+      logging
+      microkernels-all
+      microparams-init
+      next-prime
+      pthreadpool
+      vunary-microkernel-tester
+      XNNPACK
+    )
     ADD_SHARDED_TEST(${TEST}-test 10)
   ENDFOREACH()
 
@@ -1356,7 +1367,13 @@ IF(XNNPACK_BUILD_TESTS)
     FOREACH(TEST ${LIBRARY_SHARDED_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
       TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
-      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE XNNPACK fp16 GTest::gmock GTest::gtest GTest::gtest_main)
+      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
+        fp16
+        GTest::gmock
+        GTest::gtest
+        GTest::gtest_main
+        XNNPACK
+      )
       ADD_SHARDED_TEST(${TEST}-test 10)
     ENDFOREACH()
 
@@ -1368,54 +1385,51 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE XNNPACK)
 
     # ---[ Build operator-level unit tests
-    SET(LIBRARY_UNARY_TESTS
+    SET(LIBRARY_UNIT_TESTS
         abs-nc
+        add-nd
+        add-nd-eager
         bankers-rounding-nc
         ceiling-nc
         clamp-nc
+        copysign-nd
+        divide-nd
+        divide-nd-eager
         elu-nc
         exp-nc
         floor-nc
         hardswish-nc
         leaky-relu-nc
         log-nc
-        negate-nc
-        reciprocal-square-root-nc
-        sigmoid-nc
-        square-nc
-        square-root-nc
-        tanh-nc
-        truncation-nc
-        unpooling-nhwc)
-
-    FOREACH(TEST ${LIBRARY_UNARY_TESTS})
-      ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-      TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
-      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
-      ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-    ENDFOREACH()
-
-    SET(LIBRARY_BINARY_ELEMENTWISE_TESTS
-        add-nd
-        add-nd-eager
-        copysign-nd
-        divide-nd
-        divide-nd-eager
         maximum-nd
         maximum-nd-eager
         minimum-nd
         minimum-nd-eager
         multiply-nd
         multiply-nd-eager
+        negate-nc
+        reciprocal-square-root-nc
+        sigmoid-nc
+        square-nc
+        square-root-nc
         squared-difference-nd
         squared-difference-nd-eager
         subtract-nd
-        subtract-nd-eager)
+        subtract-nd-eager
+        tanh-nc
+        truncation-nc
+        unpooling-nhwc)
 
-    FOREACH(TEST ${LIBRARY_BINARY_ELEMENTWISE_TESTS})
+    FOREACH(TEST ${LIBRARY_UNIT_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
       TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
-      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
+      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
+        binary-elementwise-operator-tester
+        fp16
+        GTest::gtest
+        GTest::gtest_main
+        unary-operator-tester
+        XNNPACK)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     ENDFOREACH()
 
@@ -1432,7 +1446,12 @@ IF(XNNPACK_BUILD_TESTS)
     FOREACH(TEST ${LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
       TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
-      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE XNNPACK GTest::gmock GTest::gtest GTest::gtest_main fp16)
+      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
+        fp16
+        GTest::gmock
+        GTest::gtest
+        GTest::gtest_main
+        XNNPACK)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     ENDFOREACH()
 
@@ -1502,7 +1521,14 @@ IF(XNNPACK_BUILD_TESTS)
     FOREACH(TEST ${LIBRARY_SUBGRAPH_UNIT_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
       TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
-      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE XNNPACK GTest::gmock GTest::gtest GTest::gtest_main fp16 subgraph convolution-test-helpers)
+      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
+        convolution-test-helpers
+        fp16
+        GTest::gmock
+        GTest::gtest
+        GTest::gtest_main
+        subgraph
+        XNNPACK)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     ENDFOREACH()
   ENDIF()
@@ -1975,684 +2001,157 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ENDIF()
 
   # ---[ Build microkernel-level microbenchmarks
-  ADD_EXECUTABLE(bf16-gemm-bench bench/bf16-gemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(bf16-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(bf16-gemm-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(bf16-gemm-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f16-conv-hwc2chw-bench bench/f16-conv-hwc2chw.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-conv-hwc2chw-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-conv-hwc2chw-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-conv-hwc2chw-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f16-dwconv-bench bench/f16-dwconv.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-dwconv-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-dwconv-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-dwconv-bench PRIVATE bench-utils indirection hardware-config logging microkernel-utils microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f16-dwconv2d-chw-bench bench/f16-dwconv2d-chw.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-dwconv2d-chw-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-dwconv2d-chw-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-dwconv2d-chw-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f16-gavgpool-cw-bench bench/f16-gavgpool-cw.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-gavgpool-cw-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-gavgpool-cw-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-gavgpool-cw-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f16-f32acc-gemm-bench bench/f16-f32acc-gemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-f32acc-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-f32acc-gemm-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-f32acc-gemm-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f16-gemm-bench bench/f16-gemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-gemm-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-gemm-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f16-gemm-minmax-bench bench/f16-gemm-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-gemm-minmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-gemm-minmax-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-gemm-minmax-bench PRIVATE gemm-benchmark bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f16-f32acc-igemm-bench bench/f16-f32acc-igemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-f32acc-igemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-f32acc-igemm-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-f32acc-igemm-bench PRIVATE bench-utils indirection hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f16-igemm-bench bench/f16-igemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-igemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-igemm-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-igemm-bench PRIVATE bench-utils hardware-config indirection logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f16-raddstoreexpminusmax-bench bench/f16-raddstoreexpminusmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-raddstoreexpminusmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-raddstoreexpminusmax-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-raddstoreexpminusmax-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f16-rsum-bench bench/f16-rsum.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-rsum-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-rsum-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-rsum-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f16-f32acc-rsum-bench bench/f16-f32acc-rsum.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-f32acc-rsum-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-f32acc-rsum-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-f32acc-rsum-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f16-rmax-bench bench/f16-rmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-rmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-rmax-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-rmax-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f16-rminmax-bench bench/f16-rminmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-rminmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-rminmax-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-rminmax-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f16-rmin-bench bench/f16-rmin.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-rmin-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-rmin-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-rmin-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f16-spmm-bench bench/f16-spmm.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-spmm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-spmm-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-spmm-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f16-vabs-bench bench/f16-vabs.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vabs-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-vabs-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-vabs-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f16-vclamp-bench bench/f16-vclamp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vclamp-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-vclamp-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-vclamp-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f16-velu-bench bench/f16-velu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-velu-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-velu-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-velu-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f16-vhswish-bench bench/f16-vhswish.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vhswish-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-vhswish-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-vhswish-bench PRIVATE bench-utils microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f16-vlrelu-bench bench/f16-vlrelu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vlrelu-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-vlrelu-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-vlrelu-bench PRIVATE bench-utils microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f16-vneg-bench bench/f16-vneg.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vneg-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-vneg-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-vneg-bench PRIVATE bench-utils microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f16-vrndd-bench bench/f16-vrndd.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vrndd-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-vrndd-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-vrndd-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f16-vrndne-bench bench/f16-vrndne.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vrndne-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-vrndne-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-vrndne-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f16-vrndu-bench bench/f16-vrndu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vrndu-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-vrndu-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-vrndu-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f16-vrndz-bench bench/f16-vrndz.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vrndz-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-vrndz-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-vrndz-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f16-vrsqrt-bench bench/f16-vrsqrt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vrsqrt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-vrsqrt-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-vrsqrt-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f16-vsigmoid-bench bench/f16-vsigmoid.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vsigmoid-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-vsigmoid-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-vsigmoid-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f16-vsqr-bench bench/f16-vsqr.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vsqr-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-vsqr-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-vsqr-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f16-vsqrt-bench bench/f16-vsqrt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vsqrt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-vsqrt-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-vsqrt-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(f16-vtanh-bench bench/f16-vtanh.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-vtanh-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-vtanh-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-vtanh-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f16-f32-vcvt-bench bench/f16-f32-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-f32-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-f32-vcvt-bench PRIVATE fp16 benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-f32-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-bgemm-bench bench/f32-bgemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-bgemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-bgemm-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-bgemm-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-conv-hwc-bench bench/f32-conv-hwc.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-conv-hwc-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-conv-hwc-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f32-conv-hwc2chw-bench bench/f32-conv-hwc2chw.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-conv-hwc2chw-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-conv-hwc2chw-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-conv-hwc2chw-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f32-dwconv-bench bench/f32-dwconv.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-dwconv-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-dwconv-bench PRIVATE bench-utils indirection hardware-config logging microkernel-utils microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f32-dwconv2d-chw-bench bench/f32-dwconv2d-chw.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-dwconv2d-chw-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-dwconv2d-chw-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-dwconv2d-chw-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-f16-vcvt-bench bench/f32-f16-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-f16-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-f16-vcvt-bench PRIVATE fp16 benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-f16-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-gavgpool-cw-bench bench/f32-gavgpool-cw.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-gavgpool-cw-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-gavgpool-cw-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-gavgpool-cw-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-gemm-bench bench/f32-gemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-gemm-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-gemm-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f32-gemm-minmax-bench bench/f32-gemm-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-gemm-minmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-gemm-minmax-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-gemm-minmax-bench PRIVATE gemm-benchmark bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f32-gemm-goi-minmax-bench bench/f32-gemm-goi-minmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-gemm-goi-minmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-gemm-goi-minmax-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-gemm-goi-minmax-bench PRIVATE gemm-benchmark bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(qd8-f16-qb4w-gemm-bench bench/qd8-f16-qb4w-gemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(qd8-f16-qb4w-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qd8-f16-qb4w-gemm-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(qd8-f16-qb4w-gemm-bench PRIVATE gemm-benchmark bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(qd8-f16-qc4w-gemm-bench bench/qd8-f16-qc4w-gemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(qd8-f16-qc4w-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qd8-f16-qc4w-gemm-bench PRIVATE benchmark::benchmark fp16 pthreadpool)
-  TARGET_LINK_LIBRARIES(qd8-f16-qc4w-gemm-bench PRIVATE gemm-benchmark bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f32-qc4w-gemm-bench bench/f32-qc4w-gemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-qc4w-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-qc4w-gemm-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-qc4w-gemm-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f32-qc8w-gemm-bench bench/f32-qc8w-gemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-qc8w-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-qc8w-gemm-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-qc8w-gemm-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f32-igemm-bench bench/f32-igemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-igemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-igemm-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-igemm-bench PRIVATE bench-utils indirection hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f32-im2col-gemm-bench bench/f32-im2col-gemm.cc src/im2col.c)
-  TARGET_INCLUDE_DIRECTORIES(f32-im2col-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-im2col-gemm-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-im2col-gemm-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(f32-qs8-vcvt-bench bench/f32-qs8-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-qs8-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-qs8-vcvt-bench PRIVATE fp16 benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-qs8-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-qu8-vcvt-bench bench/f32-qu8-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-qu8-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-qu8-vcvt-bench PRIVATE fp16 benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-qu8-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-raddstoreexpminusmax-bench bench/f32-raddstoreexpminusmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-raddstoreexpminusmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-raddstoreexpminusmax-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-raddstoreexpminusmax-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-raddexpminusmax-bench bench/f32-raddexpminusmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-raddexpminusmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-raddexpminusmax-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-raddexpminusmax-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-raddextexp-bench bench/f32-raddextexp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-raddextexp-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-raddextexp-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-raddextexp-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-vscaleexpminusmax-bench bench/f32-vscaleexpminusmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vscaleexpminusmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vscaleexpminusmax-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-vscaleexpminusmax-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-vscaleextexp-bench bench/f32-vscaleextexp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vscaleextexp-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vscaleextexp-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-vscaleextexp-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-rmax-bench bench/f32-rmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-rmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-rmax-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-rmax-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-rminmax-bench bench/f32-rminmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-rminmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-rminmax-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-rminmax-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-rmin-bench bench/f32-rmin.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-rmin-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-rmin-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-rmin-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-rsum-bench bench/f32-rsum.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-rsum-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-rsum-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-rsum-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f16-f32acc-rdsum-bench bench/f16-f32acc-rdsum.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-f32acc-rdsum-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f16-f32acc-rdsum-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f16-f32acc-rdsum-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-rdsum-bench bench/f32-rdsum.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-rdsum-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-rdsum-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-rdsum-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-spmm-bench bench/f32-spmm.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-spmm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-spmm-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-spmm-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-softmax-bench bench/f32-softmax.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-softmax-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-softmax-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-softmax-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-vcmul-bench bench/f32-vcmul.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vcmul-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vcmul-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-vcmul-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qd8-f16-qc8w-gemm-bench bench/qd8-f16-qc8w-gemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(qd8-f16-qc8w-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qd8-f16-qc8w-gemm-bench PRIVATE benchmark::benchmark fp16 pthreadpool packing)
-  TARGET_LINK_LIBRARIES(qd8-f16-qc8w-gemm-bench PRIVATE gemm-benchmark bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qd8-f32-qc8w-gemm-bench bench/qd8-f32-qc8w-gemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(qd8-f32-qc8w-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qd8-f32-qc8w-gemm-bench PRIVATE benchmark::benchmark fp16 pthreadpool packing)
-  TARGET_LINK_LIBRARIES(qd8-f32-qc8w-gemm-bench PRIVATE gemm-benchmark bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qd8-f32-qb4w-gemm-bench bench/qd8-f32-qb4w-gemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(qd8-f32-qb4w-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qd8-f32-qb4w-gemm-bench PRIVATE benchmark::benchmark fp16 pthreadpool packing)
-  TARGET_LINK_LIBRARIES(qd8-f32-qb4w-gemm-bench PRIVATE gemm-benchmark bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qd8-f32-qc4w-gemm-bench bench/qd8-f32-qc4w-gemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(qd8-f32-qc4w-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qd8-f32-qc4w-gemm-bench PRIVATE benchmark::benchmark fp16 pthreadpool packing)
-  TARGET_LINK_LIBRARIES(qd8-f32-qc4w-gemm-bench PRIVATE gemm-benchmark bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qp8-f32-qc4w-gemm-bench bench/qp8-f32-qc4w-gemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(qp8-f32-qc4w-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qp8-f32-qc4w-gemm-bench PRIVATE benchmark::benchmark fp16 pthreadpool packing)
-  TARGET_LINK_LIBRARIES(qp8-f32-qc4w-gemm-bench PRIVATE gemm-benchmark bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-vabs-bench bench/f32-vabs.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vabs-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vabs-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-vabs-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-velu-bench bench/f32-velu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-velu-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-velu-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-velu-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-vgelu-bench bench/f32-vgelu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vgelu-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vgelu-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-vgelu-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-vhswish-bench bench/f32-vhswish.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vhswish-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vhswish-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-vhswish-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-vlrelu-bench bench/f32-vlrelu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vlrelu-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vlrelu-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-vlrelu-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-vneg-bench bench/f32-vneg.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vneg-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vneg-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-vneg-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-vrelu-bench bench/f32-vrelu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrelu-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vrelu-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-vrelu-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-vrndd-bench bench/f32-vrndd.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrndd-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vrndd-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-vrndd-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-vrndne-bench bench/f32-vrndne.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrndne-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vrndne-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-vrndne-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-vrndu-bench bench/f32-vrndu.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrndu-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vrndu-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-vrndu-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-vrndz-bench bench/f32-vrndz.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vrndz-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vrndz-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-vrndz-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-vsigmoid-bench bench/f32-vsigmoid.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vsigmoid-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vsigmoid-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-vsigmoid-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-vsqr-bench bench/f32-vsqr.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vsqr-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vsqr-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-vsqr-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-vsqrt-bench bench/f32-vsqrt.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vsqrt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vsqrt-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-vsqrt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-vclamp-bench bench/f32-vclamp.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vclamp-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vclamp-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-vclamp-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(f32-vtanh-bench bench/f32-vtanh.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-vtanh-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(f32-vtanh-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(f32-vtanh-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qs8-dwconv-bench bench/qs8-dwconv.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-dwconv-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-dwconv-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qs8-dwconv-bench PRIVATE bench-utils indirection hardware-config logging microkernels-all microkernel-utils microparams-init packing)
-
-  ADD_EXECUTABLE(qs8-f16-vcvt-bench bench/qs8-f16-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-f16-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-f16-vcvt-bench PRIVATE fp16 benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qs8-f16-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qs8-f32-vcvt-bench bench/qs8-f32-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-f32-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-f32-vcvt-bench PRIVATE fp16 benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qs8-f32-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qs8-gemm-bench bench/qs8-gemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-gemm-bench PRIVATE benchmark::benchmark fp16 pthreadpool microparams-init)
-  TARGET_LINK_LIBRARIES(qs8-gemm-bench PRIVATE gemm-benchmark bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(qs8-qc8w-gemm-fp32-bench bench/qs8-qc8w-gemm-fp32.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-qc8w-gemm-fp32-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-qc8w-gemm-fp32-bench PRIVATE benchmark::benchmark fp16 pthreadpool microparams-init)
-  TARGET_LINK_LIBRARIES(qs8-qc8w-gemm-fp32-bench PRIVATE gemm-benchmark bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(qu8-gemm-fp32-bench bench/qu8-gemm-fp32.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-gemm-fp32-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-gemm-fp32-bench PRIVATE benchmark::benchmark fp16 pthreadpool microparams-init)
-  TARGET_LINK_LIBRARIES(qu8-gemm-fp32-bench PRIVATE gemm-benchmark bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(qu8-gemm-rndnu-bench bench/qu8-gemm-rndnu.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-gemm-rndnu-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-gemm-rndnu-bench PRIVATE benchmark::benchmark fp16 pthreadpool microparams-init)
-  TARGET_LINK_LIBRARIES(qu8-gemm-rndnu-bench PRIVATE gemm-benchmark bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(qs8-requantization-bench bench/qs8-requantization.cc)
-  SET_TARGET_PROPERTIES(qs8-requantization-bench PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qs8-requantization-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-requantization-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qs8-requantization-bench PRIVATE bench-utils microkernels-all)
-
-  # ADD_EXECUTABLE(qs8-rdsum-minmax-fp32-test test/qs8-rdsum-minmax-fp32.cc)
-  # TARGET_INCLUDE_DIRECTORIES(qs8-rdsum-minmax-fp32-test PRIVATE include src test)
-  # TARGET_LINK_LIBRARIES(qs8-rdsum-minmax-fp32-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
-  # TARGET_LINK_LIBRARIES(qs8-rdsum-minmax-fp32-test PRIVATE hardware-config logging microkernels-all)
-
-  ADD_EXECUTABLE(qs8-rsum-bench bench/qs8-rsum.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-rsum-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-rsum-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qs8-rsum-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qs8-vadd-bench bench/qs8-vadd.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-vadd-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-vadd-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qs8-vadd-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qs8-vaddc-bench bench/qs8-vaddc.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-vaddc-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-vaddc-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qs8-vaddc-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qs8-vcvt-bench bench/qs8-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-vcvt-bench PRIVATE fp16 benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qs8-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qs16-qs8-vcvt-bench bench/qs16-qs8-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs16-qs8-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs16-qs8-vcvt-bench PRIVATE fp16 benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qs16-qs8-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qs8-vhswish-bench bench/qs8-vhswish.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-vhswish-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-vhswish-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qs8-vhswish-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qs8-vlrelu-bench bench/qs8-vlrelu.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-vlrelu-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-vlrelu-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qs8-vlrelu-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qs8-vmul-bench bench/qs8-vmul.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-vmul-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-vmul-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qs8-vmul-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qs8-vmulc-bench bench/qs8-vmulc.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-vmulc-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qs8-vmulc-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qs8-vmulc-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qu8-f32-vcvt-bench bench/qu8-f32-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-f32-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-f32-vcvt-bench PRIVATE fp16 benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qu8-f32-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qu8-gemm-bench bench/qu8-gemm.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-gemm-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-gemm-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qu8-gemm-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init packing)
-
-  ADD_EXECUTABLE(qu8-requantization-bench bench/qu8-requantization.cc)
-  SET_TARGET_PROPERTIES(qu8-requantization-bench PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(qu8-requantization-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-requantization-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qu8-requantization-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(qu8-vadd-bench bench/qu8-vadd.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vadd-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-vadd-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qu8-vadd-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qu8-vaddc-bench bench/qu8-vaddc.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vaddc-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-vaddc-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qu8-vaddc-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qu8-vcvt-bench bench/qu8-vcvt.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vcvt-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-vcvt-bench PRIVATE fp16 benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qu8-vcvt-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qu8-vhswish-bench bench/qu8-vhswish.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vhswish-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-vhswish-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qu8-vhswish-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qu8-vlrelu-bench bench/qu8-vlrelu.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vlrelu-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-vlrelu-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qu8-vlrelu-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qu8-vmul-bench bench/qu8-vmul.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vmul-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-vmul-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qu8-vmul-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(qu8-vmulc-bench bench/qu8-vmulc.cc)
-  TARGET_INCLUDE_DIRECTORIES(qu8-vmulc-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(qu8-vmulc-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(qu8-vmulc-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(s16-rmaxabs-bench bench/s16-rmaxabs.cc)
-  TARGET_INCLUDE_DIRECTORIES(s16-rmaxabs-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(s16-rmaxabs-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(s16-rmaxabs-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(s16-window-bench bench/s16-window.cc)
-  TARGET_INCLUDE_DIRECTORIES(s16-window-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(s16-window-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(s16-window-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(u32-filterbank-accumulate-bench bench/u32-filterbank-accumulate.cc)
-  TARGET_INCLUDE_DIRECTORIES(u32-filterbank-accumulate-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(u32-filterbank-accumulate-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(u32-filterbank-accumulate-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(u32-filterbank-subtract-bench bench/u32-filterbank-subtract.cc)
-  TARGET_INCLUDE_DIRECTORIES(u32-filterbank-subtract-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(u32-filterbank-subtract-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(u32-filterbank-subtract-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(u32-vlog-bench bench/u32-vlog.cc)
-  TARGET_INCLUDE_DIRECTORIES(u32-vlog-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(u32-vlog-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(u32-vlog-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(u64-u32-vsqrtshift-bench bench/u64-u32-vsqrtshift.cc)
-  TARGET_INCLUDE_DIRECTORIES(u64-u32-vsqrtshift-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(u64-u32-vsqrtshift-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(u64-u32-vsqrtshift-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(i16-vlshift-bench bench/i16-vlshift.cc)
-  TARGET_INCLUDE_DIRECTORIES(i16-vlshift-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(i16-vlshift-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(i16-vlshift-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(cs16-vsquareabs-bench bench/cs16-vsquareabs.cc)
-  TARGET_INCLUDE_DIRECTORIES(cs16-vsquareabs-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(cs16-vsquareabs-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(cs16-vsquareabs-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(cs16-bfly4-bench bench/cs16-bfly4.cc)
-  TARGET_INCLUDE_DIRECTORIES(cs16-bfly4-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(cs16-bfly4-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(cs16-bfly4-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(cs16-fftr-bench bench/cs16-fftr.cc)
-  TARGET_INCLUDE_DIRECTORIES(cs16-fftr-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(cs16-fftr-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(cs16-fftr-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(xx-transposev-bench bench/xx-transposev.cc)
-  TARGET_INCLUDE_DIRECTORIES(xx-transposev-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(xx-transposev-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(xx-transposev-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(x8-lut-bench bench/x8-lut.cc)
-  TARGET_INCLUDE_DIRECTORIES(x8-lut-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(x8-lut-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(x8-lut-bench PRIVATE bench-utils microkernels-all)
-
-  ADD_EXECUTABLE(x8-transpose-bench bench/x32-transpose.cc)
-  TARGET_INCLUDE_DIRECTORIES(x8-transpose-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(x8-transpose-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(x8-transpose-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(x16-transpose-bench bench/x16-transpose.cc)
-  TARGET_INCLUDE_DIRECTORIES(x16-transpose-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(x16-transpose-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(x16-transpose-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(x24-transpose-bench bench/x16-transpose.cc)
-  TARGET_INCLUDE_DIRECTORIES(x24-transpose-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(x24-transpose-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(x24-transpose-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(x8-packq-bench bench/x8-packq.cc)
-  TARGET_INCLUDE_DIRECTORIES(x8-packq-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(x8-packq-bench PRIVATE benchmark::benchmark pthreadpool)
+  SET(MICROKERNEL_BENCHMARKS
+      bf16-gemm
+      cs16-bfly4
+      cs16-fftr
+      cs16-vsquareabs
+      f16-conv-hwc2chw
+      f16-dwconv
+      f16-dwconv2d-chw
+      f16-f32-vcvt
+      f16-f32acc-gemm
+      f16-f32acc-igemm
+      f16-f32acc-rdsum
+      f16-f32acc-rsum
+      f16-gavgpool-cw
+      f16-gemm
+      f16-gemm-minmax
+      f16-igemm
+      f16-raddstoreexpminusmax
+      f16-rmax
+      f16-rmin
+      f16-rminmax
+      f16-rsum
+      f16-spmm
+      f16-vabs
+      f16-vclamp
+      f16-velu
+      f16-vhswish
+      f16-vlrelu
+      f16-vneg
+      f16-vrndd
+      f16-vrndne
+      f16-vrndu
+      f16-vrndz
+      f16-vrsqrt
+      f16-vsigmoid
+      f16-vsqr
+      f16-vsqrt
+      f16-vtanh
+      f32-bgemm
+      f32-conv-hwc
+      f32-conv-hwc2chw
+      f32-dwconv
+      f32-dwconv2d-chw
+      f32-f16-vcvt
+      f32-gavgpool-cw
+      f32-gemm
+      f32-gemm-goi-minmax
+      f32-gemm-minmax
+      f32-igemm
+      f32-im2col-gemm
+      f32-qc4w-gemm
+      f32-qc8w-gemm
+      f32-qs8-vcvt
+      f32-qu8-vcvt
+      f32-raddexpminusmax
+      f32-raddextexp
+      f32-raddstoreexpminusmax
+      f32-rdsum
+      f32-rmax
+      f32-rmin
+      f32-rminmax
+      f32-rsum
+      f32-softmax
+      f32-spmm
+      f32-vabs
+      f32-vclamp
+      f32-vcmul
+      f32-velu
+      f32-vgelu
+      f32-vhswish
+      f32-vlrelu
+      f32-vneg
+      f32-vrelu
+      f32-vrndd
+      f32-vrndne
+      f32-vrndu
+      f32-vrndz
+      f32-vscaleexpminusmax
+      f32-vscaleextexp
+      f32-vsigmoid
+      f32-vsqr
+      f32-vsqrt
+      f32-vtanh
+      i16-vlshift
+      qd8-f16-qb4w-gemm
+      qd8-f16-qc4w-gemm
+      qd8-f16-qc8w-gemm
+      qd8-f32-qb4w-gemm
+      qd8-f32-qc4w-gemm
+      qd8-f32-qc8w-gemm
+      qp8-f32-qc4w-gemm
+      qs16-qs8-vcvt
+      qs8-dwconv
+      qs8-f16-vcvt
+      qs8-f32-vcvt
+      qs8-gemm
+      qs8-qc8w-gemm-fp32
+      qs8-requantization
+      qs8-rsum
+      qs8-vadd
+      qs8-vaddc
+      qs8-vcvt
+      qs8-vhswish
+      qs8-vlrelu
+      qs8-vmul
+      qs8-vmulc
+      qu8-f32-vcvt
+      qu8-gemm
+      qu8-gemm-fp32
+      qu8-gemm-rndnu
+      qu8-requantization
+      qu8-vadd
+      qu8-vaddc
+      qu8-vcvt
+      qu8-vhswish
+      qu8-vlrelu
+      qu8-vmul
+      qu8-vmulc
+      s16-rmaxabs
+      s16-window
+      u32-filterbank-accumulate
+      u32-filterbank-subtract
+      u32-vlog
+      u64-u32-vsqrtshift
+      x16-packw
+      x16-transpose
+      x24-transpose
+      x32-packw
+      x32-transpose
+      x64-transpose
+      x8-lut
+      x8-packq
+      x8-packw
+      x8-transpose
+      xx-transposev)
+
+  FOREACH(BENCH ${LIBRARY_OPERATOR_BENCHMARKS})
+    TARGET_INCLUDE_DIRECTORIES(${BENCH}-bench PRIVATE . include src)
+    TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
+      bench-utils
+      benchmark::benchmark
+      hardware-config
+      logging
+      microkernels-all
+      microparams-init
+      pthreadpool
+    )
+  ENDFOREACH()
+
+  # Special-case
   IF(XNNPACK_ENABLE_KLEIDIAI)
     TARGET_LINK_LIBRARIES(x8-packq-bench PRIVATE kleidiai)
   ENDIF()
-  TARGET_LINK_LIBRARIES(x8-packq-bench PRIVATE packq-benchmark bench-utils hardware-config logging microkernels-all packing)
-
-  ADD_EXECUTABLE(x8-packw-bench bench/x8-packw.cc)
-  TARGET_INCLUDE_DIRECTORIES(x8-packw-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(x8-packw-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(x8-packw-bench PRIVATE bench-utils hardware-config logging microkernels-all packing)
-
-  ADD_EXECUTABLE(x16-packw-bench bench/x16-packw.cc)
-  TARGET_INCLUDE_DIRECTORIES(x16-packw-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(x16-packw-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(x16-packw-bench PRIVATE bench-utils hardware-config logging microkernels-all packing)
-
-  ADD_EXECUTABLE(x32-packw-bench bench/x32-packw.cc)
-  TARGET_INCLUDE_DIRECTORIES(x32-packw-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(x32-packw-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(x32-packw-bench PRIVATE bench-utils hardware-config logging microkernels-all packing)
-
-  ADD_EXECUTABLE(x32-transpose-bench bench/x32-transpose.cc)
-  TARGET_INCLUDE_DIRECTORIES(x32-transpose-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(x32-transpose-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(x32-transpose-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
-  ADD_EXECUTABLE(x64-transpose-bench bench/x64-transpose.cc)
-  TARGET_INCLUDE_DIRECTORIES(x64-transpose-bench PRIVATE . include src)
-  TARGET_LINK_LIBRARIES(x64-transpose-bench PRIVATE benchmark::benchmark pthreadpool)
-  TARGET_LINK_LIBRARIES(x64-transpose-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
-
 ENDIF()
