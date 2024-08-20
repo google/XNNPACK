@@ -2147,7 +2147,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       packing
       packq-benchmark
       pthreadpool)
-    SET_TARGET_PROPERTIES(${BENCH}-test PROPERTIES CXX_EXTENSIONS YES)
+    SET_TARGET_PROPERTIES(${BENCH}-bench PROPERTIES CXX_EXTENSIONS YES)
   ENDFOREACH()
 
   # Special-case
