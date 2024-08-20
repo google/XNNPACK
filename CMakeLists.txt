@@ -1813,6 +1813,7 @@ IF(XNNPACK_BUILD_TESTS)
         vcvt-microkernel-tester
         vunary-microkernel-tester)
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+    SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
   ENDFOREACH()
 
   # Special-case
