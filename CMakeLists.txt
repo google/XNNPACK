@@ -2126,6 +2126,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       x8-transpose
       xx-transposev)
   FOREACH(BENCH ${MICROKERNEL_BENCHMARKS})
+    ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)
     TARGET_INCLUDE_DIRECTORIES(${BENCH}-bench PRIVATE . include src)
     TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
       bench-utils
