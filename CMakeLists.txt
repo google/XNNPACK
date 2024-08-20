@@ -1535,6 +1535,7 @@ IF(XNNPACK_BUILD_TESTS)
     f16-f32-vcvt
     f16-f32acc-gemm-minmax
     f16-f32acc-igemm-minmax
+    f16-f32acc-rdsum
     f16-f32acc-rsum
     f16-gavgpool-cw
     f16-gavgpool-minmax
@@ -1614,6 +1615,7 @@ IF(XNNPACK_BUILD_TESTS)
     f32-raddexpminusmax
     f32-raddextexp
     f32-raddstoreexpminusmax
+    f32-rdsum
     f32-rmax
     f32-rmin
     f32-rminmax
@@ -1704,6 +1706,7 @@ IF(XNNPACK_BUILD_TESTS)
     qs8-qc8w-gemm-minmax-fp32
     qs8-qc8w-igemm-minmax-fp32
     qs8-requantization
+    qs8-rdsum-minmax-fp32
     qs8-rsum
     qs8-vadd-minmax
     qs8-vaddc-minmax
@@ -2272,16 +2275,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(f32-rsum-bench PRIVATE benchmark::benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(f32-rsum-bench PRIVATE bench-utils hardware-config logging microkernels-all microparams-init)
 
-  ADD_EXECUTABLE(f16-f32acc-rdsum-test test/f16-f32acc-rdsum.cc)
-  TARGET_INCLUDE_DIRECTORIES(f16-f32acc-rdsum-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f16-f32acc-rdsum-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
-  TARGET_LINK_LIBRARIES(f16-f32acc-rdsum-test PRIVATE hardware-config logging microkernels-all)
-
-  ADD_EXECUTABLE(f32-rdsum-test test/f32-rdsum.cc)
-  TARGET_INCLUDE_DIRECTORIES(f32-rdsum-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(f32-rdsum-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
-  TARGET_LINK_LIBRARIES(f32-rdsum-test PRIVATE hardware-config logging microkernels-all)
-
   ADD_EXECUTABLE(f16-f32acc-rdsum-bench bench/f16-f32acc-rdsum.cc)
   TARGET_INCLUDE_DIRECTORIES(f16-f32acc-rdsum-bench PRIVATE . include src)
   TARGET_LINK_LIBRARIES(f16-f32acc-rdsum-bench PRIVATE benchmark::benchmark pthreadpool)
@@ -2453,10 +2446,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   TARGET_LINK_LIBRARIES(qs8-requantization-bench PRIVATE benchmark::benchmark pthreadpool)
   TARGET_LINK_LIBRARIES(qs8-requantization-bench PRIVATE bench-utils microkernels-all)
 
-  ADD_EXECUTABLE(qs8-rdsum-minmax-fp32-test test/qs8-rdsum-minmax-fp32.cc)
-  TARGET_INCLUDE_DIRECTORIES(qs8-rdsum-minmax-fp32-test PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(qs8-rdsum-minmax-fp32-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
-  TARGET_LINK_LIBRARIES(qs8-rdsum-minmax-fp32-test PRIVATE hardware-config logging microkernels-all)
+  # ADD_EXECUTABLE(qs8-rdsum-minmax-fp32-test test/qs8-rdsum-minmax-fp32.cc)
+  # TARGET_INCLUDE_DIRECTORIES(qs8-rdsum-minmax-fp32-test PRIVATE include src test)
+  # TARGET_LINK_LIBRARIES(qs8-rdsum-minmax-fp32-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
+  # TARGET_LINK_LIBRARIES(qs8-rdsum-minmax-fp32-test PRIVATE hardware-config logging microkernels-all)
 
   ADD_EXECUTABLE(qs8-rsum-bench bench/qs8-rsum.cc)
   TARGET_INCLUDE_DIRECTORIES(qs8-rsum-bench PRIVATE . include src)
