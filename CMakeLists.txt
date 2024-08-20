@@ -1526,6 +1526,8 @@ IF(XNNPACK_BUILD_TESTS)
         XNNPACK)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     ENDFOREACH()
+    # Some special cases
+    SET_TARGET_PROPERTIES(tanh-test PROPERTIES CXX_EXTENSIONS YES)
   ENDIF()
 
   # ---[ Normalization unit tests
