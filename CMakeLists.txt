@@ -1525,10 +1525,8 @@ IF(XNNPACK_BUILD_TESTS)
         subgraph
         XNNPACK)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+      SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
     ENDFOREACH()
-    # Some special cases
-    SET_TARGET_PROPERTIES(convolution-2d-test PROPERTIES CXX_EXTENSIONS YES)
-    SET_TARGET_PROPERTIES(tanh-test PROPERTIES CXX_EXTENSIONS YES)
   ENDIF()
 
   # ---[ Normalization unit tests
