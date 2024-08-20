@@ -2005,7 +2005,7 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c64(
     size_t input_stride,
     const float* zero,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -2013,6 +2013,8 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c64(
   assert(output != NULL);
 
   const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
+  const __m512 vmin = _mm512_set1_ps(params->scalar.min);
+  const __m512 vmax = _mm512_set1_ps(params->scalar.max);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 64; channels -= 64) {
@@ -2117,9 +2119,17 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c64(
       i6 = (const float*) ((uintptr_t) i6 + input_increment);
     }
     vacc0 = _mm512_mul_ps(vacc0, vscale);
+    vacc0 = _mm512_max_ps(vacc0, vmin);
+    vacc0 = _mm512_min_ps(vacc0, vmax);
     vacc1 = _mm512_mul_ps(vacc1, vscale);
+    vacc1 = _mm512_max_ps(vacc1, vmin);
+    vacc1 = _mm512_min_ps(vacc1, vmax);
     vacc2 = _mm512_mul_ps(vacc2, vscale);
+    vacc2 = _mm512_max_ps(vacc2, vmin);
+    vacc2 = _mm512_min_ps(vacc2, vmax);
     vacc3 = _mm512_mul_ps(vacc3, vscale);
+    vacc3 = _mm512_max_ps(vacc3, vmin);
+    vacc3 = _mm512_min_ps(vacc3, vmax);
 
     const float* o = output;
     const __m512 vo0 = _mm512_loadu_ps(o); o += 16;
@@ -2210,6 +2220,8 @@ void xnn_f32_rdsum_ukernel_7p7x__avx512f_c64(
     }
     for (size_t i = 0; i < num_chunks; ++i) {
       vacc[i] = _mm512_mul_ps(vacc[i], vscale);
+      vacc[i] = _mm512_max_ps(vacc[i], vmin);
+      vacc[i] = _mm512_min_ps(vacc[i], vmax);
     }
 
     __m512 vo[4];
@@ -2364,7 +2376,7 @@ void xnn_f32_rsum_ukernel__avx512f_u64_acc4(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -2413,6 +2425,8 @@ void xnn_f32_rsum_ukernel__avx512f_u64_acc4(
   vacc = _mm_add_ps(vacc, _mm_movehl_ps(vacc, vacc));
   vacc = _mm_add_ss(vacc, _mm_movehdup_ps(vacc));
   vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->scalar.scale));
+  vacc = _mm_max_ss(vacc, _mm_load_ss(&params->scalar.min));
+  vacc = _mm_min_ss(vacc, _mm_load_ss(&params->scalar.max));
   *output += _mm_cvtss_f32(vacc);
 }
 
@@ -3414,18 +3428,29 @@ void xnn_f32_velu_ukernel__avx512f_rr1_p6_u128(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m512 vprescale = _mm512_set1_ps(params->avx512_rr1_p6.prescale);
-  const __m512 valpha = _mm512_set1_ps(params->avx512_rr1_p6.alpha);
-  const __m512 vbeta = _mm512_set1_ps(params->avx512_rr1_p6.beta);
-  const __m512 vsat_cutoff = _mm512_set1_ps(params->avx512_rr1_p6.sat_cutoff);
-  const __m512 vmagic_bias = _mm512_set1_ps(params->avx512_rr1_p6.magic_bias);
-  const __m512 vlog2e = _mm512_set1_ps(params->avx512_rr1_p6.log2e);
-  const __m512 vminus_ln2 = _mm512_set1_ps(params->avx512_rr1_p6.minus_ln2);
-  const __m512 vc6 = _mm512_set1_ps(params->avx512_rr1_p6.c6);
-  const __m512 vc5 = _mm512_set1_ps(params->avx512_rr1_p6.c5);
-  const __m512 vc4 = _mm512_set1_ps(params->avx512_rr1_p6.c4);
-  const __m512 vc3 = _mm512_set1_ps(params->avx512_rr1_p6.c3);
-  const __m512 vc2 = _mm512_set1_ps(params->avx512_rr1_p6.c2);
+  const __m512 vsat_cutoff = _mm512_set1_ps(-0x1.154246p+4f);
+  const __m512 vmagic_bias = _mm512_set1_ps(0x1.8000FEp23f);
+  const __m512 vlog2e = _mm512_set1_ps(0x1.715476p+0f);
+  const __m512 vminus_ln2 = _mm512_set1_ps(-0x1.62E430p-1f);
+  const __m512 vc6 = _mm512_set1_ps(0x1.6B7338p-10f);
+  const __m512 vc5 = _mm512_set1_ps(0x1.12278Ep-7f);
+  const __m512 vc4 = _mm512_set1_ps(0x1.555716p-5f);
+  const __m512 vc3 = _mm512_set1_ps(0x1.5554B0p-3f);
+  const __m512 vc2 = _mm512_set1_ps(0x1.FFFFFEp-2f);
+
+  XNN_FORCE_REALIZATION(vsat_cutoff);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vminus_ln2);
+  XNN_FORCE_REALIZATION(vc6);
+  XNN_FORCE_REALIZATION(vc5);
+  XNN_FORCE_REALIZATION(vc4);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+  
+  const __m512 vprescale = _mm512_set1_ps(params->scalar.prescale);
+  const __m512 valpha = _mm512_set1_ps(params->scalar.alpha);
+  const __m512 vbeta = _mm512_set1_ps(params->scalar.beta);
 
   for (; batch >= 128 * sizeof(float); batch -= 128 * sizeof(float)) {
     __m512 vx0 = _mm512_loadu_ps(input);
@@ -3665,9 +3690,9 @@ void xnn_f32_vhswish_ukernel__avx512f_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m512 vsixth = _mm512_set1_ps(params->avx512.sixth);
-  const __m512 vhalf = _mm512_set1_ps(params->avx512.half);
-  const __m512 vone = _mm512_set1_ps(params->avx512.one);
+  const __m512 vsixth = _mm512_set1_ps(0x1.555556p-3f);
+  const __m512 vhalf = _mm512_set1_ps(0.5f);
+  const __m512 vone = _mm512_set1_ps(1.0f);
   const __m512 vzero = _mm512_setzero_ps();
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
@@ -3879,8 +3904,8 @@ void xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32(
   assert(output != NULL);
 
   // Constants for the Newton-Raphson iteration.
-  const __m512 vthree = _mm512_set1_ps(params->avx512.three);
-  const __m512 vneg_half = _mm512_set1_ps(params->avx512.neg_half);
+  const __m512 vthree = _mm512_set1_ps(3.0f);
+  const __m512 vneg_half = _mm512_set1_ps(-0.5f);
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     const __m512 vx0 = _mm512_loadu_ps(input);
@@ -3954,16 +3979,36 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_u64(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m512i vsign_mask = _mm512_set1_epi32((int) params->avx512_rr2_lut32_p2.sign_mask);
-  const __m512 vmagic_bias = _mm512_set1_ps(params->avx512_rr2_lut32_p2.magic_bias);
-  const __m512 vlog2e = _mm512_set1_ps(params->avx512_rr2_lut32_p2.log2e);
-  const __m512 vtable_lo = _mm512_load_ps(params->avx512_rr2_lut32_p2.table_lo);
-  const __m512 vtable_hi = _mm512_load_ps(params->avx512_rr2_lut32_p2.table_hi);
-  const __m512 vminus_ln2_hi = _mm512_set1_ps(params->avx512_rr2_lut32_p2.minus_ln2_hi);
-  const __m512 vminus_ln2_lo = _mm512_set1_ps(params->avx512_rr2_lut32_p2.minus_ln2_lo);
-  const __m512 vc2 = _mm512_set1_ps(params->avx512_rr2_lut32_p2.c2);
-  const __m512 vc1 = _mm512_set1_ps(params->avx512_rr2_lut32_p2.c1);
-  const __m512 vone = _mm512_set1_ps(params->avx512_rr2_lut32_p2.one);
+  XNN_ALIGN(64) static const float table[32] = {
+    0x1.000000p+0f, 0x1.059B0Ep+0f, 0x1.0B5586p+0f, 0x1.11301Ep+0f,
+    0x1.172B84p+0f, 0x1.1D4874p+0f, 0x1.2387A6p+0f, 0x1.29E9E0p+0f,
+    0x1.306FE0p+0f, 0x1.371A74p+0f, 0x1.3DEA64p+0f, 0x1.44E086p+0f,
+    0x1.4BFDAEp+0f, 0x1.5342B6p+0f, 0x1.5AB07Ep+0f, 0x1.6247ECp+0f,
+    0x1.6A09E6p+0f, 0x1.71F75Ep+0f, 0x1.7A1148p+0f, 0x1.82589Ap+0f,
+    0x1.8ACE54p+0f, 0x1.93737Cp+0f, 0x1.9C4918p+0f, 0x1.A5503Cp+0f,
+    0x1.AE89FAp+0f, 0x1.B7F770p+0f, 0x1.C199BEp+0f, 0x1.CB720Ep+0f,
+    0x1.D5818Ep+0f, 0x1.DFC974p+0f, 0x1.EA4AFAp+0f, 0x1.F50766p+0f,
+  };
+  const __m512 vtable_lo = _mm512_load_ps(&table[0]);
+  const __m512 vtable_hi = _mm512_load_ps(&table[16]);
+
+  const __m512i vsign_mask = _mm512_set1_epi32(UINT32_C(0x80000000));
+  const __m512 vmagic_bias = _mm512_set1_ps(0x1.800000p18f);
+  const __m512 vlog2e = _mm512_set1_ps(0x1.715476p0f);
+  const __m512 vminus_ln2_hi = _mm512_set1_ps(-0x1.62E430p-1f);
+  const __m512 vminus_ln2_lo = _mm512_set1_ps(0x1.05C61p-29f);
+  const __m512 vc2 = _mm512_set1_ps(0x1.000000p-1f);
+  const __m512 vc1 = _mm512_set1_ps(0x1.0000F6p-0f);
+  const __m512 vone = _mm512_set1_ps(1.0f);
+
+  XNN_FORCE_REALIZATION(vsign_mask);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vminus_ln2_hi);
+  XNN_FORCE_REALIZATION(vminus_ln2_lo);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);
+  XNN_FORCE_REALIZATION(vone);
 
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
     const __m512 vx0 = _mm512_loadu_ps(input);
@@ -4112,8 +4157,8 @@ void xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u16(
   assert(output != NULL);
 
   // Constants for the Newton-Raphson iteration.
-  const __m512 vneg_three = _mm512_set1_ps(params->avx512.neg_three);
-  const __m512 vneg_half = _mm512_set1_ps(params->avx512.neg_half);
+  const __m512 vneg_three = _mm512_set1_ps(-3.0f);
+  const __m512 vneg_half = _mm512_set1_ps(-0.5f);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m512 vx = _mm512_loadu_ps(input);

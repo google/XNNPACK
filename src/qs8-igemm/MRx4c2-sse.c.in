@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert SSE in [2, 4]
-$assert not XOP or AVX
 $assert not AVX or SSE == 4
 $assert REQUANTIZATION == "FP32"
 $assert DATATYPE in ["QC8", "QS8", "QU8"]
@@ -12,15 +11,8 @@ $assert VARIANT in ["LD64", "LD128"]
 $assert MR <= 4
 #include <assert.h>
 
-$if XOP:
-  #ifdef _MSC_VER
-    #include <intrin.h>
-  #else
-    #include <x86intrin.h>
-  #endif
-$else:
-  $SSE_HEADER = {2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
-  #include <${SSE_HEADER}>
+$SSE_HEADER = {2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
+#include <${SSE_HEADER}>
 
 #include "xnnpack/igemm.h"
 #include "xnnpack/math.h"
@@ -31,7 +23,7 @@ $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QU8": "qu8"}[DATATYPE]
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("sse4" if SSE == 4 and DATATYPE != "QU8" else "sse2")
 $PARAMS_UNION = "xnn_qs8_qc8w_conv_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
-$ISA = "xop" if XOP else "avx" if AVX else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
+$ISA = "avx" if AVX else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
 void xnn_${DATATYPE_SPEC}_igemm_minmax_fp32_ukernel_${MR}x4c2__${ISA}_${VARIANT.lower()}(
     size_t mr,
     size_t nc,
@@ -127,20 +119,12 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_fp32_ukernel_${MR}x4c2__${ISA}_${VARIANT.
               const __m128i vxb${K+1} = _mm_unpackhi_epi8(vb${K}${K+1}, vsb${K}${K+1});
 
             $for M in range(MR):
-              $if XOP:
-                vacc${M}x0123 = _mm_maddd_epi16(
-                  _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K}, ${K}, ${K}, ${K})), vxb${K}, vacc${M}x0123);
-              $else:
-                vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
-                  _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K}, ${K}, ${K}, ${K})), vxb${K}));
+              vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
+                _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K}, ${K}, ${K}, ${K})), vxb${K}));
 
             $for M in range(MR):
-              $if XOP:
-                vacc${M}x0123 = _mm_maddd_epi16(
-                  _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K+1}, ${K+1}, ${K+1}, ${K+1})), vxb${K+1}, vacc${M}x0123);
-              $else:
-                vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
-                  _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K+1}, ${K+1}, ${K+1}, ${K+1})), vxb${K+1}));
+              vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
+                _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K+1}, ${K+1}, ${K+1}, ${K+1})), vxb${K+1}));
         $else:
           $for K in range(4):
             $if K == 0:
@@ -159,12 +143,8 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_fp32_ukernel_${MR}x4c2__${ISA}_${VARIANT.
                 const __m128i vxb${K} = _mm_srai_epi16(_mm_unpacklo_epi8(vb${K}, vb${K}), 8);
 
             $for M in range(MR):
-              $if XOP:
-                vacc${M}x0123 = _mm_maddd_epi16(
-                  _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K}, ${K}, ${K}, ${K})), vxb${K}, vacc${M}x0123);
-              $else:
-                vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
-                  _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K}, ${K}, ${K}, ${K})), vxb${K}));
+              vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
+                _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(${K}, ${K}, ${K}, ${K})), vxb${K}));
 
         w = (const void*) ((const ${XINT8_T}*) w + 32);
         k -= 8 * sizeof(${XINT8_T});
@@ -198,12 +178,8 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_fp32_ukernel_${MR}x4c2__${ISA}_${VARIANT.
             const __m128i vxb0 = _mm_srai_epi16(_mm_unpacklo_epi8(vb0, vb0), 8);
 
         $for M in range(MR):
-          $if XOP:
-            vacc${M}x0123 = _mm_maddd_epi16(
-              _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(0, 0, 0, 0)), vxb0, vacc${M}x0123);
-          $else:
-            vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
-              _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(0, 0, 0, 0)), vxb0));
+          vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
+            _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(0, 0, 0, 0)), vxb0));
 
         if (k > 2 * sizeof(${XINT8_T})) {
           const __m128i vb1 = _mm_loadl_epi64((const __m128i*) w);
@@ -220,12 +196,8 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_fp32_ukernel_${MR}x4c2__${ISA}_${VARIANT.
               const __m128i vxb1 = _mm_srai_epi16(_mm_unpacklo_epi8(vb1, vb1), 8);
 
           $for M in range(MR):
-            $if XOP:
-              vacc${M}x0123 = _mm_maddd_epi16(
-                _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(1, 1, 1, 1)), vxb1, vacc${M}x0123);
-            $else:
-              vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
-                _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(1, 1, 1, 1)), vxb1));
+            vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
+              _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(1, 1, 1, 1)), vxb1));
 
           if (k > 4 * sizeof(${XINT8_T})) {
             const __m128i vb2 = _mm_loadl_epi64((const __m128i*) w);
@@ -242,12 +214,8 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_fp32_ukernel_${MR}x4c2__${ISA}_${VARIANT.
                 const __m128i vxb2 = _mm_srai_epi16(_mm_unpacklo_epi8(vb2, vb2), 8);
 
             $for M in range(MR):
-              $if XOP:
-                vacc${M}x0123 = _mm_maddd_epi16(
-                  _mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(2, 2, 2, 2)), vxb2, vacc${M}x0123);
-              $else:
-                vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
-                  _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(2, 2, 2, 2)), vxb2));
+              vacc${M}x0123 = _mm_add_epi32(vacc${M}x0123,
+                _mm_madd_epi16(_mm_shuffle_epi32(vxa${M}, _MM_SHUFFLE(2, 2, 2, 2)), vxb2));
           }
         }
       }

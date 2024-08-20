@@ -1,4 +1,5 @@
 name: Build and Run Tests
+
 on:
   workflow_call:
     inputs:
@@ -12,11 +13,13 @@ on:
         default: false
         required: false
         type: boolean
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}-${{ inputs.update-caches }}
   cancel-in-progress: true
+
 jobs:
-  cmake-linux-local:
+  cmake-linux-x86_64:
     runs-on: ubuntu-22.04-8core
     timeout-minutes: 60
     steps:
@@ -28,13 +31,16 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: "${{ github.job }}"
+          key: ${{ github.job }}
           max-size: "1G"
-          append-timestamp: false
           save: ${{ inputs.update-caches }}
       - name: Configure and build
         run: scripts/build-local.sh
         working-directory: ${{ github.workspace }}
+      - name: Run tests
+        if: ${{ inputs.run-tests }}
+        run: ctest --output-on-failure --parallel $(nproc)
+        working-directory: ${{ github.workspace }}/build/local
   cmake-linux-aarch64:
     runs-on: arm-ubuntu-arm-22.04-8core
     timeout-minutes: 60
@@ -47,17 +53,16 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: "${{ github.job }}"
+          key: ${{ github.job }}
           max-size: "1G"
-          append-timestamp: false
           save: ${{ inputs.update-caches }}
       - name: Configure and build
-        run: scripts/build-linux-aarch64.sh -DCMAKE_BUILD_TYPE=Release
+        run: scripts/build-local.sh
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
         run: ctest --output-on-failure --parallel $(nproc)
-        working-directory: ${{ github.workspace }}/build/linux/aarch64
+        working-directory: ${{ github.workspace }}/build/local
   cmake-linux-armhf:
     runs-on: arm-ubuntu-arm-22.04-8core
     timeout-minutes: 60
@@ -72,9 +77,8 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: "${{ github.job }}"
+          key: ${{ github.job }}
           max-size: "1G"
-          append-timestamp: false
           save: ${{ inputs.update-caches }}
       - name: Configure and build
         run: scripts/build-linux-armhf.sh -DCMAKE_BUILD_TYPE=Release
@@ -103,9 +107,8 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: "${{ github.job }}"
+          key: ${{ github.job }}
           max-size: "1G"
-          append-timestamp: false
           save: ${{ inputs.update-caches }}
       - name: Configure and build
         run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release -DXNNPACK_ENABLE_RISCV_VECTOR=OFF
@@ -131,9 +134,8 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: "${{ github.job }}"
+          key: ${{ github.job }}
           max-size: "1G"
-          append-timestamp: false
           save: ${{ inputs.update-caches }}
       - name: Configure and build
         run: |
@@ -156,9 +158,8 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: "${{ github.job }}"
+          key: ${{ github.job }}
           max-size: "1G"
-          append-timestamp: false
           save: ${{ inputs.update-caches }}
       - name: Install Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
@@ -181,9 +182,8 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: "${{ github.job }}"
+          key: ${{ github.job }}
           max-size: "1G"
-          append-timestamp: false
           save: ${{ inputs.update-caches }}
       - name: Install Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
@@ -210,9 +210,8 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: "${{ github.job }}"
+          key: ${{ github.job }}
           max-size: "1G"
-          append-timestamp: false
           save: ${{ inputs.update-caches }}
       - name: Install Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
@@ -244,9 +243,8 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: "${{ github.job }}"
+          key: ${{ github.job }}
           max-size: "1G"
-          append-timestamp: false
           save: ${{ inputs.update-caches }}
       - name: Generate CMake project
         run: |
@@ -267,7 +265,7 @@ jobs:
   cmake-android:
     strategy:
       matrix:
-        script: [build-android-arm64.sh, build-android-armv7.sh, build-android-x86.sh]
+        arch: [arm64, armv7, x86]
     runs-on: ubuntu-22.04-8core
     timeout-minutes: 60
     steps:
@@ -285,12 +283,20 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: "${{ github.job }}"
+          key: ${{ github.job }}-${{ matrix.arch }}
           max-size: "1G"
-          append-timestamp: false
           save: ${{ inputs.update-caches }}
+      - name: Force compiler binary mtime
+        # The nttld/setup-ndk action downloads the compiler binaries and copies them to the
+        # tools-cache, where their mtimes are set to the current time. This is bad since ccache
+        # uses the compiler binary mtime to determine whether two compilations match. We solve
+        # this problem by coercing the mtime of the compiler binaries to a fixed value. Note that
+        # if the compiler does indeed change, this will also cause the path to change as it would
+        # imply using a different NDK version.
+        run: |
+          find ${{ steps.setup-ndk.outputs.ndk-path }} -wholename '*/bin/clang*' -executable -type f,l -exec touch -h -t 202408130000 {} +
       - name: Configure and build
-        run: scripts/${{ matrix.script }}
+        run: scripts/build-android-${{ matrix.arch }}.sh
         working-directory: ${{ github.workspace }}
         env:
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
@@ -322,7 +328,7 @@ jobs:
       - name: Build with Xcode
         run: cmake --build build/ios/x86_64 --parallel $(sysctl -n hw.ncpu) -- -sdk iphonesimulator -quiet
         working-directory: ${{ github.workspace }}
-  bazel-linux-x86_64:
+  bazel-linux-x86_64-clang-18:
     runs-on: ubuntu-22.04-8core
     timeout-minutes: 60
     steps:
@@ -339,7 +345,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: "/home/runner/.cache/bazel"
-          key: "${{ github.job }}"
+          key: ${{ github.job }}
+          restore-keys: |
+            ${{ github.job }}-
       - name: Build tests
         env:
           CC: clang-18
@@ -355,12 +363,17 @@ jobs:
         run: |
             bazel test --test_output=errors test:all
         working-directory: ${{ github.workspace }}
+      - name: Compress disk cache
+        # Bazel's `--disk-cache` currently grows without bounds, so we remove files
+        # that haven't been accessed in 30+ days manually.
+        if: ${{ inputs.update-caches }}
+        run: find $HOME/.cache/bazel -type f -atime +30 -delete
       - name: Save bazel cache
         if: ${{ inputs.update-caches }}
         uses: actions/cache/save@v4
         with:
           path: "/home/runner/.cache/bazel"
-          key: "${{ github.job }}"
+          key: ${{ github.job }}-${{ github.sha }}
   bazel-linux-x86_64-gcc-9:
     runs-on: ubuntu-22.04-8core
     timeout-minutes: 60
@@ -380,7 +393,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: "/home/runner/.cache/bazel"
-          key: "${{ github.job }}"
+          key: ${{ github.job }}
+          restore-keys: |
+            ${{ github.job }}-
       - name: Build tests
         run: |
             bazel build ${BAZEL_DEFINES} test:all
@@ -390,12 +405,17 @@ jobs:
         run: |
             bazel test ${BAZEL_DEFINES} --test_output=errors test:all
         working-directory: ${{ github.workspace }}
+      - name: Compress disk cache
+        # Bazel's `--disk-cache` currently grows without bounds, so we remove files
+        # that haven't been accessed in 30+ days manually.
+        if: ${{ inputs.update-caches }}
+        run: find $HOME/.cache/bazel -type f -atime +30 -delete
       - name: Save bazel cache
         if: ${{ inputs.update-caches }}
         uses: actions/cache/save@v4
         with:
           path: "/home/runner/.cache/bazel"
-          key: "${{ github.job }}"
+          key: ${{ github.job }}-${{ github.sha }}
   bazel-linux-aarch64:
     runs-on: arm-ubuntu-arm-22.04-4core
     timeout-minutes: 60
@@ -413,13 +433,15 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: "/home/runner/.cache/bazel"
-          key: "${{ github.job }}"
+          key: ${{ github.job }}
+          restore-keys: |
+            ${{ github.job }}-
       - name: Build tests
         env:
           CC: clang-18
           CXX: clang++-18
         run: |
-            bazel build --define=xnn_enable_jit=false test:all
+            bazel build test:all
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
@@ -429,16 +451,20 @@ jobs:
         run: |
           # We only test the KleidiAI integration for now.
           bazel test \
-            --define=xnn_enable_jit=false \
             --test_output=all \
             --test_filter=*QP8* \
             test:qp8_f32_qc4w_gemm_minmax_test \
             test:fully_connected_nc_test \
             test:fully_connected_test
         working-directory: ${{ github.workspace }}
+      - name: Compress disk cache
+        # Bazel's `--disk-cache` currently grows without bounds, so we remove files
+        # that haven't been accessed in 30+ days manually.
+        if: ${{ inputs.update-caches }}
+        run: find $HOME/.cache/bazel -type f -atime +30 -delete
       - name: Save bazel cache
         if: ${{ inputs.update-caches }}
         uses: actions/cache/save@v4
         with:
           path: "/home/runner/.cache/bazel"
-          key: "${{ github.job }}"
+          key: ${{ github.job }}-${{ github.sha }}

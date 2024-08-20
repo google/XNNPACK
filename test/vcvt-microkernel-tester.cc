@@ -28,8 +28,7 @@
 #include "replicable_random_device.h"
 
 void VCvtMicrokernelTester::Test(
-    xnn_f16_f32_vcvt_ukernel_fn vcvt,
-    xnn_init_f16_f32_cvt_params_fn init_params) const {
+    xnn_f16_f32_vcvt_ukernel_fn vcvt) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(-100.0f, 100.0f);
 
@@ -41,13 +40,8 @@ void VCvtMicrokernelTester::Test(
                   [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
     std::fill(output.begin(), output.end(), nanf(""));
 
-    union xnn_f16_f32_cvt_params params;
-    if (init_params != nullptr) {
-      init_params(&params);
-    }
-
     // Call optimized micro-kernel.
-    vcvt(batch_size() * sizeof(uint16_t), input.data(), output.data(), &params);
+    vcvt(batch_size() * sizeof(uint16_t), input.data(), output.data(), nullptr);
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
@@ -60,8 +54,7 @@ void VCvtMicrokernelTester::Test(
 }
 
 void VCvtMicrokernelTester::Test(
-    xnn_f32_f16_vcvt_ukernel_fn vcvt,
-    xnn_init_f32_f16_cvt_params_fn init_params) const {
+    xnn_f32_f16_vcvt_ukernel_fn vcvt) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(-100.0f, 100.0f);
 
@@ -71,13 +64,8 @@ void VCvtMicrokernelTester::Test(
     std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
     std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
-    union xnn_f32_f16_cvt_params params;
-    if (init_params != nullptr) {
-      init_params(&params);
-    }
-
     // Call optimized micro-kernel.
-    vcvt(batch_size() * sizeof(float), input.data(), output.data(), &params);
+    vcvt(batch_size() * sizeof(float), input.data(), output.data(), nullptr);
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {

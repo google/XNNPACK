@@ -27,10 +27,13 @@ void xnn_f32_qu8_vcvt_ukernel__avx2_u64(
   assert(input != NULL);
   assert(output != NULL);
 
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
   const __m256 vscale = _mm256_load_ps(params->avx2.scale);
   const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->avx2.output_max_less_zero_point);
   const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx2.output_zero_point);
-  const __m256i vshuffle_mask = _mm256_load_si256((const __m256i*) params->avx2.shuffle_mask);
+  XNN_ALIGN(32) static const uint32_t shuffle_mask[8] = {0, 4, 1, 5, 2, 6, 3, 7};
+  const __m256i vshuffle_mask = _mm256_load_si256((const __m256i*) shuffle_mask);
   const __m256i voutput_min = _mm256_load_si256((const __m256i*) params->avx2.output_min);
 
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
@@ -113,7 +116,7 @@ void xnn_f32_qu8_vcvt_ukernel__avx2_u64(
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2.mask_table[7] - batch));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
     __m256 vx = _mm256_maskload_ps(input, vmask);
     vx = _mm256_mul_ps(vx, vscale);

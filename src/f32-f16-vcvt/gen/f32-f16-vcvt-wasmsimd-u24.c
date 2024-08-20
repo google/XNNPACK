@@ -19,21 +19,30 @@ void xnn_f32_f16_vcvt_ukernel__wasmsimd_u24(
     size_t batch,
     const float* input,
     void* output,
-    const union xnn_f32_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const void* params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vexp_bias = wasm_v128_load64_splat(params->wasmsimd.exp_bias);
-  const v128_t vscale_to_inf = wasm_v128_load64_splat(params->wasmsimd.scale_to_inf);
-  const v128_t vexpw_max = wasm_v128_load64_splat(params->wasmsimd.expw_max);
-  const v128_t vscale_to_zero = wasm_v128_load64_splat(params->wasmsimd.scale_to_zero);
-  const v128_t vbias_min = wasm_v128_load64_splat(params->wasmsimd.bias_min);
-  const v128_t vmanth_mask = wasm_v128_load64_splat(params->wasmsimd.manth_mask);
-  const v128_t vexph_mask = wasm_v128_load64_splat(params->wasmsimd.exph_mask);
-  const v128_t vnanh = wasm_v128_load64_splat(params->wasmsimd.nanh);
+  const v128_t vexp_bias = wasm_u32x4_const_splat(UINT32_C(0x07800000));
+  const v128_t vscale_to_inf = wasm_f32x4_const_splat(0x1.0p+112f);
+  const v128_t vexpw_max = wasm_u32x4_const_splat(UINT32_C(0x7F800000));
+  const v128_t vscale_to_zero = wasm_f32x4_const_splat(0x1.0p-110f);
+  const v128_t vbias_min = wasm_u32x4_const_splat(UINT32_C(0x40008000));
+  const v128_t vmanth_mask = wasm_u32x4_const_splat(UINT32_C(0x00000FFF));
+  const v128_t vexph_mask = wasm_u32x4_const_splat(UINT32_C(0x00007C00));
+  const v128_t vnanh = wasm_u16x8_const_splat(UINT16_C(0x7E00));
+
+  XNN_FORCE_REALIZATION(vexp_bias);
+  XNN_FORCE_REALIZATION(vscale_to_inf);
+  XNN_FORCE_REALIZATION(vexpw_max);
+  XNN_FORCE_REALIZATION(vscale_to_zero);
+  XNN_FORCE_REALIZATION(vbias_min);
+  XNN_FORCE_REALIZATION(vmanth_mask);
+  XNN_FORCE_REALIZATION(vexph_mask);
+  XNN_FORCE_REALIZATION(vnanh);
 
   uint16_t* o = (uint16_t*) output;
   for (; batch >= 24 * sizeof(float); batch -= 24 * sizeof(float)) {

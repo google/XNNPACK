@@ -22,12 +22,6 @@
   BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v3_large, models::FP32MobileNetV3Large)->Unit(benchmark::kMicrosecond)->UseRealTime(); \
   BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v3_small, models::FP32MobileNetV3Small)->Unit(benchmark::kMicrosecond)->UseRealTime();
 
-#define BENCHMARK_FP32_END2END_JIT(benchmark_fn) \
-  BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v1, models::FP32MobileNetV1Jit)->Unit(benchmark::kMicrosecond)->UseRealTime(); \
-  BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v2, models::FP32MobileNetV2Jit)->Unit(benchmark::kMicrosecond)->UseRealTime(); \
-  BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v3_large, models::FP32MobileNetV3LargeJit)->Unit(benchmark::kMicrosecond)->UseRealTime(); \
-  BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v3_small, models::FP32MobileNetV3SmallJit)->Unit(benchmark::kMicrosecond)->UseRealTime();
-
 #define BENCHMARK_QS8_END2END(benchmark_fn) \
   BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v1, models::QS8MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime(); \
   BENCHMARK_CAPTURE(benchmark_fn, mobilenet_v2, models::QS8MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();

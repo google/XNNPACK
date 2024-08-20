@@ -6,24 +6,15 @@
 #include <assert.h>
 #include <stddef.h>
 
-#ifdef _WIN32
-  #include <windows.h>
-#else
-  #include <pthread.h>
-#endif
-
 #include "xnnpack/common.h"
 #include "xnnpack/config.h"
+#include "xnnpack/init-once.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/unpool.h"
 
 static struct xnn_unpool_config x32_unpool_config = {0};
 
-#if XNN_PLATFORM_WINDOWS
-  static INIT_ONCE init_guard_x32_unpool = INIT_ONCE_STATIC_INIT;
-#else
-  static pthread_once_t init_guard_x32_unpool = PTHREAD_ONCE_INIT;
-#endif
+XNN_INIT_ONCE_GUARD(x32_unpool);
 
 static void init_x32_unpool_config(void) {
   #if XNN_ARCH_ARM
@@ -46,22 +37,11 @@ static void init_x32_unpool_config(void) {
 
 }
 
-#if XNN_PLATFORM_WINDOWS
-  static BOOL CALLBACK init_x32_unpool_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_x32_unpool_config();
-    return TRUE;
-  }
-#endif
-
 const struct xnn_unpool_config* xnn_init_x32_unpool_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_x32_unpool, &init_x32_unpool_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_x32_unpool, &init_x32_unpool_config);
-  #endif
+  XNN_INIT_ONCE(x32_unpool);
   return &x32_unpool_config;
 }

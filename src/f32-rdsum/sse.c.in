@@ -21,14 +21,16 @@ void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__sse_c${CHANNELS}(
     size_t input_stride,
     const float* zero,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
   assert(channels != 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vscale = _mm_load_ps(params->sse.scale);
+  const __m128 vscale = _mm_set1_ps(params->scalar.scale);
+  const __m128 vmin = _mm_set1_ps(params->scalar.min);
+  const __m128 vmax = _mm_set1_ps(params->scalar.max);
 
   size_t input_increment = ${ACCUMULATORS} * input_stride;
   for (; channels >= ${CHANNELS}; channels -= ${CHANNELS}) {
@@ -59,6 +61,8 @@ void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__sse_c${CHANNELS}(
     }
     $for i in range(UNROLL):
       vacc${i} = _mm_mul_ps(vacc${i}, vscale);
+      vacc${i} = _mm_max_ps(vacc${i}, vmin);
+      vacc${i} = _mm_min_ps(vacc${i}, vmax);
 
     const float* o = output;
     $for i in range(0, UNROLL):
@@ -97,6 +101,8 @@ void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__sse_c${CHANNELS}(
     }
     for (int i = 0; i < num_chunks; ++i) {
       vacc[i] = _mm_mul_ps(vacc[i], vscale);
+      vacc[i] = _mm_max_ps(vacc[i], vmin);
+      vacc[i] = _mm_min_ps(vacc[i], vmax);
     }
 
     __m128 vo[${UNROLL}];

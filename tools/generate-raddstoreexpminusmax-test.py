@@ -175,6 +175,8 @@ def main(args):
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
       init_fn = ukernel_spec.get("init")
+      if init_fn is None:
+        init_fn = "nullptr"
       elements_tile, vector_tile, arch, isa = split_ukernel_name(name)
 
       test_case = generate_test_cases(name, init_fn, elements_tile, vector_tile, isa)

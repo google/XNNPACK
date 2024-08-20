@@ -400,29 +400,6 @@ SET(ALL_NEON_MICROKERNEL_SRCS
   src/i16-vlshift/gen/i16-vlshift-neon-u16.c
   src/i16-vlshift/gen/i16-vlshift-neon-u24.c
   src/i16-vlshift/gen/i16-vlshift-neon-u32.c
-  src/math/f16-f32-cvt-neon-int16.c
-  src/math/f16-f32-cvt-neon-int32.c
-  src/math/f32-expm1minus-neon-rr2-lut16-p3.c
-  src/math/f32-expm1minus-neon-rr2-p6.c
-  src/math/f32-f16-cvt-neon.c
-  src/math/f32-qs8-cvt-neon.c
-  src/math/f32-qu8-cvt-neon.c
-  src/math/f32-roundd-neon-addsub.c
-  src/math/f32-roundd-neon-cvt.c
-  src/math/f32-roundne-neon-addsub.c
-  src/math/f32-roundu-neon-addsub.c
-  src/math/f32-roundu-neon-cvt.c
-  src/math/f32-roundz-neon-addsub.c
-  src/math/f32-roundz-neon-cvt.c
-  src/math/f32-sigmoid-neon-rr2-lut64-p2-nr2recps.c
-  src/math/f32-sigmoid-neon-rr2-lut2048-p1-nr2recps.c
-  src/math/f32-sigmoid-neon-rr2-p5-nr2recps.c
-  src/math/f32-sqrt-neon-nr1rsqrts.c
-  src/math/f32-sqrt-neon-nr2rsqrts.c
-  src/math/f32-sqrt-neon-nr3rsqrts.c
-  src/math/gen/f32-tanh-neon-expm1minus-rr1-p6h5ts-nr2recps.c
-  src/math/gen/f32-tanh-neon-expm1minus-rr2-lut8-p4h2ts-nr2recps.c
-  src/math/gen/f32-tanh-neon-expm1minus-rr2-lut8-p4h3ps-nr2recps.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x16-minmax-neon-mlal-lane-prfm.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x16-minmax-neon-mlal-lane.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-2x16-minmax-neon-mlal-lane-prfm.c

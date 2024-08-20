@@ -27,15 +27,25 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr1_p5_scalef_div_u96(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m512i vsign_mask = _mm512_set1_epi32((int) params->avx512_rr1_p5.sign_mask);
-  const __m512 vlog2e = _mm512_set1_ps(params->avx512_rr1_p5.log2e);
-  const __m512 vminus_ln2 = _mm512_set1_ps(params->avx512_rr1_p5.minus_ln2);
-  const __m512 vc5 = _mm512_set1_ps(params->avx512_rr1_p5.c5);
-  const __m512 vc4 = _mm512_set1_ps(params->avx512_rr1_p5.c4);
-  const __m512 vc3 = _mm512_set1_ps(params->avx512_rr1_p5.c3);
-  const __m512 vc2 = _mm512_set1_ps(params->avx512_rr1_p5.c2);
-  const __m512 vc1 = _mm512_set1_ps(params->avx512_rr1_p5.c1);
-  const __m512 vone = _mm512_set1_ps(params->avx512_rr1_p5.one);
+  const __m512i vsign_mask = _mm512_set1_epi32(UINT32_C(0x80000000));
+  const __m512 vlog2e = _mm512_set1_ps(0x1.715476p0f);
+  const __m512 vminus_ln2 = _mm512_set1_ps(-0x1.62E430p-1f);
+  const __m512 vc5 = _mm512_set1_ps(0x1.0F9F9Cp-7f);
+  const __m512 vc4 = _mm512_set1_ps(0x1.573A1Ap-5f);
+  const __m512 vc3 = _mm512_set1_ps(0x1.555A80p-3f);
+  const __m512 vc2 = _mm512_set1_ps(0x1.FFFDC6p-2f);
+  const __m512 vc1 = _mm512_set1_ps(0x1.FFFFF6p-1f);
+  const __m512 vone = _mm512_set1_ps(1.0f);
+
+  XNN_FORCE_REALIZATION(vsign_mask);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vminus_ln2);
+  XNN_FORCE_REALIZATION(vc5);
+  XNN_FORCE_REALIZATION(vc4);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);
+  XNN_FORCE_REALIZATION(vone);
 
   for (; batch >= 96 * sizeof(float); batch -= 96 * sizeof(float)) {
     const __m512 vx0 = _mm512_loadu_ps(input);

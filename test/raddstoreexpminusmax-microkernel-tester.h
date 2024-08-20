@@ -72,7 +72,9 @@ class RAddStoreExpMinusMaxMicrokernelTester {
       // Call optimized micro-kernel.
       uint16_t sum = UINT16_C(0x7E00) /* NaN */;
       xnn_f16_expminus_params params;
-      init_params(&params);
+      if (init_params) {
+        init_params(&params);
+      }
       raddstoreexpminusmax(elements() * sizeof(uint16_t), x.data(), &x_max_as_half, y.data(), &sum, &params);
 
       // Verify results.
@@ -110,7 +112,9 @@ class RAddStoreExpMinusMaxMicrokernelTester {
       // Call optimized micro-kernel.
       float sum = std::nanf("");
       xnn_f32_expminus_params params;
-      init_params(&params);
+      if (init_params) {
+        init_params(&params);
+      }
       raddstoreexpminusmax(elements() * sizeof(float), x.data(), &x_max, y.data(), &sum, &params);
 
       // Verify results.

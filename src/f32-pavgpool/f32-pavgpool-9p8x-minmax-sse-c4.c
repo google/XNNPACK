@@ -5,8 +5,13 @@
 
 #include <assert.h>
 
+#include <stddef.h>
+#include <stdint.h>
 #include <xmmintrin.h>
 
+
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
 #include "xnnpack/pavgpool.h"
 
 

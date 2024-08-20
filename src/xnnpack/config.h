@@ -157,16 +157,8 @@ XNN_INTERNAL const struct xnn_prelu_config* xnn_init_f32_prelu_config();
 static inline struct xnn_hmp_dqgemm_ukernel xnn_init_hmp_dqgemm_ukernel(
     xnn_dqgemm_ukernel_fn function) {
   struct xnn_hmp_dqgemm_ukernel ukernel = {{ function }};
-#if XNN_PLATFORM_JIT
-  ukernel.generated_code_chunk[0].offset = SIZE_MAX;
-  ukernel.generated_code_chunk[0].offset_end = SIZE_MAX;
-#endif  // XNN_PLATFORM_JIT
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
     ukernel.function[i] = function;
-#if XNN_PLATFORM_JIT
-    ukernel.generated_code_chunk[i].offset = SIZE_MAX;
-    ukernel.generated_code_chunk[i].offset_end = SIZE_MAX;
-#endif  // XNN_PLATFORM_JIT
   }
   return ukernel;
 }
@@ -176,10 +168,6 @@ static inline struct xnn_hmp_dqgemm_bl_ukernel xnn_init_hmp_dqgemm_bl_ukernel(
   struct xnn_hmp_dqgemm_bl_ukernel ukernel;// = {{ function }};
   for (size_t i = 0; i < XNN_MAX_UARCH_TYPES; i++) {
     ukernel.function[i] = function;
-#if XNN_PLATFORM_JIT
-    ukernel.generated_code_chunk[i].offset = SIZE_MAX;
-    ukernel.generated_code_chunk[i].offset_end = SIZE_MAX;
-#endif  // XNN_PLATFORM_JIT
   }
   return ukernel;
 }
@@ -187,16 +175,8 @@ static inline struct xnn_hmp_dqgemm_bl_ukernel xnn_init_hmp_dqgemm_bl_ukernel(
 static inline struct xnn_hmp_dqigemm_ukernel xnn_init_hmp_dqigemm_ukernel(
     xnn_dqigemm_ukernel_fn function) {
   struct xnn_hmp_dqigemm_ukernel ukernel = {{function}};
-#if XNN_PLATFORM_JIT
-  ukernel.generated_code_chunk[0].offset = SIZE_MAX;
-  ukernel.generated_code_chunk[0].offset_end = SIZE_MAX;
-#endif  // XNN_PLATFORM_JIT
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
     ukernel.function[i] = function;
-#if XNN_PLATFORM_JIT
-    ukernel.generated_code_chunk[i].offset = SIZE_MAX;
-    ukernel.generated_code_chunk[i].offset_end = SIZE_MAX;
-#endif  // XNN_PLATFORM_JIT
   }
   return ukernel;
 }
@@ -204,32 +184,16 @@ static inline struct xnn_hmp_dqigemm_ukernel xnn_init_hmp_dqigemm_ukernel(
 static inline struct xnn_hmp_qp8gemm_ukernel xnn_init_hmp_qp8gemm_ukernel(
     xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn function) {
   struct xnn_hmp_qp8gemm_ukernel ukernel = {{function}};
-#if XNN_PLATFORM_JIT
-  ukernel.generated_code_chunk[0].offset = SIZE_MAX;
-  ukernel.generated_code_chunk[0].offset_end = SIZE_MAX;
-#endif  // XNN_PLATFORM_JIT
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
     ukernel.function[i] = function;
-#if XNN_PLATFORM_JIT
-    ukernel.generated_code_chunk[i].offset = SIZE_MAX;
-    ukernel.generated_code_chunk[i].offset_end = SIZE_MAX;
-#endif  // XNN_PLATFORM_JIT
   }
   return ukernel;
 }
 
 static inline struct xnn_hmp_gemm_ukernel xnn_init_hmp_gemm_ukernel(xnn_gemm_ukernel_fn function) {
   struct xnn_hmp_gemm_ukernel ukernel = {{ function }};
-#if XNN_PLATFORM_JIT
-  ukernel.generated_code_chunk[0].offset = SIZE_MAX;
-  ukernel.generated_code_chunk[0].offset_end = SIZE_MAX;
-#endif  // XNN_PLATFORM_JIT
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
     ukernel.function[i] = function;
-#if XNN_PLATFORM_JIT
-    ukernel.generated_code_chunk[i].offset = SIZE_MAX;
-    ukernel.generated_code_chunk[i].offset_end = SIZE_MAX;
-#endif  // XNN_PLATFORM_JIT
   }
   return ukernel;
 }
@@ -249,16 +213,8 @@ static inline bool xnn_is_hmp_gemm_ukernel(struct xnn_hmp_gemm_ukernel ukernel) 
 
 static inline struct xnn_hmp_igemm_ukernel xnn_init_hmp_igemm_ukernel(xnn_igemm_ukernel_fn function) {
   struct xnn_hmp_igemm_ukernel ukernel = {{ function }};
-#if XNN_PLATFORM_JIT
-  ukernel.generated_code_chunk[0].offset = SIZE_MAX;
-  ukernel.generated_code_chunk[0].offset_end = SIZE_MAX;
-#endif  // XNN_PLATFORM_JIT
   for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
     ukernel.function[i] = function;
-#if XNN_PLATFORM_JIT
-    ukernel.generated_code_chunk[i].offset = SIZE_MAX;
-    ukernel.generated_code_chunk[i].offset_end = SIZE_MAX;
-#endif  // XNN_PLATFORM_JIT
   }
   return ukernel;
 }
@@ -275,50 +231,6 @@ static inline bool xnn_is_hmp_igemm_ukernel(struct xnn_hmp_igemm_ukernel ukernel
   return difference != 0;
 #endif
 }
-
-#if XNN_PLATFORM_JIT
-static inline struct xnn_hmp_gemm_codegen xnn_init_hmp_gemm_codegen(xnn_jit_gemm_code_generator_fn function) {
-  struct xnn_hmp_gemm_codegen ukernel = {{ function }};
-  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    ukernel.function[i] = function;
-  }
-  return ukernel;
-}
-
-static inline bool xnn_is_hmp_gemm_codegen(struct xnn_hmp_gemm_codegen ukernel) {
-#if XNN_MAX_UARCH_TYPES == 1
-  return false;
-#else
-  uintptr_t default_fn = (uintptr_t) ukernel.function[XNN_UARCH_DEFAULT];
-  uintptr_t difference = 0;
-  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    difference |= (default_fn ^ (uintptr_t) ukernel.function[i]);
-  }
-  return difference != 0;
-#endif
-}
-
-static inline struct xnn_hmp_igemm_codegen xnn_init_hmp_igemm_codegen(xnn_jit_igemm_code_generator_fn function) {
-  struct xnn_hmp_igemm_codegen ukernel = {{ function }};
-  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    ukernel.function[i] = function;
-  }
-  return ukernel;
-}
-
-static inline bool xnn_is_hmp_igemm_codegen(struct xnn_hmp_igemm_codegen ukernel) {
-#if XNN_MAX_UARCH_TYPES == 1
-  return false;
-#else
-  uintptr_t default_fn = (uintptr_t) ukernel.function[XNN_UARCH_DEFAULT];
-  uintptr_t difference = 0;
-  for (size_t i = 1; i < XNN_MAX_UARCH_TYPES; i++) {
-    difference |= (default_fn ^ (uintptr_t) ukernel.function[i]);
-  }
-  return difference != 0;
-#endif
-}
-#endif  // XNN_PLATFORM_JIT
 
 XNN_INTERNAL struct xnn_gemm_config* xnn_init_f16_gemm_config();
 XNN_INTERNAL struct xnn_gemm_config* xnn_init_f32_gemm_config();

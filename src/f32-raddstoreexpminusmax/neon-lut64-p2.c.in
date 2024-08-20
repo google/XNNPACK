@@ -18,7 +18,6 @@ $VMULADDQ_F32 = "vfmaq_f32" if FMA else "vmlaq_f32"
 
 extern XNN_INTERNAL const float xnn_table_exp2_k_over_64[64];
 
-$PARAMS_STRUCT = "neonfma_rr1_lut64_p2" if FMA else "neon_rr2_lut64_p2"
 void xnn_f32_raddstoreexpminusmax_ukernel__${"neonfma" if FMA else "neon"}_rr${1 if FMA else 2}_lut64_p2_u${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t batch,
     const float* input,
@@ -34,17 +33,28 @@ void xnn_f32_raddstoreexpminusmax_ukernel__${"neonfma" if FMA else "neon"}_rr${1
   assert(output != NULL);
   assert(sum != NULL);
 
-  const float32x4_t vi_max = vld1q_dup_f32(max);
-  const float32x4_t vlog2e = vld1q_dup_f32(&params->${PARAMS_STRUCT}.log2e);
-  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->${PARAMS_STRUCT}.magic_bias);
+  const float32x4_t vlog2e = vmovq_n_f32(0x1.715476p+0f);
+  const float32x4_t vmagic_bias = vmovq_n_f32(0x1.800000p17f);
   const int32x4_t vindex_mask = vmovq_n_s32(INT32_C(0x3F));
+  const float32x4_t vc2 = vmovq_n_f32(0x1.FFFF0Ap-2f);
+  const float32x4_t vdenorm_cutoff = vmovq_n_f32(-0x1.5D589Ep6f);
+
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vindex_mask);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
+
   $if FMA:
-    const float32x4_t vminus_ln2 = vld1q_dup_f32(&params->${PARAMS_STRUCT}.minus_ln2);
+    const float32x4_t vminus_ln2 = vmovq_n_f32(-0x1.62E430p-1f);
+    XNN_FORCE_REALIZATION(vminus_ln2);
   $else:
-    const float32x4_t vminus_ln2_hi = vld1q_dup_f32(&params->${PARAMS_STRUCT}.minus_ln2_hi);
-    const float32x4_t vminus_ln2_lo = vld1q_dup_f32(&params->${PARAMS_STRUCT}.minus_ln2_lo);
-  const float32x4_t vc2 = vld1q_dup_f32(&params->${PARAMS_STRUCT}.c2);
-  const float32x4_t vdenorm_cutoff = vld1q_dup_f32(&params->${PARAMS_STRUCT}.denorm_cutoff);
+    const float32x4_t vminus_ln2_hi = vmovq_n_f32(-0x1.62E400p-1f);
+    const float32x4_t vminus_ln2_lo = vmovq_n_f32(-0x1.7F7D1Cp-20f);
+    XNN_FORCE_REALIZATION(vminus_ln2_hi);
+    XNN_FORCE_REALIZATION(vminus_ln2_lo);
+
+  const float32x4_t vi_max = vld1q_dup_f32(max);
 
   $if BATCH_TILE > 4:
     $for K in range(ACCUMULATORS):

@@ -6,13 +6,10 @@
 // Auto-generated file. Do not edit!
 //   Generator: tools/update-microkernels.py -a
 
-#include <assert.h>
+
 
 #include <immintrin.h>
 
-#include "xnnpack/gemm.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/math.h"
-#include "xnnpack/prefetch.h"
-#include "xnnpack/unaligned.h"
+
+
 

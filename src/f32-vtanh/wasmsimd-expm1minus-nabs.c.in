@@ -19,7 +19,6 @@ $assert MINMAX in ["WASM", "PSEUDO", "RELAXED"]
 
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
-#include "xnnpack/math-stubs.h"
 #include "xnnpack/microparams.h"
 
 $if LOG2LUT != 0:

@@ -19,7 +19,6 @@ $VMULSUBQ_F32 = "vfmsq_f32" if FMA else "vmlsq_f32"
 
 extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_64[64];
 
-$PARAMS_STRUCT = "neonfma_rr1_lut64_p2" if FMA else "neon_rr2_lut64_p2"
 $ISA = ("aarch64_" if DIV_ALGO == "div" else "") + ("neonfma" if FMA else "neon")
 void xnn_f32_vsigmoid_ukernel__${ISA}_rr${1 if FMA else 2}_lut64_p2_${DIV_ALGO}_u${BATCH_TILE}(
     size_t batch,
@@ -32,17 +31,28 @@ void xnn_f32_vsigmoid_ukernel__${ISA}_rr${1 if FMA else 2}_lut64_p2_${DIV_ALGO}_
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->${PARAMS_STRUCT}.magic_bias);
-  const float32x4_t vminus_log2e = vld1q_dup_f32(&params->${PARAMS_STRUCT}.minus_log2e);
+  const float32x4_t vmagic_bias = vmovq_n_f32(0x1.800000p17f);
+  const float32x4_t vminus_log2e = vmovq_n_f32(-0x1.715476p0f);
   const int32x4_t vindex_mask = vmovq_n_s32(INT32_C(0x3F));
-  $if FMA:
-    const float32x4_t vln2 = vld1q_dup_f32(&params->${PARAMS_STRUCT}.ln2);
-  $else:
-    const float32x4_t vln2_hi = vld1q_dup_f32(&params->${PARAMS_STRUCT}.ln2_hi);
-    const float32x4_t vln2_lo = vld1q_dup_f32(&params->${PARAMS_STRUCT}.ln2_lo);
-  const float32x4_t vc2 = vld1q_dup_f32(&params->${PARAMS_STRUCT}.c2);
+  const float32x4_t vc2 = vmovq_n_f32(0x1.FFFF0Ap-2f);
   const float32x4_t vone = vmovq_n_f32(1.0f);
-  const float32x4_t vdenorm_cutoff = vld1q_dup_f32(&params->${PARAMS_STRUCT}.denorm_cutoff);
+  const float32x4_t vdenorm_cutoff = vmovq_n_f32(0x1.5D589Ep+6f);
+
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vminus_log2e);
+  // XNN_FORCE_REALIZATION(vindex_mask);
+  XNN_FORCE_REALIZATION(vc2);
+  // XNN_FORCE_REALIZATION(vone);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
+
+  $if FMA:
+    const float32x4_t vln2 = vmovq_n_f32(0x1.62E430p-1f);
+    XNN_FORCE_REALIZATION(vln2);
+  $else:
+    const float32x4_t vln2_hi = vmovq_n_f32(0x1.630000p-1f);
+    const float32x4_t vln2_lo = vmovq_n_f32(-0x1.BD0106p-13f);
+    XNN_FORCE_REALIZATION(vln2_hi);
+    XNN_FORCE_REALIZATION(vln2_lo);
 
   $if BATCH_TILE > 4:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {

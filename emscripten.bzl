@@ -31,6 +31,7 @@ def xnnpack_emscripten_benchmark_linkopts():
         "-s ALLOW_MEMORY_GROWTH=1",
         "-s INITIAL_MEMORY=1gb",
         "-s MAXIMUM_MEMORY=4gb",
+        "-s TEXTDECODER=1",
         "--pre-js $(location //:preamble.js.lds)",
     ]
 

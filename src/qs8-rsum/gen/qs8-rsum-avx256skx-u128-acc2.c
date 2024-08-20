@@ -25,7 +25,12 @@ void xnn_qs8_rsum_ukernel__avx256skx_u128_acc2(
   assert(output != NULL);
   assert(params != NULL);
 
-  const __m256i vone = _mm256_load_si256((const __m256i*) &params->avx2.onemask_table[0]);
+  XNN_ALIGN(32) static const int8_t onemask_table[64] = {
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  };
+
+  const __m256i vone = _mm256_load_si256((const __m256i*) &onemask_table[0]);
   const __m256i vone_16 = _mm256_srli_epi16(vone, 8);
   __m256i vacc0 = _mm256_setzero_si256();
   __m256i vacc1 = _mm256_setzero_si256();

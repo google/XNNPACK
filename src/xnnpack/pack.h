@@ -14,7 +14,7 @@
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
-#include "xnnpack/operator.h"
+#include "xnnpack/microparams.h"
 
 
 #ifdef __cplusplus
@@ -191,6 +191,21 @@ typedef void (*xnn_pack_qs8_qc4w_gemm_fn)(
   const struct xnn_qs8_qc4w_packing_params* params);
 
 XNN_INTERNAL void xnn_pack_qs8_qc4w_gemm_goi_w(
+  size_t g,
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const uint8_t* kernel,
+  const int32_t* bias,
+  const float* scale,
+  void* packed_weights,
+  size_t extra_bytes,
+  const struct xnn_qs8_qc4w_packing_params* params);
+
+// 4 bit unsigned weights
+XNN_INTERNAL void xnn_pack_qs8_qc4uw_gemm_goi_w(
   size_t g,
   size_t nc,
   size_t kc,
@@ -395,6 +410,7 @@ XNN_INTERNAL size_t xnn_packed_stride_qs8_weights_and_biases(
     size_t k_stride,                            //
     size_t extra_bytes);
 
+// Caveat - misnamed qs4.  Should be qc4w
 XNN_INTERNAL void xnn_pack_qs4_weights_and_biases(
     uint32_t flags,                                //
     const struct xnn_gemm_config* gemm_config,     //
@@ -485,6 +501,21 @@ XNN_INTERNAL void xnn_pack_qs8_to_qu8_gemm_gio_w(
   const struct xnn_qs8_packing_params* params);
 
 XNN_INTERNAL void xnn_pack_qs8_qc4w_gemm_gio_w(
+  size_t g,
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  size_t k_stride,
+  const uint8_t* kernel,
+  const int32_t* bias,
+  const float* scale,
+  void* packed_weights,
+  size_t extra_bytes,
+  const struct xnn_qs8_qc4w_packing_params* params);
+
+XNN_INTERNAL void xnn_pack_qs8_qc4uw_gemm_gio_w(
   size_t g,
   size_t nc,
   size_t kc,

@@ -24,12 +24,6 @@
 #include "xnnpack/requantization.h"
 #include "next_prime.h"
 
-#if XNN_PLATFORM_JIT
-#include <vector>
-
-#include "xnnpack/post-operation.h"
-#endif  // XNN_PLATFORM_JIT
-
 class GemmMicrokernelTester {
  public:
   GemmMicrokernelTester clone() const {
@@ -403,77 +397,6 @@ class GemmMicrokernelTester {
             xnn_init_f32_minmax_params_fn init_minmax_params,
             xnn_pack_weights_and_biases_fn pack,
             xnn_packed_stride_weights_and_biases_fn packed_stride);
-
-#if XNN_PLATFORM_JIT
-  void Test(
-    xnn_jit_gemm_code_generator_fn gemm_generator,
-    xnn_init_f16_minmax_params_fn init_params,
-    xnn_pack_f16_gemm_fn pack) const;
-  void Test(
-    xnn_jit_igemm_code_generator_fn igemm_generator,
-    xnn_init_f16_minmax_params_fn init_params,
-    xnn_pack_f16_igemm_fn pack) const;
-  void Test(
-    xnn_jit_gemm_code_generator_fn gemm_generator,
-    xnn_init_f32_minmax_params_fn init_params,
-    xnn_pack_f32_gemm_fn pack) const;
-  void Test(
-    xnn_jit_igemm_code_generator_fn igemm_generator,
-    xnn_init_f32_minmax_params_fn init_params,
-    xnn_pack_f32_igemm_fn pack) const;
-  void Test(
-    xnn_jit_gemm_code_generator_fn gemm_generator,
-    xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
-    xnn_pack_qs8_gemm_fn pack,
-    xnn_qs8_requantize_fn requantize) const;
-  void Test(
-    xnn_jit_igemm_code_generator_fn igemm_generator,
-    xnn_init_qs8_qc8w_conv_minmax_params_fn init_params,
-    xnn_pack_qs8_igemm_fn pack,
-    xnn_qs8_requantize_fn requantize) const;
-  void Test(
-    xnn_jit_gemm_code_generator_fn gemm_generator,
-    xnn_init_qs8_conv_minmax_params_fn init_params,
-    xnn_pack_qs8_gemm_fn pack,
-    xnn_qs8_requantize_fn requantize) const;
-  void Test(
-    xnn_jit_igemm_code_generator_fn igemm_generator,
-    xnn_init_qs8_conv_minmax_params_fn init_params,
-    xnn_pack_qs8_igemm_fn pack,
-    xnn_qs8_requantize_fn requantize) const;
-  void Test(
-    xnn_jit_gemm_code_generator_fn gemm_generator,
-    xnn_init_f32_minmax_params_fn init_params,
-    xnn_pack_f32_gemm_fn pack,
-    const std::vector<xnn_post_operation>& fused_operators) const;
-  void Test(
-    xnn_jit_igemm_code_generator_fn gemm_generator,
-    xnn_init_f32_minmax_params_fn init_params,
-    xnn_pack_f32_igemm_fn pack,
-    const std::vector<xnn_post_operation>& fused_operators) const;
-
-  // Test that JIT generated code matches assembly.
-  void Test(
-    xnn_jit_gemm_code_generator_fn gemm_generator,
-    xnn_init_f16_minmax_params_fn init_params,
-    xnn_pack_f16_gemm_fn pack,
-    xnn_f16_gemm_minmax_ukernel_fn gemm_minmax) const;
-  void Test(
-    xnn_jit_igemm_code_generator_fn igemm_generator,
-    xnn_init_f16_minmax_params_fn init_params,
-    xnn_pack_f16_igemm_fn pack,
-    xnn_f16_igemm_minmax_ukernel_fn igemm_minmax) const;
-  void Test(
-    xnn_jit_gemm_code_generator_fn gemm_generator,
-    xnn_init_f32_minmax_params_fn init_params,
-    xnn_pack_f32_gemm_fn pack,
-    xnn_f32_gemm_minmax_ukernel_fn gemm_minmax) const;
-  void Test(
-    xnn_jit_igemm_code_generator_fn igemm_generator,
-    xnn_init_f32_minmax_params_fn init_params,
-    xnn_pack_f32_igemm_fn pack,
-    xnn_f32_igemm_minmax_ukernel_fn igemm_minmax) const;
-#endif  // XNN_PLATFORM_JIT
 
  private:
   size_t mr_{1};

@@ -17,9 +17,11 @@ void xnn_x24_transposec_ukernel__2x2_neon_tbl64(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x24_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
+  static const uint8_t pos0[8] = {0, 1, 2, 8, 9, 10, 0, 0};
+  static const uint8_t pos1[8] = {3, 4, 5, 11, 12, 13, 0, 0};
+
   assert(output_stride >= block_height * 3);
   assert(input_stride >= block_width * 3);
 
@@ -38,8 +40,8 @@ void xnn_x24_transposec_ukernel__2x2_neon_tbl64(
   uint8_t* o0 = (uint8_t*) output;
   uint8_t* o1 = (uint8_t*) ((uintptr_t) o0 + output_stride);
 
-  const uint8x8_t vperm0 = vld1_u8(params->neon_tbl64.pos0);
-  const uint8x8_t vperm1 = vld1_u8(params->neon_tbl64.pos1);
+  const uint8x8_t vperm0 = vld1_u8(pos0);
+  const uint8x8_t vperm1 = vld1_u8(pos1);
   do {
     if XNN_UNPREDICTABLE(block_width < 2) {
       o1 = o0;

@@ -18,10 +18,9 @@ xnnpack_cc_library(
     deps = [
         "@FP16",
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -32,24 +31,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "fp32_mobilenet_v1_jit",
-    srcs = ["fp32-mobilenet-v1-jit.cc"],
-    copts = xnnpack_std_cxxopts(),
-    visibility = xnnpack_visibility(),
-    deps = [
-        "//:XNNPACK",
-        "//:aligned_allocator",
-        "//:cache",
-        "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -59,11 +43,11 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     visibility = xnnpack_visibility(),
     deps = [
+        "@FP16",
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -74,10 +58,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -88,10 +71,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -102,10 +84,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -116,10 +97,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -130,10 +110,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -144,10 +123,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -158,10 +136,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -172,10 +149,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -186,10 +162,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -201,10 +176,9 @@ xnnpack_cc_library(
     deps = [
         "@FP16",
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -214,24 +188,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "fp32_mobilenet_v2_jit",
-    srcs = ["fp32-mobilenet-v2-jit.cc"],
-    copts = xnnpack_std_cxxopts(),
-    visibility = xnnpack_visibility(),
-    deps = [
-        "//:XNNPACK",
-        "//:aligned_allocator",
-        "//:cache",
-        "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -241,11 +200,11 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     visibility = xnnpack_visibility(),
     deps = [
+        "@FP16",
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -256,10 +215,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -271,10 +229,9 @@ xnnpack_cc_library(
     deps = [
         "@FP16",
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -285,24 +242,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "fp32_mobilenet_v3_large_jit",
-    srcs = ["fp32-mobilenet-v3-large-jit.cc"],
-    copts = xnnpack_std_cxxopts(),
-    visibility = xnnpack_visibility(),
-    deps = [
-        "//:XNNPACK",
-        "//:aligned_allocator",
-        "//:cache",
-        "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -312,11 +254,11 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     visibility = xnnpack_visibility(),
     deps = [
+        "@FP16",
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -327,10 +269,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -342,10 +283,9 @@ xnnpack_cc_library(
     deps = [
         "@FP16",
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -356,39 +296,9 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "fp32_mobilenet_v3_small_fused",
-    srcs = ["fp32-mobilenet-v3-small-fused.cc"],
-    copts = xnnpack_std_cxxopts(),
-    visibility = xnnpack_visibility(),
-    deps = [
-        "//:XNNPACK",
-        "//:aligned_allocator",
-        "//:cache",
-        "//:models_h",
-        "//:post_operation",
-        "@pthreadpool",
-    ],
-)
-
-xnnpack_cc_library(
-    name = "fp32_mobilenet_v3_small_jit",
-    srcs = ["fp32-mobilenet-v3-small-jit.cc"],
-    copts = xnnpack_std_cxxopts(),
-    visibility = xnnpack_visibility(),
-    deps = [
-        "//:XNNPACK",
-        "//:aligned_allocator",
-        "//:cache",
-        "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -398,11 +308,11 @@ xnnpack_cc_library(
     copts = xnnpack_std_cxxopts(),
     visibility = xnnpack_visibility(),
     deps = [
+        "@FP16",
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )
 
@@ -413,9 +323,8 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         "//:XNNPACK",
-        "//:aligned_allocator",
         "//:cache",
+        "//:common",
         "//:models_h",
-        "@pthreadpool",
     ],
 )

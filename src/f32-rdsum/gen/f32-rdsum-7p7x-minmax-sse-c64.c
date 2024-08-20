@@ -23,14 +23,16 @@ void xnn_f32_rdsum_ukernel_7p7x__sse_c64(
     size_t input_stride,
     const float* zero,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
   assert(channels != 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vscale = _mm_load_ps(params->sse.scale);
+  const __m128 vscale = _mm_set1_ps(params->scalar.scale);
+  const __m128 vmin = _mm_set1_ps(params->scalar.min);
+  const __m128 vmax = _mm_set1_ps(params->scalar.max);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 64; channels -= 64) {
@@ -327,21 +329,53 @@ void xnn_f32_rdsum_ukernel_7p7x__sse_c64(
       i6 = (const float*) ((uintptr_t) i6 + input_increment);
     }
     vacc0 = _mm_mul_ps(vacc0, vscale);
+    vacc0 = _mm_max_ps(vacc0, vmin);
+    vacc0 = _mm_min_ps(vacc0, vmax);
     vacc1 = _mm_mul_ps(vacc1, vscale);
+    vacc1 = _mm_max_ps(vacc1, vmin);
+    vacc1 = _mm_min_ps(vacc1, vmax);
     vacc2 = _mm_mul_ps(vacc2, vscale);
+    vacc2 = _mm_max_ps(vacc2, vmin);
+    vacc2 = _mm_min_ps(vacc2, vmax);
     vacc3 = _mm_mul_ps(vacc3, vscale);
+    vacc3 = _mm_max_ps(vacc3, vmin);
+    vacc3 = _mm_min_ps(vacc3, vmax);
     vacc4 = _mm_mul_ps(vacc4, vscale);
+    vacc4 = _mm_max_ps(vacc4, vmin);
+    vacc4 = _mm_min_ps(vacc4, vmax);
     vacc5 = _mm_mul_ps(vacc5, vscale);
+    vacc5 = _mm_max_ps(vacc5, vmin);
+    vacc5 = _mm_min_ps(vacc5, vmax);
     vacc6 = _mm_mul_ps(vacc6, vscale);
+    vacc6 = _mm_max_ps(vacc6, vmin);
+    vacc6 = _mm_min_ps(vacc6, vmax);
     vacc7 = _mm_mul_ps(vacc7, vscale);
+    vacc7 = _mm_max_ps(vacc7, vmin);
+    vacc7 = _mm_min_ps(vacc7, vmax);
     vacc8 = _mm_mul_ps(vacc8, vscale);
+    vacc8 = _mm_max_ps(vacc8, vmin);
+    vacc8 = _mm_min_ps(vacc8, vmax);
     vacc9 = _mm_mul_ps(vacc9, vscale);
+    vacc9 = _mm_max_ps(vacc9, vmin);
+    vacc9 = _mm_min_ps(vacc9, vmax);
     vacc10 = _mm_mul_ps(vacc10, vscale);
+    vacc10 = _mm_max_ps(vacc10, vmin);
+    vacc10 = _mm_min_ps(vacc10, vmax);
     vacc11 = _mm_mul_ps(vacc11, vscale);
+    vacc11 = _mm_max_ps(vacc11, vmin);
+    vacc11 = _mm_min_ps(vacc11, vmax);
     vacc12 = _mm_mul_ps(vacc12, vscale);
+    vacc12 = _mm_max_ps(vacc12, vmin);
+    vacc12 = _mm_min_ps(vacc12, vmax);
     vacc13 = _mm_mul_ps(vacc13, vscale);
+    vacc13 = _mm_max_ps(vacc13, vmin);
+    vacc13 = _mm_min_ps(vacc13, vmax);
     vacc14 = _mm_mul_ps(vacc14, vscale);
+    vacc14 = _mm_max_ps(vacc14, vmin);
+    vacc14 = _mm_min_ps(vacc14, vmax);
     vacc15 = _mm_mul_ps(vacc15, vscale);
+    vacc15 = _mm_max_ps(vacc15, vmin);
+    vacc15 = _mm_min_ps(vacc15, vmax);
 
     const float* o = output;
     __m128 vo0 = _mm_loadu_ps(o); o += 4;
@@ -461,6 +495,8 @@ void xnn_f32_rdsum_ukernel_7p7x__sse_c64(
     }
     for (int i = 0; i < num_chunks; ++i) {
       vacc[i] = _mm_mul_ps(vacc[i], vscale);
+      vacc[i] = _mm_max_ps(vacc[i], vmin);
+      vacc[i] = _mm_min_ps(vacc[i], vmax);
     }
 
     __m128 vo[16];

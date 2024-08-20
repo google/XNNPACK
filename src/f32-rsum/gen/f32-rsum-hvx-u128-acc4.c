@@ -13,6 +13,7 @@
 #include "xnnpack/simd/f32-hvx.h"
 
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "xnnpack/reduce.h"
 
 
@@ -20,7 +21,7 @@ void xnn_f32_rsum_ukernel__hvx_u128_acc4(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -66,8 +67,11 @@ void xnn_f32_rsum_ukernel__hvx_u128_acc4(
   vacc0 = xnn_add_f32(vacc0, Q6_V_vror_VR(vacc0, 8));
   vacc0 = xnn_add_f32(vacc0, Q6_V_vror_VR(vacc0, 4));
 
-  float partial_sum = *((float*) &vacc0);
+  float result = *((float*) &vacc0);
 
-  const float vscale = params->scalar.scale;
-  *output += partial_sum * vscale;
+  const float vscale = params->scale;
+  result = result * vscale;
+  result = math_max_f32(result, params->scalar.min);
+  result = math_min_f32(result, params->scalar.max);
+  *output += result;
 }

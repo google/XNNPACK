@@ -26,10 +26,15 @@ void xnn_f32_vhswish_ukernel__sse_u4(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vsixth = _mm_load_ps(params->sse.sixth);
-  const __m128 vhalf = _mm_load_ps(params->sse.half);
-  const __m128 vone = _mm_load_ps(params->sse.one);
+  const __m128 vsixth = _mm_set1_ps(0x1.555556p-3f);
+  const __m128 vhalf = _mm_set1_ps(0.5f);
+  const __m128 vone = _mm_set1_ps(1.0f);
   const __m128 vzero = _mm_setzero_ps();
+
+  XNN_FORCE_REALIZATION(vsixth);
+  XNN_FORCE_REALIZATION(vhalf);
+  XNN_FORCE_REALIZATION(vone);
+  // XNN_FORCE_REALIZATION(vzero);
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const __m128 vx0123 = _mm_loadu_ps(input);

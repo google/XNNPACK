@@ -6,14 +6,9 @@
 #include <assert.h>
 #include <stddef.h>
 
-#ifdef _WIN32
-  #include <windows.h>
-#else
-  #include <pthread.h>
-#endif
-
 #include "xnnpack/common.h"
 #include "xnnpack/config.h"
+#include "xnnpack/init-once.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/reduce.h"
@@ -22,15 +17,9 @@ static struct xnn_rmax_config f16_rmax_config = {0};
 static struct xnn_rmax_config f32_rmax_config = {0};
 static struct xnn_rmax_config u8_rmax_config = {0};
 
-#if XNN_PLATFORM_WINDOWS
-  static INIT_ONCE init_guard_f16_rmax = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_rmax = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_u8_rmax = INIT_ONCE_STATIC_INIT;
-#else
-  static pthread_once_t init_guard_f16_rmax = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_rmax = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_u8_rmax = PTHREAD_ONCE_INIT;
-#endif
+XNN_INIT_ONCE_GUARD(f16_rmax);
+XNN_INIT_ONCE_GUARD(f32_rmax);
+XNN_INIT_ONCE_GUARD(u8_rmax);
 
 static void init_f16_rmax_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
@@ -81,7 +70,6 @@ static void init_f32_rmax_config(void) {
       f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__avx512f_u64_acc4;
     } else if (hardware_config->use_x86_avx) {
       f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__avx_u32_acc4;
-      f32_rmax_config.init.f32 = xnn_init_f32_default_avx_params;
     } else {
       f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__sse_u16_acc4;
     }
@@ -121,33 +109,12 @@ static void init_u8_rmax_config(void) {
 
 }
 
-#if XNN_PLATFORM_WINDOWS
-  static BOOL CALLBACK init_f16_rmax_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_rmax_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_rmax_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_rmax_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_u8_rmax_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_u8_rmax_config();
-    return TRUE;
-  }
-#endif
-
 const struct xnn_rmax_config* xnn_init_f16_rmax_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_rmax, &init_f16_rmax_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_rmax, &init_f16_rmax_config);
-  #endif
+  XNN_INIT_ONCE(f16_rmax);
   return &f16_rmax_config;
 }
 
@@ -156,11 +123,7 @@ const struct xnn_rmax_config* xnn_init_f32_rmax_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_rmax, &init_f32_rmax_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_rmax, &init_f32_rmax_config);
-  #endif
+  XNN_INIT_ONCE(f32_rmax);
   return &f32_rmax_config;
 }
 
@@ -169,10 +132,6 @@ const struct xnn_rmax_config* xnn_init_u8_rmax_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_u8_rmax, &init_u8_rmax_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_u8_rmax, &init_u8_rmax_config);
-  #endif
+  XNN_INIT_ONCE(u8_rmax);
   return &u8_rmax_config;
 }

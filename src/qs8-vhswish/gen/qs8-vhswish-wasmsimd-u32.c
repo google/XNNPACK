@@ -32,10 +32,10 @@ void xnn_qs8_vhswish_ukernel__wasmsimd_u32(
   const v128_t vshift_max = wasm_v128_load64_splat(params->wasmsimd.shift_max);
   const v128_t vshift_min = wasm_v128_load64_splat(params->wasmsimd.shift_min);
   const v128_t vscale_ratio = wasm_v128_load64_splat(params->wasmsimd.scale_ratio);
-  const v128_t vmax_val = wasm_v128_load64_splat(params->wasmsimd.max_val);
-  const v128_t vmin_val = wasm_v128_load64_splat(params->wasmsimd.min_val);
-  const v128_t vhalf = wasm_v128_load64_splat(params->wasmsimd.half);
-  const v128_t vzero = wasm_v128_load64_splat(params->wasmsimd.zero);
+  const v128_t vmax_val = wasm_u16x8_const_splat(0x7FFF);
+  const v128_t vmin_val = wasm_u16x8_const_splat(0x8000);
+  const v128_t vhalf = wasm_u16x8_const_splat(0x4000);
+  const v128_t vzero = wasm_u16x8_const_splat(0);
   const v128_t vinput_scale_div_exp = wasm_i16x8_splat(1 << params->wasmsimd.input_scale_div_exp);
 
   for (; batch >= 32 * sizeof(int8_t); batch -= 32 * sizeof(int8_t)) {

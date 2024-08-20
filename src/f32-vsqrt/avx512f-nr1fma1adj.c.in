@@ -27,7 +27,7 @@ void xnn_f32_vsqrt_ukernel__avx512f_nr1fma1adj_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m512 vhalf = _mm512_set1_ps(params->avx512.half);
+  const __m512 vhalf = _mm512_set1_ps(0.5f);
   $if BATCH_TILE > 16:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       const __m512 vx${ABC[0]} = _mm512_loadu_ps(input);

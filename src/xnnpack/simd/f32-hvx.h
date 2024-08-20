@@ -44,9 +44,19 @@ static XNN_INLINE xnn_simd_f32_t xnn_add_f32(xnn_simd_f32_t a,
   return Q6_Vsf_vadd_VsfVsf(a, b);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_add_qf32(xnn_simd_f32_t a,
+                                              xnn_simd_f32_t b) {
+  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_VsfVsf(a, b));
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_mul_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
   return Q6_Vsf_vmpy_VsfVsf(a, b);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_mul_qf32(xnn_simd_f32_t a,
+                                              xnn_simd_f32_t b) {
+  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(a, b));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_div_f32(xnn_simd_f32_t a,
@@ -60,15 +70,32 @@ static XNN_INLINE xnn_simd_f32_t xnn_fmadd_f32(xnn_simd_f32_t a,
   return Q6_Vsf_vadd_VsfVsf(c, Q6_Vsf_vmpy_VsfVsf(a, b));
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_fmadd_qf32(xnn_simd_f32_t a,
+                                                xnn_simd_f32_t b,
+                                                xnn_simd_f32_t c) {
+  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vadd_Vqf32Vsf(Q6_Vqf32_vmpy_VsfVsf(a, b), c));
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_fnmadd_f32(xnn_simd_f32_t a,
                                                 xnn_simd_f32_t b,
                                                 xnn_simd_f32_t c) {
   return Q6_Vsf_vsub_VsfVsf(c, Q6_Vsf_vmpy_VsfVsf(a, b));
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_fnmadd_qf32(xnn_simd_f32_t a,
+                                                 xnn_simd_f32_t b,
+                                                 xnn_simd_f32_t c) {
+  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vsub_VsfVsf(c, xnn_mul_qf32(a, b)));
+}
+
 static XNN_INLINE xnn_simd_f32_t xnn_sub_f32(xnn_simd_f32_t a,
                                              xnn_simd_f32_t b) {
   return Q6_Vsf_vsub_VsfVsf(a, b);
+}
+
+static XNN_INLINE xnn_simd_f32_t xnn_sub_qf32(xnn_simd_f32_t a,
+                                              xnn_simd_f32_t b) {
+  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vsub_VsfVsf(a, b));
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_max_f32(xnn_simd_f32_t a,

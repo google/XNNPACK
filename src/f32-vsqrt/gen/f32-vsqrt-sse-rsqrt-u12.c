@@ -48,8 +48,8 @@ void xnn_f32_vsqrt_ukernel__sse_rsqrt_u12(
   assert(output != NULL);
 
   // Constants for the Newton-Raphson iteration.
-  const __m128 vthree = _mm_load_ps(params->sse.three);
-  const __m128 vhalf = _mm_load_ps(params->sse.half);
+  const __m128 vthree = _mm_set1_ps(3.0f);
+  const __m128 vhalf = _mm_set1_ps(0.5f);
 
   for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {
     const __m128 vx0 = _mm_loadu_ps(input);

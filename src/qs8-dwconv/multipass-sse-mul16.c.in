@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert SSE in [2, 4]
-$assert not XOP or AVX
 $assert not AVX or SSE == 4
 $assert REQUANTIZATION == "FP32"
 $assert DATATYPE in ["QC8", "QS8", "QU8"]
@@ -21,14 +20,7 @@ $assert MIDDLE_PASS_TILE >= 1
 $assert LAST_PASS_TILE >= 1
 #include <assert.h>
 
-$if XOP:
-  #ifdef _MSC_VER
-    #include <intrin.h>
-  #else
-    #include <x86intrin.h>
-  #endif
-$else:
-  #include <${SSE_HEADER}>
+#include <${SSE_HEADER}>
 
 #include "xnnpack/dwconv.h"
 #include "xnnpack/math.h"
@@ -38,7 +30,7 @@ $else:
 $DATATYPE_SPEC = {"QS8": "qs8", "QC8": "qs8_qc8w", "QU8": "qu8"}[DATATYPE]
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("sse4" if SSE == 4 and DATATYPE != "QU8" else "sse2")
 $PARAMS_UNION = "xnn_qs8_qc8w_conv_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
-$ISA = "xop" if XOP else "avx" if AVX else {2: "sse2", 4: "sse41"}[SSE]
+$ISA = "avx" if AVX else {2: "sse2", 4: "sse41"}[SSE]
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${FIRST_PASS_TILE}f${MIDDLE_PASS_TILE}m${LAST_PASS_TILE}l${CHANNEL_TILE}c${CHANNEL_SUBTILE}s${CHANNEL_ROUND}r__${ISA}_mul16${"_add16" if ADD16 else ""}(
     size_t channels,
@@ -123,8 +115,6 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${FIRS
               __m128i vprod${ABC[C:C+8]} = _mm_mullo_epi16(vxi${K}x${ABC[C:C+8]}, vxk${K}x${ABC[C:C+8]});
             $elif K % 2 == 0 or not ADD16:
               vprod${ABC[C:C+8]} = _mm_mullo_epi16(vxi${K}x${ABC[C:C+8]}, vxk${K}x${ABC[C:C+8]});
-            $elif XOP:
-              vprod${ABC[C:C+8]} = _mm_macc_epi16(vxi${K}x${ABC[C:C+8]}, vxk${K}x${ABC[C:C+8]}, vprod${ABC[C:C+8]});
             $else:
               vprod${ABC[C:C+8]} = _mm_add_epi16(vprod${ABC[C:C+8]}, _mm_mullo_epi16(vxi${K}x${ABC[C:C+8]}, vxk${K}x${ABC[C:C+8]}));
 
@@ -199,8 +189,6 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${FIRS
                 __m128i vprod${ABC[0:8]} = _mm_mullo_epi16(vxi${K}x${ABC[0:8]}, vxk${K}x${ABC[0:8]});
               $elif K % 2 == 0 or not ADD16:
                 vprod${ABC[0:8]} = _mm_mullo_epi16(vxi${K}x${ABC[0:8]}, vxk${K}x${ABC[0:8]});
-              $elif XOP:
-                vprod${ABC[0:8]} = _mm_macc_epi16(vxi${K}x${ABC[0:8]}, vxk${K}x${ABC[0:8]}, vprod${ABC[0:8]});
               $else:
                 vprod${ABC[0:8]} = _mm_add_epi16(vprod${ABC[0:8]}, _mm_mullo_epi16(vxi${K}x${ABC[0:8]}, vxk${K}x${ABC[0:8]}));
 
@@ -285,8 +273,6 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${FIRS
               __m128i vprod${ABC[C:C+8]} = _mm_mullo_epi16(vxi${K}x${ABC[C:C+8]}, vxk${K}x${ABC[C:C+8]});
             $elif K % 2 == 0 or not ADD16:
               vprod${ABC[C:C+8]} = _mm_mullo_epi16(vxi${K}x${ABC[C:C+8]}, vxk${K}x${ABC[C:C+8]});
-            $elif XOP:
-              vprod${ABC[C:C+8]} = _mm_macc_epi16(vxi${K}x${ABC[C:C+8]}, vxk${K}x${ABC[C:C+8]}, vprod${ABC[C:C+8]});
             $else:
               vprod${ABC[C:C+8]} = _mm_add_epi16(vprod${ABC[C:C+8]}, _mm_mullo_epi16(vxi${K}x${ABC[C:C+8]}, vxk${K}x${ABC[C:C+8]}));
 
@@ -361,8 +347,6 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${FIRS
                 __m128i vprod${ABC[0:8]} = _mm_mullo_epi16(vxi${K}x${ABC[0:8]}, vxk${K}x${ABC[0:8]});
               $elif K % 2 == 0 or not ADD16:
                 vprod${ABC[0:8]} = _mm_mullo_epi16(vxi${K}x${ABC[0:8]}, vxk${K}x${ABC[0:8]});
-              $elif XOP:
-                vprod${ABC[0:8]} = _mm_macc_epi16(vxi${K}x${ABC[0:8]}, vxk${K}x${ABC[0:8]}, vprod${ABC[0:8]});
               $else:
                 vprod${ABC[0:8]} = _mm_add_epi16(vprod${ABC[0:8]}, _mm_mullo_epi16(vxi${K}x${ABC[0:8]}, vxk${K}x${ABC[0:8]}));
 
@@ -446,8 +430,6 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${FIRS
               __m128i vprod${ABC[C:C+8]} = _mm_mullo_epi16(vxi${K}x${ABC[C:C+8]}, vxk${K}x${ABC[C:C+8]});
             $elif K % 2 == 0 or not ADD16:
               vprod${ABC[C:C+8]} = _mm_mullo_epi16(vxi${K}x${ABC[C:C+8]}, vxk${K}x${ABC[C:C+8]});
-            $elif XOP:
-              vprod${ABC[C:C+8]} = _mm_macc_epi16(vxi${K}x${ABC[C:C+8]}, vxk${K}x${ABC[C:C+8]}, vprod${ABC[C:C+8]});
             $else:
               vprod${ABC[C:C+8]} = _mm_add_epi16(vprod${ABC[C:C+8]}, _mm_mullo_epi16(vxi${K}x${ABC[C:C+8]}, vxk${K}x${ABC[C:C+8]}));
 
@@ -583,8 +565,6 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${FIRS
               __m128i vprod${ABC[0:8]} = _mm_mullo_epi16(vxi${K}x${ABC[0:8]}, vxk${K}x${ABC[0:8]});
             $elif K % 2 == 0 or not ADD16:
               vprod${ABC[0:8]} = _mm_mullo_epi16(vxi${K}x${ABC[0:8]}, vxk${K}x${ABC[0:8]});
-            $elif XOP:
-              vprod${ABC[0:8]} = _mm_macc_epi16(vxi${K}x${ABC[0:8]}, vxk${K}x${ABC[0:8]}, vprod${ABC[0:8]});
             $else:
               vprod${ABC[0:8]} = _mm_add_epi16(vprod${ABC[0:8]}, _mm_mullo_epi16(vxi${K}x${ABC[0:8]}, vxk${K}x${ABC[0:8]}));
 

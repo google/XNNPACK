@@ -28,7 +28,6 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u128(
   assert(output != NULL);
   assert(sum != NULL);
 
-  XNN_SIMD_CONST_F32(vindex_mask, INT32_C(0x3F));
   const HVX_Vector vi_max = xnn_set1_f32(*max);
   const HVX_Vector vlog2e = xnn_set1_f32(params->hvx_rr2_p5.log2e);
   const HVX_Vector vmagic_bias = xnn_set1_f32(params->hvx_rr2_p5.magic_bias);

@@ -29,11 +29,6 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/f32-f16-vcvt/gen/f32-f16-vcvt-sse2-u16.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-sse2-u24.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-sse2-u32.c
-  src/f32-gemminc/gen/f32-gemminc-1x8-minmax-sse2-dup.c
-  src/f32-gemminc/gen/f32-gemminc-3x8-minmax-sse2-dup.c
-  src/f32-gemminc/gen/f32-gemminc-4x8-minmax-sse2-dup.c
-  src/f32-gemminc/gen/f32-gemminc-5x8-minmax-sse2-dup.c
-  src/f32-gemminc/gen/f32-gemminc-6x8-minmax-sse2-dup.c
   src/f32-prelu/gen/f32-prelu-sse2-2x4.c
   src/f32-prelu/gen/f32-prelu-sse2-2x8.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse2-u8.c
@@ -103,34 +98,6 @@ SET(ALL_SSE2_MICROKERNEL_SRCS
   src/f32-vunary/gen/f32-vabs-sse2.c
   src/f32-vunary/gen/f32-vneg-sse2.c
   src/f32-vunary/gen/f32-vsqr-sse2.c
-  src/math/f16-f32-cvt-sse2-int16.c
-  src/math/f16-f32-cvt-sse2-int32.c
-  src/math/f32-exp-sse2-rr2-lut64-p2.c
-  src/math/f32-exp-sse2-rr2-p5.c
-  src/math/f32-expm1minus-sse2-rr2-lut16-p3.c
-  src/math/f32-expm1minus-sse2-rr2-p6.c
-  src/math/f32-expminus-sse2-rr2-p5.c
-  src/math/f32-f16-cvt-sse2.c
-  src/math/f32-roundd-sse2-cvt.c
-  src/math/f32-roundne-sse2-cvt.c
-  src/math/f32-roundu-sse2-cvt.c
-  src/math/f32-roundz-sse2-cvt.c
-  src/math/f32-sigmoid-sse2-rr2-lut64-p2-div.c
-  src/math/f32-sigmoid-sse2-rr2-lut64-p2-nr1.c
-  src/math/f32-sigmoid-sse2-rr2-lut64-p2-nr2.c
-  src/math/f32-sigmoid-sse2-rr2-p5-div.c
-  src/math/f32-sigmoid-sse2-rr2-p5-nr1.c
-  src/math/f32-sigmoid-sse2-rr2-p5-nr2.c
-  src/math/gen/f32-tanh-sse2-expm1minus-rr1-lut8-p4h3ps-div.c
-  src/math/gen/f32-tanh-sse2-expm1minus-rr1-p6h5ts-div.c
-  src/math/gen/f32-tanh-sse2-expm1minus-rr1-p6h5ts-nr1.c
-  src/math/gen/f32-tanh-sse2-expm1minus-rr1-p6h5ts-nr2.c
-  src/math/gen/f32-tanh-sse2-expm1minus-rr2-lut8-p4h2ts-nr1.c
-  src/math/gen/f32-tanh-sse2-expm1minus-rr2-lut8-p4h2ts-nr2.c
-  src/math/gen/f32-tanh-sse2-expm1minus-rr2-lut8-p4h3ps-nr1.c
-  src/math/gen/f32-tanh-sse2-expm1minus-rr2-lut8-p4h3ps-nr2.c
-  src/math/gen/f32-tanh-sse2-expm1minus-rr2-lut8-p4h3ts-nr1.c
-  src/math/gen/f32-tanh-sse2-expm1minus-rr2-lut8-p4h3ts-nr2.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x4c8-minmax-sse2-ld64.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x4c8-minmax-sse2-ld128.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-2x4c8-minmax-sse2-ld64.c

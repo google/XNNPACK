@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <string.h>
 
+
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/log.h"

@@ -10,6 +10,7 @@ $NUM_ITERS = TILE_SIZE.bit_length() - 1
 $__M128X = {32: "__m128", 64: "__m128d"}[SIZE]
 $__M256X = {32: "__m256", 64: "__m256d"}[SIZE]
 $XFLOAT = {32: "float", 64: "double"}[SIZE]
+$XINT = {32: "int32_t", 64: "int64_t"}[SIZE]
 $_MM_STOREU_PX = {32: "_mm_storeu_ps", 64: "_mm_storeu_pd"}[SIZE]
 $_MM256_UNPACKLO_PX = {32: "_mm256_unpacklo_ps", 64: "_mm256_unpacklo_pd"}[SIZE]
 $_MM256_UNPACKHI_PX = {32: "_mm256_unpackhi_ps", 64: "_mm256_unpackhi_pd"}[SIZE]
@@ -38,9 +39,13 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
     size_t input_stride,
     size_t output_stride,
     size_t block_width,
-    size_t block_height,
-    const union xnn_x${SIZE}_transpose_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    size_t block_height) XNN_OOB_READS
 {
+  $if SIZE == 64:
+    static const int64_t mask_table[7] = {-1, -1, -1, -1, 0, 0, 0};
+  $else:
+    static const int32_t mask_table[15] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
   assert(block_width == 1 || output_stride >= block_height * sizeof(${XFLOAT}));
   assert(block_height == 1 || input_stride >= block_width * sizeof(${XFLOAT}));
 
@@ -84,7 +89,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_SIZE}x${TILE_SIZE}_${IN_PTRS.lower(
     $elif OUT_PTRS == "SWITCH":
       const size_t oN_stride = rem * output_stride;
 
-    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx.mask_table[rem ^ ${TILE_SIZE-1}]));
+    __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[rem ^ ${TILE_SIZE-1}]));
 
     size_t bh = block_height;
     for (; bh >= ${TILE_SIZE}; bh -= ${TILE_SIZE}) {

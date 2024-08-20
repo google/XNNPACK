@@ -6,14 +6,9 @@
 #include <assert.h>
 #include <stddef.h>
 
-#ifdef _WIN32
-  #include <windows.h>
-#else
-  #include <pthread.h>
-#endif
-
 #include "xnnpack/common.h"
 #include "xnnpack/config.h"
+#include "xnnpack/init-once.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/transpose.h"
@@ -21,11 +16,7 @@
 
 static struct xnn_transpose_config transpose_config = {0};
 
-#if XNN_PLATFORM_WINDOWS
-  static INIT_ONCE init_guard = INIT_ONCE_STATIC_INIT;
-#else
-  static pthread_once_t init_guard = PTHREAD_ONCE_INIT;
-#endif
+XNN_INIT_ONCE_GUARD(transpose);
 
 static void init_transpose_config(void) {
   #if XNN_ARCH_ARM
@@ -44,7 +35,6 @@ static void init_transpose_config(void) {
       };
       transpose_config.x24 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x24_transposec_ukernel__2x2_neon_tbl64,
-        .init.x24 = (xnn_init_x24_transpose_params_fn) xnn_init_x24_transpose_neon_tbl64_params,
         .tile_size = 32,
       };
       transpose_config.x32 = (struct xnn_transpose_subconfig) {
@@ -98,13 +88,11 @@ static void init_transpose_config(void) {
     };
     transpose_config.x24 = (struct xnn_transpose_subconfig) {
       .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128,
-      .init.x24 = (xnn_init_x24_transpose_params_fn) xnn_init_x24_transpose_neon_tbl128_params,
       .tile_size = 32,
     };
     transpose_config.x32 = (struct xnn_transpose_subconfig) {
       .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x32_transposec_ukernel__4x4_aarch64_neon_tbl128,
       .tile_size = 32,
-      .init.x32 = (xnn_init_x32_transpose_params_fn) xnn_init_x32_transpose_neon_tbl128_params,
     };
     transpose_config.x64 = (struct xnn_transpose_subconfig) {
       .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x64_transposec_ukernel__2x2_multi_dec_zip_neon,
@@ -146,31 +134,26 @@ static void init_transpose_config(void) {
     if (hardware_config->use_x86_ssse3) {
       transpose_config.x24 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x24_transposec_ukernel__4x4_ssse3,
-        .init.x24 = (xnn_init_x24_transpose_params_fn) xnn_init_x24_transpose_ssse3_params,
         .tile_size = 32,
       };
     }
     if (hardware_config->use_x86_avx) {
       transpose_config.x32 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x32_transposec_ukernel__8x8_reuse_multi_avx,
-        .init.x32 = (xnn_init_x32_transpose_params_fn) xnn_init_x32_transpose_avx_params,
         .tile_size = 32,
       };
       transpose_config.x64 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x64_transposec_ukernel__4x4_reuse_multi_avx,
-        .init.x64 = (xnn_init_x64_transpose_params_fn) xnn_init_x64_transpose_avx_params,
         .tile_size = 32,
       };
     }
     if (hardware_config->use_x86_avx2) {
       transpose_config.x8 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x8_transposec_ukernel__32x32_reuse_switch_avx2,
-        .init.x8 = (xnn_init_x8_transpose_params_fn) xnn_init_x8_transpose_avx2_params,
         .tile_size = 32,
       };
       transpose_config.x16 = (struct xnn_transpose_subconfig) {
         .const_size_ukernel = (xnn_transposec_ukernel_fn) xnn_x16_transposec_ukernel__16x16_reuse_switch_avx2,
-        .init.x16 = (xnn_init_x16_transpose_params_fn) xnn_init_x16_transpose_avx2_params,
         .tile_size = 32,
       };
     }
@@ -260,22 +243,11 @@ static void init_transpose_config(void) {
   #endif
 }
 
-#if XNN_PLATFORM_WINDOWS
-  static BOOL CALLBACK init_transpose_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_transpose_config();
-    return TRUE;
-  }
-#endif
-
 const struct xnn_transpose_config* xnn_init_transpose_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard, &init_transpose_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard, &init_transpose_config);
-  #endif
+  XNN_INIT_ONCE(transpose);
   return &transpose_config;
 }

@@ -15,12 +15,9 @@
 
 # ARM NEON
 - name: xnn_x24_transposec_ukernel__2x2_neon_tbl64
-  init: xnn_init_x24_transpose_neon_tbl64_params
 
 # AArch64
 - name: xnn_x24_transposec_ukernel__4x4_aarch64_neon_tbl128
-  init: xnn_init_x24_transpose_neon_tbl128_params
 
 # SSSE3
 - name: xnn_x24_transposec_ukernel__4x4_ssse3
-  init: xnn_init_x24_transpose_ssse3_params

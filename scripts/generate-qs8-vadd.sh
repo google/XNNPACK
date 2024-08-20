@@ -70,85 +70,85 @@ tools/xngen src/qs8-vaddc/neon.c.in -D BATCH_TILE=32 -D LD128=0 -D DATATYPE=QU8 
 tools/xngen src/qs8-vaddc/neon.c.in -D BATCH_TILE=16 -D LD128=1 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-neon-ld128-u16.c &
 
 ################################### x86 SSE ###################################
-tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse2-mul16-ld64-u8.c &
-tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse2-mul16-ld64-u16.c &
-tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=24 -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse2-mul16-ld64-u24.c &
-tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=32 -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse2-mul16-ld64-u32.c &
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=2 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse2-mul16-ld64-u8.c &
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=2 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse2-mul16-ld64-u16.c &
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=24 -D SSE=2 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse2-mul16-ld64-u24.c &
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=32 -D SSE=2 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse2-mul16-ld64-u32.c &
 
-tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-sse2-mul16-ld64-u8.c &
-tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-sse2-mul16-ld64-u16.c &
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=2 -D AVX=0 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-sse2-mul16-ld64-u8.c &
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=2 -D AVX=0 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-sse2-mul16-ld64-u16.c &
 
-tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul16-ld64-u8.c &
-tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul16-ld64-u16.c &
-tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul16-ld64-u24.c &
-tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul16-ld64-u32.c &
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul16-ld64-u8.c &
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul16-ld64-u16.c &
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul16-ld64-u24.c &
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul16-ld64-u32.c &
 
-tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-sse41-mul16-ld64-u8.c &
-tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-sse41-mul16-ld64-u16.c &
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=0 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-sse41-mul16-ld64-u8.c &
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-sse41-mul16-ld64-u16.c &
 
-tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-avx-mul16-ld64-u8.c &
-tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-avx-mul16-ld64-u16.c &
-tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-avx-mul16-ld64-u24.c &
-tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-avx-mul16-ld64-u32.c &
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-avx-mul16-ld64-u8.c &
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-avx-mul16-ld64-u16.c &
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=1 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-avx-mul16-ld64-u24.c &
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=1 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-avx-mul16-ld64-u32.c &
 
-tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-avx-mul16-ld64-u8.c &
-tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-avx-mul16-ld64-u16.c &
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-avx-mul16-ld64-u8.c &
+tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-avx-mul16-ld64-u16.c &
 
-tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul32-ld32-u8.c &
-tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul32-ld32-u16.c &
-tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul32-ld32-u24.c &
-tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul32-ld32-u32.c &
+tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul32-ld32-u8.c &
+tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul32-ld32-u16.c &
+tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul32-ld32-u24.c &
+tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul32-ld32-u32.c &
 
-tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-sse41-mul32-ld32-u8.c &
-tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-sse41-mul32-ld32-u16.c &
+tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=0 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-sse41-mul32-ld32-u8.c &
+tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-sse41-mul32-ld32-u16.c &
 
-tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-avx-mul32-ld32-u8.c &
-tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-avx-mul32-ld32-u16.c &
-tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-avx-mul32-ld32-u24.c &
-tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-avx-mul32-ld32-u32.c &
+tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-avx-mul32-ld32-u8.c &
+tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-avx-mul32-ld32-u16.c &
+tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=1 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-avx-mul32-ld32-u24.c &
+tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=1 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-avx-mul32-ld32-u32.c &
 
-tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-avx-mul32-ld32-u8.c &
-tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-avx-mul32-ld32-u16.c &
+tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-avx-mul32-ld32-u8.c &
+tools/xngen src/qs8-vadd/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D DATATYPE=QU8 -o src/qu8-vadd/gen/qu8-vadd-minmax-avx-mul32-ld32-u16.c &
 
-tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse2-mul16-ld64-u8.c &
-tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse2-mul16-ld64-u16.c &
-tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=24 -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse2-mul16-ld64-u24.c &
-tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=32 -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse2-mul16-ld64-u32.c &
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=2 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse2-mul16-ld64-u8.c &
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=2 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse2-mul16-ld64-u16.c &
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=24 -D SSE=2 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse2-mul16-ld64-u24.c &
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=32 -D SSE=2 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse2-mul16-ld64-u32.c &
 
-tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-sse2-mul16-ld64-u8.c &
-tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=2 -D AVX=0 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-sse2-mul16-ld64-u16.c &
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=2 -D AVX=0 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-sse2-mul16-ld64-u8.c &
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=2 -D AVX=0 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-sse2-mul16-ld64-u16.c &
 
-tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse41-mul16-ld64-u8.c &
-tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse41-mul16-ld64-u16.c &
-tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse41-mul16-ld64-u24.c &
-tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse41-mul16-ld64-u32.c &
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse41-mul16-ld64-u8.c &
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse41-mul16-ld64-u16.c &
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse41-mul16-ld64-u24.c &
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse41-mul16-ld64-u32.c &
 
-tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-sse41-mul16-ld64-u8.c &
-tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-sse41-mul16-ld64-u16.c &
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=0 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-sse41-mul16-ld64-u8.c &
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-sse41-mul16-ld64-u16.c &
 
-tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-avx-mul16-ld64-u8.c &
-tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-avx-mul16-ld64-u16.c &
-tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-avx-mul16-ld64-u24.c &
-tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-avx-mul16-ld64-u32.c &
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-avx-mul16-ld64-u8.c &
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-avx-mul16-ld64-u16.c &
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=1 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-avx-mul16-ld64-u24.c &
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=1 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-avx-mul16-ld64-u32.c &
 
-tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-avx-mul16-ld64-u8.c &
-tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-avx-mul16-ld64-u16.c &
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-avx-mul16-ld64-u8.c &
+tools/xngen src/qs8-vaddc/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-avx-mul16-ld64-u16.c &
 
-tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse41-mul32-ld32-u8.c &
-tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse41-mul32-ld32-u16.c &
-tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse41-mul32-ld32-u24.c &
-tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse41-mul32-ld32-u32.c &
+tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse41-mul32-ld32-u8.c &
+tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse41-mul32-ld32-u16.c &
+tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse41-mul32-ld32-u24.c &
+tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-sse41-mul32-ld32-u32.c &
 
-tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-sse41-mul32-ld32-u8.c &
-tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-sse41-mul32-ld32-u16.c &
+tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=0 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-sse41-mul32-ld32-u8.c &
+tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=0 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-sse41-mul32-ld32-u16.c &
 
-tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-avx-mul32-ld32-u8.c &
-tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-avx-mul32-ld32-u16.c &
-tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-avx-mul32-ld32-u24.c &
-tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-avx-mul32-ld32-u32.c &
+tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-avx-mul32-ld32-u8.c &
+tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-avx-mul32-ld32-u16.c &
+tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=24 -D SSE=4 -D AVX=1 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-avx-mul32-ld32-u24.c &
+tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=32 -D SSE=4 -D AVX=1 -D DATATYPE=QS8 -o src/qs8-vaddc/gen/qs8-vaddc-minmax-avx-mul32-ld32-u32.c &
 
-tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-avx-mul32-ld32-u8.c &
-tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D XOP=0 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-avx-mul32-ld32-u16.c &
+tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=8  -D SSE=4 -D AVX=1 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-avx-mul32-ld32-u8.c &
+tools/xngen src/qs8-vaddc/sse-mul32-ld32.c.in -D BATCH_TILE=16 -D SSE=4 -D AVX=1 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-avx-mul32-ld32-u16.c &
 
 ################################### x86 AVX ###################################
 tools/xngen src/qs8-vadd/avx2-mul32-ld64.c.in -D BATCH_TILE=8  -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-avx2-mul32-ld64-u8.c &

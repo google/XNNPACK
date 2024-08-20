@@ -27,14 +27,29 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr1_lut16_p3_perm_scalef_div_u48(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m512i vsign_mask = _mm512_set1_epi32((int) params->avx512_rr1_lut16_p3.sign_mask);
-  const __m512 vmagic_bias = _mm512_set1_ps(params->avx512_rr1_lut16_p3.magic_bias);
-  const __m512 vlog2e = _mm512_set1_ps(params->avx512_rr1_lut16_p3.log2e);
-  const __m512 vtable = _mm512_load_ps(params->avx512_rr1_lut16_p3.table);
-  const __m512 vminus_ln2 = _mm512_set1_ps(params->avx512_rr1_lut16_p3.minus_ln2);
-  const __m512 vc3 = _mm512_set1_ps(params->avx512_rr1_lut16_p3.c3);
-  const __m512 vc2 = _mm512_set1_ps(params->avx512_rr1_lut16_p3.c2);
-  const __m512 vone = _mm512_set1_ps(params->avx512_rr1_lut16_p3.one);
+  XNN_ALIGN(64) static const float table[16] = {
+    0x1.000000p+0f, 0x1.0B5586p+0f, 0x1.172B84p+0f, 0x1.2387A6p+0f, 
+    0x1.306FE0p+0f, 0x1.3DEA64p+0f, 0x1.4BFDAEp+0f, 0x1.5AB07Ep+0f, 
+    0x1.6A09E6p+0f, 0x1.7A1148p+0f, 0x1.8ACE54p+0f, 0x1.9C4918p+0f,
+    0x1.AE89FAp+0f, 0x1.C199BEp+0f, 0x1.D5818Ep+0f, 0x1.EA4AFAp+0f,
+  };
+  const __m512 vtable = _mm512_load_ps(table);
+
+  const __m512i vsign_mask = _mm512_set1_epi32(UINT32_C(0x80000000));
+  const __m512 vmagic_bias = _mm512_set1_ps(0x1.800000p19f);
+  const __m512 vlog2e = _mm512_set1_ps(0x1.715476p0f);
+  const __m512 vminus_ln2 = _mm512_set1_ps(-0x1.62E430p-1f);
+  const __m512 vc3 = _mm512_set1_ps(0x1.55559Ap-3f);
+  const __m512 vc2 = _mm512_set1_ps(0x1.00021Ep-1f);
+  const __m512 vone = _mm512_set1_ps(1.0f);
+
+  XNN_FORCE_REALIZATION(vsign_mask);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vminus_ln2);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vone);
 
   for (; batch >= 48 * sizeof(float); batch -= 48 * sizeof(float)) {
     const __m512 vx0 = _mm512_loadu_ps(input);

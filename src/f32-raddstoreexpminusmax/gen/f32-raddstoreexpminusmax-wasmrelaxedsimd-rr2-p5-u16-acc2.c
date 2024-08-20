@@ -30,17 +30,29 @@ void xnn_f32_raddstoreexpminusmax_ukernel__wasmrelaxedsimd_rr2_p5_u16_acc2(
   assert(output != NULL);
   assert(sum != NULL);
 
+  const v128_t vlog2e = wasm_f32x4_const_splat(0x1.715476p+0f);
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(0x1.8000FEp23f);
+  const v128_t vminus_ln2_hi = wasm_f32x4_const_splat(-0x1.62E400p-1f);
+  const v128_t vminus_ln2_lo = wasm_f32x4_const_splat(-0x1.7F7D1Cp-20f);
+  const v128_t vc5 = wasm_f32x4_const_splat(0x1.0F9F9Cp-7f);
+  const v128_t vc4 = wasm_f32x4_const_splat(0x1.573A1Ap-5f);
+  const v128_t vc3 = wasm_f32x4_const_splat(0x1.555A80p-3f);
+  const v128_t vc2 = wasm_f32x4_const_splat(0x1.FFFDC6p-2f);
+  const v128_t vc1 = wasm_f32x4_const_splat(0x1.FFFFF6p-1f);
+  const v128_t vdenorm_cutoff = wasm_f32x4_const_splat(-0x1.5D589Ep6f);
+
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vminus_ln2_hi);
+  XNN_FORCE_REALIZATION(vminus_ln2_lo);
+  XNN_FORCE_REALIZATION(vc5);
+  XNN_FORCE_REALIZATION(vc4);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
+
   const v128_t vi_max = wasm_v128_load32_splat(max);
-  const v128_t vlog2e = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.log2e);
-  const v128_t vmagic_bias = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.magic_bias);
-  const v128_t vminus_ln2_hi = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.minus_ln2_hi);
-  const v128_t vminus_ln2_lo = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.minus_ln2_lo);
-  const v128_t vc5 = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.c5);
-  const v128_t vc4 = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.c4);
-  const v128_t vc3 = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.c3);
-  const v128_t vc2 = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.c2);
-  const v128_t vc1 = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.c1);
-  const v128_t vdenorm_cutoff = wasm_v128_load64_splat(params->wasmsimd_rr2_p5.denorm_cutoff);
 
   v128_t vacc0 = wasm_f32x4_const_splat(0.0f);
   v128_t vacc1 = vacc0;

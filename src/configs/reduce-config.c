@@ -6,14 +6,9 @@
 #include <assert.h>
 #include <stddef.h>
 
-#ifdef _WIN32
-  #include <windows.h>
-#else
-  #include <pthread.h>
-#endif
-
 #include "xnnpack/common.h"
 #include "xnnpack/config.h"
+#include "xnnpack/init-once.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/reduce.h"
@@ -25,21 +20,12 @@ static struct xnn_reduce_config f32_rminmax_config = {0};
 static struct xnn_reduce_config f32_rsum_config = {0};
 static struct xnn_reduce_config f32_rdsum_config = {0};
 
-#if XNN_PLATFORM_WINDOWS
-  static INIT_ONCE init_guard_f16_f32acc_rsum = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_f32acc_rdsum = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f16_rminmax = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_rminmax = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_rsum = INIT_ONCE_STATIC_INIT;
-  static INIT_ONCE init_guard_f32_rdsum = INIT_ONCE_STATIC_INIT;
-#else
-  static pthread_once_t init_guard_f16_f32acc_rsum = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_f32acc_rdsum = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f16_rminmax = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_rminmax = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_rsum = PTHREAD_ONCE_INIT;
-  static pthread_once_t init_guard_f32_rdsum = PTHREAD_ONCE_INIT;
-#endif
+XNN_INIT_ONCE_GUARD(f16_f32acc_rsum);
+XNN_INIT_ONCE_GUARD(f16_f32acc_rdsum);
+XNN_INIT_ONCE_GUARD(f16_rminmax);
+XNN_INIT_ONCE_GUARD(f32_rminmax);
+XNN_INIT_ONCE_GUARD(f32_rsum);
+XNN_INIT_ONCE_GUARD(f32_rdsum);
 
 static void init_f16_f32acc_rsum_config(void) {
   #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_ARM_FP16_VECTOR
@@ -64,7 +50,7 @@ static void init_f16_f32acc_rsum_config(void) {
     } else if (hardware_config->use_x86_f16c) {
       f16_f32acc_rsum_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__f16c_u32_acc4,
-        .init.f16_f32acc_scale = xnn_init_f16_f32acc_scale_avx_params,
+        .init.f16_f32acc_scale = xnn_init_f16_f32acc_scale_scalar_params,
         .element_tile = 32,
       };
     }
@@ -130,7 +116,6 @@ static void init_f32_rminmax_config(void) {
     } else if (hardware_config->use_x86_avx) {
       f32_rminmax_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rminmax_ukernel__avx_u32_acc4,
-        .init.f32_default = xnn_init_f32_default_avx_params,
         .element_tile = 32,
       };
     } else {
@@ -170,20 +155,20 @@ static void init_f32_rsum_config(void) {
     if (hardware_config->use_arm_neon) {
       f32_rsum_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__neon_u16_acc4,
-        .init.f32_scale = xnn_init_f32_scale_scalar_params,
+        .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
         .element_tile = 16,
       };
     } else {
       f32_rsum_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__scalar_u4_acc4,
-        .init.f32_scale = xnn_init_f32_scale_scalar_params,
+        .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
         .element_tile = 4,
       };
     }
   #elif XNN_ARCH_ARM64
     f32_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__neon_u16_acc4,
-      .init.f32_scale = xnn_init_f32_scale_scalar_params,
+      .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
       .element_tile = 16,
     };
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -192,32 +177,32 @@ static void init_f32_rsum_config(void) {
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       f32_rsum_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__avx512f_u64_acc4,
-        .init.f32_scale = xnn_init_f32_scale_scalar_params,
+        .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
         .element_tile = 64,
       };
     } else if (hardware_config->use_x86_avx) {
       f32_rsum_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__avx_u32_acc4,
-        .init.f32_scale = xnn_init_f32_scale_avx_params,
+        .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
         .element_tile = 32,
       };
     } else {
       f32_rsum_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__sse_u16_acc4,
-        .init.f32_scale = xnn_init_f32_scale_scalar_params,
+        .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
         .element_tile = 16,
       };
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__wasmsimd_u16_acc4,
-      .init.f32_scale = xnn_init_f32_scale_scalar_params,
+      .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
       .element_tile = 16,
     };
   #else
     f32_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__scalar_u4_acc4,
-      .init.f32_scale = xnn_init_f32_scale_scalar_params,
+      .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
       .element_tile = 4,
     };
   #endif
@@ -246,7 +231,7 @@ static void init_f16_f32acc_rdsum_config(void) {
     } else if (hardware_config->use_x86_f16c) {
       f16_f32acc_rdsum_config = (struct xnn_reduce_config) {
         .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_c32,
-        .init.f16_f32acc_scale = xnn_init_f16_f32acc_scale_avx_params,
+        .init.f16_f32acc_scale = xnn_init_f16_f32acc_scale_scalar_params,
         .element_tile = 32,
       };
     }
@@ -260,20 +245,20 @@ static void init_f32_rdsum_config(void) {
     if (hardware_config->use_arm_neon) {
       f32_rdsum_config = (struct xnn_reduce_config) {
         .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_f32_rdsum_ukernel_7p7x__neon_c16,
-        .init.f32_scale = xnn_init_f32_scale_scalar_params,
+        .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
         .element_tile = 16,
       };
     } else {
       f32_rdsum_config = (struct xnn_reduce_config) {
         .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_f32_rdsum_ukernel_7p7x__scalar_c4,
-        .init.f32_scale = xnn_init_f32_scale_scalar_params,
+        .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
         .element_tile = 4,
       };
     }
   #elif XNN_ARCH_ARM64
     f32_rdsum_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_f32_rdsum_ukernel_7p7x__neon_c16,
-      .init.f32_scale = xnn_init_f32_scale_scalar_params,
+      .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
       .element_tile = 16,
     };
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -282,78 +267,43 @@ static void init_f32_rdsum_config(void) {
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
       f32_rdsum_config = (struct xnn_reduce_config) {
         .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_f32_rdsum_ukernel_7p7x__avx512f_c64,
-        .init.f32_scale = xnn_init_f32_scale_scalar_params,
+        .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
         .element_tile = 64,
       };
     } else if (hardware_config->use_x86_avx) {
       f32_rdsum_config = (struct xnn_reduce_config) {
         .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_f32_rdsum_ukernel_7p7x__avx_c32,
-        .init.f32_scale = xnn_init_f32_scale_avx_params,
+        .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
         .element_tile = 32,
       };
     } else {
       f32_rdsum_config = (struct xnn_reduce_config) {
         .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_f32_rdsum_ukernel_7p7x__sse_c16,
-        .init.f32_scale = xnn_init_f32_scale_sse_params,
+        .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
         .element_tile = 16,
       };
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_rdsum_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16,
-      .init.f32_scale = xnn_init_f32_scale_scalar_params,
+      .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
       .element_tile = 16,
     };
   #else
     f32_rdsum_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_f32_rdsum_ukernel_7p7x__scalar_c4,
-      .init.f32_scale = xnn_init_f32_scale_scalar_params,
+      .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
       .element_tile = 4,
     };
   #endif
 }
-
-#if XNN_PLATFORM_WINDOWS
-  static BOOL CALLBACK init_f16_f32acc_rsum_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_f32acc_rsum_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_f32acc_rdsum_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_f32acc_rdsum_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f16_rminmax_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f16_rminmax_config();
-    return TRUE;
-  }
-  static BOOL CALLBACK init_f32_rminmax_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_rminmax_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_rsum_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_rsum_config();
-    return TRUE;
-  }
-
-  static BOOL CALLBACK init_f32_rdsum_config_windows(PINIT_ONCE init_once, PVOID parameter, PVOID* context) {
-    init_f32_rdsum_config();
-    return TRUE;
-  }
-#endif
 
 const struct xnn_reduce_config* xnn_init_f16_f32acc_rsum_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_f32acc_rsum, &init_f16_f32acc_rsum_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_f32acc_rsum, &init_f16_f32acc_rsum_config);
-  #endif
+  XNN_INIT_ONCE(f16_f32acc_rsum);
   return &f16_f32acc_rsum_config;
 }
 
@@ -362,11 +312,7 @@ const struct xnn_reduce_config* xnn_init_f16_rminmax_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_rminmax, &init_f16_rminmax_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_rminmax, &init_f16_rminmax_config);
-  #endif
+  XNN_INIT_ONCE(f16_rminmax);
   return &f16_rminmax_config;
 }
 
@@ -375,11 +321,7 @@ const struct xnn_reduce_config* xnn_init_f32_rminmax_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_rminmax, &init_f32_rminmax_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_rminmax, &init_f32_rminmax_config);
-  #endif
+  XNN_INIT_ONCE(f32_rminmax);
   return &f32_rminmax_config;
 }
 
@@ -388,11 +330,7 @@ const struct xnn_reduce_config* xnn_init_f32_rsum_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_rsum, &init_f32_rsum_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_rsum, &init_f32_rsum_config);
-  #endif
+  XNN_INIT_ONCE(f32_rsum);
   return &f32_rsum_config;
 }
 
@@ -401,11 +339,7 @@ const struct xnn_reduce_config* xnn_init_f16_f32acc_rdsum_config() {
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f16_f32acc_rdsum, &init_f16_f32acc_rdsum_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f16_f32acc_rdsum, &init_f16_f32acc_rdsum_config);
-  #endif
+  XNN_INIT_ONCE(f16_f32acc_rdsum);
   return &f16_f32acc_rdsum_config;
 }
 
@@ -414,10 +348,6 @@ const struct xnn_reduce_config* xnn_init_f32_rdsum_config() {
   if (hardware_config == NULL) {
     return NULL;
   }
-  #if XNN_PLATFORM_WINDOWS
-    InitOnceExecuteOnce(&init_guard_f32_rdsum, &init_f32_rdsum_config_windows, NULL, NULL);
-  #else
-    pthread_once(&init_guard_f32_rdsum, &init_f32_rdsum_config);
-  #endif
+  XNN_INIT_ONCE(f32_rdsum);
   return &f32_rdsum_config;
 }

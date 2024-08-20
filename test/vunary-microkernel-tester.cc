@@ -24,10 +24,6 @@
 #include "xnnpack/microparams.h"
 #include "replicable_random_device.h"
 
-#if XNN_PLATFORM_JIT
-  #include "xnnpack/memory.h"
-#endif
-
 #ifndef M_SQRT1_2
 #define M_SQRT1_2 0.7071067811865475244
 #endif
@@ -40,7 +36,7 @@ void VUnaryMicrokernelTester::Test(xnn_f32_vrelu_ukernel_fn vrelu) const {
 
 void VUnaryMicrokernelTester::TestAbs(
     xnn_bf16_vabs_ukernel_fn vabs,
-    xnn_init_bf16_abs_params_fn init_params) const {
+    xnn_init_bf16_default_params_fn init_params) const {
   TestBF16(
       vabs, InitParamsWrapper(init_params), [](float x) { return std::abs(x); },
       TolExact16, -1.0f, 1.0f);
@@ -48,7 +44,7 @@ void VUnaryMicrokernelTester::TestAbs(
 
 void VUnaryMicrokernelTester::TestAbs(
     xnn_f16_vabs_ukernel_fn vabs,
-    xnn_init_f16_abs_params_fn init_params) const {
+    xnn_init_f16_default_params_fn init_params) const {
   TestFP16(
       vabs, InitParamsWrapper(init_params), [](float x) { return std::abs(x); },
       TolExact16, -1.0f, 1.0f);
@@ -161,7 +157,7 @@ void VUnaryMicrokernelTester::Test(
 
 void VUnaryMicrokernelTester::TestNeg(
     xnn_f16_vneg_ukernel_fn vneg,
-    xnn_init_f16_neg_params_fn init_params) const {
+    xnn_init_f16_default_params_fn init_params) const {
   TestFP16(
       vneg, InitParamsWrapper(init_params), [](float x) { return -x; },
       TolExact16, -1.0f, 1.0f);
@@ -494,16 +490,3 @@ void VUnaryMicrokernelTester::Test(
   }
 }
 
-#if XNN_PLATFORM_JIT
-void VUnaryMicrokernelTester::Test(xnn_vrelu_generator_fn generator,
-                                   size_t k_unroll, bool use_locals) const {
-  xnn_code_buffer b;
-  ASSERT_EQ(xnn_allocate_code_memory(&b, XNN_DEFAULT_CODE_BUFFER_SIZE),
-            xnn_status_success);
-  ASSERT_EQ(generator(&b, k_unroll, use_locals), xnn_status_success);
-  ASSERT_EQ(xnn_finalize_code_memory(&b), xnn_status_success);
-  auto kernel = (xnn_f32_vrelu_ukernel_fn)(xnn_first_function_ptr(&b));
-  Test(kernel);
-  xnn_release_code_memory(&b);
-}
-#endif  // XNN_PLATFORM_JIT

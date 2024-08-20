@@ -48,9 +48,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__avx512skx_madd_prfm(
   const __m512 voutput_min = _mm512_set1_ps(params->avx512vnni.min);
   const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
   const __m512i vsign_mask = _mm512_set1_epi8(params->avx512vnni.sign_mask);  // 0x80
-  const __m512i vkernel_sign_mask1 = _mm512_set1_epi8(params->avx512vnni.kernel_sign_mask1);  // 0x08
-  const __m512i vkernel_sign_mask2 = _mm512_set1_epi8(params->avx512vnni.kernel_sign_mask2);  // 0x88
-  const __m512i vvalue_mask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0x0F
+  const __m512i vmask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0x0F
   assert(params->avx512vnni.mask == (int8_t) 0x0F);
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_load_epi32(w);
@@ -69,14 +67,12 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__avx512skx_madd_prfm(
 
       const __m512i vbb01234567x01234567 = _mm512_load_si512(w);
       const __m512i vbb89ABCDEFx01234567 = _mm512_load_si512((const int8_t*) w + 64);
-      const __m512i vbu01234567x01234567 = _mm512_xor_si512(vbb01234567x01234567, vkernel_sign_mask2);  // convert int4 to uint4
-      const __m512i vbu89ABCDEFx01234567 = _mm512_xor_si512(vbb89ABCDEFx01234567, vkernel_sign_mask2);
-      const __m512i vbs01234567x89ABCDEF = _mm512_srli_epi32(vbu01234567x01234567, 4);
-      const __m512i vbs89ABCDEFx89ABCDEF = _mm512_srli_epi32(vbu89ABCDEFx01234567, 4);
-      const __m512i vb01234567x01234567 = _mm512_and_si512(vbu01234567x01234567, vvalue_mask);
-      const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbu89ABCDEFx01234567, vvalue_mask);
-      const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbs01234567x89ABCDEF, vvalue_mask);
-      const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbs89ABCDEFx89ABCDEF, vvalue_mask);
+      const __m512i vbs01234567x89ABCDEF = _mm512_srli_epi32(vbb01234567x01234567, 4);
+      const __m512i vbs89ABCDEFx89ABCDEF = _mm512_srli_epi32(vbb89ABCDEFx01234567, 4);
+      const __m512i vb01234567x01234567 = _mm512_and_si512(vbb01234567x01234567, vmask);
+      const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbb89ABCDEFx01234567, vmask);
+      const __m512i vb01234567x89ABCDEF = _mm512_and_si512(vbs01234567x89ABCDEF, vmask);
+      const __m512i vb89ABCDEFx89ABCDEF = _mm512_and_si512(vbs89ABCDEFx89ABCDEF, vmask);
 
       vacc0x01234567 = _mm512_dpbusd_epi32_madd(vacc0x01234567, va0x01234567, vb01234567x01234567);
       vacc0x89ABCDEF = _mm512_dpbusd_epi32_madd(vacc0x89ABCDEF, va0x01234567, vb89ABCDEFx01234567);
@@ -95,8 +91,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__avx512skx_madd_prfm(
 
       const __m512i vbb01234567x01234567 = _mm512_load_si512(w);
       const __m512i vbb89ABCDEFx01234567 = _mm512_load_si512((const int8_t*) w + 64);
-      const __m512i vb01234567x01234567 = _mm512_xor_si512(vbb01234567x01234567, vkernel_sign_mask1);  // convert int4 to uint4
-      const __m512i vb89ABCDEFx01234567 = _mm512_xor_si512(vbb89ABCDEFx01234567, vkernel_sign_mask1);
+      const __m512i vb01234567x01234567 = _mm512_and_si512(vbb01234567x01234567, vmask);
+      const __m512i vb89ABCDEFx01234567 = _mm512_and_si512(vbb89ABCDEFx01234567, vmask);
 
       vacc0x01234567 = _mm512_dpbusd_epi32_madd(vacc0x01234567, va0x01234567, vb01234567x01234567);
       vacc0x89ABCDEF = _mm512_dpbusd_epi32_madd(vacc0x89ABCDEF, va0x01234567, vb89ABCDEFx01234567);

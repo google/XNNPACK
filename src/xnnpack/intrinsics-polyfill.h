@@ -170,36 +170,37 @@ void _mm512_storeu_epi32 (void* mem_addr, __m512i a) {
 }
 #endif  // GCC pre-10
 
+#ifdef __AVX512BW__
 // VNNI replacement that uses vpmaddubsw.
 // u4 is uint4 in lower 4 bits.
+// subtracting zero_point (8) converts 4 bit value to sign extended 8 bit value.
 static XNN_INTRINSIC
 __m512i _mm512_dpbusd_epi32_madd(__m512i i32, const __m512i u8, const __m512i u4) {
-  const __m512i vzero_point = _mm512_set1_epi8(0x08);
+  const __m512i vzero_point = _mm512_set1_epi8(8);
   const __m512i vsixteen = _mm512_set1_epi16(16);
   const __m512i i4 = _mm512_sub_epi8(u4, vzero_point);  // convert uint4 to int4
   const __m512i i12 = _mm512_maddubs_epi16(u8, i4);  // u8 * i4 = i12
   const __m512i v = _mm512_madd_epi16(i12, vsixteen);  // convert 16 bits to 32 bits
   return _mm512_add_epi32(i32, v);
 }
+#endif  // __AVX512BW__
 #endif  // __AVX512F__
 
-#ifdef __AVX__
+#ifdef __AVX2__
 
 // AVXVNNI replacement that uses vpmaddubsw.
-// i4h is int4 in upper 4 bits.  Low bits are zero.
+// u4 is uint4 in lower 4 bits.
 static XNN_INTRINSIC
-__m256i _mm256_dpbusd_epi32_bw(__m256i i32, const __m256i u8, const __m256i i4h) {
-  const __m256i vzero_point = _mm256_set1_epi8(0x08);
-  const __m256i v16 = _mm256_set1_epi16(16);  // accumulators are times 16
-  const __m256i i4l = _mm256_srli_epi32(i4h, 4);   // move high nibble to low 4 bits
-  const __m256i u4 = _mm256_xor_si256(i4l, vzero_point);  // convert int4 to uint4
+__m256i _mm256_dpbusd_epi32_madd(__m256i i32, const __m256i u8, const __m256i u4) {
+  const __m256i vzero_point = _mm256_set1_epi8(8);
+  const __m256i vsixteen = _mm256_set1_epi16(16);  // accumulators are times 16
   const __m256i i4 = _mm256_sub_epi8(u4, vzero_point);  // convert uint4 to int4
   const __m256i i12 = _mm256_maddubs_epi16(u8, i4);  // u8 * i4 = i12
-  const __m256i v = _mm256_madd_epi16(i12, v16);  // convert 16 bits to 32 bits
+  const __m256i v = _mm256_madd_epi16(i12, vsixteen);  // convert 16 bits to 32 bits
   return _mm256_add_epi32(i32, v);
 }
 
-#endif  // __AVX__
+#endif  // __AVX2__
 
 
 #if XNN_ARCH_ARM
@@ -406,17 +407,57 @@ float Q6_f32_vrsum_Vsf(HVX_Vector vin){
     return *((float *) &vin);
 }
 
-// Temporary div implementation for HVX.
-// TODO: improve the implementation 
-//       e.g., use reprocical with newton-raphson approximation
+// DIV implementation using Newton-Raphson reciprocal approximation
+// Implementation comes from Halide project
+// a/b = a * fast_inverse__vsf(b)
+static XNN_INTRINSIC
+HVX_Vector fast_inverse__vsf(HVX_Vector vin) {
+    const uint32_t fp_exp_norm = 0x7F000000;  // IEEE sf: sign=0, exp=254, mant=0
+    const uint32_t fp_exp_mask = 0xFF800000;  // mask for IEEE sf exp
+    const uint32_t nr_T1       = 0x5a5a5a7f;  // Newton Raphson T1=24.0/17.0 (qf32)
+    const uint32_t nr_T2       = 0x8787877d;  // Newton Raphson T2=-8.0/17.0 (qf32)
+    const uint32_t qf_one      = 0x4000007F;  // 1.0 (qf32)
+
+    HVX_Vector vfp_exp_norm = Q6_V_vsplat_R(fp_exp_norm);
+    HVX_Vector vfp_exp_mask = Q6_V_vsplat_R(fp_exp_mask);
+
+    HVX_Vector vnr_T1 = Q6_V_vsplat_R(nr_T1);
+    HVX_Vector vnr_T2 = Q6_V_vsplat_R(nr_T2);
+
+    HVX_Vector vone  = Q6_V_vsplat_R(qf_one);
+    HVX_Vector vzero = Q6_V_vzero();
+
+    // IEEE sf: sign[i] = sign(den[i]), exp[i] = exp(den[i]), mant = 0
+    HVX_Vector vfp_exp = Q6_V_vand_VV(vin, vfp_exp_mask);
+
+    // normalization factor in IEEE sf:
+    //   sign[i] = sign(den[i]), exp[i] = 254 - exp(den[i]), mant = 0
+    HVX_Vector vfp_norm = Q6_Vw_vsub_VwVw(vfp_exp_norm, vfp_exp);
+    HVX_Vector vnorm = Q6_Vqf32_vadd_VsfVsf(vfp_norm, vzero);  // qf32
+
+    HVX_Vector vout = Q6_Vqf32_vmpy_VsfVsf(vin, vfp_norm);  // normalize den[i]
+
+    // initial estimate X0[i] = T1 + (T2 * den[i])
+    HVX_Vector vtmp = Q6_Vqf32_vmpy_Vqf32Vqf32(vnr_T2, vout);
+    HVX_Vector vX0  = Q6_Vqf32_vadd_Vqf32Vqf32(vnr_T1, vtmp);
+
+#pragma clang loop unroll(enable)
+    for (int newtRaph = 0; newtRaph < 3; newtRaph++) {
+        vtmp = Q6_Vqf32_vmpy_Vqf32Vqf32(vX0,  vout);  // X0[i] * den[i]
+        vtmp = Q6_Vqf32_vsub_Vqf32Vqf32(vone, vtmp);  // (1.0 - X0[i] * den[i])
+        vtmp = Q6_Vqf32_vmpy_Vqf32Vqf32(vX0,  vtmp);  // X0[i] * (1.0 - X0[i] * den[i])
+        vX0  = Q6_Vqf32_vadd_Vqf32Vqf32(vX0,  vtmp);  // X0[i] = X0[i] + X0[i] * (1.0 - X0[i] * den[i])
+    }
+
+    // multiply result by same normalization factor applied to denominator earlier.
+    vout = Q6_Vqf32_vmpy_Vqf32Vqf32(vX0, vnorm);
+
+    vout = Q6_Vsf_equals_Vqf32(vout);  // convert output back to IEEE sf
+    return vout;
+}
+
 static XNN_INTRINSIC
 HVX_Vector Q6_Vsf_vdiv_VsfVsf(HVX_Vector vin1, HVX_Vector vin2){
-    float* svin1 = (float *) &vin1;
-    float* svin2 = (float *) &vin2;
-
-    for(int i = 0; i < 32; i++)
-      svin1[i] = svin1[i] / svin2[i];
-
-    return *((HVX_UVector *) svin1);
+  return Q6_Vsf_equals_Vqf32(Q6_Vqf32_vmpy_VsfVsf(vin1, fast_inverse__vsf(vin2)));
 }
 #endif  // XNN_ARCH_HEXAGON

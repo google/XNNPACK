@@ -15,7 +15,7 @@
 #include "xnnpack/common.h"
 
 
-extern XNN_INTERNAL const int32_t xnn_table_exp2minus_k_over_16[16];
+extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_16[16];
 
 void xnn_f32_velu_ukernel__neon_rr2_lut16_p3_u24(
     size_t batch,
@@ -28,18 +28,29 @@ void xnn_f32_velu_ukernel__neon_rr2_lut16_p3_u24(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vprescale = vld1q_dup_f32(&params->neon_rr2_lut16_p3.prescale);
-  const float32x4_t valpha = vld1q_dup_f32(&params->neon_rr2_lut16_p3.alpha);
-  const float32x4_t vbeta = vld1q_dup_f32(&params->neon_rr2_lut16_p3.beta);
-  const float32x4_t vsat_cutoff = vld1q_dup_f32(&params->neon_rr2_lut16_p3.sat_cutoff);
-  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->neon_rr2_lut16_p3.magic_bias);
-  const float32x4_t vlog2e = vld1q_dup_f32(&params->neon_rr2_lut16_p3.log2e);
-  const int32x4_t vindex_mask = vmovq_n_s32(0xF);
-  const float32x4_t vminus_ln2_hi = vld1q_dup_f32(&params->neon_rr2_lut16_p3.minus_ln2_hi);
-  const float32x4_t vminus_ln2_lo = vld1q_dup_f32(&params->neon_rr2_lut16_p3.minus_ln2_lo);
-  const float32x4_t vc3 = vld1q_dup_f32(&params->neon_rr2_lut16_p3.c3);
-  const float32x4_t vc2 = vld1q_dup_f32(&params->neon_rr2_lut16_p3.c2);
+  const float32x4_t vsat_cutoff = vmovq_n_f32(-0x1.154246p+4f);
+  const float32x4_t vmagic_bias = vmovq_n_f32(0x1.800000p19f);
+  const float32x4_t vlog2e = vmovq_n_f32(0x1.715476p+0f);
+  const int32x4_t vindex_mask = vmovq_n_s32(INT32_C(0xF));
+  const float32x4_t vc3 = vmovq_n_f32(0x1.55561Cp-3f);
+  const float32x4_t vc2 = vmovq_n_f32(0x1.0001ECp-1f);
   const float32x4_t vone = vmovq_n_f32(1.0f);
+
+  XNN_FORCE_REALIZATION(vsat_cutoff);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vone);
+
+  const float32x4_t vminus_ln2_hi = vmovq_n_f32(-0x1.62E400p-1f);
+  const float32x4_t vminus_ln2_lo = vmovq_n_f32(-0x1.7F7D1Cp-20f);
+  XNN_FORCE_REALIZATION(vminus_ln2_hi);
+  XNN_FORCE_REALIZATION(vminus_ln2_lo);
+
+  const float32x4_t vprescale = vld1q_dup_f32(&params->scalar.prescale);
+  const float32x4_t valpha = vld1q_dup_f32(&params->scalar.alpha);
+  const float32x4_t vbeta = vld1q_dup_f32(&params->scalar.beta);
 
   for (; batch >= 24 * sizeof(float); batch -= 24 * sizeof(float)) {
     float32x4_t vx0123 = vld1q_f32(input); input += 4;

@@ -23,17 +23,11 @@
 - name: xnn_x64_transposec_ukernel__2x2_reuse_switch_sse2
 # x86 AVX
 - name: xnn_x64_transposec_ukernel__4x4_multi_mov_avx
-  init: xnn_init_x64_transpose_avx_params
 - name: xnn_x64_transposec_ukernel__4x4_multi_multi_avx
-  init: xnn_init_x64_transpose_avx_params
 - name: xnn_x64_transposec_ukernel__4x4_multi_switch_avx
-  init: xnn_init_x64_transpose_avx_params
 - name: xnn_x64_transposec_ukernel__4x4_reuse_mov_avx
-  init: xnn_init_x64_transpose_avx_params
 - name: xnn_x64_transposec_ukernel__4x4_reuse_multi_avx
-  init: xnn_init_x64_transpose_avx_params
 - name: xnn_x64_transposec_ukernel__4x4_reuse_switch_avx
-  init: xnn_init_x64_transpose_avx_params
 # ARM NEON
 - name: xnn_x64_transposec_ukernel__2x2_multi_dec_zip_neon
 - name: xnn_x64_transposec_ukernel__2x2_multi_mov_zip_neon

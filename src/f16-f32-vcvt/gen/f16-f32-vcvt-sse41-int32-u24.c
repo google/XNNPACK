@@ -19,18 +19,24 @@ void xnn_f16_f32_vcvt_ukernel__sse41_int32_u24(
     size_t batch,
     const void* input,
     float* output,
-    const union xnn_f16_f32_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const void* params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vsign_mask = _mm_load_si128((const __m128i*) params->sse_int32.sign_mask);
-  const __m128i vexp_offset = _mm_load_si128((const __m128i*) params->sse_int32.exp_offset);
-  const __m128 vexp_scale = _mm_load_ps(params->sse_int32.exp_scale);
-  const __m128i vmagic_bias = _mm_load_si128((const __m128i*) params->sse_int32.magic_bias);
-  const __m128i vdenorm_cutoff = _mm_load_si128((const __m128i*) params->sse_int32.denorm_cutoff);
+  const __m128i vsign_mask = _mm_set1_epi32(UINT32_C(0x80000000));
+  const __m128i vexp_offset = _mm_set1_epi32(UINT32_C(0x70000000));
+  const __m128 vexp_scale = _mm_set1_ps(0x1.0p-112f);
+  const __m128i vmagic_bias = _mm_set1_epi32(UINT32_C(0x3F000000));
+  const __m128i vdenorm_cutoff = _mm_set1_epi32(UINT32_C(0x08000000));
+
+  XNN_FORCE_REALIZATION(vsign_mask);
+  XNN_FORCE_REALIZATION(vexp_offset);
+  XNN_FORCE_REALIZATION(vexp_scale);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   const uint16_t* i = (const uint16_t*) input;
   for (; batch >= 24 * sizeof(uint16_t); batch -= 24 * sizeof(uint16_t)) {

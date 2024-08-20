@@ -26,18 +26,31 @@ void xnn_f32_vsigmoid_ukernel__sse2_rr2_p5_div_u12(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vsign_mask = _mm_load_ps(params->sse2_rr2_p5.sign_mask);
-  const __m128 vmagic_bias = _mm_load_ps(params->sse2_rr2_p5.magic_bias);
-  const __m128 vlog2e = _mm_load_ps(params->sse2_rr2_p5.log2e);
-  const __m128 vminus_ln2_hi = _mm_load_ps(params->sse2_rr2_p5.minus_ln2_hi);
-  const __m128 vminus_ln2_lo = _mm_load_ps(params->sse2_rr2_p5.minus_ln2_lo);
-  const __m128 vc5 = _mm_load_ps(params->sse2_rr2_p5.c5);
-  const __m128 vc4 = _mm_load_ps(params->sse2_rr2_p5.c4);
-  const __m128 vc3 = _mm_load_ps(params->sse2_rr2_p5.c3);
-  const __m128 vc2 = _mm_load_ps(params->sse2_rr2_p5.c2);
-  const __m128 vc1 = _mm_load_ps(params->sse2_rr2_p5.c1);
-  const __m128 vone = _mm_load_ps(params->sse2_rr2_p5.one);
-  const __m128 vdenorm_cutoff = _mm_load_ps(params->sse2_rr2_p5.denorm_cutoff);
+  const __m128 vsign_mask = _mm_set1_ps(-0.0f);
+  const __m128 vmagic_bias = _mm_set1_ps(0x1.8000FEp23f);
+  const __m128 vlog2e = _mm_set1_ps(0x1.715476p0f);
+  const __m128 vminus_ln2_hi = _mm_set1_ps(-0x1.62E400p-1f);
+  const __m128 vminus_ln2_lo = _mm_set1_ps(-0x1.7F7D1Cp-20f);
+  const __m128 vc5 = _mm_set1_ps(0x1.0F9F9Cp-7f);
+  const __m128 vc4 = _mm_set1_ps(0x1.573A1Ap-5f);
+  const __m128 vc3 = _mm_set1_ps(0x1.555A80p-3f);
+  const __m128 vc2 = _mm_set1_ps(0x1.FFFDC6p-2f);
+  const __m128 vc1 = _mm_set1_ps(0x1.FFFFF6p-1f);
+  const __m128 vone = _mm_set1_ps(1.0f);
+  const __m128 vdenorm_cutoff = _mm_set1_ps(-0x1.5D589Ep+6f);
+
+  XNN_FORCE_REALIZATION(vsign_mask);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vminus_ln2_hi);
+  XNN_FORCE_REALIZATION(vminus_ln2_lo);
+  XNN_FORCE_REALIZATION(vc5);
+  XNN_FORCE_REALIZATION(vc4);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);
+  XNN_FORCE_REALIZATION(vone);
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {
     const __m128 vx0123 = _mm_loadu_ps(input);

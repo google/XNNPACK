@@ -30,7 +30,7 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
+  const __m512 vscale = _mm512_set1_ps(params->scale);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 16; channels -= 16) {

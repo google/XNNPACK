@@ -26,18 +26,31 @@ void xnn_f32_velu_ukernel__avx2_rr1_p6_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m256 vprescale = _mm256_load_ps(params->avx2_rr1_p6.prescale);
-  const __m256 valpha = _mm256_load_ps(params->avx2_rr1_p6.alpha);
-  const __m256 vbeta = _mm256_load_ps(params->avx2_rr1_p6.beta);
-  const __m256 vsat_cutoff = _mm256_load_ps(params->avx2_rr1_p6.sat_cutoff);
-  const __m256 vmagic_bias = _mm256_load_ps(params->avx2_rr1_p6.magic_bias);
-  const __m256 vlog2e = _mm256_load_ps(params->avx2_rr1_p6.log2e);
-  const __m256 vminus_ln2 = _mm256_load_ps(params->avx2_rr1_p6.minus_ln2);
-  const __m256 vc6 = _mm256_load_ps(params->avx2_rr1_p6.c6);
-  const __m256 vc5 = _mm256_load_ps(params->avx2_rr1_p6.c5);
-  const __m256 vc4 = _mm256_load_ps(params->avx2_rr1_p6.c4);
-  const __m256 vc3 = _mm256_load_ps(params->avx2_rr1_p6.c3);
-  const __m256 vc2 = _mm256_load_ps(params->avx2_rr1_p6.c2);
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
+  const __m256 vsat_cutoff = _mm256_set1_ps(-0x1.154246p+4f);
+  const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
+  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
+  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
+  const __m256 vc6 = _mm256_set1_ps(0x1.6B7338p-10f);
+  const __m256 vc5 = _mm256_set1_ps(0x1.12278Ep-7f);
+  const __m256 vc4 = _mm256_set1_ps(0x1.555716p-5f);
+  const __m256 vc3 = _mm256_set1_ps(0x1.5554B0p-3f);
+  const __m256 vc2 = _mm256_set1_ps(0x1.FFFFFEp-2f);
+
+  XNN_FORCE_REALIZATION(vsat_cutoff);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vminus_ln2);
+  XNN_FORCE_REALIZATION(vc6);
+  XNN_FORCE_REALIZATION(vc5);
+  XNN_FORCE_REALIZATION(vc4);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+
+  const __m256 vprescale = _mm256_set1_ps(params->scalar.prescale);
+  const __m256 valpha = _mm256_set1_ps(params->scalar.alpha);
+  const __m256 vbeta = _mm256_set1_ps(params->scalar.beta);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     __m256 vx0 = _mm256_loadu_ps(input);
@@ -124,7 +137,7 @@ void xnn_f32_velu_ukernel__avx2_rr1_p6_u16(
   if XNN_UNLIKELY(batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &params->avx2_rr1_p6.mask_table[7] - batch));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
     __m256 vx = _mm256_maskload_ps(input, vmask);
 
