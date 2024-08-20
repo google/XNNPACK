@@ -1901,6 +1901,9 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     TARGET_LINK_LIBRARIES(gemm-benchmark PUBLIC kleidiai)
   ENDIF()
 
+  ADD_LIBRARY(im2col STATIC src/im2col.c)
+  TARGET_INCLUDE_DIRECTORIES(im2col PRIVATE src)
+
   IF(XNNPACK_BUILD_LIBRARY)
     # ---[ Build end-to-end microbenchmarks
     ADD_LIBRARY(bench-models STATIC
@@ -2131,10 +2134,16 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
       bench-utils
       benchmark::benchmark
+      fp16
+      gemm-benchmark
       hardware-config
+      im2col
+      indirection
       logging
       microkernels-all
       microparams-init
+      packing
+      packq-benchmark
       pthreadpool)
   ENDFOREACH()
 
