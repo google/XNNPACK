@@ -1846,7 +1846,7 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(copysign-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(copysign-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME copysign-test COMMAND copysign-test)
-  
+
     ADD_EXECUTABLE(deconvolution-2d-test test/deconvolution-2d.cc)
     SET_TARGET_PROPERTIES(deconvolution-2d-test PROPERTIES CXX_EXTENSIONS YES)
     TARGET_INCLUDE_DIRECTORIES(deconvolution-2d-test PRIVATE src test)
@@ -3561,7 +3561,7 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_EXECUTABLE(x32-packx-test test/x32-packx.cc)
   TARGET_INCLUDE_DIRECTORIES(x32-packx-test PRIVATE include src test)
   TARGET_LINK_LIBRARIES(x32-packx-test PRIVATE pthreadpool GTest::gtest GTest::gtest_main)
-  TARGET_LINK_LIBRARIES(x32-packx-test PRIVATE hardware-config logging microkernels-all)
+  TARGET_LINK_LIBRARIES(x32-packx-test PRIVATE hardware-config logging microkernels-all next-prime)
   ADD_TEST(NAME x32-packx-test COMMAND x32-packx-test)
 
   ADD_EXECUTABLE(x32-unpool-test test/x32-unpool.cc)
