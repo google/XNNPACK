@@ -52,8 +52,8 @@ static XNN_INLINE xnn_simd_s32_t xnn_clz_s32(xnn_simd_s32_t a) {
   xnn_simd_s32_t low_a = _mm256_castpd_si256(low);
   xnn_simd_s32_t high_a = _mm256_castpd_si256(high);
 
-  xnn_simd_s32_t shift_low = _mm256_srli_epi64(low_a, 52) & 0x7FF;
-  xnn_simd_s32_t shift_high = _mm256_srli_epi64(high_a, 52) & 0x7FF;
+  xnn_simd_s32_t shift_low = _mm256_and_si256(_mm256_srli_epi64(low_a, 52) , _mm256_set1_epi32(0x7FF));
+  xnn_simd_s32_t shift_high = _mm256_and_si256(_mm256_srli_epi64(high_a, 52), _mm256_set1_epi32(0x7FF));
 
   xnn_simd_s32_t exponent =
       _mm256_set_epi32(_mm256_extract_epi32(shift_high, 6),

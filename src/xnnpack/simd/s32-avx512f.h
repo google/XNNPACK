@@ -52,8 +52,8 @@ static XNN_INLINE xnn_simd_s32_t xnn_clz_s32(xnn_simd_s32_t a) {
   xnn_simd_s32_t low_a = _mm512_castpd_si512(low);
   xnn_simd_s32_t high_a = _mm512_castpd_si512(high);
 
-  xnn_simd_s32_t shift_low = _mm512_srli_epi64(low_a, 52) & 0x7FF;
-  xnn_simd_s32_t shift_high = _mm512_srli_epi64(high_a, 52) & 0x7FF;
+  xnn_simd_s32_t shift_low =  _mm512_and_epi32(_mm512_srli_epi64(low_a, 52) , _mm512_set1_epi32(0x7FF));
+  xnn_simd_s32_t shift_high =  _mm512_and_epi32(_mm512_srli_epi64(high_a, 52), _mm512_set1_epi32(0x7FF));
 
   xnn_simd_s32_t mask =
       _mm512_setr_epi32(1, 3, 5, 7, 9, 11, 13, 15, 0, 2, 4, 6, 8, 10, 12, 14);
