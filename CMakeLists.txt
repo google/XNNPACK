@@ -1571,263 +1571,29 @@ IF(XNNPACK_BUILD_TESTS)
   ENDFOREACH()
 
   # ---[ Build microkernel-level unit tests
-  SET(MICROKERNEL_UNIT_TESTS
-    bf16-gemm-minmax
-    bf16-vabs
-    cs16-bfly4
-    cs16-fftr
-    cs16-vsquareabs
-    f16-avgpool-minmax
-    f16-conv-hwc2chw
-    f16-dwconv-minmax-multipass
-    f16-dwconv-minmax-unipass
-    f16-dwconv2d-chw
-    f16-f32-vcvt
-    f16-f32acc-gemm-minmax
-    f16-f32acc-igemm-minmax
-    f16-f32acc-rdsum
-    f16-f32acc-rsum
-    f16-gavgpool-cw
-    f16-gavgpool-minmax
-    f16-gemm-minmax
-    f16-ibilinear-chw
-    f16-ibilinear
-    f16-igemm-minmax
-    f16-maxpool-minmax
-    f16-pavgpool-minmax
-    f16-prelu
-    f16-raddstoreexpminusmax
-    f16-rmax
-    f16-rsum
-    f16-spmm-minmax
-    f16-vabs
-    f16-vadd-minmax
-    f16-vaddc-minmax
-    f16-vclamp
-    f16-vcmul
-    f16-vdiv-minmax
-    f16-vdivc-minmax
-    f16-velu
-    f16-vhswish
-    f16-vlrelu
-    f16-vmax
-    f16-vmaxc
-    f16-vmin
-    f16-vminc
-    f16-vmul-minmax
-    f16-vmulc-minmax
-    f16-vmulcaddc-minmax
-    f16-vneg
-    f16-vrdivc-minmax
-    f16-vrndd
-    f16-vrndne
-    f16-vrndu
-    f16-vrndz
-    f16-vrsqrt
-    f16-vrsubc-minmax
-    f16-vsigmoid
-    f16-vsqr
-    f16-vsqrdiff
-    f16-vsqrdiffc
-    f16-vsqrt
-    f16-vsub-minmax
-    f16-vsubc-minmax
-    f16-vtanh
-    f32-argmaxpool
-    f32-conv-hwc
-    f32-conv-hwc2chw
-    f32-dwconv-minmax-multipass
-    f32-dwconv-minmax-unipass
-    f32-dwconv-multipass
-    f32-dwconv-unipass
-    f32-dwconv2d-chw
-    f32-f16-vcvt
-    f32-gavgpool-cw
-    f32-gavgpool-minmax
-    f32-gemm-goi-minmax
-    f32-gemm-minmax
-    f32-gemm-relu
-    f32-gemm
-    f32-gemminc-minmax
-    f32-ibilinear-chw
-    f32-ibilinear
-    f32-igemm-minmax
-    f32-igemm-relu
-    f32-igemm
-    f32-ppmm-minmax
-    f32-prelu
-    f32-qc4w-gemm-minmax
-    f32-qc8w-gemm-minmax
-    f32-qc8w-gemm-relu
-    f32-qc8w-gemm
-    f32-qs8-vcvt
-    f32-qu8-vcvt
-    f32-raddexpminusmax
-    f32-raddextexp
-    f32-raddstoreexpminusmax
-    f32-rdsum
-    f32-rmax
-    f32-rmin
-    f32-rminmax
-    f32-rsum
-    f32-spmm-minmax
-    f32-vabs
-    f32-vadd-minmax
-    f32-vadd-relu
-    f32-vadd
-    f32-vaddc-minmax
-    f32-vaddc-relu
-    f32-vaddc
-    f32-vcmul
-    f32-vcopysign
-    f32-vcopysignc
-    f32-vdiv-minmax
-    f32-vdiv-relu
-    f32-vdiv
-    f32-vdivc-minmax
-    f32-vdivc-relu
-    f32-vdivc
-    f32-velu
-    f32-vexp
-    f32-vgelu
-    f32-vhswish
-    f32-vlog
-    f32-vmax
-    f32-vmaxc
-    f32-vmin
-    f32-vminc
-    f32-vmul-minmax
-    f32-vmul-relu
-    f32-vmul
-    f32-vmulc-minmax
-    f32-vmulc-relu
-    f32-vmulc
-    f32-vmulcaddc-minmax
-    f32-vneg
-    f32-vrcopysignc
-    f32-vrdivc-minmax
-    f32-vrdivc-relu
-    f32-vrdivc
-    f32-vrelu
-    f32-vrndd
-    f32-vrndne
-    f32-vrndu
-    f32-vrndz
-    f32-vrsqrt
-    f32-vrsubc-minmax
-    f32-vrsubc-relu
-    f32-vrsubc
-    f32-vscaleexpminusmax
-    f32-vscaleextexp
-    f32-vsigmoid
-    f32-vsqr
-    f32-vsqrdiff
-    f32-vsqrdiffc
-    f32-vsqrt
-    f32-vsub-minmax
-    f32-vsub-relu
-    f32-vsub
-    f32-vsubc-minmax
-    f32-vsubc-relu
-    f32-vsubc
-    f32-vtanh
-    i16-vlshift
-    indirection
-    packing
-    qd8-f16-qb4w-gemm-minmax
-    qd8-f16-qc4w-gemm-minmax
-    qd8-f16-qc8w-gemm-minmax
-    qd8-f32-qb4w-gemm-minmax
-    qd8-f32-qc4w-gemm-minmax
-    qd8-f32-qc8w-gemm-minmax
-    qd8-f32-qc8w-igemm-minmax
-    qp8-f32-qc4w-gemm-minmax
-    qs16-qs8-vcvt
-    qs8-dwconv-minmax-multipass-fp32
-    qs8-dwconv-minmax-multipass-rndnu
-    qs8-dwconv-minmax-unipass-fp32
-    qs8-dwconv-minmax-unipass-rndnu
-    qs8-f16-vcvt
-    qs8-f32-vcvt
-    qs8-gavgpool-minmax-fp32
-    qs8-gavgpool-minmax-rndnu
-    qs8-qc8w-dwconv-minmax-multipass-fp32
-    qs8-qc8w-dwconv-minmax-unipass-fp32
-    qs8-qc8w-gemm-minmax-fp32
-    qs8-qc8w-igemm-minmax-fp32
-    qs8-requantization
-    qs8-rdsum-minmax-fp32
-    qs8-rsum
-    qs8-vadd-minmax
-    qs8-vaddc-minmax
-    qs8-vcvt
-    qs8-vhswish
-    qs8-vlrelu
-    qs8-vmul-minmax-fp32
-    qs8-vmulc-minmax-fp32
-    qu8-avgpool-minmax-fp32
-    qu8-dwconv-minmax-multipass-fp32
-    qu8-dwconv-minmax-multipass-rndnu
-    qu8-dwconv-minmax-unipass-fp32
-    qu8-dwconv-minmax-unipass-rndnu
-    qu8-f32-vcvt
-    qu8-gavgpool-minmax-fp32
-    qu8-gavgpool-minmax-rndnu
-    qu8-gemm-minmax-fp32
-    qu8-gemm-minmax-rndnu
-    qu8-igemm-minmax-fp32
-    qu8-igemm-minmax-rndnu
-    qu8-requantization
-    qu8-vadd-minmax
-    qu8-vaddc-minmax
-    qu8-vcvt
-    qu8-vhswish
-    qu8-vlrelu
-    qu8-vmul-minmax-fp32
-    qu8-vmul-minmax-rndnu
-    qu8-vmulc-minmax-fp32
-    qu8-vmulc-minmax-rndnu
-    s16-rmaxabs
-    s16-window
-    s32-vmul
-    s32-vmulc
-    s8-ibilinear
-    s8-maxpool-minmax
-    s8-vclamp
-    u32-filterbank-accumulate
-    u32-filterbank-subtract
-    u32-vlog
-    u8-ibilinear
-    u8-lut32norm
-    u8-maxpool-minmax
-    u8-rmax
-    u8-vclamp
-    x16-packw
-    x16-transpose
-    x24-transpose
-    x32-packb
-    x32-packw
-    x32-packx
-    x32-transpose
-    x32-unpool
-    x32-zerob
-    x32-zip
-    x64-transpose
-    x8-lut
-    x8-packq
-    x8-packw
-    x8-transpose
-    x8-zip
-    xx-fill
-    xx-pad
-    xx-transposev)
-  FOREACH(TEST ${MICROKERNEL_UNIT_TESTS})
+  SET(MICROKERNEL_DWCONV_UNIT_TESTS
+      f16-dwconv-minmax-multipass
+      f16-dwconv-minmax-unipass
+      f32-dwconv-multipass
+      f32-dwconv-minmax-multipass
+      f32-dwconv-unipass
+      f32-dwconv-minmax-unipass
+      qs8-qc8w-dwconv-minmax-multipass-fp32
+      qs8-qc8w-dwconv-minmax-unipass-fp32
+      qs8-dwconv-minmax-multipass-fp32
+      qs8-dwconv-minmax-multipass-rndnu
+      qs8-dwconv-minmax-unipass-fp32
+      qs8-dwconv-minmax-unipass-rndnu
+      qu8-dwconv-minmax-multipass-fp32
+      qu8-dwconv-minmax-multipass-rndnu
+      qu8-dwconv-minmax-unipass-fp32
+      qu8-dwconv-minmax-unipass-rndnu)
+  FOREACH(TEST ${MICROKERNEL_DWCONV_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         dwconv-microkernel-tester
         fp16
-        gemm-microkernel-tester
         GTest::gmock
         GTest::gtest
         GTest::gtest_main
@@ -1835,12 +1601,273 @@ IF(XNNPACK_BUILD_TESTS)
         logging
         microkernels-all
         microparams-init
-        packq-microkernel-tester
         pthreadpool
+    )
+    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+    SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
+  ENDFOREACH()
+
+  SET(MICROKERNEL_GEMM_UNIT_TESTS
+      bf16-gemm-minmax
+      f16-f32acc-gemm-minmax
+      f16-gemm-minmax
+      f16-f32acc-igemm-minmax
+      f16-igemm-minmax
+      qd8-f16-qc8w-gemm-minmax
+      f32-gemm
+      f32-gemm-relu
+      f32-gemm-minmax
+      f32-gemm-goi-minmax
+      f32-qc8w-gemm
+      f32-qc8w-gemm-relu
+      f32-qc8w-gemm-minmax
+      f32-qc4w-gemm-minmax
+      f32-gemminc-minmax
+      f32-igemm
+      f32-igemm-relu
+      f32-igemm-minmax
+      f32-ppmm-minmax
+      qd8-f32-qc8w-gemm-minmax
+      qd8-f16-qb4w-gemm-minmax
+      qd8-f16-qc4w-gemm-minmax
+      qd8-f32-qb4w-gemm-minmax
+      qd8-f32-qc4w-gemm-minmax
+      qd8-f32-qc8w-igemm-minmax
+      qp8-f32-qc4w-gemm-minmax
+      qs8-qc8w-gemm-minmax-fp32
+      qs8-qc8w-igemm-minmax-fp32
+      qu8-gemm-minmax-fp32
+      qu8-gemm-minmax-rndnu
+      qu8-igemm-minmax-fp32
+      qu8-igemm-minmax-rndnu)
+  FOREACH(TEST ${MICROKERNEL_GEMM_UNIT_TESTS})
+    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
+        gemm-microkernel-tester
+        fp16
+        GTest::gmock
+        GTest::gtest
+        GTest::gtest_main
+        hardware-config
+        logging
+        microkernels-all
+        microparams-init
+        pthreadpool
+    )
+    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+    SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
+  ENDFOREACH()
+
+  SET(MICROKERNEL_PACKQ_UNIT_TESTS
+      x8-packq)
+  FOREACH(TEST ${MICROKERNEL_PACKQ_UNIT_TESTS})
+    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
+        packq-microkernel-tester
+        fp16
+        GTest::gmock
+        GTest::gtest
+        GTest::gtest_main
+        hardware-config
+        logging
+        microkernels-all
+        microparams-init
+        pthreadpool
+    )
+    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+    SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
+  ENDFOREACH()
+
+  SET(MICROKERNEL_VBINARY_UNIT_TESTS
+      f16-vadd-minmax
+      f16-vdiv-minmax
+      f16-vsqrdiff
+      f16-vmax
+      f16-vmin
+      f16-vmul-minmax
+      f16-vsub-minmax
+      f32-vadd
+      f32-vadd-minmax
+      f32-vadd-relu
+      f32-vcopysign
+       s32-vmul
+      f32-vdiv
+      f32-vdiv-minmax
+      f32-vdiv-relu
+      f32-vmax
+      f32-vmin
+      f32-vmul
+      f32-vmul-minmax
+      f32-vmul-relu
+      f32-vsqrdiff
+      f32-vsub
+      f32-vsub-minmax
+      f32-vsub-relu
+      qs8-vadd-minmax
+      qs8-vmul-minmax-fp32
+      qu8-vadd-minmax
+      qu8-vmul-minmax-fp32
+      qu8-vmul-minmax-rndnu)
+  FOREACH(TEST ${MICROKERNEL_VBINARY_UNIT_TESTS})
+    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         vbinary-microkernel-tester
+        fp16
+        GTest::gmock
+        GTest::gtest
+        GTest::gtest_main
+        hardware-config
+        logging
+        microkernels-all
+        microparams-init
+        pthreadpool
+    )
+    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+    SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
+  ENDFOREACH()
+
+  SET(MICROKERNEL_VBINARYC_UNIT_TESTS
+      f16-vaddc-minmax
+      f16-vdivc-minmax
+      f16-vrdivc-minmax
+      f16-vsqrdiffc
+      f16-vmaxc
+      f16-vminc
+      f16-vmulc-minmax
+      f16-vsubc-minmax
+      f16-vrsubc-minmax
+      f32-vaddc
+      f32-vaddc-minmax
+      f32-vaddc-relu
+      f32-vcopysignc
+      f32-vrcopysignc
+      f32-vdivc
+      f32-vdivc-minmax
+      f32-vdivc-relu
+      f32-vrdivc
+      f32-vrdivc-minmax
+      f32-vrdivc-relu
+      f32-vmaxc
+      f32-vminc
+      f32-vmulc
+      f32-vmulc-minmax
+      f32-vmulc-relu
+      f32-vsqrdiffc
+      f32-vsubc
+      f32-vsubc-minmax
+      f32-vsubc-relu
+      f32-vrsubc
+      f32-vrsubc-minmax
+      f32-vrsubc-relu
+      qs8-vaddc-minmax
+      qs8-vmulc-minmax-fp32
+      qu8-vaddc-minmax
+      qu8-vmulc-minmax-fp32
+      qu8-vmulc-minmax-rndnu
+      s32-vmulc)
+  FOREACH(TEST ${MICROKERNEL_VBINARYC_UNIT_TESTS})
+    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         vbinaryc-microkernel-tester
+        fp16
+        GTest::gmock
+        GTest::gtest
+        GTest::gtest_main
+        hardware-config
+        logging
+        microkernels-all
+        microparams-init
+        pthreadpool
+    )
+    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+    SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
+  ENDFOREACH()
+
+  SET(MICROKERNEL_VCVT_TESTS
+      f16-f32-vcvt
+      f32-f16-vcvt
+      f32-qs8-vcvt
+      f32-qu8-vcvt
+      qs8-f16-vcvt
+      qs8-f32-vcvt
+      qs8-vcvt
+      qs16-qs8-vcvt
+      qu8-f32-vcvt
+      qu8-vcvt)
+  FOREACH(TEST ${MICROKERNEL_VCVT_TESTS})
+    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         vcvt-microkernel-tester
-        vunary-microkernel-tester)
+        fp16
+        GTest::gmock
+        GTest::gtest
+        GTest::gtest_main
+        hardware-config
+        logging
+        microkernels-all
+        microparams-init
+        pthreadpool
+    )
+    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+    SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
+  ENDFOREACH()
+
+  SET(MICROKERNEL_VUNARY_TESTS
+      bf16-vabs
+      f16-vabs
+      f16-vclamp
+      f16-velu
+      f16-vhswish
+      f16-vlrelu
+      f16-vneg
+      f16-vrndne
+      f16-vrndz
+      f16-vrndu
+      f16-vrndd
+      f16-vrsqrt
+      f16-vsigmoid
+      f16-vsqr
+      f16-vsqrt
+      f16-vtanh
+      f32-vabs
+      f32-vhswish
+      f32-velu
+      f32-vgelu
+      f32-vexp
+      f32-vlog
+      f32-vneg
+      f32-vrelu
+      f32-vrndne
+      f32-vrndz
+      f32-vrndu
+      f32-vrndd
+      f32-vsigmoid
+      f32-vsqr
+      f32-vsqrt
+      f32-vrsqrt
+      f32-vtanh
+      s8-vclamp
+      u8-vclamp)
+  FOREACH(TEST ${MICROKERNEL_VUNARY_TESTS})
+    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
+        vunary-microkernel-tester
+        fp16
+        GTest::gmock
+        GTest::gtest
+        GTest::gtest_main
+        hardware-config
+        logging
+        microkernels-all
+        microparams-init
+        pthreadpool
+    )
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
   ENDFOREACH()
