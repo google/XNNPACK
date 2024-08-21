@@ -514,7 +514,19 @@ void VUnaryMicrokernelTester::TestClz(
 
     // Compute reference results.
     for (size_t i = 0; i < batch_size(); i++) {
-      y_ref[i] = __builtin_clz(x_data[i]);
+      int32_t clz = 0;
+      int32_t value = x[i];
+      if (value == 0)
+        clz = 32;
+      else if (value < 0)
+        clz = 0;
+      else {
+        while ((value & 0x80000000) == 0) {
+          clz++;
+          value <<= 1;
+        }
+      }
+      y_ref[i] = clz;
     }
     // Prepare parameters.
     xnn_s32_default_params params;

@@ -212,13 +212,13 @@ class UnaryOperatorTester {
         << static_cast<int32_t>(input) << " (" << FloatFromInputQU8(input)
         << ")";
   }
-
   virtual void CheckResultS32(int32_t y, int32_t y_ref, size_t batch,
                               size_t channel, int32_t input) const {
     EXPECT_EQ(y_ref, y)
         << "at batch " << batch << " / " << batch_size() << ", channel "
         << channel << " / " << channels() << ", input " << input;
   }
+
   // Wrappers for the create/reshape/setup/run functions of the underlying `f32`
   // op, override these with calls to the actual op functions, e.g. using the
   // `CREATE_OP_OVERRIDES_F32` macro defined below.
@@ -323,8 +323,8 @@ class UnaryOperatorTester {
                                           std::numeric_limits<int8_t>::max()};
   std::pair<uint8_t, uint8_t> range_qu8_ = {
       0, std::numeric_limits<uint8_t>::max()};
-  std::pair<uint32_t, uint32_t> range_s32_ = {std::numeric_limits<int32_t>::min(),
-                                          std::numeric_limits<int32_t>::max()};
+  std::pair<int32_t, int32_t> range_s32_ = {
+      std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()};
 
  private:
   size_t batch_size_ = 1;

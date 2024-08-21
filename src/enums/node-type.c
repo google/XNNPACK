@@ -14,7 +14,7 @@
 
 #if XNN_LOG_LEVEL > 0
 static const uint16_t offset[63] = {
-  0, 8, 12, 17, 35, 54, 71, 93, 101, 107, 127, 140, 153, 166, 179, 187, 202, 207, 217, 234, 252, 277, 284, 288, 292,
+  0, 8, 12, 17, 35, 54, 71, 93, 101, 107, 120, 133, 146, 159, 167, 182, 187, 197, 217, 234, 252, 277, 284, 288, 292,
   304, 316, 328, 334, 350, 373, 378, 404, 430, 452, 474, 484, 488, 499, 514, 523, 532, 542, 549, 555, 578, 589, 594,
   623, 631, 639, 657, 664, 676, 695, 715, 727, 742, 768, 781, 798, 807, 812
 };
@@ -29,7 +29,6 @@ static const char data[] =
   "Batch Matrix Multiply\0"
   "Ceiling\0"
   "Clamp\0"
-  "Count Leading Zeros\0"
   "Concatenate2\0"
   "Concatenate3\0"
   "Concatenate4\0"
@@ -38,6 +37,7 @@ static const char data[] =
   "Convolution 2D\0"
   "Copy\0"
   "Copy Sign\0"
+  "Count Leading Zeros\0"
   "Deconvolution 2D\0"
   "Depth To Space 2D\0"
   "Depthwise Convolution 2D\0"
