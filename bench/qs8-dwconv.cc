@@ -23,7 +23,6 @@
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microkernel-utils.h"
 #include "xnnpack/microparams-init.h"
-#include "xnnpack/operator.h"
 #include "xnnpack/pack.h"
 
 
@@ -103,36 +102,18 @@ static void DWConvBenchmark(benchmark::State& state,
   }
 
   std::vector<const int8_t*> i(i_elements * num_buffers);
-  xnn_operator convolution_op = { };
-  convolution_op.indirection_buffer = reinterpret_cast<const void**>(i.data());
-  convolution_op.input              = a.data();
-  convolution_op.input_pixel_stride = channels;
-  convolution_op.zero_buffer        = z.data();
-  convolution_op.input_height       = input_height;
-  convolution_op.input_width        = input_width;
-  convolution_op.output_height      = output_height;
-  convolution_op.output_width       = output_width;
-  convolution_op.kernel_height      = kernel_height;
-  convolution_op.kernel_width       = kernel_width;
-  convolution_op.stride_height      = subsampling;
-  convolution_op.stride_width       = subsampling;
-  convolution_op.dilation_height    = dilation;
-  convolution_op.dilation_width     = dilation;
-  convolution_op.padding_top        = padding_top;
-  convolution_op.padding_left       = padding_left;
-
   xnn_indirection_init_dwconv2d(
-    /*output_y_start=*/0, /*output_y_end=*/convolution_op.output_height,
-    convolution_op.indirection_buffer,
-    convolution_op.input,
-    convolution_op.input_pixel_stride << XNN_LOG2_SIZEOF_INT8_T,
-    convolution_op.zero_buffer,
-    convolution_op.input_height, convolution_op.input_width,
-    convolution_op.output_height, convolution_op.output_width,
-    convolution_op.kernel_height, convolution_op.kernel_width,
-    convolution_op.stride_height, convolution_op.stride_width,
-    convolution_op.dilation_height, convolution_op.dilation_width,
-    convolution_op.padding_top, convolution_op.padding_left,
+    /*output_y_start=*/0, /*output_y_end=*/output_height,
+    reinterpret_cast<const void**>(i.data()),
+    a.data(),
+    channels << XNN_LOG2_SIZEOF_INT8_T,
+    z.data(),
+    input_height, input_width,
+    output_height, output_width,
+    kernel_height, kernel_width,
+    subsampling, subsampling,
+    dilation, dilation,
+    padding_top, padding_left,
     step_height, step_width, primary_tile);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(i.cbegin(), i.cbegin() + i_elements, i.begin() + n * i_elements);
@@ -266,36 +247,18 @@ static void DWConvBenchmark(benchmark::State& state,
   }
 
   std::vector<const int8_t*> i(i_elements * num_buffers);
-  xnn_operator convolution_op = { };
-  convolution_op.indirection_buffer = reinterpret_cast<const void**>(i.data());
-  convolution_op.input              = a.data();
-  convolution_op.input_pixel_stride = channels;
-  convolution_op.zero_buffer        = z.data();
-  convolution_op.input_height       = input_height;
-  convolution_op.input_width        = input_width;
-  convolution_op.output_height      = output_height;
-  convolution_op.output_width       = output_width;
-  convolution_op.kernel_height      = kernel_height;
-  convolution_op.kernel_width       = kernel_width;
-  convolution_op.stride_height      = subsampling;
-  convolution_op.stride_width       = subsampling;
-  convolution_op.dilation_height    = dilation;
-  convolution_op.dilation_width     = dilation;
-  convolution_op.padding_top        = padding_top;
-  convolution_op.padding_left       = padding_left;
-
   xnn_indirection_init_dwconv2d(
-    /*output_y_start=*/0, /*output_y_end=*/convolution_op.output_height,
-    convolution_op.indirection_buffer,
-    convolution_op.input,
-    convolution_op.input_pixel_stride << XNN_LOG2_SIZEOF_INT8_T,
-    convolution_op.zero_buffer,
-    convolution_op.input_height, convolution_op.input_width,
-    convolution_op.output_height, convolution_op.output_width,
-    convolution_op.kernel_height, convolution_op.kernel_width,
-    convolution_op.stride_height, convolution_op.stride_width,
-    convolution_op.dilation_height, convolution_op.dilation_width,
-    convolution_op.padding_top, convolution_op.padding_left,
+    /*output_y_start=*/0, /*output_y_end=*/output_height,
+    reinterpret_cast<const void**>(i.data()),
+    a.data(),
+    channels << XNN_LOG2_SIZEOF_INT8_T,
+    z.data(),
+    input_height, input_width,
+    output_height, output_width,
+    kernel_height, kernel_width,
+    subsampling, subsampling,
+    dilation, dilation,
+    padding_top, padding_left,
     step_height, step_width, tile_size);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(i.cbegin(), i.cbegin() + i_elements, i.begin() + n * i_elements);

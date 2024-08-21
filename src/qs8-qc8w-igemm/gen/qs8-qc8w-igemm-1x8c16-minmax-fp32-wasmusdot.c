@@ -43,6 +43,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c16__wasmusdot(
   kc = round_up_po2(kc, 16 * sizeof(int8_t));
   int8_t* c0 = c;
 
+
   const v128_t vsign_mask = wasm_u8x16_const_splat(UINT8_C(0x80));
   do {
     v128_t vacc0x0 = wasm_v128_load32_zero(w);

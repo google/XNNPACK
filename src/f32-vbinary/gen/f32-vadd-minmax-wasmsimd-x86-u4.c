@@ -28,8 +28,10 @@ void xnn_f32_vadd_minmax_ukernel__wasmsimd_x86_u4(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const v128_t voutput_min = wasm_v128_load64_splat(params->wasmsimd.min);
-  const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd.max);
+  const v128_t voutput_min = wasm_v128_load32_splat(&params->wasmsimd.min);
+  const v128_t voutput_max = wasm_v128_load32_splat(&params->wasmsimd.max);
+  XNN_FORCE_REALIZATION(voutput_min);
+  XNN_FORCE_REALIZATION(voutput_max);
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const v128_t va = wasm_v128_load(input_a);

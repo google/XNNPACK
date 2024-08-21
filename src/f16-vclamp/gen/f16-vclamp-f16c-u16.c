@@ -30,8 +30,8 @@ void xnn_f16_vclamp_ukernel__f16c_u16(
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
+  const __m256 vy_min = _mm256_set1_ps(params->avx.min);
+  const __m256 vy_max = _mm256_set1_ps(params->avx.max);
 
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
     __m256 vacc01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i));

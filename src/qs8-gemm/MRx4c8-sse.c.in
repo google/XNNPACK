@@ -24,6 +24,7 @@ $else:
   $SSE_HEADER = {2: "emmintrin.h", 3: "tmmintrin.h", 4: "smmintrin.h"}[SSE]
   #include <${SSE_HEADER}>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/math.h"
 $if DATATYPE != "QD8":
@@ -113,8 +114,15 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
         c${M} = c${M-1};
       }
 
+  $if DATATYPE in ["QD8", "QC4", "QB4"]:
+    const __m128 vmin = _mm_set1_ps(params->${PARAMS_STRUCT}.min);
+    const __m128 vmax = _mm_set1_ps(params->${PARAMS_STRUCT}.max);
+    XNN_FORCE_REALIZATION(vmin);
+    XNN_FORCE_REALIZATION(vmax);
+
   $if DATATYPE in ["QC4", "QB4"]:
-    const __m128i vmask = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.mask);  // 0xF0
+    const __m128i vmask = _mm_set1_epi8(0xF0);
+    XNN_FORCE_REALIZATION(vmask);
   do {
     $if DATATYPE in ["QD8", "QC4"]:
       const __m128i vksum = _mm_load_si128((const __m128i*) w);
@@ -455,11 +463,9 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
       $for M in range(MR):
         vout${M}x0123 = _mm_add_ps(vout${M}x0123, vbias0123);
 
-      const __m128 vmin = _mm_load_ps(params->${PARAMS_STRUCT}.min);
       $for M in range(MR):
         vout${M}x0123 = _mm_max_ps(vout${M}x0123, vmin);
 
-      const __m128 vmax = _mm_load_ps(params->${PARAMS_STRUCT}.max);
       $for M in range(MR):
         vout${M}x0123 = _mm_min_ps(vout${M}x0123, vmax);
 

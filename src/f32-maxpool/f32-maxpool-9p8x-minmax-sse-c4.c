@@ -25,8 +25,11 @@ void xnn_f32_maxpool_minmax_ukernel_9p8x__sse_c4(
   assert(kernel_elements != 0);
   assert(channels != 0);
 
-  const __m128 voutput_max = _mm_load_ps(params->sse.max);
-  const __m128 voutput_min = _mm_load_ps(params->sse.min);
+  const __m128 voutput_max = _mm_set1_ps(params->sse.max);
+  const __m128 voutput_min = _mm_set1_ps(params->sse.min);
+  XNN_FORCE_REALIZATION(voutput_max);
+  XNN_FORCE_REALIZATION(voutput_min);
+
   do {
     float* o = output;
     {

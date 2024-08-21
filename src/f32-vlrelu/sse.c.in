@@ -28,7 +28,7 @@ void xnn_f32_vlrelu_ukernel__${ISA}_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vslope = _mm_load_ps(params->sse.slope);
+  const __m128 vslope = _mm_set1_ps(params->scalar.slope);
   $if SSE == 1:
     const __m128 vzero = _mm_setzero_ps();
   for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {

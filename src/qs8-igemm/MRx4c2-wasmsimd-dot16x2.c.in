@@ -76,6 +76,10 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c2__
   $if DATATYPE == "QD8":
     const v128_t vinput_zero_point = wasm_v128_load32_splat(&quantization_params->zero_point);
     const v128_t vinput_scale = wasm_v128_load32_splat(&quantization_params->inv_scale);
+    const v128_t vmin = wasm_v128_load32_splat(&params->wasmsimd.min);
+    const v128_t vmax = wasm_v128_load32_splat(&params->wasmsimd.max);
+    XNN_FORCE_REALIZATION(vmin);
+    XNN_FORCE_REALIZATION(vmax);
   do {
     $if DATATYPE == "QD8":
       const v128_t vksum0123 = wasm_v128_load(w);
@@ -206,11 +210,9 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c2__
         vacc${M}x0123 = wasm_f32x4_add(vacc${M}x0123, vbias0123);
       w = (const float*) w + 4;
 
-      const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
       $for M in range(MR):
         vacc${M}x0123 = wasm_f32x4_pmax(vacc${M}x0123, vmin);
 
-      const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
       $for M in range(MR):
         vacc${M}x0123 = wasm_f32x4_pmin(vacc${M}x0123, vmax);
 

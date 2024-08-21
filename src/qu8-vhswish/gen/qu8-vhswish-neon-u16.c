@@ -26,13 +26,13 @@ void xnn_qu8_vhswish_ukernel__neon_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const uint16x8_t vinput_zero_point = vld1q_dup_u16(&params->neon.input_zero_point);
-  const int16x8_t vinput_scale_div_exp = 	vld1q_dup_s16(&params->neon.input_scale_div_exp);
-  const int16x8_t vinput_scale_div_mantissa = vld1q_dup_s16(&params->neon.input_scale_div_mantissa);
-  const int16x8_t vscale_ratio = vld1q_dup_s16(&params->neon.scale_ratio);
+  const uint16x8_t vinput_zero_point = vld1q_dup_u16(&params->scalar.input_zero_point);
+  const int16x8_t vinput_scale_div_exp = 	vdupq_n_s16(params->scalar.input_scale_div_exp + 15);
+  const int16x8_t vinput_scale_div_mantissa = vld1q_dup_s16(&params->scalar.input_scale_div_mantissa);
+  const int16x8_t vscale_ratio = vld1q_dup_s16(&params->scalar.scale_ratio);
   const int16x8_t vhalf = vdupq_n_s16(16384);
   const int16x8_t vzero = vdupq_n_s16(0);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
   for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
     const uint8x16_t vx0 = vld1q_u8(input); input += 16;
     int16x8_t vacc0 = vreinterpretq_s16_u16(vsubw_u8(vinput_zero_point, vget_low_u8(vx0)));

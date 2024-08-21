@@ -4,22 +4,13 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-### Tests for packing micro-kernels
-tools/generate-pack-test.py --spec test/x32-packx.yaml --output test/x32-packx.cc &
-
 ### Tests for Pack quantized micro-kernels
-tools/generate-packq-test.py --spec test/x8-packq.yaml --output test/x8-packq.cc --output-bench bench/x8-packq.cc &
+tools/generate-packq-test.py --spec test/x8-packq.yaml --output-bench bench/x8-packq.cc &
 
 ### Tests for Pack Weights micro-kernels
-tools/generate-packw-test.py --spec test/x8-packw.yaml --output test/x8-packw.cc --output-bench bench/x8-packw.cc &
-tools/generate-packw-test.py --spec test/x16-packw.yaml --output test/x16-packw.cc --output-bench bench/x16-packw.cc &
-tools/generate-packw-test.py --spec test/x32-packw.yaml --output test/x32-packw.cc --output-bench bench/x32-packw.cc &
-
-### Tests for Zero Bias micro-kernels
-tools/generate-packb-test.py --spec test/x32-zerob.yaml --output test/x32-zerob.cc &
-
-### Tests for Pack Bias micro-kernels
-tools/generate-packb-test.py --spec test/x32-packb.yaml --output test/x32-packb.cc &
+tools/generate-packw-test.py --spec test/x8-packw.yaml --output-bench bench/x8-packw.cc &
+tools/generate-packw-test.py --spec test/x16-packw.yaml --output-bench bench/x16-packw.cc &
+tools/generate-packw-test.py --spec test/x32-packw.yaml --output-bench bench/x32-packw.cc &
 
 ### Tests for MaxPool micro-kernels
 tools/generate-maxpool-test.py --spec test/f32-maxpool-minmax.yaml --output test/f32-maxpool-minmax.cc &

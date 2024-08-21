@@ -49,8 +49,10 @@ void xnn_f32_ppmm_minmax_ukernel_${MR}x${NR}__wasmsimd${ARCH_SUFFIX}_splat(
         c${M} = c${M-1};
       }
 
-  const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
-  const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
+  const v128_t vmin = wasm_v128_load32_splat(&params->wasmsimd.min);
+  const v128_t vmax = wasm_v128_load32_splat(&params->wasmsimd.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
   do {
     v128_t vacc0x${ABC[0:4]} = wasm_v128_load(w);
     $for N in range(4, NR, 4):

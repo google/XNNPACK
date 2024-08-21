@@ -11,6 +11,7 @@
 
 #include <immintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
@@ -43,6 +44,10 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c8__avx2(
   const int8_t* a0 = a;
   float* c0 = c;
 
+  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
   do {
     const __m128i vinit0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     const __m128i vinit1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -105,10 +110,8 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c8__avx2(
     w = (const float*) w + 16;
     vout0x01234567 = _mm256_fmadd_ps(vout0x01234567, vfilter_output_scale01234567, vbias01234567);
 
-    const __m256 vmin = _mm256_load_ps(params->avx.min);
     vout0x01234567 = _mm256_max_ps(vout0x01234567, vmin);
 
-    const __m256 vmax = _mm256_load_ps(params->avx.max);
     vout0x01234567 = _mm256_min_ps(vout0x01234567, vmax);
 
     if XNN_LIKELY(nc >= 8) {

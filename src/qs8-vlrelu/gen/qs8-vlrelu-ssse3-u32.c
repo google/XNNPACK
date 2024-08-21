@@ -27,10 +27,15 @@ void xnn_qs8_vlrelu_ukernel__ssse3_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vinput_zero_point = _mm_load_si128((const __m128i*) params->sse2.input_zero_point);
-  const __m128i vmultiplier_diff = _mm_load_si128((const __m128i*) params->sse2.multiplier_diff);
-  const __m128i vmultiplier_base = _mm_load_si128((const __m128i*) params->sse2.multiplier_base);
-  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
+  const __m128i vinput_zero_point = _mm_set1_epi16(params->scalar.input_zero_point);
+  const __m128i vmultiplier_diff = _mm_set1_epi16(-params->scalar.negative_multiplier ^ -params->scalar.positive_multiplier);
+  const __m128i vmultiplier_base = _mm_set1_epi16(-params->scalar.negative_multiplier);
+  const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
+  XNN_FORCE_REALIZATION(vinput_zero_point);
+  XNN_FORCE_REALIZATION(vmultiplier_diff);
+  XNN_FORCE_REALIZATION(vmultiplier_base);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+
   for (; batch >= 32 * sizeof(int8_t); batch -= 32 * sizeof(int8_t)) {
     const __m128i vx0 = _mm_loadu_si128((const __m128i*) input);
     const __m128i vx1 = _mm_loadu_si128((const __m128i*) (input + 16));

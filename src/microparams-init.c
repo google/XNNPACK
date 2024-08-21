@@ -380,7 +380,6 @@ size_t xnn_init_qs8_qc8w_conv_minmax_fp32_avx512vnni_params(
   int8_t output_min,
   int8_t output_max)
 {
-  params->fp32_avx512vnni.sign_mask = 0x80;
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   params->fp32_avx512vnni.output_max_less_zero_point = output_max_less_zero_point;
   params->fp32_avx512vnni.output_zero_point = (int32_t) output_zero_point;
@@ -396,7 +395,6 @@ size_t xnn_init_qs8_qc8w_conv_minmax_fp32_avxvnni_params(
   int8_t output_min,
   int8_t output_max)
 {
-  params->fp32_avxvnni.sign_mask = 0x80;
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   params->fp32_avxvnni.output_max_less_zero_point = output_max_less_zero_point;
   params->fp32_avxvnni.output_zero_point = (int32_t) output_zero_point;
@@ -416,9 +414,6 @@ size_t xnn_init_qs8_conv_minmax_fp32_avx512vnni_params(
   assert(scale >= 0x1.0p-32f);
   assert(scale < 256.0f);
 
-  params->fp32_avx512vnni.sign_mask = 0x80;
-  params->fp32_avx512vnni.mask = 0xF0;
-  params->fp32_avx512vnni.gfni_shl4 = INT64_C(0x01020408);
   const float output_max_less_zero_point = (float) ((int32_t) output_max - (int32_t) output_zero_point);
   params->fp32_avx512vnni.output_max_less_zero_point = output_max_less_zero_point;
   params->fp32_avx512vnni.output_zero_point = (int32_t) output_zero_point;
@@ -1856,9 +1851,7 @@ void xnn_update_f32_scaleminmax_sse_params(
   union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale)
 {
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse.scale[i] = scale;
-  }
+  params->sse.scale = scale;
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -1886,11 +1879,9 @@ size_t xnn_init_f16_scaleminmax_avx_params(
   const float scale_f32 = fp16_ieee_to_fp32_value(scale);
   const float min_f32 = fp16_ieee_to_fp32_value(min);
   const float max_f32 = fp16_ieee_to_fp32_value(max);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.scale[i] = scale_f32;
-    params->avx.min[i] = min_f32;
-    params->avx.max[i] = max_f32;
-  }
+  params->avx.scale = scale_f32;
+  params->avx.min = min_f32;
+  params->avx.max = max_f32;
   return sizeof(params->avx);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -1910,9 +1901,7 @@ void xnn_update_f16_scaleminmax_avx_params(
   uint16_t scale)
 {
   const float scale_f32 = fp16_ieee_to_fp32_value(scale);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.scale[i] = scale_f32;
-  }
+  params->avx.scale = scale_f32;
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -1935,11 +1924,9 @@ size_t xnn_init_f32_scaleminmax_sse_params(
   float min,
   float max)
 {
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse.scale[i] = scale;
-    params->sse.min[i] = min;
-    params->sse.max[i] = max;
-  }
+  params->sse.scale = scale;
+  params->sse.min = min;
+  params->sse.max = max;
   return sizeof(params->sse);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -2114,10 +2101,8 @@ size_t xnn_init_f16_minmax_avx_params(
 {
   const float min_f32 = fp16_ieee_to_fp32_value(min);
   const float max_f32 = fp16_ieee_to_fp32_value(max);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.min[i] = min_f32;
-    params->avx.max[i] = max_f32;
-  }
+  params->avx.min = min_f32;
+  params->avx.max = max_f32;
   return sizeof(params->avx);
 }
 
@@ -2130,7 +2115,6 @@ size_t xnn_init_f16_minmax_avxvnni_params(
   const float max_f32 = fp16_ieee_to_fp32_value(max);
   params->avxvnni.min = min_f32;
   params->avxvnni.max = max_f32;
-  params->avxvnni.sign_mask = 0x80;
   return sizeof(params->avxvnni);
 }
 
@@ -2170,13 +2154,8 @@ size_t xnn_init_f16_qc4w_minmax_avx_params(
   assert(kernel_zero_point <= 15);
   const float min_f32 = fp16_ieee_to_fp32_value(output_min);
   const float max_f32 = fp16_ieee_to_fp32_value(output_max);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.min[i] = min_f32;
-    params->avx.max[i] = max_f32;
-  }
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx.mask[i] = 0xF0;
-  }
+  params->avx.min = min_f32;
+  params->avx.max = max_f32;
   return sizeof(params->avx);
 }
 
@@ -2191,9 +2170,6 @@ size_t xnn_init_f16_qc4w_minmax_avxvnni_params(
   const float max_f32 = fp16_ieee_to_fp32_value(output_max);
   params->avxvnni.min = min_f32;
   params->avxvnni.max = max_f32;
-  params->avxvnni.sign_mask = 0x80;
-  params->avxvnni.mask = 0xF0;
-  params->avxvnni.gfni_shl4 = INT64_C(0x01020408);
   return sizeof(params->avxvnni);
 }
 
@@ -2208,9 +2184,6 @@ size_t xnn_init_f16_qc4w_minmax_avxvnni_madd_params(
   const float max_f32 = fp16_ieee_to_fp32_value(output_max);
   params->avxvnni.min = min_f32;
   params->avxvnni.max = max_f32;
-  params->avxvnni.sign_mask = 0x80;
-  params->avxvnni.mask = 0x0F;
-  params->avxvnni.gfni_shl4 = INT64_C(0);
   return sizeof(params->avxvnni);
 }
 #endif
@@ -2241,13 +2214,8 @@ size_t xnn_init_f16_qb4w_minmax_avx_params(
   assert(kernel_zero_point <= 15);
   const float min_f32 = fp16_ieee_to_fp32_value(output_min);
   const float max_f32 = fp16_ieee_to_fp32_value(output_max);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.min[i] = min_f32;
-    params->avx.max[i] = max_f32;
-  }
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx.mask[i] = 0xF0;
-  }
+  params->avx.min = min_f32;
+  params->avx.max = max_f32;
   params->avx.blocksize = blocksize;
   return sizeof(params->avx);
 }
@@ -2264,9 +2232,6 @@ size_t xnn_init_f16_qb4w_minmax_avxvnni_params(
   const float max_f32 = fp16_ieee_to_fp32_value(output_max);
   params->avxvnni.min = min_f32;
   params->avxvnni.max = max_f32;
-  params->avxvnni.sign_mask = 0x80;
-  params->avxvnni.mask = 0xF0;
-  params->avxvnni.gfni_shl4 = INT64_C(0x01020408);
   params->avxvnni.blocksize = blocksize;
   return sizeof(params->avxvnni);
 }
@@ -2278,10 +2243,8 @@ size_t xnn_init_f32_minmax_sse_params(
   float output_min,
   float output_max)
 {
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse.min[i] = output_min;
-    params->sse.max[i] = output_max;
-  }
+  params->sse.min = output_min;
+  params->sse.max = output_max;
   return sizeof(params->sse);
 }
 
@@ -2290,10 +2253,8 @@ size_t xnn_init_f32_minmax_avx_params(
   float output_min,
   float output_max)
 {
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.min[i] = output_min;
-    params->avx.max[i] = output_max;
-  }
+  params->avx.min = output_min;
+  params->avx.max = output_max;
   return sizeof(params->avx);
 }
 
@@ -2303,7 +2264,6 @@ size_t xnn_init_f32_minmax_avx512vnni_params(
   float output_max) {
   params->avx512vnni.min = output_min;
   params->avx512vnni.max = output_max;
-  params->avx512vnni.sign_mask = 0x80;
   return sizeof(params->avx512vnni);
 }
 
@@ -2313,7 +2273,6 @@ size_t xnn_init_f32_minmax_avxvnni_params(
   float output_max) {
   params->avxvnni.min = output_min;
   params->avxvnni.max = output_max;
-  params->avxvnni.sign_mask = 0x80;
   return sizeof(params->avxvnni);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -2324,10 +2283,8 @@ size_t xnn_init_f32_minmax_wasmsimd_params(
   float output_min,
   float output_max)
 {
-  params->wasmsimd.min[0] = output_min;
-  params->wasmsimd.min[1] = output_min;
-  params->wasmsimd.max[0] = output_max;
-  params->wasmsimd.max[1] = output_max;
+  params->wasmsimd.min = output_min;
+  params->wasmsimd.max = output_max;
   return sizeof(params->wasmsimd);
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -2338,10 +2295,8 @@ size_t xnn_init_f32_minmax_hvx_params(
   float output_min,
   float output_max)
 {
-  for (uint32_t i = 0; i < 32; i++) {
-    params->hvx.min[i] = output_min;
-    params->hvx.max[i] = output_max;
-  }
+  params->hvx.min = output_min;
+  params->hvx.max = output_max;
   return sizeof(params->hvx);
 }
 #endif // XNN_ARCH_HEXAGON
@@ -2364,16 +2319,13 @@ size_t xnn_init_f32_qc4w_minmax_sse_params(
   uint8_t kernel_zero_point)
 {
   assert(kernel_zero_point <= 15);
+  params->sse.min = output_min;
+  params->sse.max = output_max;
   for (uint32_t i = 0; i < 4; i++) {
-    params->sse.min[i] = output_min;
-    params->sse.max[i] = output_max;
     params->sse.magic_bias_c0[i] = 0x4B0000F0;
     params->sse.magic_bias_c1[i] = 0x4900000F;
     params->sse.magic_bias_plus_kernel_zero_point_c0[i] = 0x1.0001E0p+23f + (float) kernel_zero_point;
     params->sse.magic_bias_plus_kernel_zero_point_c1[i] = 0x1.00001Ep+19f + (float) kernel_zero_point;
-  }
-  for (uint32_t i = 0; i < 16; i++) {
-    params->sse.mask[i] = 0xF0;
   }
   return sizeof(params->sse);
 }
@@ -2385,16 +2337,13 @@ size_t xnn_init_f32_qc4w_minmax_avx_params(
   uint8_t kernel_zero_point)
 {
   assert(kernel_zero_point <= 15);
+  params->avx.min = output_min;
+  params->avx.max = output_max;
   for (uint32_t i = 0; i < 8; i++) {
-    params->avx.min[i] = output_min;
-    params->avx.max[i] = output_max;
     params->avx.magic_bias_c0[i] = 0x4B0000F0;
     params->avx.magic_bias_c1[i] = 0x4900000F;
     params->avx.magic_bias_plus_kernel_zero_point_c0[i] = 0x1.0001E0p+23f + (float) kernel_zero_point;
     params->avx.magic_bias_plus_kernel_zero_point_c1[i] = 0x1.00001Ep+19f + (float) kernel_zero_point;
-  }
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx.mask[i] = 0xF0;
   }
   return sizeof(params->avx);
 }
@@ -2424,9 +2373,6 @@ size_t xnn_init_f32_qc4w_minmax_avx512vnni_params(
   assert(kernel_zero_point <= 15);
   params->avx512vnni.min = output_min;
   params->avx512vnni.max = output_max;
-  params->avx512vnni.sign_mask = 0x80;
-  params->avx512vnni.mask = 0xF0;
-  params->avx512vnni.gfni_shl4 = INT64_C(0x01020408);
   return sizeof(params->avx512vnni);
 }
 
@@ -2439,9 +2385,6 @@ size_t xnn_init_f32_qc4w_minmax_avx512vnni_madd_params(
   assert(kernel_zero_point <= 15);
   params->avx512vnni.min = output_min;
   params->avx512vnni.max = output_max;
-  params->avx512vnni.sign_mask = 0x80;
-  params->avx512vnni.mask = 0x0F;
-  params->avx512vnni.gfni_shl4 = INT64_C(0);  // Unused
   return sizeof(params->avx512vnni);
 }
 
@@ -2454,9 +2397,6 @@ size_t xnn_init_f32_qc4w_minmax_avxvnni_params(
   assert(kernel_zero_point <= 15);
   params->avxvnni.min = output_min;
   params->avxvnni.max = output_max;
-  params->avxvnni.sign_mask = 0x80;
-  params->avxvnni.mask = 0xF0;
-  params->avxvnni.gfni_shl4 = INT64_C(0x01020408);
   return sizeof(params->avxvnni);
 }
 
@@ -2469,9 +2409,6 @@ size_t xnn_init_f32_qc4w_minmax_avxvnni_madd_params(
   assert(kernel_zero_point <= 15);
   params->avxvnni.min = output_min;
   params->avxvnni.max = output_max;
-  params->avxvnni.sign_mask = 0x80;
-  params->avxvnni.mask = 0x0F;
-  params->avxvnni.gfni_shl4 = INT64_C(0);  // Unused
   return sizeof(params->avxvnni);
 }
 
@@ -2485,15 +2422,10 @@ size_t xnn_init_f32_qc4w_minmax_wasmsimd_params(
   uint8_t kernel_zero_point)
 {
   assert(kernel_zero_point <= 15);
-  params->wasmsimd.min[0] = output_min;
-  params->wasmsimd.min[1] = output_min;
-  params->wasmsimd.max[0] = output_max;
-  params->wasmsimd.max[1] = output_max;
+  params->wasmsimd.min = output_min;
+  params->wasmsimd.max = output_max;
   for (uint32_t i = 0; i < 4; i++) {
     params->wasmsimd.minus_kernel_zero_point[i] = -(int32_t) kernel_zero_point;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->wasmsimd.mask[i] = 0xF0;
   }
   return sizeof(params->wasmsimd);
 }
@@ -2509,7 +2441,6 @@ size_t xnn_init_f32_qc4w_minmax_scalar_params(
   params->scalar.min = output_min;
   params->scalar.max = output_max;
   params->scalar.minus_kernel_zero_point = -(int32_t) kernel_zero_point;
-  params->scalar.mask = 0xF0;
   return sizeof(params->scalar);
 }
 
@@ -2522,16 +2453,13 @@ size_t xnn_init_f32_qb4w_minmax_sse_params(
   size_t blocksize)
 {
   assert(kernel_zero_point <= 15);
+  params->sse.min = output_min;
+  params->sse.max = output_max;
   for (uint32_t i = 0; i < 4; i++) {
-    params->sse.min[i] = output_min;
-    params->sse.max[i] = output_max;
     params->sse.magic_bias_c0[i] = 0x4B0000F0;
     params->sse.magic_bias_c1[i] = 0x4900000F;
     params->sse.magic_bias_plus_kernel_zero_point_c0[i] = 0x1.0001E0p+23f + (float) kernel_zero_point;
     params->sse.magic_bias_plus_kernel_zero_point_c1[i] = 0x1.00001Ep+19f + (float) kernel_zero_point;
-  }
-  for (uint32_t i = 0; i < 16; i++) {
-    params->sse.mask[i] = 0xF0;
   }
   params->sse.blocksize = blocksize;
   return sizeof(params->sse);
@@ -2545,16 +2473,13 @@ size_t xnn_init_f32_qb4w_minmax_avx_params(
   size_t blocksize)
 {
   assert(kernel_zero_point <= 15);
+  params->avx.min = output_min;
+  params->avx.max = output_max;
   for (uint32_t i = 0; i < 8; i++) {
-    params->avx.min[i] = output_min;
-    params->avx.max[i] = output_max;
     params->avx.magic_bias_c0[i] = 0x4B0000F0;
     params->avx.magic_bias_c1[i] = 0x4900000F;
     params->avx.magic_bias_plus_kernel_zero_point_c0[i] = 0x1.0001E0p+23f + (float) kernel_zero_point;
     params->avx.magic_bias_plus_kernel_zero_point_c1[i] = 0x1.00001Ep+19f + (float) kernel_zero_point;
-  }
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx.mask[i] = 0xF0;
   }
   params->avx.blocksize = blocksize;
   return sizeof(params->avx);
@@ -2588,9 +2513,6 @@ size_t xnn_init_f32_qb4w_minmax_avx512vnni_params(
   assert(kernel_zero_point <= 15);
   params->avx512vnni.min = output_min;
   params->avx512vnni.max = output_max;
-  params->avx512vnni.sign_mask = 0x80;
-  params->avx512vnni.mask = 0xF0;
-  params->avx512vnni.gfni_shl4 = INT64_C(0x01020408);
   params->avx512vnni.blocksize = blocksize;
   return sizeof(params->avx512vnni);
 }
@@ -2606,9 +2528,6 @@ size_t xnn_init_f32_qb4w_minmax_avxvnni_params(
   assert(kernel_zero_point <= 15);
   params->avxvnni.min = output_min;
   params->avxvnni.max = output_max;
-  params->avxvnni.sign_mask = 0x80;
-  params->avxvnni.mask = 0xF0;
-  params->avxvnni.gfni_shl4 = INT64_C(0x01020408);
   params->avxvnni.blocksize = blocksize;
   return sizeof(params->avxvnni);
 }
@@ -2624,15 +2543,10 @@ size_t xnn_init_f32_qb4w_minmax_wasmsimd_params(
   size_t blocksize)
 {
   assert(kernel_zero_point <= 15);
-  params->wasmsimd.min[0] = output_min;
-  params->wasmsimd.min[1] = output_min;
-  params->wasmsimd.max[0] = output_max;
-  params->wasmsimd.max[1] = output_max;
+  params->wasmsimd.min = output_min;
+  params->wasmsimd.max = output_max;
   for (uint32_t i = 0; i < 4; i++) {
     params->wasmsimd.minus_kernel_zero_point[i] = -(int32_t) kernel_zero_point;
-  }
-  for (uint32_t i = 0; i < 8; i++) {
-    params->wasmsimd.mask[i] = 0xF0;
   }
   params->wasmsimd.blocksize = blocksize;
   return sizeof(params->wasmsimd);
@@ -2650,7 +2564,6 @@ size_t xnn_init_f32_qb4w_minmax_scalar_params(
   params->scalar.min = output_min;
   params->scalar.max = output_max;
   params->scalar.minus_kernel_zero_point = -(int32_t) kernel_zero_point;
-  params->scalar.mask = 0xF0;
   params->scalar.blocksize = blocksize;
   return sizeof(params->scalar);
 }
@@ -2675,28 +2588,6 @@ size_t xnn_init_qs8_hswish_scalar_params(
   return sizeof(params->scalar);
 }
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_qs8_hswish_neon_params(
-  union xnn_qs8_hswish_params params[XNN_MIN_ELEMENTS(1)],
-  int16_t input_zero_point,
-  int16_t output_zero_point,
-  float input_scale,
-  float output_scale)
-{
-  params->neon.input_zero_point = input_zero_point;
-  params->neon.output_zero_point= output_zero_point;
-  const float divisor1 = 0x1.555556p-10f;
-  const uint32_t input_scale_div = float_as_uint32(input_scale * divisor1);
-  params->neon.input_scale_div_exp = (int16_t) (input_scale_div >> 23) - 111;
-  params->neon.input_scale_div_mantissa = (int16_t) ((input_scale_div << 9) >> 18 | UINT16_C(0x4000));
-  const float scale_ratio = input_scale / output_scale;
-  assert(scale_ratio >= 0x1.0p-8f);
-  assert(scale_ratio < 0x1.0p+7f);
-  params->neon.scale_ratio = (int16_t) lrintf(scale_ratio * 256.0f);
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_qs8_hswish_sse2_params(
   union xnn_qs8_hswish_params params[XNN_MIN_ELEMENTS(1)],
@@ -2710,47 +2601,13 @@ size_t xnn_init_qs8_hswish_sse2_params(
   assert(scale_ratio >= 0x1.0p-8f);
   assert(scale_ratio < 0x1.0p+7f);
   const int16_t scale_ratio_param = (int16_t) -lrintf(scale_ratio * 256.0f);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse2.input_zero_point[i] = input_zero_point;
-    params->sse2.output_zero_point[i] = output_zero_point;
-    params->sse2.input_scale_div[i] = input_scale_div;
-    params->sse2.scale_ratio[i] = scale_ratio_param;
-  }
+  params->sse2.input_zero_point = input_zero_point;
+  params->sse2.output_zero_point = output_zero_point;
+  params->sse2.input_scale_div = input_scale_div;
+  params->sse2.scale_ratio = scale_ratio_param;
   return sizeof(params->sse2);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_qs8_hswish_wasmsimd_params(
-  union xnn_qs8_hswish_params params[XNN_MIN_ELEMENTS(1)],
-  int16_t input_zero_point,
-  int16_t output_zero_point,
-  float input_scale,
-  float output_scale)
-{
-  const float divisor1 = 0x1.555556p-10f;
-  const uint32_t input_scale_div = float_as_uint32(input_scale * divisor1);
-  const int16_t input_scale_div_exp = (int16_t) (input_scale_div >> 23) - 111;
-  assert(input_scale_div_exp >= 0);
-  assert(input_scale_div_exp <=15);
-  params->wasmsimd.input_scale_div_exp = (uint32_t) input_scale_div_exp;
-  const int16_t input_scale_div_mantissa = (int16_t) ((input_scale_div << 9) >> 18 | UINT16_C(0x4000));
-  const float scale_ratio = input_scale / output_scale;
-  assert(scale_ratio >= 0x1.0p-8f);
-  assert(scale_ratio < 0x1.0p+7f);
-  const int16_t scale_ratio_int = (int16_t) lrintf(scale_ratio * 256.0f);
-  int16_t shift_max = (int16_t) 1 << (15 - input_scale_div_exp);
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd.input_zero_point[i] = input_zero_point;
-    params->wasmsimd.output_zero_point[i] = output_zero_point;
-    params->wasmsimd.input_scale_div_mantissa[i] = input_scale_div_mantissa;
-    params->wasmsimd.scale_ratio[i] = scale_ratio_int;
-    params->wasmsimd.shift_max[i] = shift_max;
-    params->wasmsimd.shift_min[i] = -shift_max;
-  }
-  return sizeof(params->wasmsimd);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 size_t xnn_init_qu8_hswish_scalar_params(
   union xnn_qu8_hswish_params params[XNN_MIN_ELEMENTS(1)],
@@ -2771,58 +2628,6 @@ size_t xnn_init_qu8_hswish_scalar_params(
   params->scalar.scale_ratio = (int32_t) lrintf(scale_ratio * 256.0f);
   return sizeof(params->scalar);
 }
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_qu8_hswish_neon_params(
-  union xnn_qu8_hswish_params params[XNN_MIN_ELEMENTS(1)],
-  int16_t input_zero_point,
-  int16_t output_zero_point,
-  float input_scale,
-  float output_scale)
-{
-  params->neon.input_zero_point = input_zero_point;
-  params->neon.output_zero_point= output_zero_point;
-  const float divisor1 = 0x1.555556p-10f;
-  const uint32_t input_scale_div = float_as_uint32(input_scale * divisor1);
-  params->neon.input_scale_div_exp = (int16_t) (input_scale_div >> 23) - 111;
-  params->neon.input_scale_div_mantissa = (int16_t) ((input_scale_div << 9) >> 18 | UINT16_C(0x4000));
-  const float scale_ratio = input_scale / output_scale;
-  assert(scale_ratio >= 0x1.0p-8f);
-  assert(scale_ratio < 0x1.0p+7f);
-  params->neon.scale_ratio = (int16_t) lrintf(scale_ratio * 256.0f);
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_qu8_hswish_wasmsimd_params(
-  union xnn_qu8_hswish_params params[XNN_MIN_ELEMENTS(1)],
-  int16_t input_zero_point,
-  int16_t output_zero_point,
-  float input_scale,
-  float output_scale)
-{
-  const float divisor1 = 0x1.555556p-10f;
-  const uint32_t input_scale_div = float_as_uint32(input_scale * divisor1);
-  const int16_t input_scale_div_exp = (int16_t) (input_scale_div >> 23) - 111;
-  assert(input_scale_div_exp >= 0);
-  assert(input_scale_div_exp <=15);
-  params->wasmsimd.input_scale_div_exp = (uint32_t) input_scale_div_exp;
-  const int16_t input_scale_div_mantissa = (int16_t) ((input_scale_div << 9) >> 18 | UINT16_C(0x4000));
-  const float scale_ratio = input_scale / output_scale;
-  assert(scale_ratio >= 0x1.0p-8f);
-  assert(scale_ratio < 0x1.0p+7f);
-  const int16_t scale_ratio_int = (int16_t) lrintf(scale_ratio * 256.0f);
-  const int16_t shift_max = (int16_t) 1 << (15 - input_scale_div_exp);
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd.input_zero_point[i] = input_zero_point;
-    params->wasmsimd.output_zero_point[i] = output_zero_point;
-    params->wasmsimd.input_scale_div_mantissa[i] = input_scale_div_mantissa;
-    params->wasmsimd.scale_ratio[i] = scale_ratio_int;
-    params->wasmsimd.shift_max[i] = shift_max;
-    params->wasmsimd.shift_min[i] = -shift_max;
-  }
-  return sizeof(params->wasmsimd);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_qu8_hswish_sse2_params(
@@ -2837,12 +2642,10 @@ size_t xnn_init_qu8_hswish_sse2_params(
   assert(scale_ratio >= 0x1.0p-8f);
   assert(scale_ratio < 0x1.0p+7f);
   const int16_t scale_ratio_param = (int16_t) -lrintf(scale_ratio * 256.0f);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse2.input_zero_point[i] = input_zero_point;
-    params->sse2.output_zero_point[i] = output_zero_point;
-    params->sse2.input_scale_div[i] = input_scale_div;
-    params->sse2.scale_ratio[i] = scale_ratio_param;
-  }
+  params->sse2.input_zero_point = input_zero_point;
+  params->sse2.output_zero_point = output_zero_point;
+  params->sse2.input_scale_div = input_scale_div;
+  params->sse2.scale_ratio = scale_ratio_param;
   return sizeof(params->sse2);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -3085,9 +2888,7 @@ size_t xnn_init_f16_lrelu_avx_params(
   union xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t slope)
 {
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.slope[i] = fp16_ieee_to_fp32_value(slope);
-  }
+  params->avx.slope = fp16_ieee_to_fp32_value(slope);
   return sizeof(params->avx);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -3100,40 +2901,7 @@ size_t xnn_init_f32_lrelu_scalar_params(
   return sizeof(params->scalar);
 }
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_lrelu_sse_params(
-  union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float slope)
-{
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse.slope[i] = slope;
-  }
-  return sizeof(params->sse);
-}
-
-size_t xnn_init_f32_lrelu_avx_params(
-  union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float slope)
-{
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.slope[i] = slope;
-  }
-  return sizeof(params->avx);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_f32_lrelu_wasmsimd_params(
-  union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float slope)
-{
-  params->wasmsimd.slope[0] = slope;
-  params->wasmsimd.slope[1] = slope;
-  return sizeof(params->wasmsimd);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-size_t xnn_init_qs8_lrelu_scalar_select_params(
+size_t xnn_init_qs8_lrelu_scalar_params(
   union xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float positive_scale,
   float negative_scale,
@@ -3153,252 +2921,14 @@ size_t xnn_init_qs8_lrelu_scalar_select_params(
   assert(negative_multiplier <= 32768L);
   assert(negative_multiplier >= -32767L);
   assert(negative_multiplier != 0L);
-  params->scalar_select.input_zero_point = (int32_t) input_zero_point;
-  params->scalar_select.positive_multiplier = (int32_t) positive_multiplier;
-  params->scalar_select.negative_multiplier = (int32_t) negative_multiplier;
-  params->scalar_select.bias = ((int32_t) output_zero_point << 8) + INT32_C(0x80);
-  return sizeof(params->scalar_select);
+  params->scalar.input_zero_point = input_zero_point;
+  params->scalar.positive_multiplier = positive_multiplier;
+  params->scalar.negative_multiplier = negative_multiplier;
+  params->scalar.output_zero_point = output_zero_point;
+  return sizeof(params->scalar);
 }
 
-size_t xnn_init_qs8_lrelu_scalar_andxor_params(
-  union xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float positive_scale,
-  float negative_scale,
-  int8_t input_zero_point,
-  int8_t output_zero_point)
-{
-  assert(positive_scale >= 0x1.0p-8f);
-  assert(positive_scale <= 0x1.0p+7f);
-  assert(negative_scale <= 0x1.0p+7f);
-  assert(negative_scale >= -0x1.FFFC00p+6f);
-  assert(fabsf(negative_scale) >= 0x1.0p-8f);
-
-  const long positive_multiplier = lrintf(256.0f * positive_scale);
-  assert(positive_multiplier >= 1L);
-  assert(positive_multiplier <= 32768L);
-  const long negative_multiplier = lrintf(256.0f * negative_scale);
-  assert(negative_multiplier <= 32768L);
-  assert(negative_multiplier >= -32767L);
-  assert(negative_multiplier != 0L);
-  params->scalar_andxor.input_zero_point = (int32_t) input_zero_point;
-  params->scalar_andxor.multiplier_base = (int32_t) positive_multiplier;
-  params->scalar_andxor.multiplier_diff = (int32_t) negative_multiplier ^ (int32_t) positive_multiplier;
-  params->scalar_andxor.bias = ((int32_t) output_zero_point << 8) + INT32_C(0x80);
-  return sizeof(params->scalar_andxor);
-}
-
-#if XNN_ARCH_ARM
-size_t xnn_init_qs8_lrelu_armsimd32_params(
-  union xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float positive_scale,
-  float negative_scale,
-  int8_t input_zero_point,
-  int8_t output_zero_point)
-{
-  assert(positive_scale >= 0x1.0p-8f);
-  assert(positive_scale <= 0x1.0p+7f);
-  assert(negative_scale <= 0x1.0p+7f);
-  assert(negative_scale >= -0x1.FFFC00p+6f);
-  assert(fabsf(negative_scale) >= 0x1.0p-8f);
-
-  const long positive_multiplier = lrintf(-256.0f * positive_scale);
-  assert(positive_multiplier <= -1L);
-  assert(positive_multiplier >= -32768L);
-  const long negative_multiplier = lrintf(-256.0f * negative_scale);
-  assert(negative_multiplier >= -32768L);
-  assert(negative_multiplier <= 32767L);
-  assert(negative_multiplier != 0L);
-  params->armsimd32.input_zero_point = (uint32_t) (uint16_t) (int16_t) input_zero_point * UINT32_C(0x00010001);
-  params->armsimd32.positive_multiplier = (uint32_t) (uint16_t) (int16_t) positive_multiplier * UINT32_C(0x00010001);
-  params->armsimd32.negative_multiplier = (uint32_t) (uint16_t) (int16_t) negative_multiplier * UINT32_C(0x00010001);
-  params->armsimd32.bias = ((int32_t) output_zero_point << 8) + INT32_C(0x80);
-  return sizeof(params->armsimd32);
-}
-#endif  // XNN_ARCH_ARM
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_qs8_lrelu_neon_params(
-  union xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float positive_scale,
-  float negative_scale,
-  int8_t input_zero_point,
-  int8_t output_zero_point)
-{
-  assert(positive_scale >= 0x1.0p-8f);
-  assert(positive_scale <= 0x1.0p+7f);
-  assert(negative_scale <= 0x1.0p+7f);
-  assert(negative_scale >= -0x1.FFFC00p+6f);
-  assert(fabsf(negative_scale) >= 0x1.0p-8f);
-
-  const long positive_multiplier = lrintf(-256.0f * positive_scale);
-  assert(positive_multiplier <= -1L);
-  assert(positive_multiplier >= -32768L);
-  const long negative_multiplier = lrintf(-256.0f * negative_scale);
-  assert(negative_multiplier >= -32768L);
-  assert(negative_multiplier <= 32767L);
-  assert(negative_multiplier != 0L);
-  params->neon.input_zero_point = (int16_t) input_zero_point;
-  params->neon.positive_multiplier = (int16_t) positive_multiplier;
-  params->neon.negative_multiplier = (int16_t) negative_multiplier;
-  params->neon.output_zero_point = (int16_t) output_zero_point;
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_qs8_lrelu_sse2_params(
-  union xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float positive_scale,
-  float negative_scale,
-  int8_t input_zero_point,
-  int8_t output_zero_point)
-{
-  assert(positive_scale >= 0x1.0p-8f);
-  assert(positive_scale <= 0x1.0p+7f);
-  assert(negative_scale <= 0x1.0p+7f);
-  assert(negative_scale >= -0x1.FFFC00p+6f);
-  assert(fabsf(negative_scale) >= 0x1.0p-8f);
-
-  const long positive_multiplier = lrintf(-256.0f * positive_scale);
-  assert(positive_multiplier <= -1L);
-  assert(positive_multiplier >= -32768L);
-  const long negative_multiplier = lrintf(-256.0f * negative_scale);
-  assert(negative_multiplier >= -32768L);
-  assert(negative_multiplier <= 32767L);
-  assert(negative_multiplier != 0L);
-  const int16_t multiplier_base = (int16_t) negative_multiplier;
-  const int16_t multiplier_diff = (int16_t) positive_multiplier ^ (int16_t) negative_multiplier;
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse2.input_zero_point[i] = (int16_t) input_zero_point;
-    params->sse2.multiplier_diff[i] = multiplier_diff;
-    params->sse2.multiplier_base[i] = multiplier_base;
-    params->sse2.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  return sizeof(params->sse2);
-}
-
-size_t xnn_init_qs8_lrelu_avx_params(
-  union xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float positive_scale,
-  float negative_scale,
-  int8_t input_zero_point,
-  int8_t output_zero_point)
-{
-  assert(positive_scale >= 0x1.0p-8f);
-  assert(positive_scale <= 0x1.0p+7f);
-  assert(negative_scale <= 0x1.0p+7f);
-  assert(negative_scale >= -0x1.FFFC00p+6f);
-  assert(fabsf(negative_scale) >= 0x1.0p-8f);
-
-  const long positive_multiplier = lrintf(-256.0f * positive_scale);
-  assert(positive_multiplier <= -1L);
-  assert(positive_multiplier >= -32768L);
-  const long negative_multiplier = lrintf(-256.0f * negative_scale);
-  assert(negative_multiplier >= -32768L);
-  assert(negative_multiplier <= 32767L);
-  assert(negative_multiplier != 0L);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.input_zero_point[i] = (int16_t) input_zero_point;
-    params->avx.positive_multiplier[i] = (int16_t) positive_multiplier;
-    params->avx.negative_multiplier[i] = (int16_t) negative_multiplier;
-    params->avx.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  return sizeof(params->avx);
-}
-
-size_t xnn_init_qs8_lrelu_avx2_params(
-  union xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float positive_scale,
-  float negative_scale,
-  int8_t input_zero_point,
-  int8_t output_zero_point)
-{
-  assert(positive_scale >= 0x1.0p-8f);
-  assert(positive_scale <= 0x1.0p+7f);
-  assert(negative_scale <= 0x1.0p+7f);
-  assert(negative_scale >= -0x1.FFFC00p+6f);
-  assert(fabsf(negative_scale) >= 0x1.0p-8f);
-
-  const long positive_multiplier = lrintf(-256.0f * positive_scale);
-  assert(positive_multiplier <= -1L);
-  assert(positive_multiplier >= -32768L);
-  const long negative_multiplier = lrintf(-256.0f * negative_scale);
-  assert(negative_multiplier >= -32768L);
-  assert(negative_multiplier <= 32767L);
-  assert(negative_multiplier != 0L);
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx2.input_zero_point[i] = (int16_t) input_zero_point;
-    params->avx2.positive_multiplier[i] = (int16_t) positive_multiplier;
-    params->avx2.negative_multiplier[i] = (int16_t) negative_multiplier;
-    params->avx2.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  return sizeof(params->avx2);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_qs8_lrelu_wasmsimd_arm_params(
-  union xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float positive_scale,
-  float negative_scale,
-  int8_t input_zero_point,
-  int8_t output_zero_point)
-{
-  assert(positive_scale >= 0x1.0p-8f);
-  assert(positive_scale <= 0x1.0p+7f);
-  assert(negative_scale <= 0x1.0p+7f);
-  assert(negative_scale >= -0x1.FFFC00p+6f);
-  assert(fabsf(negative_scale) >= 0x1.0p-8f);
-
-  const long positive_multiplier = lrintf(-256.0f * positive_scale);
-  assert(positive_multiplier <= -1L);
-  assert(positive_multiplier >= -32768L);
-  const long negative_multiplier = lrintf(-256.0f * negative_scale);
-  assert(negative_multiplier >= -32768L);
-  assert(negative_multiplier <= 32767L);
-  assert(negative_multiplier != 0L);
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd_arm.input_zero_point[i] = (int16_t) input_zero_point;
-    params->wasmsimd_arm.positive_multiplier[i] = (int16_t) positive_multiplier;
-    params->wasmsimd_arm.negative_multiplier[i] = (int16_t) negative_multiplier;
-    params->wasmsimd_arm.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  return sizeof(params->wasmsimd_arm);
-}
-
-size_t xnn_init_qs8_lrelu_wasmsimd_x86_params(
-  union xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float positive_scale,
-  float negative_scale,
-  int8_t input_zero_point,
-  int8_t output_zero_point)
-{
-  assert(positive_scale >= 0x1.0p-8f);
-  assert(positive_scale <= 0x1.0p+7f);
-  assert(negative_scale <= 0x1.0p+7f);
-  assert(negative_scale >= -0x1.FFFC00p+6f);
-  assert(fabsf(negative_scale) >= 0x1.0p-8f);
-
-  const long positive_multiplier = lrintf(-256.0f * positive_scale);
-  assert(positive_multiplier <= -1L);
-  assert(positive_multiplier >= -32768L);
-  const long negative_multiplier = lrintf(-256.0f * negative_scale);
-  assert(negative_multiplier >= -32768L);
-  assert(negative_multiplier <= 32767L);
-  assert(negative_multiplier != 0L);
-  const int16_t multiplier_base = (int16_t) negative_multiplier;
-  const int16_t multiplier_diff = (int16_t) positive_multiplier ^ (int16_t) negative_multiplier;
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd_x86.input_zero_point[i] = (int16_t) input_zero_point;
-    params->wasmsimd_x86.multiplier_diff[i] = multiplier_diff;
-    params->wasmsimd_x86.multiplier_base[i] = multiplier_base;
-    params->wasmsimd_x86.output_zero_point[i] = (int16_t) output_zero_point;
-  }
-  return sizeof(params->wasmsimd_x86);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-size_t xnn_init_qu8_lrelu_scalar_select_params(
+size_t xnn_init_qu8_lrelu_scalar_params(
   union xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float positive_scale,
   float negative_scale,
@@ -3418,250 +2948,12 @@ size_t xnn_init_qu8_lrelu_scalar_select_params(
   assert(negative_multiplier <= 32768L);
   assert(negative_multiplier >= -32767L);
   assert(negative_multiplier != 0L);
-  params->scalar_select.input_zero_point = (int32_t) input_zero_point;
-  params->scalar_select.positive_multiplier = (int32_t) positive_multiplier;
-  params->scalar_select.negative_multiplier = (int32_t) negative_multiplier;
-  params->scalar_select.bias = ((int32_t) output_zero_point << 8) + INT32_C(0x80);
-  return sizeof(params->scalar_select);
+  params->scalar.input_zero_point = input_zero_point;
+  params->scalar.positive_multiplier = positive_multiplier;
+  params->scalar.negative_multiplier = negative_multiplier;
+  params->scalar.output_zero_point = output_zero_point;
+  return sizeof(params->scalar);
 }
-
-size_t xnn_init_qu8_lrelu_scalar_andxor_params(
-  union xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float positive_scale,
-  float negative_scale,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point)
-{
-  assert(positive_scale >= 0x1.0p-8f);
-  assert(positive_scale <= 0x1.0p+7f);
-  assert(negative_scale <= 0x1.0p+7f);
-  assert(negative_scale >= -0x1.FFFC00p+6f);
-  assert(fabsf(negative_scale) >= 0x1.0p-8f);
-
-  const long positive_multiplier = lrintf(256.0f * positive_scale);
-  assert(positive_multiplier >= 1L);
-  assert(positive_multiplier <= 32768L);
-  const long negative_multiplier = lrintf(256.0f * negative_scale);
-  assert(negative_multiplier <= 32768L);
-  assert(negative_multiplier >= -32767L);
-  assert(negative_multiplier != 0L);
-  params->scalar_andxor.input_zero_point = (int32_t) input_zero_point;
-  params->scalar_andxor.multiplier_base = (int32_t) positive_multiplier;
-  params->scalar_andxor.multiplier_diff = (int32_t) negative_multiplier ^ (int32_t) positive_multiplier;
-  params->scalar_andxor.bias = ((int32_t) output_zero_point << 8) + INT32_C(0x80);
-  return sizeof(params->scalar_andxor);
-}
-
-#if XNN_ARCH_ARM
-size_t xnn_init_qu8_lrelu_armsimd32_params(
-  union xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float positive_scale,
-  float negative_scale,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point)
-{
-  assert(positive_scale >= 0x1.0p-8f);
-  assert(positive_scale <= 0x1.0p+7f);
-  assert(negative_scale <= 0x1.0p+7f);
-  assert(negative_scale >= -0x1.FFFC00p+6f);
-  assert(fabsf(negative_scale) >= 0x1.0p-8f);
-
-  const long positive_multiplier = lrintf(-256.0f * positive_scale);
-  assert(positive_multiplier <= -1L);
-  assert(positive_multiplier >= -32768L);
-  const long negative_multiplier = lrintf(-256.0f * negative_scale);
-  assert(negative_multiplier >= -32768L);
-  assert(negative_multiplier <= 32767L);
-  assert(negative_multiplier != 0L);
-  params->armsimd32.input_zero_point = (uint32_t) input_zero_point * UINT32_C(0x00010001);
-  params->armsimd32.positive_multiplier = (uint32_t) (uint16_t) (int16_t) positive_multiplier * UINT32_C(0x00010001);
-  params->armsimd32.negative_multiplier = (uint32_t) (uint16_t) (int16_t) negative_multiplier * UINT32_C(0x00010001);
-  params->armsimd32.bias = ((int32_t) output_zero_point << 8) + INT32_C(0x80);
-  return sizeof(params->armsimd32);
-}
-#endif  // XNN_ARCH_ARM
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_qu8_lrelu_neon_params(
-  union xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float positive_scale,
-  float negative_scale,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point)
-{
-  assert(positive_scale >= 0x1.0p-8f);
-  assert(positive_scale <= 0x1.0p+7f);
-  assert(negative_scale <= 0x1.0p+7f);
-  assert(negative_scale >= -0x1.FFFC00p+6f);
-  assert(fabsf(negative_scale) >= 0x1.0p-8f);
-
-  const long positive_multiplier = lrintf(-256.0f * positive_scale);
-  assert(positive_multiplier <= -1L);
-  assert(positive_multiplier >= -32768L);
-  const long negative_multiplier = lrintf(-256.0f * negative_scale);
-  assert(negative_multiplier >= -32768L);
-  assert(negative_multiplier <= 32767L);
-  assert(negative_multiplier != 0L);
-  params->neon.input_zero_point = (uint16_t) input_zero_point;
-  params->neon.positive_multiplier = (int16_t) positive_multiplier;
-  params->neon.negative_multiplier = (int16_t) negative_multiplier;
-  params->neon.output_zero_point = (int16_t) output_zero_point;
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_qu8_lrelu_sse2_params(
-  union xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float positive_scale,
-  float negative_scale,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point)
-{
-  assert(positive_scale >= 0x1.0p-8f);
-  assert(positive_scale <= 0x1.0p+7f);
-  assert(negative_scale <= 0x1.0p+7f);
-  assert(negative_scale >= -0x1.FFFC00p+6f);
-  assert(fabsf(negative_scale) >= 0x1.0p-8f);
-
-  const long positive_multiplier = lrintf(-256.0f * positive_scale);
-  assert(positive_multiplier <= -1L);
-  assert(positive_multiplier >= -32768L);
-  const long negative_multiplier = lrintf(-256.0f * negative_scale);
-  assert(negative_multiplier >= -32768L);
-  assert(negative_multiplier <= 32767L);
-  assert(negative_multiplier != 0L);
-  const int16_t multiplier_base = (int16_t) negative_multiplier;
-  const int16_t multiplier_diff = (int16_t) positive_multiplier ^ (int16_t) negative_multiplier;
-  for (uint32_t i = 0; i < 8; i++) {
-    params->sse2.input_zero_point[i] = (int16_t) (uint16_t) input_zero_point;
-    params->sse2.multiplier_diff[i] = multiplier_diff;
-    params->sse2.multiplier_base[i] = multiplier_base;
-    params->sse2.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
-  }
-  return sizeof(params->sse2);
-}
-
-size_t xnn_init_qu8_lrelu_avx_params(
-  union xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float positive_scale,
-  float negative_scale,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point)
-{
-  assert(positive_scale >= 0x1.0p-8f);
-  assert(positive_scale <= 0x1.0p+7f);
-  assert(negative_scale <= 0x1.0p+7f);
-  assert(negative_scale >= -0x1.FFFC00p+6f);
-  assert(fabsf(negative_scale) >= 0x1.0p-8f);
-
-  const long positive_multiplier = lrintf(-256.0f * positive_scale);
-  assert(positive_multiplier <= -1L);
-  assert(positive_multiplier >= -32768L);
-  const long negative_multiplier = lrintf(-256.0f * negative_scale);
-  assert(negative_multiplier >= -32768L);
-  assert(negative_multiplier <= 32767L);
-  assert(negative_multiplier != 0L);
-  for (uint32_t i = 0; i < 8; i++) {
-    params->avx.input_zero_point[i] = (int16_t) (uint16_t) input_zero_point;
-    params->avx.positive_multiplier[i] = (int16_t) positive_multiplier;
-    params->avx.negative_multiplier[i] = (int16_t) negative_multiplier;
-    params->avx.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
-  }
-  return sizeof(params->avx);
-}
-
-size_t xnn_init_qu8_lrelu_avx2_params(
-  union xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float positive_scale,
-  float negative_scale,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point)
-{
-  assert(positive_scale >= 0x1.0p-8f);
-  assert(positive_scale <= 0x1.0p+7f);
-  assert(negative_scale <= 0x1.0p+7f);
-  assert(negative_scale >= -0x1.FFFC00p+6f);
-  assert(fabsf(negative_scale) >= 0x1.0p-8f);
-
-  const long positive_multiplier = lrintf(-256.0f * positive_scale);
-  assert(positive_multiplier <= -1L);
-  assert(positive_multiplier >= -32768L);
-  const long negative_multiplier = lrintf(-256.0f * negative_scale);
-  assert(negative_multiplier >= -32768L);
-  assert(negative_multiplier <= 32767L);
-  assert(negative_multiplier != 0L);
-  for (uint32_t i = 0; i < 16; i++) {
-    params->avx2.input_zero_point[i] = (int16_t) (uint16_t) input_zero_point;
-    params->avx2.positive_multiplier[i] = (int16_t) positive_multiplier;
-    params->avx2.negative_multiplier[i] = (int16_t) negative_multiplier;
-    params->avx2.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
-  }
-  return sizeof(params->avx2);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_qu8_lrelu_wasmsimd_arm_params(
-  union xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float positive_scale,
-  float negative_scale,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point)
-{
-  assert(positive_scale >= 0x1.0p-8f);
-  assert(positive_scale <= 0x1.0p+7f);
-  assert(negative_scale <= 0x1.0p+7f);
-  assert(negative_scale >= -0x1.FFFC00p+6f);
-  assert(fabsf(negative_scale) >= 0x1.0p-8f);
-
-  const long positive_multiplier = lrintf(-256.0f * positive_scale);
-  assert(positive_multiplier <= -1L);
-  assert(positive_multiplier >= -32768L);
-  const long negative_multiplier = lrintf(-256.0f * negative_scale);
-  assert(negative_multiplier >= -32768L);
-  assert(negative_multiplier <= 32767L);
-  assert(negative_multiplier != 0L);
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd_arm.input_zero_point[i] = (int16_t) (uint16_t) input_zero_point;
-    params->wasmsimd_arm.positive_multiplier[i] = (int16_t) positive_multiplier;
-    params->wasmsimd_arm.negative_multiplier[i] = (int16_t) negative_multiplier;
-    params->wasmsimd_arm.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
-  }
-  return sizeof(params->wasmsimd_arm);
-}
-
-size_t xnn_init_qu8_lrelu_wasmsimd_x86_params(
-  union xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float positive_scale,
-  float negative_scale,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point)
-{
-  assert(positive_scale >= 0x1.0p-8f);
-  assert(positive_scale <= 0x1.0p+7f);
-  assert(negative_scale <= 0x1.0p+7f);
-  assert(negative_scale >= -0x1.FFFC00p+6f);
-  assert(fabsf(negative_scale) >= 0x1.0p-8f);
-
-  const long positive_multiplier = lrintf(-256.0f * positive_scale);
-  assert(positive_multiplier <= -1L);
-  assert(positive_multiplier >= -32768L);
-  const long negative_multiplier = lrintf(-256.0f * negative_scale);
-  assert(negative_multiplier >= -32768L);
-  assert(negative_multiplier <= 32767L);
-  assert(negative_multiplier != 0L);
-  const int16_t multiplier_base = (int16_t) negative_multiplier;
-  const int16_t multiplier_diff = (int16_t) positive_multiplier ^ (int16_t) negative_multiplier;
-  for (uint32_t i = 0; i < 4; i++) {
-    params->wasmsimd_x86.input_zero_point[i] = (int16_t) (uint16_t) input_zero_point;
-    params->wasmsimd_x86.multiplier_diff[i] = multiplier_diff;
-    params->wasmsimd_x86.multiplier_base[i] = multiplier_base;
-    params->wasmsimd_x86.output_zero_point[i] = (int16_t) (uint16_t) output_zero_point;
-  }
-  return sizeof(params->wasmsimd_x86);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_f16_chw_neonfp16arith_stride1_params(
@@ -3777,10 +3069,8 @@ size_t xnn_init_f32_chw_sse_stride1_params(
   float output_min,
   float output_max)
 {
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse_stride1.min[i] = output_min;
-    params->sse_stride1.max[i] = output_max;
-  }
+  params->sse_stride1.min = output_min;
+  params->sse_stride1.max = output_max;
 
   const uint32_t w4 = (width - 1) & 3;
   params->sse_stride1.mask[0] = UINT32_C(0xFFFFFFFF);
@@ -3797,10 +3087,8 @@ size_t xnn_init_f32_chw_sse_stride2_params(
   float output_min,
   float output_max)
 {
-  for (uint32_t i = 0; i < 4; i++) {
-    params->sse_stride2.min[i] = output_min;
-    params->sse_stride2.max[i] = output_max;
-  }
+  params->sse_stride2.min = output_min;
+  params->sse_stride2.max = output_max;
 
   const uint32_t w8 = (width - 1) & 7;
   params->sse_stride2.mask_even[0] = UINT32_C(0xFFFFFFFF);
@@ -3823,10 +3111,8 @@ size_t xnn_init_f32_chw_wasmsimd_stride1_params(
   float output_min,
   float output_max)
 {
-  params->wasmsimd_stride1.min[0] = output_min;
-  params->wasmsimd_stride1.min[1] = output_min;
-  params->wasmsimd_stride1.max[0] = output_max;
-  params->wasmsimd_stride1.max[1] = output_max;
+  params->wasmsimd_stride1.min = output_min;
+  params->wasmsimd_stride1.max = output_max;
 
   const uint32_t w4 = (width - 1) & 3;
   params->wasmsimd_stride1.mask[0] = UINT32_C(0xFFFFFFFF);
@@ -3843,10 +3129,8 @@ size_t xnn_init_f32_chw_wasmsimd_stride2_params(
   float output_min,
   float output_max)
 {
-  params->wasmsimd_stride2.min[0] = output_min;
-  params->wasmsimd_stride2.min[1] = output_min;
-  params->wasmsimd_stride2.max[0] = output_max;
-  params->wasmsimd_stride2.max[1] = output_max;
+  params->wasmsimd_stride2.min = output_min;
+  params->wasmsimd_stride2.max = output_max;
 
   const uint32_t w8 = (width - 1) & 7;
   params->wasmsimd_stride2.mask_even[0] = UINT32_C(0xFFFFFFFF);
@@ -3986,69 +3270,6 @@ void xnn_update_f32_chw_wasmsimd_stride2_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_s8_minmax_sse2_params(
-  union xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int8_t output_min,
-  int8_t output_max)
-{
-  assert(output_min < output_max);
-
-  const uint8_t output_min_with_bias = UINT8_C(0x80) ^ (uint8_t) output_min;
-  const uint8_t output_max_with_bias = UINT8_C(0x80) ^ (uint8_t) output_max;
-  for (uint32_t i = 0; i < 16; i++) {
-    params->sse2.bias[i] = UINT8_C(0x80);
-    params->sse2.min_with_bias[i] = output_min_with_bias;
-    params->sse2.max_with_bias[i] = output_max_with_bias;
-  }
-  return sizeof(params->sse2);
-}
-
-size_t xnn_init_s8_minmax_sse4_params(
-  union xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int8_t output_min,
-  int8_t output_max)
-{
-  assert(output_min < output_max);
-
-  for (uint32_t i = 0; i < 16; i++) {
-    params->sse4.min[i] = output_min;
-    params->sse4.max[i] = output_max;
-  }
-  return sizeof(params->sse4);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_s8_minmax_neon_params(
-  union xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int8_t output_min,
-  int8_t output_max)
-{
-  assert(output_min < output_max);
-
-  params->neon.min = output_min;
-  params->neon.max = output_max;
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_s8_minmax_wasmsimd_params(
-  union xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int8_t output_min,
-  int8_t output_max)
-{
-  assert(output_min < output_max);
-
-  for (uint32_t i = 0; i < 8; i++) {
-    params->wasmsimd.min[i] = output_min;
-    params->wasmsimd.max[i] = output_max;
-  }
-  return sizeof(params->wasmsimd);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
 size_t xnn_init_s8_minmax_scalar_params(
   union xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_min,
@@ -4060,76 +3281,6 @@ size_t xnn_init_s8_minmax_scalar_params(
   params->scalar.max = (int32_t) output_max;
   return sizeof(params->scalar);
 }
-
-size_t xnn_init_u8_minmax_params(
-  union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint8_t output_min,
-  uint8_t output_max)
-{
-  assert(output_min < output_max);
-
-  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-    for (uint32_t i = 0; i < 16; i++) {
-      params->sse2.min[i] = output_min;
-      params->sse2.max[i] = output_max;
-    }
-    return sizeof(params->sse2);
-  #elif XNN_ARCH_ARM || XNN_ARCH_ARM64
-    params->neon.min = output_min;
-    params->neon.max = output_max;
-    return sizeof(params->neon);
-  #else
-    params->scalar.min = (uint32_t) output_min;
-    params->scalar.max = (uint32_t) output_max;
-    return sizeof(params->scalar);
-  #endif
-}
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_u8_minmax_sse2_params(
-  union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint8_t output_min,
-  uint8_t output_max)
-{
-  assert(output_min < output_max);
-
-  for (uint32_t i = 0; i < 16; i++) {
-    params->sse2.min[i] = output_min;
-    params->sse2.max[i] = output_max;
-  }
-  return sizeof(params->sse2);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_u8_minmax_wasmsimd_params(
-  union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint8_t output_min,
-  uint8_t output_max)
-{
-  assert(output_min < output_max);
-
-  for (uint32_t i = 0; i < 8; i++) {
-    params->wasmsimd.min[i] = output_min;
-    params->wasmsimd.max[i] = output_max;
-  }
-  return sizeof(params->wasmsimd);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_u8_minmax_neon_params(
-  union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint8_t output_min,
-  uint8_t output_max)
-{
-  assert(output_min < output_max);
-
-  params->neon.min = output_min;
-  params->neon.max = output_max;
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 size_t xnn_init_u8_minmax_scalar_params(
   union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],

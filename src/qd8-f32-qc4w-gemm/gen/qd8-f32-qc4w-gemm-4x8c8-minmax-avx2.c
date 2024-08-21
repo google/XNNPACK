@@ -11,6 +11,7 @@
 
 #include <immintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
@@ -61,7 +62,12 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x8c8__avx2(
     c3 = c2;
   }
 
-  const __m128i vmask = _mm_load_si128((const __m128i*) params->avx.mask);  // 0xF0
+  const __m128i vmask = _mm_set1_epi8(0xF0);
+  XNN_FORCE_REALIZATION(vmask);
+  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
   do {
     const __m128i vinit0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     const __m128i vinit1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -296,13 +302,11 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x8c8__avx2(
     vout2x01234567 = _mm256_fmadd_ps(vout2x01234567, vfilter_output_scale01234567, vbias01234567);
     vout3x01234567 = _mm256_fmadd_ps(vout3x01234567, vfilter_output_scale01234567, vbias01234567);
 
-    const __m256 vmin = _mm256_load_ps(params->avx.min);
     vout0x01234567 = _mm256_max_ps(vout0x01234567, vmin);
     vout1x01234567 = _mm256_max_ps(vout1x01234567, vmin);
     vout2x01234567 = _mm256_max_ps(vout2x01234567, vmin);
     vout3x01234567 = _mm256_max_ps(vout3x01234567, vmin);
 
-    const __m256 vmax = _mm256_load_ps(params->avx.max);
     vout0x01234567 = _mm256_min_ps(vout0x01234567, vmax);
     vout1x01234567 = _mm256_min_ps(vout1x01234567, vmax);
     vout2x01234567 = _mm256_min_ps(vout2x01234567, vmax);

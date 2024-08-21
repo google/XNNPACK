@@ -56,8 +56,10 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x2c4__wasmrelaxedsimd(
     c3 = c2;
   }
 
-  const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
-  const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
+  const v128_t vmin = wasm_v128_load32_splat(&params->wasmsimd.min);
+  const v128_t vmax = wasm_v128_load32_splat(&params->wasmsimd.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
   do {
     v128_t vacc0x0c4 = wasm_v128_load32_zero(w);
     v128_t vacc0x1c4 = wasm_v128_load32_zero((const float*) w + 1);

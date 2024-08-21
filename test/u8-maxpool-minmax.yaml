@@ -5,13 +5,13 @@
 
 # ARM NEON
 - name: xnn_u8_maxpool_minmax_ukernel_9p8x__neon_c16
-  init: xnn_init_u8_minmax_neon_params
+  init: xnn_init_u8_minmax_scalar_params
 # x86 SSE
 - name: xnn_u8_maxpool_minmax_ukernel_9p8x__sse2_c16
-  init: xnn_init_u8_minmax_sse2_params
+  init: xnn_init_u8_minmax_scalar_params
 # WAsm SIMD
 - name: xnn_u8_maxpool_minmax_ukernel_9p8x__wasmsimd_c16
-  init: xnn_init_u8_minmax_wasmsimd_params
+  init: xnn_init_u8_minmax_scalar_params
 # Scalar
 - name: xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1
   init: xnn_init_u8_minmax_scalar_params

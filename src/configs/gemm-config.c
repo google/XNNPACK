@@ -1592,7 +1592,8 @@ static void init_qd8_f32_qc4w_gemm_config(void) {
     #endif  // XNN_ENABLE_AVX512AMX
     #if XNN_ENABLE_AVX512VNNIGFNI
     // Zen4 has gfni but is slower and 8x16 works better on zen4.  14x16 is faster on Sapphire Rapids
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512vnnigfni && cpuinfo_get_core(0)->uarch != cpuinfo_uarch_zen4) {
+    // TODO(b/361288044): Re-enable once fixed.
+    if (false && !XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512vnnigfni && cpuinfo_get_core(0)->uarch != cpuinfo_uarch_zen4) {
       qd8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__avx512vnnigfni_prfm);
       qd8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(14)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc4w_gemm_minmax_ukernel_14x16c8__avx512vnnigfni_prfm);
       qd8_f32_qc4w_gemm_config.init.f32_qc4w = xnn_init_f32_qc4w_minmax_avx512vnni_params;

@@ -28,10 +28,10 @@ void xnn_qu8_vlrelu_ukernel__armsimd32_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const uint16x2_t vinput_zero_point = (uint16x2_t) params->armsimd32.input_zero_point;
-  const int16x2_t vpositive_multiplier = (int16x2_t) params->armsimd32.positive_multiplier;
-  const int16x2_t vnegative_multiplier = (int16x2_t) params->armsimd32.negative_multiplier;
-  const int32_t vbias = params->armsimd32.bias;
+  const uint16x2_t vinput_zero_point = (uint16x2_t) broadcast2x_uint16(params->scalar.input_zero_point);
+  const int16x2_t vpositive_multiplier = (int16x2_t) broadcast2x_uint16(-params->scalar.positive_multiplier);
+  const int16x2_t vnegative_multiplier = (int16x2_t) broadcast2x_uint16(-params->scalar.negative_multiplier);
+  const int32_t vbias = (params->scalar.output_zero_point << 8) + 0x80;
   for (; batch >= 8 * sizeof(uint8_t); batch -= 8 * sizeof(uint8_t)) {
     const uint8x4_t vx0123 = (uint8x4_t) unaligned_indexed_load_u32(input, 0);
     const uint8x4_t vx4567 = (uint8x4_t) unaligned_indexed_load_u32(input, 1);

@@ -62,6 +62,11 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_5x8__avx2_broadcast(
     c4 = c3;
   }
 
+  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+
   do {
     __m256 vacc0x01234567 = _mm256_loadu_ps((const float*) w + 0);
     __m256 vacc1x01234567 = vacc0x01234567;
@@ -103,14 +108,12 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_5x8__avx2_broadcast(
     vacc3x01234567 = _mm256_mul_ps(vacc3x01234567, vscale01234567);
     vacc4x01234567 = _mm256_mul_ps(vacc4x01234567, vscale01234567);
     w = (const float*) w + 8;
-    const __m256 vmin = _mm256_load_ps(params->avx.min);
     vacc0x01234567 = _mm256_max_ps(vmin, vacc0x01234567);
     vacc1x01234567 = _mm256_max_ps(vmin, vacc1x01234567);
     vacc2x01234567 = _mm256_max_ps(vmin, vacc2x01234567);
     vacc3x01234567 = _mm256_max_ps(vmin, vacc3x01234567);
     vacc4x01234567 = _mm256_max_ps(vmin, vacc4x01234567);
 
-    const __m256 vmax = _mm256_load_ps(params->avx.max);
     vacc0x01234567 = _mm256_min_ps(vmax, vacc0x01234567);
     vacc1x01234567 = _mm256_min_ps(vmax, vacc1x01234567);
     vacc2x01234567 = _mm256_min_ps(vmax, vacc2x01234567);

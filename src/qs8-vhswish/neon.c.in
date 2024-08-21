@@ -43,13 +43,13 @@ void xnn_${DATATYPE.lower()}_vhswish_ukernel__neon_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const ${XINT16X8_T} vinput_zero_point = ${VLD1Q_DUP_X16}(&params->neon.input_zero_point);
-  const int16x8_t vinput_scale_div_exp = 	vld1q_dup_s16(&params->neon.input_scale_div_exp);
-  const int16x8_t vinput_scale_div_mantissa = vld1q_dup_s16(&params->neon.input_scale_div_mantissa);
-  const int16x8_t vscale_ratio = vld1q_dup_s16(&params->neon.scale_ratio);
+  const ${XINT16X8_T} vinput_zero_point = ${VLD1Q_DUP_X16}(&params->scalar.input_zero_point);
+  const int16x8_t vinput_scale_div_exp = 	vdupq_n_s16(params->scalar.input_scale_div_exp + 15);
+  const int16x8_t vinput_scale_div_mantissa = vld1q_dup_s16(&params->scalar.input_scale_div_mantissa);
+  const int16x8_t vscale_ratio = vld1q_dup_s16(&params->scalar.scale_ratio);
   const int16x8_t vhalf = vdupq_n_s16(16384);
   const int16x8_t vzero = vdupq_n_s16(0);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
       $for N in range(SIMD_TILE):

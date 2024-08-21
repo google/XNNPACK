@@ -29,8 +29,10 @@ void xnn_f32_vmulc_minmax_ukernel__sse_u8(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m128 voutput_min = _mm_load_ps(params->sse.min);
-  const __m128 voutput_max = _mm_load_ps(params->sse.max);
+  const __m128 voutput_min = _mm_set1_ps(params->sse.min);
+  const __m128 voutput_max = _mm_set1_ps(params->sse.max);
+  XNN_FORCE_REALIZATION(voutput_min);
+  XNN_FORCE_REALIZATION(voutput_max);
   const __m128 vb = _mm_load1_ps(input_b);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {

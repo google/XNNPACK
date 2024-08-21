@@ -168,7 +168,6 @@ xnnpack_benchmark(
         "//:indirection",
         "//:microkernel_configs",
         "//:microkernel_utils",
-        "//:operators",
     ],
 )
 
@@ -399,7 +398,7 @@ xnnpack_benchmark(
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:indirection",
-        "//:operators",
+        "//:math",
     ],
 )
 
@@ -411,7 +410,7 @@ xnnpack_benchmark(
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:indirection",
-        "//:operators",
+        "//:math",
     ],
 )
 
@@ -581,7 +580,7 @@ xnnpack_benchmark(
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:indirection",
-        "//:operators",
+        "//:math",
     ],
 )
 
@@ -591,8 +590,7 @@ xnnpack_benchmark(
         "dconv.h",
         "f32-conv-hwc.cc",
     ],
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
 xnnpack_benchmark(
@@ -601,9 +599,7 @@ xnnpack_benchmark(
         "dconv.h",
         "f16-conv-hwc2chw.cc",
     ],
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        "//:operators",
-    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
 xnnpack_benchmark(
@@ -628,8 +624,7 @@ xnnpack_benchmark(
         "dconv.h",
         "f32-conv-hwc2chw.cc",
     ],
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
 xnnpack_benchmark(
@@ -641,7 +636,6 @@ xnnpack_benchmark(
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:indirection",
         "//:microkernel_utils",
-        "//:operators",
     ],
 )
 
@@ -654,7 +648,6 @@ xnnpack_benchmark(
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:indirection",
         "//:microkernel_utils",
-        "//:operators",
     ],
 )
 
@@ -666,7 +659,6 @@ xnnpack_benchmark(
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:indirection",
-        "//:operators",
     ],
 )
 
@@ -678,7 +670,6 @@ xnnpack_benchmark(
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:indirection",
-        "//:operators",
     ],
 )
 

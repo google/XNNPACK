@@ -15,6 +15,7 @@
   #include <x86intrin.h>
 #endif
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/math.h"
 #include "xnnpack/unaligned.h"
@@ -56,6 +57,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x4c8__avx_ld64(
     a2 = a1;
     c2 = c1;
   }
+
 
   do {
     __m128i vacc0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);

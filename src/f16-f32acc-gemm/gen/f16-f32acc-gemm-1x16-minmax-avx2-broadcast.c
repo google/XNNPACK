@@ -39,6 +39,12 @@ void xnn_f16_f32acc_gemm_minmax_ukernel_1x16__avx2_broadcast(
   const uint16_t* a0 = a;
   uint16_t* c0 = c;
 
+  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+
+
   do {
     __m256 vacc0x0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) w));
     __m256 vacc0x1 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) ((const uint16_t*) w + 8)));
@@ -59,11 +65,9 @@ void xnn_f16_f32acc_gemm_minmax_ukernel_1x16__avx2_broadcast(
       k -= sizeof(uint16_t);
     } while (k != 0);
 
-    const __m256 vmin = _mm256_load_ps(params->avx.min);
     vacc0x0 = _mm256_max_ps(vacc0x0, vmin);
     vacc0x1 = _mm256_max_ps(vacc0x1, vmin);
 
-    const __m256 vmax = _mm256_load_ps(params->avx.max);
     vacc0x0 = _mm256_min_ps(vacc0x0, vmax);
     vacc0x1 = _mm256_min_ps(vacc0x1, vmax);
 

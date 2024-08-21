@@ -27,7 +27,7 @@ void xnn_f32_vlrelu_ukernel__${ISA}_laneselect_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vslope = wasm_v128_load64_splat(params->wasmsimd.slope);
+  const v128_t vslope = wasm_v128_load32_splat(&params->scalar.slope);
   $if BATCH_TILE > 4:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       const v128_t vx${ABC[0:4]} = wasm_v128_load(input);

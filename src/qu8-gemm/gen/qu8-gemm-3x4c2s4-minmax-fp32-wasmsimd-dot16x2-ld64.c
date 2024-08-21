@@ -11,6 +11,7 @@
 
 #include <wasm_simd128.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/math.h"
 
@@ -50,6 +51,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x4c2s4__wasmsimd_dot16x2_ld64(
     a2 = a1;
     c2 = c1;
   }
+
 
   kc = round_up_po2(kc, 8 * sizeof(uint8_t));
   do {

@@ -19,9 +19,9 @@
 #include "xnnpack/common.h"
 #include "xnnpack/igemm.h"
 #include "xnnpack/indirection.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
-#include "xnnpack/operator.h"
 #include "xnnpack/pack.h"
 
 
@@ -91,41 +91,21 @@ static void f32_igemm(benchmark::State& state,
   }
 
   std::vector<const float*> i(i_elements * num_buffers);
-  xnn_operator convolution_op = { };
-  convolution_op.indirection_buffer   = reinterpret_cast<const void**>(i.data());
-  convolution_op.input                = a.data();
-  convolution_op.input_pixel_stride   = input_pixel_stride;
-  convolution_op.zero_buffer          = z.data();
-  convolution_op.groups               = 1;
-  convolution_op.group_input_channels = group_input_channels;
-  convolution_op.batch_size           = 1;
-  convolution_op.input_height         = input_height;
-  convolution_op.input_width          = input_width;
-  convolution_op.output_height        = output_height;
-  convolution_op.output_width         = output_width;
-  convolution_op.kernel_height        = kernel_height;
-  convolution_op.kernel_width         = kernel_width;
-  convolution_op.stride_height        = subsampling;
-  convolution_op.stride_width         = subsampling;
-  convolution_op.dilation_height      = dilation;
-  convolution_op.dilation_width       = dilation;
-  convolution_op.padding_top          = padding_top;
-  convolution_op.padding_left         = padding_left;
   const size_t tiled_output_size = round_up(output_size, mr);
   xnn_indirection_init_conv2d(
       /*output_tile_size=*/mr,
       /*output_start=*/0,
       /*output_end=*/tiled_output_size,
-      convolution_op.indirection_buffer,
-      convolution_op.input,
-      convolution_op.zero_buffer,
-      convolution_op.input_pixel_stride << XNN_LOG2_SIZEOF_FLOAT,
-      convolution_op.input_height, convolution_op.input_width,
-      convolution_op.output_height, convolution_op.output_width,
-      convolution_op.kernel_height, convolution_op.kernel_width,
-      convolution_op.stride_height, convolution_op.stride_width,
-      convolution_op.dilation_height, convolution_op.dilation_width,
-      convolution_op.padding_top, convolution_op.padding_left);
+      reinterpret_cast<const void**>(i.data()),
+      a.data(),
+      z.data(),
+      input_pixel_stride << XNN_LOG2_SIZEOF_FLOAT,
+      input_height, input_width,
+      output_height, output_width,
+      kernel_height, kernel_width,
+      subsampling, subsampling,
+      dilation, dilation,
+      padding_top, padding_left);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(i.cbegin(), i.cbegin() + i_elements, i.begin() + n * i_elements);
   }

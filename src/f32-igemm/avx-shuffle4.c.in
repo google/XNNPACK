@@ -55,6 +55,11 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}s4__${ISA}_broadcast(
         c${M} = c${M-1};
       }
 
+  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+
   do {
     __m256 vacc0x${ABC[0:8]} = _mm256_load_ps(w);
     $for N in range(8, NR, 8):
@@ -126,12 +131,10 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}s4__${ISA}_broadcast(
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
 
-    const __m256 vmin = _mm256_load_ps(params->avx.min);
     $for N in range(0, NR, 8):
       $for M in range(MR):
         vacc${M}x${ABC[N:N+8]} = _mm256_max_ps(vmin, vacc${M}x${ABC[N:N+8]});
 
-    const __m256 vmax = _mm256_load_ps(params->avx.max);
     $for N in range(0, NR, 8):
       $for M in range(MR):
         vacc${M}x${ABC[N:N+8]} = _mm256_min_ps(vmax, vacc${M}x${ABC[N:N+8]});
