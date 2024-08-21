@@ -40,7 +40,19 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
 }
 
 static XNN_INLINE xnn_simd_s32_t xnn_clz_s32(xnn_simd_s32_t a) {
-  return __builtin_clz(a);
+  int32_t clz = 0;
+  int32_t value = a;
+  if (value == 0)
+    clz = 32;
+  else if (value < 0)
+    clz = 0;
+  else {
+    while ((value & 0x80000000) == 0) {
+      clz++;
+      value <<= 1;
+    }
+  }
+  return clz;
 }
 
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t *ptr) { return *ptr; }

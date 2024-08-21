@@ -464,23 +464,6 @@ enum xnn_status xnn_create_clamp_nc_s8(
     xnn_operator_type_clamp_nc_s8, clamp_op_out);
 }
 
-enum xnn_status xnn_create_clz_nc_s32(
-    uint32_t flags,
-    xnn_operator_t* clz_op_out)
-{
-  const struct xnn_unary_elementwise_config* s32_clz_config = xnn_init_s32_clz_config();
-  assert(s32_clz_config != NULL);
-
-  union xnn_s32_default_params params;
-  if XNN_LIKELY(s32_clz_config != NULL && s32_clz_config->init.s32_default != NULL) {
-    s32_clz_config->init.s32_default(&params);
-  }
-  return create_unary_elementwise_nc(
-    flags, s32_clz_config, /*rminmax_config=*/NULL,
-    &params, sizeof(params),
-    xnn_operator_type_clz_nc_s32, clz_op_out);
-}
-
 enum xnn_status xnn_create_clamp_nc_u8(
     uint8_t output_min,
     uint8_t output_max,
@@ -505,6 +488,22 @@ enum xnn_status xnn_create_clamp_nc_u8(
     flags, u8_clamp_config, /*rminmax_config=*/NULL,
     &params, sizeof(params),
     xnn_operator_type_clamp_nc_u8, clamp_op_out);
+}
+
+enum xnn_status xnn_create_clz_nc_s32(uint32_t flags,
+                                      xnn_operator_t* clz_op_out) {
+  const struct xnn_unary_elementwise_config* s32_clz_config =
+      xnn_init_s32_clz_config();
+  assert(s32_clz_config != NULL);
+
+  union xnn_s32_default_params params;
+  if XNN_LIKELY (s32_clz_config != NULL &&
+                 s32_clz_config->init.s32_default != NULL) {
+    s32_clz_config->init.s32_default(&params);
+  }
+  return create_unary_elementwise_nc(
+      flags, s32_clz_config, /*rminmax_config=*/NULL, &params, sizeof(params),
+      xnn_operator_type_clz_nc_s32, clz_op_out);
 }
 
 enum xnn_status xnn_create_convert_nc_f16_f32(
@@ -1664,40 +1663,29 @@ enum xnn_status xnn_reshape_clamp_nc_s8(
     threadpool);
 }
 
-enum xnn_status xnn_reshape_clz_nc_s32(
-    xnn_operator_t clz_op,
-    size_t batch_size,
-    size_t channels,
-    size_t input_stride,
-    size_t output_stride,
-    pthreadpool_t threadpool)
-{
+enum xnn_status xnn_reshape_clamp_nc_u8(xnn_operator_t clamp_op,
+                                        size_t batch_size, size_t channels,
+                                        size_t input_stride,
+                                        size_t output_stride,
+                                        pthreadpool_t threadpool) {
   return reshape_unary_elementwise_nc(
-    clz_op, xnn_operator_type_clz_nc_s32,
-    batch_size,
-    channels, input_stride, output_stride,
-    /*log2_input_size=*/XNN_LOG2_SIZEOF_INT32_T,
-    /*log2_output_size=*/XNN_LOG2_SIZEOF_INT32_T,
-    &clz_op->params.s32_default, sizeof(clz_op->params.s32_default),
-    threadpool);
+      clamp_op, xnn_operator_type_clamp_nc_u8, batch_size, channels,
+      input_stride, output_stride,
+      /*log2_input_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+      /*log2_output_size=*/XNN_LOG2_SIZEOF_UINT8_T, &clamp_op->params.u8_minmax,
+      sizeof(clamp_op->params.u8_minmax), threadpool);
 }
 
-enum xnn_status xnn_reshape_clamp_nc_u8(
-    xnn_operator_t clamp_op,
-    size_t batch_size,
-    size_t channels,
-    size_t input_stride,
-    size_t output_stride,
-    pthreadpool_t threadpool)
-{
+enum xnn_status xnn_reshape_clz_nc_s32(xnn_operator_t clz_op, size_t batch_size,
+                                       size_t channels, size_t input_stride,
+                                       size_t output_stride,
+                                       pthreadpool_t threadpool) {
   return reshape_unary_elementwise_nc(
-    clamp_op, xnn_operator_type_clamp_nc_u8,
-    batch_size,
-    channels, input_stride, output_stride,
-    /*log2_input_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    /*log2_output_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    &clamp_op->params.u8_minmax, sizeof(clamp_op->params.u8_minmax),
-    threadpool);
+      clz_op, xnn_operator_type_clz_nc_s32, batch_size, channels, input_stride,
+      output_stride,
+      /*log2_input_size=*/XNN_LOG2_SIZEOF_INT32_T,
+      /*log2_output_size=*/XNN_LOG2_SIZEOF_INT32_T, &clz_op->params.s32_default,
+      sizeof(clz_op->params.s32_default), threadpool);
 }
 
 enum xnn_status xnn_reshape_convert_nc_f16_f32(
@@ -2680,16 +2668,6 @@ enum xnn_status xnn_setup_clamp_nc_s8(
     input, output);
 }
 
-enum xnn_status xnn_setup_clz_nc_s32(
-    xnn_operator_t clz_op,
-    const int32_t* input,
-    int32_t* output)
-{
-  return setup_unary_elementwise_nc(
-    clz_op, xnn_operator_type_clz_nc_s32,
-    input, output);
-}
-
 enum xnn_status xnn_setup_clamp_nc_u8(
     xnn_operator_t clamp_op,
     const uint8_t* input,
@@ -2698,6 +2676,12 @@ enum xnn_status xnn_setup_clamp_nc_u8(
   return setup_unary_elementwise_nc(
     clamp_op, xnn_operator_type_clamp_nc_u8,
     input, output);
+}
+
+enum xnn_status xnn_setup_clz_nc_s32(xnn_operator_t clz_op,
+                                     const int32_t* input, int32_t* output) {
+  return setup_unary_elementwise_nc(clz_op, xnn_operator_type_clz_nc_s32, input,
+                                    output);
 }
 
 enum xnn_status xnn_setup_convert_nc_f16_f32(

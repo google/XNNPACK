@@ -32,7 +32,21 @@ class ClzOperatorTester : public UnaryOperatorTester {
   float RefFunc(float x) const override {
     return 0;
   }
-  int32_t RefFunc(int32_t x) const override { return __builtin_clz(x); }
+  int32_t RefFunc(int32_t x) const override {
+    int32_t clz = 0;
+    int32_t value = x;
+    if (value == 0)
+      clz = 32;
+    else if (value < 0)
+      clz = 0;
+    else {
+      while ((value & 0x80000000) == 0) {
+        clz++;
+        value <<= 1;
+      }
+    }
+    return clz;
+  }
 
   CREATE_OP_OVERRIDES_S32(clz);
 };
