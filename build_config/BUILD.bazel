@@ -276,6 +276,14 @@ selects.config_setting_group(
 )
 
 selects.config_setting_group(
+    name = "arm",
+    match_any = [
+        ":aarch32",
+        ":aarch64",
+    ],
+)
+
+selects.config_setting_group(
     name = "x86",
     match_any = [
         ":android_x86",

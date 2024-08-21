@@ -331,7 +331,7 @@ typedef void (*xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn)(
     size_t m,
     size_t n,
     size_t k,
-    const int8_t* lhs_packed,
+    const void* lhs_packed,
     const void* rhs_packed,
     float* dst,
     size_t dst_stride_row,

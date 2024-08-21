@@ -9,9 +9,13 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/dwconv.h"
 #include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
 #include "xnnpack/unaligned.h"
 
 

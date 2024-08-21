@@ -3,7 +3,7 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-"""Generates an identifier from the files in the XNNPack project
+"""Generates an identifier from the files in the XNNPack project.
 
 This generates a fingerprint of the XNNPack library sources.
 """
@@ -25,7 +25,17 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "--output", required=True, action="store", help="Set the output"
 )
-parser.add_argument("inputs", nargs="+", help="The source files to use to generate the fingerprint.")
+parser.add_argument(
+    "--input_file_list",
+    required=False,
+    action="store",
+    help="Set an input file list to use instead of the arguments.",
+)
+parser.add_argument(
+    "inputs",
+    nargs="*",
+    help="The source files to use to generate the fingerprint.",
+)
 
 FILE_TEMPLATE = """// Copyright 2024 Google LLC
 //
@@ -66,14 +76,19 @@ bool xnn_experimental_check_build_identifier(const void* data, const size_t size
 
 def main(args) -> None:
   m = hashlib.sha256()
+  if args.input_file_list:
+    with open(args.input_file_list, "r") as f:
+      args.inputs = f.read().splitlines()
   for path in args.inputs:
     with open(path, "rb") as f:
       m.update(f.read())
   byte_list = ", ".join(str(b).rjust(3, "x") for b in m.digest())
   byte_list = textwrap.indent(textwrap.fill(byte_list, width=40), "  ").replace("x", " ")
-  formated_input_list = "\n".join("// - " + p for p in args.inputs)
+  formatted_input_list = "\n".join("// - " + p for p in args.inputs)
   with open(args.output, "w") as out:
-    out.write(FILE_TEMPLATE.format(id_data=byte_list, genlist=formated_input_list))
+    out.write(
+        FILE_TEMPLATE.format(id_data=byte_list, genlist=formatted_input_list)
+    )
 
 
 if __name__ == "__main__":

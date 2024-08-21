@@ -8,9 +8,13 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/dwconv.h"
 #include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
 #include "xnnpack/unaligned.h"
 
 
@@ -188,7 +192,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_6f6m7l4c1s1r__scalar_imagic(
       }
       if XNN_UNLIKELY(c != 0) {
         do {
-          int32_t vacc = *((const int32_t*) w);
+          int32_t vacc = unaligned_load_s32(w);
           const int32_t vi0 = (int32_t) (uint32_t) *i0++;
           const int32_t vk0 = (int32_t) (uint32_t) ((const uint8_t*) ((uintptr_t) w + 1 * sizeof(int32_t)))[0] - vkernel_zero_point;
           vacc += vi0 * vk0;

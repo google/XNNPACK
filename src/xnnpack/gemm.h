@@ -2206,7 +2206,7 @@ DECLARE_QD8_F32_QB4W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qb4w_gemm_minmax_u
       size_t m,                                                    \
       size_t n,                                                    \
       size_t k,                                                    \
-      const int8_t* lhs_packed,                                    \
+      const void* lhs_packed,                                      \
       const void* rhs_packed,                                      \
       float* dst,                                                  \
       size_t dst_stride_row,                                       \

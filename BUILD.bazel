@@ -11,20 +11,9 @@ load("@bazel_skylib//lib:selects.bzl", "selects")  # buildifier: disable=out-of-
 load("@rules_python//python:py_binary.bzl", "py_binary")
 load(
     ":build_defs.bzl",
-    "xnnpack_aggregate_library",
     "xnnpack_cc_library",
-    "xnnpack_gcc_std_copts",
     "xnnpack_if_kleidiai_enabled",
-    "xnnpack_kleidiai_defines",
-    "xnnpack_microkernel_cc_library",
     "xnnpack_min_size_copts",
-    "xnnpack_msvc_std_copts",
-    "xnnpack_simd_f16_archs",
-    "xnnpack_simd_f32_archs",
-    "xnnpack_simd_s16_archs",
-    "xnnpack_simd_s32_archs",
-    "xnnpack_simd_s8_archs",
-    "xnnpack_slinky_defines",
     "xnnpack_slinky_deps",
     "xnnpack_slinky_srcs",
     "xnnpack_std_cxxopts",
@@ -32,54 +21,26 @@ load(
     "xnnpack_visibility",
 )
 load(
+    ":build_params.bzl",
+    "xnnpack_archs",
+    "xnnpack_cc_library_for_arch",
+    "xnnpack_cond_for_arch",
+    "xnnpack_configurable_defines",
+    "xnnpack_list_sum",
+    "xnnpack_select_if",
+    "xnnpack_simd_f16_archs",
+    "xnnpack_simd_f32_archs",
+    "xnnpack_simd_s16_archs",
+    "xnnpack_simd_s32_archs",
+    "xnnpack_simd_s8_archs",
+)
+load(
     "//gen:microkernels.bzl",
-    "AARCH32_ASM_MICROKERNEL_SRCS",
-    "AARCH64_ASM_MICROKERNEL_SRCS",
-    "ALL_ARMSIMD32_MICROKERNEL_SRCS",
-    "ALL_AVX256SKX_MICROKERNEL_SRCS",
-    "ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS",
-    "ALL_AVX256VNNI_MICROKERNEL_SRCS",
-    "ALL_AVX2_MICROKERNEL_SRCS",
-    "ALL_AVX512AMX_MICROKERNEL_SRCS",
-    "ALL_AVX512FP16_MICROKERNEL_SRCS",
-    "ALL_AVX512F_MICROKERNEL_SRCS",
-    "ALL_AVX512SKX_MICROKERNEL_SRCS",
-    "ALL_AVX512VBMI_MICROKERNEL_SRCS",
-    "ALL_AVX512VNNIGFNI_MICROKERNEL_SRCS",
-    "ALL_AVX512VNNI_MICROKERNEL_SRCS",
-    "ALL_AVXVNNI_MICROKERNEL_SRCS",
-    "ALL_AVX_MICROKERNEL_SRCS",
-    "ALL_F16C_MICROKERNEL_SRCS",
-    "ALL_FMA3_MICROKERNEL_SRCS",
-    "ALL_FP16ARITH_MICROKERNEL_SRCS",
-    "ALL_HEXAGON_MICROKERNEL_SRCS",
-    "ALL_HVX_MICROKERNEL_SRCS",
-    "ALL_NEONBF16_AARCH64_MICROKERNEL_SRCS",
-    "ALL_NEONBF16_MICROKERNEL_SRCS",
-    "ALL_NEONDOTFP16ARITH_MICROKERNEL_SRCS",
-    "ALL_NEONDOT_AARCH64_MICROKERNEL_SRCS",
-    "ALL_NEONDOT_MICROKERNEL_SRCS",
-    "ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS",
-    "ALL_NEONFMA_MICROKERNEL_SRCS",
-    "ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS",
-    "ALL_NEONFP16ARITH_MICROKERNEL_SRCS",
-    "ALL_NEONFP16_MICROKERNEL_SRCS",
-    "ALL_NEONI8MM_AARCH64_MICROKERNEL_SRCS",
-    "ALL_NEONI8MM_MICROKERNEL_SRCS",
-    "ALL_NEONV8_MICROKERNEL_SRCS",
-    "ALL_NEON_AARCH64_MICROKERNEL_SRCS",
-    "ALL_NEON_MICROKERNEL_SRCS",
-    "ALL_RVVFP16ARITH_MICROKERNEL_SRCS",
-    "ALL_RVV_MICROKERNEL_SRCS",
-    "ALL_SCALAR_MICROKERNEL_SRCS",
-    "ALL_SSE2_MICROKERNEL_SRCS",
-    "ALL_SSE41_MICROKERNEL_SRCS",
-    "ALL_SSE_MICROKERNEL_SRCS",
-    "ALL_SSSE3_MICROKERNEL_SRCS",
-    "ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS",
-    "ALL_WASMSIMD_MICROKERNEL_SRCS",
-    "ALL_WASM_MICROKERNEL_SRCS",
-    "WASM32_ASM_MICROKERNEL_SRCS",
+    "all_srcs_for_arch",
+    "non_prod_asm_srcs_for_arch",
+    "non_prod_c_srcs_for_arch",
+    "prod_asm_srcs_for_arch",
+    "prod_c_srcs_for_arch",
 )
 
 licenses(["notice"])
@@ -242,6 +203,7 @@ MICROKERNEL_HDRS = [
 ]
 
 MICROKERNEL_DEPS = [
+    ":assembly",
     ":common",
     ":hardware_config",
     ":logging",
@@ -282,7 +244,10 @@ INTERNAL_MICROKERNEL_HDRS = MICROKERNEL_HDRS + SIMD_HEADERS + [
     "src/xnnpack/unaligned.h",
 ]
 
-ALL_MICROKERNEL_SRCS = ALL_NEON_AARCH64_MICROKERNEL_SRCS + ALL_NEONBF16_AARCH64_MICROKERNEL_SRCS + ALL_NEONDOT_AARCH64_MICROKERNEL_SRCS + ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS + ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS + ALL_ARMSIMD32_MICROKERNEL_SRCS + ALL_AVX_MICROKERNEL_SRCS + ALL_AVXVNNI_MICROKERNEL_SRCS + ALL_AVX256SKX_MICROKERNEL_SRCS + ALL_AVX256VNNI_MICROKERNEL_SRCS + ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS + ALL_AVX2_MICROKERNEL_SRCS + ALL_AVX512F_MICROKERNEL_SRCS + ALL_AVX512SKX_MICROKERNEL_SRCS + ALL_AVX512VBMI_MICROKERNEL_SRCS + ALL_AVX512VNNI_MICROKERNEL_SRCS + ALL_AVX512VNNIGFNI_MICROKERNEL_SRCS + ALL_AVX512AMX_MICROKERNEL_SRCS + ALL_AVX512FP16_MICROKERNEL_SRCS + ALL_F16C_MICROKERNEL_SRCS + ALL_FMA3_MICROKERNEL_SRCS + ALL_FP16ARITH_MICROKERNEL_SRCS + ALL_HEXAGON_MICROKERNEL_SRCS + ALL_HVX_MICROKERNEL_SRCS + ALL_NEON_MICROKERNEL_SRCS + ALL_NEONBF16_MICROKERNEL_SRCS + ALL_NEONDOT_MICROKERNEL_SRCS + ALL_NEONDOTFP16ARITH_MICROKERNEL_SRCS + ALL_NEONFMA_MICROKERNEL_SRCS + ALL_NEONFP16_MICROKERNEL_SRCS + ALL_NEONFP16ARITH_MICROKERNEL_SRCS + ALL_NEONV8_MICROKERNEL_SRCS + ALL_RVV_MICROKERNEL_SRCS + ALL_RVVFP16ARITH_MICROKERNEL_SRCS + ALL_SCALAR_MICROKERNEL_SRCS + ALL_SSE_MICROKERNEL_SRCS + ALL_SSE2_MICROKERNEL_SRCS + ALL_SSE41_MICROKERNEL_SRCS + ALL_SSSE3_MICROKERNEL_SRCS + ALL_WASM_MICROKERNEL_SRCS + ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS + AARCH32_ASM_MICROKERNEL_SRCS + AARCH64_ASM_MICROKERNEL_SRCS + WASM32_ASM_MICROKERNEL_SRCS
+ALL_MICROKERNEL_SRCS = xnnpack_list_sum(
+    [all_srcs_for_arch(arch) for arch in xnnpack_archs()],
+    [],
+)
 
 filegroup(
     name = "microkernel_source_files",
@@ -300,8 +265,6 @@ filegroup(
 xnnpack_cc_library(
     name = "microkernels_h",
     hdrs = INTERNAL_MICROKERNEL_HDRS,
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
         ":config_hdrs",
@@ -316,8 +279,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "xnnpack_h",
     hdrs = ["include/xnnpack.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         "@pthreadpool",
     ],
@@ -327,23 +288,17 @@ xnnpack_cc_library(
     name = "experiments_config",
     srcs = ["src/configs/experiments-config.c"],
     hdrs = ["include/experiments-config.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
 )
 
 xnnpack_cc_library(
     name = "common",
     hdrs = ["src/xnnpack/common.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
 )
 
 xnnpack_cc_library(
     name = "init_once",
     hdrs = ["src/xnnpack/init-once.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
         ":xnnpack_h",
@@ -355,8 +310,6 @@ xnnpack_cc_library(
     hdrs = [
         "src/xnnpack/microparams.h",
     ],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
     ],
@@ -370,54 +323,7 @@ xnnpack_cc_library(
         "src/xnnpack/microfnptr.h",
         "src/xnnpack/microparams.h",
     ],
-    defines = select({
-        ":cpuinfo_enabled": ["XNN_ENABLE_CPUINFO=1"],
-        "//conditions:default": ["XNN_ENABLE_CPUINFO=0"],
-    }) + select({
-        ":arm_fp16_scalar_enabled": ["XNN_ENABLE_ARM_FP16_SCALAR=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_FP16_SCALAR=0"],
-    }) + select({
-        ":arm_fp16_vector_enabled": ["XNN_ENABLE_ARM_FP16_VECTOR=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_FP16_VECTOR=0"],
-    }) + select({
-        ":arm_bf16_enabled": ["XNN_ENABLE_ARM_BF16=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_BF16=0"],
-    }) + select({
-        ":arm_dotprod_enabled": ["XNN_ENABLE_ARM_DOTPROD=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_DOTPROD=0"],
-    }) + select({
-        ":arm_i8mm_enabled": ["XNN_ENABLE_ARM_I8MM=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_I8MM=0"],
-    }) + select({
-        ":riscv_fp16_vector_enabled": ["XNN_ENABLE_RISCV_FP16_VECTOR=1"],
-        "//conditions:default": ["XNN_ENABLE_RISCV_FP16_VECTOR=0"],
-    }) + select({
-        ":avx512vnnigfni_enabled": ["XNN_ENABLE_AVX512VNNIGFNI=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX512VNNIGFNI=0"],
-    }) + select({
-        ":avx512amx_enabled": ["XNN_ENABLE_AVX512AMX=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX512AMX=0"],
-    }) + select({
-        ":avx512fp16_enabled": ["XNN_ENABLE_AVX512FP16=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX512FP16=0"],
-    }) + select({
-        ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
-        "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
-    }) + select({
-        ":avx256skx_enabled": ["XNN_ENABLE_AVX256SKX=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX256SKX=0"],
-    }) + select({
-        ":avx256vnni_enabled": ["XNN_ENABLE_AVX256VNNI=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX256VNNI=0"],
-    }) + select({
-        ":avx256vnnigfni_enabled": ["XNN_ENABLE_AVX256VNNIGFNI=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX256VNNIGFNI=0"],
-    }) + select({
-        ":hvx_enabled": ["XNN_ENABLE_HVX=1"],
-        "//conditions:default": ["XNN_ENABLE_HVX=0"],
-    }),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
+    defines = xnnpack_configurable_defines(),
     deps = [
         ":common",
         ":init_once",
@@ -482,23 +388,10 @@ xnnpack_cc_library(
         ":cpuinfo_enabled": ["-DXNN_ENABLE_CPUINFO=1"],
         "//conditions:default": ["-DXNN_ENABLE_CPUINFO=0"],
     }),
-    defines = xnnpack_kleidiai_defines(),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
+    defines = xnnpack_configurable_defines(),
     deps = [
         ":common",
         ":config_hdrs",
-        ":enable_assembly",
-        ":enable_avx256skx",
-        ":enable_avx256vnni",
-        ":enable_avx256vnnigfni",
-        ":enable_avx512amx",
-        ":enable_avx512fp16",
-        ":enable_avx512vnnigfni",
-        ":enable_avxvnni",
-        ":enable_dwconv_multipass",
-        ":enable_gemm_m_specialization",
-        ":enable_hvx",
         ":experiments_config",
         ":hardware_config",
         ":init_once",
@@ -520,8 +413,6 @@ xnnpack_cc_library(
         "src/xnnpack/microfnptr.h",
         "src/xnnpack/params.h",
     ],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
         ":microparams",
@@ -532,8 +423,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "math",
     hdrs = ["src/xnnpack/math.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
         ":config_hdrs",
@@ -543,8 +432,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "prefetch",
     hdrs = ["src/xnnpack/prefetch.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
     ],
@@ -553,8 +440,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "unaligned",
     hdrs = ["src/xnnpack/unaligned.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
     ],
@@ -564,8 +449,6 @@ xnnpack_cc_library(
     name = "microparams_init",
     srcs = ["src/microparams-init.c"],
     hdrs = ["src/xnnpack/microparams-init.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
         ":logging",
@@ -580,8 +463,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "node_type",
     hdrs = ["src/xnnpack/node-type.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
     ],
@@ -590,8 +471,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "allocation_type",
     hdrs = ["src/xnnpack/allocation-type.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
     ],
@@ -600,8 +479,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "operator_type",
     hdrs = ["src/xnnpack/operator-type.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
     ],
@@ -610,8 +487,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "microkernel_type",
     hdrs = ["src/xnnpack/microkernel-type.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
     ],
@@ -620,8 +495,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "internal",
     hdrs = ["src/xnnpack/internal.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":xnnpack_h",
     ],
@@ -633,8 +506,6 @@ xnnpack_cc_library(
         "src/allocator.c",
     ],
     hdrs = ["src/xnnpack/allocator.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
         ":logging",
@@ -649,8 +520,6 @@ xnnpack_cc_library(
     hdrs = [
         "src/xnnpack/aligned-allocator.h",
     ],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
 )
 
 xnnpack_cc_library(
@@ -658,8 +527,6 @@ xnnpack_cc_library(
     hdrs = [
         "src/xnnpack/isa-checks.h",
     ],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
         ":hardware_config",
@@ -672,8 +539,9 @@ xnnpack_cc_library(
         "src/memory.c",
     ],
     hdrs = ["src/xnnpack/memory.h"],
-    # Do not use xnnpack_gcc_std_copts, as it defines -std=c99, which then makes MAP_ANONYMOUS undefined
-    msvc_copts = xnnpack_msvc_std_copts(),
+    # Override using xnnpack_gcc_std_copts, as it defines -std=c99, which then makes MAP_ANONYMOUS
+    # undefined
+    gcc_copts = [],
     deps = [
         ":common",
         ":logging",
@@ -685,8 +553,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "quantization",
     hdrs = ["src/xnnpack/quantization.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
         ":math",
@@ -698,8 +564,6 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "requantization",
     hdrs = ["src/xnnpack/requantization.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
         ":math",
@@ -710,686 +574,97 @@ xnnpack_cc_library(
 xnnpack_cc_library(
     name = "requantization_stubs",
     hdrs = ["src/xnnpack/requantization-stubs.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
 )
 
 xnnpack_cc_library(
     name = "tables",
     srcs = TABLE_SRCS,
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
     ],
 )
 
-xnnpack_microkernel_cc_library(
-    name = "scalar",
-    aarch32_copts = ["-marm"],
-    gcc_copts = xnnpack_gcc_std_copts() + [
-        "-fno-fast-math",
-        "-fno-math-errno",
-        "-ffp-contract=off",
-    ],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    srcs_prod = ["src/amalgam/gen/scalar.c"],
-    srcs_test = ALL_SCALAR_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS + [
-        ":config_hdrs",
-        "@FP16",
-        "@FXdiv",
-    ],
-)
-
-xnnpack_microkernel_cc_library(
-    name = "wasm",
-    gcc_copts = xnnpack_gcc_std_copts() + [
-        "-fno-fast-math",
-        "-fno-math-errno",
-    ],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    wasm_srcs_prod = ["src/amalgam/gen/wasm.c"],
-    wasm_srcs_test = ALL_WASM_MICROKERNEL_SRCS,
-    wasmrelaxedsimd_srcs_prod = [
-        "src/amalgam/gen/wasm.c",
-        "src/amalgam/gen/wasmrelaxedsimd.c",
-        "src/amalgam/gen/wasmsimd.c",
-    ],
-    wasmrelaxedsimd_srcs_test = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS + ALL_WASMRELAXEDSIMD_MICROKERNEL_SRCS,
-    wasmsimd_srcs_prod = [
-        "src/amalgam/gen/wasm.c",
-        "src/amalgam/gen/wasmsimd.c",
-    ],
-    wasmsimd_srcs_test = ALL_WASM_MICROKERNEL_SRCS + ALL_WASMSIMD_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "armsimd32",
-    aarch32_copts = [
-        "-marm",
-        "-march=armv6",
-        "-mfpu=vfp",
-        "-munaligned-access",
-    ],
-    aarch32_srcs_prod = ["src/amalgam/gen/armsimd32.c"],
-    aarch32_srcs_test = ALL_ARMSIMD32_MICROKERNEL_SRCS,
-    gcc_copts = xnnpack_gcc_std_copts() + [
-        "-fno-fast-math",
-        "-fno-math-errno",
-    ],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "fp16arith",
-    aarch32_copts = [
-        "-marm",
-        "-march=armv8.2-a+fp16",
-        # GCC emits wrong directives for assembler with -mfpu=fp-armv8
-        "-mfpu=neon-fp-armv8",
-        # For vsqrth_f16 polyfill using sqrtf
-        "-fno-math-errno",
-        # For vminh_f16/vmaxh_f16 polyfills using compare + select
-        "-ffinite-math-only",
-    ],
-    aarch32_srcs_prod = ["src/amalgam/gen/fp16arith.c"],
-    aarch32_srcs_test = ALL_FP16ARITH_MICROKERNEL_SRCS,
-    aarch64_copts = ["-march=armv8.2-a+fp16"],
-    aarch64_srcs_test = ALL_FP16ARITH_MICROKERNEL_SRCS,
-    defines = xnnpack_kleidiai_defines(),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
-        "@KleidiAI//kai/ukernels/matmul",
-    ]),
-)
-
-xnnpack_microkernel_cc_library(
-    name = "neon",
-    aarch32_copts = [
-        "-marm",
-        "-march=armv7-a",
-        "-mfpu=neon",
-    ],
-    aarch32_srcs_prod = ["src/amalgam/gen/neon.c"],
-    aarch32_srcs_test = ALL_NEON_MICROKERNEL_SRCS,
-    aarch64_srcs_prod = [
-        "src/amalgam/gen/neon-aarch64.c",
-        "src/amalgam/gen/neon.c",
-    ],
-    aarch64_srcs_test = ALL_NEON_MICROKERNEL_SRCS + ALL_NEON_AARCH64_MICROKERNEL_SRCS,
-    defines = xnnpack_kleidiai_defines(),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
-        "@KleidiAI//kai/ukernels/matmul",
-        "@KleidiAI//kai/ukernels/matmul:lhs_quant_pack_qai8dxp_f32",
-    ]),
-)
-
-xnnpack_microkernel_cc_library(
-    name = "neonfp16",
-    aarch32_copts = [
-        "-marm",
-        "-march=armv7-a",
-        "-mfpu=neon-fp16",
-    ],
-    aarch32_srcs_prod = ["src/amalgam/gen/neonfp16.c"],
-    aarch32_srcs_test = ALL_NEONFP16_MICROKERNEL_SRCS,
-    aarch64_srcs_prod = ["src/amalgam/gen/neonfp16.c"],
-    aarch64_srcs_test = ALL_NEONFP16_MICROKERNEL_SRCS,
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "neonfma",
-    aarch32_copts = [
-        "-marm",
-        "-march=armv7-a",
-        "-mfpu=neon-vfpv4",
-    ],
-    aarch32_srcs_prod = ["src/amalgam/gen/neonfma.c"],
-    aarch32_srcs_test = ALL_NEONFMA_MICROKERNEL_SRCS,
-    aarch64_srcs_prod = [
-        "src/amalgam/gen/neonfma-aarch64.c",
-        "src/amalgam/gen/neonfma.c",
-    ],
-    aarch64_srcs_test = ALL_NEONFMA_MICROKERNEL_SRCS + ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS,
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "neonv8",
-    aarch32_copts = [
-        "-marm",
-        "-march=armv8-a",
-        "-mfpu=neon-fp-armv8",
-    ],
-    aarch32_srcs_prod = ["src/amalgam/gen/neonv8.c"],
-    aarch32_srcs_test = ALL_NEONV8_MICROKERNEL_SRCS,
-    aarch64_srcs_prod = ["src/amalgam/gen/neonv8.c"],
-    aarch64_srcs_test = ALL_NEONV8_MICROKERNEL_SRCS,
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "neonfp16arith",
-    aarch32_copts = [
-        "-marm",
-        "-march=armv8.2-a+fp16",
-        "-mfpu=neon-fp-armv8",
-    ],
-    aarch32_srcs_prod = ["src/amalgam/gen/neonfp16arith.c"],
-    aarch32_srcs_test = ALL_NEONFP16ARITH_MICROKERNEL_SRCS,
-    aarch64_copts = ["-march=armv8.2-a+fp16"],
-    aarch64_srcs_prod = [
-        "src/amalgam/gen/neonfp16arith-aarch64.c",
-        "src/amalgam/gen/neonfp16arith.c",
-    ],
-    aarch64_srcs_test = ALL_NEONFP16ARITH_MICROKERNEL_SRCS + ALL_NEONFP16ARITH_AARCH64_MICROKERNEL_SRCS,
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS,
-)
-
 xnnpack_cc_library(
-    name = "neonbf16_test_microkernels",
-    aarch64_copts = ["-march=armv8.2-a+bf16"],
-    aarch64_srcs = ALL_NEONBF16_MICROKERNEL_SRCS + ALL_NEONBF16_AARCH64_MICROKERNEL_SRCS,
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "neondotfp16arith",
-    aarch32_copts = [
-        "-marm",
-        "-march=armv8.2-a+dotprod+fp16",
-        "-mfpu=neon-fp-armv8",
-    ],
-    aarch32_srcs_prod = ["src/amalgam/gen/neondotfp16arith.c"],
-    aarch32_srcs_test = ALL_NEONDOTFP16ARITH_MICROKERNEL_SRCS,
-    aarch64_copts = ["-march=armv8.2-a+dotprod+fp16"],
-    aarch64_srcs_prod = [
-        "src/amalgam/gen/neondotfp16arith.c",
-    ],
-    aarch64_srcs_test = ALL_NEONDOTFP16ARITH_MICROKERNEL_SRCS,
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "neondot",
-    aarch32_copts = [
-        "-marm",
-        "-march=armv8.2-a+dotprod",
-        "-mfpu=neon-fp-armv8",
-    ],
-    aarch32_srcs_prod = ["src/amalgam/gen/neondot.c"],
-    aarch32_srcs_test = ALL_NEONDOT_MICROKERNEL_SRCS,
-    aarch64_copts = ["-march=armv8.2-a+dotprod"],
-    aarch64_srcs_prod = [
-        "src/amalgam/gen/neondot-aarch64.c",
-        "src/amalgam/gen/neondot.c",
-    ],
-    aarch64_srcs_test = ALL_NEONDOT_MICROKERNEL_SRCS + ALL_NEONDOT_AARCH64_MICROKERNEL_SRCS,
-    defines = xnnpack_kleidiai_defines(),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
-        "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp1x8_qsi4cxp4x8_1x4x32_neon_dotprod",
-        "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp1x8_qsi4cxp8x8_1x8x32_neon_dotprod",
-    ]),
-)
-
-xnnpack_microkernel_cc_library(
-    name = "neoni8mm",
-    aarch32_copts = [
-        "-marm",
-        "-march=armv8.2-a+i8mm+fp16",
-        "-mfpu=neon-fp-armv8",
-    ],
-    aarch32_srcs_prod = ["src/amalgam/gen/neoni8mm.c"],
-    aarch32_srcs_test = ALL_NEONI8MM_MICROKERNEL_SRCS,
-    aarch64_copts = ["-march=armv8.2-a+i8mm+fp16"],
-    aarch64_srcs_prod = [
-        "src/amalgam/gen/neoni8mm-aarch64.c",
-        "src/amalgam/gen/neoni8mm.c",
-    ],
-    aarch64_srcs_test = ALL_NEONI8MM_MICROKERNEL_SRCS + ALL_NEONI8MM_AARCH64_MICROKERNEL_SRCS,
-    defines = xnnpack_kleidiai_defines(),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS + xnnpack_if_kleidiai_enabled([
-        "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp4x8_4x4x32_neon_i8mm",
-        "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp4x8_8x4x32_neon_i8mm",
-        "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp8x8_4x8x32_neon_i8mm",
-        "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp8x8_8x8x32_neon_i8mm",
-    ]),
-)
-
-xnnpack_microkernel_cc_library(
-    name = "sse2",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = [
-        "-msse2",
-        "-mno-sse3",
-    ],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    msvc_x86_32_copts = ["/arch:SSE2"],
-    x86_srcs_prod = [
-        "src/amalgam/gen/sse.c",
-        "src/amalgam/gen/sse2.c",
-    ],
-    x86_srcs_test = ALL_SSE_MICROKERNEL_SRCS + ALL_SSE2_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "ssse3",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = [
-        "-mssse3",
-        "-mno-sse4.1",
-    ],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    msvc_x86_32_copts = ["/arch:SSE2"],
-    x86_srcs_prod = ["src/amalgam/gen/ssse3.c"],
-    x86_srcs_test = ALL_SSSE3_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "sse41",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = [
-        "-msse4.1",
-        "-mno-sse4.2",
-    ],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    msvc_x86_32_copts = ["/arch:SSE2"],
-    x86_srcs_prod = ["src/amalgam/gen/sse41.c"],
-    x86_srcs_test = ALL_SSE41_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "avx",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = [
-        "-mavx",
-        "-mno-avx2",
-        "-mno-f16c",
-        "-mno-fma",
-    ],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    msvc_x86_32_copts = ["/arch:AVX"],
-    msvc_x86_64_copts = ["/arch:AVX"],
-    x86_srcs_prod = ["src/amalgam/gen/avx.c"],
-    x86_srcs_test = ALL_AVX_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "avxvnni",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = [
-        "-mavx2",
-        "-mavxvnni",
-        "-mf16c",
-        "-mfma",
-    ],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    msvc_x86_32_copts = ["/arch:AVX"],
-    msvc_x86_64_copts = ["/arch:AVX"],
-    x86_srcs_prod = ["src/amalgam/gen/avxvnni.c"],
-    x86_srcs_test = ALL_AVXVNNI_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "f16c",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = [
-        "-mf16c",
-        "-mno-avx2",
-        "-mno-fma",
-    ],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    msvc_x86_32_copts = ["/arch:AVX"],
-    msvc_x86_64_copts = ["/arch:AVX"],
-    x86_srcs_prod = ["src/amalgam/gen/f16c.c"],
-    x86_srcs_test = ALL_F16C_MICROKERNEL_SRCS,
-    deps = [
-        ":common",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":unaligned",
-    ],
-)
-
-xnnpack_microkernel_cc_library(
-    name = "fma3",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = [
-        "-mf16c",
-        "-mfma",
-        "-mno-avx2",
-    ],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    msvc_x86_32_copts = ["/arch:AVX"],
-    msvc_x86_64_copts = ["/arch:AVX"],
-    x86_srcs_prod = ["src/amalgam/gen/fma3.c"],
-    x86_srcs_test = ALL_FMA3_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "avx2",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = [
-        "-mf16c",
-        "-mfma",
-        "-mavx2",
-    ],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    msvc_x86_32_copts = ["/arch:AVX2"],
-    msvc_x86_64_copts = ["/arch:AVX2"],
-    x86_srcs_prod = ["src/amalgam/gen/avx2.c"],
-    x86_srcs_test = ALL_AVX2_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "avx512f",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = ["-mavx512f"],
-    mingw_copts = ["-fno-asynchronous-unwind-tables"],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    msvc_x86_32_copts = ["/arch:AVX512"],
-    msvc_x86_64_copts = ["/arch:AVX512"],
-    msys_copts = ["-fno-asynchronous-unwind-tables"],
-    x86_srcs_prod = ["src/amalgam/gen/avx512f.c"],
-    x86_srcs_test = ALL_AVX512F_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "avx512skx",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = [
-        "-mf16c",
-        "-mfma",
-        "-mavx512f",
-        "-mavx512cd",
-        "-mavx512bw",
-        "-mavx512dq",
-        "-mavx512vl",
-    ],
-    mingw_copts = ["-fno-asynchronous-unwind-tables"],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    msvc_x86_32_copts = ["/arch:AVX512"],
-    msvc_x86_64_copts = ["/arch:AVX512"],
-    msys_copts = ["-fno-asynchronous-unwind-tables"],
-    x86_srcs_prod = ["src/amalgam/gen/avx512skx.c"],
-    x86_srcs_test = ALL_AVX512SKX_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "avx256skx",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = [
-        "-mf16c",
-        "-mfma",
-        "-mavx512f",
-        "-mavx512cd",
-        "-mavx512bw",
-        "-mavx512dq",
-        "-mavx512vl",
-    ],
-    mingw_copts = ["-fno-asynchronous-unwind-tables"],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    msvc_x86_32_copts = ["/arch:AVX512"],
-    msvc_x86_64_copts = ["/arch:AVX512"],
-    msys_copts = ["-fno-asynchronous-unwind-tables"],
-    x86_srcs_prod = ["src/amalgam/gen/avx256skx.c"],
-    x86_srcs_test = ALL_AVX256SKX_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "avx512vbmi",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = [
-        "-mf16c",
-        "-mfma",
-        "-mavx512f",
-        "-mavx512cd",
-        "-mavx512bw",
-        "-mavx512dq",
-        "-mavx512vl",
-        "-mavx512vbmi",
-    ],
-    mingw_copts = ["-fno-asynchronous-unwind-tables"],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    msvc_x86_32_copts = ["/arch:AVX512"],
-    msvc_x86_64_copts = ["/arch:AVX512"],
-    msys_copts = ["-fno-asynchronous-unwind-tables"],
-    x86_srcs_prod = ["src/amalgam/gen/avx512vbmi.c"],
-    x86_srcs_test = ALL_AVX512VBMI_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "avx512vnni",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = [
-        "-mf16c",
-        "-mfma",
-        "-mavx512f",
-        "-mavx512cd",
-        "-mavx512bw",
-        "-mavx512dq",
-        "-mavx512vl",
-        "-mavx512vnni",
-    ],
-    mingw_copts = ["-fno-asynchronous-unwind-tables"],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    msvc_x86_32_copts = ["/arch:AVX512"],
-    msvc_x86_64_copts = ["/arch:AVX512"],
-    msys_copts = ["-fno-asynchronous-unwind-tables"],
-    x86_srcs_prod = ["src/amalgam/gen/avx512vnni.c"],
-    x86_srcs_test = ALL_AVX512VNNI_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "avx256vnni",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = [
-        "-mf16c",
-        "-mfma",
-        "-mavx512f",
-        "-mavx512cd",
-        "-mavx512bw",
-        "-mavx512dq",
-        "-mavx512vl",
-        "-mavx512vnni",
-    ],
-    mingw_copts = ["-fno-asynchronous-unwind-tables"],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    msvc_x86_32_copts = ["/arch:AVX512"],
-    msvc_x86_64_copts = ["/arch:AVX512"],
-    msys_copts = ["-fno-asynchronous-unwind-tables"],
-    x86_srcs_prod = ["src/amalgam/gen/avx256vnni.c"],
-    x86_srcs_test = ALL_AVX256VNNI_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "avx512vnnigfni",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = [
-        "-mf16c",
-        "-mfma",
-        "-mavx512f",
-        "-mavx512cd",
-        "-mavx512bw",
-        "-mavx512dq",
-        "-mavx512vl",
-        "-mavx512vnni",
-        "-mgfni",
-    ],
-    mingw_copts = ["-fno-asynchronous-unwind-tables"],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    msvc_x86_32_copts = ["/arch:AVX512"],
-    msvc_x86_64_copts = ["/arch:AVX512"],
-    msys_copts = ["-fno-asynchronous-unwind-tables"],
-    x86_srcs_prod = ["src/amalgam/gen/avx512vnnigfni.c"],
-    x86_srcs_test = ALL_AVX512VNNIGFNI_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "avx256vnnigfni",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = [
-        "-mf16c",
-        "-mfma",
-        "-mavx512f",
-        "-mavx512cd",
-        "-mavx512bw",
-        "-mavx512dq",
-        "-mavx512vl",
-        "-mavx512vnni",
-        "-mgfni",
-    ],
-    mingw_copts = ["-fno-asynchronous-unwind-tables"],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    msvc_x86_32_copts = ["/arch:AVX512"],
-    msvc_x86_64_copts = ["/arch:AVX512"],
-    msys_copts = ["-fno-asynchronous-unwind-tables"],
-    x86_srcs_prod = ["src/amalgam/gen/avx256vnnigfni.c"],
-    x86_srcs_test = ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "avx512amx",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = [
-        "-mf16c",
-        "-mfma",
-        "-mavx512f",
-        "-mavx512cd",
-        "-mavx512bw",
-        "-mavx512dq",
-        "-mavx512vl",
-        "-mavx512vnni",
-        "-mgfni",
-        "-mamx-tile",
-        "-mamx-int8",
-    ],
-    mingw_copts = ["-fno-asynchronous-unwind-tables"],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    msvc_x86_32_copts = ["/arch:AVX512"],
-    msvc_x86_64_copts = ["/arch:AVX512"],
-    msys_copts = ["-fno-asynchronous-unwind-tables"],
-    x86_srcs_prod = ["src/amalgam/gen/avx512amx.c"],
-    x86_srcs_test = ALL_AVX512AMX_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "avx512fp16",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    gcc_x86_copts = [
-        "-mf16c",
-        "-mfma",
-        "-mavx512f",
-        "-mavx512cd",
-        "-mavx512bw",
-        "-mavx512dq",
-        "-mavx512vl",
-        "-mavx512vnni",
-        "-mgfni",
-        "-mavx512fp16",
-    ],
-    mingw_copts = ["-fno-asynchronous-unwind-tables"],
-    msvc_copts = xnnpack_msvc_std_copts(),
-    msvc_x86_32_copts = ["/arch:AVX512"],
-    msvc_x86_64_copts = ["/arch:AVX512"],
-    msys_copts = ["-fno-asynchronous-unwind-tables"],
-    x86_srcs_prod = ["src/amalgam/gen/avx512fp16.c"],
-    x86_srcs_test = ALL_AVX512FP16_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "rvv",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    riscv_copts = [
-        "-march=rv64gcv -mabi=lp64d",
-    ],
-    riscv_srcs_prod = ["src/amalgam/gen/rvv.c"],
-    riscv_srcs_test = ALL_RVV_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_microkernel_cc_library(
-    name = "rvvfp16arith",
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
-    riscv_copts = [
-        "-march=rv64gc_zvfh -mabi=lp64d",
-    ],
-    riscv_srcs_prod = ["src/amalgam/gen/rvvfp16arith.c"],
-    riscv_srcs_test = ALL_RVVFP16ARITH_MICROKERNEL_SRCS,
-    deps = MICROKERNEL_DEPS,
-)
-
-xnnpack_cc_library(
-    name = "asm_microkernels",
+    name = "assembly",
     hdrs = ["src/xnnpack/assembly.h"],
-    aarch32_copts = [
-        "-marm",
-        "-march=armv8.2-a+dotprod+fp16",
-        "-mfpu=neon-fp-armv8",
+    compatible_with = [],
+)
+
+genrule(
+    name = "generated_microkernel_lists",
+    srcs = glob(["**"]),
+    outs = ([
+                "testdata/gen/microkernels.bzl",
+                "testdata/cmake/gen/microkernels.cmake",
+            ] + ["testdata/gen/" + arch + "_microkernels.bzl" for arch in xnnpack_archs()] +
+            ["testdata/cmake/gen/" + arch + "_microkernels.cmake" for arch in xnnpack_archs()]),
+    cmd = ("$(location //tools:update_microkernels) " +
+           "--output $(RULEDIR)/testdata " +
+           "--root_dir %s" % (package_name() if package_name() else ".")),
+    compatible_with = [],
+    tools = ["//tools:update_microkernels"],
+)
+
+filegroup(
+    name = "cmake_microkernel_lists",
+    srcs = glob([
+        "cmake/gen/*.cmake",
+    ]),
+)
+
+sh_test(
+    name = "microkernel_lists_test",
+    size = "small",
+    srcs = ["microkernel_lists_test.sh"],
+    data = [
+        ":cmake_microkernel_lists",
+        ":generated_microkernel_lists",
+        "//gen:bzl_microkernel_lists",
     ],
-    aarch32_srcs = AARCH32_ASM_MICROKERNEL_SRCS,
-    aarch64_copts = ["-march=armv8.2-a+fp16+dotprod"],
-    aarch64_srcs = AARCH64_ASM_MICROKERNEL_SRCS,
-    wasm_srcs = WASM32_ASM_MICROKERNEL_SRCS,
-    wasmrelaxedsimd_srcs = WASM32_ASM_MICROKERNEL_SRCS,
-    wasmsimd_srcs = WASM32_ASM_MICROKERNEL_SRCS,
     deps = [
-        ":common",
+        "//util/shell/gbash",
+        "//util/shell/gbash:unit",
     ],
 )
 
-xnnpack_cc_library(
-    name = "hvx_microkernels",
-    gcc_copts = xnnpack_gcc_std_copts() + [
-        "-mhvx-ieee-fp",
-    ],
-    hexagon_srcs = ALL_HEXAGON_MICROKERNEL_SRCS + ALL_HVX_MICROKERNEL_SRCS,
-    msvc_copts = xnnpack_msvc_std_copts(),
-    deps = MICROKERNEL_DEPS,
-)
+# Generate the prod/all microkernel libraries for each architecture.
+[
+    [
+        genrule(
+            name = arch + "_prod_microkernel_srcs",
+            srcs = prod_c_srcs_for_arch(arch),
+            outs = [arch + "_prod_microkernels.c"],
+            cmd = "cat $(SRCS) > $@",
+            compatible_with = [],
+        ),
+        genrule(
+            name = arch + "_non_prod_microkernel_srcs",
+            srcs = non_prod_c_srcs_for_arch(arch),
+            outs = [arch + "_non_prod_microkernels.c"],
+            cmd = "cat $(SRCS) > $@",
+            compatible_with = [],
+        ),
+        xnnpack_cc_library_for_arch(
+            name = arch + "_prod_microkernels",
+            srcs = prod_asm_srcs_for_arch(arch) + [":" + arch + "_prod_microkernel_srcs"],
+            arch = arch,
+            compatible_with = [],
+            defines = xnnpack_configurable_defines(),
+            tags = ["nobuilder"],
+            deps = MICROKERNEL_DEPS,
+        ),
+        xnnpack_cc_library_for_arch(
+            name = arch + "_all_microkernels",
+            srcs = non_prod_asm_srcs_for_arch(arch) + [":" + arch + "_non_prod_microkernel_srcs"],
+            arch = arch,
+            compatible_with = [],
+            defines = xnnpack_configurable_defines(),
+            tags = ["nobuilder"],
+            deps = MICROKERNEL_DEPS + [":" + arch + "_prod_microkernels"],
+        ),
+    ]
+    for arch in xnnpack_archs()
+]
 
 xnnpack_cc_library(
     name = "log_level_default",
@@ -1430,8 +705,6 @@ xnnpack_cc_library(
         ":xnn_log_level_explicit_debug": ["XNN_LOG_LEVEL=5"],
         "//conditions:default": [],
     }),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = select({
         ":xnn_log_level_explicit_none": [],
@@ -1451,277 +724,30 @@ xnnpack_cc_library(
     ],
 )
 
-xnnpack_aggregate_library(
-    name = "prod_microkernels",
-    aarch32_deps = [
-        ":armsimd32_prod_microkernels",
-        ":neon_prod_microkernels",
-        ":neonfp16_prod_microkernels",
-        ":neonfma_prod_microkernels",
-        ":neonv8_prod_microkernels",
-        ":asm_microkernels",
-    ],
-    aarch64_deps = [
-        ":neon_prod_microkernels",
-        ":neonfp16_prod_microkernels",
-        ":neonfma_prod_microkernels",
-        ":neonv8_prod_microkernels",
-        ":asm_microkernels",
-    ],
-    defines = select({
-        ":arm_fp16_scalar_enabled": ["XNN_ENABLE_ARM_FP16_SCALAR=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_FP16_SCALAR=0"],
-    }) + select({
-        ":arm_fp16_vector_enabled": ["XNN_ENABLE_ARM_FP16_VECTOR=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_FP16_VECTOR=0"],
-    }) + select({
-        ":arm_bf16_enabled": ["XNN_ENABLE_ARM_BF16=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_BF16=0"],
-    }) + select({
-        ":arm_dotprod_enabled": ["XNN_ENABLE_ARM_DOTPROD=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_DOTPROD=0"],
-    }) + select({
-        ":arm_i8mm_enabled": ["XNN_ENABLE_ARM_I8MM=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_I8MM=0"],
-    }) + select({
-        ":riscv_fp16_vector_enabled": ["XNN_ENABLE_RISCV_FP16_VECTOR=1"],
-        "//conditions:default": ["XNN_ENABLE_RISCV_FP16_VECTOR=0"],
-    }) + select({
-        ":avx512vnnigfni_enabled": ["XNN_ENABLE_AVX512VNNIGFNI=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX512VNNIGFNI=0"],
-    }) + select({
-        ":avx512amx_enabled": ["XNN_ENABLE_AVX512AMX=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX512AMX=0"],
-    }) + select({
-        ":avx512fp16_enabled": ["XNN_ENABLE_AVX512FP16=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX512FP16=0"],
-    }) + select({
-        ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
-        "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
-    }) + select({
-        ":avx256skx_enabled": ["XNN_ENABLE_AVX256SKX=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX256SKX=0"],
-    }) + select({
-        ":avx256vnni_enabled": ["XNN_ENABLE_AVX256VNNI=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX256VNNI=0"],
-    }) + select({
-        ":avx256vnnigfni_enabled": ["XNN_ENABLE_AVX256VNNIGFNI=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX256VNNIGFNI=0"],
-    }) + select({
-        ":hvx_enabled": ["XNN_ENABLE_HVX=1"],
-        "//conditions:default": ["XNN_ENABLE_HVX=0"],
-    }),
-    generic_deps = [
-        ":scalar_prod_microkernels",
-    ] + select({
-        ":arm_fp16_scalar_enabled": [":fp16arith_prod_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":arm_fp16_vector_enabled": [":neonfp16arith_prod_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":arm_dotprod_enabled": [":neondot_prod_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":arm_neondotfp16_enabled": [":neondotfp16arith_prod_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":arm_i8mm_enabled": [":neoni8mm_prod_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":riscv_vector_enabled": [":rvv_prod_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":riscv_fp16_vector_enabled": [":rvvfp16arith_prod_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":avxvnni_enabled": [":avxvnni_prod_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":avx256skx_enabled": [":avx256skx_prod_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":avx256vnni_enabled": [":avx256vnni_prod_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":avx256vnnigfni_enabled": [":avx256vnnigfni_prod_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":avx512amx_enabled": [":avx512amx_prod_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":avx512fp16_enabled": [":avx512fp16_prod_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":hvx_enabled": [":hvx_microkernels"],
-        "//conditions:default": [],
-    }),
-    wasm_deps = [
-        ":wasm_prod_microkernels",
-        ":asm_microkernels",
-    ],
-    wasmrelaxedsimd_deps = [
-        ":wasm_prod_microkernels",
-        ":asm_microkernels",
-    ],
-    wasmsimd_deps = [
-        ":wasm_prod_microkernels",
-        ":asm_microkernels",
-    ],
-    x86_deps = [
-        ":sse2_prod_microkernels",
-        ":ssse3_prod_microkernels",
-        ":sse41_prod_microkernels",
-        ":avx_prod_microkernels",
-        ":f16c_prod_microkernels",
-        ":fma3_prod_microkernels",
-        ":avx2_prod_microkernels",
-        ":avx512f_prod_microkernels",
-        ":avx512skx_prod_microkernels",
-        ":avx512vbmi_prod_microkernels",
-        ":avx512vnni_prod_microkernels",
-        ":avx512vnnigfni_prod_microkernels",
-    ],
-)
-
-xnnpack_aggregate_library(
-    name = "test_microkernels",
-    aarch32_deps = [
-        ":armsimd32_test_microkernels",
-        ":neon_test_microkernels",
-        ":neonfp16_test_microkernels",
-        ":neonfma_test_microkernels",
-        ":neonv8_test_microkernels",
-        ":asm_microkernels",
-    ],
-    aarch64_deps = [
-        ":neon_test_microkernels",
-        ":neonfp16_test_microkernels",
-        ":neonfma_test_microkernels",
-        ":neonv8_test_microkernels",
-        ":asm_microkernels",
-    ],
-    defines = select({
-        ":arm_fp16_scalar_enabled": ["XNN_ENABLE_ARM_FP16_SCALAR=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_FP16_SCALAR=0"],
-    }) + select({
-        ":arm_fp16_vector_enabled": ["XNN_ENABLE_ARM_FP16_VECTOR=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_FP16_VECTOR=0"],
-    }) + select({
-        ":arm_bf16_enabled": ["XNN_ENABLE_ARM_BF16=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_BF16=0"],
-    }) + select({
-        ":arm_dotprod_enabled": ["XNN_ENABLE_ARM_DOTPROD=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_DOTPROD=0"],
-    }) + select({
-        ":arm_i8mm_enabled": ["XNN_ENABLE_ARM_I8MM=1"],
-        "//conditions:default": ["XNN_ENABLE_ARM_I8MM=0"],
-    }) + select({
-        ":riscv_vector_enabled": ["XNN_ENABLE_RISCV_VECTOR=1"],
-        "//conditions:default": ["XNN_ENABLE_RISCV_VECTOR=0"],
-    }) + select({
-        ":riscv_fp16_vector_enabled": ["XNN_ENABLE_RISCV_FP16_VECTOR=1"],
-        "//conditions:default": ["XNN_ENABLE_RISCV_FP16_VECTOR=0"],
-    }) + select({
-        ":avx512vnnigfni_enabled": ["XNN_ENABLE_AVX512VNNIGFNI=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX512VNNIGFNI=0"],
-    }) + select({
-        ":avx512amx_enabled": ["XNN_ENABLE_AVX512AMX=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX512AMX=0"],
-    }) + select({
-        ":avx512fp16_enabled": ["XNN_ENABLE_AVX512FP16=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX512FP16=0"],
-    }) + select({
-        ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
-        "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
-    }) + select({
-        ":avx256skx_enabled": ["XNN_ENABLE_AVX256SKX=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX256SKX=0"],
-    }) + select({
-        ":avx256vnni_enabled": ["XNN_ENABLE_AVX256VNNI=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX256VNNI=0"],
-    }) + select({
-        ":avx256vnnigfni_enabled": ["XNN_ENABLE_AVX256VNNIGFNI=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX256VNNIGFNI=0"],
-    }) + select({
-        ":hvx_enabled": ["XNN_ENABLE_HVX=1"],
-        "//conditions:default": ["XNN_ENABLE_HVX=0"],
-    }),
-    generic_deps = [
-        ":scalar_test_microkernels",
-    ] + select({
-        ":arm_fp16_scalar_enabled": [":fp16arith_test_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":arm_neondotfp16_enabled": [":neondotfp16arith_test_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":arm_fp16_vector_enabled": [":neonfp16arith_test_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":arm_bf16_enabled": [":neonbf16_test_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":arm_dotprod_enabled": [":neondot_test_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":arm_i8mm_enabled": [":neoni8mm_test_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":riscv_vector_enabled": [":rvv_test_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":riscv_fp16_vector_enabled": [":rvvfp16arith_test_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":avxvnni_enabled": [":avxvnni_test_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":avx256skx_enabled": [":avx256skx_test_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":avx256vnni_enabled": [":avx256vnni_test_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":avx256vnnigfni_enabled": [":avx256vnnigfni_test_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":avx512amx_enabled": [":avx512amx_test_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":avx512fp16_enabled": [":avx512fp16_test_microkernels"],
-        "//conditions:default": [],
-    }) + select({
-        ":hvx_enabled": [":hvx_microkernels"],
-        "//conditions:default": [],
-    }),
-    wasm_deps = [
-        ":wasm_test_microkernels",
-        ":asm_microkernels",
-    ],
-    wasmrelaxedsimd_deps = [
-        ":wasm_test_microkernels",
-        ":asm_microkernels",
-    ],
-    wasmsimd_deps = [
-        ":wasm_test_microkernels",
-        ":asm_microkernels",
-    ],
-    x86_deps = [
-        ":sse2_test_microkernels",
-        ":ssse3_test_microkernels",
-        ":sse41_test_microkernels",
-        ":avx_test_microkernels",
-        ":f16c_test_microkernels",
-        ":fma3_test_microkernels",
-        ":avx2_test_microkernels",
-        ":avx512f_test_microkernels",
-        ":avx512skx_test_microkernels",
-        ":avx512vbmi_test_microkernels",
-        ":avx512vnni_test_microkernels",
-        ":avx512vnnigfni_test_microkernels",
-    ],
-)
+[
+    cc_library(
+        name = lib + "_microkernels",
+        compatible_with = [],
+        defines = xnnpack_configurable_defines(),
+        hdrs_check = "strict",
+        linkstatic = True,
+        visibility = ["//:__subpackages__"],
+        deps = xnnpack_list_sum(
+            [
+                xnnpack_select_if(
+                    xnnpack_cond_for_arch(arch),
+                    [":" + arch + "_" + lib + "_microkernels"],
+                )
+                for arch in xnnpack_archs()
+            ],
+            [],
+        ) + xnnpack_select_if(
+            "//build_config:hexagon",
+            ["//base:system_malloc"],
+        ),
+    )
+    for lib in ("prod", "all")
+]
 
 xnnpack_cc_library(
     name = "im2col",
@@ -1729,8 +755,6 @@ xnnpack_cc_library(
     hdrs = [
         "src/xnnpack/im2col.h",
     ],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [":common"],
 )
 
@@ -1738,8 +762,6 @@ xnnpack_cc_library(
     name = "indirection",
     srcs = ["src/indirection.c"],
     hdrs = ["src/xnnpack/indirection.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
         ":math",
@@ -1754,9 +776,7 @@ xnnpack_cc_library(
     name = "packing",
     srcs = ["src/packing.c"],
     hdrs = ["src/xnnpack/pack.h"],
-    defines = xnnpack_kleidiai_defines(),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
+    defines = xnnpack_configurable_defines(),
     deps = [
         ":common",
         ":config_hdrs",
@@ -1772,111 +792,6 @@ xnnpack_cc_library(
         "@KleidiAI//kai/ukernels/matmul:rhs_pack_kxn_qsi4cxp_qsu4cxs1s0",
         "@KleidiAI//kai/ukernels/matmul:rhs_pack_nxk_qsi4cxp_qsu4cxs1s0",
     ]),
-)
-
-cc_library(
-    name = "enable_assembly",
-    defines = select({
-        ":assembly_enabled": ["XNN_ENABLE_ASSEMBLY=1"],
-        "//conditions:default": ["XNN_ENABLE_ASSEMBLY=0"],
-    }),
-    visibility = xnnpack_visibility(),
-)
-
-cc_library(
-    name = "enable_avxvnni",
-    defines = select({
-        ":avxvnni_enabled": ["XNN_ENABLE_AVXVNNI=1"],
-        "//conditions:default": ["XNN_ENABLE_AVXVNNI=0"],
-    }),
-    visibility = xnnpack_visibility(),
-)
-
-cc_library(
-    name = "enable_avx256skx",
-    defines = select({
-        ":avx256skx_enabled": ["XNN_ENABLE_AVX256SKX=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX256SKX=0"],
-    }),
-    visibility = xnnpack_visibility(),
-)
-
-cc_library(
-    name = "enable_avx256vnni",
-    defines = select({
-        ":avx256vnni_enabled": ["XNN_ENABLE_AVX256VNNI=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX256VNNI=0"],
-    }),
-    visibility = xnnpack_visibility(),
-)
-
-cc_library(
-    name = "enable_avx256vnnigfni",
-    defines = select({
-        ":avx256vnnigfni_enabled": ["XNN_ENABLE_AVX256VNNIGFNI=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX256VNNIGFNI=0"],
-    }),
-    visibility = xnnpack_visibility(),
-)
-
-cc_library(
-    name = "enable_hvx",
-    defines = select({
-        ":hvx_enabled": ["XNN_ENABLE_HVX=1"],
-        "//conditions:default": ["XNN_ENABLE_HVX=0"],
-    }),
-    visibility = xnnpack_visibility(),
-)
-
-cc_library(
-    name = "enable_avx512amx",
-    defines = select({
-        ":avx512amx_enabled": ["XNN_ENABLE_AVX512AMX=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX512AMX=0"],
-    }),
-    visibility = xnnpack_visibility(),
-)
-
-cc_library(
-    name = "enable_avx512fp16",
-    defines = select({
-        ":avx512fp16_enabled": ["XNN_ENABLE_AVX512FP16=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX512FP16=0"],
-    }),
-    visibility = xnnpack_visibility(),
-)
-
-cc_library(
-    name = "enable_avx512vnnigfni",
-    defines = select({
-        ":avx512vnnigfni_enabled": ["XNN_ENABLE_AVX512VNNIGFNI=1"],
-        "//conditions:default": ["XNN_ENABLE_AVX512VNNIGFNI=0"],
-    }),
-    visibility = xnnpack_visibility(),
-)
-
-cc_library(
-    name = "enable_sparse",
-    defines = select({
-        ":sparse_enabled": ["XNN_ENABLE_SPARSE=1"],
-        "//conditions:default": ["XNN_ENABLE_SPARSE=0"],
-    }),
-)
-
-cc_library(
-    name = "enable_gemm_m_specialization",
-    defines = select({
-        ":gemm_m_specialization_enabled": ["XNN_ENABLE_GEMM_M_SPECIALIZATION=1"],
-        "//conditions:default": ["XNN_ENABLE_GEMM_M_SPECIALIZATION=0"],
-    }),
-)
-
-cc_library(
-    name = "enable_dwconv_multipass",
-    defines = select({
-        ":dwconv_multipass_enabled": ["XNN_ENABLE_DWCONV_MULTIPASS=1"],
-        "//conditions:default": ["XNN_ENABLE_DWCONV_MULTIPASS=0"],
-    }),
 )
 
 py_binary(
@@ -1909,16 +824,12 @@ genrule(
 xnnpack_cc_library(
     name = "build_identifier",
     srcs = ["src/build_identifier.c"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
 )
 
 xnnpack_cc_library(
     name = "cache",
     srcs = ["src/cache.c"],
     hdrs = ["src/xnnpack/cache.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":allocator",
         ":common",
@@ -1937,8 +848,6 @@ xnnpack_cc_library(
     hdrs = [
         "src/xnnpack/compute.h",
     ],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
         ":math",
@@ -1951,8 +860,6 @@ xnnpack_cc_library(
     name = "microkernel_utils",
     srcs = ["src/microkernel-utils.c"],
     hdrs = ["src/xnnpack/microkernel-utils.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
         ":math",
@@ -1966,8 +873,6 @@ xnnpack_cc_library(
     hdrs = [
         "src/xnnpack/operator.h",
     ],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":allocator",
         ":cache",
@@ -1983,8 +888,6 @@ xnnpack_cc_library(
     name = "operator_utils",
     srcs = ["src/operator-utils.c"],
     hdrs = ["src/xnnpack/operator-utils.h"],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":allocator",
         ":common",
@@ -2010,13 +913,11 @@ xnnpack_cc_library(
         ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
         "//conditions:default": [],
     }),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
+    defines = xnnpack_configurable_defines(),
     deps = [
         ":allocator",
         ":cache",
         ":common",
-        ":enable_gemm_m_specialization",
         ":indirection",
         ":logging",
         ":math",
@@ -2048,19 +949,13 @@ xnnpack_cc_library(
         "src/xnnpack/subgraph.h",
         "src/xnnpack/subgraph-validation.h",
     ],
-    defines = select({
-        ":memopt_enabled": ["XNN_ENABLE_MEMOPT=1"],
-        "//conditions:default": ["XNN_ENABLE_MEMOPT=1"],
-    }) + xnnpack_slinky_defines(),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
+    defines = xnnpack_configurable_defines(),
     deps = [
         ":allocation_type",
         ":allocator",
         ":cache",
         ":common",
         ":config_hdrs",
-        ":enable_sparse",
         ":hardware_config",
         ":internal",
         ":logging",
@@ -2088,8 +983,6 @@ xnnpack_cc_library(
     hdrs = [
         "src/xnnpack/mutex.h",
     ],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
         ":logging",
@@ -2103,8 +996,6 @@ xnnpack_cc_library(
     hdrs = [
         "src/xnnpack/normalization.h",
     ],
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     deps = [
         ":common",
         ":math",
@@ -2127,8 +1018,6 @@ xnnpack_cc_library(
         ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
         "//conditions:default": [],
     }),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
         ":allocator",
@@ -2164,8 +1053,6 @@ xnnpack_cc_library(
         ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
         "//conditions:default": [],
     }),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
         ":allocator",
@@ -2194,8 +1081,6 @@ xnnpack_cc_library(
         ":xnn_enable_hmp_explicit_false": ["-DXNN_MAX_UARCH_TYPES=1"],
         "//conditions:default": [],
     }),
-    gcc_copts = xnnpack_gcc_std_copts(),
-    msvc_copts = xnnpack_msvc_std_copts(),
     visibility = xnnpack_visibility(),
     deps = [
         ":allocator",
@@ -2605,6 +1490,14 @@ alias(
 )
 
 selects.config_setting_group(
+    name = "arm_aarch64_fp16_vector_enabled",
+    match_all = [
+        ":arm_fp16_vector_enabled",
+        "//build_config:aarch64",
+    ],
+)
+
+selects.config_setting_group(
     name = "arm_bf16_enabled_by_default",
     match_any = [
         "//build_config:aarch64",
@@ -2638,6 +1531,14 @@ alias(
 )
 
 selects.config_setting_group(
+    name = "arm_aarch64_dotprod_enabled",
+    match_all = [
+        ":arm_dotprod_enabled",
+        "//build_config:aarch64",
+    ],
+)
+
+selects.config_setting_group(
     name = "arm_i8mm_enabled_by_default",
     match_any = [
         "//build_config:aarch32",
@@ -2652,6 +1553,14 @@ alias(
         ":xnn_enable_arm_i8mm_explicit_false": ":xnn_enable_arm_i8mm_explicit_true",
         "//conditions:default": ":arm_i8mm_enabled_by_default",
     }),
+)
+
+selects.config_setting_group(
+    name = "arm_aarch64_i8mm_enabled",
+    match_all = [
+        ":arm_i8mm_enabled",
+        "//build_config:aarch64",
+    ],
 )
 
 selects.config_setting_group(
@@ -2936,5 +1845,11 @@ alias(
 bzl_library(
     name = "build_defs_bzl",
     srcs = ["build_defs.bzl"],
+    visibility = ["//visibility:private"],
+)
+
+bzl_library(
+    name = "build_params_bzl",
+    srcs = ["build_params.bzl"],
     visibility = ["//visibility:private"],
 )

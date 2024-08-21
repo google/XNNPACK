@@ -5,7 +5,10 @@ Auto-generated file. Do not edit!
   Generator: tools/update-microkernels.py
 """
 
-ALL_HVX_MICROKERNEL_SRCS = [
+PROD_HVX_MICROKERNEL_SRCS = [
+]
+
+NON_PROD_HVX_MICROKERNEL_SRCS = [
     "src/f32-gemm/gen/f32-gemm-1x32-minmax-hvx-broadcast.c",
     "src/f32-gemm/gen/f32-gemm-1x64-minmax-hvx-broadcast.c",
     "src/f32-gemm/gen/f32-gemm-1x128-minmax-hvx-broadcast.c",
@@ -108,3 +111,5 @@ ALL_HVX_MICROKERNEL_SRCS = [
     "src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u96.c",
     "src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u128.c",
 ]
+
+ALL_HVX_MICROKERNEL_SRCS = PROD_HVX_MICROKERNEL_SRCS + NON_PROD_HVX_MICROKERNEL_SRCS
