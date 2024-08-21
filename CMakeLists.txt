@@ -1479,12 +1479,9 @@ IF(XNNPACK_BUILD_TESTS)
         concatenate4
         concatenate5
         convert
-        convolution-2d
         copy
         copysign
-        deconvolution-2d
         depth-to-space-2d
-        depthwise-convolution-2d
         divide2
         elu
         gelu
@@ -1571,6 +1568,116 @@ IF(XNNPACK_BUILD_TESTS)
   ENDFOREACH()
 
   # ---[ Build microkernel-level unit tests
+  SET(MICROKERNEL_UNIT_TESTS
+      cs16-bfly4
+      cs16-fftr
+      cs16-vsquareabs
+      f16-avgpool-minmax
+      f16-conv-hwc2chw
+      f16-f32acc-rdsum
+      f16-f32acc-rsum
+      f16-gavgpool-cw
+      f16-gavgpool-minmax
+      f16-ibilinear-chw
+      f16-ibilinear
+      f16-maxpool-minmax
+      f16-pavgpool-minmax
+      f16-prelu
+      f16-raddstoreexpminusmax
+      f16-rmax
+      f16-rsum
+      f16-spmm-minmax
+      f16-vcmul
+      f16-vmulcaddc-minmax
+      f32-argmaxpool
+      f32-conv-hwc
+      f32-conv-hwc2chw
+      f32-gavgpool-cw
+      f32-gavgpool-minmax
+      f32-ibilinear-chw
+      f32-ibilinear
+      f32-prelu
+      f32-raddexpminusmax
+      f32-raddextexp
+      f32-raddstoreexpminusmax
+      f32-rdsum
+      f32-rmax
+      f32-rmin
+      f32-rminmax
+      f32-rsum
+      f32-spmm-minmax
+      f32-vcmul
+      f32-vmulcaddc-minmax
+      f32-vscaleexpminusmax
+      f32-vscaleextexp
+      i16-vlshift
+      indirection
+      packing
+      qs8-gavgpool-minmax-fp32
+      qs8-gavgpool-minmax-rndnu
+      qs8-requantization
+      qs8-rdsum-minmax-fp32
+      qs8-rsum
+      qs8-vhswish
+      qs8-vlrelu
+      qu8-avgpool-minmax-fp32
+      qu8-gavgpool-minmax-fp32
+      qu8-gavgpool-minmax-rndnu
+      qu8-requantization
+      qu8-vhswish
+      qu8-vlrelu
+      s16-rmaxabs
+      s16-window
+      s8-ibilinear
+      s8-maxpool-minmax
+      u32-filterbank-accumulate
+      u32-filterbank-subtract
+      u32-vlog
+      u8-ibilinear
+      u8-lut32norm
+      u8-maxpool-minmax
+      u8-rmax
+      x16-packw
+      x16-transpose
+      x24-transpose
+      x32-packb
+      x32-packw
+      x32-packx
+      x32-transpose
+      x32-unpool
+      x32-zerob
+      x32-zip
+      x64-transpose
+      x8-lut
+      x8-packw
+      x8-transpose
+      x8-zip
+      xx-fill
+      xx-pad
+      xx-transposev)
+  FOREACH(TEST ${MICROKERNEL_UNIT_TESTS})
+    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
+        fp16
+        GTest::gmock
+        GTest::gtest
+        GTest::gtest_main
+        hardware-config
+        indirection
+        logging
+        microkernels-all
+        microkernel-utils
+        microparams-init
+        next-prime
+        packing
+        pthreadpool
+        XNNPACK
+    )
+    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+    SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
+  ENDFOREACH()
+
   SET(MICROKERNEL_DWCONV_UNIT_TESTS
       f16-dwconv-minmax-multipass
       f16-dwconv-minmax-unipass
@@ -2013,7 +2120,8 @@ IF(XNNPACK_BUILD_BENCHMARKS)
         benchmark::benchmark
         fp16
         hardware-config
-        logging microkernels-all
+        logging
+        microkernels-all
         microparams-init
         XNNPACK)
     ENDFOREACH()
@@ -2046,7 +2154,12 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     FOREACH(BENCH ${LIBRARY_OPERATOR_BENCHMARKS})
       ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)
       TARGET_INCLUDE_DIRECTORIES(${BENCH}-bench PRIVATE .)
-      TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE XNNPACK fp16 benchmark::benchmark bench-utils)
+      TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
+        bench-utils
+        benchmark::benchmark
+        fp16
+        XNNPACK
+      )
     ENDFOREACH()
   ENDIF()
 
