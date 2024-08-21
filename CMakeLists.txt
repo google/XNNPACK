@@ -1528,6 +1528,24 @@ IF(XNNPACK_BUILD_TESTS)
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
       TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
       TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
+        fp16
+        GTest::gmock
+        GTest::gtest
+        GTest::gtest_main
+        subgraph
+        XNNPACK)
+      ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+      SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
+    ENDFOREACH()
+
+    SET(LIBRARY_SUBGRAPH_CONVOLUTION_UNIT_TESTS
+        convolution-2d
+        deconvolution-2d
+        depthwise-convolution-2d)
+    FOREACH(TEST ${LIBRARY_SUBGRAPH_CONVOLUTION_UNIT_TESTS})
+      ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+      TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
+      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         convolution-test-helpers
         fp16
         GTest::gmock
