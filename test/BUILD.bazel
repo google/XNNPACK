@@ -1735,7 +1735,7 @@ xnnpack_unit_test(
         "mean-nd.cc",
         "mean-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + ["//:requantization"],
 )
 
 xnnpack_unit_test(
