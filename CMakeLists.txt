@@ -1383,41 +1383,53 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE XNNPACK)
 
     # ---[ Build operator-level unit tests
-    SET(LIBRARY_UNIT_TESTS
+    SET(LIBRARY_UNARY_UNIT_TESTS
         abs-nc
-        add-nd
-        add-nd-eager
         bankers-rounding-nc
         ceiling-nc
         clamp-nc
-        copysign-nd
-        divide-nd
-        divide-nd-eager
         elu-nc
         exp-nc
         floor-nc
         hardswish-nc
         leaky-relu-nc
         log-nc
+        negate-nc
+        reciprocal-square-root-nc
+        sigmoid-nc
+        square-nc
+        square-root-nc
+        tanh-nc
+        truncation-nc)
+    FOREACH(TEST ${LIBRARY_UNARY_UNIT_TESTS})
+      ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+      TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
+      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
+        fp16
+        GTest::gtest
+        GTest::gtest_main
+        unary-operator-tester
+        XNNPACK)
+      ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+    ENDFOREACH()
+
+    SET(LIBRARY_BINARY_ELEMENTWISE_UNIT_TESTS
+        add-nd
+        add-nd-eager
+        copysign-nd
+        divide-nd
+        divide-nd-eager
         maximum-nd
         maximum-nd-eager
         minimum-nd
         minimum-nd-eager
         multiply-nd
         multiply-nd-eager
-        negate-nc
-        reciprocal-square-root-nc
-        sigmoid-nc
-        square-nc
-        square-root-nc
         squared-difference-nd
         squared-difference-nd-eager
         subtract-nd
-        subtract-nd-eager
-        tanh-nc
-        truncation-nc
-        unpooling-nhwc)
-    FOREACH(TEST ${LIBRARY_UNIT_TESTS})
+        subtract-nd-eager)
+    FOREACH(TEST ${LIBRARY_BINARY_ELEMENTWISE_UNIT_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
       TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
       TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
@@ -1425,7 +1437,6 @@ IF(XNNPACK_BUILD_TESTS)
         fp16
         GTest::gtest
         GTest::gtest_main
-        unary-operator-tester
         XNNPACK)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     ENDFOREACH()
