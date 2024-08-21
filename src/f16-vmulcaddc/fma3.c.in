@@ -39,8 +39,10 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c${CHANNEL_TILE}__fma3_${ROW_TILE}x(
   const size_t input_increment = input_stride * ${ROW_TILE} - channels;
   const size_t output_increment = output_stride * ${ROW_TILE} - channels;
 
-  const __m256 vmin = _mm256_load_ps(params->avx.min);
-  const __m256 vmax = _mm256_load_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
   do {
     $for M in range(1, ROW_TILE):
       $if M % 2 == 0:

@@ -11,6 +11,7 @@
 
 #include <immintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
@@ -69,11 +70,12 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_7x16c4__avx512vnni(
     c6 = c5;
   }
 
+  const __m512i vsign_mask = _mm512_set1_epi8(0x80);
+  XNN_FORCE_REALIZATION(vsign_mask);
   const __m512i vinput_zero_point = _mm512_set1_epi32((int) quantization_params->zero_point + 128);
   const __m512 vinput_inv_scale = _mm512_set1_ps(quantization_params->inv_scale);
   const __m512 voutput_min = _mm512_set1_ps(params->avx512vnni.min);
   const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
-  const __m512i vsign_mask = _mm512_set1_epi8(params->avx512vnni.sign_mask);  // 0x80
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_load_epi32(w);
     __m512i vacc0x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point);

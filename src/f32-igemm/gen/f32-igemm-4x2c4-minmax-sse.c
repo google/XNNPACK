@@ -54,6 +54,11 @@ void xnn_f32_igemm_minmax_ukernel_4x2c4__sse(
     c3 = c2;
   }
 
+  const __m128 vmax = _mm_set1_ps(params->sse.max);
+  const __m128 vmin = _mm_set1_ps(params->sse.min);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+
   do {
     __m128 vacc0x0c4 = _mm_load_ss(w);
     __m128 vacc0x1c4 = _mm_load_ss(w + 1);
@@ -146,11 +151,9 @@ void xnn_f32_igemm_minmax_ukernel_4x2c4__sse(
     __m128 vacc01x01 = _mm_add_ps(_mm_movelh_ps(vacc0x01c2, vacc1x01c2), _mm_movehl_ps(vacc1x01c2, vacc0x01c2));
     __m128 vacc23x01 = _mm_add_ps(_mm_movelh_ps(vacc2x01c2, vacc3x01c2), _mm_movehl_ps(vacc3x01c2, vacc2x01c2));
 
-    const __m128 vmax = _mm_load_ps(params->sse.max);
     vacc01x01 = _mm_min_ps(vacc01x01, vmax);
     vacc23x01 = _mm_min_ps(vacc23x01, vmax);
 
-    const __m128 vmin = _mm_load_ps(params->sse.min);
     vacc01x01 = _mm_max_ps(vacc01x01, vmin);
     vacc23x01 = _mm_max_ps(vacc23x01, vmin);
 

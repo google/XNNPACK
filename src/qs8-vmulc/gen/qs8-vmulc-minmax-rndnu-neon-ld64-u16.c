@@ -27,7 +27,7 @@ void xnn_qs8_vmulc_minmax_rndnu_ukernel__neon_ld64_u16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const int8x8_t va_zero_point = vld1_dup_s8(params->rndnu_neon.a_zero_point);
+  const int8x8_t va_zero_point = vld1_dup_s8(&params->rndnu_neon.a_zero_point);
   const int32x4_t vleft_pre_shift = vld1q_dup_s32(&params->rndnu_neon.left_pre_shift);
   const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
   const int32x4_t vleft_post_shift = vld1q_dup_s32(&params->rndnu_neon.left_post_shift);
@@ -36,7 +36,7 @@ void xnn_qs8_vmulc_minmax_rndnu_ukernel__neon_ld64_u16(
   const int8x16_t voutput_max = vld1q_dup_s8(&params->rndnu_neon.output_max);
 
   const int8x8_t vb = vld1_dup_s8(input_b);
-  const int8x8_t vb_zero_point = vld1_dup_s8(params->rndnu_neon.b_zero_point);
+  const int8x8_t vb_zero_point = vld1_dup_s8(&params->rndnu_neon.b_zero_point);
   const int16x8_t vxb = vsubl_s8(vb, vb_zero_point);
   for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
     const int8x8_t va01234567 = vld1_s8(input_a); input_a += 8;

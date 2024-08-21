@@ -26,8 +26,8 @@ void xnn_f32_vclamp_ukernel__sse_u4(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vy_min = _mm_load_ps(params->sse.min);
-  const __m128 vy_max = _mm_load_ps(params->sse.max);
+  const __m128 vy_min = _mm_set1_ps(params->sse.min);
+  const __m128 vy_max = _mm_set1_ps(params->sse.max);
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     __m128 vacc0123 = _mm_loadu_ps(input);

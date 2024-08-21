@@ -11,6 +11,7 @@
 
 #include <smmintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/math.h"
 #include "xnnpack/unaligned.h"
@@ -40,6 +41,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__sse41_ld64(
   kc = round_up_po2(kc, 8 * sizeof(uint8_t));
   const uint8_t* a0 = a;
   uint8_t* c0 = c;
+
 
   do {
     __m128i vacc0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);

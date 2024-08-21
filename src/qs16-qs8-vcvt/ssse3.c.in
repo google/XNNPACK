@@ -44,9 +44,15 @@ void xnn_qs16_qs8_vcvt_ukernel__ssse3_u${BATCH_TILE}(
       0x80, 0x80, 14, 15, 0x80, 0x80, 0x80, 0x80,
     };
 
-  const __m128i vinput_bias = _mm_load_si128((const __m128i*) params->ssse3.input_bias);
-  const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->ssse3.multiplier);
-  const __m128i vbias = _mm_load_si128((const __m128i*) params->ssse3.bias);
+  const __m128i vinput_bias = _mm_set1_epi16(UINT16_C(0x8000));
+  const __m128i vmultiplier = _mm_set1_epi32(params->scalar.multiplier);
+  const __m128i vbias = _mm_set1_epi64x(
+      (int64_t) ((uint64_t) params->scalar.output_zero_point << 32) + 
+      INT64_C(0x80000000) -
+      (INT64_C(0x80000000) * (int64_t) params->scalar.multiplier));
+  XNN_FORCE_REALIZATION(vinput_bias);
+  XNN_FORCE_REALIZATION(vmultiplier);
+  XNN_FORCE_REALIZATION(vbias);
   const __m128i vshuffle01 = _mm_load_si128((const __m128i*) shuffle01);
   const __m128i vshuffle23 = _mm_load_si128((const __m128i*) shuffle23);
 

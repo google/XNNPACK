@@ -38,8 +38,10 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c16__fma3_2x(
   const size_t input_increment = input_stride * 2 - channels;
   const size_t output_increment = output_stride * 2 - channels;
 
-  const __m256 vmin = _mm256_load_ps(params->avx.min);
-  const __m256 vmax = _mm256_load_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
   do {
     if XNN_UNPREDICTABLE(rows < 2) {
       i1 = i0;

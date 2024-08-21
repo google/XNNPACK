@@ -17,7 +17,7 @@ $if REQUANTIZATION == "FP32" and ARMV8:
 #include "xnnpack/vbinary.h"
 
 
-$PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if ARMV8 else "neon")
+$PARAMS_STRUCT = ("rndnu_neon" if REQUANTIZATION == "RNDNU" else "scalar")
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $XINT8X8_T = {"QS8": "int8x8_t", "QU8": "uint8x8_t"}[DATATYPE]
 $XINT8X16_T = {"QS8": "int8x16_t", "QU8": "uint8x16_t"}[DATATYPE]
@@ -54,19 +54,19 @@ void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__${"
 
   $if LD128:
     #if XNN_ARCH_ARM64
-      const ${XINT8X16_T} va_zero_point = ${VLD1Q_DUP_X8}(params->${PARAMS_STRUCT}.a_zero_point);
+      const ${XINT8X16_T} va_zero_point = ${VLD1Q_DUP_X8}(&params->${PARAMS_STRUCT}.a_zero_point);
     #else
-      const ${XINT8X8_T} va_zero_point = ${VLD1_DUP_X8}(params->${PARAMS_STRUCT}.a_zero_point);
+      const ${XINT8X8_T} va_zero_point = ${VLD1_DUP_X8}(&params->${PARAMS_STRUCT}.a_zero_point);
     #endif
   $else:
-    const ${XINT8X8_T} va_zero_point = ${VLD1_DUP_X8}(params->${PARAMS_STRUCT}.a_zero_point);
+    const ${XINT8X8_T} va_zero_point = ${VLD1_DUP_X8}(&params->${PARAMS_STRUCT}.a_zero_point);
   $if REQUANTIZATION == "FP32":
-    const float32x4_t vscale = vld1q_dup_f32(&params->${PARAMS_STRUCT}.scale);
+    const float32x4_t vscale = vld1q_dup_f32(&params->scalar.scale);
     $if ARMV8:
-      const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->fp32_neonv8.output_zero_point);
+      const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
     $else:
-      const float32x4_t vmagic_bias = vld1q_dup_f32(&params->fp32_neon.magic_bias);
-      const int32x4_t vmagic_bias_less_output_zero_point = vld1q_dup_s32(&params->fp32_neon.magic_bias_less_output_zero_point);
+      const float32x4_t vmagic_bias = vdupq_n_f32(12582912.0f);
+      const int32x4_t vmagic_bias_less_output_zero_point = vdupq_n_s32(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
   $elif REQUANTIZATION == "RNDNU":
     const int32x4_t vleft_pre_shift = vld1q_dup_s32(&params->rndnu_neon.left_pre_shift);
     const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
@@ -80,7 +80,7 @@ void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__${"
     const ${XINT8X8_T} voutput_max = ${VLD1_DUP_X8}(&params->${PARAMS_STRUCT}.output_max);
 
   const ${XINT8X8_T} vb = ${VLD1_DUP_X8}(input_b);
-  const ${XINT8X8_T} vb_zero_point = ${VLD1_DUP_X8}(params->${PARAMS_STRUCT}.b_zero_point);
+  const ${XINT8X8_T} vb_zero_point = ${VLD1_DUP_X8}(&params->${PARAMS_STRUCT}.b_zero_point);
   $if DATATYPE == "QU8":
     const int16x8_t vxb = vreinterpretq_s16_u16(vsubl_u8(vb, vb_zero_point));
   $else:

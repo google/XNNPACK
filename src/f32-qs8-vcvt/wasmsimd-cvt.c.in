@@ -30,10 +30,14 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__wasmsimd_cvt_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vscale = wasm_v128_load64_splat(params->wasmsimd_cvt.scale);
-  const v128_t voutput_zero_point = wasm_v128_load64_splat(params->wasmsimd_cvt.output_zero_point);
-  const v128_t voutput_min = wasm_v128_load64_splat(params->wasmsimd_cvt.output_min);
-  const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd_cvt.output_max);
+  const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
+  const v128_t voutput_zero_point = wasm_v128_load16_splat(&params->scalar.output_zero_point);
+  const v128_t voutput_min = wasm_v128_load8_splat(&params->scalar.output_min);
+  const v128_t voutput_max = wasm_v128_load8_splat(&params->scalar.output_max);
+  XNN_FORCE_REALIZATION(vscale);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+  XNN_FORCE_REALIZATION(voutput_max);
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       v128_t vx${ABC[0:4]} = wasm_v128_load(input);

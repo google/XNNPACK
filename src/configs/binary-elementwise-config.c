@@ -1039,7 +1039,7 @@ static void init_qs8_vadd_config(void) {
       qs8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__neon_ld64_u16;
       qs8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__neon_ld64_u16;
       qs8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__neon_ld64_u16;
-      qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_neon_params;
+      qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_scalar_params;
       qs8_vadd_config.minmax.element_tile = 16;
     } else if (!XNN_PLATFORM_MOBILE) {
       qs8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__scalar_u1;
@@ -1052,7 +1052,7 @@ static void init_qs8_vadd_config(void) {
     qs8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__neon_ld64_u32;
     qs8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__neon_ld64_u32;
     qs8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__neon_ld64_u32;
-    qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_neon_params;
+    qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_scalar_params;
     qs8_vadd_config.minmax.element_tile = 32;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -1061,38 +1061,38 @@ static void init_qs8_vadd_config(void) {
       qs8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__avx512skx_mul32_ld128_u16;
       qs8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_u16;
       qs8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_u16;
-      qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_avx512_params;
+      qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_scalar_params;
       qs8_vadd_config.minmax.element_tile = 16;
     } else if (hardware_config->use_x86_avx2) {
       qs8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__avx2_mul32_ld64_u16;
       qs8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16;
       qs8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16;
-      qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_avx2_params;
+      qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_scalar_params;
       qs8_vadd_config.minmax.element_tile = 16;
     } else if (hardware_config->use_x86_avx) {
       qs8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__avx_mul32_ld32_u8;
       qs8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__avx_mul32_ld32_u8;
       qs8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__avx_mul32_ld32_u8;
-      qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_sse4_mul32_params;
+      qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_scalar_params;
       qs8_vadd_config.minmax.element_tile = 8;
     } else if (hardware_config->use_x86_sse4_1) {
       qs8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__sse41_mul16_ld64_u8;
       qs8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__sse41_mul16_ld64_u8;
       qs8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__sse41_mul16_ld64_u8;
-      qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_sse4_mul16_params;
+      qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_scalar_params;
       qs8_vadd_config.minmax.element_tile = 8;
     } else {
       qs8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__sse2_mul16_ld64_u8;
       qs8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_u8;
       qs8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__sse2_mul16_ld64_u8;
-      qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_sse2_params;
+      qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_scalar_params;
       qs8_vadd_config.minmax.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     qs8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__wasmsimd_u32;
     qs8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__wasmsimd_u32;
     qs8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vaddc_minmax_ukernel__wasmsimd_u32;
-    qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_wasmsimd_params;
+    qs8_vadd_config.init.qs8_add = xnn_init_qs8_add_minmax_scalar_params;
     qs8_vadd_config.minmax.element_tile = 32;
   #else
     qs8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vadd_minmax_ukernel__scalar_u4;
@@ -1117,7 +1117,7 @@ static void init_qs8_vmul_config(void) {
       qs8_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmul_minmax_fp32_ukernel__scalar_u4;
       qs8_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_u4;
       qs8_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_u4;
-      qs8_vmul_config.init.qs8_mul = xnn_init_qs8_mul_minmax_fp32_scalar_params;
+      qs8_vmul_config.init.qs8_mul = xnn_init_qs8_mul_minmax_scalar_params;
       qs8_vmul_config.minmax.element_tile = 4;
     }
   #elif XNN_ARCH_ARM64
@@ -1133,38 +1133,38 @@ static void init_qs8_vmul_config(void) {
       qs8_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmul_minmax_fp32_ukernel__avx_mul16_ld64_u16;
       qs8_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_u16;
       qs8_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_u16;
-      qs8_vmul_config.init.qs8_mul = xnn_init_qs8_mul_minmax_fp32_sse4_params;
+      qs8_vmul_config.init.qs8_mul = xnn_init_qs8_mul_minmax_scalar_params;
       qs8_vmul_config.minmax.element_tile = 16;
     } else if (hardware_config->use_x86_sse4_1) {
       qs8_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmul_minmax_fp32_ukernel__sse41_mul16_ld64_u16;
       qs8_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmulc_minmax_fp32_ukernel__sse41_mul16_ld64_u16;
       qs8_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmulc_minmax_fp32_ukernel__sse41_mul16_ld64_u16;
-      qs8_vmul_config.init.qs8_mul = xnn_init_qs8_mul_minmax_fp32_sse4_params;
+      qs8_vmul_config.init.qs8_mul = xnn_init_qs8_mul_minmax_scalar_params;
       qs8_vmul_config.minmax.element_tile = 16;
     } else {
       qs8_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmul_minmax_fp32_ukernel__sse2_mul16_ld64_u8;
       qs8_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_u8;
       qs8_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_u8;
-      qs8_vmul_config.init.qs8_mul = xnn_init_qs8_mul_minmax_fp32_sse2_params;
+      qs8_vmul_config.init.qs8_mul = xnn_init_qs8_mul_minmax_scalar_params;
       qs8_vmul_config.minmax.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     qs8_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_u8;
     qs8_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_u8;
     qs8_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_u8;
-    qs8_vmul_config.init.qs8_mul = xnn_init_qs8_mul_minmax_fp32_wasmsimd_params;
+    qs8_vmul_config.init.qs8_mul = xnn_init_qs8_mul_minmax_scalar_params;
     qs8_vmul_config.minmax.element_tile = 8;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     qs8_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmul_minmax_fp32_ukernel__rvv_u2v;
     qs8_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmulc_minmax_fp32_ukernel__rvv_u2v;
     qs8_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmulc_minmax_fp32_ukernel__rvv_u2v;
-    qs8_vmul_config.init.qs8_mul = xnn_init_qs8_mul_minmax_fp32_scalar_params;
+    qs8_vmul_config.init.qs8_mul = xnn_init_qs8_mul_minmax_scalar_params;
     qs8_vmul_config.minmax.element_tile = 2;
   #else
     qs8_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmul_minmax_fp32_ukernel__scalar_u4;
     qs8_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_u4;
     qs8_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qs8_vmulc_minmax_fp32_ukernel__scalar_u4;
-    qs8_vmul_config.init.qs8_mul = xnn_init_qs8_mul_minmax_fp32_scalar_params;
+    qs8_vmul_config.init.qs8_mul = xnn_init_qs8_mul_minmax_scalar_params;
     qs8_vmul_config.minmax.element_tile = 4;
   #endif
 }
@@ -1177,7 +1177,7 @@ static void init_qu8_vadd_config(void) {
       qu8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vadd_minmax_ukernel__neon_ld64_u16;
       qu8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__neon_ld64_u16;
       qu8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__neon_ld64_u16;
-      qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_neon_params;
+      qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_scalar_params;
       qu8_vadd_config.minmax.element_tile = 8;
     } else if (!XNN_PLATFORM_MOBILE) {
       qu8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vadd_minmax_ukernel__scalar_u1;
@@ -1190,7 +1190,7 @@ static void init_qu8_vadd_config(void) {
     qu8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vadd_minmax_ukernel__neon_ld64_u32;
     qu8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__neon_ld64_u32;
     qu8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__neon_ld64_u32;
-    qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_neon_params;
+    qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_scalar_params;
     qu8_vadd_config.minmax.element_tile = 8;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -1199,38 +1199,38 @@ static void init_qu8_vadd_config(void) {
       qu8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_u16;
       qu8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_u16;
       qu8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_u16;
-      qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_avx512_params;
+      qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_scalar_params;
       qu8_vadd_config.minmax.element_tile = 16;
     } else if (hardware_config->use_x86_avx2) {
       qu8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vadd_minmax_ukernel__avx2_mul32_ld64_u16;
       qu8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16;
       qu8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16;
-      qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_avx2_params;
+      qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_scalar_params;
       qu8_vadd_config.minmax.element_tile = 16;
     } else if (hardware_config->use_x86_avx) {
       qu8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vadd_minmax_ukernel__avx_mul32_ld32_u8;
       qu8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__avx_mul32_ld32_u8;
       qu8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__avx_mul32_ld32_u8;
-      qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_sse4_params;
+      qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_scalar_params;
       qu8_vadd_config.minmax.element_tile = 8;
     } else if (hardware_config->use_x86_sse4_1) {
       qu8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vadd_minmax_ukernel__sse41_mul16_ld64_u8;
       qu8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__sse41_mul16_ld64_u8;
       qu8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__sse41_mul16_ld64_u8;
-      qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_sse2_params;
+      qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_scalar_params;
       qu8_vadd_config.minmax.element_tile = 8;
     } else {
       qu8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vadd_minmax_ukernel__sse2_mul16_ld64_u8;
       qu8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__sse2_mul16_ld64_u8;
       qu8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__sse2_mul16_ld64_u8;
-      qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_sse2_params;
+      qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_scalar_params;
       qu8_vadd_config.minmax.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     qu8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vadd_minmax_ukernel__wasmsimd_u32;
     qu8_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__wasmsimd_u32;
     qu8_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vaddc_minmax_ukernel__wasmsimd_u32;
-    qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_wasmsimd_params;
+    qu8_vadd_config.init.qu8_add = xnn_init_qu8_add_minmax_scalar_params;
     qu8_vadd_config.minmax.element_tile = 32;
   #else
     qu8_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vadd_minmax_ukernel__scalar_u4;
@@ -1255,7 +1255,7 @@ static void init_qu8_vmul_config(void) {
       qu8_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmul_minmax_fp32_ukernel__scalar_u4;
       qu8_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_u4;
       qu8_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_u4;
-      qu8_vmul_config.init.qu8_mul = xnn_init_qu8_mul_minmax_fp32_scalar_params;
+      qu8_vmul_config.init.qu8_mul = xnn_init_qu8_mul_minmax_scalar_params;
       qu8_vmul_config.minmax.element_tile = 4;
     }
   #elif XNN_ARCH_ARM64
@@ -1271,38 +1271,38 @@ static void init_qu8_vmul_config(void) {
       qu8_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmul_minmax_fp32_ukernel__avx_mul16_ld64_u16;
       qu8_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_u16;
       qu8_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmulc_minmax_fp32_ukernel__avx_mul16_ld64_u16;
-      qu8_vmul_config.init.qu8_mul = xnn_init_qu8_mul_minmax_fp32_sse2_params;
+      qu8_vmul_config.init.qu8_mul = xnn_init_qu8_mul_minmax_scalar_params;
       qu8_vmul_config.minmax.element_tile = 16;
     } else if (hardware_config->use_x86_sse4_1) {
       qu8_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmul_minmax_fp32_ukernel__sse41_mul16_ld64_u16;
       qu8_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmulc_minmax_fp32_ukernel__sse41_mul16_ld64_u16;
       qu8_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmulc_minmax_fp32_ukernel__sse41_mul16_ld64_u16;
-      qu8_vmul_config.init.qu8_mul = xnn_init_qu8_mul_minmax_fp32_sse2_params;
+      qu8_vmul_config.init.qu8_mul = xnn_init_qu8_mul_minmax_scalar_params;
       qu8_vmul_config.minmax.element_tile = 16;
     } else {
       qu8_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmul_minmax_fp32_ukernel__sse2_mul16_ld64_u8;
       qu8_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_u8;
       qu8_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_u8;
-      qu8_vmul_config.init.qu8_mul = xnn_init_qu8_mul_minmax_fp32_sse2_params;
+      qu8_vmul_config.init.qu8_mul = xnn_init_qu8_mul_minmax_scalar_params;
       qu8_vmul_config.minmax.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     qu8_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmul_minmax_fp32_ukernel__wasmsimd_mul32_ld64_u8;
     qu8_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_u8;
     qu8_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmulc_minmax_fp32_ukernel__wasmsimd_mul32_ld64_u8;
-    qu8_vmul_config.init.qu8_mul = xnn_init_qu8_mul_minmax_fp32_wasmsimd_params;
+    qu8_vmul_config.init.qu8_mul = xnn_init_qu8_mul_minmax_scalar_params;
     qu8_vmul_config.minmax.element_tile = 8;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     qu8_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmul_minmax_fp32_ukernel__rvv_u2v;
     qu8_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmulc_minmax_fp32_ukernel__rvv_u2v;
     qu8_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmulc_minmax_fp32_ukernel__rvv_u2v;
-    qu8_vmul_config.init.qu8_mul = xnn_init_qu8_mul_minmax_fp32_scalar_params;
+    qu8_vmul_config.init.qu8_mul = xnn_init_qu8_mul_minmax_scalar_params;
     qu8_vmul_config.minmax.element_tile = 2;
   #else
     qu8_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmul_minmax_fp32_ukernel__scalar_u4;
     qu8_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_u4;
     qu8_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_qu8_vmulc_minmax_fp32_ukernel__scalar_u4;
-    qu8_vmul_config.init.qu8_mul = xnn_init_qu8_mul_minmax_fp32_scalar_params;
+    qu8_vmul_config.init.qu8_mul = xnn_init_qu8_mul_minmax_scalar_params;
     qu8_vmul_config.minmax.element_tile = 4;
   #endif
 }

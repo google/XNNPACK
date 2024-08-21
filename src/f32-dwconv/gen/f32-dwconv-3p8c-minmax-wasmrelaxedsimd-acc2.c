@@ -29,8 +29,10 @@ void xnn_f32_dwconv_minmax_ukernel_3p8c__wasmrelaxedsimd_acc2(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
-  const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
+  const v128_t vmin = wasm_v128_load32_splat(&params->wasmsimd.min);
+  const v128_t vmax = wasm_v128_load32_splat(&params->wasmsimd.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
   do {
     const float* i0 = input[0];
     assert(i0 != NULL);

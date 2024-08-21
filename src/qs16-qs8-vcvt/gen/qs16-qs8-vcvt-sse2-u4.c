@@ -26,11 +26,16 @@ void xnn_qs16_qs8_vcvt_ukernel__sse2_u4(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vinput_bias = _mm_load_si128((const __m128i*) params->sse2.input_bias);
-  const __m128i vmultiplier = _mm_load_si128((const __m128i*) params->sse2.multiplier);
-  const __m128i vbias = _mm_load_si128((const __m128i*) params->sse2.bias);
+  const __m128i vinput_bias = _mm_set1_epi16(UINT16_C(0x8000));
+  const __m128i vmultiplier = _mm_set1_epi32(params->scalar.multiplier);
+  const __m128i vbias = _mm_set1_epi64x(
+      (int64_t) ((uint64_t) params->scalar.output_zero_point << 32) + 
+      INT64_C(0x80000000) -
+      (INT64_C(0x80000000) * (int64_t) params->scalar.multiplier));
   const __m128i vzero = _mm_setzero_si128();
-
+  XNN_FORCE_REALIZATION(vinput_bias);
+  XNN_FORCE_REALIZATION(vmultiplier);
+  XNN_FORCE_REALIZATION(vbias);
 
   for (; batch >= 4 * sizeof(int16_t); batch -= 4 * sizeof(int16_t)) {
     __m128i vx = _mm_loadl_epi64((const __m128i*) input); input += 4;

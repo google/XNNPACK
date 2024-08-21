@@ -5,94 +5,94 @@
 
 # ARM NEON
 - name: xnn_qu8_vlrelu_ukernel__neon_u8
-  init: xnn_init_qu8_lrelu_neon_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__neon_u16
-  init: xnn_init_qu8_lrelu_neon_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__neon_u32
-  init: xnn_init_qu8_lrelu_neon_params
+  init: xnn_init_qu8_lrelu_scalar_params
 
 # x86 SSE2
 - name: xnn_qu8_vlrelu_ukernel__sse2_u16
-  init: xnn_init_qu8_lrelu_sse2_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__sse2_u32
-  init: xnn_init_qu8_lrelu_sse2_params
+  init: xnn_init_qu8_lrelu_scalar_params
 
 # x86 SSSE3
 - name: xnn_qu8_vlrelu_ukernel__ssse3_u16
-  init: xnn_init_qu8_lrelu_sse2_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__ssse3_u32
-  init: xnn_init_qu8_lrelu_sse2_params
+  init: xnn_init_qu8_lrelu_scalar_params
 
 # x86 SSE4.1
 - name: xnn_qu8_vlrelu_ukernel__sse41_u8
-  init: xnn_init_qu8_lrelu_sse2_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__sse41_u16
-  init: xnn_init_qu8_lrelu_sse2_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__sse41_u32
-  init: xnn_init_qu8_lrelu_sse2_params
+  init: xnn_init_qu8_lrelu_scalar_params
 
 # x86 AVX
 - name: xnn_qu8_vlrelu_ukernel__avx_u8
-  init: xnn_init_qu8_lrelu_avx_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__avx_u16
-  init: xnn_init_qu8_lrelu_avx_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__avx_u32
-  init: xnn_init_qu8_lrelu_avx_params
+  init: xnn_init_qu8_lrelu_scalar_params
 
 # x86 AVX2
 - name: xnn_qu8_vlrelu_ukernel__avx2_u16
-  init: xnn_init_qu8_lrelu_avx2_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__avx2_u32
-  init: xnn_init_qu8_lrelu_avx2_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__avx2_u64
-  init: xnn_init_qu8_lrelu_avx2_params
+  init: xnn_init_qu8_lrelu_scalar_params
 
 # WAsm SIMD (ARM-optimized)
 - name: xnn_qu8_vlrelu_ukernel__wasmsimd_arm_u16
-  init: xnn_init_qu8_lrelu_wasmsimd_arm_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__wasmsimd_arm_u32
-  init: xnn_init_qu8_lrelu_wasmsimd_arm_params
+  init: xnn_init_qu8_lrelu_scalar_params
 
 # WAsm SIMD (x86-optimized)
 - name: xnn_qu8_vlrelu_ukernel__wasmsimd_x86_u8
-  init: xnn_init_qu8_lrelu_wasmsimd_x86_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__wasmsimd_x86_u16
-  init: xnn_init_qu8_lrelu_wasmsimd_x86_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__wasmsimd_x86_u32
-  init: xnn_init_qu8_lrelu_wasmsimd_x86_params
+  init: xnn_init_qu8_lrelu_scalar_params
 
 # WAsm Relaxed SIMD (ARM-optimized)
 - name: xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_arm_u16
-  init: xnn_init_qu8_lrelu_wasmsimd_arm_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_arm_u32
-  init: xnn_init_qu8_lrelu_wasmsimd_arm_params
+  init: xnn_init_qu8_lrelu_scalar_params
 
 # WAsm Relaxed SIMD (x86-optimized)
 - name: xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_x86_u8
-  init: xnn_init_qu8_lrelu_wasmsimd_x86_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_x86_u16
-  init: xnn_init_qu8_lrelu_wasmsimd_x86_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_x86_u32
-  init: xnn_init_qu8_lrelu_wasmsimd_x86_params
+  init: xnn_init_qu8_lrelu_scalar_params
 
 # ARMv6 SIMD
 - name: xnn_qu8_vlrelu_ukernel__armsimd32_u4
-  init: xnn_init_qu8_lrelu_armsimd32_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__armsimd32_u8
-  init: xnn_init_qu8_lrelu_armsimd32_params
+  init: xnn_init_qu8_lrelu_scalar_params
 
 # Scalar (select)
 - name: xnn_qu8_vlrelu_ukernel__scalar_select_u1
-  init: xnn_init_qu8_lrelu_scalar_select_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__scalar_select_u2
-  init: xnn_init_qu8_lrelu_scalar_select_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__scalar_select_u4
-  init: xnn_init_qu8_lrelu_scalar_select_params
+  init: xnn_init_qu8_lrelu_scalar_params
 
 # Scalar (and+xor)
 - name: xnn_qu8_vlrelu_ukernel__scalar_andxor_u1
-  init: xnn_init_qu8_lrelu_scalar_andxor_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__scalar_andxor_u2
-  init: xnn_init_qu8_lrelu_scalar_andxor_params
+  init: xnn_init_qu8_lrelu_scalar_params
 - name: xnn_qu8_vlrelu_ukernel__scalar_andxor_u4
-  init: xnn_init_qu8_lrelu_scalar_andxor_params
+  init: xnn_init_qu8_lrelu_scalar_params

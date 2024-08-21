@@ -29,12 +29,16 @@ void xnn_f32_qs8_vcvt_ukernel__avx2_u48(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 vscale = _mm256_load_ps(params->avx2.scale);
-  const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->avx2.output_max_less_zero_point);
-  const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx2.output_zero_point);
+  const __m256 vscale = _mm256_set1_ps(params->scalar.scale);
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point));
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->scalar.output_zero_point);
   XNN_ALIGN(32) static const uint32_t shuffle_mask[8] = {0, 4, 1, 5, 2, 6, 3, 7};
   const __m256i vshuffle_mask = _mm256_load_si256((const __m256i*) shuffle_mask);
-  const __m256i voutput_min = _mm256_load_si256((const __m256i*) params->avx2.output_min);
+  const __m256i voutput_min = _mm256_set1_epi8(params->scalar.output_min);
+  XNN_FORCE_REALIZATION(vscale);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
 
   for (; batch >= 48 * sizeof(float); batch -= 48 * sizeof(float)) {
     __m256 vx01 = _mm256_loadu_ps(input);

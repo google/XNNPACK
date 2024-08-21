@@ -49,8 +49,8 @@ void xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2(
     i0 = zero;
   }
 
-  const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
-  const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
+  const v128_t vmax = wasm_v128_load32_splat(&params->wasmsimd.max);
+  const v128_t vmin = wasm_v128_load32_splat(&params->wasmsimd.min);
 
   for (size_t output_y = output_y_start; output_y < output_y_end; output_y += 2) {
     const size_t input_y2 = output_y * 2 + 2 - input_padding_top;

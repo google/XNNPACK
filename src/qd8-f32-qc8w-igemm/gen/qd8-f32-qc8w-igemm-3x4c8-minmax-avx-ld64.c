@@ -57,6 +57,10 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_3x4c8__avx_ld64(
     c2 = c1;
   }
 
+  const __m128 vmin = _mm_set1_ps(params->sse.min);
+  const __m128 vmax = _mm_set1_ps(params->sse.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
   const __m128i vinput_zero_point = _mm_castps_si128(_mm_broadcast_ss((const float*) &quantization_params->zero_point));
   const __m128 vinput_scale = _mm_broadcast_ss(&quantization_params->inv_scale);
   do {
@@ -174,12 +178,10 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_3x4c8__avx_ld64(
     vout1x0123 = _mm_add_ps(vout1x0123, vbias0123);
     vout2x0123 = _mm_add_ps(vout2x0123, vbias0123);
 
-    const __m128 vmin = _mm_load_ps(params->sse.min);
     vout0x0123 = _mm_max_ps(vout0x0123, vmin);
     vout1x0123 = _mm_max_ps(vout1x0123, vmin);
     vout2x0123 = _mm_max_ps(vout2x0123, vmin);
 
-    const __m128 vmax = _mm_load_ps(params->sse.max);
     vout0x0123 = _mm_min_ps(vout0x0123, vmax);
     vout1x0123 = _mm_min_ps(vout1x0123, vmax);
     vout2x0123 = _mm_min_ps(vout2x0123, vmax);

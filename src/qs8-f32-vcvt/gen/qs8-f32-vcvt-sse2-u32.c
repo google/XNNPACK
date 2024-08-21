@@ -27,11 +27,15 @@ void xnn_qs8_f32_vcvt_ukernel__sse2_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vsign_mask = _mm_load_si128((const __m128i*) params->sse2.sign_mask);
-  const __m128i vmagic_exp = _mm_load_si128((const __m128i*) params->sse2.magic_exp);
-  const __m128 vmagic_bias = _mm_load_ps(params->sse2.magic_bias);
-  const __m128 vscale = _mm_load_ps(params->sse2.scale);
+  const __m128i vsign_mask = _mm_set1_epi8(UINT8_C(0x80));
+  XNN_FORCE_REALIZATION(vsign_mask);
+  const __m128i vmagic_exp = _mm_set1_epi16(UINT16_C(0x4B00));
+  const __m128 vmagic_bias = _mm_set1_ps((float) (INT32_C(0x00800080) + (int32_t) params->scalar.zero_point));
+  const __m128 vscale = _mm_set1_ps(params->scalar.scale);
   const __m128i vzero = _mm_setzero_si128();
+  XNN_FORCE_REALIZATION(vmagic_exp);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vscale);
   for (; batch >= 32 * sizeof(int8_t); batch -= 32 * sizeof(int8_t)) {
     __m128i vx01234567 = _mm_loadl_epi64((const __m128i*) input);
     __m128i vx89ABCDEF = _mm_loadl_epi64((const __m128i*) (input + 8));

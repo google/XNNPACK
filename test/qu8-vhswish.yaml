@@ -5,11 +5,11 @@
 
 # ARM NEON
 - name: xnn_qu8_vhswish_ukernel__neon_u8
-  init: xnn_init_qu8_hswish_neon_params
+  init: xnn_init_qu8_hswish_scalar_params
 - name: xnn_qu8_vhswish_ukernel__neon_u16
-  init: xnn_init_qu8_hswish_neon_params
+  init: xnn_init_qu8_hswish_scalar_params
 - name: xnn_qu8_vhswish_ukernel__neon_u32
-  init: xnn_init_qu8_hswish_neon_params
+  init: xnn_init_qu8_hswish_scalar_params
 
 # x86 SSE2
 - name: xnn_qu8_vhswish_ukernel__sse2_u16
@@ -41,11 +41,11 @@
 
 # WAsm Relaxed SIMD
 - name: xnn_qu8_vhswish_ukernel__wasmsimd_u8
-  init: xnn_init_qu8_hswish_wasmsimd_params
+  init: xnn_init_qu8_hswish_scalar_params
 - name: xnn_qu8_vhswish_ukernel__wasmsimd_u16
-  init: xnn_init_qu8_hswish_wasmsimd_params
+  init: xnn_init_qu8_hswish_scalar_params
 - name: xnn_qu8_vhswish_ukernel__wasmsimd_u32
-  init: xnn_init_qu8_hswish_wasmsimd_params
+  init: xnn_init_qu8_hswish_scalar_params
 
 # Scalar
 - name: xnn_qu8_vhswish_ukernel__scalar_u1

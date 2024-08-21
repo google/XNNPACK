@@ -26,9 +26,12 @@ void xnn_qu8_vcvt_ukernel__wasmsimd_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vinput_zero_point = wasm_v128_load64_splat(params->wasmsimd.input_zero_point);
-  const v128_t vmultiplier = wasm_v128_load64_splat(params->wasmsimd.multiplier);
-  const v128_t voutput_zero_point = wasm_v128_load64_splat(params->wasmsimd.output_zero_point);
+  const v128_t vinput_zero_point = wasm_v128_load16_splat(&params->scalar.input_zero_point);
+  const v128_t vmultiplier = wasm_i16x8_splat(-params->scalar.multiplier);
+  const v128_t voutput_zero_point = wasm_v128_load16_splat(&params->scalar.output_zero_point);
+  XNN_FORCE_REALIZATION(vinput_zero_point);
+  XNN_FORCE_REALIZATION(vmultiplier);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
   for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
     v128_t vacc0 = wasm_u16x8_load8x8(input);
     v128_t vacc1 = wasm_u16x8_load8x8(input + 8);

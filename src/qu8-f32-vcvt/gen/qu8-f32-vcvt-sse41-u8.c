@@ -27,15 +27,17 @@ void xnn_qu8_f32_vcvt_ukernel__sse41_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vminus_zero_point = _mm_load_si128((const __m128i*) params->sse4.minus_zero_point);
-  const __m128 vscale = _mm_load_ps(params->sse4.scale);
+  const __m128i vzero_point = _mm_set1_epi32(params->scalar.zero_point);
+  const __m128 vscale = _mm_set1_ps(params->scalar.scale);
+  XNN_FORCE_REALIZATION(vzero_point);
+  XNN_FORCE_REALIZATION(vscale);
   for (; batch >= 8 * sizeof(uint8_t); batch -= 8 * sizeof(uint8_t)) {
     __m128i vx0123 = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(input)));
     __m128i vx4567 = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(input + 4)));
     input += 8;
 
-    vx0123 = _mm_add_epi32(vx0123, vminus_zero_point);
-    vx4567 = _mm_add_epi32(vx4567, vminus_zero_point);
+    vx0123 = _mm_sub_epi32(vx0123, vzero_point);
+    vx4567 = _mm_sub_epi32(vx4567, vzero_point);
 
     __m128 vy0123 = _mm_cvtepi32_ps(vx0123);
     __m128 vy4567 = _mm_cvtepi32_ps(vx4567);
@@ -49,7 +51,7 @@ void xnn_qu8_f32_vcvt_ukernel__sse41_u8(
   }
   for (; batch >= 4 * sizeof(uint8_t); batch -= 4 * sizeof(uint8_t)) {
     __m128i vx = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(input)));
-    vx = _mm_add_epi32(vx, vminus_zero_point);
+    vx = _mm_sub_epi32(vx, vzero_point);
     input += 4;
 
     __m128 vy = _mm_cvtepi32_ps(vx);
@@ -63,7 +65,7 @@ void xnn_qu8_f32_vcvt_ukernel__sse41_u8(
     assert(batch <= 3 * sizeof(uint8_t));
 
     __m128i vx = _mm_cvtepu8_epi32(_mm_cvtsi32_si128((int) unaligned_load_s32(input)));
-    vx = _mm_add_epi32(vx, vminus_zero_point);
+    vx = _mm_sub_epi32(vx, vzero_point);
 
     __m128 vy = _mm_cvtepi32_ps(vx);
     vy = _mm_mul_ps(vy, vscale);

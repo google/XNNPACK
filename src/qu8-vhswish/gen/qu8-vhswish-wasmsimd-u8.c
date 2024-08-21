@@ -26,17 +26,29 @@ void xnn_qu8_vhswish_ukernel__wasmsimd_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vinput_zero_point = wasm_v128_load64_splat(params->wasmsimd.input_zero_point);
-  const v128_t voutput_zero_point = wasm_v128_load64_splat(params->wasmsimd.output_zero_point);
-  const v128_t vinput_scale_div_mantissa = wasm_v128_load64_splat(params->wasmsimd.input_scale_div_mantissa);
-  const v128_t vshift_max = wasm_v128_load64_splat(params->wasmsimd.shift_max);
-  const v128_t vshift_min = wasm_v128_load64_splat(params->wasmsimd.shift_min);
-  const v128_t vscale_ratio = wasm_v128_load64_splat(params->wasmsimd.scale_ratio);
+  const int16_t shift_max = (int16_t) 1 << (15 - params->scalar.input_scale_div_exp);
+  const v128_t vinput_zero_point = wasm_v128_load16_splat(&params->scalar.input_zero_point);
+  const v128_t voutput_zero_point = wasm_v128_load16_splat(&params->scalar.output_zero_point);
+  const v128_t vinput_scale_div_mantissa = wasm_v128_load16_splat(&params->scalar.input_scale_div_mantissa);
+  const v128_t vshift_max = wasm_i16x8_splat(shift_max);
+  const v128_t vshift_min = wasm_i16x8_splat(-shift_max);
+  const v128_t vscale_ratio = wasm_v128_load16_splat(&params->scalar.scale_ratio);
   const v128_t vmax_val = wasm_u16x8_const_splat(0x7FFF);
   const v128_t vmin_val = wasm_u16x8_const_splat(0x8000);
   const v128_t vhalf = wasm_u16x8_const_splat(0x4000);
   const v128_t vzero = wasm_u16x8_const_splat(0);
-  const v128_t vinput_scale_div_exp = wasm_i16x8_splat(1 << params->wasmsimd.input_scale_div_exp);
+  const v128_t vinput_scale_div_exp = wasm_i16x8_splat(1 << params->scalar.input_scale_div_exp);
+  XNN_FORCE_REALIZATION(vinput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(vinput_scale_div_mantissa);
+  XNN_FORCE_REALIZATION(vshift_max);
+  XNN_FORCE_REALIZATION(vshift_min);
+  XNN_FORCE_REALIZATION(vscale_ratio);
+  XNN_FORCE_REALIZATION(vmax_val);
+  XNN_FORCE_REALIZATION(vmin_val);
+  XNN_FORCE_REALIZATION(vhalf);
+  XNN_FORCE_REALIZATION(vzero);
+  XNN_FORCE_REALIZATION(vinput_scale_div_exp);
 
   for (; batch >= 8 * sizeof(uint8_t); batch -= 8 * sizeof(uint8_t)) {
     v128_t vacc = wasm_u16x8_load8x8(input);

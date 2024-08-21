@@ -42,6 +42,11 @@ void xnn_f32_igemm_minmax_ukernel_1x8__fma3_broadcast(
 
   float* c0 = c;
 
+  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+
   do {
     __m256 vacc0x01234567 = _mm256_load_ps(w);
     w += 8;
@@ -69,10 +74,8 @@ void xnn_f32_igemm_minmax_ukernel_1x8__fma3_broadcast(
       p -= 1 * sizeof(void*);
     } while (p != 0);
 
-    const __m256 vmin = _mm256_load_ps(params->avx.min);
     vacc0x01234567 = _mm256_max_ps(vmin, vacc0x01234567);
 
-    const __m256 vmax = _mm256_load_ps(params->avx.max);
     vacc0x01234567 = _mm256_min_ps(vmax, vacc0x01234567);
 
     if XNN_LIKELY(nc >= 8) {

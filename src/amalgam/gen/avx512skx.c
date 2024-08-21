@@ -1290,11 +1290,15 @@ void xnn_f32_qs8_vcvt_ukernel__avx512skx_u128(
   XNN_ALIGN(64) static const uint32_t shuffle512_mask[16] = {0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15};
 
 
-  const __m512 vscale = _mm512_load_ps(params->avx512.scale);
-  const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->avx512.output_max_less_zero_point);
-  const __m512i voutput_zero_point = _mm512_load_si512(params->avx512.output_zero_point);
+  const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
+  const __m512 voutput_max_less_zero_point = _mm512_set1_ps((float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point));
+  const __m512i voutput_zero_point = _mm512_set1_epi16(params->scalar.output_zero_point);
   const __m512i vshuffle512_mask = _mm512_load_si512(shuffle512_mask);
-  const __m512i voutput_min = _mm512_load_si512(params->avx512.output_min);
+  const __m512i voutput_min = _mm512_set1_epi8(params->scalar.output_min);
+  XNN_FORCE_REALIZATION(vscale);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
   for (; batch >= 128 * sizeof(float); batch -= 128 * sizeof(float)) {
     __m512 vx0123 = _mm512_loadu_ps(input);
     __m512 vx4567 = _mm512_loadu_ps(input + 16);
@@ -1411,11 +1415,15 @@ void xnn_f32_qu8_vcvt_ukernel__avx512skx_u128(
   XNN_ALIGN(64) static const uint32_t shuffle512_mask[16] = {0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15};
 
 
-  const __m512 vscale = _mm512_load_ps(params->avx512.scale);
-  const __m512 voutput_max_less_zero_point = _mm512_load_ps(params->avx512.output_max_less_zero_point);
-  const __m512i voutput_zero_point = _mm512_load_si512(params->avx512.output_zero_point);
+  const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
+  const __m512 voutput_max_less_zero_point = _mm512_set1_ps((float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point));
+  const __m512i voutput_zero_point = _mm512_set1_epi16(params->scalar.output_zero_point);
   const __m512i vshuffle512_mask = _mm512_load_si512(shuffle512_mask);
-  const __m512i voutput_min = _mm512_load_si512(params->avx512.output_min);
+  const __m512i voutput_min = _mm512_set1_epi8(params->scalar.output_min);
+  XNN_FORCE_REALIZATION(vscale);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
   for (; batch >= 128 * sizeof(float); batch -= 128 * sizeof(float)) {
     __m512 vx0123 = _mm512_loadu_ps(input);
     __m512 vx4567 = _mm512_loadu_ps(input + 16);
@@ -1544,12 +1552,13 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x16c8__avx512skx_madd_prfm(
   const int8_t* a0 = a;
   float* c0 = c;
 
+  const __m512i vsign_mask = _mm512_set1_epi8(0x80);
+  XNN_FORCE_REALIZATION(vsign_mask);
   const __m512i vinput_zero_point0 = _mm512_set1_epi32((int) quantization_params[0].zero_point + 128);
   const __m512 voutput_min = _mm512_set1_ps(params->avx512vnni.min);
   const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
-  const __m512i vsign_mask = _mm512_set1_epi8(params->avx512vnni.sign_mask);  // 0x80
-  const __m512i vmask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0x0F
-  assert(params->avx512vnni.mask == (int8_t) 0x0F);
+  const __m512i vmask = _mm512_set1_epi8(0x0F);
+  XNN_FORCE_REALIZATION(vmask);
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_load_epi32(w);
     __m512i vsum0x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point0);
@@ -1711,6 +1720,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_8x16c8__avx512skx_madd_prfm(
     c7 = c6;
   }
 
+  const __m512i vsign_mask = _mm512_set1_epi8(0x80);
+  XNN_FORCE_REALIZATION(vsign_mask);
   const __m512i vinput_zero_point0 = _mm512_set1_epi32((int) quantization_params[0].zero_point + 128);
   const __m512i vinput_zero_point1 = _mm512_set1_epi32((int) quantization_params[1].zero_point + 128);
   const __m512i vinput_zero_point2 = _mm512_set1_epi32((int) quantization_params[2].zero_point + 128);
@@ -1721,9 +1732,8 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_8x16c8__avx512skx_madd_prfm(
   const __m512i vinput_zero_point7 = _mm512_set1_epi32((int) quantization_params[7].zero_point + 128);
   const __m512 voutput_min = _mm512_set1_ps(params->avx512vnni.min);
   const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
-  const __m512i vsign_mask = _mm512_set1_epi8(params->avx512vnni.sign_mask);  // 0x80
-  const __m512i vmask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0x0F
-  assert(params->avx512vnni.mask == (int8_t) 0x0F);
+  const __m512i vmask = _mm512_set1_epi8(0x0F);
+  XNN_FORCE_REALIZATION(vmask);
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_load_epi32(w);
     __m512i vsum0x0123456789ABCDEF = _mm512_mullo_epi32(vksum0123456789ABCDEF, vinput_zero_point0);
@@ -3781,15 +3791,17 @@ void xnn_qs8_f32_vcvt_ukernel__avx512skx_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m512i vminus_zero_point = _mm512_load_si512(params->avx512.minus_zero_point);
-  const __m512 vscale = _mm512_load_ps(params->avx512.scale);
+  const __m512i vzero_point = _mm512_set1_epi32(params->scalar.zero_point);
+  const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
+  XNN_FORCE_REALIZATION(vzero_point);
+  XNN_FORCE_REALIZATION(vscale);
   for (; batch >= 32 * sizeof(int8_t); batch -= 32 * sizeof(int8_t)) {
     __m512i vx0123456789ABCDEF = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) input));
     __m512i vxGHIJKLMNOPQRSTUV = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) (input + 16)));
     input += 32;
 
-    vx0123456789ABCDEF = _mm512_add_epi32(vx0123456789ABCDEF, vminus_zero_point);
-    vxGHIJKLMNOPQRSTUV = _mm512_add_epi32(vxGHIJKLMNOPQRSTUV, vminus_zero_point);
+    vx0123456789ABCDEF = _mm512_sub_epi32(vx0123456789ABCDEF, vzero_point);
+    vxGHIJKLMNOPQRSTUV = _mm512_sub_epi32(vxGHIJKLMNOPQRSTUV, vzero_point);
 
     __m512 vy0123456789ABCDEF = _mm512_cvtepi32_ps(vx0123456789ABCDEF);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_cvtepi32_ps(vxGHIJKLMNOPQRSTUV);
@@ -3803,7 +3815,7 @@ void xnn_qs8_f32_vcvt_ukernel__avx512skx_u32(
   }
   for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
     __m512i vx = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) input));
-    vx = _mm512_add_epi32(vx, vminus_zero_point);
+    vx = _mm512_sub_epi32(vx, vzero_point);
     input += 16;
 
     __m512 vy = _mm512_cvtepi32_ps(vx);
@@ -3820,7 +3832,7 @@ void xnn_qs8_f32_vcvt_ukernel__avx512skx_u32(
     const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
     __m512i vx = _mm512_cvtepi8_epi32(_mm_maskz_loadu_epi8(vmask, input));
-    vx = _mm512_add_epi32(vx, vminus_zero_point);
+    vx = _mm512_sub_epi32(vx, vzero_point);
 
     __m512 vy = _mm512_cvtepi32_ps(vx);
     vy = _mm512_mul_ps(vy, vscale);
@@ -5704,13 +5716,21 @@ void xnn_qs8_vadd_minmax_ukernel__avx512skx_mul32_ld128_u16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m512i vbias = _mm512_load_si512(params->avx512.bias);
-  const __m512i va_multiplier = _mm512_load_si512(params->avx512.a_multiplier);
-  const __m512i vb_multiplier = _mm512_load_si512(params->avx512.b_multiplier);
-  const __m128i vshift = _mm_load_si128((const __m128i*) params->avx512.shift);
-  const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx512.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->avx512.output_min);
-  const __m128i voutput_max = _mm_load_si128((const __m128i*) params->avx512.output_max);
+  const __m512i vbias = _mm512_set1_epi32(params->scalar.bias);
+  const __m512i va_multiplier = _mm512_set1_epi32(params->scalar.a_multiplier);
+  const __m512i vb_multiplier = _mm512_set1_epi32(params->scalar.b_multiplier);
+  const __m128i vshift = _mm_set1_epi64x(params->scalar.shift);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->scalar.output_min);
+  const __m128i voutput_max = _mm_set1_epi8(params->scalar.output_max);
+
+  XNN_FORCE_REALIZATION(vbias);
+  XNN_FORCE_REALIZATION(va_multiplier);
+  XNN_FORCE_REALIZATION(vb_multiplier);
+  XNN_FORCE_REALIZATION(vshift);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+  XNN_FORCE_REALIZATION(voutput_max);
 
   for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
     const __m512i va0123456789ABCDEF = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) input_a));
@@ -5770,15 +5790,19 @@ void xnn_qs8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_u16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m512i va_multiplier = _mm512_load_si512(params->avx512.a_multiplier);
-  const __m128i vshift = _mm_load_si128((const __m128i*) params->avx512.shift);
-  const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx512.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->avx512.output_min);
-  const __m128i voutput_max = _mm_load_si128((const __m128i*) params->avx512.output_max);
+  const __m512i vbias = _mm512_set1_epi32((params->scalar.b_multiplier * (int32_t) *input_b) + params->scalar.bias);
+  const __m512i va_multiplier = _mm512_set1_epi32(params->scalar.a_multiplier);
+  const __m128i vshift = _mm_set1_epi64x(params->scalar.shift);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->scalar.output_min);
+  const __m128i voutput_max = _mm_set1_epi8(params->scalar.output_max);
 
-  const __m512i vbias = _mm512_add_epi32(
-    _mm512_broadcastd_epi32(_mm_cvtsi32_si128(params->avx512.b_multiplier[0] * (int32_t) *input_b)),
-    _mm512_load_si512(params->avx512.bias));
+  XNN_FORCE_REALIZATION(vbias);
+  XNN_FORCE_REALIZATION(va_multiplier);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+  XNN_FORCE_REALIZATION(voutput_max);
+
   for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
     const __m512i va0123456789ABCDEF = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) input_a));
     input_a += 16;
@@ -6716,15 +6740,17 @@ void xnn_qu8_f32_vcvt_ukernel__avx512skx_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m512i vminus_zero_point = _mm512_load_si512(params->avx512.minus_zero_point);
-  const __m512 vscale = _mm512_load_ps(params->avx512.scale);
+  const __m512i vzero_point = _mm512_set1_epi32(params->scalar.zero_point);
+  const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
+  XNN_FORCE_REALIZATION(vzero_point);
+  XNN_FORCE_REALIZATION(vscale);
   for (; batch >= 32 * sizeof(uint8_t); batch -= 32 * sizeof(uint8_t)) {
     __m512i vx0123456789ABCDEF = _mm512_cvtepu8_epi32(_mm_loadu_si128((const __m128i*) input));
     __m512i vxGHIJKLMNOPQRSTUV = _mm512_cvtepu8_epi32(_mm_loadu_si128((const __m128i*) (input + 16)));
     input += 32;
 
-    vx0123456789ABCDEF = _mm512_add_epi32(vx0123456789ABCDEF, vminus_zero_point);
-    vxGHIJKLMNOPQRSTUV = _mm512_add_epi32(vxGHIJKLMNOPQRSTUV, vminus_zero_point);
+    vx0123456789ABCDEF = _mm512_sub_epi32(vx0123456789ABCDEF, vzero_point);
+    vxGHIJKLMNOPQRSTUV = _mm512_sub_epi32(vxGHIJKLMNOPQRSTUV, vzero_point);
 
     __m512 vy0123456789ABCDEF = _mm512_cvtepi32_ps(vx0123456789ABCDEF);
     __m512 vyGHIJKLMNOPQRSTUV = _mm512_cvtepi32_ps(vxGHIJKLMNOPQRSTUV);
@@ -6738,7 +6764,7 @@ void xnn_qu8_f32_vcvt_ukernel__avx512skx_u32(
   }
   for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
     __m512i vx = _mm512_cvtepu8_epi32(_mm_loadu_si128((const __m128i*) input));
-    vx = _mm512_add_epi32(vx, vminus_zero_point);
+    vx = _mm512_sub_epi32(vx, vzero_point);
     input += 16;
 
     __m512 vy = _mm512_cvtepi32_ps(vx);
@@ -6755,7 +6781,7 @@ void xnn_qu8_f32_vcvt_ukernel__avx512skx_u32(
     const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
     __m512i vx = _mm512_cvtepu8_epi32(_mm_maskz_loadu_epi8(vmask, input));
-    vx = _mm512_add_epi32(vx, vminus_zero_point);
+    vx = _mm512_sub_epi32(vx, vzero_point);
 
     __m512 vy = _mm512_cvtepi32_ps(vx);
     vy = _mm512_mul_ps(vy, vscale);
@@ -7601,13 +7627,21 @@ void xnn_qu8_vadd_minmax_ukernel__avx512skx_mul32_ld128_u16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m512i vbias = _mm512_load_si512(params->avx512.bias);
-  const __m512i va_multiplier = _mm512_load_si512(params->avx512.a_multiplier);
-  const __m512i vb_multiplier = _mm512_load_si512(params->avx512.b_multiplier);
-  const __m128i vshift = _mm_load_si128((const __m128i*) params->avx512.shift);
-  const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx512.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->avx512.output_min);
-  const __m128i voutput_max = _mm_load_si128((const __m128i*) params->avx512.output_max);
+  const __m512i vbias = _mm512_set1_epi32(params->scalar.bias);
+  const __m512i va_multiplier = _mm512_set1_epi32(params->scalar.a_multiplier);
+  const __m512i vb_multiplier = _mm512_set1_epi32(params->scalar.b_multiplier);
+  const __m128i vshift = _mm_set1_epi64x(params->scalar.shift);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->scalar.output_min);
+  const __m128i voutput_max = _mm_set1_epi8(params->scalar.output_max);
+
+  XNN_FORCE_REALIZATION(vbias);
+  XNN_FORCE_REALIZATION(va_multiplier);
+  XNN_FORCE_REALIZATION(vb_multiplier);
+  XNN_FORCE_REALIZATION(vshift);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+  XNN_FORCE_REALIZATION(voutput_max);
 
   for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
     const __m512i va0123456789ABCDEF = _mm512_cvtepu8_epi32(_mm_loadu_si128((const __m128i*) input_a));
@@ -7667,15 +7701,19 @@ void xnn_qu8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_u16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m512i va_multiplier = _mm512_load_si512(params->avx512.a_multiplier);
-  const __m128i vshift = _mm_load_si128((const __m128i*) params->avx512.shift);
-  const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->avx512.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->avx512.output_min);
-  const __m128i voutput_max = _mm_load_si128((const __m128i*) params->avx512.output_max);
+  const __m512i vbias = _mm512_set1_epi32((params->scalar.b_multiplier * (int32_t) *input_b) + params->scalar.bias);
+  const __m512i va_multiplier = _mm512_set1_epi32(params->scalar.a_multiplier);
+  const __m128i vshift = _mm_set1_epi64x(params->scalar.shift);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->scalar.output_min);
+  const __m128i voutput_max = _mm_set1_epi8(params->scalar.output_max);
 
-  const __m512i vbias = _mm512_add_epi32(
-    _mm512_broadcastd_epi32(_mm_cvtsi32_si128(params->avx512.b_multiplier[0] * (int32_t) *input_b)),
-    _mm512_load_si512(params->avx512.bias));
+  XNN_FORCE_REALIZATION(vbias);
+  XNN_FORCE_REALIZATION(va_multiplier);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+  XNN_FORCE_REALIZATION(voutput_max);
+
   for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
     const __m512i va0123456789ABCDEF = _mm512_cvtepu8_epi32(_mm_loadu_si128((const __m128i*) input_a));
     input_a += 16;

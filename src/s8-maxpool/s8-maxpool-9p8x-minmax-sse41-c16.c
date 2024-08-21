@@ -26,8 +26,10 @@ void xnn_s8_maxpool_minmax_ukernel_9p8x__sse41_c16(
   assert(kernel_elements != 0);
   assert(channels != 0);
 
-  const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse4.max);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse4.min);
+  const __m128i voutput_max = _mm_set1_epi8(params->scalar.max);
+  const __m128i voutput_min = _mm_set1_epi8(params->scalar.min);
+  XNN_FORCE_REALIZATION(voutput_max);
+  XNN_FORCE_REALIZATION(voutput_min);
 
   do {
     int8_t* o = output;

@@ -11,6 +11,7 @@
 
 #include <immintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
@@ -47,7 +48,8 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x8c8__avxvnni(
     c1 = c0;
   }
 
-  const __m256i vsign_mask = _mm256_set1_epi8(params->fp32_avxvnni.sign_mask);  // 0x80
+  const __m256i vsign_mask = _mm256_set1_epi8(0x80);
+  XNN_FORCE_REALIZATION(vsign_mask);
   const __m256 voutput_max_less_zero_point = _mm256_set1_ps(params->fp32_avxvnni.output_max_less_zero_point);
   const __m256i voutput_zero_point = _mm256_set1_epi32(params->fp32_avxvnni.output_zero_point);
   const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avxvnni.output_min);

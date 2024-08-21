@@ -29,8 +29,8 @@ void xnn_f16_vclamp_ukernel__f16c_u${BATCH_TILE}(
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vy_min = _mm256_load_ps(params->avx.min);
-  const __m256 vy_max = _mm256_load_ps(params->avx.max);
+  const __m256 vy_min = _mm256_set1_ps(params->avx.min);
+  const __m256 vy_max = _mm256_set1_ps(params->avx.max);
 
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {

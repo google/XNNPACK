@@ -28,18 +28,18 @@ void xnn_qs8_vmulc_minmax_fp32_ukernel__neon_ld128_u16(
   assert(output != NULL);
 
   #if XNN_ARCH_ARM64
-    const int8x16_t va_zero_point = vld1q_dup_s8(params->fp32_neon.a_zero_point);
+    const int8x16_t va_zero_point = vld1q_dup_s8(&params->scalar.a_zero_point);
   #else
-    const int8x8_t va_zero_point = vld1_dup_s8(params->fp32_neon.a_zero_point);
+    const int8x8_t va_zero_point = vld1_dup_s8(&params->scalar.a_zero_point);
   #endif
-  const float32x4_t vscale = vld1q_dup_f32(&params->fp32_neon.scale);
-  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->fp32_neon.magic_bias);
-  const int32x4_t vmagic_bias_less_output_zero_point = vld1q_dup_s32(&params->fp32_neon.magic_bias_less_output_zero_point);
-  const int8x16_t voutput_min = vld1q_dup_s8(&params->fp32_neon.output_min);
-  const int8x16_t voutput_max = vld1q_dup_s8(&params->fp32_neon.output_max);
+  const float32x4_t vscale = vld1q_dup_f32(&params->scalar.scale);
+  const float32x4_t vmagic_bias = vdupq_n_f32(12582912.0f);
+  const int32x4_t vmagic_bias_less_output_zero_point = vdupq_n_s32(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
+  const int8x16_t voutput_min = vld1q_dup_s8(&params->scalar.output_min);
+  const int8x16_t voutput_max = vld1q_dup_s8(&params->scalar.output_max);
 
   const int8x8_t vb = vld1_dup_s8(input_b);
-  const int8x8_t vb_zero_point = vld1_dup_s8(params->fp32_neon.b_zero_point);
+  const int8x8_t vb_zero_point = vld1_dup_s8(&params->scalar.b_zero_point);
   const int16x8_t vxb = vsubl_s8(vb, vb_zero_point);
   for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
     const int8x16_t va0123456789ABCDEF = vld1q_s8(input_a); input_a += 16;

@@ -29,8 +29,11 @@ void xnn_f32_spmm_minmax_ukernel_4x1__sse(
   assert(mc % sizeof(float) == 0);
   assert(nc != 0);
 
-  const __m128 vmin = _mm_load_ps(params->sse.min);
-  const __m128 vmax = _mm_load_ps(params->sse.max);
+  const __m128 vmin = _mm_set1_ps(params->sse.min);
+  const __m128 vmax = _mm_set1_ps(params->sse.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+
   size_t output_decrement = output_stride * nc - 4 * sizeof(float);
   while XNN_LIKELY(mc >= 4 * sizeof(float)) {
     const float* w = weights;

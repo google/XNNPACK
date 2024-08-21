@@ -35,8 +35,10 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__wasmsimd_x86_acc2(
   assert(output_width != 0);
   assert(kernel_size > 5);
 
-  const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
-  const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
+  const v128_t vmin = wasm_v128_load32_splat(&params->wasmsimd.min);
+  const v128_t vmax = wasm_v128_load32_splat(&params->wasmsimd.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
   do {
     const float* w = weights;
 

@@ -40,6 +40,11 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4c16__wasmusdot(
   const int8_t* a0 = a;
   float* c0 = c;
 
+  const v128_t vmin = wasm_v128_load32_splat(&params->wasmsimd.min);
+  const v128_t vmax = wasm_v128_load32_splat(&params->wasmsimd.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+
   const v128_t vsign_mask = wasm_u8x16_const_splat(UINT8_C(0x80));
   do {
     v128_t vksum0 = wasm_v128_load32_zero(w);
@@ -94,10 +99,8 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4c16__wasmusdot(
     w = (const float*) w + 4;
     vacc0x0123 = wasm_f32x4_add(vacc0x0123, vbias0123);
 
-    const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
     vacc0x0123 = wasm_f32x4_pmax(vacc0x0123, vmin);
 
-    const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
     vacc0x0123 = wasm_f32x4_pmin(vacc0x0123, vmax);
 
     if XNN_LIKELY(nc >= 4) {

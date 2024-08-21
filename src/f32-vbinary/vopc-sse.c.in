@@ -45,8 +45,10 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__sse_u${BATCH_TILE}(
   assert(output != NULL);
 
   $if ACTIVATION == "MINMAX":
-    const __m128 voutput_min = _mm_load_ps(params->sse.min);
-    const __m128 voutput_max = _mm_load_ps(params->sse.max);
+    const __m128 voutput_min = _mm_set1_ps(params->sse.min);
+    const __m128 voutput_max = _mm_set1_ps(params->sse.max);
+    XNN_FORCE_REALIZATION(voutput_min);
+    XNN_FORCE_REALIZATION(voutput_max);
   const __m128 vb = _mm_load1_ps(input_b);
 
   $if BATCH_TILE > 4:

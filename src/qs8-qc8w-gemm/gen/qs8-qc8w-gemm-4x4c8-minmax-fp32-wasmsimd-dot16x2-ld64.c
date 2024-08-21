@@ -58,6 +58,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4c8__wasmsimd_dot16x2_ld64(
     c3 = c2;
   }
 
+
   do {
     v128_t vacc0x0 = wasm_v128_load32_zero(w);
     v128_t vacc0x1 = wasm_v128_load32_zero((const int32_t*) w + 1);

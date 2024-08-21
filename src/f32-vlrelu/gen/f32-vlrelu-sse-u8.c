@@ -26,7 +26,7 @@ void xnn_f32_vlrelu_ukernel__sse_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128 vslope = _mm_load_ps(params->sse.slope);
+  const __m128 vslope = _mm_set1_ps(params->scalar.slope);
   const __m128 vzero = _mm_setzero_ps();
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     __m128 vx0123 = _mm_loadu_ps(input);

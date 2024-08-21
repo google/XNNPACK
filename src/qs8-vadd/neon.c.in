@@ -49,25 +49,25 @@ void xnn_${DATATYPE.lower()}_vadd_minmax_ukernel__neon_${"ld128" if LD128 else "
 
   $if LD128:
     #if XNN_ARCH_ARM64
-      const ${XINT8X16_T} va_zero_point = ${VLD1Q_DUP_X8}(&params->neon.a_zero_point);
-      const ${XINT8X16_T} vb_zero_point = ${VLD1Q_DUP_X8}(&params->neon.b_zero_point);
+      const ${XINT8X16_T} va_zero_point = ${VLD1Q_DUP_X8}(&params->scalar.a_zero_point);
+      const ${XINT8X16_T} vb_zero_point = ${VLD1Q_DUP_X8}(&params->scalar.b_zero_point);
     #else
-      const ${XINT8X8_T} va_zero_point = ${VLD1_DUP_X8}(&params->neon.a_zero_point);
-      const ${XINT8X8_T} vb_zero_point = ${VLD1_DUP_X8}(&params->neon.b_zero_point);
+      const ${XINT8X8_T} va_zero_point = ${VLD1_DUP_X8}(&params->scalar.a_zero_point);
+      const ${XINT8X8_T} vb_zero_point = ${VLD1_DUP_X8}(&params->scalar.b_zero_point);
     #endif
   $else:
-    const ${XINT8X8_T} va_zero_point = ${VLD1_DUP_X8}(&params->neon.a_zero_point);
-    const ${XINT8X8_T} vb_zero_point = ${VLD1_DUP_X8}(&params->neon.b_zero_point);
-  const int32x4_t va_multiplier = vld1q_dup_s32(&params->neon.a_multiplier);
-  const int32x4_t vb_multiplier = vld1q_dup_s32(&params->neon.b_multiplier);
-  const int32x4_t vright_shift = vld1q_dup_s32(&params->neon.right_shift);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
+    const ${XINT8X8_T} va_zero_point = ${VLD1_DUP_X8}(&params->scalar.a_zero_point);
+    const ${XINT8X8_T} vb_zero_point = ${VLD1_DUP_X8}(&params->scalar.b_zero_point);
+  const int32x4_t va_multiplier = vld1q_dup_s32(&params->scalar.a_multiplier);
+  const int32x4_t vb_multiplier = vld1q_dup_s32(&params->scalar.b_multiplier);
+  const int32x4_t vright_shift = vdupq_n_s32(-params->scalar.shift);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
   $if BATCH_TILE >= 16:
-    const ${XINT8X16_T} voutput_min = ${VLD1Q_DUP_X8}(&params->neon.output_min);
-    const ${XINT8X16_T} voutput_max = ${VLD1Q_DUP_X8}(&params->neon.output_max);
+    const ${XINT8X16_T} voutput_min = ${VLD1Q_DUP_X8}(&params->scalar.output_min);
+    const ${XINT8X16_T} voutput_max = ${VLD1Q_DUP_X8}(&params->scalar.output_max);
   $else:
-    const ${XINT8X8_T} voutput_min = ${VLD1_DUP_X8}(&params->neon.output_min);
-    const ${XINT8X8_T} voutput_max = ${VLD1_DUP_X8}(&params->neon.output_max);
+    const ${XINT8X8_T} voutput_min = ${VLD1_DUP_X8}(&params->scalar.output_min);
+    const ${XINT8X8_T} voutput_max = ${VLD1_DUP_X8}(&params->scalar.output_max);
 
   for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
     $if LD128:

@@ -27,7 +27,7 @@ void xnn_f16_vlrelu_ukernel__f16c_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m256 vslope = _mm256_load_ps(params->avx.slope);
+  const __m256 vslope = _mm256_set1_ps(params->avx.slope);
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {

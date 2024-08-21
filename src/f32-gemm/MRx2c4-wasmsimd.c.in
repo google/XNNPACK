@@ -71,8 +71,10 @@ void xnn_${DATATYPE_SPEC}_gemm${ACTIVATION_SUFFIX}_ukernel_${MR}x${NR}c4__${ISA}
       }
 
   $if ACTIVATION == "MINMAX":
-    const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
-    const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
+    const v128_t vmin = wasm_v128_load32_splat(&params->wasmsimd.min);
+    const v128_t vmax = wasm_v128_load32_splat(&params->wasmsimd.max);
+    XNN_FORCE_REALIZATION(vmin);
+    XNN_FORCE_REALIZATION(vmax);
   do {
     v128_t vacc0x0c4 = wasm_v128_load32_zero(w);
     $for N in range(1, NR):

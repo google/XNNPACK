@@ -26,13 +26,13 @@ void xnn_qu8_vmul_minmax_fp32_ukernel__scalar_u4(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const int32_t va_zero_point = params->fp32_scalar.a_zero_point;
-  const int32_t vb_zero_point = params->fp32_scalar.b_zero_point;
-  const float vscale = params->fp32_scalar.scale;
-  const float voutput_min_less_zero_point = params->fp32_scalar.output_min_less_zero_point;
-  const float voutput_max_less_zero_point = params->fp32_scalar.output_max_less_zero_point;
-  const float vmagic_bias = params->fp32_scalar.magic_bias;
-  const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar.magic_bias_less_output_zero_point;
+  const int32_t va_zero_point = params->scalar.a_zero_point;
+  const int32_t vb_zero_point = params->scalar.b_zero_point;
+  const float vscale = params->scalar.scale;
+  const float voutput_min_less_zero_point = (int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point;
+  const float voutput_max_less_zero_point = (int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point;
 
   for (; batch >= 4 * sizeof(uint8_t); batch -= 4 * sizeof(uint8_t)) {
     const int32_t va0 = input_a[0] - va_zero_point;

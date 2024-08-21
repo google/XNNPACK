@@ -11,6 +11,7 @@
 
 #include <wasm_simd128.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/igemm.h"
 #include "xnnpack/math.h"
 

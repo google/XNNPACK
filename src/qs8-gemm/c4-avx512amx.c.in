@@ -13,6 +13,7 @@ $assert DATATYPE in ["QD8_F32", "QD8_F16", "QC8", "QC4_F32"]
 
 #include <immintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
@@ -125,8 +126,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
     const __m512 voutput_min = _mm512_set1_ps(params->${PARAMS_STRUCT}.min);
     const __m512 voutput_max = _mm512_set1_ps(params->${PARAMS_STRUCT}.max);
     $if DATATYPE in ["QC4_F32", "QC4_F16"]:
-      const __m512i vmask = _mm512_set1_epi8(params->${PARAMS_STRUCT}.mask);  // 0xF0
-      const __m512i vshl4 = _mm512_set1_epi64(params->${PARAMS_STRUCT}.gfni_shl4);  // 0x01020408
+      const __m512i vmask = _mm512_set1_epi8(0xF0);
+      const __m512i vshl4 = _mm512_set1_epi64(0x01020408);
+      XNN_FORCE_REALIZATION(vmask);
+      XNN_FORCE_REALIZATION(vshl4);
   $else:
     const __m512 voutput_max_less_zero_point = _mm512_set1_ps(params->${PARAMS_STRUCT}.output_max_less_zero_point);
     const __m512i voutput_zero_point = _mm512_set1_epi32(params->${PARAMS_STRUCT}.output_zero_point);

@@ -41,6 +41,11 @@ void xnn_f16_igemm_minmax_ukernel_7x8__avx2_broadcast(
   assert(w != NULL);
   assert(c != NULL);
 
+  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+
   uint16_t* c0 = c;
   uint16_t* c1 = (uint16_t*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {
@@ -149,7 +154,6 @@ void xnn_f16_igemm_minmax_ukernel_7x8__avx2_broadcast(
       p -= 7 * sizeof(void*);
     } while (p != 0);
 
-    const __m256 vmin = _mm256_load_ps(params->avx.min);
     vacc0x0 = _mm256_max_ps(vacc0x0, vmin);
     vacc1x0 = _mm256_max_ps(vacc1x0, vmin);
     vacc2x0 = _mm256_max_ps(vacc2x0, vmin);
@@ -158,7 +162,6 @@ void xnn_f16_igemm_minmax_ukernel_7x8__avx2_broadcast(
     vacc5x0 = _mm256_max_ps(vacc5x0, vmin);
     vacc6x0 = _mm256_max_ps(vacc6x0, vmin);
 
-    const __m256 vmax = _mm256_load_ps(params->avx.max);
     vacc0x0 = _mm256_min_ps(vacc0x0, vmax);
     vacc1x0 = _mm256_min_ps(vacc1x0, vmax);
     vacc2x0 = _mm256_min_ps(vacc2x0, vmax);

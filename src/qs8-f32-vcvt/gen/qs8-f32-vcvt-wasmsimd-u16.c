@@ -27,15 +27,17 @@ void xnn_qs8_f32_vcvt_ukernel__wasmsimd_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vminus_zero_point = wasm_v128_load64_splat(params->wasmsimd.minus_zero_point);
-  const v128_t vscale = wasm_v128_load64_splat(params->wasmsimd.scale);
+  const v128_t vzero_point = wasm_v128_load16_splat(&params->scalar.zero_point);
+  const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
+  XNN_FORCE_REALIZATION(vzero_point);
+  XNN_FORCE_REALIZATION(vscale);
   for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
     v128_t vx01234567 = wasm_i16x8_load8x8(input);
     v128_t vx89ABCDEF = wasm_i16x8_load8x8(input + 8);
     input += 16;
 
-    vx01234567 = wasm_i16x8_add(vx01234567, vminus_zero_point);
-    vx89ABCDEF = wasm_i16x8_add(vx89ABCDEF, vminus_zero_point);
+    vx01234567 = wasm_i16x8_sub(vx01234567, vzero_point);
+    vx89ABCDEF = wasm_i16x8_sub(vx89ABCDEF, vzero_point);
 
     v128_t vy0123 = wasm_i32x4_extend_low_i16x8(vx01234567);
     v128_t vy4567 = wasm_i32x4_extend_high_i16x8(vx01234567);
@@ -60,7 +62,7 @@ void xnn_qs8_f32_vcvt_ukernel__wasmsimd_u16(
   }
   for (; batch >= 8 * sizeof(int8_t); batch -= 8 * sizeof(int8_t)) {
     v128_t vx = wasm_i16x8_load8x8(input);
-    vx = wasm_i16x8_add(vx, vminus_zero_point);
+    vx = wasm_i16x8_sub(vx, vzero_point);
     input += 8;
 
     v128_t vy_lo = wasm_i32x4_extend_low_i16x8(vx);
@@ -81,7 +83,7 @@ void xnn_qs8_f32_vcvt_ukernel__wasmsimd_u16(
     assert(batch <= 7 * sizeof(int8_t));
 
     v128_t vx = wasm_i16x8_load8x8(input);
-    vx = wasm_i16x8_add(vx, vminus_zero_point);
+    vx = wasm_i16x8_sub(vx, vzero_point);
     input += 8;
 
     v128_t vy = wasm_i32x4_extend_low_i16x8(vx);

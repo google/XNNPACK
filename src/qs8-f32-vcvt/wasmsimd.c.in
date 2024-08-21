@@ -28,8 +28,10 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__wasmsimd_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vminus_zero_point = wasm_v128_load64_splat(params->wasmsimd.minus_zero_point);
-  const v128_t vscale = wasm_v128_load64_splat(params->wasmsimd.scale);
+  const v128_t vzero_point = wasm_v128_load16_splat(&params->scalar.zero_point);
+  const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
+  XNN_FORCE_REALIZATION(vzero_point);
+  XNN_FORCE_REALIZATION(vscale);
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
       v128_t vx${ABC[0:8]} = ${WASM_X16X8_LOAD8X8}(input);
@@ -38,7 +40,7 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__wasmsimd_u${BATCH_TILE}(
       input += ${BATCH_TILE};
 
       $for N in range(0, BATCH_TILE, 8):
-        vx${ABC[N:N+8]} = wasm_i16x8_add(vx${ABC[N:N+8]}, vminus_zero_point);
+        vx${ABC[N:N+8]} = wasm_i16x8_sub(vx${ABC[N:N+8]}, vzero_point);
 
       $for N in range(0, BATCH_TILE, 8):
         v128_t vy${ABC[N:N+4]} = wasm_i32x4_extend_low_i16x8(vx${ABC[N:N+8]});
@@ -57,7 +59,7 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__wasmsimd_u${BATCH_TILE}(
     }
   for (; batch >= 8 * sizeof(${XINT8_T}); batch -= 8 * sizeof(${XINT8_T})) {
     v128_t vx = ${WASM_X16X8_LOAD8X8}(input);
-    vx = wasm_i16x8_add(vx, vminus_zero_point);
+    vx = wasm_i16x8_sub(vx, vzero_point);
     input += 8;
 
     v128_t vy_lo = wasm_i32x4_extend_low_i16x8(vx);
@@ -78,7 +80,7 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__wasmsimd_u${BATCH_TILE}(
     assert(batch <= 7 * sizeof(${XINT8_T}));
 
     v128_t vx = ${WASM_X16X8_LOAD8X8}(input);
-    vx = wasm_i16x8_add(vx, vminus_zero_point);
+    vx = wasm_i16x8_sub(vx, vzero_point);
     input += 8;
 
     v128_t vy = wasm_i32x4_extend_low_i16x8(vx);

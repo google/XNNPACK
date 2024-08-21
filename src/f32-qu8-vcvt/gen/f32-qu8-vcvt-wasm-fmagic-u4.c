@@ -25,11 +25,11 @@ void xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_u4(
   assert(output != NULL);
 
   const float* i = input;
-  const float vscale = params->scalar_fmagic.scale;
-  const float voutput_min_less_zero_point = params->scalar_fmagic.output_min_less_zero_point;
-  const float voutput_max_less_zero_point = params->scalar_fmagic.output_max_less_zero_point;
-  const float vmagic_bias = params->scalar_fmagic.magic_bias;
-  const int32_t vmagic_bias_less_zero_point = params->scalar_fmagic.magic_bias_less_zero_point;
+  const float vscale = params->scalar.scale;
+  const float voutput_min_less_zero_point = (float) ((int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point);
+  const float voutput_max_less_zero_point = (float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point);
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point;
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     float vx0 = i[0];

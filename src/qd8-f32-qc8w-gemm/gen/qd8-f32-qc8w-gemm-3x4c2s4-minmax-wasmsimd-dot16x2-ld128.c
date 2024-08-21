@@ -11,6 +11,7 @@
 
 #include <wasm_simd128.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/math.h"
 
@@ -51,6 +52,11 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x4c2s4__wasmsimd_dot16x2_ld128(
     a2 = a1;
     c2 = c1;
   }
+
+  const v128_t vmin = wasm_v128_load32_splat(&params->wasmsimd.min);
+  const v128_t vmax = wasm_v128_load32_splat(&params->wasmsimd.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
 
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   do {
@@ -132,12 +138,10 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x4c2s4__wasmsimd_dot16x2_ld128(
     vacc2x0123 = wasm_f32x4_add(vacc2x0123, vbias0123);
     w = (const float*) w + 4;
 
-    const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
     vacc0x0123 = wasm_f32x4_pmax(vacc0x0123, vmin);
     vacc1x0123 = wasm_f32x4_pmax(vacc1x0123, vmin);
     vacc2x0123 = wasm_f32x4_pmax(vacc2x0123, vmin);
 
-    const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
     vacc0x0123 = wasm_f32x4_pmin(vacc0x0123, vmax);
     vacc1x0123 = wasm_f32x4_pmin(vacc1x0123, vmax);
     vacc2x0123 = wasm_f32x4_pmin(vacc2x0123, vmax);

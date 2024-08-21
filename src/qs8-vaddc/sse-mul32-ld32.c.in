@@ -12,6 +12,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <immintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/unaligned.h"
 #include "xnnpack/vbinary.h"
@@ -37,15 +38,20 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__${ISA}_mul32_ld32_u${BATCH_TI
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m128i va_multiplier = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.a_multiplier);
-  const __m128i vshift = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.shift);
-  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
-  const __m128i voutput_max = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_max);
+  const __m128i vbias = _mm_set1_epi32(params->scalar.b_multiplier * (int32_t) *input_b + params->scalar.bias);
+  const __m128i va_multiplier = _mm_set1_epi32(params->scalar.a_multiplier);
+  const __m128i vshift = _mm_cvtsi32_si128((int) params->scalar.shift);
+  const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->scalar.output_min);
+  const __m128i voutput_max = _mm_set1_epi8(params->scalar.output_max);
 
-  __m128i vbias = _mm_cvtsi32_si128(params->${PARAMS_STRUCT}.b_multiplier[0] * (int32_t) *input_b);
-  vbias = _mm_shuffle_epi32(vbias, _MM_SHUFFLE(0, 0, 0, 0));
-  vbias = _mm_add_epi32(vbias, _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.bias));
+  XNN_FORCE_REALIZATION(vbias);
+  XNN_FORCE_REALIZATION(va_multiplier);
+  XNN_FORCE_REALIZATION(vshift);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+  XNN_FORCE_REALIZATION(voutput_max);
+
   for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
     const __m128i va${ABC[0:4]} = ${_MM_CVTEPX8_EPI32}(_mm_cvtsi32_si128((int) unaligned_load_s32(input_a)));
     $for N in range(4, BATCH_TILE, 4):
