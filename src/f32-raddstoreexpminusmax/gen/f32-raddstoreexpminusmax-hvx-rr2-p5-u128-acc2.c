@@ -29,16 +29,27 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u128_acc2(
   assert(sum != NULL);
 
   const HVX_Vector vi_max = xnn_set1_f32(*max);
-  const HVX_Vector vlog2e = xnn_set1_f32(params->hvx_rr2_p5.log2e);
-  const HVX_Vector vmagic_bias = xnn_set1_f32(params->hvx_rr2_p5.magic_bias);
-  const HVX_Vector vminus_ln2_hi = xnn_set1_f32(params->hvx_rr2_p5.minus_ln2_hi);
-  const HVX_Vector vminus_ln2_lo = xnn_set1_f32(params->hvx_rr2_p5.minus_ln2_lo);
-  const HVX_Vector vc5 = xnn_set1_f32(params->hvx_rr2_p5.c5);
-  const HVX_Vector vc4 = xnn_set1_f32(params->hvx_rr2_p5.c4);
-  const HVX_Vector vc3 = xnn_set1_f32(params->hvx_rr2_p5.c3);
-  const HVX_Vector vc2 = xnn_set1_f32(params->hvx_rr2_p5.c2);
-  const HVX_Vector vc1 = xnn_set1_f32(params->hvx_rr2_p5.c1);
-  const HVX_Vector vdenorm_cutoff = xnn_set1_f32(params->hvx_rr2_p5.denorm_cutoff);
+  const HVX_Vector vlog2e = xnn_set1_f32(0x1.715476p+0f);
+  const HVX_Vector vmagic_bias = xnn_set1_f32(0x1.8000FEp23f);
+  const HVX_Vector vminus_ln2_hi = xnn_set1_f32(-0x1.62E400p-1f);
+  const HVX_Vector vminus_ln2_lo = xnn_set1_f32(-0x1.7F7D1Cp-20f);
+  const HVX_Vector vc5 = xnn_set1_f32(0x1.0F9F9Cp-7f);
+  const HVX_Vector vc4 = xnn_set1_f32(0x1.573A1Ap-5f);
+  const HVX_Vector vc3 = xnn_set1_f32(0x1.555A80p-3f);
+  const HVX_Vector vc2 = xnn_set1_f32(0x1.FFFDC6p-2f);
+  const HVX_Vector vc1 = xnn_set1_f32(0x1.FFFFF6p-1f);
+  const HVX_Vector vdenorm_cutoff = xnn_set1_f32(-0x1.5D589Ep6f);
+
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vminus_ln2_hi);
+  XNN_FORCE_REALIZATION(vminus_ln2_lo);
+  XNN_FORCE_REALIZATION(vc5);
+  XNN_FORCE_REALIZATION(vc4);
+  XNN_FORCE_REALIZATION(vc3);
+  XNN_FORCE_REALIZATION(vc2);
+  XNN_FORCE_REALIZATION(vc1);  
+  XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   HVX_Vector vacc0 = Q6_V_vzero();
   HVX_Vector vacc1 = vacc0;
