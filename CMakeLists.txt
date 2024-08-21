@@ -406,6 +406,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/negate.c
   src/subgraph/prelu.c
   src/subgraph/reciprocal-square-root.c
+  src/subgraph/remainder.c
   src/subgraph/reshape-helpers.c
   src/subgraph/scaled-dot-product-attention.c
   src/subgraph/sigmoid.c
@@ -1619,6 +1620,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(reciprocal-square-root-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME reciprocal-square-root-nc-test COMMAND reciprocal-square-root-nc-test)
 
+    ADD_EXECUTABLE(remainder-nd-test test/remainder-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(remainder-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(remainder-nd-test PRIVATE XNNPACK binary-elementwise-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME remainder-nd-test COMMAND remainder-nd-test)
+
     ADD_EXECUTABLE(resize-bilinear-nhwc-test test/resize-bilinear-nhwc.cc)
     TARGET_INCLUDE_DIRECTORIES(resize-bilinear-nhwc-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(resize-bilinear-nhwc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
@@ -1973,6 +1979,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_INCLUDE_DIRECTORIES(reciprocal-square-root-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(reciprocal-square-root-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME reciprocal-square-root-test COMMAND reciprocal-square-root-test)
+
+    ADD_EXECUTABLE(remainder-test test/remainder.cc)
+    TARGET_INCLUDE_DIRECTORIES(remainder-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(remainder-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME remainder-test COMMAND remainder-test)
 
     ADD_EXECUTABLE(reshape-helpers-test test/reshape-helpers.cc)
     TARGET_INCLUDE_DIRECTORIES(reshape-helpers-test PRIVATE src test)
@@ -2967,6 +2978,24 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(f32-vrndd-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
   TARGET_LINK_LIBRARIES(f32-vrndd-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME f32-vrndd-test COMMAND f32-vrndd-test)
+
+  ADD_EXECUTABLE(f32-vrem-test test/f32-vrem.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-vrem-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f32-vrem-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(f32-vrem-test PRIVATE vbinary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME f32-vrem-test COMMAND f32-vrem-test)
+
+  ADD_EXECUTABLE(f32-vremc-test test/f32-vremc.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-vremc-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f32-vremc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(f32-vremc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME f32-vremc-test COMMAND f32-vremc-test)
+
+  ADD_EXECUTABLE(f32-vrremc-test test/f32-vrremc.cc)
+  TARGET_INCLUDE_DIRECTORIES(f32-vrremc-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(f32-vrremc-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
+  TARGET_LINK_LIBRARIES(f32-vrremc-test PRIVATE vbinaryc-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME f32-vrremc-test COMMAND f32-vrremc-test)
 
   ADD_EXECUTABLE(f32-vscaleexpminusmax-test test/f32-vscaleexpminusmax.cc)
   TARGET_INCLUDE_DIRECTORIES(f32-vscaleexpminusmax-test PRIVATE include src test)

@@ -117,6 +117,12 @@ static XNN_INLINE xnn_simd_f32_t xnn_neg_f32(xnn_simd_f32_t a) {
   return Q6_Vsf_vsub_VsfVsf(v0, a);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_rem_f32(xnn_simd_f32_t a,
+                                             xnn_simd_f32_t b) {
+  xnn_simd_f32_t quotient = _Q6_vflt_vf(_Q6_vfint_vf(Q6_Vsf_vdiv_VsfVsf(a, b)));
+  return Q6_Vsf_vsub_VsfVsf(a, Q6_Vsf_vmpy_VsfVsf(quotient, b));
+}
+
 // Logical operations.
 
 static XNN_INLINE xnn_simd_f32_t xnn_and_f32(xnn_simd_f32_t a,

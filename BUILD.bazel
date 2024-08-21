@@ -159,6 +159,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/negate.c",
     "src/subgraph/prelu.c",
     "src/subgraph/reciprocal-square-root.c",
+    "src/subgraph/remainder.c",
     "src/subgraph/reshape-helpers.c",
     "src/subgraph/reshape-2d.c",
     "src/subgraph/rope.c",

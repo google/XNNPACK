@@ -995,6 +995,10 @@ void BinaryElementwiseOperatorTester::TestF32() const {
                   xnn_create_multiply_nd_f32(output_min, output_max, 0,
                                              &binary_elementwise_op));
         break;
+      case OperationType::Remainder:
+        ASSERT_EQ(xnn_status_success,
+                  xnn_create_remainder_nd_f32(0, &binary_elementwise_op));
+        break;
       case OperationType::Subtract:
         ASSERT_EQ(xnn_status_success,
                   xnn_create_subtract_nd_f32(output_min, output_max, 0,
@@ -1077,6 +1081,17 @@ void BinaryElementwiseOperatorTester::TestF32() const {
                 num_input2_dims(), input2_shape().data(),
                 /*threadpool=*/nullptr));
         ASSERT_EQ(xnn_status_success, xnn_setup_multiply_nd_f32(
+                                          binary_elementwise_op, input1.data(),
+                                          input2.data(), output.data()));
+        break;
+      case OperationType::Remainder:
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_reshape_remainder_nd_f32(
+                binary_elementwise_op, num_input1_dims(), input1_shape().data(),
+                num_input2_dims(), input2_shape().data(),
+                /*threadpool=*/nullptr));
+        ASSERT_EQ(xnn_status_success, xnn_setup_remainder_nd_f32(
                                           binary_elementwise_op, input1.data(),
                                           input2.data(), output.data()));
         break;

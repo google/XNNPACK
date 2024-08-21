@@ -229,7 +229,7 @@ void VBinaryCMicrokernelTester::Test(
   std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
   std::vector<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-  const float b = f32dist(rng);
+  float b = f32dist(rng);
   std::vector<float> y(batch_size() +
                        (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
   std::vector<float> y_ref(batch_size());
@@ -240,9 +240,10 @@ void VBinaryCMicrokernelTester::Test(
     } else {
       std::fill(y.begin(), y.end(), nanf(""));
     }
-    const float* a_data = inplace() ? y.data() : a.data();
+    float* a_data = inplace() ? y.data() : a.data();
 
     // Compute reference results.
+    int q;
     for (size_t i = 0; i < batch_size(); i++) {
       switch (op_type) {
         case OpType::AddC:
@@ -268,6 +269,16 @@ void VBinaryCMicrokernelTester::Test(
           break;
         case OpType::MulC:
           y_ref[i] = a_data[i] * b;
+          break;
+        case OpType::RemC:
+          if (b == 0) b = 1;
+          q = a_data[i] / b;
+          y_ref[i] = a_data[i] - q * b;
+          break;
+        case OpType::RRemC:
+          if (a_data[i] == 0) a_data[i] = 1;
+          q = b / a_data[i];
+          y_ref[i] = b - q * a_data[i];
           break;
         case OpType::SqrDiffC: {
           const float diff = a_data[i] - b;
