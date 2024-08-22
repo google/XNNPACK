@@ -2494,7 +2494,7 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "memory_planner_test",
     srcs = [
-        "memory-planner-test.cc",
+        "memory-planner.cc",
         "runtime-tester.h",
         "subgraph-tester.h",
     ],
