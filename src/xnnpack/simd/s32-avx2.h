@@ -61,8 +61,8 @@ static XNN_INLINE xnn_simd_s32_t xnn_clz_s32(xnn_simd_s32_t a) {
   xnn_simd_s32_t high_exp = _mm256_permutevar8x32_epi32(shift_high, idx);
 
   xnn_simd_s32_t exponent = _mm256_inserti128_si256(
-    _mm256_castsi128_si256(_mm256_extracti128_si256(low_exp, 1)), _mm256_extracti128_si256(high_exp, 1), 1
-  );
+      _mm256_castsi128_si256(_mm256_extracti128_si256(low_exp, 1)),
+      _mm256_extracti128_si256(high_exp, 1), 1);
 
   exponent = _mm256_and_si256(exponent, _mm256_set1_epi32(0x7FF));
 
