@@ -193,8 +193,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p8c__avx(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
   do {
@@ -639,8 +639,8 @@ void xnn_f32_dwconv_minmax_ukernel_3p16c__avx(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
   do {
@@ -798,8 +798,8 @@ void xnn_f32_dwconv_minmax_ukernel_4p16c__avx(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
   do {
@@ -984,8 +984,8 @@ void xnn_f32_dwconv_minmax_ukernel_6f6m7l8c8s4r__avx(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
   do {
@@ -1434,8 +1434,8 @@ void xnn_f32_dwconv_minmax_ukernel_9p16c__avx(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
   do {
@@ -4181,8 +4181,8 @@ void xnn_f32_vadd_minmax_ukernel__avx_u16(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 voutput_min = _mm256_set1_ps(params->avx.min);
-  const __m256 voutput_max = _mm256_set1_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(voutput_min);
   XNN_FORCE_REALIZATION(voutput_max);
 
@@ -4261,8 +4261,8 @@ void xnn_f32_vaddc_minmax_ukernel__avx_u16(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 voutput_min = _mm256_set1_ps(params->avx.min);
-  const __m256 voutput_max = _mm256_set1_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(voutput_min);
   XNN_FORCE_REALIZATION(voutput_max);
   const __m256 vb = _mm256_broadcast_ss(input_b);
@@ -4339,8 +4339,8 @@ void xnn_f32_vdiv_minmax_ukernel__avx_u16(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 voutput_min = _mm256_set1_ps(params->avx.min);
-  const __m256 voutput_max = _mm256_set1_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(voutput_min);
   XNN_FORCE_REALIZATION(voutput_max);
 
@@ -4419,8 +4419,8 @@ void xnn_f32_vdivc_minmax_ukernel__avx_u16(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 voutput_min = _mm256_set1_ps(params->avx.min);
-  const __m256 voutput_max = _mm256_set1_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(voutput_min);
   XNN_FORCE_REALIZATION(voutput_max);
   const __m256 vb = _mm256_broadcast_ss(input_b);
@@ -4761,8 +4761,8 @@ void xnn_f32_vmul_minmax_ukernel__avx_u16(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 voutput_min = _mm256_set1_ps(params->avx.min);
-  const __m256 voutput_max = _mm256_set1_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(voutput_min);
   XNN_FORCE_REALIZATION(voutput_max);
 
@@ -4841,8 +4841,8 @@ void xnn_f32_vmulc_minmax_ukernel__avx_u16(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 voutput_min = _mm256_set1_ps(params->avx.min);
-  const __m256 voutput_max = _mm256_set1_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(voutput_min);
   XNN_FORCE_REALIZATION(voutput_max);
   const __m256 vb = _mm256_broadcast_ss(input_b);
@@ -4919,8 +4919,8 @@ void xnn_f32_vrdivc_minmax_ukernel__avx_u16(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 voutput_min = _mm256_set1_ps(params->avx.min);
-  const __m256 voutput_max = _mm256_set1_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(voutput_min);
   XNN_FORCE_REALIZATION(voutput_max);
   const __m256 vb = _mm256_broadcast_ss(input_b);
@@ -4997,8 +4997,8 @@ void xnn_f32_vrsubc_minmax_ukernel__avx_u16(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 voutput_min = _mm256_set1_ps(params->avx.min);
-  const __m256 voutput_max = _mm256_set1_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(voutput_min);
   XNN_FORCE_REALIZATION(voutput_max);
   const __m256 vb = _mm256_broadcast_ss(input_b);
@@ -5215,8 +5215,8 @@ void xnn_f32_vsub_minmax_ukernel__avx_u16(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 voutput_min = _mm256_set1_ps(params->avx.min);
-  const __m256 voutput_max = _mm256_set1_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(voutput_min);
   XNN_FORCE_REALIZATION(voutput_max);
 
@@ -5295,8 +5295,8 @@ void xnn_f32_vsubc_minmax_ukernel__avx_u16(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 voutput_min = _mm256_set1_ps(params->avx.min);
-  const __m256 voutput_max = _mm256_set1_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(voutput_min);
   XNN_FORCE_REALIZATION(voutput_max);
   const __m256 vb = _mm256_broadcast_ss(input_b);
@@ -5371,8 +5371,8 @@ void xnn_f32_vclamp_ukernel__avx_u16(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     __m256 vacc01234567 = _mm256_loadu_ps(input);

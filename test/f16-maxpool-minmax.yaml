@@ -9,4 +9,4 @@
 
 # x86 F16C
 - name: xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8
-  init: xnn_init_f16_minmax_avx_params
+  init: xnn_init_f16_minmax_scalar_params

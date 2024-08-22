@@ -26,8 +26,8 @@ void xnn_f32_vclamp_ukernel__wasmsimd_arm_u4(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t vy_min = wasm_v128_load32_splat(&params->wasmsimd.min);
-  const v128_t vy_max = wasm_v128_load32_splat(&params->wasmsimd.max);
+  const v128_t vy_min = wasm_v128_load32_splat(&params->scalar.min);
+  const v128_t vy_max = wasm_v128_load32_splat(&params->scalar.max);
   XNN_FORCE_REALIZATION(vy_min);
   XNN_FORCE_REALIZATION(vy_max);
 

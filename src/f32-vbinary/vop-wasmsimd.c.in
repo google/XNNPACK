@@ -43,8 +43,8 @@ void xnn_f32_v${OP.lower()}${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}_
   assert(output != NULL);
 
   $if ACTIVATION == "MINMAX":
-    const v128_t voutput_min = wasm_v128_load32_splat(&params->wasmsimd.min);
-    const v128_t voutput_max = wasm_v128_load32_splat(&params->wasmsimd.max);
+    const v128_t voutput_min = wasm_v128_load32_splat(&params->scalar.min);
+    const v128_t voutput_max = wasm_v128_load32_splat(&params->scalar.max);
     XNN_FORCE_REALIZATION(voutput_min);
     XNN_FORCE_REALIZATION(voutput_max);
   $elif ACTIVATION == "RELU":

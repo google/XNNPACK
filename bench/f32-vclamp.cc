@@ -84,23 +84,23 @@ void f32_vclamp(benchmark::State& state, xnn_f32_vclamp_ukernel_fn ukernel,
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_vclamp, sse_u4,
                     xnn_f32_vclamp_ukernel__sse_u4,
-                    xnn_init_f32_minmax_sse_params)
+                    xnn_init_f32_minmax_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vclamp, sse_u8,
                     xnn_f32_vclamp_ukernel__sse_u8,
-                    xnn_init_f32_minmax_sse_params)
+                    xnn_init_f32_minmax_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vclamp, avx_u8,
                     xnn_f32_vclamp_ukernel__avx_u8,
-                    xnn_init_f32_minmax_avx_params,
+                    xnn_init_f32_minmax_scalar_params,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vclamp, avx_u16,
                     xnn_f32_vclamp_ukernel__avx_u16,
-                    xnn_init_f32_minmax_avx_params,
+                    xnn_init_f32_minmax_scalar_params,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
@@ -121,22 +121,22 @@ void f32_vclamp(benchmark::State& state, xnn_f32_vclamp_ukernel_fn ukernel,
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(f32_vclamp, wasmsimd_arm_u4,
                     xnn_f32_vclamp_ukernel__wasmsimd_arm_u4,
-                    xnn_init_f32_minmax_wasmsimd_params)
+                    xnn_init_f32_minmax_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vclamp, wasmsimd_arm_u8,
                     xnn_f32_vclamp_ukernel__wasmsimd_arm_u8,
-                    xnn_init_f32_minmax_wasmsimd_params)
+                    xnn_init_f32_minmax_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vclamp, wasmsimd_x86_u4,
                     xnn_f32_vclamp_ukernel__wasmsimd_x86_u4,
-                    xnn_init_f32_minmax_wasmsimd_params)
+                    xnn_init_f32_minmax_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f32_vclamp, wasmsimd_x86_u8,
                     xnn_f32_vclamp_ukernel__wasmsimd_x86_u8,
-                    xnn_init_f32_minmax_wasmsimd_params)
+                    xnn_init_f32_minmax_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

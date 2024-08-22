@@ -11,6 +11,6 @@
 
 # x86 AVX2
 - name: xnn_f16_pavgpool_minmax_ukernel_9p8x__avx2_c8
-  init: xnn_init_f16_minmax_avx_params
+  init: xnn_init_f16_minmax_scalar_params
 - name: xnn_f16_pavgpool_minmax_ukernel_9x__avx2_c8
-  init: xnn_init_f16_minmax_avx_params
+  init: xnn_init_f16_minmax_scalar_params

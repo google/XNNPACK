@@ -157,39 +157,39 @@ static void f16_igemm(benchmark::State& state,
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   static void f16_f32acc_igemm_1x8__avx2_broadcast(benchmark::State& state, const char* net) {
     f16_igemm(state, xnn_f16_f32acc_igemm_minmax_ukernel_1x8__avx2_broadcast, 1, 8, 1, 1,
-      xnn_init_f16_minmax_avx_params, benchmark::utils::CheckAVX2);
+      xnn_init_f16_minmax_scalar_params, benchmark::utils::CheckAVX2);
   }
   static void f16_f32acc_igemm_4x8__avx2_broadcast(benchmark::State& state, const char* net) {
     f16_igemm(state, xnn_f16_f32acc_igemm_minmax_ukernel_4x8__avx2_broadcast, 4, 8, 1, 1,
-      xnn_init_f16_minmax_avx_params, benchmark::utils::CheckAVX2);
+      xnn_init_f16_minmax_scalar_params, benchmark::utils::CheckAVX2);
   }
   static void f16_f32acc_igemm_5x8__avx2_broadcast(benchmark::State& state, const char* net) {
     f16_igemm(state, xnn_f16_f32acc_igemm_minmax_ukernel_5x8__avx2_broadcast, 5, 8, 1, 1,
-      xnn_init_f16_minmax_avx_params, benchmark::utils::CheckAVX2);
+      xnn_init_f16_minmax_scalar_params, benchmark::utils::CheckAVX2);
   }
   static void f16_f32acc_igemm_6x8__avx2_broadcast(benchmark::State& state, const char* net) {
     f16_igemm(state, xnn_f16_f32acc_igemm_minmax_ukernel_6x8__avx2_broadcast, 6, 8, 1, 1,
-      xnn_init_f16_minmax_avx_params, benchmark::utils::CheckAVX2);
+      xnn_init_f16_minmax_scalar_params, benchmark::utils::CheckAVX2);
   }
   static void f16_f32acc_igemm_7x8__avx2_broadcast(benchmark::State& state, const char* net) {
     f16_igemm(state, xnn_f16_f32acc_igemm_minmax_ukernel_7x8__avx2_broadcast, 7, 8, 1, 1,
-      xnn_init_f16_minmax_avx_params, benchmark::utils::CheckAVX2);
+      xnn_init_f16_minmax_scalar_params, benchmark::utils::CheckAVX2);
   }
   static void f16_f32acc_igemm_1x16__avx2_broadcast(benchmark::State& state, const char* net) {
     f16_igemm(state, xnn_f16_f32acc_igemm_minmax_ukernel_1x16__avx2_broadcast, 1, 16, 1, 1,
-      xnn_init_f16_minmax_avx_params, benchmark::utils::CheckAVX2);
+      xnn_init_f16_minmax_scalar_params, benchmark::utils::CheckAVX2);
   }
   static void f16_f32acc_igemm_3x16__avx2_broadcast(benchmark::State& state, const char* net) {
     f16_igemm(state, xnn_f16_f32acc_igemm_minmax_ukernel_3x16__avx2_broadcast, 3, 16, 1, 1,
-      xnn_init_f16_minmax_avx_params, benchmark::utils::CheckAVX2);
+      xnn_init_f16_minmax_scalar_params, benchmark::utils::CheckAVX2);
   }
   static void f16_f32acc_igemm_4x16__avx2_broadcast(benchmark::State& state, const char* net) {
     f16_igemm(state, xnn_f16_f32acc_igemm_minmax_ukernel_4x16__avx2_broadcast, 4, 16, 1, 1,
-      xnn_init_f16_minmax_avx_params, benchmark::utils::CheckAVX2);
+      xnn_init_f16_minmax_scalar_params, benchmark::utils::CheckAVX2);
   }
   static void f16_f32acc_igemm_5x16__avx2_broadcast(benchmark::State& state, const char* net) {
     f16_igemm(state, xnn_f16_f32acc_igemm_minmax_ukernel_5x16__avx2_broadcast, 5, 16, 1, 1,
-      xnn_init_f16_minmax_avx_params, benchmark::utils::CheckAVX2);
+      xnn_init_f16_minmax_scalar_params, benchmark::utils::CheckAVX2);
   }
 
   BENCHMARK_CONV(f16_f32acc_igemm_1x8__avx2_broadcast)

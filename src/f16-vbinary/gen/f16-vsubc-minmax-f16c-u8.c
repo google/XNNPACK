@@ -33,8 +33,8 @@ void xnn_f16_vsubc_minmax_ukernel__f16c_u8(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vy_min = _mm256_set1_ps(params->avx.min);
-  const __m256 vy_max = _mm256_set1_ps(params->avx.max);
+  const __m256 vy_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 vy_max = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vy_min);
   XNN_FORCE_REALIZATION(vy_max);
 

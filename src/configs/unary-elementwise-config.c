@@ -166,7 +166,7 @@ static void init_f16_clamp_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_f16c) {
       f16_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vclamp_ukernel__f16c_u16;
-      f16_clamp_config.init.f16_minmax = xnn_init_f16_minmax_avx_params;
+      f16_clamp_config.init.f16_minmax = xnn_init_f16_minmax_scalar_params;
       f16_clamp_config.element_tile = 16;
     }
   #endif
@@ -247,7 +247,7 @@ static void init_f16_lrelu_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_f16c) {
       f16_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vlrelu_ukernel__f16c_u16;
-      f16_lrelu_config.init.f16_lrelu = xnn_init_f16_lrelu_avx_params;
+      f16_lrelu_config.init.f16_lrelu = xnn_init_f16_lrelu_scalar_params;
       f16_lrelu_config.element_tile = 16;
     }
   #endif
@@ -646,11 +646,11 @@ static void init_f32_clamp_config(void) {
       f32_clamp_config.element_tile = 16;
     } else if (hardware_config->use_x86_avx) {
       f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__avx_u16;
-      f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_avx_params;
+      f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_clamp_config.element_tile = 16;
     } else {
       f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__sse_u8;
-      f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_sse_params;
+      f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_clamp_config.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -658,11 +658,11 @@ static void init_f32_clamp_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {
       f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__wasmsimd_x86_u8;
-      f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_wasmsimd_params;
+      f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_clamp_config.element_tile = 8;
     } else {
       f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__wasmsimd_arm_u8;
-      f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_wasmsimd_params;
+      f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_clamp_config.element_tile = 8;
     }
   #elif XNN_ARCH_WASM
@@ -1932,7 +1932,7 @@ static void init_qs8_to_f16_cvt_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_avx2) {
       qs8_to_f16_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f16_vcvt_ukernel__avx2_u16;
-      qs8_to_f16_cvt_config.init.qs8_f16_cvt = xnn_init_qs8_f16_cvt_avx_params;
+      qs8_to_f16_cvt_config.init.qs8_f16_cvt = xnn_init_qs8_f16_cvt_scalar_params;
       qs8_to_f16_cvt_config.element_tile = 16;
     }
   #endif

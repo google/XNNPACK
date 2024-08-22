@@ -11,6 +11,6 @@
 
 # x86 FMA3
 - name: xnn_f16_vmulcaddc_minmax_ukernel_c8__fma3_2x
-  init: xnn_init_f16_minmax_avx_params
+  init: xnn_init_f16_minmax_scalar_params
 - name: xnn_f16_vmulcaddc_minmax_ukernel_c16__fma3_2x
-  init: xnn_init_f16_minmax_avx_params
+  init: xnn_init_f16_minmax_scalar_params

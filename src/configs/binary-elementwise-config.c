@@ -98,7 +98,7 @@ static void init_f16_vadd_config(void) {
       f16_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vadd_minmax_ukernel__f16c_u16;
       f16_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vaddc_minmax_ukernel__f16c_u16;
       f16_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vaddc_minmax_ukernel__f16c_u16;
-      f16_vadd_config.init.f16_minmax = xnn_init_f16_minmax_avx_params;
+      f16_vadd_config.init.f16_minmax = xnn_init_f16_minmax_scalar_params;
       f16_vadd_config.minmax.element_tile = 16;
     }
   #endif
@@ -141,7 +141,7 @@ static void init_f16_vdiv_config(void) {
       f16_vdiv_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vdiv_minmax_ukernel__f16c_u8;
       f16_vdiv_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vdivc_minmax_ukernel__f16c_u8;
       f16_vdiv_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vrdivc_minmax_ukernel__f16c_u8;
-      f16_vdiv_config.init.f16_minmax = xnn_init_f16_minmax_avx_params;
+      f16_vdiv_config.init.f16_minmax = xnn_init_f16_minmax_scalar_params;
       f16_vdiv_config.minmax.element_tile = 8;
     }
   #endif
@@ -264,7 +264,7 @@ static void init_f16_vmul_config(void) {
       f16_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vmul_minmax_ukernel__f16c_u16;
       f16_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vmulc_minmax_ukernel__f16c_u16;
       f16_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vmulc_minmax_ukernel__f16c_u16;
-      f16_vmul_config.init.f16_minmax = xnn_init_f16_minmax_avx_params;
+      f16_vmul_config.init.f16_minmax = xnn_init_f16_minmax_scalar_params;
       f16_vmul_config.minmax.element_tile = 16;
     }
   #endif
@@ -307,7 +307,7 @@ static void init_f16_vsub_config(void) {
       f16_vsub_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vsub_minmax_ukernel__f16c_u16;
       f16_vsub_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vsubc_minmax_ukernel__f16c_u16;
       f16_vsub_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vrsubc_minmax_ukernel__f16c_u16;
-      f16_vsub_config.init.f16_minmax = xnn_init_f16_minmax_avx_params;
+      f16_vsub_config.init.f16_minmax = xnn_init_f16_minmax_scalar_params;
       f16_vsub_config.minmax.element_tile = 16;
     }
   #endif
@@ -350,7 +350,7 @@ static void init_f16_vsqrdiff_config(void) {
       f16_vsqrdiff_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vsqrdiff_ukernel__f16c_u16;
       f16_vsqrdiff_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vsqrdiffc_ukernel__f16c_u16;
       f16_vsqrdiff_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vsqrdiffc_ukernel__f16c_u16;
-      f16_vsqrdiff_config.init.f16_minmax = xnn_init_f16_minmax_avx_params;
+      f16_vsqrdiff_config.init.f16_minmax = xnn_init_f16_minmax_scalar_params;
       f16_vsqrdiff_config.minmax.element_tile = 16;
     }
   #endif
@@ -392,13 +392,13 @@ static void init_f32_vadd_config(void) {
       f32_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vadd_minmax_ukernel__avx_u16;
       f32_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_minmax_ukernel__avx_u16;
       f32_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_minmax_ukernel__avx_u16;
-      f32_vadd_config.init.f32_minmax = xnn_init_f32_minmax_avx_params;
+      f32_vadd_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_vadd_config.minmax.element_tile = 16;
     } else {
       f32_vadd_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vadd_minmax_ukernel__sse_u8;
       f32_vadd_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_minmax_ukernel__sse_u8;
       f32_vadd_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_minmax_ukernel__sse_u8;
-      f32_vadd_config.init.f32_minmax = xnn_init_f32_minmax_sse_params;
+      f32_vadd_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_vadd_config.minmax.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -411,7 +411,7 @@ static void init_f32_vadd_config(void) {
       f32_vadd_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vadd_ukernel__wasmsimd_u16;
       f32_vadd_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_ukernel__wasmsimd_u16;
       f32_vadd_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_ukernel__wasmsimd_u16;
-      f32_vadd_config.init.f32_minmax = xnn_init_f32_minmax_wasmsimd_params;
+      f32_vadd_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_vadd_config.minmax.element_tile = 16;
       f32_vadd_config.linear.element_tile = 16;
     } else {
@@ -421,7 +421,7 @@ static void init_f32_vadd_config(void) {
       f32_vadd_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vadd_ukernel__wasmsimd_u16;
       f32_vadd_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_ukernel__wasmsimd_u16;
       f32_vadd_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_ukernel__wasmsimd_u16;
-      f32_vadd_config.init.f32_minmax = xnn_init_f32_minmax_wasmsimd_params;
+      f32_vadd_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_vadd_config.minmax.element_tile = 16;
       f32_vadd_config.linear.element_tile = 16;
     }
@@ -592,13 +592,13 @@ static void init_f32_vdiv_config(void) {
       f32_vdiv_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdiv_minmax_ukernel__avx_u16;
       f32_vdiv_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdivc_minmax_ukernel__avx_u16;
       f32_vdiv_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrdivc_minmax_ukernel__avx_u16;
-      f32_vdiv_config.init.f32_minmax = xnn_init_f32_minmax_avx_params;
+      f32_vdiv_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_vdiv_config.minmax.element_tile = 16;
     } else {
       f32_vdiv_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdiv_minmax_ukernel__sse_u8;
       f32_vdiv_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdivc_minmax_ukernel__sse_u8;
       f32_vdiv_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrdivc_minmax_ukernel__sse_u8;
-      f32_vdiv_config.init.f32_minmax = xnn_init_f32_minmax_sse_params;
+      f32_vdiv_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_vdiv_config.minmax.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -611,7 +611,7 @@ static void init_f32_vdiv_config(void) {
       f32_vdiv_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdiv_ukernel__wasmsimd_u16;
       f32_vdiv_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdivc_ukernel__wasmsimd_u16;
       f32_vdiv_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrdivc_ukernel__wasmsimd_u16;
-      f32_vdiv_config.init.f32_minmax = xnn_init_f32_minmax_wasmsimd_params;
+      f32_vdiv_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_vdiv_config.minmax.element_tile = 16;
       f32_vdiv_config.linear.element_tile = 16;
     } else {
@@ -621,7 +621,7 @@ static void init_f32_vdiv_config(void) {
       f32_vdiv_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdiv_ukernel__wasmsimd_u16;
       f32_vdiv_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdivc_ukernel__wasmsimd_u16;
       f32_vdiv_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrdivc_ukernel__wasmsimd_u16;
-      f32_vdiv_config.init.f32_minmax = xnn_init_f32_minmax_wasmsimd_params;
+      f32_vdiv_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_vdiv_config.minmax.element_tile = 16;
       f32_vdiv_config.linear.element_tile = 16;
     }
@@ -827,13 +827,13 @@ static void init_f32_vmul_config(void) {
       f32_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmul_minmax_ukernel__avx_u16;
       f32_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_minmax_ukernel__avx_u16;
       f32_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_minmax_ukernel__avx_u16;
-      f32_vmul_config.init.f32_minmax = xnn_init_f32_minmax_avx_params;
+      f32_vmul_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_vmul_config.minmax.element_tile = 16;
     } else {
       f32_vmul_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmul_minmax_ukernel__sse_u8;
       f32_vmul_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_minmax_ukernel__sse_u8;
       f32_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_minmax_ukernel__sse_u8;
-      f32_vmul_config.init.f32_minmax = xnn_init_f32_minmax_sse_params;
+      f32_vmul_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_vmul_config.minmax.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -846,7 +846,7 @@ static void init_f32_vmul_config(void) {
       f32_vmul_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmul_ukernel__wasmsimd_u16;
       f32_vmul_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_ukernel__wasmsimd_u16;
       f32_vmul_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_ukernel__wasmsimd_u16;
-      f32_vmul_config.init.f32_minmax = xnn_init_f32_minmax_wasmsimd_params;
+      f32_vmul_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_vmul_config.minmax.element_tile = 16;
       f32_vmul_config.linear.element_tile = 16;
     } else {
@@ -856,7 +856,7 @@ static void init_f32_vmul_config(void) {
       f32_vmul_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmul_ukernel__wasmsimd_u16;
       f32_vmul_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_ukernel__wasmsimd_u16;
       f32_vmul_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vmulc_ukernel__wasmsimd_u16;
-      f32_vmul_config.init.f32_minmax = xnn_init_f32_minmax_wasmsimd_params;
+      f32_vmul_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_vmul_config.minmax.element_tile = 16;
       f32_vmul_config.linear.element_tile = 16;
     }
@@ -918,13 +918,13 @@ static void init_f32_vsub_config(void) {
       f32_vsub_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsub_minmax_ukernel__avx_u16;
       f32_vsub_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsubc_minmax_ukernel__avx_u16;
       f32_vsub_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrsubc_minmax_ukernel__avx_u16;
-      f32_vsub_config.init.f32_minmax = xnn_init_f32_minmax_avx_params;
+      f32_vsub_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_vsub_config.minmax.element_tile = 16;
     } else {
       f32_vsub_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsub_minmax_ukernel__sse_u8;
       f32_vsub_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsubc_minmax_ukernel__sse_u8;
       f32_vsub_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrsubc_minmax_ukernel__sse_u8;
-      f32_vsub_config.init.f32_minmax = xnn_init_f32_minmax_sse_params;
+      f32_vsub_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_vsub_config.minmax.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -937,7 +937,7 @@ static void init_f32_vsub_config(void) {
       f32_vsub_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsub_ukernel__wasmsimd_u16;
       f32_vsub_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsubc_ukernel__wasmsimd_u16;
       f32_vsub_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrsubc_ukernel__wasmsimd_u16;
-      f32_vsub_config.init.f32_minmax = xnn_init_f32_minmax_wasmsimd_params;
+      f32_vsub_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_vsub_config.minmax.element_tile = 16;
       f32_vsub_config.linear.element_tile = 16;
     } else {
@@ -947,7 +947,7 @@ static void init_f32_vsub_config(void) {
       f32_vsub_config.linear.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsub_ukernel__wasmsimd_u16;
       f32_vsub_config.linear.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vsubc_ukernel__wasmsimd_u16;
       f32_vsub_config.linear.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrsubc_ukernel__wasmsimd_u16;
-      f32_vsub_config.init.f32_minmax = xnn_init_f32_minmax_wasmsimd_params;
+      f32_vsub_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
       f32_vsub_config.minmax.element_tile = 16;
       f32_vsub_config.linear.element_tile = 16;
     }

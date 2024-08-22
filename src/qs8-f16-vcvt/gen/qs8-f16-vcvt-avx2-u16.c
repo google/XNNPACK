@@ -28,8 +28,8 @@ void xnn_qs8_f16_vcvt_ukernel__avx2_u16(
   assert(output != NULL);
 
   uint16_t* o = (uint16_t*) output;
-  const __m256i vzero_point = _mm256_set1_epi32(params->avx.zero_point);
-  const __m256 vscale = _mm256_set1_ps(params->avx.scale);
+  const __m256i vzero_point = _mm256_set1_epi32(params->scalar.zero_point);
+  const __m256 vscale = _mm256_set1_ps(params->scalar.scale);
   XNN_FORCE_REALIZATION(vzero_point);
   XNN_FORCE_REALIZATION(vscale);
   for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {

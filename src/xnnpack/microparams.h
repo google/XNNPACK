@@ -84,18 +84,6 @@ union xnn_f32_scaleminmax_params {
     float min;
     float max;
   } scalar;
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    float scale;
-    float min;
-    float max;
-  } sse;
-  struct {
-    float scale;
-    float min;
-    float max;
-  } avx;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 
@@ -117,22 +105,6 @@ union xnn_f16_minmax_params {
   struct {
     float min;
     float max;
-  } sse;
-  struct {
-    float min;
-    float max;
-  } avx;
-  struct {
-    float min;
-    float max;
-  } avx512vnni;
-  struct {
-    float min;
-    float max;
-  } avxvnni;
-  struct {
-    float min;
-    float max;
   } scalar;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
@@ -142,36 +114,6 @@ union xnn_f32_minmax_params {
     float min;
     float max;
   } scalar;
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    float min;
-    float max;
-  } sse;
-  struct {
-    float min;
-    float max;
-  } avx;
-  struct {
-    float min;
-    float max;
-  } avx512vnni;
-  struct {
-    float min;
-    float max;
-  } avxvnni;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  struct {
-    float min;
-    float max;
-  } wasmsimd;
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-#if XNN_ARCH_HEXAGON
-  struct {
-    float min;
-    float max;
-  } hvx;
-#endif //XNN_ARCH_HEXAGON
 };
 
 union xnn_f16_qc4w_minmax_params {
@@ -709,7 +651,7 @@ union xnn_qs8_f16_cvt_params {
   struct {
     int32_t zero_point;
     float scale;
-  } avx;
+  } scalar;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
@@ -831,7 +773,7 @@ union xnn_f16_lrelu_params {
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   struct {
     float slope;
-  } avx;
+  } scalar;
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 

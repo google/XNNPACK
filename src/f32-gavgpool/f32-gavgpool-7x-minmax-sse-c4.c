@@ -49,9 +49,9 @@ void xnn_f32_gavgpool_minmax_ukernel_7x__sse_c4(
   if (rows <= 6) {
     i6 = zero;
   }
-  const __m128 vscale = _mm_set1_ps(params->sse.scale);
-  const __m128 vmin = _mm_set1_ps(params->sse.min);
-  const __m128 vmax = _mm_set1_ps(params->sse.max);
+  const __m128 vscale = _mm_set1_ps(params->scalar.scale);
+  const __m128 vmin = _mm_set1_ps(params->scalar.min);
+  const __m128 vmax = _mm_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vscale);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);

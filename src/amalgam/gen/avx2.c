@@ -658,8 +658,8 @@ void xnn_f16_pavgpool_minmax_ukernel_9p8x__avx2_c8(
   assert(kernel_elements > 9);
   assert(channels != 0);
 
-  const __m256 voutput_min = _mm256_set1_ps(params->avx.min);
-  const __m256 voutput_max = _mm256_set1_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(voutput_min);
   XNN_FORCE_REALIZATION(voutput_max);
 
@@ -994,8 +994,8 @@ void xnn_f16_pavgpool_minmax_ukernel_9x__avx2_c8(
   assert(kernel_elements <= 9);
   assert(channels != 0);
 
-  const __m256 voutput_min = _mm256_set1_ps(params->avx.min);
-  const __m256 voutput_max = _mm256_set1_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(voutput_min);
   XNN_FORCE_REALIZATION(voutput_max);
 
@@ -7397,8 +7397,8 @@ void xnn_qs8_f16_vcvt_ukernel__avx2_u16(
   assert(output != NULL);
 
   uint16_t* o = (uint16_t*) output;
-  const __m256i vzero_point = _mm256_set1_epi32(params->avx.zero_point);
-  const __m256 vscale = _mm256_set1_ps(params->avx.scale);
+  const __m256i vzero_point = _mm256_set1_epi32(params->scalar.zero_point);
+  const __m256 vscale = _mm256_set1_ps(params->scalar.scale);
   XNN_FORCE_REALIZATION(vzero_point);
   XNN_FORCE_REALIZATION(vscale);
   for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {

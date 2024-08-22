@@ -1341,35 +1341,12 @@ size_t xnn_init_f32_scale_scalar_params(
   return sizeof(params[0]);
 }
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_scaleminmax_avx_params(
-  union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  float min,
-  float max)
-{
-  params->avx.scale = scale;
-  params->avx.min = min;
-  params->avx.max = max;
-  return sizeof(params->avx);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
 void xnn_update_f32_scaleminmax_scalar_params(
   union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale)
 {
   params->scalar.scale = scale;
 }
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-void xnn_update_f32_scaleminmax_sse_params(
-  union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
-  float scale)
-{
-  params->sse.scale = scale;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_f16_scaleminmax_fp16arith_params(
@@ -1432,20 +1409,6 @@ size_t xnn_init_f32_scaleminmax_scalar_params(
   params->scalar.max = max;
   return sizeof(params->scalar);
 }
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_scaleminmax_sse_params(
-  union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  float min,
-  float max)
-{
-  params->sse.scale = scale;
-  params->sse.min = min;
-  params->sse.max = max;
-  return sizeof(params->sse);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 size_t xnn_init_f32_gavgpool_scalar_params(
   union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
@@ -1610,30 +1573,6 @@ size_t xnn_init_f16_minmax_fp16arith_params(
 }
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_minmax_avx_params(
-  union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t min,
-  uint16_t max)
-{
-  const float min_f32 = fp16_ieee_to_fp32_value(min);
-  const float max_f32 = fp16_ieee_to_fp32_value(max);
-  params->avx.min = min_f32;
-  params->avx.max = max_f32;
-  return sizeof(params->avx);
-}
-
-size_t xnn_init_f16_minmax_avxvnni_params(
-  union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t min,
-  uint16_t max)
-{
-  const float min_f32 = fp16_ieee_to_fp32_value(min);
-  const float max_f32 = fp16_ieee_to_fp32_value(max);
-  params->avxvnni.min = min_f32;
-  params->avxvnni.max = max_f32;
-  return sizeof(params->avxvnni);
-}
-
 size_t xnn_init_f16_minmax_scalar_params(
   union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t min,
@@ -1706,70 +1645,6 @@ size_t xnn_init_f16_qb4w_minmax_scalar32_params(
   return sizeof(params->scalar);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f32_minmax_sse_params(
-  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  float output_min,
-  float output_max)
-{
-  params->sse.min = output_min;
-  params->sse.max = output_max;
-  return sizeof(params->sse);
-}
-
-size_t xnn_init_f32_minmax_avx_params(
-  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  float output_min,
-  float output_max)
-{
-  params->avx.min = output_min;
-  params->avx.max = output_max;
-  return sizeof(params->avx);
-}
-
-size_t xnn_init_f32_minmax_avx512vnni_params(
-  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  float output_min,
-  float output_max) {
-  params->avx512vnni.min = output_min;
-  params->avx512vnni.max = output_max;
-  return sizeof(params->avx512vnni);
-}
-
-size_t xnn_init_f32_minmax_avxvnni_params(
-  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  float output_min,
-  float output_max) {
-  params->avxvnni.min = output_min;
-  params->avxvnni.max = output_max;
-  return sizeof(params->avxvnni);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-size_t xnn_init_f32_minmax_wasmsimd_params(
-  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  float output_min,
-  float output_max)
-{
-  params->wasmsimd.min = output_min;
-  params->wasmsimd.max = output_max;
-  return sizeof(params->wasmsimd);
-}
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-#if XNN_ARCH_HEXAGON
-size_t xnn_init_f32_minmax_hvx_params(
-  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  float output_min,
-  float output_max)
-{
-  params->hvx.min = output_min;
-  params->hvx.max = output_max;
-  return sizeof(params->hvx);
-}
-#endif // XNN_ARCH_HEXAGON
 
 size_t xnn_init_f32_minmax_scalar_params(
   union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2124,12 +1999,12 @@ size_t xnn_init_f16_lrelu_fp16arith_params(
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_lrelu_avx_params(
+size_t xnn_init_f16_lrelu_scalar_params(
   union xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t slope)
 {
-  params->avx.slope = fp16_ieee_to_fp32_value(slope);
-  return sizeof(params->avx);
+  params->scalar.slope = fp16_ieee_to_fp32_value(slope);
+  return sizeof(params->scalar);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
@@ -2564,14 +2439,14 @@ size_t xnn_init_qs8_f16_cvt_neonfp16arith_params(
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_qs8_f16_cvt_avx_params(
+size_t xnn_init_qs8_f16_cvt_scalar_params(
   union xnn_qs8_f16_cvt_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale,
   int8_t zero_point)
 {
-  params->avx.zero_point = (int32_t) zero_point;
-  params->avx.scale = fp16_ieee_to_fp32_value(scale);
-  return sizeof(params->avx);
+  params->scalar.zero_point = (int32_t) zero_point;
+  params->scalar.scale = fp16_ieee_to_fp32_value(scale);
+  return sizeof(params->scalar);
 }
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 

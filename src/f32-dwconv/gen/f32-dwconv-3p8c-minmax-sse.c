@@ -29,8 +29,8 @@ void xnn_f32_dwconv_minmax_ukernel_3p8c__sse(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const __m128 vmax = _mm_set1_ps(params->sse.max);
-  const __m128 vmin = _mm_set1_ps(params->sse.min);
+  const __m128 vmax = _mm_set1_ps(params->scalar.max);
+  const __m128 vmin = _mm_set1_ps(params->scalar.min);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
   do {

@@ -27,8 +27,8 @@ void xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8(
   assert(kernel_elements != 0);
   assert(channels != 0);
 
-  const __m256 voutput_min = _mm256_set1_ps(params->avx.min);
-  const __m256 voutput_max = _mm256_set1_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(voutput_min);
   XNN_FORCE_REALIZATION(voutput_max);
   do {

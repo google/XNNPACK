@@ -47,7 +47,7 @@ static void init_f16_maxpool_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_f16c) {
       f16_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8;
-      f16_maxpool_config.init.f16 = xnn_init_f16_minmax_avx_params;
+      f16_maxpool_config.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_maxpool_config.first_pass_tile_size = 9;
       f16_maxpool_config.remainder_pass_tile_size = 8;
     }
@@ -76,7 +76,7 @@ static void init_f32_maxpool_config(void) {
     f32_maxpool_config.remainder_pass_tile_size = 8;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p8x__sse_c4;
-    f32_maxpool_config.init.f32 = xnn_init_f32_minmax_sse_params;
+    f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_maxpool_config.first_pass_tile_size = 9;
     f32_maxpool_config.remainder_pass_tile_size = 8;
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
@@ -84,12 +84,12 @@ static void init_f32_maxpool_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {
       f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p8x__wasmsimd_x86_c4;
-      f32_maxpool_config.init.f32 = xnn_init_f32_minmax_wasmsimd_params;
+      f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
       f32_maxpool_config.first_pass_tile_size = 9;
       f32_maxpool_config.remainder_pass_tile_size = 8;
     } else {
       f32_maxpool_config.ukernel = (xnn_maxpool_ukernel_fn) xnn_f32_maxpool_minmax_ukernel_9p8x__wasmsimd_arm_c4;
-      f32_maxpool_config.init.f32 = xnn_init_f32_minmax_wasmsimd_params;
+      f32_maxpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
       f32_maxpool_config.first_pass_tile_size = 9;
       f32_maxpool_config.remainder_pass_tile_size = 8;
     }

@@ -1251,7 +1251,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p4c__sse,
-                        xnn_init_f32_minmax_sse_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_SSE;
@@ -1269,7 +1269,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p4c__sse_acc2,
-                        xnn_init_f32_minmax_sse_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_SSE;
@@ -1287,7 +1287,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p8c__sse,
-                        xnn_init_f32_minmax_sse_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_SSE;
@@ -1305,7 +1305,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p8c__sse_acc2,
-                        xnn_init_f32_minmax_sse_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_SSE;
@@ -1323,7 +1323,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p4c__sse,
-                        xnn_init_f32_minmax_sse_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_SSE;
@@ -1341,7 +1341,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p4c__sse_acc2,
-                        xnn_init_f32_minmax_sse_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_SSE;
@@ -1359,7 +1359,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p8c__sse,
-                        xnn_init_f32_minmax_sse_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_SSE;
@@ -1377,7 +1377,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p8c__sse_acc2,
-                        xnn_init_f32_minmax_sse_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_SSE;
@@ -1395,7 +1395,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p4c__sse,
-                        xnn_init_f32_minmax_sse_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_SSE;
@@ -1413,7 +1413,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p4c__sse_acc2,
-                        xnn_init_f32_minmax_sse_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_SSE;
@@ -1431,7 +1431,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p8c__sse,
-                        xnn_init_f32_minmax_sse_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_SSE;
@@ -1449,7 +1449,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p8c__sse_acc2,
-                        xnn_init_f32_minmax_sse_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_SSE;
@@ -1467,7 +1467,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p4c__sse,
-                        xnn_init_f32_minmax_sse_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_SSE;
@@ -1485,7 +1485,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p4c__sse_acc2,
-                        xnn_init_f32_minmax_sse_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_SSE;
@@ -1503,7 +1503,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p8c__sse,
-                        xnn_init_f32_minmax_sse_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_SSE;
@@ -1521,7 +1521,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p8c__sse_acc2,
-                        xnn_init_f32_minmax_sse_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_SSE;
@@ -1539,7 +1539,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p8c__avx,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_AVX;
@@ -1557,7 +1557,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p8c__avx_acc2,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_AVX;
@@ -1575,7 +1575,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p16c__avx,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_AVX;
@@ -1593,7 +1593,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p16c__avx_acc2,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_AVX;
@@ -1611,7 +1611,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p8c__avx,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_AVX;
@@ -1629,7 +1629,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p8c__avx_acc2,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_AVX;
@@ -1647,7 +1647,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p16c__avx,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_AVX;
@@ -1665,7 +1665,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p16c__avx_acc2,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_AVX;
@@ -1683,7 +1683,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p8c__avx,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_AVX;
@@ -1701,7 +1701,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p8c__avx_acc2,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_AVX;
@@ -1719,7 +1719,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p16c__avx,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_AVX;
@@ -1737,7 +1737,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p16c__avx_acc2,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_AVX;
@@ -1755,7 +1755,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p8c__avx,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_AVX;
@@ -1773,7 +1773,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p8c__avx_acc2,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_AVX;
@@ -1791,7 +1791,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p16c__avx,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_AVX;
@@ -1809,7 +1809,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p16c__avx_acc2,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_AVX;
@@ -1827,7 +1827,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p8c__fma3,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_FMA3;
@@ -1845,7 +1845,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p8c__fma3_acc2,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_FMA3;
@@ -1863,7 +1863,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p16c__fma3,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_FMA3;
@@ -1881,7 +1881,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p16c__fma3_acc2,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_FMA3;
@@ -1899,7 +1899,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p8c__fma3,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_FMA3;
@@ -1917,7 +1917,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p8c__fma3_acc2,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_FMA3;
@@ -1935,7 +1935,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p16c__fma3,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_FMA3;
@@ -1953,7 +1953,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p16c__fma3_acc2,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_FMA3;
@@ -1971,7 +1971,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p8c__fma3,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_FMA3;
@@ -1989,7 +1989,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p8c__fma3_acc2,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_FMA3;
@@ -2007,7 +2007,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p16c__fma3,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_FMA3;
@@ -2025,7 +2025,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p16c__fma3_acc2,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_FMA3;
@@ -2043,7 +2043,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p8c__fma3,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_FMA3;
@@ -2061,7 +2061,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p8c__fma3_acc2,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_FMA3;
@@ -2079,7 +2079,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p16c__fma3,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_FMA3;
@@ -2097,7 +2097,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p16c__fma3_acc2,
-                        xnn_init_f32_minmax_avx_params);
+                        xnn_init_f32_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_X86_FMA3;
@@ -2403,7 +2403,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p4c__wasmsimd_arm,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2418,7 +2418,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p4c__wasmsimd_arm_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2433,7 +2433,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p4c__wasmsimd_x86,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2448,7 +2448,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p4c__wasmsimd_x86_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2463,7 +2463,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p8c__wasmsimd_arm,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2478,7 +2478,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p8c__wasmsimd_arm_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2493,7 +2493,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p8c__wasmsimd_x86,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2508,7 +2508,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p8c__wasmsimd_x86_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2523,7 +2523,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p4c__wasmsimd_arm,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2538,7 +2538,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p4c__wasmsimd_arm_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2553,7 +2553,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p4c__wasmsimd_x86,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2568,7 +2568,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p4c__wasmsimd_x86_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2583,7 +2583,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p8c__wasmsimd_arm,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2598,7 +2598,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p8c__wasmsimd_arm_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2613,7 +2613,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p8c__wasmsimd_x86,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2628,7 +2628,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p8c__wasmsimd_x86_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2643,7 +2643,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p4c__wasmsimd_arm,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2658,7 +2658,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p4c__wasmsimd_arm_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2673,7 +2673,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p4c__wasmsimd_x86,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2688,7 +2688,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p4c__wasmsimd_x86_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2703,7 +2703,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p8c__wasmsimd_arm,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2718,7 +2718,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p8c__wasmsimd_arm_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2733,7 +2733,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p8c__wasmsimd_x86,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2748,7 +2748,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p8c__wasmsimd_x86_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2763,7 +2763,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_arm,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2778,7 +2778,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_arm_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2793,7 +2793,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_x86,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2808,7 +2808,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p4c__wasmsimd_x86_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2823,7 +2823,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_arm,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2838,7 +2838,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_arm_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2853,7 +2853,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2868,7 +2868,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p8c__wasmsimd_x86_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2883,7 +2883,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p4c__wasmrelaxedsimd,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2898,7 +2898,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p4c__wasmrelaxedsimd_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2913,7 +2913,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p4c__wasmrelaxedsimd_fma,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2928,7 +2928,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p4c__wasmrelaxedsimd_fma_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2943,7 +2943,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p8c__wasmrelaxedsimd,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2958,7 +2958,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p8c__wasmrelaxedsimd_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2973,7 +2973,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p8c__wasmrelaxedsimd_fma,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -2988,7 +2988,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/3,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_3p8c__wasmrelaxedsimd_fma_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3003,7 +3003,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p4c__wasmrelaxedsimd,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3018,7 +3018,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p4c__wasmrelaxedsimd_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3033,7 +3033,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p4c__wasmrelaxedsimd_fma,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3048,7 +3048,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p4c__wasmrelaxedsimd_fma_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3063,7 +3063,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p8c__wasmrelaxedsimd,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3078,7 +3078,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p8c__wasmrelaxedsimd_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3093,7 +3093,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p8c__wasmrelaxedsimd_fma,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3108,7 +3108,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_4p8c__wasmrelaxedsimd_fma_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3123,7 +3123,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p4c__wasmrelaxedsimd,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3138,7 +3138,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p4c__wasmrelaxedsimd_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3153,7 +3153,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p4c__wasmrelaxedsimd_fma,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3168,7 +3168,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p4c__wasmrelaxedsimd_fma_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3183,7 +3183,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p8c__wasmrelaxedsimd,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3198,7 +3198,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p8c__wasmrelaxedsimd_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3213,7 +3213,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p8c__wasmrelaxedsimd_fma,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3228,7 +3228,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_9p8c__wasmrelaxedsimd_fma_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3243,7 +3243,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3258,7 +3258,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3273,7 +3273,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd_fma,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3288,7 +3288,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p4c__wasmrelaxedsimd_fma_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3303,7 +3303,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p8c__wasmrelaxedsimd,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3318,7 +3318,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p8c__wasmrelaxedsimd_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3333,7 +3333,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p8c__wasmrelaxedsimd_fma,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;
@@ -3348,7 +3348,7 @@ std::vector<DWConvTestParams> CreateTests2(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f32_dwconv_minmax_ukernel_25p8c__wasmrelaxedsimd_fma_acc2,
-                        xnn_init_f32_minmax_wasmsimd_params);
+                        xnn_init_f32_minmax_scalar_params);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
         return info.param.test_name;

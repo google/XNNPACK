@@ -15,10 +15,10 @@
 
 # x86 F16C
 - name: xnn_qs8_f16_vcvt_ukernel__avx2_u16
-  init: xnn_init_qs8_f16_cvt_avx_params
+  init: xnn_init_qs8_f16_cvt_scalar_params
 - name: xnn_qs8_f16_vcvt_ukernel__avx2_u24
-  init: xnn_init_qs8_f16_cvt_avx_params
+  init: xnn_init_qs8_f16_cvt_scalar_params
 - name: xnn_qs8_f16_vcvt_ukernel__avx2_u32
-  init: xnn_init_qs8_f16_cvt_avx_params
+  init: xnn_init_qs8_f16_cvt_scalar_params
 - name: xnn_qs8_f16_vcvt_ukernel__avx2_u64
-  init: xnn_init_qs8_f16_cvt_avx_params
+  init: xnn_init_qs8_f16_cvt_scalar_params
