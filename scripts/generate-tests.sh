@@ -415,5 +415,10 @@ tools/xngen test/s32-simd.cc.in -D ARCH=avx512f -D ARCH_MACRO="XNN_ARCH_X86 || X
 tools/xngen test/s32-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/s32-simd-wasmsimd.cc &
 
 tools/xngen test/s8-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/s8-simd-scalar.cc &
+tools/xngen test/s8-simd.cc.in -D ARCH=sse41 -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/s8-simd-sse41.cc &
+tools/xngen test/s8-simd.cc.in -D ARCH=neon -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/s8-simd-neon.cc &
+tools/xngen test/s8-simd.cc.in -D ARCH=avx2 -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/s8-simd-avx2.cc &
+tools/xngen test/s8-simd.cc.in -D ARCH=avx512bw -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/s8-simd-avx512bw.cc &
+tools/xngen test/s8-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/s8-simd-wasmsimd.cc &
 
 wait

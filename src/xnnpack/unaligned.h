@@ -61,6 +61,11 @@ XNN_INLINE static void unaligned_store_u16(void* address, uint16_t value) {
   *((xnn_unaligned_uint16_t*) address) = value;
 }
 
+XNN_INLINE static void unaligned_store_u8(void* address, uint8_t value) {
+  typedef XNN_UNALIGNED uint8_t xnn_unaligned_uint8_t;
+  *((xnn_unaligned_uint8_t*) address) = value;
+}
+
 XNN_INLINE static void unaligned_store_f32(void* address, float value) {
   typedef XNN_UNALIGNED float xnn_unaligned_float;
   *((xnn_unaligned_float*) address) = value;
