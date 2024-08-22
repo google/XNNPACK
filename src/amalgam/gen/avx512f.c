@@ -5485,6 +5485,36 @@ void xnn_f32_vtanh_ukernel__avx512f_rational_9_6_nr_u16(
   }
 }
 
+void xnn_s32_vclz_ukernel__avx512f_u16(
+    size_t batch,
+    const int32_t* input,
+    int32_t* output,
+    const union xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(int32_t) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+  assert(xnn_simd_size_s32 == 16);
+
+  for (; batch >= xnn_simd_bytes_s32; batch -= xnn_simd_bytes_s32) {
+    xnn_simd_s32_t vin = xnn_loadu_s32(input);
+    input += xnn_simd_size_s32;
+
+    xnn_simd_s32_t vy = xnn_clz_s32(vin);
+
+    xnn_storeu_s32(output, vy);
+    output += xnn_simd_size_s32;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    xnn_simd_s32_t vin = xnn_load_tail_s32(input, batch >> XNN_LOG2_SIZEOF_INT32_T);
+
+    xnn_simd_s32_t vy = xnn_clz_s32(vin);
+
+    xnn_store_tail_s32(output, vy, batch >> XNN_LOG2_SIZEOF_INT32_T);
+  }
+}
+
 void xnn_s32_vmul_ukernel__avx512f_u32(
     size_t batch,
     const int32_t* input_a,

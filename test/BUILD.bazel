@@ -277,6 +277,7 @@ xnnpack_cc_library(
     "f32_vsqr",
     "f32_vsqrt",
     "f32_vtanh",
+    "s32_clz",
     "s8_vclamp",
     "u8_vclamp",
     "u64_u32_vsqrtshift",
@@ -1479,6 +1480,7 @@ xnnpack_binary(
     "bankers_rounding_nc",
     "ceiling_nc",
     "clamp_nc",
+    "clz_nc",
     "elu_nc",
     "exp_nc",
     "floor_nc",
@@ -1940,6 +1942,7 @@ xnnpack_cc_library(
     "bankers_rounding",
     "ceiling",
     "clamp",
+    "clz"
     "convert",
     "copy",
     "elu",

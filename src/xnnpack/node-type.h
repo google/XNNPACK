@@ -34,6 +34,7 @@ enum xnn_node_type {
   xnn_node_type_convolution_2d,
   xnn_node_type_copy,
   xnn_node_type_copysign,
+  xnn_node_type_clz,
   xnn_node_type_deconvolution_2d,
   xnn_node_type_depth_to_space_2d,
   xnn_node_type_depthwise_convolution_2d,

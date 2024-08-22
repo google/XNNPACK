@@ -38,6 +38,10 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return vminq_s32(a, b);
 }
 
+static XNN_INLINE xnn_simd_s32_t xnn_clz_s32(xnn_simd_s32_t a) {
+  return vclzq_s32(a);
+}
+
 // Load/store operations.
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {
   return vld1q_s32(ptr);

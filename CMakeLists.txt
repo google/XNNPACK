@@ -378,6 +378,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/batch-matrix-multiply.c
   src/subgraph/ceiling.c
   src/subgraph/clamp.c
+  src/subgraph/clz.c
   src/subgraph/concatenate.c
   src/subgraph/convert.c
   src/subgraph/convolution-2d.c
@@ -1440,6 +1441,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(clamp-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
     ADD_TEST(NAME clamp-nc-test COMMAND clamp-nc-test)
 
+    ADD_EXECUTABLE(clz-nc-test test/clz-nc.cc)
+    TARGET_INCLUDE_DIRECTORIES(clz-nc-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(clz-nc-test PRIVATE XNNPACK unary-operator-tester fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME clz-nc-test COMMAND clz-nc-test)
+
     ADD_EXECUTABLE(constant-pad-nd-test test/constant-pad-nd.cc)
     TARGET_INCLUDE_DIRECTORIES(constant-pad-nd-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(constant-pad-nd-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main)
@@ -1806,6 +1812,11 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(clamp-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
     ADD_TEST(NAME clamp-test COMMAND clamp-test)
 
+    ADD_EXECUTABLE(clz-test test/clz.cc)
+    TARGET_INCLUDE_DIRECTORIES(clz-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(clz-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main subgraph)
+    ADD_TEST(NAME clz-test COMMAND clz-test)
+  
     ADD_EXECUTABLE(concatenate2-test test/concatenate2.cc)
     TARGET_INCLUDE_DIRECTORIES(concatenate2-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(concatenate2-test PRIVATE XNNPACK GTest::gtest GTest::gtest_main subgraph fp16)
@@ -3476,6 +3487,12 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(s8-vclamp-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main)
   TARGET_LINK_LIBRARIES(s8-vclamp-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
   ADD_TEST(NAME s8-vclamp-test COMMAND s8-vclamp-test)
+
+  ADD_EXECUTABLE(s32-vclz-test test/s32-vclz.cc)
+  TARGET_INCLUDE_DIRECTORIES(s32-vclz-test PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(s32-vclz-test PRIVATE fp16 pthreadpool GTest::gtest GTest::gtest_main microparams-init)
+  TARGET_LINK_LIBRARIES(s32-vclz-test PRIVATE vunary-microkernel-tester hardware-config logging microkernels-all microparams-init)
+  ADD_TEST(NAME s32-vclz-test COMMAND s32-vclz-test)
 
   ADD_EXECUTABLE(u8-lut32norm-test test/u8-lut32norm.cc)
   TARGET_INCLUDE_DIRECTORIES(u8-lut32norm-test PRIVATE include src test)

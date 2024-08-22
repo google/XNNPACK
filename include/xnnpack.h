@@ -1682,6 +1682,22 @@ enum xnn_status xnn_define_clamp(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a Count Leading Zeros Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param input_id - Value ID for the input tensor. The input tensor must be
+/// defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be
+/// defined in the @a subgraph, and its
+///                    shape must match the shape of the input tensor.
+/// @param flags - binary features of the Count Leading Zeros Node. No supported
+/// flags are currently defined.
+enum xnn_status xnn_define_clz(
+  xnn_subgraph_t subgraph,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define an ELU (Exponential Linear Unit) Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
@@ -2810,6 +2826,23 @@ enum xnn_status xnn_setup_clamp_nc_u8(
   xnn_operator_t clamp_op,
   const uint8_t* input,
   uint8_t* output);
+
+enum xnn_status xnn_create_clz_nc_s32(
+  uint32_t flags,
+  xnn_operator_t* clz_op_out);
+
+enum xnn_status xnn_reshape_clz_nc_s32(
+  xnn_operator_t clz_op,
+  size_t batch_size,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_clz_nc_s32(
+  xnn_operator_t clz_op,
+  const int32_t* input,
+  int32_t* output);
 
 enum xnn_status xnn_create_constant_pad_nd_x8(
   const void* padding_value,

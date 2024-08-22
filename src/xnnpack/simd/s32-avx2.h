@@ -43,6 +43,45 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return _mm256_min_epi32(a, b);
 }
 
+static XNN_INLINE xnn_simd_s32_t xnn_clz_s32(xnn_simd_s32_t a) {
+  __m128i lowi = _mm256_extracti128_si256(a, 0);
+  __m128i highi = _mm256_extracti128_si256(a, 1);
+
+  __m256d low = _mm256_cvtepi32_pd(lowi);
+  __m256d high = _mm256_cvtepi32_pd(highi);
+  xnn_simd_s32_t low_a = _mm256_castpd_si256(low);
+  xnn_simd_s32_t high_a = _mm256_castpd_si256(high);
+
+  xnn_simd_s32_t shift_low = _mm256_srli_epi64(low_a, 52);
+  xnn_simd_s32_t shift_high = _mm256_srli_epi64(high_a, 52);
+
+  xnn_simd_s32_t idx = _mm256_setr_epi32(1, 3, 5, 7, 0, 2, 4, 6);
+
+  xnn_simd_s32_t low_exp = _mm256_permutevar8x32_epi32(shift_low, idx);
+  xnn_simd_s32_t high_exp = _mm256_permutevar8x32_epi32(shift_high, idx);
+
+  xnn_simd_s32_t exponent = _mm256_inserti128_si256(
+      _mm256_castsi128_si256(_mm256_extracti128_si256(low_exp, 1)),
+      _mm256_extracti128_si256(high_exp, 1), 1);
+
+  exponent = _mm256_and_si256(exponent, _mm256_set1_epi32(0x7FF));
+
+  xnn_simd_s32_t result =
+      _mm256_sub_epi32(_mm256_set1_epi32(31),
+                       _mm256_sub_epi32(exponent, _mm256_set1_epi32(1023)));
+
+  xnn_simd_s32_t zero = _mm256_setzero_si256();
+  xnn_simd_s32_t mask = _mm256_cmpgt_epi32(zero, a);
+  result = _mm256_andnot_si256(mask, result);
+
+  xnn_simd_s32_t thirty_two = _mm256_set1_epi32(32);
+  xnn_simd_s32_t maskz = _mm256_cmpeq_epi32(a, zero);
+
+  result = _mm256_blendv_epi8(result, thirty_two, maskz);
+
+  return result;
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {

@@ -111,6 +111,8 @@
   string: "Copy (NC, X32)"
 - name: xnn_operator_type_copysign_nd_f32
   string: "Copy Sign (NC, F32)"
+- name: xnn_operator_type_clz_nc_s32
+  string: "Count Leading Zeros (NC, S32)"
 - name: xnn_operator_type_deconvolution_nhwc_f16
   string: "Deconvolution (NHWC, F16)"
 - name: xnn_operator_type_deconvolution_nhwc_f32

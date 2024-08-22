@@ -39,6 +39,8 @@
   string: "Copy"
 - name: xnn_node_type_copysign
   string: "Copy Sign"
+- name: xnn_node_type_clz
+  string: "Count Leading Zeros"
 - name: xnn_node_type_deconvolution_2d
   string: "Deconvolution 2D"
 - name: xnn_node_type_depth_to_space_2d
