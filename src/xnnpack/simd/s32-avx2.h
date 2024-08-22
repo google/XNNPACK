@@ -52,18 +52,19 @@ static XNN_INLINE xnn_simd_s32_t xnn_clz_s32(xnn_simd_s32_t a) {
   xnn_simd_s32_t low_a = _mm256_castpd_si256(low);
   xnn_simd_s32_t high_a = _mm256_castpd_si256(high);
 
-  xnn_simd_s32_t shift_low = _mm256_and_si256(_mm256_srli_epi64(low_a, 52) , _mm256_set1_epi32(0x7FF));
-  xnn_simd_s32_t shift_high = _mm256_and_si256(_mm256_srli_epi64(high_a, 52), _mm256_set1_epi32(0x7FF));
+  xnn_simd_s32_t shift_low = _mm256_srli_epi64(low_a, 52);
+  xnn_simd_s32_t shift_high = _mm256_srli_epi64(high_a, 52);
 
-  xnn_simd_s32_t exponent =
-      _mm256_set_epi32(_mm256_extract_epi32(shift_high, 6),
-                       _mm256_extract_epi32(shift_high, 4),
-                       _mm256_extract_epi32(shift_high, 2),
-                       _mm256_extract_epi32(shift_high, 0),
-                       _mm256_extract_epi32(shift_low, 6),
-                       _mm256_extract_epi32(shift_low, 4),
-                       _mm256_extract_epi32(shift_low, 2),
-                       _mm256_extract_epi32(shift_low, 0));
+  xnn_simd_s32_t idx = _mm256_setr_epi32(1, 3, 5, 7, 0, 2, 4, 6);
+
+  xnn_simd_s32_t low_exp = _mm256_permutevar8x32_epi32(shift_low, idx);
+  xnn_simd_s32_t high_exp = _mm256_permutevar8x32_epi32(shift_high, idx);
+
+  xnn_simd_s32_t exponent = _mm256_inserti128_si256(
+    _mm256_castsi128_si256(_mm256_extracti128_si256(low_exp, 1)), _mm256_extracti128_si256(high_exp, 1), 1
+  );
+
+  exponent = _mm256_and_si256(exponent, _mm256_set1_epi32(0x7FF));
 
   xnn_simd_s32_t result =
       _mm256_sub_epi32(_mm256_set1_epi32(31),

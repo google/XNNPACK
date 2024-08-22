@@ -51,14 +51,15 @@ static XNN_INLINE xnn_simd_s32_t xnn_clz_s32(xnn_simd_s32_t a) {
   xnn_simd_s32_t low_a = _mm_castpd_si128(low);
   xnn_simd_s32_t high_a = _mm_castpd_si128(high);
 
-  xnn_simd_s32_t shift_low = _mm_and_si128(_mm_srli_epi64(low_a, 52), _mm_set1_epi32(0x7FF));
-  xnn_simd_s32_t shift_high =_mm_and_si128(_mm_srli_epi64(high_a, 52), _mm_set1_epi32(0x7FF));
+  xnn_simd_s32_t shift_low = _mm_srli_epi64(low_a, 52);
+  xnn_simd_s32_t shift_high = _mm_srli_epi64(high_a, 52);
 
-  xnn_simd_s32_t exponent =
-      _mm_set_epi32(_mm_extract_epi32(shift_high, 2),
-                    _mm_extract_epi32(shift_high, 0),
-                    _mm_extract_epi32(shift_low, 2),
-                    _mm_extract_epi32(shift_low, 0));
+  xnn_simd_s32_t low_exp = _mm_shuffle_epi32(shift_low, _MM_SHUFFLE(3, 1, 2, 0));
+  xnn_simd_s32_t high_exp = _mm_shuffle_epi32(shift_high, _MM_SHUFFLE(2, 0, 3, 1));
+
+  xnn_simd_s32_t exponent = _mm_blend_epi16(low_exp, high_exp, 0b11110000);
+
+  exponent =  _mm_and_si128(exponent, _mm_set1_epi32(0x7FF));
 
   xnn_simd_s32_t result = _mm_sub_epi32(_mm_set1_epi32(31), _mm_sub_epi32(exponent, _mm_set1_epi32(1023)));
 
