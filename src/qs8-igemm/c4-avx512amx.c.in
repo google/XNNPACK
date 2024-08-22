@@ -24,7 +24,7 @@ $if PREFETCH:
 $GFNI = 0
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8_F16" : "qd8_f16_qc8w", "QD8_F32": "qd8_f32_qc8w"}[DATATYPE]
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
-$PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx512"
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar"
 $PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8_F16": "xnn_f16_minmax_params", "QD8_F32": "xnn_f32_minmax_params"}[DATATYPE]
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $OUT_T = {"QC8": "int8_t", "QD8_F16": "void", "QD8_F32": "float"}[DATATYPE]
@@ -130,12 +130,18 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
   $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
     const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
     const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+    // XNN_FORCE_REALIZATION(voutput_min);
+    // XNN_FORCE_REALIZATION(voutput_max);
     $if DATATYPE in ["QC4_F16", "QC4_F32"]:
       const __m256i vmask = _mm256_set1_epi8(params->scalar.mask);
+      XNN_FORCE_REALIZATION(vmask);
   $else:
-    const __m512 voutput_max_less_zero_point = _mm512_set1_ps(params->${PARAMS_STRUCT}.output_max_less_zero_point);
+    const __m512 voutput_max_less_zero_point = _mm512_set1_ps((int32_t) params->${PARAMS_STRUCT}.output_max - (int32_t) params->${PARAMS_STRUCT}.output_zero_point);
     const __m512i voutput_zero_point = _mm512_set1_epi32(params->${PARAMS_STRUCT}.output_zero_point);
-    const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
+    const __m128i voutput_min = _mm_set1_epi8(params->${PARAMS_STRUCT}.output_min);
+    // XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+    // XNN_FORCE_REALIZATION(voutput_zero_point);
+    // XNN_FORCE_REALIZATION(voutput_min);
 
   do {
     $for N in range(0, NR, 16):

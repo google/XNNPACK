@@ -149,6 +149,8 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_16x64c4__avx512amx(
 
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
 
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_load_epi32((const int32_t*) w + 0);
@@ -968,6 +970,8 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x64c4__avx512amx(
 
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
 
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_load_epi32((const int32_t*) w + 0);
@@ -1237,6 +1241,8 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_16x64c4__avx512amx(
 
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
 
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_loadu_epi32((const int32_t*) w + 0);
@@ -2279,6 +2285,8 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x64c4__avx512amx(
 
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
 
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_loadu_epi32((const int32_t*) w + 0);
@@ -2560,8 +2568,10 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_16x64c4__avx512amx(
     c15 = c14;
   }
 
-  const __m512 voutput_min = _mm512_set1_ps(params->avx512vnni.min);
-  const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
+  const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
+  const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
   const __m512i vmask = _mm512_set1_epi8(0xF0);
   const __m512i vshl4 = _mm512_set1_epi64(0x01020408);
   XNN_FORCE_REALIZATION(vmask);
@@ -3572,8 +3582,10 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x64c4__avx512amx(
 
   float* c0 = c;
 
-  const __m512 voutput_min = _mm512_set1_ps(params->avx512vnni.min);
-  const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
+  const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
+  const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
   const __m512i vmask = _mm512_set1_epi8(0xF0);
   const __m512i vshl4 = _mm512_set1_epi64(0x01020408);
   XNN_FORCE_REALIZATION(vmask);
@@ -4030,6 +4042,8 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_16x64c4__avx512amx(
 
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
 
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_load_epi32((const int32_t*) w + 0);
@@ -4785,6 +4799,8 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x64c4__avx512amx(
 
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
 
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_load_epi32((const int32_t*) w + 0);
@@ -5050,6 +5066,8 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_16x64c4__avx512amx(
 
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
 
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_loadu_epi32((const int32_t*) w + 0);
@@ -6028,6 +6046,8 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x64c4__avx512amx(
 
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
 
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_loadu_epi32((const int32_t*) w + 0);
@@ -6303,9 +6323,12 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_16x64c4__avx512amx(
     c15 = c14;
   }
 
-  const __m512 voutput_max_less_zero_point = _mm512_set1_ps(params->fp32_avx512.output_max_less_zero_point);
-  const __m512i voutput_zero_point = _mm512_set1_epi32(params->fp32_avx512.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx512.output_min);
+  const __m512 voutput_max_less_zero_point = _mm512_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m512i voutput_zero_point = _mm512_set1_epi32(params->fp32_scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->fp32_scalar.output_min);
+  // XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  // XNN_FORCE_REALIZATION(voutput_zero_point);
+  // XNN_FORCE_REALIZATION(voutput_min);
 
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_load_epi32((const int32_t*) w + 0);
@@ -7119,9 +7142,12 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x64c4__avx512amx(
 
   int8_t* c0 = c;
 
-  const __m512 voutput_max_less_zero_point = _mm512_set1_ps(params->fp32_avx512.output_max_less_zero_point);
-  const __m512i voutput_zero_point = _mm512_set1_epi32(params->fp32_avx512.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx512.output_min);
+  const __m512 voutput_max_less_zero_point = _mm512_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m512i voutput_zero_point = _mm512_set1_epi32(params->fp32_scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->fp32_scalar.output_min);
+  // XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  // XNN_FORCE_REALIZATION(voutput_zero_point);
+  // XNN_FORCE_REALIZATION(voutput_min);
 
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_load_epi32((const int32_t*) w + 0);
@@ -7384,9 +7410,12 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x64c4__avx512amx(
     c15 = c14;
   }
 
-  const __m512 voutput_max_less_zero_point = _mm512_set1_ps(params->fp32_avx512.output_max_less_zero_point);
-  const __m512i voutput_zero_point = _mm512_set1_epi32(params->fp32_avx512.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx512.output_min);
+  const __m512 voutput_max_less_zero_point = _mm512_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m512i voutput_zero_point = _mm512_set1_epi32(params->fp32_scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->fp32_scalar.output_min);
+  // XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  // XNN_FORCE_REALIZATION(voutput_zero_point);
+  // XNN_FORCE_REALIZATION(voutput_min);
 
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_loadu_epi32((const int32_t*) w + 0);
@@ -8390,9 +8419,12 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x64c4__avx512amx(
 
   int8_t* c0 = c;
 
-  const __m512 voutput_max_less_zero_point = _mm512_set1_ps(params->fp32_avx512.output_max_less_zero_point);
-  const __m512i voutput_zero_point = _mm512_set1_epi32(params->fp32_avx512.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx512.output_min);
+  const __m512 voutput_max_less_zero_point = _mm512_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m512i voutput_zero_point = _mm512_set1_epi32(params->fp32_scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->fp32_scalar.output_min);
+  // XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  // XNN_FORCE_REALIZATION(voutput_zero_point);
+  // XNN_FORCE_REALIZATION(voutput_min);
 
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_loadu_epi32((const int32_t*) w + 0);

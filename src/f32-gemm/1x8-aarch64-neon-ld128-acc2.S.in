@@ -40,6 +40,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_1x8__asm_aarch64_neon_ld
         $if DATATYPE == "QC4":
           # Load min/max/zerop values
           LD3R        {v4.4s, v5.4s, v6.4s}, [x8]
+          NEG         v6.4s, v6.4s
           MOVI        v7.8b, 15
         $else:
           # Load min/max values

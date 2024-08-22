@@ -51,7 +51,15 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x4__scalar_fmagic(
     c3 = c2;
   }
 
-  const int32_t vb_zero_point = params->fp32_scalar_fmagic.kernel_zero_point;
+  const int32_t output_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t output_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const float vscale = params->fp32_scalar.scale;
+  const float voutput_min_less_zero_point = output_min_less_zero_point;
+  const float voutput_max_less_zero_point = output_max_less_zero_point;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
+
+  const int32_t vb_zero_point = params->fp32_scalar.kernel_zero_point;
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];
     int32_t vacc0x1 = ((const int32_t*) w)[1];
@@ -121,7 +129,6 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x4__scalar_fmagic(
     float vfpacc3x2 = (float) vacc3x2;
     float vfpacc3x3 = (float) vacc3x3;
 
-    const float vscale = params->fp32_scalar_fmagic.scale;
     vfpacc0x0 *= vscale;
     vfpacc0x1 *= vscale;
     vfpacc0x2 *= vscale;
@@ -139,7 +146,6 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x4__scalar_fmagic(
     vfpacc3x2 *= vscale;
     vfpacc3x3 *= vscale;
 
-    const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
     vfpacc0x0 = math_max_f32(vfpacc0x0, voutput_min_less_zero_point);
     vfpacc0x1 = math_max_f32(vfpacc0x1, voutput_min_less_zero_point);
     vfpacc0x2 = math_max_f32(vfpacc0x2, voutput_min_less_zero_point);
@@ -157,7 +163,6 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x4__scalar_fmagic(
     vfpacc3x2 = math_max_f32(vfpacc3x2, voutput_min_less_zero_point);
     vfpacc3x3 = math_max_f32(vfpacc3x3, voutput_min_less_zero_point);
 
-    const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
     vfpacc0x0 = math_min_f32(vfpacc0x0, voutput_max_less_zero_point);
     vfpacc0x1 = math_min_f32(vfpacc0x1, voutput_max_less_zero_point);
     vfpacc0x2 = math_min_f32(vfpacc0x2, voutput_max_less_zero_point);
@@ -175,7 +180,6 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x4__scalar_fmagic(
     vfpacc3x2 = math_min_f32(vfpacc3x2, voutput_max_less_zero_point);
     vfpacc3x3 = math_min_f32(vfpacc3x3, voutput_max_less_zero_point);
 
-    const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
     vfpacc0x0 += vmagic_bias;
     vfpacc0x1 += vmagic_bias;
     vfpacc0x2 += vmagic_bias;
@@ -193,7 +197,6 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x4__scalar_fmagic(
     vfpacc3x2 += vmagic_bias;
     vfpacc3x3 += vmagic_bias;
 
-    const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
     int32_t vout0x0 = (int32_t) float_as_uint32(vfpacc0x0) - vmagic_bias_less_output_zero_point;
     int32_t vout0x1 = (int32_t) float_as_uint32(vfpacc0x1) - vmagic_bias_less_output_zero_point;
     int32_t vout0x2 = (int32_t) float_as_uint32(vfpacc0x2) - vmagic_bias_less_output_zero_point;

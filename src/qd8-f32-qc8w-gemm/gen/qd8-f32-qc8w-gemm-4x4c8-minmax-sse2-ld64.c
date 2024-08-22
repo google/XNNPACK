@@ -60,10 +60,11 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4c8__sse2_ld64(
     c3 = c2;
   }
 
-  const __m128 vmin = _mm_set1_ps(params->sse.min);
-  const __m128 vmax = _mm_set1_ps(params->sse.max);
+  const __m128 vmin = _mm_set1_ps(params->scalar.min);
+  const __m128 vmax = _mm_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
+
 
   do {
     const __m128i vksum = _mm_load_si128((const __m128i*) w);

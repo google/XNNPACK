@@ -12,6 +12,7 @@
 #include <wasm_simd128.h>
 
 #include "xnnpack/dwconv.h"
+#include "xnnpack/math.h"
 
 
 void xnn_qs8_dwconv_minmax_fp32_ukernel_25p8c__wasmsimd_mul16_add16(
@@ -28,6 +29,19 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_25p8c__wasmsimd_mul16_add16(
 {
   assert(channels != 0);
   assert(output_width != 0);
+
+
+  const v128_t vscale = wasm_v128_load32_splat(&params->fp32_scalar.scale);
+  XNN_FORCE_REALIZATION(vscale);
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(12582912.0f);
+  const int32_t output_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const v128_t vmagic_min = wasm_i32x4_splat((int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point));
+  const v128_t vmagic_bias_less_output_zero_point = wasm_i32x4_splat(INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point);
+  const v128_t voutput_max = wasm_i8x16_splat(params->fp32_scalar.output_max);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vmagic_min);
+  XNN_FORCE_REALIZATION(vmagic_bias_less_output_zero_point);
+  XNN_FORCE_REALIZATION(voutput_max);
 
   do {
     const int8_t* i0 = input[0];
@@ -371,19 +385,15 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_25p8c__wasmsimd_mul16_add16(
       vacc0123 = wasm_f32x4_convert_i32x4(vacc0123);
       vacc4567 = wasm_f32x4_convert_i32x4(vacc4567);
 
-      const v128_t vscale = wasm_v128_load64_splat(params->fp32_wasmsimd.scale);
       vacc0123 = wasm_f32x4_mul(vacc0123, vscale);
       vacc4567 = wasm_f32x4_mul(vacc4567, vscale);
 
-      const v128_t vmagic_bias = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias);
       vacc0123 = wasm_f32x4_add(vacc0123, vmagic_bias);
       vacc4567 = wasm_f32x4_add(vacc4567, vmagic_bias);
 
-      const v128_t vmagic_min = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_min);
       vacc0123 = wasm_i32x4_max(vacc0123, vmagic_min);
       vacc4567 = wasm_i32x4_max(vacc4567, vmagic_min);
 
-      const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias_less_output_zero_point);
       vacc0123 = wasm_i32x4_sub(vacc0123, vmagic_bias_less_output_zero_point);
       vacc4567 = wasm_i32x4_sub(vacc4567, vmagic_bias_less_output_zero_point);
 
@@ -391,7 +401,6 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_25p8c__wasmsimd_mul16_add16(
 
       v128_t vout0123456701234567 = wasm_i8x16_narrow_i16x8(vout01234567, vout01234567);
 
-      const v128_t voutput_max = wasm_v128_load64_splat(params->fp32_wasmsimd.output_max);
       vout0123456701234567 = wasm_i8x16_min(vout0123456701234567, voutput_max);
 
       wasm_v128_store64_lane(output, vout0123456701234567, 0);
@@ -584,26 +593,21 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_25p8c__wasmsimd_mul16_add16(
       vacc0123 = wasm_f32x4_convert_i32x4(vacc0123);
       vacc4567 = wasm_f32x4_convert_i32x4(vacc4567);
 
-      const v128_t vscale = wasm_v128_load64_splat(params->fp32_wasmsimd.scale);
       vacc0123 = wasm_f32x4_mul(vacc0123, vscale);
       vacc4567 = wasm_f32x4_mul(vacc4567, vscale);
 
-      const v128_t vmagic_bias = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias);
       vacc0123 = wasm_f32x4_add(vacc0123, vmagic_bias);
       vacc4567 = wasm_f32x4_add(vacc4567, vmagic_bias);
 
-      const v128_t vmagic_min = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_min);
       vacc0123 = wasm_i32x4_max(vacc0123, vmagic_min);
       vacc4567 = wasm_i32x4_max(vacc4567, vmagic_min);
 
-      const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias_less_output_zero_point);
       vacc0123 = wasm_i32x4_sub(vacc0123, vmagic_bias_less_output_zero_point);
       vacc4567 = wasm_i32x4_sub(vacc4567, vmagic_bias_less_output_zero_point);
 
       v128_t vout01234567 = wasm_i16x8_narrow_i32x4(vacc0123, vacc4567);
       v128_t vout0123456701234567 = wasm_i8x16_narrow_i16x8(vout01234567, vout01234567);
 
-      const v128_t voutput_max = wasm_v128_load64_splat(params->fp32_wasmsimd.output_max);
       vout0123456701234567 = wasm_i8x16_min(vout0123456701234567, voutput_max);
 
 

@@ -3390,7 +3390,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_1x8__aarch64_neonfma_lane_ld128(
 
   const float* a0 = a;
   float* c0 = c;
-  const int32x4_t vminus_kernel_zero_point = vld1q_dup_s32(&params->scalar.minus_kernel_zero_point);
+  const int32x4_t vminus_kernel_zero_point = vdupq_n_s32(-params->scalar.kernel_zero_point);
   const uint16x8_t vmask = vmovq_n_u16(UINT16_C(0xF));
 
   do {
@@ -3567,7 +3567,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x8__aarch64_neonfma_lane_ld128(
     a3 = a2;
     c3 = c2;
   }
-  const int32x4_t vminus_kernel_zero_point = vld1q_dup_s32(&params->scalar.minus_kernel_zero_point);
+  const int32x4_t vminus_kernel_zero_point = vdupq_n_s32(-params->scalar.kernel_zero_point);
   const uint16x8_t vmask = vmovq_n_u16(UINT16_C(0xF));
 
   do {
@@ -3861,7 +3861,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_6x8__aarch64_neonfma_lane_ld128(
     a5 = a4;
     c5 = c4;
   }
-  const int32x4_t vminus_kernel_zero_point = vld1q_dup_s32(&params->scalar.minus_kernel_zero_point);
+  const int32x4_t vminus_kernel_zero_point = vdupq_n_s32(-params->scalar.kernel_zero_point);
   const uint16x8_t vmask = vmovq_n_u16(UINT16_C(0xF));
 
   do {

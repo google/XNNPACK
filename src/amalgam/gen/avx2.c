@@ -62,8 +62,8 @@ void xnn_f16_f32acc_gemm_minmax_ukernel_1x16__avx2_broadcast(
   const uint16_t* a0 = a;
   uint16_t* c0 = c;
 
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 
@@ -158,8 +158,8 @@ void xnn_f16_f32acc_gemm_minmax_ukernel_4x16__avx2_broadcast(
   const uint16_t* a0 = a;
   uint16_t* c0 = c;
 
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 
@@ -349,8 +349,8 @@ void xnn_f16_f32acc_igemm_minmax_ukernel_1x16__avx2_broadcast(
   assert(w != NULL);
   assert(c != NULL);
 
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 
@@ -458,8 +458,8 @@ void xnn_f16_f32acc_igemm_minmax_ukernel_4x16__avx2_broadcast(
   assert(w != NULL);
   assert(c != NULL);
 
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 
@@ -1679,13 +1679,17 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_1x16__avx2_broadcast(
 
   const float* a0 = a;
   float* c0 = c;
-  const __m256i vmagic_bias_c0 = _mm256_load_si256((const __m256i*) params->avx.magic_bias_c0);
-  const __m256i vmagic_bias_c1 = _mm256_load_si256((const __m256i*) params->avx.magic_bias_c1);
-  const __m256 vmagic_bias_plus_kernel_zero_point_c0 = _mm256_load_ps(params->avx.magic_bias_plus_kernel_zero_point_c0);
-  const __m256 vmagic_bias_plus_kernel_zero_point_c1 = _mm256_load_ps(params->avx.magic_bias_plus_kernel_zero_point_c1);
+  const __m256i vmagic_bias_c0 = _mm256_set1_epi32(0x4B0000F0);
+  const __m256i vmagic_bias_c1 = _mm256_set1_epi32(0x4900000F);
+  const __m256 vmagic_bias_plus_kernel_zero_point_c0 = _mm256_set1_ps(0x1.0001E0p+23f + (float) params->scalar.kernel_zero_point);
+  const __m256 vmagic_bias_plus_kernel_zero_point_c1 = _mm256_set1_ps(0x1.00001Ep+19f + (float) params->scalar.kernel_zero_point);
+  XNN_FORCE_REALIZATION(vmagic_bias_c0);
+  XNN_FORCE_REALIZATION(vmagic_bias_c1);
+  XNN_FORCE_REALIZATION(vmagic_bias_plus_kernel_zero_point_c0);
+  XNN_FORCE_REALIZATION(vmagic_bias_plus_kernel_zero_point_c1);
 
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 
@@ -1825,13 +1829,17 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_3x16__avx2_broadcast(
     a2 = a1;
     c2 = c1;
   }
-  const __m256i vmagic_bias_c0 = _mm256_load_si256((const __m256i*) params->avx.magic_bias_c0);
-  const __m256i vmagic_bias_c1 = _mm256_load_si256((const __m256i*) params->avx.magic_bias_c1);
-  const __m256 vmagic_bias_plus_kernel_zero_point_c0 = _mm256_load_ps(params->avx.magic_bias_plus_kernel_zero_point_c0);
-  const __m256 vmagic_bias_plus_kernel_zero_point_c1 = _mm256_load_ps(params->avx.magic_bias_plus_kernel_zero_point_c1);
+  const __m256i vmagic_bias_c0 = _mm256_set1_epi32(0x4B0000F0);
+  const __m256i vmagic_bias_c1 = _mm256_set1_epi32(0x4900000F);
+  const __m256 vmagic_bias_plus_kernel_zero_point_c0 = _mm256_set1_ps(0x1.0001E0p+23f + (float) params->scalar.kernel_zero_point);
+  const __m256 vmagic_bias_plus_kernel_zero_point_c1 = _mm256_set1_ps(0x1.00001Ep+19f + (float) params->scalar.kernel_zero_point);
+  XNN_FORCE_REALIZATION(vmagic_bias_c0);
+  XNN_FORCE_REALIZATION(vmagic_bias_c1);
+  XNN_FORCE_REALIZATION(vmagic_bias_plus_kernel_zero_point_c0);
+  XNN_FORCE_REALIZATION(vmagic_bias_plus_kernel_zero_point_c1);
 
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 
@@ -2030,8 +2038,8 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x16__avx2_broadcast(
   const float* a0 = a;
   float* c0 = c;
 
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 
@@ -2156,8 +2164,8 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_5x16__avx2_broadcast(
     c4 = c3;
   }
 
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 
@@ -3103,7 +3111,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x8c8__avx2(
   assert(c != NULL);
 
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
-  size_t bl = params->avx.blocksize;
+  size_t bl = params->scalar.blocksize;
   assert(bl <= round_up_po2(kc, 16));
   assert(bl != 0);
   assert(bl % 32 == 0);
@@ -3112,10 +3120,11 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x8c8__avx2(
 
   const __m128i vmask = _mm_set1_epi8(0xF0);
   XNN_FORCE_REALIZATION(vmask);
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
+
   do {
     const __m128 vinit0 = _mm_load_ss(&((const float*) w)[0]);
     const __m128 vinit1 = _mm_load_ss(&((const float*) w)[1]);
@@ -3329,7 +3338,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_3x8c8__avx2(
   assert(c != NULL);
 
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
-  size_t bl = params->avx.blocksize;
+  size_t bl = params->scalar.blocksize;
   assert(bl <= round_up_po2(kc, 16));
   assert(bl != 0);
   assert(bl % 32 == 0);
@@ -3350,10 +3359,11 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_3x8c8__avx2(
 
   const __m128i vmask = _mm_set1_epi8(0xF0);
   XNN_FORCE_REALIZATION(vmask);
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
+
   do {
     const __m128 vinit0 = _mm_load_ss(&((const float*) w)[0]);
     const __m128 vinit1 = _mm_load_ss(&((const float*) w)[1]);
@@ -3679,8 +3689,10 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_1x8c8__avx2_madd_prfm(
   const __m256i vsign_mask = _mm256_set1_epi8(0x80);
   XNN_FORCE_REALIZATION(vsign_mask);
   const __m256i vinput_zero_point0 = _mm256_set1_epi32((int) quantization_params[0].zero_point + 128);
-  const __m256 voutput_min = _mm256_set1_ps(params->avxvnni.min);
-  const __m256 voutput_max = _mm256_set1_ps(params->avxvnni.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
   const __m256i vmask = _mm256_set1_epi8(0x0F);
   XNN_FORCE_REALIZATION(vmask);
   do {
@@ -3830,8 +3842,10 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_4x8c8__avx2_madd_prfm(
   const __m256i vinput_zero_point1 = _mm256_set1_epi32((int) quantization_params[1].zero_point + 128);
   const __m256i vinput_zero_point2 = _mm256_set1_epi32((int) quantization_params[2].zero_point + 128);
   const __m256i vinput_zero_point3 = _mm256_set1_epi32((int) quantization_params[3].zero_point + 128);
-  const __m256 voutput_min = _mm256_set1_ps(params->avxvnni.min);
-  const __m256 voutput_max = _mm256_set1_ps(params->avxvnni.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
   const __m256i vmask = _mm256_set1_epi8(0x0F);
   XNN_FORCE_REALIZATION(vmask);
   do {
@@ -4052,10 +4066,11 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x8c8__avx2(
   const int8_t* a0 = a;
   uint16_t* c0 = (uint16_t*) c;
 
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
+
   do {
     const __m128i vinit0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     const __m128i vinit1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -4190,10 +4205,11 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_3x8c8__avx2(
     c2 = c1;
   }
 
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
+
   do {
     const __m128i vinit0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     const __m128i vinit1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -4388,10 +4404,13 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c8__avx2(
 
   const __m256i vinput_zero_point = _mm256_set1_epi32((int) quantization_params->zero_point);
   const __m256 vinput_scale = _mm256_broadcast_ss(&quantization_params->inv_scale);
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
-  XNN_FORCE_REALIZATION(vmin);
-  XNN_FORCE_REALIZATION(vmax);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(vinput_zero_point);
+  // XNN_FORCE_REALIZATION(vinput_scale);
+  // XNN_FORCE_REALIZATION(vmin);
+  // XNN_FORCE_REALIZATION(vmax);
+
   do {
     const __m128i vinit0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     const __m128i vinit1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -4540,10 +4559,13 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_3x8c8__avx2(
 
   const __m256i vinput_zero_point = _mm256_set1_epi32((int) quantization_params->zero_point);
   const __m256 vinput_scale = _mm256_broadcast_ss(&quantization_params->inv_scale);
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
-  XNN_FORCE_REALIZATION(vmin);
-  XNN_FORCE_REALIZATION(vmax);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(vinput_zero_point);
+  // XNN_FORCE_REALIZATION(vinput_scale);
+  // XNN_FORCE_REALIZATION(vmin);
+  // XNN_FORCE_REALIZATION(vmax);
+
   do {
     const __m128i vinit0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     const __m128i vinit1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -4747,7 +4769,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x8c8__avx2(
   assert(c != NULL);
 
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
-  size_t bl = params->avx.blocksize;
+  size_t bl = params->scalar.blocksize;
   assert(bl <= round_up_po2(kc, 16));
   assert(bl != 0);
   assert(bl % 32 == 0);
@@ -4756,10 +4778,11 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_1x8c8__avx2(
 
   const __m128i vmask = _mm_set1_epi8(0xF0);
   XNN_FORCE_REALIZATION(vmask);
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
+
   do {
     const __m128 vinit0 = _mm_load_ss(&((const float*) w)[0]);
     const __m128 vinit1 = _mm_load_ss(&((const float*) w)[1]);
@@ -4974,7 +4997,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x8c8__avx2(
   assert(c != NULL);
 
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
-  size_t bl = params->avx.blocksize;
+  size_t bl = params->scalar.blocksize;
   assert(bl <= round_up_po2(kc, 16));
   assert(bl != 0);
   assert(bl % 32 == 0);
@@ -4995,10 +5018,11 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x8c8__avx2(
 
   const __m128i vmask = _mm_set1_epi8(0xF0);
   XNN_FORCE_REALIZATION(vmask);
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
+
   do {
     const __m128 vinit0 = _mm_load_ss(&((const float*) w)[0]);
     const __m128 vinit1 = _mm_load_ss(&((const float*) w)[1]);
@@ -5325,8 +5349,10 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x8c8__avx2_madd_prfm(
   const __m256i vsign_mask = _mm256_set1_epi8(0x80);
   XNN_FORCE_REALIZATION(vsign_mask);
   const __m256i vinput_zero_point0 = _mm256_set1_epi32((int) quantization_params[0].zero_point + 128);
-  const __m256 voutput_min = _mm256_set1_ps(params->avxvnni.min);
-  const __m256 voutput_max = _mm256_set1_ps(params->avxvnni.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
   const __m256i vmask = _mm256_set1_epi8(0x0F);
   XNN_FORCE_REALIZATION(vmask);
   do {
@@ -5476,8 +5502,10 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x8c8__avx2_madd_prfm(
   const __m256i vinput_zero_point1 = _mm256_set1_epi32((int) quantization_params[1].zero_point + 128);
   const __m256i vinput_zero_point2 = _mm256_set1_epi32((int) quantization_params[2].zero_point + 128);
   const __m256i vinput_zero_point3 = _mm256_set1_epi32((int) quantization_params[3].zero_point + 128);
-  const __m256 voutput_min = _mm256_set1_ps(params->avxvnni.min);
-  const __m256 voutput_max = _mm256_set1_ps(params->avxvnni.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
   const __m256i vmask = _mm256_set1_epi8(0x0F);
   XNN_FORCE_REALIZATION(vmask);
   do {
@@ -5698,10 +5726,11 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c8__avx2(
   const int8_t* a0 = a;
   float* c0 = c;
 
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
+
   do {
     const __m128i vinit0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     const __m128i vinit1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -5843,10 +5872,11 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x8c8__avx2(
     c3 = c2;
   }
 
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
+
   do {
     const __m128i vinit0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     const __m128i vinit1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -6075,10 +6105,13 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x8c8__avx2(
 
   const __m256i vinput_zero_point = _mm256_set1_epi32((int) quantization_params->zero_point);
   const __m256 vinput_scale = _mm256_broadcast_ss(&quantization_params->inv_scale);
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
-  XNN_FORCE_REALIZATION(vmin);
-  XNN_FORCE_REALIZATION(vmax);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(vinput_zero_point);
+  // XNN_FORCE_REALIZATION(vinput_scale);
+  // XNN_FORCE_REALIZATION(vmin);
+  // XNN_FORCE_REALIZATION(vmax);
+
   do {
     const __m128i vinit0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     const __m128i vinit1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -6232,10 +6265,13 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x8c8__avx2(
 
   const __m256i vinput_zero_point = _mm256_set1_epi32((int) quantization_params->zero_point);
   const __m256 vinput_scale = _mm256_broadcast_ss(&quantization_params->inv_scale);
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
-  XNN_FORCE_REALIZATION(vmin);
-  XNN_FORCE_REALIZATION(vmax);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(vinput_zero_point);
+  // XNN_FORCE_REALIZATION(vinput_scale);
+  // XNN_FORCE_REALIZATION(vmin);
+  // XNN_FORCE_REALIZATION(vmax);
+
   do {
     const __m128i vinit0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     const __m128i vinit1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -6468,6 +6504,17 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul32(
   assert(channels != 0);
   assert(output_width != 0);
 
+
+  const __m256 vscale = _mm256_set1_ps(params->fp32_scalar.scale);
+  XNN_FORCE_REALIZATION(vscale);
+
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->fp32_scalar.output_min);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+
   do {
     const int8_t* i0 = input[0];
     assert(i0 != NULL);
@@ -6833,23 +6880,19 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul32(
       __m256 vscaled01234567 = _mm256_cvtepi32_ps(vacc01234567);
       __m256 vscaled89ABCDEF = _mm256_cvtepi32_ps(vacc89ABCDEF);
 
-      const __m256 vscale = _mm256_load_ps(params->fp32_avx2.scale);
       vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale);
       vscaled89ABCDEF = _mm256_mul_ps(vscaled89ABCDEF, vscale);
 
-      const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
       vscaled01234567 = _mm256_min_ps(vscaled01234567, voutput_max_less_zero_point);
       vscaled89ABCDEF = _mm256_min_ps(vscaled89ABCDEF, voutput_max_less_zero_point);
 
       vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
       vacc89ABCDEF = _mm256_cvtps_epi32(vscaled89ABCDEF);
 
-      const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
       __m256i vout012389AB4567CDEF = _mm256_adds_epi16(_mm256_packs_epi32(vacc01234567, vacc89ABCDEF), voutput_zero_point);
 
       __m128i vout0123456789ABCDEF = _mm_shuffle_epi32(_mm_packs_epi16(_mm256_castsi256_si128(vout012389AB4567CDEF), _mm256_extracti128_si256(vout012389AB4567CDEF, 1)), _MM_SHUFFLE(3, 1, 2, 0));
 
-      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
       vout0123456789ABCDEF = _mm_max_epi8(vout0123456789ABCDEF, voutput_min);
 
       _mm_storeu_si128((__m128i*) output, vout0123456789ABCDEF);
@@ -7014,18 +7057,16 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul32(
         k += 8;
 
         __m256 vscaled01234567 = _mm256_cvtepi32_ps(vacc01234567);
-        vscaled01234567 = _mm256_mul_ps(vscaled01234567, _mm256_load_ps(params->fp32_avx2.scale));
-        vscaled01234567 = _mm256_min_ps(vscaled01234567, _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point));
+        vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale);
+        vscaled01234567 = _mm256_min_ps(vscaled01234567, voutput_max_less_zero_point);
         vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
 
         w = (const void*) ((const int32_t*) w + 8);
 
-        const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_avx2.output_zero_point);
-        __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), voutput_zero_point);
+        __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), _mm256_castsi256_si128(voutput_zero_point));
 
         __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
-        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
         vout0123456701234567 = _mm_max_epi8(vout0123456701234567, voutput_min);
 
         if XNN_LIKELY(c >= 8) {
@@ -7070,6 +7111,17 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32(
 {
   assert(channels != 0);
   assert(output_width != 0);
+
+
+  const __m256 vscale = _mm256_set1_ps(params->fp32_scalar.scale);
+  XNN_FORCE_REALIZATION(vscale);
+
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->fp32_scalar.output_min);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
 
   do {
     const int8_t* i0 = input[0];
@@ -7212,23 +7264,19 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32(
       __m256 vscaled01234567 = _mm256_cvtepi32_ps(vacc01234567);
       __m256 vscaled89ABCDEF = _mm256_cvtepi32_ps(vacc89ABCDEF);
 
-      const __m256 vscale = _mm256_load_ps(params->fp32_avx2.scale);
       vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale);
       vscaled89ABCDEF = _mm256_mul_ps(vscaled89ABCDEF, vscale);
 
-      const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
       vscaled01234567 = _mm256_min_ps(vscaled01234567, voutput_max_less_zero_point);
       vscaled89ABCDEF = _mm256_min_ps(vscaled89ABCDEF, voutput_max_less_zero_point);
 
       vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
       vacc89ABCDEF = _mm256_cvtps_epi32(vscaled89ABCDEF);
 
-      const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
       __m256i vout012389AB4567CDEF = _mm256_adds_epi16(_mm256_packs_epi32(vacc01234567, vacc89ABCDEF), voutput_zero_point);
 
       __m128i vout0123456789ABCDEF = _mm_shuffle_epi32(_mm_packs_epi16(_mm256_castsi256_si128(vout012389AB4567CDEF), _mm256_extracti128_si256(vout012389AB4567CDEF, 1)), _MM_SHUFFLE(3, 1, 2, 0));
 
-      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
       vout0123456789ABCDEF = _mm_max_epi8(vout0123456789ABCDEF, voutput_min);
 
       _mm_storeu_si128((__m128i*) output, vout0123456789ABCDEF);
@@ -7297,18 +7345,16 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32(
         k += 8;
 
         __m256 vscaled01234567 = _mm256_cvtepi32_ps(vacc01234567);
-        vscaled01234567 = _mm256_mul_ps(vscaled01234567, _mm256_load_ps(params->fp32_avx2.scale));
-        vscaled01234567 = _mm256_min_ps(vscaled01234567, _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point));
+        vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale);
+        vscaled01234567 = _mm256_min_ps(vscaled01234567, voutput_max_less_zero_point);
         vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
 
         w = (const void*) ((const int32_t*) w + 8);
 
-        const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_avx2.output_zero_point);
-        __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), voutput_zero_point);
+        __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), _mm256_castsi256_si128(voutput_zero_point));
 
         __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
-        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
         vout0123456701234567 = _mm_max_epi8(vout0123456701234567, voutput_min);
 
         if XNN_LIKELY(c >= 8) {
@@ -7498,6 +7544,15 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul32(
   assert(channels != 0);
   assert(output_width != 0);
 
+
+
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->fp32_scalar.output_min);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+
   do {
     const int8_t* i0 = input[0];
     assert(i0 != NULL);
@@ -7869,19 +7924,16 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul32(
       vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale01234567);
       vscaled89ABCDEF = _mm256_mul_ps(vscaled89ABCDEF, vscale89ABCDEF);
 
-      const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
       vscaled01234567 = _mm256_min_ps(vscaled01234567, voutput_max_less_zero_point);
       vscaled89ABCDEF = _mm256_min_ps(vscaled89ABCDEF, voutput_max_less_zero_point);
 
       vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
       vacc89ABCDEF = _mm256_cvtps_epi32(vscaled89ABCDEF);
 
-      const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
       __m256i vout012389AB4567CDEF = _mm256_adds_epi16(_mm256_packs_epi32(vacc01234567, vacc89ABCDEF), voutput_zero_point);
 
       __m128i vout0123456789ABCDEF = _mm_shuffle_epi32(_mm_packs_epi16(_mm256_castsi256_si128(vout012389AB4567CDEF), _mm256_extracti128_si256(vout012389AB4567CDEF, 1)), _MM_SHUFFLE(3, 1, 2, 0));
 
-      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
       vout0123456789ABCDEF = _mm_max_epi8(vout0123456789ABCDEF, voutput_min);
 
       _mm_storeu_si128((__m128i*) output, vout0123456789ABCDEF);
@@ -8048,17 +8100,15 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul32(
         __m256 vscaled01234567 = _mm256_cvtepi32_ps(vacc01234567);
         const __m256 vscale01234567 = _mm256_loadu_ps((const float*) ((uintptr_t) w + 16 * sizeof(int32_t) + 400 * sizeof(int8_t)));
         vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale01234567);
-        vscaled01234567 = _mm256_min_ps(vscaled01234567, _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point));
+        vscaled01234567 = _mm256_min_ps(vscaled01234567, voutput_max_less_zero_point);
         vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
 
         w = (const void*) ((const int32_t*) w + 8);
 
-        const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_avx2.output_zero_point);
-        __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), voutput_zero_point);
+        __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), _mm256_castsi256_si128(voutput_zero_point));
 
         __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
-        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
         vout0123456701234567 = _mm_max_epi8(vout0123456701234567, voutput_min);
 
         if XNN_LIKELY(c >= 8) {
@@ -8103,6 +8153,15 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p16c__avx2_mul32(
 {
   assert(channels != 0);
   assert(output_width != 0);
+
+
+
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->fp32_scalar.output_min);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
 
   do {
     const int8_t* i0 = input[0];
@@ -8167,19 +8226,16 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p16c__avx2_mul32(
       vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale01234567);
       vscaled89ABCDEF = _mm256_mul_ps(vscaled89ABCDEF, vscale89ABCDEF);
 
-      const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
       vscaled01234567 = _mm256_min_ps(vscaled01234567, voutput_max_less_zero_point);
       vscaled89ABCDEF = _mm256_min_ps(vscaled89ABCDEF, voutput_max_less_zero_point);
 
       vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
       vacc89ABCDEF = _mm256_cvtps_epi32(vscaled89ABCDEF);
 
-      const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
       __m256i vout012389AB4567CDEF = _mm256_adds_epi16(_mm256_packs_epi32(vacc01234567, vacc89ABCDEF), voutput_zero_point);
 
       __m128i vout0123456789ABCDEF = _mm_shuffle_epi32(_mm_packs_epi16(_mm256_castsi256_si128(vout012389AB4567CDEF), _mm256_extracti128_si256(vout012389AB4567CDEF, 1)), _MM_SHUFFLE(3, 1, 2, 0));
 
-      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
       vout0123456789ABCDEF = _mm_max_epi8(vout0123456789ABCDEF, voutput_min);
 
       _mm_storeu_si128((__m128i*) output, vout0123456789ABCDEF);
@@ -8214,17 +8270,15 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p16c__avx2_mul32(
         __m256 vscaled01234567 = _mm256_cvtepi32_ps(vacc01234567);
         const __m256 vscale01234567 = _mm256_loadu_ps((const float*) ((uintptr_t) w + 16 * sizeof(int32_t) + 48 * sizeof(int8_t)));
         vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale01234567);
-        vscaled01234567 = _mm256_min_ps(vscaled01234567, _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point));
+        vscaled01234567 = _mm256_min_ps(vscaled01234567, voutput_max_less_zero_point);
         vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
 
         w = (const void*) ((const int32_t*) w + 8);
 
-        const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_avx2.output_zero_point);
-        __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), voutput_zero_point);
+        __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), _mm256_castsi256_si128(voutput_zero_point));
 
         __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
-        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
         vout0123456701234567 = _mm_max_epi8(vout0123456701234567, voutput_min);
 
         if XNN_LIKELY(c >= 8) {
@@ -8269,6 +8323,15 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32(
 {
   assert(channels != 0);
   assert(output_width != 0);
+
+
+
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->fp32_scalar.output_min);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
 
   do {
     const int8_t* i0 = input[0];
@@ -8417,19 +8480,16 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32(
       vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale01234567);
       vscaled89ABCDEF = _mm256_mul_ps(vscaled89ABCDEF, vscale89ABCDEF);
 
-      const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
       vscaled01234567 = _mm256_min_ps(vscaled01234567, voutput_max_less_zero_point);
       vscaled89ABCDEF = _mm256_min_ps(vscaled89ABCDEF, voutput_max_less_zero_point);
 
       vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
       vacc89ABCDEF = _mm256_cvtps_epi32(vscaled89ABCDEF);
 
-      const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
       __m256i vout012389AB4567CDEF = _mm256_adds_epi16(_mm256_packs_epi32(vacc01234567, vacc89ABCDEF), voutput_zero_point);
 
       __m128i vout0123456789ABCDEF = _mm_shuffle_epi32(_mm_packs_epi16(_mm256_castsi256_si128(vout012389AB4567CDEF), _mm256_extracti128_si256(vout012389AB4567CDEF, 1)), _MM_SHUFFLE(3, 1, 2, 0));
 
-      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
       vout0123456789ABCDEF = _mm_max_epi8(vout0123456789ABCDEF, voutput_min);
 
       _mm_storeu_si128((__m128i*) output, vout0123456789ABCDEF);
@@ -8500,17 +8560,15 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32(
         __m256 vscaled01234567 = _mm256_cvtepi32_ps(vacc01234567);
         const __m256 vscale01234567 = _mm256_loadu_ps((const float*) ((uintptr_t) w + 16 * sizeof(int32_t) + 144 * sizeof(int8_t)));
         vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale01234567);
-        vscaled01234567 = _mm256_min_ps(vscaled01234567, _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point));
+        vscaled01234567 = _mm256_min_ps(vscaled01234567, voutput_max_less_zero_point);
         vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
 
         w = (const void*) ((const int32_t*) w + 8);
 
-        const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_avx2.output_zero_point);
-        __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), voutput_zero_point);
+        __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), _mm256_castsi256_si128(voutput_zero_point));
 
         __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
-        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
         vout0123456701234567 = _mm_max_epi8(vout0123456701234567, voutput_min);
 
         if XNN_LIKELY(c >= 8) {
@@ -8566,6 +8624,13 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__avx2(
   const int8_t* a0 = a;
   int8_t* c0 = c;
 
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m256i voutput_min = _mm256_set1_epi8(params->fp32_scalar.output_min);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+
   do {
     const __m128i vbias0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     const __m128i vbias0x1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -8619,19 +8684,17 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__avx2(
     w = (const float*) w + 8;
     vfpacc0x01234567 = _mm256_mul_ps(vfpacc0x01234567, vscale01234567);
 
-    const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
     vfpacc0x01234567 = _mm256_min_ps(vfpacc0x01234567, voutput_max_less_zero_point);
 
     vacc0x01234567 = _mm256_cvtps_epi32(vfpacc0x01234567);
 
-    const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
     __m256i vacc00x01234567 = _mm256_adds_epi16(_mm256_packs_epi32(vacc0x01234567, vacc0x01234567), voutput_zero_point);
 
     vacc00x01234567 = _mm256_permute4x64_epi64(vacc00x01234567, _MM_SHUFFLE(3, 1, 2, 0));
 
     __m256i vout = _mm256_packs_epi16(vacc00x01234567, vacc00x01234567);
 
-    vout = _mm256_max_epi8(vout, _mm256_load_si256((const __m256i*) params->fp32_avx2.output_min));
+    vout = _mm256_max_epi8(vout, voutput_min);
 
     __m128i vout_lo = _mm256_castsi256_si128(vout);
     __m128i vout_hi = _mm256_extracti128_si256(vout, 1);
@@ -8706,6 +8769,13 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x8c8__avx2(
     a2 = a1;
     c2 = c1;
   }
+
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m256i voutput_min = _mm256_set1_epi8(params->fp32_scalar.output_min);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
 
   do {
     const __m128i vbias0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
@@ -8794,7 +8864,6 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x8c8__avx2(
     vfpacc1x01234567 = _mm256_mul_ps(vfpacc1x01234567, vscale01234567);
     vfpacc2x01234567 = _mm256_mul_ps(vfpacc2x01234567, vscale01234567);
 
-    const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
     vfpacc0x01234567 = _mm256_min_ps(vfpacc0x01234567, voutput_max_less_zero_point);
     vfpacc1x01234567 = _mm256_min_ps(vfpacc1x01234567, voutput_max_less_zero_point);
     vfpacc2x01234567 = _mm256_min_ps(vfpacc2x01234567, voutput_max_less_zero_point);
@@ -8803,7 +8872,6 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x8c8__avx2(
     vacc1x01234567 = _mm256_cvtps_epi32(vfpacc1x01234567);
     vacc2x01234567 = _mm256_cvtps_epi32(vfpacc2x01234567);
 
-    const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
     __m256i vacc01x01234567 = _mm256_adds_epi16(_mm256_packs_epi32(vacc0x01234567, vacc1x01234567), voutput_zero_point);
     __m256i vacc22x01234567 = _mm256_adds_epi16(_mm256_packs_epi32(vacc2x01234567, vacc2x01234567), voutput_zero_point);
 
@@ -8812,7 +8880,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_3x8c8__avx2(
 
     __m256i vout = _mm256_packs_epi16(vacc01x01234567, vacc22x01234567);
 
-    vout = _mm256_max_epi8(vout, _mm256_load_si256((const __m256i*) params->fp32_avx2.output_min));
+    vout = _mm256_max_epi8(vout, voutput_min);
 
     __m128i vout_lo = _mm256_castsi256_si128(vout);
     __m128i vout_hi = _mm256_extracti128_si256(vout, 1);
@@ -8895,6 +8963,13 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c8__avx2(
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   int8_t* c0 = c;
 
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m256i voutput_min = _mm256_set1_epi8(params->fp32_scalar.output_min);
+  // XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  // XNN_FORCE_REALIZATION(voutput_zero_point);
+  // XNN_FORCE_REALIZATION(voutput_min);
+
   do {
     const __m128i vbias0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     const __m128i vbias0x1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -8961,19 +9036,17 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c8__avx2(
     w = (const void*) ((const float*) w + 8);
     vscaled0x01234567 = _mm256_mul_ps(vscaled0x01234567, vscale01234567);
 
-    const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
     vscaled0x01234567 = _mm256_min_ps(vscaled0x01234567, voutput_max_less_zero_point);
 
     vacc0x01234567 = _mm256_cvtps_epi32(vscaled0x01234567);
 
-    const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
     __m256i vacc00x01234567 = _mm256_adds_epi16(_mm256_packs_epi32(vacc0x01234567, vacc0x01234567), voutput_zero_point);
 
     vacc00x01234567 = _mm256_permute4x64_epi64(vacc00x01234567, _MM_SHUFFLE(3, 1, 2, 0));
 
     __m256i vout = _mm256_packs_epi16(vacc00x01234567, vacc00x01234567);
 
-    vout = _mm256_max_epi8(vout, _mm256_load_si256((const __m256i*) params->fp32_avx2.output_min));
+    vout = _mm256_max_epi8(vout, voutput_min);
 
     __m128i vout_lo = _mm256_castsi256_si128(vout);
     __m128i vout_hi = _mm256_extracti128_si256(vout, 1);
@@ -9047,6 +9120,13 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_3x8c8__avx2(
   if XNN_UNPREDICTABLE(mr <= 2) {
     c2 = c1;
   }
+
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m256i voutput_min = _mm256_set1_epi8(params->fp32_scalar.output_min);
+  // XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  // XNN_FORCE_REALIZATION(voutput_zero_point);
+  // XNN_FORCE_REALIZATION(voutput_min);
 
   do {
     const __m128i vbias0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
@@ -9156,7 +9236,6 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_3x8c8__avx2(
     vscaled1x01234567 = _mm256_mul_ps(vscaled1x01234567, vscale01234567);
     vscaled2x01234567 = _mm256_mul_ps(vscaled2x01234567, vscale01234567);
 
-    const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
     vscaled0x01234567 = _mm256_min_ps(vscaled0x01234567, voutput_max_less_zero_point);
     vscaled1x01234567 = _mm256_min_ps(vscaled1x01234567, voutput_max_less_zero_point);
     vscaled2x01234567 = _mm256_min_ps(vscaled2x01234567, voutput_max_less_zero_point);
@@ -9165,7 +9244,6 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_3x8c8__avx2(
     vacc1x01234567 = _mm256_cvtps_epi32(vscaled1x01234567);
     vacc2x01234567 = _mm256_cvtps_epi32(vscaled2x01234567);
 
-    const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
     __m256i vacc01x01234567 = _mm256_adds_epi16(_mm256_packs_epi32(vacc0x01234567, vacc1x01234567), voutput_zero_point);
     __m256i vacc22x01234567 = _mm256_adds_epi16(_mm256_packs_epi32(vacc2x01234567, vacc2x01234567), voutput_zero_point);
 
@@ -9174,7 +9252,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_3x8c8__avx2(
 
     __m256i vout = _mm256_packs_epi16(vacc01x01234567, vacc22x01234567);
 
-    vout = _mm256_max_epi8(vout, _mm256_load_si256((const __m256i*) params->fp32_avx2.output_min));
+    vout = _mm256_max_epi8(vout, voutput_min);
 
     __m128i vout_lo = _mm256_castsi256_si128(vout);
     __m128i vout_hi = _mm256_extracti128_si256(vout, 1);
@@ -9612,7 +9690,19 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul32(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const __m256i vk_zero_point = _mm256_cvtepu16_epi32(_mm_load_si128((const __m128i*) params->fp32_avx2.kernel_zero_point));
+  const __m256i vk_zero_point = _mm256_set1_epi32(params->fp32_scalar.kernel_zero_point);
+  XNN_FORCE_REALIZATION(vk_zero_point);
+
+  const __m256 vscale = _mm256_set1_ps(params->fp32_scalar.scale);
+  XNN_FORCE_REALIZATION(vscale);
+
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->fp32_scalar.output_min);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+
   do {
     const uint8_t* i0 = input[0];
     assert(i0 != NULL);
@@ -9978,23 +10068,19 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul32(
       __m256 vscaled01234567 = _mm256_cvtepi32_ps(vacc01234567);
       __m256 vscaled89ABCDEF = _mm256_cvtepi32_ps(vacc89ABCDEF);
 
-      const __m256 vscale = _mm256_load_ps(params->fp32_avx2.scale);
       vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale);
       vscaled89ABCDEF = _mm256_mul_ps(vscaled89ABCDEF, vscale);
 
-      const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
       vscaled01234567 = _mm256_min_ps(vscaled01234567, voutput_max_less_zero_point);
       vscaled89ABCDEF = _mm256_min_ps(vscaled89ABCDEF, voutput_max_less_zero_point);
 
       vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
       vacc89ABCDEF = _mm256_cvtps_epi32(vscaled89ABCDEF);
 
-      const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
       __m256i vout012389AB4567CDEF = _mm256_adds_epi16(_mm256_packs_epi32(vacc01234567, vacc89ABCDEF), voutput_zero_point);
 
       __m128i vout0123456789ABCDEF = _mm_shuffle_epi32(_mm_packus_epi16(_mm256_castsi256_si128(vout012389AB4567CDEF), _mm256_extracti128_si256(vout012389AB4567CDEF, 1)), _MM_SHUFFLE(3, 1, 2, 0));
 
-      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
       vout0123456789ABCDEF = _mm_max_epu8(vout0123456789ABCDEF, voutput_min);
 
       _mm_storeu_si128((__m128i*) output, vout0123456789ABCDEF);
@@ -10159,18 +10245,16 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul32(
         k += 8;
 
         __m256 vscaled01234567 = _mm256_cvtepi32_ps(vacc01234567);
-        vscaled01234567 = _mm256_mul_ps(vscaled01234567, _mm256_load_ps(params->fp32_avx2.scale));
-        vscaled01234567 = _mm256_min_ps(vscaled01234567, _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point));
+        vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale);
+        vscaled01234567 = _mm256_min_ps(vscaled01234567, voutput_max_less_zero_point);
         vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
 
         w = (const void*) ((const int32_t*) w + 8);
 
-        const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_avx2.output_zero_point);
-        __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), voutput_zero_point);
+        __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), _mm256_castsi256_si128(voutput_zero_point));
 
         __m128i vout0123456701234567 = _mm_packus_epi16(vout01234567, vout01234567);
 
-        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
         vout0123456701234567 = _mm_max_epu8(vout0123456701234567, voutput_min);
 
         if XNN_LIKELY(c >= 8) {
@@ -10216,7 +10300,19 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const __m256i vk_zero_point = _mm256_cvtepu16_epi32(_mm_load_si128((const __m128i*) params->fp32_avx2.kernel_zero_point));
+  const __m256i vk_zero_point = _mm256_set1_epi32(params->fp32_scalar.kernel_zero_point);
+  XNN_FORCE_REALIZATION(vk_zero_point);
+
+  const __m256 vscale = _mm256_set1_ps(params->fp32_scalar.scale);
+  XNN_FORCE_REALIZATION(vscale);
+
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->fp32_scalar.output_min);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+
   do {
     const uint8_t* i0 = input[0];
     assert(i0 != NULL);
@@ -10358,23 +10454,19 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32(
       __m256 vscaled01234567 = _mm256_cvtepi32_ps(vacc01234567);
       __m256 vscaled89ABCDEF = _mm256_cvtepi32_ps(vacc89ABCDEF);
 
-      const __m256 vscale = _mm256_load_ps(params->fp32_avx2.scale);
       vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale);
       vscaled89ABCDEF = _mm256_mul_ps(vscaled89ABCDEF, vscale);
 
-      const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
       vscaled01234567 = _mm256_min_ps(vscaled01234567, voutput_max_less_zero_point);
       vscaled89ABCDEF = _mm256_min_ps(vscaled89ABCDEF, voutput_max_less_zero_point);
 
       vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
       vacc89ABCDEF = _mm256_cvtps_epi32(vscaled89ABCDEF);
 
-      const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
       __m256i vout012389AB4567CDEF = _mm256_adds_epi16(_mm256_packs_epi32(vacc01234567, vacc89ABCDEF), voutput_zero_point);
 
       __m128i vout0123456789ABCDEF = _mm_shuffle_epi32(_mm_packus_epi16(_mm256_castsi256_si128(vout012389AB4567CDEF), _mm256_extracti128_si256(vout012389AB4567CDEF, 1)), _MM_SHUFFLE(3, 1, 2, 0));
 
-      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
       vout0123456789ABCDEF = _mm_max_epu8(vout0123456789ABCDEF, voutput_min);
 
       _mm_storeu_si128((__m128i*) output, vout0123456789ABCDEF);
@@ -10443,18 +10535,16 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32(
         k += 8;
 
         __m256 vscaled01234567 = _mm256_cvtepi32_ps(vacc01234567);
-        vscaled01234567 = _mm256_mul_ps(vscaled01234567, _mm256_load_ps(params->fp32_avx2.scale));
-        vscaled01234567 = _mm256_min_ps(vscaled01234567, _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point));
+        vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale);
+        vscaled01234567 = _mm256_min_ps(vscaled01234567, voutput_max_less_zero_point);
         vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
 
         w = (const void*) ((const int32_t*) w + 8);
 
-        const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_avx2.output_zero_point);
-        __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), voutput_zero_point);
+        __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), _mm256_castsi256_si128(voutput_zero_point));
 
         __m128i vout0123456701234567 = _mm_packus_epi16(vout01234567, vout01234567);
 
-        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
         vout0123456701234567 = _mm_max_epu8(vout0123456701234567, voutput_min);
 
         if XNN_LIKELY(c >= 8) {
@@ -10581,7 +10671,17 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x8c8__avx2(
   const uint8_t* a0 = a;
   uint8_t* c0 = c;
 
-  const __m256i vb_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.kernel_zero_point);
+  const __m256i vb_zero_point = _mm256_set1_epi16(params->fp32_scalar.kernel_zero_point);
+  XNN_FORCE_REALIZATION(vb_zero_point);
+  const __m256 vscale = _mm256_set1_ps(params->fp32_scalar.scale);
+  // XNN_FORCE_REALIZATION(vscale);
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m256i voutput_min = _mm256_set1_epi8(params->fp32_scalar.output_min);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+
   do {
     const __m128i vbias0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     const __m128i vbias0x1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -10631,22 +10731,19 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x8c8__avx2(
 
     __m256 vfpacc0x01234567 = _mm256_cvtepi32_ps(vacc0x01234567);
 
-    const __m256 vscale = _mm256_load_ps(params->fp32_avx2.scale);
     vfpacc0x01234567 = _mm256_mul_ps(vfpacc0x01234567, vscale);
 
-    const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
     vfpacc0x01234567 = _mm256_min_ps(vfpacc0x01234567, voutput_max_less_zero_point);
 
     vacc0x01234567 = _mm256_cvtps_epi32(vfpacc0x01234567);
 
-    const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
     __m256i vacc00x01234567 = _mm256_adds_epi16(_mm256_packs_epi32(vacc0x01234567, vacc0x01234567), voutput_zero_point);
 
     vacc00x01234567 = _mm256_permute4x64_epi64(vacc00x01234567, _MM_SHUFFLE(3, 1, 2, 0));
 
     __m256i vout = _mm256_packus_epi16(vacc00x01234567, vacc00x01234567);
 
-    vout = _mm256_max_epu8(vout, _mm256_load_si256((const __m256i*) params->fp32_avx2.output_min));
+    vout = _mm256_max_epu8(vout, voutput_min);
 
     __m128i vout_lo = _mm256_castsi256_si128(vout);
     __m128i vout_hi = _mm256_extracti128_si256(vout, 1);
@@ -10722,7 +10819,17 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x8c8__avx2(
     c2 = c1;
   }
 
-  const __m256i vb_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.kernel_zero_point);
+  const __m256i vb_zero_point = _mm256_set1_epi16(params->fp32_scalar.kernel_zero_point);
+  XNN_FORCE_REALIZATION(vb_zero_point);
+  const __m256 vscale = _mm256_set1_ps(params->fp32_scalar.scale);
+  // XNN_FORCE_REALIZATION(vscale);
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m256i voutput_min = _mm256_set1_epi8(params->fp32_scalar.output_min);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+
   do {
     const __m128i vbias0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     const __m128i vbias0x1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -10804,12 +10911,10 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x8c8__avx2(
     __m256 vfpacc1x01234567 = _mm256_cvtepi32_ps(vacc1x01234567);
     __m256 vfpacc2x01234567 = _mm256_cvtepi32_ps(vacc2x01234567);
 
-    const __m256 vscale = _mm256_load_ps(params->fp32_avx2.scale);
     vfpacc0x01234567 = _mm256_mul_ps(vfpacc0x01234567, vscale);
     vfpacc1x01234567 = _mm256_mul_ps(vfpacc1x01234567, vscale);
     vfpacc2x01234567 = _mm256_mul_ps(vfpacc2x01234567, vscale);
 
-    const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
     vfpacc0x01234567 = _mm256_min_ps(vfpacc0x01234567, voutput_max_less_zero_point);
     vfpacc1x01234567 = _mm256_min_ps(vfpacc1x01234567, voutput_max_less_zero_point);
     vfpacc2x01234567 = _mm256_min_ps(vfpacc2x01234567, voutput_max_less_zero_point);
@@ -10818,7 +10923,6 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x8c8__avx2(
     vacc1x01234567 = _mm256_cvtps_epi32(vfpacc1x01234567);
     vacc2x01234567 = _mm256_cvtps_epi32(vfpacc2x01234567);
 
-    const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
     __m256i vacc01x01234567 = _mm256_adds_epi16(_mm256_packs_epi32(vacc0x01234567, vacc1x01234567), voutput_zero_point);
     __m256i vacc22x01234567 = _mm256_adds_epi16(_mm256_packs_epi32(vacc2x01234567, vacc2x01234567), voutput_zero_point);
 
@@ -10827,7 +10931,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_3x8c8__avx2(
 
     __m256i vout = _mm256_packus_epi16(vacc01x01234567, vacc22x01234567);
 
-    vout = _mm256_max_epu8(vout, _mm256_load_si256((const __m256i*) params->fp32_avx2.output_min));
+    vout = _mm256_max_epu8(vout, voutput_min);
 
     __m128i vout_lo = _mm256_castsi256_si128(vout);
     __m128i vout_hi = _mm256_extracti128_si256(vout, 1);
@@ -10910,6 +11014,17 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x8c8__avx2(
   kc = round_up_po2(kc, 8 * sizeof(uint8_t));
   uint8_t* c0 = c;
 
+  const __m256 vscale = _mm256_set1_ps(params->fp32_scalar.scale);
+  // XNN_FORCE_REALIZATION(vscale);
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m256i voutput_min = _mm256_set1_epi8(params->fp32_scalar.output_min);
+  // XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  // XNN_FORCE_REALIZATION(voutput_zero_point);
+  // XNN_FORCE_REALIZATION(voutput_min);
+
+  const __m256i vb_zero_point = _mm256_set1_epi16(params->fp32_scalar.kernel_zero_point);
+  XNN_FORCE_REALIZATION(vb_zero_point);
   do {
     const __m128i vbias0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     const __m128i vbias0x1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -10926,7 +11041,6 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x8c8__avx2(
     w = (const int32_t*) w + 8;
 
     size_t p = ks;
-    const __m256i vb_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.kernel_zero_point);
     do {
       const uint8_t* restrict a0 = a[0];
       if XNN_UNPREDICTABLE(a0 != zero) {
@@ -10973,22 +11087,19 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x8c8__avx2(
 
     __m256 vscaled0x01234567 = _mm256_cvtepi32_ps(vacc0x01234567);
 
-    const __m256 vscale = _mm256_load_ps(params->fp32_avx2.scale);
     vscaled0x01234567 = _mm256_mul_ps(vscaled0x01234567, vscale);
 
-    const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
     vscaled0x01234567 = _mm256_min_ps(vscaled0x01234567, voutput_max_less_zero_point);
 
     vacc0x01234567 = _mm256_cvtps_epi32(vscaled0x01234567);
 
-    const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
     __m256i vacc00x01234567 = _mm256_adds_epi16(_mm256_packs_epi32(vacc0x01234567, vacc0x01234567), voutput_zero_point);
 
     vacc00x01234567 = _mm256_permute4x64_epi64(vacc00x01234567, _MM_SHUFFLE(3, 1, 2, 0));
 
     __m256i vout = _mm256_packus_epi16(vacc00x01234567, vacc00x01234567);
 
-    vout = _mm256_max_epu8(vout, _mm256_load_si256((const __m256i*) params->fp32_avx2.output_min));
+    vout = _mm256_max_epu8(vout, voutput_min);
 
     __m128i vout_lo = _mm256_castsi256_si128(vout);
     __m128i vout_hi = _mm256_extracti128_si256(vout, 1);
@@ -11063,6 +11174,17 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_3x8c8__avx2(
     c2 = c1;
   }
 
+  const __m256 vscale = _mm256_set1_ps(params->fp32_scalar.scale);
+  // XNN_FORCE_REALIZATION(vscale);
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m256i voutput_min = _mm256_set1_epi8(params->fp32_scalar.output_min);
+  // XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  // XNN_FORCE_REALIZATION(voutput_zero_point);
+  // XNN_FORCE_REALIZATION(voutput_min);
+
+  const __m256i vb_zero_point = _mm256_set1_epi16(params->fp32_scalar.kernel_zero_point);
+  XNN_FORCE_REALIZATION(vb_zero_point);
   do {
     const __m128i vbias0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     const __m128i vbias0x1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -11087,7 +11209,6 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_3x8c8__avx2(
     w = (const int32_t*) w + 8;
 
     size_t p = ks;
-    const __m256i vb_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.kernel_zero_point);
     do {
       const uint8_t* restrict a0 = a[0];
       if XNN_UNPREDICTABLE(a0 != zero) {
@@ -11166,12 +11287,10 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_3x8c8__avx2(
     __m256 vscaled1x01234567 = _mm256_cvtepi32_ps(vacc1x01234567);
     __m256 vscaled2x01234567 = _mm256_cvtepi32_ps(vacc2x01234567);
 
-    const __m256 vscale = _mm256_load_ps(params->fp32_avx2.scale);
     vscaled0x01234567 = _mm256_mul_ps(vscaled0x01234567, vscale);
     vscaled1x01234567 = _mm256_mul_ps(vscaled1x01234567, vscale);
     vscaled2x01234567 = _mm256_mul_ps(vscaled2x01234567, vscale);
 
-    const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
     vscaled0x01234567 = _mm256_min_ps(vscaled0x01234567, voutput_max_less_zero_point);
     vscaled1x01234567 = _mm256_min_ps(vscaled1x01234567, voutput_max_less_zero_point);
     vscaled2x01234567 = _mm256_min_ps(vscaled2x01234567, voutput_max_less_zero_point);
@@ -11180,7 +11299,6 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_3x8c8__avx2(
     vacc1x01234567 = _mm256_cvtps_epi32(vscaled1x01234567);
     vacc2x01234567 = _mm256_cvtps_epi32(vscaled2x01234567);
 
-    const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
     __m256i vacc01x01234567 = _mm256_adds_epi16(_mm256_packs_epi32(vacc0x01234567, vacc1x01234567), voutput_zero_point);
     __m256i vacc22x01234567 = _mm256_adds_epi16(_mm256_packs_epi32(vacc2x01234567, vacc2x01234567), voutput_zero_point);
 
@@ -11189,7 +11307,7 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_3x8c8__avx2(
 
     __m256i vout = _mm256_packus_epi16(vacc01x01234567, vacc22x01234567);
 
-    vout = _mm256_max_epu8(vout, _mm256_load_si256((const __m256i*) params->fp32_avx2.output_min));
+    vout = _mm256_max_epu8(vout, voutput_min);
 
     __m128i vout_lo = _mm256_castsi256_si128(vout);
     __m128i vout_hi = _mm256_extracti128_si256(vout, 1);

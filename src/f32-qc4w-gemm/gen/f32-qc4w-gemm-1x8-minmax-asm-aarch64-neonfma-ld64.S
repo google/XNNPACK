@@ -37,6 +37,7 @@ BEGIN_FUNCTION xnn_f32_qc4w_gemm_minmax_ukernel_1x8__asm_aarch64_neonfma_ld64
 
         # Load min/max/zerop values
         LD3R        {v4.4s, v5.4s, v6.4s}, [x8]
+        NEG         v6.4s, v6.4s
 0:
         # Load initial bias from w into accumulators
         LDP         q16, q17, [x5], 32

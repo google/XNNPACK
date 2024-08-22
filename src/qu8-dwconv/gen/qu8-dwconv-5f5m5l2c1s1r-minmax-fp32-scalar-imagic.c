@@ -32,12 +32,14 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_5f5m5l2c1s1r__scalar_imagic(
   assert(output_width != 0);
   assert(kernel_size > 5);
 
-  const float vscale = params->fp32_scalar_imagic.scale;
-  const float vmagic_bias = params->fp32_scalar_imagic.magic_bias;
-  const int32_t vmagic_min = params->fp32_scalar_imagic.magic_min;
-  const int32_t vmagic_max = params->fp32_scalar_imagic.magic_max;
-  const int32_t vmagic_bias_less_zero_point = params->fp32_scalar_imagic.magic_bias_less_zero_point;
-  const int32_t vkernel_zero_point = params->fp32_scalar_imagic.kernel_zero_point;
+  const float vscale = params->fp32_scalar.scale;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t output_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t output_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t vmagic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
+  const int32_t vmagic_max = (int32_t) float_as_uint32(12582912.0f + output_max_less_zero_point);
+  const int32_t vmagic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t vkernel_zero_point = params->fp32_scalar.kernel_zero_point;
   do {
     const void* w = weights;
 

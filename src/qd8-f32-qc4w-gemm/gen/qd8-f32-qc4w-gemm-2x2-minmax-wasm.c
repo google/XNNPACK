@@ -41,6 +41,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x2__wasm(
     c1 = c0;
   }
 
+
   kc = round_up_po2(kc, 2);
   do {
     const int32_t vksum0 = unaligned_indexed_load_s32(w, 0);

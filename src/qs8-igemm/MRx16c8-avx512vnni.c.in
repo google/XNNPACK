@@ -22,7 +22,7 @@ $if PREFETCH:
 $GFNI = 0
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qc8w", "QS8": "qs8", "QU8": "qu8"}[DATATYPE]
 $REQUANTIZATION_SPEC = "" if DATATYPE in ["QD8", "QC4"] else "_" + REQUANTIZATION.lower()
-$PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx512vnni" if REQUANTIZATION else "avx512vnni"
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar" if REQUANTIZATION else "scalar"
 $PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params"}[DATATYPE]
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $OUT_T = "float" if DATATYPE in ["QD8", "QC4"] else XINT8_T
@@ -79,8 +79,12 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8_
   $if DATATYPE in ["QD8", "QC4"]:
     const __m512i vinput_zero_point = _mm512_set1_epi32((int) quantization_params->zero_point + 128);
     const __m512 vinput_inv_scale = _mm512_set1_ps(quantization_params->inv_scale);
-    const __m512 voutput_min = _mm512_set1_ps(params->avx512vnni.min);
-    const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
+    const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
+    const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+    // XNN_FORCE_REALIZATION(vinput_zero_point);
+    // XNN_FORCE_REALIZATION(vinput_inv_scale);
+    // XNN_FORCE_REALIZATION(voutput_min);
+    // XNN_FORCE_REALIZATION(voutput_max);
     $if DATATYPE == "QC4":
       const __m512i vmask = _mm512_set1_epi8(0xF0);
       XNN_FORCE_REALIZATION(vmask);
@@ -89,12 +93,14 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8_
         XNN_FORCE_REALIZATION(vshl4);
   $else:
     $if DATATYPE != "QC8":
-      const __m512 vscale = _mm512_load_ps(params->${PARAMS_STRUCT}.scale);
-    const __m512 voutput_max_less_zero_point = _mm512_set1_ps(params->${PARAMS_STRUCT}.output_max_less_zero_point);
+      const __m512 vscale = _mm512_set1_ps(params->${PARAMS_STRUCT}.scale);
+      // XNN_FORCE_REALIZATION(vscale);
+    const __m512 voutput_max_less_zero_point = _mm512_set1_ps((int32_t) params->${PARAMS_STRUCT}.output_max - (int32_t) params->${PARAMS_STRUCT}.output_zero_point);
     const __m512i voutput_zero_point = _mm512_set1_epi32(params->${PARAMS_STRUCT}.output_zero_point);
-    const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
-    $if DATATYPE == "QU8":
-      const __m512i vb_zero_point = _mm512_load_si512(params->${PARAMS_STRUCT}.kernel_zero_point);
+    const __m128i voutput_min = _mm_set1_epi8(params->${PARAMS_STRUCT}.output_min);
+    // XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+    // XNN_FORCE_REALIZATION(voutput_zero_point);
+    XNN_FORCE_REALIZATION(voutput_min);
   do {
     $if DATATYPE in ["QD8", "QC4"]:
       const __m512i vksum0123456789ABCDEF = _mm512_load_epi32(w);

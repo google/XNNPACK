@@ -68,6 +68,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_6
           STP         d8,  d9, [sp, -16]!     // Save d8-d9 on stack
           # Load min/max/zerop values
           LD3R        {v6.4s, v7.4s, v8.4s}, [x8]
+          NEG         v8.4s, v8.4s
         $else:
           # Load min/max values
           LD2R        {v6.4s, v7.4s}, [x8]

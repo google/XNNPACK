@@ -57,6 +57,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_4x4__scalar(
     c3 = c2;
   }
 
+
   kc = round_up_po2(kc, 2);
   do {
     const float vksum0 = ((const float*) w)[0];

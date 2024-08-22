@@ -41,7 +41,14 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x2__scalar_lrintf(
 
   uint8_t* c0 = c;
 
-  const int32_t vb_zero_point = params->fp32_scalar_lrintf.kernel_zero_point;
+  const int32_t output_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t output_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const float vscale = params->fp32_scalar.scale;
+  const float voutput_min_less_zero_point = output_min_less_zero_point;
+  const float voutput_max_less_zero_point = output_max_less_zero_point;
+  const int32_t voutput_zero_point = params->fp32_scalar.output_zero_point;
+
+  const int32_t vb_zero_point = params->fp32_scalar.kernel_zero_point;
   do {
     int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
     int32_t vacc0x1 = unaligned_indexed_load_s32(w, 1);
@@ -75,22 +82,18 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x2__scalar_lrintf(
     float vfpacc0x0 = (float) vacc0x0;
     float vfpacc0x1 = (float) vacc0x1;
 
-    const float vscale = params->fp32_scalar_lrintf.scale;
     vfpacc0x0 *= vscale;
     vfpacc0x1 *= vscale;
 
-    const float voutput_min_less_zero_point = params->fp32_scalar_lrintf.output_min_less_zero_point;
     vfpacc0x0 = math_max_f32(vfpacc0x0, voutput_min_less_zero_point);
     vfpacc0x1 = math_max_f32(vfpacc0x1, voutput_min_less_zero_point);
 
-    const float voutput_max_less_zero_point = params->fp32_scalar_lrintf.output_max_less_zero_point;
     vfpacc0x0 = math_min_f32(vfpacc0x0, voutput_max_less_zero_point);
     vfpacc0x1 = math_min_f32(vfpacc0x1, voutput_max_less_zero_point);
 
     const int32_t vrndacc0x0 = (int32_t) lrintf(vfpacc0x0);
     const int32_t vrndacc0x1 = (int32_t) lrintf(vfpacc0x1);
 
-    const int32_t voutput_zero_point = params->fp32_scalar_lrintf.output_zero_point;
     int32_t vout0x0 = vrndacc0x0 + voutput_zero_point;
     int32_t vout0x1 = vrndacc0x1 + voutput_zero_point;
 

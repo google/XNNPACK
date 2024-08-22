@@ -40,6 +40,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x4__wasm(
     c1 = c0;
   }
 
+
   kc = round_up_po2(kc, 2);
   do {
     const int32_t vksum0 = ((const int32_t*) w)[0];

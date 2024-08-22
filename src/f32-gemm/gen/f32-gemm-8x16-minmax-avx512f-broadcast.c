@@ -80,7 +80,6 @@ void xnn_f32_gemm_minmax_ukernel_8x16__avx512f_broadcast(
     a7 = a6;
     c7 = c6;
   }
-
   do {
     __m512 vacc0x0 = _mm512_load_ps(w);
     __m512 vacc1x0 = vacc0x0;

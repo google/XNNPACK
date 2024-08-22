@@ -109,7 +109,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_12x16c8__avx512vnni(
     a11 = a10;
     c11 = c10;
   }
-  size_t bl = params->avx512vnni.blocksize;
+  size_t bl = params->scalar.blocksize;
   assert(bl != 0);
   assert(bl <= kc);
   assert(kc % bl == 0);
@@ -129,8 +129,10 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_12x16c8__avx512vnni(
   const __m512 vinput_zero_point9 = _mm512_set1_ps((float) quantization_params[9].zero_point + 128);
   const __m512 vinput_zero_point10 = _mm512_set1_ps((float) quantization_params[10].zero_point + 128);
   const __m512 vinput_zero_point11 = _mm512_set1_ps((float) quantization_params[11].zero_point + 128);
-  const __m512 voutput_min = _mm512_set1_ps(params->avx512vnni.min);
-  const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
+  const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
+  const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
   const __m512i vmask = _mm512_set1_epi8(0xF0);
   XNN_FORCE_REALIZATION(vmask);
   do {

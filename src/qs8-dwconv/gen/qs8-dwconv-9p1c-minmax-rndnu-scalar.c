@@ -13,7 +13,6 @@
 #include "xnnpack/math.h"
 #include "xnnpack/unaligned.h"
 
-
 void xnn_qs8_dwconv_minmax_rndnu_ukernel_9p1c__scalar(
     size_t channels,
     size_t output_width,
@@ -32,8 +31,8 @@ void xnn_qs8_dwconv_minmax_rndnu_ukernel_9p1c__scalar(
   const int32_t vmultiplier = params->rndnu_scalar.multiplier;
   const int64_t vrounding = params->rndnu_scalar.rounding;
   const uint32_t vshift = params->rndnu_scalar.shift;
-  const int32_t voutput_min_less_zero_point = params->rndnu_scalar.output_min_less_zero_point;
-  const int32_t voutput_max_less_zero_point = params->rndnu_scalar.output_max_less_zero_point;
+  const int32_t voutput_min_less_zero_point = (int32_t) params->rndnu_scalar.output_min - (int32_t) params->rndnu_scalar.output_zero_point;
+  const int32_t voutput_max_less_zero_point = (int32_t) params->rndnu_scalar.output_max - (int32_t) params->rndnu_scalar.output_zero_point;
   const int32_t voutput_zero_point = params->rndnu_scalar.output_zero_point;
   do {
     const int8_t* i0 = input[0];

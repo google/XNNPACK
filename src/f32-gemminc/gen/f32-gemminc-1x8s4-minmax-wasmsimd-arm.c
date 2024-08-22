@@ -40,8 +40,8 @@ void xnn_f32_gemminc_minmax_ukernel_1x8s4__wasmsimd_arm(
   const float* a0 = a;
   float* c0 = c;
 
-  const v128_t vmin = wasm_v128_load32_splat(&params->wasmsimd.min);
-  const v128_t vmax = wasm_v128_load32_splat(&params->wasmsimd.max);
+  const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
+  const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
   do {

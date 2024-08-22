@@ -40,6 +40,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x2__scalar(
   const int8_t* a0 = a;
   uint16_t* c0 = c;
 
+
   kc = round_up_po2(kc, 2);
   do {
     const float vksum0 = unaligned_indexed_load_f32(w, 0);

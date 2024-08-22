@@ -407,7 +407,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_3x4c2__sse2_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -427,7 +427,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_3x4c2__sse41_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -447,7 +447,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_2x4c2s4__sse41_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -467,7 +467,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_3x4c2s4__sse2_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -487,7 +487,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_3x4c2s4__sse41_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -507,7 +507,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_4x4c2s4__sse2_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -527,7 +527,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__sse2_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -547,7 +547,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_2x4c8__sse2_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -567,7 +567,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_3x4c8__sse41_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -587,7 +587,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_1x4c2s4__sse2_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -607,7 +607,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_4x4c2s4__sse2_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -627,7 +627,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_4x4c2s4__sse41_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -647,7 +647,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_1x4c2__sse2_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -667,7 +667,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_2x4c2__sse2_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -687,7 +687,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_3x4c2__sse41_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -707,7 +707,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_4x4c2__sse2_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -727,7 +727,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_4x4c2__sse41_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -747,7 +747,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__sse2_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -767,7 +767,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__sse41_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -787,7 +787,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_2x4c8__sse2_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -807,7 +807,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_2x4c8__sse41_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -827,7 +827,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_2x4c2__avx_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -847,7 +847,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_3x4c2__avx_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -867,7 +867,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_4x4c2__avx_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -887,7 +887,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_3x4c2__avx_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -907,7 +907,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_3x4c2s4__avx_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -927,7 +927,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_3x4c2s4__avx_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -947,7 +947,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_4x4c2s4__avx_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -967,7 +967,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_2x4c8__avx_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -987,7 +987,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_3x4c8__avx_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -1007,7 +1007,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__avx_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -1027,7 +1027,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_2x4c8__avx_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -1047,7 +1047,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_2x8c8__avx2,
-                        xnn_init_qu8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -1067,7 +1067,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_3x8c8__avx2,
-                        xnn_init_qu8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -1087,7 +1087,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_5x16c8__avx512skx,
-                        xnn_init_qu8_conv_minmax_fp32_avx512_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -1107,7 +1107,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_8x16c8__avx512skx,
-                        xnn_init_qu8_conv_minmax_fp32_avx512_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           },
@@ -1130,7 +1130,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_1x4c2s4__wasmsimd_dot16x2_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_wasmsimd_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           })),
@@ -1147,7 +1147,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__wasmsimd_dot16x2_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_wasmsimd_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           })),
@@ -1164,7 +1164,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_2x4c2__wasmsimd_dot16x2_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_wasmsimd_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           })),
@@ -1181,7 +1181,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_3x4c2s4__wasmsimd_dot16x2_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_wasmsimd_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           })),
@@ -1198,7 +1198,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_3x4c8__wasmsimd_dot16x2_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_wasmsimd_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           })),
@@ -1215,7 +1215,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_4x4c2__wasmsimd_dot16x2_ld64,
-                        xnn_init_qu8_conv_minmax_fp32_wasmsimd_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           })),
@@ -1232,7 +1232,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_4x4c2__wasmsimd_dot16x2_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_wasmsimd_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           })),
@@ -1249,7 +1249,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_4x4c8__wasmsimd_dot16x2_ld128,
-                        xnn_init_qu8_conv_minmax_fp32_wasmsimd_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           })),
@@ -1269,7 +1269,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_1x2__wasm_fmagic,
-                        xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           })),
@@ -1286,7 +1286,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_1x4__wasm_fmagic,
-                        xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           })),
@@ -1303,7 +1303,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_2x2__wasm_fmagic,
-                        xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           })),
@@ -1320,7 +1320,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_2x4__wasm_fmagic,
-                        xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           })),
@@ -1337,7 +1337,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_4x2__wasm_fmagic,
-                        xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           })),
@@ -1354,7 +1354,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic,
-                        xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params,
+                        xnn_init_qu8_conv_minmax_fp32_scalar_params,
                         xnn_pack_qu8_gemm_goi_w,
                         xnn_qu8_requantize_fp32);
           })),
@@ -1373,7 +1373,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*is_igemm=*/false,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_1x2__scalar_fmagic,
-                      xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params,
+                      xnn_init_qu8_conv_minmax_fp32_scalar_params,
                       xnn_pack_qu8_gemm_goi_w,
                       xnn_qu8_requantize_fp32);
         })),
@@ -1391,7 +1391,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*is_igemm=*/false,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_1x2__scalar_lrintf,
-                      xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
+                      xnn_init_qu8_conv_minmax_fp32_scalar_params,
                       xnn_pack_qu8_gemm_goi_w,
                       xnn_qu8_requantize_fp32);
         })),
@@ -1409,7 +1409,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*is_igemm=*/false,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_1x4__scalar_fmagic,
-                      xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params,
+                      xnn_init_qu8_conv_minmax_fp32_scalar_params,
                       xnn_pack_qu8_gemm_goi_w,
                       xnn_qu8_requantize_fp32);
         })),
@@ -1427,7 +1427,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*is_igemm=*/false,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_1x4__scalar_lrintf,
-                      xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
+                      xnn_init_qu8_conv_minmax_fp32_scalar_params,
                       xnn_pack_qu8_gemm_goi_w,
                       xnn_qu8_requantize_fp32);
         })),
@@ -1445,7 +1445,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*is_igemm=*/false,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_2x2__scalar_fmagic,
-                      xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params,
+                      xnn_init_qu8_conv_minmax_fp32_scalar_params,
                       xnn_pack_qu8_gemm_goi_w,
                       xnn_qu8_requantize_fp32);
         })),
@@ -1463,7 +1463,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*is_igemm=*/false,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_2x2__scalar_lrintf,
-                      xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
+                      xnn_init_qu8_conv_minmax_fp32_scalar_params,
                       xnn_pack_qu8_gemm_goi_w,
                       xnn_qu8_requantize_fp32);
         })),
@@ -1481,7 +1481,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*is_igemm=*/false,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_2x4__scalar_fmagic,
-                      xnn_init_qu8_conv_minmax_fp32_scalar_fmagic_params,
+                      xnn_init_qu8_conv_minmax_fp32_scalar_params,
                       xnn_pack_qu8_gemm_goi_w,
                       xnn_qu8_requantize_fp32);
         })),
@@ -1499,7 +1499,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*is_igemm=*/false,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_2x4__scalar_lrintf,
-                      xnn_init_qu8_conv_minmax_fp32_scalar_lrintf_params,
+                      xnn_init_qu8_conv_minmax_fp32_scalar_params,
                       xnn_pack_qu8_gemm_goi_w,
                       xnn_qu8_requantize_fp32);
         })),
@@ -1517,7 +1517,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*is_igemm=*/false,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_3x2__scalar_imagic,
-                      xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params,
+                      xnn_init_qu8_conv_minmax_fp32_scalar_params,
                       xnn_pack_qu8_gemm_goi_w,
                       xnn_qu8_requantize_fp32);
         })),
@@ -1535,7 +1535,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*is_igemm=*/false,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_3x4__scalar_imagic,
-                      xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params,
+                      xnn_init_qu8_conv_minmax_fp32_scalar_params,
                       xnn_pack_qu8_gemm_goi_w,
                       xnn_qu8_requantize_fp32);
         })),
@@ -1553,7 +1553,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*is_igemm=*/false,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_4x2__scalar_imagic,
-                      xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params,
+                      xnn_init_qu8_conv_minmax_fp32_scalar_params,
                       xnn_pack_qu8_gemm_goi_w,
                       xnn_qu8_requantize_fp32);
         })),
@@ -1571,7 +1571,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*is_igemm=*/false,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_qu8_gemm_minmax_fp32_ukernel_4x4__scalar_imagic,
-                      xnn_init_qu8_conv_minmax_fp32_scalar_imagic_params,
+                      xnn_init_qu8_conv_minmax_fp32_scalar_params,
                       xnn_pack_qu8_gemm_goi_w,
                       xnn_qu8_requantize_fp32);
         })),

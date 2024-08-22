@@ -44,6 +44,12 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x4__scalar_lrintf(
     c1 = c0;
   }
 
+  const int32_t output_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t output_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const float voutput_min_less_zero_point = output_min_less_zero_point;
+  const float voutput_max_less_zero_point = output_max_less_zero_point;
+  const int32_t voutput_zero_point = params->fp32_scalar.output_zero_point;
+
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];
     int32_t vacc0x1 = ((const int32_t*) w)[1];
@@ -117,7 +123,6 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x4__scalar_lrintf(
     vfpacc1x3 *= vscale3;
     w = (const void*) ((const float*) w + 4);
 
-    const float voutput_min_less_zero_point = params->fp32_scalar_lrintf.output_min_less_zero_point;
     vfpacc0x0 = math_max_f32(vfpacc0x0, voutput_min_less_zero_point);
     vfpacc0x1 = math_max_f32(vfpacc0x1, voutput_min_less_zero_point);
     vfpacc0x2 = math_max_f32(vfpacc0x2, voutput_min_less_zero_point);
@@ -127,7 +132,6 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x4__scalar_lrintf(
     vfpacc1x2 = math_max_f32(vfpacc1x2, voutput_min_less_zero_point);
     vfpacc1x3 = math_max_f32(vfpacc1x3, voutput_min_less_zero_point);
 
-    const float voutput_max_less_zero_point = params->fp32_scalar_lrintf.output_max_less_zero_point;
     vfpacc0x0 = math_min_f32(vfpacc0x0, voutput_max_less_zero_point);
     vfpacc0x1 = math_min_f32(vfpacc0x1, voutput_max_less_zero_point);
     vfpacc0x2 = math_min_f32(vfpacc0x2, voutput_max_less_zero_point);
@@ -146,7 +150,6 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_2x4__scalar_lrintf(
     const int32_t vrndacc1x2 = (int32_t) lrintf(vfpacc1x2);
     const int32_t vrndacc1x3 = (int32_t) lrintf(vfpacc1x3);
 
-    const int32_t voutput_zero_point = params->fp32_scalar_lrintf.output_zero_point;
     int32_t vout0x0 = vrndacc0x0 + voutput_zero_point;
     int32_t vout0x1 = vrndacc0x1 + voutput_zero_point;
     int32_t vout0x2 = vrndacc0x2 + voutput_zero_point;

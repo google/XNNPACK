@@ -34,6 +34,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8__wasm(
   const int8_t* a0 = a;
   float* c0 = c;
 
+
   do {
     const int32_t vksum0 = ((const int32_t*) w)[0];
     const int32_t vksum1 = ((const int32_t*) w)[1];

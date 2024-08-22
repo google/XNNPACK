@@ -33,9 +33,9 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_6f6m7l2c1s1r__scalar_lrintf(
   assert(output_width != 0);
   assert(kernel_size > 6);
 
-  const float voutput_min_less_zero_point = params->fp32_scalar_lrintf.output_min_less_zero_point;
-  const float voutput_max_less_zero_point = params->fp32_scalar_lrintf.output_max_less_zero_point;
-  const int32_t voutput_zero_point = params->fp32_scalar_lrintf.output_zero_point;
+  const float voutput_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const float voutput_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t voutput_zero_point = params->fp32_scalar.output_zero_point;
   do {
     const void* w = weights;
 

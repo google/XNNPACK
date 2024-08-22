@@ -35,6 +35,14 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_5f5m5l8c8s8r__sse41_mul16_add16(
   assert(kernel_size > 5);
 
 
+
+  const __m128 voutput_max_less_zero_point = _mm_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m128i voutput_zero_point = _mm_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->fp32_scalar.output_min);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+
   do {
     const void* w = weights;
 
@@ -350,20 +358,17 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_5f5m5l8c8s8r__sse41_mul16_add16(
         vscaled0123 = _mm_mul_ps(vscaled0123, vscale0123);
         vscaled4567 = _mm_mul_ps(vscaled4567, vscale4567);
 
-        const __m128 voutput_max_less_zero_point = _mm_load_ps(params->fp32_sse4.output_max_less_zero_point);
         vscaled0123 = _mm_min_ps(vscaled0123, voutput_max_less_zero_point);
         vscaled4567 = _mm_min_ps(vscaled4567, voutput_max_less_zero_point);
 
         vacc0123 = _mm_cvtps_epi32(vscaled0123);
         vacc4567 = _mm_cvtps_epi32(vscaled4567);
 
-        const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse4.output_zero_point);
         __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc4567), voutput_zero_point);
 
 
         __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
-        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_sse4.output_min);
         vout0123456701234567 = _mm_max_epi8(vout0123456701234567, voutput_min);
 
         _mm_storel_epi64((__m128i*) output, vout0123456701234567);
@@ -437,20 +442,18 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_5f5m5l8c8s8r__sse41_mul16_add16(
           vscaled4567 = _mm_mul_ps(vscaled4567, vscale4567);
 
 
-          const __m128 voutput_max_less_zero_point = _mm_load_ps(params->fp32_sse4.output_max_less_zero_point);
           vscaled0123 = _mm_min_ps(vscaled0123, voutput_max_less_zero_point);
           vscaled4567 = _mm_min_ps(vscaled4567, voutput_max_less_zero_point);
 
           vacc0123 = _mm_cvtps_epi32(vscaled0123);
           vacc4567 = _mm_cvtps_epi32(vscaled4567);
 
-          const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse4.output_zero_point);
           __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(vacc0123, vacc4567), voutput_zero_point);
 
 
           __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
-          vout0123456701234567 = _mm_max_epi8(vout0123456701234567, _mm_load_si128((const __m128i*) params->fp32_sse4.output_min));
+          vout0123456701234567 = _mm_max_epi8(vout0123456701234567, voutput_min);
 
           if (c & 4) {
             unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vout0123456701234567));

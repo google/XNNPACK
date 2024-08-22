@@ -41,7 +41,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_2x8c8__avx2(
   assert(c != NULL);
 
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
-  size_t bl = params->avx.blocksize;
+  size_t bl = params->scalar.blocksize;
   assert(bl <= round_up_po2(kc, 16));
   assert(bl != 0);
   assert(bl % 32 == 0);
@@ -56,10 +56,11 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_2x8c8__avx2(
 
   const __m128i vmask = _mm_set1_epi8(0xF0);
   XNN_FORCE_REALIZATION(vmask);
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
+
   do {
     const __m128 vinit0 = _mm_load_ss(&((const float*) w)[0]);
     const __m128 vinit1 = _mm_load_ss(&((const float*) w)[1]);

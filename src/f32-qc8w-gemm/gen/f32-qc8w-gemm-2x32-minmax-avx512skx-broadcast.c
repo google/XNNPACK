@@ -45,7 +45,6 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_2x32__avx512skx_broadcast(
     a1 = a0;
     c1 = c0;
   }
-
   do {
     __m512 vacc0x0 = _mm512_loadu_ps(w);
     __m512 vacc0x1 = _mm512_loadu_ps((const float*) w + 16);

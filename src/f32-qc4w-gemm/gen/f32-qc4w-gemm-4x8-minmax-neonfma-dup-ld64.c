@@ -56,7 +56,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x8__neonfma_dup_ld64(
     a3 = a2;
     c3 = c2;
   }
-  const int32x4_t vminus_kernel_zero_point = vld1q_dup_s32(&params->scalar.minus_kernel_zero_point);
+  const int32x4_t vminus_kernel_zero_point = vdupq_n_s32(-params->scalar.kernel_zero_point);
   const uint16x8_t vmask = vmovq_n_u16(UINT16_C(0xF));
 
   do {

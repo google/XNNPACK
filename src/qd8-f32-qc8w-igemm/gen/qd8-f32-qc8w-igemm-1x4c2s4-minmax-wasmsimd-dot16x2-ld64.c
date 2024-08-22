@@ -48,10 +48,11 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4c2s4__wasmsimd_dot16x2_ld64(
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   const v128_t vinput_scale = wasm_v128_load32_splat(&quantization_params->inv_scale);
   const v128_t vinput_zero_point = wasm_v128_load32_splat(&quantization_params->zero_point);
-    const v128_t vmin = wasm_v128_load32_splat(&params->wasmsimd.min);
-    const v128_t vmax = wasm_v128_load32_splat(&params->wasmsimd.max);
-    XNN_FORCE_REALIZATION(vmin);
-    XNN_FORCE_REALIZATION(vmax);
+  const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
+  const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+
   do {
     const v128_t vksum0123 = wasm_v128_load(w);
     v128_t vacc0x0123 = wasm_i32x4_mul(vksum0123, vinput_zero_point);

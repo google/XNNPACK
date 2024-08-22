@@ -237,8 +237,10 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_28x16c4__avx512skx_madd_prfm(
   const __m512i vinput_zero_point25 = _mm512_set1_epi32((int) quantization_params[25].zero_point + 128);
   const __m512i vinput_zero_point26 = _mm512_set1_epi32((int) quantization_params[26].zero_point + 128);
   const __m512i vinput_zero_point27 = _mm512_set1_epi32((int) quantization_params[27].zero_point + 128);
-  const __m512 voutput_min = _mm512_set1_ps(params->avx512vnni.min);
-  const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
+  const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
+  const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
   const __m512i vmask = _mm512_set1_epi8(0x0F);
   XNN_FORCE_REALIZATION(vmask);
   do {

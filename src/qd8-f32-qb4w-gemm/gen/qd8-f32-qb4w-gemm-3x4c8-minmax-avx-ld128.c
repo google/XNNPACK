@@ -43,7 +43,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x4c8__avx_ld128(
   assert(w != NULL);
   assert(c != NULL);
 
-  size_t bl = params->sse.blocksize;
+  size_t bl = params->scalar.blocksize;
   assert(bl <= round_up_po2(kc, 2));
   assert(bl != 0);
   assert(bl % 32 == 0);
@@ -63,13 +63,14 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_3x4c8__avx_ld128(
     c2 = c1;
   }
 
-  const __m128 vmin = _mm_set1_ps(params->sse.min);
-  const __m128 vmax = _mm_set1_ps(params->sse.max);
+  const __m128 vmin = _mm_set1_ps(params->scalar.min);
+  const __m128 vmax = _mm_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 
   const __m128i vmask = _mm_set1_epi8(0xF0);
   XNN_FORCE_REALIZATION(vmask);
+
   do {
     const __m128 vksum = _mm_load_ps((const float*) w);
     const __m128i vinput_zero_point0 = _mm_castps_si128(_mm_broadcast_ss((const float*) &quantization_params[0].zero_point));

@@ -419,7 +419,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p8c__sse2_mul16,
-                        xnn_init_qs8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -438,7 +438,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p8c__sse2_mul16_add16,
-                        xnn_init_qs8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -457,7 +457,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p8c__sse41_mul16,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -476,7 +476,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p8c__sse41_mul16_add16,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -495,7 +495,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p8c__sse41_mul32,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -514,7 +514,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__sse2_mul16,
-                        xnn_init_qs8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -533,7 +533,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__sse2_mul16_add16,
-                        xnn_init_qs8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -552,7 +552,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__sse41_mul16,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -571,7 +571,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__sse41_mul16_add16,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -590,7 +590,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__sse41_mul32,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -609,7 +609,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p8c__sse2_mul16,
-                        xnn_init_qs8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -628,7 +628,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p8c__sse2_mul16_add16,
-                        xnn_init_qs8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -647,7 +647,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p8c__sse41_mul16,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -666,7 +666,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p8c__sse41_mul16_add16,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -685,7 +685,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p8c__sse41_mul32,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -704,7 +704,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__sse2_mul16,
-                        xnn_init_qs8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -723,7 +723,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__sse2_mul16_add16,
-                        xnn_init_qs8_conv_minmax_fp32_sse2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -742,7 +742,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__sse41_mul16,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -761,7 +761,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__sse41_mul16_add16,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -780,7 +780,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__sse41_mul32,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -799,7 +799,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p8c__avx_mul16,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -818,7 +818,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p8c__avx_mul16_add16,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -837,7 +837,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p8c__avx_mul32,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -856,7 +856,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p8c__avx2_mul32,
-                        xnn_init_qs8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -875,7 +875,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx_mul16,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -894,7 +894,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx_mul16_add16,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -913,7 +913,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx_mul32,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -932,7 +932,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul16_add16_vpunpck,
-                        xnn_init_qs8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -951,7 +951,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul16_vpmovsx,
-                        xnn_init_qs8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -970,7 +970,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul16_vpunpck,
-                        xnn_init_qs8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -989,7 +989,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32,
-                        xnn_init_qs8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1008,7 +1008,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/32, /*adj_c_block=*/32, /*cr=*/32, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p32c__avx2_mul16_add16_vpunpck,
-                        xnn_init_qs8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1027,7 +1027,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/32, /*adj_c_block=*/32, /*cr=*/32, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p32c__avx2_mul16_vpmovsx,
-                        xnn_init_qs8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1046,7 +1046,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/32, /*adj_c_block=*/32, /*cr=*/32, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p32c__avx2_mul16_vpunpck,
-                        xnn_init_qs8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1065,7 +1065,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/32, /*adj_c_block=*/32, /*cr=*/32, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p32c__avx2_mul32,
-                        xnn_init_qs8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1084,7 +1084,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p8c__avx_mul16,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1103,7 +1103,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p8c__avx_mul16_add16,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1122,7 +1122,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p8c__avx_mul32,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1141,7 +1141,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p8c__avx2_mul32,
-                        xnn_init_qs8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1160,7 +1160,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__avx_mul16,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1179,7 +1179,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__avx_mul16_add16,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1198,7 +1198,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__avx_mul32,
-                        xnn_init_qs8_conv_minmax_fp32_sse4_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1217,7 +1217,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul16_add16_vpunpck,
-                        xnn_init_qs8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1236,7 +1236,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul16_vpmovsx,
-                        xnn_init_qs8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1255,7 +1255,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul16_vpunpck,
-                        xnn_init_qs8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1274,7 +1274,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__avx2_mul32,
-                        xnn_init_qs8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1293,7 +1293,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/32, /*adj_c_block=*/32, /*cr=*/32, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p32c__avx2_mul16_add16_vpunpck,
-                        xnn_init_qs8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1312,7 +1312,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/32, /*adj_c_block=*/32, /*cr=*/32, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p32c__avx2_mul16_vpmovsx,
-                        xnn_init_qs8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1331,7 +1331,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/32, /*adj_c_block=*/32, /*cr=*/32, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p32c__avx2_mul16_vpunpck,
-                        xnn_init_qs8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1350,7 +1350,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/32, /*adj_c_block=*/32, /*cr=*/32, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p32c__avx2_mul32,
-                        xnn_init_qs8_conv_minmax_fp32_avx2_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1369,7 +1369,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx512skx_mul32,
-                        xnn_init_qs8_conv_minmax_fp32_avx512_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1388,7 +1388,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/32, /*adj_c_block=*/32, /*cr=*/32, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p32c__avx512skx_mul32,
-                        xnn_init_qs8_conv_minmax_fp32_avx512_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1407,7 +1407,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__avx512skx_mul32,
-                        xnn_init_qs8_conv_minmax_fp32_avx512_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1426,7 +1426,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/32, /*adj_c_block=*/32, /*cr=*/32, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p32c__avx512skx_mul32,
-                        xnn_init_qs8_conv_minmax_fp32_avx512_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           },
           []() {
@@ -1445,7 +1445,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p8c__wasmsimd_mul16,
-                        xnn_init_qs8_conv_minmax_fp32_wasmsimd_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1461,7 +1461,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p8c__wasmsimd_mul16_add16,
-                        xnn_init_qs8_conv_minmax_fp32_wasmsimd_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1477,7 +1477,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__wasmsimd_mul16,
-                        xnn_init_qs8_conv_minmax_fp32_wasmsimd_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1493,7 +1493,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__wasmsimd_mul16_add16,
-                        xnn_init_qs8_conv_minmax_fp32_wasmsimd_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1509,7 +1509,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p8c__wasmsimd_mul16,
-                        xnn_init_qs8_conv_minmax_fp32_wasmsimd_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1525,7 +1525,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p8c__wasmsimd_mul16_add16,
-                        xnn_init_qs8_conv_minmax_fp32_wasmsimd_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1541,7 +1541,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__wasmsimd_mul16,
-                        xnn_init_qs8_conv_minmax_fp32_wasmsimd_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1557,7 +1557,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__wasmsimd_mul16_add16,
-                        xnn_init_qs8_conv_minmax_fp32_wasmsimd_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1573,7 +1573,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/1, /*adj_c_block=*/1, /*cr=*/1, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p1c__wasm_fmagic,
-                        xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1589,7 +1589,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/2, /*adj_c_block=*/2, /*cr=*/2, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p2c__wasm_fmagic,
-                        xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1605,7 +1605,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/9,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p4c__wasm_fmagic,
-                        xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1621,7 +1621,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/1, /*adj_c_block=*/1, /*cr=*/1, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p1c__wasm_fmagic,
-                        xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1637,7 +1637,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/2, /*adj_c_block=*/2, /*cr=*/2, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p2c__wasm_fmagic,
-                        xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1653,7 +1653,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/25,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p4c__wasm_fmagic,
-                        xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
+                        xnn_init_qs8_conv_minmax_fp32_scalar_params,
                         xnn_qs8_requantize_fp32);
           })),
       [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1668,7 +1668,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*c_block=*/1, /*adj_c_block=*/1, /*cr=*/1, /*kr=*/9,
         [](DWConvMicrokernelTester& tester) {
           tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p1c__scalar_fmagic,
-                      xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
+                      xnn_init_qs8_conv_minmax_fp32_scalar_params,
                       xnn_qs8_requantize_fp32);
         })),
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1681,7 +1681,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*c_block=*/1, /*adj_c_block=*/1, /*cr=*/1, /*kr=*/9,
         [](DWConvMicrokernelTester& tester) {
           tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p1c__scalar_imagic,
-                      xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params,
+                      xnn_init_qs8_conv_minmax_fp32_scalar_params,
                       xnn_qs8_requantize_fp32);
         })),
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1694,7 +1694,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*c_block=*/1, /*adj_c_block=*/1, /*cr=*/1, /*kr=*/9,
         [](DWConvMicrokernelTester& tester) {
           tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p1c__scalar_lrintf,
-                      xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params,
+                      xnn_init_qs8_conv_minmax_fp32_scalar_params,
                       xnn_qs8_requantize_fp32);
         })),
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1707,7 +1707,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*c_block=*/2, /*adj_c_block=*/2, /*cr=*/2, /*kr=*/9,
         [](DWConvMicrokernelTester& tester) {
           tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p2c__scalar_fmagic,
-                      xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
+                      xnn_init_qs8_conv_minmax_fp32_scalar_params,
                       xnn_qs8_requantize_fp32);
         })),
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1720,7 +1720,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*c_block=*/2, /*adj_c_block=*/2, /*cr=*/2, /*kr=*/9,
         [](DWConvMicrokernelTester& tester) {
           tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p2c__scalar_imagic,
-                      xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params,
+                      xnn_init_qs8_conv_minmax_fp32_scalar_params,
                       xnn_qs8_requantize_fp32);
         })),
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1733,7 +1733,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*c_block=*/2, /*adj_c_block=*/2, /*cr=*/2, /*kr=*/9,
         [](DWConvMicrokernelTester& tester) {
           tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p2c__scalar_lrintf,
-                      xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params,
+                      xnn_init_qs8_conv_minmax_fp32_scalar_params,
                       xnn_qs8_requantize_fp32);
         })),
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1746,7 +1746,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/9,
         [](DWConvMicrokernelTester& tester) {
           tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p4c__scalar_fmagic,
-                      xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
+                      xnn_init_qs8_conv_minmax_fp32_scalar_params,
                       xnn_qs8_requantize_fp32);
         })),
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1759,7 +1759,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/9,
         [](DWConvMicrokernelTester& tester) {
           tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p4c__scalar_imagic,
-                      xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params,
+                      xnn_init_qs8_conv_minmax_fp32_scalar_params,
                       xnn_qs8_requantize_fp32);
         })),
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1772,7 +1772,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/9,
         [](DWConvMicrokernelTester& tester) {
           tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_9p4c__scalar_lrintf,
-                      xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params,
+                      xnn_init_qs8_conv_minmax_fp32_scalar_params,
                       xnn_qs8_requantize_fp32);
         })),
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1785,7 +1785,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*c_block=*/1, /*adj_c_block=*/1, /*cr=*/1, /*kr=*/25,
         [](DWConvMicrokernelTester& tester) {
           tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p1c__scalar_fmagic,
-                      xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
+                      xnn_init_qs8_conv_minmax_fp32_scalar_params,
                       xnn_qs8_requantize_fp32);
         })),
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1798,7 +1798,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*c_block=*/1, /*adj_c_block=*/1, /*cr=*/1, /*kr=*/25,
         [](DWConvMicrokernelTester& tester) {
           tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p1c__scalar_imagic,
-                      xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params,
+                      xnn_init_qs8_conv_minmax_fp32_scalar_params,
                       xnn_qs8_requantize_fp32);
         })),
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1811,7 +1811,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*c_block=*/1, /*adj_c_block=*/1, /*cr=*/1, /*kr=*/25,
         [](DWConvMicrokernelTester& tester) {
           tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p1c__scalar_lrintf,
-                      xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params,
+                      xnn_init_qs8_conv_minmax_fp32_scalar_params,
                       xnn_qs8_requantize_fp32);
         })),
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1824,7 +1824,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*c_block=*/2, /*adj_c_block=*/2, /*cr=*/2, /*kr=*/25,
         [](DWConvMicrokernelTester& tester) {
           tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p2c__scalar_fmagic,
-                      xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
+                      xnn_init_qs8_conv_minmax_fp32_scalar_params,
                       xnn_qs8_requantize_fp32);
         })),
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1837,7 +1837,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*c_block=*/2, /*adj_c_block=*/2, /*cr=*/2, /*kr=*/25,
         [](DWConvMicrokernelTester& tester) {
           tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p2c__scalar_imagic,
-                      xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params,
+                      xnn_init_qs8_conv_minmax_fp32_scalar_params,
                       xnn_qs8_requantize_fp32);
         })),
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1850,7 +1850,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*c_block=*/2, /*adj_c_block=*/2, /*cr=*/2, /*kr=*/25,
         [](DWConvMicrokernelTester& tester) {
           tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p2c__scalar_lrintf,
-                      xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params,
+                      xnn_init_qs8_conv_minmax_fp32_scalar_params,
                       xnn_qs8_requantize_fp32);
         })),
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1863,7 +1863,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/25,
         [](DWConvMicrokernelTester& tester) {
           tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p4c__scalar_fmagic,
-                      xnn_init_qs8_conv_minmax_fp32_scalar_fmagic_params,
+                      xnn_init_qs8_conv_minmax_fp32_scalar_params,
                       xnn_qs8_requantize_fp32);
         })),
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1876,7 +1876,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/25,
         [](DWConvMicrokernelTester& tester) {
           tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p4c__scalar_imagic,
-                      xnn_init_qs8_conv_minmax_fp32_scalar_imagic_params,
+                      xnn_init_qs8_conv_minmax_fp32_scalar_params,
                       xnn_qs8_requantize_fp32);
         })),
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
@@ -1889,7 +1889,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/25,
         [](DWConvMicrokernelTester& tester) {
           tester.Test(xnn_qs8_dwconv_minmax_fp32_ukernel_25p4c__scalar_lrintf,
-                      xnn_init_qs8_conv_minmax_fp32_scalar_lrintf_params,
+                      xnn_init_qs8_conv_minmax_fp32_scalar_params,
                       xnn_qs8_requantize_fp32);
         })),
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {

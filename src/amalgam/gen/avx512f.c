@@ -1445,7 +1445,6 @@ void xnn_f32_gemm_minmax_ukernel_1x16__avx512f_broadcast(
 
   const float* a0 = a;
   float* c0 = c;
-
   do {
     __m512 vacc0x0 = _mm512_load_ps(w);
     w += 16;
@@ -1546,7 +1545,6 @@ void xnn_f32_gemm_minmax_ukernel_7x16__avx512f_broadcast(
     a6 = a5;
     c6 = c5;
   }
-
   do {
     __m512 vacc0x0 = _mm512_load_ps(w);
     __m512 vacc1x0 = vacc0x0;

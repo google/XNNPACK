@@ -35,6 +35,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x2__scalar(
   const int8_t* a0 = a;
   float* c0 = c;
 
+
   do {
     const int32_t vksum0 = unaligned_indexed_load_s32(w, 0);
     const int32_t vksum1 = unaligned_indexed_load_s32(w, 1);
