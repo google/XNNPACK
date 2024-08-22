@@ -879,7 +879,7 @@ struct dwconv2d_context {
   size_t output_channel_stride;
   size_t output_batch_stride;
   union {
-    union xnn_f32_chw_params f32;
+    union xnn_f32_minmax_params f32;
   } params;
   union {
     xnn_dwconv2d_chw_ukernel_fn chw_ukernel;

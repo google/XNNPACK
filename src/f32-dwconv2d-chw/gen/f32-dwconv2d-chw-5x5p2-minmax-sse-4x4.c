@@ -23,18 +23,20 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__sse_4x4(
     const float* zero,
     float* output,
     uint32_t padding_top,
-    const union xnn_f32_chw_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(input_height != 0);
   assert(input_width != 0);
   assert(input_width % sizeof(float) == 0);
   assert(padding_top == 2);
 
-  const __m128 vmask = _mm_load_ps((const float*) params->sse_stride1.mask);
-  const __m128 vmax = _mm_set1_ps(params->sse_stride1.max);
-  const __m128 vmin = _mm_set1_ps(params->sse_stride1.min);
+  const __m128 vmax = _mm_set1_ps(params->scalar.max);
+  const __m128 vmin = _mm_set1_ps(params->scalar.min);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
+
+  static const int32_t mask_table[7] = {-1, -1, -1, -1, 0, 0, 0};
+  const __m128 vmask = _mm_loadu_ps((const float*) &mask_table[3 - (((input_width >> 2) - 1) & 3)]);
 
   const __m128 vbias = _mm_load1_ps(weights);
   const __m128 vk00 = _mm_load1_ps(weights + 1);
@@ -559,6 +561,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__sse_4x4(
     assert(w >= 1 * sizeof(float));
     assert(w <= 4 * sizeof(float));
     {
+      __m128 vmask = _mm_loadu_ps((const float*) &mask_table[4 - (w >> 2)]);
       vi0x4567 = _mm_and_ps(vi0x4567, vmask);
       vi1x4567 = _mm_and_ps(vi1x4567, vmask);
       vi2x4567 = _mm_and_ps(vi2x4567, vmask);

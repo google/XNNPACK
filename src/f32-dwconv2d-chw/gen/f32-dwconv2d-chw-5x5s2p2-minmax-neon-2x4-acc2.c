@@ -23,7 +23,7 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neon_2x4_acc2(
     const float* zero,
     float* output,
     uint32_t padding_top,
-    const union xnn_f32_chw_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(input_height != 0);
   assert(input_width != 0);
@@ -31,10 +31,12 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5s2p2__neon_2x4_acc2(
   assert(padding_top >= 1);
   assert(padding_top <= 2);
 
-  const uint32x4_t vmask_even = vld1q_u32(params->neon_stride2.mask_even);
-  const uint32x4_t vmask_odd = vld1q_u32(params->neon_stride2.mask_odd);
-  const float32x4_t vmax = vld1q_dup_f32(&params->neon_stride2.max);
-  const float32x4_t vmin = vld1q_dup_f32(&params->neon_stride2.min);
+  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+
+  static const int32_t mask_table[8] = {-1, -1, -1, -1, 0, 0, 0, 0};
+  const uint32x4_t vmask_even = vld1q_u32((const uint32_t*) &mask_table[3 - (((input_width - 4) & 31) >> 3)]);
+  const uint32x4_t vmask_odd = vld1q_u32((const uint32_t*) &mask_table[4 - ((((input_width - 4) & 31) + 4) >> 3)]);
 
   const float32x4_t vw0123 = vld1q_f32(weights);
   const float32x4_t vw4567 = vld1q_f32(weights + 4);
