@@ -1193,11 +1193,6 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(vbinary-microkernel-tester PRIVATE . include src test)
   TARGET_LINK_LIBRARIES(vbinary-microkernel-tester PRIVATE XNNPACK fp16 pthreadpool GTest::gtest)
 
-  ADD_LIBRARY(vbinaryc-microkernel-tester STATIC test/vbinaryc-microkernel-tester.cc)
-  SET_TARGET_PROPERTIES(vbinaryc-microkernel-tester PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(vbinaryc-microkernel-tester PRIVATE . include src test)
-  TARGET_LINK_LIBRARIES(vbinaryc-microkernel-tester PRIVATE XNNPACK fp16 pthreadpool GTest::gtest)
-
   ADD_LIBRARY(vcvt-microkernel-tester STATIC test/vcvt-microkernel-tester.cc)
   TARGET_INCLUDE_DIRECTORIES(vcvt-microkernel-tester PRIVATE . include src test)
   TARGET_LINK_LIBRARIES(vcvt-microkernel-tester PRIVATE XNNPACK fp16 pthreadpool GTest::gtest)
@@ -1679,97 +1674,77 @@ IF(XNNPACK_BUILD_TESTS)
 
   SET(MICROKERNEL_VBINARY_UNIT_TESTS
       f16-vadd-minmax
+      f16-vaddc-minmax
       f16-vdiv-minmax
-      f16-vsqrdiff
+      f16-vdivc-minmax
       f16-vmax
+      f16-vmaxc
       f16-vmin
+      f16-vminc
       f16-vmul-minmax
+      f16-vmulc-minmax
+      f16-vrdivc-minmax
+      f16-vrsubc-minmax
+      f16-vsqrdiff
+      f16-vsqrdiffc
       f16-vsub-minmax
+      f16-vsubc-minmax
       f32-vadd
       f32-vadd-minmax
       f32-vadd-relu
+      f32-vaddc
+      f32-vaddc-minmax
+      f32-vaddc-relu
       f32-vcopysign
-       s32-vmul
+      f32-vcopysignc
       f32-vdiv
       f32-vdiv-minmax
       f32-vdiv-relu
+      f32-vdivc
+      f32-vdivc-minmax
+      f32-vdivc-relu
       f32-vmax
+      f32-vmaxc
       f32-vmin
+      f32-vminc
       f32-vmul
       f32-vmul-minmax
       f32-vmul-relu
+      f32-vmulc
+      f32-vmulc-minmax
+      f32-vmulc-relu
+      f32-vrcopysignc
+      f32-vrdivc
+      f32-vrdivc-minmax
+      f32-vrdivc-relu
+      f32-vrsubc
+      f32-vrsubc-minmax
+      f32-vrsubc-relu
       f32-vsqrdiff
+      f32-vsqrdiffc
       f32-vsub
       f32-vsub-minmax
       f32-vsub-relu
+      f32-vsubc
+      f32-vsubc-minmax
+      f32-vsubc-relu
       qs8-vadd-minmax
+      qs8-vaddc-minmax
       qs8-vmul-minmax-fp32
+      qs8-vmulc-minmax-fp32
       qu8-vadd-minmax
+      qu8-vaddc-minmax
       qu8-vmul-minmax-fp32
-      qu8-vmul-minmax-rndnu)
+      qu8-vmul-minmax-rndnu
+      qu8-vmulc-minmax-fp32
+      qu8-vmulc-minmax-rndnu
+      s32-vmul
+      s32-vmulc)
   FOREACH(TEST ${MICROKERNEL_VBINARY_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         vbinary-microkernel-tester
-        fp16
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
-        hardware-config
-        logging
-        microkernels-all
-        microparams-init
-        pthreadpool
-    )
-    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-    SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
-  ENDFOREACH()
-
-  SET(MICROKERNEL_VBINARYC_UNIT_TESTS
-      f16-vaddc-minmax
-      f16-vdivc-minmax
-      f16-vrdivc-minmax
-      f16-vsqrdiffc
-      f16-vmaxc
-      f16-vminc
-      f16-vmulc-minmax
-      f16-vsubc-minmax
-      f16-vrsubc-minmax
-      f32-vaddc
-      f32-vaddc-minmax
-      f32-vaddc-relu
-      f32-vcopysignc
-      f32-vrcopysignc
-      f32-vdivc
-      f32-vdivc-minmax
-      f32-vdivc-relu
-      f32-vrdivc
-      f32-vrdivc-minmax
-      f32-vrdivc-relu
-      f32-vmaxc
-      f32-vminc
-      f32-vmulc
-      f32-vmulc-minmax
-      f32-vmulc-relu
-      f32-vsqrdiffc
-      f32-vsubc
-      f32-vsubc-minmax
-      f32-vsubc-relu
-      f32-vrsubc
-      f32-vrsubc-minmax
-      f32-vrsubc-relu
-      qs8-vaddc-minmax
-      qs8-vmulc-minmax-fp32
-      qu8-vaddc-minmax
-      qu8-vmulc-minmax-fp32
-      qu8-vmulc-minmax-rndnu
-      s32-vmulc)
-  FOREACH(TEST ${MICROKERNEL_VBINARYC_UNIT_TESTS})
-    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
-    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        vbinaryc-microkernel-tester
         fp16
         GTest::gmock
         GTest::gtest

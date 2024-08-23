@@ -33,71 +33,33 @@ void VBinaryMicrokernelTester::Test(xnn_f16_vbinary_ukernel_fn vbinary,
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
-  std::vector<uint16_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-  std::vector<uint16_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-  std::vector<uint16_t> y(
+  std::vector<Float16> a(batch_size() + XNN_EXTRA_BYTES / sizeof(Float16));
+  std::vector<Float16> b(broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(Float16));
+  std::vector<Float16> y(
       batch_size() +
-      (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
+      (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(Float16) : 0));
   std::vector<float> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(a.begin(), a.end(),
-                  [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+                  [&]() { return f32dist(rng); });
     std::generate(b.begin(), b.end(),
-                  [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+                  [&]() { return f32dist(rng); });
     if (inplace_a() || inplace_b()) {
       std::generate(y.begin(), y.end(),
-                    [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+                    [&]() { return f32dist(rng); });
     } else {
       std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
     }
-    const uint16_t* a_data = inplace_a() ? y.data() : a.data();
-    const uint16_t* b_data = inplace_b() ? y.data() : b.data();
-
-    // Compute reference results.
-    for (size_t i = 0; i < batch_size(); i++) {
-      switch (op_type) {
-        case OpType::Add:
-          y_ref[i] = fp16_ieee_to_fp32_value(a_data[i]) +
-                     fp16_ieee_to_fp32_value(b_data[i]);
-          break;
-        case OpType::CopySign:
-          y_ref[i] = std::copysign(fp16_ieee_to_fp32_value(a_data[i]), fp16_ieee_to_fp32_value(b_data[i]));
-          break;
-        case OpType::Div:
-          y_ref[i] = fp16_ieee_to_fp32_value(a_data[i]) /
-                     fp16_ieee_to_fp32_value(b_data[i]);
-          break;
-        case OpType::Max:
-          y_ref[i] = std::max<float>(fp16_ieee_to_fp32_value(a_data[i]),
-                                     fp16_ieee_to_fp32_value(b_data[i]));
-          break;
-        case OpType::Min:
-          y_ref[i] = std::min<float>(fp16_ieee_to_fp32_value(a_data[i]),
-                                     fp16_ieee_to_fp32_value(b_data[i]));
-          break;
-        case OpType::Mul:
-          y_ref[i] = fp16_ieee_to_fp32_value(a_data[i]) *
-                     fp16_ieee_to_fp32_value(b_data[i]);
-          break;
-        case OpType::SqrDiff: {
-          const float diff = fp16_ieee_to_fp32_value(a_data[i]) -
-                             fp16_ieee_to_fp32_value(b_data[i]);
-          y_ref[i] = diff * diff;
-          break;
-        }
-        case OpType::Sub:
-          y_ref[i] = fp16_ieee_to_fp32_value(a_data[i]) -
-                     fp16_ieee_to_fp32_value(b_data[i]);
-          break;
-      }
-    }
+    const Float16* a_data = inplace_a() ? y.data() : a.data();
+    const Float16* b_data = inplace_b() ? y.data() : b.data();
+    reference_op_impl(a_data, b_data, y_ref.data(), batch_size(), op_type);
 
     // Call optimized micro-kernel.
-    vbinary(batch_size() * sizeof(uint16_t), a_data, b_data, y.data(), nullptr);
+    vbinary(batch_size() * sizeof(Float16), a_data, b_data, y.data(), nullptr);
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
-      EXPECT_NEAR(fp16_ieee_to_fp32_value(y[i]), y_ref[i],
+      EXPECT_NEAR(y[i], y_ref[i],
                   std::max(1.0e-4f, std::abs(y_ref[i]) * 1.0e-2f))
           << "at " << i << " / " << batch_size();
     }
@@ -110,64 +72,26 @@ void VBinaryMicrokernelTester::Test(
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
-  std::vector<uint16_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-  std::vector<uint16_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-  std::vector<uint16_t> y(
+  std::vector<Float16> a(batch_size() + XNN_EXTRA_BYTES / sizeof(Float16));
+  std::vector<Float16> b(broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(Float16));
+  std::vector<Float16> y(
       batch_size() +
-      (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
+      (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(Float16) : 0));
   std::vector<float> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(a.begin(), a.end(),
-                  [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+                  [&]() { return f32dist(rng); });
     std::generate(b.begin(), b.end(),
-                  [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+                  [&]() { return f32dist(rng); });
     if (inplace_a() || inplace_b()) {
       std::generate(y.begin(), y.end(),
-                    [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+                    [&]() { return f32dist(rng); });
     } else {
       std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
     }
-    const uint16_t* a_data = inplace_a() ? y.data() : a.data();
-    const uint16_t* b_data = inplace_b() ? y.data() : b.data();
-
-    // Compute reference results.
-    for (size_t i = 0; i < batch_size(); i++) {
-      switch (op_type) {
-        case OpType::Add:
-          y_ref[i] = fp16_ieee_to_fp32_value(a_data[i]) +
-                     fp16_ieee_to_fp32_value(b_data[i]);
-          break;
-        case OpType::CopySign:
-          y_ref[i] = std::copysign(fp16_ieee_to_fp32_value(a_data[i]), fp16_ieee_to_fp32_value(b_data[i]));
-          break;
-        case OpType::Div:
-          y_ref[i] = fp16_ieee_to_fp32_value(a_data[i]) /
-                     fp16_ieee_to_fp32_value(b_data[i]);
-          break;
-        case OpType::Max:
-          y_ref[i] = std::max<float>(fp16_ieee_to_fp32_value(a_data[i]),
-                                     fp16_ieee_to_fp32_value(b_data[i]));
-          break;
-        case OpType::Min:
-          y_ref[i] = std::min<float>(fp16_ieee_to_fp32_value(a_data[i]),
-                                     fp16_ieee_to_fp32_value(b_data[i]));
-          break;
-        case OpType::Mul:
-          y_ref[i] = fp16_ieee_to_fp32_value(a_data[i]) *
-                     fp16_ieee_to_fp32_value(b_data[i]);
-          break;
-        case OpType::SqrDiff: {
-          const float diff = fp16_ieee_to_fp32_value(a_data[i]) -
-                             fp16_ieee_to_fp32_value(b_data[i]);
-          y_ref[i] = diff * diff;
-          break;
-        }
-        case OpType::Sub:
-          y_ref[i] = fp16_ieee_to_fp32_value(a_data[i]) -
-                     fp16_ieee_to_fp32_value(b_data[i]);
-          break;
-      }
-    }
+    const Float16* a_data = inplace_a() ? y.data() : a.data();
+    const Float16* b_data = inplace_b() ? y.data() : b.data();
+    reference_op_impl(a_data, b_data, y_ref.data(), batch_size(), op_type);
 
     const float accumulated_min =
         *std::min_element(y_ref.cbegin(), y_ref.cend());
@@ -194,12 +118,12 @@ void VBinaryMicrokernelTester::Test(
                 fp16_ieee_from_fp32_value(y_max));
 
     // Call optimized micro-kernel.
-    vbinary_minmax(batch_size() * sizeof(uint16_t), a_data, b_data, y.data(),
+    vbinary_minmax(batch_size() * sizeof(Float16), a_data, b_data, y.data(),
                    &params);
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
-      EXPECT_NEAR(fp16_ieee_to_fp32_value(y[i]), y_ref[i],
+      EXPECT_NEAR(y[i], y_ref[i],
                   std::max(1.0e-4f, std::abs(y_ref[i]) * 1.0e-2f))
           << "at " << i << " / " << batch_size();
     }
@@ -207,13 +131,12 @@ void VBinaryMicrokernelTester::Test(
 }
 
 void VBinaryMicrokernelTester::Test(
-    xnn_f32_vbinary_ukernel_fn vbinary, OpType op_type,
-    xnn_init_f32_default_params_fn init_params) const {
+    xnn_f32_vbinary_ukernel_fn vbinary, OpType op_type) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
   std::vector<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<float> b(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<float> b(broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> y(batch_size() + (inplace_a() || inplace_b()
                                            ? XNN_EXTRA_BYTES / sizeof(float)
                                            : 0));
@@ -228,48 +151,10 @@ void VBinaryMicrokernelTester::Test(
     }
     const float* a_data = inplace_a() ? y.data() : a.data();
     const float* b_data = inplace_b() ? y.data() : b.data();
-
-    // Compute reference results.
-    for (size_t i = 0; i < batch_size(); i++) {
-      switch (op_type) {
-        case OpType::Add:
-          y_ref[i] = a_data[i] + b_data[i];
-          break;
-        case OpType::CopySign:
-          y_ref[i] = std::copysign(a_data[i], b_data[i]);
-          break;
-        case OpType::Div:
-          y_ref[i] = a_data[i] / b_data[i];
-          break;
-        case OpType::Max:
-          y_ref[i] = std::max<float>(a_data[i], b_data[i]);
-          break;
-        case OpType::Min:
-          y_ref[i] = std::min<float>(a_data[i], b_data[i]);
-          break;
-        case OpType::Mul:
-          y_ref[i] = a_data[i] * b_data[i];
-          break;
-        case OpType::SqrDiff: {
-          const float diff = a_data[i] - b_data[i];
-          y_ref[i] = diff * diff;
-          break;
-        }
-        case OpType::Sub:
-          y_ref[i] = a_data[i] - b_data[i];
-          break;
-      }
-    }
-
-    // Prepare parameters.
-    xnn_f32_default_params params;
-    if (init_params != nullptr) {
-      init_params(&params);
-    }
+    reference_op_impl(a_data, b_data, y_ref.data(), batch_size(), op_type);
 
     // Call optimized micro-kernel.
-    vbinary(batch_size() * sizeof(float), a_data, b_data, y.data(),
-            init_params != nullptr ? &params : nullptr);
+    vbinary(batch_size() * sizeof(float), a_data, b_data, y.data(), nullptr);
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
@@ -280,13 +165,12 @@ void VBinaryMicrokernelTester::Test(
 }
 
 void VBinaryMicrokernelTester::Test(
-    xnn_s32_vbinary_ukernel_fn vbinary, OpType op_type,
-    xnn_init_s32_default_params_fn init_params) const {
+    xnn_s32_vbinary_ukernel_fn vbinary, OpType op_type) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<int32_t> s32dist(-100000, 100000);
 
   std::vector<int32_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
-  std::vector<int32_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
+  std::vector<int32_t> b(broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
   std::vector<int32_t> y(batch_size() + (inplace_a() || inplace_b()
                                            ? XNN_EXTRA_BYTES / sizeof(int32_t)
                                            : 0));
@@ -301,50 +185,10 @@ void VBinaryMicrokernelTester::Test(
     }
     const int32_t* a_data = inplace_a() ? y.data() : a.data();
     const int32_t* b_data = inplace_b() ? y.data() : b.data();
-
-    // Compute reference results.
-    for (size_t i = 0; i < batch_size(); i++) {
-        switch (op_type) {
-        case OpType::Add:
-          y_ref[i] = a_data[i] + b_data[i];
-          break;
-        case OpType::CopySign:
-          y_ref[i] = std::copysign(a_data[i], b_data[i]);
-          break;
-        case OpType::Div:
-          y_ref[i] = a_data[i] / b_data[i];
-          break;
-        case OpType::Max:
-          y_ref[i] = std::max<int32_t>(a_data[i], b_data[i]);
-          break;
-        case OpType::Min:
-          y_ref[i] = std::min<int32_t>(a_data[i], b_data[i]);
-          break;
-        case OpType::Mul:
-          // Overflow is the expected behaviour
-          y_ref[i] = ((((int64_t) a_data[i] * (int64_t) b_data[i]) << 32) >> 32);
-          break;
-        case OpType::SqrDiff: {
-          const int32_t diff = a_data[i] - b_data[i];
-          y_ref[i] = diff * diff;
-          break;
-        }
-        case OpType::Sub:
-          y_ref[i] = a_data[i] - b_data[i];
-          break;
-      }
-    }
-
-
-    // Prepare parameters.
-    xnn_s32_default_params params;
-    if (init_params != nullptr) {
-      init_params(&params);
-    }
+    reference_op_impl(a_data, b_data, y_ref.data(), batch_size(), op_type);
 
     // Call optimized micro-kernel.
-    vbinary(batch_size() * sizeof(int32_t), a_data, b_data, y.data(),
-            &params);
+    vbinary(batch_size() * sizeof(int32_t), a_data, b_data, y.data(), nullptr);
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
@@ -362,7 +206,7 @@ void VBinaryMicrokernelTester::Test(
   std::uniform_real_distribution<float> rhs_f32dist(0.1, 1.0f);
 
   std::vector<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<float> b(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<float> b(broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> y(batch_size() + (inplace_a() || inplace_b()
                                            ? XNN_EXTRA_BYTES / sizeof(float)
                                            : 0));
@@ -377,38 +221,7 @@ void VBinaryMicrokernelTester::Test(
     }
     const float* a_data = inplace_a() ? y.data() : a.data();
     const float* b_data = inplace_b() ? y.data() : b.data();
-
-    // Compute reference results.
-    for (size_t i = 0; i < batch_size(); i++) {
-      switch (op_type) {
-        case OpType::Add:
-          y_ref[i] = a_data[i] + b_data[i];
-          break;
-        case OpType::CopySign:
-          y_ref[i] = std::copysign(a_data[i], b_data[i]);
-          break;
-        case OpType::Div:
-          y_ref[i] = a_data[i] / b_data[i];
-          break;
-        case OpType::Max:
-          y_ref[i] = std::max<float>(a_data[i], b_data[i]);
-          break;
-        case OpType::Min:
-          y_ref[i] = std::min<float>(a_data[i], b_data[i]);
-          break;
-        case OpType::Mul:
-          y_ref[i] = a_data[i] * b_data[i];
-          break;
-        case OpType::SqrDiff: {
-          const float diff = a_data[i] - b_data[i];
-          y_ref[i] = diff * diff;
-          break;
-        }
-        case OpType::Sub:
-          y_ref[i] = a_data[i] - b_data[i];
-          break;
-      }
-    }
+    reference_op_impl(a_data, b_data, y_ref.data(), batch_size(), op_type);
     for (size_t i = 0; i < batch_size(); i++) {
       y_ref[i] = std::max(y_ref[i], 0.0f);
     }
@@ -433,7 +246,7 @@ void VBinaryMicrokernelTester::Test(
   std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
   std::vector<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<float> b(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<float> b(broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> y(batch_size() + (inplace_a() || inplace_b()
                                            ? XNN_EXTRA_BYTES / sizeof(float)
                                            : 0));
@@ -448,38 +261,8 @@ void VBinaryMicrokernelTester::Test(
     }
     const float* a_data = inplace_a() ? y.data() : a.data();
     const float* b_data = inplace_b() ? y.data() : b.data();
+    reference_op_impl(a_data, b_data, y_ref.data(), batch_size(), op_type);
 
-    // Compute reference results.
-    for (size_t i = 0; i < batch_size(); i++) {
-      switch (op_type) {
-        case OpType::Add:
-          y_ref[i] = a_data[i] + b_data[i];
-          break;
-        case OpType::CopySign:
-          y_ref[i] = std::copysign(a_data[i], b_data[i]);
-          break;
-        case OpType::Div:
-          y_ref[i] = a_data[i] / b_data[i];
-          break;
-        case OpType::Max:
-          y_ref[i] = std::max<float>(a_data[i], b_data[i]);
-          break;
-        case OpType::Min:
-          y_ref[i] = std::min<float>(a_data[i], b_data[i]);
-          break;
-        case OpType::Mul:
-          y_ref[i] = a_data[i] * b_data[i];
-          break;
-        case OpType::SqrDiff: {
-          const float diff = a_data[i] - b_data[i];
-          y_ref[i] = diff * diff;
-          break;
-        }
-        case OpType::Sub:
-          y_ref[i] = a_data[i] - b_data[i];
-          break;
-      }
-    }
     const float accumulated_min =
         *std::min_element(y_ref.cbegin(), y_ref.cend());
     const float accumulated_max =
@@ -524,7 +307,7 @@ void VBinaryMicrokernelTester::Test(
   };
 
   std::vector<uint8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-  std::vector<uint8_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+  std::vector<uint8_t> b(broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
   std::vector<uint8_t> y(batch_size() + (inplace_a() || inplace_b()
                                              ? XNN_EXTRA_BYTES / sizeof(uint8_t)
                                              : 0));
@@ -540,6 +323,7 @@ void VBinaryMicrokernelTester::Test(
     }
     const uint8_t* a_data = inplace_a() ? y.data() : a.data();
     const uint8_t* b_data = inplace_b() ? y.data() : b.data();
+    const size_t stride_b = broadcast_b() ? 0 : 1;
 
     // Prepare parameters.
     xnn_qu8_add_minmax_params quantization_params;
@@ -558,12 +342,12 @@ void VBinaryMicrokernelTester::Test(
                 static_cast<float>(static_cast<int32_t>(a_data[i]) -
                                    static_cast<int32_t>(a_zero_point())) *
                     (a_scale() / y_scale()) +
-                static_cast<float>(static_cast<int32_t>(b_data[i]) -
+                static_cast<float>(static_cast<int32_t>(b_data[i * stride_b]) -
                                    static_cast<int32_t>(b_zero_point())) *
                     (b_scale() / y_scale());
       y_fp[i] = std::min<float>(y_fp[i], static_cast<float>(qmax()));
       y_fp[i] = std::max<float>(y_fp[i], static_cast<float>(qmin()));
-      y_ref[i] = xnn_qu8_quantize_add(a_data[i], b_data[i],
+      y_ref[i] = xnn_qu8_quantize_add(a_data[i], b_data[i * stride_b],
                                       scalar_quantization_params);
     }
 
@@ -576,7 +360,7 @@ void VBinaryMicrokernelTester::Test(
           << "at element " << i << " / " << batch_size();
       EXPECT_GE(static_cast<uint32_t>(y[i]), static_cast<uint32_t>(qmin()))
           << "at element " << i << " / " << batch_size();
-      EXPECT_NEAR(static_cast<float>(static_cast<int32_t>(y[i])), y_fp[i], 0.6f)
+      EXPECT_NEAR(static_cast<float>(static_cast<int32_t>(y[i])), y_fp[i], 1.0f)
           << "at element " << i << " / " << batch_size();
       EXPECT_EQ(static_cast<uint32_t>(y_ref[i]), static_cast<uint32_t>(y[i]))
           << "at element " << i << " / " << batch_size();
@@ -586,8 +370,7 @@ void VBinaryMicrokernelTester::Test(
 
 void VBinaryMicrokernelTester::Test(
     xnn_qu8_vmul_minmax_ukernel_fn vmul_minmax,
-    xnn_init_qu8_mul_minmax_params_fn init_params,
-    xnn_qu8_requantize_fn requantize) const {
+    xnn_init_qu8_mul_minmax_params_fn init_params) const {
   xnnpack::ReplicableRandomDevice rng;
   auto u8rng = [&rng]() {
     return std::uniform_int_distribution<uint32_t>(
@@ -595,7 +378,7 @@ void VBinaryMicrokernelTester::Test(
   };
 
   std::vector<uint8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-  std::vector<uint8_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+  std::vector<uint8_t> b(broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
   std::vector<uint8_t> y(batch_size() + (inplace_a() || inplace_b()
                                              ? XNN_EXTRA_BYTES / sizeof(uint8_t)
                                              : 0));
@@ -611,6 +394,7 @@ void VBinaryMicrokernelTester::Test(
     }
     const uint8_t* a_data = inplace_a() ? y.data() : a.data();
     const uint8_t* b_data = inplace_b() ? y.data() : b.data();
+    const size_t stride_b = broadcast_b() ? 0 : 1;
 
     // Prepare parameters.
     const float product_scale = a_scale() * b_scale();
@@ -623,7 +407,7 @@ void VBinaryMicrokernelTester::Test(
     for (size_t i = 0; i < batch_size(); i++) {
       const int32_t acc = (static_cast<int32_t>(a_data[i]) -
                            static_cast<int32_t>(a_zero_point())) *
-                          (static_cast<int32_t>(b_data[i]) -
+                          (static_cast<int32_t>(b_data[i * stride_b]) -
                            static_cast<int32_t>(b_zero_point()));
       y_fp[i] = static_cast<float>(y_zero_point()) +
                 product_output_scale * static_cast<float>(acc);
@@ -631,8 +415,7 @@ void VBinaryMicrokernelTester::Test(
           y_fp[i], static_cast<float>(static_cast<int32_t>(qmax())));
       y_fp[i] = std::max<float>(
           y_fp[i], static_cast<float>(static_cast<int32_t>(qmin())));
-      y_ref[i] =
-          requantize(acc, product_output_scale, y_zero_point(), qmin(), qmax());
+      y_ref[i] = xnn_qu8_requantize_fp32(acc, product_output_scale, y_zero_point(), qmin(), qmax());
     }
 
     // Call optimized micro-kernel.
@@ -644,9 +427,9 @@ void VBinaryMicrokernelTester::Test(
           << "at element " << i << " / " << batch_size();
       EXPECT_GE(static_cast<uint32_t>(y[i]), static_cast<uint32_t>(qmin()))
           << "at element " << i << " / " << batch_size();
-      EXPECT_NEAR(static_cast<float>(static_cast<int32_t>(y[i])), y_fp[i], 0.6f)
+      EXPECT_NEAR(static_cast<float>(static_cast<int32_t>(y[i])), y_fp[i], 1.0f)
           << "at element " << i << " / " << batch_size();
-      EXPECT_EQ(static_cast<uint32_t>(y[i]), static_cast<uint32_t>(y_ref[i]))
+      EXPECT_NEAR(static_cast<uint32_t>(y[i]), static_cast<uint32_t>(y_ref[i]), 1)
           << "at element " << i << " / " << batch_size();
     }
   }
@@ -679,6 +462,7 @@ void VBinaryMicrokernelTester::Test(
     }
     const int8_t* a_data = inplace_a() ? y.data() : a.data();
     const int8_t* b_data = inplace_b() ? y.data() : b.data();
+    const size_t stride_b = broadcast_b() ? 0 : 1;
 
     // Prepare parameters.
     xnn_qs8_add_minmax_params quantization_params;
@@ -703,14 +487,14 @@ void VBinaryMicrokernelTester::Test(
           static_cast<float>(static_cast<int32_t>(a_data[i]) -
                              static_cast<int32_t>(a_zero_point() - 0x80)) *
               (a_scale() / y_scale()) +
-          static_cast<float>(static_cast<int32_t>(b_data[i]) -
+          static_cast<float>(static_cast<int32_t>(b_data[i * stride_b]) -
                              static_cast<int32_t>(b_zero_point() - 0x80)) *
               (b_scale() / y_scale());
       y_fp[i] = std::min<float>(
           y_fp[i], static_cast<float>(static_cast<int32_t>(qmax() - 0x80)));
       y_fp[i] = std::max<float>(
           y_fp[i], static_cast<float>(static_cast<int32_t>(qmin() - 0x80)));
-      y_ref[i] = xnn_qs8_quantize_add(a_data[i], b_data[i],
+      y_ref[i] = xnn_qs8_quantize_add(a_data[i], b_data[i * stride_b],
                                       scalar_quantization_params);
     }
 
@@ -725,7 +509,7 @@ void VBinaryMicrokernelTester::Test(
           << "at element " << i << " / " << batch_size();
       EXPECT_EQ(static_cast<int32_t>(y_ref[i]), static_cast<int32_t>(y[i]))
           << "at element " << i << " / " << batch_size();
-      EXPECT_NEAR(static_cast<float>(static_cast<int32_t>(y[i])), y_fp[i], 0.6f)
+      EXPECT_NEAR(static_cast<float>(static_cast<int32_t>(y[i])), y_fp[i], 1.0f)
           << "at element " << i << " / " << batch_size();
     }
   }
@@ -733,8 +517,7 @@ void VBinaryMicrokernelTester::Test(
 
 void VBinaryMicrokernelTester::Test(
     xnn_qs8_vmul_minmax_ukernel_fn vmul_minmax,
-    xnn_init_qs8_mul_minmax_params_fn init_params,
-    xnn_qs8_requantize_fn requantize) const {
+    xnn_init_qs8_mul_minmax_params_fn init_params) const {
   xnnpack::ReplicableRandomDevice rng;
   auto i8rng = [&rng]() {
     return std::uniform_int_distribution<int32_t>(
@@ -759,6 +542,7 @@ void VBinaryMicrokernelTester::Test(
     }
     const int8_t* a_data = inplace_a() ? y.data() : a.data();
     const int8_t* b_data = inplace_b() ? y.data() : b.data();
+    const size_t stride_b = broadcast_b() ? 0 : 1;
 
     // Prepare parameters.
     const float product_scale = a_scale() * b_scale();
@@ -775,7 +559,7 @@ void VBinaryMicrokernelTester::Test(
     for (size_t i = 0; i < batch_size(); i++) {
       const int32_t acc = (static_cast<int32_t>(a_data[i]) -
                            static_cast<int32_t>(a_zero_point() - 0x80)) *
-                          (static_cast<int32_t>(b_data[i]) -
+                          (static_cast<int32_t>(b_data[i * stride_b]) -
                            static_cast<int32_t>(b_zero_point() - 0x80));
       y_fp[i] = static_cast<float>(y_zero_point() - 0x80) +
                 product_output_scale * static_cast<float>(acc);
@@ -783,7 +567,7 @@ void VBinaryMicrokernelTester::Test(
           y_fp[i], static_cast<float>(static_cast<int32_t>(qmax() - 0x80)));
       y_fp[i] = std::max<float>(
           y_fp[i], static_cast<float>(static_cast<int32_t>(qmin() - 0x80)));
-      y_ref[i] = requantize(acc, product_output_scale,
+      y_ref[i] = xnn_qs8_requantize_fp32(acc, product_output_scale,
                             static_cast<int8_t>(y_zero_point() - 0x80),
                             static_cast<int8_t>(qmin() - 0x80),
                             static_cast<int8_t>(qmax() - 0x80));
@@ -798,9 +582,9 @@ void VBinaryMicrokernelTester::Test(
           << "at element " << i << " / " << batch_size();
       EXPECT_GE(static_cast<int32_t>(y[i]), static_cast<int32_t>(qmin() - 0x80))
           << "at element " << i << " / " << batch_size();
-      EXPECT_EQ(static_cast<int32_t>(y_ref[i]), static_cast<int32_t>(y[i]))
+      EXPECT_NEAR(static_cast<int32_t>(y_ref[i]), static_cast<int32_t>(y[i]), 1)
           << "at element " << i << " / " << batch_size();
-      EXPECT_NEAR(static_cast<float>(static_cast<int32_t>(y[i])), y_fp[i], 0.6f)
+      EXPECT_NEAR(static_cast<float>(static_cast<int32_t>(y[i])), y_fp[i], 1.0f)
           << "at element " << i << " / " << batch_size();
     }
   }
