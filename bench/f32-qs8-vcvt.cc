@@ -68,6 +68,46 @@
 #endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
 
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(f32_qs8_vcvt, rvv_u1v,
+                    xnn_f32_qs8_vcvt_ukernel__rvv_u1v,
+                    xnn_init_f32_qs8_cvt_scalar_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(f32_qs8_vcvt, rvv_u2v,
+                    xnn_f32_qs8_vcvt_ukernel__rvv_u2v,
+                    xnn_init_f32_qs8_cvt_scalar_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(f32_qs8_vcvt, rvv_u4v,
+                    xnn_f32_qs8_vcvt_ukernel__rvv_u4v,
+                    xnn_init_f32_qs8_cvt_scalar_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(f32_qs8_vcvt, rvv_u8v,
+                    xnn_f32_qs8_vcvt_ukernel__rvv_u8v,
+                    xnn_init_f32_qs8_cvt_scalar_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(f32_qs8_vcvt, wasmsimd_cvt_u8,
                     xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_u8,
