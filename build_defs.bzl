@@ -83,72 +83,6 @@ def xnnpack_kleidiai_defines():
         not_enabled = ["XNN_ENABLE_KLEIDIAI=0"],
     )
 
-_XNNPACK_ARCH_COPT_MAPPING = {
-    "avx": select({
-        "//build_config:x86": ["-mavx"],
-        "//conditions:default": [],
-    }),
-    "avx2": select({
-        "//build_config:x86": ["-mavx2"],
-        "//conditions:default": [],
-    }),
-    "avx512bw": select({
-        "//build_config:x86": ["-mavx512bw"],
-        "//conditions:default": [],
-    }),
-    "avx512f": select({
-        "//build_config:x86": ["-mavx512f"],
-        "//conditions:default": [],
-    }),
-    "fma3": select({
-        "//build_config:x86": ["-mfma"],
-        "//conditions:default": [],
-    }),
-    "hvx": select({
-        "//build_config:hexagon": ["-mhvx-ieee-fp"],
-        "//conditions:default": [],
-    }),
-    "neon": select({
-        "//build_config:aarch32": [
-            "-marm",
-            "-march=armv7-a",
-            "-mfpu=neon",
-        ],
-        "//conditions:default": [],
-    }),
-    "scalar": [],
-    "sse2": select({
-        "//build_config:x86": ["-msse2"],
-        "//conditions:default": [],
-    }),
-    "sse41": select({
-        "//build_config:x86": ["-msse4.1"],
-        "//conditions:default": [],
-    }),
-    "wasmsimd": [],
-}
-
-def xnnpack_simd_archs():
-    return _XNNPACK_ARCH_COPT_MAPPING.keys()
-
-def xnnpack_simd_f32_archs():
-    return ["avx", "avx2", "avx512f", "fma3", "hvx", "neon", "scalar", "sse2", "wasmsimd"]
-
-def xnnpack_simd_f16_archs():
-    return ["scalar"]
-
-def xnnpack_simd_s16_archs():
-    return ["avx2", "avx512bw", "neon", "scalar", "sse41", "wasmsimd"]
-
-def xnnpack_simd_s32_archs():
-    return ["avx2", "avx512f", "neon", "scalar", "sse41", "wasmsimd"]
-
-def xnnpack_simd_s8_archs():
-    return ["scalar"]
-
-def xnnpack_simd_copts_for_arch(arch):
-    return _XNNPACK_ARCH_COPT_MAPPING[arch]
-
 def xnnpack_cc_library(
         name,
         srcs = [],
@@ -162,8 +96,8 @@ def xnnpack_cc_library(
         wasmrelaxedsimd_srcs = [],
         linkopts = [],
         copts = [],
-        gcc_copts = [],
-        msvc_copts = [],
+        gcc_copts = xnnpack_gcc_std_copts(),
+        msvc_copts = xnnpack_msvc_std_copts(),
         mingw_copts = [],
         msys_copts = [],
         gcc_x86_copts = [],
@@ -182,7 +116,8 @@ def xnnpack_cc_library(
         includes = [],
         deps = [],
         visibility = [":__subpackages__"],
-        testonly = False):
+        testonly = False,
+        **kwargs):
     """C/C++/assembly library with architecture-specific configuration.
 
     Define a static library with architecture- and instruction-specific
@@ -231,6 +166,8 @@ def xnnpack_cc_library(
       includes: List of include dirs to be added to the compile line.
       deps: The list of other libraries to be linked.
       visibility: The list of packages that can depend on this target.
+      testonly: If True only testonly targets (such as tests) can depend on this.
+      **kwargs: Other arguments to pass to the cc_library rule.
     """
     native.cc_library(
         name = name,
@@ -304,176 +241,19 @@ def xnnpack_cc_library(
         textual_hdrs = hdrs,
         visibility = visibility,
         testonly = testonly,
+        **kwargs,
     )
 
-def xnnpack_microkernel_cc_library(
-        name,
-        srcs_prod = [],
-        srcs_test = [],
-        x86_srcs_prod = [],
-        x86_srcs_test = [],
-        aarch32_srcs_prod = [],
-        aarch32_srcs_test = [],
-        aarch64_srcs_prod = [],
-        aarch64_srcs_test = [],
-        hexagon_srcs_prod = [],
-        hexagon_srcs_test = [],
-        riscv_srcs_prod = [],
-        riscv_srcs_test = [],
-        wasm_srcs_prod = [],
-        wasm_srcs_test = [],
-        wasmsimd_srcs_prod = [],
-        wasmsimd_srcs_test = [],
-        wasmrelaxedsimd_srcs_prod = [],
-        wasmrelaxedsimd_srcs_test = [],
-        linkopts = [],
-        copts = [],
-        gcc_copts = [],
-        msvc_copts = [],
-        mingw_copts = [],  # buildifier: disable=unused-variable
-        msys_copts = [],  # buildifier: disable=unused-variable
-        gcc_x86_copts = [],
-        msvc_x86_32_copts = [],
-        msvc_x86_64_copts = [],
-        aarch32_copts = [],
-        aarch64_copts = [],
-        hexagon_copts = [],
-        riscv_copts = [],
-        wasm_copts = [],
-        wasmsimd_copts = [],
-        wasmrelaxedsimd_copts = [],
-        optimized_copts = ["-O2"],
-        hdrs = [],
-        defines = [],
-        includes = [],
-        deps = [],
-        visibility = [":__subpackages__"],
-        testonly = False):
-    """C/C++/assembly library with architecture-specific configuration.
-
-    A wrapper for xnnpack_cc_library called twice, once with prod and once with test.
-    """
+def xnnpack_cxx_library(name, copts = xnnpack_std_cxxopts(), gcc_copts = [], msvc_copts = [], **kwargs):
     xnnpack_cc_library(
-        name = name + "_prod_microkernels",
-        srcs = srcs_prod,
-        x86_srcs = x86_srcs_prod,
-        aarch32_srcs = aarch32_srcs_prod,
-        aarch64_srcs = aarch64_srcs_prod,
-        hexagon_srcs = hexagon_srcs_prod,
-        riscv_srcs = riscv_srcs_prod,
-        wasm_srcs = wasm_srcs_prod,
-        wasmsimd_srcs = wasmsimd_srcs_prod,
-        wasmrelaxedsimd_srcs = wasmrelaxedsimd_srcs_prod,
-        linkopts = linkopts,
+        name,
         copts = copts,
         gcc_copts = gcc_copts,
         msvc_copts = msvc_copts,
-        mingw_copts = mingw_copts,  # buildifier: disable=unused-variable
-        msys_copts = msys_copts,  # buildifier: disable=unused-variable
-        gcc_x86_copts = gcc_x86_copts,
-        msvc_x86_32_copts = msvc_x86_32_copts,
-        msvc_x86_64_copts = msvc_x86_64_copts,
-        aarch32_copts = aarch32_copts,
-        aarch64_copts = aarch64_copts,
-        hexagon_copts = hexagon_copts,
-        riscv_copts = riscv_copts,
-        wasm_copts = wasm_copts,
-        wasmsimd_copts = wasmsimd_copts,
-        wasmrelaxedsimd_copts = wasmrelaxedsimd_copts,
-        optimized_copts = optimized_copts,
-        hdrs = hdrs,
-        defines = defines,
-        includes = includes,
-        deps = deps,
-        visibility = visibility,
-        testonly = testonly,
-    )
-    xnnpack_cc_library(
-        name = name + "_test_microkernels",
-        srcs = srcs_test,
-        x86_srcs = x86_srcs_test,
-        aarch32_srcs = aarch32_srcs_test,
-        aarch64_srcs = aarch64_srcs_test,
-        hexagon_srcs = hexagon_srcs_test,
-        riscv_srcs = riscv_srcs_test,
-        wasm_srcs = wasm_srcs_test,
-        wasmsimd_srcs = wasmsimd_srcs_test,
-        wasmrelaxedsimd_srcs = wasmrelaxedsimd_srcs_test,
-        linkopts = linkopts,
-        copts = copts,
-        gcc_copts = gcc_copts,
-        msvc_copts = msvc_copts,
-        mingw_copts = mingw_copts,  # buildifier: disable=unused-variable
-        msys_copts = msys_copts,  # buildifier: disable=unused-variable
-        gcc_x86_copts = gcc_x86_copts,
-        msvc_x86_32_copts = msvc_x86_32_copts,
-        msvc_x86_64_copts = msvc_x86_64_copts,
-        aarch32_copts = aarch32_copts,
-        aarch64_copts = aarch64_copts,
-        hexagon_copts = hexagon_copts,
-        riscv_copts = riscv_copts,
-        wasm_copts = wasm_copts,
-        wasmsimd_copts = wasmsimd_copts,
-        wasmrelaxedsimd_copts = wasmrelaxedsimd_copts,
-        optimized_copts = optimized_copts,
-        hdrs = hdrs,
-        defines = defines,
-        includes = includes,
-        deps = deps,
-        visibility = visibility,
-        testonly = testonly,
+        **kwargs
     )
 
-def xnnpack_aggregate_library(
-        name,
-        generic_deps = [],
-        x86_deps = [],
-        aarch32_deps = [],
-        aarch64_deps = [],
-        hexagon_deps = [],
-        riscv_deps = [],
-        wasm_deps = [],
-        wasmsimd_deps = [],
-        wasmrelaxedsimd_deps = [],
-        defines = [],
-        compatible_with = None):
-    """Static library that aggregates architecture-specific dependencies.
-
-    Args:
-      name: The name of the library target to define.
-      generic_deps: The list of libraries to link on all architectures.
-      x86_deps: The list of libraries to link in x86 and x86-64 builds.
-      aarch32_deps: The list of libraries to link in AArch32 builds.
-      aarch64_deps: The list of libraries to link in AArch64 builds.
-      hexagon_deps: The list of libraries to link in Hexagon builds.
-      riscv_deps: The list of libraries to link in RISC-V builds.
-      wasm_deps: The list of libraries to link in WebAssembly 1.0 builds.
-      wasmsimd_deps: The list of libraries to link in WebAssembly SIMD builds.
-      wasmrelaxedsimd_deps: The list of libraries to link in WebAssembly
-                            Relaxed SIMD builds.
-      defines: List of predefines macros to be added to the compile line.
-      compatible_with: The list of additional environments this rule can be built for.
-    """
-
-    native.cc_library(
-        name = name,
-        linkstatic = True,
-        deps = generic_deps + select({
-            "//build_config:aarch32": aarch32_deps,
-            "//build_config:aarch64": aarch64_deps,
-            "//build_config:x86": x86_deps,
-            "//build_config:emscripten_wasm": wasm_deps,
-            "//build_config:emscripten_wasmsimd": wasmsimd_deps,
-            "//build_config:emscripten_wasmrelaxedsimd": wasmrelaxedsimd_deps,
-            "//build_config:riscv": riscv_deps,
-            "//conditions:default": [],
-        }),
-        defines = defines,
-        compatible_with = compatible_with,
-        visibility = ["//:__subpackages__"],
-    )
-
-def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = [], linkopts = [], defines = [], automatic = True, timeout = "short", shard_count = 1):
+def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [], deps = [], tags = [], linkopts = [], defines = [], automatic = True, timeout = "short", shard_count = 1, **kwargs):
     """Unit test binary based on Google Test.
 
     Args:
@@ -493,6 +273,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
       automatic: Whether to create the test or testable binary.
       timeout: How long the test is expected to run before returning.
       shard_count: Specifies the number of parallel shards to use to run the test.
+      **kwargs: Other arguments to pass to the cc_test rule.
     """
 
     if automatic:
@@ -528,6 +309,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
             tags = tags,
             timeout = timeout,
             shard_count = shard_count,
+            **kwargs,
         )
     else:
         native.cc_binary(
@@ -561,6 +343,7 @@ def xnnpack_unit_test(name, srcs, copts = [], mingw_copts = [], msys_copts = [],
             }),
             testonly = True,
             tags = tags,
+            **kwargs,
         )
 
 def xnnpack_binary(name, srcs, copts = [], deps = [], linkopts = []):

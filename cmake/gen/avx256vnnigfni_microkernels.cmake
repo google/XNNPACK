@@ -9,7 +9,9 @@
 #   Generator: tools/update-microkernels.py
 
 
-SET(ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS
+SET(PROD_AVX256VNNIGFNI_MICROKERNEL_SRCS)
+
+SET(NON_PROD_AVX256VNNIGFNI_MICROKERNEL_SRCS
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx256vnnigfni-prfm.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx256vnnigfni.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-5x8c8-minmax-avx256vnnigfni-prfm.c
@@ -42,3 +44,5 @@ SET(ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-12x8c8-minmax-avx256vnnigfni.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-14x8c8-minmax-avx256vnnigfni-prfm.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-14x8c8-minmax-avx256vnnigfni.c)
+
+SET(ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS ${PROD_AVX256VNNIGFNI_MICROKERNEL_SRCS} + ${NON_PROD_AVX256VNNIGFNI_MICROKERNEL_SRCS})

@@ -9,9 +9,13 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/dwconv.h"
 #include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
 #include "xnnpack/unaligned.h"
 
 
@@ -166,7 +170,7 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_5f5m5l4c1s1r__scalar_lrintf(
       }
       if XNN_UNLIKELY(c != 0) {
         do {
-          int32_t vacc = *((const int32_t*) w);
+          int32_t vacc = unaligned_load_s32(w);
           const int32_t vi0 = (int32_t) *i0++;
           const int32_t vk0 = (int32_t) ((const int8_t*) ((uintptr_t) w + 1 * sizeof(int32_t)))[0];
           vacc += vi0 * vk0;

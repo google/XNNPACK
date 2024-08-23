@@ -24,6 +24,8 @@ $if ARCH == "scalar":
 #endif  // M_LN2
 
 // Extracts the exponent of the input `a` as a `float` value.
+#ifndef HAVE_XNN_SIGNED_GETEXP_F32
+#define HAVE_XNN_SIGNED_GETEXP_F32
 static XNN_INLINE xnn_simd_f32_t xnn_signed_getexp_f32(xnn_simd_f32_t a) {
   $if ARCH == "avx512f":
     // Create a mask of the zeros in the input.
@@ -87,6 +89,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_signed_getexp_f32(xnn_simd_f32_t a) {
     // exponent bias, resulting in the unbiased exponent.
     return xnn_sub_f32(xnn_or_f32(bias_256, exp), bias_383);
 }
+#endif  // HAVE_XNN_SIGNED_GETEXP_F32
 
 $for BATCH_TILE in BATCH_TILES:
   $assert BATCH_TILE % SIMD_SIZE == 0

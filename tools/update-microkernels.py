@@ -5,15 +5,28 @@
 # LICENSE file in the root directory of this source tree.
 
 import argparse
-import io
-import itertools
 import os
 import re
 import sys
-import tempfile
 
-import xnncommon
-
+parser = argparse.ArgumentParser(
+    description='Utility for re-generating microkernel lists'
+)
+parser.add_argument(
+    '-o',
+    '--output',
+    required=False,
+    help='Directory for generated files.',
+)
+parser.add_argument(
+    '-r',
+    '--root_dir',
+    required=False,
+    help=(
+        'Start search for files at this directory instead of the script'
+        ' directory.'
+    ),
+)
 
 TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -119,23 +132,10 @@ MICROKERNEL_NAME_REGEX = re.compile(
 )
 
 VERIFICATION_IGNORE_SUBDIRS = {
-    os.path.join('src', 'math'),
-    os.path.join('src', 'math', 'gen'),
     os.path.join('src', 'qs8-requantization'),
     os.path.join('src', 'qu8-requantization'),
     os.path.join('src', 'xnnpack', 'simd'),
 }
-
-AMALGAMATION_HEADER = """\
-// Copyright 2021 Google LLC
-//
-// This source code is licensed under the BSD-style license found in the
-// LICENSE file in the root directory of this source tree.
-//
-// Auto-generated file. Do not edit!
-//   Generator: tools/update-microkernels.py -a
-
-"""
 
 UNWANTED_INCLUDES = (
     '<arm_acle.h>',
@@ -151,16 +151,6 @@ UNWANTED_INCLUDES = (
     '<wasm_simd128.h>',
 )
 
-parser = argparse.ArgumentParser(
-    description='Utility for re-generating microkernel lists'
-)
-parser.add_argument(
-    '-a',
-    '--amalgamate',
-    action='store_true',
-    help='Amalgamate production microkernels',
-)
-
 
 def human_sort_key(text):
   return [
@@ -168,77 +158,6 @@ def human_sort_key(text):
       for token in re.split(r'(\d+|\W)', text)
       if token
   ]
-
-
-def _discard(l, val):
-  while val in l:
-    l.remove(val)
-
-
-def amalgamate_microkernel_sources(source_paths, include_header):
-  amalgam_lines = list()
-  amalgam_includes = []
-  for filepath in sorted(source_paths):
-    with open(filepath, 'r', encoding='utf-8') as file:
-      source_lines = file.read().splitlines()
-
-    consumed_license = False
-    consumed_includes = False
-    for line in source_lines:
-      if line.startswith('//'):
-        if not consumed_license:
-          # Skip and generate a standard license header for amalgamated file
-          continue
-      elif line.lstrip().startswith('#'):
-        if not consumed_includes:
-          if line not in amalgam_includes:
-            amalgam_includes.append(line)
-          continue
-        consumed_license = True
-      elif not line:
-        if not consumed_includes:
-          # Skip empty lines until end of headers
-          continue
-      else:
-        consumed_license = True
-        consumed_includes = True
-
-      amalgam_lines.append(line)
-
-    amalgam_lines.append('')
-
-  # Single-line sequences for intrinsics with a standardized header
-  for filename in UNWANTED_INCLUDES:
-    _discard(amalgam_includes, f'#include {filename}')
-
-  amalgam_text = AMALGAMATION_HEADER
-
-  amalgam_text += '\n'.join(
-      '\n'.join(sorted(g))
-      for _, g in itertools.groupby(
-          [
-              inc
-              for inc in amalgam_includes
-              if 'xnnpack' not in inc
-          ],
-          lambda x: True if x.startswith('#include ') else x,
-      )
-  )
-  if include_header:
-    amalgam_text += '\n\n#include <%s>\n\n' % include_header
-  else:
-    amalgam_text += '\n\n'
-  amalgam_text += '\n'.join(
-      sorted(
-          inc
-          for inc in amalgam_includes
-          if 'xnnpack' in inc
-      )
-  )
-  amalgam_text += '\n\n\n'
-  amalgam_text += '\n'.join(amalgam_lines)
-
-  return amalgam_text
 
 
 def make_variable_name(prefix, key, suffix):
@@ -258,22 +177,33 @@ def write_grouped_microkernels_bzl(file, key, microkernels, prefix, suffix):
 
 def write_grouped_microkernels_cmake(file, key, microkernels, prefix, suffix):
   if key not in microkernels:
-    return
+    return []
   variable_name = make_variable_name(prefix, key, suffix)
   file.write(f'\nSET({variable_name}')
   for microkernel in sorted(microkernels[key], key=human_sort_key):
     file.write(f'\n  {microkernel}')
   file.write(')\n')
+  return [variable_name]
 
 
 def main(args):
   options = parser.parse_args(args)
-  root_dir = os.path.normpath(os.path.join(TOOLS_DIR, '..'))
+  root_dir = (
+      options.root_dir
+      if options.root_dir
+      else os.path.normpath(os.path.join(TOOLS_DIR, '..'))
+  )
   src_dir = os.path.join(root_dir, 'src')
   configs_dir = os.path.join(src_dir, 'configs')
+  dst_dir = options.output if options.output else root_dir
+  bzl_gen_dir = os.path.join(dst_dir, 'gen')
+  if not os.path.exists(bzl_gen_dir):
+    os.makedirs(bzl_gen_dir, exist_ok=True)
+  cmake_gen_dir = os.path.join(dst_dir, 'cmake', 'gen')
+  if not os.path.exists(cmake_gen_dir):
+    os.makedirs(cmake_gen_dir, exist_ok=True)
   ignore_roots = {
       src_dir,
-      os.path.join(src_dir, 'amalgam', 'gen'),
       os.path.join(src_dir, 'configs'),
       os.path.join(src_dir, 'enums'),
       os.path.join(src_dir, 'operators'),
@@ -286,13 +216,10 @@ def main(args):
   c_microkernels_per_isa['neondot_aarch64'] = list()
   c_microkernels_per_isa['neonfma_aarch64'] = list()
   c_microkernels_per_isa['neonfp16arith_aarch64'] = list()
-  c_microkernels_per_isa['neonbf16_aarch64'] = list()
   c_microkernels_per_isa['neoni8mm_aarch64'] = list()
-  temp_c_microkernels_per_isa = {isa: [] for isa in c_microkernels_per_isa}
   asm_microkernels_per_arch = {arch: [] for arch in ARCH_LIST}
   microkernel_name_to_filename = dict()
-  microkernel_temp_dir = tempfile.mkdtemp()
-  for root, dirs, files in os.walk(src_dir, topdown=False):
+  for root, _, files in os.walk(src_dir, topdown=False):
     if root in ignore_roots:
       continue
 
@@ -305,90 +232,68 @@ def main(args):
 
       subdir = os.path.relpath(root, root_dir)
       filepath = os.path.join(subdir, name)
-      temp_filepaths = []
 
       # Build microkernel name -> microkernel filepath mapping
-      if options.amalgamate:
-        with open(os.path.join(root_dir, filepath), 'r', encoding='utf-8') as f:
-          content = f.read()
-          microkernels = re.findall(MICROKERNEL_NAME_REGEX, content)
-          if not microkernels:
-            if subdir not in VERIFICATION_IGNORE_SUBDIRS:
-              print('No microkernel found in %s' % filepath)
+      with open(os.path.join(root_dir, filepath), 'r', encoding='utf-8') as f:
+        content = f.read()
+        microkernels = re.findall(MICROKERNEL_NAME_REGEX, content)
+        if not microkernels:
+          if subdir in VERIFICATION_IGNORE_SUBDIRS:
+            microkernel_name_to_filename[
+                os.path.splitext(os.path.basename(filepath))[0]
+            ] = filepath
           else:
-            microkernels = sorted(set(microkernels))
-            if len(microkernels) > 1:
-              if ext == '.cc':
-                # In generators it is normal to have multiple implementations in the same file.
-                # We need to filter out non-generators though.
-                microkernels = sorted(
-                    filter(
-                        lambda fn: fn.startswith('xnn_generate_'), microkernels
-                    )
-                )
-                if (
-                    not microkernels
-                    and subdir not in VERIFICATION_IGNORE_SUBDIRS
-                ):
-                  print('No microkernel generator found in %s' % filepath)
-
-                for microkernel in microkernels:
-                  if microkernel in microkernel_name_to_filename:
-                    print(
-                        'Duplicate microkernel generator definition: %s and %s'
-                        % (microkernel_name_to_filename[microkernel], filepath)
-                    )
-                  else:
-                    microkernel_name_to_filename[microkernel] = filepath
-              else:
-                # Extract the individual function names and their offsets.
-                matches = list(re.finditer(MICROKERNEL_NAME_REGEX, content))
-                header = content[: matches[0].start(0)].rsplit('\n', 1)[0]
-                functions = []
-                for k in range(len(matches) - 1):
-                  functions.append(
-                      content[: matches[k].start(0)].rsplit('\n', 1)[1]
-                      + matches[k].group(0)
-                      + content[
-                          matches[k].end(0) : matches[k + 1].start()
-                      ].rsplit('\n', 1)[0]
+            print('No microkernel found in %s' % filepath)
+        else:
+          microkernels = sorted(set(microkernels))
+          if len(microkernels) > 1:
+            if ext == '.cc':
+              # In generators it is normal to have multiple implementations in
+              # the same file. We need to filter out non-generators though.
+              microkernels = sorted(
+                  filter(
+                      lambda fn: fn.startswith('xnn_generate_'), microkernels
                   )
-                functions.append(
-                    content[: matches[-1].start(0)].rsplit('\n', 1)[1]
-                    + content[matches[-1].start(0) :]
-                )
+              )
+              if not microkernels and subdir not in VERIFICATION_IGNORE_SUBDIRS:
+                print('No microkernel generator found in %s' % filepath)
 
-                # Write them to temporary files.
-                for k in range(len(matches)):
-                  microkernel = matches[k].group(0)
-                  if microkernel in microkernel_name_to_filename:
-                    print(
-                        'Duplicate microkernel definition: %s and %s (%ith'
-                        ' function)'
-                        % (
-                            microkernel_name_to_filename[microkernel],
-                            filepath,
-                            k,
-                        )
-                    )
-                  filename = os.path.join(
-                      microkernel_temp_dir, microkernel + '.c'
+              for microkernel in microkernels:
+                if microkernel in microkernel_name_to_filename:
+                  print(
+                      'Duplicate microkernel generator definition: %s and %s'
+                      % (microkernel_name_to_filename[microkernel], filepath)
                   )
-                  with open(filename, 'w', encoding='utf-8') as f:
-                    f.write(header)
-                    f.write(functions[k])
-                  microkernel_name_to_filename[microkernel] = filename
-                  temp_filepaths.append(filename)
-
+                else:
+                  microkernel_name_to_filename[microkernel] = filepath
             else:
-              microkernel = microkernels[0]
-              if microkernel in microkernel_name_to_filename:
-                print(
-                    'Duplicate microkernel definition: %s and %s'
-                    % (microkernel_name_to_filename[microkernel], filepath)
-                )
-              else:
+              # Extract the individual function names and their offsets.
+              matches = list(re.finditer(MICROKERNEL_NAME_REGEX, content))
+
+              # Write them to temporary files.
+              for k, match in enumerate(matches):
+                microkernel = match.group(0)
+                if microkernel in microkernel_name_to_filename:
+                  print(
+                      'Duplicate microkernel definition: %s and %s (%ith'
+                      ' function)'
+                      % (
+                          microkernel_name_to_filename[microkernel],
+                          filepath,
+                          k,
+                      )
+                  )
                 microkernel_name_to_filename[microkernel] = filepath
+
+          else:
+            microkernel = microkernels[0]
+            if microkernel in microkernel_name_to_filename:
+              print(
+                  'Duplicate microkernel definition: %s and %s'
+                  % (microkernel_name_to_filename[microkernel], filepath)
+              )
+            else:
+              microkernel_name_to_filename[microkernel] = filepath
 
       if ext == '.c':
         arch = None
@@ -399,8 +304,6 @@ def main(args):
             isa = ISA_MAP.get(component, component)
             key = isa if arch is None else f'{isa}_{arch}'
             c_microkernels_per_isa[key].append(filepath)
-            if temp_filepaths:
-              temp_c_microkernels_per_isa[key].extend(temp_filepaths)
             break
         else:
           print('Unknown ISA for C microkernel %s' % filepath)
@@ -412,7 +315,42 @@ def main(args):
         else:
           print('Unknown architecture for assembly microkernel %s' % filepath)
 
-  with io.StringIO() as microkernels_bzl:
+  # Collect filenames of production microkernels as a set
+  prod_microkernels = set()
+  for configs_filepath in os.listdir(configs_dir):
+    with open(
+        os.path.join(configs_dir, configs_filepath), 'r', encoding='utf-8'
+    ) as config_file:
+      content = config_file.read()
+      microkernels = re.findall(MICROKERNEL_NAME_REGEX, content)
+      prod_microkernels.update(microkernels)
+  prod_microkernels = set(
+      map(microkernel_name_to_filename.get, prod_microkernels)
+  )
+
+  # Split the microkernels into prod/test.
+  prod_c_microkernels_per_isa = dict()
+  non_prod_c_microkernels_per_isa = dict()
+  for arch, microkernels in c_microkernels_per_isa.items():
+    prod_c_microkernels_per_isa[arch] = [
+        v for v in microkernels if v in prod_microkernels
+    ]
+    non_prod_c_microkernels_per_isa[arch] = [
+        v for v in microkernels if v not in prod_microkernels
+    ]
+  prod_asm_microkernels_per_arch = dict()
+  non_prod_asm_microkernels_per_arch = dict()
+  for arch, microkernels in asm_microkernels_per_arch.items():
+    prod_asm_microkernels_per_arch[arch] = [
+        v for v in microkernels if v in prod_microkernels
+    ]
+    non_prod_asm_microkernels_per_arch[arch] = [
+        v for v in microkernels if v not in prod_microkernels
+    ]
+
+  with open(
+      os.path.join(bzl_gen_dir, 'microkernels.bzl'), 'w'
+  ) as microkernels_bzl:
     microkernels_bzl.write('''\
 """
 Microkernel filenames lists.
@@ -422,12 +360,20 @@ Auto-generated file. Do not edit!
 """
 
 ''')
-    keys = set(c_microkernels_per_isa.keys()).union(asm_microkernels_per_arch.keys())
+    prod_c_vars_per_arch = dict()
+    non_prod_c_vars_per_arch = dict()
+    prod_asm_vars_per_arch = dict()
+    non_prod_asm_vars_per_arch = dict()
+    keys = set(c_microkernels_per_isa.keys()).union(
+        asm_microkernels_per_arch.keys()
+    )
     keys = sorted(keys, key=lambda key: key + '_microkernels.bzl')
     exports = ['\n']
     for key in keys:
       arch_microkernels_bzl_filename = key + '_microkernels.bzl'
-      with io.StringIO() as arch_microkernels_bzl:
+      with open(
+          os.path.join(bzl_gen_dir, arch_microkernels_bzl_filename), 'w'
+      ) as arch_microkernels_bzl:
         arch_microkernels_bzl.write(f'''\
 """
 Microkernel filenames lists for {key}.
@@ -436,39 +382,112 @@ Auto-generated file. Do not edit!
   Generator: tools/update-microkernels.py
 """
 ''')
-        vars = write_grouped_microkernels_bzl(
+        prod_c_vars = write_grouped_microkernels_bzl(
             arch_microkernels_bzl,
             key,
-            c_microkernels_per_isa,
-            'ALL',
+            prod_c_microkernels_per_isa,
+            'PROD',
             'MICROKERNEL_SRCS',
         )
-        vars = vars + write_grouped_microkernels_bzl(
+        if prod_c_vars:
+          prod_c_vars_per_arch[key] = prod_c_vars
+        non_prod_c_vars = write_grouped_microkernels_bzl(
             arch_microkernels_bzl,
             key,
-            asm_microkernels_per_arch,
-            '',
+            non_prod_c_microkernels_per_isa,
+            'NON_PROD',
+            'MICROKERNEL_SRCS',
+        )
+        if non_prod_c_vars:
+          non_prod_c_vars_per_arch[key] = non_prod_c_vars
+        c_vars = prod_c_vars + non_prod_c_vars
+        if c_vars:
+          all_srcs = make_variable_name('ALL', key, 'MICROKERNEL_SRCS')
+          arch_microkernels_bzl.write(f'\n{all_srcs} = {" + ".join(c_vars)}\n')
+          c_vars.append(all_srcs)
+        prod_asm_vars = write_grouped_microkernels_bzl(
+            arch_microkernels_bzl,
+            key,
+            prod_asm_microkernels_per_arch,
+            'PROD',
             'ASM_MICROKERNEL_SRCS',
         )
-        arch_microkernels_bzl.seek(0)
-        xnncommon.overwrite_if_changed(
-            os.path.join(root_dir, 'gen', arch_microkernels_bzl_filename),
-            arch_microkernels_bzl.read(),
+        if prod_asm_vars:
+          prod_asm_vars_per_arch[key] = prod_asm_vars
+        non_prod_asm_vars = write_grouped_microkernels_bzl(
+            arch_microkernels_bzl,
+            key,
+            non_prod_asm_microkernels_per_arch,
+            'NON_PROD',
+            'ASM_MICROKERNEL_SRCS',
         )
-        imports = ', '.join(f'_{var} = "{var}"' for var in vars)
+        if non_prod_asm_vars:
+          non_prod_asm_vars_per_arch[key] = non_prod_asm_vars
+        asm_vars = prod_asm_vars + non_prod_asm_vars
+        if asm_vars:
+          all_srcs = make_variable_name('', key, 'ASM_MICROKERNEL_SRCS')
+          arch_microkernels_bzl.write(
+              f'\n{all_srcs} = {" + ".join(asm_vars)}\n'
+          )
+          asm_vars.append(all_srcs)
+        all_vars = c_vars + asm_vars
+        imports = ', '.join(f'_{var} = "{var}"' for var in sorted(all_vars))
         microkernels_bzl.write(
             f'load("{arch_microkernels_bzl_filename}", {imports})\n'
         )
-        for var in vars:
+        for var in all_vars:
           exports.append(f'{var} = _{var}\n')
-    microkernels_bzl.write(''.join(exports))
-    microkernels_bzl.seek(0)
-    xnncommon.overwrite_if_changed(
-        os.path.join(root_dir, 'gen', 'microkernels.bzl'),
-        microkernels_bzl.read(),
-    )
 
-  with io.StringIO() as microkernels_cmake:
+    # Generate dictionaries of microkernel lists per arch.
+    microkernels_bzl.write(''.join(sorted(exports)))
+    microkernels_bzl.write('\nPROD_C_SRCS_FOR_ARCH = {\n')
+    for key, var_list in prod_c_vars_per_arch.items():
+      microkernels_bzl.write(f'    "{key}": {" + ".join(var_list)},\n')
+    microkernels_bzl.write('}\n')
+    microkernels_bzl.write('\nNON_PROD_C_SRCS_FOR_ARCH = {\n')
+    for key, var_list in non_prod_c_vars_per_arch.items():
+      microkernels_bzl.write(f'    "{key}": {" + ".join(var_list)},\n')
+    microkernels_bzl.write('}\n')
+    microkernels_bzl.write('\nPROD_ASM_SRCS_FOR_ARCH = {\n')
+    for key, var_list in prod_asm_vars_per_arch.items():
+      microkernels_bzl.write(f'    "{key}": {" + ".join(var_list)},\n')
+    microkernels_bzl.write('}\n')
+    microkernels_bzl.write('\nNON_PROD_ASM_SRCS_FOR_ARCH = {\n')
+    for key, var_list in non_prod_asm_vars_per_arch.items():
+      microkernels_bzl.write(f'    "{key}": {" + ".join(var_list)},\n')
+    microkernels_bzl.write('}\n')
+    microkernels_bzl.write("""
+def prod_c_srcs_for_arch(arch):
+    return PROD_C_SRCS_FOR_ARCH.get(arch, [])
+
+def non_prod_c_srcs_for_arch(arch):
+    return NON_PROD_C_SRCS_FOR_ARCH.get(arch, [])
+
+def all_c_srcs_for_arch(arch):
+    return prod_c_srcs_for_arch(arch) + non_prod_c_srcs_for_arch(arch)
+
+def prod_asm_srcs_for_arch(arch):
+    return PROD_ASM_SRCS_FOR_ARCH.get(arch, [])
+
+def non_prod_asm_srcs_for_arch(arch):
+    return NON_PROD_ASM_SRCS_FOR_ARCH.get(arch, [])
+
+def all_asm_srcs_for_arch(arch):
+    return prod_asm_srcs_for_arch(arch) + non_prod_asm_srcs_for_arch(arch)
+
+def prod_srcs_for_arch(arch):
+    return prod_c_srcs_for_arch(arch) + prod_asm_srcs_for_arch(arch)
+
+def non_prod_srcs_for_arch(arch):
+    return non_prod_c_srcs_for_arch(arch) + non_prod_asm_srcs_for_arch(arch)
+
+def all_srcs_for_arch(arch):
+    return all_c_srcs_for_arch(arch) + all_asm_srcs_for_arch(arch)
+""")
+
+  with open(
+      os.path.join(cmake_gen_dir, 'microkernels.cmake'), 'w'
+  ) as microkernels_cmake:
     microkernels_cmake.write("""\
 # Copyright 2022 Google LLC
 #
@@ -482,11 +501,15 @@ Auto-generated file. Do not edit!
 
 """)
     keys = sorted(
-        set(c_microkernels_per_isa.keys()).union(asm_microkernels_per_arch.keys())
+        set(c_microkernels_per_isa.keys()).union(
+            asm_microkernels_per_arch.keys()
+        )
     )
     for key in keys:
       arch_microkernels_cmake_filename = key + '_microkernels.cmake'
-      with io.StringIO() as arch_microkernels_cmake:
+      with open(
+          os.path.join(cmake_gen_dir, arch_microkernels_cmake_filename), 'w'
+      ) as arch_microkernels_cmake:
         arch_microkernels_cmake.write(f"""\
 # Copyright 2022 Google LLC
 #
@@ -499,75 +522,47 @@ Auto-generated file. Do not edit!
 #   Generator: tools/update-microkernels.py
 
 """)
-        write_grouped_microkernels_cmake(
+        c_vars = write_grouped_microkernels_cmake(
             arch_microkernels_cmake,
             key,
-            c_microkernels_per_isa,
-            'ALL',
+            prod_c_microkernels_per_isa,
+            'PROD',
             'MICROKERNEL_SRCS',
         )
-        write_grouped_microkernels_cmake(
+        c_vars += write_grouped_microkernels_cmake(
             arch_microkernels_cmake,
             key,
-            asm_microkernels_per_arch,
-            '',
+            non_prod_c_microkernels_per_isa,
+            'NON_PROD',
+            'MICROKERNEL_SRCS',
+        )
+        asm_vars = write_grouped_microkernels_cmake(
+            arch_microkernels_cmake,
+            key,
+            prod_asm_microkernels_per_arch,
+            'PROD',
             'ASM_MICROKERNEL_SRCS',
         )
-        arch_microkernels_cmake.seek(0)
-        xnncommon.overwrite_if_changed(
-            os.path.join(
-                root_dir, 'cmake', 'gen', arch_microkernels_cmake_filename
-            ),
-            arch_microkernels_cmake.read(),
+        asm_vars += write_grouped_microkernels_cmake(
+            arch_microkernels_cmake,
+            key,
+            non_prod_asm_microkernels_per_arch,
+            'NON_PROD',
+            'ASM_MICROKERNEL_SRCS',
         )
+        if c_vars:
+          c_vars = [f'${{{v}}}' for v in c_vars]
+          arch_microkernels_cmake.write(
+              f'\nSET({make_variable_name("ALL", key, "MICROKERNEL_SRCS")} {" + ".join(c_vars)})\n'
+          )
+        if asm_vars:
+          asm_vars = [f'${{{v}}}' for v in asm_vars]
+          arch_microkernels_cmake.write(
+              f'\nSET({make_variable_name("ALL", key, "ASM_MICROKERNEL_SRCS")} {" + ".join(asm_vars)})\n'
+          )
         microkernels_cmake.write(
             f'INCLUDE(cmake/gen/{arch_microkernels_cmake_filename})\n'
         )
-
-    microkernels_cmake.seek(0)
-    xnncommon.overwrite_if_changed(
-        os.path.join(root_dir, 'cmake', 'gen', 'microkernels.cmake'),
-        microkernels_cmake.read(),
-    )
-
-  if options.amalgamate:
-    # Collect filenames of production microkernels as a set
-    prod_microkernels = set()
-    for configs_filepath in os.listdir(configs_dir):
-      with open(
-          os.path.join(configs_dir, configs_filepath), 'r', encoding='utf-8'
-      ) as config_file:
-        content = config_file.read()
-        microkernels = re.findall(MICROKERNEL_NAME_REGEX, content)
-        prod_microkernels.update(microkernels)
-    prod_microkernels = set(
-        map(microkernel_name_to_filename.get, prod_microkernels)
-    )
-
-    for isa_spec, microkernels in c_microkernels_per_isa.items():
-      microkernels = microkernels + temp_c_microkernels_per_isa[isa_spec]
-      microkernels = sorted(
-          prod_microkernels.intersection(microkernels),
-          key=human_sort_key,
-      )
-      filepaths = [
-          fp if os.path.isabs(fp) else os.path.join(root_dir, fp)
-          for fp in microkernels
-      ]
-      if '_' in isa_spec:
-        isa, arch = isa_spec.split('_')
-        amalgam_filename = f'{isa}-{arch}.c'
-      else:
-        isa = isa_spec
-        amalgam_filename = f'{isa}.c'
-      header = ISA_TO_HEADER_MAP.get(isa)
-      amalgam_text = amalgamate_microkernel_sources(
-          filepaths, include_header=header
-      )
-      xnncommon.overwrite_if_changed(
-          os.path.join(src_dir, 'amalgam', 'gen', amalgam_filename),
-          amalgam_text,
-      )
 
 
 if __name__ == '__main__':

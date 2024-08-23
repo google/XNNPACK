@@ -5,3 +5,11 @@
 #
 # Description:
 #   XNNPACK - optimized floating-point neural network operators library
+
+filegroup(
+    name = "bzl_microkernel_lists",
+    srcs = glob([
+        "**/*.bzl",
+    ]),
+    visibility = ["//:__subpackages__"],
+)

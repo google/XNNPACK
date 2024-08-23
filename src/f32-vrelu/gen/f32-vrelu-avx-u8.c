@@ -15,8 +15,6 @@
 #include "xnnpack/common.h"
 
 
-static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
-
 void xnn_f32_vrelu_ukernel__avx_u8(
     size_t batch,
     const float* input,
@@ -27,6 +25,8 @@ void xnn_f32_vrelu_ukernel__avx_u8(
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(output != NULL);
+
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
   const __m256 vzero = _mm256_setzero_ps();
 

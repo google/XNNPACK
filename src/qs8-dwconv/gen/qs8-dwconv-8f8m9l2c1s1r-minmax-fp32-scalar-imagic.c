@@ -8,9 +8,13 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/dwconv.h"
 #include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
 #include "xnnpack/unaligned.h"
 
 

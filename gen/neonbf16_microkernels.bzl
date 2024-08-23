@@ -5,7 +5,10 @@ Auto-generated file. Do not edit!
   Generator: tools/update-microkernels.py
 """
 
-ALL_NEONBF16_MICROKERNEL_SRCS = [
+PROD_NEONBF16_MICROKERNEL_SRCS = [
+]
+
+NON_PROD_NEONBF16_MICROKERNEL_SRCS = [
     "src/bf16-gemm/gen/bf16-gemm-1x4c8-minmax-neonbf16-bfdot.c",
     "src/bf16-gemm/gen/bf16-gemm-1x4c8-minmax-neonbf16-bfmlal.c",
     "src/bf16-gemm/gen/bf16-gemm-1x8c2-minmax-neonbf16-bfdot-lane-ld128.c",
@@ -24,3 +27,5 @@ ALL_NEONBF16_MICROKERNEL_SRCS = [
     "src/bf16-vunary/gen/bf16-vabs-neonbf16-u16.c",
     "src/bf16-vunary/gen/bf16-vabs-neonbf16-u24.c",
 ]
+
+ALL_NEONBF16_MICROKERNEL_SRCS = PROD_NEONBF16_MICROKERNEL_SRCS + NON_PROD_NEONBF16_MICROKERNEL_SRCS

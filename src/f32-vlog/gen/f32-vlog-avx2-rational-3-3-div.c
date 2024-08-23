@@ -22,6 +22,8 @@
 #endif  // M_LN2
 
 // Extracts the exponent of the input `a` as a `float` value.
+#ifndef HAVE_XNN_SIGNED_GETEXP_F32
+#define HAVE_XNN_SIGNED_GETEXP_F32
 static XNN_INLINE xnn_simd_f32_t xnn_signed_getexp_f32(xnn_simd_f32_t a) {
   // The bits of IEE754 single-precision floating-point format are:
   //
@@ -67,6 +69,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_signed_getexp_f32(xnn_simd_f32_t a) {
   // exponent bias, resulting in the unbiased exponent.
   return xnn_sub_f32(xnn_or_f32(bias_256, exp), bias_383);
 }
+#endif  // HAVE_XNN_SIGNED_GETEXP_F32
 
 
 void xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u8(

@@ -22,6 +22,8 @@
 #endif  // M_LN2
 
 // Extracts the exponent of the input `a` as a `float` value.
+#ifndef HAVE_XNN_SIGNED_GETEXP_F32
+#define HAVE_XNN_SIGNED_GETEXP_F32
 static XNN_INLINE xnn_simd_f32_t xnn_signed_getexp_f32(xnn_simd_f32_t a) {
   // Create a mask of the zeros in the input.
   __mmask16 zero_mask = _mm512_cmp_ps_mask(a, _mm512_setzero_ps(), _CMP_EQ_OQ);
@@ -40,6 +42,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_signed_getexp_f32(xnn_simd_f32_t a) {
 
   return res;
 }
+#endif  // HAVE_XNN_SIGNED_GETEXP_F32
 
 
 void xnn_f32_vlog_ukernel__avx512f_rational_3_3_nr_u16(

@@ -9,7 +9,9 @@
 #   Generator: tools/update-microkernels.py
 
 
-SET(ALL_HVX_MICROKERNEL_SRCS
+SET(PROD_HVX_MICROKERNEL_SRCS)
+
+SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-1x32-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-1x64-minmax-hvx-broadcast.c
   src/f32-gemm/gen/f32-gemm-1x128-minmax-hvx-broadcast.c
@@ -111,3 +113,5 @@ SET(ALL_HVX_MICROKERNEL_SRCS
   src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u64.c
   src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u96.c
   src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u128.c)
+
+SET(ALL_HVX_MICROKERNEL_SRCS ${PROD_HVX_MICROKERNEL_SRCS} + ${NON_PROD_HVX_MICROKERNEL_SRCS})
