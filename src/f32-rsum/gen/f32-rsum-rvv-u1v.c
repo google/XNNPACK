@@ -1,3 +1,7 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-rsum/rvv.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2024 Imagination Technologies, Inc.
 //
 // This source code is licensed under the BSD-style license found in the
@@ -5,9 +9,9 @@
 
 #include <assert.h>
 
+#include <riscv_vector.h>
 #include "xnnpack/common.h"
 #include "xnnpack/reduce.h"
-#include <riscv_vector.h>
 
 void xnn_f32_rsum_ukernel__rvv_u1v(
     size_t batch,
@@ -60,8 +64,7 @@ void xnn_f32_rsum_ukernel__rvv_u1v(
     sum_f32v = __riscv_vfadd_vv_f32m1_tu(sum_f32v, sum_f32v, in_f32v, n1);
     batch -= n1;
   }
-  acc_f32v = __riscv_vfredosum_vs_f32m1_f32m1(sum_f32v, acc_f32v, n);
+  acc_f32v = __riscv_vfredusum_vs_f32m1_f32m1(sum_f32v, acc_f32v, n);
   vfloat32m1_t out_f32v = __riscv_vfmul_vf_f32m1(acc_f32v, params->scalar.scale, 1);
-  out_f32v = __riscv_vfmin_vf_f32m1(__riscv_vfmax_vf_f32m1(out_f32v, params->scalar.min, 1), params->scalar.max, 1);
   *output += __riscv_vfmv_f_s_f32m1_f32(out_f32v);
 }
