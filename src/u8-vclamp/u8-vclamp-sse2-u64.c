@@ -25,8 +25,11 @@ void xnn_u8_vclamp_ukernel__sse2_u64(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i voutput_max = _mm_load_si128((const __m128i*) params->sse2.max);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->sse2.min);
+  const __m128i voutput_max = _mm_set1_epi8(params->scalar.max);
+  const __m128i voutput_min = _mm_set1_epi8(params->scalar.min);
+  XNN_FORCE_REALIZATION(voutput_max);
+  XNN_FORCE_REALIZATION(voutput_min);
+
   for (; batch >= 64; batch -= 64) {
     __m128i vacc0 = _mm_loadu_si128((const __m128i*) input);
     __m128i vacc1 = _mm_loadu_si128((const __m128i*) input + 1);

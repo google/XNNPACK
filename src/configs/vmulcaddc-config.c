@@ -43,7 +43,7 @@ static void init_f16_vmulcaddc_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_avx2) {
       f16_vmulcaddc_config.ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f16_vmulcaddc_minmax_ukernel_c8__fma3_2x;
-      f16_vmulcaddc_config.init.f16 = xnn_init_f16_minmax_avx_params;
+      f16_vmulcaddc_config.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_vmulcaddc_config.channel_tile = 8;
       f16_vmulcaddc_config.row_tile = 2;
     }
@@ -72,13 +72,13 @@ static void init_f32_vmulcaddc_config(void) {
     f32_vmulcaddc_config.row_tile = 2;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     f32_vmulcaddc_config.ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f32_vmulcaddc_minmax_ukernel_c4__sse_2x;
-    f32_vmulcaddc_config.init.f32 = xnn_init_f32_minmax_sse_params;
+    f32_vmulcaddc_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_vmulcaddc_config.channel_tile = 4;
     f32_vmulcaddc_config.row_tile = 2;
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     #if XNN_ARCH_WASMRELAXEDSIMD
       f32_vmulcaddc_config.ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmrelaxedsimd_fma_2x;
-      f32_vmulcaddc_config.init.f32 = xnn_init_f32_minmax_wasmsimd_params;
+      f32_vmulcaddc_config.init.f32 = xnn_init_f32_minmax_scalar_params;
       f32_vmulcaddc_config.channel_tile = 4;
       f32_vmulcaddc_config.row_tile = 2;
     #else
@@ -86,12 +86,12 @@ static void init_f32_vmulcaddc_config(void) {
       assert(hardware_config != NULL);
       if (hardware_config->is_x86) {
         f32_vmulcaddc_config.ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmsimd_x86_2x;
-        f32_vmulcaddc_config.init.f32 = xnn_init_f32_minmax_wasmsimd_params;
+        f32_vmulcaddc_config.init.f32 = xnn_init_f32_minmax_scalar_params;
         f32_vmulcaddc_config.channel_tile = 4;
         f32_vmulcaddc_config.row_tile = 2;
       } else {
         f32_vmulcaddc_config.ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f32_vmulcaddc_minmax_ukernel_c4__wasmsimd_arm_2x;
-        f32_vmulcaddc_config.init.f32 = xnn_init_f32_minmax_wasmsimd_params;
+        f32_vmulcaddc_config.init.f32 = xnn_init_f32_minmax_scalar_params;
         f32_vmulcaddc_config.channel_tile = 4;
         f32_vmulcaddc_config.row_tile = 2;
       }

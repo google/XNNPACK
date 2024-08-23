@@ -57,6 +57,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}${"_goi" if GOI e
         $if DATATYPE == "QC4":
           # Load min/max/zerop values
           LD3R        {v4.4s, v5.4s, v6.4s}, [x8]
+          NEG         v6.4s, v6.4s
           MOVI        v7.8b, 15
         $else:
           # Load min/max values

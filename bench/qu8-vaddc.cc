@@ -70,26 +70,26 @@ static void qu8_vaddc(
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   BENCHMARK_CAPTURE(qu8_vaddc, neon_ld64_u8,
                     xnn_qu8_vaddc_minmax_ukernel__neon_ld64_u8,
-                    xnn_init_qu8_add_minmax_neon_params,
+                    xnn_init_qu8_add_minmax_scalar_params,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(qu8_vaddc, neon_ld64_u16,
                     xnn_qu8_vaddc_minmax_ukernel__neon_ld64_u16,
-                    xnn_init_qu8_add_minmax_neon_params,
+                    xnn_init_qu8_add_minmax_scalar_params,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(qu8_vaddc, neon_ld64_u32,
                     xnn_qu8_vaddc_minmax_ukernel__neon_ld64_u32,
-                    xnn_init_qu8_add_minmax_neon_params,
+                    xnn_init_qu8_add_minmax_scalar_params,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 
   BENCHMARK_CAPTURE(qu8_vaddc, neon_ld128_u16,
                     xnn_qu8_vaddc_minmax_ukernel__neon_ld128_u16,
-                    xnn_init_qu8_add_minmax_neon_params,
+                    xnn_init_qu8_add_minmax_scalar_params,
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
@@ -98,90 +98,90 @@ static void qu8_vaddc(
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qu8_vaddc, avx512skx_mul32_ld128_u16,
                     xnn_qu8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_u16,
-                    xnn_init_qu8_add_minmax_avx512_params,
+                    xnn_init_qu8_add_minmax_scalar_params,
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(qu8_vaddc, avx512skx_mul32_ld128_u32,
                     xnn_qu8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_u32,
-                    xnn_init_qu8_add_minmax_avx512_params,
+                    xnn_init_qu8_add_minmax_scalar_params,
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 
   BENCHMARK_CAPTURE(qu8_vaddc, avx2_mul32_ld64_u8,
                     xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_u8,
-                    xnn_init_qu8_add_minmax_avx2_params,
+                    xnn_init_qu8_add_minmax_scalar_params,
                     benchmark::utils::CheckAVX2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(qu8_vaddc, avx2_mul32_ld64_u16,
                     xnn_qu8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16,
-                    xnn_init_qu8_add_minmax_avx2_params,
+                    xnn_init_qu8_add_minmax_scalar_params,
                     benchmark::utils::CheckAVX2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 
   BENCHMARK_CAPTURE(qu8_vaddc, avx_mul16_ld64_u8,
                     xnn_qu8_vaddc_minmax_ukernel__avx_mul16_ld64_u8,
-                    xnn_init_qu8_add_minmax_sse2_params,
+                    xnn_init_qu8_add_minmax_scalar_params,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(qu8_vaddc, avx_mul16_ld64_u16,
                     xnn_qu8_vaddc_minmax_ukernel__avx_mul16_ld64_u16,
-                    xnn_init_qu8_add_minmax_sse2_params,
+                    xnn_init_qu8_add_minmax_scalar_params,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 
   BENCHMARK_CAPTURE(qu8_vaddc, avx_mul32_ld32_u8,
                     xnn_qu8_vaddc_minmax_ukernel__avx_mul32_ld32_u8,
-                    xnn_init_qu8_add_minmax_sse4_params,
+                    xnn_init_qu8_add_minmax_scalar_params,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(qu8_vaddc, avx_mul32_ld32_u16,
                     xnn_qu8_vaddc_minmax_ukernel__avx_mul32_ld32_u16,
-                    xnn_init_qu8_add_minmax_sse4_params,
+                    xnn_init_qu8_add_minmax_scalar_params,
                     benchmark::utils::CheckAVX)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 
   BENCHMARK_CAPTURE(qu8_vaddc, sse41_mul16_ld64_u8,
                     xnn_qu8_vaddc_minmax_ukernel__sse41_mul16_ld64_u8,
-                    xnn_init_qu8_add_minmax_sse2_params,
+                    xnn_init_qu8_add_minmax_scalar_params,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(qu8_vaddc, sse41_mul16_ld64_u16,
                     xnn_qu8_vaddc_minmax_ukernel__sse41_mul16_ld64_u16,
-                    xnn_init_qu8_add_minmax_sse2_params,
+                    xnn_init_qu8_add_minmax_scalar_params,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 
   BENCHMARK_CAPTURE(qu8_vaddc, sse41_mul32_ld32_u8,
                     xnn_qu8_vaddc_minmax_ukernel__sse41_mul32_ld32_u8,
-                    xnn_init_qu8_add_minmax_sse4_params,
+                    xnn_init_qu8_add_minmax_scalar_params,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(qu8_vaddc, sse41_mul32_ld32_u16,
                     xnn_qu8_vaddc_minmax_ukernel__sse41_mul32_ld32_u16,
-                    xnn_init_qu8_add_minmax_sse4_params,
+                    xnn_init_qu8_add_minmax_scalar_params,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 
   BENCHMARK_CAPTURE(qu8_vaddc, sse2_mul16_ld64_u8,
                     xnn_qu8_vaddc_minmax_ukernel__sse2_mul16_ld64_u8,
-                    xnn_init_qu8_add_minmax_sse2_params)
+                    xnn_init_qu8_add_minmax_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(qu8_vaddc, sse2_mul16_ld64_u16,
                     xnn_qu8_vaddc_minmax_ukernel__sse2_mul16_ld64_u16,
-                    xnn_init_qu8_add_minmax_sse2_params)
+                    xnn_init_qu8_add_minmax_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -189,12 +189,12 @@ static void qu8_vaddc(
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   BENCHMARK_CAPTURE(qu8_vaddc, wasmsimd_u8,
                     xnn_qu8_vaddc_minmax_ukernel__wasmsimd_u8,
-                    xnn_init_qu8_add_minmax_wasmsimd_params)
+                    xnn_init_qu8_add_minmax_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(qu8_vaddc, wasmsimd_u16,
                     xnn_qu8_vaddc_minmax_ukernel__wasmsimd_u16,
-                    xnn_init_qu8_add_minmax_wasmsimd_params)
+                    xnn_init_qu8_add_minmax_scalar_params)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint8_t, uint8_t>)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

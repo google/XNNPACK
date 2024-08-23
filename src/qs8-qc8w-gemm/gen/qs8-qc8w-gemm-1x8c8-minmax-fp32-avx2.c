@@ -11,6 +11,7 @@
 
 #include <immintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
@@ -41,6 +42,13 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__avx2(
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   const int8_t* a0 = a;
   int8_t* c0 = c;
+
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m256i voutput_min = _mm256_set1_epi8(params->fp32_scalar.output_min);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
 
   do {
     const __m128i vbias0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
@@ -95,19 +103,17 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__avx2(
     w = (const float*) w + 8;
     vfpacc0x01234567 = _mm256_mul_ps(vfpacc0x01234567, vscale01234567);
 
-    const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
     vfpacc0x01234567 = _mm256_min_ps(vfpacc0x01234567, voutput_max_less_zero_point);
 
     vacc0x01234567 = _mm256_cvtps_epi32(vfpacc0x01234567);
 
-    const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
     __m256i vacc00x01234567 = _mm256_adds_epi16(_mm256_packs_epi32(vacc0x01234567, vacc0x01234567), voutput_zero_point);
 
     vacc00x01234567 = _mm256_permute4x64_epi64(vacc00x01234567, _MM_SHUFFLE(3, 1, 2, 0));
 
     __m256i vout = _mm256_packs_epi16(vacc00x01234567, vacc00x01234567);
 
-    vout = _mm256_max_epi8(vout, _mm256_load_si256((const __m256i*) params->fp32_avx2.output_min));
+    vout = _mm256_max_epi8(vout, voutput_min);
 
     __m128i vout_lo = _mm256_castsi256_si128(vout);
     __m128i vout_hi = _mm256_extracti128_si256(vout, 1);

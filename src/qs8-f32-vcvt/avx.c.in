@@ -28,8 +28,10 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__avx_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vminus_zero_point = _mm_load_si128((const __m128i*) params->avx.minus_zero_point);
-  const __m256 vscale = _mm256_load_ps(params->avx.scale);
+  const __m128i vzero_point = _mm_set1_epi32(params->scalar.zero_point);
+  const __m256 vscale = _mm256_set1_ps(params->scalar.scale);
+  XNN_FORCE_REALIZATION(vzero_point);
+  XNN_FORCE_REALIZATION(vscale);
   for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
     __m128i vx${ABC[0:4]} = ${_MM_CVTEPX8_EPI32}(_mm_cvtsi32_si128((int) unaligned_load_s32(input)));
     $for N in range(4, BATCH_TILE, 4):
@@ -37,7 +39,7 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__avx_u${BATCH_TILE}(
     input += ${BATCH_TILE};
 
     $for N in range(0, BATCH_TILE, 4):
-      vx${ABC[N:N+4]} = _mm_add_epi32(vx${ABC[N:N+4]}, vminus_zero_point);
+      vx${ABC[N:N+4]} = _mm_sub_epi32(vx${ABC[N:N+4]}, vzero_point);
 
     $for N in range(0, BATCH_TILE, 8):
       const __m256i vx${ABC[N:N+8]} = _mm256_insertf128_si256(_mm256_castsi128_si256(vx${ABC[N:N+4]}), vx${ABC[N+4:N+8]}, 1);
@@ -55,7 +57,7 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__avx_u${BATCH_TILE}(
   }
   for (; batch >= 4 * sizeof(${XINT8_T}); batch -= 4 * sizeof(${XINT8_T})) {
     __m128i vx = ${_MM_CVTEPX8_EPI32}(_mm_cvtsi32_si128((int) unaligned_load_s32(input)));
-    vx = _mm_add_epi32(vx, vminus_zero_point);
+    vx = _mm_sub_epi32(vx, vzero_point);
     input += 4;
 
     __m128 vy = _mm_cvtepi32_ps(vx);
@@ -69,7 +71,7 @@ void xnn_${DATATYPE.lower()}_f32_vcvt_ukernel__avx_u${BATCH_TILE}(
     assert(batch <= 3 * sizeof(${XINT8_T}));
 
     __m128i vx = ${_MM_CVTEPX8_EPI32}(_mm_cvtsi32_si128((int) unaligned_load_s32(input)));
-    vx = _mm_add_epi32(vx, vminus_zero_point);
+    vx = _mm_sub_epi32(vx, vzero_point);
 
     __m128 vy = _mm_cvtepi32_ps(vx);
     vy = _mm_mul_ps(vy, _mm256_castps256_ps128(vscale));

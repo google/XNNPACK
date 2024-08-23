@@ -11,6 +11,7 @@
 
 #include <immintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
@@ -96,12 +97,14 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_10x16c8__avx512vnnigfni(
     a9 = a8;
     c9 = c8;
   }
-  size_t bl = params->avx512vnni.blocksize;
+  size_t bl = params->scalar.blocksize;
   assert(bl != 0);
   assert(bl <= kc);
   assert(kc % bl == 0);
   assert(bl % 32 == 0);
 
+  const __m512i vsign_mask = _mm512_set1_epi8(0x80);
+  XNN_FORCE_REALIZATION(vsign_mask);
   const __m512 vinput_zero_point0 = _mm512_set1_ps((float) quantization_params[0].zero_point + 128);
   const __m512 vinput_zero_point1 = _mm512_set1_ps((float) quantization_params[1].zero_point + 128);
   const __m512 vinput_zero_point2 = _mm512_set1_ps((float) quantization_params[2].zero_point + 128);
@@ -112,12 +115,14 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_10x16c8__avx512vnnigfni(
   const __m512 vinput_zero_point7 = _mm512_set1_ps((float) quantization_params[7].zero_point + 128);
   const __m512 vinput_zero_point8 = _mm512_set1_ps((float) quantization_params[8].zero_point + 128);
   const __m512 vinput_zero_point9 = _mm512_set1_ps((float) quantization_params[9].zero_point + 128);
-  const __m512 voutput_min = _mm512_set1_ps(params->avx512vnni.min);
-  const __m512 voutput_max = _mm512_set1_ps(params->avx512vnni.max);
-  const __m512i vsign_mask = _mm512_set1_epi8(params->avx512vnni.sign_mask);  // 0x80
-  const __m512i vmask = _mm512_set1_epi8(params->avx512vnni.mask);  // 0xF0
-  assert(params->avx512vnni.mask == (int8_t) 0xF0);
-  const __m512i vshl4 = _mm512_set1_epi64(params->avx512vnni.gfni_shl4);  // 0x01020408
+  const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
+  const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
+  const __m512i vmask = _mm512_set1_epi8(0xF0);
+  XNN_FORCE_REALIZATION(vmask);
+  const __m512i vshl4 = _mm512_set1_epi64(0x01020408);
+  XNN_FORCE_REALIZATION(vshl4);
   do {
     const __m512 vksum0123456789ABCDEF = _mm512_loadu_ps(w);
     __m512 vscaled0x0123456789ABCDEF = _mm512_mul_ps(vksum0123456789ABCDEF, vinput_zero_point0);

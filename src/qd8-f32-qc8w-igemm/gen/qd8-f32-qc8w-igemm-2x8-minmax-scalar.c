@@ -45,6 +45,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_2x8__scalar(
     c1 = c0;
   }
 
+
   do {
     const int32_t vksum0 = ((const int32_t*) w)[0];
     const int32_t vksum1 = ((const int32_t*) w)[1];

@@ -382,13 +382,9 @@ struct xnn_spmm_config {
 struct xnn_dwconv2d_chw_parameters {
   xnn_dwconv2d_chw_ukernel_fn ukernel;
   union {
-    xnn_init_f16_chw_params_fn f16;
-    xnn_init_f32_chw_params_fn f32;
+    xnn_init_f16_minmax_params_fn f16;
+    xnn_init_f32_minmax_params_fn f32;
   } init;
-  union {
-    xnn_update_f16_chw_params_fn f16;
-    xnn_update_f32_chw_params_fn f32;
-  } update;
   // Number of output width pixels in a tile.
   uint8_t output_width_tile;
   // Number of output height pixels in a tile.

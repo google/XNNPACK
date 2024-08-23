@@ -48,7 +48,7 @@ static void init_f16_pavgpool_config(void) {
     if (hardware_config->use_x86_avx2) {
       f16_pavgpool_config.unipass = (xnn_pavgpool_unipass_ukernel_fn) xnn_f16_pavgpool_minmax_ukernel_9x__avx2_c8;
       f16_pavgpool_config.multipass = (xnn_pavgpool_multipass_ukernel_fn) xnn_f16_pavgpool_minmax_ukernel_9p8x__avx2_c8;
-      f16_pavgpool_config.init.f16 = xnn_init_f16_minmax_avx_params;
+      f16_pavgpool_config.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_pavgpool_config.primary_tile = 9;
       f16_pavgpool_config.incremental_tile = 8;
       f16_pavgpool_config.channel_tile = 8;
@@ -85,7 +85,7 @@ static void init_f32_pavgpool_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     f32_pavgpool_config.unipass = (xnn_pavgpool_unipass_ukernel_fn) xnn_f32_pavgpool_minmax_ukernel_9x__sse_c4;
     f32_pavgpool_config.multipass = (xnn_pavgpool_multipass_ukernel_fn) xnn_f32_pavgpool_minmax_ukernel_9p8x__sse_c4;
-    f32_pavgpool_config.init.f32 = xnn_init_f32_minmax_sse_params;
+    f32_pavgpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_pavgpool_config.primary_tile = 9;
     f32_pavgpool_config.incremental_tile = 8;
     f32_pavgpool_config.channel_tile = 4;
@@ -95,14 +95,14 @@ static void init_f32_pavgpool_config(void) {
     if (hardware_config->is_x86) {
       f32_pavgpool_config.unipass = (xnn_pavgpool_unipass_ukernel_fn) xnn_f32_pavgpool_minmax_ukernel_9x__wasmsimd_x86_c4;
       f32_pavgpool_config.multipass = (xnn_pavgpool_multipass_ukernel_fn) xnn_f32_pavgpool_minmax_ukernel_9p8x__wasmsimd_x86_c4;
-      f32_pavgpool_config.init.f32 = xnn_init_f32_minmax_wasmsimd_params;
+      f32_pavgpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
       f32_pavgpool_config.primary_tile = 9;
       f32_pavgpool_config.incremental_tile = 8;
       f32_pavgpool_config.channel_tile = 4;
     } else {
       f32_pavgpool_config.unipass = (xnn_pavgpool_unipass_ukernel_fn) xnn_f32_pavgpool_minmax_ukernel_9x__wasmsimd_arm_c4;
       f32_pavgpool_config.multipass = (xnn_pavgpool_multipass_ukernel_fn) xnn_f32_pavgpool_minmax_ukernel_9p8x__wasmsimd_arm_c4;
-      f32_pavgpool_config.init.f32 = xnn_init_f32_minmax_wasmsimd_params;
+      f32_pavgpool_config.init.f32 = xnn_init_f32_minmax_scalar_params;
       f32_pavgpool_config.primary_tile = 9;
       f32_pavgpool_config.incremental_tile = 8;
       f32_pavgpool_config.channel_tile = 4;

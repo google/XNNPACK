@@ -12,6 +12,7 @@ $assert MR <= 4
 
 #include <wasm_simd128.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/math.h"
 
@@ -20,7 +21,7 @@ $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qc8w", "QC4": "qd8_f32_qc4w
 $LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
-$PARAMS_STRUCT = REQUANTIZATION.lower() + "_wasmsimd"
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar"
 $PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QC4": "xnn_f32_qc4w_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params"}[DATATYPE]
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $OUT_T = "float" if DATATYPE in ["QD8", "QC4"] else XINT8_T
@@ -75,10 +76,29 @@ void xnn_${DATATYPE_SPEC}_igemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukern
       }
 
   $if DATATYPE == "QU8":
-    const v128_t vb_zero_point = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.kernel_zero_point);
+    const v128_t vb_zero_point = wasm_i16x8_splat(params->${PARAMS_STRUCT}.kernel_zero_point);
+    XNN_FORCE_REALIZATION(vb_zero_point);
   $if DATATYPE == "QD8":
     const v128_t vinput_zero_point = wasm_v128_load32_splat(&quantization_params->zero_point);
     const v128_t vinput_scale = wasm_v128_load32_splat(&quantization_params->inv_scale);
+    const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
+    const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
+    XNN_FORCE_REALIZATION(vmin);
+    XNN_FORCE_REALIZATION(vmax);
+  $else:
+    $if DATATYPE != "QC8":
+      const v128_t vscale = wasm_v128_load32_splat(&params->${PARAMS_STRUCT}.scale);
+      XNN_FORCE_REALIZATION(vscale);
+
+    const v128_t vmagic_bias = wasm_f32x4_const_splat(12582912.0f);
+    const int32_t output_min_less_zero_point = (int32_t) params->${PARAMS_STRUCT}.output_min - (int32_t) params->${PARAMS_STRUCT}.output_zero_point;
+    const v128_t vmagic_min = wasm_i32x4_splat((int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point));
+    const v128_t vmagic_bias_less_output_zero_point = wasm_i32x4_splat(INT32_C(0x4B400000) - (int32_t) params->${PARAMS_STRUCT}.output_zero_point);
+    const v128_t voutput_max = wasm_i8x16_splat(params->${PARAMS_STRUCT}.output_max);
+    XNN_FORCE_REALIZATION(vmagic_bias);
+    XNN_FORCE_REALIZATION(vmagic_min);
+    XNN_FORCE_REALIZATION(vmagic_bias_less_output_zero_point);
+    XNN_FORCE_REALIZATION(voutput_max);
   do {
     $if DATATYPE == "QD8":
       const v128_t vksum0123 = wasm_v128_load(w);
@@ -189,11 +209,9 @@ void xnn_${DATATYPE_SPEC}_igemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukern
         vacc${M}x0123 = wasm_f32x4_add(vacc${M}x0123, vbias0123);
       w = (const float*) w + 4;
 
-      const v128_t vmin = wasm_v128_load64_splat(params->wasmsimd.min);
       $for M in range(MR):
         vacc${M}x0123 = wasm_f32x4_pmax(vacc${M}x0123, vmin);
 
-      const v128_t vmax = wasm_v128_load64_splat(params->wasmsimd.max);
       $for M in range(MR):
         vacc${M}x0123 = wasm_f32x4_pmin(vacc${M}x0123, vmax);
 
@@ -228,19 +246,15 @@ void xnn_${DATATYPE_SPEC}_igemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukern
         $for M in range(MR):
           vacc${M}x0123 = wasm_f32x4_mul(vacc${M}x0123, vscale0123);
       $else:
-        const v128_t vscale = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.scale);
         $for M in range(MR):
           vacc${M}x0123 = wasm_f32x4_mul(vacc${M}x0123, vscale);
 
-      const v128_t vmagic_bias = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.magic_bias);
       $for M in range(MR):
         vacc${M}x0123 = wasm_f32x4_add(vacc${M}x0123, vmagic_bias);
 
-      const v128_t vmagic_min = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.magic_min);
       $for M in range(MR):
         vacc${M}x0123 = wasm_i32x4_max(vacc${M}x0123, vmagic_min);
 
-      const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
       $for M in range(MR):
         vacc${M}x0123 = wasm_i32x4_sub(vacc${M}x0123, vmagic_bias_less_output_zero_point);
 
@@ -252,7 +266,6 @@ void xnn_${DATATYPE_SPEC}_igemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukern
       $else:
         v128_t vout = ${WASM_X8X16_NARROW_I16X8}(vacc0${min(1, MR-1)}x0123, vacc0${min(1, MR-1)}x0123);
 
-      const v128_t voutput_max = wasm_v128_load64_splat(params->${PARAMS_STRUCT}.output_max);
       vout = ${WASM_X8X16_MIN}(vout, voutput_max);
 
       if (nc >= 4) {

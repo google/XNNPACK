@@ -28,7 +28,7 @@ void xnn_f32_vlrelu_ukernel__avx_u16(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 vslope = _mm256_load_ps(params->avx.slope);
+  const __m256 vslope = _mm256_set1_ps(params->scalar.slope);
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m256 vx01234567 = _mm256_loadu_ps(input);
     const __m256 vx89ABCDEF = _mm256_loadu_ps(input + 8);

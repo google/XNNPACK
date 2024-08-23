@@ -50,6 +50,7 @@ BEGIN_FUNCTION xnn_f32_qc4w_gemm_minmax_ukernel_4x2__asm_aarch64_neonfma_ld128
 
         # Load min/max/zerop values
         LD3R        {v4.2s, v5.2s, v6.2s}, [x8]
+        NEG         v6.2s, v6.2s
         MOVI        v7.8b, 15
 
         ADD         x12, x11, x4            // a2 = a1 + a_stride

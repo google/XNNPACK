@@ -13,6 +13,7 @@ $assert DATATYPE in ["QD8_F32", "QD8_F16", "QC8", "QC4_F32"]
 
 #include <immintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
@@ -23,7 +24,7 @@ $if PREFETCH:
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8_F16" : "qd8_f16_qc8w", "QD8_F32": "qd8_f32_qc8w", "QC4_F32": "qd8_f32_qc4w"}[DATATYPE]
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
-$PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx512" if REQUANTIZATION else "avx512vnni" if DATATYPE in ["QC4_F32", "QC4_F16"] else "scalar"
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar" if REQUANTIZATION else "scalar"
 $PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8_F16": "xnn_f16_minmax_params", "QD8_F32": "xnn_f32_minmax_params", "QC4_F32": "xnn_f32_qc4w_minmax_params"}[DATATYPE]
 $OUT_T = {"QC8": "int8_t", "QD8_F16": "void", "QD8_F32": "float", "QC4_F32": "float"}[DATATYPE]
 $_MM_MAX_EPX8 = "_mm_max_epi8"
@@ -124,13 +125,20 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
   $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
     const __m512 voutput_min = _mm512_set1_ps(params->${PARAMS_STRUCT}.min);
     const __m512 voutput_max = _mm512_set1_ps(params->${PARAMS_STRUCT}.max);
+    // XNN_FORCE_REALIZATION(voutput_min);
+    // XNN_FORCE_REALIZATION(voutput_max);
     $if DATATYPE in ["QC4_F32", "QC4_F16"]:
-      const __m512i vmask = _mm512_set1_epi8(params->${PARAMS_STRUCT}.mask);  // 0xF0
-      const __m512i vshl4 = _mm512_set1_epi64(params->${PARAMS_STRUCT}.gfni_shl4);  // 0x01020408
+      const __m512i vmask = _mm512_set1_epi8(0xF0);
+      const __m512i vshl4 = _mm512_set1_epi64(0x01020408);
+      XNN_FORCE_REALIZATION(vmask);
+      XNN_FORCE_REALIZATION(vshl4);
   $else:
-    const __m512 voutput_max_less_zero_point = _mm512_set1_ps(params->${PARAMS_STRUCT}.output_max_less_zero_point);
+    const __m512 voutput_max_less_zero_point = _mm512_set1_ps((int32_t) params->${PARAMS_STRUCT}.output_max - (int32_t) params->${PARAMS_STRUCT}.output_zero_point);
     const __m512i voutput_zero_point = _mm512_set1_epi32(params->${PARAMS_STRUCT}.output_zero_point);
-    const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
+    const __m128i voutput_min = _mm_set1_epi8(params->${PARAMS_STRUCT}.output_min);
+    // XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+    // XNN_FORCE_REALIZATION(voutput_zero_point);
+    // XNN_FORCE_REALIZATION(voutput_min);
 
   do {
     $for N in range(0, NR, 16):

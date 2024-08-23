@@ -56,6 +56,7 @@ BEGIN_FUNCTION xnn_f32_qc4w_gemm_minmax_ukernel_6x8__asm_aarch64_neonfma_ld64
         STP         d8,  d9, [sp, -16]!     // Save d8-d9 on stack
         # Load min/max/zerop values
         LD3R        {v6.4s, v7.4s, v8.4s}, [x8]
+        NEG         v8.4s, v8.4s
 
         ADD         x10, x9, x4             // a2 = a1 + a_stride
         ADD         x17, x16, x7            // c2 = c1 + cm_stride

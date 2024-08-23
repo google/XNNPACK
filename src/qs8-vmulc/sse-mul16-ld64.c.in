@@ -15,11 +15,11 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #include <${SSE_HEADER}>
 
+#include "xnnpack/common.h"
 #include "xnnpack/unaligned.h"
 #include "xnnpack/vbinary.h"
 
 
-$PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("sse4" if SSE == 4 and DATATYPE == "QS8" else "sse2")
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $_MM_CVTEPX8_EPI16 = {"QS8": "_mm_cvtepi8_epi16", "QU8": "_mm_cvtepu8_epi16"}[DATATYPE]
 $_MM_PACKXS_EPI16 = {"QS8": "_mm_packs_epi16", "QU8": "_mm_packus_epi16"}[DATATYPE]
@@ -39,15 +39,24 @@ void xnn_${DATATYPE.lower()}_vmulc_minmax_${REQUANTIZATION.lower()}_ukernel__${I
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m128i va_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.a_zero_point);
-  const __m128 vscale = _mm_load_ps(params->${PARAMS_STRUCT}.scale);
-  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
-  const __m128i voutput_max = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_max);
+  const __m128i va_zero_point = _mm_set1_epi16(params->scalar.a_zero_point);
+  const __m128 vscale = _mm_set1_ps(params->scalar.scale);
+  const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
+  $if DATATYPE == "QS8" and SSE < 4:
+    const __m128i voutput_min = _mm_set1_epi16(params->scalar.output_min);
+    const __m128i voutput_max = _mm_set1_epi16(params->scalar.output_max);
+  $if DATATYPE == "QU8" or SSE == 4:
+    const __m128i voutput_min = _mm_set1_epi8(params->scalar.output_min);
+    const __m128i voutput_max = _mm_set1_epi8(params->scalar.output_max);
 
-  __m128i vxb = _mm_sub_epi16(
-    _mm_shuffle_epi32(_mm_cvtsi32_si128(UINT32_C(0x00010001) * (uint32_t) (uint16_t) (int16_t) *input_b), 0),
-    _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.b_zero_point));
+  __m128i vxb = _mm_set1_epi16((UINT32_C(0x00010001) * (uint32_t) (uint16_t) (int16_t) *input_b) - params->scalar.b_zero_point);
+
+  XNN_FORCE_REALIZATION(va_zero_point);
+  XNN_FORCE_REALIZATION(vscale);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+  XNN_FORCE_REALIZATION(voutput_max);
+
   for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
     $if SSE == 4:
       const __m128i va${ABC[0:8]} = ${_MM_CVTEPX8_EPI16}(_mm_loadl_epi64((const __m128i*) input_a));

@@ -436,7 +436,7 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
     xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u64_acc2,
     nullptr,
     xnn_f32_vmulc_minmax_ukernel__avx_u16,
-    xnn_init_f32_minmax_avx_params,
+    xnn_init_f32_minmax_scalar_params,
     benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
 
   BENCHMARK_CAPTURE(TwoPassSoftMax, avx512f_p5_scalef,

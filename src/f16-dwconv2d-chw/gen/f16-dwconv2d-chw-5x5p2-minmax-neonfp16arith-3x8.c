@@ -24,7 +24,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8(
     const void* zero,
     void* output,
     uint32_t padding_top,
-    const union xnn_f16_chw_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(input_height != 0);
   assert(input_width != 0);
@@ -32,16 +32,20 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8(
   assert(padding_top == 2);
 
   #if XNN_ARCH_ARM64
-    const uint16x8x2_t vminmax = vld2q_dup_u16(&params->neonfp16arith_stride1.min);
+    const uint16x8x2_t vminmax = vld2q_dup_u16(&params->fp16arith.min);
     const float16x8_t vmin = vreinterpretq_f16_u16(vminmax.val[0]);
     const float16x8_t vmax = vreinterpretq_f16_u16(vminmax.val[1]);
   #else
     // vld2_dup is to work around aarch32 clang bug with vld1q_dup
-    const uint16x4x2_t vminmax = vld2_dup_u16(&params->neonfp16arith_stride1.min);
+    const uint16x4x2_t vminmax = vld2_dup_u16(&params->fp16arith.min);
     const float16x8_t vmin = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[0], vminmax.val[0]));
     const float16x8_t vmax = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[1], vminmax.val[1]));
   #endif
-  const uint16x8_t vmask = vld1q_u16(params->neonfp16arith_stride1.mask);
+
+  // TODO(dsharlet): I don't really understand how this works. This mask is used twice, once for pixels
+  // 9-16, and once for pixels 1-8. Shouldn't these have different masks?
+  static const int16_t mask_table[15] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+  const uint16x8_t vmask = vld1q_u16((const uint16_t*) &mask_table[7 - (((input_width >> 1) - 1) & 7)]);
 
   const uint16_t* w = (const uint16_t*) weights;
   const float16x8_t vw01234567 = vreinterpretq_f16_u16(vld1q_u16(w));
@@ -550,7 +554,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_3x8(
       vst1q_u16(o0, vreinterpretq_u16_f16(vo0)); o0 += 8;
     }
 
-    // Always process the last block of 5..16 pixels.
+    // Always process the last block of 9..16 pixels.
     assert(w <= 16 * sizeof(uint16_t));
     if XNN_LIKELY(w > 8 * sizeof(uint16_t)) {
       float16x8_t vo0p0 = vdupq_lane_f16(vget_low_f16(vw01234567), 0);

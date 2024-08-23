@@ -11,6 +11,7 @@
 
 #include <emmintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/unaligned.h"
 #include "xnnpack/vbinary.h"
 
@@ -28,15 +29,20 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__sse2_mul16_ld64_u16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const __m128i va_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.a_zero_point);
-  const __m128 vscale = _mm_load_ps(params->fp32_sse2.scale);
-  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_sse2.output_min);
-  const __m128i voutput_max = _mm_load_si128((const __m128i*) params->fp32_sse2.output_max);
+  const __m128i va_zero_point = _mm_set1_epi16(params->scalar.a_zero_point);
+  const __m128 vscale = _mm_set1_ps(params->scalar.scale);
+  const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->scalar.output_min);
+  const __m128i voutput_max = _mm_set1_epi8(params->scalar.output_max);
 
-  __m128i vxb = _mm_sub_epi16(
-    _mm_shuffle_epi32(_mm_cvtsi32_si128(UINT32_C(0x00010001) * (uint32_t) (uint16_t) (int16_t) *input_b), 0),
-    _mm_load_si128((const __m128i*) params->fp32_sse2.b_zero_point));
+  __m128i vxb = _mm_set1_epi16((UINT32_C(0x00010001) * (uint32_t) (uint16_t) (int16_t) *input_b) - params->scalar.b_zero_point);
+
+  XNN_FORCE_REALIZATION(va_zero_point);
+  XNN_FORCE_REALIZATION(vscale);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+  XNN_FORCE_REALIZATION(voutput_max);
+
   for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
     __m128i va01234567 = _mm_loadl_epi64((const __m128i*) input_a);
     __m128i va89ABCDEF = _mm_loadl_epi64((const __m128i*) (input_a + 8));

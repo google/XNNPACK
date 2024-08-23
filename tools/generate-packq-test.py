@@ -21,8 +21,6 @@ import xnncommon
 parser = argparse.ArgumentParser(description='PackW microkernel test generator')
 parser.add_argument("-s", "--spec", metavar="FILE", required=True,
                     help="Specification (YAML) file")
-parser.add_argument("-o", "--output", metavar="FILE", required=True,
-                    help='Output (C++ source) file')
 parser.add_argument(
     "-b",
     "--output-bench",
@@ -60,78 +58,8 @@ $if CPP_CHECK:
   #endif  // ${CPP_CHECK}
 """
 
-PACKQ_TEST_TEMPLATE = """\
-$if CPP_CHECK:
-  #if ${CPP_CHECK}
-TEST(${TEST_NAME}, k_div_kr_m_div_mr) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t kr = 1; kr <= 4; kr++) {
-    for (size_t mr = 1; mr <= 4; mr++) {
-      PackQMicrokernelTester()
-          .m(mr * ${UNROLL * 10})
-          .k(kr * ${UNROLL * 10})
-          .mr(mr)
-          .kr(kr)
-          .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-}
-
-TEST(${TEST_NAME}, k_div_kr_m_div_mr_kr_div_sr) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t sr = 1; sr <= 4; sr++) {
-    for (size_t kr = sr; kr <= 4 * sr; kr += sr) {
-      for (size_t mr = 1; mr <= 4; mr++) {
-        PackQMicrokernelTester()
-            .m(mr * ${UNROLL * 10})
-            .k(kr * ${UNROLL * 10})
-            .mr(mr)
-            .kr(kr)
-            .sr(sr)
-            .Test(${", ".join(TEST_ARGS)});
-      }
-    }
-  }
-}
-
-TEST(${TEST_NAME}, k_div_kr_m_lt_mr) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t kr = 1; kr <= 4; kr++) {
-    for (size_t mr = 2; mr <= 4; mr++) {
-      PackQMicrokernelTester()
-          .m(mr - 1)
-          .k(kr * ${UNROLL * 10})
-          .mr(mr)
-          .kr(kr)
-          .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-}
-
-TEST(${TEST_NAME}, k_div_kr_m_gt_mr) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t kr = 1; kr <= 4; kr++) {
-    for (size_t mr = 2; mr <= 4; mr++) {
-      PackQMicrokernelTester()
-          .m(2 * mr + 1)
-          .k(kr * ${UNROLL * 10})
-          .mr(mr)
-          .kr(kr)
-          .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-}
-$if CPP_CHECK:
-  #endif  // ${CPP_CHECK}
-"""
-
-
 def generate_cases(ukernel, cpp_check,isa, unroll):
-  """Generates all tests cases for a PACKQ micro-kernel.
+  """Generates all benchmark cases for a PACKQ micro-kernel.
 
   Args:
     ukernel: C name of the micro-kernel function.
@@ -146,17 +74,6 @@ def generate_cases(ukernel, cpp_check,isa, unroll):
   """
   _, test_name = ukernel.split("_", 1)
   _, datatype, _ = ukernel.split("_", 2)
-  test_case = xngen.preprocess(
-      PACKQ_TEST_TEMPLATE,
-      {
-          "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
-          "TEST_ARGS": [ukernel],
-          "UNROLL": unroll,
-          "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
-          "next_prime": next_prime,
-          "CPP_CHECK": cpp_check,
-      },
-  )
 
   benchmark = xngen.preprocess(
       PACKQ_BENCHMARK_TEMPLATE,
@@ -170,7 +87,7 @@ def generate_cases(ukernel, cpp_check,isa, unroll):
       },
   )
 
-  return test_case, benchmark
+  return benchmark
 
 
 def main(args):
@@ -180,30 +97,6 @@ def main(args):
     spec_yaml = yaml.safe_load(spec_file)
     if not isinstance(spec_yaml, list):
       raise ValueError("expected a list of micro-kernels in the spec")
-
-    tests = """\
-// Copyright 2023 Google LLC
-//
-// This source code is licensed under the BSD-style license found in the
-// LICENSE file in the root directory of this source tree.
-//
-// Auto-generated file. Do not edit!
-//   Specification: {specification}
-//   Generator: {generator}
-
-
-#include <cstddef>
-
-#include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
-#include "xnnpack/packq.h"
-#include "packq-microkernel-tester.h"
-
-
-namespace xnnpack {{""".format(
-        specification=options.spec, generator=sys.argv[0]
-    )
 
     bench_output = """\
 // Copyright 2023 Google LLC
@@ -231,15 +124,9 @@ namespace xnnpack {{""".format(
       cpp_check = ukernel_spec.get("cpp-check")
       arch, isa, unroll = split_ukernel_name(name)
 
-      test_case, benchmark = generate_cases(name, cpp_check,isa, unroll)
-      tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
-
+      benchmark = generate_cases(name, cpp_check,isa, unroll)
       benches[isa_hierarchy.get(isa, 0)] += \
         "\n\n" + xnncommon.postprocess_test_case(benchmark, arch, isa)
-
-    tests += "\n\n};  // namespace xnnpack\n"
-
-    xnncommon.overwrite_if_changed(options.output, tests)
 
     for arch_idx in reversed(range(len(isa_hierarchy))):
       bench_output += benches[arch_idx]
@@ -253,6 +140,8 @@ BENCHMARK_MAIN();
     if options.output_bench:
       output_name = options.output_bench
       xnncommon.overwrite_if_changed(output_name, bench_output)
+    else:
+      raise Exception("options.output_bench must be True")
 
 if __name__ == "__main__":
   main(sys.argv[1:])

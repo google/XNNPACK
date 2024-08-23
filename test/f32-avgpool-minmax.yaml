@@ -8,7 +8,7 @@
   init: xnn_init_f32_scaleminmax_scalar_params
 # x86 SSE
 - name: xnn_f32_avgpool_minmax_ukernel_9p8x__sse_c4
-  init: xnn_init_f32_scaleminmax_sse_params
+  init: xnn_init_f32_scaleminmax_scalar_params
 # WAsm SIMD
 - name: xnn_f32_avgpool_minmax_ukernel_9p8x__wasmsimd_arm_c4
   init: xnn_init_f32_scaleminmax_scalar_params
@@ -30,7 +30,7 @@
   init: xnn_init_f32_scaleminmax_scalar_params
 # x86 SSE
 - name: xnn_f32_avgpool_minmax_ukernel_9x__sse_c4
-  init: xnn_init_f32_scaleminmax_sse_params
+  init: xnn_init_f32_scaleminmax_scalar_params
 # WAsm SIMD
 - name: xnn_f32_avgpool_minmax_ukernel_9x__wasmsimd_arm_c4
   init: xnn_init_f32_scaleminmax_scalar_params

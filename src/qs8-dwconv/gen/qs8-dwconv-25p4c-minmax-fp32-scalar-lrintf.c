@@ -13,7 +13,6 @@
 #include "xnnpack/dwconv.h"
 #include "xnnpack/math.h"
 
-
 void xnn_qs8_dwconv_minmax_fp32_ukernel_25p4c__scalar_lrintf(
     size_t channels,
     size_t output_width,
@@ -29,10 +28,10 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_25p4c__scalar_lrintf(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const float vscale = params->fp32_scalar_lrintf.scale;
-  const float voutput_min_less_zero_point = params->fp32_scalar_lrintf.output_min_less_zero_point;
-  const float voutput_max_less_zero_point = params->fp32_scalar_lrintf.output_max_less_zero_point;
-  const int32_t voutput_zero_point = params->fp32_scalar_lrintf.output_zero_point;
+  const float vscale = params->fp32_scalar.scale;
+  const float voutput_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const float voutput_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t voutput_zero_point = params->fp32_scalar.output_zero_point;
   do {
     const int8_t* i0 = input[0];
     assert(i0 != NULL);

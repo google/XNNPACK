@@ -83,20 +83,6 @@ uint32_t murmur_hash3(const void* key, size_t len, uint32_t seed)
   return fmix32(h1);
 }
 
-#ifndef NDEBUG
-// This function is only used by an assert, so do not include it in non-debug
-// builds.
-static inline size_t cache_size(struct xnn_cache* cache) {
-  switch (cache->type) {
-    case xnn_cache_type_weights:
-      return cache->weights.size;
-    default:
-      XNN_UNREACHABLE;
-  }
-  return SIZE_MAX;
-}
-#endif
-
 static inline void* cache_start(struct xnn_cache* cache) {
   switch (cache->type) {
     case xnn_cache_type_weights:

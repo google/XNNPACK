@@ -28,11 +28,11 @@ void xnn_qs8_vmul_minmax_rndnu_ukernel__neon_ld128_u16(
   assert(output != NULL);
 
   #if XNN_ARCH_ARM64
-    const int8x16_t va_zero_point = vld1q_dup_s8(params->rndnu_neon.a_zero_point);
-    const int8x16_t vb_zero_point = vld1q_dup_s8(params->rndnu_neon.b_zero_point);
+    const int8x16_t va_zero_point = vld1q_dup_s8(&params->rndnu_neon.a_zero_point);
+    const int8x16_t vb_zero_point = vld1q_dup_s8(&params->rndnu_neon.b_zero_point);
   #else
-    const int8x8_t va_zero_point = vld1_dup_s8(params->rndnu_neon.a_zero_point);
-    const int8x8_t vb_zero_point = vld1_dup_s8(params->rndnu_neon.b_zero_point);
+    const int8x8_t va_zero_point = vld1_dup_s8(&params->rndnu_neon.a_zero_point);
+    const int8x8_t vb_zero_point = vld1_dup_s8(&params->rndnu_neon.b_zero_point);
   #endif
   const int32x4_t vleft_pre_shift = vld1q_dup_s32(&params->rndnu_neon.left_pre_shift);
   const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);

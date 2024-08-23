@@ -11,6 +11,7 @@
 
 #include <emmintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/math.h"
 #include "xnnpack/unaligned.h"
@@ -46,6 +47,15 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x4c8__sse2_ld64(
     a1 = a0;
     c1 = c0;
   }
+
+
+  const __m128 voutput_max_less_zero_point = _mm_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m128i voutput_zero_point = _mm_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi16(params->fp32_scalar.output_min);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+
 
   do {
     __m128i vacc0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
@@ -114,17 +124,14 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_2x4c8__sse2_ld64(
     vscaled0x0123 = _mm_mul_ps(vscaled0x0123, vscale0123);
     vscaled1x0123 = _mm_mul_ps(vscaled1x0123, vscale0123);
 
-    const __m128 voutput_max_less_zero_point = _mm_load_ps(params->fp32_sse2.output_max_less_zero_point);
     vscaled0x0123 = _mm_min_ps(vscaled0x0123, voutput_max_less_zero_point);
     vscaled1x0123 = _mm_min_ps(vscaled1x0123, voutput_max_less_zero_point);
 
     vacc0x0123 = _mm_cvtps_epi32(vscaled0x0123);
     vacc1x0123 = _mm_cvtps_epi32(vscaled1x0123);
 
-    const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.output_zero_point);
     __m128i vacc01x0123 = _mm_adds_epi16(_mm_packs_epi32(vacc0x0123, vacc1x0123), voutput_zero_point);
 
-    const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_sse2.output_min);
     vacc01x0123 = _mm_max_epi16(vacc01x0123, voutput_min);
 
     __m128i vout = _mm_packs_epi16(vacc01x0123, vacc01x0123);

@@ -215,9 +215,10 @@ static inline uint8_t xnn_qu8_quantize_add(
   acc = math_asr_s32(acc, params.scalar.shift);
 
   // Clamp and add output zero point.
-  acc = math_max_s32(acc, params.scalar.output_min_less_zero_point);
-  acc = math_min_s32(acc, params.scalar.output_max_less_zero_point);
-  return (int8_t) ((int32_t) acc + params.scalar.output_zero_point);
+  acc += params.scalar.output_zero_point;
+  acc = math_max_s32(acc, params.scalar.output_min);
+  acc = math_min_s32(acc, params.scalar.output_max);
+  return (uint8_t) acc;
 }
 
 static inline int8_t xnn_qs8_quantize_add(
@@ -231,9 +232,10 @@ static inline int8_t xnn_qs8_quantize_add(
   acc = math_asr_s32(acc, params.scalar.shift);
 
   // Clamp and add output zero point.
-  acc = math_max_s32(acc, params.scalar.output_min_less_zero_point);
-  acc = math_min_s32(acc, params.scalar.output_max_less_zero_point);
-  return (int8_t) ((int32_t) acc + params.scalar.output_zero_point);
+  acc += params.scalar.output_zero_point;
+  acc = math_max_s32(acc, params.scalar.output_min);
+  acc = math_min_s32(acc, params.scalar.output_max);
+  return (int8_t) acc;
 }
 
 inline static int8_t xnn_qs8_quantize(float val, float scale, int32_t zero_point)

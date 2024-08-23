@@ -23,16 +23,18 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__neon_3x4_acc2(
     const float* zero,
     float* output,
     uint32_t padding_top,
-    const union xnn_f32_chw_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(input_height != 0);
   assert(input_width != 0);
   assert(input_width % sizeof(float) == 0);
   assert(padding_top == 2);
 
-  const uint32x4_t vmask = vld1q_u32(params->neon_stride1.mask);
-  const float32x4_t vmax = vld1q_dup_f32(&params->neon_stride1.max);
-  const float32x4_t vmin = vld1q_dup_f32(&params->neon_stride1.min);
+  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+
+  static const int32_t mask_table[7] = {-1, -1, -1, -1, 0, 0, 0};
+  const uint32x4_t vmask = vld1q_u32((const uint32_t*) &mask_table[3 - (((input_width >> 2) - 1) & 3)]);
 
   const float32x4_t vw0123 = vld1q_f32(weights);
   const float32x4_t vw4567 = vld1q_f32(weights + 4);

@@ -5,6 +5,8 @@
 
 # ARM NEON
 - name: xnn_f32_argmaxpool_ukernel_4x__neon_c4
+# RISC-V Vector
+- name: xnn_f32_argmaxpool_ukernel_4x__rvv_u1v
 # x86 SSE
 - name: xnn_f32_argmaxpool_ukernel_4x__sse2_c4
 # WAsm SIMD
@@ -13,6 +15,8 @@
 - name: xnn_f32_argmaxpool_ukernel_4x__scalar_c1
 # ARM NEON
 - name: xnn_f32_argmaxpool_ukernel_9x__neon_c4
+# RISC-V Vector
+- name: xnn_f32_argmaxpool_ukernel_9x__rvv_u1v
 # x86 SSE
 - name: xnn_f32_argmaxpool_ukernel_9x__sse2_c4
 # WAsm SIMD
@@ -21,6 +25,8 @@
 - name: xnn_f32_argmaxpool_ukernel_9x__scalar_c1
 # ARM NEON
 - name: xnn_f32_argmaxpool_ukernel_9p8x__neon_c4
+# RISC-V Vector
+- name: xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v
 # x86 SSE
 - name: xnn_f32_argmaxpool_ukernel_9p8x__sse2_c4
 # WAsm SIMD

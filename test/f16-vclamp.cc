@@ -492,7 +492,7 @@
     TEST_REQUIRES_X86_F16C;
     VUnaryMicrokernelTester()
       .batch_size(8)
-      .Test(xnn_f16_vclamp_ukernel__f16c_u8, xnn_init_f16_minmax_avx_params);
+      .Test(xnn_f16_vclamp_ukernel__f16c_u8, xnn_init_f16_minmax_scalar_params);
   }
 
   TEST(F16_VCLAMP__F16C_U8, batch_div_8) {
@@ -501,7 +501,7 @@
     for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f16_vclamp_ukernel__f16c_u8, xnn_init_f16_minmax_avx_params);
+        .Test(xnn_f16_vclamp_ukernel__f16c_u8, xnn_init_f16_minmax_scalar_params);
     }
   }
 
@@ -511,7 +511,7 @@
     for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f16_vclamp_ukernel__f16c_u8, xnn_init_f16_minmax_avx_params);
+        .Test(xnn_f16_vclamp_ukernel__f16c_u8, xnn_init_f16_minmax_scalar_params);
     }
   }
 
@@ -521,7 +521,7 @@
     for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f16_vclamp_ukernel__f16c_u8, xnn_init_f16_minmax_avx_params);
+        .Test(xnn_f16_vclamp_ukernel__f16c_u8, xnn_init_f16_minmax_scalar_params);
     }
   }
 
@@ -532,7 +532,7 @@
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f16_vclamp_ukernel__f16c_u8, xnn_init_f16_minmax_avx_params);
+        .Test(xnn_f16_vclamp_ukernel__f16c_u8, xnn_init_f16_minmax_scalar_params);
     }
   }
 
@@ -544,7 +544,7 @@
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmin(qmin)
-          .Test(xnn_f16_vclamp_ukernel__f16c_u8, xnn_init_f16_minmax_avx_params);
+          .Test(xnn_f16_vclamp_ukernel__f16c_u8, xnn_init_f16_minmax_scalar_params);
       }
     }
   }
@@ -557,7 +557,7 @@
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmax(qmax)
-          .Test(xnn_f16_vclamp_ukernel__f16c_u8, xnn_init_f16_minmax_avx_params);
+          .Test(xnn_f16_vclamp_ukernel__f16c_u8, xnn_init_f16_minmax_scalar_params);
       }
     }
   }
@@ -569,7 +569,7 @@
     TEST_REQUIRES_X86_F16C;
     VUnaryMicrokernelTester()
       .batch_size(16)
-      .Test(xnn_f16_vclamp_ukernel__f16c_u16, xnn_init_f16_minmax_avx_params);
+      .Test(xnn_f16_vclamp_ukernel__f16c_u16, xnn_init_f16_minmax_scalar_params);
   }
 
   TEST(F16_VCLAMP__F16C_U16, batch_div_16) {
@@ -578,7 +578,7 @@
     for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f16_vclamp_ukernel__f16c_u16, xnn_init_f16_minmax_avx_params);
+        .Test(xnn_f16_vclamp_ukernel__f16c_u16, xnn_init_f16_minmax_scalar_params);
     }
   }
 
@@ -588,7 +588,7 @@
     for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f16_vclamp_ukernel__f16c_u16, xnn_init_f16_minmax_avx_params);
+        .Test(xnn_f16_vclamp_ukernel__f16c_u16, xnn_init_f16_minmax_scalar_params);
     }
   }
 
@@ -598,7 +598,7 @@
     for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_f16_vclamp_ukernel__f16c_u16, xnn_init_f16_minmax_avx_params);
+        .Test(xnn_f16_vclamp_ukernel__f16c_u16, xnn_init_f16_minmax_scalar_params);
     }
   }
 
@@ -609,7 +609,7 @@
       VUnaryMicrokernelTester()
         .batch_size(batch_size)
         .inplace(true)
-        .Test(xnn_f16_vclamp_ukernel__f16c_u16, xnn_init_f16_minmax_avx_params);
+        .Test(xnn_f16_vclamp_ukernel__f16c_u16, xnn_init_f16_minmax_scalar_params);
     }
   }
 
@@ -621,7 +621,7 @@
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmin(qmin)
-          .Test(xnn_f16_vclamp_ukernel__f16c_u16, xnn_init_f16_minmax_avx_params);
+          .Test(xnn_f16_vclamp_ukernel__f16c_u16, xnn_init_f16_minmax_scalar_params);
       }
     }
   }
@@ -634,7 +634,7 @@
         VUnaryMicrokernelTester()
           .batch_size(batch_size)
           .qmax(qmax)
-          .Test(xnn_f16_vclamp_ukernel__f16c_u16, xnn_init_f16_minmax_avx_params);
+          .Test(xnn_f16_vclamp_ukernel__f16c_u16, xnn_init_f16_minmax_scalar_params);
       }
     }
   }

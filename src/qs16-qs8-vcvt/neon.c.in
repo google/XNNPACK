@@ -25,8 +25,8 @@ void xnn_qs16_qs8_vcvt_ukernel__neon_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const int32x4_t vmultiplier = vld1q_dup_s32(&params->neon.multiplier);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
+  const int32x4_t vmultiplier = vld1q_dup_s32(&params->scalar.multiplier);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(int16_t); batch -= ${BATCH_TILE} * sizeof(int16_t)) {
       $for N in range(SIMD_TILE):

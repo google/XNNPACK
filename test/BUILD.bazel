@@ -530,7 +530,6 @@ xnnpack_unit_test(
     srcs = [
         "f16-gemm-minmax.cc",
     ],
-    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -541,7 +540,6 @@ xnnpack_unit_test(
     srcs = [
         "f16-f32acc-igemm-minmax.cc",
     ],
-    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -552,7 +550,6 @@ xnnpack_unit_test(
     srcs = [
         "f16-igemm-minmax.cc",
     ],
-    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -649,7 +646,6 @@ xnnpack_unit_test(
         "f32-igemm-minmax.cc",
         "f32-igemm-minmax-2.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -746,7 +742,6 @@ xnnpack_unit_test(
         "f32-gemm-minmax.cc",
         "f32-gemm-minmax-2.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -757,7 +752,6 @@ xnnpack_unit_test(
     srcs = [
         "f32-gemm-goi-minmax.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -788,7 +782,6 @@ xnnpack_unit_test(
     srcs = [
         "f32-qc4w-gemm-minmax.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -799,7 +792,6 @@ xnnpack_unit_test(
     srcs = [
         "f32-qc8w-gemm-minmax.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -811,7 +803,6 @@ xnnpack_unit_test(
         "f32-gemminc-minmax.cc",
         "f32-gemminc-minmax-2.cc",
     ],
-    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -954,7 +945,6 @@ xnnpack_unit_test(
         "qd8-f16-qc8w-gemm-minmax-3.cc",
         "qd8-f16-qc8w-gemm-minmax-4.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -969,7 +959,6 @@ xnnpack_unit_test(
         "qd8-f32-qc8w-gemm-minmax-3.cc",
         "qd8-f32-qc8w-gemm-minmax-4.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -984,7 +973,6 @@ xnnpack_unit_test(
         "qd8-f16-qc4w-gemm-minmax-3.cc",
         "qd8-f16-qc4w-gemm-minmax-4.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -999,7 +987,6 @@ xnnpack_unit_test(
         "qd8-f32-qc4w-gemm-minmax-3.cc",
         "qd8-f32-qc4w-gemm-minmax-4.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -1011,7 +998,6 @@ xnnpack_unit_test(
     srcs = [
         "qd8-f16-qb4w-gemm-minmax.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -1023,7 +1009,6 @@ xnnpack_unit_test(
     srcs = [
         "qd8-f32-qb4w-gemm-minmax.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -1049,7 +1034,6 @@ xnnpack_unit_test(
         "qs8-qc8w-gemm-minmax-fp32-2.cc",
         "qs8-qc8w-gemm-minmax-fp32-3.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -1064,7 +1048,6 @@ xnnpack_unit_test(
         "qd8-f16-qc8w-igemm-minmax-3.cc",
         "qd8-f16-qc8w-igemm-minmax-4.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -1077,7 +1060,6 @@ xnnpack_unit_test(
         "qd8-f32-qc8w-igemm-minmax-2.cc",
         "qd8-f32-qc8w-igemm-minmax-3.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -1091,7 +1073,6 @@ xnnpack_unit_test(
         "qs8-qc8w-igemm-minmax-fp32-2.cc",
         "qs8-qc8w-igemm-minmax-fp32-3.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -1184,7 +1165,6 @@ xnnpack_unit_test(
         "qu8-gemm-minmax-fp32.cc",
         "qu8-gemm-minmax-fp32-2.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -1196,7 +1176,6 @@ xnnpack_unit_test(
         "qu8-gemm-minmax-rndnu.cc",
         "qu8-gemm-minmax-rndnu-2.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -1208,7 +1187,6 @@ xnnpack_unit_test(
         "qu8-igemm-minmax-fp32.cc",
         "qu8-igemm-minmax-fp32-2.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -1220,7 +1198,6 @@ xnnpack_unit_test(
         "qu8-igemm-minmax-rndnu.cc",
         "qu8-igemm-minmax-rndnu-2.cc",
     ],
-    shard_count = 10,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -2517,7 +2494,7 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "memory_planner_test",
     srcs = [
-        "memory-planner-test.cc",
+        "memory-planner.cc",
         "runtime-tester.h",
         "subgraph-tester.h",
     ],

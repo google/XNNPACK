@@ -18,7 +18,7 @@ $assert KERNEL_TILE >= 2
 
 
 $DATATYPE_SPEC = {"QS8": "qs8", "QC8": "qs8_qc8w", "QU8": "qu8"}[DATATYPE]
-$PARAMS_STRUCT = REQUANTIZATION.lower() + "_avx2"
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar"
 $PARAMS_UNION = "xnn_qs8_qc8w_conv_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $_MM256_CVTEPX8_EPI32 = "_mm256_cvtepu8_epi32" if DATATYPE == "QU8" else "_mm256_cvtepi8_epi32"
@@ -41,7 +41,23 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERN
   assert(output_width != 0);
 
   $if DATATYPE == "QU8":
-    const __m256i vk_zero_point = _mm256_cvtepu16_epi32(_mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.kernel_zero_point));
+    const __m256i vk_zero_point = _mm256_set1_epi32(params->${PARAMS_STRUCT}.kernel_zero_point);
+    XNN_FORCE_REALIZATION(vk_zero_point);
+
+  $if DATATYPE != "QC8":
+    const __m256 vscale = _mm256_set1_ps(params->${PARAMS_STRUCT}.scale);
+    XNN_FORCE_REALIZATION(vscale);
+
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->${PARAMS_STRUCT}.output_max - (int32_t) params->${PARAMS_STRUCT}.output_zero_point);
+  $if CHANNEL_TILE > 8:
+    const __m256i voutput_zero_point = _mm256_set1_epi16(params->${PARAMS_STRUCT}.output_zero_point);
+  $else:
+    const __m128i voutput_zero_point = _mm_set1_epi16(params->${PARAMS_STRUCT}.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->${PARAMS_STRUCT}.output_min);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+
   do {
     $for K in range(KERNEL_TILE):
       const ${XINT8_T}* i${K} = input[${K}];
@@ -87,21 +103,15 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERN
         $for C in range(0, CHANNEL_TILE, 8):
           vscaled${ABC[C:C+8]} = _mm256_mul_ps(vscaled${ABC[C:C+8]}, vscale${ABC[C:C+8]});
       $else:
-        const __m256 vscale = _mm256_load_ps(params->fp32_avx2.scale);
         $for C in range(0, CHANNEL_TILE, 8):
           vscaled${ABC[C:C+8]} = _mm256_mul_ps(vscaled${ABC[C:C+8]}, vscale);
 
-      const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->${PARAMS_STRUCT}.output_max_less_zero_point);
       $for C in range(0, CHANNEL_TILE, 8):
         vscaled${ABC[C:C+8]} = _mm256_min_ps(vscaled${ABC[C:C+8]}, voutput_max_less_zero_point);
 
       $for C in range(0, CHANNEL_TILE, 8):
         vacc${ABC[C:C+8]} = _mm256_cvtps_epi32(vscaled${ABC[C:C+8]});
 
-      $if CHANNEL_TILE > 8:
-        const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->${PARAMS_STRUCT}.output_zero_point);
-      $else:
-        const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_zero_point);
       $for C in range(0, CHANNEL_TILE, 16):
         $if C + 8 < CHANNEL_TILE:
           __m256i vout${ABC[C:C+4]}${ABC[C+8:C+12]}${ABC[C+4:C+8]}${ABC[C+12:C+16]} = _mm256_adds_epi16(_mm256_packs_epi32(vacc${ABC[C:C+8]}, vacc${ABC[C+8:C+16]}), voutput_zero_point);
@@ -116,7 +126,6 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERN
         $else:
           __m128i vout${ABC[C:C+8]}${ABC[C:C+8]} = ${_MM_PACKXS_EPI16}(vout${ABC[C:C+8]}, vout${ABC[C:C+8]});
 
-      const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
       $for C in range(0, CHANNEL_TILE, 16):
         $if C + 8 < CHANNEL_TILE:
           vout${ABC[C:C+16]} = ${_MM_MAX_EPX8}(vout${ABC[C:C+16]}, voutput_min);
@@ -172,19 +181,19 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERN
           const __m256 vscale${ABC[0:8]} = _mm256_loadu_ps((const float*) ((uintptr_t) w + ${CHANNEL_TILE} * sizeof(int32_t) + ${CHANNEL_TILE * KERNEL_TILE} * sizeof(${XINT8_T})));
           vscaled${ABC[0:8]} = _mm256_mul_ps(vscaled${ABC[0:8]}, vscale${ABC[0:8]});
         $else:
-          vscaled${ABC[0:8]} = _mm256_mul_ps(vscaled${ABC[0:8]}, _mm256_load_ps(params->fp32_avx2.scale));
-        vscaled${ABC[0:8]} = _mm256_min_ps(vscaled${ABC[0:8]}, _mm256_load_ps(params->${PARAMS_STRUCT}.output_max_less_zero_point));
+          vscaled${ABC[0:8]} = _mm256_mul_ps(vscaled${ABC[0:8]}, vscale);
+        vscaled${ABC[0:8]} = _mm256_min_ps(vscaled${ABC[0:8]}, voutput_max_less_zero_point);
         vacc${ABC[0:8]} = _mm256_cvtps_epi32(vscaled${ABC[0:8]});
 
         $if CHANNEL_TILE > 8:
           w = (const void*) ((const int32_t*) w + 8);
 
-        const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_zero_point);
-        __m128i vout${ABC[0:8]} = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc${ABC[0:8]}), _mm256_extracti128_si256(vacc${ABC[0:8]}, 1)), voutput_zero_point);
+          __m128i vout${ABC[0:8]} = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc${ABC[0:8]}), _mm256_extracti128_si256(vacc${ABC[0:8]}, 1)), _mm256_castsi256_si128(voutput_zero_point));
+        $else:
+          __m128i vout${ABC[0:8]} = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc${ABC[0:8]}), _mm256_extracti128_si256(vacc${ABC[0:8]}, 1)), voutput_zero_point);
 
         __m128i vout${ABC[0:8]}${ABC[0:8]} = ${_MM_PACKXS_EPI16}(vout${ABC[0:8]}, vout${ABC[0:8]});
 
-        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
         vout${ABC[0:8]}${ABC[0:8]} = ${_MM_MAX_EPX8}(vout${ABC[0:8]}${ABC[0:8]}, voutput_min);
 
         $if CHANNEL_TILE > 8:

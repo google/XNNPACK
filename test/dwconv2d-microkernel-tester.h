@@ -162,7 +162,7 @@ class DWConv2DMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_dwconv2d_chw_ukernel_fn dwconv, xnn_init_f32_chw_params_fn init_params) const {
+  void Test(xnn_f32_dwconv2d_chw_ukernel_fn dwconv, xnn_init_f32_minmax_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
@@ -203,8 +203,8 @@ class DWConv2DMicrokernelTester {
       const float output_max = accumulated_max - accumulated_range / 255.0f * float(255 - qmax());
 
       // Prepare parameters.
-      xnn_f32_chw_params chw_params;
-      init_params(&chw_params, input_width(), output_min, output_max);
+      xnn_f32_minmax_params chw_params;
+      init_params(&chw_params, output_min, output_max);
 
       // Clamp reference results.
       for (float& output_val : output_ref) {
@@ -231,7 +231,7 @@ class DWConv2DMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_dwconv2d_chw_ukernel_fn dwconv, xnn_init_f16_chw_params_fn init_params) const {
+  void Test(xnn_f16_dwconv2d_chw_ukernel_fn dwconv, xnn_init_f16_minmax_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
@@ -272,8 +272,8 @@ class DWConv2DMicrokernelTester {
       const float output_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
 
       // Prepare parameters.
-      xnn_f16_chw_params chw_params;
-      init_params(&chw_params, input_width(),
+      xnn_f16_minmax_params chw_params;
+      init_params(&chw_params,
         fp16_ieee_from_fp32_value(output_min),
         fp16_ieee_from_fp32_value(output_max));
 

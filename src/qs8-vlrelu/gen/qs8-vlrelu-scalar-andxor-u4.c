@@ -24,10 +24,10 @@ void xnn_qs8_vlrelu_ukernel__scalar_andxor_u4(
   assert(input != NULL);
   assert(output != NULL);
 
-  const int32_t vinput_zero_point = params->scalar_andxor.input_zero_point;
-  const int32_t vmultiplier_diff = params->scalar_andxor.multiplier_diff;
-  const int32_t vmultiplier_base = params->scalar_andxor.multiplier_base;
-  const int32_t vbias = params->scalar_andxor.bias;
+  const int32_t vinput_zero_point = params->scalar.input_zero_point;
+  const int32_t vmultiplier_diff = params->scalar.negative_multiplier ^ params->scalar.positive_multiplier;
+  const int32_t vmultiplier_base = params->scalar.positive_multiplier;
+  const int32_t vbias = (params->scalar.output_zero_point << 8) + 128;
   for (; batch >= 4 * sizeof(int8_t); batch -= 4 * sizeof(int8_t)) {
     int32_t vacc0 = (int32_t) input[0];
     int32_t vacc1 = (int32_t) input[1];

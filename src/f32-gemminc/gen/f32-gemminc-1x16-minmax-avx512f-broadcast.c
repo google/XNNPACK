@@ -40,7 +40,6 @@ void xnn_f32_gemminc_minmax_ukernel_1x16__avx512f_broadcast(
 
   const float* a0 = a;
   float* c0 = c;
-
   do {
     __m512 vacc0x0 = _mm512_load_ps(acc + 0);
     acc += 16;

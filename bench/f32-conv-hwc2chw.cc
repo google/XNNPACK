@@ -135,13 +135,13 @@ static void f32_conv_hwc2chw(benchmark::State& state,
   static void f32_conv_hwc2chw_3x3s2p1c3x4__sse_1x1(benchmark::State& state, const char* net) {
     f32_conv_hwc2chw(state,
       xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_1x1,
-      xnn_init_f32_minmax_sse_params,
+      xnn_init_f32_minmax_scalar_params,
       4 /* output channel tile */);
   }
   static void f32_conv_hwc2chw_3x3s2p1c3x4__sse_2x2(benchmark::State& state, const char* net) {
     f32_conv_hwc2chw(state,
       xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_2x2,
-      xnn_init_f32_minmax_sse_params,
+      xnn_init_f32_minmax_scalar_params,
       4 /* output channel tile */);
   }
 
@@ -154,7 +154,7 @@ static void f32_conv_hwc2chw(benchmark::State& state,
   static void f32_conv_hwc2chw_3x3s2p1c3x4__wasmsimd_2x2(benchmark::State& state, const char* net) {
     f32_conv_hwc2chw(state,
       xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2,
-      xnn_init_f32_minmax_wasmsimd_params,
+      xnn_init_f32_minmax_scalar_params,
       4 /* output channel tile */);
   }
 

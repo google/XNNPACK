@@ -24,7 +24,7 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2(
     const void* zero,
     void* output,
     uint32_t padding_top,
-    const union xnn_f16_chw_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(input_height != 0);
   assert(input_width != 0);
@@ -32,17 +32,19 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2(
   assert(padding_top <= 1);
 
   #if XNN_ARCH_ARM64
-    const uint16x8x2_t vminmax = vld2q_dup_u16(&params->neonfp16arith_stride2.min);
+    const uint16x8x2_t vminmax = vld2q_dup_u16(&params->fp16arith.min);
     const float16x8_t vmin = vreinterpretq_f16_u16(vminmax.val[0]);
     const float16x8_t vmax = vreinterpretq_f16_u16(vminmax.val[1]);
   #else
     // vld2_dup is to work around aarch32 clang bug with vld1q_dup
-    const uint16x4x2_t vminmax = vld2_dup_u16(&params->neonfp16arith_stride2.min);
+    const uint16x4x2_t vminmax = vld2_dup_u16(&params->fp16arith.min);
     const float16x8_t vmin = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[0], vminmax.val[0]));
     const float16x8_t vmax = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[1], vminmax.val[1]));
   #endif
-  const uint16x8_t vmask_even = vld1q_u16(params->neonfp16arith_stride2.mask_even);
-  const uint16x8_t vmask_odd  = vld1q_u16(params->neonfp16arith_stride2.mask_odd);
+
+  static const int16_t mask_table[16] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0};
+  const uint16x8_t vmask_even = vld1q_u16((const uint16_t*) &mask_table[8 - (((input_width & 31) + 2) >> 2)]);
+  const uint16x8_t vmask_odd = vld1q_u16((const uint16_t*) &mask_table[8 - ((input_width & 31) >> 2)]);
 
   const uint16_t* w = (const uint16_t*) weights;
   const float16x8_t vw01234567 = vreinterpretq_f16_u16(vld1q_u16(w));

@@ -27,8 +27,8 @@ void xnn_qu8_f32_vcvt_ukernel__neon_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const int16x8_t vminus_zero_point = vreinterpretq_s16_u32(vld1q_dup_u32((const void*) params->neon.minus_zero_point));
-  const float32x4_t vscale = vld1q_dup_f32(&params->neon.scale);
+  const int16x8_t vminus_zero_point = vdupq_n_s16(-params->scalar.zero_point);
+  const float32x4_t vscale = vld1q_dup_f32(&params->scalar.scale);
   for (; batch >= 8 * sizeof(uint8_t); batch -= 8 * sizeof(uint8_t)) {
     const uint8x8_t vx = vld1_u8(input); input += 8;
 

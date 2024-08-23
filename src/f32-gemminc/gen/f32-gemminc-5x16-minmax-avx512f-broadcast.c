@@ -64,7 +64,6 @@ void xnn_f32_gemminc_minmax_ukernel_5x16__avx512f_broadcast(
     a4 = a3;
     c4 = c3;
   }
-
   do {
     __m512 vacc0x0 = _mm512_load_ps(acc + 0);
     __m512 vacc1x0 = _mm512_load_ps(acc + 16);

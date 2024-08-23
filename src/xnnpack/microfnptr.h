@@ -2270,7 +2270,7 @@ typedef void (*xnn_f16_dwconv2d_chw_ukernel_fn)(
     const void* zero,
     void* output,
     uint32_t padding_top,
-    const union xnn_f16_chw_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_dwconv2d_chw_ukernel_fn)(
     size_t input_height,
@@ -2280,7 +2280,7 @@ typedef void (*xnn_f32_dwconv2d_chw_ukernel_fn)(
     const float* zero,
     float* output,
     uint32_t padding_top,
-    const union xnn_f32_chw_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // IBILINEAR-CHW: Indirect BILINEAR interpolation in CHW layout
 
@@ -2900,30 +2900,6 @@ typedef size_t (*xnn_init_f32_gavgpool_params_fn)(
 typedef void (*xnn_update_f32_gavgpool_params_fn)(
   union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
   float multiplier,
-  uint32_t width);
-
-typedef size_t (*xnn_init_f32_chw_params_fn)(
-  union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],
-  uint32_t width,
-  float output_min,
-  float output_max);
-
-typedef size_t (*xnn_init_f16_chw_params_fn)(
-  union xnn_f16_chw_params params[XNN_MIN_ELEMENTS(1)],
-  uint32_t width,
-  uint16_t output_min,
-  uint16_t output_max);
-
-typedef void (*xnn_update_chw_params_fn)(
-  void* params,
-  uint32_t width);
-
-typedef void (*xnn_update_f32_chw_params_fn)(
-  union xnn_f32_chw_params params[XNN_MIN_ELEMENTS(1)],
-  uint32_t width);
-
-typedef void (*xnn_update_f16_chw_params_fn)(
-  union xnn_f16_chw_params params[XNN_MIN_ELEMENTS(1)],
   uint32_t width);
 
 typedef void (*xnn_indirection_init_resize_bilinear2d_hwc_fn)(

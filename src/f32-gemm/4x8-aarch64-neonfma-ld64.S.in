@@ -62,6 +62,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_4
         $if DATATYPE == "QC4":
           # Load min/max/zerop values
           LD3R        {v4.4s, v5.4s, v6.4s}, [x8]
+          NEG         v6.4s, v6.4s
         $else:
           # Load min/max values
           LD2R        {v4.4s, v5.4s}, [x8]

@@ -52,6 +52,13 @@ void xnn_qu8_igemm_minmax_rndnu_ukernel_4x2__scalar(
     c3 = c2;
   }
 
+  const int32_t vmultiplier = params->rndnu_scalar.multiplier;
+  const int64_t vrounding = params->rndnu_scalar.rounding;
+  const uint32_t vshift = params->rndnu_scalar.shift;
+  const int32_t voutput_min_less_zero_point = (int32_t) params->rndnu_scalar.output_min - (int32_t) params->rndnu_scalar.output_zero_point;
+  const int32_t voutput_max_less_zero_point = (int32_t) params->rndnu_scalar.output_max - (int32_t) params->rndnu_scalar.output_zero_point;
+  const int32_t voutput_zero_point = params->rndnu_scalar.output_zero_point;
+
   const int32_t vb_zero_point = params->rndnu_scalar.kernel_zero_point;
   do {
     int32_t vacc0x0 = unaligned_indexed_load_s32(w, 0);
@@ -113,8 +120,6 @@ void xnn_qu8_igemm_minmax_rndnu_ukernel_4x2__scalar(
       p -= 4 * sizeof(void*);
     } while (p != 0);
 
-    const int32_t vmultiplier = params->rndnu_scalar.multiplier;
-    const int64_t vrounding = params->rndnu_scalar.rounding;
     const int64_t vextacc0x0 = math_mulext_s32(vacc0x0, vmultiplier) + vrounding;
     const int64_t vextacc0x1 = math_mulext_s32(vacc0x1, vmultiplier) + vrounding;
     const int64_t vextacc1x0 = math_mulext_s32(vacc1x0, vmultiplier) + vrounding;
@@ -124,7 +129,6 @@ void xnn_qu8_igemm_minmax_rndnu_ukernel_4x2__scalar(
     const int64_t vextacc3x0 = math_mulext_s32(vacc3x0, vmultiplier) + vrounding;
     const int64_t vextacc3x1 = math_mulext_s32(vacc3x1, vmultiplier) + vrounding;
 
-    const uint32_t vshift = params->rndnu_scalar.shift;
     int32_t vout0x0 = (int32_t) math_asr_s64(vextacc0x0, vshift);
     int32_t vout0x1 = (int32_t) math_asr_s64(vextacc0x1, vshift);
     int32_t vout1x0 = (int32_t) math_asr_s64(vextacc1x0, vshift);
@@ -134,7 +138,6 @@ void xnn_qu8_igemm_minmax_rndnu_ukernel_4x2__scalar(
     int32_t vout3x0 = (int32_t) math_asr_s64(vextacc3x0, vshift);
     int32_t vout3x1 = (int32_t) math_asr_s64(vextacc3x1, vshift);
 
-    const int32_t voutput_min_less_zero_point = params->rndnu_scalar.output_min_less_zero_point;
     vout0x0 = math_max_s32(vout0x0, voutput_min_less_zero_point);
     vout0x1 = math_max_s32(vout0x1, voutput_min_less_zero_point);
     vout1x0 = math_max_s32(vout1x0, voutput_min_less_zero_point);
@@ -144,7 +147,6 @@ void xnn_qu8_igemm_minmax_rndnu_ukernel_4x2__scalar(
     vout3x0 = math_max_s32(vout3x0, voutput_min_less_zero_point);
     vout3x1 = math_max_s32(vout3x1, voutput_min_less_zero_point);
 
-    const int32_t voutput_max_less_zero_point = params->rndnu_scalar.output_max_less_zero_point;
     vout0x0 = math_min_s32(vout0x0, voutput_max_less_zero_point);
     vout0x1 = math_min_s32(vout0x1, voutput_max_less_zero_point);
     vout1x0 = math_min_s32(vout1x0, voutput_max_less_zero_point);
@@ -154,7 +156,6 @@ void xnn_qu8_igemm_minmax_rndnu_ukernel_4x2__scalar(
     vout3x0 = math_min_s32(vout3x0, voutput_max_less_zero_point);
     vout3x1 = math_min_s32(vout3x1, voutput_max_less_zero_point);
 
-    const int32_t voutput_zero_point = params->rndnu_scalar.output_zero_point;
     vout0x0 += voutput_zero_point;
     vout0x1 += voutput_zero_point;
     vout1x0 += voutput_zero_point;

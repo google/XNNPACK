@@ -43,9 +43,9 @@ void xnn_${DATATYPE.lower()}_vcvt_ukernel__neon_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const ${XINT16X8_T} vinput_zero_point = ${VLD1Q_DUP_X16}(&params->neon.input_zero_point);
-  const int16x8_t vmultiplier = vld1q_dup_s16(&params->neon.multiplier);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
+  const ${XINT16X8_T} vinput_zero_point = ${VLD1Q_DUP_X16}(&params->scalar.input_zero_point);
+  const int16x8_t vmultiplier = vdupq_n_s16(-params->scalar.multiplier);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
       $for N in range(SIMD_TILE):

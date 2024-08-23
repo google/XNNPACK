@@ -21,8 +21,11 @@ void xnn_s8_vclamp_ukernel__wasmsimd_u64(
   assert(input != NULL);
   assert(output != NULL);
 
-  const v128_t voutput_max = wasm_v128_load64_splat(params->wasmsimd.max);
-  const v128_t voutput_min = wasm_v128_load64_splat(params->wasmsimd.min);
+  const v128_t voutput_max = wasm_v128_load8_splat(&params->scalar.max);
+  const v128_t voutput_min = wasm_v128_load8_splat(&params->scalar.min);
+  XNN_FORCE_REALIZATION(voutput_max);
+  XNN_FORCE_REALIZATION(voutput_min);
+
   for (; batch >= 64; batch -= 64) {
     v128_t vacc0 = wasm_v128_load(input);
     v128_t vacc1 = wasm_v128_load(input + 16);

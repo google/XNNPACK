@@ -7,6 +7,7 @@
 
 #include <emmintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/maxpool.h"
 #include "xnnpack/unaligned.h"
 
@@ -26,9 +27,12 @@ void xnn_s8_maxpool_minmax_ukernel_9p8x__sse2_c16(
   assert(kernel_elements != 0);
   assert(channels != 0);
 
-  const __m128i vbias = _mm_load_si128((const __m128i*) params->sse2.bias);
-  const __m128i voutput_max_with_bias = _mm_load_si128((const __m128i*) params->sse2.max_with_bias);
-  const __m128i voutput_min_with_bias = _mm_load_si128((const __m128i*) params->sse2.min_with_bias);
+  const __m128i vbias = _mm_set1_epi8(UINT8_C(0x80));
+  const __m128i voutput_max_with_bias = _mm_set1_epi8(UINT8_C(0x80) ^ params->scalar.max);
+  const __m128i voutput_min_with_bias = _mm_set1_epi8(UINT8_C(0x80) ^ params->scalar.min);
+  XNN_FORCE_REALIZATION(vbias);
+  XNN_FORCE_REALIZATION(voutput_max_with_bias);
+  XNN_FORCE_REALIZATION(voutput_min_with_bias);
 
   do {
     int8_t* o = output;

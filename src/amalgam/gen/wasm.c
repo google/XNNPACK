@@ -3432,7 +3432,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_1x4__wasm(
 
   const float vmin = params->scalar.min;
   const float vmax = params->scalar.max;
-  const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point;
+  const int32_t vminus_kernel_zero_point = -params->scalar.kernel_zero_point;
   do {
     float vacc00 = ((const float*)w)[0];
     float vacc01 = ((const float*)w)[1];
@@ -3576,7 +3576,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_4x4__wasm(
 
   const float vmin = params->scalar.min;
   const float vmax = params->scalar.max;
-  const int32_t vminus_kernel_zero_point = params->scalar.minus_kernel_zero_point;
+  const int32_t vminus_kernel_zero_point = -params->scalar.kernel_zero_point;
   do {
     float vacc00 = ((const float*)w)[0];
     float vacc01 = ((const float*)w)[1];
@@ -4108,6 +4108,85 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_4x4__wasm(
   } while (nc != 0);
 }
 
+void xnn_f32_qs8_vcvt_ukernel__wasm_fmagic_u4(
+    size_t batch,
+    const float* input,
+    int8_t* output,
+    const union xnn_f32_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const float* i = input;
+  const float vscale = params->scalar.scale;
+  const float voutput_min_less_zero_point = (float) ((int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point);
+  const float voutput_max_less_zero_point = (float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point);
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point;
+
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    float vx0 = i[0];
+    float vx1 = i[1];
+    float vx2 = i[2];
+    float vx3 = i[3];
+    i += 4;
+
+    vx0 *= vscale;
+    vx1 *= vscale;
+    vx2 *= vscale;
+    vx3 *= vscale;
+
+    vx0 = __builtin_wasm_max_f32(vx0, voutput_min_less_zero_point);
+    vx1 = __builtin_wasm_max_f32(vx1, voutput_min_less_zero_point);
+    vx2 = __builtin_wasm_max_f32(vx2, voutput_min_less_zero_point);
+    vx3 = __builtin_wasm_max_f32(vx3, voutput_min_less_zero_point);
+
+    vx0 = __builtin_wasm_min_f32(vx0, voutput_max_less_zero_point);
+    vx1 = __builtin_wasm_min_f32(vx1, voutput_max_less_zero_point);
+    vx2 = __builtin_wasm_min_f32(vx2, voutput_max_less_zero_point);
+    vx3 = __builtin_wasm_min_f32(vx3, voutput_max_less_zero_point);
+
+    vx0 += vmagic_bias;
+    vx1 += vmagic_bias;
+    vx2 += vmagic_bias;
+    vx3 += vmagic_bias;
+
+    int32_t vy0 = (int32_t) float_as_uint32(vx0);
+    int32_t vy1 = (int32_t) float_as_uint32(vx1);
+    int32_t vy2 = (int32_t) float_as_uint32(vx2);
+    int32_t vy3 = (int32_t) float_as_uint32(vx3);
+
+    vy0 -= vmagic_bias_less_zero_point;
+    vy1 -= vmagic_bias_less_zero_point;
+    vy2 -= vmagic_bias_less_zero_point;
+    vy3 -= vmagic_bias_less_zero_point;
+
+    output[0] = (int8_t) vy0;
+    output[1] = (int8_t) vy1;
+    output[2] = (int8_t) vy2;
+    output[3] = (int8_t) vy3;
+    output += 4;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    do {
+      float vx = *i++;
+      vx *= vscale;
+      vx = __builtin_wasm_max_f32(vx, voutput_min_less_zero_point);
+      vx = __builtin_wasm_min_f32(vx, voutput_max_less_zero_point);
+      vx += vmagic_bias;
+
+      int32_t vy = (int32_t) float_as_uint32(vx);
+      vy -= vmagic_bias_less_zero_point;
+
+      *output++ = (int8_t) vy;
+
+      batch -= sizeof(float);
+    } while (batch != 0);
+  }
+}
+
 void xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_u4(
     size_t batch,
     const float* input,
@@ -4120,11 +4199,11 @@ void xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_u4(
   assert(output != NULL);
 
   const float* i = input;
-  const float vscale = params->scalar_fmagic.scale;
-  const float voutput_min_less_zero_point = params->scalar_fmagic.output_min_less_zero_point;
-  const float voutput_max_less_zero_point = params->scalar_fmagic.output_max_less_zero_point;
-  const float vmagic_bias = params->scalar_fmagic.magic_bias;
-  const int32_t vmagic_bias_less_zero_point = params->scalar_fmagic.magic_bias_less_zero_point;
+  const float vscale = params->scalar.scale;
+  const float voutput_min_less_zero_point = (float) ((int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point);
+  const float voutput_max_less_zero_point = (float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point);
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point;
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     float vx0 = i[0];
@@ -5924,6 +6003,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4__wasm(
   const int8_t* a0 = a;
   float* c0 = c;
 
+
   kc = round_up_po2(kc, 2);
   do {
     const int32_t vksum0 = ((const int32_t*) w)[0];
@@ -6075,6 +6155,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4__wasm(
     a3 = a2;
     c3 = c2;
   }
+
 
   kc = round_up_po2(kc, 2);
   do {
@@ -6366,6 +6447,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x4__wasm(
   const int8_t* a0 = a;
   float* c0 = c;
 
+
   do {
     const int32_t vksum0 = ((const int32_t*) w)[0];
     const int32_t vksum1 = ((const int32_t*) w)[1];
@@ -6504,6 +6586,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x4__wasm(
     a3 = a2;
     c3 = c2;
   }
+
 
   do {
     const int32_t vksum0 = ((const int32_t*) w)[0];
@@ -6771,6 +6854,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x4__wasm(
 
   float* c0 = c;
 
+
   do {
     const int32_t vksum0 = ((const int32_t*) w)[0];
     const int32_t vksum1 = ((const int32_t*) w)[1];
@@ -6922,6 +7006,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_4x4__wasm(
   if XNN_UNPREDICTABLE(mr != 4) {
     c3 = c2;
   }
+
 
   do {
     const int32_t vksum0 = ((const int32_t*) w)[0];
@@ -7200,11 +7285,11 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_25p2c__wasm_fmagic(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const float vscale = params->fp32_scalar_fmagic.scale;
-  const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
-  const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
-  const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
-  const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
+  const float vscale = params->fp32_scalar.scale;
+  const float voutput_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const float voutput_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
   do {
     const int8_t* i0 = input[0];
     assert(i0 != NULL);
@@ -7722,11 +7807,11 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_9p2c__wasm_fmagic(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const float vscale = params->fp32_scalar_fmagic.scale;
-  const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
-  const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
-  const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
-  const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
+  const float vscale = params->fp32_scalar.scale;
+  const float voutput_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const float voutput_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
   do {
     const int8_t* i0 = input[0];
     assert(i0 != NULL);
@@ -7956,10 +8041,10 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_25p2c__wasm_fmagic(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
-  const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
-  const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
-  const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
+  const float voutput_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const float voutput_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
   do {
     const int8_t* i0 = input[0];
     assert(i0 != NULL);
@@ -8482,10 +8567,10 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p2c__wasm_fmagic(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
-  const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
-  const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
-  const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
+  const float voutput_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const float voutput_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
   do {
     const int8_t* i0 = input[0];
     assert(i0 != NULL);
@@ -8612,10 +8697,10 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_9p2c__wasm_fmagic(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
-  const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
-  const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
-  const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
+  const float voutput_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const float voutput_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
   do {
     const int8_t* i0 = input[0];
     assert(i0 != NULL);
@@ -8855,6 +8940,13 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4__wasm_fmagic(
   const int8_t* a0 = a;
   int8_t* c0 = c;
 
+  const int32_t output_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t output_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const float voutput_min_less_zero_point = output_min_less_zero_point;
+  const float voutput_max_less_zero_point = output_max_less_zero_point;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
+
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];
     int32_t vacc0x1 = ((const int32_t*) w)[1];
@@ -8895,25 +8987,21 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4__wasm_fmagic(
     vfpacc0x3 *= vscale3;
     w = (const void*) ((const float*) w + 4);
 
-    const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
     vfpacc0x0 = __builtin_wasm_max_f32(vfpacc0x0, voutput_min_less_zero_point);
     vfpacc0x1 = __builtin_wasm_max_f32(vfpacc0x1, voutput_min_less_zero_point);
     vfpacc0x2 = __builtin_wasm_max_f32(vfpacc0x2, voutput_min_less_zero_point);
     vfpacc0x3 = __builtin_wasm_max_f32(vfpacc0x3, voutput_min_less_zero_point);
 
-    const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
     vfpacc0x0 = __builtin_wasm_min_f32(vfpacc0x0, voutput_max_less_zero_point);
     vfpacc0x1 = __builtin_wasm_min_f32(vfpacc0x1, voutput_max_less_zero_point);
     vfpacc0x2 = __builtin_wasm_min_f32(vfpacc0x2, voutput_max_less_zero_point);
     vfpacc0x3 = __builtin_wasm_min_f32(vfpacc0x3, voutput_max_less_zero_point);
 
-    const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
     vfpacc0x0 += vmagic_bias;
     vfpacc0x1 += vmagic_bias;
     vfpacc0x2 += vmagic_bias;
     vfpacc0x3 += vmagic_bias;
 
-    const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
     int32_t vout0x0 = (int32_t) float_as_uint32(vfpacc0x0) - vmagic_bias_less_output_zero_point;
     int32_t vout0x1 = (int32_t) float_as_uint32(vfpacc0x1) - vmagic_bias_less_output_zero_point;
     int32_t vout0x2 = (int32_t) float_as_uint32(vfpacc0x2) - vmagic_bias_less_output_zero_point;
@@ -8983,6 +9071,13 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     a3 = a2;
     c3 = c2;
   }
+
+  const int32_t output_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t output_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const float voutput_min_less_zero_point = output_min_less_zero_point;
+  const float voutput_max_less_zero_point = output_max_less_zero_point;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
 
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];
@@ -9075,7 +9170,6 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     vfpacc3x3 *= vscale3;
     w = (const void*) ((const float*) w + 4);
 
-    const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
     vfpacc0x0 = __builtin_wasm_max_f32(vfpacc0x0, voutput_min_less_zero_point);
     vfpacc0x1 = __builtin_wasm_max_f32(vfpacc0x1, voutput_min_less_zero_point);
     vfpacc0x2 = __builtin_wasm_max_f32(vfpacc0x2, voutput_min_less_zero_point);
@@ -9093,7 +9187,6 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     vfpacc3x2 = __builtin_wasm_max_f32(vfpacc3x2, voutput_min_less_zero_point);
     vfpacc3x3 = __builtin_wasm_max_f32(vfpacc3x3, voutput_min_less_zero_point);
 
-    const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
     vfpacc0x0 = __builtin_wasm_min_f32(vfpacc0x0, voutput_max_less_zero_point);
     vfpacc0x1 = __builtin_wasm_min_f32(vfpacc0x1, voutput_max_less_zero_point);
     vfpacc0x2 = __builtin_wasm_min_f32(vfpacc0x2, voutput_max_less_zero_point);
@@ -9111,7 +9204,6 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     vfpacc3x2 = __builtin_wasm_min_f32(vfpacc3x2, voutput_max_less_zero_point);
     vfpacc3x3 = __builtin_wasm_min_f32(vfpacc3x3, voutput_max_less_zero_point);
 
-    const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
     vfpacc0x0 += vmagic_bias;
     vfpacc0x1 += vmagic_bias;
     vfpacc0x2 += vmagic_bias;
@@ -9129,7 +9221,6 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     vfpacc3x2 += vmagic_bias;
     vfpacc3x3 += vmagic_bias;
 
-    const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
     int32_t vout0x0 = (int32_t) float_as_uint32(vfpacc0x0) - vmagic_bias_less_output_zero_point;
     int32_t vout0x1 = (int32_t) float_as_uint32(vfpacc0x1) - vmagic_bias_less_output_zero_point;
     int32_t vout0x2 = (int32_t) float_as_uint32(vfpacc0x2) - vmagic_bias_less_output_zero_point;
@@ -9233,6 +9324,13 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4__wasm_fmagic(
 
   int8_t* c0 = c;
 
+  const int32_t output_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t output_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const float voutput_min_less_zero_point = output_min_less_zero_point;
+  const float voutput_max_less_zero_point = output_max_less_zero_point;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
+
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];
     int32_t vacc0x1 = ((const int32_t*) w)[1];
@@ -9284,25 +9382,21 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4__wasm_fmagic(
     vfpacc0x3 *= vscale3;
     w = (const void*) ((const float*) w + 4);
 
-    const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
     vfpacc0x0 = __builtin_wasm_max_f32(vfpacc0x0, voutput_min_less_zero_point);
     vfpacc0x1 = __builtin_wasm_max_f32(vfpacc0x1, voutput_min_less_zero_point);
     vfpacc0x2 = __builtin_wasm_max_f32(vfpacc0x2, voutput_min_less_zero_point);
     vfpacc0x3 = __builtin_wasm_max_f32(vfpacc0x3, voutput_min_less_zero_point);
 
-    const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
     vfpacc0x0 = __builtin_wasm_min_f32(vfpacc0x0, voutput_max_less_zero_point);
     vfpacc0x1 = __builtin_wasm_min_f32(vfpacc0x1, voutput_max_less_zero_point);
     vfpacc0x2 = __builtin_wasm_min_f32(vfpacc0x2, voutput_max_less_zero_point);
     vfpacc0x3 = __builtin_wasm_min_f32(vfpacc0x3, voutput_max_less_zero_point);
 
-    const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
     vfpacc0x0 += vmagic_bias;
     vfpacc0x1 += vmagic_bias;
     vfpacc0x2 += vmagic_bias;
     vfpacc0x3 += vmagic_bias;
 
-    const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
     int32_t vout0x0 = (int32_t) float_as_uint32(vfpacc0x0) - vmagic_bias_less_output_zero_point;
     int32_t vout0x1 = (int32_t) float_as_uint32(vfpacc0x1) - vmagic_bias_less_output_zero_point;
     int32_t vout0x2 = (int32_t) float_as_uint32(vfpacc0x2) - vmagic_bias_less_output_zero_point;
@@ -9371,6 +9465,13 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
   if XNN_UNPREDICTABLE(mr != 4) {
     c3 = c2;
   }
+
+  const int32_t output_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t output_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const float voutput_min_less_zero_point = output_min_less_zero_point;
+  const float voutput_max_less_zero_point = output_max_less_zero_point;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
 
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];
@@ -9489,7 +9590,6 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     vfpacc3x3 *= vscale3;
     w = (const void*) ((const float*) w + 4);
 
-    const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
     vfpacc0x0 = __builtin_wasm_max_f32(vfpacc0x0, voutput_min_less_zero_point);
     vfpacc0x1 = __builtin_wasm_max_f32(vfpacc0x1, voutput_min_less_zero_point);
     vfpacc0x2 = __builtin_wasm_max_f32(vfpacc0x2, voutput_min_less_zero_point);
@@ -9507,7 +9607,6 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     vfpacc3x2 = __builtin_wasm_max_f32(vfpacc3x2, voutput_min_less_zero_point);
     vfpacc3x3 = __builtin_wasm_max_f32(vfpacc3x3, voutput_min_less_zero_point);
 
-    const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
     vfpacc0x0 = __builtin_wasm_min_f32(vfpacc0x0, voutput_max_less_zero_point);
     vfpacc0x1 = __builtin_wasm_min_f32(vfpacc0x1, voutput_max_less_zero_point);
     vfpacc0x2 = __builtin_wasm_min_f32(vfpacc0x2, voutput_max_less_zero_point);
@@ -9525,7 +9624,6 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     vfpacc3x2 = __builtin_wasm_min_f32(vfpacc3x2, voutput_max_less_zero_point);
     vfpacc3x3 = __builtin_wasm_min_f32(vfpacc3x3, voutput_max_less_zero_point);
 
-    const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
     vfpacc0x0 += vmagic_bias;
     vfpacc0x1 += vmagic_bias;
     vfpacc0x2 += vmagic_bias;
@@ -9543,7 +9641,6 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     vfpacc3x2 += vmagic_bias;
     vfpacc3x3 += vmagic_bias;
 
-    const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
     int32_t vout0x0 = (int32_t) float_as_uint32(vfpacc0x0) - vmagic_bias_less_output_zero_point;
     int32_t vout0x1 = (int32_t) float_as_uint32(vfpacc0x1) - vmagic_bias_less_output_zero_point;
     int32_t vout0x2 = (int32_t) float_as_uint32(vfpacc0x2) - vmagic_bias_less_output_zero_point;
@@ -9632,12 +9729,12 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_25p2c__wasm_fmagic(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const float vscale = params->fp32_scalar_fmagic.scale;
-  const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
-  const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
-  const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
-  const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
-  const int32_t vkernel_zero_point = params->fp32_scalar_fmagic.kernel_zero_point;
+  const float vscale = params->fp32_scalar.scale;
+  const float voutput_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const float voutput_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t vkernel_zero_point = params->fp32_scalar.kernel_zero_point;
   do {
     const uint8_t* i0 = input[0];
     assert(i0 != NULL);
@@ -10155,12 +10252,12 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_9p2c__wasm_fmagic(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const float vscale = params->fp32_scalar_fmagic.scale;
-  const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
-  const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
-  const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
-  const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
-  const int32_t vkernel_zero_point = params->fp32_scalar_fmagic.kernel_zero_point;
+  const float vscale = params->fp32_scalar.scale;
+  const float voutput_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const float voutput_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t vkernel_zero_point = params->fp32_scalar.kernel_zero_point;
   do {
     const uint8_t* i0 = input[0];
     assert(i0 != NULL);
@@ -10395,7 +10492,15 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x4__wasm_fmagic(
   const uint8_t* a0 = a;
   uint8_t* c0 = c;
 
-  const int32_t vb_zero_point = params->fp32_scalar_fmagic.kernel_zero_point;
+  const int32_t output_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t output_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const float vscale = params->fp32_scalar.scale;
+  const float voutput_min_less_zero_point = output_min_less_zero_point;
+  const float voutput_max_less_zero_point = output_max_less_zero_point;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
+
+  const int32_t vb_zero_point = params->fp32_scalar.kernel_zero_point;
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];
     int32_t vacc0x1 = ((const int32_t*) w)[1];
@@ -10426,31 +10531,26 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x4__wasm_fmagic(
     float vfpacc0x2 = (float) vacc0x2;
     float vfpacc0x3 = (float) vacc0x3;
 
-    const float vscale = params->fp32_scalar_fmagic.scale;
     vfpacc0x0 *= vscale;
     vfpacc0x1 *= vscale;
     vfpacc0x2 *= vscale;
     vfpacc0x3 *= vscale;
 
-    const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
     vfpacc0x0 = __builtin_wasm_max_f32(vfpacc0x0, voutput_min_less_zero_point);
     vfpacc0x1 = __builtin_wasm_max_f32(vfpacc0x1, voutput_min_less_zero_point);
     vfpacc0x2 = __builtin_wasm_max_f32(vfpacc0x2, voutput_min_less_zero_point);
     vfpacc0x3 = __builtin_wasm_max_f32(vfpacc0x3, voutput_min_less_zero_point);
 
-    const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
     vfpacc0x0 = __builtin_wasm_min_f32(vfpacc0x0, voutput_max_less_zero_point);
     vfpacc0x1 = __builtin_wasm_min_f32(vfpacc0x1, voutput_max_less_zero_point);
     vfpacc0x2 = __builtin_wasm_min_f32(vfpacc0x2, voutput_max_less_zero_point);
     vfpacc0x3 = __builtin_wasm_min_f32(vfpacc0x3, voutput_max_less_zero_point);
 
-    const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
     vfpacc0x0 += vmagic_bias;
     vfpacc0x1 += vmagic_bias;
     vfpacc0x2 += vmagic_bias;
     vfpacc0x3 += vmagic_bias;
 
-    const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
     int32_t vout0x0 = (int32_t) float_as_uint32(vfpacc0x0) - vmagic_bias_less_output_zero_point;
     int32_t vout0x1 = (int32_t) float_as_uint32(vfpacc0x1) - vmagic_bias_less_output_zero_point;
     int32_t vout0x2 = (int32_t) float_as_uint32(vfpacc0x2) - vmagic_bias_less_output_zero_point;
@@ -10521,7 +10621,15 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     c3 = c2;
   }
 
-  const int32_t vb_zero_point = params->fp32_scalar_fmagic.kernel_zero_point;
+  const int32_t output_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t output_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const float vscale = params->fp32_scalar.scale;
+  const float voutput_min_less_zero_point = output_min_less_zero_point;
+  const float voutput_max_less_zero_point = output_max_less_zero_point;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
+
+  const int32_t vb_zero_point = params->fp32_scalar.kernel_zero_point;
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];
     int32_t vacc0x1 = ((const int32_t*) w)[1];
@@ -10591,7 +10699,6 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     float vfpacc3x2 = (float) vacc3x2;
     float vfpacc3x3 = (float) vacc3x3;
 
-    const float vscale = params->fp32_scalar_fmagic.scale;
     vfpacc0x0 *= vscale;
     vfpacc0x1 *= vscale;
     vfpacc0x2 *= vscale;
@@ -10609,7 +10716,6 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     vfpacc3x2 *= vscale;
     vfpacc3x3 *= vscale;
 
-    const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
     vfpacc0x0 = __builtin_wasm_max_f32(vfpacc0x0, voutput_min_less_zero_point);
     vfpacc0x1 = __builtin_wasm_max_f32(vfpacc0x1, voutput_min_less_zero_point);
     vfpacc0x2 = __builtin_wasm_max_f32(vfpacc0x2, voutput_min_less_zero_point);
@@ -10627,7 +10733,6 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     vfpacc3x2 = __builtin_wasm_max_f32(vfpacc3x2, voutput_min_less_zero_point);
     vfpacc3x3 = __builtin_wasm_max_f32(vfpacc3x3, voutput_min_less_zero_point);
 
-    const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
     vfpacc0x0 = __builtin_wasm_min_f32(vfpacc0x0, voutput_max_less_zero_point);
     vfpacc0x1 = __builtin_wasm_min_f32(vfpacc0x1, voutput_max_less_zero_point);
     vfpacc0x2 = __builtin_wasm_min_f32(vfpacc0x2, voutput_max_less_zero_point);
@@ -10645,7 +10750,6 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     vfpacc3x2 = __builtin_wasm_min_f32(vfpacc3x2, voutput_max_less_zero_point);
     vfpacc3x3 = __builtin_wasm_min_f32(vfpacc3x3, voutput_max_less_zero_point);
 
-    const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
     vfpacc0x0 += vmagic_bias;
     vfpacc0x1 += vmagic_bias;
     vfpacc0x2 += vmagic_bias;
@@ -10663,7 +10767,6 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     vfpacc3x2 += vmagic_bias;
     vfpacc3x3 += vmagic_bias;
 
-    const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
     int32_t vout0x0 = (int32_t) float_as_uint32(vfpacc0x0) - vmagic_bias_less_output_zero_point;
     int32_t vout0x1 = (int32_t) float_as_uint32(vfpacc0x1) - vmagic_bias_less_output_zero_point;
     int32_t vout0x2 = (int32_t) float_as_uint32(vfpacc0x2) - vmagic_bias_less_output_zero_point;
@@ -10767,7 +10870,15 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x4__wasm_fmagic(
 
   uint8_t* c0 = c;
 
-  const int32_t vb_zero_point = params->fp32_scalar_fmagic.kernel_zero_point;
+  const int32_t output_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t output_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const float vscale = params->fp32_scalar.scale;
+  const float voutput_min_less_zero_point = output_min_less_zero_point;
+  const float voutput_max_less_zero_point = output_max_less_zero_point;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
+
+  const int32_t vb_zero_point = params->fp32_scalar.kernel_zero_point;
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];
     int32_t vacc0x1 = ((const int32_t*) w)[1];
@@ -10809,31 +10920,26 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_1x4__wasm_fmagic(
     float vfpacc0x2 = (float) vacc0x2;
     float vfpacc0x3 = (float) vacc0x3;
 
-    const float vscale = params->fp32_scalar_fmagic.scale;
     vfpacc0x0 *= vscale;
     vfpacc0x1 *= vscale;
     vfpacc0x2 *= vscale;
     vfpacc0x3 *= vscale;
 
-    const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
     vfpacc0x0 = __builtin_wasm_max_f32(vfpacc0x0, voutput_min_less_zero_point);
     vfpacc0x1 = __builtin_wasm_max_f32(vfpacc0x1, voutput_min_less_zero_point);
     vfpacc0x2 = __builtin_wasm_max_f32(vfpacc0x2, voutput_min_less_zero_point);
     vfpacc0x3 = __builtin_wasm_max_f32(vfpacc0x3, voutput_min_less_zero_point);
 
-    const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
     vfpacc0x0 = __builtin_wasm_min_f32(vfpacc0x0, voutput_max_less_zero_point);
     vfpacc0x1 = __builtin_wasm_min_f32(vfpacc0x1, voutput_max_less_zero_point);
     vfpacc0x2 = __builtin_wasm_min_f32(vfpacc0x2, voutput_max_less_zero_point);
     vfpacc0x3 = __builtin_wasm_min_f32(vfpacc0x3, voutput_max_less_zero_point);
 
-    const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
     vfpacc0x0 += vmagic_bias;
     vfpacc0x1 += vmagic_bias;
     vfpacc0x2 += vmagic_bias;
     vfpacc0x3 += vmagic_bias;
 
-    const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
     int32_t vout0x0 = (int32_t) float_as_uint32(vfpacc0x0) - vmagic_bias_less_output_zero_point;
     int32_t vout0x1 = (int32_t) float_as_uint32(vfpacc0x1) - vmagic_bias_less_output_zero_point;
     int32_t vout0x2 = (int32_t) float_as_uint32(vfpacc0x2) - vmagic_bias_less_output_zero_point;
@@ -10903,7 +11009,15 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     c3 = c2;
   }
 
-  const int32_t vb_zero_point = params->fp32_scalar_fmagic.kernel_zero_point;
+  const int32_t output_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const int32_t output_max_less_zero_point = (int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point;
+  const float vscale = params->fp32_scalar.scale;
+  const float voutput_min_less_zero_point = output_min_less_zero_point;
+  const float voutput_max_less_zero_point = output_max_less_zero_point;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
+
+  const int32_t vb_zero_point = params->fp32_scalar.kernel_zero_point;
   do {
     int32_t vacc0x0 = ((const int32_t*) w)[0];
     int32_t vacc0x1 = ((const int32_t*) w)[1];
@@ -10999,7 +11113,6 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     float vfpacc3x2 = (float) vacc3x2;
     float vfpacc3x3 = (float) vacc3x3;
 
-    const float vscale = params->fp32_scalar_fmagic.scale;
     vfpacc0x0 *= vscale;
     vfpacc0x1 *= vscale;
     vfpacc0x2 *= vscale;
@@ -11017,7 +11130,6 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     vfpacc3x2 *= vscale;
     vfpacc3x3 *= vscale;
 
-    const float voutput_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
     vfpacc0x0 = __builtin_wasm_max_f32(vfpacc0x0, voutput_min_less_zero_point);
     vfpacc0x1 = __builtin_wasm_max_f32(vfpacc0x1, voutput_min_less_zero_point);
     vfpacc0x2 = __builtin_wasm_max_f32(vfpacc0x2, voutput_min_less_zero_point);
@@ -11035,7 +11147,6 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     vfpacc3x2 = __builtin_wasm_max_f32(vfpacc3x2, voutput_min_less_zero_point);
     vfpacc3x3 = __builtin_wasm_max_f32(vfpacc3x3, voutput_min_less_zero_point);
 
-    const float voutput_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
     vfpacc0x0 = __builtin_wasm_min_f32(vfpacc0x0, voutput_max_less_zero_point);
     vfpacc0x1 = __builtin_wasm_min_f32(vfpacc0x1, voutput_max_less_zero_point);
     vfpacc0x2 = __builtin_wasm_min_f32(vfpacc0x2, voutput_max_less_zero_point);
@@ -11053,7 +11164,6 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     vfpacc3x2 = __builtin_wasm_min_f32(vfpacc3x2, voutput_max_less_zero_point);
     vfpacc3x3 = __builtin_wasm_min_f32(vfpacc3x3, voutput_max_less_zero_point);
 
-    const float vmagic_bias = params->fp32_scalar_fmagic.magic_bias;
     vfpacc0x0 += vmagic_bias;
     vfpacc0x1 += vmagic_bias;
     vfpacc0x2 += vmagic_bias;
@@ -11071,7 +11181,6 @@ void xnn_qu8_igemm_minmax_fp32_ukernel_4x4__wasm_fmagic(
     vfpacc3x2 += vmagic_bias;
     vfpacc3x3 += vmagic_bias;
 
-    const int32_t vmagic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
     int32_t vout0x0 = (int32_t) float_as_uint32(vfpacc0x0) - vmagic_bias_less_output_zero_point;
     int32_t vout0x1 = (int32_t) float_as_uint32(vfpacc0x1) - vmagic_bias_less_output_zero_point;
     int32_t vout0x2 = (int32_t) float_as_uint32(vfpacc0x2) - vmagic_bias_less_output_zero_point;

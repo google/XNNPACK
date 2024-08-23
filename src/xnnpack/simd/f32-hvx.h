@@ -60,7 +60,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_mul_qf32(xnn_simd_f32_t a,
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_div_f32(xnn_simd_f32_t a,
-                                             xnn_simd_f32_t b){
+                                             xnn_simd_f32_t b) {
   return Q6_Vsf_vdiv_VsfVsf(a, b);
 }
 

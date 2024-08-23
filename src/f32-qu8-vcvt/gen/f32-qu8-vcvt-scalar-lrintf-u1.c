@@ -26,10 +26,10 @@ void xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_u1(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float vscale = params->scalar_lrintf.scale;
-  const float voutput_min_less_zero_point = params->scalar_lrintf.output_min_less_zero_point;
-  const float voutput_max_less_zero_point = params->scalar_lrintf.output_max_less_zero_point;
-  const int32_t voutput_zero_point = params->scalar_lrintf.output_zero_point;
+  const float vscale = params->scalar.scale;
+  const float voutput_min_less_zero_point = (float) ((int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point);
+  const float voutput_max_less_zero_point = (float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point);
+  const int32_t voutput_zero_point = params->scalar.output_zero_point;
 
   do {
     float vx = *input++;

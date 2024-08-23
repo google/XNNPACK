@@ -21,7 +21,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f16_vcvt, avx2_u16,
                     xnn_qs8_f16_vcvt_ukernel__avx2_u16,
-                    xnn_init_qs8_f16_cvt_avx_params,
+                    xnn_init_qs8_f16_cvt_scalar_params,
                     benchmark::utils::CheckAVX2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, uint16_t>)
     ->UseRealTime();
@@ -31,7 +31,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f16_vcvt, avx2_u24,
                     xnn_qs8_f16_vcvt_ukernel__avx2_u24,
-                    xnn_init_qs8_f16_cvt_avx_params,
+                    xnn_init_qs8_f16_cvt_scalar_params,
                     benchmark::utils::CheckAVX2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, uint16_t>)
     ->UseRealTime();
@@ -41,7 +41,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f16_vcvt, avx2_u32,
                     xnn_qs8_f16_vcvt_ukernel__avx2_u32,
-                    xnn_init_qs8_f16_cvt_avx_params,
+                    xnn_init_qs8_f16_cvt_scalar_params,
                     benchmark::utils::CheckAVX2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, uint16_t>)
     ->UseRealTime();
@@ -51,7 +51,7 @@
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qs8_f16_vcvt, avx2_u64,
                     xnn_qs8_f16_vcvt_ukernel__avx2_u64,
-                    xnn_init_qs8_f16_cvt_avx_params,
+                    xnn_init_qs8_f16_cvt_scalar_params,
                     benchmark::utils::CheckAVX2)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, uint16_t>)
     ->UseRealTime();

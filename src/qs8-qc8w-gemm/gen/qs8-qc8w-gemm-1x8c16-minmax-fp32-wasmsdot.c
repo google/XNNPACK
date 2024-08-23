@@ -39,6 +39,17 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c16__wasmsdot(
   const int8_t* a0 = a;
   int8_t* c0 = c;
 
+
+  const v128_t vmagic_bias = wasm_f32x4_const_splat(12582912.0f);
+  const int32_t output_min_less_zero_point = (int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point;
+  const v128_t vmagic_min = wasm_i32x4_splat((int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point));
+  const v128_t vmagic_bias_less_output_zero_point = wasm_i32x4_splat(INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point);
+  const v128_t voutput_max = wasm_v128_load32_splat(&params->fp32_scalar.output_max);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vmagic_min);
+  XNN_FORCE_REALIZATION(vmagic_bias_less_output_zero_point);
+  XNN_FORCE_REALIZATION(voutput_max);
+
   do {
     v128_t vacc0x0 = wasm_v128_load32_zero(w);
     v128_t vacc0x1 = wasm_v128_load32_zero((const int32_t*) w + 1);
@@ -102,15 +113,12 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c16__wasmsdot(
     vacc0x0123 = wasm_f32x4_mul(vacc0x0123, vscale0123);
     vacc0x4567 = wasm_f32x4_mul(vacc0x4567, vscale4567);
 
-    const v128_t vmagic_bias = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias);
     vacc0x0123 = wasm_f32x4_add(vacc0x0123, vmagic_bias);
     vacc0x4567 = wasm_f32x4_add(vacc0x4567, vmagic_bias);
 
-    const v128_t vmagic_min = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_min);
     vacc0x0123 = wasm_i32x4_max(vacc0x0123, vmagic_min);
     vacc0x4567 = wasm_i32x4_max(vacc0x4567, vmagic_min);
 
-    const v128_t vmagic_bias_less_output_zero_point = wasm_v128_load64_splat(params->fp32_wasmsimd.magic_bias_less_output_zero_point);
     vacc0x0123 = wasm_i32x4_sub(vacc0x0123, vmagic_bias_less_output_zero_point);
     vacc0x4567 = wasm_i32x4_sub(vacc0x4567, vmagic_bias_less_output_zero_point);
 
@@ -118,7 +126,6 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c16__wasmsdot(
 
     v128_t vacc0x01234567_0x01234567 = wasm_i8x16_narrow_i16x8(vacc0x01234567, vacc0x01234567);
 
-    const v128_t voutput_max = wasm_v128_load64_splat(params->fp32_wasmsimd.output_max);
     vacc0x01234567_0x01234567 = wasm_i8x16_min(vacc0x01234567_0x01234567, voutput_max);
 
     if XNN_LIKELY(nc >= 8) {

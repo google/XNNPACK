@@ -20,7 +20,7 @@ $SSE_HEADER = {2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
 
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QU8": "qu8"}[DATATYPE]
-$PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("sse4" if SSE == 4 and DATATYPE != "QU8" else "sse2")
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar"
 $PARAMS_UNION = "xnn_qs8_qc8w_conv_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $ISA = "avx" if AVX else {2: "sse2", 3: "ssse3", 4: "sse41"}[SSE]
@@ -66,6 +66,22 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_fp32_ukernel_${MR}x4c2__${ISA}_${VARIANT.
         c${M} = c${M-1};
       }
 
+  $if DATATYPE != "QC8":
+    const __m128 vscale = _mm_set1_ps(params->${PARAMS_STRUCT}.scale);
+    XNN_FORCE_REALIZATION(vscale);
+  const __m128 voutput_max_less_zero_point = _mm_set1_ps((int32_t) params->${PARAMS_STRUCT}.output_max - (int32_t) params->${PARAMS_STRUCT}.output_zero_point);
+  const __m128i voutput_zero_point = _mm_set1_epi16(params->${PARAMS_STRUCT}.output_zero_point);
+  $if DATATYPE == "QU8":
+    const __m128i voutput_min = _mm_set1_epi8(params->${PARAMS_STRUCT}.output_min);
+  $else:
+    $if SSE < 4:
+      const __m128i voutput_min = _mm_set1_epi16(params->${PARAMS_STRUCT}.output_min);
+    $if SSE == 4:
+      const __m128i voutput_min = _mm_set1_epi8(params->${PARAMS_STRUCT}.output_min);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+
   do {
     __m128i vacc0x0123 = _mm_loadu_si128((const __m128i*) w);
     $for M in range(1, MR):
@@ -83,7 +99,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_fp32_ukernel_${MR}x4c2__${ISA}_${VARIANT.
 
       size_t k = kc;
       $if DATATYPE == "QU8":
-        const __m128i vb_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.kernel_zero_point);
+        const __m128i vb_zero_point = _mm_set1_epi16(params->${PARAMS_STRUCT}.kernel_zero_point);
         $if SSE < 4 or VARIANT == "LD128":
           const __m128i vzero = _mm_setzero_si128();
       while (k >= 8 * sizeof(${XINT8_T})) {
@@ -231,18 +247,15 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_fp32_ukernel_${MR}x4c2__${ISA}_${VARIANT.
       $for M in range(MR):
         vscaled${M}x0123 = _mm_mul_ps(vscaled${M}x0123, vscale0123);
     $else:
-      const __m128 vscale = _mm_load_ps(params->${PARAMS_STRUCT}.scale);
       $for M in range(MR):
         vscaled${M}x0123 = _mm_mul_ps(vscaled${M}x0123, vscale);
 
-    const __m128 voutput_max_less_zero_point = _mm_load_ps(params->${PARAMS_STRUCT}.output_max_less_zero_point);
     $for M in range(MR):
       vscaled${M}x0123 = _mm_min_ps(vscaled${M}x0123, voutput_max_less_zero_point);
 
     $for M in range(MR):
       vacc${M}x0123 = _mm_cvtps_epi32(vscaled${M}x0123);
 
-    const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_zero_point);
     $for M in range(0, MR, 2):
       __m128i vacc${M}${min(M+1, MR-1)}x0123 = _mm_adds_epi16(_mm_packs_epi32(vacc${M}x0123, vacc${min(M+1, MR-1)}x0123), voutput_zero_point);
 
@@ -252,10 +265,9 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_fp32_ukernel_${MR}x4c2__${ISA}_${VARIANT.
       $else:
         __m128i vout = _mm_packus_epi16(vacc0${min(1, MR-1)}x0123, vacc0${min(1, MR-1)}x0123);
 
-      vout = _mm_max_epu8(vout, _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min));
+      vout = _mm_max_epu8(vout, voutput_min);
     $else:
       $if SSE < 4:
-        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
         $for M in range(0, MR, 2):
           vacc${M}${min(M+1, MR-1)}x0123 = _mm_max_epi16(vacc${M}${min(M+1, MR-1)}x0123, voutput_min);
 
@@ -265,7 +277,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_fp32_ukernel_${MR}x4c2__${ISA}_${VARIANT.
         __m128i vout = _mm_packs_epi16(vacc0${min(1, MR-1)}x0123, vacc0${min(1, MR-1)}x0123);
 
       $if SSE == 4:
-        vout = _mm_max_epi8(vout, _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min));
+        vout = _mm_max_epi8(vout, voutput_min);
 
     if (nc >= 4) {
       $for M in reversed(range(1, MR)):

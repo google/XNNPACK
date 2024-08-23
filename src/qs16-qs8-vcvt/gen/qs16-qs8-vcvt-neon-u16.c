@@ -25,8 +25,8 @@ void xnn_qs16_qs8_vcvt_ukernel__neon_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const int32x4_t vmultiplier = vld1q_dup_s32(&params->neon.multiplier);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neon.output_zero_point);
+  const int32x4_t vmultiplier = vld1q_dup_s32(&params->scalar.multiplier);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
   for (; batch >= 16 * sizeof(int16_t); batch -= 16 * sizeof(int16_t)) {
     const int16x8_t vx0 = vld1q_s16(input); input += 8;
     const int16x8_t vx1 = vld1q_s16(input); input += 8;

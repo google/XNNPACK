@@ -28,8 +28,8 @@ void xnn_f32_vclamp_ukernel__avx_u16(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 vmin = _mm256_load_ps(params->avx.min);
-  const __m256 vmax = _mm256_load_ps(params->avx.max);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     __m256 vacc01234567 = _mm256_loadu_ps(input);

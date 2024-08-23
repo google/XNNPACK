@@ -52,6 +52,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4__scalar(
     c3 = c2;
   }
 
+
   kc = round_up_po2(kc, 2);
   do {
     const int32_t vksum0 = ((const int32_t*) w)[0];

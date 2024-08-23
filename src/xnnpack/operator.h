@@ -50,7 +50,6 @@ struct xnn_ukernel_dwconv2d {
   union {
     xnn_dwconv2d_chw_ukernel_fn chw_fn;
   };
-  xnn_update_chw_params_fn update_params;
   uint8_t output_width_tile;
 };
 
@@ -245,8 +244,8 @@ struct xnn_operator {
     struct {
       union xnn_f32_scale_params f32_scale;
     };
-    union xnn_f16_chw_params f16_chw;
-    union xnn_f32_chw_params f32_chw;
+    union xnn_f16_minmax_params f16_chw;
+    union xnn_f32_minmax_params f32_chw;
     union xnn_f32_qb4w_minmax_params f32_qb4w_minmax;
     union xnn_f32_qc4w_minmax_params f32_qc4w_minmax;
     union xnn_f32_qs8_cvt_params f32_qs8_cvt;

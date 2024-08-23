@@ -153,6 +153,8 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_16x32c4__avx512amx_prfm(
 
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(voutput_min);
+  // XNN_FORCE_REALIZATION(voutput_max);
 
   do {
     const __m512i vksum0123456789ABCDEF = _mm512_loadu_epi32((const int32_t*) w + 0);

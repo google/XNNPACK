@@ -24,6 +24,7 @@ $else:
   $SSE_HEADER = {2: "emmintrin.h", 3: "tmmintrin.h", 4: "smmintrin.h"}[SSE]
   #include <${SSE_HEADER}>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/math.h"
 $if DATATYPE != "QD8":
@@ -53,9 +54,9 @@ $LOAD_SUFFIX = {"LD128": "_ld128", "LD64": "_ld64", "EXTENDED": ""}[VARIANT]
 $GEMM_SUFFIX = "_xw" if VARIANT == "EXTENDED" else ""
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $if DATATYPE in ["QD8", "QC4", "QB4"]:
-  $PARAMS_STRUCT = "sse"
+  $PARAMS_STRUCT = "scalar"
 $else:
-  $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("sse4" if SSE == 4 and DATATYPE != "QU8" else "sse2")
+  $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar"
 $PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8": "xnn_f32_minmax_params", "QC4": "xnn_f32_qc4w_minmax_params", "QS8": "xnn_qs8_conv_minmax_params", "QU8": "xnn_qu8_conv_minmax_params", "QB4": "xnn_f32_qb4w_minmax_params"}[DATATYPE]
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $OUT_T = "float" if DATATYPE in ["QD8", "QC4", "QB4"] else XINT8_T
@@ -87,7 +88,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
   assert(c != NULL);
 
   $if DATATYPE == "QB4":
-    size_t bl = params->sse.blocksize;
+    size_t bl = params->scalar.blocksize;
     assert(bl <= round_up_po2(kc, 2));
     assert(bl != 0);
     assert(bl % 32 == 0);
@@ -113,8 +114,36 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
         c${M} = c${M-1};
       }
 
+  $if DATATYPE in ["QD8", "QC4", "QB4"]:
+    const __m128 vmin = _mm_set1_ps(params->${PARAMS_STRUCT}.min);
+    const __m128 vmax = _mm_set1_ps(params->${PARAMS_STRUCT}.max);
+    XNN_FORCE_REALIZATION(vmin);
+    XNN_FORCE_REALIZATION(vmax);
+  $else:
+    $if DATATYPE != "QC8":
+      const __m128 vscale = _mm_set1_ps(params->${PARAMS_STRUCT}.scale);
+      XNN_FORCE_REALIZATION(vscale);
+
+    const __m128 voutput_max_less_zero_point = _mm_set1_ps((int32_t) params->${PARAMS_STRUCT}.output_max - (int32_t) params->${PARAMS_STRUCT}.output_zero_point);
+    const __m128i voutput_zero_point = _mm_set1_epi16(params->${PARAMS_STRUCT}.output_zero_point);
+    $if DATATYPE == "QU8":
+      const __m128i voutput_min = _mm_set1_epi8(params->${PARAMS_STRUCT}.output_min);
+    $else:
+      $if SSE < 4:
+        const __m128i voutput_min = _mm_set1_epi16(params->${PARAMS_STRUCT}.output_min);
+      $if SSE == 4:
+        const __m128i voutput_min = _mm_set1_epi8(params->${PARAMS_STRUCT}.output_min);
+    XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+    XNN_FORCE_REALIZATION(voutput_zero_point);
+    XNN_FORCE_REALIZATION(voutput_min);
+
   $if DATATYPE in ["QC4", "QB4"]:
-    const __m128i vmask = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.mask);  // 0xF0
+    const __m128i vmask = _mm_set1_epi8(0xF0);
+    XNN_FORCE_REALIZATION(vmask);
+
+  $if DATATYPE == "QU8":
+    const __m128i vb_zero_point = _mm_set1_epi16(params->${PARAMS_STRUCT}.kernel_zero_point);
+    XNN_FORCE_REALIZATION(vb_zero_point);
   do {
     $if DATATYPE in ["QD8", "QC4"]:
       const __m128i vksum = _mm_load_si128((const __m128i*) w);
@@ -195,7 +224,6 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
     w = (const int32_t*) w + 4;
 
     $if DATATYPE == "QU8":
-      const __m128i vb_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.kernel_zero_point);
       $if SSE < 4 or VARIANT == "LD128":
         const __m128i vzero = _mm_setzero_si128();
     $if DATATYPE == "QB4":
@@ -455,11 +483,9 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
       $for M in range(MR):
         vout${M}x0123 = _mm_add_ps(vout${M}x0123, vbias0123);
 
-      const __m128 vmin = _mm_load_ps(params->${PARAMS_STRUCT}.min);
       $for M in range(MR):
         vout${M}x0123 = _mm_max_ps(vout${M}x0123, vmin);
 
-      const __m128 vmax = _mm_load_ps(params->${PARAMS_STRUCT}.max);
       $for M in range(MR):
         vout${M}x0123 = _mm_min_ps(vout${M}x0123, vmax);
 
@@ -497,18 +523,15 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
         $for M in range(MR):
           vscaled${M}x0123 = _mm_mul_ps(vscaled${M}x0123, vscale0123);
       $else:
-        const __m128 vscale = _mm_load_ps(params->${PARAMS_STRUCT}.scale);
         $for M in range(MR):
           vscaled${M}x0123 = _mm_mul_ps(vscaled${M}x0123, vscale);
 
-      const __m128 voutput_max_less_zero_point = _mm_load_ps(params->${PARAMS_STRUCT}.output_max_less_zero_point);
       $for M in range(MR):
         vscaled${M}x0123 = _mm_min_ps(vscaled${M}x0123, voutput_max_less_zero_point);
 
       $for M in range(MR):
         vacc${M}x0123 = _mm_cvtps_epi32(vscaled${M}x0123);
 
-      const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_zero_point);
       $for M in range(0, MR, 2):
         __m128i vacc${M}${min(M+1, MR-1)}x0123 = _mm_adds_epi16(_mm_packs_epi32(vacc${M}x0123, vacc${min(M+1, MR-1)}x0123), voutput_zero_point);
 
@@ -518,10 +541,9 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
         $else:
           __m128i vout = _mm_packus_epi16(vacc0${min(1, MR-1)}x0123, vacc0${min(1, MR-1)}x0123);
 
-        vout = _mm_max_epu8(vout, _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min));
+        vout = _mm_max_epu8(vout, voutput_min);
       $else:
         $if SSE < 4:
-          const __m128i voutput_min = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min);
           $for M in range(0, MR, 2):
             vacc${M}${min(M+1, MR-1)}x0123 = _mm_max_epi16(vacc${M}${min(M+1, MR-1)}x0123, voutput_min);
 
@@ -532,7 +554,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
 
         $# SSE 4, AVX
         $if SSE == 4:
-          vout = _mm_max_epi8(vout, _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.output_min));
+          vout = _mm_max_epi8(vout, voutput_min);
 
       if (nc >= 4) {
         unaligned_store_u32(c0, (uint32_t) _mm_cvtsi128_si32(vout));

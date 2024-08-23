@@ -28,8 +28,8 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__scalar_u${BATCH_TILE}(
   const int32_t vbias = params->scalar.bias + (int32_t) *input_b * params->scalar.b_multiplier;
   const int32_t va_multiplier = params->scalar.a_multiplier;
   const uint32_t vshift = params->scalar.shift;
-  const int32_t voutput_min_less_zero_point = params->scalar.output_min_less_zero_point;
-  const int32_t voutput_max_less_zero_point = params->scalar.output_max_less_zero_point;
+  const int32_t voutput_min = params->scalar.output_min;
+  const int32_t voutput_max = params->scalar.output_max;
   const int32_t voutput_zero_point = params->scalar.output_zero_point;
 
   $if BATCH_TILE == 1:
@@ -38,9 +38,10 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__scalar_u${BATCH_TILE}(
       const int32_t vacc = vbias + va * va_multiplier;
 
       int32_t vout = math_asr_s32(vacc, vshift);
-      vout = math_max_s32(vout, voutput_min_less_zero_point);
-      vout = math_min_s32(vout, voutput_max_less_zero_point);
-      *output++ = (${XINT8_T}) (vout + voutput_zero_point);
+      vout = vout + voutput_zero_point;
+      vout = math_max_s32(vout, voutput_min);
+      vout = math_min_s32(vout, voutput_max);
+      *output++ = (${XINT8_T}) vout;
 
       batch -= sizeof(${XINT8_T});
     } while (batch != 0);
@@ -58,13 +59,13 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__scalar_u${BATCH_TILE}(
         int32_t vout${N} = math_asr_s32(vacc${N}, vshift);
 
       $for N in range(BATCH_TILE):
-        vout${N} = math_max_s32(vout${N}, voutput_min_less_zero_point);
-
-      $for N in range(BATCH_TILE):
-        vout${N} = math_min_s32(vout${N}, voutput_max_less_zero_point);
-
-      $for N in range(BATCH_TILE):
         vout${N} += voutput_zero_point;
+
+      $for N in range(BATCH_TILE):
+        vout${N} = math_max_s32(vout${N}, voutput_min);
+
+      $for N in range(BATCH_TILE):
+        vout${N} = math_min_s32(vout${N}, voutput_max);
 
       $for N in range(BATCH_TILE):
         output[${N}] = (${XINT8_T}) vout${N};
@@ -76,18 +77,20 @@ void xnn_${DATATYPE.lower()}_vaddc_minmax_ukernel__scalar_u${BATCH_TILE}(
         const int32_t vacc = vbias + va * va_multiplier;
 
         int32_t vout = math_asr_s32(vacc, vshift);
-        vout = math_max_s32(vout, voutput_min_less_zero_point);
-        vout = math_min_s32(vout, voutput_max_less_zero_point);
-        *output++ = (${XINT8_T}) (vout + voutput_zero_point);
+          vout = vout + voutput_zero_point;
+        vout = math_max_s32(vout, voutput_min);
+        vout = math_min_s32(vout, voutput_max);
+        *output++ = (${XINT8_T}) vout;
       $else:
         do {
           const int32_t va = *input_a++;
           const int32_t vacc = vbias + va * va_multiplier;
 
           int32_t vout = math_asr_s32(vacc, vshift);
-          vout = math_max_s32(vout, voutput_min_less_zero_point);
-          vout = math_min_s32(vout, voutput_max_less_zero_point);
-          *output++ = (${XINT8_T}) (vout + voutput_zero_point);
+          vout = vout + voutput_zero_point;
+          vout = math_max_s32(vout, voutput_min);
+          vout = math_min_s32(vout, voutput_max);
+          *output++ = (${XINT8_T}) vout;
 
           batch -= sizeof(${XINT8_T});
         } while (batch != 0);

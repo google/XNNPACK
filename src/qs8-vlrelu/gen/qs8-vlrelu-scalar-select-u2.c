@@ -24,10 +24,10 @@ void xnn_qs8_vlrelu_ukernel__scalar_select_u2(
   assert(input != NULL);
   assert(output != NULL);
 
-  const int32_t vinput_zero_point = params->scalar_select.input_zero_point;
-  const int32_t vpositive_multiplier = params->scalar_select.positive_multiplier;
-  const int32_t vnegative_multiplier = params->scalar_select.negative_multiplier;
-  const int32_t vbias = params->scalar_select.bias;
+  const int32_t vinput_zero_point = params->scalar.input_zero_point;
+  const int32_t vpositive_multiplier = params->scalar.positive_multiplier;
+  const int32_t vnegative_multiplier = params->scalar.negative_multiplier;
+  const int32_t vbias = (params->scalar.output_zero_point << 8) + 0x80;
   for (; batch >= 2 * sizeof(int8_t); batch -= 2 * sizeof(int8_t)) {
     int32_t vacc0 = (int32_t) input[0];
     int32_t vacc1 = (int32_t) input[1];

@@ -69,6 +69,10 @@ void xnn_f32_gemminc_minmax_ukernel_6x16s4__fma3_broadcast(
     a5 = a4;
     c5 = c4;
   }
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
 
   do {
     __m256 vacc0x01234567 = _mm256_load_ps(acc + 0);
@@ -287,7 +291,6 @@ void xnn_f32_gemminc_minmax_ukernel_6x16s4__fma3_broadcast(
       w += 64;
     }
 
-    const __m256 vmin = _mm256_load_ps(params->avx.min);
     vacc0x01234567 = _mm256_max_ps(vmin, vacc0x01234567);
     vacc1x01234567 = _mm256_max_ps(vmin, vacc1x01234567);
     vacc2x01234567 = _mm256_max_ps(vmin, vacc2x01234567);
@@ -301,7 +304,6 @@ void xnn_f32_gemminc_minmax_ukernel_6x16s4__fma3_broadcast(
     vacc4x89ABCDEF = _mm256_max_ps(vmin, vacc4x89ABCDEF);
     vacc5x89ABCDEF = _mm256_max_ps(vmin, vacc5x89ABCDEF);
 
-    const __m256 vmax = _mm256_load_ps(params->avx.max);
     vacc0x01234567 = _mm256_min_ps(vmax, vacc0x01234567);
     vacc1x01234567 = _mm256_min_ps(vmax, vacc1x01234567);
     vacc2x01234567 = _mm256_min_ps(vmax, vacc2x01234567);

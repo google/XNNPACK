@@ -27,10 +27,10 @@ void xnn_f32_qu8_vcvt_ukernel__neonv8_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vscale = vld1q_dup_f32(&params->neonv8.scale);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neonv8.output_zero_point);
-  const uint8x16_t voutput_min = vld1q_dup_u8(&params->neonv8.output_min);
-  const uint8x16_t voutput_max = vld1q_dup_u8(&params->neonv8.output_max);
+  const float32x4_t vscale = vld1q_dup_f32(&params->scalar.scale);
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
+  const uint8x16_t voutput_min = vld1q_dup_u8(&params->scalar.output_min);
+  const uint8x16_t voutput_max = vld1q_dup_u8(&params->scalar.output_max);
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     float32x4_t vx0123 = vld1q_f32(input); input += 4;
     float32x4_t vx4567 = vld1q_f32(input); input += 4;

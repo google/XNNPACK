@@ -11,6 +11,7 @@
 
 #include <immintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/dwconv.h"
 #include "xnnpack/math.h"
 #include "xnnpack/unaligned.h"
@@ -34,6 +35,13 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_6f6m7l32c8s8r__avx2_mul32(
   assert(output_width != 0);
   assert(kernel_size > 6);
 
+
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->fp32_scalar.output_min);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
 
   do {
     const void* w = weights;
@@ -593,7 +601,6 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_6f6m7l32c8s8r__avx2_mul32(
         vscaledGHIJKLMN = _mm256_mul_ps(vscaledGHIJKLMN, vscaleGHIJKLMN);
         vscaledOPQRSTUV = _mm256_mul_ps(vscaledOPQRSTUV, vscaleOPQRSTUV);
 
-        const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
         vscaled01234567 = _mm256_min_ps(vscaled01234567, voutput_max_less_zero_point);
         vscaled89ABCDEF = _mm256_min_ps(vscaled89ABCDEF, voutput_max_less_zero_point);
         vscaledGHIJKLMN = _mm256_min_ps(vscaledGHIJKLMN, voutput_max_less_zero_point);
@@ -604,14 +611,12 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_6f6m7l32c8s8r__avx2_mul32(
         vaccGHIJKLMN = _mm256_cvtps_epi32(vscaledGHIJKLMN);
         vaccOPQRSTUV = _mm256_cvtps_epi32(vscaledOPQRSTUV);
 
-        const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
         __m256i vout012389AB4567CDEF = _mm256_adds_epi16(_mm256_packs_epi32(vacc01234567, vacc89ABCDEF), voutput_zero_point);
         __m256i voutGHIJOPQRKLMNSTUV = _mm256_adds_epi16(_mm256_packs_epi32(vaccGHIJKLMN, vaccOPQRSTUV), voutput_zero_point);
 
         __m128i vout0123456789ABCDEF = _mm_shuffle_epi32(_mm_packs_epi16(_mm256_castsi256_si128(vout012389AB4567CDEF), _mm256_extracti128_si256(vout012389AB4567CDEF, 1)), _MM_SHUFFLE(3, 1, 2, 0));
         __m128i voutGHIJKLMNOPQRSTUV = _mm_shuffle_epi32(_mm_packs_epi16(_mm256_castsi256_si128(voutGHIJOPQRKLMNSTUV), _mm256_extracti128_si256(voutGHIJOPQRKLMNSTUV, 1)), _MM_SHUFFLE(3, 1, 2, 0));
 
-        const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
         vout0123456789ABCDEF = _mm_max_epi8(vout0123456789ABCDEF, voutput_min);
         voutGHIJKLMNOPQRSTUV = _mm_max_epi8(voutGHIJKLMNOPQRSTUV, voutput_min);
 
@@ -670,17 +675,15 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_6f6m7l32c8s8r__avx2_mul32(
           __m256 vscaled01234567 = _mm256_cvtepi32_ps(vacc01234567);
           const __m256 vscale01234567 = _mm256_loadu_ps((const float*) ((uintptr_t) w + 56 * sizeof(int8_t)));
           vscaled01234567 = _mm256_mul_ps(vscaled01234567, vscale01234567);
-          vscaled01234567 = _mm256_min_ps(vscaled01234567, _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point));
+          vscaled01234567 = _mm256_min_ps(vscaled01234567, voutput_max_less_zero_point);
           vacc01234567 = _mm256_cvtps_epi32(vscaled01234567);
 
           w = (void*) ((uintptr_t) w + 56 * sizeof(int8_t) + 8 * sizeof(float));
 
-          const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_avx2.output_zero_point);
-          __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), voutput_zero_point);
+          __m128i vout01234567 = _mm_adds_epi16(_mm_packs_epi32(_mm256_castsi256_si128(vacc01234567), _mm256_extracti128_si256(vacc01234567, 1)), _mm256_castsi256_si128(voutput_zero_point));
 
           __m128i vout0123456701234567 = _mm_packs_epi16(vout01234567, vout01234567);
 
-          const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_avx2.output_min);
           vout0123456701234567 = _mm_max_epi8(vout0123456701234567, voutput_min);
 
           if XNN_LIKELY(c >= 8) {

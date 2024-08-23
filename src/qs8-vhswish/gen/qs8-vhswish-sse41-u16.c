@@ -27,12 +27,16 @@ void xnn_qs8_vhswish_ukernel__sse41_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vinput_zero_point = _mm_load_si128((const __m128i*) params->sse2.input_zero_point);
-  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->sse2.output_zero_point);
-  const __m128i vinput_scale_div = _mm_load_si128((const __m128i*) params->sse2.input_scale_div);
-  const __m128i vscale_ratio = _mm_load_si128((const __m128i*) params->sse2.scale_ratio);
+  const __m128i vinput_zero_point = _mm_set1_epi16(params->sse2.input_zero_point);
+  const __m128i voutput_zero_point = _mm_set1_epi16(params->sse2.output_zero_point);
+  const __m128i vinput_scale_div = _mm_set1_epi16(params->sse2.input_scale_div);
+  const __m128i vscale_ratio = _mm_set1_epi16(params->sse2.scale_ratio);
   const __m128i vhalf = _mm_set1_epi32(0x4000);
   const __m128i vzero = _mm_setzero_si128();
+  XNN_FORCE_REALIZATION(vinput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(vinput_scale_div);
+  XNN_FORCE_REALIZATION(vscale_ratio);
   for (; batch >= 16 * sizeof(int8_t); batch -= 16 * sizeof(int8_t)) {
     __m128i vextx0 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input));
     __m128i vextx1 = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) (input + 8)));

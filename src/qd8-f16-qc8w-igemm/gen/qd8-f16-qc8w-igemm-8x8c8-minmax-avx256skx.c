@@ -77,6 +77,13 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_8x8c8__avx256skx(
 
   const __m256i vinput_zero_point = _mm256_set1_epi32((int) quantization_params->zero_point);
   const __m256 vinput_scale = _mm256_broadcast_ss(&quantization_params->inv_scale);
+  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
+  // XNN_FORCE_REALIZATION(vinput_zero_point);
+  // XNN_FORCE_REALIZATION(vinput_scale);
+  // XNN_FORCE_REALIZATION(vmin);
+  // XNN_FORCE_REALIZATION(vmax);
+
   do {
     const __m128i vinit0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     const __m128i vinit1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -320,7 +327,6 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_8x8c8__avx256skx(
     vout6x01234567 = _mm256_fmadd_ps(vout6x01234567, vfilter_output_scale01234567, vbias01234567);
     vout7x01234567 = _mm256_fmadd_ps(vout7x01234567, vfilter_output_scale01234567, vbias01234567);
 
-    const __m256 vmin = _mm256_load_ps(params->avx.min);
     vout7x01234567 = _mm256_max_ps(vout7x01234567, vmin);
     vout6x01234567 = _mm256_max_ps(vout6x01234567, vmin);
     vout5x01234567 = _mm256_max_ps(vout5x01234567, vmin);
@@ -330,7 +336,6 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_8x8c8__avx256skx(
     vout1x01234567 = _mm256_max_ps(vout1x01234567, vmin);
     vout0x01234567 = _mm256_max_ps(vout0x01234567, vmin);
 
-    const __m256 vmax = _mm256_load_ps(params->avx.max);
     vout7x01234567 = _mm256_min_ps(vout7x01234567, vmax);
     vout6x01234567 = _mm256_min_ps(vout6x01234567, vmax);
     vout5x01234567 = _mm256_min_ps(vout5x01234567, vmax);

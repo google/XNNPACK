@@ -11,6 +11,7 @@
 
 #include <immintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
@@ -48,7 +49,17 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_2x8c8__avx2(
     c1 = c0;
   }
 
-  const __m256i vb_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.kernel_zero_point);
+  const __m256i vb_zero_point = _mm256_set1_epi16(params->fp32_scalar.kernel_zero_point);
+  XNN_FORCE_REALIZATION(vb_zero_point);
+  const __m256 vscale = _mm256_set1_ps(params->fp32_scalar.scale);
+  // XNN_FORCE_REALIZATION(vscale);
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const __m256i voutput_zero_point = _mm256_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m256i voutput_min = _mm256_set1_epi8(params->fp32_scalar.output_min);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
+
   do {
     const __m128i vbias0x0 = _mm_cvtsi32_si128(((const int*) w)[0]);
     const __m128i vbias0x1 = _mm_cvtsi32_si128(((const int*) w)[1]);
@@ -114,25 +125,22 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_2x8c8__avx2(
     __m256 vfpacc0x01234567 = _mm256_cvtepi32_ps(vacc0x01234567);
     __m256 vfpacc1x01234567 = _mm256_cvtepi32_ps(vacc1x01234567);
 
-    const __m256 vscale = _mm256_load_ps(params->fp32_avx2.scale);
     vfpacc0x01234567 = _mm256_mul_ps(vfpacc0x01234567, vscale);
     vfpacc1x01234567 = _mm256_mul_ps(vfpacc1x01234567, vscale);
 
-    const __m256 voutput_max_less_zero_point = _mm256_load_ps(params->fp32_avx2.output_max_less_zero_point);
     vfpacc0x01234567 = _mm256_min_ps(vfpacc0x01234567, voutput_max_less_zero_point);
     vfpacc1x01234567 = _mm256_min_ps(vfpacc1x01234567, voutput_max_less_zero_point);
 
     vacc0x01234567 = _mm256_cvtps_epi32(vfpacc0x01234567);
     vacc1x01234567 = _mm256_cvtps_epi32(vfpacc1x01234567);
 
-    const __m256i voutput_zero_point = _mm256_load_si256((const __m256i*) params->fp32_avx2.output_zero_point);
     __m256i vacc01x01234567 = _mm256_adds_epi16(_mm256_packs_epi32(vacc0x01234567, vacc1x01234567), voutput_zero_point);
 
     vacc01x01234567 = _mm256_permute4x64_epi64(vacc01x01234567, _MM_SHUFFLE(3, 1, 2, 0));
 
     __m256i vout = _mm256_packus_epi16(vacc01x01234567, vacc01x01234567);
 
-    vout = _mm256_max_epu8(vout, _mm256_load_si256((const __m256i*) params->fp32_avx2.output_min));
+    vout = _mm256_max_epu8(vout, voutput_min);
 
     __m128i vout_lo = _mm256_castsi256_si128(vout);
     __m128i vout_hi = _mm256_extracti128_si256(vout, 1);

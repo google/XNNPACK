@@ -27,10 +27,14 @@ void xnn_qs8_vlrelu_ukernel__avx_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vinput_zero_point = _mm_load_si128((const __m128i*) params->avx.input_zero_point);
-  const __m128i vpositive_multiplier = _mm_load_si128((const __m128i*) params->avx.positive_multiplier);
-  const __m128i vnegative_multiplier = _mm_load_si128((const __m128i*) params->avx.negative_multiplier);
-  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->avx.output_zero_point);
+  const __m128i vinput_zero_point = _mm_set1_epi16(params->scalar.input_zero_point);
+  const __m128i vpositive_multiplier = _mm_set1_epi16(-params->scalar.positive_multiplier);
+  const __m128i vnegative_multiplier = _mm_set1_epi16(-params->scalar.negative_multiplier);
+  const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
+  XNN_FORCE_REALIZATION(vpositive_multiplier);
+  XNN_FORCE_REALIZATION(vnegative_multiplier);
+  XNN_FORCE_REALIZATION(vinput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
   for (; batch >= 8 * sizeof(int8_t); batch -= 8 * sizeof(int8_t)) {
     __m128i vacc = _mm_cvtepi8_epi16(_mm_loadl_epi64((const __m128i*) input));
     __m128i vmultiplier = _mm_cmpgt_epi16(vacc, vinput_zero_point);

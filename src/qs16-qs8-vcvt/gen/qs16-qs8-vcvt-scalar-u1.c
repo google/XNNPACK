@@ -25,7 +25,7 @@ void xnn_qs16_qs8_vcvt_ukernel__scalar_u1(
   assert(output != NULL);
 
   const int32_t vmultiplier = params->scalar.multiplier;
-  const int64_t vbias = (int64_t) params->scalar.bias;
+  const int64_t vbias = (int64_t) ((int32_t) (params->scalar.output_zero_point << 16) + 0x8000);
   do {
     const int32_t vx = (int32_t) *input++;
 

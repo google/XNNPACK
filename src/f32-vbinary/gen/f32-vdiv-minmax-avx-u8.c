@@ -30,8 +30,10 @@ void xnn_f32_vdiv_minmax_ukernel__avx_u8(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  const __m256 voutput_min = _mm256_load_ps(params->avx.min);
-  const __m256 voutput_max = _mm256_load_ps(params->avx.max);
+  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
+  XNN_FORCE_REALIZATION(voutput_min);
+  XNN_FORCE_REALIZATION(voutput_max);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     __m256 vacc = _mm256_loadu_ps(input_a);

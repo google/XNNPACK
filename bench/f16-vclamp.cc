@@ -80,13 +80,13 @@ void f16_vclamp(benchmark::State& state, xnn_f16_vclamp_ukernel_fn ukernel,
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f16_vclamp, f16c_u8,
                     xnn_f16_vclamp_ukernel__f16c_u8,
-                    xnn_init_f16_minmax_avx_params,
+                    xnn_init_f16_minmax_scalar_params,
                     benchmark::utils::CheckF16C)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
   BENCHMARK_CAPTURE(f16_vclamp, f16c_u16,
                     xnn_f16_vclamp_ukernel__f16c_u16,
-                    xnn_init_f16_minmax_avx_params,
+                    xnn_init_f16_minmax_scalar_params,
                     benchmark::utils::CheckF16C)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
     ->UseRealTime();
