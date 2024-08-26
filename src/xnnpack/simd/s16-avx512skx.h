@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 //
 
-#ifndef __XNNPACK_SRC_XNNPACK_SIMD_S16_AVX512F_H_
-#define __XNNPACK_SRC_XNNPACK_SIMD_S16_AVX512F_H_
+#ifndef __XNNPACK_SRC_XNNPACK_SIMD_S16_AVX512SKX_H_
+#define __XNNPACK_SRC_XNNPACK_SIMD_S16_AVX512SKX_H_
 
 #include <assert.h>
 #include <immintrin.h>
@@ -16,7 +16,7 @@
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/unaligned.h"
 
-// SIMD vector type for s16 using SSE41.
+// SIMD vector type for s16 using AVX512SKX.
 typedef __m512i xnn_simd_s16_t;
 #define xnn_simd_size_s16 32
 #define xnn_simd_log2_size_s16 5
@@ -72,4 +72,4 @@ static XNN_INLINE void xnn_store_tail_s16(int16_t* output, xnn_simd_s16_t v,
   _mm512_mask_storeu_epi16(output, vmask, v);
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_S16_AVX512F_H_
+#endif  // __XNNPACK_SRC_XNNPACK_SIMD_S16_AVX512SKX_H_

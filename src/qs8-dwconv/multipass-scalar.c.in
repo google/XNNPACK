@@ -17,9 +17,13 @@ $assert LAST_PASS_TILE >= 1
 #include <assert.h>
 $if VARIANT == "LRINTF":
   #include <math.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/dwconv.h"
 #include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
 $if (CHANNEL_TILE % 4 != 0) or ((LAST_PASS_TILE * CHANNEL_SUBTILE % 4) != 0):
   #include "xnnpack/unaligned.h"
 
@@ -158,7 +162,7 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${FIRS
             *b++ = vacc;
           $else:
             do {
-              int32_t vacc = *((const int32_t*) w);
+              int32_t vacc = unaligned_load_s32(w);
               $for K in range(FIRST_PASS_TILE):
                 $if DATATYPE == "QU8":
                   const int32_t vi${K} = (int32_t) (uint32_t) *i${K}++;

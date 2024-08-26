@@ -9,7 +9,29 @@
 #   Generator: tools/update-microkernels.py
 
 
-SET(ALL_NEONFMA_MICROKERNEL_SRCS
+SET(PROD_NEONFMA_MICROKERNEL_SRCS
+  src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-neonfma.c
+  src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-neonfma.c
+  src/f32-dwconv/gen/f32-dwconv-5f5m5l8c4s4r-minmax-neonfma-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-neonfma.c
+  src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-neonfma-acc2.c
+  src/f32-gemm/gen/f32-gemm-1x8s4-minmax-neonfma.c
+  src/f32-gemm/gen/f32-gemm-4x8s4-minmax-neonfma.c
+  src/f32-gemm/gen/f32-gemm-6x8s4-minmax-neonfma.c
+  src/f32-ibilinear-chw/gen/f32-ibilinear-chw-neonfma-p8.c
+  src/f32-ibilinear/gen/f32-ibilinear-neonfma-c8.c
+  src/f32-igemm/gen/f32-igemm-1x8s4-minmax-neonfma.c
+  src/f32-igemm/gen/f32-igemm-4x8s4-minmax-neonfma.c
+  src/f32-igemm/gen/f32-igemm-6x8s4-minmax-neonfma.c
+  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neonfma-rr1-lut64-p2-u16.c
+  src/f32-spmm/gen/f32-spmm-32x1-minmax-neonfma-pipelined.c
+  src/f32-velu/gen/f32-velu-neonfma-rr1-lut16-p3-u16.c
+  src/f32-velu/gen/f32-velu-neonfma-rr1-p6-u8.c
+  src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-neonfma-2x.c
+  src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-nr2recps-u16.c
+  src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2fma-u8.c)
+
+SET(NON_PROD_NEONFMA_MICROKERNEL_SRCS
   src/bf16-gemm/gen/bf16-gemm-1x4c8-minmax-neonfma-shland.c
   src/bf16-gemm/gen/bf16-gemm-1x4c8-minmax-neonfma-zip.c
   src/bf16-gemm/gen/bf16-gemm-2x4c8-minmax-neonfma-shland.c
@@ -23,18 +45,15 @@ SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-neonfma.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-neonfma-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-neonfma.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-neonfma.c
   src/f32-dwconv/gen/f32-dwconv-4p4c-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p4c-minmax-neonfma.c
   src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-neonfma-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-neonfma.c
   src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-neonfma.c
   src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-minmax-neonfma.c
-  src/f32-dwconv/gen/f32-dwconv-5f5m5l8c4s4r-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-5f5m5l8c4s4r-minmax-neonfma.c
   src/f32-dwconv/gen/f32-dwconv-6f6m7l4c4s4r-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-6f6m7l4c4s4r-minmax-neonfma.c
@@ -47,23 +66,18 @@ SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-neonfma.c
   src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-neonfma-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-neonfma.c
   src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-neonfma.c
   src/f32-dwconv/gen/f32-dwconv-25p4c-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p4c-minmax-neonfma.c
-  src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p8c-minmax-neonfma.c
   src/f32-dwconv/gen/f32-dwconv-25p16c-minmax-neonfma-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p16c-minmax-neonfma.c
   src/f32-gemm/gen/f32-gemm-1x8-minmax-neonfma-dup-ld64.c
-  src/f32-gemm/gen/f32-gemm-1x8s4-minmax-neonfma.c
   src/f32-gemm/gen/f32-gemm-4x8-minmax-neonfma-dup-ld64.c
   src/f32-gemm/gen/f32-gemm-4x8-minmax-neonfma-dup-ld128.c
-  src/f32-gemm/gen/f32-gemm-4x8s4-minmax-neonfma.c
   src/f32-gemm/gen/f32-gemm-6x8-minmax-neonfma-dup-ld64.c
   src/f32-gemm/gen/f32-gemm-6x8-minmax-neonfma-dup-ld128.c
-  src/f32-gemm/gen/f32-gemm-6x8s4-minmax-neonfma.c
   src/f32-gemm/gen/f32-gemm-8x8s4-minmax-neonfma.c
   src/f32-gemminc/gen/f32-gemminc-1x8-minmax-neonfma-dup-ld64.c
   src/f32-gemminc/gen/f32-gemminc-1x8s4-minmax-neonfma.c
@@ -75,18 +89,13 @@ SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/f32-gemminc/gen/f32-gemminc-6x8s4-minmax-neonfma.c
   src/f32-gemminc/gen/f32-gemminc-8x8s4-minmax-neonfma.c
   src/f32-ibilinear-chw/gen/f32-ibilinear-chw-neonfma-p4.c
-  src/f32-ibilinear-chw/gen/f32-ibilinear-chw-neonfma-p8.c
   src/f32-ibilinear-chw/gen/f32-ibilinear-chw-neonfma-p16.c
   src/f32-ibilinear/gen/f32-ibilinear-neonfma-c4.c
-  src/f32-ibilinear/gen/f32-ibilinear-neonfma-c8.c
   src/f32-igemm/gen/f32-igemm-1x8-minmax-neonfma-dup-ld64.c
-  src/f32-igemm/gen/f32-igemm-1x8s4-minmax-neonfma.c
   src/f32-igemm/gen/f32-igemm-4x8-minmax-neonfma-dup-ld64.c
   src/f32-igemm/gen/f32-igemm-4x8-minmax-neonfma-dup-ld128.c
-  src/f32-igemm/gen/f32-igemm-4x8s4-minmax-neonfma.c
   src/f32-igemm/gen/f32-igemm-6x8-minmax-neonfma-dup-ld64.c
   src/f32-igemm/gen/f32-igemm-6x8-minmax-neonfma-dup-ld128.c
-  src/f32-igemm/gen/f32-igemm-6x8s4-minmax-neonfma.c
   src/f32-igemm/gen/f32-igemm-8x8s4-minmax-neonfma.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x8-minmax-neonfma-dup-ld64.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x8-minmax-neonfma-dup-ld64.c
@@ -105,7 +114,6 @@ SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neonfma-rr1-lut64-p2-u12.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neonfma-rr1-lut64-p2-u16-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neonfma-rr1-lut64-p2-u16-acc4.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neonfma-rr1-lut64-p2-u16.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neonfma-rr1-lut64-p2-u20-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neonfma-rr1-lut64-p2-u20-acc5.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neonfma-rr1-lut64-p2-u20.c
@@ -131,22 +139,18 @@ SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/f32-spmm/gen/f32-spmm-16x1-minmax-neonfma-pipelined.c
   src/f32-spmm/gen/f32-spmm-16x1-minmax-neonfma-x2.c
   src/f32-spmm/gen/f32-spmm-16x1-minmax-neonfma.c
-  src/f32-spmm/gen/f32-spmm-32x1-minmax-neonfma-pipelined.c
   src/f32-spmm/gen/f32-spmm-32x1-minmax-neonfma-x2.c
   src/f32-spmm/gen/f32-spmm-32x1-minmax-neonfma.c
   src/f32-velu/gen/f32-velu-neonfma-rr1-lut16-p3-u4.c
   src/f32-velu/gen/f32-velu-neonfma-rr1-lut16-p3-u8.c
   src/f32-velu/gen/f32-velu-neonfma-rr1-lut16-p3-u12.c
-  src/f32-velu/gen/f32-velu-neonfma-rr1-lut16-p3-u16.c
   src/f32-velu/gen/f32-velu-neonfma-rr1-lut16-p3-u20.c
   src/f32-velu/gen/f32-velu-neonfma-rr1-lut16-p3-u24.c
   src/f32-velu/gen/f32-velu-neonfma-rr1-p6-u4.c
-  src/f32-velu/gen/f32-velu-neonfma-rr1-p6-u8.c
   src/f32-velu/gen/f32-velu-neonfma-rr1-p6-u12.c
   src/f32-velu/gen/f32-velu-neonfma-rr1-p6-u16.c
   src/f32-velu/gen/f32-velu-neonfma-rr1-p6-u20.c
   src/f32-velu/gen/f32-velu-neonfma-rr1-p6-u24.c
-  src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-neonfma-2x.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c8-minmax-neonfma-2x.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-nr1recps1fma-u4.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-nr1recps1fma-u8.c
@@ -163,7 +167,6 @@ SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-nr2recps-u4.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-nr2recps-u8.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-nr2recps-u12.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-nr2recps-u16.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-nr2recps-u20.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-nr2recps-u24.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut2048-p1-nr1recps1fma-u4.c
@@ -215,10 +218,11 @@ SET(ALL_NEONFMA_MICROKERNEL_SRCS
   src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr1recps1fma-u12.c
   src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr1recps1fma-u16.c
   src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2fma-u4.c
-  src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2fma-u8.c
   src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2fma-u12.c
   src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2fma-u16.c
   src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2recps-u4.c
   src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2recps-u8.c
   src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2recps-u12.c
   src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2recps-u16.c)
+
+SET(ALL_NEONFMA_MICROKERNEL_SRCS ${PROD_NEONFMA_MICROKERNEL_SRCS} + ${NON_PROD_NEONFMA_MICROKERNEL_SRCS})

@@ -6,7 +6,7 @@
 load(
     "//:build_defs.bzl",
     "xnnpack_benchmark",
-    "xnnpack_cc_library",
+    "xnnpack_cxx_library",
     "xnnpack_if_kleidiai_enabled",
     "xnnpack_kleidiai_defines",
     "xnnpack_optional_dnnl_copts",
@@ -19,14 +19,17 @@ load(
     "xnnpack_optional_tflite_deps",
     "xnnpack_visibility",
 )
+load(
+    "//:build_params.bzl",
+    "xnnpack_select_if",
+)
 
 MICROKERNEL_BENCHMARK_DEPS = [
     ":bench_utils",
     "@FP16",
     "//:aligned_allocator",
-    "//:test_microkernels",
+    "//:all_microkernels",
     "//:common",
-    "//:enable_assembly",
     "//:hardware_config",
     "//:microkernels_h",
     "//:microparams_init",
@@ -45,7 +48,7 @@ OPERATOR_BENCHMARK_DEPS = [
     "@FP16",
 ]
 
-xnnpack_cc_library(
+xnnpack_cxx_library(
     name = "bench_utils",
     srcs = ["utils.cc"],
     hdrs = ["utils.h"],
@@ -62,10 +65,10 @@ xnnpack_cc_library(
         "//:params",
         "//:xnnpack_h",
         "@com_google_benchmark//:benchmark",
-    ] + select({
-        "//:cpuinfo_enabled": ["@cpuinfo"],
-        "//conditions:default": [],
-    }),
+    ] + xnnpack_select_if(
+        "//:cpuinfo_enabled",
+        ["@cpuinfo"],
+    ),
 )
 
 cc_library(
@@ -94,7 +97,7 @@ cc_library(
 
 ######################### Benchmarks for micro-kernels #########################
 
-xnnpack_cc_library(
+xnnpack_cxx_library(
     name = "gemm_benchmark",
     srcs = [
         "gemm-benchmark.cc",
@@ -507,7 +510,7 @@ xnnpack_benchmark(
     ],
 )
 
-xnnpack_cc_library(
+xnnpack_cxx_library(
     name = "packq_benchmark",
     srcs = [
         "bgemm.h",

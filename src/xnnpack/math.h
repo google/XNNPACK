@@ -20,7 +20,6 @@
 
 #include "xnnpack/common.h"
 
-
 // stdlib.h from Windows 10 SDK defines min & max macros.
 // Undefine them before defining the corresponding functions.
 #ifdef min
@@ -30,6 +29,9 @@
   #undef max
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 XNN_INLINE static size_t min(size_t a, size_t b) {
   return XNN_UNPREDICTABLE(b < a) ? b : a;
@@ -337,6 +339,38 @@ XNN_INLINE static uint32_t math_rotl_u32(uint32_t x, int8_t r)
   #endif
 }
 
+extern XNN_INTERNAL const uint16_t xnn_table_vlog[129];
+
+#define LOG_SEGMENTS_LOG2 7
+#define LOG_SCALE 65536
+#define LOG_SCALE_LOG2 16
+#define LOG_COEFF 45426
+
+XNN_INLINE static uint32_t math_u32_log32(uint32_t x, uint32_t out_scale) {
+  const uint32_t log2x = math_clz_nonzero_u32(x) ^ 31;
+  int32_t frac = x - (UINT32_C(1) << log2x);
+  frac <<= math_doz_u32(LOG_SCALE_LOG2, log2x);
+  frac >>= math_doz_u32(log2x, LOG_SCALE_LOG2);
+
+  const uint32_t base_seg = frac >> (LOG_SCALE_LOG2 - LOG_SEGMENTS_LOG2);
+  const uint32_t seg_unit =
+      (UINT32_C(1) << LOG_SCALE_LOG2) >> LOG_SEGMENTS_LOG2;
+
+  const int32_t c0 = xnn_table_vlog[base_seg];
+  const int32_t c1 = xnn_table_vlog[base_seg + 1];
+  const int32_t seg_base = seg_unit * base_seg;
+  const int32_t rel_pos =
+      math_asr_s32((c1 - c0) * (frac - seg_base), LOG_SCALE_LOG2);
+  const uint32_t fraction = frac + c0 + rel_pos;
+  const uint32_t log2 = (log2x << LOG_SCALE_LOG2) + fraction;
+  const uint32_t round = LOG_SCALE >> 1;
+  const uint32_t loge =
+      (math_mulext_u32(log2, LOG_COEFF) + round) >> LOG_SCALE_LOG2;
+
+  const uint32_t loge_scaled = (out_scale * loge + round) >> LOG_SCALE_LOG2;
+  return loge_scaled;
+}
+
 #ifndef __cplusplus
 XNN_INLINE static uint32_t math_cvt_sat_u32_f64(double x) {
   #if defined(__GNUC__) && defined(__arm__) && (__GNUC__ >= 9)
@@ -386,3 +420,7 @@ XNN_INLINE static float math_cvt_bf16_fp32(float x) {
   // TODO Handle fraction rounding
   return bits.as_uint32 >> 16;
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif

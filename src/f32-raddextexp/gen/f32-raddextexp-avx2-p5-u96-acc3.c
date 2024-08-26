@@ -15,8 +15,6 @@
 #include "xnnpack/raddextexp.h"
 
 
-static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
-
 void xnn_f32_raddextexp_ukernel__avx2_p5_u96_acc3(
     size_t batch,
     const float* input,
@@ -26,6 +24,8 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_u96_acc3(
   assert(batch % sizeof(float) == 0);
   assert(input != NULL);
   assert(sum != NULL);
+
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
   const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
   const __m256 vminus_ln2_hi = _mm256_set1_ps(-0x1.62E43p-1f);

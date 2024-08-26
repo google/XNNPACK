@@ -24,15 +24,15 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "xnnpack/isa-checks.h"
-#include "xnnpack/simd/s16-avx512bw.h"
+#include "xnnpack/simd/s16-avx512skx.h"
 #include "replicable_random_device.h"
 
 namespace xnnpack {
 
-class S16SimdAVX512BWTest : public ::testing::Test {
+class S16SimdAVX512SKXTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    TEST_REQUIRES_X86_AVX512F;
+    TEST_REQUIRES_X86_AVX512SKX;
     inputs_.resize(3 * xnn_simd_size_s16);
     output_.resize(xnn_simd_size_s16);
     std::uniform_int_distribution<int16_t> s16(-100, 100);
@@ -45,7 +45,7 @@ class S16SimdAVX512BWTest : public ::testing::Test {
   std::vector<int16_t> output_;
 };
 
-TEST_F(S16SimdAVX512BWTest, StoreTail) {
+TEST_F(S16SimdAVX512SKXTest, StoreTail) {
   const xnn_simd_s16_t a = xnn_loadu_s16(inputs_.data());
   for (size_t num_elements = 1; num_elements < xnn_simd_size_s16;
       num_elements++) {
