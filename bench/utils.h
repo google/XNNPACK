@@ -7,11 +7,11 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/memory.h"
-
 #include <benchmark/benchmark.h>
 
 namespace benchmark {
@@ -96,7 +96,11 @@ void BinaryElementwiseParameters(benchmark::internal::Benchmark* benchmark) {
 // Set multi-threading parameters appropriate for the processor.
 void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark);
 
-typedef bool (*IsaCheckFunction)(benchmark::State& state);
+using IsaCheckFunction = std::function<bool(benchmark::State&)>;
+
+// Check if the architecture flags are supported.
+// If unsupported, report error in benchmark state, and return false.
+bool CheckArchFlags(benchmark::State& state, uint64_t arch_flags);
 
 // Check if either ARM VFPv2 or VFPv3 extension is supported.
 // If VFP is unsupported, report error in benchmark state, and return false.

@@ -15,8 +15,67 @@
 extern "C" {
 #endif
 
+enum xnn_arch_flags {
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  xnn_arch_arm_v6 = 1 << 0,
+  xnn_arch_arm_vfpv2 = 1 << 1,
+  xnn_arch_arm_vfpv3 = 1 << 2,
+  xnn_arch_arm_neon = 1 << 3,
+  xnn_arch_arm_neon_fp16 = 1 << 4,
+  xnn_arch_arm_neon_fma = 1 << 5,
+  xnn_arch_arm_neon_v8 = 1 << 6,
+  xnn_arch_arm_fp16_arith = 1 << 7,
+  xnn_arch_arm_neon_fp16_arith = 1 << 8,
+  xnn_arch_arm_neon_bf16 = 1 << 9,
+  xnn_arch_arm_neon_dot = 1 << 10,
+  xnn_arch_arm_neon_i8mm = 1 << 11,
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  xnn_arch_x86_ssse3 = 1 << 0,
+  xnn_arch_x86_sse4_1 = 1 << 1,
+  xnn_arch_x86_avx = 1 << 2,
+  xnn_arch_x86_f16c = 1 << 3,
+  xnn_arch_x86_fma3 = 1 << 4,
+  xnn_arch_x86_avx2 = 1 << 5,
+  xnn_arch_x86_avx512f = 1 << 6,
+  xnn_arch_x86_avx512vbmi = 1 << 7,
+  xnn_arch_x86_avx512skx = 1 << 8,
+  xnn_arch_x86_avx512vnni = 1 << 9,
+  xnn_arch_x86_avx512vnnigfni = 1 << 10,
+  xnn_arch_x86_avx512amx = 1 << 11,
+  xnn_arch_x86_avx512fp16 = 1 << 12,
+  xnn_arch_x86_avxvnni = 1 << 13,
+  xnn_arch_x86_avx256skx = 1 << 14,
+  xnn_arch_x86_avx256vnni = 1 << 15,
+  xnn_arch_x86_avx256vnnigfni = 1 << 16,
+#endif
+#if XNN_ARCH_RISCV
+  xnn_arch_riscv_vector = 1 << 0,
+  xnn_arch_riscv_vector_fp16_arith = 1 << 1,
+  xnn_arch_riscv_vlenb = 1 << 2,
+#endif
+#if XNN_ARCH_PPC64
+  xnn_arch_vsx = 1 << 0,
+  xnn_arch_vsx3 = 1 << 1,
+  xnn_arch_mma = 1 << 2,
+#endif
+#if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  xnn_arch_wasm_is_x86 = 1 << 0,
+#endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ARCH_WASMRELAXEDSIMD
+  xnn_arch_wasm_blendvps = 1 << 1,
+  xnn_arch_wasm_pshufb = 1 << 2,
+  xnn_arch_wasm_sdot = 1 << 3,
+  xnn_arch_wasm_usdot = 1 << 4,
+  xnn_arch_wasm_fma = 1 << 5,
+#endif  // XNN_ARCH_WASMRELAXEDSIMD
+#if XNN_ARCH_HEXAGON
+  xnn_arch_hvx = 1 << 0,
+#endif  // XNN_ARCH_HEXAGON
+};
+
 struct xnn_hardware_config {
-  char _; // Dummy member variable to comply with the C standard
+  uint64_t arch_flags;
 #if XNN_ARCH_ARM
   bool use_arm_v6;
   bool use_arm_vfpv2;

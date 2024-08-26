@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: test/f16-velu.yaml
+//   Microkernel: f16-velu
 //   Generator: tools/generate-vunary-benchmark.py
 
 #include <stddef.h>
@@ -12,16 +12,11 @@
 
 #include <benchmark/benchmark.h>
 #include "bench/f16-vunary-benchmark.h"
-#include "bench/utils.h"
-#include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
 
-void f16_velu(benchmark::State& state, xnn_f16_velu_ukernel_fn ukernel,
-              xnn_init_f16_elu_params_fn init_params = nullptr,
-              benchmark::utils::IsaCheckFunction isa_check = nullptr) {
+void f16_velu(benchmark::State& state, uint64_t arch_flags, xnn_f16_velu_ukernel_fn ukernel,
+              xnn_init_f16_elu_params_fn init_params = nullptr) {
   f16_vunary_benchmark<xnn_f16_elu_params>(
       state, ukernel,
       [init_params](xnn_f16_elu_params* params) -> size_t {
@@ -31,40 +26,18 @@ void f16_velu(benchmark::State& state, xnn_f16_velu_ukernel_fn ukernel,
                     /*beta=*/UINT16_C(0x3C00));     // beta = 1.0h
         return sizeof(*params);
       },
-      isa_check,
+      arch_flags,
       /*range_min=*/-9.0,
       /*range_max=*/9.0);
 }
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  BENCHMARK_CAPTURE(f16_velu, neonfp16arith_rr1_p3_u8,
-                    xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_u8,
-                    xnn_init_f16_elu_scalar_params,
-                    benchmark::utils::CheckNEONFP16ARITH)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_velu, neonfp16arith_rr1_p3_u16,
-                    xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_u16,
-                    xnn_init_f16_elu_scalar_params,
-                    benchmark::utils::CheckNEONFP16ARITH)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
-    ->UseRealTime();
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(f16_velu, avx2_rr1_p3_u8,
-                    xnn_f16_velu_ukernel__avx2_rr1_p3_u8,
-                    xnn_init_f16_elu_avx2_params,
-                    benchmark::utils::CheckAVX2)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f16_velu, avx2_rr1_p3_u16,
-                    xnn_f16_velu_ukernel__avx2_rr1_p3_u16,
-                    xnn_init_f16_elu_avx2_params,
-                    benchmark::utils::CheckAVX2)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
-    ->UseRealTime();
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile,              \
+                                datatype, params_type, init_params)                        \
+BENCHMARK_CAPTURE(f16_velu, ukernel, arch_flags, ukernel, init_params)                     \
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<datatype, datatype>)                \
+  ->UseRealTime();
+#include "src/f16-velu/f16-velu.h"
+#undef XNN_UKERNEL_WITH_PARAMS
 
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

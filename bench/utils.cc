@@ -182,6 +182,19 @@ void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark) {
   #endif  // XNN_ENABLE_CPUINFO
 }
 
+bool CheckArchFlags(benchmark::State& state, uint64_t arch_flags) {
+  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == nullptr) {
+    state.SkipWithError("no hardware config");
+    return false;
+  } else if ((hardware_config->arch_flags & arch_flags) != arch_flags) {
+    state.SkipWithError("architecture unsupported");
+    return false;
+  }
+
+  return true;
+}
+
 #if XNN_ARCH_ARM
   bool CheckVFP(benchmark::State& state) {
     const xnn_hardware_config* hardware_config = xnn_init_hardware_config();

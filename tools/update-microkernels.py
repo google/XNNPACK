@@ -226,6 +226,8 @@ def main(args):
     for name in files:
       if name.endswith('.in'):
         continue
+      if name.endswith('.h'):
+        continue
       basename, ext = os.path.splitext(name)
       if ext == '.sollya':
         continue
