@@ -235,6 +235,7 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/s8-vclamp/s8-vclamp-wasmsimd-u64.c
   src/s32-vmul/gen/s32-vmul-wasmsimd.c
   src/s32-vmul/gen/s32-vmulc-wasmsimd.c
+  src/s32-vpopcnt/gen/s32-vpopcnt-wasmsimd.c
   src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-dot16x2-c8.c
   src/u8-maxpool/u8-maxpool-9p8x-minmax-wasmsimd-c16.c
   src/u8-vclamp/u8-vclamp-wasmsimd-u64.c
@@ -1178,7 +1179,6 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-dot16x2-c16.c
   src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-mul32-c8.c
   src/s8-ibilinear/gen/s8-ibilinear-wasmsimd-mul32-c16.c
-  src/s32-vpopcnt/gen/s32-vpopcnt-wasmsimd.c
   src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-dot16x2-c16.c
   src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-mul32-c8.c
   src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-mul32-c16.c

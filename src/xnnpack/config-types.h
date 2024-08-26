@@ -115,6 +115,7 @@ struct xnn_unary_elementwise_config {
     xnn_init_qu8_hswish_params_fn qu8_hswish;
     xnn_init_qu8_lrelu_params_fn qu8_lrelu;
     xnn_init_s8_minmax_params_fn s8_minmax;
+    xnn_init_s32_default_params_fn s32_default;
     xnn_init_u8_minmax_params_fn u8_minmax;
   } init;
   // Number of elements in a tile.

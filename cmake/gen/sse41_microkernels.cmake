@@ -71,6 +71,7 @@ SET(PROD_SSE41_MICROKERNEL_SRCS
   src/s8-vclamp/s8-vclamp-sse41-u64.c
   src/s32-vmul/gen/s32-vmul-sse41.c
   src/s32-vmul/gen/s32-vmulc-sse41.c
+  src/s32-vpopcnt/gen/s32-vpopcnt-sse41.c
   src/u8-ibilinear/gen/u8-ibilinear-sse41-c16.c)
 
 SET(NON_PROD_SSE41_MICROKERNEL_SRCS
@@ -381,7 +382,6 @@ SET(NON_PROD_SSE41_MICROKERNEL_SRCS
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-sse41-mul16-ld64-u8.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-sse41-mul16-ld64-u8.c
   src/s8-ibilinear/gen/s8-ibilinear-sse41-c8.c
-  src/s32-vpopcnt/gen/s32-vpopcnt-sse41.c
   src/u8-ibilinear/gen/u8-ibilinear-sse41-c8.c)
 
 SET(ALL_SSE41_MICROKERNEL_SRCS ${PROD_SSE41_MICROKERNEL_SRCS} + ${NON_PROD_SSE41_MICROKERNEL_SRCS})

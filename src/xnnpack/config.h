@@ -99,6 +99,7 @@ XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_qu8_hswish_conf
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_qu8_lrelu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_qu8_to_f32_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_s8_clamp_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_s32_popcnt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_u8_clamp_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_xx_copy_config();
 

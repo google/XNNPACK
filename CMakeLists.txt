@@ -1280,6 +1280,7 @@ IF(XNNPACK_BUILD_TESTS)
         leaky-relu-nc
         log-nc
         negate-nc
+        popcnt-nc
         reciprocal-square-root-nc
         sigmoid-nc
         square-nc

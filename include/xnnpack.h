@@ -6049,6 +6049,33 @@ enum xnn_status xnn_run_square_root_nc_f32(
   uint32_t flags,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_create_pop_count_nc_s32(
+  uint32_t flags,
+  xnn_operator_t* popcnt_op_out);
+
+enum xnn_status xnn_setup_pop_count_nc_s32(
+  xnn_operator_t popcnt_op,
+  const int32_t* input,
+  int32_t* output);
+
+enum xnn_status xnn_reshape_pop_count_nc_s32(
+  xnn_operator_t popcnt_op,
+  size_t batch_size,
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_run_pop_count_nc_s32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const int32_t* input,
+  int32_t* output,
+  uint32_t flags,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_create_reciprocal_square_root_nc_f16(
     uint32_t flags, xnn_operator_t* sqrt_op_out);
 
