@@ -13,6 +13,7 @@ load(
 )
 load(
     "//:build_params.bzl",
+    "xnnpack_select_if",
     "xnnpack_simd_copts_for_arch",
     "xnnpack_simd_f16_archs",
     "xnnpack_simd_f32_archs",
@@ -165,6 +166,10 @@ sh_test(
         "//:generated_microkernel_lists",
         "//gen:bzl_microkernel_lists",
     ],
+    target_compatible_with = xnnpack_select_if(
+        "//build_config:emscripten",
+        ["@platforms//:incompatible"],
+    ),
 )
 
 ######################### Unit tests for simd wrappers #########################
