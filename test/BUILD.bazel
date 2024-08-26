@@ -165,10 +165,6 @@ sh_test(
         "//:generated_microkernel_lists",
         "//gen:bzl_microkernel_lists",
     ],
-    tags = [
-        "nobuilder",
-        "notap",
-    ],
 )
 
 ######################### Unit tests for simd wrappers #########################
