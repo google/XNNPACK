@@ -592,7 +592,11 @@ xnnpack_cc_library(
 
 genrule(
     name = "generated_microkernel_lists",
-    srcs = glob(["**"]),
+    srcs = glob([
+        "**/*.c",
+        "**/*.cc",
+        "**/*.S",
+    ]),
     outs = ([
                 "testdata/gen/microkernels.bzl",
                 "testdata/cmake/gen/microkernels.cmake",
@@ -603,6 +607,7 @@ genrule(
            "--root_dir %s" % (package_name() if package_name() else ".")),
     compatible_with = [],
     tools = ["//tools:update_microkernels"],
+    visibility = ["//:__subpackages__"],
 )
 
 filegroup(
@@ -610,25 +615,7 @@ filegroup(
     srcs = glob([
         "cmake/gen/*.cmake",
     ]),
-)
-
-sh_test(
-    name = "microkernel_lists_test",
-    size = "small",
-    srcs = ["microkernel_lists_test.sh"],
-    data = [
-        ":cmake_microkernel_lists",
-        ":generated_microkernel_lists",
-        "//gen:bzl_microkernel_lists",
-    ],
-    tags = [
-        "nobuilder",
-        "notap",
-    ],
-    deps = [
-        "//util/shell/gbash",
-        "//util/shell/gbash:unit",
-    ],
+    visibility = ["//:__subpackages__"],
 )
 
 # Generate the prod/all microkernel libraries for each architecture.
