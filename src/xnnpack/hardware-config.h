@@ -71,6 +71,9 @@ enum xnn_arch_flags {
 #if XNN_ARCH_HEXAGON
   xnn_arch_hvx = 1 << 0,
 #endif  // XNN_ARCH_HEXAGON
+  // This is a flag you can use if you want an arch_flags that will *never*
+  // match any architecture, which is occasionally necessary.
+  xnn_arch_impossible = 1 << 30,
 };
 
 struct xnn_hardware_config {

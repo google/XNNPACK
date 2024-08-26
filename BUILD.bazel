@@ -157,6 +157,7 @@ TABLE_SRCS = [
 
 MICROKERNEL_DEFS = [
     "src/bf16-vabs/bf16-vabs.h",
+    "src/f16-maxpool/f16-maxpool-minmax.h",
     "src/f16-vabs/f16-vabs.h",
     "src/f16-vbinary/f16-vadd-minmax.h",
     "src/f16-vbinary/f16-vaddc-minmax.h",
@@ -189,6 +190,7 @@ MICROKERNEL_DEFS = [
     "src/f16-vsqr/f16-vsqr.h",
     "src/f16-vsqrt/f16-vsqrt.h",
     "src/f16-vtanh/f16-vtanh.h",
+    "src/f32-maxpool/f32-maxpool-minmax.h",
     "src/f32-vabs/f32-vabs.h",
     "src/f32-vbinary/f32-vadd-minmax.h",
     "src/f32-vbinary/f32-vadd-relu.h",
@@ -266,8 +268,10 @@ MICROKERNEL_DEFS = [
     "src/qu8-vmulc/qu8-vmulc-minmax-rndnu.h",
     "src/s32-vmul/s32-vmul.h",
     "src/s32-vmul/s32-vmulc.h",
+    "src/s8-maxpool/s8-maxpool-minmax.h",
     "src/s8-vclamp/s8-vclamp.h",
     "src/u64-u32-vsqrtshift/u64-u32-vsqrtshift.h",
+    "src/u8-maxpool/u8-maxpool-minmax.h",
     "src/u8-vclamp/u8-vclamp.h",
 ]
 
