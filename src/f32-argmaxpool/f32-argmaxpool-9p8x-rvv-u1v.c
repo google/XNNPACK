@@ -220,7 +220,6 @@ void xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v(
         i7 = i0;
       }
 
-      size_t c = channels;
       float* ab = accumulation_buffer;
       uint32_t* ib = index_buffer;
       for (size_t c = channels; c != 0; ) {

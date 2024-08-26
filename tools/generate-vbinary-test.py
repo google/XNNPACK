@@ -22,8 +22,10 @@ parser = argparse.ArgumentParser(
 parser.add_argument("-t", "--tester", metavar="TESTER", required=True,
                     choices=[
                     "VCMulMicrokernelTester",
-                    "VBinaryMicrokernelTester", "VBinaryCMicrokernelTester"],
+                    "VBinaryMicrokernelTester"],
                     help="Tester class to be used in the generated test")
+parser.add_argument("-b", "--broadcast_b", action="store_true",
+                    help='Broadcast the RHS of the operation')
 parser.add_argument("-s", "--spec", metavar="FILE", required=True,
                     help="Specification (YAML) file")
 parser.add_argument("-o", "--output", metavar="FILE", required=True,
@@ -45,17 +47,17 @@ def split_ukernel_name(name):
     "mul": "Mul",
     "sqrdiff": "SqrDiff",
     "sub": "Sub",
-    "addc": "AddC",
-    "copysignc": "CopySignC",
-    "rcopysignc": "RCopySignC",
-    "divc": "DivC",
-    "rdivc": "RDivC",
-    "maxc": "MaxC",
-    "minc": "MinC",
-    "mulc": "MulC",
-    "sqrdiffc": "SqrDiffC",
-    "subc": "SubC",
-    "rsubc": "RSubC",
+    "addc": "Add",
+    "copysignc": "CopySign",
+    "rcopysignc": "RCopySign",
+    "divc": "Div",
+    "rdivc": "RDiv",
+    "maxc": "Max",
+    "minc": "Min",
+    "mulc": "Mul",
+    "sqrdiffc": "SqrDiff",
+    "subc": "Sub",
+    "rsubc": "RSub",
   }[match.group(2)]
   batch_tile = int(match.group(8))
   vector_tile = bool(match.group(9))
@@ -65,14 +67,8 @@ def split_ukernel_name(name):
   else:
     activation_type = activation_type.upper()
 
-  requantization_type = match.group(6)
-  if not requantization_type:
-    requantization_type = None
-  else:
-    requantization_type = requantization_type.upper()
-
   arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(7))
-  return op_type, activation_type, requantization_type, batch_tile, vector_tile, arch, isa
+  return op_type, activation_type, batch_tile, vector_tile, arch, isa
 
 
 BINOP_TEST_TEMPLATE = """\
@@ -81,7 +77,7 @@ TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}${BATCH_SUFFIX}) {
     ${ISA_CHECK};
   ${TESTER}()
     .batch_size(${BATCH_TILE}${BATCH_SCALE})
-    .Test(${", ".join(TEST_ARGS)});
+    ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
 }
 
 $if BATCH_TILE > 1 or BATCH_SCALE != "":
@@ -92,7 +88,7 @@ $if BATCH_TILE > 1 or BATCH_SCALE != "":
       for (size_t batch_size = ${BATCH_TILE*2}; batch_size < ${BATCH_TILE*10}; batch_size += ${BATCH_TILE}) {
         ${TESTER}()
           .batch_size(batch_size)
-          .Test(${", ".join(TEST_ARGS)});
+          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
       }
     $else:
       for (size_t batch_size = ${BATCH_TILE*2}${BATCH_SCALE};
@@ -100,7 +96,7 @@ $if BATCH_TILE > 1 or BATCH_SCALE != "":
                   batch_size += ${BATCH_TILE}${BATCH_SCALE}) {
         ${TESTER}()
           .batch_size(batch_size)
-          .Test(${", ".join(TEST_ARGS)});
+          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
       }
   }
 
@@ -111,7 +107,7 @@ $if BATCH_TILE > 1 or BATCH_SCALE != "":
       for (size_t batch_size = 1; batch_size < ${BATCH_TILE}; batch_size++) {
         ${TESTER}()
           .batch_size(batch_size)
-          .Test(${", ".join(TEST_ARGS)});
+          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
       }
     $else:
       for (size_t batch_size = 1${BATCH_SCALE};
@@ -119,7 +115,7 @@ $if BATCH_TILE > 1 or BATCH_SCALE != "":
                   batch_size++) {
         ${TESTER}()
           .batch_size(batch_size)
-          .Test(${", ".join(TEST_ARGS)});
+          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
       }
   }
 
@@ -130,7 +126,7 @@ TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}${BATCH_SUFFIX}) {
     for (size_t batch_size = ${BATCH_TILE+1}; batch_size < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch_size++) {
       ${TESTER}()
         .batch_size(batch_size)
-        .Test(${", ".join(TEST_ARGS)});
+        ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
     }
   $else:
     for (size_t batch_size = ${BATCH_TILE+1}${BATCH_SCALE};
@@ -138,11 +134,11 @@ TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}${BATCH_SUFFIX}) {
                 batch_size += ${BATCH_TILE*2}) {
       ${TESTER}()
         .batch_size(batch_size)
-        .Test(${", ".join(TEST_ARGS)});
+        ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
     }
 }
 
-$if TESTER in ["VMulCMicrokernelTester", "VBinaryCMicrokernelTester"]:
+$if TESTER in ["VMulCMicrokernelTester"]:
   TEST(${TEST_NAME}, inplace) {
     $if ISA_CHECK:
       ${ISA_CHECK};
@@ -151,7 +147,7 @@ $if TESTER in ["VMulCMicrokernelTester", "VBinaryCMicrokernelTester"]:
         ${TESTER}()
           .batch_size(batch_size)
           .inplace(true)
-          .Test(${", ".join(TEST_ARGS)});
+          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
       }
     $else:
       for (size_t batch_size = 1;
@@ -160,7 +156,28 @@ $if TESTER in ["VMulCMicrokernelTester", "VBinaryCMicrokernelTester"]:
         ${TESTER}()
           .batch_size(batch_size)
           .inplace(true)
-          .Test(${", ".join(TEST_ARGS)});
+          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
+      }
+  }
+$elif BROADCAST_B:
+  TEST(${TEST_NAME}, inplace) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    $if BATCH_SCALE == "":
+      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+        ${TESTER}()
+          .batch_size(batch_size)
+          .inplace_a(true)
+          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
+      }
+    $else:
+      for (size_t batch_size = 1;
+                  batch_size <= ${BATCH_TILE*5}${BATCH_SCALE};
+                  batch_size += ${max(1, BATCH_TILE-1)}${BATCH_SCALE}) {
+        ${TESTER}()
+          .batch_size(batch_size)
+          .inplace_a(true)
+          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
       }
   }
 $else:
@@ -172,7 +189,7 @@ $else:
         ${TESTER}()
           .batch_size(batch_size)
           .inplace_a(true)
-          .Test(${", ".join(TEST_ARGS)});
+          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
       }
     $else:
       for (size_t batch_size = 1;
@@ -181,7 +198,7 @@ $else:
         ${TESTER}()
           .batch_size(batch_size)
           .inplace_a(true)
-          .Test(${", ".join(TEST_ARGS)});
+          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
       }
   }
 
@@ -193,7 +210,7 @@ $else:
         ${TESTER}()
           .batch_size(batch_size)
           .inplace_b(true)
-          .Test(${", ".join(TEST_ARGS)});
+          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
       }
     $else:
       for (size_t batch_size = 1;
@@ -202,7 +219,7 @@ $else:
         ${TESTER}()
           .batch_size(batch_size)
           .inplace_b(true)
-          .Test(${", ".join(TEST_ARGS)});
+          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
       }
   }
 
@@ -215,7 +232,7 @@ $else:
           .batch_size(batch_size)
           .inplace_a(true)
           .inplace_b(true)
-          .Test(${", ".join(TEST_ARGS)});
+          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
       }
     $else:
       for (size_t batch_size = 1;
@@ -225,7 +242,7 @@ $else:
           .batch_size(batch_size)
           .inplace_a(true)
           .inplace_b(true)
-          .Test(${", ".join(TEST_ARGS)});
+          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
       }
   }
 
@@ -239,7 +256,7 @@ $if DATATYPE.startswith("Q"):
           ${TESTER}()
             .batch_size(batch_size)
             .a_zero_point(a_zero_point)
-            .Test(${", ".join(TEST_ARGS)});
+            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
         }
       }
     $else:
@@ -250,7 +267,7 @@ $if DATATYPE.startswith("Q"):
           ${TESTER}()
             .batch_size(batch_size)
             .a_zero_point(a_zero_point)
-            .Test(${", ".join(TEST_ARGS)});
+            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
         }
       }
   }
@@ -264,7 +281,7 @@ $if DATATYPE.startswith("Q"):
           ${TESTER}()
             .batch_size(batch_size)
             .b_zero_point(b_zero_point)
-            .Test(${", ".join(TEST_ARGS)});
+            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
         }
       }
     $else:
@@ -275,7 +292,7 @@ $if DATATYPE.startswith("Q"):
           ${TESTER}()
             .batch_size(batch_size)
             .b_zero_point(b_zero_point)
-            .Test(${", ".join(TEST_ARGS)});
+            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
         }
       }
   }
@@ -289,7 +306,7 @@ $if DATATYPE.startswith("Q"):
           ${TESTER}()
             .batch_size(batch_size)
             .y_zero_point(y_zero_point)
-            .Test(${", ".join(TEST_ARGS)});
+            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
         }
       }
     $else:
@@ -300,7 +317,7 @@ $if DATATYPE.startswith("Q"):
           ${TESTER}()
             .batch_size(batch_size)
             .y_zero_point(y_zero_point)
-            .Test(${", ".join(TEST_ARGS)});
+            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
         }
       }
   }
@@ -314,7 +331,7 @@ $if DATATYPE.startswith("Q"):
           ${TESTER}()
             .batch_size(batch_size)
             .a_scale(a_scale)
-            .Test(${", ".join(TEST_ARGS)});
+            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
         }
       }
     $else:
@@ -325,7 +342,7 @@ $if DATATYPE.startswith("Q"):
           ${TESTER}()
             .batch_size(batch_size)
             .a_scale(a_scale)
-            .Test(${", ".join(TEST_ARGS)});
+            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
         }
       }
   }
@@ -339,7 +356,7 @@ $if DATATYPE.startswith("Q"):
           ${TESTER}()
             .batch_size(batch_size)
             .b_scale(b_scale)
-            .Test(${", ".join(TEST_ARGS)});
+            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
         }
       }
     $else:
@@ -350,7 +367,7 @@ $if DATATYPE.startswith("Q"):
           ${TESTER}()
             .batch_size(batch_size)
             .b_scale(b_scale)
-            .Test(${", ".join(TEST_ARGS)});
+            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
         }
       }
   }
@@ -364,7 +381,7 @@ $if DATATYPE.startswith("Q"):
           ${TESTER}()
             .batch_size(batch_size)
             .y_scale(y_scale)
-            .Test(${", ".join(TEST_ARGS)});
+            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
         }
       }
     $else:
@@ -375,7 +392,7 @@ $if DATATYPE.startswith("Q"):
           ${TESTER}()
             .batch_size(batch_size)
             .y_scale(y_scale)
-            .Test(${", ".join(TEST_ARGS)});
+            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
         }
       }
   }
@@ -389,7 +406,7 @@ $if ACTIVATION_TYPE == "MINMAX":
         ${TESTER}()
           .batch_size(batch_size)
           .qmin(128)
-          .Test(${", ".join(TEST_ARGS)});
+          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
       }
     $else:
       for (size_t batch_size = 1;
@@ -398,7 +415,7 @@ $if ACTIVATION_TYPE == "MINMAX":
         ${TESTER}()
           .batch_size(batch_size)
           .qmin(128)
-          .Test(${", ".join(TEST_ARGS)});
+          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
       }
   }
 
@@ -410,7 +427,7 @@ $if ACTIVATION_TYPE == "MINMAX":
         ${TESTER}()
           .batch_size(batch_size)
           .qmax(128)
-          .Test(${", ".join(TEST_ARGS)});
+          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
       }
     $else:
       for (size_t batch_size = 1;
@@ -419,14 +436,14 @@ $if ACTIVATION_TYPE == "MINMAX":
         ${TESTER}()
           .batch_size(batch_size)
           .qmax(128)
-          .Test(${", ".join(TEST_ARGS)});
+          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
       }
   }
 """
 
 
 def generate_test_cases(ukernel, op_type, init_fn, activation_type,
-                        requantization_type, tester, batch_tile, vector_tile, isa):
+                        tester, broadcast_b, batch_tile, vector_tile, isa):
   """Generates all tests cases for a Vector Binary Operation micro-kernel.
 
   Args:
@@ -434,7 +451,7 @@ def generate_test_cases(ukernel, op_type, init_fn, activation_type,
     op_type: Operation type (ADD/MUL/SUB/etc).
     init_fn: C name of the function to initialize microkernel parameters.
     activation_type: Activation type (LINEAR/MINMAX/RELU).
-    requantization_type: Requantization type (FP32/RNDNU).
+    broadcast_b: If the RHS should be broadcasted.
     tester: C++ name of the tester class.
     batch_tile: Number of batch elements processed per one iteration of the
                 inner loop of the micro-kernel.
@@ -449,13 +466,10 @@ def generate_test_cases(ukernel, op_type, init_fn, activation_type,
   _, test_name = ukernel.split("_", 1)
   _, datatype, _ = ukernel.split("_", 2)
   test_args = [ukernel]
-  if tester in ["VBinaryMicrokernelTester", "VBinaryCMicrokernelTester"] and not datatype in ['qs8', 'qu8']:
+  if tester in ["VBinaryMicrokernelTester"] and not datatype in ['qs8', 'qu8']:
     test_args.append("%s::OpType::%s" % (tester, op_type))
   if init_fn:
     test_args.append(init_fn)
-    if requantization_type:
-      test_args.append("xnn_%s_requantize_%s" % \
-        (datatype.lower(), requantization_type.lower()))
   batch_scale = ""
   if vector_tile:
     ctype = {"qs8": "int8_t", "qu8": "uint8_t", "f16": "uint16_t", "f32": "float"}[datatype]
@@ -467,6 +481,7 @@ def generate_test_cases(ukernel, op_type, init_fn, activation_type,
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
       "TESTER": tester,
+      "BROADCAST_B": ".broadcast_b(true)" if broadcast_b else "",
       "DATATYPE": datatype.upper(),
       "BATCH_TILE": batch_tile,
       "BATCH_SCALE": batch_scale,
@@ -488,7 +503,6 @@ def main(args):
     tester_header = {
       "VCMulMicrokernelTester": "vcmul-microkernel-tester.h",
       "VBinaryMicrokernelTester": "vbinary-microkernel-tester.h",
-      "VBinaryCMicrokernelTester": "vbinaryc-microkernel-tester.h",
     }[options.tester]
     tests = """\
 // Copyright 2019 Google LLC
@@ -516,11 +530,11 @@ def main(args):
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
       init_fn = ukernel_spec.get("init")
-      op_type, activation_type, requantization_type, batch_tile, vector_tile, arch, isa = \
+      op_type, activation_type, batch_tile, vector_tile, arch, isa = \
         split_ukernel_name(name)
 
       test_case = generate_test_cases(name, op_type, init_fn, activation_type,
-                                      requantization_type, options.tester,
+                                      options.tester, options.broadcast_b,
                                       batch_tile, vector_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
