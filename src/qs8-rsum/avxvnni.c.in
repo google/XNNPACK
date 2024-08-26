@@ -15,6 +15,7 @@ $assert ACCUMULATORS <= SIMD_TILE
 #include "xnnpack/reduce.h"
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
+$_MM256_DPBUSD_EPI32 = "_mm256_dpbusd_avx_epi32" if AVX == 2 else "_mm256_dpbusd_epi32"
 $ISA = "avxvnni" if AVX == 2 else "avx256vnni"
 
 void xnn_qs8_rsum_ukernel__${ISA}_u${CHANNEL_TILE}${ACC_SUFFIX}(
@@ -39,11 +40,11 @@ void xnn_qs8_rsum_ukernel__${ISA}_u${CHANNEL_TILE}${ACC_SUFFIX}(
   $if CHANNEL_TILE > 32:
     for (; batch >= ${CHANNEL_TILE}; batch -= ${CHANNEL_TILE}) {
       $for N in range(SIMD_TILE):
-        vacc${N % ACCUMULATORS} = _mm256_dpbusd_epi32(vacc${N % ACCUMULATORS}, vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
+        vacc${N % ACCUMULATORS} = ${_MM256_DPBUSD_EPI32}(vacc${N % ACCUMULATORS}, vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
     }
   if (XNN_UNLIKELY(batch != 0)) {
     for (; batch >= 32; batch -= 32) {
-      vacc0 = _mm256_dpbusd_epi32(vacc0, vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
+      vacc0 = ${_MM256_DPBUSD_EPI32}(vacc0, vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
     }
 
     $if AVX == 2:
@@ -51,19 +52,19 @@ void xnn_qs8_rsum_ukernel__${ISA}_u${CHANNEL_TILE}${ACC_SUFFIX}(
       if (XNN_UNLIKELY(batch >= 17)) {
         assert(batch >= 17 && batch <= 31);
         const __m256i vonemask = _mm256_loadu_si256((const __m256i*) &onemask_table[32 - batch]);
-        vacc0 = _mm256_dpbusd_epi32(vacc0, vonemask, _mm256_loadu_si256((const __m256i*) input));
+        vacc0 = ${_MM256_DPBUSD_EPI32}(vacc0, vonemask, _mm256_loadu_si256((const __m256i*) input));
       // Remainder is between 1 and 16 bytes, so process 16 bytes (overread of up to 15)
       } else if (XNN_UNLIKELY(batch != 0)) {
         assert(batch >= 1 && batch <= 16);
         const __m256i vonemask = _mm256_loadu_si256((const __m256i*) &onemask_table[32 - batch]);
-        vacc0 = _mm256_dpbusd_epi32(vacc0, vonemask, _mm256_castsi128_si256(_mm_loadu_si128((const __m128i*) input)));
+        vacc0 = ${_MM256_DPBUSD_EPI32}(vacc0, vonemask, _mm256_castsi128_si256(_mm_loadu_si128((const __m128i*) input)));
       }
     $else:
       if (XNN_UNLIKELY(batch != 0)) {
         assert(batch >= 1 && batch <= 31);
         // Prepare mask for valid 8-bit elements (depends on batch).
         const __mmask32 vmask = _cvtu32_mask32((UINT32_C(1) << batch) - 1);
-        vacc0 = _mm256_dpbusd_epi32(vacc0, vone, _mm256_maskz_loadu_epi8(vmask, (const __m256i*) input)); input += 32;
+        vacc0 = ${_MM256_DPBUSD_EPI32}(vacc0, vone, _mm256_maskz_loadu_epi8(vmask, (const __m256i*) input)); input += 32;
       }
   }
   $if ACCUMULATORS > 1:
