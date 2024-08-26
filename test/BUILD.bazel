@@ -1954,6 +1954,7 @@ xnnpack_cxx_library(
     "leaky_relu",
     "log",
     "negate",
+    "pop_count",
     "reciprocal_square_root",
     "sigmoid",
     "softmax",

@@ -414,6 +414,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/minimum2.c
   src/subgraph/multiply2.c
   src/subgraph/negate.c
+  src/subgraph/pop-count.c
   src/subgraph/prelu.c
   src/subgraph/reciprocal-square-root.c
   src/subgraph/reshape-helpers.c
@@ -1388,6 +1389,7 @@ IF(XNNPACK_BUILD_TESTS)
         minimum2
         multiply2
         negate
+        pop-count
         prelu
         reciprocal-square-root
         reshape-helpers
