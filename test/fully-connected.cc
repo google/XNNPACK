@@ -2993,7 +2993,7 @@ TEST_F(FullyConnectedTestQD8F16QB4W, define)
   uint32_t kernel_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
     xnn_status_success, xnn_define_blockwise_quantized_tensor_value(
-        subgraph, xnn_datatype_qbint4, kernel_zero_point, kernel_scale.data(), kernel_dims.size(),
+        subgraph, xnn_datatype_qbint4_bf16, kernel_zero_point, kernel_scale.data(), kernel_dims.size(),
         /*channel_dim=*/0, block_size, kernel_dims.data(), kernel.data(), /*external_id=*/1, /*flags=*/0, &kernel_id));
 
   uint32_t bias_id = XNN_INVALID_VALUE_ID;
@@ -3115,7 +3115,7 @@ TEST_F(FullyConnectedTestQD8F16QB4W, internally_allocated_dynamic_quantization_p
   uint32_t kernel_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
     xnn_status_success, xnn_define_blockwise_quantized_tensor_value(
-        subgraph, xnn_datatype_qbint4, kernel_zero_point, kernel_scale.data(), kernel_dims.size(),
+        subgraph, xnn_datatype_qbint4_bf16, kernel_zero_point, kernel_scale.data(), kernel_dims.size(),
         /*channel_dim=*/0, block_size, kernel_dims.data(), kernel.data(), /*external_id=*/1, /*flags=*/0, &kernel_id));
 
   uint32_t bias_id = XNN_INVALID_VALUE_ID;
@@ -3945,7 +3945,7 @@ TEST_F(FullyConnectedTestQD8F32QB4W, define)
   uint32_t kernel_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
     xnn_status_success, xnn_define_blockwise_quantized_tensor_value(
-        subgraph, xnn_datatype_qbint4, kernel_zero_point, kernel_scale.data(), kernel_dims.size(),
+        subgraph, xnn_datatype_qbint4_bf16, kernel_zero_point, kernel_scale.data(), kernel_dims.size(),
         /*channel_dim=*/0, block_size, kernel_dims.data(), kernel.data(), /*external_id=*/1, /*flags=*/0, &kernel_id));
 
   uint32_t bias_id = XNN_INVALID_VALUE_ID;
@@ -4067,7 +4067,7 @@ TEST_F(FullyConnectedTestQD8F32QB4W, internally_allocated_dynamic_quantization_p
   uint32_t kernel_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
     xnn_status_success, xnn_define_blockwise_quantized_tensor_value(
-        subgraph, xnn_datatype_qbint4, kernel_zero_point, kernel_scale.data(), kernel_dims.size(),
+        subgraph, xnn_datatype_qbint4_bf16, kernel_zero_point, kernel_scale.data(), kernel_dims.size(),
         /*channel_dim=*/0, block_size, kernel_dims.data(), kernel.data(), /*external_id=*/1, /*flags=*/0, &kernel_id));
 
   uint32_t bias_id = XNN_INVALID_VALUE_ID;

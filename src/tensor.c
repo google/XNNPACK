@@ -50,7 +50,7 @@ static enum xnn_status check_zero_point(
 {
   switch (datatype) {
     case xnn_datatype_qcint4:
-    case xnn_datatype_qbint4:
+    case xnn_datatype_qbint4_bf16:
       if (zero_point < 0 || zero_point > 15) {
         xnn_log_error(
           "failed to create Quantized Dense Tensor value: invalid zero point %" PRId32" outside the [0, 15] range",
@@ -452,7 +452,7 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value(
     xnn_subgraph_t subgraph,
     enum xnn_datatype datatype,
     int32_t zero_point,
-    const uint16_t* scale,
+    const void* scale,
     size_t num_dims,
     size_t channel_dim,
     size_t block_size,
@@ -472,6 +472,12 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value(
       "failed to create Blockwise Quantized Dense Tensor value: "
       "external ID %" PRIu32 " exceeds the number of reserved external IDs in subgraph (%" PRIu32 ")",
       external_id, subgraph->external_value_ids);
+    return xnn_status_invalid_parameter;
+  }
+
+  if ((flags & XNN_VALUE_FLAG_FP16_SCALES) || (flags & XNN_VALUE_FLAG_FP32_SCALES)) {
+    xnn_log_error(
+      "failed to create Blockwise Quantized Dense Tensor value: Only BF16 scales are supported");
     return xnn_status_invalid_parameter;
   }
 
@@ -508,7 +514,7 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value(
   }
 
   switch (datatype) {
-    case xnn_datatype_qbint4:
+    case xnn_datatype_qbint4_bf16:
       break;
     default:
       xnn_log_error("failed to create Blockwise Quantized Dense Tensor value: unsupported datatype %s (%d)",
@@ -518,7 +524,7 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value(
 
   const size_t block_count = dims[0] * dims[1] / block_size;
   for (size_t block = 0; block < block_count; block++) {
-    float float_scale = math_cvt_fp32_bf16(scale[block]);
+    float float_scale = math_cvt_fp32_bf16(((uint16_t*)scale)[block]);
     if (float_scale <= 0.0f || !isnormal(float_scale)) {
       xnn_log_error(
         "failed to create Blockwise Quantized Dense Tensor value with %.7g scale in block #%zu: "
@@ -538,7 +544,7 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value(
   value->type = xnn_value_type_dense_tensor;
   value->datatype = datatype;
   value->quantization.zero_point = zero_point;
-  value->quantization.blockwise_scale = scale;
+  value->quantization.blockwise_scale = (uint16_t*)scale;
   value->quantization.channel_dimension_blockwise = channel_dim;
   value->quantization.block_size = block_size;
   set_shape(value, num_dims, dims);
@@ -625,7 +631,7 @@ size_t xnn_tensor_get_size(const struct xnn_value* value)
       size = 4;
       break;
     case xnn_datatype_qcint4:
-    case xnn_datatype_qbint4:
+    case xnn_datatype_qbint4_bf16:
     case xnn_datatype_qdint8:
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
