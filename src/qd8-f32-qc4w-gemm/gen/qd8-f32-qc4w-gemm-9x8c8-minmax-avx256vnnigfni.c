@@ -109,7 +109,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_9x8c8__avx256vnnigfni(
   const __m256i vmask = _mm256_set1_epi8(0xF0);
   XNN_FORCE_REALIZATION(vmask);
   const __m256i vshl4 = _mm256_set1_epi64x(0x01020408);
-  XNN_FORCE_REALIZATION(vmask);
+  XNN_FORCE_REALIZATION(vshl4);
   do {
     const __m256i vksum01234567 = _mm256_load_si256(w);
     __m256i vsum0x01234567 = _mm256_mullo_epi32(vksum01234567, vinput_zero_point0);

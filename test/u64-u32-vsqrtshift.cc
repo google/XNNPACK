@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: test/u64-u32-vsqrtshift.yaml
+//   Microkernel: u64-u32-vsqrtshift
 //   Generator: tools/generate-vunary-test.py
 
 
@@ -24,30 +24,26 @@
 #include "next_prime.h"
 #include "vunary-microkernel-tester.h"
 
-
-TEST(U64_U32_VSQRTSHIFT__SCALAR_CVTU32_SQRT_CVTU32F64_U1, batch_eq_1) {
-  VUnaryMicrokernelTester()
-    .batch_size(1)
-    .Test(xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtu32f64_u1);
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)\
+                                                                                                                 \
+XNN_TEST_UNARY_BATCH_EQ(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                        \
+XNN_TEST_UNARY_BATCH_DIV(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                       \
+XNN_TEST_UNARY_BATCH_LT(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                        \
+XNN_TEST_UNARY_BATCH_GT(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                        \
+                                                                                                                 \
+TEST(ukernel, shift) {                                                                                           \
+  TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                          \
+  const size_t batch_scale = get_batch_scale<datatype>();                                                        \
+  const size_t batch_end = batch_tile * batch_scale;                                                             \
+  const size_t batch_step = std::max(1, batch_tile - 1);                                                         \
+  for (uint32_t shift = 0; shift < 32; shift++) {                                                                \
+    for (size_t batch_size = 1; batch_size <= 5 * batch_end; batch_size += batch_step) {                         \
+      VUnaryMicrokernelTester()                                                                                  \
+        .batch_size(batch_size)                                                                                  \
+        .shift(shift)                                                                                            \
+        .Test(ukernel, init_params);                                                                             \
+    }                                                                                                            \
+  }                                                                                                              \
 }
-
-TEST(U64_U32_VSQRTSHIFT__SCALAR_CVTU32_SQRT_CVTU32F64_U1, batch_gt_1) {
-  const size_t batch_step = 1;
-  for (size_t batch_size = batch_step + 1; batch_size < 10; batch_size++) {
-    VUnaryMicrokernelTester()
-      .batch_size(batch_size)
-      .Test(xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtu32f64_u1);
-  }
-}
-
-TEST(U64_U32_VSQRTSHIFT__SCALAR_CVTU32_SQRT_CVTU32F64_U1, shift) {
-  const size_t batch_step = 1;
-  for (uint32_t shift = 0; shift < 32; shift++) {
-    for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 1) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .shift(shift)
-        .Test(xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtu32f64_u1);
-    }
-  }
-}
+#include "src/u64-u32-vsqrtshift/u64-u32-vsqrtshift.h"
+#undef XNN_UKERNEL_WITH_PARAMS

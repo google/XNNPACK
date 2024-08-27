@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: test/f32-vrndu.yaml
+//   Microkernel: f32-vrndu
 //   Generator: tools/generate-vunary-benchmark.py
 
 #include <stddef.h>
@@ -12,128 +12,26 @@
 
 #include <benchmark/benchmark.h>
 #include "bench/f32-vunary-benchmark.h"
-#include "bench/utils.h"
-#include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
 
-void f32_vrndu(benchmark::State& state, xnn_f32_vround_ukernel_fn ukernel,
-              xnn_init_f32_rnd_params_fn init_params = nullptr,
-              benchmark::utils::IsaCheckFunction isa_check = nullptr) {
+void f32_vrndu(benchmark::State& state, uint64_t arch_flags, xnn_f32_vround_ukernel_fn ukernel,
+              xnn_init_f32_rnd_params_fn init_params = nullptr) {
   f32_vunary_benchmark<xnn_f32_rnd_params>(
       state, ukernel,
       init_params,
-      isa_check,
+      arch_flags,
       /*range_min=*/-10.0,
       /*range_max=*/10.0);
 }
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  BENCHMARK_CAPTURE(f32_vrndu, neon_u4,
-                    xnn_f32_vrndu_ukernel__neon_u4,
-                    /*init_params=*/nullptr,
-                    benchmark::utils::CheckNEON)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrndu, neon_u8,
-                    xnn_f32_vrndu_ukernel__neon_u8,
-                    /*init_params=*/nullptr,
-                    benchmark::utils::CheckNEON)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrndu, neonv8_u4,
-                    xnn_f32_vrndu_ukernel__neonv8_u4,
-                    /*init_params=*/nullptr,
-                    benchmark::utils::CheckNEONV8)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrndu, neonv8_u8,
-                    xnn_f32_vrndu_ukernel__neonv8_u8,
-                    /*init_params=*/nullptr,
-                    benchmark::utils::CheckNEONV8)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(f32_vrndu, sse2_u4,
-                    xnn_f32_vrndu_ukernel__sse2_u4,
-                    /*init_params=*/nullptr)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrndu, sse2_u8,
-                    xnn_f32_vrndu_ukernel__sse2_u8,
-                    /*init_params=*/nullptr)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrndu, sse41_u4,
-                    xnn_f32_vrndu_ukernel__sse41_u4,
-                    /*init_params=*/nullptr,
-                    benchmark::utils::CheckSSE41)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrndu, sse41_u8,
-                    xnn_f32_vrndu_ukernel__sse41_u8,
-                    /*init_params=*/nullptr,
-                    benchmark::utils::CheckSSE41)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrndu, avx_u8,
-                    xnn_f32_vrndu_ukernel__avx_u8,
-                    /*init_params=*/nullptr,
-                    benchmark::utils::CheckAVX)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrndu, avx_u16,
-                    xnn_f32_vrndu_ukernel__avx_u16,
-                    /*init_params=*/nullptr,
-                    benchmark::utils::CheckAVX)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrndu, avx512f_u16,
-                    xnn_f32_vrndu_ukernel__avx512f_u16,
-                    /*init_params=*/nullptr,
-                    benchmark::utils::CheckAVX512F)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrndu, avx512f_u32,
-                    xnn_f32_vrndu_ukernel__avx512f_u32,
-                    /*init_params=*/nullptr,
-                    benchmark::utils::CheckAVX512F)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  BENCHMARK_CAPTURE(f32_vrndu, wasmsimd_u4,
-                    xnn_f32_vrndu_ukernel__wasmsimd_u4,
-                    /*init_params=*/nullptr)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(f32_vrndu, wasmsimd_u8,
-                    xnn_f32_vrndu_ukernel__wasmsimd_u8,
-                    /*init_params=*/nullptr)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-    ->UseRealTime();
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-BENCHMARK_CAPTURE(f32_vrndu, scalar_libm_u1,
-                  xnn_f32_vrndu_ukernel__scalar_libm_u1,
-                  /*init_params=*/nullptr)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile,              \
+                                datatype, params_type, init_params)                        \
+BENCHMARK_CAPTURE(f32_vrndu, ukernel, arch_flags, ukernel, init_params)                    \
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<datatype, datatype>)                \
   ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vrndu, scalar_libm_u2,
-                  xnn_f32_vrndu_ukernel__scalar_libm_u2,
-                  /*init_params=*/nullptr)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(f32_vrndu, scalar_libm_u4,
-                  xnn_f32_vrndu_ukernel__scalar_libm_u4,
-                  /*init_params=*/nullptr)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
-  ->UseRealTime();
+#include "src/f32-vrnd/f32-vrndu.h"
+#undef XNN_UKERNEL_WITH_PARAMS
+
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
