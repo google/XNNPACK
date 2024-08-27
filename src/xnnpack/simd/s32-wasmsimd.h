@@ -41,6 +41,12 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return wasm_i32x4_min(a, b);
 }
 
+// Bitwise operations.
+static XNN_INLINE xnn_simd_s32_t xnn_popcnt_s32(xnn_simd_s32_t a) {
+  const xnn_simd_s32_t bytes = wasm_i8x16_popcnt(a);
+  const xnn_simd_s32_t half_sum = wasm_i16x8_add(wasm_i16x8_extend_low_i8x16(bytes), wasm_i16x8_extend_high_i8x16(bytes));
+  return wasm_i32x4_add(wasm_i32x4_extend_low_i16x8(half_sum), wasm_i32x4_extend_high_i16x8(half_sum));
+}
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {

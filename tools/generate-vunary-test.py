@@ -50,6 +50,7 @@ OP_TYPES = {
     "vlog": "Log",
     "vlrelu": "LeakyReLU",
     "vneg": "Negate",
+    "vpopcnt":"PopCount",
     "vrelu": "ReLU",
     "vrndd": "RoundDown",
     "vrndne": "RoundToNearestEven",

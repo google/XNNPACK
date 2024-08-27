@@ -39,6 +39,17 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return (a < b) ? a : b;
 }
 
+// Bitwise operations.
+static XNN_INLINE xnn_simd_s32_t xnn_popcnt_s32(xnn_simd_s32_t a) {
+  int count = 0;
+  while (a) {
+      a &= (a - 1);
+      count++;
+  }
+  return count;
+}
+
+// Load/store operations.
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t *ptr) { return *ptr; }
 
 static XNN_INLINE xnn_simd_s32_t xnn_load_s32(const int32_t *ptr) { return *ptr; }

@@ -288,6 +288,7 @@ sh_test(
     "f32_vsqr",
     "f32_vsqrt",
     "f32_vtanh",
+    "s32-vpopcnt",
     "s8_vclamp",
     "u8_vclamp",
     "u64_u32_vsqrtshift",
