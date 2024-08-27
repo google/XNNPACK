@@ -139,7 +139,7 @@ TEST_F(StaticConstantPadTestF16, define)
   std::fill(pre_paddings.begin(), pre_paddings.begin() + dims.size(), dim_dist(rng));
   std::fill(post_paddings.begin(), post_paddings.begin() + dims.size(), dim_dist(rng));
   xnn_float16 padding_value = f32dist(rng);
-  uint32_t padding_value_as_bits = xnn_float16_from_float(padding_value);
+  uint32_t padding_value_as_bits = padding_value.value;
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -389,7 +389,7 @@ TEST_F(StaticConstantPadTestF16, matches_operator_api)
   std::fill(pre_paddings.begin(), pre_paddings.begin() + dims.size(), dim_dist(rng));
   std::fill(post_paddings.begin(), post_paddings.begin() + dims.size(), dim_dist(rng));
   float padding_value = f32dist(rng);
-  uint32_t padding_value_as_u32 = xnn_float16_from_float(padding_value);
+  xnn_float16 padding_value_half = padding_value;
   std::vector<size_t> output_dims = dims;
   for (size_t i = 0; i < dims.size(); i++) {
     output_dims[i] = pre_paddings[i] + output_dims[i] + post_paddings[i];
@@ -397,14 +397,14 @@ TEST_F(StaticConstantPadTestF16, matches_operator_api)
   // Output sizes
   operator_output = std::vector<xnn_float16>(NumElements(output_dims));
   subgraph_output = std::vector<xnn_float16>(operator_output.size());
-  std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
+  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
+  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   // Call operator API.
   xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_constant_pad_nd_x16(&padding_value_as_u32, /*flags=*/0, &op);
+  const xnn_status status = xnn_create_constant_pad_nd_x16(&padding_value_half, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }

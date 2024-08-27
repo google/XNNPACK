@@ -96,10 +96,10 @@ TEST_F(HardSwishTestF32, define)
 
 TEST_F(HardSwishTestF16, matches_operator_api)
 {
-  std::vector<xnn_float16> input(num_output_elements + XNN_EXTRA_BYTES / sizeof(xnn_float16), UINT16_C(0x7E00));
+  std::vector<xnn_float16> input(num_output_elements + XNN_EXTRA_BYTES / sizeof(xnn_float16), std::nanf(""));
   std::uniform_real_distribution<float> f32dist(-4.0f, 4.0f);
-  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-  std::vector<xnn_float16> subgraph_output(num_output_elements, UINT16_C(0x7E00) /* NaN */);
+  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+  std::vector<xnn_float16> subgraph_output(num_output_elements, std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -112,7 +112,7 @@ TEST_F(HardSwishTestF16, matches_operator_api)
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-  std::vector<xnn_float16> operator_output(num_output_elements, UINT16_C(0x7E00));
+  std::vector<xnn_float16> operator_output(num_output_elements, std::nanf(""));
   ASSERT_EQ(xnn_status_success, xnn_reshape_hardswish_nc_f16(op, batch_size, channels, channels, channels, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_setup_hardswish_nc_f16(op, input.data(), operator_output.data()));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));

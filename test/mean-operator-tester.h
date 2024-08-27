@@ -141,8 +141,8 @@ class MeanOperatorTester {
         }
       }
 
-      std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-      std::fill(output.begin(), output.end(), UINT16_C(0x7E00)  /* NaN */);
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       std::fill(output_ref.begin(), output_ref.end(), 0.0f);
@@ -153,7 +153,7 @@ class MeanOperatorTester {
               for (size_t m = 0; m < input_dims[4]; m++) {
                 for (size_t n = 0; n < input_dims[5]; n++) {
                   output_ref[i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3] + m * output_strides[4] + n * output_strides[5]] +=
-                    xnn_float16_to_float(input[i * input_strides[0] + j * input_strides[1] + k * input_strides[2] + l * input_strides[3] + m * input_strides[4] + n * input_strides[5]]);
+                    input[i * input_strides[0] + j * input_strides[1] + k * input_strides[2] + l * input_strides[3] + m * input_strides[4] + n * input_strides[5]];
                 }
               }
             }
@@ -214,7 +214,7 @@ class MeanOperatorTester {
                 for (size_t n = 0; n < output_dims[5]; n++) {
                   const size_t index =
                     i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
-                  ASSERT_NEAR(xnn_float16_to_float(output[index]), output_ref[index], 3.0e-2f * std::abs(output_ref[index]))
+                  ASSERT_NEAR(output[index], output_ref[index], 3.0e-2f * std::abs(output_ref[index]))
                     << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")";
                 }
               }

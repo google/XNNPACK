@@ -59,9 +59,7 @@ $elif OP_NAME == "clamp":
         state, ukernel,
         [init_params](xnn_${DATATYPE}_minmax_params* params) -> size_t {
           $if DATATYPE == "f16":
-            init_params(params,
-                UINT16_C(0xAC00),  // -1.0h
-                UINT16_C(0x3C00));  // 1.0h
+            init_params(params, -1.0f, 1.0f);
           $else:
             init_params(params, -INFINITY, INFINITY);
           return sizeof(*params);
@@ -87,19 +85,16 @@ $else:
         state, ukernel,
         $if OP_NAME == "lrelu":
           [init_params](xnn_${DATATYPE}_${OP_NAME}_params* params) -> size_t {
-            $if DATATYPE == "f16":
-              init_params(params, UINT16_C(0x1F00));  // 0.01h
-            $else:
-              init_params(params, 0.01f);
+            init_params(params, 0.01f);
             return sizeof(*params);
           },
         $elif OP_NAME == "elu":
           $if DATATYPE == "f16":
             [init_params](xnn_${DATATYPE}_${OP_NAME}_params* params) -> size_t {
               init_params(params,
-                          /*prescale=*/UINT16_C(0x3C00),  // prescale = 1.0h
-                          /*alpha=*/UINT16_C(0x3C00),     // alpha = 1.0h
-                          /*beta=*/UINT16_C(0x3C00));     // beta = 1.0h
+                          /*prescale=*/1.0f,
+                          /*alpha=*/1.0f,
+                          /*beta=*/1.0f);
               return sizeof(*params);
             },
           $else:

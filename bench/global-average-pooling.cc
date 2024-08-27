@@ -175,10 +175,9 @@ static void global_average_pooling_f16(benchmark::State& state) {
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
-  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
-
+  
   std::vector<xnn_float16> input(batch_size * input_height * input_width * channels);
-  std::generate(input.begin(), input.end(), std::ref(f16rng));
+  std::generate(input.begin(), input.end(), f32rng);
   std::vector<xnn_float16> output(batch_size * channels);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);

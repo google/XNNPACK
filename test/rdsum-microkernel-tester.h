@@ -176,7 +176,7 @@ class RDSumMicrokernelTester {
     std::vector<float> output(channels());
     std::vector<float> output_ref(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(output.begin(), output.end(), [&]() { return f32dist(rng); });
       for (size_t i = 0; i < output.size(); ++i) {
         output_ref[i] = output[i];
@@ -186,7 +186,7 @@ class RDSumMicrokernelTester {
       for (size_t c = 0; c < channels(); c++) {
         float acc = 0.0f;
         for (size_t n = 0; n < rows(); n++) {
-          acc += xnn_float16_to_float(input[n * input_stride() + c]);
+          acc += input[n * input_stride() + c];
         }
         output_ref[c] += acc / float(rows());
       }

@@ -38,7 +38,7 @@ void VUnaryMicrokernelTester::Test(xnn_f32_vrelu_ukernel_fn vrelu,
 void VUnaryMicrokernelTester::Test(xnn_bf16_vabs_ukernel_fn vabs,
                                    xnn_init_bf16_default_params_fn init_params,
                                    Abs) const {
-  Test<BFloat16>(
+  Test<xnn_bfloat16>(
       vabs, InitParamsWrapper(init_params), [](float x) { return std::abs(x); },
       TolExact16, -1.0f, 1.0f);
 }
@@ -46,7 +46,7 @@ void VUnaryMicrokernelTester::Test(xnn_bf16_vabs_ukernel_fn vabs,
 void VUnaryMicrokernelTester::Test(xnn_f16_vabs_ukernel_fn vabs,
                                    xnn_init_f16_default_params_fn init_params,
                                    Abs) const {
-  Test<Float16>(
+  Test<xnn_float16>(
       vabs, InitParamsWrapper(init_params), [](float x) { return std::abs(x); },
       TolExact16, -1.0f, 1.0f);
 }
@@ -76,11 +76,12 @@ void VUnaryMicrokernelTester::Test(xnn_f32_vclamp_ukernel_fn vclamp,
 void VUnaryMicrokernelTester::Test(xnn_f16_velu_ukernel_fn velu,
                                    xnn_init_f16_elu_params_fn init_params,
                                    Default) const {
-  Test<Float16>(
+  Test<xnn_float16>(
       velu,
-      InitParamsWrapper(init_params, xnn_float16_from_float(prescale()),
-                        xnn_float16_from_float(alpha()),
-                        xnn_float16_from_float(beta())),
+      InitParamsWrapper(init_params, 
+                        xnn_float16(prescale()),
+                        xnn_float16(alpha()),
+                        xnn_float16(beta())),
       [this](float x) {
         return std::signbit(x) ? alpha() * std::expm1(x * prescale())
                                : x * beta();
@@ -115,7 +116,7 @@ void VUnaryMicrokernelTester::Test(xnn_f32_vgelu_ukernel_fn vgelu,
 void VUnaryMicrokernelTester::Test(xnn_f16_vhswish_ukernel_fn vhswish,
                                    xnn_init_f16_hswish_params_fn init_params,
                                    Default) const {
-  Test<Float16>(
+  Test<xnn_float16>(
       vhswish, InitParamsWrapper(init_params),
       [](float x) {
         return (x / 6.0f) * std::max(std::min(x + 3.0f, 6.0f), 0.0f);
@@ -137,9 +138,9 @@ void VUnaryMicrokernelTester::Test(xnn_f32_vhswish_ukernel_fn vhswish,
 void VUnaryMicrokernelTester::Test(xnn_f16_vlrelu_ukernel_fn vlrelu,
                                    xnn_init_f16_lrelu_params_fn init_params,
                                    Default) const {
-  const xnn_float16 slope_as_half = xnn_float16_from_float(slope());
-  const float slope_as_float = xnn_float16_to_float(slope_as_half);
-  Test<Float16>(
+  const xnn_float16 slope_as_half = slope();
+  const float slope_as_float = slope_as_half;
+  Test<xnn_float16>(
       vlrelu, InitParamsWrapper(init_params, slope_as_half),
       [slope_as_float](float x) {
         return std::signbit(x) ? x * slope_as_float : x;
@@ -159,7 +160,7 @@ void VUnaryMicrokernelTester::Test(xnn_f32_vlrelu_ukernel_fn vlrelu,
 void VUnaryMicrokernelTester::Test(xnn_f16_vneg_ukernel_fn vneg,
                                    xnn_init_f16_default_params_fn init_params,
                                    Neg) const {
-  Test<Float16>(
+  Test<xnn_float16>(
       vneg, InitParamsWrapper(init_params), [](float x) { return -x; },
       TolExact16, -1.0f, 1.0f);
 }
@@ -176,7 +177,7 @@ void VUnaryMicrokernelTester::Test(xnn_f16_vround_ukernel_fn vrnd,
                                    OpType op_type,
                                    xnn_init_f16_rnd_params_fn init_params,
                                    Default) const {
-  Test<Float16>(
+  Test<xnn_float16>(
       vrnd, InitParamsWrapper(init_params),
       [op_type](float x) -> float {
         switch (op_type) {
@@ -223,7 +224,7 @@ void VUnaryMicrokernelTester::Test(xnn_f32_vround_ukernel_fn vrnd,
 void VUnaryMicrokernelTester::Test(xnn_f16_vsigmoid_ukernel_fn vsigmoid,
                                    xnn_init_f16_sigmoid_params_fn init_params,
                                    Default) const {
-  Test<Float16>(
+  Test<xnn_float16>(
       vsigmoid, InitParamsWrapper(init_params),
       [](float x) {
         const float e = std::exp(x);
@@ -247,7 +248,7 @@ void VUnaryMicrokernelTester::Test(xnn_f32_vsigmoid_ukernel_fn vsigmoid,
 void VUnaryMicrokernelTester::Test(xnn_f16_vsqr_ukernel_fn vsqr,
                                    xnn_init_f16_default_params_fn init_params,
                                    Sqr) const {
-  Test<Float16>(
+  Test<xnn_float16>(
       vsqr, InitParamsWrapper(init_params), [](float x) { return x * x; },
       TolMixed(1.0e-4f, 5.0e-3f), -10.0f, 10.0f);
 }
@@ -263,7 +264,7 @@ void VUnaryMicrokernelTester::Test(xnn_f32_vsqr_ukernel_fn vsqr,
 void VUnaryMicrokernelTester::Test(xnn_f16_vsqrt_ukernel_fn vsqrt,
                                    xnn_init_f16_sqrt_params_fn init_params,
                                    Default) const {
-  Test<Float16>(
+  Test<xnn_float16>(
       vsqrt, InitParamsWrapper(init_params),
       [](float x) { return std::sqrt(x); }, TolMixed(1.0e-4f, 5.0e-3f), 0.001f,
       10.0f);
@@ -300,7 +301,7 @@ void VUnaryMicrokernelTester::Test(xnn_f32_vsqrt_ukernel_fn vsqrt,
 void VUnaryMicrokernelTester::Test(xnn_f16_vrsqrt_ukernel_fn vrsqrt,
                                    xnn_init_f16_rsqrt_params_fn init_params,
                                    Default) const {
-  Test<Float16>(
+  Test<xnn_float16>(
       vrsqrt, InitParamsWrapper(init_params),
       [](float x) { return 1.0f / std::sqrt(x); }, TolMixed(1.0e-4f, 5.0e-3f),
       1.0e-4f, 10.0f);
@@ -319,7 +320,7 @@ void VUnaryMicrokernelTester::Test(xnn_f32_vrsqrt_ukernel_fn vrsqrt,
 void VUnaryMicrokernelTester::Test(xnn_f16_vtanh_ukernel_fn vtanh,
                                    xnn_init_f16_tanh_params_fn init_params,
                                    Default) const {
-  Test<Float16>(
+  Test<xnn_float16>(
       vtanh, InitParamsWrapper(init_params),
       [](float x) { return std::tanh(x); },
       TolMixed(/*abs_tol=*/1.0e-4f, /*rel_tol=*/5.0e-3f), -5.0f, 5.0f);
@@ -338,11 +339,11 @@ void VUnaryMicrokernelTester::Test(xnn_f32_vtanh_ukernel_fn vtanh,
 void VUnaryMicrokernelTester::Test(xnn_f16_vclamp_ukernel_fn vclamp,
                                    xnn_init_f16_minmax_params_fn init_params,
                                    Default) const {
-  Test<Float16>(
+  Test<xnn_float16>(
       vclamp,
       InitParamsWrapper(init_params,
-                        xnn_float16_from_float(static_cast<float>(qmin())),
-                        xnn_float16_from_float(static_cast<float>(qmax()))),
+                        xnn_float16(qmin()),
+                        xnn_float16(qmax())),
       [this](float x) {
         return std::max(std::min(x, static_cast<float>(qmax())),
                         static_cast<float>(qmin()));

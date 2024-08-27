@@ -154,9 +154,9 @@ TEST(SUBGRAPH_FP16, with_static_value) {
   // The static value should be converted to FP16
   const xnn_value* static_value = tester.Value(1);
   ASSERT_EQ(static_value->datatype, xnn_datatype_fp16);
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[0], xnn_float16_from_float(1.0f));
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[1], xnn_float16_from_float(2.0f));
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[2], xnn_float16_from_float(3.0f));
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[0], 1.0f);
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[1], 2.0f);
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[2], 3.0f);
 
   // Check that the output of convert is allocated in workspace.
   const xnn_value* convert_out = tester.Value(3);
@@ -305,12 +305,12 @@ TEST(SUBGRAPH_FP16, convolution_weights_used_by_another_node) {
   ASSERT_EQ(static_value->datatype, xnn_datatype_fp16);
   ASSERT_EQ(static_value->fp32_data, static_filter_data);
   // Weights are converted to fp16.
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[0], xnn_float16_from_float(1.0f));
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[1], xnn_float16_from_float(2.0f));
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[2], xnn_float16_from_float(3.0f));
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[3], xnn_float16_from_float(4.0f));
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[4], xnn_float16_from_float(5.0f));
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[5], xnn_float16_from_float(6.0f));
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[0], 1.0f);
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[1], 2.0f);
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[2], 3.0f);
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[3], 4.0f);
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[4], 5.0f);
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[5], 6.0f);
   // But original fp32 weights kept around.
   ASSERT_EQ(static_cast<const float*>(static_value->fp32_data)[0], 1.0f);
   ASSERT_EQ(static_cast<const float*>(static_value->fp32_data)[1], 2.0f);
@@ -383,8 +383,8 @@ TEST(SUBGRAPH_FP16, convolution_bias_used_by_another_node) {
   ASSERT_EQ(static_value->datatype, xnn_datatype_fp16);
   ASSERT_EQ(static_value->fp32_data, static_bias_data);
   // Weights are converted to fp16.
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[0], xnn_float16_from_float(1.0f));
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[1], xnn_float16_from_float(2.0f));
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[0], 1.0f);
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[1], 2.0f);
   // But original fp32 weights kept around.
   ASSERT_EQ(static_cast<const float*>(static_value->fp32_data)[0], 1.0f);
   ASSERT_EQ(static_cast<const float*>(static_value->fp32_data)[1], 2.0f);
@@ -541,12 +541,12 @@ TEST(SUBGRAPH_FP16, fully_connected_weights_used_by_another_node) {
   ASSERT_EQ(static_value->datatype, xnn_datatype_fp16);
   ASSERT_EQ(static_value->fp32_data, static_filter_data);
   // Weights are converted to fp16.
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[0], xnn_float16_from_float(1.0f));
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[1], xnn_float16_from_float(2.0f));
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[2], xnn_float16_from_float(3.0f));
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[3], xnn_float16_from_float(4.0f));
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[4], xnn_float16_from_float(5.0f));
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[5], xnn_float16_from_float(6.0f));
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[0], 1.0f);
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[1], 2.0f);
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[2], 3.0f);
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[3], 4.0f);
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[4], 5.0f);
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[5], 6.0f);
   // But original fp32 weights kept around.
   ASSERT_EQ(static_cast<const float*>(static_value->fp32_data)[0], 1.0f);
   ASSERT_EQ(static_cast<const float*>(static_value->fp32_data)[1], 2.0f);
@@ -610,8 +610,8 @@ TEST(SUBGRAPH_FP16, fully_connected_bias_used_by_another_node) {
   ASSERT_EQ(static_value->datatype, xnn_datatype_fp16);
   ASSERT_EQ(static_value->fp32_data, static_bias_data);
   // Weights are converted to fp16.
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[0], xnn_float16_from_float(1.0f));
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[1], xnn_float16_from_float(2.0f));
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[0], 1.0f);
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[1], 2.0f);
   // But original fp32 weights kept around.
   ASSERT_EQ(static_cast<const float*>(static_value->fp32_data)[0], 1.0f);
   ASSERT_EQ(static_cast<const float*>(static_value->fp32_data)[1], 2.0f);
@@ -669,8 +669,8 @@ TEST(SUBGRAPH_FP16, prelu_slope_used_by_another_node) {
   ASSERT_EQ(static_value->datatype, xnn_datatype_fp16);
   ASSERT_EQ(static_value->fp32_data, static_slope_data);
   // Weights are converted to fp16.
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[0], xnn_float16_from_float(1.0f));
-  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[1], xnn_float16_from_float(2.0f));
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[0], 1.0f);
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[1], 2.0f);
   // But original fp32 weights kept around.
   ASSERT_EQ(static_cast<const float*>(static_value->fp32_data)[0], 1.0f);
   ASSERT_EQ(static_cast<const float*>(static_value->fp32_data)[1], 2.0f);
