@@ -1,9 +1,0 @@
-# Copyright 2023 Google LLC
-#
-# This source code is licensed under the BSD-style license found in the
-# LICENSE file in the root directory of this source tree.
-
-# ARM NEON
-- name: xnn_f16_vcmul_ukernel__neonfp16arith_u8
-- name: xnn_f16_vcmul_ukernel__neonfp16arith_u16
-- name: xnn_f16_vcmul_ukernel__neonfp16arith_u32
