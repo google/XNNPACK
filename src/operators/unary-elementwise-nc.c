@@ -1359,6 +1359,49 @@ enum xnn_status xnn_create_square_nc_f32(
     xnn_operator_type_square_nc_f32, square_op_out);
 }
 
+enum xnn_status xnn_create_pop_count_nc_s32(
+    uint32_t flags,
+    xnn_operator_t* popcnt_op_out)
+{
+  const struct xnn_unary_elementwise_config* s32_popcnt_config = xnn_init_s32_popcnt_config();
+  union xnn_s32_default_params params;
+  if XNN_LIKELY(s32_popcnt_config != NULL && s32_popcnt_config->init.s32_default != NULL) {
+    s32_popcnt_config->init.s32_default(&params);
+  }
+  return create_unary_elementwise_nc(
+    flags, s32_popcnt_config, /*rminmax_config=*/NULL,
+    &params, sizeof(params),
+    xnn_operator_type_pop_count_nc_s32, popcnt_op_out);
+}
+
+enum xnn_status xnn_reshape_pop_count_nc_s32(
+    xnn_operator_t popcnt_op,
+    size_t batch_size,
+    size_t channels,
+    size_t input_stride,
+    size_t output_stride,
+    pthreadpool_t threadpool)
+{
+  return reshape_unary_elementwise_nc(
+    popcnt_op, xnn_operator_type_pop_count_nc_s32,
+    batch_size,
+    channels, input_stride, output_stride,
+    /*log2_input_size=*/XNN_LOG2_SIZEOF_INT32_T,
+    /*log2_output_size=*/XNN_LOG2_SIZEOF_INT32_T,
+    &popcnt_op->params.s32_default, sizeof(popcnt_op->params.s32_default),
+    threadpool);
+}
+
+enum xnn_status xnn_setup_pop_count_nc_s32(
+    xnn_operator_t popcnt_op,
+    const int32_t* input,
+    int32_t* output)
+{
+  return setup_unary_elementwise_nc(
+    popcnt_op, xnn_operator_type_pop_count_nc_s32,
+    input, output);
+}
+
 enum xnn_status xnn_create_square_root_nc_f16(
     uint32_t flags,
     xnn_operator_t* sqrt_op_out)
@@ -3855,6 +3898,34 @@ enum xnn_status xnn_run_sigmoid_nc_f32(
     f32_sigmoid_config, &params, sizeof(params),
     /*log2_input_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_output_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    flags,
+    threadpool);
+}
+
+enum xnn_status xnn_run_pop_count_nc_s32(
+  size_t channels,
+  size_t input_stride,
+  size_t output_stride,
+  size_t batch_size,
+  const int32_t* input,
+  int32_t* output,
+  uint32_t flags,
+  pthreadpool_t threadpool)
+{
+  const struct xnn_unary_elementwise_config* s32_popcnt_config = xnn_init_s32_popcnt_config();
+
+  union xnn_s32_default_params params;
+  if XNN_LIKELY(s32_popcnt_config != NULL && s32_popcnt_config->init.s32_default != NULL) {
+    s32_popcnt_config->init.s32_default(&params);
+  }
+
+  return run_unary_elementwise_nc(
+    xnn_operator_type_square_root_nc_f32,
+    channels, input_stride, output_stride, batch_size,
+    input, output,
+    s32_popcnt_config, &params, sizeof(params),
+    /*log2_input_size=*/XNN_LOG2_SIZEOF_INT32_T,
+    /*log2_output_size=*/XNN_LOG2_SIZEOF_INT32_T,
     flags,
     threadpool);
 }

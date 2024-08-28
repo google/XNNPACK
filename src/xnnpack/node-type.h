@@ -60,6 +60,7 @@ enum xnn_node_type {
   xnn_node_type_multiply2,
   xnn_node_type_negate,
   xnn_node_type_prelu,
+  xnn_node_type_pop_count,
   xnn_node_type_reciprocal_square_root,
   xnn_node_type_reshape_2d,
   xnn_node_type_rope,

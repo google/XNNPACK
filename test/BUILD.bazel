@@ -288,9 +288,11 @@ sh_test(
     "f32_vsqr",
     "f32_vsqrt",
     "f32_vtanh",
+    "s32-vpopcnt",
     "s8_vclamp",
     "u8_vclamp",
     "u64_u32_vsqrtshift",
+    "s32-popcnt-nc",
 ]]
 
 [xnnpack_unit_test(
@@ -1952,6 +1954,7 @@ xnnpack_cxx_library(
     "leaky_relu",
     "log",
     "negate",
+    "pop_count",
     "reciprocal_square_root",
     "sigmoid",
     "softmax",

@@ -414,6 +414,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/minimum2.c
   src/subgraph/multiply2.c
   src/subgraph/negate.c
+  src/subgraph/pop-count.c
   src/subgraph/prelu.c
   src/subgraph/reciprocal-square-root.c
   src/subgraph/reshape-helpers.c
@@ -1280,6 +1281,7 @@ IF(XNNPACK_BUILD_TESTS)
         leaky-relu-nc
         log-nc
         negate-nc
+        popcnt-nc
         reciprocal-square-root-nc
         sigmoid-nc
         square-nc
@@ -1387,6 +1389,7 @@ IF(XNNPACK_BUILD_TESTS)
         minimum2
         multiply2
         negate
+        pop-count
         prelu
         reciprocal-square-root
         reshape-helpers
@@ -1824,6 +1827,7 @@ IF(XNNPACK_BUILD_TESTS)
       f32-vrsqrt
       f32-vtanh
       s8-vclamp
+      s32-vpopcnt
       u8-vclamp)
   FOREACH(TEST ${MICROKERNEL_VUNARY_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)

@@ -41,6 +41,21 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return _mm_min_epi32(a, b);
 }
 
+// Bitwise operations.
+static XNN_INLINE xnn_simd_s32_t xnn_popcnt_s32(xnn_simd_s32_t a) {
+  xnn_simd_s32_t lookup_table = _mm_setr_epi8(
+    (char)0, (char)1, (char)1, (char)2,(char)1, (char)2, (char)2, (char)3,
+    (char)1, (char)2, (char)2, (char)3,(char)2, (char)3, (char)3, (char)4
+  );
+  const xnn_simd_s32_t mask = _mm_set1_epi32(0x0F);
+  xnn_simd_s32_t result = _mm_setzero_si128();
+  for (int i = 0; i < 8; ++i) {
+    const xnn_simd_s32_t nibble = _mm_and_si128(_mm_srli_epi32(a, i * 4), mask);
+    result = _mm_add_epi8(result, _mm_shuffle_epi8(lookup_table, nibble));
+  }
+  return result;
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {

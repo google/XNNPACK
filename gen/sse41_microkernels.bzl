@@ -67,6 +67,7 @@ PROD_SSE41_MICROKERNEL_SRCS = [
     "src/s8-vclamp/s8-vclamp-sse41-u64.c",
     "src/s32-vmul/gen/s32-vmul-sse41.c",
     "src/s32-vmul/gen/s32-vmulc-sse41.c",
+    "src/s32-vpopcnt/gen/s32-vpopcnt-sse41.c",
     "src/u8-ibilinear/gen/u8-ibilinear-sse41-c16.c",
 ]
 

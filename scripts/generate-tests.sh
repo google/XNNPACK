@@ -218,6 +218,7 @@ tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel s8-vcla
 tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel u8-vclamp --output test/u8-vclamp.cc &
 
 tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel u64-u32-vsqrtshift --output test/u64-u32-vsqrtshift.cc &
+tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel s32-vpopcnt --output test/s32-vpopcnt.cc &
 
 ### Tests for VLRelu micro-kernels
 tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-vlrelu --output test/f16-vlrelu.cc &

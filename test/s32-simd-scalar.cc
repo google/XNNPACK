@@ -50,6 +50,23 @@ TEST_F(S32SimdSCALARTest, Mul) {
   }
 }
 
+TEST_F(S32SimdSCALARTest, PopCount) {
+  const xnn_simd_s32_t a = xnn_loadu_s32(inputs_.data());
+  const xnn_simd_s32_t res = xnn_popcnt_s32(a);
+  xnn_storeu_s32(output_.data(), res);
+  const static auto popcount_fn = [](uint32_t a) -> int32_t {
+    int count = 0;
+    while (a) {
+        count += a & 1;
+        a >>= 1;
+    }
+    return count;
+  };
+  for (size_t k = 0; k < xnn_simd_size_s32; k++) {
+    ASSERT_EQ(output_[k], popcount_fn(inputs_[k]) );
+  }
+}
+
 TEST_F(S32SimdSCALARTest, StoreTail) {
   const xnn_simd_s32_t a = xnn_loadu_s32(inputs_.data());
   for (size_t num_elements = 1; num_elements < xnn_simd_size_s32;
