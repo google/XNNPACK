@@ -304,6 +304,26 @@ tools/xngen src/qs8-gemm/MRx4c16-wasmdot.c.in -D MR=2 NR=8 -D REQUANTIZATION=FP3
 tools/xngen src/qs8-gemm/MRx4c16-wasmdot.c.in -D MR=3 NR=8 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x8c16-minmax-fp32-wasmusdot.c &
 tools/xngen src/qs8-gemm/MRx4c16-wasmdot.c.in -D MR=4 NR=8 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c16-minmax-fp32-wasmusdot.c &
 
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=1 NR=8 -D UNROLL=0 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-wasmusdot.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=2 NR=8 -D UNROLL=0 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-wasmusdot.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=3 NR=8 -D UNROLL=0 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x8c8-minmax-fp32-wasmusdot.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=4 NR=8 -D UNROLL=0 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-wasmusdot.c &
+
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=1 NR=8 -D UNROLL=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-wasmusdot-u2.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=2 NR=8 -D UNROLL=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-wasmusdot-u2.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=3 NR=8 -D UNROLL=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x8c8-minmax-fp32-wasmusdot-u2.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=4 NR=8 -D UNROLL=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=0 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-wasmusdot-u2.c &
+
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=1 NR=8 -D UNROLL=0 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-wasmsdot.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=2 NR=8 -D UNROLL=0 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-wasmsdot.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=3 NR=8 -D UNROLL=0 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x8c8-minmax-fp32-wasmsdot.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=4 NR=8 -D UNROLL=0 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-wasmsdot.c &
+
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=1 NR=8 -D UNROLL=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-wasmsdot-u2.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=2 NR=8 -D UNROLL=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c8-minmax-fp32-wasmsdot-u2.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=3 NR=8 -D UNROLL=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-3x8c8-minmax-fp32-wasmsdot-u2.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=4 NR=8 -D UNROLL=1 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -D SDOT=1 -o src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-wasmsdot-u2.c &
+
 tools/xngen src/qs8-gemm/MRx4c16-wasmdot.c.in -D MR=1 NR=4 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=0 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x4c16-minmax-wasmusdot.c &
 tools/xngen src/qs8-gemm/MRx4c16-wasmdot.c.in -D MR=2 NR=4 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=0 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x4c16-minmax-wasmusdot.c &
 tools/xngen src/qs8-gemm/MRx4c16-wasmdot.c.in -D MR=3 NR=4 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=0 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x4c16-minmax-wasmusdot.c &
@@ -313,6 +333,26 @@ tools/xngen src/qs8-gemm/MRx4c16-wasmdot.c.in -D MR=1 NR=8 -D REQUANTIZATION=   
 tools/xngen src/qs8-gemm/MRx4c16-wasmdot.c.in -D MR=2 NR=8 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=0 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c16-minmax-wasmusdot.c &
 tools/xngen src/qs8-gemm/MRx4c16-wasmdot.c.in -D MR=3 NR=8 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=0 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x8c16-minmax-wasmusdot.c &
 tools/xngen src/qs8-gemm/MRx4c16-wasmdot.c.in -D MR=4 NR=8 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=0 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c16-minmax-wasmusdot.c &
+
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=1 NR=8 -D UNROLL=0 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=0 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-wasmusdot.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=2 NR=8 -D UNROLL=0 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=0 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-wasmusdot.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=3 NR=8 -D UNROLL=0 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=0 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x8c8-minmax-wasmusdot.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=4 NR=8 -D UNROLL=0 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=0 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-wasmusdot.c &
+
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=1 NR=8 -D UNROLL=1 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=0 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-wasmusdot-u2.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=2 NR=8 -D UNROLL=1 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=0 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-wasmusdot-u2.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=3 NR=8 -D UNROLL=1 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=0 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x8c8-minmax-wasmusdot-u2.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=4 NR=8 -D UNROLL=1 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=0 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-wasmusdot-u2.c &
+
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=1 NR=8 -D UNROLL=0 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-wasmsdot.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=2 NR=8 -D UNROLL=0 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-wasmsdot.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=3 NR=8 -D UNROLL=0 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x8c8-minmax-wasmsdot.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=4 NR=8 -D UNROLL=0 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-wasmsdot.c &
+
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=1 NR=8 -D UNROLL=1 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-wasmsdot-u2.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=2 NR=8 -D UNROLL=1 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x8c8-minmax-wasmsdot-u2.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=3 NR=8 -D UNROLL=1 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x8c8-minmax-wasmsdot-u2.c &
+tools/xngen src/qs8-gemm/c8-wasmdot.c.in -D MR=4 NR=8 -D UNROLL=1 -D REQUANTIZATION=     -D DATATYPE=QD8 -D SDOT=1 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x8c8-minmax-wasmsdot-u2.c &
 
 ################################### ARM NEON ##################################
 tools/xngen src/qs8-gemm/neon-mlal-lane.c.in -D MR=1 -D NR=8  -D PREFETCH=0 -D REQUANTIZATION=         -D DATATYPE=QD8 -D ARMV8=0 -o src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8-minmax-neon-mlal-lane.c &
