@@ -1298,33 +1298,15 @@ IF(XNNPACK_BUILD_TESTS)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     ENDFOREACH()
 
-    SET(LIBRARY_BINARY_ELEMENTWISE_UNIT_TESTS
-        add-nd
-        add-nd-eager
-        copysign-nd
-        divide-nd
-        divide-nd-eager
-        maximum-nd
-        maximum-nd-eager
-        minimum-nd
-        minimum-nd-eager
-        multiply-nd
-        multiply-nd-eager
-        squared-difference-nd
-        squared-difference-nd-eager
-        subtract-nd
-        subtract-nd-eager)
-    FOREACH(TEST ${LIBRARY_BINARY_ELEMENTWISE_UNIT_TESTS})
-      ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-      TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
-      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        binary-elementwise-operator-tester
-        fp16
-        GTest::gtest
-        GTest::gtest_main
-        XNNPACK)
-      ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-    ENDFOREACH()
+    ADD_EXECUTABLE(binary-nd-test test/binary-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(binary-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(binary-nd-test PRIVATE
+      binary-elementwise-operator-tester
+      fp16
+      GTest::gtest
+      GTest::gtest_main
+      XNNPACK)
+    ADD_SHARDED_TEST(binary-nd-test 10)
 
     # ---[ Build subgraph optimizations unit tests
     SET(LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS
