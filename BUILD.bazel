@@ -156,7 +156,9 @@ TABLE_SRCS = [
 
 MICROKERNEL_DEFS = [
     "src/bf16-vabs/bf16-vabs.h",
+    "src/f16-avgpool/f16-avgpool-minmax.h",
     "src/f16-maxpool/f16-maxpool-minmax.h",
+    "src/f16-pavgpool/f16-pavgpool-minmax.h",
     "src/f16-vabs/f16-vabs.h",
     "src/f16-vbinary/f16-vadd-minmax.h",
     "src/f16-vbinary/f16-vaddc-minmax.h",
@@ -189,6 +191,8 @@ MICROKERNEL_DEFS = [
     "src/f16-vsqr/f16-vsqr.h",
     "src/f16-vsqrt/f16-vsqrt.h",
     "src/f16-vtanh/f16-vtanh.h",
+    "src/f32-avgpool/f32-avgpool-minmax.h",
+    "src/f32-pavgpool/f32-pavgpool-minmax.h",
     "src/f32-maxpool/f32-maxpool-minmax.h",
     "src/f32-vabs/f32-vabs.h",
     "src/f32-vbinary/f32-vadd-minmax.h",
@@ -257,6 +261,7 @@ MICROKERNEL_DEFS = [
     "src/qs8-vmul/qs8-vmul-minmax-rndnu.h",
     "src/qs8-vmulc/qs8-vmulc-minmax-fp32.h",
     "src/qs8-vmulc/qs8-vmulc-minmax-rndnu.h",
+    "src/qu8-avgpool/qu8-avgpool-minmax.h",
     "src/qu8-vadd/qu8-vadd-minmax.h",
     "src/qu8-vaddc/qu8-vaddc-minmax.h",
     "src/qu8-vhswish/qu8-vhswish.h",
