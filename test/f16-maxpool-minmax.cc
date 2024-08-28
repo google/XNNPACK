@@ -1,15 +1,14 @@
 // Copyright (c) Facebook, Inc. and its affiliates.
 // All rights reserved.
 //
-// Copyright 2019 Google LLC
+// Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
-//
-// Auto-generated file. Do not edit!
-//   Specification: test/f16-maxpool-minmax.yaml
-//   Generator: tools/generate-maxpool-test.py
 
+#include <algorithm>
+#include <limits>
+#include <string>
 
 #include <gtest/gtest.h>
 #include "xnnpack/common.h"
@@ -19,1840 +18,243 @@
 #include "maxpool-microkernel-tester.h"
 #include "next_prime.h"
 
+namespace {
+
+// _Float16 isn't supported on all targets, but all we really need is to specify
+// any type that is neither u8 nor s8 for our purposes here.
+using XnnTest = XnnMaxpoolTest<xnn_f16_maxpool_ukernel_fn, xnn_init_f16_minmax_params_fn, uint16_t>;
+using XnnTestParam = XnnMaxpoolTestParam<xnn_f16_maxpool_ukernel_fn, xnn_init_f16_minmax_params_fn>;
+
+std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) {
+  return info.param.name;
+}
+
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, qmin, qmax, params_type, init_params) \
+  { #ukernel, ukernel, init_params, arch_flags, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, qmin, qmax },
+
+const XnnTestParam xnn_test_params[] = {
+#include "src/f16-maxpool/f16-maxpool-minmax.h"
+};
+
+#undef XNN_UKERNEL_WITH_PARAMS
+
+}  // namespace
+
+TEST_P(XnnTest, channels_eq_channel_tile_unipass_fulltile) {
+	XnnTest::channels_eq_channel_tile_unipass_fulltile();
+}
+TEST_P(XnnTest, channels_eq_channel_tile_unipass_fulltile_with_input_offset) {
+	XnnTest::channels_eq_channel_tile_unipass_fulltile_with_input_offset();
+}
+TEST_P(XnnTest, channels_eq_channel_tile_unipass_fulltile_with_qmin) {
+	XnnTest::channels_eq_channel_tile_unipass_fulltile_with_qmin();
+}
+TEST_P(XnnTest, channels_eq_channel_tile_unipass_fulltile_with_qmax) {
+	XnnTest::channels_eq_channel_tile_unipass_fulltile_with_qmax();
+}
+TEST_P(XnnTest, channels_eq_channel_tile_unipass_subtile) {
+	XnnTest::channels_eq_channel_tile_unipass_subtile();
+}
+TEST_P(XnnTest, channels_eq_channel_tile_unipass_subtile_with_input_offset) {
+	XnnTest::channels_eq_channel_tile_unipass_subtile_with_input_offset();
+}
+TEST_P(XnnTest, channels_div_channel_tile_unipass_fulltile) {
+	XnnTest::channels_div_channel_tile_unipass_fulltile();
+}
+TEST_P(XnnTest, channels_div_channel_tile_unipass_fulltile_with_input_offset) {
+	XnnTest::channels_div_channel_tile_unipass_fulltile_with_input_offset();
+}
+TEST_P(XnnTest, channels_div_channel_tile_unipass_fulltile_with_qmin) {
+	XnnTest::channels_div_channel_tile_unipass_fulltile_with_qmin();
+}
+TEST_P(XnnTest, channels_div_channel_tile_unipass_fulltile_with_qmax) {
+	XnnTest::channels_div_channel_tile_unipass_fulltile_with_qmax();
+}
+TEST_P(XnnTest, channels_div_channel_tile_unipass_subtile) {
+	XnnTest::channels_div_channel_tile_unipass_subtile();
+}
+TEST_P(XnnTest, channels_div_channel_tile_unipass_subtile_with_input_offset) {
+	XnnTest::channels_div_channel_tile_unipass_subtile_with_input_offset();
+}
+TEST_P(XnnTest, channels_lt_channel_tile_unipass_fulltile) {
+	XnnTest::channels_lt_channel_tile_unipass_fulltile();
+}
+TEST_P(XnnTest, channels_lt_channel_tile_unipass_fulltile_with_input_offset) {
+	XnnTest::channels_lt_channel_tile_unipass_fulltile_with_input_offset();
+}
+TEST_P(XnnTest, channels_lt_channel_tile_unipass_fulltile_with_qmin) {
+	XnnTest::channels_lt_channel_tile_unipass_fulltile_with_qmin();
+}
+TEST_P(XnnTest, channels_lt_channel_tile_unipass_fulltile_with_qmax) {
+	XnnTest::channels_lt_channel_tile_unipass_fulltile_with_qmax();
+}
+TEST_P(XnnTest, channels_lt_channel_tile_unipass_subtile) {
+	XnnTest::channels_lt_channel_tile_unipass_subtile();
+}
+TEST_P(XnnTest, channels_lt_channel_tile_unipass_subtile_with_input_offset) {
+	XnnTest::channels_lt_channel_tile_unipass_subtile_with_input_offset();
+}
+TEST_P(XnnTest, channels_gt_channel_tile_unipass_fulltile) {
+	XnnTest::channels_gt_channel_tile_unipass_fulltile();
+}
+TEST_P(XnnTest, channels_gt_channel_tile_unipass_fulltile_with_input_offset) {
+	XnnTest::channels_gt_channel_tile_unipass_fulltile_with_input_offset();
+}
+TEST_P(XnnTest, channels_gt_channel_tile_unipass_fulltile_with_qmin) {
+	XnnTest::channels_gt_channel_tile_unipass_fulltile_with_qmin();
+}
+TEST_P(XnnTest, channels_gt_channel_tile_unipass_fulltile_with_qmax) {
+	XnnTest::channels_gt_channel_tile_unipass_fulltile_with_qmax();
+}
+TEST_P(XnnTest, channels_gt_channel_tile_unipass_subtile) {
+	XnnTest::channels_gt_channel_tile_unipass_subtile();
+}
+TEST_P(XnnTest, channels_gt_channel_tile_unipass_subtile_with_input_offset) {
+	XnnTest::channels_gt_channel_tile_unipass_subtile_with_input_offset();
+}
+TEST_P(XnnTest, channels_eq_channel_tile_twopass_fulltile) {
+	XnnTest::channels_eq_channel_tile_twopass_fulltile();
+}
+TEST_P(XnnTest, channels_eq_channel_tile_twopass_fulltile_with_input_offset) {
+	XnnTest::channels_eq_channel_tile_twopass_fulltile_with_input_offset();
+}
+TEST_P(XnnTest, channels_eq_channel_tile_twopass_fulltile_with_qmin) {
+	XnnTest::channels_eq_channel_tile_twopass_fulltile_with_qmin();
+}
+TEST_P(XnnTest, channels_eq_channel_tile_twopass_fulltile_with_qmax) {
+	XnnTest::channels_eq_channel_tile_twopass_fulltile_with_qmax();
+}
+TEST_P(XnnTest, channels_eq_channel_tile_twopass_subtile) {
+	XnnTest::channels_eq_channel_tile_twopass_subtile();
+}
+TEST_P(XnnTest, channels_eq_channel_tile_twopass_subtile_with_input_offset) {
+	XnnTest::channels_eq_channel_tile_twopass_subtile_with_input_offset();
+}
+TEST_P(XnnTest, channels_div_channel_tile_twopass_fulltile) {
+	XnnTest::channels_div_channel_tile_twopass_fulltile();
+}
+TEST_P(XnnTest, channels_div_channel_tile_twopass_fulltile_with_input_offset) {
+	XnnTest::channels_div_channel_tile_twopass_fulltile_with_input_offset();
+}
+TEST_P(XnnTest, channels_div_channel_tile_twopass_fulltile_with_qmin) {
+	XnnTest::channels_div_channel_tile_twopass_fulltile_with_qmin();
+}
+TEST_P(XnnTest, channels_div_channel_tile_twopass_fulltile_with_qmax) {
+	XnnTest::channels_div_channel_tile_twopass_fulltile_with_qmax();
+}
+TEST_P(XnnTest, channels_div_channel_tile_twopass_subtile) {
+	XnnTest::channels_div_channel_tile_twopass_subtile();
+}
+TEST_P(XnnTest, channels_div_channel_tile_twopass_subtile_with_input_offset) {
+	XnnTest::channels_div_channel_tile_twopass_subtile_with_input_offset();
+}
+TEST_P(XnnTest, channels_lt_channel_tile_twopass_fulltile) {
+	XnnTest::channels_lt_channel_tile_twopass_fulltile();
+}
+TEST_P(XnnTest, channels_lt_channel_tile_twopass_fulltile_with_input_offset) {
+	XnnTest::channels_lt_channel_tile_twopass_fulltile_with_input_offset();
+}
+TEST_P(XnnTest, channels_lt_channel_tile_twopass_fulltile_with_qmin) {
+	XnnTest::channels_lt_channel_tile_twopass_fulltile_with_qmin();
+}
+TEST_P(XnnTest, channels_lt_channel_tile_twopass_fulltile_with_qmax) {
+	XnnTest::channels_lt_channel_tile_twopass_fulltile_with_qmax();
+}
+TEST_P(XnnTest, channels_lt_channel_tile_twopass_subtile) {
+	XnnTest::channels_lt_channel_tile_twopass_subtile();
+}
+TEST_P(XnnTest, channels_lt_channel_tile_twopass_subtile_with_input_offset) {
+	XnnTest::channels_lt_channel_tile_twopass_subtile_with_input_offset();
+}
+TEST_P(XnnTest, channels_gt_channel_tile_twopass_fulltile) {
+	XnnTest::channels_gt_channel_tile_twopass_fulltile();
+}
+TEST_P(XnnTest, channels_gt_channel_tile_twopass_fulltile_with_input_offset) {
+	XnnTest::channels_gt_channel_tile_twopass_fulltile_with_input_offset();
+}
+TEST_P(XnnTest, channels_gt_channel_tile_twopass_fulltile_with_qmin) {
+	XnnTest::channels_gt_channel_tile_twopass_fulltile_with_qmin();
+}
+TEST_P(XnnTest, channels_gt_channel_tile_twopass_fulltile_with_qmax) {
+	XnnTest::channels_gt_channel_tile_twopass_fulltile_with_qmax();
+}
+TEST_P(XnnTest, channels_gt_channel_tile_twopass_subtile) {
+	XnnTest::channels_gt_channel_tile_twopass_subtile();
+}
+TEST_P(XnnTest, channels_gt_channel_tile_twopass_subtile_with_input_offset) {
+	XnnTest::channels_gt_channel_tile_twopass_subtile_with_input_offset();
+}
+TEST_P(XnnTest, channels_eq_channel_tile_multipass) {
+	XnnTest::channels_eq_channel_tile_multipass();
+}
+TEST_P(XnnTest, channels_eq_channel_tile_multipass_with_input_offset) {
+	XnnTest::channels_eq_channel_tile_multipass_with_input_offset();
+}
+TEST_P(XnnTest, channels_eq_channel_tile_multipass_with_qmin) {
+	XnnTest::channels_eq_channel_tile_multipass_with_qmin();
+}
+TEST_P(XnnTest, channels_eq_channel_tile_multipass_with_qmax) {
+	XnnTest::channels_eq_channel_tile_multipass_with_qmax();
+}
+TEST_P(XnnTest, channels_div_channel_tile_multipass) {
+	XnnTest::channels_div_channel_tile_multipass();
+}
+TEST_P(XnnTest, channels_div_channel_tile_multipass_with_input_offset) {
+	XnnTest::channels_div_channel_tile_multipass_with_input_offset();
+}
+TEST_P(XnnTest, channels_div_channel_tile_multipass_with_qmin) {
+	XnnTest::channels_div_channel_tile_multipass_with_qmin();
+}
+TEST_P(XnnTest, channels_div_channel_tile_multipass_with_qmax) {
+	XnnTest::channels_div_channel_tile_multipass_with_qmax();
+}
+TEST_P(XnnTest, channels_lt_channel_tile_multipass) {
+	XnnTest::channels_lt_channel_tile_multipass();
+}
+TEST_P(XnnTest, channels_lt_channel_tile_multipass_with_input_offset) {
+	XnnTest::channels_lt_channel_tile_multipass_with_input_offset();
+}
+TEST_P(XnnTest, channels_lt_channel_tile_multipass_with_qmin) {
+	XnnTest::channels_lt_channel_tile_multipass_with_qmin();
+}
+TEST_P(XnnTest, channels_lt_channel_tile_multipass_with_qmax) {
+	XnnTest::channels_lt_channel_tile_multipass_with_qmax();
+}
+TEST_P(XnnTest, channels_gt_channel_tile_multipass) {
+	XnnTest::channels_gt_channel_tile_multipass();
+}
+TEST_P(XnnTest, channels_gt_channel_tile_multipass_with_input_offset) {
+	XnnTest::channels_gt_channel_tile_multipass_with_input_offset();
+}
+TEST_P(XnnTest, channels_gt_channel_tile_multipass_with_qmin) {
+	XnnTest::channels_gt_channel_tile_multipass_with_qmin();
+}
+TEST_P(XnnTest, channels_gt_channel_tile_multipass_with_qmax) {
+	XnnTest::channels_gt_channel_tile_multipass_with_qmax();
+}
+TEST_P(XnnTest, few_output_pixels) {
+	XnnTest::few_output_pixels();
+}
+TEST_P(XnnTest, few_output_pixels_with_input_offset) {
+	XnnTest::few_output_pixels_with_input_offset();
+}
+TEST_P(XnnTest, few_output_pixels_with_qmin) {
+	XnnTest::few_output_pixels_with_qmin();
+}
+TEST_P(XnnTest, few_output_pixels_with_qmax) {
+	XnnTest::few_output_pixels_with_qmax();
+}
+TEST_P(XnnTest, few_output_pixels_with_output_stride) {
+	XnnTest::few_output_pixels_with_output_stride();
+}
+TEST_P(XnnTest, few_output_pixels_with_step) {
+	XnnTest::few_output_pixels_with_step();
+}
+
+INSTANTIATE_TEST_SUITE_P(f16_maxpool_minmax,
+                         XnnTest,
+                         testing::ValuesIn(xnn_test_params, xnn_test_params + sizeof(xnn_test_params)/sizeof(*xnn_test_params)),
+                         GetTestName);
+// xnn_test_params[] can be empty for some build configurations
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(XnnTest);
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_eq_8_unipass_fulltile) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    MaxPoolMicrokernelTester()
-      .pooling_elements(9)
-      .pooling_tile(9, 8)
-      .channels(channel_tile)
-      .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_eq_8_unipass_fulltile_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    MaxPoolMicrokernelTester()
-      .pooling_elements(9)
-      .pooling_tile(9, 8)
-      .channels(channel_tile)
-      .input_offset(11)
-      .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_eq_8_unipass_fulltile_with_qmin) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    MaxPoolMicrokernelTester()
-      .pooling_elements(9)
-      .pooling_tile(9, 8)
-      .channels(channel_tile)
-      .qmin(-16384)
-      .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_eq_8_unipass_fulltile_with_qmax) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    MaxPoolMicrokernelTester()
-      .pooling_elements(9)
-      .pooling_tile(9, 8)
-      .channels(channel_tile)
-      .qmax(16384)
-      .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_eq_8_unipass_subtile) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(9, 8)
-        .channels(channel_tile)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_eq_8_unipass_subtile_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(9, 8)
-        .channels(channel_tile)
-        .input_offset(11)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_div_8_unipass_fulltile) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t channels = 16; channels < 64; channels += 8) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_div_8_unipass_fulltile_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t channels = 16; channels < 64; channels += 8) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .input_offset(67)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_div_8_unipass_fulltile_with_qmin) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t channels = 16; channels < 64; channels += 8) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmin(-16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_div_8_unipass_fulltile_with_qmax) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t channels = 16; channels < 64; channels += 8) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmax(16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_div_8_unipass_subtile) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 16; channels < 64; channels += 8) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_div_8_unipass_subtile_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 16; channels < 64; channels += 8) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .input_offset(67)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_lt_8_unipass_fulltile) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_lt_8_unipass_fulltile_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .input_offset(11)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_lt_8_unipass_fulltile_with_qmin) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmin(-16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_lt_8_unipass_fulltile_with_qmax) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmax(16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_lt_8_unipass_subtile) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 1; channels < channel_tile; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_lt_8_unipass_subtile_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 1; channels < channel_tile; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .input_offset(11)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_gt_8_unipass_fulltile) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t channels = 9; channels < 16; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_gt_8_unipass_fulltile_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t channels = 9; channels < 16; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .input_offset(17)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_gt_8_unipass_fulltile_with_qmin) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t channels = 9; channels < 16; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmin(-16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_gt_8_unipass_fulltile_with_qmax) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t channels = 9; channels < 16; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmax(16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_gt_8_unipass_subtile) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 9; channels < 16; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_gt_8_unipass_subtile_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 9; channels < 16; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .input_offset(17)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_eq_8_twopass_fulltile) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    MaxPoolMicrokernelTester()
-      .pooling_elements(17)
-      .pooling_tile(9, 8)
-      .channels(channel_tile)
-      .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_eq_8_twopass_fulltile_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    MaxPoolMicrokernelTester()
-      .pooling_elements(17)
-      .pooling_tile(9, 8)
-      .channels(channel_tile)
-      .input_offset(11)
-      .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_eq_8_twopass_fulltile_with_qmin) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    MaxPoolMicrokernelTester()
-      .pooling_elements(17)
-      .pooling_tile(9, 8)
-      .channels(channel_tile)
-      .qmin(-16384)
-      .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_eq_8_twopass_fulltile_with_qmax) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    MaxPoolMicrokernelTester()
-      .pooling_elements(17)
-      .pooling_tile(9, 8)
-      .channels(channel_tile)
-      .qmax(16384)
-      .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_eq_8_twopass_subtile) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(9, 8)
-        .channels(channel_tile)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_eq_8_twopass_subtile_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(9, 8)
-        .channels(channel_tile)
-        .input_offset(11)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_div_8_twopass_fulltile) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t channels = 16; channels < 64; channels += 8) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_div_8_twopass_fulltile_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t channels = 16; channels < 64; channels += 8) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .input_offset(41)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_div_8_twopass_fulltile_with_qmin) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t channels = 16; channels < 64; channels += 8) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmin(-16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_div_8_twopass_fulltile_with_qmax) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t channels = 16; channels < 64; channels += 8) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmax(16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_div_8_twopass_subtile) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 16; channels < 64; channels += 8) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_div_8_twopass_subtile_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 16; channels < 64; channels += 8) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .input_offset(67)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_lt_8_twopass_fulltile) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_lt_8_twopass_fulltile_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .input_offset(11)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_lt_8_twopass_fulltile_with_qmin) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmin(-16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_lt_8_twopass_fulltile_with_qmax) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmax(16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_lt_8_twopass_subtile) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 1; channels < channel_tile; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_lt_8_twopass_subtile_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 1; channels < channel_tile; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .input_offset(11)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_gt_8_twopass_fulltile) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t channels = 9; channels < 16; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_gt_8_twopass_fulltile_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t channels = 9; channels < 16; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .input_offset(17)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_gt_8_twopass_fulltile_with_qmin) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t channels = 9; channels < 16; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmin(-16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_gt_8_twopass_fulltile_with_qmax) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t channels = 9; channels < 16; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmax(16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_gt_8_twopass_subtile) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 9; channels < 16; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_gt_8_twopass_subtile_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 9; channels < 16; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .input_offset(17)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_eq_8_multipass) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(9, 8)
-        .channels(channel_tile)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_eq_8_multipass_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(9, 8)
-        .channels(channel_tile)
-        .input_offset(11)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_eq_8_multipass_with_qmin) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(9, 8)
-        .channels(channel_tile)
-        .qmin(-16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_eq_8_multipass_with_qmax) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(9, 8)
-        .channels(channel_tile)
-        .qmax(16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_div_8_multipass) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 16; channels < 64; channels += 8) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_div_8_multipass_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 16; channels < 64; channels += 8) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .input_offset(67)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_div_8_multipass_with_qmin) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 16; channels < 64; channels += 8) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .qmin(-16384)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_div_8_multipass_with_qmax) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 16; channels < 64; channels += 8) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .qmax(16384)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_lt_8_multipass) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 1; channels < channel_tile; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_lt_8_multipass_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 1; channels < channel_tile; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .input_offset(channel_tile)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_lt_8_multipass_with_qmin) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 1; channels < channel_tile; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .qmin(-16384)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_lt_8_multipass_with_qmax) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 1; channels < channel_tile; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .qmax(16384)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_gt_8_multipass) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 9; channels < 16; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_gt_8_multipass_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 9; channels < 16; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .input_offset(17)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_gt_8_multipass_with_qmin) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 9; channels < 16; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .qmin(-16384)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, channels_gt_8_multipass_with_qmax) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 9; channels < 16; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .qmax(16384)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, few_output_pixels) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-      for (size_t pooling_elements : std::vector<size_t>{{2, 9, 16}}) {
-        for (size_t channels = 1; channels <= 40; channels += 7) {
-          MaxPoolMicrokernelTester()
-            .output_pixels(output_pixels)
-            .pooling_elements(pooling_elements)
-            .pooling_tile(9, 8)
-            .channels(channels)
-            .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-        }
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, few_output_pixels_with_input_offset) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-      for (size_t pooling_elements : std::vector<size_t>{{2, 9, 16}}) {
-        for (size_t channels = 1; channels <= 40; channels += 7) {
-          MaxPoolMicrokernelTester()
-            .output_pixels(output_pixels)
-            .pooling_elements(pooling_elements)
-            .pooling_tile(9, 8)
-            .channels(channels)
-            .input_offset(43)
-            .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-        }
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, few_output_pixels_with_qmin) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-      for (size_t pooling_elements : std::vector<size_t>{{2, 9, 16}}) {
-        for (size_t channels = 1; channels <= 40; channels += 7) {
-          MaxPoolMicrokernelTester()
-            .output_pixels(output_pixels)
-            .pooling_elements(pooling_elements)
-            .pooling_tile(9, 8)
-            .channels(channels)
-            .qmin(-16384)
-            .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-        }
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, few_output_pixels_with_qmax) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-      for (size_t pooling_elements : std::vector<size_t>{{2, 9, 16}}) {
-        for (size_t channels = 1; channels <= 40; channels += 7) {
-          MaxPoolMicrokernelTester()
-            .output_pixels(output_pixels)
-            .pooling_elements(pooling_elements)
-            .pooling_tile(9, 8)
-            .channels(channels)
-            .qmax(16384)
-            .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-        }
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, few_output_pixels_with_output_stride) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-      for (size_t pooling_elements : std::vector<size_t>{{2, 9, 16}}) {
-        for (size_t channels = 1; channels <= 40; channels += 7) {
-          MaxPoolMicrokernelTester()
-            .output_pixels(output_pixels)
-            .pooling_elements(pooling_elements)
-            .pooling_tile(9, 8)
-            .channels(channels)
-            .output_stride(43)
-            .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-        }
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__NEONFP16ARITH_C8, few_output_pixels_with_step) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-      for (size_t pooling_elements : std::vector<size_t>{{2, 9, 16}}) {
-        for (size_t channels = 1; channels <= 40; channels += 7) {
-          for (size_t step = 2; step <= pooling_elements; step++) {
-            MaxPoolMicrokernelTester()
-              .output_pixels(output_pixels)
-              .pooling_elements(pooling_elements)
-              .pooling_tile(9, 8)
-              .step(step)
-              .channels(channels)
-              .output_stride(43)
-              .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, xnn_init_f16_minmax_fp16arith_params);
-          }
-        }
-      }
-    }
-  }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_eq_8_unipass_fulltile) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    MaxPoolMicrokernelTester()
-      .pooling_elements(9)
-      .pooling_tile(9, 8)
-      .channels(channel_tile)
-      .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_eq_8_unipass_fulltile_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    MaxPoolMicrokernelTester()
-      .pooling_elements(9)
-      .pooling_tile(9, 8)
-      .channels(channel_tile)
-      .input_offset(11)
-      .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_eq_8_unipass_fulltile_with_qmin) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    MaxPoolMicrokernelTester()
-      .pooling_elements(9)
-      .pooling_tile(9, 8)
-      .channels(channel_tile)
-      .qmin(-16384)
-      .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_eq_8_unipass_fulltile_with_qmax) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    MaxPoolMicrokernelTester()
-      .pooling_elements(9)
-      .pooling_tile(9, 8)
-      .channels(channel_tile)
-      .qmax(16384)
-      .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_eq_8_unipass_subtile) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(9, 8)
-        .channels(channel_tile)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_eq_8_unipass_subtile_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(9, 8)
-        .channels(channel_tile)
-        .input_offset(11)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_div_8_unipass_fulltile) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t channels = 16; channels < 64; channels += 8) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_div_8_unipass_fulltile_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t channels = 16; channels < 64; channels += 8) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .input_offset(67)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_div_8_unipass_fulltile_with_qmin) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t channels = 16; channels < 64; channels += 8) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmin(-16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_div_8_unipass_fulltile_with_qmax) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t channels = 16; channels < 64; channels += 8) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmax(16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_div_8_unipass_subtile) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 16; channels < 64; channels += 8) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_div_8_unipass_subtile_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 16; channels < 64; channels += 8) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .input_offset(67)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_lt_8_unipass_fulltile) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_lt_8_unipass_fulltile_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .input_offset(11)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_lt_8_unipass_fulltile_with_qmin) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmin(-16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_lt_8_unipass_fulltile_with_qmax) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmax(16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_lt_8_unipass_subtile) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 1; channels < channel_tile; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_lt_8_unipass_subtile_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 1; channels < channel_tile; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .input_offset(11)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_gt_8_unipass_fulltile) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t channels = 9; channels < 16; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_gt_8_unipass_fulltile_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t channels = 9; channels < 16; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .input_offset(17)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_gt_8_unipass_fulltile_with_qmin) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t channels = 9; channels < 16; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmin(-16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_gt_8_unipass_fulltile_with_qmax) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t channels = 9; channels < 16; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(9)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmax(16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_gt_8_unipass_subtile) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 9; channels < 16; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_gt_8_unipass_subtile_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t pooling_elements = 2; pooling_elements < 9; pooling_elements++) {
-      for (size_t channels = 9; channels < 16; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .input_offset(17)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_eq_8_twopass_fulltile) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    MaxPoolMicrokernelTester()
-      .pooling_elements(17)
-      .pooling_tile(9, 8)
-      .channels(channel_tile)
-      .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_eq_8_twopass_fulltile_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    MaxPoolMicrokernelTester()
-      .pooling_elements(17)
-      .pooling_tile(9, 8)
-      .channels(channel_tile)
-      .input_offset(11)
-      .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_eq_8_twopass_fulltile_with_qmin) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    MaxPoolMicrokernelTester()
-      .pooling_elements(17)
-      .pooling_tile(9, 8)
-      .channels(channel_tile)
-      .qmin(-16384)
-      .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_eq_8_twopass_fulltile_with_qmax) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    MaxPoolMicrokernelTester()
-      .pooling_elements(17)
-      .pooling_tile(9, 8)
-      .channels(channel_tile)
-      .qmax(16384)
-      .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_eq_8_twopass_subtile) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(9, 8)
-        .channels(channel_tile)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_eq_8_twopass_subtile_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(9, 8)
-        .channels(channel_tile)
-        .input_offset(11)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_div_8_twopass_fulltile) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t channels = 16; channels < 64; channels += 8) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_div_8_twopass_fulltile_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t channels = 16; channels < 64; channels += 8) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .input_offset(41)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_div_8_twopass_fulltile_with_qmin) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t channels = 16; channels < 64; channels += 8) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmin(-16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_div_8_twopass_fulltile_with_qmax) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t channels = 16; channels < 64; channels += 8) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmax(16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_div_8_twopass_subtile) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 16; channels < 64; channels += 8) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_div_8_twopass_subtile_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 16; channels < 64; channels += 8) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .input_offset(67)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_lt_8_twopass_fulltile) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_lt_8_twopass_fulltile_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .input_offset(11)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_lt_8_twopass_fulltile_with_qmin) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmin(-16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_lt_8_twopass_fulltile_with_qmax) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t channels = 1; channels < channel_tile; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmax(16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_lt_8_twopass_subtile) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 1; channels < channel_tile; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_lt_8_twopass_subtile_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 1; channels < channel_tile; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .input_offset(11)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_gt_8_twopass_fulltile) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t channels = 9; channels < 16; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_gt_8_twopass_fulltile_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t channels = 9; channels < 16; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .input_offset(17)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_gt_8_twopass_fulltile_with_qmin) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t channels = 9; channels < 16; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmin(-16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_gt_8_twopass_fulltile_with_qmax) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t channels = 9; channels < 16; channels++) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(17)
-        .pooling_tile(9, 8)
-        .channels(channels)
-        .qmax(16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_gt_8_twopass_subtile) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 9; channels < 16; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_gt_8_twopass_subtile_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t pooling_elements = 10; pooling_elements < 17; pooling_elements++) {
-      for (size_t channels = 9; channels < 16; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .input_offset(17)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_eq_8_multipass) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(9, 8)
-        .channels(channel_tile)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_eq_8_multipass_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(9, 8)
-        .channels(channel_tile)
-        .input_offset(11)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_eq_8_multipass_with_qmin) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(9, 8)
-        .channels(channel_tile)
-        .qmin(-16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_eq_8_multipass_with_qmax) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      MaxPoolMicrokernelTester()
-        .pooling_elements(pooling_elements)
-        .pooling_tile(9, 8)
-        .channels(channel_tile)
-        .qmax(16384)
-        .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_div_8_multipass) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 16; channels < 64; channels += 8) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_div_8_multipass_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 16; channels < 64; channels += 8) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .input_offset(67)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_div_8_multipass_with_qmin) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 16; channels < 64; channels += 8) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .qmin(-16384)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_div_8_multipass_with_qmax) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 16; channels < 64; channels += 8) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .qmax(16384)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_lt_8_multipass) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 1; channels < channel_tile; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_lt_8_multipass_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 1; channels < channel_tile; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .input_offset(channel_tile)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_lt_8_multipass_with_qmin) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 1; channels < channel_tile; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .qmin(-16384)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_lt_8_multipass_with_qmax) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t channel_tile = 8;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 1; channels < channel_tile; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .qmax(16384)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_gt_8_multipass) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 9; channels < 16; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_gt_8_multipass_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 9; channels < 16; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .input_offset(17)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_gt_8_multipass_with_qmin) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 9; channels < 16; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .qmin(-16384)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, channels_gt_8_multipass_with_qmax) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t pooling_elements = 18; pooling_elements <= 33; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
-      for (size_t channels = 9; channels < 16; channels++) {
-        MaxPoolMicrokernelTester()
-          .pooling_elements(pooling_elements)
-          .pooling_tile(9, 8)
-          .channels(channels)
-          .qmax(16384)
-          .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, few_output_pixels) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-      for (size_t pooling_elements : std::vector<size_t>{{2, 9, 16}}) {
-        for (size_t channels = 1; channels <= 40; channels += 7) {
-          MaxPoolMicrokernelTester()
-            .output_pixels(output_pixels)
-            .pooling_elements(pooling_elements)
-            .pooling_tile(9, 8)
-            .channels(channels)
-            .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, few_output_pixels_with_input_offset) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-      for (size_t pooling_elements : std::vector<size_t>{{2, 9, 16}}) {
-        for (size_t channels = 1; channels <= 40; channels += 7) {
-          MaxPoolMicrokernelTester()
-            .output_pixels(output_pixels)
-            .pooling_elements(pooling_elements)
-            .pooling_tile(9, 8)
-            .channels(channels)
-            .input_offset(43)
-            .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, few_output_pixels_with_qmin) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-      for (size_t pooling_elements : std::vector<size_t>{{2, 9, 16}}) {
-        for (size_t channels = 1; channels <= 40; channels += 7) {
-          MaxPoolMicrokernelTester()
-            .output_pixels(output_pixels)
-            .pooling_elements(pooling_elements)
-            .pooling_tile(9, 8)
-            .channels(channels)
-            .qmin(-16384)
-            .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, few_output_pixels_with_qmax) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-      for (size_t pooling_elements : std::vector<size_t>{{2, 9, 16}}) {
-        for (size_t channels = 1; channels <= 40; channels += 7) {
-          MaxPoolMicrokernelTester()
-            .output_pixels(output_pixels)
-            .pooling_elements(pooling_elements)
-            .pooling_tile(9, 8)
-            .channels(channels)
-            .qmax(16384)
-            .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, few_output_pixels_with_output_stride) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-      for (size_t pooling_elements : std::vector<size_t>{{2, 9, 16}}) {
-        for (size_t channels = 1; channels <= 40; channels += 7) {
-          MaxPoolMicrokernelTester()
-            .output_pixels(output_pixels)
-            .pooling_elements(pooling_elements)
-            .pooling_tile(9, 8)
-            .channels(channels)
-            .output_stride(43)
-            .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F16_MAXPOOL_MINMAX_9P8X__F16C_C8, few_output_pixels_with_step) {
-    TEST_REQUIRES_X86_F16C;
-    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
-      for (size_t pooling_elements : std::vector<size_t>{{2, 9, 16}}) {
-        for (size_t channels = 1; channels <= 40; channels += 7) {
-          for (size_t step = 2; step <= pooling_elements; step++) {
-            MaxPoolMicrokernelTester()
-              .output_pixels(output_pixels)
-              .pooling_elements(pooling_elements)
-              .pooling_tile(9, 8)
-              .step(step)
-              .channels(channels)
-              .output_stride(43)
-              .Test(xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8, xnn_init_f16_minmax_scalar_params);
-          }
-        }
-      }
-    }
-  }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
