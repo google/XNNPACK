@@ -121,7 +121,6 @@ SUBGRAPH_SRCS = [
     "src/subgraph/prelu.c",
     "src/subgraph/reciprocal-square-root.c",
     "src/subgraph/reshape-helpers.c",
-    "src/subgraph/reshape-2d.c",
     "src/subgraph/rope.c",
     "src/subgraph/scaled-dot-product-attention.c",
     "src/subgraph/sigmoid.c",

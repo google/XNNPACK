@@ -1942,7 +1942,6 @@ xnnpack_cxx_library(
     "square_root",
     "static_constant_pad",
     "static_reshape",
-    "reshape_2d",
     "static_slice",
     "static_transpose",
     "tanh",
