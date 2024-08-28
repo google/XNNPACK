@@ -58,10 +58,6 @@ extern "C" {
 #include "src/f16-vbinary/f16-vsubc-minmax.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 
-DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vcmul_ukernel__neonfp16arith_u8)
-DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vcmul_ukernel__neonfp16arith_u16)
-DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vcmul_ukernel__neonfp16arith_u32)
-
 #define DECLARE_F32_VBINOP_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                         \
       size_t n,                                      \
@@ -91,6 +87,7 @@ DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vcmul_ukernel__neonfp16arith_u32)
 #include "src/f32-vbinary/f32-vaddc.h"
 #include "src/f32-vbinary/f32-vcopysign.h"
 #include "src/f32-vbinary/f32-vcopysignc.h"
+#include "src/f32-vbinary/f32-vcmul.h"
 #include "src/f32-vbinary/f32-vdiv-minmax.h"
 #include "src/f32-vbinary/f32-vdiv-relu.h"
 #include "src/f32-vbinary/f32-vdiv.h"
@@ -123,26 +120,6 @@ DECLARE_F16_VBINOP_UKERNEL_FUNCTION(xnn_f16_vcmul_ukernel__neonfp16arith_u32)
 #include "src/f32-vbinary/f32-vsubc-relu.h"
 #include "src/f32-vbinary/f32-vsubc.h"
 #undef XNN_UKERNEL_WITH_PARAMS
-
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__neon_u4)
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__neon_u8)
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__neon_u12)
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__neon_u16)
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__rvv_u1v)
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__rvv_u2v)
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__rvv_u4v)
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__scalar_u1)
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__scalar_u2)
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__scalar_u4)
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__scalar_u8)
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__sse_u4)
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__sse_u8)
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__sse_u12)
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__sse_u16)
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__wasmsimd_u4)
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__wasmsimd_u8)
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__wasmsimd_u12)
-DECLARE_F32_VBINOP_UKERNEL_FUNCTION(xnn_f32_vcmul_ukernel__wasmsimd_u16)
 
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, \
                                 datatype, params_type, init_params)           \
