@@ -971,9 +971,9 @@ IF(XNNPACK_BUILD_LIBRARY)
   TARGET_INCLUDE_DIRECTORIES(allocator PRIVATE include src)
   TARGET_INCLUDE_DIRECTORIES(cache PRIVATE include src)
   TARGET_INCLUDE_DIRECTORIES(microkernel-utils PRIVATE include src)
-  TARGET_INCLUDE_DIRECTORIES(subgraph PRIVATE include src)
-  TARGET_INCLUDE_DIRECTORIES(operators PRIVATE include src)
-  TARGET_INCLUDE_DIRECTORIES(operator-run PRIVATE include src)
+  TARGET_INCLUDE_DIRECTORIES(subgraph PRIVATE . include src)
+  TARGET_INCLUDE_DIRECTORIES(operators PRIVATE . include src)
+  TARGET_INCLUDE_DIRECTORIES(operator-run PRIVATE . include src)
   TARGET_INCLUDE_DIRECTORIES(operator-utils PRIVATE include src)
   TARGET_INCLUDE_DIRECTORIES(memory PRIVATE include src)
   TARGET_INCLUDE_DIRECTORIES(mutex PRIVATE include src)
@@ -1250,7 +1250,7 @@ IF(XNNPACK_BUILD_TESTS)
     )
     FOREACH(TEST ${LIBRARY_SHARDED_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-      TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
+      TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . src test)
       TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         fp16
         GTest::gmock
@@ -1616,7 +1616,7 @@ IF(XNNPACK_BUILD_TESTS)
       qu8-igemm-minmax-rndnu)
   FOREACH(TEST ${MICROKERNEL_GEMM_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         gemm-microkernel-tester
         fp16
@@ -1637,7 +1637,7 @@ IF(XNNPACK_BUILD_TESTS)
       x8-packq)
   FOREACH(TEST ${MICROKERNEL_PACKQ_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         packq-microkernel-tester
         fp16

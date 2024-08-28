@@ -4,14 +4,6 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-### Tests for Pack quantized micro-kernels
-tools/generate-packq-test.py --spec test/x8-packq.yaml --output test/x8-packq.cc --output-bench bench/x8-packq.cc &
-
-### Tests for Pack Weights micro-kernels
-tools/generate-packw-test.py --spec test/x8-packw.yaml --output test/x8-packw.cc --output-bench bench/x8-packw.cc &
-tools/generate-packw-test.py --spec test/x16-packw.yaml --output test/x16-packw.cc --output-bench bench/x16-packw.cc &
-tools/generate-packw-test.py --spec test/x32-packw.yaml --output test/x32-packw.cc --output-bench bench/x32-packw.cc &
-
 ### Tests for MaxPool micro-kernels
 tools/generate-maxpool-test.py --spec test/f32-maxpool-minmax.yaml --output test/f32-maxpool-minmax.cc &
 tools/generate-maxpool-test.py --spec test/f16-maxpool-minmax.yaml --output test/f16-maxpool-minmax.cc &

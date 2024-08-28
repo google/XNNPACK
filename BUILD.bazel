@@ -268,6 +268,13 @@ MICROKERNEL_DEFS = [
     "src/s8-vclamp/s8-vclamp.h",
     "src/u64-u32-vsqrtshift/u64-u32-vsqrtshift.h",
     "src/u8-vclamp/u8-vclamp.h",
+    "src/x16-packw/x16-packw.h",
+    "src/x32-packb/x32-packb.h",
+    "src/x32-packw/x32-packw.h",
+    "src/x32-packx/x32-packx.h",
+    "src/x32-zerob/x32-zerob.h",
+    "src/x8-packq/x8-packq.h",
+    "src/x8-packw/x8-packw.h",
 ]
 
 MICROKERNEL_HDRS = [
@@ -383,6 +390,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":config_hdrs",
+        ":math",
         ":memory",
         ":microparams",
         ":mutex",
