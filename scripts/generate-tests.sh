@@ -4,12 +4,6 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-### Tests for MaxPool micro-kernels
-tools/generate-maxpool-test.py --spec test/f32-maxpool-minmax.yaml --output test/f32-maxpool-minmax.cc &
-tools/generate-maxpool-test.py --spec test/f16-maxpool-minmax.yaml --output test/f16-maxpool-minmax.cc &
-tools/generate-maxpool-test.py --spec test/s8-maxpool-minmax.yaml --output test/s8-maxpool-minmax.cc &
-tools/generate-maxpool-test.py --spec test/u8-maxpool-minmax.yaml --output test/u8-maxpool-minmax.cc &
-
 ### Tests for GAvgPool micro-kernels
 tools/generate-gavgpool-test.py --spec test/f16-gavgpool-minmax.yaml --output test/f16-gavgpool-minmax.cc &
 tools/generate-gavgpool-test.py --spec test/f32-gavgpool-minmax.yaml --output test/f32-gavgpool-minmax.cc &
