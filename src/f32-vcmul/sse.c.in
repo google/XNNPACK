@@ -3,19 +3,27 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert BATCH_TILE % 4 == 0
-$assert BATCH_TILE >= 4
-$SIMD_TILE = BATCH_TILE // 4
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$if AVX == 512:
+  $assert BATCH_TILE % 16 == 0
+  $assert BATCH_TILE >= 16
+  $SIMD_TILE = BATCH_TILE // 16
+$else:
+  $assert BATCH_TILE % 4 == 0
+  $assert BATCH_TILE >= 4
+  $SIMD_TILE = BATCH_TILE // 4
+
 #include <assert.h>
 
-#include <xmmintrin.h>
+$if AVX == 512:
+  #include <immintrin.h>
+$else:
+  #include <xmmintrin.h>
 
 #include "xnnpack/common.h"
 #include "xnnpack/vbinary.h"
 
-
-void xnn_f32_vcmul_ukernel__sse_u${BATCH_TILE}(
+$ISA = "avx512skx" if AVX == 512 else "sse"
+void xnn_f32_vcmul_ukernel__${ISA}_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -34,35 +42,68 @@ void xnn_f32_vcmul_ukernel__sse_u${BATCH_TILE}(
   const float* bi = (const float*) ((uintptr_t) input_b + batch);
   float* or = output;
   float* oi = (float*) ((uintptr_t) output + batch);
-  $if BATCH_TILE > 4:
+
+  $if AVX == 512:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
-      const __m128 va0r = _mm_loadu_ps(ar);
-      const __m128 va0i = _mm_loadu_ps(ai);
-      const __m128 vb0r = _mm_loadu_ps(br);
-      const __m128 vb0i = _mm_loadu_ps(bi);
+      const __m512 va0r = _mm512_loadu_ps(ar);
+      const __m512 va0i = _mm512_loadu_ps(ai);
+      const __m512 vb0r = _mm512_loadu_ps(br);
+      const __m512 vb0i = _mm512_loadu_ps(bi);
       $for N in range(1, SIMD_TILE):
-        const __m128 va${ABC[N]}r = _mm_loadu_ps(ar + ${N * 4});
-        const __m128 va${ABC[N]}i = _mm_loadu_ps(ai + ${N * 4});
-        const __m128 vb${ABC[N]}r = _mm_loadu_ps(br + ${N * 4});
-        const __m128 vb${ABC[N]}i = _mm_loadu_ps(bi + ${N * 4});
+        const __m512 va${N}r = _mm512_loadu_ps(ar + ${N * BATCH_TILE});
+        const __m512 va${N}i = _mm512_loadu_ps(ai + ${N * BATCH_TILE});
+        const __m512 vb${N}r = _mm512_loadu_ps(br + ${N * BATCH_TILE});
+        const __m512 vb${N}i = _mm512_loadu_ps(bi + ${N * BATCH_TILE});
       ar += ${BATCH_TILE};
       ai += ${BATCH_TILE};
       br += ${BATCH_TILE};
       bi += ${BATCH_TILE};
 
       $for N in range(SIMD_TILE):
-        __m128 vacc${ABC[N]}r = _mm_mul_ps(va${ABC[N]}r, vb${ABC[N]}r);
-        __m128 vacc${ABC[N]}i = _mm_mul_ps(va${ABC[N]}r, vb${ABC[N]}i);
+        __m512 vacc${N}r = _mm512_mul_ps(va${N}r, vb${N}r);
+        __m512 vacc${N}i = _mm512_mul_ps(va${N}r, vb${N}i);
 
       $for N in range(SIMD_TILE):
-        vacc${ABC[N]}r = _mm_sub_ps(vacc${ABC[N]}r, _mm_mul_ps(va${ABC[N]}i, vb${ABC[N]}i));
-        vacc${ABC[N]}i = _mm_add_ps(vacc${ABC[N]}i, _mm_mul_ps(va${ABC[N]}i, vb${ABC[N]}r));
+        vacc${N}r = _mm512_sub_ps(vacc${N}r, _mm512_mul_ps(va${N}i, vb${N}i));
+        vacc${N}i = _mm512_add_ps(vacc${N}i, _mm512_mul_ps(va${N}i, vb${N}r));
+
+      _mm512_storeu_ps(or, vacc0r);
+      _mm512_storeu_ps(oi, vacc0i);
+      $for N in range(1, SIMD_TILE):
+        _mm512_storeu_ps(or + ${N * BATCH_TILE}, vacc${N}r);
+        _mm512_storeu_ps(oi + ${N * BATCH_TILE}, vacc${N}i);
+      or += ${BATCH_TILE};
+      oi += ${BATCH_TILE};
+    }
+  $elif BATCH_TILE > 4:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      const __m128 va0r = _mm_loadu_ps(ar);
+      const __m128 va0i = _mm_loadu_ps(ai);
+      const __m128 vb0r = _mm_loadu_ps(br);
+      const __m128 vb0i = _mm_loadu_ps(bi);
+      $for N in range(1, SIMD_TILE):
+        const __m128 va${N}r = _mm_loadu_ps(ar + ${N * BATCH_TILE});
+        const __m128 va${N}i = _mm_loadu_ps(ai + ${N * BATCH_TILE});
+        const __m128 vb${N}r = _mm_loadu_ps(br + ${N * BATCH_TILE});
+        const __m128 vb${N}i = _mm_loadu_ps(bi + ${N * BATCH_TILE});
+      ar += ${BATCH_TILE};
+      ai += ${BATCH_TILE};
+      br += ${BATCH_TILE};
+      bi += ${BATCH_TILE};
+
+      $for N in range(SIMD_TILE):
+        __m128 vacc${N}r = _mm_mul_ps(va${N}r, vb${N}r);
+        __m128 vacc${N}i = _mm_mul_ps(va${N}r, vb${N}i);
+
+      $for N in range(SIMD_TILE):
+        vacc${N}r = _mm_sub_ps(vacc${N}r, _mm_mul_ps(va${N}i, vb${N}i));
+        vacc${N}i = _mm_add_ps(vacc${N}i, _mm_mul_ps(va${N}i, vb${N}r));
 
       _mm_storeu_ps(or, vacc0r);
       _mm_storeu_ps(oi, vacc0i);
       $for N in range(1, SIMD_TILE):
-        _mm_storeu_ps(or + ${N * 4}, vacc${ABC[N]}r);
-        _mm_storeu_ps(oi + ${N * 4}, vacc${ABC[N]}i);
+        _mm_storeu_ps(or + ${N * BATCH_TILE}, vacc${N}r);
+        _mm_storeu_ps(oi + ${N * BATCH_TILE}, vacc${N}i);
       or += ${BATCH_TILE};
       oi += ${BATCH_TILE};
     }
