@@ -224,7 +224,7 @@ struct xnn_gavgpool_cw_config {
     xnn_init_f32_gavgpool_params_fn f32;
   } init;
   union {
-    xnn_update_f16_gavgpool_neonfp16arith_params_fn f16;
+    xnn_update_f16_gavgpool_scalar_params_fn f16;
     xnn_update_f32_gavgpool_params_fn f32;
   } update;
 

@@ -17,15 +17,15 @@
 
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon_fp16_arith, xnn_f16_vclamp_ukernel__neonfp16arith_u8, 8, false, uint16_t, xnn_f16_minmax_params, xnn_init_f16_minmax_fp16arith_params)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon_fp16_arith, xnn_f16_vclamp_ukernel__neonfp16arith_u16, 16, false, uint16_t, xnn_f16_minmax_params, xnn_init_f16_minmax_fp16arith_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon_fp16_arith, xnn_f16_vclamp_ukernel__neonfp16arith_u8, 8, false, uint16_t, xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon_fp16_arith, xnn_f16_vclamp_ukernel__neonfp16arith_u16, 16, false, uint16_t, xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #if XNN_ENABLE_RISCV_FP16_VECTOR && (XNN_ARCH_RISCV)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vclamp_ukernel__rvvfp16arith_u1v, 1, true, uint16_t, xnn_f16_minmax_params, xnn_init_f16_minmax_fp16arith_params)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vclamp_ukernel__rvvfp16arith_u2v, 2, true, uint16_t, xnn_f16_minmax_params, xnn_init_f16_minmax_fp16arith_params)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vclamp_ukernel__rvvfp16arith_u4v, 4, true, uint16_t, xnn_f16_minmax_params, xnn_init_f16_minmax_fp16arith_params)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vclamp_ukernel__rvvfp16arith_u8v, 8, true, uint16_t, xnn_f16_minmax_params, xnn_init_f16_minmax_fp16arith_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vclamp_ukernel__rvvfp16arith_u1v, 1, true, uint16_t, xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vclamp_ukernel__rvvfp16arith_u2v, 2, true, uint16_t, xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vclamp_ukernel__rvvfp16arith_u4v, 4, true, uint16_t, xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector_fp16_arith, xnn_f16_vclamp_ukernel__rvvfp16arith_u8v, 8, true, uint16_t, xnn_f16_minmax_params, xnn_init_f16_minmax_scalar_params)
 #endif  // XNN_ENABLE_RISCV_FP16_VECTOR && (XNN_ARCH_RISCV)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

@@ -29,10 +29,10 @@ void xnn_f16_qs8_vcvt_ukernel__neonfp16arith_u8(
 
   const uint16_t* i = (const uint16_t*) input;
 
-  const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neonfp16arith.scale));
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->neonfp16arith.output_zero_point);
-  const int8x8_t voutput_min = vld1_dup_s8(&params->neonfp16arith.output_min);
-  const int8x8_t voutput_max = vld1_dup_s8(&params->neonfp16arith.output_max);
+  const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.scale));
+  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
+  const int8x8_t voutput_min = vld1_dup_s8(&params->scalar.output_min);
+  const int8x8_t voutput_max = vld1_dup_s8(&params->scalar.output_max);
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     float16x8_t vx = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
 

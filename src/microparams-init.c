@@ -11,7 +11,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <fp16/fp16.h>
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microparams.h"
@@ -1317,7 +1316,7 @@ void xnn_update_qu8_avgpool_minmax_fp32_wasmsimd_params(
 }
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-size_t xnn_init_f16_scale_fp16arith_params(
+size_t xnn_init_f16_scale_scalar_params(
   union xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale)
 {
@@ -1348,55 +1347,25 @@ void xnn_update_f32_scaleminmax_scalar_params(
   params->scalar.scale = scale;
 }
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f16_scaleminmax_fp16arith_params(
+size_t xnn_init_f16_scaleminmax_scalar_params(
   union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale,
   uint16_t min,
   uint16_t max)
 {
-  params->fp16arith.scale = scale;
-  params->fp16arith.min = min;
-  params->fp16arith.max = max;
-  return sizeof(params->fp16arith);
+  params->scalar.scale = scale;
+  params->scalar.min = min;
+  params->scalar.max = max;
+  return sizeof(params->scalar);
 }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_scaleminmax_avx_params(
-  union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t scale,
-  uint16_t min,
-  uint16_t max)
-{
-  const float scale_f32 = fp16_ieee_to_fp32_value(scale);
-  const float min_f32 = fp16_ieee_to_fp32_value(min);
-  const float max_f32 = fp16_ieee_to_fp32_value(max);
-  params->avx.scale = scale_f32;
-  params->avx.min = min_f32;
-  params->avx.max = max_f32;
-  return sizeof(params->avx);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-void xnn_update_f16_scaleminmax_fp16arith_params(
+void xnn_update_f16_scaleminmax_scalar_params(
   union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale)
 {
-  params->fp16arith.scale = scale;
+  params->scalar.scale = scale;
 }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-void xnn_update_f16_scaleminmax_avx_params(
-  union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t scale)
-{
-  const float scale_f32 = fp16_ieee_to_fp32_value(scale);
-  params->avx.scale = scale_f32;
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 size_t xnn_init_f32_scaleminmax_scalar_params(
   union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -1473,30 +1442,28 @@ size_t xnn_init_f32_gavgpool_sse_params(
 }
 #endif
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f16_gavgpool_neonfp16arith_params(
+size_t xnn_init_f16_gavgpool_scalar_params(
   union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t multiplier,
   uint16_t output_min,
   uint16_t output_max,
   uint32_t width)
 {
-  params->neonfp16arith.multiplier = multiplier;
-  params->neonfp16arith.output_min = output_min;
-  params->neonfp16arith.output_max = output_max;
+  params->scalar.multiplier = multiplier;
+  params->scalar.output_min = output_min;
+  params->scalar.output_max = output_max;
 
   const uint32_t w = (width - 1) & 7;
-  params->neonfp16arith.mask[0] = UINT16_C(0xFFFF);
-  params->neonfp16arith.mask[1] = -(uint16_t) (w >= 1);
-  params->neonfp16arith.mask[2] = -(uint16_t) (w >= 2);
-  params->neonfp16arith.mask[3] = -(uint16_t) (w >= 3);
-  params->neonfp16arith.mask[4] = -(uint16_t) (w >= 4);
-  params->neonfp16arith.mask[5] = -(uint16_t) (w >= 5);
-  params->neonfp16arith.mask[6] = -(uint16_t) (w >= 6);
-  params->neonfp16arith.mask[7] = -(uint16_t) (w >= 7);
-  return sizeof(params->neonfp16arith);
+  params->scalar.mask[0] = UINT16_C(0xFFFF);
+  params->scalar.mask[1] = -(uint16_t) (w >= 1);
+  params->scalar.mask[2] = -(uint16_t) (w >= 2);
+  params->scalar.mask[3] = -(uint16_t) (w >= 3);
+  params->scalar.mask[4] = -(uint16_t) (w >= 4);
+  params->scalar.mask[5] = -(uint16_t) (w >= 5);
+  params->scalar.mask[6] = -(uint16_t) (w >= 6);
+  params->scalar.mask[7] = -(uint16_t) (w >= 7);
+  return sizeof(params->scalar);
 }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 void xnn_update_f32_gavgpool_params(
   union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
@@ -1532,25 +1499,23 @@ void xnn_update_f32_gavgpool_params(
   #endif
 }
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-void xnn_update_f16_gavgpool_neonfp16arith_params(
+void xnn_update_f16_gavgpool_scalar_params(
   union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t multiplier,
   uint32_t width)
 {
-  params->neonfp16arith.multiplier = multiplier;
+  params->scalar.multiplier = multiplier;
 
   const uint32_t w = (width - 1) & 7;
-  params->neonfp16arith.mask[0] = UINT16_C(0xFFFF);
-  params->neonfp16arith.mask[1] = -(uint16_t) (w >= 1);
-  params->neonfp16arith.mask[2] = -(uint16_t) (w >= 2);
-  params->neonfp16arith.mask[3] = -(uint16_t) (w >= 3);
-  params->neonfp16arith.mask[4] = -(uint16_t) (w >= 4);
-  params->neonfp16arith.mask[5] = -(uint16_t) (w >= 5);
-  params->neonfp16arith.mask[6] = -(uint16_t) (w >= 6);
-  params->neonfp16arith.mask[7] = -(uint16_t) (w >= 7);
+  params->scalar.mask[0] = UINT16_C(0xFFFF);
+  params->scalar.mask[1] = -(uint16_t) (w >= 1);
+  params->scalar.mask[2] = -(uint16_t) (w >= 2);
+  params->scalar.mask[3] = -(uint16_t) (w >= 3);
+  params->scalar.mask[4] = -(uint16_t) (w >= 4);
+  params->scalar.mask[5] = -(uint16_t) (w >= 5);
+  params->scalar.mask[6] = -(uint16_t) (w >= 6);
+  params->scalar.mask[7] = -(uint16_t) (w >= 7);
 }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 size_t xnn_init_bf16_minmax_scalar_params(
   union xnn_bf16_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -1562,29 +1527,15 @@ size_t xnn_init_bf16_minmax_scalar_params(
   return sizeof(params->scalar);
 }
 
-size_t xnn_init_f16_minmax_fp16arith_params(
-  union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t min,
-  uint16_t max)
-{
-  params->fp16arith.min = min;
-  params->fp16arith.max = max;
-  return sizeof(params->fp16arith);
-}
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_f16_minmax_scalar_params(
   union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t min,
   uint16_t max)
 {
-  const float min_f32 = fp16_ieee_to_fp32_value(min);
-  const float max_f32 = fp16_ieee_to_fp32_value(max);
-  params->scalar.min = min_f32;
-  params->scalar.max = max_f32;
+  params->scalar.min = min;
+  params->scalar.max = max;
   return sizeof(params->scalar);
 }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 size_t xnn_init_f16_qc4w_minmax_scalar_params(
   union xnn_f16_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -1593,26 +1544,10 @@ size_t xnn_init_f16_qc4w_minmax_scalar_params(
   uint8_t kernel_zero_point)
 {
   assert(kernel_zero_point <= 15);
-  params->fp16arith.min = output_min;
-  params->fp16arith.max = output_max;
-  return sizeof(params->fp16arith);
-}
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_qc4w_minmax_scalar32_params(
-  union xnn_f16_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t output_min,
-  uint16_t output_max,
-  uint8_t kernel_zero_point)
-{
-  assert(kernel_zero_point <= 15);
-  const float min_f32 = fp16_ieee_to_fp32_value(output_min);
-  const float max_f32 = fp16_ieee_to_fp32_value(output_max);
-  params->scalar.min = min_f32;
-  params->scalar.max = max_f32;
+  params->scalar.min = output_min;
+  params->scalar.max = output_max;
   return sizeof(params->scalar);
 }
-#endif
 
 size_t xnn_init_f16_qb4w_minmax_scalar_params(
   union xnn_f16_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -1622,29 +1557,11 @@ size_t xnn_init_f16_qb4w_minmax_scalar_params(
   size_t blocksize)
 {
   assert(kernel_zero_point <= 15);
-  params->fp16arith.min = output_min;
-  params->fp16arith.max = output_max;
-  params->fp16arith.blocksize = blocksize;
-  return sizeof(params->fp16arith);
-}
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_qb4w_minmax_scalar32_params(
-  union xnn_f16_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t output_min,
-  uint16_t output_max,
-  uint8_t kernel_zero_point,
-  size_t blocksize)
-{
-  assert(kernel_zero_point <= 15);
-  const float min_f32 = fp16_ieee_to_fp32_value(output_min);
-  const float max_f32 = fp16_ieee_to_fp32_value(output_max);
-  params->scalar.min = min_f32;
-  params->scalar.max = max_f32;
+  params->scalar.min = output_min;
+  params->scalar.max = output_max;
   params->scalar.blocksize = blocksize;
   return sizeof(params->scalar);
 }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 size_t xnn_init_f32_minmax_scalar_params(
   union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -1960,19 +1877,6 @@ size_t xnn_init_f16_elu_scalar_params(
   return sizeof(params->scalar);
 }
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-size_t xnn_init_f16_elu_avx2_params(
-  union xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t prescale,
-  uint16_t alpha,
-  uint16_t beta)
-{
-  params->avx2.prescale = fp16_ieee_to_fp32_value(prescale);
-  params->avx2.alpha = fp16_ieee_to_fp32_value(alpha);
-  params->avx2.beta = fp16_ieee_to_fp32_value(beta);
-  return sizeof(params->avx2);
-}
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 size_t xnn_init_f32_elu_scalar_params(
   union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
@@ -1987,26 +1891,13 @@ size_t xnn_init_f32_elu_scalar_params(
 }
 
 
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f16_lrelu_fp16arith_params(
-  union xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t slope)
-{
-  params->fp16arith.slope = slope;
-  return sizeof(params->fp16arith);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_f16_lrelu_scalar_params(
   union xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t slope)
 {
-  params->scalar.slope = fp16_ieee_to_fp32_value(slope);
+  params->scalar.slope = slope;
   return sizeof(params->scalar);
 }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 size_t xnn_init_f32_lrelu_scalar_params(
   union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
@@ -2331,7 +2222,7 @@ size_t xnn_init_f16_qs8_cvt_scalar_params(
   int8_t output_min,
   int8_t output_max)
 {
-  params->scalar.scale = fp16_ieee_to_fp32_value(scale);
+  params->scalar.scale = scale;
   params->scalar.output_min = output_min;
   params->scalar.output_max = output_max;
   params->scalar.output_zero_point = output_zero_point;
@@ -2351,22 +2242,6 @@ size_t xnn_init_f32_qs8_cvt_scalar_params(
   params->scalar.output_max = output_max;
   return sizeof(params->scalar);
 }
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_f16_qs8_cvt_neonfp16arith_params(
-  union xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max)
-{
-  params->neonfp16arith.scale = scale;
-  params->neonfp16arith.output_zero_point = (int16_t) output_zero_point;
-  params->neonfp16arith.output_min = output_min;
-  params->neonfp16arith.output_max = output_max;
-  return sizeof(params->neonfp16arith);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 size_t xnn_init_f32_qu8_cvt_scalar_params(
   union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
@@ -2426,29 +2301,15 @@ size_t xnn_init_qs8_f32_cvt_scalar_params(
   return sizeof(params->scalar);
 }
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-size_t xnn_init_qs8_f16_cvt_neonfp16arith_params(
-  union xnn_qs8_f16_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t scale,
-  int8_t zero_point)
-{
-  params->neon.zero_point = (int16_t) zero_point;
-  params->neon.scale = scale;
-  return sizeof(params->neon);
-}
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
 size_t xnn_init_qs8_f16_cvt_scalar_params(
   union xnn_qs8_f16_cvt_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale,
   int8_t zero_point)
 {
-  params->scalar.zero_point = (int32_t) zero_point;
-  params->scalar.scale = fp16_ieee_to_fp32_value(scale);
+  params->scalar.zero_point = (int16_t) zero_point;
+  params->scalar.scale = scale;
   return sizeof(params->scalar);
 }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 size_t xnn_init_qu8_cvt_scalar_params(
   union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],

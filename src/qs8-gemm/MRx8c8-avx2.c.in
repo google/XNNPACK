@@ -112,8 +112,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
     const __m128i vmask = _mm_set1_epi8(0xF0);
     XNN_FORCE_REALIZATION(vmask);
   $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32", "QB4_F16", "QB4_F32"]:
-    const __m256 vmin = _mm256_set1_ps(params->scalar.min);
-    const __m256 vmax = _mm256_set1_ps(params->scalar.max);
+    $if "F16" in DATATYPE:
+      const __m256 vmin = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.min));
+      const __m256 vmax = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
+    $else:
+      const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+      const __m256 vmax = _mm256_set1_ps(params->scalar.max);
     XNN_FORCE_REALIZATION(vmin);
     XNN_FORCE_REALIZATION(vmax);
   $else:

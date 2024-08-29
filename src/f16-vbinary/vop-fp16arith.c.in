@@ -48,8 +48,8 @@ void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__fp16arith_u${BATCH_TILE}(
 
   $if ACTIVATION == "MINMAX":
     float16_t vy_min, vy_max;
-    memcpy(&vy_min, &params->fp16arith.min, sizeof(vy_min));
-    memcpy(&vy_max, &params->fp16arith.max, sizeof(vy_max));
+    memcpy(&vy_min, &params->scalar.min, sizeof(vy_min));
+    memcpy(&vy_max, &params->scalar.max, sizeof(vy_max));
 
   $if BATCH_TILE > 1:
     for (; batch >= ${BATCH_TILE} * sizeof(float16_t); batch -= ${BATCH_TILE} * sizeof(float16_t)) {

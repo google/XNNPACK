@@ -86,8 +86,12 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__
   $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
     const __m256i vinput_zero_point = _mm256_set1_epi32((int) quantization_params->zero_point + 128);
     const __m256 vinput_inv_scale = _mm256_set1_ps(quantization_params->inv_scale);
-    const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
-    const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
+    $if "F16" in DATATYPE:
+      const __m256 voutput_min = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.min));
+      const __m256 voutput_max = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
+    $else:
+      const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
+      const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
     // XNN_FORCE_REALIZATION(vinput_zero_point);
     // XNN_FORCE_REALIZATION(vinput_inv_scale);
     // XNN_FORCE_REALIZATION(voutput_min);

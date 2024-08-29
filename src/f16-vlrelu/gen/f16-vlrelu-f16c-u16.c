@@ -27,7 +27,7 @@ void xnn_f16_vlrelu_ukernel__f16c_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m256 vslope = _mm256_set1_ps(params->scalar.slope);
+  const __m256 vslope = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.slope));
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {

@@ -99,10 +99,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
       }
 
   $if DATATYPE in ["QB4_F16", "QB4_F32"]:
-    $if DATATYPE == "QB4_F16":
-      size_t bl = params->fp16arith.blocksize;
-    $else:
-      size_t bl = params->scalar.blocksize;
+    size_t bl = params->scalar.blocksize;
     assert(bl <= kc);
     assert(bl != 0);
     assert(bl % 32 == 0);
@@ -275,11 +272,11 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
           $for N in range(0, NR, 8):
             float16x8_t vfp16out${M}x${ABC[N:N+8]} = vcombine_f16(vcvt_f16_f32(vout${M}x${ABC[N:N+4]}), vcvt_f16_f32(vout${M}x${ABC[N+4:N+8]}));
 
-        const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
+        const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.min));
         $for M in range(0, MR):
           $for N in range(0, NR, 8):
             vfp16out${M}x${ABC[N:N+8]} = vmaxq_f16(vfp16out${M}x${ABC[N:N+8]}, voutput_min);
-        const float16x8_t voutput_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
+        const float16x8_t voutput_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.max));
         $for M in range(0, MR):
           $for N in range(0, NR, 8):
             vfp16out${M}x${ABC[N:N+8]} = vminq_f16(vfp16out${M}x${ABC[N:N+8]}, voutput_max);

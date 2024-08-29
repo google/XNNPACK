@@ -22,7 +22,7 @@
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VCvtMicrokernelTester()
       .batch_size(8)
-      .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u8, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+      .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u8, xnn_init_qs8_f16_cvt_scalar_params);
   }
 
   TEST(QS8_F16_VCVT__NEONFP16ARITH_U8, batch_div_8) {
@@ -30,7 +30,7 @@
     for (size_t batch_size = 16; batch_size < 80; batch_size += 8) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u8, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u8, xnn_init_qs8_f16_cvt_scalar_params);
     }
   }
 
@@ -39,7 +39,7 @@
     for (size_t batch_size = 1; batch_size < 8; batch_size++) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u8, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u8, xnn_init_qs8_f16_cvt_scalar_params);
     }
   }
 
@@ -48,7 +48,7 @@
     for (size_t batch_size = 9; batch_size < 16; batch_size++) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u8, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u8, xnn_init_qs8_f16_cvt_scalar_params);
     }
   }
 
@@ -58,7 +58,7 @@
       VCvtMicrokernelTester()
         .batch_size(batch_size)
         .scale(50)
-        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u8, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u8, xnn_init_qs8_f16_cvt_scalar_params);
     }
   }
 
@@ -69,7 +69,7 @@
         VCvtMicrokernelTester()
           .batch_size(batch_size)
           .input_zero_point(input_zero_point)
-          .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u8, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+          .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u8, xnn_init_qs8_f16_cvt_scalar_params);
       }
     }
   }
@@ -81,7 +81,7 @@
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VCvtMicrokernelTester()
       .batch_size(16)
-      .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u16, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+      .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u16, xnn_init_qs8_f16_cvt_scalar_params);
   }
 
   TEST(QS8_F16_VCVT__NEONFP16ARITH_U16, batch_div_16) {
@@ -89,7 +89,7 @@
     for (size_t batch_size = 32; batch_size < 160; batch_size += 16) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u16, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u16, xnn_init_qs8_f16_cvt_scalar_params);
     }
   }
 
@@ -98,7 +98,7 @@
     for (size_t batch_size = 1; batch_size < 16; batch_size++) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u16, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u16, xnn_init_qs8_f16_cvt_scalar_params);
     }
   }
 
@@ -107,7 +107,7 @@
     for (size_t batch_size = 17; batch_size < 32; batch_size++) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u16, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u16, xnn_init_qs8_f16_cvt_scalar_params);
     }
   }
 
@@ -117,7 +117,7 @@
       VCvtMicrokernelTester()
         .batch_size(batch_size)
         .scale(50)
-        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u16, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u16, xnn_init_qs8_f16_cvt_scalar_params);
     }
   }
 
@@ -128,7 +128,7 @@
         VCvtMicrokernelTester()
           .batch_size(batch_size)
           .input_zero_point(input_zero_point)
-          .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u16, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+          .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u16, xnn_init_qs8_f16_cvt_scalar_params);
       }
     }
   }
@@ -140,7 +140,7 @@
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VCvtMicrokernelTester()
       .batch_size(24)
-      .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u24, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+      .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u24, xnn_init_qs8_f16_cvt_scalar_params);
   }
 
   TEST(QS8_F16_VCVT__NEONFP16ARITH_U24, batch_div_24) {
@@ -148,7 +148,7 @@
     for (size_t batch_size = 48; batch_size < 240; batch_size += 24) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u24, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u24, xnn_init_qs8_f16_cvt_scalar_params);
     }
   }
 
@@ -157,7 +157,7 @@
     for (size_t batch_size = 1; batch_size < 24; batch_size++) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u24, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u24, xnn_init_qs8_f16_cvt_scalar_params);
     }
   }
 
@@ -166,7 +166,7 @@
     for (size_t batch_size = 25; batch_size < 48; batch_size++) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u24, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u24, xnn_init_qs8_f16_cvt_scalar_params);
     }
   }
 
@@ -176,7 +176,7 @@
       VCvtMicrokernelTester()
         .batch_size(batch_size)
         .scale(50)
-        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u24, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u24, xnn_init_qs8_f16_cvt_scalar_params);
     }
   }
 
@@ -187,7 +187,7 @@
         VCvtMicrokernelTester()
           .batch_size(batch_size)
           .input_zero_point(input_zero_point)
-          .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u24, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+          .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u24, xnn_init_qs8_f16_cvt_scalar_params);
       }
     }
   }
@@ -199,7 +199,7 @@
     TEST_REQUIRES_ARM_NEON_FP16_ARITH;
     VCvtMicrokernelTester()
       .batch_size(32)
-      .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u32, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+      .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u32, xnn_init_qs8_f16_cvt_scalar_params);
   }
 
   TEST(QS8_F16_VCVT__NEONFP16ARITH_U32, batch_div_32) {
@@ -207,7 +207,7 @@
     for (size_t batch_size = 64; batch_size < 320; batch_size += 32) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u32, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u32, xnn_init_qs8_f16_cvt_scalar_params);
     }
   }
 
@@ -216,7 +216,7 @@
     for (size_t batch_size = 1; batch_size < 32; batch_size++) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u32, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u32, xnn_init_qs8_f16_cvt_scalar_params);
     }
   }
 
@@ -225,7 +225,7 @@
     for (size_t batch_size = 33; batch_size < 64; batch_size++) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
-        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u32, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u32, xnn_init_qs8_f16_cvt_scalar_params);
     }
   }
 
@@ -235,7 +235,7 @@
       VCvtMicrokernelTester()
         .batch_size(batch_size)
         .scale(50)
-        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u32, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+        .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u32, xnn_init_qs8_f16_cvt_scalar_params);
     }
   }
 
@@ -246,7 +246,7 @@
         VCvtMicrokernelTester()
           .batch_size(batch_size)
           .input_zero_point(input_zero_point)
-          .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u32, xnn_init_qs8_f16_cvt_neonfp16arith_params);
+          .Test(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u32, xnn_init_qs8_f16_cvt_scalar_params);
       }
     }
   }

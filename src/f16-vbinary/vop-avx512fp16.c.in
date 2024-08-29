@@ -56,8 +56,8 @@ void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__avx512fp16_u${BATCH_TILE}(
   uint16_t* o = (uint16_t*) output;
 
   $if ACTIVATION == "MINMAX":
-    const __m512h voutput_min = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.min));
-    const __m512h voutput_max = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.max));
+    const __m512h voutput_min = _mm512_castsi512_ph(_mm512_set1_epi16(params->scalar.min));
+    const __m512h voutput_max = _mm512_castsi512_ph(_mm512_set1_epi16(params->scalar.max));
 
   $if BATCH_TILE > 32:
     for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {

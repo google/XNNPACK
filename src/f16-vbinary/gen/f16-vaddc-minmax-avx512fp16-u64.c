@@ -34,8 +34,8 @@ void xnn_f16_vaddc_minmax_ukernel__avx512fp16_u64(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
-  const __m512h voutput_min = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.min));
-  const __m512h voutput_max = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.max));
+  const __m512h voutput_min = _mm512_castsi512_ph(_mm512_set1_epi16(params->scalar.min));
+  const __m512h voutput_max = _mm512_castsi512_ph(_mm512_set1_epi16(params->scalar.max));
   const __m512h vb = _mm512_castsi512_ph(_mm512_set1_epi16(*b));
 
   for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {

@@ -267,10 +267,10 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_1x16__neonfp16arith_mlal_lane_prfm(
 
     float16x8_t vfp16out0x01234567 = vcombine_f16(vcvt_f16_f32(vout0x0123), vcvt_f16_f32(vout0x4567));
     float16x8_t vfp16out0x89ABCDEF = vcombine_f16(vcvt_f16_f32(vout0x89AB), vcvt_f16_f32(vout0xCDEF));
-    const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
+    const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.min));
     vfp16out0x01234567 = vmaxq_f16(vfp16out0x01234567, voutput_min);
     vfp16out0x89ABCDEF = vmaxq_f16(vfp16out0x89ABCDEF, voutput_min);
-    const float16x8_t voutput_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
+    const float16x8_t voutput_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.max));
     vfp16out0x01234567 = vminq_f16(vfp16out0x01234567, voutput_max);
     vfp16out0x89ABCDEF = vminq_f16(vfp16out0x89ABCDEF, voutput_max);
 

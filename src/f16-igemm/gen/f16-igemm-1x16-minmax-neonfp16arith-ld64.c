@@ -119,11 +119,11 @@ void xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64(
     } while (p != 0);
 
 
-    const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
+    const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.min));
     vacc0x0 = vmaxq_f16(vacc0x0, vmin);
     vacc0x1 = vmaxq_f16(vacc0x1, vmin);
 
-    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
+    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.max));
     vacc0x0 = vminq_f16(vacc0x0, vmax);
     vacc0x1 = vminq_f16(vacc0x1, vmax);
 

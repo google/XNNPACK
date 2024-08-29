@@ -10,6 +10,7 @@ $assert DATATYPE in ["QC8", "QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]
 
 #include <immintrin.h>
 
+#include <fp16/fp16.h>
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
@@ -87,8 +88,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__$
   $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
     $for M in range(MR):
       const __m128i vinput_zero_point${M} = _mm_set1_epi32((int) quantization_params[${M}].zero_point + 128);
-    const __m128 voutput_min = _mm_set1_ps(params->scalar.min);
-    const __m128 voutput_max = _mm_set1_ps(params->scalar.max);
+    $if "F16" in DATATYPE:
+      const __m128 voutput_min = _mm_set1_ps(fp16_ieee_to_fp32_value(params->scalar.min));
+      const __m128 voutput_max = _mm_set1_ps(fp16_ieee_to_fp32_value(params->scalar.max));
+    $else:
+      const __m128 voutput_min = _mm_set1_ps(params->scalar.min);
+      const __m128 voutput_max = _mm_set1_ps(params->scalar.max);
     $if DATATYPE in ["QC4_F16", "QC4_F32"]:
       $if VARIANT == "MADD":
         const __m128i vmask = _mm_set1_epi8(0x0F);

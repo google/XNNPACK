@@ -18,7 +18,7 @@
 // arch_flags, ukernel, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, qmin, qmax, params_type, init_params
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon_fp16_arith, xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, 8, 8, 9, 8, -16384, 16384, xnn_init_f16_minmax_params_fn, xnn_init_f16_minmax_fp16arith_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon_fp16_arith, xnn_f16_maxpool_minmax_ukernel_9p8x__neonfp16arith_c8, 8, 8, 9, 8, -16384, 16384, xnn_init_f16_minmax_params_fn, xnn_init_f16_minmax_scalar_params)
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

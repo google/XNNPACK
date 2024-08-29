@@ -26,7 +26,7 @@ void xnn_f16_vlrelu_ukernel__neonfp16arith_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float16x8_t vslope = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.slope));
+  const float16x8_t vslope = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.slope));
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {

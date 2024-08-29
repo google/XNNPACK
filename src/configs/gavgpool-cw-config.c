@@ -25,8 +25,8 @@ static void init_f16_gavgpool_cw_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_gavgpool_cw_config.ukernel = (xnn_gavgpool_cw_ukernel_fn) xnn_f16_gavgpool_cw_ukernel__neonfp16arith_u8;
-      f16_gavgpool_cw_config.init.f16 = xnn_init_f16_gavgpool_neonfp16arith_params;
-      f16_gavgpool_cw_config.update.f16 = xnn_update_f16_gavgpool_neonfp16arith_params;
+      f16_gavgpool_cw_config.init.f16 = xnn_init_f16_gavgpool_scalar_params;
+      f16_gavgpool_cw_config.update.f16 = xnn_update_f16_gavgpool_scalar_params;
       f16_gavgpool_cw_config.pixel_tile = 8;
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
@@ -34,8 +34,8 @@ static void init_f16_gavgpool_cw_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_gavgpool_cw_config.ukernel = (xnn_gavgpool_cw_ukernel_fn) xnn_f16_gavgpool_cw_ukernel__neonfp16arith_u8;
-      f16_gavgpool_cw_config.init.f16 = xnn_init_f16_gavgpool_neonfp16arith_params;
-      f16_gavgpool_cw_config.update.f16 = xnn_update_f16_gavgpool_neonfp16arith_params;
+      f16_gavgpool_cw_config.init.f16 = xnn_init_f16_gavgpool_scalar_params;
+      f16_gavgpool_cw_config.update.f16 = xnn_update_f16_gavgpool_scalar_params;
       f16_gavgpool_cw_config.pixel_tile = 8;
     }
   #endif
