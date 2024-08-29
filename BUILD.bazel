@@ -12,6 +12,7 @@ load("@rules_python//python:py_binary.bzl", "py_binary")
 load(
     ":build_defs.bzl",
     "xnnpack_cc_library",
+    "xnnpack_cxx_library",
     "xnnpack_if_kleidiai_enabled",
     "xnnpack_min_size_copts",
     "xnnpack_slinky_deps",
@@ -895,9 +896,9 @@ xnnpack_cc_library(
     ],
 )
 
-xnnpack_cc_library(
+xnnpack_cxx_library(
     name = "packing",
-    srcs = ["src/packing.c"],
+    srcs = ["src/packing.cc"],
     hdrs = ["src/xnnpack/pack.h"],
     defines = xnnpack_configurable_defines(),
     deps = [
@@ -936,7 +937,7 @@ xnnpack_transitive_source_list(
 genrule(
     name = "generate_build_identifier",
     srcs = [
-        "src/packing.c",
+        "src/packing.cc",
         ":build_identifier_ukernel_srcs",
     ],
     outs = ["src/build_identifier.c"],

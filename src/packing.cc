@@ -28,6 +28,8 @@
 
 #include <fp16/fp16.h>
 
+extern "C" {
+
 void xnn_pack_f32_gemm_goi_w(
   size_t g,
   size_t nc,
@@ -44,14 +46,14 @@ void xnn_pack_f32_gemm_goi_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           packed_weights[nr_block_offset] = b[nr_block_start + nr_block_offset];
         }
@@ -77,7 +79,7 @@ void xnn_pack_f32_gemm_goi_w(
       packed_weights = (float*) ((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc * kc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -99,14 +101,14 @@ void xnn_pack_f16_gemm_goi_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           packed_weights[nr_block_offset] = b[nr_block_start + nr_block_offset];
         }
@@ -132,7 +134,7 @@ void xnn_pack_f16_gemm_goi_w(
       packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc * kc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -154,14 +156,14 @@ void xnn_pack_f32_to_f16_gemm_goi_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           packed_weights[nr_block_offset] = fp16_ieee_from_fp32_value(b[nr_block_start + nr_block_offset]);
         }
@@ -187,7 +189,7 @@ void xnn_pack_f32_to_f16_gemm_goi_w(
       packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc * kc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -209,8 +211,8 @@ void xnn_pack_qu8_gemm_goi_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   const int32_t izp = (int32_t) params->input_zero_point;
@@ -219,7 +221,7 @@ void xnn_pack_qu8_gemm_goi_w(
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_weights;
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, bzp + b[nr_block_start + nr_block_offset]);
           packed_weights = (int32_t*) packed_weights + 1;
@@ -249,10 +251,10 @@ void xnn_pack_qu8_gemm_goi_w(
         }
         packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc * kc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -274,8 +276,8 @@ void xnn_pack_qs8_gemm_goi_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   const uint32_t izp = (uint32_t) params->input_zero_point;
@@ -283,7 +285,7 @@ void xnn_pack_qs8_gemm_goi_w(
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_weights;
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
           packed_weights = (int32_t*) packed_weights + 1;
@@ -313,10 +315,10 @@ void xnn_pack_qs8_gemm_goi_w(
         }
         packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc * kc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -338,8 +340,8 @@ void xnn_pack_qs8_to_qu8_gemm_goi_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   const uint32_t izp = (uint32_t) params->input_zero_point + 128;
@@ -347,7 +349,7 @@ void xnn_pack_qs8_to_qu8_gemm_goi_w(
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_weights;
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
           packed_weights = (int32_t*) packed_weights + 1;
@@ -377,10 +379,10 @@ void xnn_pack_qs8_to_qu8_gemm_goi_w(
         }
         packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc * kc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -410,9 +412,9 @@ void xnn_pack_qs8_qc4w_gemm_goi_w(
   assert(nr >= sr);
   assert(kr >= 1 && kr <= 16);
   assert(sr >= 1 && sr <= 16);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
-  assert(params != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
+  assert(params != nullptr);
   assert(params->kernel_zero_point == 8 || params->kernel_zero_point == 0);
 
   const size_t skr = sr * kr;
@@ -423,7 +425,7 @@ void xnn_pack_qs8_qc4w_gemm_goi_w(
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_weights;
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
           packed_weights = (int32_t*) packed_weights + 1;
@@ -477,11 +479,11 @@ void xnn_pack_qs8_qc4w_gemm_goi_w(
         }
         packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;  // skip NR remainder
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
       nr_block_start += nr;
     } while (nr_block_start < nc);
     k += nc * kc;  // kc * 2 nibbles
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -509,9 +511,9 @@ void xnn_pack_qs8_qc4uw_gemm_goi_w(
   assert(nr >= sr);
   assert(kr >= 1 && kr <= 16);
   assert(sr >= 1 && sr <= 16);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
-  assert(params != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
+  assert(params != nullptr);
   assert(params->kernel_zero_point == 8 || params->kernel_zero_point == 0);
 
   const size_t skr = sr * kr;
@@ -522,7 +524,7 @@ void xnn_pack_qs8_qc4uw_gemm_goi_w(
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_weights;
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
           packed_weights = (int32_t*) packed_weights + 1;
@@ -576,11 +578,11 @@ void xnn_pack_qs8_qc4uw_gemm_goi_w(
         }
         packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;  // skip NR remainder
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
       nr_block_start += nr;
     } while (nr_block_start < nc);
     k += nc * kc;  // kc * 2 nibbles
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -608,11 +610,11 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
   assert(nr >= sr);
   assert(kr >= 1 && kr <= 16);
   assert(sr >= 1 && sr <= 16);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
-  assert(params != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
+  assert(params != nullptr);
   assert(params->kernel_zero_point == 8);
-  assert(bias == NULL); // Not used here. Must be updated outside.
+  assert(bias == nullptr); // Not used here. Must be updated outside.
 
   const size_t skr = sr * kr;
 
@@ -698,11 +700,11 @@ void xnn_pack_qs8_qb4w_gemm_gio_w(
   assert(nr >= sr);
   assert(kr >= 1 && kr <= 16);
   assert(sr >= 1 && sr <= 16);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
-  assert(params != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
+  assert(params != nullptr);
   assert(params->kernel_zero_point == 8);
-  assert(bias == NULL);  // Not used here. Must be updated outside.
+  assert(bias == nullptr);  // Not used here. Must be updated outside.
 
   const size_t skr = sr * kr;
 
@@ -786,9 +788,9 @@ void xnn_pack_qs8_qc4w_gemm_gio_w(
   assert(nr >= sr);
   assert(kr >= 1 && kr <= 16);
   assert(sr >= 1 && sr <= 16);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
-  assert(params != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
+  assert(params != nullptr);
   assert(params->kernel_zero_point == 8 || params->kernel_zero_point == 0);
 
   const size_t skr = sr * kr;
@@ -799,7 +801,7 @@ void xnn_pack_qs8_qc4w_gemm_gio_w(
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_weights;
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
           packed_weights = (int32_t*) packed_weights + 1;
@@ -853,11 +855,11 @@ void xnn_pack_qs8_qc4w_gemm_gio_w(
         }
         packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;  // skip NR remainder
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
       nr_block_start += nr;
     } while (nr_block_start < nc);
     k += nc * kc;  // kc * 2 nibbles
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -886,9 +888,9 @@ void xnn_pack_qs8_qc4uw_gemm_gio_w(
   assert(nr >= sr);
   assert(kr >= 1 && kr <= 16);
   assert(sr >= 1 && sr <= 16);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
-  assert(params != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
+  assert(params != nullptr);
   assert(params->kernel_zero_point == 8 || params->kernel_zero_point == 0);
 
   const size_t skr = sr * kr;
@@ -899,7 +901,7 @@ void xnn_pack_qs8_qc4uw_gemm_gio_w(
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_weights;
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
           packed_weights = (int32_t*) packed_weights + 1;
@@ -953,11 +955,11 @@ void xnn_pack_qs8_qc4uw_gemm_gio_w(
         }
         packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;  // skip NR remainder
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
       nr_block_start += nr;
     } while (nr_block_start < nc);
     k += nc * kc;  // kc * 2 nibbles
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -979,15 +981,15 @@ void xnn_pack_f32_qs8w_gemm_goi_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const int32_t* b = (const int32_t*) bias;
   const size_t skr = sr * kr;
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
           packed_weights = (int32_t*) packed_weights + 1;
@@ -1014,10 +1016,10 @@ void xnn_pack_f32_qs8w_gemm_goi_w(
         }
         packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc * kc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -1041,8 +1043,8 @@ void xnn_pack_f32_qc4w_gemm_goi_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   kc = (kc + 1) >> 1;
   const int32_t* b = (const int32_t*) bias;
@@ -1050,7 +1052,7 @@ void xnn_pack_f32_qc4w_gemm_goi_w(
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
           packed_weights = (int32_t*) packed_weights + 1;
@@ -1077,10 +1079,10 @@ void xnn_pack_f32_qc4w_gemm_goi_w(
         }
         packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
     }
     k = (const uint8_t*) k + nc * kc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -1103,14 +1105,14 @@ void xnn_pack_f32_gemm_gio_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           packed_weights[nr_block_offset] = b[nr_block_start + nr_block_offset];
         }
@@ -1136,7 +1138,7 @@ void xnn_pack_f32_gemm_gio_w(
       packed_weights = (float*) ((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc * kc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -1159,14 +1161,14 @@ void xnn_pack_f16_gemm_gio_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           packed_weights[nr_block_offset] = b[nr_block_start + nr_block_offset];
         }
@@ -1192,7 +1194,7 @@ void xnn_pack_f16_gemm_gio_w(
       packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc * kc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -1215,14 +1217,14 @@ void xnn_pack_f32_to_f16_gemm_gio_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           packed_weights[nr_block_offset] = fp16_ieee_from_fp32_value(b[nr_block_start + nr_block_offset]);
         }
@@ -1248,7 +1250,7 @@ void xnn_pack_f32_to_f16_gemm_gio_w(
       packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc * kc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -1271,8 +1273,8 @@ void xnn_pack_qu8_gemm_gio_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   const int32_t izp = (int32_t) params->input_zero_point;
@@ -1281,7 +1283,7 @@ void xnn_pack_qu8_gemm_gio_w(
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_weights;
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, bzp + b[nr_block_start + nr_block_offset]);
           packed_weights = (int32_t*) packed_weights + 1;
@@ -1311,10 +1313,10 @@ void xnn_pack_qu8_gemm_gio_w(
         }
         packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc * kc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -1337,8 +1339,8 @@ void xnn_pack_qs8_to_qu8_gemm_gio_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   const uint32_t izp = (uint32_t) params->input_zero_point + 128;
@@ -1346,7 +1348,7 @@ void xnn_pack_qs8_to_qu8_gemm_gio_w(
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_weights;
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
           packed_weights = (int32_t*) packed_weights + 1;
@@ -1376,10 +1378,10 @@ void xnn_pack_qs8_to_qu8_gemm_gio_w(
         }
         packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc * kc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -1402,8 +1404,8 @@ void xnn_pack_qs8_gemm_gio_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   const uint32_t izp = (uint32_t) params->input_zero_point;
@@ -1411,7 +1413,7 @@ void xnn_pack_qs8_gemm_gio_w(
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_weights;
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
           packed_weights = (int32_t*) packed_weights + 1;
@@ -1441,10 +1443,10 @@ void xnn_pack_qs8_gemm_gio_w(
         }
         packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc * kc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -1478,7 +1480,7 @@ void pack_weights_and_biases(uint32_t flags,                                 //
       groups, output_channels, input_channels,
       nr, kr, sr,
       output_channels,
-      weights, accumulator_init, /*scale=*/NULL,
+      weights, accumulator_init, /*scale=*/nullptr,
       packed_weights_ptr,
       nr * extra_bytes,
       params);
@@ -1486,13 +1488,13 @@ void pack_weights_and_biases(uint32_t flags,                                 //
     pack_gemm_goi_w(
       groups, output_channels, input_channels,
       nr, kr, sr,
-      weights, accumulator_init, /*scale=*/NULL,
+      weights, accumulator_init, /*scale=*/nullptr,
       packed_weights_ptr,
       nr * extra_bytes,
       params);
   }
-  if (extra_data1 != NULL) {
-    assert(init_extra_data1_fn != NULL);
+  if (extra_data1 != nullptr) {
+    assert(init_extra_data1_fn != nullptr);
 
     for (size_t group = 0; group < groups; group++) {
       void* packed_group_ptr = (void*)((char*)packed_weights_ptr +
@@ -1507,14 +1509,14 @@ void pack_weights_and_biases(uint32_t flags,                                 //
     }
   }
 
-  if (extra_data0 != NULL) {
-    assert(init_extra_data0_fn != NULL);
+  if (extra_data0 != nullptr) {
+    assert(init_extra_data0_fn != nullptr);
     for (size_t group = 0; group < groups; group++) {
       void* packed_group_ptr = (void*)((char*)packed_weights_ptr +
                                        group * n_stride * weights_stride);
       void* weights = (void*)((uintptr_t)packed_group_ptr +
                               nr * (weights_stride - extra_bytes));
-      if (extra_data1 != NULL) {
+      if (extra_data1 != nullptr) {
         weights = (void*)((uintptr_t)weights + nr * sizeof(float));
       }
       void* extra_data_ptr =
@@ -1641,7 +1643,8 @@ void xnn_pack_kai_qs4_weights_and_biases(
   const uint32_t nr = gemm_config->nr;
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
-  const struct xnn_qs8_qc4w_packing_params* xnn_params = params;
+  const struct xnn_qs8_qc4w_packing_params* xnn_params =
+      reinterpret_cast<const struct xnn_qs8_qc4w_packing_params*>(params);
 
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     // Repack the packing params.
@@ -1651,11 +1654,11 @@ void xnn_pack_kai_qs4_weights_and_biases(
 
     kai_run_rhs_pack_kxn_qsi4cxp_qsu4cxs1s0(
         groups, output_channels, input_channels, nr, kr, sr,
-        /*rhs=*/weights,                    //
-        /*bias=*/extra_data0,               //
-        /*scale=*/extra_data1,              //
-        /*rhs_packed=*/packed_weights_ptr,  //
-        /*extra_bytes=*/0,                  //
+        /*rhs=*/reinterpret_cast<const uint8_t*>(weights),
+        /*bias=*/reinterpret_cast<const float*>(extra_data0),
+        /*scale=*/reinterpret_cast<const float*>(extra_data1),
+        /*rhs_packed=*/packed_weights_ptr,
+        /*extra_bytes=*/0,
         &kai_params);
   } else {
     // Repack the packing params.
@@ -1665,11 +1668,11 @@ void xnn_pack_kai_qs4_weights_and_biases(
 
     kai_run_rhs_pack_nxk_qsi4cxp_qsu4cxs1s0(
         groups, output_channels, input_channels, nr, kr, sr,
-        /*rhs=*/weights,                    //
-        /*bias=*/extra_data0,               //
-        /*scale=*/extra_data1,              //
-        /*rhs_packed=*/packed_weights_ptr,  //
-        /*extra_bytes=*/0,                  //
+        /*rhs=*/reinterpret_cast<const uint8_t*>(weights),
+        /*bias=*/reinterpret_cast<const float*>(extra_data0),
+        /*scale=*/reinterpret_cast<const float*>(extra_data1),
+        /*rhs_packed=*/packed_weights_ptr,
+        /*extra_bytes=*/0,
         &kai_params);
   }
 }
@@ -1692,15 +1695,15 @@ void xnn_pack_f32_qs8w_gemm_gio_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const int32_t* b = (const int32_t*) bias;
   const size_t skr = sr * kr;
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
           packed_weights = (int32_t*) packed_weights + 1;
@@ -1727,10 +1730,10 @@ void xnn_pack_f32_qs8w_gemm_gio_w(
         }
         packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc * kc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -1753,14 +1756,14 @@ void xnn_pack_f32_conv_goki_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           packed_weights[nr_block_offset] = b[nr_block_start + nr_block_offset];
         }
@@ -1784,7 +1787,7 @@ void xnn_pack_f32_conv_goki_w(
       packed_weights = (float*) ((uintptr_t) packed_weights + extra_bytes);
     }
     k += ks * kc * nc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -1807,14 +1810,14 @@ void xnn_pack_f16_conv_goki_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           packed_weights[nr_block_offset] = b[nr_block_start + nr_block_offset];
         }
@@ -1838,7 +1841,7 @@ void xnn_pack_f16_conv_goki_w(
       packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
     }
     k += ks * kc * nc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -1861,14 +1864,14 @@ void xnn_pack_f32_to_f16_conv_goki_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   do {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           packed_weights[nr_block_offset] = fp16_ieee_from_fp32_value(b[nr_block_start + nr_block_offset]);
         }
@@ -1892,7 +1895,7 @@ void xnn_pack_f32_to_f16_conv_goki_w(
       packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
     }
     k += ks * kc * nc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -1915,8 +1918,8 @@ void xnn_pack_qu8_conv_goki_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   const int32_t izp = (int32_t) params->input_zero_point;
@@ -1925,7 +1928,7 @@ void xnn_pack_qu8_conv_goki_w(
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_weights;
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, bzp + b[nr_block_start + nr_block_offset]);
           packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
@@ -1957,10 +1960,10 @@ void xnn_pack_qu8_conv_goki_w(
           packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;
         }
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
     }
     k += ks * kc * nc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -1983,8 +1986,8 @@ void xnn_pack_qs8_to_qu8_conv_goki_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   const uint32_t izp = (int32_t) params->input_zero_point + 128;
@@ -1992,7 +1995,7 @@ void xnn_pack_qs8_to_qu8_conv_goki_w(
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_weights;
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
           packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
@@ -2024,10 +2027,10 @@ void xnn_pack_qs8_to_qu8_conv_goki_w(
           packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
         }
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
     }
     k += ks * kc * nc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -2050,8 +2053,8 @@ void xnn_pack_qs8_conv_goki_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   const uint32_t izp = (int32_t) params->input_zero_point;
@@ -2059,7 +2062,7 @@ void xnn_pack_qs8_conv_goki_w(
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_weights;
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
           packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
@@ -2091,10 +2094,10 @@ void xnn_pack_qs8_conv_goki_w(
           packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
         }
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
     }
     k += ks * kc * nc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   } while (--g != 0);
@@ -2116,13 +2119,13 @@ void xnn_pack_f32_conv_kgo_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   for (size_t i = 0; i < g; i++) {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           packed_weights[nr_block_offset] = b[nr_block_start + nr_block_offset];
         }
@@ -2140,7 +2143,7 @@ void xnn_pack_f32_conv_kgo_w(
       packed_weights = (float*) ((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   }
@@ -2162,13 +2165,13 @@ void xnn_pack_f16_conv_kgo_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   for (size_t i = 0; i < g; i++) {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           packed_weights[nr_block_offset] = b[nr_block_start + nr_block_offset];
         }
@@ -2186,7 +2189,7 @@ void xnn_pack_f16_conv_kgo_w(
       packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   }
@@ -2208,13 +2211,13 @@ void xnn_pack_f32_to_f16_conv_kgo_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   for (size_t i = 0; i < g; i++) {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           packed_weights[nr_block_offset] = fp16_ieee_from_fp32_value(b[nr_block_start + nr_block_offset]);
         }
@@ -2232,7 +2235,7 @@ void xnn_pack_f32_to_f16_conv_kgo_w(
       packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   }
@@ -2254,8 +2257,8 @@ void xnn_pack_qu8_conv_kgo_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const int32_t izp = (int32_t) params->input_zero_point;
   const int32_t bzp = (int32_t) ks * izp * (int32_t) params->kernel_zero_point;
@@ -2263,7 +2266,7 @@ void xnn_pack_qu8_conv_kgo_w(
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_weights;
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, bzp + b[nr_block_start + nr_block_offset]);
           packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
@@ -2287,10 +2290,10 @@ void xnn_pack_qu8_conv_kgo_w(
           packed_weights = (uint8_t*) packed_weights + nr * kr;
         }
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   }
@@ -2313,15 +2316,15 @@ void pack_qs8_conv_kgo_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const uint32_t izp = (uint32_t) params->input_zero_point + zero_point_offset;
   for (size_t i = 0; i < g; i++) {
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_weights;
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
           packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
@@ -2345,10 +2348,10 @@ void pack_qs8_conv_kgo_w(
           packed_weights = (int8_t*) packed_weights + nr * kr;
         }
       }
-      packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   }
@@ -2411,8 +2414,8 @@ void xnn_pack_f32_deconv_goki_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   for (size_t i = 0; i < g; i++) {
@@ -2423,7 +2426,7 @@ void xnn_pack_f32_deconv_goki_w(
         }
         for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
           const size_t nr_block_size = min(nc - nr_block_start, nr);
-          if XNN_LIKELY(b != NULL) {
+          if XNN_LIKELY(b != nullptr) {
             for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
               packed_weights[nr_block_offset] = b[nr_block_start + nr_block_offset];
             }
@@ -2445,12 +2448,12 @@ void xnn_pack_f32_deconv_goki_w(
               }
             }
           }
-          packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+          packed_weights = reinterpret_cast<float*>((uintptr_t) packed_weights + extra_bytes);
         }
       }
     }
     k += kh * kw * kc * nc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   }
@@ -2477,8 +2480,8 @@ void xnn_pack_f16_deconv_goki_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   for (size_t i = 0; i < g; i++) {
@@ -2489,7 +2492,7 @@ void xnn_pack_f16_deconv_goki_w(
         }
         for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
           const size_t nr_block_size = min(nc - nr_block_start, nr);
-          if XNN_LIKELY(b != NULL) {
+          if XNN_LIKELY(b != nullptr) {
             for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
               packed_weights[nr_block_offset] = b[nr_block_start + nr_block_offset];
             }
@@ -2511,12 +2514,12 @@ void xnn_pack_f16_deconv_goki_w(
               }
             }
           }
-          packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+          packed_weights = reinterpret_cast<uint16_t*>((uintptr_t) packed_weights + extra_bytes);
         }
       }
     }
     k += kh * kw * kc * nc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   }
@@ -2543,8 +2546,8 @@ void xnn_pack_f32_to_f16_deconv_goki_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   for (size_t i = 0; i < g; i++) {
@@ -2555,7 +2558,7 @@ void xnn_pack_f32_to_f16_deconv_goki_w(
         }
         for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
           const size_t nr_block_size = min(nc - nr_block_start, nr);
-          if XNN_LIKELY(b != NULL) {
+          if XNN_LIKELY(b != nullptr) {
             for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
               packed_weights[nr_block_offset] = fp16_ieee_from_fp32_value(b[nr_block_start + nr_block_offset]);
             }
@@ -2577,12 +2580,12 @@ void xnn_pack_f32_to_f16_deconv_goki_w(
               }
             }
           }
-          packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+          packed_weights = reinterpret_cast<uint16_t*>((uintptr_t) packed_weights + extra_bytes);
         }
       }
     }
     k += kh * kw * kc * nc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   }
@@ -2610,8 +2613,8 @@ void pack_qs8_deconv_goki_w(
 {
   assert(groups != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   const uint32_t izp = (uint32_t) params->input_zero_point + zero_point_offset;
@@ -2657,12 +2660,12 @@ void pack_qs8_deconv_goki_w(
               }
             }
           }
-          packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+          packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
         }
       }
     }
     k += kh * kw * kc * nc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   }
@@ -2735,8 +2738,8 @@ void xnn_pack_qu8_deconv_goki_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   const int32_t izp = (int32_t) params->input_zero_point;
@@ -2784,12 +2787,12 @@ void xnn_pack_qu8_deconv_goki_w(
               }
             }
           }
-          packed_weights = (void*) ((uintptr_t) packed_weights + extra_bytes);
+          packed_weights = reinterpret_cast<void*>((uintptr_t) packed_weights + extra_bytes);
         }
       }
     }
     k += kh * kw * kc * nc;
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nc;
     }
   }
@@ -2821,8 +2824,8 @@ void xnn_pack_f32_dwconv_ghw_w(
   size_t per_subtile_extra_bytes,
   const void* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
   if (middle_pass_tile == 0) {
     // Uni-pass DWCONV.
@@ -2845,7 +2848,7 @@ void xnn_pack_f32_dwconv_ghw_w(
     size_t cr_block_start = 0;
     for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           *packed_weights++ = b[cr_block_start + cr_block_offset];
         }
@@ -2875,7 +2878,7 @@ void xnn_pack_f32_dwconv_ghw_w(
 
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           *packed_weights++ = b[cr_block_start + cr_block_offset];
         }
@@ -3007,8 +3010,8 @@ void xnn_pack_f16_dwconv_ghw_w(
   size_t per_subtile_extra_bytes,
   const void* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
   if (middle_pass_tile == 0) {
     // Uni-pass DWCONV.
@@ -3031,7 +3034,7 @@ void xnn_pack_f16_dwconv_ghw_w(
     size_t cr_block_start = 0;
     for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           *packed_weights++ = b[cr_block_start + cr_block_offset];
         }
@@ -3061,7 +3064,7 @@ void xnn_pack_f16_dwconv_ghw_w(
 
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           *packed_weights++ = b[cr_block_start + cr_block_offset];
         }
@@ -3193,8 +3196,8 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
   size_t per_subtile_extra_bytes,
   const void* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
   if (middle_pass_tile == 0) {
     // Uni-pass DWCONV.
@@ -3217,7 +3220,7 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
     size_t cr_block_start = 0;
     for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           *packed_weights++ = fp16_ieee_from_fp32_value(b[cr_block_start + cr_block_offset]);
         }
@@ -3247,7 +3250,7 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
 
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           *packed_weights++ = fp16_ieee_from_fp32_value(b[cr_block_start + cr_block_offset]);
         }
@@ -3380,8 +3383,8 @@ void xnn_pack_qu8_dwconv_ghw_w(
   size_t per_subtile_extra_bytes,
   const struct xnn_qu8_packing_params* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
   if (middle_pass_tile == 0) {
     // Uni-pass DWCONV.
@@ -3407,7 +3410,7 @@ void xnn_pack_qu8_dwconv_ghw_w(
     for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
       int32_t* packed_b = (int32_t*) packed_weights;
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           unaligned_store_s32(packed_weights, boff + b[cr_block_start + cr_block_offset]);
           packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
@@ -3453,7 +3456,7 @@ void xnn_pack_qu8_dwconv_ghw_w(
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       int32_t* packed_b = (int32_t*) packed_weights;
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           unaligned_store_s32(packed_weights, boff + b[cr_block_start + cr_block_offset]);
           packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
@@ -3603,8 +3606,8 @@ void xnn_pack_qs8_dwconv_ghw_w(
   size_t per_subtile_extra_bytes,
   const struct xnn_qs8_packing_params* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
   if (middle_pass_tile == 0) {
     // Uni-pass DWCONV.
@@ -3629,7 +3632,7 @@ void xnn_pack_qs8_dwconv_ghw_w(
     for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
       int32_t* packed_b = (int32_t*) packed_weights;
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           unaligned_store_s32(packed_weights, b[cr_block_start + cr_block_offset]);
           packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
@@ -3679,7 +3682,7 @@ void xnn_pack_qs8_dwconv_ghw_w(
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       int32_t* packed_b = (int32_t*) packed_weights;
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           unaligned_store_s32(packed_weights, b[cr_block_start + cr_block_offset]);
           packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
@@ -3833,8 +3836,8 @@ void xnn_pack_f32_dwconv_hwg_w(
   size_t per_subtile_extra_bytes,
   const void* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
   if (middle_pass_tile == 0) {
     // Uni-pass DWCONV.
@@ -3857,7 +3860,7 @@ void xnn_pack_f32_dwconv_hwg_w(
     size_t cr_block_start = 0;
     for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           *packed_weights++ = b[cr_block_start + cr_block_offset];
         }
@@ -3889,7 +3892,7 @@ void xnn_pack_f32_dwconv_hwg_w(
     }
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           *packed_weights++ = b[cr_block_start + cr_block_offset];
         }
@@ -4034,8 +4037,8 @@ void xnn_pack_f16_dwconv_hwg_w(
   size_t per_subtile_extra_bytes,
   const void* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
   if (middle_pass_tile == 0) {
     // Uni-pass DWCONV.
@@ -4058,7 +4061,7 @@ void xnn_pack_f16_dwconv_hwg_w(
     size_t cr_block_start = 0;
     for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           *packed_weights++ = b[cr_block_start + cr_block_offset];
         }
@@ -4090,7 +4093,7 @@ void xnn_pack_f16_dwconv_hwg_w(
     }
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           *packed_weights++ = b[cr_block_start + cr_block_offset];
         }
@@ -4235,8 +4238,8 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
   size_t per_subtile_extra_bytes,
   const void* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
   if (middle_pass_tile == 0) {
     // Uni-pass DWCONV.
@@ -4259,7 +4262,7 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
     size_t cr_block_start = 0;
     for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           *packed_weights++ = fp16_ieee_from_fp32_value(b[cr_block_start + cr_block_offset]);
         }
@@ -4291,7 +4294,7 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
     }
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           *packed_weights++ = fp16_ieee_from_fp32_value(b[cr_block_start + cr_block_offset]);
         }
@@ -4436,8 +4439,8 @@ void xnn_pack_qu8_dwconv_hwg_w(
   size_t per_subtile_extra_bytes,
   const struct xnn_qu8_packing_params* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
   if (middle_pass_tile == 0) {
     // Uni-pass DWCONV.
@@ -4463,7 +4466,7 @@ void xnn_pack_qu8_dwconv_hwg_w(
     for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
       int32_t* packed_b = (int32_t*) packed_weights;
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           unaligned_store_s32(packed_weights, boff + b[cr_block_start + cr_block_offset]);
           packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
@@ -4509,7 +4512,7 @@ void xnn_pack_qu8_dwconv_hwg_w(
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       int32_t* packed_b = (int32_t*) packed_weights;
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           unaligned_store_s32(packed_weights, boff + b[cr_block_start + cr_block_offset]);
           packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
@@ -4659,8 +4662,8 @@ void xnn_pack_qs8_dwconv_hwg_w(
   size_t per_subtile_extra_bytes,
   const struct xnn_qs8_packing_params* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
   if (middle_pass_tile == 0) {
     // Uni-pass DWCONV.
@@ -4685,7 +4688,7 @@ void xnn_pack_qs8_dwconv_hwg_w(
     for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
       int32_t* packed_b = (int32_t*) packed_weights;
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           unaligned_store_s32(packed_weights, b[cr_block_start + cr_block_offset]);
           packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
@@ -4735,7 +4738,7 @@ void xnn_pack_qs8_dwconv_hwg_w(
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       int32_t* packed_b = (int32_t*) packed_weights;
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      if XNN_LIKELY(b != NULL) {
+      if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           unaligned_store_s32(packed_weights, b[cr_block_start + cr_block_offset]);
           packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
@@ -4884,8 +4887,8 @@ void xnn_pack_f32_gemminc_goi_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   do {
@@ -4922,8 +4925,8 @@ void xnn_pack_f16_gemminc_goi_w(
 {
   assert(g != 0);
   assert(nr >= sr);
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   const size_t skr = sr * kr;
   do {
@@ -4958,12 +4961,12 @@ void xnn_pack_f32_dconv_oki_w(
   float* packed_weights,
   const void* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
     const size_t nr_block_size = min(nc - nr_block_start, nr);
-    if XNN_LIKELY(b != NULL) {
+    if XNN_LIKELY(b != nullptr) {
       for (size_t nr_block_offset = 0; nr_block_offset < nr; nr_block_offset++) {
         *packed_weights++ = b[min(nr_block_offset, nr_block_size - 1)];
       }
@@ -4983,7 +4986,7 @@ void xnn_pack_f32_dconv_oki_w(
         }
       }
     }
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nr;
     }
   }
@@ -5000,12 +5003,12 @@ void xnn_pack_f32_to_f16_dconv_oki_w(
   uint16_t* packed_weights,
   const void* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
     const size_t nr_block_size = min(nc - nr_block_start, nr);
-    if XNN_LIKELY(b != NULL) {
+    if XNN_LIKELY(b != nullptr) {
       for (size_t nr_block_offset = 0; nr_block_offset < nr; nr_block_offset++) {
         *packed_weights++ = fp16_ieee_from_fp32_value(b[min(nr_block_offset, nr_block_size - 1)]);
       }
@@ -5025,7 +5028,7 @@ void xnn_pack_f32_to_f16_dconv_oki_w(
         }
       }
     }
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nr;
     }
   }
@@ -5042,12 +5045,12 @@ void xnn_pack_f16_dconv_oki_w(
   uint16_t* packed_weights,
   const void* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
     const size_t nr_block_size = min(nc - nr_block_start, nr);
-    if XNN_LIKELY(b != NULL) {
+    if XNN_LIKELY(b != nullptr) {
       for (size_t nr_block_offset = 0; nr_block_offset < nr; nr_block_offset++) {
         *packed_weights++ = b[min(nr_block_offset, nr_block_size - 1)];
       }
@@ -5067,7 +5070,7 @@ void xnn_pack_f16_dconv_oki_w(
         }
       }
     }
-    if XNN_UNPREDICTABLE(b != NULL) {
+    if XNN_UNPREDICTABLE(b != nullptr) {
       b += nr;
     }
   }
@@ -5081,11 +5084,11 @@ void xnn_pack_f32_chw_dwconv_ghw_w(
   float* packed_weights,
   const void* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   for (size_t g = 0; g < groups; g++) {
-    if XNN_LIKELY(b != NULL) {
+    if XNN_LIKELY(b != nullptr) {
       *packed_weights = *b++;
     } else {
       *packed_weights = 0.0f;
@@ -5105,11 +5108,11 @@ void xnn_pack_f32_to_f16_chw_dwconv_ghw_w(
   uint16_t* packed_weights,
   const void* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   for (size_t g = 0; g < groups; g++) {
-    if XNN_LIKELY(b != NULL) {
+    if XNN_LIKELY(b != nullptr) {
       *packed_weights = fp16_ieee_from_fp32_value(*b++);
     } else {
       *packed_weights = 0;
@@ -5129,11 +5132,11 @@ void xnn_pack_f16_chw_dwconv_ghw_w(
   uint16_t* packed_weights,
   const void* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   for (size_t g = 0; g < groups; g++) {
-    if XNN_LIKELY(b != NULL) {
+    if XNN_LIKELY(b != nullptr) {
       *packed_weights = *b++;
     } else {
       *packed_weights = 0;
@@ -5153,11 +5156,11 @@ void xnn_pack_f32_chw_dwconv_hwg_w(
   float* packed_weights,
   const void* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   for (size_t g = 0; g < groups; g++) {
-    if XNN_LIKELY(b != NULL) {
+    if XNN_LIKELY(b != nullptr) {
       *packed_weights = *b++;
     } else {
       *packed_weights = 0.0f;
@@ -5177,11 +5180,11 @@ void xnn_pack_f16_chw_dwconv_hwg_w(
   uint16_t* packed_weights,
   const void* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   for (size_t g = 0; g < groups; g++) {
-    if XNN_LIKELY(b != NULL) {
+    if XNN_LIKELY(b != nullptr) {
       *packed_weights = *b++;
     } else {
       *packed_weights = 0;
@@ -5201,11 +5204,11 @@ void xnn_pack_f32_to_f16_chw_dwconv_hwg_w(
   uint16_t* packed_weights,
   const void* params)
 {
-  assert(k != NULL);
-  assert(packed_weights != NULL);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
 
   for (size_t g = 0; g < groups; g++) {
-    if XNN_LIKELY(b != NULL) {
+    if XNN_LIKELY(b != nullptr) {
       *packed_weights = fp16_ieee_from_fp32_value(*b++);
     } else {
       *packed_weights = 0;
@@ -5226,8 +5229,8 @@ void xnn_pack_f32_vmulcaddc_w(
   float* packed_weights,
   const void* params)
 {
-  assert(s != NULL);
-  assert(packed_weights != NULL);
+  assert(s != nullptr);
+  assert(packed_weights != nullptr);
 
   for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += cr) {
     const size_t cr_block_size = min(c - cr_block_start, cr);
@@ -5235,7 +5238,7 @@ void xnn_pack_f32_vmulcaddc_w(
       *packed_weights++ = s[cr_block_start + cr_block_offset];
     }
     packed_weights += cr - cr_block_size;
-    if XNN_LIKELY(b != NULL) {
+    if XNN_LIKELY(b != nullptr) {
       for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
         *packed_weights++ = b[cr_block_start + cr_block_offset];
       }
@@ -5257,8 +5260,8 @@ void xnn_pack_f16_vmulcaddc_w(
   uint16_t* packed_weights,
   const void* params)
 {
-  assert(s != NULL);
-  assert(packed_weights != NULL);
+  assert(s != nullptr);
+  assert(packed_weights != nullptr);
 
   for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += cr) {
     const size_t cr_block_size = min(c - cr_block_start, cr);
@@ -5266,7 +5269,7 @@ void xnn_pack_f16_vmulcaddc_w(
       *packed_weights++ = s[cr_block_start + cr_block_offset];
     }
     packed_weights += cr - cr_block_size;
-    if XNN_LIKELY(b != NULL) {
+    if XNN_LIKELY(b != nullptr) {
       for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
         *packed_weights++ = b[cr_block_start + cr_block_offset];
       }
@@ -5288,8 +5291,8 @@ void xnn_pack_f32_to_f16_vmulcaddc_w(
   uint16_t* packed_weights,
   const void* params)
 {
-  assert(s != NULL);
-  assert(packed_weights != NULL);
+  assert(s != nullptr);
+  assert(packed_weights != nullptr);
 
   for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += cr) {
     const size_t cr_block_size = min(c - cr_block_start, cr);
@@ -5297,7 +5300,7 @@ void xnn_pack_f32_to_f16_vmulcaddc_w(
       *packed_weights++ = fp16_ieee_from_fp32_value(s[cr_block_start + cr_block_offset]);
     }
     packed_weights += cr - cr_block_size;
-    if XNN_LIKELY(b != NULL) {
+    if XNN_LIKELY(b != nullptr) {
       for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
         *packed_weights++ = fp16_ieee_from_fp32_value(b[cr_block_start + cr_block_offset]);
       }
@@ -5317,8 +5320,8 @@ void xnn_pack_f32_prelu_w(
   const float* s,
   float* packed_weights)
 {
-  assert(s != NULL);
-  assert(packed_weights != NULL);
+  assert(s != nullptr);
+  assert(packed_weights != nullptr);
   assert(slope_channels == input_channels || slope_channels == 1);
 
   if (slope_channels == 1) {
@@ -5336,8 +5339,8 @@ void xnn_pack_f16_prelu_w(
   const uint16_t* s,
   uint16_t* packed_weights)
 {
-  assert(s != NULL);
-  assert(packed_weights != NULL);
+  assert(s != nullptr);
+  assert(packed_weights != nullptr);
   assert(slope_channels == input_channels || slope_channels == 1);
 
   if (slope_channels == 1) {
@@ -5355,8 +5358,8 @@ void xnn_pack_f32_to_f16_prelu_w(
   const float* s,
   uint16_t* packed_weights)
 {
-  assert(s != NULL);
-  assert(packed_weights != NULL);
+  assert(s != nullptr);
+  assert(packed_weights != nullptr);
   assert(slope_channels == input_channels || slope_channels == 1);
 
   if (slope_channels == 1) {
@@ -5377,8 +5380,8 @@ void xnn_analyze_f32_spmm_w(
   const float* kernel,
   struct xnn_spmm_packing_params* params)
 {
-  assert(kernel != NULL);
-  assert(params != NULL);
+  assert(kernel != nullptr);
+  assert(params != nullptr);
 
   // Count number of non-zero values.
   size_t num_nonzeroes = 0;
@@ -5423,8 +5426,8 @@ void xnn_analyze_f16_spmm_w(
   const uint16_t* kernel,
   struct xnn_spmm_packing_params* params)
 {
-  assert(kernel != NULL);
-  assert(params != NULL);
+  assert(kernel != nullptr);
+  assert(params != nullptr);
 
   // Count number of non-zero values.
   size_t num_nonzeroes = 0;
@@ -5477,7 +5480,7 @@ enum xnn_status xnn_pack_f32_spmm_w(
   size_t first_ic = 0, last_ic = 0;
   bool first_nonzero = true;
   for (size_t ocb = 0; ocb < round_down_po2(group_output_channels, output_channels_block_size); ocb += output_channels_block_size) {
-    if XNN_LIKELY(bias != NULL) {
+    if XNN_LIKELY(bias != nullptr) {
       for (size_t oco = 0; oco < output_channels_block_size; oco++) {
         *nonzero_values++ = bias[ocb + oco];
       }
@@ -5514,7 +5517,7 @@ enum xnn_status xnn_pack_f32_spmm_w(
     output_channel_nonzeros += 1;
   }
   for (size_t oc = round_down_po2(group_output_channels, output_channels_block_size); oc < group_output_channels; oc++) {
-    if XNN_LIKELY(bias != NULL) {
+    if XNN_LIKELY(bias != nullptr) {
       *nonzero_values++ = bias[oc];
     } else {
       *nonzero_values++ = 0.0f;
@@ -5570,7 +5573,7 @@ enum xnn_status xnn_pack_f32_to_f16_spmm_w(
   size_t first_ic = 0, last_ic = 0;
   bool first_nonzero = true;
   for (size_t ocb = 0; ocb < round_down_po2(group_output_channels, output_channels_block_size); ocb += output_channels_block_size) {
-    if XNN_LIKELY(bias != NULL) {
+    if XNN_LIKELY(bias != nullptr) {
       for (size_t oco = 0; oco < output_channels_block_size; oco++) {
         *nonzero_values++ = fp16_ieee_from_fp32_value(bias[ocb + oco]);
       }
@@ -5607,7 +5610,7 @@ enum xnn_status xnn_pack_f32_to_f16_spmm_w(
     output_channel_nonzeros += 1;
   }
   for (size_t oc = round_down_po2(group_output_channels, output_channels_block_size); oc < group_output_channels; oc++) {
-    if XNN_LIKELY(bias != NULL) {
+    if XNN_LIKELY(bias != nullptr) {
       *nonzero_values++ = fp16_ieee_from_fp32_value(bias[oc]);
     } else {
       *nonzero_values++ = 0;
@@ -5662,7 +5665,7 @@ enum xnn_status xnn_pack_f16_spmm_w(
   size_t first_ic = 0, last_ic = 0;
   bool first_nonzero = true;
   for (size_t ocb = 0; ocb < round_down_po2(group_output_channels, output_channels_block_size); ocb += output_channels_block_size) {
-    if XNN_LIKELY(bias != NULL) {
+    if XNN_LIKELY(bias != nullptr) {
       for (size_t oco = 0; oco < output_channels_block_size; oco++) {
         *nonzero_values++ = bias[ocb + oco];
       }
@@ -5699,7 +5702,7 @@ enum xnn_status xnn_pack_f16_spmm_w(
     output_channel_nonzeros += 1;
   }
   for (size_t oc = round_down_po2(group_output_channels, output_channels_block_size); oc < group_output_channels; oc++) {
-    if XNN_LIKELY(bias != NULL) {
+    if XNN_LIKELY(bias != nullptr) {
       *nonzero_values++ = bias[oc];
     } else {
       *nonzero_values++ = 0;
@@ -5739,3 +5742,5 @@ enum xnn_status xnn_pack_f16_spmm_w(
   *first_input_channel = first_ic;
   return xnn_status_success;
 }
+
+}  // extern "C"
