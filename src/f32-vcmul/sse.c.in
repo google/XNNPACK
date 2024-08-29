@@ -4,17 +4,17 @@
 // LICENSE file in the root directory of this source tree.
 
 $if AVX == 512:
-  $assert BATCH_TILE % 16 == 0
-  $assert BATCH_TILE >= 16
-  $SIMD_TILE = BATCH_TILE // 16
+  $SIMD_SIZE = 16
+$elif AVX == 2:
+  $SIMD_SIZE = 8
 $else:
-  $assert BATCH_TILE % 4 == 0
-  $assert BATCH_TILE >= 4
-  $SIMD_TILE = BATCH_TILE // 4
-
+  $SIMD_SIZE = 4
+$assert BATCH_TILE % SIMD_SIZE == 0
+$assert BATCH_TILE >= SIMD_SIZE
+$SIMD_TILE = BATCH_TILE // SIMD_SIZE
 #include <assert.h>
 
-$if AVX == 512:
+$if AVX >= 2:
   #include <immintrin.h>
 $else:
   #include <xmmintrin.h>
@@ -22,7 +22,8 @@ $else:
 #include "xnnpack/common.h"
 #include "xnnpack/vbinary.h"
 
-$ISA = "avx512skx" if AVX == 512 else "sse"
+
+$ISA = "avx512skx" if AVX == 512 else "avx2" if AVX == 2 else "sse"
 void xnn_f32_vcmul_ukernel__${ISA}_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,
@@ -42,7 +43,6 @@ void xnn_f32_vcmul_ukernel__${ISA}_u${BATCH_TILE}(
   const float* bi = (const float*) ((uintptr_t) input_b + batch);
   float* or = output;
   float* oi = (float*) ((uintptr_t) output + batch);
-
   $if AVX == 512:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       const __m512 va0r = _mm512_loadu_ps(ar);
@@ -50,10 +50,10 @@ void xnn_f32_vcmul_ukernel__${ISA}_u${BATCH_TILE}(
       const __m512 vb0r = _mm512_loadu_ps(br);
       const __m512 vb0i = _mm512_loadu_ps(bi);
       $for N in range(1, SIMD_TILE):
-        const __m512 va${N}r = _mm512_loadu_ps(ar + ${N * BATCH_TILE});
-        const __m512 va${N}i = _mm512_loadu_ps(ai + ${N * BATCH_TILE});
-        const __m512 vb${N}r = _mm512_loadu_ps(br + ${N * BATCH_TILE});
-        const __m512 vb${N}i = _mm512_loadu_ps(bi + ${N * BATCH_TILE});
+        const __m512 va${N}r = _mm512_loadu_ps(ar + ${N * SIMD_SIZE});
+        const __m512 va${N}i = _mm512_loadu_ps(ai + ${N * SIMD_SIZE});
+        const __m512 vb${N}r = _mm512_loadu_ps(br + ${N * SIMD_SIZE});
+        const __m512 vb${N}i = _mm512_loadu_ps(bi + ${N * SIMD_SIZE});
       ar += ${BATCH_TILE};
       ai += ${BATCH_TILE};
       br += ${BATCH_TILE};
@@ -70,8 +70,40 @@ void xnn_f32_vcmul_ukernel__${ISA}_u${BATCH_TILE}(
       _mm512_storeu_ps(or, vacc0r);
       _mm512_storeu_ps(oi, vacc0i);
       $for N in range(1, SIMD_TILE):
-        _mm512_storeu_ps(or + ${N * BATCH_TILE}, vacc${N}r);
-        _mm512_storeu_ps(oi + ${N * BATCH_TILE}, vacc${N}i);
+        _mm512_storeu_ps(or + ${N * SIMD_SIZE}, vacc${N}r);
+        _mm512_storeu_ps(oi + ${N * SIMD_SIZE}, vacc${N}i);
+      or += ${BATCH_TILE};
+      oi += ${BATCH_TILE};
+    }
+  $elif AVX == 2:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      const __m256 va0r = _mm256_loadu_ps(ar);
+      const __m256 va0i = _mm256_loadu_ps(ai);
+      const __m256 vb0r = _mm256_loadu_ps(br);
+      const __m256 vb0i = _mm256_loadu_ps(bi);
+      $for N in range(1, SIMD_TILE):
+        const __m256 va${N}r = _mm256_loadu_ps(ar + ${N * SIMD_SIZE});
+        const __m256 va${N}i = _mm256_loadu_ps(ai + ${N * SIMD_SIZE});
+        const __m256 vb${N}r = _mm256_loadu_ps(br + ${N * SIMD_SIZE});
+        const __m256 vb${N}i = _mm256_loadu_ps(bi + ${N * SIMD_SIZE});
+      ar += ${BATCH_TILE};
+      ai += ${BATCH_TILE};
+      br += ${BATCH_TILE};
+      bi += ${BATCH_TILE};
+
+      $for N in range(SIMD_TILE):
+        __m256 vacc${N}r = _mm256_mul_ps(va${N}r, vb${N}r);
+        __m256 vacc${N}i = _mm256_mul_ps(va${N}r, vb${N}i);
+
+      $for N in range(SIMD_TILE):
+        vacc${N}r = _mm256_sub_ps(vacc${N}r, _mm256_mul_ps(va${N}i, vb${N}i));
+        vacc${N}i = _mm256_add_ps(vacc${N}i, _mm256_mul_ps(va${N}i, vb${N}r));
+
+      _mm256_storeu_ps(or, vacc0r);
+      _mm256_storeu_ps(oi, vacc0i);
+      $for N in range(1, SIMD_TILE):
+        _mm256_storeu_ps(or + ${N * SIMD_SIZE}, vacc${N}r);
+        _mm256_storeu_ps(oi + ${N * SIMD_SIZE}, vacc${N}i);
       or += ${BATCH_TILE};
       oi += ${BATCH_TILE};
     }
@@ -82,10 +114,10 @@ void xnn_f32_vcmul_ukernel__${ISA}_u${BATCH_TILE}(
       const __m128 vb0r = _mm_loadu_ps(br);
       const __m128 vb0i = _mm_loadu_ps(bi);
       $for N in range(1, SIMD_TILE):
-        const __m128 va${N}r = _mm_loadu_ps(ar + ${N * BATCH_TILE});
-        const __m128 va${N}i = _mm_loadu_ps(ai + ${N * BATCH_TILE});
-        const __m128 vb${N}r = _mm_loadu_ps(br + ${N * BATCH_TILE});
-        const __m128 vb${N}i = _mm_loadu_ps(bi + ${N * BATCH_TILE});
+        const __m128 va${N}r = _mm_loadu_ps(ar + ${N * SIMD_SIZE});
+        const __m128 va${N}i = _mm_loadu_ps(ai + ${N * SIMD_SIZE});
+        const __m128 vb${N}r = _mm_loadu_ps(br + ${N * SIMD_SIZE});
+        const __m128 vb${N}i = _mm_loadu_ps(bi + ${N * SIMD_SIZE});
       ar += ${BATCH_TILE};
       ai += ${BATCH_TILE};
       br += ${BATCH_TILE};
@@ -102,8 +134,8 @@ void xnn_f32_vcmul_ukernel__${ISA}_u${BATCH_TILE}(
       _mm_storeu_ps(or, vacc0r);
       _mm_storeu_ps(oi, vacc0i);
       $for N in range(1, SIMD_TILE):
-        _mm_storeu_ps(or + ${N * BATCH_TILE}, vacc${N}r);
-        _mm_storeu_ps(oi + ${N * BATCH_TILE}, vacc${N}i);
+        _mm_storeu_ps(or + ${N * SIMD_SIZE}, vacc${N}r);
+        _mm_storeu_ps(oi + ${N * SIMD_SIZE}, vacc${N}i);
       or += ${BATCH_TILE};
       oi += ${BATCH_TILE};
     }

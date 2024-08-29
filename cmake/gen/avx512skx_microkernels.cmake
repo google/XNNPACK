@@ -107,6 +107,7 @@ SET(NON_PROD_AVX512SKX_MICROKERNEL_SRCS
   src/f32-vcmul/gen/f32-vcmul-avx512skx-u16.c
   src/f32-vcmul/gen/f32-vcmul-avx512skx-u32.c
   src/f32-vcmul/gen/f32-vcmul-avx512skx-u64.c
+  src/f32-vcmul/gen/f32-vcmul-avx512skx-u128.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x16c4-minmax-avx512skx-madd-prfm.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x16c4-minmax-avx512skx-madd.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x16c8-minmax-avx512skx-madd.c

@@ -7,13 +7,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-
 #include <assert.h>
 
 #include <immintrin.h>
 
 #include "xnnpack/common.h"
 #include "xnnpack/vbinary.h"
+
 
 void xnn_f32_vcmul_ukernel__avx512skx_u16(
     size_t batch,
@@ -34,7 +34,6 @@ void xnn_f32_vcmul_ukernel__avx512skx_u16(
   const float* bi = (const float*) ((uintptr_t) input_b + batch);
   float* or = output;
   float* oi = (float*) ((uintptr_t) output + batch);
-
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m512 va0r = _mm512_loadu_ps(ar);
     const __m512 va0i = _mm512_loadu_ps(ai);

@@ -7,13 +7,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-
 #include <assert.h>
 
 #include <immintrin.h>
 
 #include "xnnpack/common.h"
 #include "xnnpack/vbinary.h"
+
 
 void xnn_f32_vcmul_ukernel__avx512skx_u32(
     size_t batch,
@@ -34,16 +34,15 @@ void xnn_f32_vcmul_ukernel__avx512skx_u32(
   const float* bi = (const float*) ((uintptr_t) input_b + batch);
   float* or = output;
   float* oi = (float*) ((uintptr_t) output + batch);
-
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     const __m512 va0r = _mm512_loadu_ps(ar);
     const __m512 va0i = _mm512_loadu_ps(ai);
     const __m512 vb0r = _mm512_loadu_ps(br);
     const __m512 vb0i = _mm512_loadu_ps(bi);
-    const __m512 va1r = _mm512_loadu_ps(ar + 32);
-    const __m512 va1i = _mm512_loadu_ps(ai + 32);
-    const __m512 vb1r = _mm512_loadu_ps(br + 32);
-    const __m512 vb1i = _mm512_loadu_ps(bi + 32);
+    const __m512 va1r = _mm512_loadu_ps(ar + 16);
+    const __m512 va1i = _mm512_loadu_ps(ai + 16);
+    const __m512 vb1r = _mm512_loadu_ps(br + 16);
+    const __m512 vb1i = _mm512_loadu_ps(bi + 16);
     ar += 32;
     ai += 32;
     br += 32;
@@ -61,8 +60,8 @@ void xnn_f32_vcmul_ukernel__avx512skx_u32(
 
     _mm512_storeu_ps(or, vacc0r);
     _mm512_storeu_ps(oi, vacc0i);
-    _mm512_storeu_ps(or + 32, vacc1r);
-    _mm512_storeu_ps(oi + 32, vacc1i);
+    _mm512_storeu_ps(or + 16, vacc1r);
+    _mm512_storeu_ps(oi + 16, vacc1i);
     or += 32;
     oi += 32;
   }
