@@ -40,7 +40,7 @@ void xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_u${BATCH_TILE}(
   XNN_FORCE_REALIZATION(vc2);
 
   const float16x8_t vprescale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.prescale));
-  const float16x8_t vminus_alpha = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.minus_alpha));
+  const float16x8_t vminus_alpha = vnegq_f16(vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.alpha)));
   const float16x8_t vbeta = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.beta));
 
   const uint16_t* i = (const uint16_t*) input;

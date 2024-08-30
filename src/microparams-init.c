@@ -1872,7 +1872,7 @@ size_t xnn_init_f16_elu_scalar_params(
   uint16_t beta)
 {
   params->scalar.prescale = prescale;
-  params->scalar.minus_alpha = alpha ^ UINT16_C(0x8000);
+  params->scalar.alpha = alpha;
   params->scalar.beta = beta;
   return sizeof(params->scalar);
 }
