@@ -2087,6 +2087,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       f32-spmm
       f32-vabs
       f32-vclamp
+      f16-vcmul
       f32-vcmul
       f32-velu
       f32-vgelu

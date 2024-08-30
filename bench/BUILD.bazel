@@ -255,6 +255,7 @@ xnnpack_benchmark(
     "f32_rmin",
     "f32_vscaleexpminusmax",
     "f32_vscaleextexp",
+    "f16_vcmul",
     "f32_vcmul",
     "s16_rmaxabs",
     "s16_window",

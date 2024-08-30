@@ -6,7 +6,6 @@
 $assert BATCH_TILE % 8 == 0
 $assert BATCH_TILE >= 8
 $SIMD_TILE = BATCH_TILE // 8
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <arm_neon.h>
@@ -37,22 +36,22 @@ void xnn_f16_vcmul_ukernel__neonfp16arith_u${BATCH_TILE}(
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
       $for N in range(SIMD_TILE):
-        const float16x8_t va${ABC[N]}r = vreinterpretq_f16_u16(vld1q_u16(ar)); ar += 8;
-        const float16x8_t va${ABC[N]}i = vreinterpretq_f16_u16(vld1q_u16(ai)); ai += 8;
-        const float16x8_t vb${ABC[N]}r = vreinterpretq_f16_u16(vld1q_u16(br)); br += 8;
-        const float16x8_t vb${ABC[N]}i = vreinterpretq_f16_u16(vld1q_u16(bi)); bi += 8;
+        const float16x8_t va${N}r = vreinterpretq_f16_u16(vld1q_u16(ar)); ar += 8;
+        const float16x8_t va${N}i = vreinterpretq_f16_u16(vld1q_u16(ai)); ai += 8;
+        const float16x8_t vb${N}r = vreinterpretq_f16_u16(vld1q_u16(br)); br += 8;
+        const float16x8_t vb${N}i = vreinterpretq_f16_u16(vld1q_u16(bi)); bi += 8;
 
       $for N in range(SIMD_TILE):
-        float16x8_t vacc${ABC[N]}r = vmulq_f16(va${ABC[N]}r, vb${ABC[N]}r);
-        float16x8_t vacc${ABC[N]}i = vmulq_f16(va${ABC[N]}r, vb${ABC[N]}i);
+        float16x8_t vacc${N}r = vmulq_f16(va${N}r, vb${N}r);
+        float16x8_t vacc${N}i = vmulq_f16(va${N}r, vb${N}i);
 
       $for N in range(SIMD_TILE):
-        vacc${ABC[N]}r = vfmsq_f16(vacc${ABC[N]}r, va${ABC[N]}i, vb${ABC[N]}i);
-        vacc${ABC[N]}i = vfmaq_f16(vacc${ABC[N]}i, va${ABC[N]}i, vb${ABC[N]}r);
+        vacc${N}r = vfmsq_f16(vacc${N}r, va${N}i, vb${N}i);
+        vacc${N}i = vfmaq_f16(vacc${N}i, va${N}i, vb${N}r);
 
       $for N in range(SIMD_TILE):
-        vst1q_u16(or, vreinterpretq_u16_f16(vacc${ABC[N]}r)); or += 8;
-        vst1q_u16(oi, vreinterpretq_u16_f16(vacc${ABC[N]}i)); oi += 8;
+        vst1q_u16(or, vreinterpretq_u16_f16(vacc${N}r)); or += 8;
+        vst1q_u16(oi, vreinterpretq_u16_f16(vacc${N}i)); oi += 8;
     }
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const float16x8_t var = vreinterpretq_f16_u16(vld1q_u16(ar)); ar += 8;

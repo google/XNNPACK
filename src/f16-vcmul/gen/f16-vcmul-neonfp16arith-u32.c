@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f16-vcmul/neon.c.in
+//   Template: src/f16-vcmul/neonfp16arith.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC
