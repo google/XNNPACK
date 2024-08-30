@@ -522,7 +522,7 @@ enum xnn_status xnn_reshape_softmax_nc_f16(
     softmax_op->rmax_config->init.f16(&rmax_params);
   }
 
-  union xnn_f16_expminus_params expminus_params;
+  struct xnn_f16_expminus_params expminus_params;
   if (softmax_op->raddstoreexpminusmax_config->init.f16 != NULL) {
     softmax_op->raddstoreexpminusmax_config->init.f16(&expminus_params);
   }
@@ -559,7 +559,7 @@ enum xnn_status xnn_reshape_softmax_nc_f32(
     softmax_op->rmax_config->init.f32(&rmax_params);
   }
 
-  union xnn_f32_expminus_params expminus_params;
+  struct xnn_f32_expminus_params expminus_params;
   if (softmax_op->raddstoreexpminusmax_config->init.f32 != NULL) {
     softmax_op->raddstoreexpminusmax_config->init.f32(&expminus_params);
   }

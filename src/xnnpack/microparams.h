@@ -653,11 +653,11 @@ union xnn_f32_elu_params {
 
 // ExpMinus: used by RADDEXPMINUSMAX microkernels.
 
-union xnn_f16_expminus_params {
+struct xnn_f16_expminus_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
-union xnn_f32_expminus_params {
+struct xnn_f32_expminus_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 

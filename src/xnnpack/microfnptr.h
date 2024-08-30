@@ -1704,7 +1704,7 @@ typedef void (*xnn_f16_raddstoreexpminusmax_ukernel_fn)(
     const void* max,
     void* output,
     void* sum,
-    const union xnn_f16_expminus_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f16_expminus_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_raddstoreexpminusmax_ukernel_fn)(
     size_t batch,
@@ -1712,7 +1712,7 @@ typedef void (*xnn_f32_raddstoreexpminusmax_ukernel_fn)(
     const float* max,
     float* output,
     float* sum,
-    const union xnn_f32_expminus_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f32_expminus_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // VUNARY: Vector UNARY elementwise
 
@@ -2637,10 +2637,10 @@ typedef size_t (*xnn_init_f16_default_params_fn)(
 typedef size_t (*xnn_init_f32_default_params_fn)(
   union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
 typedef size_t (*xnn_init_f16_expminus_params_fn)(
-  union xnn_f16_expminus_params params[XNN_MIN_ELEMENTS(1)]);
+  struct xnn_f16_expminus_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f32_expminus_params_fn)(
-  union xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)]);
+  struct xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_s32_default_params_fn)(
   union xnn_s32_default_params params[XNN_MIN_ELEMENTS(1)]);

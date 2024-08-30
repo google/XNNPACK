@@ -288,9 +288,9 @@ struct xnn_operator {
   // We also use this to store parameters to binary operators. For most such operators, this is a copy of params,
   // but params need to be swapped for commutative ops with per-operand params.
   union {
-    union xnn_f16_expminus_params f16_expminus_params;
+    struct xnn_f16_expminus_params f16_expminus_params;
     union xnn_f32_minmax_params f32_minmax;
-    union xnn_f32_expminus_params f32_expminus_params;
+    struct xnn_f32_expminus_params f32_expminus_params;
     union xnn_f32_default_params f32_default;
     union xnn_qs8_add_minmax_params qs8_add;
     union xnn_qs8_mul_minmax_params qs8_mul;

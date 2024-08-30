@@ -61,7 +61,7 @@ static inline vfloat32m2_t eval_poly_horner(vfloat32m2_t x,
 /// @return Result of applying softexp() to elements of x
 static inline vfloat32m2_t softexp_f32m2(
     vfloat32m2_t x, size_t vl,
-    const union xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)]) {
+    const struct xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)]) {
   // Ensure that q = RN(x/log(2)) >= e_min, so that 2^q can be computed safely
   // with a simple shift into the exponent field.
   // xmin = round(-126.5 * log(2), single, RU) ~ -87.68311309814453125
@@ -111,7 +111,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__rvv_rr2_p6_u2v(
     const float* max,
     float* output,
     float* sum,
-    const union xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
