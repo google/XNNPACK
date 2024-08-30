@@ -243,10 +243,6 @@ SET(NON_PROD_AVX2_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx2-rr1-p5-u96-acc3.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx2-rr1-p5-u96-acc6.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx2-rr1-p5-u96.c
-  src/f32-vcmul/gen/f32-vcmul-avx2-u8.c
-  src/f32-vcmul/gen/f32-vcmul-avx2-u16.c
-  src/f32-vcmul/gen/f32-vcmul-avx2-u32.c
-  src/f32-vcmul/gen/f32-vcmul-avx2-u64.c
   src/f32-velu/gen/f32-velu-avx2-rr1-lut4-p4-perm-u8.c
   src/f32-velu/gen/f32-velu-avx2-rr1-lut4-p4-perm-u16.c
   src/f32-velu/gen/f32-velu-avx2-rr1-lut4-p4-perm-u24.c

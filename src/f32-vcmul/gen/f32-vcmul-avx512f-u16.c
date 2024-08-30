@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-vcmul/sse.c.in
+//   Template: src/f32-vcmul/avx512f.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC
@@ -14,8 +14,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/vbinary.h"
 
-
-void xnn_f32_vcmul_ukernel__avx512skx_u64(
+void xnn_f32_vcmul_ukernel__avx512f_u16(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -34,56 +33,26 @@ void xnn_f32_vcmul_ukernel__avx512skx_u64(
   const float* bi = (const float*) ((uintptr_t) input_b + batch);
   float* or = output;
   float* oi = (float*) ((uintptr_t) output + batch);
-  for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m512 va0r = _mm512_loadu_ps(ar);
     const __m512 va0i = _mm512_loadu_ps(ai);
     const __m512 vb0r = _mm512_loadu_ps(br);
     const __m512 vb0i = _mm512_loadu_ps(bi);
-    const __m512 va1r = _mm512_loadu_ps(ar + 16);
-    const __m512 va1i = _mm512_loadu_ps(ai + 16);
-    const __m512 vb1r = _mm512_loadu_ps(br + 16);
-    const __m512 vb1i = _mm512_loadu_ps(bi + 16);
-    const __m512 va2r = _mm512_loadu_ps(ar + 32);
-    const __m512 va2i = _mm512_loadu_ps(ai + 32);
-    const __m512 vb2r = _mm512_loadu_ps(br + 32);
-    const __m512 vb2i = _mm512_loadu_ps(bi + 32);
-    const __m512 va3r = _mm512_loadu_ps(ar + 48);
-    const __m512 va3i = _mm512_loadu_ps(ai + 48);
-    const __m512 vb3r = _mm512_loadu_ps(br + 48);
-    const __m512 vb3i = _mm512_loadu_ps(bi + 48);
-    ar += 64;
-    ai += 64;
-    br += 64;
-    bi += 64;
+    ar += 16;
+    ai += 16;
+    br += 16;
+    bi += 16;
 
     __m512 vacc0r = _mm512_mul_ps(va0r, vb0r);
     __m512 vacc0i = _mm512_mul_ps(va0r, vb0i);
-    __m512 vacc1r = _mm512_mul_ps(va1r, vb1r);
-    __m512 vacc1i = _mm512_mul_ps(va1r, vb1i);
-    __m512 vacc2r = _mm512_mul_ps(va2r, vb2r);
-    __m512 vacc2i = _mm512_mul_ps(va2r, vb2i);
-    __m512 vacc3r = _mm512_mul_ps(va3r, vb3r);
-    __m512 vacc3i = _mm512_mul_ps(va3r, vb3i);
 
     vacc0r = _mm512_sub_ps(vacc0r, _mm512_mul_ps(va0i, vb0i));
     vacc0i = _mm512_add_ps(vacc0i, _mm512_mul_ps(va0i, vb0r));
-    vacc1r = _mm512_sub_ps(vacc1r, _mm512_mul_ps(va1i, vb1i));
-    vacc1i = _mm512_add_ps(vacc1i, _mm512_mul_ps(va1i, vb1r));
-    vacc2r = _mm512_sub_ps(vacc2r, _mm512_mul_ps(va2i, vb2i));
-    vacc2i = _mm512_add_ps(vacc2i, _mm512_mul_ps(va2i, vb2r));
-    vacc3r = _mm512_sub_ps(vacc3r, _mm512_mul_ps(va3i, vb3i));
-    vacc3i = _mm512_add_ps(vacc3i, _mm512_mul_ps(va3i, vb3r));
 
     _mm512_storeu_ps(or, vacc0r);
     _mm512_storeu_ps(oi, vacc0i);
-    _mm512_storeu_ps(or + 16, vacc1r);
-    _mm512_storeu_ps(oi + 16, vacc1i);
-    _mm512_storeu_ps(or + 32, vacc2r);
-    _mm512_storeu_ps(oi + 32, vacc2i);
-    _mm512_storeu_ps(or + 48, vacc3r);
-    _mm512_storeu_ps(oi + 48, vacc3i);
-    or += 64;
-    oi += 64;
+    or += 16;
+    oi += 16;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const __m128 var = _mm_loadu_ps(ar);

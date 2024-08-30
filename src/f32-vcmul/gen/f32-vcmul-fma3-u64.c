@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-vcmul/sse.c.in
+//   Template: src/f32-vcmul/avx512f.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC
@@ -14,8 +14,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/vbinary.h"
 
-
-void xnn_f32_vcmul_ukernel__avx2_u64(
+void xnn_f32_vcmul_ukernel__fma3_u64(
     size_t batch,
     const float* input_a,
     const float* input_b,

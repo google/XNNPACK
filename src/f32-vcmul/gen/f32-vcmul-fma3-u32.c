@@ -9,12 +9,12 @@
 
 #include <assert.h>
 
-#include <xmmintrin.h>
+#include <immintrin.h>
 
 #include "xnnpack/common.h"
 #include "xnnpack/vbinary.h"
 
-void xnn_f32_vcmul_ukernel__sse_u4(
+void xnn_f32_vcmul_ukernel__fma3_u32(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -33,6 +33,57 @@ void xnn_f32_vcmul_ukernel__sse_u4(
   const float* bi = (const float*) ((uintptr_t) input_b + batch);
   float* or = output;
   float* oi = (float*) ((uintptr_t) output + batch);
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    const __m256 va0r = _mm256_loadu_ps(ar);
+    const __m256 va0i = _mm256_loadu_ps(ai);
+    const __m256 vb0r = _mm256_loadu_ps(br);
+    const __m256 vb0i = _mm256_loadu_ps(bi);
+    const __m256 va1r = _mm256_loadu_ps(ar + 8);
+    const __m256 va1i = _mm256_loadu_ps(ai + 8);
+    const __m256 vb1r = _mm256_loadu_ps(br + 8);
+    const __m256 vb1i = _mm256_loadu_ps(bi + 8);
+    const __m256 va2r = _mm256_loadu_ps(ar + 16);
+    const __m256 va2i = _mm256_loadu_ps(ai + 16);
+    const __m256 vb2r = _mm256_loadu_ps(br + 16);
+    const __m256 vb2i = _mm256_loadu_ps(bi + 16);
+    const __m256 va3r = _mm256_loadu_ps(ar + 24);
+    const __m256 va3i = _mm256_loadu_ps(ai + 24);
+    const __m256 vb3r = _mm256_loadu_ps(br + 24);
+    const __m256 vb3i = _mm256_loadu_ps(bi + 24);
+    ar += 32;
+    ai += 32;
+    br += 32;
+    bi += 32;
+
+    __m256 vacc0r = _mm256_mul_ps(va0r, vb0r);
+    __m256 vacc0i = _mm256_mul_ps(va0r, vb0i);
+    __m256 vacc1r = _mm256_mul_ps(va1r, vb1r);
+    __m256 vacc1i = _mm256_mul_ps(va1r, vb1i);
+    __m256 vacc2r = _mm256_mul_ps(va2r, vb2r);
+    __m256 vacc2i = _mm256_mul_ps(va2r, vb2i);
+    __m256 vacc3r = _mm256_mul_ps(va3r, vb3r);
+    __m256 vacc3i = _mm256_mul_ps(va3r, vb3i);
+
+    vacc0r = _mm256_sub_ps(vacc0r, _mm256_mul_ps(va0i, vb0i));
+    vacc0i = _mm256_add_ps(vacc0i, _mm256_mul_ps(va0i, vb0r));
+    vacc1r = _mm256_sub_ps(vacc1r, _mm256_mul_ps(va1i, vb1i));
+    vacc1i = _mm256_add_ps(vacc1i, _mm256_mul_ps(va1i, vb1r));
+    vacc2r = _mm256_sub_ps(vacc2r, _mm256_mul_ps(va2i, vb2i));
+    vacc2i = _mm256_add_ps(vacc2i, _mm256_mul_ps(va2i, vb2r));
+    vacc3r = _mm256_sub_ps(vacc3r, _mm256_mul_ps(va3i, vb3i));
+    vacc3i = _mm256_add_ps(vacc3i, _mm256_mul_ps(va3i, vb3r));
+
+    _mm256_storeu_ps(or, vacc0r);
+    _mm256_storeu_ps(oi, vacc0i);
+    _mm256_storeu_ps(or + 8, vacc1r);
+    _mm256_storeu_ps(oi + 8, vacc1i);
+    _mm256_storeu_ps(or + 16, vacc2r);
+    _mm256_storeu_ps(oi + 16, vacc2i);
+    _mm256_storeu_ps(or + 24, vacc3r);
+    _mm256_storeu_ps(oi + 24, vacc3i);
+    or += 32;
+    oi += 32;
+  }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const __m128 var = _mm_loadu_ps(ar);
     ar += 4;

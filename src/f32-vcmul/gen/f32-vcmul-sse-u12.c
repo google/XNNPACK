@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-vcmul/sse.c.in
+//   Template: src/f32-vcmul/avx512f.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC
@@ -13,7 +13,6 @@
 
 #include "xnnpack/common.h"
 #include "xnnpack/vbinary.h"
-
 
 void xnn_f32_vcmul_ukernel__sse_u12(
     size_t batch,

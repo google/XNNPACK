@@ -3,18 +3,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$if AVX == 512:
-  $SIMD_SIZE = 16
-$elif AVX == 2:
-  $SIMD_SIZE = 8
-$else:
-  $SIMD_SIZE = 4
+$SIMD_SIZE = {512: 16, 1: 8, 0: 4}[AVX]
 $assert BATCH_TILE % SIMD_SIZE == 0
 $assert BATCH_TILE >= SIMD_SIZE
 $SIMD_TILE = BATCH_TILE // SIMD_SIZE
 #include <assert.h>
 
-$if AVX >= 2:
+$if AVX >= 1:
   #include <immintrin.h>
 $else:
   #include <xmmintrin.h>
@@ -22,8 +17,7 @@ $else:
 #include "xnnpack/common.h"
 #include "xnnpack/vbinary.h"
 
-
-$ISA = "avx512skx" if AVX == 512 else "avx2" if AVX == 2 else "sse"
+$ISA = {512: "avx512f", 1: "fma3", 0: "sse"}[AVX]
 void xnn_f32_vcmul_ukernel__${ISA}_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,
@@ -75,7 +69,7 @@ void xnn_f32_vcmul_ukernel__${ISA}_u${BATCH_TILE}(
       or += ${BATCH_TILE};
       oi += ${BATCH_TILE};
     }
-  $elif AVX == 2:
+  $elif AVX == 1:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       const __m256 va0r = _mm256_loadu_ps(ar);
       const __m256 va0i = _mm256_loadu_ps(ai);

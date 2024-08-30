@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-vcmul/sse.c.in
+//   Template: src/f32-vcmul/avx512f.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2023 Google LLC
@@ -14,8 +14,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/vbinary.h"
 
-
-void xnn_f32_vcmul_ukernel__avx2_u16(
+void xnn_f32_vcmul_ukernel__fma3_u8(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -34,36 +33,26 @@ void xnn_f32_vcmul_ukernel__avx2_u16(
   const float* bi = (const float*) ((uintptr_t) input_b + batch);
   float* or = output;
   float* oi = (float*) ((uintptr_t) output + batch);
-  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m256 va0r = _mm256_loadu_ps(ar);
     const __m256 va0i = _mm256_loadu_ps(ai);
     const __m256 vb0r = _mm256_loadu_ps(br);
     const __m256 vb0i = _mm256_loadu_ps(bi);
-    const __m256 va1r = _mm256_loadu_ps(ar + 8);
-    const __m256 va1i = _mm256_loadu_ps(ai + 8);
-    const __m256 vb1r = _mm256_loadu_ps(br + 8);
-    const __m256 vb1i = _mm256_loadu_ps(bi + 8);
-    ar += 16;
-    ai += 16;
-    br += 16;
-    bi += 16;
+    ar += 8;
+    ai += 8;
+    br += 8;
+    bi += 8;
 
     __m256 vacc0r = _mm256_mul_ps(va0r, vb0r);
     __m256 vacc0i = _mm256_mul_ps(va0r, vb0i);
-    __m256 vacc1r = _mm256_mul_ps(va1r, vb1r);
-    __m256 vacc1i = _mm256_mul_ps(va1r, vb1i);
 
     vacc0r = _mm256_sub_ps(vacc0r, _mm256_mul_ps(va0i, vb0i));
     vacc0i = _mm256_add_ps(vacc0i, _mm256_mul_ps(va0i, vb0r));
-    vacc1r = _mm256_sub_ps(vacc1r, _mm256_mul_ps(va1i, vb1i));
-    vacc1i = _mm256_add_ps(vacc1i, _mm256_mul_ps(va1i, vb1r));
 
     _mm256_storeu_ps(or, vacc0r);
     _mm256_storeu_ps(oi, vacc0i);
-    _mm256_storeu_ps(or + 8, vacc1r);
-    _mm256_storeu_ps(oi + 8, vacc1i);
-    or += 16;
-    oi += 16;
+    or += 8;
+    oi += 8;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const __m128 var = _mm_loadu_ps(ar);
