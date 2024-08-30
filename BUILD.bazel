@@ -528,10 +528,12 @@ xnnpack_cc_library(
         ":hardware_config",
         ":init_once",
         ":logging",
+        ":math",
         ":microkernels_h",
         ":microparams_init",
         ":packing",
         ":prod_microkernels",
+        "@FP16",
     ] + select({
         ":cpuinfo_enabled": ["@cpuinfo"],
         "//conditions:default": [],
@@ -558,6 +560,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":config_hdrs",
+        "@FP16",
     ],
 )
 
@@ -888,6 +891,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":microparams",
         ":operator_h",
         ":xnnpack_h",
         "@FP16",
@@ -1019,6 +1023,7 @@ xnnpack_cc_library(
         ":operator_h",
         ":params",
         ":xnnpack_h",
+        "@FP16",
     ],
 )
 
@@ -1179,9 +1184,7 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":allocator",
-        ":build_identifier",
-        ":common",
-        ":config_hdrs",
+        ":hardware_config",
         ":init_once",
         ":logging",
         ":params",
@@ -1207,9 +1210,7 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":allocator",
-        ":build_identifier",
-        ":common",
-        ":config_hdrs",
+        ":hardware_config",
         ":init_once",
         ":logging",
         ":params",

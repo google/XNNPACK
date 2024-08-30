@@ -85,10 +85,10 @@ DECLARE_F32_CONV_HWC2CHW_UKERNEL_FUNCTION(xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3
       size_t input_width,                                    \
       size_t output_y_start,                                 \
       size_t output_y_end,                                   \
-      const void* input,                                     \
-      const void* zero,                                      \
-      const void* weights,                                   \
-      void* output,                                          \
+      const xnn_float16* input,                     \
+      const xnn_float16* zero,                      \
+      const xnn_float16* weights,                   \
+      xnn_float16* output,                          \
       size_t input_padding_top,                              \
       size_t output_channels,                                \
       size_t output_height_stride,                           \

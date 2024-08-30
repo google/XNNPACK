@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/math.h"
 
 inline size_t reference_index(
     const size_t* input_stride,
@@ -134,8 +135,8 @@ class TransposeOperatorTester {
 
   void TestX16() const {
     size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
-    std::vector<uint16_t> input(count + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> output(count);
+    std::vector<xnn_float16> input(count + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    std::vector<xnn_float16> output(count);
     std::vector<size_t> input_stride(num_dims(), 1);
     std::vector<size_t> output_stride(num_dims(), 1);
     for (size_t i = num_dims() - 1; i > 0; --i) {
@@ -178,8 +179,8 @@ class TransposeOperatorTester {
 
   void TestRunX16() const {
     const size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
-    std::vector<uint16_t> input(count + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> output(count);
+    std::vector<xnn_float16> input(count + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    std::vector<xnn_float16> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
     std::vector<size_t> output_stride(input.size(), 1);
     for (size_t i = num_dims() - 1; i > 0; --i) {

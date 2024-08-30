@@ -60,10 +60,10 @@ DECLARE_F32_VMULCADDC_MINMAX_UKERNEL_FUNCTION(xnn_f32_vmulcaddc_minmax_ukernel_c
   XNN_INTERNAL void fn_name(                                   \
       size_t m,                                                \
       size_t c,                                                \
-      const void* x,                                           \
+      const xnn_float16* x,                           \
       size_t x_stride,                                         \
-      const void* w,                                           \
-      void* y,                                                 \
+      const xnn_float16* w,                           \
+      xnn_float16* y,                                 \
       size_t y_stride,                                         \
       const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 

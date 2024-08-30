@@ -30,13 +30,13 @@ void transpose(
   }
   const size_t height = state.range(0);
   const size_t width = state.range(1);
-  const size_t tile_hbytes = height * sizeof(uint16_t);
-  const size_t tile_wbytes = width * sizeof(uint16_t);
+  const size_t tile_hbytes = height * sizeof(xnn_float16);
+  const size_t tile_wbytes = width * sizeof(xnn_float16);
 
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> x(
-      height * width + XNN_EXTRA_BYTES / sizeof(uint16_t));
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> y(
-      height * width + XNN_EXTRA_BYTES / sizeof(uint16_t));
+  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> x(
+      height * width + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> y(
+      height * width + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::iota(x.begin(), x.end(), 0);
   std::fill(y.begin(), y.end(), 0);
 

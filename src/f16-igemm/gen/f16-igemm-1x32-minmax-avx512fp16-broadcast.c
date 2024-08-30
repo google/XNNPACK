@@ -20,13 +20,13 @@ void xnn_f16_igemm_minmax_ukernel_1x32__avx512fp16_broadcast(
     size_t nc,
     size_t kc,
     size_t ks,
-    const void** restrict a,
-    const void* restrict w,
-    void* restrict c,
+    const xnn_float16** restrict a,
+    const xnn_float16* restrict w,
+    xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
-    const void* zero,
+    const xnn_float16* zero,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
@@ -46,13 +46,13 @@ void xnn_f16_igemm_minmax_ukernel_1x32__avx512fp16_broadcast(
 
   do {
     __m512h vacc0x0 = _mm512_load_ph(w);
-    w = (const uint16_t*) w + 32;
+    w = (const xnn_float16*) w + 32;
 
     size_t p = ks;
     do {
       const uint16_t* restrict a0 = (const uint16_t*) a[0];
       assert(a0 != NULL);
-      if XNN_UNPREDICTABLE(a0 != zero) {
+      if XNN_UNPREDICTABLE(a0 != (const uint16_t*) zero) {
         a0 = (const uint16_t*) ((uintptr_t) a0 + a_offset);
       }
       a += 1;
@@ -60,7 +60,7 @@ void xnn_f16_igemm_minmax_ukernel_1x32__avx512fp16_broadcast(
       size_t k = kc;
       do {
         const __m512h vb0 = _mm512_load_ph(w);
-        w = (const uint16_t*) w + 32;
+        w = (const xnn_float16*) w + 32;
 
         const __m512h va0 = _mm512_castsi512_ph(_mm512_set1_epi16(*a0));
         vacc0x0 = _mm512_fmadd_ph(va0, vb0, vacc0x0);
@@ -72,17 +72,17 @@ void xnn_f16_igemm_minmax_ukernel_1x32__avx512fp16_broadcast(
       p -= 1 * sizeof(void*);
     } while (p != 0);
 
-    const __m512h vmin = _mm512_castsi512_ph(_mm512_set1_epi16(params->scalar.min));
+    const __m512h vmin = _mm512_castsi512_ph(_mm512_set1_epi16(*(const uint16_t*) &params->scalar.min));
     vacc0x0 = _mm512_max_ph(vmin, vacc0x0);
 
-    const __m512h vmax = _mm512_castsi512_ph(_mm512_set1_epi16(params->scalar.max));
+    const __m512h vmax = _mm512_castsi512_ph(_mm512_set1_epi16(*(const uint16_t*) &params->scalar.max));
     vacc0x0 = _mm512_min_ph(vmax, vacc0x0);
 
     if XNN_LIKELY(nc >= 32) {
       _mm512_storeu_ph(c0, vacc0x0);
       c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
 
-      a = (const void**restrict) ((uintptr_t) a - ks);
+      a = (const xnn_float16**restrict) ((uintptr_t) a - ks);
       nc -= 32;
     } else {
       assert(nc != 0);

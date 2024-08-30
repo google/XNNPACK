@@ -18,8 +18,8 @@
 
 void xnn_f16_vsigmoid_ukernel__avx2_rr1_p2_div_u48(
     size_t batch,
-    const void* input,
-    void* output,
+    const xnn_float16* input,
+    xnn_float16* output,
     const struct xnn_f16_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);

@@ -144,11 +144,11 @@ protected:
 };
 
 using ConvolutionTestQC8 = QuantizedConvolutionTestBase<int8_t, int8_t, int32_t,int8_t>;
-using ConvolutionTestQD8F16QC8W = QuantizedConvolutionTestBase<float, int8_t, float, uint16_t>;
+using ConvolutionTestQD8F16QC8W = QuantizedConvolutionTestBase<float, int8_t, float, xnn_float16>;
 using ConvolutionTestQD8F32QC8W = QuantizedConvolutionTestBase<float, int8_t, float, float>;
 using ConvolutionTestQS8 = QuantizedConvolutionTestBase<int8_t, int8_t, int32_t,int8_t>;
 using ConvolutionTestQU8 = QuantizedConvolutionTestBase<uint8_t, uint8_t, int32_t,uint8_t>;
-using ConvolutionTestF16 = ConvolutionTestBase<uint16_t, float, float>;
+using ConvolutionTestF16 = ConvolutionTestBase<xnn_float16, float, float>;
 using ConvolutionTestF32 = ConvolutionTestBase<float>;
 
 TEST_F(ConvolutionTestQC8, define)
@@ -290,7 +290,7 @@ TEST_F(ConvolutionTestQD8F16QC8W, internally_allocated_dynamic_quantization_para
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/4, /*flags=*/0, &subgraph));
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
   uint32_t input_id = XNN_INVALID_NODE_ID;
-  std::vector<uint16_t> convert_input(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES / sizeof(uint16_t));
+  std::vector<xnn_float16> convert_input(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::vector<int8_t> operator_dq_data(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES);
   std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0xDEAD));
   std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0xDEAD));
@@ -299,7 +299,7 @@ TEST_F(ConvolutionTestQD8F16QC8W, internally_allocated_dynamic_quantization_para
   std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return scale_dist(rng); });
   std::generate(filter.begin(), filter.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::generate(convert_input.begin(), convert_input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+  std::generate(convert_input.begin(), convert_input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
 
   const float output_min = -std::numeric_limits<float>::infinity();
   const float output_max = std::numeric_limits<float>::infinity();
@@ -1286,7 +1286,7 @@ TEST_F(ConvolutionTestF16, matches_operator_api)
 
   xnn_operator_t op = nullptr;
 
-  std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
   std::generate(filter.begin(), filter.end(), [&]() { return f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
   std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);

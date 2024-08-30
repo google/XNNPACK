@@ -49,7 +49,7 @@ class BroadcastNDTest
 using BroadcastNDTestQS8 = BroadcastNDTest<int8_t>;
 using BroadcastNDTestQU8 = BroadcastNDTest<uint8_t>;
 #ifndef XNN_EXCLUDE_F16_TESTS
-using BroadcastNDTestF16 = BroadcastNDTest<uint16_t>;
+using BroadcastNDTestF16 = BroadcastNDTest<xnn_float16>;
 #endif  // XNN_EXCLUDE_F16_TESTS
 using BroadcastNDTestF32 = BroadcastNDTest<float>;
 using BroadcastNDTestS32 = BroadcastNDTest<int32_t>;
@@ -57,7 +57,7 @@ using BroadcastNDTestS32 = BroadcastNDTest<int32_t>;
 TEST_P(BroadcastNDTestQS8, op) { BroadcastNDTestImpl<int8_t>(GetParam()); }
 TEST_P(BroadcastNDTestQU8, op) { BroadcastNDTestImpl<uint8_t>(GetParam()); }
 #ifndef XNN_EXCLUDE_F16_TESTS
-TEST_P(BroadcastNDTestF16, op) { BroadcastNDTestImpl<uint16_t>(GetParam()); }
+TEST_P(BroadcastNDTestF16, op) { BroadcastNDTestImpl<xnn_float16>(GetParam()); }
 #endif  // XNN_EXCLUDE_F16_TESTS
 TEST_P(BroadcastNDTestF32, op) { BroadcastNDTestImpl<float>(GetParam()); }
 TEST_P(BroadcastNDTestS32, op) { BroadcastNDTestImpl<int32_t>(GetParam()); }
@@ -221,9 +221,9 @@ class FloatMinMaxTest
 };
 
 #ifndef XNN_EXCLUDE_F16_TESTS
-using FloatMinMaxTestNDF16 = FloatMinMaxTest<uint16_t>;
-TEST_P(FloatMinMaxTestNDF16, qmin) { FloatMinTestImpl<uint16_t>(GetParam()); }
-TEST_P(FloatMinMaxTestNDF16, qmax) { FloatMaxTestImpl<uint16_t>(GetParam()); }
+using FloatMinMaxTestNDF16 = FloatMinMaxTest<xnn_float16>;
+TEST_P(FloatMinMaxTestNDF16, qmin) { FloatMinTestImpl<xnn_float16>(GetParam()); }
+TEST_P(FloatMinMaxTestNDF16, qmax) { FloatMaxTestImpl<xnn_float16>(GetParam()); }
 #endif  // XNN_EXCLUDE_F16_TESTS
 
 using FloatMinMaxTestNDF32 = FloatMinMaxTest<float>;

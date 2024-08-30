@@ -22,7 +22,7 @@ namespace {
 
 // _Float16 isn't supported on all targets, but all we really need is to specify
 // any type that is neither u8 nor s8 for our purposes here.
-using XnnTest = XnnMaxpoolTest<xnn_f16_maxpool_ukernel_fn, xnn_init_f16_minmax_params_fn, uint16_t>;
+using XnnTest = XnnMaxpoolTest<xnn_f16_maxpool_ukernel_fn, xnn_init_f16_minmax_params_fn, xnn_float16>;
 using XnnTestParam = XnnMaxpoolTestParam<xnn_f16_maxpool_ukernel_fn, xnn_init_f16_minmax_params_fn>;
 
 std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) {

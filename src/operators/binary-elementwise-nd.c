@@ -130,7 +130,7 @@ static enum xnn_status create_binary_elementwise_nd_f16(
   union xnn_f16_minmax_params params;
   assert(config->init.f16_minmax != NULL);
   config->init.f16_minmax(&params,
-    fp16_ieee_from_fp32_value(output_min), fp16_ieee_from_fp32_value(output_max));
+    xnn_float16_from_float(output_min), xnn_float16_from_float(output_max));
 
   return create_binary_elementwise_nd(
     flags,

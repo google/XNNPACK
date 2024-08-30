@@ -24,7 +24,7 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_7x64c4__avx512amx(
     size_t ks,
     const int8_t** restrict a,
     const void* restrict w,
-    void* restrict c,
+    xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -90,34 +90,34 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_7x64c4__avx512amx(
   //_tile_loadconfig(&tile_data);
   __asm__ volatile ("ldtilecfg %0" :: "m" (tile_data));
 
-  uint16_t* c0 = (uint16_t*) c;
-  uint16_t* c1 = (uint16_t*) ((uintptr_t) c0 + cm_stride);
+  xnn_float16* c0 = c;
+  xnn_float16* c1 = (xnn_float16*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {
     c1 = c0;
   }
-  uint16_t* c2 = (uint16_t*) ((uintptr_t) c1 + cm_stride);
+  xnn_float16* c2 = (xnn_float16*) ((uintptr_t) c1 + cm_stride);
   if XNN_UNPREDICTABLE(mr <= 2) {
     c2 = c1;
   }
-  uint16_t* c3 = (uint16_t*) ((uintptr_t) c2 + cm_stride);
+  xnn_float16* c3 = (xnn_float16*) ((uintptr_t) c2 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 4) {
     c3 = c2;
   }
-  uint16_t* c4 = (uint16_t*) ((uintptr_t) c3 + cm_stride);
+  xnn_float16* c4 = (xnn_float16*) ((uintptr_t) c3 + cm_stride);
   if XNN_UNPREDICTABLE(mr <= 4) {
     c4 = c3;
   }
-  uint16_t* c5 = (uint16_t*) ((uintptr_t) c4 + cm_stride);
+  xnn_float16* c5 = (xnn_float16*) ((uintptr_t) c4 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 6) {
     c5 = c4;
   }
-  uint16_t* c6 = (uint16_t*) ((uintptr_t) c5 + cm_stride);
+  xnn_float16* c6 = (xnn_float16*) ((uintptr_t) c5 + cm_stride);
   if XNN_UNPREDICTABLE(mr <= 6) {
     c6 = c5;
   }
 
-  const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
-  const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  const __m512 voutput_min = _mm512_cvtph_ps(_mm256_set1_epi16(*(const uint16_t*) &params->scalar.min));
+  const __m512 voutput_max = _mm512_cvtph_ps(_mm256_set1_epi16(*(const uint16_t*) &params->scalar.max));
   // XNN_FORCE_REALIZATION(voutput_min);
   // XNN_FORCE_REALIZATION(voutput_max);
 
@@ -530,37 +530,37 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_7x64c4__avx512amx(
       _mm256_storeu_si256((__m256i*) (c6 + 16), vfp16out6xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c6 + 32), vfp16out6xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c6 + 48), vfp16out6xmnopqrstuvwxyz01);
-      c6 = (uint16_t*) ((uintptr_t) c6 + cn_stride);
+      c6 = (xnn_float16*) ((uintptr_t) c6 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c5 + 0), vfp16out5x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c5 + 16), vfp16out5xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c5 + 32), vfp16out5xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c5 + 48), vfp16out5xmnopqrstuvwxyz01);
-      c5 = (uint16_t*) ((uintptr_t) c5 + cn_stride);
+      c5 = (xnn_float16*) ((uintptr_t) c5 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c4 + 0), vfp16out4x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c4 + 16), vfp16out4xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c4 + 32), vfp16out4xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c4 + 48), vfp16out4xmnopqrstuvwxyz01);
-      c4 = (uint16_t*) ((uintptr_t) c4 + cn_stride);
+      c4 = (xnn_float16*) ((uintptr_t) c4 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c3 + 0), vfp16out3x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c3 + 16), vfp16out3xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c3 + 32), vfp16out3xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c3 + 48), vfp16out3xmnopqrstuvwxyz01);
-      c3 = (uint16_t*) ((uintptr_t) c3 + cn_stride);
+      c3 = (xnn_float16*) ((uintptr_t) c3 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c2 + 0), vfp16out2x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c2 + 16), vfp16out2xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c2 + 32), vfp16out2xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c2 + 48), vfp16out2xmnopqrstuvwxyz01);
-      c2 = (uint16_t*) ((uintptr_t) c2 + cn_stride);
+      c2 = (xnn_float16*) ((uintptr_t) c2 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c1 + 0), vfp16out1x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c1 + 16), vfp16out1xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c1 + 32), vfp16out1xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c1 + 48), vfp16out1xmnopqrstuvwxyz01);
-      c1 = (uint16_t*) ((uintptr_t) c1 + cn_stride);
+      c1 = (xnn_float16*) ((uintptr_t) c1 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c0 + 0), vfp16out0x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c0 + 16), vfp16out0xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c0 + 32), vfp16out0xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c0 + 48), vfp16out0xmnopqrstuvwxyz01);
-      c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
+      c0 = (xnn_float16*) ((uintptr_t) c0 + cn_stride);
 
       a = (const int8_t**restrict) ((uintptr_t) a - ks);
       nc -= 64;

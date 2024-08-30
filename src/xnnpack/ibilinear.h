@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,10 +20,10 @@ extern "C" {
   XNN_INTERNAL void fn_name(                            \
       size_t output_pixels,                             \
       size_t channels,                                  \
-      const void** input,                               \
+      const xnn_float16** input,               \
       size_t input_offset,                              \
-      const void* weights,                              \
-      void* output,                                     \
+      const xnn_float16* weights,              \
+      xnn_float16* output,                     \
       size_t output_increment);
 
 DECLARE_F16_IBILINEAR_UKERNEL_FUNCTION(xnn_f16_ibilinear_ukernel__fma3_c8)
@@ -154,10 +155,10 @@ DECLARE_F32_IBILINEAR_CHW_UKERNEL_FUNCTION(xnn_f32_ibilinear_chw_ukernel__sse_p8
   XNN_INTERNAL void fn_name(                                \
       size_t output_pixels,                                 \
       size_t channels,                                      \
-      const void** input,                                   \
+      const xnn_float16** input,                   \
       size_t input_offset,                                  \
-      const void* weights,                                  \
-      void* output,                                         \
+      const xnn_float16* weights,                  \
+      xnn_float16* output,                         \
       size_t input_increment);
 
 DECLARE_F16_IBILINEAR_CHW_UKERNEL_FUNCTION(xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p4)

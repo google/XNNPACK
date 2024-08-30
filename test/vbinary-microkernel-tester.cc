@@ -20,7 +20,6 @@
 #include <climits>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
@@ -56,7 +55,11 @@ void VBinaryMicrokernelTester::Test(xnn_f16_vbinary_ukernel_fn vbinary,
     reference_op_impl(a_data, b_data, y_ref.data(), batch_size(), op_type);
 
     // Call optimized micro-kernel.
-    vbinary(batch_size() * sizeof(Float16), a_data, b_data, y.data(), nullptr);
+    vbinary(batch_size() * sizeof(xnn_float16),
+            reinterpret_cast<const xnn_float16*>(a_data),
+            reinterpret_cast<const xnn_float16*>(b_data),
+            reinterpret_cast<xnn_float16*>(y.data()),
+            nullptr);
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {
@@ -99,12 +102,12 @@ void VBinaryMicrokernelTester::Test(
     const float accumulated_max =
         *std::max_element(y_ref.cbegin(), y_ref.cend());
     const float accumulated_range = accumulated_max - accumulated_min;
-    const float y_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(
+    const float y_max = xnn_float16_to_float(xnn_float16_from_float(
         accumulated_range > 0.0f
             ? (accumulated_max -
                accumulated_range / 255.0f * static_cast<float>(255 - qmax()))
             : +std::numeric_limits<float>::infinity()));
-    const float y_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(
+    const float y_min = xnn_float16_to_float(xnn_float16_from_float(
         accumulated_range > 0.0f
             ? (accumulated_min +
                accumulated_range / 255.0f * static_cast<float>(qmin()))
@@ -115,12 +118,16 @@ void VBinaryMicrokernelTester::Test(
 
     // Prepare parameters.
     xnn_f16_minmax_params params;
-    init_params(&params, fp16_ieee_from_fp32_value(y_min),
-                fp16_ieee_from_fp32_value(y_max));
+    init_params(&params, xnn_float16_from_float(y_min),
+                xnn_float16_from_float(y_max));
 
     // Call optimized micro-kernel.
-    vbinary_minmax(batch_size() * sizeof(Float16), a_data, b_data, y.data(),
+    vbinary_minmax(batch_size() * sizeof(xnn_float16),
+                   reinterpret_cast<const xnn_float16*>(a_data),
+                   reinterpret_cast<const xnn_float16*>(b_data),
+                   reinterpret_cast<xnn_float16*>(y.data()),
                    &params);
+
 
     // Verify results.
     for (size_t i = 0; i < batch_size(); i++) {

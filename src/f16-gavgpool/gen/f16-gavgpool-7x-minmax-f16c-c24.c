@@ -18,17 +18,17 @@
 void xnn_f16_gavgpool_minmax_ukernel_7x__f16c_c24(
     size_t rows,
     size_t channels,
-    const void* input,
+    const xnn_float16* input,
     size_t input_stride,
-    const void* zero,
-    void* output,
+    const xnn_float16* zero,
+    xnn_float16* output,
     const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(rows != 0);
   assert(rows <= 7);
   assert(channels != 0);
 
-  const uint16_t* i0 = input;
+  const uint16_t* i0 = (const uint16_t*) input;
   const uint16_t* i1 = (const uint16_t*) ((uintptr_t) i0 + input_stride);
   if XNN_UNPREDICTABLE(rows < 2) {
     i1 = (const uint16_t*) zero;

@@ -17,9 +17,9 @@
 
 void xnn_f16_vadd_minmax_ukernel__avx512fp16_u64(
     size_t batch,
-    const void* restrict input_a,
-    const void* restrict input_b,
-    void* restrict output,
+    const xnn_float16* restrict input_a,
+    const xnn_float16* restrict input_b,
+    xnn_float16* restrict output,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
@@ -33,8 +33,8 @@ void xnn_f16_vadd_minmax_ukernel__avx512fp16_u64(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
-  const __m512h voutput_min = _mm512_castsi512_ph(_mm512_set1_epi16(params->scalar.min));
-  const __m512h voutput_max = _mm512_castsi512_ph(_mm512_set1_epi16(params->scalar.max));
+  const __m512h voutput_min = _mm512_castsi512_ph(_mm512_set1_epi16(*(const uint16_t*) &params->scalar.min));
+  const __m512h voutput_max = _mm512_castsi512_ph(_mm512_set1_epi16(*(const uint16_t*) &params->scalar.max));
 
   for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
     __m512h vacc0 = _mm512_loadu_ph(a);

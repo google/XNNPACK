@@ -26,8 +26,8 @@ $  "RNDD": "_MM_FROUND_TO_NEG_INF",
 $}[OP]
 void xnn_f16_v${OP.lower()}_ukernel__f16c_u${BATCH_TILE}(
     size_t batch,
-    const void* input,
-    void* output,
+    const xnn_float16* input,
+    xnn_float16* output,
     const struct xnn_f16_rnd_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);

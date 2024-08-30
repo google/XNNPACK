@@ -181,10 +181,10 @@ void tflite_convert_qu8_f32(benchmark::State& state) {
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 BENCHMARK(xnnpack_convert_f16_f32)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<xnn_float16, float>)
   ->UseRealTime();
 BENCHMARK(xnnpack_convert_f32_f16)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, uint16_t>)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<float, xnn_float16>)
   ->UseRealTime();
 BENCHMARK(xnnpack_convert_f32_qs8)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)
@@ -207,7 +207,7 @@ BENCHMARK(xnnpack_convert_qu8_f32)
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
   BENCHMARK(tflite_convert_f16_f32)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, float>)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<xnn_float16, float>)
     ->UseRealTime();
   BENCHMARK(tflite_convert_f32_qs8)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, int8_t>)

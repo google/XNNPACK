@@ -31,7 +31,7 @@ void u32_vlog(
 
   std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> input(
       num_elements + XNN_EXTRA_BYTES / sizeof(uint32_t));
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> output(num_elements);
+  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> output(num_elements);
   std::iota(input.begin(), input.end(), 0);
   std::iota(output.begin(), output.end(), 0);
 
@@ -48,26 +48,26 @@ void u32_vlog(
   state.counters["elements"] =
     benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration, benchmark::Counter::kIsRate);
 
-  const size_t bytes_per_iteration = num_elements * (sizeof(uint32_t) + sizeof(uint16_t));
+  const size_t bytes_per_iteration = num_elements * (sizeof(uint32_t) + sizeof(xnn_float16));
   state.counters["bytes"] =
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
 BENCHMARK_CAPTURE(u32_vlog, scalar_x1,
                   xnn_u32_vlog_ukernel__scalar_x1)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint32_t, uint16_t>)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint32_t, xnn_float16>)
   ->UseRealTime();
 BENCHMARK_CAPTURE(u32_vlog, scalar_x2,
                   xnn_u32_vlog_ukernel__scalar_x2)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint32_t, uint16_t>)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint32_t, xnn_float16>)
   ->UseRealTime();
 BENCHMARK_CAPTURE(u32_vlog, scalar_x3,
                   xnn_u32_vlog_ukernel__scalar_x3)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint32_t, uint16_t>)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint32_t, xnn_float16>)
   ->UseRealTime();
 BENCHMARK_CAPTURE(u32_vlog, scalar_x4,
                   xnn_u32_vlog_ukernel__scalar_x4)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint32_t, uint16_t>)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint32_t, xnn_float16>)
   ->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

@@ -25,7 +25,7 @@
 
 using StaticConstantPadTestInt8 = UnaryTest<int8_t>;
 using StaticConstantPadTestUint8 = UnaryTest<uint8_t>;
-using StaticConstantPadTestF16 = UnaryTest<uint16_t>;
+using StaticConstantPadTestF16 = UnaryTest<xnn_float16>;
 using StaticConstantPadTestF32 = UnaryTest<float>;
 
 TEST_F(StaticConstantPadTestInt8, define)
@@ -138,8 +138,8 @@ TEST_F(StaticConstantPadTestF16, define)
   std::array<size_t, XNN_MAX_TENSOR_DIMS> post_paddings;
   std::fill(pre_paddings.begin(), pre_paddings.begin() + dims.size(), dim_dist(rng));
   std::fill(post_paddings.begin(), post_paddings.begin() + dims.size(), dim_dist(rng));
-  uint16_t padding_value = f32dist(rng);
-  uint32_t padding_value_as_bits = fp16_ieee_from_fp32_value(padding_value);
+  xnn_float16 padding_value = f32dist(rng);
+  uint32_t padding_value_as_bits = xnn_float16_from_float(padding_value);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -389,14 +389,14 @@ TEST_F(StaticConstantPadTestF16, matches_operator_api)
   std::fill(pre_paddings.begin(), pre_paddings.begin() + dims.size(), dim_dist(rng));
   std::fill(post_paddings.begin(), post_paddings.begin() + dims.size(), dim_dist(rng));
   float padding_value = f32dist(rng);
-  uint32_t padding_value_as_u32 = fp16_ieee_from_fp32_value(padding_value);
+  uint32_t padding_value_as_u32 = xnn_float16_from_float(padding_value);
   std::vector<size_t> output_dims = dims;
   for (size_t i = 0; i < dims.size(); i++) {
     output_dims[i] = pre_paddings[i] + output_dims[i] + post_paddings[i];
   }
   // Output sizes
-  operator_output = std::vector<uint16_t>(NumElements(output_dims));
-  subgraph_output = std::vector<uint16_t>(operator_output.size());
+  operator_output = std::vector<xnn_float16>(NumElements(output_dims));
+  subgraph_output = std::vector<xnn_float16>(operator_output.size());
   std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
   std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
 

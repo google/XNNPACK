@@ -22,7 +22,7 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c4__neondotfp16arith(
     size_t ks,
     const int8_t** restrict a,
     const void* restrict w,
-    void* restrict c,
+    xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -123,9 +123,9 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c4__neondotfp16arith(
 
     float16x8_t vfp16out0x01234567 = vcombine_f16(vcvt_f16_f32(vout0x0123), vcvt_f16_f32(vout0x4567));
 
-    const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.min));
+    const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.min));
     vfp16out0x01234567 = vmaxq_f16(vfp16out0x01234567, voutput_min);
-    const float16x8_t voutput_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.max));
+    const float16x8_t voutput_max = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.max));
     vfp16out0x01234567 = vminq_f16(vfp16out0x01234567, voutput_max);
     if XNN_LIKELY(nc >= 8) {
       vst1q_u16(c0, vreinterpretq_u16_f16(vfp16out0x01234567));

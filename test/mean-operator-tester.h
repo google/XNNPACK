@@ -20,10 +20,10 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "replicable_random_device.h"
 #include "pthreadpool.h"
 
@@ -125,8 +125,8 @@ class MeanOperatorTester {
       output_stride *= output_dims[i - 1];
     }
 
-    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + num_input_elements());
-    std::vector<uint16_t> output(num_output_elements);
+    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) + num_input_elements());
+    std::vector<xnn_float16> output(num_output_elements);
     std::vector<float> output_ref(num_output_elements);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
@@ -139,7 +139,7 @@ class MeanOperatorTester {
         }
       }
 
-      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00)  /* NaN */);
 
       // Compute reference results.
@@ -151,7 +151,7 @@ class MeanOperatorTester {
               for (size_t m = 0; m < input_dims[4]; m++) {
                 for (size_t n = 0; n < input_dims[5]; n++) {
                   output_ref[i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3] + m * output_strides[4] + n * output_strides[5]] +=
-                    fp16_ieee_to_fp32_value(input[i * input_strides[0] + j * input_strides[1] + k * input_strides[2] + l * input_strides[3] + m * input_strides[4] + n * input_strides[5]]);
+                    xnn_float16_to_float(input[i * input_strides[0] + j * input_strides[1] + k * input_strides[2] + l * input_strides[3] + m * input_strides[4] + n * input_strides[5]]);
                 }
               }
             }
@@ -212,7 +212,7 @@ class MeanOperatorTester {
                 for (size_t n = 0; n < output_dims[5]; n++) {
                   const size_t index =
                     i * output_strides[0] + j * output_strides[1] + k * output_strides[2] + l * output_strides[3] + m * output_strides[4] + n * output_strides[5];
-                  ASSERT_NEAR(fp16_ieee_to_fp32_value(output[index]), output_ref[index], 3.0e-2f * std::abs(output_ref[index]))
+                  ASSERT_NEAR(xnn_float16_to_float(output[index]), output_ref[index], 3.0e-2f * std::abs(output_ref[index]))
                     << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k << ", " << l << ", " << m << ", " << n << ")";
                 }
               }

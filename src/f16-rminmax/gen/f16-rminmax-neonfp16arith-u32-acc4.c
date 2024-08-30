@@ -17,8 +17,8 @@
 
 void xnn_f16_rminmax_ukernel__neonfp16arith_u32_acc4(
     size_t batch,
-    const void* input,
-    void* output,
+    const xnn_float16* input,
+    xnn_float16* output,
     const union xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);

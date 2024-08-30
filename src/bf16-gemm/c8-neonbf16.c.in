@@ -18,10 +18,10 @@ void xnn_bf16_gemm_minmax_ukernel_${MR}x${NR}c8__neonbf16_${BFOPT.lower()}(
     size_t mr,
     size_t nc,
     size_t kc,
-    const void* restrict a,
+    const xnn_bfloat16* restrict a,
     size_t a_stride,
-    const void* restrict w_ptr,
-    void* restrict c,
+    const xnn_bfloat16* restrict w_ptr,
+    xnn_bfloat16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_bf16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])

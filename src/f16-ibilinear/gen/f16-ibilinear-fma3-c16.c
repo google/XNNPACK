@@ -19,10 +19,10 @@
 void xnn_f16_ibilinear_ukernel__fma3_c16(
     size_t output_pixels,
     size_t channels,
-    const void** restrict input,
+    const xnn_float16** restrict input,
     size_t input_offset,
-    const void* restrict weights,
-    void* restrict output,
+    const xnn_float16* restrict weights,
+    xnn_float16* restrict output,
     size_t output_increment) XNN_OOB_READS
 {
   assert(output_pixels != 0);
@@ -37,10 +37,10 @@ void xnn_f16_ibilinear_ukernel__fma3_c16(
     const uint16_t* i3 = (const uint16_t*) ((uintptr_t) input[3] + input_offset);
     input += 4;
 
-    const __m256 valphahv = _mm256_cvtph_ps(_mm_castps_si128(_mm_broadcast_ss(weights)));
+    const __m256 valphahv = _mm256_cvtph_ps(_mm_set1_epi32(*(const uint32_t*) weights));
     const __m256 valphah = _mm256_permute_ps(valphahv, _MM_SHUFFLE(2, 0, 2, 0));
     const __m256 valphav = _mm256_permute_ps(valphahv, _MM_SHUFFLE(3, 1, 3, 1));
-    weights = (const uint16_t*) weights + 2;
+    weights = (const xnn_float16*) weights + 2;
 
     size_t c = channels;
     for (; c >= 16 * sizeof(uint16_t); c -= 16 * sizeof(uint16_t)) {

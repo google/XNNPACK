@@ -32,9 +32,9 @@ $PARAMS = {"LINEAR": "union xnn_f16_default_params", "MINMAX": "union xnn_f16_mi
 $ISA = "aarch64_neonfp16arith" if OP in ["DIV", "RDIV"] else "neonfp16arith"
 void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__${ISA}_u${BATCH_TILE}(
     size_t batch,
-    const void* restrict input_a,
-    const void* restrict input_b,
-    void* restrict output,
+    const xnn_float16* restrict input_a,
+    const xnn_float16* restrict input_b,
+    xnn_float16* restrict output,
     const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
@@ -48,8 +48,8 @@ void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__${ISA}_u${BATCH_TILE}(
   uint16_t* o = (uint16_t*) output;
 
   $if ACTIVATION == "MINMAX":
-    const float16x8_t vy_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.min));
-    const float16x8_t vy_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.max));
+    const float16x8_t vy_min = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.min));
+    const float16x8_t vy_max = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.max));
 
   const float16x8_t vb = vreinterpretq_f16_u16(vld1q_dup_u16(b));
   $if BATCH_TILE > 8:

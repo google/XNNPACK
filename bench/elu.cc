@@ -48,7 +48,7 @@ static void xnnpack_elu_qs8(benchmark::State& state) {
 }
 
 BENCHMARK(xnnpack_elu_f16)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
     ->UseRealTime();
 BENCHMARK(xnnpack_elu_f32)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
@@ -58,7 +58,7 @@ BENCHMARK(xnnpack_elu_qs8)
     ->UseRealTime();
 
 BENCHMARK(xnnpack_elu_f16)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
   ->UseRealTime();
 BENCHMARK(xnnpack_elu_f32)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)

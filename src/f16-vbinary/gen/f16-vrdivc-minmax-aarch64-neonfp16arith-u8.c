@@ -17,9 +17,9 @@
 
 void xnn_f16_vrdivc_minmax_ukernel__aarch64_neonfp16arith_u8(
     size_t batch,
-    const void* restrict input_a,
-    const void* restrict input_b,
-    void* restrict output,
+    const xnn_float16* restrict input_a,
+    const xnn_float16* restrict input_b,
+    xnn_float16* restrict output,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
@@ -32,8 +32,8 @@ void xnn_f16_vrdivc_minmax_ukernel__aarch64_neonfp16arith_u8(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
-  const float16x8_t vy_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.min));
-  const float16x8_t vy_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.max));
+  const float16x8_t vy_min = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.min));
+  const float16x8_t vy_max = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.max));
 
   const float16x8_t vb = vreinterpretq_f16_u16(vld1q_dup_u16(b));
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {

@@ -17,9 +17,9 @@
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 
 #include <benchmark/benchmark.h>
-#include <fp16/fp16.h>
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "tensorflow/lite/interpreter.h"
@@ -325,7 +325,7 @@ void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
-  auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
 
   const size_t output_pixel_stride = groups * group_output_channels;
   const size_t input_pixel_stride = groups * group_input_channels;
@@ -338,11 +338,11 @@ void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
   const size_t output_height = (input_height + padding_height - effective_kernel_height) / subsampling + 1;
   const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
 
-  std::vector<uint16_t> input(batch_size * input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(uint16_t));
+  std::vector<xnn_float16> input(batch_size * input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::generate(input.begin(), input.end(), std::ref(f16rng));
-  std::vector<uint16_t> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
+  std::vector<xnn_float16> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
   std::generate(kernel.begin(), kernel.end(), std::ref(f16rng));
-  std::vector<uint16_t> bias(groups * group_output_channels);
+  std::vector<xnn_float16> bias(groups * group_output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(f16rng));
   const size_t output_elements = batch_size * output_height * output_width * output_pixel_stride;
 
@@ -354,8 +354,8 @@ void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
 
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
-      sizeof(uint16_t) * (kernel.size() + bias.size() + output_elements));
-  std::vector<uint16_t> output(output_elements * num_buffers);
+      sizeof(xnn_float16) * (kernel.size() + bias.size() + output_elements));
+  std::vector<xnn_float16> output(output_elements * num_buffers);
 
   std::vector<xnn_operator_t> convolution_operators(num_buffers);
   for (xnn_operator_t& convolution_op : convolution_operators) {
@@ -411,7 +411,7 @@ void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
   size_t buffer_index = 0;
   for (auto _ : state) {
     state.PauseTiming();
-    benchmark::utils::PrefetchToL1(input.data(), input.size() * sizeof(uint16_t));
+    benchmark::utils::PrefetchToL1(input.data(), input.size() * sizeof(xnn_float16));
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 

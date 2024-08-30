@@ -17,8 +17,8 @@
 
 void xnn_f16_vclamp_ukernel__rvvfp16arith_u4v(
     size_t batch,
-    const void* input,
-    void* output,
+    const xnn_float16* input,
+    xnn_float16* output,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);

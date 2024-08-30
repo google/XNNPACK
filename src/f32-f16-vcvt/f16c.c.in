@@ -18,7 +18,7 @@ $SIMD_TILE = BATCH_TILE // 8
 void xnn_f32_f16_vcvt_ukernel__f16c_u${BATCH_TILE}(
     size_t batch,
     const float* input,
-    void* output,
+    xnn_float16* output,
     const void* params)
 {
   assert(batch != 0);

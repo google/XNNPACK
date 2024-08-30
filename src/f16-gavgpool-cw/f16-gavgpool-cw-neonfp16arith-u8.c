@@ -14,8 +14,8 @@
 void xnn_f16_gavgpool_cw_ukernel__neonfp16arith_u8(
     size_t elements,
     size_t channels,
-    const void* input,
-    void* output,
+    const xnn_float16* input,
+    xnn_float16* output,
     const union xnn_f16_gavgpool_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(elements != 0);
@@ -28,7 +28,7 @@ void xnn_f16_gavgpool_cw_ukernel__neonfp16arith_u8(
   const float16x4_t voutput_max = vreinterpret_f16_u16(vld1_dup_u16(&params->scalar.output_max));
 
   uint16_t* o = (uint16_t*) output;
-  const uint16_t* i = input;
+  const uint16_t* i = (const uint16_t*) input;
   do {
     float16x8_t vsum0 = vreinterpretq_f16_u16(vmovq_n_u16(0));
     float16x8_t vsum1 = vreinterpretq_f16_u16(vmovq_n_u16(0));

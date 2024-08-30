@@ -19,17 +19,17 @@
 void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c24(
     size_t rows,
     size_t channels,
-    const void* input,
+    const xnn_float16* input,
     size_t input_stride,
-    const void* zero,
-    void* buffer,
-    void* output,
+    const xnn_float16* zero,
+    xnn_float16* buffer,
+    xnn_float16* output,
     const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(rows > 7);
   assert(channels != 0);
 
-  const uint16_t* i0 = input;
+  const uint16_t* i0 = (const uint16_t*) input;
   const uint16_t* i1 = (const uint16_t*) ((uintptr_t) i0 + input_stride);
   const uint16_t* i2 = (const uint16_t*) ((uintptr_t) i1 + input_stride);
   const uint16_t* i3 = (const uint16_t*) ((uintptr_t) i2 + input_stride);
@@ -38,7 +38,7 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c24(
   const uint16_t* i6 = (const uint16_t*) ((uintptr_t) i5 + input_stride);
   const size_t input_increment = 7 * input_stride - round_up_po2(channels, 8) * sizeof(uint16_t);
 
-  uint16_t* b = buffer;
+  uint16_t* b = (uint16_t*) buffer;
   size_t c = channels;
   for (; c >= 24; c -= 24) {
     const __m256 vi0x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0)); i0 += 8;
@@ -119,7 +119,7 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c24(
     i5 = (const uint16_t*) ((uintptr_t) i5 + input_increment);
     i6 = (const uint16_t*) ((uintptr_t) i6 + input_increment);
 
-    uint16_t* b = buffer;
+    uint16_t* b = (uint16_t*) buffer;
     size_t c = channels;
     for (; c >= 24; c -= 24) {
       __m128i vacc01234567 = _mm_loadu_si128((const __m128i*) b);
@@ -235,9 +235,9 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c24(
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
   for (; channels >= 24; channels -= 24) {
-    __m128i vacc01234567 = _mm_loadu_si128((const __m128i*) buffer); buffer = (uint16_t*) buffer + 8;
-    __m128i vacc89ABCDEF = _mm_loadu_si128((const __m128i*) buffer); buffer = (uint16_t*) buffer + 8;
-    __m128i vaccGHIJKLMN = _mm_loadu_si128((const __m128i*) buffer); buffer = (uint16_t*) buffer + 8;
+    __m128i vacc01234567 = _mm_loadu_si128((const __m128i*) buffer); buffer = (xnn_float16*) buffer + 8;
+    __m128i vacc89ABCDEF = _mm_loadu_si128((const __m128i*) buffer); buffer = (xnn_float16*) buffer + 8;
+    __m128i vaccGHIJKLMN = _mm_loadu_si128((const __m128i*) buffer); buffer = (xnn_float16*) buffer + 8;
 
     const __m256 vi0x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0)); i0 += 8;
     const __m256 vi0x89ABCDEF = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0)); i0 += 8;
@@ -302,7 +302,7 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c24(
   }
   if XNN_UNLIKELY(channels != 0) {
     do {
-      __m128i vacc01234567 = _mm_loadu_si128((const __m128i*) buffer); buffer = (uint16_t*) buffer + 8;
+      __m128i vacc01234567 = _mm_loadu_si128((const __m128i*) buffer); buffer = (xnn_float16*) buffer + 8;
 
       const __m256 vi0x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0)); i0 += 8;
       const __m256 vi1x01234567 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i1)); i1 += 8;

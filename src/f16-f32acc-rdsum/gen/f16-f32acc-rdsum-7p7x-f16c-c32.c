@@ -20,9 +20,9 @@
 void xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_c32(
     size_t rows,
     size_t channels,
-    const void* input,
+    const xnn_float16* input,
     size_t input_stride,
-    const void* zero,
+    const xnn_float16* zero,
     float* output,
     const struct xnn_f16_f32acc_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
@@ -31,11 +31,11 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_c32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m256 vscale = _mm256_set1_ps(params->scale);
+  const __m256 vscale = _mm256_set1_ps(params->scalar.scale);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 32; channels -= 32) {
-    const uint16_t* i0 = input;
+    const uint16_t* i0 = (const uint16_t*) input;
     const uint16_t* i1 = (const uint16_t*) ((uintptr_t) input + 1 * input_stride);
     const uint16_t* i2 = (const uint16_t*) ((uintptr_t) input + 2 * input_stride);
     const uint16_t* i3 = (const uint16_t*) ((uintptr_t) input + 3 * input_stride);
@@ -50,22 +50,22 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_c32(
 
     for (int r = rows; r > 0; r -= 7) {
       if XNN_UNPREDICTABLE(r < 2) {
-        i1 = zero;
+        i1 = (const uint16_t*) zero;
       }
       if XNN_UNPREDICTABLE(r <= 2) {
-        i2 = zero;
+        i2 = (const uint16_t*) zero;
       }
       if XNN_UNPREDICTABLE(r < 4) {
-        i3 = zero;
+        i3 = (const uint16_t*) zero;
       }
       if XNN_UNPREDICTABLE(r <= 4) {
-        i4 = zero;
+        i4 = (const uint16_t*) zero;
       }
       if XNN_UNPREDICTABLE(r < 6) {
-        i5 = zero;
+        i5 = (const uint16_t*) zero;
       }
       if XNN_UNPREDICTABLE(r <= 6) {
-        i6 = zero;
+        i6 = (const uint16_t*) zero;
       }
       __m256 vin0;
       __m256 vin1;
@@ -154,11 +154,11 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_c32(
     _mm256_storeu_ps(output, vacc2); output = (void*) ((uintptr_t) output + 8 * sizeof(float));
     _mm256_storeu_ps(output, vacc3); output = (void*) ((uintptr_t) output + 8 * sizeof(float));
 
-    input = (const uint16_t*) ((uintptr_t) input + 32 * sizeof(uint16_t));
+    input = (const xnn_float16*) ((uintptr_t) input + 32 * sizeof(xnn_float16));
   }
   if (channels != 0) {
     input_increment = 7 * input_stride;
-    const uint16_t* i0 = input;
+    const uint16_t* i0 = (const uint16_t*) input;
     const uint16_t* i1 = (const uint16_t*) ((uintptr_t) input + 1 * input_stride);
     const uint16_t* i2 = (const uint16_t*) ((uintptr_t) input + 2 * input_stride);
     const uint16_t* i3 = (const uint16_t*) ((uintptr_t) input + 3 * input_stride);
@@ -176,22 +176,22 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_c32(
     const size_t remainder = channels & 0x7;
     for (int r = rows; r > 0; r -= 7) {
       if XNN_UNPREDICTABLE(r < 2) {
-        i1 = zero;
+        i1 = (const uint16_t*) zero;
       }
       if XNN_UNPREDICTABLE(r <= 2) {
-        i2 = zero;
+        i2 = (const uint16_t*) zero;
       }
       if XNN_UNPREDICTABLE(r < 4) {
-        i3 = zero;
+        i3 = (const uint16_t*) zero;
       }
       if XNN_UNPREDICTABLE(r <= 4) {
-        i4 = zero;
+        i4 = (const uint16_t*) zero;
       }
       if XNN_UNPREDICTABLE(r < 6) {
-        i5 = zero;
+        i5 = (const uint16_t*) zero;
       }
       if XNN_UNPREDICTABLE(r <= 6) {
-        i6 = zero;
+        i6 = (const uint16_t*) zero;
       }
       for (int i = 0; i < num_full_chunks; ++i) {
         vacc[i] = _mm256_add_ps(_mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) &i0[i*8])), vacc[i]);

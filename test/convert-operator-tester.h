@@ -140,18 +140,18 @@ class ConvertOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
-    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       (batch_size() - 1) * input_stride() + channels());
     std::vector<float> output((batch_size() - 1) * output_stride() + channels());
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
       std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          output_ref[i * channels() + c] = fp16_ieee_to_fp32_value(input[i * input_stride() + c]);
+          output_ref[i * channels() + c] = xnn_float16_to_float(input[i * input_stride() + c]);
         }
       }
 
@@ -188,8 +188,8 @@ class ConvertOperatorTester {
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<uint16_t> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<uint16_t> output_ref(batch_size() * channels());
+    std::vector<xnn_float16> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<xnn_float16> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00)  /* NaN */);
@@ -197,7 +197,7 @@ class ConvertOperatorTester {
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          output_ref[i * channels() + c] = fp16_ieee_from_fp32_value(input[i * input_stride() + c]);
+          output_ref[i * channels() + c] = xnn_float16_from_float(input[i * input_stride() + c]);
         }
       }
 
@@ -233,7 +233,7 @@ class ConvertOperatorTester {
 
     std::vector<float> input_float((batch_size() - 1) * input_stride() +
                                    channels());
-    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
                                 (batch_size() - 1) * input_stride() +
                                 channels());
     std::vector<int8_t> output((batch_size() - 1) * output_stride() +
@@ -251,10 +251,10 @@ class ConvertOperatorTester {
       std::generate(input_float.begin(), input_float.end(),
                     [&]() { return f32dist(rng); });
       std::transform(input_float.begin(), input_float.end(), input.begin(),
-                     [](float f) { return fp16_ieee_from_fp32_value(f); });
+                     [](float f) { return xnn_float16_from_float(f); });
       std::transform(input.begin(), input.begin() + channels(),
                      input_float.begin(),
-                     [](uint16_t f) { return fp16_ieee_to_fp32_value(f); });
+                     [](xnn_float16 f) { return xnn_float16_to_float(f); });
       std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Create, setup, run, and destroy Convert operator.
@@ -544,17 +544,17 @@ class ConvertOperatorTester {
 
     std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<uint16_t> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<xnn_float16> output((batch_size() - 1) * output_stride() + channels());
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00));
 
-      const float fp16_scale = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(input_scale()));
+      const float fp16_scale = xnn_float16_to_float(xnn_float16_from_float(input_scale()));
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          output_ref[i * channels() + c] = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(float(input[i * input_stride() + c] - zero_point()) * fp16_scale));
+          output_ref[i * channels() + c] = xnn_float16_to_float(xnn_float16_from_float(float(input[i * input_stride() + c] - zero_point()) * fp16_scale));
         }
       }
 
@@ -583,7 +583,7 @@ class ConvertOperatorTester {
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           const float tolerance = std::max(output_ref[i * channels() + c] * 1e-2, 1e-4);
-          EXPECT_NEAR(output_ref[i * channels() + c], fp16_ieee_to_fp32_value(output[i * output_stride() + c]), tolerance)
+          EXPECT_NEAR(output_ref[i * channels() + c], xnn_float16_to_float(output[i * output_stride() + c]), tolerance)
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
         }
       }
@@ -755,18 +755,18 @@ class ConvertOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
-    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       (batch_size() - 1) * input_stride() + channels());
     std::vector<float> output((batch_size() - 1) * output_stride() + channels());
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
       std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          output_ref[i * channels() + c] = fp16_ieee_to_fp32_value(input[i * input_stride() + c]);
+          output_ref[i * channels() + c] = xnn_float16_to_float(input[i * input_stride() + c]);
         }
       }
 
@@ -798,8 +798,8 @@ class ConvertOperatorTester {
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<uint16_t> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<uint16_t> output_ref(batch_size() * channels());
+    std::vector<xnn_float16> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<xnn_float16> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00)  /* NaN */);
@@ -807,7 +807,7 @@ class ConvertOperatorTester {
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          output_ref[i * channels() + c] = fp16_ieee_from_fp32_value(input[i * input_stride() + c]);
+          output_ref[i * channels() + c] = xnn_float16_from_float(input[i * input_stride() + c]);
         }
       }
 

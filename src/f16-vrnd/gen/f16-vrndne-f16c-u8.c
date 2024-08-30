@@ -19,8 +19,8 @@
 
 void xnn_f16_vrndne_ukernel__f16c_u8(
     size_t batch,
-    const void* input,
-    void* output,
+    const xnn_float16* input,
+    xnn_float16* output,
     const struct xnn_f16_rnd_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);

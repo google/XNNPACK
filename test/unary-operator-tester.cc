@@ -30,21 +30,21 @@ void UnaryOperatorTester::TestF16() {
   std::uniform_real_distribution<float> f32dist(range_f16_.first,
                                                 range_f16_.second);
 
-  std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+  std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
                               (batch_size() - 1) * input_stride() + channels());
-  std::vector<uint16_t> output((batch_size() - 1) * output_stride() +
+  std::vector<xnn_float16> output((batch_size() - 1) * output_stride() +
                                channels());
   std::vector<float> output_ref(batch_size() * channels());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(),
-                  [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+                  [&]() { return xnn_float16_from_float(f32dist(rng)); });
     std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
     // Compute reference results.
     for (size_t i = 0; i < batch_size(); i++) {
       for (size_t c = 0; c < channels(); c++) {
         output_ref[i * channels() + c] =
-            RefFunc(fp16_ieee_to_fp32_value(input[i * input_stride() + c]));
+            RefFunc(xnn_float16_to_float(input[i * input_stride() + c]));
       }
     }
 

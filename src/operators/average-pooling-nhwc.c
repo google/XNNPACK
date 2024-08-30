@@ -249,10 +249,10 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f16(
   xnn_operator_t average_pooling_op = NULL;
   enum xnn_status status = xnn_status_invalid_parameter;
 
-  const uint16_t fp16_output_min = fp16_ieee_from_fp32_value(output_min);
-  const uint16_t fp16_output_max = fp16_ieee_from_fp32_value(output_max);
-  const float rounded_output_min = fp16_ieee_to_fp32_value(fp16_output_min);
-  const float rounded_output_max = fp16_ieee_to_fp32_value(fp16_output_max);
+  const xnn_float16 fp16_output_min = xnn_float16_from_float(output_min);
+  const xnn_float16 fp16_output_max = xnn_float16_from_float(output_max);
+  const float rounded_output_min = xnn_float16_to_float(fp16_output_min);
+  const float rounded_output_max = xnn_float16_to_float(fp16_output_max);
   if (rounded_output_min >= rounded_output_max) {
     xnn_log_error(
       "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
@@ -306,7 +306,7 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f16(
 
   const uint32_t pooling_size = pooling_height * pooling_width;
   avgpool_config->init.f16(&average_pooling_op->params.f16_scaleminmax,
-    fp16_ieee_from_fp32_value(1.0f / (float) (int32_t) pooling_size), fp16_output_min, fp16_output_max);
+    xnn_float16_from_float(1.0f / (float) (int32_t) pooling_size), fp16_output_min, fp16_output_max);
   const bool tf_same_padding = (flags & XNN_FLAG_TENSORFLOW_SAME_PADDING) != 0;
   const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
   if (any_padding || tf_same_padding) {
@@ -878,7 +878,7 @@ enum xnn_status xnn_reshape_average_pooling2d_nhwc_f16(
   if (is_pixelwise) {
     const size_t input_size = input_height * input_width;
     average_pooling_op->gavgpool_config->update.f16(
-      &average_pooling_op->params.f16_scaleminmax, fp16_ieee_from_fp32_value(1.0f / (float) (int32_t) input_size));
+      &average_pooling_op->params.f16_scaleminmax, xnn_float16_from_float(1.0f / (float) (int32_t) input_size));
   }
 
   return reshape_average_pooling2d(

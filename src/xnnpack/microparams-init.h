@@ -110,7 +110,7 @@ XNN_INTERNAL void xnn_init_blockwise_scale_bf16_params(
   size_t block_stride,
   // How much offset to subtract from packed_w pointer when moving from channels_tile to channels_subtile.
   size_t stride_offset,
-  const uint16_t scale[XNN_MIN_ELEMENTS(1)],
+  const xnn_bfloat16 scale[XNN_MIN_ELEMENTS(1)],
   void* packed_w);
 
 XNN_INTERNAL void xnn_init_qs8_to_qs8_qc8w_scale_fp32_params(
@@ -228,7 +228,7 @@ DECLARE_UPDATE_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qu8_avgpool_minmax_fp32_sc
 #define DECLARE_INIT_F16_SCALE_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                              \
     struct xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)], \
-    uint16_t scale);
+    xnn_float16 scale);
 
   DECLARE_INIT_F16_SCALE_PARAMS_FUNCTION(xnn_init_f16_scale_scalar_params)
 
@@ -252,9 +252,9 @@ DECLARE_INIT_F32_SCALE_PARAMS_FUNCTION(xnn_init_f32_scale_scalar_params)
 #define DECLARE_INIT_F16_SCALEMINMAX_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                    \
     struct xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
-    uint16_t scale,                                               \
-    uint16_t min,                                                 \
-    uint16_t max);
+    xnn_float16 scale,                                               \
+    xnn_float16 min,                                                 \
+    xnn_float16 max);
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_F16_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f16_scaleminmax_scalar_params)
@@ -267,7 +267,7 @@ DECLARE_INIT_F32_SCALE_PARAMS_FUNCTION(xnn_init_f32_scale_scalar_params)
 #define DECLARE_UPDATE_F16_SCALEMINMAX_PARAMS_FUNCTION(fn_name)   \
   XNN_INTERNAL void fn_name(                                      \
     struct xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
-    uint16_t scale);
+    xnn_float16 scale);
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_UPDATE_F16_SCALEMINMAX_PARAMS_FUNCTION(xnn_update_f16_scaleminmax_scalar_params)
@@ -333,8 +333,8 @@ XNN_INTERNAL void xnn_update_f32_gavgpool_params(
 #define DECLARE_INIT_BF16_MINMAX_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                \
     union xnn_bf16_minmax_params params[XNN_MIN_ELEMENTS(1)], \
-    uint16_t output_min,                                      \
-    uint16_t output_max);
+    xnn_bfloat16 output_min,                                      \
+    xnn_bfloat16 output_max);
 
 DECLARE_INIT_BF16_MINMAX_PARAMS_FUNCTION(xnn_init_bf16_minmax_scalar_params)
 
@@ -342,8 +342,8 @@ DECLARE_INIT_BF16_MINMAX_PARAMS_FUNCTION(xnn_init_bf16_minmax_scalar_params)
 #define DECLARE_INIT_F16_MINMAX_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                               \
     union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)], \
-    uint16_t output_min,                                     \
-    uint16_t output_max);
+    xnn_float16 output_min,                                     \
+    xnn_float16 output_max);
 
   DECLARE_INIT_F16_MINMAX_PARAMS_FUNCTION(xnn_init_f16_minmax_scalar_params)
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -362,8 +362,8 @@ DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(xnn_init_f32_minmax_scalar_params)
 #define DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                    \
     union xnn_f16_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)], \
-    uint16_t output_min,                                          \
-    uint16_t output_max,                                          \
+    xnn_float16 output_min,                                          \
+    xnn_float16 output_max,                                          \
     uint8_t kernel_zero_point);
 
 DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_scalar_params)
@@ -376,8 +376,8 @@ DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_scalar_par
 #define DECLARE_INIT_F16_QB4W_MINMAX_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                    \
     union xnn_f16_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)], \
-    uint16_t output_min,                                          \
-    uint16_t output_max,                                          \
+    xnn_float16 output_min,                                          \
+    xnn_float16 output_max,                                          \
     uint8_t kernel_zero_point,                                    \
     size_t blocksize);
 
@@ -480,9 +480,9 @@ DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_scalar_expm1minus_rr1_p6
 #define DECLARE_INIT_F16_ELU_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                            \
     struct xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)], \
-    uint16_t prescale,                                    \
-    uint16_t alpha,                                       \
-    uint16_t beta);
+    xnn_float16 prescale,                                    \
+    xnn_float16 alpha,                                       \
+    xnn_float16 beta);
 
 DECLARE_INIT_F16_ELU_PARAMS_FUNCTION(xnn_init_f16_elu_scalar_params)
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -503,7 +503,7 @@ DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_scalar_params)
 #define DECLARE_INIT_F16_LRELU_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                              \
     struct xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
-    uint16_t slope);
+    xnn_float16 slope);
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_F16_LRELU_PARAMS_FUNCTION(xnn_init_f16_lrelu_scalar_params)
@@ -634,7 +634,7 @@ DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mul_minmax_scalar_param
 #define DECLARE_INIT_F16_QS8_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                \
     struct xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
-    uint16_t scale,                                           \
+    xnn_float16 scale,                                           \
     int8_t zero_point,                                        \
     int8_t output_min,                                        \
     int8_t output_max);
@@ -687,7 +687,7 @@ DECLARE_INIT_QS16_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs16_qs8_cvt_scalar_params)
 #define DECLARE_INIT_QS8_F16_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                \
     struct xnn_qs8_f16_cvt_params params[XNN_MIN_ELEMENTS(1)], \
-    uint16_t scale,                                           \
+    xnn_float16 scale,                                           \
     int8_t zero_point);
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

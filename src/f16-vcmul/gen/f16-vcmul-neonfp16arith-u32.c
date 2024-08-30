@@ -17,9 +17,9 @@
 
 void xnn_f16_vcmul_ukernel__neonfp16arith_u32(
     size_t batch,
-    const void* input_a,
-    const void* input_b,
-    void* output,
+    const xnn_float16* input_a,
+    const xnn_float16* input_b,
+    xnn_float16* output,
     const union xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
