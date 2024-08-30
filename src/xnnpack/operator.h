@@ -213,12 +213,12 @@ struct xnn_operator {
     union xnn_f16_default_params f16_default;
     union xnn_f16_hswish_params f16_hswish;
     union xnn_f16_elu_params f16_elu;
-    union xnn_f16_lrelu_params f16_lrelu;
+    struct xnn_f16_lrelu_params f16_lrelu;
     union xnn_f16_sigmoid_params f16_sigmoid;
     union xnn_f16_tanh_params f16_tanh;
     union xnn_f32_default_params f32_default;
     union xnn_f32_elu_params f32_elu;
-    union xnn_f32_lrelu_params f32_lrelu;
+    struct xnn_f32_lrelu_params f32_lrelu;
     union xnn_f32_rnd_params f32_rnd;
     union xnn_f32_rsqrt_params f32_rsqrt;
     union xnn_f32_sigmoid_params f32_sigmoid;
@@ -277,8 +277,8 @@ struct xnn_operator {
     };
     union xnn_qs8_hswish_params qs8_hswish;
     union xnn_qu8_hswish_params qu8_hswish;
-    union xnn_qs8_lrelu_params qs8_lrelu;
-    union xnn_qu8_lrelu_params qu8_lrelu;
+    struct xnn_qs8_lrelu_params qs8_lrelu;
+    struct xnn_qu8_lrelu_params qu8_lrelu;
     union xnn_s8_minmax_params s8_minmax;
     union xnn_s32_default_params s32_default;
     union xnn_u8_minmax_params u8_minmax;

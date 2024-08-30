@@ -1044,7 +1044,7 @@ enum xnn_status xnn_create_leaky_relu_nc_f16(
 
   const struct xnn_unary_elementwise_config* f16_lrelu_config = xnn_init_f16_lrelu_config();
 
-  union xnn_f16_lrelu_params params;
+  struct xnn_f16_lrelu_params params;
   if XNN_LIKELY(f16_lrelu_config != NULL) {
     assert(f16_lrelu_config->init.f16_lrelu != NULL);
     f16_lrelu_config->init.f16_lrelu(&params, negative_slope_as_half);
@@ -1071,7 +1071,7 @@ enum xnn_status xnn_create_leaky_relu_nc_f32(
 
   const struct xnn_unary_elementwise_config* f32_lrelu_config = xnn_init_f32_lrelu_config();
 
-  union xnn_f32_lrelu_params params;
+  struct xnn_f32_lrelu_params params;
   if XNN_LIKELY(f32_lrelu_config != NULL) {
     assert(f32_lrelu_config->init.f32_lrelu != NULL);
     f32_lrelu_config->init.f32_lrelu(&params, negative_slope);
@@ -1187,7 +1187,7 @@ enum xnn_status xnn_create_leaky_relu_nc_qs8(
   const struct xnn_unary_elementwise_config* qs8_lrelu_config = xnn_init_qs8_lrelu_config();
   assert(qs8_lrelu_config != NULL);
 
-  union xnn_qs8_lrelu_params params;
+  struct xnn_qs8_lrelu_params params;
   assert(qs8_lrelu_config->init.qs8_lrelu != NULL);
   qs8_lrelu_config->init.qs8_lrelu(&params, positive_input_output_scale, negative_input_output_scale, input_zero_point, output_zero_point);
 
@@ -1254,7 +1254,7 @@ enum xnn_status xnn_create_leaky_relu_nc_qu8(
   const struct xnn_unary_elementwise_config* qu8_lrelu_config = xnn_init_qu8_lrelu_config();
   assert(qu8_lrelu_config != NULL);
 
-  union xnn_qu8_lrelu_params params;
+  struct xnn_qu8_lrelu_params params;
   assert(qu8_lrelu_config->init.qu8_lrelu != NULL);
   qu8_lrelu_config->init.qu8_lrelu(&params, positive_input_output_scale, negative_input_output_scale, input_zero_point, output_zero_point);
 
@@ -3758,7 +3758,7 @@ enum xnn_status xnn_run_leaky_relu_nc_f32(
 
   const struct xnn_unary_elementwise_config* f32_lrelu_config = xnn_init_f32_lrelu_config();
 
-  union xnn_f32_lrelu_params params;
+  struct xnn_f32_lrelu_params params;
   if XNN_LIKELY(f32_lrelu_config != NULL) {
     assert(f32_lrelu_config->init.f32_lrelu != NULL);
     f32_lrelu_config->init.f32_lrelu(&params, negative_slope);

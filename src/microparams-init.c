@@ -1892,7 +1892,7 @@ size_t xnn_init_f32_elu_scalar_params(
 
 
 size_t xnn_init_f16_lrelu_scalar_params(
-  union xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t slope)
 {
   params->scalar.slope = slope;
@@ -1900,7 +1900,7 @@ size_t xnn_init_f16_lrelu_scalar_params(
 }
 
 size_t xnn_init_f32_lrelu_scalar_params(
-  union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float slope)
 {
   params->scalar.slope = slope;
@@ -1908,7 +1908,7 @@ size_t xnn_init_f32_lrelu_scalar_params(
 }
 
 size_t xnn_init_qs8_lrelu_scalar_params(
-  union xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float positive_scale,
   float negative_scale,
   int8_t input_zero_point,
@@ -1935,7 +1935,7 @@ size_t xnn_init_qs8_lrelu_scalar_params(
 }
 
 size_t xnn_init_qu8_lrelu_scalar_params(
-  union xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float positive_scale,
   float negative_scale,
   uint8_t input_zero_point,

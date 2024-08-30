@@ -710,19 +710,19 @@ struct {
 
 // LReLU (Leaky ReLU): used by VLRELU microkernels.
 
-union xnn_f16_lrelu_params {
+struct xnn_f16_lrelu_params {
   struct {
     uint16_t slope;
   } scalar;
 };
 
-union xnn_f32_lrelu_params {
+struct xnn_f32_lrelu_params {
   struct {
     float slope;
   } scalar;
 };
 
-union xnn_qs8_lrelu_params {
+struct xnn_qs8_lrelu_params {
   struct {
     int32_t input_zero_point;
     int32_t positive_multiplier;
@@ -731,7 +731,7 @@ union xnn_qs8_lrelu_params {
   } scalar;
 };
 
-union xnn_qu8_lrelu_params {
+struct xnn_qu8_lrelu_params {
   struct {
     int32_t input_zero_point;
     int32_t positive_multiplier;

@@ -502,7 +502,7 @@ DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_scalar_params)
 
 #define DECLARE_INIT_F16_LRELU_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                              \
-    union xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
     uint16_t slope);
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -515,7 +515,7 @@ DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_scalar_params)
 
 #define DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                              \
-    union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
     float slope);
 
 DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(xnn_init_f32_lrelu_scalar_params)
@@ -523,7 +523,7 @@ DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(xnn_init_f32_lrelu_scalar_params)
 
 #define DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                              \
-    union xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
     float positive_scale,                                   \
     float negative_scale,                                   \
     int8_t input_zero_point,                                \
@@ -534,7 +534,7 @@ DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_scalar_params)
 
 #define DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                              \
-    union xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
     float positive_scale,                                   \
     float negative_scale,                                   \
     uint8_t input_zero_point,                               \

@@ -1349,7 +1349,7 @@ struct univector_strided_context {
   union {
     union xnn_f16_default_params f16_default;
     union xnn_f16_hswish_params f16_hswish;
-    union xnn_f16_lrelu_params f16_lrelu;
+    struct xnn_f16_lrelu_params f16_lrelu;
     union xnn_f16_minmax_params f16_minmax;
     union xnn_f16_default_params f16_neg;
     union xnn_f16_sigmoid_params f16_sigmoid;
@@ -1357,7 +1357,7 @@ struct univector_strided_context {
     union xnn_f32_default_params f32_default;
     union xnn_f32_elu_params f32_elu;
     union xnn_f32_hswish_params f32_hswish;
-    union xnn_f32_lrelu_params f32_lrelu;
+    struct xnn_f32_lrelu_params f32_lrelu;
     union xnn_f32_minmax_params f32_minmax;
     struct xnn_f32_qs8_cvt_params f32_qs8_cvt;
     struct xnn_f32_qu8_cvt_params f32_qu8_cvt;
@@ -1369,11 +1369,11 @@ struct univector_strided_context {
     struct xnn_qs16_qs8_cvt_params qs16_qs8_cvt;
     struct xnn_qs8_f32_cvt_params qs8_f32_cvt;
     union xnn_qs8_hswish_params qs8_hswish;
-    union xnn_qs8_lrelu_params qs8_lrelu;
+    struct xnn_qs8_lrelu_params qs8_lrelu;
     struct xnn_qu8_cvt_params qu8_cvt;
     struct xnn_qu8_f32_cvt_params qu8_f32_cvt;
     union xnn_qu8_hswish_params qu8_hswish;
-    union xnn_qu8_lrelu_params qu8_lrelu;
+    struct xnn_qu8_lrelu_params qu8_lrelu;
     union xnn_s8_minmax_params s8_minmax;
     union xnn_u8_minmax_params u8_minmax;
   } params;
@@ -1395,13 +1395,13 @@ struct univector_contiguous_context {
   union {
     union xnn_f16_default_params f16_default;
     union xnn_f16_hswish_params f16_hswish;
-    union xnn_f16_lrelu_params f16_lrelu;
+    struct xnn_f16_lrelu_params f16_lrelu;
     union xnn_f16_minmax_params f16_minmax;
     union xnn_f16_sigmoid_params f16_sigmoid;
     union xnn_f32_default_params f32_default;
     union xnn_f32_elu_params f32_elu;
     union xnn_f32_hswish_params f32_hswish;
-    union xnn_f32_lrelu_params f32_lrelu;
+    struct xnn_f32_lrelu_params f32_lrelu;
     union xnn_f32_minmax_params f32_minmax;
     struct xnn_f32_qs8_cvt_params f32_qs8_cvt;
     struct xnn_f32_qu8_cvt_params f32_qu8_cvt;
@@ -1412,11 +1412,11 @@ struct univector_contiguous_context {
     struct xnn_qs16_qs8_cvt_params qs16_qs8_cvt;
     struct xnn_qs8_f32_cvt_params qs8_f32_cvt;
     union xnn_qs8_hswish_params qs8_hswish;
-    union xnn_qs8_lrelu_params qs8_lrelu;
+    struct xnn_qs8_lrelu_params qs8_lrelu;
     struct xnn_qu8_cvt_params qu8_cvt;
     struct xnn_qu8_f32_cvt_params qu8_f32_cvt;
     union xnn_qu8_hswish_params qu8_hswish;
-    union xnn_qu8_lrelu_params qu8_lrelu;
+    struct xnn_qu8_lrelu_params qu8_lrelu;
     union xnn_s8_minmax_params s8_minmax;
     union xnn_u8_minmax_params u8_minmax;
   } params;

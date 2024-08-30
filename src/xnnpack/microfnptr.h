@@ -1910,25 +1910,25 @@ typedef void (*xnn_f16_vlrelu_ukernel_fn)(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_f16_lrelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f16_lrelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_vlrelu_ukernel_fn)(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_lrelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f32_lrelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_qs8_vlrelu_ukernel_fn)(
     size_t batch,
     const int8_t* input,
     int8_t* output,
-    const union xnn_qs8_lrelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_qs8_lrelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_qu8_vlrelu_ukernel_fn)(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,
-    const union xnn_qu8_lrelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_qu8_lrelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // VNEG: Vector NEGate elementwise
 
@@ -2681,11 +2681,11 @@ typedef size_t (*xnn_init_qu8_hswish_params_fn)(
   float output_scale);
 
 typedef size_t (*xnn_init_f16_lrelu_params_fn)(
-  union xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t slope);
 
 typedef size_t (*xnn_init_f32_lrelu_params_fn)(
-  union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float slope);
 
 typedef size_t (*xnn_init_f32_log_params_fn)(
@@ -2695,14 +2695,14 @@ typedef size_t (*xnn_init_f32_relu_params_fn)(
   union xnn_f32_relu_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_qs8_lrelu_params_fn)(
-  union xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float positive_slope,
   float negative_slope,
   int8_t input_zero_point,
   int8_t output_zero_point);
 
 typedef size_t (*xnn_init_qu8_lrelu_params_fn)(
-  union xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float positive_slope,
   float negative_slope,
   uint8_t input_zero_point,
