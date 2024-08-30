@@ -7,7 +7,7 @@ $assert BATCH_TILE % 32 == 0
 $assert BATCH_TILE >= 32
 $SIMD_TILE = BATCH_TILE // 32
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "PRELU", "RPRELU"]
 $assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
@@ -28,6 +28,8 @@ $  "MUL": lambda x: "_mm512_mul_ph(%s, vb)" % x,
 $  "SUB": lambda x: "_mm512_sub_ph(%s, vb)" % x,
 $  "RSUB": lambda x: "_mm512_sub_ph(vb, %s)" % x,
 $  "SQRDIFF": lambda x: "_mm512_sub_ph(%s, vb)" % x,
+$  "PRELU": lambda x: "_mm512_mul_ph(%s, vb)" % x,
+$  "RPRELU": lambda x: "_mm512_mul_ph(%s, vb)" % x,
 $}[OP]
 $_MM512_MASKZ_OP_ph = {
 $  "ADD": lambda m, x: "_mm512_maskz_add_ph(%s, %s, vb)" % (m, x),
@@ -39,6 +41,8 @@ $  "MUL": lambda m, x: "_mm512_maskz_mul_ph(%s, %s, vb)" % (m, x),
 $  "SUB": lambda m, x: "_mm512_maskz_sub_ph(%s, %s, vb)" % (m, x),
 $  "RSUB": lambda m, x: "_mm512_maskz_sub_ph(%s, vb, %s)" % (m, x),
 $  "SQRDIFF": lambda m, x: "_mm512_maskz_sub_ph(%s, %s, vb)" % (m, x),
+$  "PRELU": lambda m, x: "_mm512_maskz_mul_ph(%s, %s, vb)" % (m, x),
+$  "RPRELU": lambda m, x: "_mm512_maskz_mul_ph(%s, %s, vb)" % (m, x),
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
 $PARAMS = {"LINEAR": "union xnn_f16_default_params", "MINMAX": "union xnn_f16_minmax_params"}[ACTIVATION]
@@ -65,18 +69,32 @@ void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__avx512fp16_u${BATCH_TILE}(
     const __m512h voutput_max = _mm512_castsi512_ph(_mm512_set1_epi16(*(const uint16_t*) &params->scalar.max));
   const __m512h vb = _mm512_castsi512_ph(_mm512_set1_epi16(*b));
 
+  $if OP == "PRELU":
+    const __m512h vzero = _mm512_setzero_ph();
+  $elif OP == "RPRELU":
+    const __m512h vzero = _mm512_setzero_ph();
+    const __mmask32 vsign = _mm512_cmp_ph_mask(vb, vzero, _CMP_LT_OQ);
+
   for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
-    __m512h vacc${ABC[0]} = _mm512_loadu_ph(a);
+    __m512h va${ABC[0]} = _mm512_loadu_ph(a);
     $for N in range(1, SIMD_TILE):
-      __m512h vacc${ABC[N]} = _mm512_loadu_ph(a + ${N * 32});
+      __m512h va${ABC[N]} = _mm512_loadu_ph(a + ${N * 32});
     a += ${BATCH_TILE};
 
-    $for N in range(SIMD_TILE):
-      vacc${ABC[N]} = ${_MM512_OP_ph("vacc" + ABC[N])};
-
-    $if OP == "SQRDIFF":
+    $if OP == "PRELU":
       $for N in range(SIMD_TILE):
-        vacc${ABC[N]} = _mm512_mul_ph(vacc${ABC[N]}, vacc${ABC[N]});
+        const __mmask32 vsign${ABC[N]} = _mm512_cmp_ph_mask(va${ABC[N]}, vzero, _CMP_LT_OQ);
+        __m512h vacc${ABC[N]} = _mm512_mask_mul_ph(va${ABC[N]}, vsign${ABC[N]}, va${ABC[N]}, vb);
+    $elif OP == "RPRELU":
+      $for N in range(SIMD_TILE):
+        __m512h vacc${ABC[N]} = _mm512_mask_mul_ph(vb, vsign, va${ABC[N]}, vb);
+    $else:
+      $for N in range(SIMD_TILE):
+        __m512h vacc${ABC[N]} = ${_MM512_OP_ph("va" + ABC[N])};
+
+      $if OP == "SQRDIFF":
+        $for N in range(SIMD_TILE):
+          vacc${ABC[N]} = _mm512_mul_ph(vacc${ABC[N]}, vacc${ABC[N]});
 
     $if ACTIVATION == "MINMAX":
       $for N in range(SIMD_TILE):
@@ -92,12 +110,19 @@ void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__avx512fp16_u${BATCH_TILE}(
   }
   $if BATCH_TILE > 32:
     for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
-      __m512h vacc = _mm512_loadu_ph(a);
+      __m512h va = _mm512_loadu_ph(a);
       a += 32;
 
-      vacc = ${_MM512_OP_ph("vacc")};
-      $if OP == "SQRDIFF":
-        vacc = _mm512_mul_ph(vacc, vacc);
+      $if OP == "PRELU":
+        const __mmask32 vsign = _mm512_cmp_ph_mask(va, vzero, _CMP_LT_OQ);
+        __m512h vacc = _mm512_mask_mul_ph(va, vsign, va, vb);
+      $elif OP == "RPRELU":
+        __m512h vacc = _mm512_mask_mul_ph(vb, vsign, va, vb);
+      $else:
+        __m512h vacc = ${_MM512_OP_ph("va")};
+        $if OP == "SQRDIFF":
+          vacc = _mm512_mul_ph(vacc, vacc);
+
       $if ACTIVATION == "MINMAX":
         vacc = _mm512_max_ph(voutput_min, vacc);
         vacc = _mm512_min_ph(voutput_max, vacc);
@@ -112,11 +137,18 @@ void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__avx512fp16_u${BATCH_TILE}(
     batch >>= XNN_LOG2_SIZEOF_HALF;
     const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
-    __m512h vacc = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
+    __m512h va = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
 
-    vacc = ${_MM512_MASKZ_OP_ph("vmask", "vacc")};
-    $if OP == "SQRDIFF":
-      vacc = _mm512_maskz_mul_ph(vmask, vacc, vacc);
+    $if OP == "PRELU":
+      const __mmask16 vsign = _mm512_cmp_ph_mask(va, vzero, _CMP_LT_OQ);
+      __m512h vacc = _mm512_mask_mul_ph(va, vsign, va, vb);
+    $elif OP == "RPRELU":
+      __m512h vacc = _mm512_mask_mul_ph(vb, vsign, va, vb);
+    $else:
+      __m512h vacc = ${_MM512_MASKZ_OP_ph("vmask", "va")};
+      $if OP == "SQRDIFF":
+        vacc = _mm512_maskz_mul_ph(vmask, vacc, vacc);
+
     $if ACTIVATION == "MINMAX":
       vacc = _mm512_maskz_max_ph(vmask, voutput_min, vacc);
       vacc = _mm512_maskz_min_ph(vmask, voutput_max, vacc);

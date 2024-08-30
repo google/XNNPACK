@@ -41,6 +41,8 @@ class VBinaryMicrokernelTester {
     Sub,
     RSub,
     SqrDiff,
+    Prelu,
+    RPrelu,
   };
 
   template <typename A, typename B, typename Result>
@@ -77,6 +79,12 @@ class VBinaryMicrokernelTester {
           } else {
             result[i] = a[i] * b[i * stride_b];
           }
+          break;
+        case OpType::Prelu:
+          result[i] = a[i] < 0 ? static_cast<Result>(a[i] * b[i * stride_b]) : static_cast<Result>(a[i]);
+          break;
+        case OpType::RPrelu:
+          result[i] = b[i * stride_b] < 0 ? static_cast<Result>(a[i] * b[i * stride_b]) : static_cast<Result>(b[i * stride_b]);
           break;
         case OpType::SqrDiff: {
           const double diff = static_cast<double>(a[i]) - static_cast<double>(b[i * stride_b]);

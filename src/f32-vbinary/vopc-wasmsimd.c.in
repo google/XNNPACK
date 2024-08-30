@@ -7,7 +7,7 @@ $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
 $SIMD_TILE = BATCH_TILE // 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "PRELU", "RPRELU"]
 $assert ACTIVATION in ["LINEAR", "MINMAX", "RELU"]
 #include <assert.h>
 
@@ -17,6 +17,7 @@ $assert ACTIVATION in ["LINEAR", "MINMAX", "RELU"]
 #include "xnnpack/vbinary.h"
 
 
+$WASM_V32X4_LANESELECT = "wasm_i32x4_relaxed_laneselect" if RELAXED else "wasm_v128_bitselect"
 $WASM_F32X4_OP = {
 $  "ADD": lambda x: "wasm_f32x4_add(%s, vb)" % x,
 $  "DIV": lambda x: "wasm_f32x4_div(%s, vb)" % x,
@@ -27,12 +28,15 @@ $  "MUL": lambda x: "wasm_f32x4_mul(%s, vb)" % x,
 $  "SUB": lambda x: "wasm_f32x4_sub(%s, vb)" % x,
 $  "RSUB": lambda x: "wasm_f32x4_sub(vb, %s)" % x,
 $  "SQRDIFF": lambda x: "wasm_f32x4_sub(%s, vb)" % x,
+$  "PRELU": lambda x: "wasm_f32x4_mul(%s, vb)" % x,
+$  "RPRELU": lambda x: "wasm_f32x4_mul(%s, vb)" % x,
 $}[OP]
 $assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
 $ARCH_SUFFIX = "" if ACTIVATION in ["LINEAR", "RELU"] and OP not in ["MIN", "MAX"] else "_x86" if X86 else "_arm"
+$RELAXED_SUFFIX = "relaxed" if RELAXED else ""
 $ACTIVATION_SUFFIX = {"LINEAR": ""}.get(ACTIVATION, "_" + ACTIVATION.lower())
 $PARAMS = {"LINEAR": "union xnn_f32_default_params", "RELU": "union xnn_f32_relu_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
-void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}_u${BATCH_TILE}(
+void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasm${RELAXED_SUFFIX}simd${ARCH_SUFFIX}_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -54,6 +58,8 @@ void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}
     const v128_t vzero = wasm_i32x4_const_splat(0);
   const v128_t vb = wasm_v128_load32_splat(input_b);
 
+  $if OP == "RPRELU":
+    const v128_t vmask = wasm_i32x4_shr(vb, 31);
   $if BATCH_TILE > 4:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       const v128_t va${ABC[0]} = wasm_v128_load(input_a);
@@ -67,6 +73,15 @@ void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}
       $if OP == "SQRDIFF":
         $for N in range(SIMD_TILE):
           vy${ABC[N]} = wasm_f32x4_mul(vy${ABC[N]}, vy${ABC[N]});
+      $elif OP == "PRELU":
+        $for N in range(SIMD_TILE):
+          const v128_t vmask${ABC[N]} = wasm_i32x4_shr(va${ABC[N]}, 31);
+
+        $for N in range(SIMD_TILE):
+          vy${ABC[N]} = ${WASM_V32X4_LANESELECT}(vy${ABC[N]}, va${ABC[N]}, vmask${ABC[N]});
+      $elif OP == "RPRELU":
+        $for N in range(SIMD_TILE):
+          vy${ABC[N]} = ${WASM_V32X4_LANESELECT}(vy${ABC[N]}, vb, vmask);
 
       $if ACTIVATION == "MINMAX":
         $if X86:
@@ -97,6 +112,11 @@ void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}
     v128_t vy = ${WASM_F32X4_OP("va")};
     $if OP == "SQRDIFF":
       vy = wasm_f32x4_mul(vy, vy);
+    $elif OP == "PRELU":
+      const v128_t vmask = wasm_i32x4_shr(va, 31);
+      vy = ${WASM_V32X4_LANESELECT}(vy, va, vmask);
+    $elif OP == "RPRELU":
+      vy = ${WASM_V32X4_LANESELECT}(vy, vb, vmask);
 
     $if ACTIVATION == "MINMAX":
       $if X86:
@@ -117,6 +137,11 @@ void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasmsimd${ARCH_SUFFIX}
     v128_t vy = ${WASM_F32X4_OP("va")};
     $if OP == "SQRDIFF":
       vy = wasm_f32x4_mul(vy, vy);
+    $elif OP == "PRELU":
+      const v128_t vmask = wasm_i32x4_shr(va, 31);
+      vy = ${WASM_V32X4_LANESELECT}(vy, va, vmask);
+    $elif OP == "RPRELU":
+      vy = ${WASM_V32X4_LANESELECT}(vy, vb, vmask);
 
     $if ACTIVATION == "MINMAX":
       $if X86:

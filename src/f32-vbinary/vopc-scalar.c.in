@@ -5,7 +5,7 @@
 
 $assert BATCH_TILE >= 1
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "PRELU", "RPRELU"]
 $assert ACTIVATION in ["LINEAR", "MINMAX", "RELU"]
 #include <assert.h>
 
@@ -26,6 +26,8 @@ $  "MUL": lambda x: "%s * vb" % x,
 $  "SUB": lambda x: "%s - vb" % x,
 $  "RSUB": lambda x: "vb - %s" % x,
 $  "SQRDIFF": lambda x: "%s - vb" % x,
+$  "PRELU": lambda x: "%s * vb" % x,
+$  "RPRELU": lambda x: "%s * vb" % x,
 $}[OP]
 $SUFFIX = {"LINEAR": "", "RELU": "_relu", "MINMAX": "_minmax"}[ACTIVATION]
 $PARAMS = {"LINEAR": "union xnn_f32_default_params", "RELU": "union xnn_f32_relu_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
@@ -53,6 +55,10 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_u
       float vacc = ${OP_FUNC("va")};
       $if OP == "SQRDIFF":
         vacc = vacc * vacc;
+      $elif OP == "PRELU":
+        vacc = XNN_UNPREDICTABLE(va < 0.0f) ? vacc : va;
+      $elif OP == "RPRELU":
+        vacc = (vb < 0.0f) ? vacc : vb;
       $if ACTIVATION == "MINMAX":
         vacc = ${MAX_F32}(vacc, voutput_min);
         vacc = ${MIN_F32}(vacc, voutput_max);
@@ -72,6 +78,12 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_u
       $if OP == "SQRDIFF":
         $for N in range(BATCH_TILE):
           vacc${ABC[N]} = vacc${ABC[N]} * vacc${ABC[N]};
+      $elif OP == "PRELU":
+        $for N in range(BATCH_TILE):
+          vacc${ABC[N]} = XNN_UNPREDICTABLE(va${ABC[N]} < 0.0f) ? vacc${ABC[N]} : va${ABC[N]};
+      $elif OP == "RPRELU":
+        $for N in range(BATCH_TILE):
+          vacc${ABC[N]} = vb < 0.0f ? vacc${ABC[N]} : vb;
 
       $if ACTIVATION == "MINMAX":
         $for N in range(BATCH_TILE):
@@ -94,6 +106,10 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_u
         float vacc = ${OP_FUNC("va")};
         $if OP == "SQRDIFF":
           vacc = vacc * vacc;
+        $elif OP == "PRELU":
+          vacc = XNN_UNPREDICTABLE(va < 0.0f) ? vacc : va;
+        $elif OP == "RPRELU":
+          vacc = XNN_UNPREDICTABLE(vb < 0.0f) ? vacc : vb;
         $if ACTIVATION == "MINMAX":
           vacc = ${MAX_F32}(vacc, voutput_min);
           vacc = ${MIN_F32}(vacc, voutput_max);
@@ -106,6 +122,10 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_u
           float vacc = ${OP_FUNC("va")};
           $if OP == "SQRDIFF":
             vacc = vacc * vacc;
+          $elif OP == "PRELU":
+            vacc = XNN_UNPREDICTABLE(va < 0.0f) ? vacc : va;
+          $elif OP == "RPRELU":
+            vacc = XNN_UNPREDICTABLE(vb < 0.0f) ? vacc : vb;
           $if ACTIVATION == "MINMAX":
             vacc = ${MAX_F32}(vacc, voutput_min);
             vacc = ${MIN_F32}(vacc, voutput_max);

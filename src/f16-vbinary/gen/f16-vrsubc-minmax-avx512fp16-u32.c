@@ -38,11 +38,12 @@ void xnn_f16_vrsubc_minmax_ukernel__avx512fp16_u32(
   const __m512h voutput_max = _mm512_castsi512_ph(_mm512_set1_epi16(*(const uint16_t*) &params->scalar.max));
   const __m512h vb = _mm512_castsi512_ph(_mm512_set1_epi16(*b));
 
+
   for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
-    __m512h vacc0 = _mm512_loadu_ph(a);
+    __m512h va0 = _mm512_loadu_ph(a);
     a += 32;
 
-    vacc0 = _mm512_sub_ph(vb, vacc0);
+    __m512h vacc0 = _mm512_sub_ph(vb, va0);
 
 
     vacc0 = _mm512_max_ph(voutput_min, vacc0);
@@ -59,9 +60,10 @@ void xnn_f16_vrsubc_minmax_ukernel__avx512fp16_u32(
     batch >>= XNN_LOG2_SIZEOF_HALF;
     const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
-    __m512h vacc = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
+    __m512h va = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
 
-    vacc = _mm512_maskz_sub_ph(vmask, vb, vacc);
+    __m512h vacc = _mm512_maskz_sub_ph(vmask, vb, va);
+
     vacc = _mm512_maskz_max_ph(vmask, voutput_min, vacc);
     vacc = _mm512_maskz_min_ph(vmask, voutput_max, vacc);
     _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));

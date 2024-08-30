@@ -36,12 +36,12 @@ void xnn_f32_vdiv_minmax_ukernel__avx_u16(
   XNN_FORCE_REALIZATION(voutput_max);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    __m256 vacc0 = _mm256_loadu_ps(input_a);
-    __m256 vacc1 = _mm256_loadu_ps(input_a + 8);
+    const __m256 va0 = _mm256_loadu_ps(input_a);
+    const __m256 va1 = _mm256_loadu_ps(input_a + 8);
     input_a += 16;
 
-    vacc0 = _mm256_div_ps(vacc0, _mm256_loadu_ps(input_b));
-    vacc1 = _mm256_div_ps(vacc1, _mm256_loadu_ps(input_b + 8));
+    __m256 vacc0 = _mm256_div_ps(va0, _mm256_loadu_ps(input_b));
+    __m256 vacc1 = _mm256_div_ps(va1, _mm256_loadu_ps(input_b + 8));
     input_b += 16;
 
 
@@ -56,10 +56,10 @@ void xnn_f32_vdiv_minmax_ukernel__avx_u16(
     output += 16;
   }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    __m256 vacc = _mm256_loadu_ps(input_a);
+    const __m256 va = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    vacc = _mm256_div_ps(vacc, _mm256_loadu_ps(input_b));
+    __m256 vacc = _mm256_div_ps(va, _mm256_loadu_ps(input_b));
     input_b += 8;
     vacc = _mm256_max_ps(voutput_min, vacc);
     vacc = _mm256_min_ps(voutput_max, vacc);
@@ -71,10 +71,10 @@ void xnn_f32_vdiv_minmax_ukernel__avx_u16(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
-    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
+    const __m256 va = _mm256_maskload_ps(input_a, vmask);
     const __m256 vb = _mm256_maskload_ps(input_b, vmask);
 
-    vacc = _mm256_div_ps(vacc, vb);
+    __m256 vacc = _mm256_div_ps(va, vb);
     vacc = _mm256_max_ps(voutput_min, vacc);
     vacc = _mm256_min_ps(voutput_max, vacc);
 

@@ -6,7 +6,7 @@
 $assert BATCH_TILE % 8 == 0
 $assert BATCH_TILE >= 8
 $ABC = "01234567456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "PRELU", "RPRELU"]
 $assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
@@ -27,6 +27,8 @@ $  "MUL": lambda x: "_mm256_mul_ps(%s, vb)" % x,
 $  "SUB": lambda x: "_mm256_sub_ps(%s, vb)" % x,
 $  "RSUB": lambda x: "_mm256_sub_ps(vb, %s)" % x,
 $  "SQRDIFF": lambda x: "_mm256_sub_ps(%s, vb)" % x,
+$  "PRELU": lambda x: "_mm256_mul_ps(%s, vb)" % x,
+$  "RPRELU": lambda x: "_mm256_mul_ps(%s, vb)" % x,
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
 $PARAMS = {"LINEAR": "union xnn_f16_default_params", "MINMAX": "union xnn_f16_minmax_params"}[ACTIVATION]
@@ -67,6 +69,12 @@ void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__f16c_u${BATCH_TILE}(
       $if OP == "SQRDIFF":
         $for N in range(0, BATCH_TILE, 8):
           vy${ABC[N:N+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vy${ABC[N:N+8]}, vy${ABC[N:N+8]}), _MM_FROUND_TO_NEAREST_INT));
+      $elif OP == "PRELU":
+        $for N in range(0, BATCH_TILE, 8):
+          vy${ABC[N:N+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_blendv_ps(va${ABC[N:N+8]}, vy${ABC[N:N+8]}, va${ABC[N:N+8]}), _MM_FROUND_TO_NEAREST_INT));
+      $elif OP == "RPRELU":
+        $for N in range(0, BATCH_TILE, 8):
+          vy${ABC[N:N+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_blendv_ps(vb, vy${ABC[N:N+8]}, vb), _MM_FROUND_TO_NEAREST_INT));
 
       $if ACTIVATION == "MINMAX":
         $for N in range(0, BATCH_TILE, 8):
@@ -87,6 +95,10 @@ void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__f16c_u${BATCH_TILE}(
     __m256 vy = _mm256_cvtph_ps(_mm256_cvtps_ph(${_MM256_OP_PS("va")}, _MM_FROUND_TO_NEAREST_INT));
     $if OP == "SQRDIFF":
       vy = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vy, vy), _MM_FROUND_TO_NEAREST_INT));
+    $elif OP == "PRELU":
+      vy = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_blendv_ps(va, vy, va), _MM_FROUND_TO_NEAREST_INT));
+    $elif OP == "RPRELU":
+      vy = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_blendv_ps(vb, vy, vb), _MM_FROUND_TO_NEAREST_INT));
 
     $if ACTIVATION == "MINMAX":
       vy = _mm256_max_ps(vy, vy_min);
@@ -101,6 +113,10 @@ void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__f16c_u${BATCH_TILE}(
     __m256 vy = _mm256_cvtph_ps(_mm256_cvtps_ph(${_MM256_OP_PS("va")}, _MM_FROUND_TO_NEAREST_INT));
     $if OP == "SQRDIFF":
       vy = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vy, vy), _MM_FROUND_TO_NEAREST_INT));
+    $elif OP == "PRELU":
+      vy = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_blendv_ps(va, vy, va), _MM_FROUND_TO_NEAREST_INT));
+    $elif OP == "RPRELU":
+      vy = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_blendv_ps(vb, vy, vb), _MM_FROUND_TO_NEAREST_INT));
 
     $if ACTIVATION == "MINMAX":
       vy = _mm256_max_ps(vy, vy_min);

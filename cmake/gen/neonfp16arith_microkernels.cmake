@@ -270,6 +270,12 @@ SET(NON_PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vminc-neonfp16arith-u8.c
   src/f16-vbinary/gen/f16-vmul-minmax-neonfp16arith-u8.c
   src/f16-vbinary/gen/f16-vmulc-minmax-neonfp16arith-u8.c
+  src/f16-vbinary/gen/f16-vprelu-neonfp16arith-u8.c
+  src/f16-vbinary/gen/f16-vprelu-neonfp16arith-u16.c
+  src/f16-vbinary/gen/f16-vpreluc-neonfp16arith-u8.c
+  src/f16-vbinary/gen/f16-vpreluc-neonfp16arith-u16.c
+  src/f16-vbinary/gen/f16-vrpreluc-neonfp16arith-u8.c
+  src/f16-vbinary/gen/f16-vrpreluc-neonfp16arith-u16.c
   src/f16-vbinary/gen/f16-vrsubc-minmax-neonfp16arith-u8.c
   src/f16-vbinary/gen/f16-vsqrdiff-neonfp16arith-u8.c
   src/f16-vbinary/gen/f16-vsqrdiffc-neonfp16arith-u8.c

@@ -51,7 +51,6 @@ void xnn_f32_vsub_minmax_ukernel__wasmsimd_x86_u16(
     v128_t vacc2 = wasm_f32x4_sub(va2, vb2);
     v128_t vacc3 = wasm_f32x4_sub(va3, vb3);
 
-
     vacc0 = wasm_f32x4_pmax(voutput_min, vacc0);
     vacc1 = wasm_f32x4_pmax(voutput_min, vacc1);
     vacc2 = wasm_f32x4_pmax(voutput_min, vacc2);

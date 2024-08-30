@@ -36,13 +36,14 @@ void xnn_f16_vminc_ukernel__avx512fp16_u64(
 
   const __m512h vb = _mm512_castsi512_ph(_mm512_set1_epi16(*b));
 
+
   for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
-    __m512h vacc0 = _mm512_loadu_ph(a);
-    __m512h vacc1 = _mm512_loadu_ph(a + 32);
+    __m512h va0 = _mm512_loadu_ph(a);
+    __m512h va1 = _mm512_loadu_ph(a + 32);
     a += 64;
 
-    vacc0 = _mm512_min_ph(vacc0, vb);
-    vacc1 = _mm512_min_ph(vacc1, vb);
+    __m512h vacc0 = _mm512_min_ph(va0, vb);
+    __m512h vacc1 = _mm512_min_ph(va1, vb);
 
 
 
@@ -51,10 +52,11 @@ void xnn_f16_vminc_ukernel__avx512fp16_u64(
     o += 64;
   }
   for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
-    __m512h vacc = _mm512_loadu_ph(a);
+    __m512h va = _mm512_loadu_ph(a);
     a += 32;
 
-    vacc = _mm512_min_ph(vacc, vb);
+    __m512h vacc = _mm512_min_ph(va, vb);
+
 
     _mm512_storeu_ph(o, vacc);
     o += 32;
@@ -66,9 +68,10 @@ void xnn_f16_vminc_ukernel__avx512fp16_u64(
     batch >>= XNN_LOG2_SIZEOF_HALF;
     const __mmask32 vmask = _cvtu32_mask32((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
-    __m512h vacc = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
+    __m512h va = _mm512_castsi512_ph(_mm512_maskz_loadu_epi16(vmask, a));
 
-    vacc = _mm512_maskz_min_ph(vmask, vacc, vb);
+    __m512h vacc = _mm512_maskz_min_ph(vmask, va, vb);
+
     _mm512_mask_storeu_epi16(o, vmask, _mm512_castph_si512(vacc));
   }
 #endif  // defined(__AVX512FP16__)

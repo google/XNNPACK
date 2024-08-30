@@ -2,7 +2,7 @@
 //   Template: src/f32-vbinary/vopc-neon.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2_lo9 Google LLC
+// Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -31,24 +31,25 @@ void xnn_f32_vsqrdiffc_ukernel__neon_u8(
   const float32x4_t vb = vld1q_dup_f32(input_b);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    float32x4_t vacc_ = vld1q_f32(input_a); input_a += 4;
-    float32x4_t vaccl = vld1q_f32(input_a); input_a += 4;
+    const float32x4_t va0 = vld1q_f32(input_a); input_a += 4;
+    const float32x4_t va1 = vld1q_f32(input_a); input_a += 4;
 
-    vacc_ = vsubq_f32(vacc_, vb);
-    vaccl = vsubq_f32(vaccl, vb);
+    float32x4_t vacc0 = vsubq_f32(va0, vb);
+    float32x4_t vacc1 = vsubq_f32(va1, vb);
 
-    vacc_ = vmulq_f32(vacc_, vacc_);
-    vaccl = vmulq_f32(vaccl, vaccl);
+    vacc0 = vmulq_f32(vacc0, vacc0);
+    vacc1 = vmulq_f32(vacc1, vacc1);
 
 
-    vst1q_f32(output, vacc_); output += 4;
-    vst1q_f32(output, vaccl); output += 4;
+    vst1q_f32(output, vacc0); output += 4;
+    vst1q_f32(output, vacc1); output += 4;
   }
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float32x4_t va = vld1q_f32(input_a); input_a += 4;
 
     float32x4_t vacc = vsubq_f32(va, vb);
     vacc = vmulq_f32(vacc, vacc);
+
 
     vst1q_f32(output, vacc); output += 4;
   }
@@ -57,6 +58,7 @@ void xnn_f32_vsqrdiffc_ukernel__neon_u8(
 
     float32x4_t vacc = vsubq_f32(va, vb);
     vacc = vmulq_f32(vacc, vacc);
+
 
     float32x2_t vacc_lo = vget_low_f32(vacc);
     if (batch & (2 * sizeof(float))) {

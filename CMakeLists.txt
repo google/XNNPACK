@@ -1669,6 +1669,9 @@ IF(XNNPACK_BUILD_TESTS)
       f16-vminc
       f16-vmul-minmax
       f16-vmulc-minmax
+      f16-vprelu
+      f16-vpreluc
+      f16-vrpreluc
       f16-vrdivc-minmax
       f16-vrsubc-minmax
       f16-vsqrdiff
@@ -1699,6 +1702,9 @@ IF(XNNPACK_BUILD_TESTS)
       f32-vmulc
       f32-vmulc-minmax
       f32-vmulc-relu
+      f32-vprelu
+      f32-vpreluc
+      f32-vrpreluc
       f32-vrcopysignc
       f32-vrdivc
       f32-vrdivc-minmax

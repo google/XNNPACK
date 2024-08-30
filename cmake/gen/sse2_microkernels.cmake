@@ -135,6 +135,12 @@ SET(NON_PROD_SSE2_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u16.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u20-acc5.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u20.c
+  src/f32-vbinary/gen/f32-vprelu-sse2-u4.c
+  src/f32-vbinary/gen/f32-vprelu-sse2-u8.c
+  src/f32-vbinary/gen/f32-vpreluc-sse2-u4.c
+  src/f32-vbinary/gen/f32-vpreluc-sse2-u8.c
+  src/f32-vbinary/gen/f32-vrpreluc-sse2-u4.c
+  src/f32-vbinary/gen/f32-vrpreluc-sse2-u8.c
   src/f32-velu/gen/f32-velu-sse2-rr2-lut16-p3-u4.c
   src/f32-velu/gen/f32-velu-sse2-rr2-lut16-p3-u8.c
   src/f32-velu/gen/f32-velu-sse2-rr2-lut16-p3-u16.c

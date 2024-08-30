@@ -6,7 +6,7 @@
 $assert BATCH_TILE % 8 == 0
 $assert BATCH_TILE >= 8
 $ABC = "01234567456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "PRELU", "RPRELU"]
 $assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
@@ -26,6 +26,8 @@ $  "MUL": lambda x: "vmulq_f16(%s, vb)" % x,
 $  "SUB": lambda x: "vsubq_f16(%s, vb)" % x,
 $  "RSUB": lambda x: "vsubq_f16(vb, %s)" % x,
 $  "SQRDIFF": lambda x: "vsubq_f16(%s, vb)" % x,
+$  "PRELU": lambda x: "vmulq_f16(%s, vb)" % x,
+$  "RPRELU": lambda x: "vmulq_f16(%s, vb)" % x,
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
 $PARAMS = {"LINEAR": "union xnn_f16_default_params", "MINMAX": "union xnn_f16_minmax_params"}[ACTIVATION]
@@ -52,6 +54,8 @@ void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__${ISA}_u${BATCH_TILE}(
     const float16x8_t vy_max = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.max));
 
   const float16x8_t vb = vreinterpretq_f16_u16(vld1q_dup_u16(b));
+  $if OP == "RPRELU":
+    const uint16x8_t vm = vcltq_s16(vreinterpretq_s16_f16(vb), vmovq_n_s16(0));
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
       $for N in range(0, BATCH_TILE, 8):
@@ -63,6 +67,15 @@ void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__${ISA}_u${BATCH_TILE}(
       $if OP == "SQRDIFF":
         $for N in range(0, BATCH_TILE, 8):
           vy${ABC[N:N+8]} = vmulq_f16(vy${ABC[N:N+8]}, vy${ABC[N:N+8]});
+      $elif OP == "PRELU":
+        $for N in range(0, BATCH_TILE, 8):
+          const uint16x8_t vm${ABC[N:N+8]} = vcltq_s16(vreinterpretq_s16_f16(va${ABC[N:N+8]}), vmovq_n_s16(0));
+
+        $for N in range(0, BATCH_TILE, 8):
+          vy${ABC[N:N+8]} = vbslq_f16(vm${ABC[N:N+8]}, vy${ABC[N:N+8]}, va${ABC[N:N+8]});
+      $elif OP == "RPRELU":
+        $for N in range(0, BATCH_TILE, 8):
+          vy${ABC[N:N+8]} = vbslq_f16(vm, vy${ABC[N:N+8]}, vb);
 
       $if ACTIVATION == "MINMAX":
         $for N in range(0, BATCH_TILE, 8):
@@ -80,6 +93,11 @@ void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__${ISA}_u${BATCH_TILE}(
     float16x8_t vy01234567 = ${VOPQ_f16("va01234567")};
     $if OP == "SQRDIFF":
       vy01234567 = vmulq_f16(vy01234567, vy01234567);
+    $elif OP == "PRELU":
+      const uint16x8_t vm01234567 = vcltq_s16(vreinterpretq_s16_f16(va01234567), vmovq_n_s16(0));
+      vy01234567 = vbslq_f16(vm01234567, vy01234567, va01234567);
+    $elif OP == "RPRELU":
+      vy01234567 = vbslq_f16(vm, vy01234567, vb);
     $if ACTIVATION == "MINMAX":
       vy01234567 = vmaxq_f16(vy01234567, vy_min);
       vy01234567 = vminq_f16(vy01234567, vy_max);
@@ -91,6 +109,11 @@ void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__${ISA}_u${BATCH_TILE}(
     float16x8_t vy01234567 = ${VOPQ_f16("va01234567")};
     $if OP == "SQRDIFF":
       vy01234567 = vmulq_f16(vy01234567, vy01234567);
+    $elif OP == "PRELU":
+      const uint16x8_t vm01234567 = vcltq_s16(vreinterpretq_s16_f16(va01234567), vmovq_n_s16(0));
+      vy01234567 = vbslq_f16(vm01234567, vy01234567, va01234567);
+    $elif OP == "RPRELU":
+      vy01234567 = vbslq_f16(vm, vy01234567, vb);
     $if ACTIVATION == "MINMAX":
       vy01234567 = vmaxq_f16(vy01234567, vy_min);
       vy01234567 = vminq_f16(vy01234567, vy_max);

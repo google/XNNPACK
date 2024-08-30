@@ -7,7 +7,7 @@ $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
 $SIMD_TILE = BATCH_TILE // 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "PRELU", "RPRELU"]
 $assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
@@ -28,10 +28,13 @@ $  "MUL": lambda x: "_mm_mul_ps(%s, vb)" % x,
 $  "SUB": lambda x: "_mm_sub_ps(%s, vb)" % x,
 $  "RSUB": lambda x: "_mm_sub_ps(vb, %s)" % x,
 $  "SQRDIFF": lambda x: "_mm_sub_ps(%s, vb)" % x,
+$  "PRELU": lambda x: "_mm_mul_ps(%s, vb)" % x,
+$  "RPRELU": lambda x: "_mm_mul_ps(%s, vb)" % x,
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
 $PARAMS = {"LINEAR": "union xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
-void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__sse_u${BATCH_TILE}(
+$ISA = {1: "sse", 2: "sse2", 4: "sse41"}[SSE]
+void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__${ISA}_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,
     const float* input_b,
@@ -51,6 +54,9 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__sse_u${BATCH_TILE}(
     XNN_FORCE_REALIZATION(voutput_max);
   const __m128 vb = _mm_load1_ps(input_b);
 
+  $if OP == "RPRELU":
+    $if SSE == 2:
+      const __m128 vmask = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(vb)));
   $if BATCH_TILE > 4:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       const __m128 va${ABC[0]} = _mm_loadu_ps(input_a);
@@ -64,6 +70,22 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__sse_u${BATCH_TILE}(
       $if OP == "SQRDIFF":
         $for N in range(SIMD_TILE):
           vacc${ABC[N]} = _mm_mul_ps(vacc${ABC[N]}, vacc${ABC[N]});
+      $elif OP == "PRELU":
+        $for N in range(SIMD_TILE):
+          $if SSE == 2:
+            const __m128 vmask${ABC[N]} = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(va${ABC[N]})));
+
+        $for N in range(SIMD_TILE):
+          $if SSE == 2:
+            vacc${ABC[N]} = _mm_or_ps(_mm_and_ps(vacc${ABC[N]}, vmask${ABC[N]}), _mm_andnot_ps(vmask${ABC[N]}, va${ABC[N]}));
+          $elif SSE == 4:
+            vacc${ABC[N]} = _mm_blendv_ps(va${ABC[N]}, vacc${ABC[N]}, va${ABC[N]});
+      $elif OP == "RPRELU":
+        $for N in range(SIMD_TILE):
+          $if SSE == 2:
+            vacc${ABC[N]} = _mm_or_ps(_mm_and_ps(vacc${ABC[N]}, vmask), _mm_andnot_ps(vmask, vb));
+          $elif SSE == 4:
+            vacc${ABC[N]} = _mm_blendv_ps(vb, vacc${ABC[N]}, vb);
 
       $if ACTIVATION == "MINMAX":
         $for N in range(SIMD_TILE):
@@ -84,6 +106,17 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__sse_u${BATCH_TILE}(
     __m128 vacc = ${_MM_OP_PS("va")};
     $if OP == "SQRDIFF":
       vacc = _mm_mul_ps(vacc, vacc);
+    $elif OP == "PRELU":
+      $if SSE == 2:
+        const __m128 vmask = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(va)));
+        vacc = _mm_or_ps(_mm_and_ps(vacc, vmask), _mm_andnot_ps(vmask, va));
+      $elif SSE == 4:
+        vacc = _mm_blendv_ps(va, vacc, va);
+    $elif OP == "RPRELU":
+      $if SSE == 2:
+        vacc = _mm_or_ps(_mm_and_ps(vacc, vmask), _mm_andnot_ps(vmask, vb));
+      $elif SSE == 4:
+        vacc = _mm_blendv_ps(vb, vacc, vb);
     $if ACTIVATION == "MINMAX":
       vacc = _mm_max_ps(vacc, voutput_min);
       vacc = _mm_min_ps(vacc, voutput_max);
@@ -97,6 +130,17 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__sse_u${BATCH_TILE}(
     __m128 vacc = ${_MM_OP_PS("va")};
     $if OP == "SQRDIFF":
       vacc = _mm_mul_ps(vacc, vacc);
+    $elif OP == "PRELU":
+      $if SSE == 2:
+        const __m128 vmask = _mm_castsi128_ps(_mm_cmpgt_epi32(_mm_setzero_si128(), _mm_castps_si128(va)));
+        vacc = _mm_or_ps(_mm_and_ps(vacc, vmask), _mm_andnot_ps(vmask, va));
+      $elif SSE == 4:
+        vacc = _mm_blendv_ps(va, vacc, va);
+    $elif OP == "RPRELU":
+      $if SSE == 2:
+        vacc = _mm_or_ps(_mm_and_ps(vacc, vmask), _mm_andnot_ps(vmask, vb));
+      $elif SSE == 4:
+        vacc = _mm_blendv_ps(vb, vacc, vb);
     $if ACTIVATION == "MINMAX":
       vacc = _mm_max_ps(vacc, voutput_min);
       vacc = _mm_min_ps(vacc, voutput_max);
