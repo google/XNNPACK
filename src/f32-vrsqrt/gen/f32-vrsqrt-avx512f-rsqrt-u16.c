@@ -35,7 +35,7 @@ void xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u16(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_rsqrt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_rsqrt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);

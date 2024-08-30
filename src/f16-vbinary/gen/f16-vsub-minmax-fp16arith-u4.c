@@ -35,8 +35,8 @@ void xnn_f16_vsub_minmax_ukernel__fp16arith_u4(
   float16_t* o = (float16_t*) output;
 
   float16_t vy_min, vy_max;
-  memcpy(&vy_min, &params->fp16arith.min, sizeof(vy_min));
-  memcpy(&vy_max, &params->fp16arith.max, sizeof(vy_max));
+  memcpy(&vy_min, &params->scalar.min, sizeof(vy_min));
+  memcpy(&vy_max, &params->scalar.max, sizeof(vy_max));
 
   for (; batch >= 4 * sizeof(float16_t); batch -= 4 * sizeof(float16_t)) {
     const float16_t va0 = *a++;

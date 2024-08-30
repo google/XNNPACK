@@ -143,7 +143,7 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f16(
     goto error;
   }
 
-  union xnn_f16_expminus_params expminus_params;
+  struct xnn_f16_expminus_params expminus_params;
   if (raddstoreexpminusmax_config->init.f16 != NULL) {
     raddstoreexpminusmax_config->init.f16(&expminus_params);
   }
@@ -253,7 +253,7 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f32(
     goto error;
   }
 
-  union xnn_f32_expminus_params expminus_params;
+  struct xnn_f32_expminus_params expminus_params;
   if (raddstoreexpminusmax_config->init.f32 != NULL) {
     raddstoreexpminusmax_config->init.f32(&expminus_params);
   }

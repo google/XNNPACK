@@ -25,22 +25,22 @@ static void init_f16_dwconv2d_chw_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_dwconv2d_chw_config.dwconv2d_chw_3x3.ukernel = (xnn_dwconv2d_chw_ukernel_fn) xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8;
-      f16_dwconv2d_chw_config.dwconv2d_chw_3x3.init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_dwconv2d_chw_config.dwconv2d_chw_3x3.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv2d_chw_config.dwconv2d_chw_3x3.output_height_tile = 2;
       f16_dwconv2d_chw_config.dwconv2d_chw_3x3.output_width_tile = 8;
 
       f16_dwconv2d_chw_config.dwconv2d_chw_3x3s2.ukernel = (xnn_dwconv2d_chw_ukernel_fn) xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8;
-      f16_dwconv2d_chw_config.dwconv2d_chw_3x3s2.init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_dwconv2d_chw_config.dwconv2d_chw_3x3s2.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv2d_chw_config.dwconv2d_chw_3x3s2.output_height_tile = 1;
       f16_dwconv2d_chw_config.dwconv2d_chw_3x3s2.output_width_tile = 8;
 
       f16_dwconv2d_chw_config.dwconv2d_chw_5x5.ukernel = (xnn_dwconv2d_chw_ukernel_fn) xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8;
-      f16_dwconv2d_chw_config.dwconv2d_chw_5x5.init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_dwconv2d_chw_config.dwconv2d_chw_5x5.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv2d_chw_config.dwconv2d_chw_5x5.output_height_tile = 1;
       f16_dwconv2d_chw_config.dwconv2d_chw_5x5.output_width_tile = 8;
 
       f16_dwconv2d_chw_config.dwconv2d_chw_5x5s2.ukernel = (xnn_dwconv2d_chw_ukernel_fn) xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8;
-      f16_dwconv2d_chw_config.dwconv2d_chw_5x5s2.init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_dwconv2d_chw_config.dwconv2d_chw_5x5s2.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv2d_chw_config.dwconv2d_chw_5x5s2.output_height_tile = 1;
       f16_dwconv2d_chw_config.dwconv2d_chw_5x5s2.output_width_tile = 8;
     }
@@ -49,22 +49,22 @@ static void init_f16_dwconv2d_chw_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_dwconv2d_chw_config.dwconv2d_chw_3x3.ukernel = (xnn_dwconv2d_chw_ukernel_fn) xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_2x8;
-      f16_dwconv2d_chw_config.dwconv2d_chw_3x3.init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_dwconv2d_chw_config.dwconv2d_chw_3x3.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv2d_chw_config.dwconv2d_chw_3x3.output_height_tile = 2;
       f16_dwconv2d_chw_config.dwconv2d_chw_3x3.output_width_tile = 8;
 
       f16_dwconv2d_chw_config.dwconv2d_chw_3x3s2.ukernel = (xnn_dwconv2d_chw_ukernel_fn) xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8;
-      f16_dwconv2d_chw_config.dwconv2d_chw_3x3s2.init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_dwconv2d_chw_config.dwconv2d_chw_3x3s2.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv2d_chw_config.dwconv2d_chw_3x3s2.output_height_tile = 1;
       f16_dwconv2d_chw_config.dwconv2d_chw_3x3s2.output_width_tile = 8;
 
       f16_dwconv2d_chw_config.dwconv2d_chw_5x5.ukernel = (xnn_dwconv2d_chw_ukernel_fn) xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8;
-      f16_dwconv2d_chw_config.dwconv2d_chw_5x5.init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_dwconv2d_chw_config.dwconv2d_chw_5x5.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv2d_chw_config.dwconv2d_chw_5x5.output_height_tile = 1;
       f16_dwconv2d_chw_config.dwconv2d_chw_5x5.output_width_tile = 8;
 
       f16_dwconv2d_chw_config.dwconv2d_chw_5x5s2.ukernel = (xnn_dwconv2d_chw_ukernel_fn) xnn_f16_dwconv2d_chw_ukernel_5x5s2p2__neonfp16arith_1x8;
-      f16_dwconv2d_chw_config.dwconv2d_chw_5x5s2.init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_dwconv2d_chw_config.dwconv2d_chw_5x5s2.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv2d_chw_config.dwconv2d_chw_5x5s2.output_height_tile = 1;
       f16_dwconv2d_chw_config.dwconv2d_chw_5x5s2.output_width_tile = 8;
     }

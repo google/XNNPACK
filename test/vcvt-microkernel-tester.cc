@@ -104,7 +104,7 @@ void VCvtMicrokernelTester::Test(xnn_f16_qs8_vcvt_ukernel_fn vcvt,
 
     std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
-    union xnn_f16_qs8_cvt_params params;
+    struct xnn_f16_qs8_cvt_params params;
     init_params(&params, fp16_ieee_from_fp32_value(scale()),
                 output_zero_point(), qmin(), qmax());
 
@@ -155,7 +155,7 @@ void VCvtMicrokernelTester::Test(
     std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
     std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
-    union xnn_f32_qs8_cvt_params params;
+    struct xnn_f32_qs8_cvt_params params;
     init_params(&params, scale(), output_zero_point(), qmin(), qmax());
 
     // Call optimized micro-kernel.
@@ -203,7 +203,7 @@ void VCvtMicrokernelTester::Test(
     std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
     std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
-    union xnn_f32_qu8_cvt_params params;
+    struct xnn_f32_qu8_cvt_params params;
     init_params(&params, scale(), output_zero_point(), qmin(), qmax());
 
     // Call optimized micro-kernel.
@@ -249,7 +249,7 @@ void VCvtMicrokernelTester::Test(xnn_qs8_vcvt_ukernel_fn vcvt,
     std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
     std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
-    union xnn_qs8_cvt_params params;
+    struct xnn_qs8_cvt_params params;
     init_params(&params, scale(), input_zero_point(), output_zero_point());
 
     // Call optimized micro-kernel.
@@ -296,7 +296,7 @@ void VCvtMicrokernelTester::Test(
     std::generate(input.begin(), input.end(), [&]() { return i16dist(rng); });
     std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
-    union xnn_qs16_qs8_cvt_params params;
+    struct xnn_qs16_qs8_cvt_params params;
     init_params(&params, scale(), output_zero_point());
 
     // Call optimized micro-kernel.
@@ -345,7 +345,7 @@ void VCvtMicrokernelTester::Test(
     std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
     std::fill(output.begin(), output.end(), UINT16_C(0x7E00));
 
-    union xnn_qs8_f16_cvt_params params;
+    struct xnn_qs8_f16_cvt_params params;
     init_params(&params, fp16_ieee_from_fp32_value(scale()),
                 input_zero_point());
 
@@ -386,7 +386,7 @@ void VCvtMicrokernelTester::Test(
     std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
     std::fill(output.begin(), output.end(), std::nanf(""));
 
-    union xnn_qs8_f32_cvt_params params;
+    struct xnn_qs8_f32_cvt_params params;
     init_params(&params, scale(), input_zero_point());
 
     // Call optimized micro-kernel.
@@ -426,7 +426,7 @@ void VCvtMicrokernelTester::Test(xnn_qu8_vcvt_ukernel_fn vcvt,
     std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
     std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
-    union xnn_qu8_cvt_params params;
+    struct xnn_qu8_cvt_params params;
     init_params(&params, scale(), input_zero_point(), output_zero_point());
 
     // Call optimized micro-kernel.
@@ -473,7 +473,7 @@ void VCvtMicrokernelTester::Test(
     std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
     std::fill(output.begin(), output.end(), std::nanf(""));
 
-    union xnn_qu8_f32_cvt_params params;
+    struct xnn_qu8_f32_cvt_params params;
     init_params(&params, scale(), input_zero_point());
 
     // Call optimized micro-kernel.

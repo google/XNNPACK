@@ -12,6 +12,7 @@ load("@rules_python//python:py_binary.bzl", "py_binary")
 load(
     ":build_defs.bzl",
     "xnnpack_cc_library",
+    "xnnpack_cxx_library",
     "xnnpack_if_kleidiai_enabled",
     "xnnpack_min_size_copts",
     "xnnpack_slinky_deps",
@@ -121,7 +122,6 @@ SUBGRAPH_SRCS = [
     "src/subgraph/prelu.c",
     "src/subgraph/reciprocal-square-root.c",
     "src/subgraph/reshape-helpers.c",
-    "src/subgraph/reshape-2d.c",
     "src/subgraph/rope.c",
     "src/subgraph/scaled-dot-product-attention.c",
     "src/subgraph/sigmoid.c",
@@ -132,7 +132,6 @@ SUBGRAPH_SRCS = [
     "src/subgraph/squared-difference.c",
     "src/subgraph/static-constant-pad.c",
     "src/subgraph/static-mean.c",
-    "src/subgraph/static-reshape.c",
     "src/subgraph/static-resize-bilinear-2d.c",
     "src/subgraph/static-slice.c",
     "src/subgraph/static-transpose.c",
@@ -157,6 +156,9 @@ TABLE_SRCS = [
 
 MICROKERNEL_DEFS = [
     "src/bf16-vabs/bf16-vabs.h",
+    "src/f16-avgpool/f16-avgpool-minmax.h",
+    "src/f16-maxpool/f16-maxpool-minmax.h",
+    "src/f16-pavgpool/f16-pavgpool-minmax.h",
     "src/f16-vabs/f16-vabs.h",
     "src/f16-vbinary/f16-vadd-minmax.h",
     "src/f16-vbinary/f16-vaddc-minmax.h",
@@ -189,6 +191,9 @@ MICROKERNEL_DEFS = [
     "src/f16-vsqr/f16-vsqr.h",
     "src/f16-vsqrt/f16-vsqrt.h",
     "src/f16-vtanh/f16-vtanh.h",
+    "src/f32-avgpool/f32-avgpool-minmax.h",
+    "src/f32-maxpool/f32-maxpool-minmax.h",
+    "src/f32-pavgpool/f32-pavgpool-minmax.h",
     "src/f32-vabs/f32-vabs.h",
     "src/f32-vbinary/f32-vadd-minmax.h",
     "src/f32-vbinary/f32-vadd-relu.h",
@@ -256,6 +261,7 @@ MICROKERNEL_DEFS = [
     "src/qs8-vmul/qs8-vmul-minmax-rndnu.h",
     "src/qs8-vmulc/qs8-vmulc-minmax-fp32.h",
     "src/qs8-vmulc/qs8-vmulc-minmax-rndnu.h",
+    "src/qu8-avgpool/qu8-avgpool-minmax.h",
     "src/qu8-vadd/qu8-vadd-minmax.h",
     "src/qu8-vaddc/qu8-vaddc-minmax.h",
     "src/qu8-vhswish/qu8-vhswish.h",
@@ -264,11 +270,20 @@ MICROKERNEL_DEFS = [
     "src/qu8-vmul/qu8-vmul-minmax-rndnu.h",
     "src/qu8-vmulc/qu8-vmulc-minmax-fp32.h",
     "src/qu8-vmulc/qu8-vmulc-minmax-rndnu.h",
+    "src/s8-maxpool/s8-maxpool-minmax.h",
+    "src/s8-vclamp/s8-vclamp.h",
     "src/s32-vmul/s32-vmul.h",
     "src/s32-vmul/s32-vmulc.h",
-    "src/s8-vclamp/s8-vclamp.h",
-    "src/u64-u32-vsqrtshift/u64-u32-vsqrtshift.h",
+    "src/u8-maxpool/u8-maxpool-minmax.h",
     "src/u8-vclamp/u8-vclamp.h",
+    "src/u64-u32-vsqrtshift/u64-u32-vsqrtshift.h",
+    "src/x8-packq/x8-packq.h",
+    "src/x8-packw/x8-packw.h",
+    "src/x16-packw/x16-packw.h",
+    "src/x32-packb/x32-packb.h",
+    "src/x32-packw/x32-packw.h",
+    "src/x32-packx/x32-packx.h",
+    "src/x32-zerob/x32-zerob.h",
 ]
 
 MICROKERNEL_HDRS = [
@@ -384,6 +399,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":config_hdrs",
+        ":math",
         ":memory",
         ":microparams",
         ":mutex",
@@ -879,9 +895,9 @@ xnnpack_cc_library(
     ],
 )
 
-xnnpack_cc_library(
+xnnpack_cxx_library(
     name = "packing",
-    srcs = ["src/packing.c"],
+    srcs = ["src/packing.cc"],
     hdrs = ["src/xnnpack/pack.h"],
     defines = xnnpack_configurable_defines(),
     deps = [
@@ -920,7 +936,7 @@ xnnpack_transitive_source_list(
 genrule(
     name = "generate_build_identifier",
     srcs = [
-        "src/packing.c",
+        "src/packing.cc",
         ":build_identifier_ukernel_srcs",
     ],
     outs = ["src/build_identifier.c"],

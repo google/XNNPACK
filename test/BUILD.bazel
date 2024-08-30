@@ -1497,31 +1497,13 @@ xnnpack_binary(
     "truncation_nc",
 ]]
 
-[xnnpack_unit_test(
-    name = "%s_test" % operator,
+xnnpack_unit_test(
+    name = "binary_nd_test",
     timeout = "moderate",
-    srcs = [
-        "%s.cc" % operator.replace("_", "-"),
-    ],
-    shard_count = 5,
+    srcs = ["binary-nd.cc"],
+    shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
-) for operator in [
-    "add_nd",
-    "add_nd_eager",
-    "copysign_nd",
-    "divide_nd",
-    "divide_nd_eager",
-    "maximum_nd",
-    "maximum_nd_eager",
-    "minimum_nd",
-    "minimum_nd_eager",
-    "multiply_nd",
-    "multiply_nd_eager",
-    "squared_difference_nd",
-    "squared_difference_nd_eager",
-    "subtract_nd",
-    "subtract_nd_eager",
-]]
+)
 
 xnnpack_unit_test(
     name = "argmax_pooling_nhwc_test",
@@ -1959,8 +1941,8 @@ xnnpack_cxx_library(
     "square",
     "square_root",
     "static_constant_pad",
+    "static_expand_dims",
     "static_reshape",
-    "reshape_2d",
     "static_slice",
     "static_transpose",
     "tanh",

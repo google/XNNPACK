@@ -1246,6 +1246,23 @@ enum xnn_status xnn_define_static_constant_pad(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a Expand Dims Node with and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param num_new_axes - number of new axes of size 1 to be inserted.
+/// @param new_axes - The axis positions of the new axes in the expanded dimensions.
+/// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
+///                    shape must match the shape of the input tensor with padding.
+/// @param flags - binary features of the Constant Pad Node. No supported flags are currently defined.
+enum xnn_status xnn_define_static_expand_dims(
+  xnn_subgraph_t subgraph,
+  size_t num_new_axes,
+  const size_t* new_axes,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a Mean Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
@@ -1525,24 +1542,6 @@ enum xnn_status xnn_define_static_reshape(
   uint32_t input_id,
   uint32_t output_id,
   uint32_t flags);
-
-/// Define a Node that reshapes a tensor to two dimensions, retaining the
-/// trailing dimension, and add it to a Subgraph.
-///
-/// This operator is experimental.
-///
-/// @param subgraph - a Subgraph object that will own the created Node.
-/// @param input_id - Value ID for the input tensor. The input tensor must be
-///                   defined in the @a subgraph.
-/// @param output_id - Value ID for the output tensor. The output tensor must be
-///                    defined in the @a subgraph, and its
-///                    size must match the shape of the input tensor with
-///                    padding.
-/// @param flags - binary features of the Reshape Node. No supported flags are
-///                currently defined.
-enum xnn_status xnn_define_reshape_2d(xnn_subgraph_t subgraph,
-                                      uint32_t input_id, uint32_t output_id,
-                                      uint32_t flags);
 
 /// Define a 2D Resize Bilinear Node with static output height & width specification and add it to a Subgraph.
 ///

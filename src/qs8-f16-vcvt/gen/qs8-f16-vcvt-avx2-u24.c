@@ -20,7 +20,7 @@ void xnn_qs8_f16_vcvt_ukernel__avx2_u24(
     size_t batch,
     const int8_t* input,
     void* output,
-    const union xnn_qs8_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_qs8_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(int8_t) == 0);
@@ -29,7 +29,7 @@ void xnn_qs8_f16_vcvt_ukernel__avx2_u24(
 
   uint16_t* o = (uint16_t*) output;
   const __m256i vzero_point = _mm256_set1_epi32(params->scalar.zero_point);
-  const __m256 vscale = _mm256_set1_ps(params->scalar.scale);
+  const __m256 vscale = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.scale));
   XNN_FORCE_REALIZATION(vzero_point);
   XNN_FORCE_REALIZATION(vscale);
   for (; batch >= 24 * sizeof(int8_t); batch -= 24 * sizeof(int8_t)) {

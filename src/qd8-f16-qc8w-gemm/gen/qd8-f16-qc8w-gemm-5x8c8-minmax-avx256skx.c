@@ -68,8 +68,8 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_5x8c8__avx256skx(
     c4 = c3;
   }
 
-  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
-  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
+  const __m256 vmin = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.min));
+  const __m256 vmax = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 

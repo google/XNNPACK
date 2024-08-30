@@ -22,7 +22,7 @@ $if REQUANTIZATION == "FP32" and ARMV8:
 
 $DATATYPE_SPEC = {"QS8": "qs8", "QC8": "qs8_qc8w"}[DATATYPE]
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if ARMV8 else "neon")
-$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QS8": "xnn_qs8_conv_minmax_params"}[DATATYPE]
+$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8": "union xnn_qs8_conv_minmax_params"}[DATATYPE]
 $ISA = "neonv8" if ARMV8 else "neon"
 void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__${ISA}_${"mla8" if MLA else "mul8"}_${LOAD_VARIANT.lower()}(
     size_t channels,
@@ -34,7 +34,7 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERN
     size_t output_increment,
     size_t input_offset,
     const int8_t* zero,
-    const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(channels != 0);
   assert(output_width != 0);

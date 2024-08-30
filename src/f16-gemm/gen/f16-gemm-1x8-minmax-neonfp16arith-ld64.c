@@ -92,10 +92,10 @@ void xnn_f16_gemm_minmax_ukernel_1x8__neonfp16arith_ld64(
       } while (k != 0);
     }
 
-    const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
+    const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.min));
     vacc0x0 = vmaxq_f16(vacc0x0, vmin);
 
-    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
+    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.max));
     vacc0x0 = vminq_f16(vacc0x0, vmax);
 
     if XNN_LIKELY(nc >= 8) {

@@ -109,7 +109,7 @@ enum xnn_status xnn_create_mean_nd_f32(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f32_scaleminmax_params params;
+  struct xnn_f32_scaleminmax_params params;
   rsum_config->init.f32_scaleminmax(&params, /*scale=*/1.0f, /*min=*/-INFINITY, /*max=*/INFINITY);
   return create_mean_nd(
     flags,

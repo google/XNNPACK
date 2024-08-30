@@ -23,137 +23,137 @@
 
 # ARM NEONI8MM
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c8__neoni8mm
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x16c8__neoni8mm
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_2x8c8__neoni8mm
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_2x16c8__neoni8mm
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_3x8c8__neoni8mm
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_3x16c8__neoni8mm
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   k-block: 16
   pack: xnn_pack_qs8_conv_goki_w
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x8c8__neoni8mm
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x16c8__neoni8mm
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_6x8c8__neoni8mm
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_6x16c8__neoni8mm
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_8x8c8__neoni8mm
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_8x16c8__neoni8mm
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 
 # ARM NEONDOT
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c4__neondotfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x16c4__neondotfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x32c4__neondotfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_2x8c4__neondotfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_2x16c4__neondotfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_2x32c4__neondotfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x8c4__neondotfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondotfp16arith_cortex_a55
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x16c4__asm_aarch64_neondotfp16arith_ld128
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x16c4__neondotfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x32c4__neondotfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_6x8c4__neondotfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_6x16c4__neondotfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_6x32c4__neondotfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_8x8c4__neondotfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_8x16c4__neondotfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_8x32c4__neondotfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 4
 
 # ARM NEON
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c2s4__neonfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_2x8c2s4__neonfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 
 # AArch32 assembly
 - name: xnn_qd8_f16_qc8w_igemm_minmax_ukernel_4x8c4__asm_aarch32_neondotfp16arith_cortex_a55
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 8
 

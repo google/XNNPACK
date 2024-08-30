@@ -130,7 +130,7 @@ enum xnn_run_state {
 };
 
 struct f16_f32acc_mean_params {
-  union xnn_f16_f32acc_scale_params f16_f32acc_scale;
+  struct xnn_f16_f32acc_scale_params f16_f32acc_scale;
 };
 
 struct xnn_operator {
@@ -212,50 +212,44 @@ struct xnn_operator {
   union {
     union xnn_f16_default_params f16_default;
     union xnn_f16_hswish_params f16_hswish;
-    union xnn_f16_elu_params f16_elu;
-    union xnn_f16_lrelu_params f16_lrelu;
-    union xnn_f16_sigmoid_params f16_sigmoid;
+    struct xnn_f16_elu_params f16_elu;
+    struct xnn_f16_lrelu_params f16_lrelu;
+    struct xnn_f16_sigmoid_params f16_sigmoid;
     union xnn_f16_tanh_params f16_tanh;
     union xnn_f32_default_params f32_default;
-    union xnn_f32_elu_params f32_elu;
-    union xnn_f32_lrelu_params f32_lrelu;
-    union xnn_f32_rnd_params f32_rnd;
-    union xnn_f32_rsqrt_params f32_rsqrt;
-    union xnn_f32_sigmoid_params f32_sigmoid;
-    union xnn_f32_sqrt_params f32_sqrt;
+    struct xnn_f32_elu_params f32_elu;
+    struct xnn_f32_lrelu_params f32_lrelu;
+    struct xnn_f32_rnd_params f32_rnd;
+    struct xnn_f32_rsqrt_params f32_rsqrt;
+    struct xnn_f32_sigmoid_params f32_sigmoid;
+    struct xnn_f32_sqrt_params f32_sqrt;
     union xnn_f32_tanh_params f32_tanh;
     // Parameters for Global Average Pooling in CHW layout
     union xnn_f16_gavgpool_params f16_gavgpool;
     union xnn_f32_gavgpool_params f32_gavgpool;
     union xnn_f32_hswish_params f32_hswish;
-    // Pixelwise Average Pooling normally use f16_minmax_params, but also initialize
-    // f16_scaleminmax_params in case it needs to switch to Global Average Pooling operation.
-    struct {
-      union xnn_f16_minmax_params f16_minmax;
-      union xnn_f16_scaleminmax_params f16_scaleminmax;
-    };
+    union xnn_f16_minmax_params f16_minmax;
+    struct xnn_f16_scaleminmax_params f16_scaleminmax;
     struct f16_f32acc_mean_params mean_params;
     // Pixelwise Average Pooling normally use f32_minmax_params, but also initialize
     // f32_scaleminmax_params in case it needs to switch to Global Average Pooling operation.
     struct {
       union xnn_f32_minmax_params f32_minmax;
-      union xnn_f32_scaleminmax_params f32_scaleminmax;
+      struct xnn_f32_scaleminmax_params f32_scaleminmax;
     };
-    struct {
-      union xnn_f32_scale_params f32_scale;
-    };
+    union xnn_f32_scale_params f32_scale;
     union xnn_f16_minmax_params f16_chw;
     union xnn_f32_minmax_params f32_chw;
     union xnn_f32_qb4w_minmax_params f32_qb4w_minmax;
     union xnn_f32_qc4w_minmax_params f32_qc4w_minmax;
-    union xnn_f32_qs8_cvt_params f32_qs8_cvt;
-    union xnn_f32_qu8_cvt_params f32_qu8_cvt;
-    union xnn_qs8_cvt_params qs8_cvt;
-    union xnn_qs8_f16_cvt_params qs8_f16_cvt;
-    union xnn_qs8_f32_cvt_params qs8_f32_cvt;
-    union xnn_qs16_qs8_cvt_params qs16_qs8_cvt;
-    union xnn_qu8_cvt_params qu8_cvt;
-    union xnn_qu8_f32_cvt_params qu8_f32_cvt;
+    struct xnn_f32_qs8_cvt_params f32_qs8_cvt;
+    struct xnn_f32_qu8_cvt_params f32_qu8_cvt;
+    struct xnn_qs8_cvt_params qs8_cvt;
+    struct xnn_qs8_f16_cvt_params qs8_f16_cvt;
+    struct xnn_qs8_f32_cvt_params qs8_f32_cvt;
+    struct xnn_qs16_qs8_cvt_params qs16_qs8_cvt;
+    struct xnn_qu8_cvt_params qu8_cvt;
+    struct xnn_qu8_f32_cvt_params qu8_f32_cvt;
     union xnn_qs8_conv_minmax_params qs8_conv_minmax;
     union xnn_qs8_qc8w_conv_minmax_params qs8_qc8w_conv_minmax;
     // Average Pooling normally use qs8_avgpool_params, but also initialize qs8_gavgpool_params in case it needs to switch
@@ -277,8 +271,8 @@ struct xnn_operator {
     };
     union xnn_qs8_hswish_params qs8_hswish;
     union xnn_qu8_hswish_params qu8_hswish;
-    union xnn_qs8_lrelu_params qs8_lrelu;
-    union xnn_qu8_lrelu_params qu8_lrelu;
+    struct xnn_qs8_lrelu_params qs8_lrelu;
+    struct xnn_qu8_lrelu_params qu8_lrelu;
     union xnn_s8_minmax_params s8_minmax;
     union xnn_s32_default_params s32_default;
     union xnn_u8_minmax_params u8_minmax;
@@ -288,9 +282,9 @@ struct xnn_operator {
   // We also use this to store parameters to binary operators. For most such operators, this is a copy of params,
   // but params need to be swapped for commutative ops with per-operand params.
   union {
-    union xnn_f16_expminus_params f16_expminus_params;
+    struct xnn_f16_expminus_params f16_expminus_params;
     union xnn_f32_minmax_params f32_minmax;
-    union xnn_f32_expminus_params f32_expminus_params;
+    struct xnn_f32_expminus_params f32_expminus_params;
     union xnn_f32_default_params f32_default;
     union xnn_qs8_add_minmax_params qs8_add;
     union xnn_qs8_mul_minmax_params qs8_mul;

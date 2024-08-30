@@ -26,7 +26,7 @@ static void init_f16_conv_hwc2chw_3x3c3s2_config(void) {
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_conv_hwc2chw_3x3c3s2_config.ukernel_with_symm_padding =
         (xnn_conv_hwc2chw_ukernel_fn) xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2;
-      f16_conv_hwc2chw_3x3c3s2_config.init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_conv_hwc2chw_3x3c3s2_config.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_conv_hwc2chw_3x3c3s2_config.output_channel_tile = 4;
       f16_conv_hwc2chw_3x3c3s2_config.output_height_tile = 2;
       f16_conv_hwc2chw_3x3c3s2_config.output_width_tile = 2;
@@ -37,7 +37,7 @@ static void init_f16_conv_hwc2chw_3x3c3s2_config(void) {
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_conv_hwc2chw_3x3c3s2_config.ukernel_with_symm_padding =
         (xnn_conv_hwc2chw_ukernel_fn) xnn_f16_conv_hwc2chw_ukernel_3x3s2p1c3x4__neonfp16arith_2x2;
-      f16_conv_hwc2chw_3x3c3s2_config.init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_conv_hwc2chw_3x3c3s2_config.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_conv_hwc2chw_3x3c3s2_config.output_channel_tile = 4;
       f16_conv_hwc2chw_3x3c3s2_config.output_height_tile = 2;
       f16_conv_hwc2chw_3x3c3s2_config.output_width_tile = 2;

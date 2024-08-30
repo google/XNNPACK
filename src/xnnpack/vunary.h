@@ -16,26 +16,26 @@ extern "C" {
 #endif
 
 
-#define DECLARE_BF16_UKERNEL_FUNCTION(fn_name, params_union) \
+#define DECLARE_BF16_UKERNEL_FUNCTION(fn_name, params_type) \
   XNN_INTERNAL void fn_name(                                 \
       size_t n,                                              \
       const void* x,                                         \
       void* y,                                               \
-      const union params_union params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-#define DECLARE_F16_UKERNEL_FUNCTION(fn_name, params_union) \
+#define DECLARE_F16_UKERNEL_FUNCTION(fn_name, params_type) \
   XNN_INTERNAL void fn_name(                                \
       size_t n,                                             \
       const void* x,                                        \
       void* y,                                              \
-      const union params_union params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-#define DECLARE_F32_UKERNEL_FUNCTION(fn_name, params_union) \
+#define DECLARE_F32_UKERNEL_FUNCTION(fn_name, params_type) \
   XNN_INTERNAL void fn_name(                                \
       size_t n,                                             \
       const float* x,                                       \
       float* y,                                             \
-      const union params_union params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 #define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype) \
   XNN_INTERNAL void fn_name(size_t n, const int8_t* x, int8_t* y,           \

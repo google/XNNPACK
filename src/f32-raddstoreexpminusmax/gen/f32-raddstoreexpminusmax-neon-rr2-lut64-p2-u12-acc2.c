@@ -23,7 +23,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_lut64_p2_u12_acc2(
     const float* max,
     float* output,
     float* sum,
-    const union xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);

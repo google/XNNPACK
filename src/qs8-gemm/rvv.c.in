@@ -17,7 +17,7 @@ $INTERMEDIATE_MLUL = {"m4": "m2", "m8": "m4"}[OUT_LMUL]
 #include "xnnpack/math.h"
 
 $DATATYPE_SPEC = {"QD8": "qd8_f32_qc8w", "QC4": "qd8_f32_qc4w"}[DATATYPE]
-$PARAMS_UNION = {"QD8": "xnn_f32_minmax_params", "QC4": "xnn_f32_qc4w_minmax_params"}[DATATYPE]
+$PARAMS_TYPE = {"QD8": "union xnn_f32_minmax_params", "QC4": "union xnn_f32_qc4w_minmax_params"}[DATATYPE]
 void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${OUT_LMUL[1]}v__rvv(
     size_t mr,
     size_t nc,
@@ -28,7 +28,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${OUT_LMUL[1]}v__rvv(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)],
+    const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);

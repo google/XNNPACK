@@ -13,11 +13,11 @@
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
-#include <initializer_list>
 #include <limits>
 #include <numeric>
 #include <vector>
 
+#include <gtest/gtest.h>
 #include "xnnpack.h"
 
 class BinaryElementwiseOperatorTester {
@@ -34,10 +34,91 @@ class BinaryElementwiseOperatorTester {
     SquaredDifference,
   };
 
+  static std::string ToString(OperationType operation_type) {
+    switch (operation_type) {
+      case OperationType::Unknown:
+        return "Unknown";
+      case OperationType::Add:
+        return "Add";
+      case OperationType::CopySign:
+        return "CopySign";
+      case OperationType::Divide:
+        return "Divide";
+      case OperationType::Maximum:
+        return "Maximum";
+      case OperationType::Minimum:
+        return "Minimum";
+      case OperationType::Multiply:
+        return "Multiply";
+      case OperationType::Subtract:
+        return "Subtract";
+      case OperationType::SquaredDifference:
+        return "SquaredDifference";
+      default:
+        return "Unknown";
+    }
+  }
+
+  template <typename T>
+  void CheckResults(const size_t* output_dims, const T* input1, const T* input2,
+                    const T* output, const size_t* input1_strides,
+                    const size_t* input2_strides,
+                    const size_t* output_strides) const {
+    // Verify results.
+    for (size_t i = 0; i < output_dims[0]; i++) {
+      for (size_t j = 0; j < output_dims[1]; j++) {
+        for (size_t k = 0; k < output_dims[2]; k++) {
+          for (size_t l = 0; l < output_dims[3]; l++) {
+            for (size_t m = 0; m < output_dims[4]; m++) {
+              for (size_t n = 0; n < output_dims[5]; n++) {
+                float output_ref =
+                    Compute(
+                        input1_scale() * (static_cast<int32_t>(
+                                              input1[i * input1_strides[0] +
+                                                     j * input1_strides[1] +
+                                                     k * input1_strides[2] +
+                                                     l * input1_strides[3] +
+                                                     m * input1_strides[4] +
+                                                     n * input1_strides[5]]) -
+                                          input1_zero_point()),
+                        input2_scale() * (static_cast<int32_t>(
+                                              input2[i * input2_strides[0] +
+                                                     j * input2_strides[1] +
+                                                     k * input2_strides[2] +
+                                                     l * input2_strides[3] +
+                                                     m * input2_strides[4] +
+                                                     n * input2_strides[5]]) -
+                                          input2_zero_point())) /
+                        output_scale() +
+                    static_cast<float>(output_zero_point());
+                output_ref =
+                    std::max<float>(output_ref, static_cast<float>(qmin()));
+                output_ref =
+                    std::min<float>(output_ref, static_cast<float>(qmax()));
+                const size_t index =
+                    i * output_strides[0] + j * output_strides[1] +
+                    k * output_strides[2] + l * output_strides[3] +
+                    m * output_strides[4] + n * output_strides[5];
+                ASSERT_NEAR(static_cast<float>(output[index]), output_ref, 0.6f)
+                    << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k
+                    << ", " << l << ", " << m << ", " << n << ")"
+                    << ", input1 zero point = " << input1_zero_point()
+                    << ", input1 scale = " << input1_scale()
+                    << ", input2 zero point = " << input2_zero_point()
+                    << ", input2 scale = " << input2_scale()
+                    << ", output zero point = " << output_zero_point()
+                    << ", output scale = " << output_scale();
+              }
+            }
+          }
+        }
+      }
+    }
+  }
   BinaryElementwiseOperatorTester& input1_shape(
-      std::initializer_list<size_t> input1_shape) {
+      std::vector<size_t> input1_shape) {
     assert(input1_shape.size() <= XNN_MAX_TENSOR_DIMS);
-    this->input1_shape_ = std::vector<size_t>(input1_shape);
+    this->input1_shape_ = std::move(input1_shape);
     return *this;
   }
 
@@ -74,9 +155,9 @@ class BinaryElementwiseOperatorTester {
   float input1_scale() const { return this->input1_scale_; }
 
   BinaryElementwiseOperatorTester& input2_shape(
-      std::initializer_list<size_t> input2_shape) {
+      std::vector<size_t> input2_shape) {
     assert(input2_shape.size() <= XNN_MAX_TENSOR_DIMS);
-    this->input2_shape_ = std::vector<size_t>(input2_shape);
+    this->input2_shape_ = std::move(input2_shape);
     return *this;
   }
 
@@ -219,6 +300,18 @@ class BinaryElementwiseOperatorTester {
 
   void TestRunQU8() const;
 
+  void Test(int8_t) { TestQS8(); }
+  void Test(uint8_t) { TestQU8(); }
+  void Test(uint16_t) { TestF16(); }
+  void Test(float) { TestF32(); }
+  void Test(int32_t) { TestS32(); }
+
+  void TestRun(int8_t) { TestRunQS8(); }
+  void TestRun(uint8_t) { TestRunQU8(); }
+  void TestRun(uint16_t) {}
+  void TestRun(float) { TestRunF32(); }
+  void TestRun(int32_t) {}
+
  private:
   std::vector<size_t> input1_shape_;
   std::vector<size_t> input2_shape_;
@@ -233,3 +326,40 @@ class BinaryElementwiseOperatorTester {
   OperationType operation_type_{OperationType::Unknown};
   size_t iterations_{3};
 };
+
+// Make a shape of `rank` dimensions, broadcasting in each dimension according
+// `broadcast_mask`.
+inline std::vector<size_t> MakeShapeOfRank(size_t rank, uint32_t broadcast_mask,
+                                           const size_t* dims) {
+  std::vector<size_t> shape;
+  for (size_t i = 0; i < rank; i++) {
+    const bool broadcast = (broadcast_mask & (uint32_t(1) << i)) != 0;
+    shape.push_back(broadcast ? 1 : dims[i]);
+  }
+  std::reverse(shape.begin(), shape.end());
+  return shape;
+}
+
+enum class RunMode {
+  kCreateReshapeRun,
+  kEager,
+};
+
+template <typename T>
+void RunBinaryOpTester(size_t rank_a, size_t rank_b, const size_t* dims,
+                       RunMode run_mode,
+                       BinaryElementwiseOperatorTester& tester) {
+  for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << rank_a); bm1++) {
+    for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << rank_b); bm2++) {
+      tester.input1_shape(MakeShapeOfRank(rank_a, bm1, dims))
+          .input2_shape(MakeShapeOfRank(rank_b, bm2, dims));
+      if (run_mode == RunMode::kCreateReshapeRun) {
+        tester.Test(T());
+      } else if (run_mode == RunMode::kEager) {
+        tester.TestRun(T());
+      } else {
+        FAIL() << "Unknown run_mode";
+      }
+    }
+  }
+}

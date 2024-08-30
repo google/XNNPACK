@@ -22,7 +22,7 @@ extern "C" {
       const void* max,                                             \
       void* output,                                                \
       void* sum,                                                   \
-      const union xnn_f16_expminus_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_f16_expminus_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u16)
 DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f16_raddstoreexpminusmax_ukernel__avx2_rr1_p2_u16_acc2)
@@ -78,7 +78,7 @@ DECLARE_F16_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f16_raddstoreexpminusmax_u
       const float* max,                                            \
       float* output,                                               \
       float* sum,                                                  \
-      const union xnn_f32_expminus_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_f32_expminus_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F32_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_p5_u4)
 DECLARE_F32_RADDSTOREEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_raddstoreexpminusmax_ukernel__neon_rr2_p5_u8)

@@ -473,7 +473,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x8c8__avx2,
-                        xnn_init_f16_qb4w_minmax_scalar32_params,
+                        xnn_init_f16_qb4w_minmax_scalar_params,
                         xnn_pack_qs8_qb4w_gemm_goi_w);
           },
           []() {
@@ -492,7 +492,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qb4w_gemm_minmax_ukernel_2x8c8__avx2,
-                        xnn_init_f16_qb4w_minmax_scalar32_params,
+                        xnn_init_f16_qb4w_minmax_scalar_params,
                         xnn_pack_qs8_qb4w_gemm_goi_w);
           },
           []() {
@@ -511,7 +511,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qb4w_gemm_minmax_ukernel_3x8c8__avx2,
-                        xnn_init_f16_qb4w_minmax_scalar32_params,
+                        xnn_init_f16_qb4w_minmax_scalar_params,
                         xnn_pack_qs8_qb4w_gemm_goi_w);
           },
           []() {
@@ -530,7 +530,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qb4w_gemm_minmax_ukernel_4x8c8__avx2,
-                        xnn_init_f16_qb4w_minmax_scalar32_params,
+                        xnn_init_f16_qb4w_minmax_scalar_params,
                         xnn_pack_qs8_qb4w_gemm_goi_w);
           },
           []() {
