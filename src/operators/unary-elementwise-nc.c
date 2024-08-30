@@ -910,7 +910,7 @@ enum xnn_status xnn_create_elu_nc_f16(
 
   const struct xnn_unary_elementwise_config* f16_elu_config = xnn_init_f16_elu_config();
 
-  union xnn_f16_elu_params params;
+  struct xnn_f16_elu_params params;
   if XNN_LIKELY(f16_elu_config != NULL) {
     assert(f16_elu_config->init.f16_elu != NULL);
     f16_elu_config->init.f16_elu(&params,
@@ -937,7 +937,7 @@ enum xnn_status xnn_create_elu_nc_f32(
 
   const struct xnn_unary_elementwise_config* f32_elu_config = xnn_init_f32_elu_config();
 
-  union xnn_f32_elu_params params;
+  struct xnn_f32_elu_params params;
   if XNN_LIKELY(f32_elu_config != NULL) {
     assert(f32_elu_config->init.f32_elu != NULL);
     f32_elu_config->init.f32_elu(&params, 1.0f /* prescale */, alpha, 1.0f /* beta */);
@@ -3643,7 +3643,7 @@ enum xnn_status xnn_run_elu_nc_f32(
 
   const struct xnn_unary_elementwise_config* f32_elu_config = xnn_init_f32_elu_config();
 
-  union xnn_f32_elu_params params;
+  struct xnn_f32_elu_params params;
   if XNN_LIKELY(f32_elu_config != NULL) {
     assert(f32_elu_config->init.f32_elu != NULL);
     f32_elu_config->init.f32_elu(&params, /*prescale=*/1.0f, alpha, /*beta=*/1.0f);

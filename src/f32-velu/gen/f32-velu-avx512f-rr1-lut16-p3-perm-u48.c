@@ -20,7 +20,7 @@ void xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_u48(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);

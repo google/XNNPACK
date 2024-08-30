@@ -1862,13 +1862,13 @@ typedef void (*xnn_f16_velu_ukernel_fn)(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_f16_elu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f16_elu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_velu_ukernel_fn)(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_elu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f32_elu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // VGELU: Vector Gaussian Error Linear Unit elementwise
 
@@ -2646,7 +2646,7 @@ typedef size_t (*xnn_init_s32_default_params_fn)(
   union xnn_s32_default_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f16_elu_params_fn)(
-  union xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t prescale,
   uint16_t alpha,
   uint16_t beta);
@@ -2655,7 +2655,7 @@ typedef size_t (*xnn_init_f32_exp_params_fn)(
   union xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f32_elu_params_fn)(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
   float prescale,
   float alpha,
   float beta);

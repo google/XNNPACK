@@ -1866,7 +1866,7 @@ size_t xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params(
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 size_t xnn_init_f16_elu_scalar_params(
-  union xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t prescale,
   uint16_t alpha,
   uint16_t beta)
@@ -1879,7 +1879,7 @@ size_t xnn_init_f16_elu_scalar_params(
 
 
 size_t xnn_init_f32_elu_scalar_params(
-  union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
   float prescale,
   float alpha,
   float beta)

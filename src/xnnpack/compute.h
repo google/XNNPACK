@@ -1355,7 +1355,7 @@ struct univector_strided_context {
     struct xnn_f16_sigmoid_params f16_sigmoid;
     union xnn_f16_tanh_params f16_tanh;
     union xnn_f32_default_params f32_default;
-    union xnn_f32_elu_params f32_elu;
+    struct xnn_f32_elu_params f32_elu;
     union xnn_f32_hswish_params f32_hswish;
     struct xnn_f32_lrelu_params f32_lrelu;
     union xnn_f32_minmax_params f32_minmax;
@@ -1399,7 +1399,7 @@ struct univector_contiguous_context {
     union xnn_f16_minmax_params f16_minmax;
     struct xnn_f16_sigmoid_params f16_sigmoid;
     union xnn_f32_default_params f32_default;
-    union xnn_f32_elu_params f32_elu;
+    struct xnn_f32_elu_params f32_elu;
     union xnn_f32_hswish_params f32_hswish;
     struct xnn_f32_lrelu_params f32_lrelu;
     union xnn_f32_minmax_params f32_minmax;

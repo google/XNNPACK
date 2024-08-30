@@ -212,12 +212,12 @@ struct xnn_operator {
   union {
     union xnn_f16_default_params f16_default;
     union xnn_f16_hswish_params f16_hswish;
-    union xnn_f16_elu_params f16_elu;
+    struct xnn_f16_elu_params f16_elu;
     struct xnn_f16_lrelu_params f16_lrelu;
     struct xnn_f16_sigmoid_params f16_sigmoid;
     union xnn_f16_tanh_params f16_tanh;
     union xnn_f32_default_params f32_default;
-    union xnn_f32_elu_params f32_elu;
+    struct xnn_f32_elu_params f32_elu;
     struct xnn_f32_lrelu_params f32_lrelu;
     struct xnn_f32_rnd_params f32_rnd;
     struct xnn_f32_rsqrt_params f32_rsqrt;

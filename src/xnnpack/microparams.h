@@ -634,7 +634,7 @@ struct xnn_qu8_f32_cvt_params {
 
 // ELU: used by VELU microkernels.
 
-union xnn_f16_elu_params {
+struct xnn_f16_elu_params {
   struct {
     uint16_t prescale;
     uint16_t minus_alpha;
@@ -642,7 +642,7 @@ union xnn_f16_elu_params {
   } scalar;
 };
 
-union xnn_f32_elu_params {
+struct xnn_f32_elu_params {
   struct {
     float prescale;
     float alpha;
