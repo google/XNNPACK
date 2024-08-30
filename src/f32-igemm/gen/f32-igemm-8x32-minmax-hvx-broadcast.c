@@ -13,16 +13,7 @@
 #include <hvx_hexagon_protos.h>
 
 #include "xnnpack/igemm.h"
-
-static XNN_INLINE
-void vstu_variable_scalar(char *bytes, size_t num_bytes, HVX_Vector vin) {
-  char temp[128]  __attribute__((aligned(128)));
-  *((HVX_Vector *)temp) = vin;
-  for (size_t idx = 0; idx < num_bytes; idx++){
-     *bytes = temp[idx];
-     bytes++;
-  }
-}
+#include "xnnpack/intrinsics-polyfill.h"
 
 void xnn_f32_igemm_minmax_ukernel_8x32__hvx_broadcast(
     size_t mr,
@@ -170,7 +161,7 @@ void xnn_f32_igemm_minmax_ukernel_8x32__hvx_broadcast(
       p -= 8 * sizeof(void*);
     } while (p != 0);
 
-    const HVX_Vector vmin = *((HVX_Vector *)(params->hvx.min));
+    const HVX_Vector vmin = Q6_V_vsplat_R(params->scalar.min);
     vacc0x0 = Q6_Vw_vmax_VwVw(vmin, vacc0x0);
     vacc1x0 = Q6_Vw_vmax_VwVw(vmin, vacc1x0);
     vacc2x0 = Q6_Vw_vmax_VwVw(vmin, vacc2x0);
@@ -180,7 +171,7 @@ void xnn_f32_igemm_minmax_ukernel_8x32__hvx_broadcast(
     vacc6x0 = Q6_Vw_vmax_VwVw(vmin, vacc6x0);
     vacc7x0 = Q6_Vw_vmax_VwVw(vmin, vacc7x0);
 
-    const HVX_Vector vmax = *((HVX_Vector *)(params->hvx.max));
+    const HVX_Vector vmax = Q6_V_vsplat_R(params->scalar.max);
     vacc0x0 = Q6_Vw_vmin_VwVw(vmax, vacc0x0);
     vacc1x0 = Q6_Vw_vmin_VwVw(vmax, vacc1x0);
     vacc2x0 = Q6_Vw_vmin_VwVw(vmax, vacc2x0);
