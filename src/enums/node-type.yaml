@@ -111,6 +111,8 @@
   string: "Squared Difference"
 - name: xnn_node_type_static_constant_pad
   string: "Static Constant Pad"
+- name: xnn_node_type_static_expand_dims
+  string: "Static Expand Dims"
 - name: xnn_node_type_static_mean
   string: "Static Mean"
 - name: xnn_node_type_static_reshape

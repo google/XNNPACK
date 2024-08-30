@@ -13,10 +13,10 @@
 #include "xnnpack/node-type.h"
 
 #if XNN_LOG_LEVEL > 0
-static const uint16_t offset[61] = {
+static const uint16_t offset[62] = {
   0, 8, 12, 17, 35, 54, 71, 93, 101, 107, 120, 133, 146, 159, 167, 182, 187, 197, 214, 232, 257, 264, 268, 272, 284,
   296, 308, 314, 330, 353, 358, 384, 410, 432, 454, 464, 468, 479, 494, 503, 512, 522, 529, 535, 558, 563, 592, 600,
-  608, 626, 633, 645, 664, 684, 696, 711, 737, 750, 767, 776, 781
+  608, 626, 633, 645, 664, 684, 703, 715, 730, 756, 769, 786, 795, 800
 };
 
 static const char data[] =
@@ -73,6 +73,7 @@ static const char data[] =
   "Square Root\0"
   "Squared Difference\0"
   "Static Constant Pad\0"
+  "Static Expand Dims\0"
   "Static Mean\0"
   "Static Reshape\0"
   "Static Resize Bilinear 2D\0"

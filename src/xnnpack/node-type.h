@@ -70,6 +70,7 @@ enum xnn_node_type {
   xnn_node_type_square_root,
   xnn_node_type_squared_difference,
   xnn_node_type_static_constant_pad,
+  xnn_node_type_static_expand_dims,
   xnn_node_type_static_mean,
   xnn_node_type_static_reshape,
   xnn_node_type_static_resize_bilinear_2d,
