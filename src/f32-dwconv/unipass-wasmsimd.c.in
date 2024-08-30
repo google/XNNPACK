@@ -23,7 +23,7 @@ $  WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED":
 $ACTIVATION_SUFFIX = {"LINEAR": ""}.get(ACTIVATION, "_" + ACTIVATION.lower())
 $ISA = "wasmsimd" if not FMA and (ACTIVATION in ["LINEAR", "RELU"] or ARCH != "RELAXED") else "wasmrelaxedsimd"
 $ARCH_SUFFIX = "" if not FMA and (ACTIVATION in ["LINEAR", "RELU"] or ARCH == "RELAXED") else "_" + ("fma" if FMA else ARCH.lower())
-$PARAMS = {"LINEAR": "xnn_f32_default_params", "RELU": "xnn_f32_relu_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
+$PARAMS = {"LINEAR": "union xnn_f32_default_params", "RELU": "union xnn_f32_relu_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
 void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__${ISA}${ARCH_SUFFIX}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t channels,
     size_t output_width,
@@ -34,7 +34,7 @@ void xnn_f32_dwconv${ACTIVATION_SUFFIX}_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c_
     size_t output_increment,
     size_t input_offset,
     const float* zero,
-    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(channels != 0);
   assert(output_width != 0);

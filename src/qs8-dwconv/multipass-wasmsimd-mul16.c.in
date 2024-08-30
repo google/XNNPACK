@@ -26,7 +26,7 @@ $assert LAST_PASS_TILE >= 1
 
 $DATATYPE_SPEC = {"QS8": "qs8", "QC8": "qs8_qc8w", "QU8": "qu8"}[DATATYPE]
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar"
-$PARAMS_UNION = "xnn_qs8_qc8w_conv_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
+$PARAMS_TYPE = "union xnn_qs8_qc8w_conv_minmax_params" if DATATYPE == "QC8" else "union xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $WASM_X16X8_LOAD8X8 = "wasm_u16x8_load8x8" if DATATYPE == "QU8" else "wasm_i16x8_load8x8"
 $WASM_X32X4_EXTEND_LOW_X16X8 = "wasm_u32x4_extend_low_u16x8" if DATATYPE == "QU8" else "wasm_i32x4_extend_low_i16x8"
@@ -45,7 +45,7 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${FIRS
     const ${XINT8_T}* zero,
     size_t kernel_size,
     int32_t* buffer,
-    const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(channels != 0);
   assert(output_width != 0);

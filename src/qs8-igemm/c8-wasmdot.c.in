@@ -19,7 +19,7 @@ $assert NR == 4 or NR == 8
 $ABC = "012345678"
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qc8w"}[DATATYPE]
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
-$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8": "xnn_f32_minmax_params"}[DATATYPE]
+$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QD8": "union xnn_f32_minmax_params"}[DATATYPE]
 $OUT_T = "float" if DATATYPE == "QD8" else "int8_t"
 void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c8__wasm${"sdot" if SDOT else "usdot"}${"_u2" if UNROLL else ""}(
     size_t mr,
@@ -35,10 +35,10 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
     const int8_t* zero,
     $if DATATYPE in ["QD8"]:
       const int8_t* zero_data,
-      const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)],
+      const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)],
       const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
     $else:
-      const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+      const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= ${MR});

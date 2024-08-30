@@ -15,7 +15,7 @@ $LMUL = int(NR[1])
 
 
 $SUFFIX = {"LINEAR": "", "RELU": "_relu", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "xnn_f32_default_params", "RELU": "xnn_f32_relu_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
+$PARAMS = {"LINEAR": "union xnn_f32_default_params", "RELU": "union xnn_f32_relu_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
 void xnn_f32_igemm${SUFFIX}_ukernel_${MR}x${LMUL}v__rvv(
     size_t mr,
     size_t nc,
@@ -28,7 +28,7 @@ void xnn_f32_igemm${SUFFIX}_ukernel_${MR}x${LMUL}v__rvv(
     size_t cn_stride,
     size_t a_offset,
     const float* zero,
-    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
+    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= ${MR});
