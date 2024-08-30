@@ -219,7 +219,7 @@ struct xnn_operator {
     union xnn_f32_default_params f32_default;
     union xnn_f32_elu_params f32_elu;
     struct xnn_f32_lrelu_params f32_lrelu;
-    union xnn_f32_rnd_params f32_rnd;
+    struct xnn_f32_rnd_params f32_rnd;
     struct xnn_f32_rsqrt_params f32_rsqrt;
     struct xnn_f32_sigmoid_params f32_sigmoid;
     struct xnn_f32_sqrt_params f32_sqrt;

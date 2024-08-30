@@ -1964,13 +1964,13 @@ typedef void (*xnn_f16_vround_ukernel_fn)(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_f16_rnd_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f16_rnd_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_vround_ukernel_fn)(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_rnd_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f32_rnd_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // VSIGMOID: Vector SIGMOID elementwise
 
@@ -2760,10 +2760,10 @@ typedef size_t (*xnn_init_u8_minmax_params_fn)(
   uint8_t max);
 
 typedef size_t (*xnn_init_f16_rnd_params_fn)(
-  union xnn_f16_rnd_params params[XNN_MIN_ELEMENTS(1)]);
+  struct xnn_f16_rnd_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f32_rnd_params_fn)(
-  union xnn_f32_rnd_params params[XNN_MIN_ELEMENTS(1)]);
+  struct xnn_f32_rnd_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f16_scale_params_fn)(
   struct xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)],

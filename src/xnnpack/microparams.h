@@ -742,11 +742,11 @@ struct xnn_qu8_lrelu_params {
 
 // Rnd (Round): used by VRNDNE/VRNDU/VRNDD/VRNDZ microkernels.
 
-union xnn_f16_rnd_params {
+struct xnn_f16_rnd_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
-union xnn_f32_rnd_params {
+struct xnn_f32_rnd_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 

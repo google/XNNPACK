@@ -301,7 +301,7 @@ enum xnn_status xnn_create_bankers_rounding_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_rndne_config = xnn_init_f32_rndne_config();
 
-  union xnn_f32_rnd_params params;
+  struct xnn_f32_rnd_params params;
   if XNN_LIKELY(f32_rndne_config != NULL && f32_rndne_config->init.f32_rnd != NULL) {
     f32_rndne_config->init.f32_rnd(&params);
   }
@@ -328,7 +328,7 @@ enum xnn_status xnn_create_ceiling_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_rndu_config = xnn_init_f32_rndu_config();
 
-  union xnn_f32_rnd_params params;
+  struct xnn_f32_rnd_params params;
   if XNN_LIKELY(f32_rndu_config != NULL && f32_rndu_config->init.f32_rnd != NULL) {
     f32_rndu_config->init.f32_rnd(&params);
   }
@@ -965,7 +965,7 @@ enum xnn_status xnn_create_floor_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_rndd_config = xnn_init_f32_rndd_config();
 
-  union xnn_f32_rnd_params params;
+  struct xnn_f32_rnd_params params;
   if XNN_LIKELY(f32_rndd_config != NULL && f32_rndd_config->init.f32_rnd != NULL) {
     f32_rndd_config->init.f32_rnd(&params);
   }
@@ -1462,7 +1462,7 @@ enum xnn_status xnn_create_truncation_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_rndz_config = xnn_init_f32_rndz_config();
 
-  union xnn_f32_rnd_params params;
+  struct xnn_f32_rnd_params params;
   if XNN_LIKELY(f32_rndz_config != NULL && f32_rndz_config->init.f32_rnd != NULL) {
     f32_rndz_config->init.f32_rnd(&params);
   }
@@ -3246,7 +3246,7 @@ enum xnn_status xnn_run_bankers_rounding_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_rndne_config = xnn_init_f32_rndne_config();
 
-  union xnn_f32_rnd_params params;
+  struct xnn_f32_rnd_params params;
   if XNN_LIKELY(f32_rndne_config != NULL && f32_rndne_config->init.f32_rnd != NULL) {
     f32_rndne_config->init.f32_rnd(&params);
   }
@@ -3276,7 +3276,7 @@ enum xnn_status xnn_run_ceiling_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_rndu_config = xnn_init_f32_rndu_config();
 
-  union xnn_f32_rnd_params params;
+  struct xnn_f32_rnd_params params;
   if XNN_LIKELY(f32_rndu_config != NULL && f32_rndu_config->init.f32_rnd != NULL) {
     f32_rndu_config->init.f32_rnd(&params);
   }
@@ -3672,7 +3672,7 @@ enum xnn_status xnn_run_floor_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_rndd_config = xnn_init_f32_rndd_config();
 
-  union xnn_f32_rnd_params params;
+  struct xnn_f32_rnd_params params;
   if XNN_LIKELY(f32_rndd_config != NULL && f32_rndd_config->init.f32_rnd != NULL) {
     f32_rndd_config->init.f32_rnd(&params);
   }
@@ -3955,7 +3955,7 @@ enum xnn_status xnn_run_truncation_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_rndz_config = xnn_init_f32_rndz_config();
 
-  union xnn_f32_rnd_params params;
+  struct xnn_f32_rnd_params params;
   if XNN_LIKELY(f32_rndz_config != NULL && f32_rndz_config->init.f32_rnd != NULL) {
     f32_rndz_config->init.f32_rnd(&params);
   }
