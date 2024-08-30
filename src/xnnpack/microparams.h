@@ -560,7 +560,7 @@ union xnn_qu8_avgpool_minmax_params {
 
 // Cvt (Convert): used by VCVT microkernels.
 
-union xnn_f16_qs8_cvt_params {
+struct xnn_f16_qs8_cvt_params {
   struct {
     uint16_t scale;
     int16_t output_zero_point;
@@ -569,7 +569,7 @@ union xnn_f16_qs8_cvt_params {
   } scalar;
 };
 
-union xnn_f32_qs8_cvt_params {
+struct xnn_f32_qs8_cvt_params {
   struct {
     float scale;
     int16_t output_zero_point;
@@ -578,7 +578,7 @@ union xnn_f32_qs8_cvt_params {
   } scalar;
 };
 
-union xnn_f32_qu8_cvt_params {
+struct xnn_f32_qu8_cvt_params {
   struct {
     float scale;
     int16_t output_zero_point;
@@ -587,7 +587,7 @@ union xnn_f32_qu8_cvt_params {
   } scalar;
 };
 
-union xnn_qs8_cvt_params {
+struct xnn_qs8_cvt_params {
   struct {
     int16_t input_zero_point;
     int32_t multiplier;
@@ -595,28 +595,28 @@ union xnn_qs8_cvt_params {
   } scalar;
 };
 
-union xnn_qs16_qs8_cvt_params {
+struct xnn_qs16_qs8_cvt_params {
   struct {
     int32_t multiplier;
     int32_t output_zero_point;
   } scalar;
 };
 
-union xnn_qs8_f16_cvt_params {
+struct xnn_qs8_f16_cvt_params {
   struct {
     int16_t zero_point;
     uint16_t scale;
   } scalar;
 };
 
-union xnn_qs8_f32_cvt_params {
+struct xnn_qs8_f32_cvt_params {
   struct {
     int32_t zero_point;
     float scale;
   } scalar;
 };
 
-union xnn_qu8_cvt_params {
+struct xnn_qu8_cvt_params {
   struct {
     uint16_t input_zero_point;
     int16_t multiplier;
@@ -624,7 +624,7 @@ union xnn_qu8_cvt_params {
   } scalar;
 };
 
-union xnn_qu8_f32_cvt_params {
+struct xnn_qu8_f32_cvt_params {
   struct {
     int32_t zero_point;
     float scale;

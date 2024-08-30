@@ -1800,7 +1800,7 @@ typedef void (*xnn_f16_qs8_vcvt_ukernel_fn)(
     size_t batch,
     const void* input,
     int8_t* output,
-    const union xnn_f16_qs8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f16_qs8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_f16_vcvt_ukernel_fn)(
     size_t batch,
@@ -1812,49 +1812,49 @@ typedef void (*xnn_f32_qs8_vcvt_ukernel_fn)(
     size_t batch,
     const float* input,
     int8_t* output,
-    const union xnn_f32_qs8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f32_qs8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_qu8_vcvt_ukernel_fn)(
     size_t batch,
     const float* input,
     uint8_t* output,
-    const union xnn_f32_qu8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f32_qu8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_qs8_vcvt_ukernel_fn)(
     size_t batch,
     const int8_t* input,
     int8_t* output,
-    const union xnn_qs8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_qs8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_qs8_f16_vcvt_ukernel_fn)(
     size_t batch,
     const int8_t* input,
     void* output,
-    const union xnn_qs8_f16_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_qs8_f16_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_qs8_f32_vcvt_ukernel_fn)(
     size_t batch,
     const int8_t* input,
     float* output,
-    const union xnn_qs8_f32_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_qs8_f32_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_qs16_qs8_vcvt_ukernel_fn)(
     size_t batch,
     const int16_t* input,
     int8_t* output,
-    const union xnn_qs16_qs8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_qs16_qs8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_qu8_vcvt_ukernel_fn)(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,
-    const union xnn_qu8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_qu8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_qu8_f32_vcvt_ukernel_fn)(
     size_t batch,
     const uint8_t* input,
     float* output,
-    const union xnn_qu8_f32_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_qu8_f32_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // VELU: Vector Exponential Linear Unit elementwise
 
@@ -2483,55 +2483,55 @@ typedef void (*xnn_f32_vscaleextexp_ukernel_fn)(
 /***************** Microkernel parameter initializer pointers ****************/
 
 typedef size_t (*xnn_init_f16_qs8_cvt_params_fn)(
-  union xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale,
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max);
 
 typedef size_t (*xnn_init_f32_qs8_cvt_params_fn)(
-  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max);
 
 typedef size_t (*xnn_init_f32_qu8_cvt_params_fn)(
-  union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   uint8_t output_zero_point,
   uint8_t output_min,
   uint8_t output_max);
 
 typedef size_t (*xnn_init_qs8_cvt_params_fn)(
-  union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float input_output_scale,
   int8_t input_zero_point,
   int8_t output_zero_point);
 
 typedef size_t (*xnn_init_qs8_f16_cvt_params_fn)(
-  union xnn_qs8_f16_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qs8_f16_cvt_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale,
   int8_t zero_point);
 
 typedef size_t (*xnn_init_qs8_f32_cvt_params_fn)(
-  union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t zero_point);
 
 typedef size_t (*xnn_init_qs16_qs8_cvt_params_fn)(
-  union xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float input_output_scale,
   int8_t zero_point);
 
 typedef size_t (*xnn_init_qu8_cvt_params_fn)(
-  union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float input_output_scale,
   uint8_t input_zero_point,
   uint8_t output_zero_point);
 
 typedef size_t (*xnn_init_qu8_f32_cvt_params_fn)(
-  union xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   uint8_t zero_point);
 

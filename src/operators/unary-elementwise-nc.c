@@ -538,7 +538,7 @@ enum xnn_status xnn_create_convert_nc_f32_qs8(
 
   const struct xnn_unary_elementwise_config* f32_to_qs8_cvt_config = xnn_init_f32_to_qs8_cvt_config();
 
-  union xnn_f32_qs8_cvt_params params;
+  struct xnn_f32_qs8_cvt_params params;
   if XNN_LIKELY(f32_to_qs8_cvt_config != NULL) {
     assert(f32_to_qs8_cvt_config->init.f32_qs8_cvt != NULL);
     f32_to_qs8_cvt_config->init.f32_qs8_cvt(&params, 1.0f / output_scale, output_zero_point, output_min, output_max);
@@ -641,7 +641,7 @@ enum xnn_status xnn_create_convert_nc_f32_qu8(
 
   const struct xnn_unary_elementwise_config* f32_to_qu8_cvt_config = xnn_init_f32_to_qu8_cvt_config();
 
-  union xnn_f32_qu8_cvt_params params;
+  struct xnn_f32_qu8_cvt_params params;
   if XNN_LIKELY(f32_to_qu8_cvt_config != NULL) {
     assert(f32_to_qu8_cvt_config->init.f32_qu8_cvt != NULL);
     f32_to_qu8_cvt_config->init.f32_qu8_cvt(&params, 1.0f / output_scale, output_zero_point, output_min, output_max);
@@ -686,7 +686,7 @@ enum xnn_status xnn_create_convert_nc_qs8(
   const struct xnn_unary_elementwise_config* qs8_cvt_config = xnn_init_qs8_cvt_config();
   assert(qs8_cvt_config != NULL);
 
-  union xnn_qs8_cvt_params params;
+  struct xnn_qs8_cvt_params params;
   assert(qs8_cvt_config->init.qs8_cvt != NULL);
   qs8_cvt_config->init.qs8_cvt(&params, input_output_scale, input_zero_point, output_zero_point);
 
@@ -713,7 +713,7 @@ enum xnn_status xnn_create_convert_nc_qs8_f16(
 
   const uint16_t fp16_input_scale = fp16_ieee_from_fp32_value(input_scale);
 
-  union xnn_qs8_f16_cvt_params params;
+  struct xnn_qs8_f16_cvt_params params;
   if XNN_LIKELY(qs8_to_f16_cvt_config != NULL) {
     assert(qs8_to_f16_cvt_config->init.qs8_f16_cvt != NULL);
     qs8_to_f16_cvt_config->init.qs8_f16_cvt(&params, fp16_input_scale, input_zero_point);
@@ -740,7 +740,7 @@ enum xnn_status xnn_create_convert_nc_qs8_f32(
 
   const struct xnn_unary_elementwise_config* qs8_to_f32_cvt_config = xnn_init_qs8_to_f32_cvt_config();
 
-  union xnn_qs8_f32_cvt_params params;
+  struct xnn_qs8_f32_cvt_params params;
   if XNN_LIKELY(qs8_to_f32_cvt_config != NULL) {
     assert(qs8_to_f32_cvt_config->init.qs8_f32_cvt != NULL);
     qs8_to_f32_cvt_config->init.qs8_f32_cvt(&params, input_scale, input_zero_point);
@@ -784,7 +784,7 @@ enum xnn_status xnn_create_convert_nc_qs16_qs8(
   const struct xnn_unary_elementwise_config* qs16_to_qs8_cvt_config = xnn_init_qs16_to_qs8_cvt_config();
   assert(qs16_to_qs8_cvt_config != NULL);
 
-  union xnn_qs16_qs8_cvt_params params;
+  struct xnn_qs16_qs8_cvt_params params;
   assert(qs16_to_qs8_cvt_config->init.qs16_qs8_cvt != NULL);
   qs16_to_qs8_cvt_config->init.qs16_qs8_cvt(&params, input_output_scale, output_zero_point);
 
@@ -827,7 +827,7 @@ enum xnn_status xnn_create_convert_nc_qu8(
   const struct xnn_unary_elementwise_config* qu8_cvt_config = xnn_init_qu8_cvt_config();
   assert(qu8_cvt_config != NULL);
 
-  union xnn_qu8_cvt_params params;
+  struct xnn_qu8_cvt_params params;
   assert(qu8_cvt_config->init.qu8_cvt != NULL);
   qu8_cvt_config->init.qu8_cvt(&params, input_output_scale, input_zero_point, output_zero_point);
 
@@ -852,7 +852,7 @@ enum xnn_status xnn_create_convert_nc_qu8_f32(
 
   const struct xnn_unary_elementwise_config* qu8_to_f32_cvt_config = xnn_init_qu8_to_f32_cvt_config();
 
-  union xnn_qu8_f32_cvt_params params;
+  struct xnn_qu8_f32_cvt_params params;
   if XNN_LIKELY(qu8_to_f32_cvt_config != NULL) {
     assert(qu8_to_f32_cvt_config->init.qu8_f32_cvt != NULL);
     qu8_to_f32_cvt_config->init.qu8_f32_cvt(&params, input_scale, input_zero_point);
@@ -3418,7 +3418,7 @@ enum xnn_status xnn_run_convert_nc_f32_qs8(
 
   const struct xnn_unary_elementwise_config* f32_to_qs8_cvt_config = xnn_init_f32_to_qs8_cvt_config();
 
-  union xnn_f32_qs8_cvt_params params;
+  struct xnn_f32_qs8_cvt_params params;
   if XNN_LIKELY(f32_to_qs8_cvt_config != NULL) {
     assert(f32_to_qs8_cvt_config->init.f32_qs8_cvt != NULL);
     f32_to_qs8_cvt_config->init.f32_qs8_cvt(&params, 1.0f / output_scale, output_zero_point, INT8_MIN, INT8_MAX);
@@ -3456,7 +3456,7 @@ enum xnn_status xnn_run_convert_nc_f32_qu8(
 
   const struct xnn_unary_elementwise_config* f32_to_qu8_cvt_config = xnn_init_f32_to_qu8_cvt_config();
 
-  union xnn_f32_qu8_cvt_params params;
+  struct xnn_f32_qu8_cvt_params params;
   if XNN_LIKELY(f32_to_qu8_cvt_config != NULL) {
     assert(f32_to_qu8_cvt_config->init.f32_qu8_cvt != NULL);
     f32_to_qu8_cvt_config->init.f32_qu8_cvt(&params, 1.0f / output_scale, output_zero_point, 0, UINT8_MAX);
@@ -3494,7 +3494,7 @@ enum xnn_status xnn_run_convert_nc_qs8_f32(
 
   const struct xnn_unary_elementwise_config* qs8_to_f32_cvt_config = xnn_init_qs8_to_f32_cvt_config();
 
-  union xnn_qs8_f32_cvt_params params;
+  struct xnn_qs8_f32_cvt_params params;
   if XNN_LIKELY(qs8_to_f32_cvt_config != NULL) {
     assert(qs8_to_f32_cvt_config->init.qs8_f32_cvt != NULL);
     qs8_to_f32_cvt_config->init.qs8_f32_cvt(&params, input_scale, input_zero_point);
@@ -3549,7 +3549,7 @@ enum xnn_status xnn_run_convert_nc_qs16_qs8(
   const struct xnn_unary_elementwise_config* qs16_to_qs8_cvt_config = xnn_init_qs16_to_qs8_cvt_config();
   assert(qs16_to_qs8_cvt_config != NULL);
 
-  union xnn_qs16_qs8_cvt_params params;
+  struct xnn_qs16_qs8_cvt_params params;
   assert(qs16_to_qs8_cvt_config->init.qs16_qs8_cvt != NULL);
   qs16_to_qs8_cvt_config->init.qs16_qs8_cvt(&params, input_output_scale, output_zero_point);
 
@@ -3585,7 +3585,7 @@ enum xnn_status xnn_run_convert_nc_qu8_f32(
 
   const struct xnn_unary_elementwise_config* qu8_to_f32_cvt_config = xnn_init_qu8_to_f32_cvt_config();
 
-  union xnn_qu8_f32_cvt_params params;
+  struct xnn_qu8_f32_cvt_params params;
   if XNN_LIKELY(qu8_to_f32_cvt_config != NULL) {
     assert(qu8_to_f32_cvt_config->init.qu8_f32_cvt != NULL);
     qu8_to_f32_cvt_config->init.qu8_f32_cvt(&params, input_scale, input_zero_point);

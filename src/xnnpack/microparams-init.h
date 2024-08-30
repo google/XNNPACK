@@ -633,7 +633,7 @@ DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mul_minmax_scalar_param
 
 #define DECLARE_INIT_F16_QS8_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                \
-    union xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
     uint16_t scale,                                           \
     int8_t zero_point,                                        \
     int8_t output_min,                                        \
@@ -647,7 +647,7 @@ DECLARE_INIT_F16_QS8_CVT_PARAMS_FUNCTION(xnn_init_f16_qs8_cvt_scalar_params)
 
 #define DECLARE_INIT_F32_QS8_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                \
-    union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
     float scale,                                              \
     int8_t zero_point,                                        \
     int8_t output_min,                                        \
@@ -658,7 +658,7 @@ DECLARE_INIT_F32_QS8_CVT_PARAMS_FUNCTION(xnn_init_f32_qs8_cvt_scalar_params)
 
 #define DECLARE_INIT_F32_QU8_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                \
-    union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
     float scale,                                              \
     uint8_t zero_point,                                       \
     uint8_t output_min,                                       \
@@ -669,7 +669,7 @@ DECLARE_INIT_F32_QU8_CVT_PARAMS_FUNCTION(xnn_init_f32_qu8_cvt_scalar_params)
 
 #define DECLARE_INIT_QS8_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                            \
-    union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
     float input_output_scale,                             \
     int8_t input_zero_point,                              \
     int8_t output_zero_point);
@@ -678,7 +678,7 @@ DECLARE_INIT_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs8_cvt_scalar_params)
 
 #define DECLARE_INIT_QS16_QS8_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                 \
-    union xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
     float input_output_scale,                                  \
     int8_t output_zero_point);
 
@@ -686,7 +686,7 @@ DECLARE_INIT_QS16_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs16_qs8_cvt_scalar_params)
 
 #define DECLARE_INIT_QS8_F16_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                \
-    union xnn_qs8_f16_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_qs8_f16_cvt_params params[XNN_MIN_ELEMENTS(1)], \
     uint16_t scale,                                           \
     int8_t zero_point);
 
@@ -699,7 +699,7 @@ DECLARE_INIT_QS16_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs16_qs8_cvt_scalar_params)
 
 #define DECLARE_INIT_QS8_F32_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                \
-    union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)], \
     float scale,                                              \
     int8_t zero_point);
 
@@ -707,7 +707,7 @@ DECLARE_INIT_QS8_F32_CVT_PARAMS_FUNCTION(xnn_init_qs8_f32_cvt_scalar_params)
 
 #define DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                            \
-    union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
     float input_output_scale,                             \
     uint8_t input_zero_point,                             \
     uint8_t output_zero_point);
@@ -716,7 +716,7 @@ DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(xnn_init_qu8_cvt_scalar_params)
 
 #define DECLARE_INIT_QU8_F32_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                \
-    union xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)], \
     float scale,                                              \
     uint8_t zero_point);
 

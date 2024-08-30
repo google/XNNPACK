@@ -2216,7 +2216,7 @@ size_t xnn_init_qs8_mul_minmax_rndnu_neon_params(
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 size_t xnn_init_f16_qs8_cvt_scalar_params(
-  union xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale,
   int8_t output_zero_point,
   int8_t output_min,
@@ -2230,7 +2230,7 @@ size_t xnn_init_f16_qs8_cvt_scalar_params(
 }
 
 size_t xnn_init_f32_qs8_cvt_scalar_params(
-  union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t output_zero_point,
   int8_t output_min,
@@ -2244,7 +2244,7 @@ size_t xnn_init_f32_qs8_cvt_scalar_params(
 }
 
 size_t xnn_init_f32_qu8_cvt_scalar_params(
-  union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   uint8_t output_zero_point,
   uint8_t output_min,
@@ -2258,7 +2258,7 @@ size_t xnn_init_f32_qu8_cvt_scalar_params(
 }
 
 size_t xnn_init_qs8_cvt_scalar_params(
-  union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float input_output_scale,
   int8_t input_zero_point,
   int8_t output_zero_point)
@@ -2276,7 +2276,7 @@ size_t xnn_init_qs8_cvt_scalar_params(
 }
 
 size_t xnn_init_qs16_qs8_cvt_scalar_params(
-  union xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float input_output_scale,
   int8_t output_zero_point)
 {
@@ -2292,7 +2292,7 @@ size_t xnn_init_qs16_qs8_cvt_scalar_params(
 }
 
 size_t xnn_init_qs8_f32_cvt_scalar_params(
-  union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int8_t zero_point)
 {
@@ -2302,7 +2302,7 @@ size_t xnn_init_qs8_f32_cvt_scalar_params(
 }
 
 size_t xnn_init_qs8_f16_cvt_scalar_params(
-  union xnn_qs8_f16_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qs8_f16_cvt_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale,
   int8_t zero_point)
 {
@@ -2312,7 +2312,7 @@ size_t xnn_init_qs8_f16_cvt_scalar_params(
 }
 
 size_t xnn_init_qu8_cvt_scalar_params(
-  union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float input_output_scale,
   uint8_t input_zero_point,
   uint8_t output_zero_point)
@@ -2330,7 +2330,7 @@ size_t xnn_init_qu8_cvt_scalar_params(
 }
 
 size_t xnn_init_qu8_f32_cvt_scalar_params(
-  union xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   uint8_t zero_point)
 {
