@@ -1304,7 +1304,7 @@ enum xnn_status xnn_create_sigmoid_nc_f16(
 {
   const struct xnn_unary_elementwise_config* f16_sigmoid_config = xnn_init_f16_sigmoid_config();
 
-  union xnn_f16_sigmoid_params params;
+  struct xnn_f16_sigmoid_params params;
   if XNN_LIKELY(f16_sigmoid_config != NULL && f16_sigmoid_config->init.f16_sigmoid != NULL) {
     f16_sigmoid_config->init.f16_sigmoid(&params);
   }
@@ -1321,7 +1321,7 @@ enum xnn_status xnn_create_sigmoid_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_sigmoid_config = xnn_init_f32_sigmoid_config();
 
-  union xnn_f32_sigmoid_params params;
+  struct xnn_f32_sigmoid_params params;
   if XNN_LIKELY(f32_sigmoid_config != NULL && f32_sigmoid_config->init.f32_sigmoid != NULL) {
     f32_sigmoid_config->init.f32_sigmoid(&params);
   }
@@ -3843,7 +3843,7 @@ enum xnn_status xnn_run_sigmoid_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_sigmoid_config = xnn_init_f32_sigmoid_config();
 
-  union xnn_f32_sigmoid_params params;
+  struct xnn_f32_sigmoid_params params;
   if XNN_LIKELY(f32_sigmoid_config != NULL && f32_sigmoid_config->init.f32_sigmoid != NULL) {
     f32_sigmoid_config->init.f32_sigmoid(&params);
   }

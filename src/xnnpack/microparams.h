@@ -753,11 +753,11 @@ union xnn_f32_rnd_params {
 
 // Sigmoid: used by VSIGMOID microkernels.
 
-union xnn_f16_sigmoid_params {
+struct xnn_f16_sigmoid_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
-union xnn_f32_sigmoid_params {
+struct xnn_f32_sigmoid_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
