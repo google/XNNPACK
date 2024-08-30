@@ -88,22 +88,22 @@ void xnn_f32_vcmul_ukernel__avx512f_u128(
     __m512 vacc7r = _mm512_mul_ps(va7r, vb7r);
     __m512 vacc7i = _mm512_mul_ps(va7r, vb7i);
 
-    vacc0r = _mm512_sub_ps(vacc0r, _mm512_mul_ps(va0i, vb0i));
-    vacc0i = _mm512_add_ps(vacc0i, _mm512_mul_ps(va0i, vb0r));
-    vacc1r = _mm512_sub_ps(vacc1r, _mm512_mul_ps(va1i, vb1i));
-    vacc1i = _mm512_add_ps(vacc1i, _mm512_mul_ps(va1i, vb1r));
-    vacc2r = _mm512_sub_ps(vacc2r, _mm512_mul_ps(va2i, vb2i));
-    vacc2i = _mm512_add_ps(vacc2i, _mm512_mul_ps(va2i, vb2r));
-    vacc3r = _mm512_sub_ps(vacc3r, _mm512_mul_ps(va3i, vb3i));
-    vacc3i = _mm512_add_ps(vacc3i, _mm512_mul_ps(va3i, vb3r));
-    vacc4r = _mm512_sub_ps(vacc4r, _mm512_mul_ps(va4i, vb4i));
-    vacc4i = _mm512_add_ps(vacc4i, _mm512_mul_ps(va4i, vb4r));
-    vacc5r = _mm512_sub_ps(vacc5r, _mm512_mul_ps(va5i, vb5i));
-    vacc5i = _mm512_add_ps(vacc5i, _mm512_mul_ps(va5i, vb5r));
-    vacc6r = _mm512_sub_ps(vacc6r, _mm512_mul_ps(va6i, vb6i));
-    vacc6i = _mm512_add_ps(vacc6i, _mm512_mul_ps(va6i, vb6r));
-    vacc7r = _mm512_sub_ps(vacc7r, _mm512_mul_ps(va7i, vb7i));
-    vacc7i = _mm512_add_ps(vacc7i, _mm512_mul_ps(va7i, vb7r));
+    vacc0r = _mm512_fnmadd_ps(va0i, vb0i, vacc0r);
+    vacc0i = _mm512_fmadd_ps(va0i, vb0r, vacc0i);
+    vacc1r = _mm512_fnmadd_ps(va1i, vb1i, vacc1r);
+    vacc1i = _mm512_fmadd_ps(va1i, vb1r, vacc1i);
+    vacc2r = _mm512_fnmadd_ps(va2i, vb2i, vacc2r);
+    vacc2i = _mm512_fmadd_ps(va2i, vb2r, vacc2i);
+    vacc3r = _mm512_fnmadd_ps(va3i, vb3i, vacc3r);
+    vacc3i = _mm512_fmadd_ps(va3i, vb3r, vacc3i);
+    vacc4r = _mm512_fnmadd_ps(va4i, vb4i, vacc4r);
+    vacc4i = _mm512_fmadd_ps(va4i, vb4r, vacc4i);
+    vacc5r = _mm512_fnmadd_ps(va5i, vb5i, vacc5r);
+    vacc5i = _mm512_fmadd_ps(va5i, vb5r, vacc5i);
+    vacc6r = _mm512_fnmadd_ps(va6i, vb6i, vacc6r);
+    vacc6i = _mm512_fmadd_ps(va6i, vb6r, vacc6i);
+    vacc7r = _mm512_fnmadd_ps(va7i, vb7i, vacc7r);
+    vacc7i = _mm512_fmadd_ps(va7i, vb7r, vacc7i);
 
     _mm512_storeu_ps(or, vacc0r);
     _mm512_storeu_ps(oi, vacc0i);

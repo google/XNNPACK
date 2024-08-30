@@ -46,8 +46,8 @@ void xnn_f32_vcmul_ukernel__avx512f_u16(
     __m512 vacc0r = _mm512_mul_ps(va0r, vb0r);
     __m512 vacc0i = _mm512_mul_ps(va0r, vb0i);
 
-    vacc0r = _mm512_sub_ps(vacc0r, _mm512_mul_ps(va0i, vb0i));
-    vacc0i = _mm512_add_ps(vacc0i, _mm512_mul_ps(va0i, vb0r));
+    vacc0r = _mm512_fnmadd_ps(va0i, vb0i, vacc0r);
+    vacc0i = _mm512_fmadd_ps(va0i, vb0r, vacc0i);
 
     _mm512_storeu_ps(or, vacc0r);
     _mm512_storeu_ps(oi, vacc0i);

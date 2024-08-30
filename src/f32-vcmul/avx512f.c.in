@@ -58,8 +58,8 @@ void xnn_f32_vcmul_ukernel__${ISA}_u${BATCH_TILE}(
         __m512 vacc${N}i = _mm512_mul_ps(va${N}r, vb${N}i);
 
       $for N in range(SIMD_TILE):
-        vacc${N}r = _mm512_sub_ps(vacc${N}r, _mm512_mul_ps(va${N}i, vb${N}i));
-        vacc${N}i = _mm512_add_ps(vacc${N}i, _mm512_mul_ps(va${N}i, vb${N}r));
+        vacc${N}r = _mm512_fnmadd_ps(va${N}i, vb${N}i, vacc${N}r);
+        vacc${N}i = _mm512_fmadd_ps(va${N}i, vb${N}r, vacc${N}i);
 
       _mm512_storeu_ps(or, vacc0r);
       _mm512_storeu_ps(oi, vacc0i);
@@ -90,8 +90,8 @@ void xnn_f32_vcmul_ukernel__${ISA}_u${BATCH_TILE}(
         __m256 vacc${N}i = _mm256_mul_ps(va${N}r, vb${N}i);
 
       $for N in range(SIMD_TILE):
-        vacc${N}r = _mm256_sub_ps(vacc${N}r, _mm256_mul_ps(va${N}i, vb${N}i));
-        vacc${N}i = _mm256_add_ps(vacc${N}i, _mm256_mul_ps(va${N}i, vb${N}r));
+        vacc${N}r = _mm256_fnmadd_ps(va${N}i, vb${N}i, vacc${N}r);
+        vacc${N}i = _mm256_fmadd_ps(va${N}i, vb${N}r, vacc${N}i);
 
       _mm256_storeu_ps(or, vacc0r);
       _mm256_storeu_ps(oi, vacc0i);

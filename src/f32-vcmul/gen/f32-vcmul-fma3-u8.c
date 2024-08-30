@@ -46,8 +46,8 @@ void xnn_f32_vcmul_ukernel__fma3_u8(
     __m256 vacc0r = _mm256_mul_ps(va0r, vb0r);
     __m256 vacc0i = _mm256_mul_ps(va0r, vb0i);
 
-    vacc0r = _mm256_sub_ps(vacc0r, _mm256_mul_ps(va0i, vb0i));
-    vacc0i = _mm256_add_ps(vacc0i, _mm256_mul_ps(va0i, vb0r));
+    vacc0r = _mm256_fnmadd_ps(va0i, vb0i, vacc0r);
+    vacc0i = _mm256_fmadd_ps(va0i, vb0r, vacc0i);
 
     _mm256_storeu_ps(or, vacc0r);
     _mm256_storeu_ps(oi, vacc0i);

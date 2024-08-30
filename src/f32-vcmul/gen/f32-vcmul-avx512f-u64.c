@@ -64,14 +64,14 @@ void xnn_f32_vcmul_ukernel__avx512f_u64(
     __m512 vacc3r = _mm512_mul_ps(va3r, vb3r);
     __m512 vacc3i = _mm512_mul_ps(va3r, vb3i);
 
-    vacc0r = _mm512_sub_ps(vacc0r, _mm512_mul_ps(va0i, vb0i));
-    vacc0i = _mm512_add_ps(vacc0i, _mm512_mul_ps(va0i, vb0r));
-    vacc1r = _mm512_sub_ps(vacc1r, _mm512_mul_ps(va1i, vb1i));
-    vacc1i = _mm512_add_ps(vacc1i, _mm512_mul_ps(va1i, vb1r));
-    vacc2r = _mm512_sub_ps(vacc2r, _mm512_mul_ps(va2i, vb2i));
-    vacc2i = _mm512_add_ps(vacc2i, _mm512_mul_ps(va2i, vb2r));
-    vacc3r = _mm512_sub_ps(vacc3r, _mm512_mul_ps(va3i, vb3i));
-    vacc3i = _mm512_add_ps(vacc3i, _mm512_mul_ps(va3i, vb3r));
+    vacc0r = _mm512_fnmadd_ps(va0i, vb0i, vacc0r);
+    vacc0i = _mm512_fmadd_ps(va0i, vb0r, vacc0i);
+    vacc1r = _mm512_fnmadd_ps(va1i, vb1i, vacc1r);
+    vacc1i = _mm512_fmadd_ps(va1i, vb1r, vacc1i);
+    vacc2r = _mm512_fnmadd_ps(va2i, vb2i, vacc2r);
+    vacc2i = _mm512_fmadd_ps(va2i, vb2r, vacc2i);
+    vacc3r = _mm512_fnmadd_ps(va3i, vb3i, vacc3r);
+    vacc3i = _mm512_fmadd_ps(va3i, vb3r, vacc3i);
 
     _mm512_storeu_ps(or, vacc0r);
     _mm512_storeu_ps(oi, vacc0i);
