@@ -20,14 +20,14 @@ void xnn_f16_vlrelu_ukernel__f16c_u8(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_f16_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f16_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m256 vslope = _mm256_set1_ps(params->scalar.slope);
+  const __m256 vslope = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.slope));
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {

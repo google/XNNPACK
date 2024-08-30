@@ -18,7 +18,7 @@ void xnn_f16_qs8_vcvt_ukernel__scalar_imagic_u3(
     size_t batch,
     const void* input,
     int8_t* output,
-    const union xnn_f16_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f16_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
@@ -26,7 +26,7 @@ void xnn_f16_qs8_vcvt_ukernel__scalar_imagic_u3(
   assert(output != NULL);
 
   const uint16_t* i = (const uint16_t*) input;
-  const float vscale = params->scalar.scale;
+  const float vscale = fp16_ieee_to_fp32_value(params->scalar.scale);
   const float vmagic_bias = 12582912.0f;
   const float output_min_less_zero_point = (float) ((int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point);
   const float output_max_less_zero_point = (float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point);

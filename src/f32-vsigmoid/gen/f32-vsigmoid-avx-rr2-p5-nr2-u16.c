@@ -19,7 +19,7 @@ void xnn_f32_vsigmoid_ukernel__avx_rr2_p5_nr2_u16(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);

@@ -32,8 +32,8 @@ void xnn_f16_vsub_minmax_ukernel__neonfp16arith_u8(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
-  const float16x8_t vy_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
-  const float16x8_t vy_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
+  const float16x8_t vy_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.min));
+  const float16x8_t vy_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.max));
 
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const float16x8_t va01234567 = vreinterpretq_f16_u16(vld1q_u16(a)); a += 8;

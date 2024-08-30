@@ -52,7 +52,6 @@ enum xnn_arch_flags {
 #if XNN_ARCH_RISCV
   xnn_arch_riscv_vector = 1 << 0,
   xnn_arch_riscv_vector_fp16_arith = 1 << 1,
-  xnn_arch_riscv_vlenb = 1 << 2,
 #endif
 #if XNN_ARCH_PPC64
   xnn_arch_vsx = 1 << 0,

@@ -27,15 +27,15 @@ void xnn_f16_pavgpool_minmax_ukernel_9x__avx2_c8(
     void* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(output_pixels != 0);
   assert(kernel_elements != 0);
   assert(kernel_elements <= 9);
   assert(channels != 0);
 
-  const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
-  const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
+  const __m256 voutput_min = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.min));
+  const __m256 voutput_max = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
   XNN_FORCE_REALIZATION(voutput_min);
   XNN_FORCE_REALIZATION(voutput_max);
 

@@ -19,7 +19,7 @@ void xnn_f16_rsum_ukernel__neonfp16arith_u32_acc4(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_f16_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f16_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);

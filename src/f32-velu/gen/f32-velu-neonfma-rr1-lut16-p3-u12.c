@@ -21,7 +21,7 @@ void xnn_f32_velu_ukernel__neonfma_rr1_lut16_p3_u12(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);

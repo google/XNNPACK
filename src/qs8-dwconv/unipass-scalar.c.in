@@ -18,7 +18,7 @@ $if CHANNEL_TILE % 4 != 0:
 
 $DATATYPE_SPEC = {"QS8": "qs8", "QC8": "qs8_qc8w", "QU8": "qu8"}[DATATYPE]
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar"
-$PARAMS_UNION = "xnn_qs8_qc8w_conv_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
+$PARAMS_TYPE = "union xnn_qs8_qc8w_conv_minmax_params" if DATATYPE == "QC8" else "union xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
@@ -32,7 +32,7 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERN
     size_t output_increment,
     size_t input_offset,
     const ${XINT8_T}* zero,
-    const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)])
+    const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(channels != 0);
   assert(output_width != 0);

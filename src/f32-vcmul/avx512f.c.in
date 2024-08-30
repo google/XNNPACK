@@ -1,0 +1,186 @@
+// Copyright 2023 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$SIMD_SIZE = {512: 16, 1: 8, 0: 4}[AVX]
+$assert BATCH_TILE % SIMD_SIZE == 0
+$assert BATCH_TILE >= SIMD_SIZE
+$SIMD_TILE = BATCH_TILE // SIMD_SIZE
+#include <assert.h>
+
+$if AVX >= 1:
+  #include <immintrin.h>
+$else:
+  #include <xmmintrin.h>
+
+#include "xnnpack/common.h"
+#include "xnnpack/vbinary.h"
+
+$ISA = {512: "avx512f", 1: "fma3", 0: "sse"}[AVX]
+void xnn_f32_vcmul_ukernel__${ISA}_u${BATCH_TILE}(
+    size_t batch,
+    const float* input_a,
+    const float* input_b,
+    float* output,
+    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const float* ar = input_a;
+  const float* ai = (const float*) ((uintptr_t) input_a + batch);
+  const float* br = input_b;
+  const float* bi = (const float*) ((uintptr_t) input_b + batch);
+  float* or = output;
+  float* oi = (float*) ((uintptr_t) output + batch);
+  $if AVX == 512:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      const __m512 va0r = _mm512_loadu_ps(ar);
+      const __m512 va0i = _mm512_loadu_ps(ai);
+      const __m512 vb0r = _mm512_loadu_ps(br);
+      const __m512 vb0i = _mm512_loadu_ps(bi);
+      $for N in range(1, SIMD_TILE):
+        const __m512 va${N}r = _mm512_loadu_ps(ar + ${N * SIMD_SIZE});
+        const __m512 va${N}i = _mm512_loadu_ps(ai + ${N * SIMD_SIZE});
+        const __m512 vb${N}r = _mm512_loadu_ps(br + ${N * SIMD_SIZE});
+        const __m512 vb${N}i = _mm512_loadu_ps(bi + ${N * SIMD_SIZE});
+      ar += ${BATCH_TILE};
+      ai += ${BATCH_TILE};
+      br += ${BATCH_TILE};
+      bi += ${BATCH_TILE};
+
+      $for N in range(SIMD_TILE):
+        __m512 vacc${N}r = _mm512_mul_ps(va${N}r, vb${N}r);
+        __m512 vacc${N}i = _mm512_mul_ps(va${N}r, vb${N}i);
+
+      $for N in range(SIMD_TILE):
+        vacc${N}r = _mm512_fnmadd_ps(va${N}i, vb${N}i, vacc${N}r);
+        vacc${N}i = _mm512_fmadd_ps(va${N}i, vb${N}r, vacc${N}i);
+
+      _mm512_storeu_ps(or, vacc0r);
+      _mm512_storeu_ps(oi, vacc0i);
+      $for N in range(1, SIMD_TILE):
+        _mm512_storeu_ps(or + ${N * SIMD_SIZE}, vacc${N}r);
+        _mm512_storeu_ps(oi + ${N * SIMD_SIZE}, vacc${N}i);
+      or += ${BATCH_TILE};
+      oi += ${BATCH_TILE};
+    }
+  $elif AVX == 1:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      const __m256 va0r = _mm256_loadu_ps(ar);
+      const __m256 va0i = _mm256_loadu_ps(ai);
+      const __m256 vb0r = _mm256_loadu_ps(br);
+      const __m256 vb0i = _mm256_loadu_ps(bi);
+      $for N in range(1, SIMD_TILE):
+        const __m256 va${N}r = _mm256_loadu_ps(ar + ${N * SIMD_SIZE});
+        const __m256 va${N}i = _mm256_loadu_ps(ai + ${N * SIMD_SIZE});
+        const __m256 vb${N}r = _mm256_loadu_ps(br + ${N * SIMD_SIZE});
+        const __m256 vb${N}i = _mm256_loadu_ps(bi + ${N * SIMD_SIZE});
+      ar += ${BATCH_TILE};
+      ai += ${BATCH_TILE};
+      br += ${BATCH_TILE};
+      bi += ${BATCH_TILE};
+
+      $for N in range(SIMD_TILE):
+        __m256 vacc${N}r = _mm256_mul_ps(va${N}r, vb${N}r);
+        __m256 vacc${N}i = _mm256_mul_ps(va${N}r, vb${N}i);
+
+      $for N in range(SIMD_TILE):
+        vacc${N}r = _mm256_fnmadd_ps(va${N}i, vb${N}i, vacc${N}r);
+        vacc${N}i = _mm256_fmadd_ps(va${N}i, vb${N}r, vacc${N}i);
+
+      _mm256_storeu_ps(or, vacc0r);
+      _mm256_storeu_ps(oi, vacc0i);
+      $for N in range(1, SIMD_TILE):
+        _mm256_storeu_ps(or + ${N * SIMD_SIZE}, vacc${N}r);
+        _mm256_storeu_ps(oi + ${N * SIMD_SIZE}, vacc${N}i);
+      or += ${BATCH_TILE};
+      oi += ${BATCH_TILE};
+    }
+  $elif BATCH_TILE > 4:
+    for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+      const __m128 va0r = _mm_loadu_ps(ar);
+      const __m128 va0i = _mm_loadu_ps(ai);
+      const __m128 vb0r = _mm_loadu_ps(br);
+      const __m128 vb0i = _mm_loadu_ps(bi);
+      $for N in range(1, SIMD_TILE):
+        const __m128 va${N}r = _mm_loadu_ps(ar + ${N * SIMD_SIZE});
+        const __m128 va${N}i = _mm_loadu_ps(ai + ${N * SIMD_SIZE});
+        const __m128 vb${N}r = _mm_loadu_ps(br + ${N * SIMD_SIZE});
+        const __m128 vb${N}i = _mm_loadu_ps(bi + ${N * SIMD_SIZE});
+      ar += ${BATCH_TILE};
+      ai += ${BATCH_TILE};
+      br += ${BATCH_TILE};
+      bi += ${BATCH_TILE};
+
+      $for N in range(SIMD_TILE):
+        __m128 vacc${N}r = _mm_mul_ps(va${N}r, vb${N}r);
+        __m128 vacc${N}i = _mm_mul_ps(va${N}r, vb${N}i);
+
+      $for N in range(SIMD_TILE):
+        vacc${N}r = _mm_sub_ps(vacc${N}r, _mm_mul_ps(va${N}i, vb${N}i));
+        vacc${N}i = _mm_add_ps(vacc${N}i, _mm_mul_ps(va${N}i, vb${N}r));
+
+      _mm_storeu_ps(or, vacc0r);
+      _mm_storeu_ps(oi, vacc0i);
+      $for N in range(1, SIMD_TILE):
+        _mm_storeu_ps(or + ${N * SIMD_SIZE}, vacc${N}r);
+        _mm_storeu_ps(oi + ${N * SIMD_SIZE}, vacc${N}i);
+      or += ${BATCH_TILE};
+      oi += ${BATCH_TILE};
+    }
+  for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
+    const __m128 var = _mm_loadu_ps(ar);
+    ar += 4;
+    const __m128 vai = _mm_loadu_ps(ai);
+    ai += 4;
+    const __m128 vbr = _mm_loadu_ps(br);
+    br += 4;
+    const __m128 vbi = _mm_loadu_ps(bi);
+    bi += 4;
+
+    __m128 vaccr = _mm_mul_ps(var, vbr);
+    __m128 vacci = _mm_mul_ps(var, vbi);
+
+    vaccr = _mm_sub_ps(vaccr, _mm_mul_ps(vai, vbi));
+    vacci = _mm_add_ps(vacci, _mm_mul_ps(vai, vbr));
+
+    _mm_storeu_ps(or, vaccr);
+    or += 4;
+    _mm_storeu_ps(oi, vacci);
+    oi += 4;
+  }
+  if XNN_UNLIKELY(batch != 0) {
+    const __m128 var = _mm_loadu_ps(ar);
+    ar += 4;
+    const __m128 vai = _mm_loadu_ps(ai);
+    ai += 4;
+    const __m128 vbr = _mm_loadu_ps(br);
+    br += 4;
+    const __m128 vbi = _mm_loadu_ps(bi);
+    bi += 4;
+
+    __m128 vaccr = _mm_mul_ps(var, vbr);
+    __m128 vacci = _mm_mul_ps(var, vbi);
+
+    vaccr = _mm_sub_ps(vaccr, _mm_mul_ps(vai, vbi));
+    vacci = _mm_add_ps(vacci, _mm_mul_ps(vai, vbr));
+
+    if (batch & (2 * sizeof(float))) {
+      _mm_storel_pi((__m64*) or, vaccr);
+      or += 2;
+      _mm_storel_pi((__m64*) oi, vacci);
+      oi += 2;
+      vaccr = _mm_movehl_ps(vaccr, vaccr);
+      vacci = _mm_movehl_ps(vacci, vacci);
+    }
+    if (batch & (1 * sizeof(float))) {
+      _mm_store_ss(or, vaccr);
+      _mm_store_ss(oi, vacci);
+    }
+  }
+}

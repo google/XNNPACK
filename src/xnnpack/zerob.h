@@ -15,23 +15,18 @@
 extern "C" {
 #endif
 
-#define DECLARE_X32_ZEROB_GEMM_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                             \
-      size_t groups,                                     \
-      size_t channels,                                   \
-      uint32_t* packed_weights,                          \
-      size_t channel_tile_stride,                        \
-      size_t channel_subtile_stride,                     \
-      const union xnn_x32_packb_params* params);         \
+#define XNN_UKERNEL(arch_flags, ukernel, channel_tile, channel_subtile, channel_round) \
+  XNN_INTERNAL void ukernel(                                                           \
+      size_t groups,                                                                   \
+      size_t channels,                                                                 \
+      uint32_t* packed_weights,                                                        \
+      size_t channel_tile_stride,                                                      \
+      size_t channel_subtile_stride,                                                   \
+      const union xnn_x32_packb_params* params);                                       \
 
-DECLARE_X32_ZEROB_GEMM_UKERNEL_FUNCTION(xnn_x32_zerob_gemm_ukernel_2c1s1r__scalar_float)
-DECLARE_X32_ZEROB_GEMM_UKERNEL_FUNCTION(xnn_x32_zerob_gemm_ukernel_2c1s1r__scalar_int)
-DECLARE_X32_ZEROB_GEMM_UKERNEL_FUNCTION(xnn_x32_zerob_gemm_ukernel_2c2s1r__scalar_float)
-DECLARE_X32_ZEROB_GEMM_UKERNEL_FUNCTION(xnn_x32_zerob_gemm_ukernel_2c2s1r__scalar_int)
-DECLARE_X32_ZEROB_GEMM_UKERNEL_FUNCTION(xnn_x32_zerob_gemm_ukernel_4c1s1r__scalar_float)
-DECLARE_X32_ZEROB_GEMM_UKERNEL_FUNCTION(xnn_x32_zerob_gemm_ukernel_4c1s1r__scalar_int)
-DECLARE_X32_ZEROB_GEMM_UKERNEL_FUNCTION(xnn_x32_zerob_gemm_ukernel_4c4s1r__scalar_float)
-DECLARE_X32_ZEROB_GEMM_UKERNEL_FUNCTION(xnn_x32_zerob_gemm_ukernel_4c4s1r__scalar_int)
+#include "src/x32-zerob/x32-zerob.h"
+
+#undef XNN_UKERNEL
 
 #ifdef __cplusplus
 }  // extern "C"

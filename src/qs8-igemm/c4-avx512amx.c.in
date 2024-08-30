@@ -25,7 +25,7 @@ $GFNI = 0
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8_F16" : "qd8_f16_qc8w", "QD8_F32": "qd8_f32_qc8w"}[DATATYPE]
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar"
-$PARAMS_UNION = {"QC8": "xnn_qs8_qc8w_conv_minmax_params", "QD8_F16": "xnn_f16_minmax_params", "QD8_F32": "xnn_f32_minmax_params"}[DATATYPE]
+$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QD8_F16": "union xnn_f16_minmax_params", "QD8_F32": "union xnn_f32_minmax_params"}[DATATYPE]
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $OUT_T = {"QC8": "int8_t", "QD8_F16": "void", "QD8_F32": "float"}[DATATYPE]
 $_MM_PACKXS_EPI16 = "_mm_packus_epi16" if DATATYPE == "QU8" else "_mm_packs_epi16"
@@ -45,10 +45,10 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
     const ${XINT8_T}* zero,
     $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
       const int8_t* zero_data,
-      const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)],
+      const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)],
       const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
     $else:
-      const union ${PARAMS_UNION} params[restrict XNN_MIN_ELEMENTS(1)])
+      const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= ${MR});

@@ -35,28 +35,28 @@ static void init_f16_dwconv_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_3p16c__neonfp16arith;
-      f16_dwconv_config[0].init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_dwconv_config[0].init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv_config[0].channel_tile = 16;
       f16_dwconv_config[0].channel_subtile = 16;
       f16_dwconv_config[0].channel_round = 1;
       f16_dwconv_config[0].primary_tile = 3;
 
       f16_dwconv_config[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_4p16c__neonfp16arith;
-      f16_dwconv_config[1].init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_dwconv_config[1].init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv_config[1].channel_tile = 16;
       f16_dwconv_config[1].channel_subtile = 16;
       f16_dwconv_config[1].channel_round = 1;
       f16_dwconv_config[1].primary_tile = 4;
 
       f16_dwconv_config[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_9p8c__neonfp16arith;
-      f16_dwconv_config[2].init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_dwconv_config[2].init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv_config[2].channel_tile = 8;
       f16_dwconv_config[2].channel_subtile = 8;
       f16_dwconv_config[2].channel_round = 1;
       f16_dwconv_config[2].primary_tile = 9;
 
       f16_dwconv_config[3].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_25p8c__neonfp16arith_acc2;
-      f16_dwconv_config[3].init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_dwconv_config[3].init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv_config[3].channel_tile = 8;
       f16_dwconv_config[3].channel_subtile = 8;
       f16_dwconv_config[3].channel_round = 1;
@@ -67,28 +67,28 @@ static void init_f16_dwconv_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_3p16c__neonfp16arith;
-      f16_dwconv_config[0].init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_dwconv_config[0].init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv_config[0].channel_tile = 16;
       f16_dwconv_config[0].channel_subtile = 16;
       f16_dwconv_config[0].channel_round = 1;
       f16_dwconv_config[0].primary_tile = 3;
 
       f16_dwconv_config[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_4p16c__neonfp16arith;
-      f16_dwconv_config[1].init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_dwconv_config[1].init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv_config[1].channel_tile = 16;
       f16_dwconv_config[1].channel_subtile = 16;
       f16_dwconv_config[1].channel_round = 1;
       f16_dwconv_config[1].primary_tile = 4;
 
       f16_dwconv_config[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_9p16c__neonfp16arith;
-      f16_dwconv_config[2].init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_dwconv_config[2].init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv_config[2].channel_tile = 16;
       f16_dwconv_config[2].channel_subtile = 16;
       f16_dwconv_config[2].channel_round = 1;
       f16_dwconv_config[2].primary_tile = 9;
 
       f16_dwconv_config[3].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f16_dwconv_minmax_ukernel_25p8c__neonfp16arith_acc2;
-      f16_dwconv_config[3].init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_dwconv_config[3].init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_dwconv_config[3].channel_tile = 8;
       f16_dwconv_config[3].channel_subtile = 8;
       f16_dwconv_config[3].channel_round = 1;

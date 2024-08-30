@@ -20,7 +20,7 @@ void xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u8(
     size_t batch,
     const int8_t* input,
     void* output,
-    const union xnn_qs8_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_qs8_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(int8_t) == 0);
@@ -28,11 +28,11 @@ void xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u8(
   assert(output != NULL);
 
   uint16_t* o = (uint16_t*) output;
-  const int16x8_t vminus_zero_point = vdupq_n_s16(-params->neon.zero_point);
+  const int16x8_t vminus_zero_point = vdupq_n_s16(-params->scalar.zero_point);
 #ifdef XNN_COMPILER_MSVC
-  const float16x8_t vscale = vreinterpretq_f16_u16(vdupq_n_u16(params->neon.scale));
+  const float16x8_t vscale = vreinterpretq_f16_u16(vdupq_n_u16(params->scalar.scale));
 #else
-  const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->neon.scale));
+  const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.scale));
 #endif
   for (; batch >= 8 * sizeof(int8_t); batch -= 8 * sizeof(int8_t)) {
     const int8x8_t vx = vld1_s8(input); input += 8;

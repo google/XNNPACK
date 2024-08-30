@@ -29,8 +29,8 @@ void xnn_f16_vclamp_ukernel__rvvfp16arith_u4v(
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
 
-  const _Float16 vmin = *(const _Float16*) &params->fp16arith.min;
-  const _Float16 vmax = *(const _Float16*) &params->fp16arith.max;
+  const _Float16 vmin = *(const _Float16*) &params->scalar.min;
+  const _Float16 vmax = *(const _Float16*) &params->scalar.max;
 
   batch >>= XNN_LOG2_SIZEOF_HALF;
   do {

@@ -16,8 +16,8 @@ extern "C" {
 #endif
 
 
-#define DECLARE_F16_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                            \
+#define XNN_UKERNEL_MULTIPASS(arch_flags, ukernel, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, init_params) \
+  XNN_INTERNAL void ukernel(                                            \
       size_t output_pixels,                                             \
       size_t kernel_elements,                                           \
       size_t channels,                                                  \
@@ -29,14 +29,10 @@ extern "C" {
       void* output,                                                     \
       size_t input_increment,                                           \
       size_t output_increment,                                          \
-      const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_f16_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-DECLARE_F16_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_pavgpool_minmax_ukernel_9p8x__avx2_c8)
-DECLARE_F16_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_pavgpool_minmax_ukernel_9p8x__neonfp16arith_c8)
-
-
-#define DECLARE_F16_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                          \
+#define XNN_UKERNEL_UNIPASS(arch_flags, ukernel, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, init_params) \
+  XNN_INTERNAL void ukernel(                                          \
       size_t output_pixels,                                           \
       size_t kernel_elements,                                         \
       size_t channels,                                                \
@@ -47,14 +43,16 @@ DECLARE_F16_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_pavgpool_minmax_u
       void* output,                                                   \
       size_t input_increment,                                         \
       size_t output_increment,                                        \
-      const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_f16_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-DECLARE_F16_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_pavgpool_minmax_ukernel_9x__avx2_c8)
-DECLARE_F16_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_pavgpool_minmax_ukernel_9x__neonfp16arith_c8)
+#include "src/f16-pavgpool/f16-pavgpool-minmax.h"
+
+#undef XNN_UKERNEL_MULTIPASS
+#undef XNN_UKERNEL_UNIPASS
 
 
-#define DECLARE_F32_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                            \
+#define XNN_UKERNEL_MULTIPASS(arch_flags, ukernel, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, init_params) \
+  XNN_INTERNAL void ukernel(                                            \
       size_t output_pixels,                                             \
       size_t kernel_elements,                                           \
       size_t channels,                                                  \
@@ -68,17 +66,8 @@ DECLARE_F16_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f16_pavgpool_minmax_uke
       size_t output_increment,                                          \
       const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-DECLARE_F32_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_ukernel_9p8x__neon_c4)
-DECLARE_F32_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_ukernel_9p8x__rvv_c1v)
-DECLARE_F32_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_ukernel_9p8x__scalar_c1)
-DECLARE_F32_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_ukernel_9p8x__sse_c4)
-DECLARE_F32_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_ukernel_9p8x__wasm_c1)
-DECLARE_F32_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_ukernel_9p8x__wasmsimd_arm_c4)
-DECLARE_F32_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_ukernel_9p8x__wasmsimd_x86_c4)
-
-
-#define DECLARE_F32_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                          \
+#define XNN_UKERNEL_UNIPASS(arch_flags, ukernel, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, init_params) \
+  XNN_INTERNAL void ukernel(                                          \
       size_t output_pixels,                                           \
       size_t kernel_elements,                                         \
       size_t channels,                                                \
@@ -91,14 +80,10 @@ DECLARE_F32_PAVGPOOL_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_u
       size_t output_increment,                                        \
       const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-DECLARE_F32_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_ukernel_9x__neon_c4)
-DECLARE_F32_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v)
-DECLARE_F32_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_ukernel_9x__scalar_c1)
-DECLARE_F32_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_ukernel_9x__sse_c4)
-DECLARE_F32_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_ukernel_9x__wasm_c1)
-DECLARE_F32_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_ukernel_9x__wasmsimd_arm_c4)
-DECLARE_F32_PAVGPOOL_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_pavgpool_minmax_ukernel_9x__wasmsimd_x86_c4)
+#include "src/f32-pavgpool/f32-pavgpool-minmax.h"
 
+#undef XNN_UKERNEL_MULTIPASS
+#undef XNN_UKERNEL_UNIPASS
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -275,6 +275,66 @@ static void init_hardware_config(void) {
       hardware_config.use_wasm_fma = !wasm_v128_any_true(diff);
     }
   #endif  // XNN_ARCH_WASMRELAXEDSIMD
+
+  hardware_config.arch_flags = 0;
+  #if XNN_ARCH_ARM
+    if (hardware_config.use_arm_v6) hardware_config.arch_flags |= xnn_arch_arm_v6;
+    if (hardware_config.use_arm_vfpv2) hardware_config.arch_flags |= xnn_arch_arm_vfpv2;
+    if (hardware_config.use_arm_vfpv3) hardware_config.arch_flags |= xnn_arch_arm_vfpv3;
+    if (hardware_config.use_arm_neon) hardware_config.arch_flags |= xnn_arch_arm_neon;
+    if (hardware_config.use_arm_neon_fp16) hardware_config.arch_flags |= xnn_arch_arm_neon_fp16;
+    if (hardware_config.use_arm_neon_fma) hardware_config.arch_flags |= xnn_arch_arm_neon_fma;
+    if (hardware_config.use_arm_neon_v8) hardware_config.arch_flags |= xnn_arch_arm_neon_v8;
+  #endif
+  #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+    if (hardware_config.use_arm_fp16_arith) hardware_config.arch_flags |= xnn_arch_arm_fp16_arith;
+    if (hardware_config.use_arm_neon_fp16_arith) hardware_config.arch_flags |= xnn_arch_arm_neon_fp16_arith;
+    if (hardware_config.use_arm_neon_bf16) hardware_config.arch_flags |= xnn_arch_arm_neon_bf16;
+    if (hardware_config.use_arm_neon_dot) hardware_config.arch_flags |= xnn_arch_arm_neon_dot;
+    if (hardware_config.use_arm_neon_i8mm) hardware_config.arch_flags |= xnn_arch_arm_neon_i8mm;
+  #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    if (hardware_config.use_x86_ssse3) hardware_config.arch_flags |= xnn_arch_x86_ssse3;
+    if (hardware_config.use_x86_sse4_1) hardware_config.arch_flags |= xnn_arch_x86_sse4_1;
+    if (hardware_config.use_x86_avx) hardware_config.arch_flags |= xnn_arch_x86_avx;
+    if (hardware_config.use_x86_f16c) hardware_config.arch_flags |= xnn_arch_x86_f16c;
+    if (hardware_config.use_x86_fma3) hardware_config.arch_flags |= xnn_arch_x86_fma3;
+    if (hardware_config.use_x86_avx2) hardware_config.arch_flags |= xnn_arch_x86_avx2;
+    if (hardware_config.use_x86_avx512f) hardware_config.arch_flags |= xnn_arch_x86_avx512f;
+    if (hardware_config.use_x86_avx512vbmi) hardware_config.arch_flags |= xnn_arch_x86_avx512vbmi;
+    if (hardware_config.use_x86_avx512skx) hardware_config.arch_flags |= xnn_arch_x86_avx512skx;
+    if (hardware_config.use_x86_avx512vnni) hardware_config.arch_flags |= xnn_arch_x86_avx512vnni;
+    if (hardware_config.use_x86_avx512vnnigfni) hardware_config.arch_flags |= xnn_arch_x86_avx512vnnigfni;
+    if (hardware_config.use_x86_avx512amx) hardware_config.arch_flags |= xnn_arch_x86_avx512amx;
+    if (hardware_config.use_x86_avx512fp16) hardware_config.arch_flags |= xnn_arch_x86_avx512fp16;
+    if (hardware_config.use_x86_avxvnni) hardware_config.arch_flags |= xnn_arch_x86_avxvnni;
+    if (hardware_config.use_x86_avx256skx) hardware_config.arch_flags |= xnn_arch_x86_avx256skx;
+    if (hardware_config.use_x86_avx256vnni) hardware_config.arch_flags |= xnn_arch_x86_avx256vnni;
+    if (hardware_config.use_x86_avx256vnnigfni) hardware_config.arch_flags |= xnn_arch_x86_avx256vnnigfni;
+  #endif
+  #if XNN_ARCH_RISCV
+    if (hardware_config.use_riscv_vector) hardware_config.arch_flags |= xnn_arch_riscv_vector;
+    if (hardware_config.use_riscv_vector_fp16_arith) hardware_config.arch_flags |= xnn_arch_riscv_vector_fp16_arith;
+  #endif
+  #if XNN_ARCH_PPC64
+    if (hardware_config.use_vsx) hardware_config.arch_flags |= xnn_arch_vsx;
+    if (hardware_config.use_vsx3) hardware_config.arch_flags |= xnn_arch_vsx3;
+    if (hardware_config.use_mma) hardware_config.arch_flags |= xnn_arch_mma;
+  #endif
+  #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+    if (hardware_config.is_x86) hardware_config.arch_flags |= xnn_arch_wasm_is_x86;
+  #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  #if XNN_ARCH_WASMRELAXEDSIMD
+    if (hardware_config.use_wasm_blendvps) hardware_config.arch_flags |= xnn_arch_wasm_blendvps;
+    if (hardware_config.use_wasm_pshufb) hardware_config.arch_flags |= xnn_arch_wasm_pshufb;
+    if (hardware_config.use_wasm_sdot) hardware_config.arch_flags |= xnn_arch_wasm_sdot;
+    if (hardware_config.use_wasm_usdot) hardware_config.arch_flags |= xnn_arch_wasm_usdot;
+    if (hardware_config.use_wasm_fma) hardware_config.arch_flags |= xnn_arch_wasm_fma;
+  #endif  // XNN_ARCH_WASMRELAXEDSIMD
+  #if XNN_ARCH_HEXAGON
+    if (hardware_config.use_hvx) hardware_config.arch_flags |= xnn_arch_hvx;
+  #endif  // XNN_ARCH_HEXAGON
+
 }
 
 const struct xnn_hardware_config* xnn_init_hardware_config() {

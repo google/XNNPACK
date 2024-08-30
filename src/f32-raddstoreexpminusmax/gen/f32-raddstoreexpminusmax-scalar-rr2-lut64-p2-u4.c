@@ -23,7 +23,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_u4(
     const float* max,
     float* output,
     float* sum,
-    const union xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);

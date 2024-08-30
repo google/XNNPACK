@@ -17,19 +17,19 @@
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmulc_ukernel__wasmsimd_u4, 4, false, float, xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmulc_ukernel__wasmsimd_u8, 8, false, float, xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmulc_ukernel__wasmsimd_u16, 16, false, float, xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmulc_ukernel__wasmsimd_u4, 4, false, float, union xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmulc_ukernel__wasmsimd_u8, 8, false, float, union xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmulc_ukernel__wasmsimd_u16, 16, false, float, union xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmulc_ukernel__scalar_u1, 1, false, float, xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmulc_ukernel__scalar_u2, 2, false, float, xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmulc_ukernel__scalar_u4, 4, false, float, xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmulc_ukernel__scalar_u8, 8, false, float, xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmulc_ukernel__scalar_u1, 1, false, float, union xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmulc_ukernel__scalar_u2, 2, false, float, union xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmulc_ukernel__scalar_u4, 4, false, float, union xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vmulc_ukernel__scalar_u8, 8, false, float, union xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 
 #if XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_vmulc_ukernel__rvv_u4v, 4, true, float, xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_vmulc_ukernel__rvv_u8v, 8, true, float, xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_vmulc_ukernel__rvv_u4v, 4, true, float, union xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_vmulc_ukernel__rvv_u8v, 8, true, float, union xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 #endif  // XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
 
 

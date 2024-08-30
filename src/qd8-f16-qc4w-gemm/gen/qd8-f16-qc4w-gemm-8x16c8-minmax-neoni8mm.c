@@ -647,7 +647,7 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_8x16c8__neoni8mm(
     float16x8_t vfp16out7x01234567 = vcombine_f16(vcvt_f16_f32(vout7x0123), vcvt_f16_f32(vout7x4567));
     float16x8_t vfp16out7x89ABCDEF = vcombine_f16(vcvt_f16_f32(vout7x89AB), vcvt_f16_f32(vout7xCDEF));
 
-    const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
+    const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.min));
     vfp16out0x01234567 = vmaxq_f16(vfp16out0x01234567, voutput_min);
     vfp16out0x89ABCDEF = vmaxq_f16(vfp16out0x89ABCDEF, voutput_min);
     vfp16out1x01234567 = vmaxq_f16(vfp16out1x01234567, voutput_min);
@@ -664,7 +664,7 @@ void xnn_qd8_f16_qc4w_gemm_minmax_ukernel_8x16c8__neoni8mm(
     vfp16out6x89ABCDEF = vmaxq_f16(vfp16out6x89ABCDEF, voutput_min);
     vfp16out7x01234567 = vmaxq_f16(vfp16out7x01234567, voutput_min);
     vfp16out7x89ABCDEF = vmaxq_f16(vfp16out7x89ABCDEF, voutput_min);
-    const float16x8_t voutput_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
+    const float16x8_t voutput_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.max));
     vfp16out0x01234567 = vminq_f16(vfp16out0x01234567, voutput_max);
     vfp16out0x89ABCDEF = vminq_f16(vfp16out0x89ABCDEF, voutput_max);
     vfp16out1x01234567 = vminq_f16(vfp16out1x01234567, voutput_max);

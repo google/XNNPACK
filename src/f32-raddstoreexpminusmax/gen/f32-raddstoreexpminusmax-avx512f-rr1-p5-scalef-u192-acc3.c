@@ -21,7 +21,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_u192_acc3(
     const float* max,
     float* output,
     float* sum,
-    const union xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);

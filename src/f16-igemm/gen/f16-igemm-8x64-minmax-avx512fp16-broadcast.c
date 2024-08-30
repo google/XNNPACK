@@ -180,7 +180,7 @@ void xnn_f16_igemm_minmax_ukernel_8x64__avx512fp16_broadcast(
       p -= 8 * sizeof(void*);
     } while (p != 0);
 
-    const __m512h vmin = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.min));
+    const __m512h vmin = _mm512_castsi512_ph(_mm512_set1_epi16(params->scalar.min));
     vacc0x0 = _mm512_max_ph(vmin, vacc0x0);
     vacc1x0 = _mm512_max_ph(vmin, vacc1x0);
     vacc2x0 = _mm512_max_ph(vmin, vacc2x0);
@@ -198,7 +198,7 @@ void xnn_f16_igemm_minmax_ukernel_8x64__avx512fp16_broadcast(
     vacc6x1 = _mm512_max_ph(vmin, vacc6x1);
     vacc7x1 = _mm512_max_ph(vmin, vacc7x1);
 
-    const __m512h vmax = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.max));
+    const __m512h vmax = _mm512_castsi512_ph(_mm512_set1_epi16(params->scalar.max));
     vacc0x0 = _mm512_min_ph(vmax, vacc0x0);
     vacc1x0 = _mm512_min_ph(vmax, vacc1x0);
     vacc2x0 = _mm512_min_ph(vmax, vacc2x0);

@@ -23,7 +23,7 @@ void xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c32(
     size_t input_stride,
     const void* zero,
     float* output,
-    const union xnn_f16_f32acc_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f16_f32acc_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
   assert(channels != 0);

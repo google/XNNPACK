@@ -111,17 +111,15 @@ XNN_INLINE static float xnn_x8_packq_f32qp8_get_dequantized(
   return (val + neg_nudged_zero_point) * recip_scale;
 }
 
-#define DECLARE_X8_PACKQ_UKERNEL_FUNCTION(fn_name)                            \
-  XNN_INTERNAL void fn_name(size_t m, size_t k, size_t mr_packed, size_t kr,  \
+#define XNN_UKERNEL(arch_flags, ukernel, unroll)                              \
+  XNN_INTERNAL void ukernel(size_t m, size_t k, size_t mr_packed, size_t kr,  \
                             size_t sr, size_t m_idx_start,                    \
                             const float* XNN_RESTRICT lhs, size_t lhs_stride, \
                             void* XNN_RESTRICT lhs_packed);
 
-DECLARE_X8_PACKQ_UKERNEL_FUNCTION(xnn_x8_packq_f32qp8_ukernel__scalar_u1)
+#include "src/x8-packq/x8-packq.h"
 
-#if XNN_ENABLE_KLEIDIAI
-DECLARE_X8_PACKQ_UKERNEL_FUNCTION(xnn_x8_packq_f32qp8_ukernel__aarch64_neon_u2)
-#endif  // XNN_ENABLE_KLEIDIAI
+#undef XNN_UKERNEL
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -26,16 +26,16 @@ void xnn_f16_avgpool_minmax_ukernel_9x__f16c_c8(
     void* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(output_pixels != 0);
   assert(kernel_elements != 0);
   assert(kernel_elements <= 9);
   assert(channels != 0);
 
-  const __m256 vscale = _mm256_set1_ps(params->avx.scale);
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vscale = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.scale));
+  const __m256 vmin = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.min));
+  const __m256 vmax = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
   XNN_FORCE_REALIZATION(vscale);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);

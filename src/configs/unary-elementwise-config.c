@@ -150,7 +150,7 @@ static void init_f16_clamp_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vclamp_ukernel__neonfp16arith_u16;
-      f16_clamp_config.init.f16_minmax = xnn_init_f16_minmax_fp16arith_params;
+      f16_clamp_config.init.f16_minmax = xnn_init_f16_minmax_scalar_params;
       f16_clamp_config.element_tile = 16;
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
@@ -158,7 +158,7 @@ static void init_f16_clamp_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vclamp_ukernel__neonfp16arith_u16;
-      f16_clamp_config.init.f16_minmax = xnn_init_f16_minmax_fp16arith_params;
+      f16_clamp_config.init.f16_minmax = xnn_init_f16_minmax_scalar_params;
       f16_clamp_config.element_tile = 16;
     }
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
@@ -194,7 +194,7 @@ static void init_f16_elu_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_avx2) {
       f16_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_velu_ukernel__avx2_rr1_p3_u16;
-      f16_elu_config.init.f16_elu = xnn_init_f16_elu_avx2_params;
+      f16_elu_config.init.f16_elu = xnn_init_f16_elu_scalar_params;
       f16_elu_config.element_tile = 16;
     }
   #endif
@@ -231,7 +231,7 @@ static void init_f16_lrelu_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vlrelu_ukernel__neonfp16arith_u16;
-      f16_lrelu_config.init.f16_lrelu = xnn_init_f16_lrelu_fp16arith_params;
+      f16_lrelu_config.init.f16_lrelu = xnn_init_f16_lrelu_scalar_params;
       f16_lrelu_config.element_tile = 16;
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
@@ -239,7 +239,7 @@ static void init_f16_lrelu_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vlrelu_ukernel__neonfp16arith_u16;
-      f16_lrelu_config.init.f16_lrelu = xnn_init_f16_lrelu_fp16arith_params;
+      f16_lrelu_config.init.f16_lrelu = xnn_init_f16_lrelu_scalar_params;
       f16_lrelu_config.element_tile = 16;
     }
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
@@ -568,7 +568,7 @@ static void init_f16_to_qs8_cvt_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_qs8_vcvt_ukernel__neonfp16arith_u32;
-      f16_to_qs8_cvt_config.init.f16_qs8_cvt = xnn_init_f16_qs8_cvt_neonfp16arith_params;
+      f16_to_qs8_cvt_config.init.f16_qs8_cvt = xnn_init_f16_qs8_cvt_scalar_params;
       f16_to_qs8_cvt_config.element_tile = 32;
     }
   #else
@@ -1926,7 +1926,7 @@ static void init_qs8_to_f16_cvt_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       qs8_to_f16_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u32;
-      qs8_to_f16_cvt_config.init.qs8_f16_cvt = xnn_init_qs8_f16_cvt_neonfp16arith_params;
+      qs8_to_f16_cvt_config.init.qs8_f16_cvt = xnn_init_qs8_f16_cvt_scalar_params;
       qs8_to_f16_cvt_config.element_tile = 32;
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64

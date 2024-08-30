@@ -13,10 +13,12 @@
 #include "xnnpack/packq.h"
 #include "packq-microkernel-tester.h"
 
+namespace {
+
 struct XnnTestParam {
   const char *name;
-  bool (*isa_check)();
-  xnn_x8_packq_f32qp8_ukernel_fn fn;
+  xnn_x8_packq_f32qp8_ukernel_fn ukernel;
+  uint64_t arch_flags;
   int unroll;
 };
 
@@ -27,21 +29,21 @@ std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) 
   return info.param.name;
 }
 
+#define XNN_UKERNEL(arch_flags, ukernel, unroll) \
+  { #ukernel, ukernel, arch_flags, unroll },
+
 const XnnTestParam xnn_test_params[] = {
-  { "X8_PACKQ_F32QP8__SCALAR_U1", []() { return true; }, xnn_x8_packq_f32qp8_ukernel__scalar_u1, /*unroll=*/1 },
-#if XNN_ARCH_ARM64
-#if XNN_ENABLE_KLEIDIAI
-  { "X8_PACKQ_F32QP8__AARCH64_NEON_U2", []() { return TEST_REQUIRES_ARM_NEON_VALUE; }, xnn_x8_packq_f32qp8_ukernel__aarch64_neon_u2, /*unroll=*/2 }
-#endif  // XNN_ENABLE_KLEIDIAI
-#endif  // XNN_ARCH_ARM64
+#include "src/x8-packq/x8-packq.h"
 };
+
+#undef XNN_UKERNEL
+
+}  // namespace
 
 namespace xnnpack {
 
 TEST_P(XnnTest, k_div_kr_m_div_mr) {
-  if (!GetParam().isa_check()) {
-    GTEST_SKIP();
-  }
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t kr = 1; kr <= 4; kr++) {
     for (size_t mr = 1; mr <= 4; mr++) {
       PackQMicrokernelTester()
@@ -49,15 +51,13 @@ TEST_P(XnnTest, k_div_kr_m_div_mr) {
           .k(kr * GetParam().unroll * 10)
           .mr(mr)
           .kr(kr)
-          .Test(GetParam().fn);
+          .Test(GetParam().ukernel);
     }
   }
 }
 
 TEST_P(XnnTest, k_div_kr_m_div_mr_kr_div_sr) {
-  if (!GetParam().isa_check()) {
-    GTEST_SKIP();
-  }
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t sr = 1; sr <= 4; sr++) {
     for (size_t kr = sr; kr <= 4 * sr; kr += sr) {
       for (size_t mr = 1; mr <= 4; mr++) {
@@ -67,16 +67,14 @@ TEST_P(XnnTest, k_div_kr_m_div_mr_kr_div_sr) {
             .mr(mr)
             .kr(kr)
             .sr(sr)
-            .Test(GetParam().fn);
+            .Test(GetParam().ukernel);
       }
     }
   }
 }
 
 TEST_P(XnnTest, k_div_kr_m_lt_mr) {
-  if (!GetParam().isa_check()) {
-    GTEST_SKIP();
-  }
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t kr = 1; kr <= 4; kr++) {
     for (size_t mr = 2; mr <= 4; mr++) {
       PackQMicrokernelTester()
@@ -84,15 +82,13 @@ TEST_P(XnnTest, k_div_kr_m_lt_mr) {
           .k(kr * GetParam().unroll * 10)
           .mr(mr)
           .kr(kr)
-          .Test(GetParam().fn);
+          .Test(GetParam().ukernel);
     }
   }
 }
 
 TEST_P(XnnTest, k_div_kr_m_gt_mr) {
-  if (!GetParam().isa_check()) {
-    GTEST_SKIP();
-  }
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t kr = 1; kr <= 4; kr++) {
     for (size_t mr = 2; mr <= 4; mr++) {
       PackQMicrokernelTester()
@@ -100,7 +96,7 @@ TEST_P(XnnTest, k_div_kr_m_gt_mr) {
           .k(kr * GetParam().unroll * 10)
           .mr(mr)
           .kr(kr)
-          .Test(GetParam().fn);
+          .Test(GetParam().ukernel);
     }
   }
 }

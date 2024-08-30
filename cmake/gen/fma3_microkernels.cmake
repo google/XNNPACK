@@ -34,6 +34,7 @@ SET(PROD_FMA3_MICROKERNEL_SRCS
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x16-minmax-fma3-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x16-minmax-fma3-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x16-minmax-fma3-broadcast.c
+  src/f32-vcmul/gen/f32-vcmul-fma3-u16.c
   src/f32-vgelu/gen/f32-vgelu-fma3-rational-12-10-div.c
   src/f32-vhswish/gen/f32-vhswish-fma3-u16.c
   src/f32-vlog/gen/f32-vlog-fma3-rational-3-3-div.c
@@ -188,6 +189,9 @@ SET(NON_PROD_FMA3_MICROKERNEL_SRCS
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x16-minmax-fma3-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-7x16-minmax-fma3-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-8x16-minmax-fma3-broadcast.c
+  src/f32-vcmul/gen/f32-vcmul-fma3-u8.c
+  src/f32-vcmul/gen/f32-vcmul-fma3-u32.c
+  src/f32-vcmul/gen/f32-vcmul-fma3-u64.c
   src/f32-vhswish/gen/f32-vhswish-fma3-u8.c
   src/f32-vlog/gen/f32-vlog-fma3-rational-3-3-nr.c
   src/f32-vrsqrt/gen/f32-vrsqrt-fma3-rsqrt-u8.c

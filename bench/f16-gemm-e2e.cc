@@ -92,7 +92,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_igemm_minmax_ukernel_4x8__neonfp16arith_ld64,
       xnn_f16_gemm_minmax_ukernel_1x8__asm_aarch64_neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64,
-      xnn_init_f16_minmax_fp16arith_params,
+      xnn_init_f16_minmax_scalar_params,
       /*mr=*/4, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
@@ -103,7 +103,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_igemm_minmax_ukernel_6x8__neonfp16arith_ld64,
       xnn_f16_gemm_minmax_ukernel_1x8__asm_aarch64_neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64,
-      xnn_init_f16_minmax_fp16arith_params,
+      xnn_init_f16_minmax_scalar_params,
       /*mr=*/6, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
@@ -114,7 +114,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_igemm_minmax_ukernel_8x8__neonfp16arith_ld64,
       xnn_f16_gemm_minmax_ukernel_1x8__asm_aarch64_neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64,
-      xnn_init_f16_minmax_fp16arith_params,
+      xnn_init_f16_minmax_scalar_params,
       /*mr=*/8, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
@@ -125,7 +125,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_igemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld32,
       xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32,
       xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32,
-      xnn_init_f16_minmax_fp16arith_params,
+      xnn_init_f16_minmax_scalar_params,
       /*mr=*/4, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
@@ -136,7 +136,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_igemm_minmax_ukernel_4x16__asm_aarch64_neonfp16arith_ld64,
       xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
-      xnn_init_f16_minmax_fp16arith_params,
+      xnn_init_f16_minmax_scalar_params,
       /*mr=*/4, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
@@ -147,7 +147,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld32,
       xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32,
       xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld32,
-      xnn_init_f16_minmax_fp16arith_params,
+      xnn_init_f16_minmax_scalar_params,
       /*mr=*/6, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
@@ -158,7 +158,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_ld64,
       xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
-      xnn_init_f16_minmax_fp16arith_params,
+      xnn_init_f16_minmax_scalar_params,
       /*mr=*/6, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
@@ -169,7 +169,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55,
       xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
-      xnn_init_f16_minmax_fp16arith_params,
+      xnn_init_f16_minmax_scalar_params,
       /*mr=*/6, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
@@ -180,7 +180,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a55r0,
       xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
-      xnn_init_f16_minmax_fp16arith_params,
+      xnn_init_f16_minmax_scalar_params,
       /*mr=*/6, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
@@ -191,7 +191,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_igemm_minmax_ukernel_6x16__asm_aarch64_neonfp16arith_cortex_a75,
       xnn_f16_gemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x16__asm_aarch64_neonfp16arith_ld64,
-      xnn_init_f16_minmax_fp16arith_params,
+      xnn_init_f16_minmax_scalar_params,
       /*mr=*/6, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
@@ -215,7 +215,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_igemm_minmax_ukernel_4x8__neonfp16arith_ld64,
       xnn_f16_gemm_minmax_ukernel_1x8__neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64,
-      xnn_init_f16_minmax_fp16arith_params,
+      xnn_init_f16_minmax_scalar_params,
       /*mr=*/4, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
@@ -226,7 +226,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_igemm_minmax_ukernel_6x8__neonfp16arith_ld64,
       xnn_f16_gemm_minmax_ukernel_1x8__neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64,
-      xnn_init_f16_minmax_fp16arith_params,
+      xnn_init_f16_minmax_scalar_params,
       /*mr=*/6, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
@@ -237,7 +237,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_igemm_minmax_ukernel_8x8__neonfp16arith_ld64,
       xnn_f16_gemm_minmax_ukernel_1x8__neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64,
-      xnn_init_f16_minmax_fp16arith_params,
+      xnn_init_f16_minmax_scalar_params,
       /*mr=*/8, /*nr=*/8, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
@@ -248,7 +248,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_igemm_minmax_ukernel_4x16__neonfp16arith_ld64,
       xnn_f16_gemm_minmax_ukernel_1x16__neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64,
-      xnn_init_f16_minmax_fp16arith_params,
+      xnn_init_f16_minmax_scalar_params,
       /*mr=*/4, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
@@ -259,7 +259,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_igemm_minmax_ukernel_6x16__neonfp16arith_ld64,
       xnn_f16_gemm_minmax_ukernel_1x16__neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64,
-      xnn_init_f16_minmax_fp16arith_params,
+      xnn_init_f16_minmax_scalar_params,
       /*mr=*/6, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }
@@ -270,7 +270,7 @@ static void GEMMEnd2EndBenchmark(
       xnn_f16_igemm_minmax_ukernel_8x16__neonfp16arith_ld64,
       xnn_f16_gemm_minmax_ukernel_1x16__neonfp16arith_ld64,
       xnn_f16_igemm_minmax_ukernel_1x16__neonfp16arith_ld64,
-      xnn_init_f16_minmax_fp16arith_params,
+      xnn_init_f16_minmax_scalar_params,
       /*mr=*/8, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckNEONFP16ARITH);
   }

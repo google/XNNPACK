@@ -17,19 +17,19 @@
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_s8_vclamp_ukernel__neon_u64, 64, false, int8_t, xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_s8_vclamp_ukernel__neon_u64, 64, false, int8_t, union xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL_WITH_PARAMS(0, xnn_s8_vclamp_ukernel__sse2_u64, 64, false, int8_t, xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_sse4_1, xnn_s8_vclamp_ukernel__sse41_u64, 64, false, int8_t, xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_s8_vclamp_ukernel__sse2_u64, 64, false, int8_t, union xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_sse4_1, xnn_s8_vclamp_ukernel__sse41_u64, 64, false, int8_t, union xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-XNN_UKERNEL_WITH_PARAMS(0, xnn_s8_vclamp_ukernel__wasmsimd_u64, 64, false, int8_t, xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_s8_vclamp_ukernel__wasmsimd_u64, 64, false, int8_t, union xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
-XNN_UKERNEL_WITH_PARAMS(0, xnn_s8_vclamp_ukernel__scalar_u4, 4, false, int8_t, xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_s8_vclamp_ukernel__scalar_u4, 4, false, int8_t, union xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
 
 #ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS
 #undef XNN_DEFINED_UKERNEL_WITH_PARAMS

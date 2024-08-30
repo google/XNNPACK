@@ -17,7 +17,7 @@ void xnn_qs16_qs8_vcvt_ukernel__scalar_u2(
     size_t batch,
     const int16_t* input,
     int8_t* output,
-    const union xnn_qs16_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_qs16_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int16_t) == 0);

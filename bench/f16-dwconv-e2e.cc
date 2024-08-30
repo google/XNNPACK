@@ -181,118 +181,118 @@ static void DWConvEnd2EndBenchmark(
   static void f16_dwconv_4p8c__neonfp16arith(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_4p8c__neonfp16arith, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_4p8c__neonfp16arith, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/8, /*primary_tile=*/4, /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
   }
   static void f16_dwconv_4p8c__neonfp16arith_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_4p8c__neonfp16arith_acc2, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_4p8c__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/8, /*primary_tile=*/4, /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
   }
   static void f16_dwconv_4p16c__neonfp16arith(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_4p16c__neonfp16arith, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_4p16c__neonfp16arith, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/16, /*primary_tile=*/4, /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
   }
   static void f16_dwconv_4p16c__neonfp16arith_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_4p16c__neonfp16arith_acc2, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_4p16c__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/16, /*primary_tile=*/4, /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
   }
   static void f16_dwconv_4p32c__neonfp16arith(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_4p32c__neonfp16arith, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_4p32c__neonfp16arith, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/32, /*primary_tile=*/4, /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
   }
   static void f16_dwconv_4p32c__neonfp16arith_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_4p32c__neonfp16arith_acc2, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_4p32c__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/32, /*primary_tile=*/4, /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_9p8c__neonfp16arith(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_9p8c__neonfp16arith, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_9p8c__neonfp16arith, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/8, /*primary_tile=*/9, /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
   }
   static void f16_dwconv_9p8c__neonfp16arith_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_9p8c__neonfp16arith_acc2, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_9p8c__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/8, /*primary_tile=*/9, /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
   }
   static void f16_dwconv_9p16c__neonfp16arith(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_9p16c__neonfp16arith, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_9p16c__neonfp16arith, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/16, /*primary_tile=*/9, /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
   }
   static void f16_dwconv_9p16c__neonfp16arith_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_9p16c__neonfp16arith_acc2, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_9p16c__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/16, /*primary_tile=*/9, /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
   }
   static void f16_dwconv_9p32c__neonfp16arith(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_9p32c__neonfp16arith, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_9p32c__neonfp16arith, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/32, /*primary_tile=*/9, /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
   }
   static void f16_dwconv_9p32c__neonfp16arith_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_9p32c__neonfp16arith_acc2, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_9p32c__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/32, /*primary_tile=*/9, /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_25p8c__neonfp16arith(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_25p8c__neonfp16arith, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_25p8c__neonfp16arith, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/8, /*primary_tile=*/25, /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
   }
   static void f16_dwconv_25p8c__neonfp16arith_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_25p8c__neonfp16arith_acc2, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_25p8c__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/8, /*primary_tile=*/25, /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
   }
   static void f16_dwconv_25p16c__neonfp16arith(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_25p16c__neonfp16arith, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_25p16c__neonfp16arith, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/16, /*primary_tile=*/25, /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
   }
   static void f16_dwconv_25p16c__neonfp16arith_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_25p16c__neonfp16arith_acc2, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_25p16c__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/16, /*primary_tile=*/25, /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
   }
   static void f16_dwconv_25p32c__neonfp16arith(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_25p32c__neonfp16arith, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_25p32c__neonfp16arith, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/32, /*primary_tile=*/25, /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
   }
   static void f16_dwconv_25p32c__neonfp16arith_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_25p32c__neonfp16arith_acc2, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_25p32c__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/32, /*primary_tile=*/25, /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
   }
 
   static void f16_dwconv_5f5m5l8c8s4r__neonfp16arith(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_5f5m5l8c8s4r__neonfp16arith, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_5f5m5l8c8s4r__neonfp16arith, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/4,
       /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
       /*primary_tile_to_replace=*/25,
@@ -301,7 +301,7 @@ static void DWConvEnd2EndBenchmark(
   static void f16_dwconv_5f5m5l8c8s4r__neonfp16arith_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_5f5m5l8c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_5f5m5l8c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/4,
       /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
       /*primary_tile_to_replace=*/25,
@@ -310,7 +310,7 @@ static void DWConvEnd2EndBenchmark(
   static void f16_dwconv_5f5m5l16c8s4r__neonfp16arith(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_5f5m5l16c8s4r__neonfp16arith, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_5f5m5l16c8s4r__neonfp16arith, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/4,
       /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
       /*primary_tile_to_replace=*/25,
@@ -319,7 +319,7 @@ static void DWConvEnd2EndBenchmark(
   static void f16_dwconv_5f5m5l16c8s4r__neonfp16arith_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_5f5m5l16c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_5f5m5l16c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/4,
       /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
       /*primary_tile_to_replace=*/25,
@@ -328,7 +328,7 @@ static void DWConvEnd2EndBenchmark(
   static void f16_dwconv_5f5m5l32c8s4r__neonfp16arith(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_5f5m5l32c8s4r__neonfp16arith, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_5f5m5l32c8s4r__neonfp16arith, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/4,
       /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
       /*primary_tile_to_replace=*/25,
@@ -337,7 +337,7 @@ static void DWConvEnd2EndBenchmark(
   static void f16_dwconv_5f5m5l32c8s4r__neonfp16arith_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_5f5m5l32c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_5f5m5l32c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/4,
       /*primary_tile=*/5, /*middle_tile=*/5, /*last_tile=*/5,
       /*primary_tile_to_replace=*/25,
@@ -347,7 +347,7 @@ static void DWConvEnd2EndBenchmark(
   static void f16_dwconv_6f6m7l8c8s4r__neonfp16arith(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_6f6m7l8c8s4r__neonfp16arith, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_6f6m7l8c8s4r__neonfp16arith, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/4,
       /*primary_tile=*/6, /*middle_tile=*/6, /*last_tile=*/7,
       /*primary_tile_to_replace=*/25,
@@ -356,7 +356,7 @@ static void DWConvEnd2EndBenchmark(
   static void f16_dwconv_6f6m7l8c8s4r__neonfp16arith_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_6f6m7l8c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_6f6m7l8c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/4,
       /*primary_tile=*/6, /*middle_tile=*/6, /*last_tile=*/7,
       /*primary_tile_to_replace=*/25,
@@ -365,7 +365,7 @@ static void DWConvEnd2EndBenchmark(
   static void f16_dwconv_6f6m7l16c8s4r__neonfp16arith(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_6f6m7l16c8s4r__neonfp16arith, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_6f6m7l16c8s4r__neonfp16arith, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/4,
       /*primary_tile=*/6, /*middle_tile=*/6, /*last_tile=*/7,
       /*primary_tile_to_replace=*/25,
@@ -374,7 +374,7 @@ static void DWConvEnd2EndBenchmark(
   static void f16_dwconv_6f6m7l16c8s4r__neonfp16arith_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_6f6m7l16c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_6f6m7l16c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/4,
       /*primary_tile=*/6, /*middle_tile=*/6, /*last_tile=*/7,
       /*primary_tile_to_replace=*/25,
@@ -383,7 +383,7 @@ static void DWConvEnd2EndBenchmark(
   static void f16_dwconv_6f6m7l32c8s4r__neonfp16arith(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_6f6m7l32c8s4r__neonfp16arith, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_6f6m7l32c8s4r__neonfp16arith, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/4,
       /*primary_tile=*/6, /*middle_tile=*/6, /*last_tile=*/7,
       /*primary_tile_to_replace=*/25,
@@ -392,7 +392,7 @@ static void DWConvEnd2EndBenchmark(
   static void f16_dwconv_6f6m7l32c8s4r__neonfp16arith_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_6f6m7l32c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_6f6m7l32c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/4,
       /*primary_tile=*/6, /*middle_tile=*/6, /*last_tile=*/7,
       /*primary_tile_to_replace=*/25,
@@ -402,7 +402,7 @@ static void DWConvEnd2EndBenchmark(
   static void f16_dwconv_8f8m9l8c8s4r__neonfp16arith(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_8f8m9l8c8s4r__neonfp16arith, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_8f8m9l8c8s4r__neonfp16arith, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/4,
       /*primary_tile=*/8, /*middle_tile=*/8, /*last_tile=*/9,
       /*primary_tile_to_replace=*/25,
@@ -411,7 +411,7 @@ static void DWConvEnd2EndBenchmark(
   static void f16_dwconv_8f8m9l8c8s4r__neonfp16arith_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_8f8m9l8c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_8f8m9l8c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/4,
       /*primary_tile=*/8, /*middle_tile=*/8, /*last_tile=*/9,
       /*primary_tile_to_replace=*/25,
@@ -420,7 +420,7 @@ static void DWConvEnd2EndBenchmark(
   static void f16_dwconv_8f8m9l16c8s4r__neonfp16arith(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_8f8m9l16c8s4r__neonfp16arith, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_8f8m9l16c8s4r__neonfp16arith, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/4,
       /*primary_tile=*/8, /*middle_tile=*/8, /*last_tile=*/9,
       /*primary_tile_to_replace=*/25,
@@ -429,7 +429,7 @@ static void DWConvEnd2EndBenchmark(
   static void f16_dwconv_8f8m9l16c8s4r__neonfp16arith_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_8f8m9l16c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_8f8m9l16c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/4,
       /*primary_tile=*/8, /*middle_tile=*/8, /*last_tile=*/9,
       /*primary_tile_to_replace=*/25,
@@ -438,7 +438,7 @@ static void DWConvEnd2EndBenchmark(
   static void f16_dwconv_8f8m9l32c8s4r__neonfp16arith(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_8f8m9l32c8s4r__neonfp16arith, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_8f8m9l32c8s4r__neonfp16arith, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/4,
       /*primary_tile=*/8, /*middle_tile=*/8, /*last_tile=*/9,
       /*primary_tile_to_replace=*/25,
@@ -447,7 +447,7 @@ static void DWConvEnd2EndBenchmark(
   static void f16_dwconv_8f8m9l32c8s4r__neonfp16arith_acc2(benchmark::State& state, models::ExecutionPlanFactory model) {
     DWConvEnd2EndBenchmark(
       state, model,
-      xnn_f16_dwconv_minmax_ukernel_8f8m9l32c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_fp16arith_params,
+      xnn_f16_dwconv_minmax_ukernel_8f8m9l32c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
       /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/4,
       /*primary_tile=*/8, /*middle_tile=*/8, /*last_tile=*/9,
       /*primary_tile_to_replace=*/25,

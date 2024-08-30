@@ -30,8 +30,8 @@ void xnn_f16_dwconv_minmax_ukernel_9p8c__neonfp16arith_acc2(
   assert(output_width != 0);
 
   uint16_t* output = (uint16_t*) output_ptr;
-  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
-  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
+  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.min));
+  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.max));
   do {
     const uint16_t* i0 = (const uint16_t*) input[0];
     assert(i0 != NULL);

@@ -136,7 +136,7 @@ void qs8_rsum(
   std::iota(input.begin(), input.end(), 1);
 
   // Prepare parameters.
-  union xnn_qs8_rsum_params params;
+  struct xnn_qs8_rsum_params params;
   if (init_params) {
     init_params(&params);
   }
@@ -171,7 +171,7 @@ void f32_rdsum(
   std::iota(input.begin(), input.end(), 0.0f);
 
   // Prepare parameters.
-  union xnn_f32_scaleminmax_params params;
+  struct xnn_f32_scaleminmax_params params;
   init_params(&params, /*scale=*/1.0f / rows, /*min=*/-1.0f, /*max=*/1.0f);
 
   for (auto _ : state) {
@@ -202,7 +202,7 @@ void qs8_rdsum(
   std::fill(input.begin(), input.end(), 0);
 
   // Prepare parameters.
-  union xnn_qs8_rsum_params params;
+  struct xnn_qs8_rsum_params params;
   init_params(&params);
 
   for (auto _ : state) {
@@ -233,7 +233,7 @@ void f16_f32acc_rdsum(
   std::iota(input.begin(), input.end(), 0.0f);
 
   // Prepare parameters.
-  union xnn_f16_f32acc_scale_params params;
+  struct xnn_f16_f32acc_scale_params params;
   init_params(&params, /*scale=*/1.0f / rows);
 
   for (auto _ : state) {
