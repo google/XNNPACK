@@ -761,7 +761,7 @@ class AvgPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_pavgpool_minmax_unipass_ukernel_fn pavgpool_minmax, xnn_init_f16_minmax_params_fn init_params) const {
+  void Test(xnn_f16_pavgpool_minmax_unipass_ukernel_fn pavgpool_minmax, xnn_init_f16_scaleminmax_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
     std::uniform_real_distribution<float> m32dist(0.1f, 0.5f);
@@ -822,8 +822,8 @@ class AvgPoolMicrokernelTester {
       }
 
       // Prepare parameters.
-      xnn_f16_minmax_params params;
-      init_params(&params, output_min_as_half, output_max_as_half);
+      xnn_f16_scaleminmax_params params;
+      init_params(&params, 0, output_min_as_half, output_max_as_half);
 
       // Call optimized micro-kernel.
       pavgpool_minmax(output_pixels(), pooling_elements(), channels(),
@@ -856,7 +856,7 @@ class AvgPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_pavgpool_minmax_multipass_ukernel_fn pavgpool_minmax, xnn_init_f16_minmax_params_fn init_params) const {
+  void Test(xnn_f16_pavgpool_minmax_multipass_ukernel_fn pavgpool_minmax, xnn_init_f16_scaleminmax_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
     std::uniform_real_distribution<float> m32dist(0.1f, 0.5f);
@@ -918,8 +918,8 @@ class AvgPoolMicrokernelTester {
       }
 
       // Prepare parameters.
-      xnn_f16_minmax_params params;
-      init_params(&params, output_min_as_half, output_max_as_half);
+      xnn_f16_scaleminmax_params params;
+      init_params(&params, 0, output_min_as_half, output_max_as_half);
 
       // Call optimized micro-kernel.
       pavgpool_minmax(output_pixels(), pooling_elements(), channels(),
@@ -1175,7 +1175,7 @@ class AvgPoolMicrokernelTester {
   struct TestF16PAvgPoolFns {
     xnn_f16_pavgpool_minmax_unipass_ukernel_fn uni;
     xnn_f16_pavgpool_minmax_multipass_ukernel_fn multi;
-    xnn_init_f16_minmax_params_fn init;
+    xnn_init_f16_scaleminmax_params_fn init;
   };
 
   void Test(const TestF16PAvgPoolFns& fns) const {

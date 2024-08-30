@@ -178,7 +178,7 @@ struct xnn_pavgpool_config {
   xnn_pavgpool_unipass_ukernel_fn unipass;
   xnn_pavgpool_multipass_ukernel_fn multipass;
   union {
-    xnn_init_f16_minmax_params_fn f16;
+    xnn_init_f16_scaleminmax_params_fn f16;
     xnn_init_f32_minmax_params_fn f32;
   } init;
   // Number of rows in a primary tile.

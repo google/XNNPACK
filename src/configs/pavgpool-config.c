@@ -26,7 +26,7 @@ static void init_f16_pavgpool_config(void) {
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_pavgpool_config.unipass = (xnn_pavgpool_unipass_ukernel_fn) xnn_f16_pavgpool_minmax_ukernel_9x__neonfp16arith_c8;
       f16_pavgpool_config.multipass = (xnn_pavgpool_multipass_ukernel_fn) xnn_f16_pavgpool_minmax_ukernel_9p8x__neonfp16arith_c8;
-      f16_pavgpool_config.init.f16 = xnn_init_f16_minmax_scalar_params;
+      f16_pavgpool_config.init.f16 = xnn_init_f16_scaleminmax_scalar_params;
       f16_pavgpool_config.primary_tile = 9;
       f16_pavgpool_config.incremental_tile = 8;
       f16_pavgpool_config.channel_tile = 8;
@@ -37,7 +37,7 @@ static void init_f16_pavgpool_config(void) {
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_pavgpool_config.unipass = (xnn_pavgpool_unipass_ukernel_fn) xnn_f16_pavgpool_minmax_ukernel_9x__neonfp16arith_c8;
       f16_pavgpool_config.multipass = (xnn_pavgpool_multipass_ukernel_fn) xnn_f16_pavgpool_minmax_ukernel_9p8x__neonfp16arith_c8;
-      f16_pavgpool_config.init.f16 = xnn_init_f16_minmax_scalar_params;
+      f16_pavgpool_config.init.f16 = xnn_init_f16_scaleminmax_scalar_params;
       f16_pavgpool_config.primary_tile = 9;
       f16_pavgpool_config.incremental_tile = 8;
       f16_pavgpool_config.channel_tile = 8;
@@ -48,7 +48,7 @@ static void init_f16_pavgpool_config(void) {
     if (hardware_config->use_x86_avx2) {
       f16_pavgpool_config.unipass = (xnn_pavgpool_unipass_ukernel_fn) xnn_f16_pavgpool_minmax_ukernel_9x__avx2_c8;
       f16_pavgpool_config.multipass = (xnn_pavgpool_multipass_ukernel_fn) xnn_f16_pavgpool_minmax_ukernel_9p8x__avx2_c8;
-      f16_pavgpool_config.init.f16 = xnn_init_f16_minmax_scalar_params;
+      f16_pavgpool_config.init.f16 = xnn_init_f16_scaleminmax_scalar_params;
       f16_pavgpool_config.primary_tile = 9;
       f16_pavgpool_config.incremental_tile = 8;
       f16_pavgpool_config.channel_tile = 8;

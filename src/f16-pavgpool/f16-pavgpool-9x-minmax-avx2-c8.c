@@ -27,7 +27,7 @@ void xnn_f16_pavgpool_minmax_ukernel_9x__avx2_c8(
     void* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(output_pixels != 0);
   assert(kernel_elements != 0);
