@@ -18,27 +18,11 @@
 extern "C" {
 #endif
 
-#define DECLARE_F16_VBINOP_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                         \
-        size_t n,                                    \
-        const void* a,                               \
-        const void* b,                               \
-        void* y,                                     \
-        const union xnn_f16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-#define DECLARE_F16_VBINOP_MINMAX_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                \
-      size_t n,                                             \
-      const void* a,                                        \
-      const void* b,                                        \
-      void* y,                                              \
-      const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, \
                                 datatype, params_type, init_params)           \
   XNN_INTERNAL void ukernel(                                                  \
       size_t n, const void* a, const void* b, void* y,                        \
-      const union params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 #include "src/f16-vbinary/f16-vadd-minmax.h"
 #include "src/f16-vbinary/f16-vaddc-minmax.h"
 #include "src/f16-vbinary/f16-vcmul.h"
@@ -58,27 +42,11 @@ extern "C" {
 #include "src/f16-vbinary/f16-vsubc-minmax.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 
-#define DECLARE_F32_VBINOP_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                         \
-      size_t n,                                      \
-      const float* a,                                \
-      const float* b,                                \
-      float* y,                                      \
-      const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-#define DECLARE_F32_VBINOP_MINMAX_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                \
-      size_t n,                                             \
-      const float* a,                                       \
-      const float* b,                                       \
-      float* y,                                             \
-      const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, \
                                 datatype, params_type, init_params)           \
   XNN_INTERNAL void ukernel(                                                  \
       size_t n, const float* a, const float* b, float* y,                     \
-      const union params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 #include "src/f32-vbinary/f32-vadd-minmax.h"
 #include "src/f32-vbinary/f32-vadd-relu.h"
 #include "src/f32-vbinary/f32-vadd.h"
@@ -126,7 +94,7 @@ extern "C" {
   XNN_INTERNAL void ukernel(                                                  \
       size_t n, const uint8_t* input_a, const uint8_t* input_b,               \
       uint8_t* output,                                                        \
-      const union params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 #include "src/qu8-vadd/qu8-vadd-minmax.h"
 #include "src/qu8-vaddc/qu8-vaddc-minmax.h"
 #include "src/qu8-vmul/qu8-vmul-minmax-fp32.h"
@@ -139,7 +107,7 @@ extern "C" {
                                 datatype, params_type, init_params)           \
   XNN_INTERNAL void ukernel(                                                  \
       size_t n, const int8_t* input_a, const int8_t* input_b, int8_t* output, \
-      const union params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 #include "src/qs8-vadd/qs8-vadd-minmax.h"
 #include "src/qs8-vaddc/qs8-vaddc-minmax.h"
 #include "src/qs8-vmul/qs8-vmul-minmax-fp32.h"
@@ -153,7 +121,7 @@ extern "C" {
   XNN_INTERNAL void ukernel(                                                  \
       size_t n, const int32_t* input_a, const int32_t* input_b,               \
       int32_t* output,                                                        \
-      const union params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 #include "src/s32-vmul/s32-vmul.h"
 #include "src/s32-vmul/s32-vmulc.h"
 #undef XNN_UKERNEL_WITH_PARAMS
