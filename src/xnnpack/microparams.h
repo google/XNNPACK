@@ -60,7 +60,7 @@ union xnn_f32_scale_params {
 
 // Scale+Min+Max: used by AVGPOOL/GAVGPOOL microkernels.
 
-union xnn_f16_scaleminmax_params {
+struct xnn_f16_scaleminmax_params {
   struct {
     uint16_t scale;
     uint16_t min;
@@ -68,7 +68,7 @@ union xnn_f16_scaleminmax_params {
   } scalar;
 };
 
-union xnn_f32_scaleminmax_params {
+struct xnn_f32_scaleminmax_params {
   struct {
     float scale;
     float min;

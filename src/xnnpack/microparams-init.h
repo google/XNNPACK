@@ -251,7 +251,7 @@ DECLARE_INIT_F32_SCALE_PARAMS_FUNCTION(xnn_init_f32_scale_scalar_params)
 
 #define DECLARE_INIT_F16_SCALEMINMAX_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                    \
-    union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
     uint16_t scale,                                               \
     uint16_t min,                                                 \
     uint16_t max);
@@ -266,7 +266,7 @@ DECLARE_INIT_F32_SCALE_PARAMS_FUNCTION(xnn_init_f32_scale_scalar_params)
 
 #define DECLARE_UPDATE_F16_SCALEMINMAX_PARAMS_FUNCTION(fn_name)   \
   XNN_INTERNAL void fn_name(                                      \
-    union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
     uint16_t scale);
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -279,7 +279,7 @@ DECLARE_INIT_F32_SCALE_PARAMS_FUNCTION(xnn_init_f32_scale_scalar_params)
 
 #define DECLARE_INIT_F32_SCALEMINMAX_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                    \
-    union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
     float scale,                                                  \
     float min,                                                    \
     float max);
@@ -289,7 +289,7 @@ DECLARE_INIT_F32_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f32_scaleminmax_scalar_par
 
 #define DECLARE_UPDATE_F32_SCALEMINMAX_PARAMS_FUNCTION(fn_name)   \
   XNN_INTERNAL void fn_name(                                      \
-    union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
     float scale);
 
 DECLARE_UPDATE_F32_SCALEMINMAX_PARAMS_FUNCTION(xnn_update_f32_scaleminmax_scalar_params)

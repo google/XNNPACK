@@ -21,7 +21,7 @@ void xnn_f32_avgpool_minmax_ukernel_9p8x__neon_c4(
     float* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(output_pixels != 0);
   assert(kernel_elements > 9);

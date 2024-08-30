@@ -171,7 +171,7 @@ void f32_rdsum(
   std::iota(input.begin(), input.end(), 0.0f);
 
   // Prepare parameters.
-  union xnn_f32_scaleminmax_params params;
+  struct xnn_f32_scaleminmax_params params;
   init_params(&params, /*scale=*/1.0f / rows, /*min=*/-1.0f, /*max=*/1.0f);
 
   for (auto _ : state) {

@@ -1341,14 +1341,14 @@ size_t xnn_init_f32_scale_scalar_params(
 }
 
 void xnn_update_f32_scaleminmax_scalar_params(
-  union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale)
 {
   params->scalar.scale = scale;
 }
 
 size_t xnn_init_f16_scaleminmax_scalar_params(
-  union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale,
   uint16_t min,
   uint16_t max)
@@ -1360,7 +1360,7 @@ size_t xnn_init_f16_scaleminmax_scalar_params(
 }
 
 void xnn_update_f16_scaleminmax_scalar_params(
-  union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale)
 {
   params->scalar.scale = scale;
@@ -1368,7 +1368,7 @@ void xnn_update_f16_scaleminmax_scalar_params(
 
 
 size_t xnn_init_f32_scaleminmax_scalar_params(
-  union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   float min,
   float max)

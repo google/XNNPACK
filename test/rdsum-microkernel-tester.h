@@ -220,7 +220,7 @@ class RDSumMicrokernelTester {
       output_ref = output;
 
       // Prepare parameters.
-      union xnn_f32_scaleminmax_params params;
+      struct xnn_f32_scaleminmax_params params;
       auto input_min = std::min_element(input.begin(), input.end());
       auto input_max = std::max_element(input.begin(), input.end());
       float mi = *input_min + (*input_max - *input_min) * 0.05;

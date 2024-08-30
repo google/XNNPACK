@@ -564,7 +564,7 @@ class GAvgPoolMicrokernelTester {
       }
 
       // Prepare parameters.
-      union xnn_f32_scaleminmax_params params;
+      struct xnn_f32_scaleminmax_params params;
       init_params(&params, 1.0f / float(rows()), output_min, output_max);
 
       // Call optimized micro-kernel.
@@ -615,7 +615,7 @@ class GAvgPoolMicrokernelTester {
       const float output_max = accumulated_max - float(255 - qmax()) / 255.0f * accumulated_range;
 
       // Prepare parameters.
-      union xnn_f32_scaleminmax_params params;
+      struct xnn_f32_scaleminmax_params params;
       init_params(&params, 1.0f / float(rows()), output_min, output_max);
 
       // Clamp reference results.

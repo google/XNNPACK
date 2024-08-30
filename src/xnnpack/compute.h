@@ -337,7 +337,7 @@ struct gemm_context {
   union {
     union xnn_qs8_conv_minmax_params qs8;
     union xnn_qu8_conv_minmax_params qu8;
-    union xnn_f16_scaleminmax_params f16;
+    struct xnn_f16_scaleminmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
 };
@@ -534,7 +534,7 @@ struct igemm_context {
   union {
     union xnn_qs8_conv_minmax_params qs8;
     union xnn_qu8_conv_minmax_params qu8;
-    union xnn_f16_scaleminmax_params f16;
+    struct xnn_f16_scaleminmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
 };
@@ -653,7 +653,7 @@ struct subgemm_context {
   union {
     union xnn_qs8_conv_minmax_params qs8;
     union xnn_qu8_conv_minmax_params qu8;
-    union xnn_f16_scaleminmax_params f16;
+    struct xnn_f16_scaleminmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
 };
@@ -708,7 +708,7 @@ struct subconv_context {
   union {
     union xnn_qs8_conv_minmax_params qs8;
     union xnn_qu8_conv_minmax_params qu8;
-    union xnn_f16_scaleminmax_params f16;
+    struct xnn_f16_scaleminmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
 };
@@ -1015,8 +1015,8 @@ struct average_pooling_context {
   size_t input_increment;
   size_t output_increment;
   union {
-    union xnn_f16_scaleminmax_params f16;
-    union xnn_f32_scaleminmax_params f32;
+    struct xnn_f16_scaleminmax_params f16;
+    struct xnn_f32_scaleminmax_params f32;
     union xnn_qu8_avgpool_minmax_params qu8;
   } params;
   union {
@@ -1113,8 +1113,8 @@ struct global_average_pooling_nwc_context {
   union {
     union xnn_qs8_avgpool_minmax_params qs8;
     union xnn_qu8_avgpool_minmax_params qu8;
-    union xnn_f16_scaleminmax_params f16;
-    union xnn_f32_scaleminmax_params f32;
+    struct xnn_f16_scaleminmax_params f16;
+    struct xnn_f32_scaleminmax_params f32;
   } params;
   union {
     xnn_gavgpool_unipass_ukernel_fn unipass_ukernel;
@@ -1449,7 +1449,7 @@ struct reduce_context {
     union xnn_f32_default_params f32_default;
     union xnn_f16_f32acc_scale_params scale_params;
     union xnn_f32_scale_params f32_scale;
-    union xnn_f32_scaleminmax_params f32_scaleminmax;
+    struct xnn_f32_scaleminmax_params f32_scaleminmax;
   } params;
 };
 
