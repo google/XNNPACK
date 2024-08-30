@@ -1317,7 +1317,7 @@ void xnn_update_qu8_avgpool_minmax_fp32_wasmsimd_params(
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 size_t xnn_init_f16_scale_scalar_params(
-  union xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale)
 {
   params->scale = scale;
@@ -1325,7 +1325,7 @@ size_t xnn_init_f16_scale_scalar_params(
 }
 
 size_t xnn_init_f16_f32acc_scale_scalar_params(
-  union xnn_f16_f32acc_scale_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f16_f32acc_scale_params params[XNN_MIN_ELEMENTS(1)],
   float scale)
 {
   params->scale = scale;

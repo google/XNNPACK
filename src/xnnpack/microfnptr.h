@@ -1617,7 +1617,7 @@ typedef void (*xnn_f16_f32acc_rdsum_ukernel_fn)(
     size_t input_stride,
     const void* zero,
     float* output,
-    const union xnn_f16_f32acc_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f16_f32acc_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_rdsum_ukernel_fn)(
     size_t rows,
@@ -1635,20 +1635,20 @@ typedef void (*xnn_qs8_rdsum_ukernel_fn)(
     size_t input_stride,
     const int8_t* zero,
     int32_t* output,
-    const union xnn_qs8_rsum_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_qs8_rsum_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 // RSUM: Reduce-Sum
 
 typedef void (*xnn_f16_rsum_ukernel_fn)(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_f16_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f16_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f16_f32acc_rsum_ukernel_fn)(
     size_t batch,
     const void* input,
     float* output,
-    const union xnn_f16_f32acc_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f16_f32acc_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_rsum_ukernel_fn)(
     size_t batch,
@@ -1660,7 +1660,7 @@ typedef void (*xnn_qs8_rsum_ukernel_fn)(
     size_t batch,
     const int8_t* input,
     int32_t* output,
-    const union xnn_qs8_rsum_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_qs8_rsum_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // RMAX: Reduce-MAX
 
@@ -2557,7 +2557,7 @@ typedef size_t (*xnn_init_qu8_conv_minmax_params_fn)(
   uint8_t output_max);
 
 typedef size_t (*xnn_init_qs8_rsum_params_fn)(
-  union xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)]);
+  struct xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_qs8_avgpool_minmax_params_fn)(
   union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2766,11 +2766,11 @@ typedef size_t (*xnn_init_f32_rnd_params_fn)(
   union xnn_f32_rnd_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f16_scale_params_fn)(
-  union xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t scale);
 
 typedef size_t (*xnn_init_f16_f32acc_scale_params_fn)(
-  union xnn_f16_f32acc_scale_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f16_f32acc_scale_params params[XNN_MIN_ELEMENTS(1)],
   float scale);
 
 typedef size_t (*xnn_init_f32_scale_params_fn)(

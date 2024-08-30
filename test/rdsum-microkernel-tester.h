@@ -151,7 +151,7 @@ class RDSumMicrokernelTester {
       }
 
       // Prepare parameters.
-      union xnn_qs8_rsum_params params;
+      struct xnn_qs8_rsum_params params;
       if (init_params) {
         init_params(&params);
       }
@@ -192,7 +192,7 @@ class RDSumMicrokernelTester {
       }
 
       // Prepare parameters.
-      union xnn_f16_f32acc_scale_params params;
+      struct xnn_f16_f32acc_scale_params params;
       init_params(&params, 1.f / float(rows()));
 
       // Call optimized micro-kernel.

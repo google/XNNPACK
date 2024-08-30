@@ -39,13 +39,13 @@ union xnn_f32_relu_params {
 
 // Scale: used by RSUM microkernels
 
-union xnn_f16_scale_params {
+struct xnn_f16_scale_params {
   struct {
     uint16_t scale;
   };
 };
 
-union xnn_f16_f32acc_scale_params {
+struct xnn_f16_f32acc_scale_params {
   struct {
     float scale;
   };
@@ -367,7 +367,7 @@ union xnn_qu8_mul_minmax_params {
 
 
 // RSum params used by RSUM & RDSUM microkernels.
-union xnn_qs8_rsum_params {
+struct xnn_qs8_rsum_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 

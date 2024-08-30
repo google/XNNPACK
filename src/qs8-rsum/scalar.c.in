@@ -13,7 +13,7 @@ void xnn_qs8_rsum_ukernel__scalar_u${CHANNEL_TILE}(
     size_t batch,
     const int8_t* restrict input,
     int32_t* restrict output,
-    const union xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(input != NULL);

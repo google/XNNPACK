@@ -130,7 +130,7 @@ enum xnn_run_state {
 };
 
 struct f16_f32acc_mean_params {
-  union xnn_f16_f32acc_scale_params f16_f32acc_scale;
+  struct xnn_f16_f32acc_scale_params f16_f32acc_scale;
 };
 
 struct xnn_operator {

@@ -227,7 +227,7 @@ DECLARE_UPDATE_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qu8_avgpool_minmax_fp32_sc
 
 #define DECLARE_INIT_F16_SCALE_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                              \
-    union xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)], \
     uint16_t scale);
 
   DECLARE_INIT_F16_SCALE_PARAMS_FUNCTION(xnn_init_f16_scale_scalar_params)
@@ -235,7 +235,7 @@ DECLARE_UPDATE_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qu8_avgpool_minmax_fp32_sc
 
 #define DECLARE_INIT_F16_F32ACC_SCALE_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                     \
-    union xnn_f16_f32acc_scale_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f16_f32acc_scale_params params[XNN_MIN_ELEMENTS(1)], \
     float scale);
 
 DECLARE_INIT_F16_F32ACC_SCALE_PARAMS_FUNCTION(xnn_init_f16_f32acc_scale_scalar_params)

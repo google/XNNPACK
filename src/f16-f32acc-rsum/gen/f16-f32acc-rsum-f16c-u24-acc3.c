@@ -21,7 +21,7 @@ void xnn_f16_f32acc_rsum_ukernel__f16c_u24_acc3(
     size_t batch,
     const void* input,
     float* output,
-    const union xnn_f16_f32acc_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f16_f32acc_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
