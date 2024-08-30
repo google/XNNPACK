@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: test/bf16-vabs.yaml
+//   Microkernel: bf16-vabs
 //   Generator: tools/generate-vunary-test.py
 
 
@@ -24,155 +24,13 @@
 #include "next_prime.h"
 #include "vunary-microkernel-tester.h"
 
-
-#if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  TEST(BF16_VABS__NEONBF16_U8, batch_eq_8) {
-    TEST_REQUIRES_ARM_NEON_BF16;
-    VUnaryMicrokernelTester()
-      .batch_size(8)
-      .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u8);
-  }
-
-  TEST(BF16_VABS__NEONBF16_U8, batch_div_8) {
-    TEST_REQUIRES_ARM_NEON_BF16;
-    const size_t batch_step = 8;
-    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u8);
-    }
-  }
-
-  TEST(BF16_VABS__NEONBF16_U8, batch_lt_8) {
-    TEST_REQUIRES_ARM_NEON_BF16;
-    const size_t batch_step = 8;
-    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u8);
-    }
-  }
-
-  TEST(BF16_VABS__NEONBF16_U8, batch_gt_8) {
-    TEST_REQUIRES_ARM_NEON_BF16;
-    const size_t batch_step = 8;
-    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u8);
-    }
-  }
-
-  TEST(BF16_VABS__NEONBF16_U8, inplace) {
-    TEST_REQUIRES_ARM_NEON_BF16;
-    const size_t batch_step = 8;
-    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 7) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .inplace(true)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u8);
-    }
-  }
-#endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-
-
-#if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  TEST(BF16_VABS__NEONBF16_U16, batch_eq_16) {
-    TEST_REQUIRES_ARM_NEON_BF16;
-    VUnaryMicrokernelTester()
-      .batch_size(16)
-      .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u16);
-  }
-
-  TEST(BF16_VABS__NEONBF16_U16, batch_div_16) {
-    TEST_REQUIRES_ARM_NEON_BF16;
-    const size_t batch_step = 16;
-    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u16);
-    }
-  }
-
-  TEST(BF16_VABS__NEONBF16_U16, batch_lt_16) {
-    TEST_REQUIRES_ARM_NEON_BF16;
-    const size_t batch_step = 16;
-    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u16);
-    }
-  }
-
-  TEST(BF16_VABS__NEONBF16_U16, batch_gt_16) {
-    TEST_REQUIRES_ARM_NEON_BF16;
-    const size_t batch_step = 16;
-    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u16);
-    }
-  }
-
-  TEST(BF16_VABS__NEONBF16_U16, inplace) {
-    TEST_REQUIRES_ARM_NEON_BF16;
-    const size_t batch_step = 16;
-    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 15) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .inplace(true)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u16);
-    }
-  }
-#endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-
-
-#if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  TEST(BF16_VABS__NEONBF16_U24, batch_eq_24) {
-    TEST_REQUIRES_ARM_NEON_BF16;
-    VUnaryMicrokernelTester()
-      .batch_size(24)
-      .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u24);
-  }
-
-  TEST(BF16_VABS__NEONBF16_U24, batch_div_24) {
-    TEST_REQUIRES_ARM_NEON_BF16;
-    const size_t batch_step = 24;
-    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u24);
-    }
-  }
-
-  TEST(BF16_VABS__NEONBF16_U24, batch_lt_24) {
-    TEST_REQUIRES_ARM_NEON_BF16;
-    const size_t batch_step = 24;
-    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u24);
-    }
-  }
-
-  TEST(BF16_VABS__NEONBF16_U24, batch_gt_24) {
-    TEST_REQUIRES_ARM_NEON_BF16;
-    const size_t batch_step = 24;
-    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u24);
-    }
-  }
-
-  TEST(BF16_VABS__NEONBF16_U24, inplace) {
-    TEST_REQUIRES_ARM_NEON_BF16;
-    const size_t batch_step = 24;
-    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 23) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .inplace(true)
-        .TestAbs(xnn_bf16_vabs_ukernel__neonbf16_u24);
-    }
-  }
-#endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)\
+                                                                                                                 \
+XNN_TEST_UNARY_BATCH_EQ(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params, Abs());                 \
+XNN_TEST_UNARY_BATCH_DIV(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params, Abs());                \
+XNN_TEST_UNARY_BATCH_LT(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params, Abs());                 \
+XNN_TEST_UNARY_BATCH_GT(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params, Abs());                 \
+                                                                                                                 \
+XNN_TEST_UNARY_INPLACE(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params, Abs());
+#include "src/bf16-vabs/bf16-vabs.h"
+#undef XNN_UKERNEL_WITH_PARAMS

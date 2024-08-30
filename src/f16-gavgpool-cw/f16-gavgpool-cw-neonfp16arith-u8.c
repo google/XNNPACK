@@ -22,10 +22,10 @@ void xnn_f16_gavgpool_cw_ukernel__neonfp16arith_u8(
   assert(elements % sizeof(uint16_t) == 0);
   assert(channels != 0);
 
-  const uint16x8_t vmask = vld1q_u16(params->neonfp16arith.mask);
-  const float16x4_t vmultiplier = vreinterpret_f16_u16(vld1_dup_u16(&params->neonfp16arith.multiplier));
-  const float16x4_t voutput_min = vreinterpret_f16_u16(vld1_dup_u16(&params->neonfp16arith.output_min));
-  const float16x4_t voutput_max = vreinterpret_f16_u16(vld1_dup_u16(&params->neonfp16arith.output_max));
+  const uint16x8_t vmask = vld1q_u16(params->scalar.mask);
+  const float16x4_t vmultiplier = vreinterpret_f16_u16(vld1_dup_u16(&params->scalar.multiplier));
+  const float16x4_t voutput_min = vreinterpret_f16_u16(vld1_dup_u16(&params->scalar.output_min));
+  const float16x4_t voutput_max = vreinterpret_f16_u16(vld1_dup_u16(&params->scalar.output_max));
 
   uint16_t* o = (uint16_t*) output;
   const uint16_t* i = input;

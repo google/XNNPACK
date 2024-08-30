@@ -20,7 +20,7 @@ void xnn_qs8_vlrelu_ukernel__sse2_u16(
     size_t batch,
     const int8_t* input,
     int8_t* output,
-    const union xnn_qs8_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_qs8_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(int8_t) == 0);

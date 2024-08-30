@@ -517,6 +517,9 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "-msse4.1",
             "-mno-sse4.2",
         ],
+        extra_deps = [
+            "@FP16",
+        ],
         msvc_x86_32_copts = ["/arch:SSE2"],
         msvc_x86_64_copts = ["/arch:SSE2"],
     ),

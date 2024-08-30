@@ -227,15 +227,15 @@ DECLARE_UPDATE_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qu8_avgpool_minmax_fp32_sc
 
 #define DECLARE_INIT_F16_SCALE_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                              \
-    union xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)], \
     uint16_t scale);
 
-  DECLARE_INIT_F16_SCALE_PARAMS_FUNCTION(xnn_init_f16_scale_fp16arith_params)
+  DECLARE_INIT_F16_SCALE_PARAMS_FUNCTION(xnn_init_f16_scale_scalar_params)
 
 
 #define DECLARE_INIT_F16_F32ACC_SCALE_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                     \
-    union xnn_f16_f32acc_scale_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f16_f32acc_scale_params params[XNN_MIN_ELEMENTS(1)], \
     float scale);
 
 DECLARE_INIT_F16_F32ACC_SCALE_PARAMS_FUNCTION(xnn_init_f16_f32acc_scale_scalar_params)
@@ -251,35 +251,35 @@ DECLARE_INIT_F32_SCALE_PARAMS_FUNCTION(xnn_init_f32_scale_scalar_params)
 
 #define DECLARE_INIT_F16_SCALEMINMAX_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                    \
-    union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
     uint16_t scale,                                               \
     uint16_t min,                                                 \
     uint16_t max);
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_F16_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f16_scaleminmax_fp16arith_params)
+  DECLARE_INIT_F16_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f16_scaleminmax_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F16_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f16_scaleminmax_avx_params)
+  DECLARE_INIT_F16_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f16_scaleminmax_scalar_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 #define DECLARE_UPDATE_F16_SCALEMINMAX_PARAMS_FUNCTION(fn_name)   \
   XNN_INTERNAL void fn_name(                                      \
-    union xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
     uint16_t scale);
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_UPDATE_F16_SCALEMINMAX_PARAMS_FUNCTION(xnn_update_f16_scaleminmax_fp16arith_params)
+  DECLARE_UPDATE_F16_SCALEMINMAX_PARAMS_FUNCTION(xnn_update_f16_scaleminmax_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_UPDATE_F16_SCALEMINMAX_PARAMS_FUNCTION(xnn_update_f16_scaleminmax_avx_params)
+  DECLARE_UPDATE_F16_SCALEMINMAX_PARAMS_FUNCTION(xnn_update_f16_scaleminmax_scalar_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 #define DECLARE_INIT_F32_SCALEMINMAX_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                    \
-    union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
     float scale,                                                  \
     float min,                                                    \
     float max);
@@ -289,13 +289,13 @@ DECLARE_INIT_F32_SCALEMINMAX_PARAMS_FUNCTION(xnn_init_f32_scaleminmax_scalar_par
 
 #define DECLARE_UPDATE_F32_SCALEMINMAX_PARAMS_FUNCTION(fn_name)   \
   XNN_INTERNAL void fn_name(                                      \
-    union xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)], \
     float scale);
 
 DECLARE_UPDATE_F32_SCALEMINMAX_PARAMS_FUNCTION(xnn_update_f32_scaleminmax_scalar_params)
 
 
-XNN_INTERNAL size_t xnn_init_f16_gavgpool_neonfp16arith_params(
+XNN_INTERNAL size_t xnn_init_f16_gavgpool_scalar_params(
   union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t multiplier,
   uint16_t output_min,
@@ -319,7 +319,7 @@ DECLARE_INIT_F32_GAVGPOOL_PARAMS_FUNCITON(xnn_init_f32_gavgpool_scalar_params);
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-XNN_INTERNAL void xnn_update_f16_gavgpool_neonfp16arith_params(
+XNN_INTERNAL void xnn_update_f16_gavgpool_scalar_params(
   union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
   uint16_t multiplier,
   uint32_t width);
@@ -345,7 +345,7 @@ DECLARE_INIT_BF16_MINMAX_PARAMS_FUNCTION(xnn_init_bf16_minmax_scalar_params)
     uint16_t output_min,                                     \
     uint16_t output_max);
 
-  DECLARE_INIT_F16_MINMAX_PARAMS_FUNCTION(xnn_init_f16_minmax_fp16arith_params)
+  DECLARE_INIT_F16_MINMAX_PARAMS_FUNCTION(xnn_init_f16_minmax_scalar_params)
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_F16_MINMAX_PARAMS_FUNCTION(xnn_init_f16_minmax_scalar_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -369,7 +369,7 @@ DECLARE_INIT_F32_MINMAX_PARAMS_FUNCTION(xnn_init_f32_minmax_scalar_params)
 DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_scalar_params)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_scalar32_params)
+  DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_scalar_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
@@ -384,7 +384,7 @@ DECLARE_INIT_F16_QC4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qc4w_minmax_scalar_par
 DECLARE_INIT_F16_QB4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qb4w_minmax_scalar_params)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F16_QB4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qb4w_minmax_scalar32_params)
+  DECLARE_INIT_F16_QB4W_MINMAX_PARAMS_FUNCTION(xnn_init_f16_qb4w_minmax_scalar_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
@@ -479,20 +479,20 @@ DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_scalar_expm1minus_rr1_p6
 
 #define DECLARE_INIT_F16_ELU_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                            \
-    union xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)], \
     uint16_t prescale,                                    \
     uint16_t alpha,                                       \
     uint16_t beta);
 
 DECLARE_INIT_F16_ELU_PARAMS_FUNCTION(xnn_init_f16_elu_scalar_params)
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F16_ELU_PARAMS_FUNCTION(xnn_init_f16_elu_avx2_params)
+  DECLARE_INIT_F16_ELU_PARAMS_FUNCTION(xnn_init_f16_elu_scalar_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 #define DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                            \
-    union xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)], \
     float prescale,                                       \
     float alpha,                                          \
     float beta);
@@ -502,11 +502,11 @@ DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_scalar_params)
 
 #define DECLARE_INIT_F16_LRELU_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                              \
-    union xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
     uint16_t slope);
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_F16_LRELU_PARAMS_FUNCTION(xnn_init_f16_lrelu_fp16arith_params)
+  DECLARE_INIT_F16_LRELU_PARAMS_FUNCTION(xnn_init_f16_lrelu_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_F16_LRELU_PARAMS_FUNCTION(xnn_init_f16_lrelu_scalar_params)
@@ -515,7 +515,7 @@ DECLARE_INIT_F32_ELU_PARAMS_FUNCTION(xnn_init_f32_elu_scalar_params)
 
 #define DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                              \
-    union xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
     float slope);
 
 DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(xnn_init_f32_lrelu_scalar_params)
@@ -523,7 +523,7 @@ DECLARE_INIT_F32_LRELU_PARAMS_FUNCTION(xnn_init_f32_lrelu_scalar_params)
 
 #define DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                              \
-    union xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
     float positive_scale,                                   \
     float negative_scale,                                   \
     int8_t input_zero_point,                                \
@@ -534,7 +534,7 @@ DECLARE_INIT_QS8_LRELU_PARAMS_FUNCTION(xnn_init_qs8_lrelu_scalar_params)
 
 #define DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                              \
-    union xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)], \
     float positive_scale,                                   \
     float negative_scale,                                   \
     uint8_t input_zero_point,                               \
@@ -545,11 +545,11 @@ DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_scalar_params)
 
 #define DECLARE_INIT_F32_SQRT_PARAMS_FUNCTION(fn_name)      \
   XNN_INTERNAL size_t fn_name(                              \
-    union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
+    struct xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
 
 #define DECLARE_INIT_F32_RSQRT_PARAMS_FUNCTION(fn_name)      \
   XNN_INTERNAL size_t fn_name(                              \
-    union xnn_f32_rsqrt_params params[XNN_MIN_ELEMENTS(1)]);
+    struct xnn_f32_rsqrt_params params[XNN_MIN_ELEMENTS(1)]);
 
 
 #define DECLARE_INIT_S8_MINMAX_PARAMS_FUNCTION(fn_name)     \
@@ -633,21 +633,21 @@ DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mul_minmax_scalar_param
 
 #define DECLARE_INIT_F16_QS8_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                \
-    union xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
     uint16_t scale,                                           \
     int8_t zero_point,                                        \
     int8_t output_min,                                        \
     int8_t output_max);
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_F16_QS8_CVT_PARAMS_FUNCTION(xnn_init_f16_qs8_cvt_neonfp16arith_params)
+  DECLARE_INIT_F16_QS8_CVT_PARAMS_FUNCTION(xnn_init_f16_qs8_cvt_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 DECLARE_INIT_F16_QS8_CVT_PARAMS_FUNCTION(xnn_init_f16_qs8_cvt_scalar_params)
 
 #define DECLARE_INIT_F32_QS8_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                \
-    union xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
     float scale,                                              \
     int8_t zero_point,                                        \
     int8_t output_min,                                        \
@@ -658,7 +658,7 @@ DECLARE_INIT_F32_QS8_CVT_PARAMS_FUNCTION(xnn_init_f32_qs8_cvt_scalar_params)
 
 #define DECLARE_INIT_F32_QU8_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                \
-    union xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
     float scale,                                              \
     uint8_t zero_point,                                       \
     uint8_t output_min,                                       \
@@ -669,7 +669,7 @@ DECLARE_INIT_F32_QU8_CVT_PARAMS_FUNCTION(xnn_init_f32_qu8_cvt_scalar_params)
 
 #define DECLARE_INIT_QS8_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                            \
-    union xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
     float input_output_scale,                             \
     int8_t input_zero_point,                              \
     int8_t output_zero_point);
@@ -678,7 +678,7 @@ DECLARE_INIT_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs8_cvt_scalar_params)
 
 #define DECLARE_INIT_QS16_QS8_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                 \
-    union xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
     float input_output_scale,                                  \
     int8_t output_zero_point);
 
@@ -686,12 +686,12 @@ DECLARE_INIT_QS16_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs16_qs8_cvt_scalar_params)
 
 #define DECLARE_INIT_QS8_F16_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                \
-    union xnn_qs8_f16_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_qs8_f16_cvt_params params[XNN_MIN_ELEMENTS(1)], \
     uint16_t scale,                                           \
     int8_t zero_point);
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_QS8_F16_CVT_PARAMS_FUNCTION(xnn_init_qs8_f16_cvt_neonfp16arith_params)
+  DECLARE_INIT_QS8_F16_CVT_PARAMS_FUNCTION(xnn_init_qs8_f16_cvt_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_QS8_F16_CVT_PARAMS_FUNCTION(xnn_init_qs8_f16_cvt_scalar_params)
@@ -699,7 +699,7 @@ DECLARE_INIT_QS16_QS8_CVT_PARAMS_FUNCTION(xnn_init_qs16_qs8_cvt_scalar_params)
 
 #define DECLARE_INIT_QS8_F32_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                \
-    union xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)], \
     float scale,                                              \
     int8_t zero_point);
 
@@ -707,7 +707,7 @@ DECLARE_INIT_QS8_F32_CVT_PARAMS_FUNCTION(xnn_init_qs8_f32_cvt_scalar_params)
 
 #define DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                            \
-    union xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)], \
     float input_output_scale,                             \
     uint8_t input_zero_point,                             \
     uint8_t output_zero_point);
@@ -716,7 +716,7 @@ DECLARE_INIT_QU8_CVT_PARAMS_FUNCTION(xnn_init_qu8_cvt_scalar_params)
 
 #define DECLARE_INIT_QU8_F32_CVT_PARAMS_FUNCTION(fn_name)     \
   XNN_INTERNAL size_t fn_name(                                \
-    union xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)], \
+    struct xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)], \
     float scale,                                              \
     uint8_t zero_point);
 

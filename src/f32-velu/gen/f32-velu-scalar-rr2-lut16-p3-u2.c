@@ -21,7 +21,7 @@ void xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u2(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_elu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);

@@ -311,7 +311,6 @@ enum xnn_status xnn_create_average_pooling2d_nhwc_f16(
   const bool any_padding = (input_padding_left | input_padding_top | input_padding_right | input_padding_bottom) != 0;
   if (any_padding || tf_same_padding) {
     // pavgpool does not include padding (zero) elements when calculating the average.
-    pavgpool_config->init.f16(&average_pooling_op->params.f16_minmax, fp16_output_min, fp16_output_max);
     average_pooling_op->ukernel.type = xnn_microkernel_type_pixelwise_average_pooling;
   } else {
     // avgpool includes padding elements when calculating the average.
@@ -880,8 +879,6 @@ enum xnn_status xnn_reshape_average_pooling2d_nhwc_f16(
     const size_t input_size = input_height * input_width;
     average_pooling_op->gavgpool_config->update.f16(
       &average_pooling_op->params.f16_scaleminmax, fp16_ieee_from_fp32_value(1.0f / (float) (int32_t) input_size));
-    pooling_params = &average_pooling_op->params.f16_minmax;
-    pooling_params_size = sizeof(average_pooling_op->params.f16_minmax);
   }
 
   return reshape_average_pooling2d(

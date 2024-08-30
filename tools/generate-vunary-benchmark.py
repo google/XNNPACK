@@ -20,11 +20,10 @@ parser = argparse.ArgumentParser(
     description="Vector unary operation microkernel benchmark generator"
 )
 parser.add_argument(
-    "-s",
-    "--spec",
-    metavar="FILE",
+    "-k",
+    "--ukernel",
     required=True,
-    help="Specification (YAML) file",
+    help="Microkernel",
 )
 parser.add_argument(
     "-o",
@@ -35,61 +34,27 @@ parser.add_argument(
 )
 parser.set_defaults(defines=list())
 
-
-def split_ukernel_name(name: str) -> tuple[str, str, str]:
-  """Splits a microkernel name into its components.
-
-  Args:
-    name: The kernel name.
-
-  Returns:
-    A `tuple` `(op_type, batch_tile, vector_tile, arch, isa)` where
-      `op_type`: `str` name of the op.
-      `arch`: `str` target architecture.
-      `isa`: `str` target ISA.
-  """
-  match = re.fullmatch(
-      r"(?:xnn_|xnn_generate_)(f16|f32)(_(f16|f32))*_v(abs|clamp|elu|gelu|hswish|log|lrelu|neg|relu|rndd|rndne|rndu|rndz|rsqrt|sigmoid|sqr|sqrt|sqrtshift|tanh)_(fact_)?ukernel__(.+)_u(\d+)(v)?",
-      name,
-  )
-  if match is None:
-    raise ValueError("Unexpected microkernel name: " + name)
-  op_type = match.group(4)
-
-  arch, isa, _ = xnncommon.parse_target_name(target_name=match.group(6))
-  return op_type, arch, isa
-
-
 BENCHMARK_TEMPLATE = """\
-BENCHMARK_CAPTURE(${OP_NAME}, ${BENCHMARK_NAME},
-                  ${KERNEL},
-                  $if CHECK_ISA:
-                    ${INIT_PARAMS},
-                    ${CHECK_ISA})
-                  $else:
-                    ${INIT_PARAMS})
-  $if DATATYPE == "f16":
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
-  $else:
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, 
+                                datatype, params_type, init_params)                        
+BENCHMARK_CAPTURE(${DATATYPE}_v${OP_NAME}, ukernel, arch_flags, ukernel, init_params)      
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<datatype, datatype>)
   ->UseRealTime();"""
 
 BENCHMARK_FUNCTION_TEMPLATE = """\
 $if OP_NAME.startswith("rnd"):
-  void ${DATATYPE}_v${OP_NAME}(benchmark::State& state, xnn_${DATATYPE}_vround_ukernel_fn ukernel,
-                xnn_init_${DATATYPE}_rnd_params_fn init_params = nullptr,
-                benchmark::utils::IsaCheckFunction isa_check = nullptr) {
+  void ${DATATYPE}_v${OP_NAME}(benchmark::State& state, uint64_t arch_flags, xnn_${DATATYPE}_vround_ukernel_fn ukernel,
+                xnn_init_${DATATYPE}_rnd_params_fn init_params = nullptr) {
     ${DATATYPE}_vunary_benchmark<xnn_${DATATYPE}_rnd_params>(
         state, ukernel,
         init_params,
-        isa_check,
+        arch_flags,
         /*range_min=*/${RANGE_MIN},
         /*range_max=*/${RANGE_MAX});
   }
 $elif OP_NAME == "clamp":
-  void ${DATATYPE}_v${OP_NAME}(benchmark::State& state, xnn_${DATATYPE}_v${OP_NAME}_ukernel_fn ukernel,
-                xnn_init_${DATATYPE}_minmax_params_fn init_params = nullptr,
-                benchmark::utils::IsaCheckFunction isa_check = nullptr) {
+  void ${DATATYPE}_v${OP_NAME}(benchmark::State& state, uint64_t arch_flags, xnn_${DATATYPE}_v${OP_NAME}_ukernel_fn ukernel,
+                xnn_init_${DATATYPE}_minmax_params_fn init_params = nullptr) {
     ${DATATYPE}_vunary_benchmark<xnn_${DATATYPE}_minmax_params>(
         state, ukernel,
         [init_params](xnn_${DATATYPE}_minmax_params* params) -> size_t {
@@ -101,25 +66,23 @@ $elif OP_NAME == "clamp":
             init_params(params, -INFINITY, INFINITY);
           return sizeof(*params);
         },
-        isa_check,
+        arch_flags,
         /*range_min=*/${RANGE_MIN},
         /*range_max=*/${RANGE_MAX});
   }
 $elif OP_NAME in ("abs", "gelu", "log", "neg", "sqr"):
-  void ${DATATYPE}_v${OP_NAME}(benchmark::State& state, xnn_${DATATYPE}_v${OP_NAME}_ukernel_fn ukernel,
-                xnn_init_${DATATYPE}_default_params_fn init_params = nullptr,
-                benchmark::utils::IsaCheckFunction isa_check = nullptr) {
+  void ${DATATYPE}_v${OP_NAME}(benchmark::State& state, uint64_t arch_flags, xnn_${DATATYPE}_v${OP_NAME}_ukernel_fn ukernel,
+                xnn_init_${DATATYPE}_default_params_fn init_params = nullptr) {
     ${DATATYPE}_vunary_benchmark<xnn_${DATATYPE}_default_params>(
         state, ukernel,
         init_params,
-        isa_check,
+        arch_flags,
         /*range_min=*/${RANGE_MIN},
         /*range_max=*/${RANGE_MAX});
   }
 $else:
-  void ${DATATYPE}_v${OP_NAME}(benchmark::State& state, xnn_${DATATYPE}_v${OP_NAME}_ukernel_fn ukernel,
-                xnn_init_${DATATYPE}_${OP_NAME}_params_fn init_params = nullptr,
-                benchmark::utils::IsaCheckFunction isa_check = nullptr) {
+  void ${DATATYPE}_v${OP_NAME}(benchmark::State& state, uint64_t arch_flags, xnn_${DATATYPE}_v${OP_NAME}_ukernel_fn ukernel,
+                xnn_init_${DATATYPE}_${OP_NAME}_params_fn init_params = nullptr) {
     ${DATATYPE}_vunary_benchmark<xnn_${DATATYPE}_${OP_NAME}_params>(
         state, ukernel,
         $if OP_NAME == "lrelu":
@@ -146,10 +109,11 @@ $else:
             },
         $else:
           init_params,
-        isa_check,
+        arch_flags,
         /*range_min=*/${RANGE_MIN},
         /*range_max=*/${RANGE_MAX});
   }
+
 """
 
 RANGE_FOR_OP_NAME = {
@@ -166,63 +130,20 @@ RANGE_FOR_OP_NAME = {
     "f16_sqrt": (0.0, 1.0),
 }
 
-
-def generate_benchmark_cases(
-    ukernel: str,
-    op_type: str,
-    isa: str,
-    init_fn: str | None = None,
-):
-  """Generates all tests cases for a Vector Unary Operation micro-kernel.
-
-  Args:
-    ukernel: C name of the micro-kernel function.
-    op_type: Operation type.
-    isa: instruction set required to run the micro-kernel. Generated unit test
-      will skip execution if the host processor doesn't support this ISA.
-    init_fn: C name of the function to initialize microkernel parameters.
-
-  Returns:
-    Code for the test case.
-  """
-  datatype = ukernel.split("_", 2)[1]
-  check_isa = xnncommon.generate_isa_utilcheck_macro(isa)
-  if check_isa:
-    check_isa = f"benchmark::utils::{check_isa}"
-  return xngen.preprocess(
-      BENCHMARK_TEMPLATE,
-      {
-          "OP_NAME": f"{datatype}_v{op_type}",
-          "BENCHMARK_NAME": ukernel.split("__", 1)[1],
-          "KERNEL": ukernel,
-          "INIT_PARAMS": init_fn or "/*init_params=*/nullptr",
-          "CHECK_ISA": check_isa,
-          "DATATYPE": datatype,
-      },
-  )
-
-
 def main(args):
   options = parser.parse_args(args)
 
-  with codecs.open(options.spec, "r", encoding="utf-8") as spec_file:
-    spec_yaml = yaml.safe_load(spec_file)
-    if not isinstance(spec_yaml, list):
-      raise ValueError("expected a list of micro-kernels in the spec")
+  # Extract the datatype and op from the file name.
+  datatype, op_name = options.ukernel.split('-')
 
-    # Extract the datatype and op from the file name.
-    datatype, op_name = (
-        os.path.basename(options.spec).split(".", 1)[0].split("-v", 2)
-    )
-
-    benchmarks = """\
+  benchmarks = """\
 // Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: {specification}
+//   Microkernel: {microkernel}
 //   Generator: {generator}
 
 #include <stddef.h>
@@ -230,51 +151,51 @@ def main(args):
 
 #include <benchmark/benchmark.h>
 #include "bench/{datatype}-vunary-benchmark.h"
-#include "bench/utils.h"
-#include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
 
-""".format(specification=options.spec, generator=sys.argv[0], datatype=datatype)
+""".format(microkernel=options.ukernel, generator=sys.argv[0], datatype=datatype)
 
-    # Create the benchmark wrapper function.
-    range_min, range_max = RANGE_FOR_OP_NAME.get(
-        f"{datatype}_{op_name}", (-10.0, 10.0)
-    )
-    benchmarks += xngen.preprocess(
-        BENCHMARK_FUNCTION_TEMPLATE,
-        {
-            "DATATYPE": datatype,
-            "OP_NAME": op_name,
-            "RANGE_MIN": range_min,
-            "RANGE_MAX": range_max,
-        },
-    )
+  op_name = op_name[1:]
 
-    for ukernel_spec in spec_yaml:
-      name = ukernel_spec["name"]
-      init_fn = ukernel_spec.get("init")
-      op_type, arch, isa = split_ukernel_name(name)
+  # Create the benchmark wrapper function.
+  range_min, range_max = RANGE_FOR_OP_NAME.get(
+      f"{datatype}_{op_name}", (-10.0, 10.0)
+  )
+  benchmarks += xngen.preprocess(
+      BENCHMARK_FUNCTION_TEMPLATE,
+      {
+          "DATATYPE": datatype,
+          "OP_NAME": op_name,
+          "RANGE_MIN": range_min,
+          "RANGE_MAX": range_max,
+      },
+  )
 
-      test_case = generate_benchmark_cases(name, op_type, isa, init_fn)
-      benchmarks += "\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
+  benchmarks += xnncommon.make_multiline_macro(xngen.preprocess(
+      BENCHMARK_TEMPLATE,
+      {
+          "OP_NAME": op_name,
+          "DATATYPE": datatype,
+      },
+  ))
 
-    # Strip out consecutive preprocessor `endif`/`if` pairs.
-    benchmarks = re.sub(
-        r"\#endif  // ([^\n]+)\n\n\#if \1\n", "", benchmarks, flags=re.MULTILINE
-    )
+  folder = options.ukernel
+  if "rnd" in folder:
+    folder = folder[0:8]
 
-    # Footer with `main` function.
-    benchmarks += "\n\n" + """\
+  benchmarks += f'#include "{xnncommon._XNNPACK_SRC}/{folder}/{options.ukernel}.h"\n'
+  benchmarks += "#undef XNN_UKERNEL_WITH_PARAMS\n"
+
+  # Footer with `main` function.
+  benchmarks += "\n\n" + """\
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif
 """
 
-    # Finally, write the file to disk.
-    xnncommon.overwrite_if_changed(options.output, benchmarks)
+  # Finally, write the file to disk.
+  xnncommon.overwrite_if_changed(options.output, benchmarks)
 
 
 if __name__ == "__main__":

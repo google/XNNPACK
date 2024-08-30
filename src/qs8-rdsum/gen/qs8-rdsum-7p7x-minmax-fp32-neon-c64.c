@@ -24,7 +24,7 @@ void xnn_qs8_rdsum_ukernel_7p7x__neon_c64(
     size_t input_stride,
     const int8_t* zero,
     int32_t* output,
-    const union xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(rows != 0);
   assert(channels != 0);

@@ -25,7 +25,7 @@ static void init_f16_vmulcaddc_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_vmulcaddc_config.ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x;
-      f16_vmulcaddc_config.init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_vmulcaddc_config.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_vmulcaddc_config.channel_tile = 8;
       f16_vmulcaddc_config.row_tile = 2;
     }
@@ -34,7 +34,7 @@ static void init_f16_vmulcaddc_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_vmulcaddc_config.ukernel = (xnn_vmulcaddc_ukernel_fn) xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x;
-      f16_vmulcaddc_config.init.f16 = xnn_init_f16_minmax_fp16arith_params;
+      f16_vmulcaddc_config.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_vmulcaddc_config.channel_tile = 8;
       f16_vmulcaddc_config.row_tile = 2;
     }

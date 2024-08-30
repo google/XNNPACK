@@ -301,7 +301,7 @@ enum xnn_status xnn_create_bankers_rounding_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_rndne_config = xnn_init_f32_rndne_config();
 
-  union xnn_f32_rnd_params params;
+  struct xnn_f32_rnd_params params;
   if XNN_LIKELY(f32_rndne_config != NULL && f32_rndne_config->init.f32_rnd != NULL) {
     f32_rndne_config->init.f32_rnd(&params);
   }
@@ -328,7 +328,7 @@ enum xnn_status xnn_create_ceiling_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_rndu_config = xnn_init_f32_rndu_config();
 
-  union xnn_f32_rnd_params params;
+  struct xnn_f32_rnd_params params;
   if XNN_LIKELY(f32_rndu_config != NULL && f32_rndu_config->init.f32_rnd != NULL) {
     f32_rndu_config->init.f32_rnd(&params);
   }
@@ -538,7 +538,7 @@ enum xnn_status xnn_create_convert_nc_f32_qs8(
 
   const struct xnn_unary_elementwise_config* f32_to_qs8_cvt_config = xnn_init_f32_to_qs8_cvt_config();
 
-  union xnn_f32_qs8_cvt_params params;
+  struct xnn_f32_qs8_cvt_params params;
   if XNN_LIKELY(f32_to_qs8_cvt_config != NULL) {
     assert(f32_to_qs8_cvt_config->init.f32_qs8_cvt != NULL);
     f32_to_qs8_cvt_config->init.f32_qs8_cvt(&params, 1.0f / output_scale, output_zero_point, output_min, output_max);
@@ -641,7 +641,7 @@ enum xnn_status xnn_create_convert_nc_f32_qu8(
 
   const struct xnn_unary_elementwise_config* f32_to_qu8_cvt_config = xnn_init_f32_to_qu8_cvt_config();
 
-  union xnn_f32_qu8_cvt_params params;
+  struct xnn_f32_qu8_cvt_params params;
   if XNN_LIKELY(f32_to_qu8_cvt_config != NULL) {
     assert(f32_to_qu8_cvt_config->init.f32_qu8_cvt != NULL);
     f32_to_qu8_cvt_config->init.f32_qu8_cvt(&params, 1.0f / output_scale, output_zero_point, output_min, output_max);
@@ -686,7 +686,7 @@ enum xnn_status xnn_create_convert_nc_qs8(
   const struct xnn_unary_elementwise_config* qs8_cvt_config = xnn_init_qs8_cvt_config();
   assert(qs8_cvt_config != NULL);
 
-  union xnn_qs8_cvt_params params;
+  struct xnn_qs8_cvt_params params;
   assert(qs8_cvt_config->init.qs8_cvt != NULL);
   qs8_cvt_config->init.qs8_cvt(&params, input_output_scale, input_zero_point, output_zero_point);
 
@@ -713,7 +713,7 @@ enum xnn_status xnn_create_convert_nc_qs8_f16(
 
   const uint16_t fp16_input_scale = fp16_ieee_from_fp32_value(input_scale);
 
-  union xnn_qs8_f16_cvt_params params;
+  struct xnn_qs8_f16_cvt_params params;
   if XNN_LIKELY(qs8_to_f16_cvt_config != NULL) {
     assert(qs8_to_f16_cvt_config->init.qs8_f16_cvt != NULL);
     qs8_to_f16_cvt_config->init.qs8_f16_cvt(&params, fp16_input_scale, input_zero_point);
@@ -740,7 +740,7 @@ enum xnn_status xnn_create_convert_nc_qs8_f32(
 
   const struct xnn_unary_elementwise_config* qs8_to_f32_cvt_config = xnn_init_qs8_to_f32_cvt_config();
 
-  union xnn_qs8_f32_cvt_params params;
+  struct xnn_qs8_f32_cvt_params params;
   if XNN_LIKELY(qs8_to_f32_cvt_config != NULL) {
     assert(qs8_to_f32_cvt_config->init.qs8_f32_cvt != NULL);
     qs8_to_f32_cvt_config->init.qs8_f32_cvt(&params, input_scale, input_zero_point);
@@ -784,7 +784,7 @@ enum xnn_status xnn_create_convert_nc_qs16_qs8(
   const struct xnn_unary_elementwise_config* qs16_to_qs8_cvt_config = xnn_init_qs16_to_qs8_cvt_config();
   assert(qs16_to_qs8_cvt_config != NULL);
 
-  union xnn_qs16_qs8_cvt_params params;
+  struct xnn_qs16_qs8_cvt_params params;
   assert(qs16_to_qs8_cvt_config->init.qs16_qs8_cvt != NULL);
   qs16_to_qs8_cvt_config->init.qs16_qs8_cvt(&params, input_output_scale, output_zero_point);
 
@@ -827,7 +827,7 @@ enum xnn_status xnn_create_convert_nc_qu8(
   const struct xnn_unary_elementwise_config* qu8_cvt_config = xnn_init_qu8_cvt_config();
   assert(qu8_cvt_config != NULL);
 
-  union xnn_qu8_cvt_params params;
+  struct xnn_qu8_cvt_params params;
   assert(qu8_cvt_config->init.qu8_cvt != NULL);
   qu8_cvt_config->init.qu8_cvt(&params, input_output_scale, input_zero_point, output_zero_point);
 
@@ -852,7 +852,7 @@ enum xnn_status xnn_create_convert_nc_qu8_f32(
 
   const struct xnn_unary_elementwise_config* qu8_to_f32_cvt_config = xnn_init_qu8_to_f32_cvt_config();
 
-  union xnn_qu8_f32_cvt_params params;
+  struct xnn_qu8_f32_cvt_params params;
   if XNN_LIKELY(qu8_to_f32_cvt_config != NULL) {
     assert(qu8_to_f32_cvt_config->init.qu8_f32_cvt != NULL);
     qu8_to_f32_cvt_config->init.qu8_f32_cvt(&params, input_scale, input_zero_point);
@@ -910,7 +910,7 @@ enum xnn_status xnn_create_elu_nc_f16(
 
   const struct xnn_unary_elementwise_config* f16_elu_config = xnn_init_f16_elu_config();
 
-  union xnn_f16_elu_params params;
+  struct xnn_f16_elu_params params;
   if XNN_LIKELY(f16_elu_config != NULL) {
     assert(f16_elu_config->init.f16_elu != NULL);
     f16_elu_config->init.f16_elu(&params,
@@ -937,7 +937,7 @@ enum xnn_status xnn_create_elu_nc_f32(
 
   const struct xnn_unary_elementwise_config* f32_elu_config = xnn_init_f32_elu_config();
 
-  union xnn_f32_elu_params params;
+  struct xnn_f32_elu_params params;
   if XNN_LIKELY(f32_elu_config != NULL) {
     assert(f32_elu_config->init.f32_elu != NULL);
     f32_elu_config->init.f32_elu(&params, 1.0f /* prescale */, alpha, 1.0f /* beta */);
@@ -965,7 +965,7 @@ enum xnn_status xnn_create_floor_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_rndd_config = xnn_init_f32_rndd_config();
 
-  union xnn_f32_rnd_params params;
+  struct xnn_f32_rnd_params params;
   if XNN_LIKELY(f32_rndd_config != NULL && f32_rndd_config->init.f32_rnd != NULL) {
     f32_rndd_config->init.f32_rnd(&params);
   }
@@ -1044,7 +1044,7 @@ enum xnn_status xnn_create_leaky_relu_nc_f16(
 
   const struct xnn_unary_elementwise_config* f16_lrelu_config = xnn_init_f16_lrelu_config();
 
-  union xnn_f16_lrelu_params params;
+  struct xnn_f16_lrelu_params params;
   if XNN_LIKELY(f16_lrelu_config != NULL) {
     assert(f16_lrelu_config->init.f16_lrelu != NULL);
     f16_lrelu_config->init.f16_lrelu(&params, negative_slope_as_half);
@@ -1071,7 +1071,7 @@ enum xnn_status xnn_create_leaky_relu_nc_f32(
 
   const struct xnn_unary_elementwise_config* f32_lrelu_config = xnn_init_f32_lrelu_config();
 
-  union xnn_f32_lrelu_params params;
+  struct xnn_f32_lrelu_params params;
   if XNN_LIKELY(f32_lrelu_config != NULL) {
     assert(f32_lrelu_config->init.f32_lrelu != NULL);
     f32_lrelu_config->init.f32_lrelu(&params, negative_slope);
@@ -1187,7 +1187,7 @@ enum xnn_status xnn_create_leaky_relu_nc_qs8(
   const struct xnn_unary_elementwise_config* qs8_lrelu_config = xnn_init_qs8_lrelu_config();
   assert(qs8_lrelu_config != NULL);
 
-  union xnn_qs8_lrelu_params params;
+  struct xnn_qs8_lrelu_params params;
   assert(qs8_lrelu_config->init.qs8_lrelu != NULL);
   qs8_lrelu_config->init.qs8_lrelu(&params, positive_input_output_scale, negative_input_output_scale, input_zero_point, output_zero_point);
 
@@ -1254,7 +1254,7 @@ enum xnn_status xnn_create_leaky_relu_nc_qu8(
   const struct xnn_unary_elementwise_config* qu8_lrelu_config = xnn_init_qu8_lrelu_config();
   assert(qu8_lrelu_config != NULL);
 
-  union xnn_qu8_lrelu_params params;
+  struct xnn_qu8_lrelu_params params;
   assert(qu8_lrelu_config->init.qu8_lrelu != NULL);
   qu8_lrelu_config->init.qu8_lrelu(&params, positive_input_output_scale, negative_input_output_scale, input_zero_point, output_zero_point);
 
@@ -1304,7 +1304,7 @@ enum xnn_status xnn_create_sigmoid_nc_f16(
 {
   const struct xnn_unary_elementwise_config* f16_sigmoid_config = xnn_init_f16_sigmoid_config();
 
-  union xnn_f16_sigmoid_params params;
+  struct xnn_f16_sigmoid_params params;
   if XNN_LIKELY(f16_sigmoid_config != NULL && f16_sigmoid_config->init.f16_sigmoid != NULL) {
     f16_sigmoid_config->init.f16_sigmoid(&params);
   }
@@ -1321,7 +1321,7 @@ enum xnn_status xnn_create_sigmoid_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_sigmoid_config = xnn_init_f32_sigmoid_config();
 
-  union xnn_f32_sigmoid_params params;
+  struct xnn_f32_sigmoid_params params;
   if XNN_LIKELY(f32_sigmoid_config != NULL && f32_sigmoid_config->init.f32_sigmoid != NULL) {
     f32_sigmoid_config->init.f32_sigmoid(&params);
   }
@@ -1375,7 +1375,7 @@ enum xnn_status xnn_create_square_root_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_sqrt_config = xnn_init_f32_sqrt_config();
 
-  union xnn_f32_sqrt_params params;
+  struct xnn_f32_sqrt_params params;
   if XNN_LIKELY(f32_sqrt_config != NULL && f32_sqrt_config->init.f32_sqrt != NULL) {
     f32_sqrt_config->init.f32_sqrt(&params);
   }
@@ -1401,7 +1401,7 @@ enum xnn_status xnn_create_reciprocal_square_root_nc_f32(
   const struct xnn_unary_elementwise_config* f32_rsqrt_config =
       xnn_init_f32_rsqrt_config();
 
-  union xnn_f32_rsqrt_params params;
+  struct xnn_f32_rsqrt_params params;
   if XNN_LIKELY (f32_rsqrt_config != NULL &&
                  f32_rsqrt_config->init.f32_rsqrt != NULL) {
     f32_rsqrt_config->init.f32_rsqrt(&params);
@@ -1462,7 +1462,7 @@ enum xnn_status xnn_create_truncation_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_rndz_config = xnn_init_f32_rndz_config();
 
-  union xnn_f32_rnd_params params;
+  struct xnn_f32_rnd_params params;
   if XNN_LIKELY(f32_rndz_config != NULL && f32_rndz_config->init.f32_rnd != NULL) {
     f32_rndz_config->init.f32_rnd(&params);
   }
@@ -3246,7 +3246,7 @@ enum xnn_status xnn_run_bankers_rounding_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_rndne_config = xnn_init_f32_rndne_config();
 
-  union xnn_f32_rnd_params params;
+  struct xnn_f32_rnd_params params;
   if XNN_LIKELY(f32_rndne_config != NULL && f32_rndne_config->init.f32_rnd != NULL) {
     f32_rndne_config->init.f32_rnd(&params);
   }
@@ -3276,7 +3276,7 @@ enum xnn_status xnn_run_ceiling_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_rndu_config = xnn_init_f32_rndu_config();
 
-  union xnn_f32_rnd_params params;
+  struct xnn_f32_rnd_params params;
   if XNN_LIKELY(f32_rndu_config != NULL && f32_rndu_config->init.f32_rnd != NULL) {
     f32_rndu_config->init.f32_rnd(&params);
   }
@@ -3418,7 +3418,7 @@ enum xnn_status xnn_run_convert_nc_f32_qs8(
 
   const struct xnn_unary_elementwise_config* f32_to_qs8_cvt_config = xnn_init_f32_to_qs8_cvt_config();
 
-  union xnn_f32_qs8_cvt_params params;
+  struct xnn_f32_qs8_cvt_params params;
   if XNN_LIKELY(f32_to_qs8_cvt_config != NULL) {
     assert(f32_to_qs8_cvt_config->init.f32_qs8_cvt != NULL);
     f32_to_qs8_cvt_config->init.f32_qs8_cvt(&params, 1.0f / output_scale, output_zero_point, INT8_MIN, INT8_MAX);
@@ -3456,7 +3456,7 @@ enum xnn_status xnn_run_convert_nc_f32_qu8(
 
   const struct xnn_unary_elementwise_config* f32_to_qu8_cvt_config = xnn_init_f32_to_qu8_cvt_config();
 
-  union xnn_f32_qu8_cvt_params params;
+  struct xnn_f32_qu8_cvt_params params;
   if XNN_LIKELY(f32_to_qu8_cvt_config != NULL) {
     assert(f32_to_qu8_cvt_config->init.f32_qu8_cvt != NULL);
     f32_to_qu8_cvt_config->init.f32_qu8_cvt(&params, 1.0f / output_scale, output_zero_point, 0, UINT8_MAX);
@@ -3494,7 +3494,7 @@ enum xnn_status xnn_run_convert_nc_qs8_f32(
 
   const struct xnn_unary_elementwise_config* qs8_to_f32_cvt_config = xnn_init_qs8_to_f32_cvt_config();
 
-  union xnn_qs8_f32_cvt_params params;
+  struct xnn_qs8_f32_cvt_params params;
   if XNN_LIKELY(qs8_to_f32_cvt_config != NULL) {
     assert(qs8_to_f32_cvt_config->init.qs8_f32_cvt != NULL);
     qs8_to_f32_cvt_config->init.qs8_f32_cvt(&params, input_scale, input_zero_point);
@@ -3549,7 +3549,7 @@ enum xnn_status xnn_run_convert_nc_qs16_qs8(
   const struct xnn_unary_elementwise_config* qs16_to_qs8_cvt_config = xnn_init_qs16_to_qs8_cvt_config();
   assert(qs16_to_qs8_cvt_config != NULL);
 
-  union xnn_qs16_qs8_cvt_params params;
+  struct xnn_qs16_qs8_cvt_params params;
   assert(qs16_to_qs8_cvt_config->init.qs16_qs8_cvt != NULL);
   qs16_to_qs8_cvt_config->init.qs16_qs8_cvt(&params, input_output_scale, output_zero_point);
 
@@ -3585,7 +3585,7 @@ enum xnn_status xnn_run_convert_nc_qu8_f32(
 
   const struct xnn_unary_elementwise_config* qu8_to_f32_cvt_config = xnn_init_qu8_to_f32_cvt_config();
 
-  union xnn_qu8_f32_cvt_params params;
+  struct xnn_qu8_f32_cvt_params params;
   if XNN_LIKELY(qu8_to_f32_cvt_config != NULL) {
     assert(qu8_to_f32_cvt_config->init.qu8_f32_cvt != NULL);
     qu8_to_f32_cvt_config->init.qu8_f32_cvt(&params, input_scale, input_zero_point);
@@ -3643,7 +3643,7 @@ enum xnn_status xnn_run_elu_nc_f32(
 
   const struct xnn_unary_elementwise_config* f32_elu_config = xnn_init_f32_elu_config();
 
-  union xnn_f32_elu_params params;
+  struct xnn_f32_elu_params params;
   if XNN_LIKELY(f32_elu_config != NULL) {
     assert(f32_elu_config->init.f32_elu != NULL);
     f32_elu_config->init.f32_elu(&params, /*prescale=*/1.0f, alpha, /*beta=*/1.0f);
@@ -3672,7 +3672,7 @@ enum xnn_status xnn_run_floor_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_rndd_config = xnn_init_f32_rndd_config();
 
-  union xnn_f32_rnd_params params;
+  struct xnn_f32_rnd_params params;
   if XNN_LIKELY(f32_rndd_config != NULL && f32_rndd_config->init.f32_rnd != NULL) {
     f32_rndd_config->init.f32_rnd(&params);
   }
@@ -3758,7 +3758,7 @@ enum xnn_status xnn_run_leaky_relu_nc_f32(
 
   const struct xnn_unary_elementwise_config* f32_lrelu_config = xnn_init_f32_lrelu_config();
 
-  union xnn_f32_lrelu_params params;
+  struct xnn_f32_lrelu_params params;
   if XNN_LIKELY(f32_lrelu_config != NULL) {
     assert(f32_lrelu_config->init.f32_lrelu != NULL);
     f32_lrelu_config->init.f32_lrelu(&params, negative_slope);
@@ -3815,7 +3815,7 @@ enum xnn_status xnn_run_reciprocal_square_root_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_rsqrt_config = xnn_init_f32_rsqrt_config();
 
-  union xnn_f32_rsqrt_params params;
+  struct xnn_f32_rsqrt_params params;
   if XNN_LIKELY(f32_rsqrt_config != NULL && f32_rsqrt_config->init.f32_rsqrt != NULL) {
     f32_rsqrt_config->init.f32_rsqrt(&params);
   }
@@ -3843,7 +3843,7 @@ enum xnn_status xnn_run_sigmoid_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_sigmoid_config = xnn_init_f32_sigmoid_config();
 
-  union xnn_f32_sigmoid_params params;
+  struct xnn_f32_sigmoid_params params;
   if XNN_LIKELY(f32_sigmoid_config != NULL && f32_sigmoid_config->init.f32_sigmoid != NULL) {
     f32_sigmoid_config->init.f32_sigmoid(&params);
   }
@@ -3899,7 +3899,7 @@ enum xnn_status xnn_run_square_root_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_sqrt_config = xnn_init_f32_sqrt_config();
 
-  union xnn_f32_sqrt_params params;
+  struct xnn_f32_sqrt_params params;
   if XNN_LIKELY(f32_sqrt_config != NULL && f32_sqrt_config->init.f32_sqrt != NULL) {
     f32_sqrt_config->init.f32_sqrt(&params);
   }
@@ -3955,7 +3955,7 @@ enum xnn_status xnn_run_truncation_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_rndz_config = xnn_init_f32_rndz_config();
 
-  union xnn_f32_rnd_params params;
+  struct xnn_f32_rnd_params params;
   if XNN_LIKELY(f32_rndz_config != NULL && f32_rndz_config->init.f32_rnd != NULL) {
     f32_rndz_config->init.f32_rnd(&params);
   }

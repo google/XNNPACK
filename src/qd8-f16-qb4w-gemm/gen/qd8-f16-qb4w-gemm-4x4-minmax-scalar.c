@@ -31,7 +31,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_4x4__scalar(
   assert(mr <= 4);
   assert(nc != 0);
   assert(kc != 0);
-  size_t bl = params->fp16arith.blocksize;
+  size_t bl = params->scalar.blocksize;
   assert(bl <= round_up_po2(kc, 2));
   assert(bl != 0);
   assert(bl % 32 == 0);
@@ -268,7 +268,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_4x4__scalar(
 
     w = (const float*) w + 4;
 
-    const float voutput_min = fp16_ieee_to_fp32_value(params->fp16arith.min);
+    const float voutput_min = fp16_ieee_to_fp32_value(params->scalar.min);
     vout0x0 = math_max_f32(vout0x0, voutput_min);
     vout1x0 = math_max_f32(vout1x0, voutput_min);
     vout2x0 = math_max_f32(vout2x0, voutput_min);
@@ -286,7 +286,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_4x4__scalar(
     vout2x3 = math_max_f32(vout2x3, voutput_min);
     vout3x3 = math_max_f32(vout3x3, voutput_min);
 
-    const float voutput_max = fp16_ieee_to_fp32_value(params->fp16arith.max);
+    const float voutput_max = fp16_ieee_to_fp32_value(params->scalar.max);
     vout0x0 = math_min_f32(vout0x0, voutput_max);
     vout1x0 = math_min_f32(vout1x0, voutput_max);
     vout2x0 = math_min_f32(vout2x0, voutput_max);

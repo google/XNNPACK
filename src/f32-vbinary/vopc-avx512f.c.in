@@ -41,13 +41,13 @@ $  "RSUB": lambda m, x: "_mm512_maskz_sub_ps(%s, vb, %s)" % (m, x),
 $  "SQRDIFF": lambda m, x: "_mm512_maskz_sub_ps(%s, %s, vb)" % (m, x),
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "xnn_f32_default_params", "MINMAX": "xnn_f32_minmax_params"}[ACTIVATION]
+$PARAMS = {"LINEAR": "union xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
 void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__avx512f_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,
     const float* input_b,
     float* output,
-    const union ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
+    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);

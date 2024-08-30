@@ -22,6 +22,23 @@ def _remove_duplicate_newlines(text):
     last_newline = is_newline
   return "\n".join(filtered_lines)
 
+_XNNPACK_SRC = "src"
+
+_DATATYPE_TO_CTYPE_MAP = {
+    "s8": "int8_t",
+    "u8": "uint8_t",
+    "qs8": "int8_t",
+    "qu8": "uint8_t",
+    "s16": "int16_t",
+    "u16": "uint16_t",
+    "s32": "int32_t",
+    "u32": "uint32_t",
+    "s64": "int64_t",
+    "u64": "uint64_t",
+    "f16": "uint16_t",
+    "bf16": "uint16_t",
+    "f32": "float",
+}
 
 _ARCH_TO_MACRO_MAP = {
   "aarch32": "XNN_ARCH_ARM",
@@ -275,3 +292,9 @@ def overwrite_if_changed(filepath, content):
   if txt_changed:
     with codecs.open(filepath, "w", encoding="utf-8") as output_file:
       output_file.write(content)
+
+def make_multiline_macro(x):
+  lines = x.strip().split('\n')
+  max_len = max([len(i) for i in lines])
+  lines = [i.ljust(max_len) + "\\" for i in lines]
+  return "\n".join(lines)[:-1].strip() + "\n"

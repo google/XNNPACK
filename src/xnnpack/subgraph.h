@@ -309,6 +309,9 @@ struct xnn_node {
       uint32_t padding_value;
     } static_pad;
     struct {
+      struct xnn_shape new_axes;
+    } static_expand_dims;
+    struct {
       struct xnn_shape new_shape;
     } static_reshape;
     struct {

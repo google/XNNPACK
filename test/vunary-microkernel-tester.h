@@ -20,11 +20,53 @@
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 #include "xnnpack.h"
-#include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
 #include "replicable_random_device.h"
+
+// These help disambiguate Test overloads below.
+class Neg {};
+class Abs {};
+class Log {};
+class Sqr {};
+class Exp {};
+class Gelu {};
+class Default {};
+
+struct Float16 {
+  uint16_t value;
+
+  Float16() = default;
+  Float16(float value) : value(fp16_ieee_from_fp32_value(value)) {}
+
+  operator float() const { return fp16_ieee_to_fp32_value(value); }
+};
+
+struct BFloat16 {
+  uint16_t value;
+
+  BFloat16() = default;
+  BFloat16(float value) : value(cvt_f32_bf16(value)) {}
+
+  operator float() const { return cvt_bf16_f32(value); }
+
+private:
+  union bf16float {
+    uint16_t bf[2];
+    float f;
+  };
+  static float cvt_bf16_f32(uint16_t r) {
+    bf16float q{};
+    q.f = 0;
+    q.bf[1] = r;
+    return q.f;
+  }
+
+  static uint16_t cvt_f32_bf16(float f) {
+    bf16float q{};
+    q.f = f;
+    return q.bf[1];
+  }
+};
 
 class VUnaryMicrokernelTester {
  public:
@@ -143,133 +185,169 @@ class VUnaryMicrokernelTester {
     };
   }
 
-  void Test(xnn_f32_vrelu_ukernel_fn vrelu) const;
+  void Test(xnn_f32_vrelu_ukernel_fn vrelu,
+            xnn_init_f32_relu_params_fn init_params = nullptr,
+            Default = Default()) const;
 
-  void TestAbs(xnn_bf16_vabs_ukernel_fn vabs,
-            xnn_init_bf16_default_params_fn init_params = nullptr) const;
+  void Test(xnn_bf16_vabs_ukernel_fn vabs,
+            xnn_init_bf16_default_params_fn init_params = nullptr,
+            Abs = Abs()) const;
 
-  void TestAbs(xnn_f16_vabs_ukernel_fn vabs,
-            xnn_init_f16_default_params_fn init_params = nullptr) const;
+  void Test(xnn_f16_vabs_ukernel_fn vabs,
+            xnn_init_f16_default_params_fn init_params = nullptr,
+            Abs = Abs()) const;
 
-  void TestAbs(xnn_f32_vabs_ukernel_fn vabs,
-            xnn_init_f32_default_params_fn init_params = nullptr) const;
+  void Test(xnn_f32_vabs_ukernel_fn vabs,
+            xnn_init_f32_default_params_fn init_params = nullptr,
+            Abs = Abs()) const;
 
   void Test(xnn_f32_vclamp_ukernel_fn vclamp,
-            xnn_init_f32_minmax_params_fn init_params) const;
+            xnn_init_f32_minmax_params_fn init_params,
+            Default = Default()) const;
 
   void Test(xnn_f16_velu_ukernel_fn velu,
-            xnn_init_f16_elu_params_fn init_params) const;
+            xnn_init_f16_elu_params_fn init_params, Default = Default()) const;
 
   void Test(xnn_f32_velu_ukernel_fn velu,
-            xnn_init_f32_elu_params_fn init_params) const;
+            xnn_init_f32_elu_params_fn init_params, Default = Default()) const;
 
-  void TestExp(xnn_f32_vexp_ukernel_fn vexp,
-            xnn_init_f32_default_params_fn init_params = nullptr) const;
+  void Test(xnn_f32_vexp_ukernel_fn vexp,
+            xnn_init_f32_default_params_fn init_params = nullptr,
+            Exp = Exp()) const;
 
-  void TestGelu(xnn_f32_vgelu_ukernel_fn vgelu,
-            xnn_init_f32_default_params_fn init_params = nullptr) const;
+  void Test(xnn_f32_vgelu_ukernel_fn vgelu,
+            xnn_init_f32_default_params_fn init_params = nullptr,
+            Gelu = Gelu()) const;
 
   void Test(xnn_f16_vhswish_ukernel_fn vhswish,
-            xnn_init_f16_hswish_params_fn init_params = nullptr) const;
+            xnn_init_f16_hswish_params_fn init_params = nullptr,
+            Default = Default()) const;
 
   void Test(xnn_f32_vhswish_ukernel_fn vhswish,
-            xnn_init_f32_hswish_params_fn init_params = nullptr) const;
+            xnn_init_f32_hswish_params_fn init_params = nullptr,
+            Default = Default()) const;
 
   void Test(xnn_f16_vlrelu_ukernel_fn vlrelu,
-            xnn_init_f16_lrelu_params_fn init_params) const;
+            xnn_init_f16_lrelu_params_fn init_params,
+            Default = Default()) const;
 
   void Test(xnn_f32_vlrelu_ukernel_fn vlrelu,
-            xnn_init_f32_lrelu_params_fn init_params) const;
+            xnn_init_f32_lrelu_params_fn init_params,
+            Default = Default()) const;
 
-  void TestLog(xnn_f32_vlog_ukernel_fn vlog,
-            xnn_init_f32_default_params_fn init_params = nullptr) const;
+  void Test(xnn_f32_vlog_ukernel_fn vlog,
+            xnn_init_f32_default_params_fn init_params = nullptr,
+            Log = Log()) const;
 
-  void TestNeg(xnn_f16_vneg_ukernel_fn vneg,
-            xnn_init_f16_default_params_fn init_params = nullptr) const;
+  void Test(xnn_f16_vneg_ukernel_fn vneg,
+            xnn_init_f16_default_params_fn init_params = nullptr,
+            Neg = Neg()) const;
 
-  void TestNeg(xnn_f32_vneg_ukernel_fn vneg,
-            xnn_init_f32_default_params_fn init_params = nullptr) const;
+  void Test(xnn_f32_vneg_ukernel_fn vneg,
+            xnn_init_f32_default_params_fn init_params = nullptr,
+            Neg = Neg()) const;
 
   void Test(xnn_f16_vround_ukernel_fn vrnd, OpType op_type,
-            xnn_init_f16_rnd_params_fn init_params = nullptr) const;
+            xnn_init_f16_rnd_params_fn init_params = nullptr,
+            Default = Default()) const;
 
   void Test(xnn_f32_vround_ukernel_fn vrnd, OpType op_type,
-            xnn_init_f32_rnd_params_fn init_params = nullptr) const;
+            xnn_init_f32_rnd_params_fn init_params = nullptr,
+            Default = Default()) const;
 
   void Test(xnn_f16_vsigmoid_ukernel_fn vsigmoid,
-            xnn_init_f16_sigmoid_params_fn init_params = nullptr) const;
+            xnn_init_f16_sigmoid_params_fn init_params = nullptr,
+            Default = Default()) const;
 
   void Test(xnn_f32_vsigmoid_ukernel_fn vsigmoid,
-            xnn_init_f32_sigmoid_params_fn init_params = nullptr) const;
+            xnn_init_f32_sigmoid_params_fn init_params = nullptr,
+            Default = Default()) const;
 
-  void TestSqr(xnn_f16_vsqr_ukernel_fn vsqr,
-            xnn_init_f16_default_params_fn init_params = nullptr) const;
+  void Test(xnn_f16_vsqr_ukernel_fn vsqr,
+            xnn_init_f16_default_params_fn init_params = nullptr,
+            Sqr = Sqr()) const;
 
-  void TestSqr(xnn_f32_vsqr_ukernel_fn vsqr,
-            xnn_init_f32_default_params_fn init_params = nullptr) const;
+  void Test(xnn_f32_vsqr_ukernel_fn vsqr,
+            xnn_init_f32_default_params_fn init_params = nullptr,
+            Sqr = Sqr()) const;
 
   void Test(xnn_f16_vsqrt_ukernel_fn vsqrt,
-            xnn_init_f16_sqrt_params_fn init_params = nullptr) const;
+            xnn_init_f16_sqrt_params_fn init_params = nullptr,
+            Default = Default()) const;
 
   void Test(xnn_f32_vsqrt_ukernel_fn vsqrt,
-            xnn_init_f32_sqrt_params_fn init_params = nullptr) const;
+            xnn_init_f32_sqrt_params_fn init_params = nullptr,
+            Default = Default()) const;
 
   void Test(xnn_f16_vrsqrt_ukernel_fn vrsqrt,
-            xnn_init_f16_rsqrt_params_fn init_params = nullptr) const;
+            xnn_init_f16_rsqrt_params_fn init_params = nullptr,
+            Default = Default()) const;
 
   void Test(xnn_f32_vrsqrt_ukernel_fn vrsqrt,
-            xnn_init_f32_rsqrt_params_fn init_params = nullptr) const;
+            xnn_init_f32_rsqrt_params_fn init_params = nullptr,
+            Default = Default()) const;
 
   void Test(xnn_f16_vtanh_ukernel_fn vtanh,
-            xnn_init_f16_tanh_params_fn init_params = nullptr) const;
+            xnn_init_f16_tanh_params_fn init_params = nullptr,
+            Default = Default()) const;
 
   void Test(xnn_f32_vtanh_ukernel_fn vtanh,
-            xnn_init_f32_tanh_params_fn init_params = nullptr) const;
+            xnn_init_f32_tanh_params_fn init_params = nullptr,
+            Default = Default()) const;
 
   void Test(xnn_f16_vclamp_ukernel_fn vclamp,
-            xnn_init_f16_minmax_params_fn init_params) const;
+            xnn_init_f16_minmax_params_fn init_params,
+            Default = Default()) const;
 
   void Test(xnn_s8_vclamp_ukernel_fn vclamp,
-            xnn_init_s8_minmax_params_fn init_params) const;
+            xnn_init_s8_minmax_params_fn init_params,
+            Default = Default()) const;
 
   void Test(xnn_u8_vclamp_ukernel_fn vclamp,
-            xnn_init_u8_minmax_params_fn init_params) const;
+            xnn_init_u8_minmax_params_fn init_params,
+            Default = Default()) const;
 
-  void Test(xnn_u64_u32_vsqrtshift_ukernel_fn vsqrtshift) const;
+  void Test(xnn_u64_u32_vsqrtshift_ukernel_fn vsqrtshift, uint32_t,
+            Default = Default()) const;
 
  private:
-  // Generic test function for `fp32` `vunary` kernels.
+  template <typename T>
+  using void_or_float = typename std::conditional<std::is_same<T, float>::value, float, void>::type;
+
+  // Generic test function for `vunary` kernels.
   //
   // The function is templated on the type of the kernel parameters and takes
   // the following arguments:
   //
+  //  * `T`: The datatype to test. Should be implicitly convertible to and from
+  //    `float`.
   //  * `init_params`: A function that populates a given parameters data
   //    structure or returns `nullptr` if there is no default initialization.
   //  * `ref`: A function that computes the reference result for an input `x`.
   //  * `tol`: A function that computes the absolute tolerance for a reference
   //    result `y_ref`.
   //  * `range_min`, `range_max`: Limits for the range of input values.
-  template <typename UKernelParamsType, typename InitParamsFunc,
+  template <typename T, typename UKernelParamsType, typename InitParamsFunc,
             typename ReferenceFunc, typename ToleranceFunc>
-  void TestFP32(void (*ukernel)(size_t, const float*, float*,
+  void Test(void (*ukernel)(size_t, const void_or_float<T>*, void_or_float<T>*,
                                 const UKernelParamsType*),
                 InitParamsFunc init_params, ReferenceFunc ref,
                 ToleranceFunc tol, float range_min, float range_max) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(range_min, range_max);
 
-    std::vector<float> x(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(batch_size() +
-                         (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
-    std::vector<float> y_ref(batch_size());
+    std::vector<T> x(batch_size() + XNN_EXTRA_BYTES / sizeof(T));
+    std::vector<T> y(batch_size() +
+                         (inplace() ? XNN_EXTRA_BYTES / sizeof(T) : 0));
+    std::vector<T> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
       if (inplace()) {
-        memcpy(y.data(), x.data(), y.size() * sizeof(float));
+        memcpy(y.data(), x.data(), y.size() * sizeof(T));
       } else {
         std::fill(y.begin(), y.end(), nanf(""));
       }
-      const float* x_data = inplace() ? y.data() : x.data();
+      const T* x_data = inplace() ? y.data() : x.data();
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -281,150 +359,13 @@ class VUnaryMicrokernelTester {
       const UKernelParamsType* params_ptr = init_params(&params);
 
       // Call optimized micro-kernel.
-      ukernel(batch_size() * sizeof(float), x_data, y.data(), params_ptr);
+      ukernel(batch_size() * sizeof(T), x_data, y.data(), params_ptr);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         ASSERT_NEAR(y[i], y_ref[i], tol(y_ref[i]))
             << "at " << i << " / " << batch_size() << ", x[" << i
             << "] = " << std::scientific << x[i];
-      }
-    }
-  }
-
-  union bf16float {
-    uint16_t bf[2];
-    float f;
-  };
-  static float cvt_bf16_f32(uint16_t r) {
-    bf16float q{};
-    q.f = 0;
-    q.bf[1] = r;
-    return q.f;
-  }
-
-  static uint16_t cvt_f32_bf16(float f) {
-    bf16float q{};
-    q.f = f;
-    return q.bf[1];
-  }
-
-  // Generic test function for `bf16` `vunary` kernels.
-  //
-  // The function is templated on the type of the kernel parameters and takes
-  // the following arguments:
-  //
-  //  * `init_params`: A function that populates a given parameters data
-  //    structure or returns `nullptr` if there is no default initialization.
-  //  * `ref`: A function that computes the reference result for an input `x` of
-  //    type `float`, converted from the actual `bf16` input.
-  //  * `tol`: A function that computes the absolute tolerance for a reference
-  //    result `y_ref` of type `float`. Note that the computed result `y` will
-  //    be converted back to `float` for the comparison.
-  //  * `range_min`, `range_max`: Limits for the range of input values.
-  template <typename UKernelParamsType, typename InitParamsFunc,
-            typename ReferenceFunc, typename ToleranceFunc>
-  void TestBF16(void (*ukernel)(size_t, const void*, void*,
-                                const UKernelParamsType*),
-                InitParamsFunc init_params, ReferenceFunc ref,
-                ToleranceFunc tol, float range_min, float range_max) const {
-    xnnpack::ReplicableRandomDevice rng;
-    auto distribution =
-        std::uniform_real_distribution<float>(range_min, range_max);
-    auto bf16rng = [&]() {
-      return cvt_f32_bf16(distribution(rng));
-    };
-
-    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> y(
-        batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
-    std::vector<float> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(bf16rng));
-      } else {
-        std::generate(x.begin(), x.end(), std::ref(bf16rng));
-        std::fill(y.begin(), y.end(), UINT16_C(0xFFFF) /* NaN */);
-      }
-      const uint16_t* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = ref(cvt_bf16_f32(x_data[i]));
-      }
-
-      // Initialize the params.
-      UKernelParamsType params;
-      const UKernelParamsType* params_ptr = init_params(&params);
-
-      // Call optimized micro-kernel.
-      ukernel(batch_size() * sizeof(uint16_t), x_data, y.data(), params_ptr);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(cvt_bf16_f32(y[i]), y_ref[i], tol(y_ref[i]))
-            << "at " << i << " / " << batch_size() << ", x[" << i
-            << "] = " << cvt_bf16_f32(x[i]);
-      }
-    }
-  }
-
-  // Generic test function for `fp16` `vunary` kernels.
-  //
-  // The function is templated on the type of the kernel parameters and takes
-  // the following arguments:
-  //
-  //  * `init_params`: A function that populates a given parameters data
-  //    structure or returns `nullptr` if there is no default initialization.
-  //  * `ref`: A function that computes the reference result for an input `x` of
-  //    type `float`, converted from the actual `fp16` input.
-  //  * `tol`: A function that computes the absolute tolerance for a reference
-  //    result `y_ref` of type `float`. Note that the computed result `y` will
-  //    be converted back to `float` for the comparison.
-  //  * `range_min`, `range_max`: Limits for the range of input values.
-  template <typename UKernelParamsType, typename InitParamsFunc,
-            typename ReferenceFunc, typename ToleranceFunc>
-  void TestFP16(void (*ukernel)(size_t, const void*, void*,
-                                const UKernelParamsType*),
-                InitParamsFunc init_params, ReferenceFunc ref,
-                ToleranceFunc tol, float range_min, float range_max) const {
-    xnnpack::ReplicableRandomDevice rng;
-    auto distribution =
-        std::uniform_real_distribution<float>(range_min, range_max);
-    auto f16rng = [&]() {
-      return fp16_ieee_from_fp32_value(distribution(rng));
-    };
-
-    std::vector<uint16_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> y(
-        batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
-    std::vector<float> y_ref(batch_size());
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(f16rng));
-      } else {
-        std::generate(x.begin(), x.end(), std::ref(f16rng));
-        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
-      }
-      const uint16_t* x_data = inplace() ? y.data() : x.data();
-
-      // Compute reference results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        y_ref[i] = ref(fp16_ieee_to_fp32_value(x_data[i]));
-      }
-
-      // Initialize the params.
-      UKernelParamsType params;
-      const UKernelParamsType* params_ptr = init_params(&params);
-
-      // Call optimized micro-kernel.
-      ukernel(batch_size() * sizeof(uint16_t), x_data, y.data(), params_ptr);
-
-      // Verify results.
-      for (size_t i = 0; i < batch_size(); i++) {
-        ASSERT_NEAR(fp16_ieee_to_fp32_value(y[i]), y_ref[i], tol(y_ref[i]))
-            << "at " << i << " / " << batch_size() << ", x[" << i
-            << "] = " << fp16_ieee_to_fp32_value(x[i]);
       }
     }
   }
@@ -440,3 +381,104 @@ class VUnaryMicrokernelTester {
   uint8_t qmax_ = 255;
   size_t iterations_ = 15;
 };
+
+// TODO(b/361780131): This could probably be rewritten as some kind of GTest
+// instantiate thing instead of macros.
+#define XNN_TEST_UNARY_BATCH_EQ(ukernel, arch_flags, batch_tile, datatype, \
+                                ...)                                       \
+  TEST(ukernel, batch_eq) {                                                \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                  \
+    const size_t batch_scale = get_batch_scale<datatype>();                \
+    VUnaryMicrokernelTester()                                              \
+        .batch_size(batch_tile* batch_scale)                               \
+        .Test(__VA_ARGS__);                                                \
+  }
+
+#define XNN_TEST_UNARY_BATCH_DIV(ukernel, arch_flags, batch_tile, datatype, \
+                                 ...)                                       \
+  TEST(ukernel, batch_div) {                                                \
+    if (batch_tile == 1) return;                                            \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                   \
+    const size_t batch_scale = get_batch_scale<datatype>();                 \
+    const size_t batch_step = batch_tile * batch_scale;                     \
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step;  \
+         batch_size += batch_step) {                                        \
+      VUnaryMicrokernelTester().batch_size(batch_size).Test(__VA_ARGS__);   \
+    }                                                                       \
+  }
+
+#define XNN_TEST_UNARY_BATCH_LT(ukernel, arch_flags, batch_tile, datatype, \
+                                ...)                                       \
+  TEST(ukernel, batch_lt) {                                                \
+    if (batch_tile == 1) return;                                           \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                  \
+    const size_t batch_scale = get_batch_scale<datatype>();                \
+    const size_t batch_end = batch_tile * batch_scale;                     \
+    for (size_t batch_size = 1; batch_size < batch_end; batch_size++) {    \
+      VUnaryMicrokernelTester().batch_size(batch_size).Test(__VA_ARGS__);  \
+    }                                                                      \
+  }
+
+#define XNN_TEST_UNARY_BATCH_GT(ukernel, arch_flags, batch_tile, datatype, \
+                                ...)                                       \
+  TEST(ukernel, batch_gt) {                                                \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                  \
+    const size_t batch_scale = get_batch_scale<datatype>();                \
+    const size_t batch_step = batch_tile * batch_scale;                    \
+    const size_t batch_end = batch_tile == 1 ? 10 : 2 * batch_step;        \
+    for (size_t batch_size = batch_step + 1; batch_size < batch_end;       \
+         batch_size++) {                                                   \
+      VUnaryMicrokernelTester().batch_size(batch_size).Test(__VA_ARGS__);  \
+    }                                                                      \
+  }
+
+#define XNN_TEST_UNARY_INPLACE(ukernel, arch_flags, batch_tile, datatype, ...) \
+  TEST(ukernel, inplace) {                                                     \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                      \
+    const size_t batch_scale = get_batch_scale<datatype>();                    \
+    const size_t batch_end = batch_tile * batch_scale;                         \
+    const size_t batch_step = std::max(1, batch_tile - 1);                     \
+    for (size_t batch_size = 1; batch_size <= batch_end;                       \
+         batch_size += batch_step) {                                           \
+      VUnaryMicrokernelTester()                                                \
+          .batch_size(batch_size)                                              \
+          .inplace(true)                                                       \
+          .Test(__VA_ARGS__);                                                  \
+    }                                                                          \
+  }
+
+#define XNN_TEST_UNARY_QMIN(ukernel, arch_flags, batch_tile, datatype, ...) \
+  TEST(ukernel, qmin) {                                                     \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                   \
+    const size_t batch_scale = get_batch_scale<datatype>();                 \
+    const size_t batch_end = batch_tile * batch_scale;                      \
+    const size_t batch_step =                                               \
+        batch_scale == 1 ? std::max(1, batch_tile - 1) : batch_end - 1;     \
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {    \
+      for (size_t batch_size = 1; batch_size <= 5 * batch_end;              \
+           batch_size += batch_step) {                                      \
+        VUnaryMicrokernelTester()                                           \
+            .batch_size(batch_size)                                         \
+            .qmin(qmin)                                                     \
+            .Test(__VA_ARGS__);                                             \
+      }                                                                     \
+    }                                                                       \
+  }
+
+#define XNN_TEST_UNARY_QMAX(ukernel, arch_flags, batch_tile, datatype, ...) \
+  TEST(ukernel, qmax) {                                                     \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                   \
+    const size_t batch_scale = get_batch_scale<datatype>();                 \
+    const size_t batch_end = batch_tile * batch_scale;                      \
+    const size_t batch_step =                                               \
+        batch_scale == 1 ? std::max(1, batch_tile - 1) : batch_end - 1;     \
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {    \
+      for (size_t batch_size = 1; batch_size <= 5 * batch_end;              \
+           batch_size += batch_step) {                                      \
+        VUnaryMicrokernelTester()                                           \
+            .batch_size(batch_size)                                         \
+            .qmax(qmax)                                                     \
+            .Test(__VA_ARGS__);                                             \
+      }                                                                     \
+    }                                                                       \
+  }

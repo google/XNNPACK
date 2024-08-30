@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: test/f16-vlrelu.yaml
+//   Microkernel: f16-vlrelu
 //   Generator: tools/generate-vunary-test.py
 
 
@@ -24,258 +24,27 @@
 #include "next_prime.h"
 #include "vunary-microkernel-tester.h"
 
-
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  TEST(F16_VLRELU__NEONFP16ARITH_U8, batch_eq_8) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    VUnaryMicrokernelTester()
-      .batch_size(8)
-      .Test(xnn_f16_vlrelu_ukernel__neonfp16arith_u8, xnn_init_f16_lrelu_fp16arith_params);
-  }
-
-  TEST(F16_VLRELU__NEONFP16ARITH_U8, batch_div_8) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t batch_step = 8;
-    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_vlrelu_ukernel__neonfp16arith_u8, xnn_init_f16_lrelu_fp16arith_params);
-    }
-  }
-
-  TEST(F16_VLRELU__NEONFP16ARITH_U8, batch_lt_8) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t batch_step = 8;
-    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_vlrelu_ukernel__neonfp16arith_u8, xnn_init_f16_lrelu_fp16arith_params);
-    }
-  }
-
-  TEST(F16_VLRELU__NEONFP16ARITH_U8, batch_gt_8) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t batch_step = 8;
-    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_vlrelu_ukernel__neonfp16arith_u8, xnn_init_f16_lrelu_fp16arith_params);
-    }
-  }
-
-  TEST(F16_VLRELU__NEONFP16ARITH_U8, inplace) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t batch_step = 8;
-    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 7) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .inplace(true)
-        .Test(xnn_f16_vlrelu_ukernel__neonfp16arith_u8, xnn_init_f16_lrelu_fp16arith_params);
-    }
-  }
-
-  TEST(F16_VLRELU__NEONFP16ARITH_U8, slope) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t batch_step = 8;
-    for (float slope : std::array<float, 3>({-0.7f, 0.3f, 1.3f})) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 7) {
-        VUnaryMicrokernelTester()
-          .batch_size(batch_size)
-          .slope(slope)
-          .Test(xnn_f16_vlrelu_ukernel__neonfp16arith_u8, xnn_init_f16_lrelu_fp16arith_params);
-      }
-    }
-  }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-
-
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  TEST(F16_VLRELU__NEONFP16ARITH_U16, batch_eq_16) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    VUnaryMicrokernelTester()
-      .batch_size(16)
-      .Test(xnn_f16_vlrelu_ukernel__neonfp16arith_u16, xnn_init_f16_lrelu_fp16arith_params);
-  }
-
-  TEST(F16_VLRELU__NEONFP16ARITH_U16, batch_div_16) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t batch_step = 16;
-    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_vlrelu_ukernel__neonfp16arith_u16, xnn_init_f16_lrelu_fp16arith_params);
-    }
-  }
-
-  TEST(F16_VLRELU__NEONFP16ARITH_U16, batch_lt_16) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t batch_step = 16;
-    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_vlrelu_ukernel__neonfp16arith_u16, xnn_init_f16_lrelu_fp16arith_params);
-    }
-  }
-
-  TEST(F16_VLRELU__NEONFP16ARITH_U16, batch_gt_16) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t batch_step = 16;
-    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_vlrelu_ukernel__neonfp16arith_u16, xnn_init_f16_lrelu_fp16arith_params);
-    }
-  }
-
-  TEST(F16_VLRELU__NEONFP16ARITH_U16, inplace) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t batch_step = 16;
-    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 15) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .inplace(true)
-        .Test(xnn_f16_vlrelu_ukernel__neonfp16arith_u16, xnn_init_f16_lrelu_fp16arith_params);
-    }
-  }
-
-  TEST(F16_VLRELU__NEONFP16ARITH_U16, slope) {
-    TEST_REQUIRES_ARM_NEON_FP16_ARITH;
-    const size_t batch_step = 16;
-    for (float slope : std::array<float, 3>({-0.7f, 0.3f, 1.3f})) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 15) {
-        VUnaryMicrokernelTester()
-          .batch_size(batch_size)
-          .slope(slope)
-          .Test(xnn_f16_vlrelu_ukernel__neonfp16arith_u16, xnn_init_f16_lrelu_fp16arith_params);
-      }
-    }
-  }
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(F16_VLRELU__F16C_U8, batch_eq_8) {
-    TEST_REQUIRES_X86_F16C;
-    VUnaryMicrokernelTester()
-      .batch_size(8)
-      .Test(xnn_f16_vlrelu_ukernel__f16c_u8, xnn_init_f16_lrelu_scalar_params);
-  }
-
-  TEST(F16_VLRELU__F16C_U8, batch_div_8) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t batch_step = 8;
-    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_vlrelu_ukernel__f16c_u8, xnn_init_f16_lrelu_scalar_params);
-    }
-  }
-
-  TEST(F16_VLRELU__F16C_U8, batch_lt_8) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t batch_step = 8;
-    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_vlrelu_ukernel__f16c_u8, xnn_init_f16_lrelu_scalar_params);
-    }
-  }
-
-  TEST(F16_VLRELU__F16C_U8, batch_gt_8) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t batch_step = 8;
-    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_vlrelu_ukernel__f16c_u8, xnn_init_f16_lrelu_scalar_params);
-    }
-  }
-
-  TEST(F16_VLRELU__F16C_U8, inplace) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t batch_step = 8;
-    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 7) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .inplace(true)
-        .Test(xnn_f16_vlrelu_ukernel__f16c_u8, xnn_init_f16_lrelu_scalar_params);
-    }
-  }
-
-  TEST(F16_VLRELU__F16C_U8, slope) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t batch_step = 8;
-    for (float slope : std::array<float, 3>({-0.7f, 0.3f, 1.3f})) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 7) {
-        VUnaryMicrokernelTester()
-          .batch_size(batch_size)
-          .slope(slope)
-          .Test(xnn_f16_vlrelu_ukernel__f16c_u8, xnn_init_f16_lrelu_scalar_params);
-      }
-    }
-  }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(F16_VLRELU__F16C_U16, batch_eq_16) {
-    TEST_REQUIRES_X86_F16C;
-    VUnaryMicrokernelTester()
-      .batch_size(16)
-      .Test(xnn_f16_vlrelu_ukernel__f16c_u16, xnn_init_f16_lrelu_scalar_params);
-  }
-
-  TEST(F16_VLRELU__F16C_U16, batch_div_16) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t batch_step = 16;
-    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step; batch_size += batch_step) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_vlrelu_ukernel__f16c_u16, xnn_init_f16_lrelu_scalar_params);
-    }
-  }
-
-  TEST(F16_VLRELU__F16C_U16, batch_lt_16) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t batch_step = 16;
-    for (size_t batch_size = 1; batch_size < batch_step; batch_size++) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_vlrelu_ukernel__f16c_u16, xnn_init_f16_lrelu_scalar_params);
-    }
-  }
-
-  TEST(F16_VLRELU__F16C_U16, batch_gt_16) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t batch_step = 16;
-    for (size_t batch_size = batch_step + 1; batch_size < 2 * batch_step; batch_size++) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .Test(xnn_f16_vlrelu_ukernel__f16c_u16, xnn_init_f16_lrelu_scalar_params);
-    }
-  }
-
-  TEST(F16_VLRELU__F16C_U16, inplace) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t batch_step = 16;
-    for (size_t batch_size = 1; batch_size <= batch_step; batch_size += 15) {
-      VUnaryMicrokernelTester()
-        .batch_size(batch_size)
-        .inplace(true)
-        .Test(xnn_f16_vlrelu_ukernel__f16c_u16, xnn_init_f16_lrelu_scalar_params);
-    }
-  }
-
-  TEST(F16_VLRELU__F16C_U16, slope) {
-    TEST_REQUIRES_X86_F16C;
-    const size_t batch_step = 16;
-    for (float slope : std::array<float, 3>({-0.7f, 0.3f, 1.3f})) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_step; batch_size += 15) {
-        VUnaryMicrokernelTester()
-          .batch_size(batch_size)
-          .slope(slope)
-          .Test(xnn_f16_vlrelu_ukernel__f16c_u16, xnn_init_f16_lrelu_scalar_params);
-      }
-    }
-  }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)\
+                                                                                                                 \
+XNN_TEST_UNARY_BATCH_EQ(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                        \
+XNN_TEST_UNARY_BATCH_DIV(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                       \
+XNN_TEST_UNARY_BATCH_LT(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                        \
+XNN_TEST_UNARY_BATCH_GT(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                        \
+                                                                                                                 \
+XNN_TEST_UNARY_INPLACE(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                         \
+TEST(ukernel, slope) {                                                                                           \
+  TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                          \
+  const size_t batch_scale = get_batch_scale<datatype>();                                                        \
+  const size_t batch_end = batch_tile * batch_scale;                                                             \
+  const size_t batch_step = std::max(1, batch_tile - 1);                                                         \
+  for (float slope : std::array<float, 3>({-0.7f, 0.3f, 1.3f})) {                                                \
+    for (size_t batch_size = 1; batch_size <= 5 * batch_end; batch_size += batch_step) {                         \
+      VUnaryMicrokernelTester()                                                                                  \
+        .batch_size(batch_size)                                                                                  \
+        .slope(slope)                                                                                            \
+        .Test(ukernel, init_params);                                                                             \
+    }                                                                                                            \
+  }                                                                                                              \
+}
+#include "src/f16-vlrelu/f16-vlrelu.h"
+#undef XNN_UKERNEL_WITH_PARAMS

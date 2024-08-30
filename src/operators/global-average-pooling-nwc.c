@@ -234,7 +234,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f16(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f16_scaleminmax_params params;
+  struct xnn_f16_scaleminmax_params params;
   if (gavgpool_config->init.f16 != NULL) {
     gavgpool_config->init.f16(
       &params, 0 /* scale */, fp16_ieee_from_fp32_value(output_min), fp16_ieee_from_fp32_value(output_max));
@@ -282,7 +282,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f32(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f32_scaleminmax_params params;
+  struct xnn_f32_scaleminmax_params params;
   if (gavgpool_config->init.f32 != NULL) {
     gavgpool_config->init.f32(&params, 0.0f /* scale */, output_min, output_max);
   }
@@ -331,7 +331,7 @@ enum xnn_status xnn_create_global_sum_pooling_nwc_f16(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f16_scaleminmax_params params;
+  struct xnn_f16_scaleminmax_params params;
   if (gavgpool_config->init.f16 != NULL) {
     gavgpool_config->init.f16(
       &params,
@@ -382,7 +382,7 @@ enum xnn_status xnn_create_global_sum_pooling_nwc_f32(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f32_scaleminmax_params params;
+  struct xnn_f32_scaleminmax_params params;
   if (gavgpool_config->init.f32 != NULL) {
     gavgpool_config->init.f32(&params, /*scale=*/1.0f, output_min, output_max);
   }

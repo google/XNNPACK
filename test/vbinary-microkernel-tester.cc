@@ -29,7 +29,8 @@
 #include "replicable_random_device.h"
 
 void VBinaryMicrokernelTester::Test(xnn_f16_vbinary_ukernel_fn vbinary,
-                                    OpType op_type) const {
+                                    OpType op_type,
+                                    xnn_init_f16_default_params_fn) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
@@ -130,8 +131,9 @@ void VBinaryMicrokernelTester::Test(
   }
 }
 
-void VBinaryMicrokernelTester::Test(
-    xnn_f32_vbinary_ukernel_fn vbinary, OpType op_type) const {
+void VBinaryMicrokernelTester::Test(xnn_f32_vbinary_ukernel_fn vbinary,
+                                    OpType op_type,
+                                    xnn_init_f32_default_params_fn) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
@@ -164,8 +166,9 @@ void VBinaryMicrokernelTester::Test(
   }
 }
 
-void VBinaryMicrokernelTester::Test(
-    xnn_s32_vbinary_ukernel_fn vbinary, OpType op_type) const {
+void VBinaryMicrokernelTester::Test(xnn_s32_vbinary_ukernel_fn vbinary,
+                                    OpType op_type,
+                                    xnn_init_s32_default_params_fn) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<int32_t> s32dist(-100000, 100000);
 
@@ -199,7 +202,8 @@ void VBinaryMicrokernelTester::Test(
 }
 
 void VBinaryMicrokernelTester::Test(
-    xnn_f32_vbinary_relu_ukernel_fn vbinary_relu, OpType op_type) const {
+    xnn_f32_vbinary_relu_ukernel_fn vbinary_relu, OpType op_type,
+    xnn_init_f32_relu_params_fn) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> lhs_f32dist(-1.0f, 1.0f);
   // For denominator, avoid 0 so we don't get Infinity as the result.

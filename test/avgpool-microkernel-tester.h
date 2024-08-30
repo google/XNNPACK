@@ -25,6 +25,7 @@
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/requantization.h"
+#include "next_prime.h"
 #include "replicable_random_device.h"
 
 class AvgPoolMicrokernelTester {
@@ -760,7 +761,7 @@ class AvgPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_pavgpool_minmax_unipass_ukernel_fn pavgpool_minmax, xnn_init_f16_minmax_params_fn init_params) const {
+  void Test(xnn_f16_pavgpool_minmax_unipass_ukernel_fn pavgpool_minmax, xnn_init_f16_scaleminmax_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
     std::uniform_real_distribution<float> m32dist(0.1f, 0.5f);
@@ -821,8 +822,8 @@ class AvgPoolMicrokernelTester {
       }
 
       // Prepare parameters.
-      xnn_f16_minmax_params params;
-      init_params(&params, output_min_as_half, output_max_as_half);
+      xnn_f16_scaleminmax_params params;
+      init_params(&params, 0, output_min_as_half, output_max_as_half);
 
       // Call optimized micro-kernel.
       pavgpool_minmax(output_pixels(), pooling_elements(), channels(),
@@ -855,7 +856,7 @@ class AvgPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_f16_pavgpool_minmax_multipass_ukernel_fn pavgpool_minmax, xnn_init_f16_minmax_params_fn init_params) const {
+  void Test(xnn_f16_pavgpool_minmax_multipass_ukernel_fn pavgpool_minmax, xnn_init_f16_scaleminmax_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
     std::uniform_real_distribution<float> m32dist(0.1f, 0.5f);
@@ -917,8 +918,8 @@ class AvgPoolMicrokernelTester {
       }
 
       // Prepare parameters.
-      xnn_f16_minmax_params params;
-      init_params(&params, output_min_as_half, output_max_as_half);
+      xnn_f16_scaleminmax_params params;
+      init_params(&params, 0, output_min_as_half, output_max_as_half);
 
       // Call optimized micro-kernel.
       pavgpool_minmax(output_pixels(), pooling_elements(), channels(),
@@ -1134,6 +1135,67 @@ class AvgPoolMicrokernelTester {
     }
   }
 
+  struct TestF16AvgPoolFns {
+    xnn_f16_avgpool_minmax_unipass_ukernel_fn uni;
+    xnn_f16_avgpool_minmax_multipass_ukernel_fn multi;
+    xnn_init_f16_scaleminmax_params_fn init;
+  };
+
+  void Test(const TestF16AvgPoolFns& fns) const {
+    assert((fns.uni != nullptr) != (fns.multi != nullptr));
+    if (fns.uni) Test(fns.uni, fns.init);
+    else Test(fns.multi, fns.init);
+  }
+
+  struct TestF32AvgPoolFns {
+    xnn_f32_avgpool_minmax_unipass_ukernel_fn uni;
+    xnn_f32_avgpool_minmax_multipass_ukernel_fn multi;
+    xnn_init_f32_scaleminmax_params_fn init;
+  };
+
+  void Test(const TestF32AvgPoolFns& fns) const {
+    assert((fns.uni != nullptr) != (fns.multi != nullptr));
+    if (fns.uni) Test(fns.uni, fns.init);
+    else Test(fns.multi, fns.init);
+  }
+
+  struct TestQU8AvgPoolFns {
+    xnn_qu8_avgpool_minmax_unipass_ukernel_fn uni;
+    xnn_qu8_avgpool_minmax_multipass_ukernel_fn multi;
+    xnn_init_qu8_avgpool_minmax_params_fn init;
+    xnn_qu8_requantize_fn requantize;
+  };
+
+  void Test(const TestQU8AvgPoolFns& fns) const {
+    assert((fns.uni != nullptr) != (fns.multi != nullptr));
+    if (fns.uni) Test(fns.uni, fns.init, fns.requantize);
+    else Test(fns.multi, fns.init, fns.requantize);
+  }
+
+  struct TestF16PAvgPoolFns {
+    xnn_f16_pavgpool_minmax_unipass_ukernel_fn uni;
+    xnn_f16_pavgpool_minmax_multipass_ukernel_fn multi;
+    xnn_init_f16_scaleminmax_params_fn init;
+  };
+
+  void Test(const TestF16PAvgPoolFns& fns) const {
+    assert((fns.uni != nullptr) != (fns.multi != nullptr));
+    if (fns.uni) Test(fns.uni, fns.init);
+    else Test(fns.multi, fns.init);
+  }
+
+  struct TestF32PAvgPoolFns {
+    xnn_f32_pavgpool_minmax_unipass_ukernel_fn uni;
+    xnn_f32_pavgpool_minmax_multipass_ukernel_fn multi;
+    xnn_init_f32_minmax_params_fn init;
+  };
+
+  void Test(const TestF32PAvgPoolFns& fns) const {
+    assert((fns.uni != nullptr) != (fns.multi != nullptr));
+    if (fns.uni) Test(fns.uni, fns.init);
+    else Test(fns.multi, fns.init);
+  }
+
  private:
   size_t output_pixels_{1};
   size_t pooling_elements_{1};
@@ -1151,4 +1213,2352 @@ class AvgPoolMicrokernelTester {
   uint8_t qmin_{0};
   uint8_t qmax_{255};
   size_t iterations_{3};
+};
+
+template<typename Fns>
+struct XnnAvgPoolTestParam {
+  const char *name;
+  Fns fns;
+  uint64_t arch_flags;
+  size_t channel_tile, channel_scaled_tile, primary_tile, incremental_tile;
+};
+
+template<typename Fns>
+class XnnAvgPoolTest : public testing::TestWithParam<XnnAvgPoolTestParam<Fns>> {
+protected:
+  const XnnAvgPoolTestParam<Fns>& TestParam() const {
+    return this->GetParam();
+  }
+
+  void channels_eq_channel_tile_unipass_fulltile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    AvgPoolMicrokernelTester()
+      .pooling_elements(TestParam().primary_tile)
+      .pooling_tile(TestParam().primary_tile)
+      .channels(channel_tile)
+      .Test(TestParam().fns);
+  }
+
+  void channels_eq_channel_tile_unipass_fulltile_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    AvgPoolMicrokernelTester()
+      .pooling_elements(TestParam().primary_tile)
+      .pooling_tile(TestParam().primary_tile)
+      .channels(channel_tile)
+      .input_offset(TestParam().channel_scaled_tile == TestParam().channel_tile ?
+                    xnnpack::NextPrime(TestParam().channel_tile + 1) :
+                    channel_tile + 1)
+      .Test(TestParam().fns);
+  }
+
+  void channels_eq_channel_tile_unipass_fulltile_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(TestParam().primary_tile)
+        .pooling_tile(TestParam().primary_tile)
+        .channels(channel_tile)
+        .input_offset(TestParam().channel_scaled_tile == TestParam().channel_tile ?
+                      xnnpack::NextPrime(TestParam().channel_tile + 1) :
+                      channel_tile + 1)
+        .zero_index_mod2(zero_index_mod2)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_eq_channel_tile_unipass_fulltile_with_qmin() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    AvgPoolMicrokernelTester()
+      .pooling_elements(TestParam().primary_tile)
+      .pooling_tile(TestParam().primary_tile)
+      .channels(channel_tile)
+      .qmin(128)
+      .Test(TestParam().fns);
+  }
+
+  void channels_eq_channel_tile_unipass_fulltile_with_qmax() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    AvgPoolMicrokernelTester()
+      .pooling_elements(TestParam().primary_tile)
+      .pooling_tile(TestParam().primary_tile)
+      .channels(channel_tile)
+      .qmax(128)
+      .Test(TestParam().fns);
+  }
+
+  void channels_eq_channel_tile_unipass_subtile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = 2; pooling_elements < TestParam().primary_tile; pooling_elements++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(TestParam().primary_tile)
+        .channels(channel_tile)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_eq_channel_tile_unipass_subtile_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = 2; pooling_elements < TestParam().primary_tile; pooling_elements++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(TestParam().primary_tile)
+        .channels(channel_tile)
+        .input_offset(TestParam().channel_scaled_tile == TestParam().channel_tile ?
+                      xnnpack::NextPrime(TestParam().channel_tile + 1) :
+                      channel_tile + 1)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_eq_channel_tile_unipass_subtile_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = 2; pooling_elements < TestParam().primary_tile; pooling_elements++) {
+      for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile)
+          .channels(channel_tile)
+          .input_offset(TestParam().channel_scaled_tile == TestParam().channel_tile ?
+                        xnnpack::NextPrime(TestParam().channel_tile + 1) :
+                        channel_tile + 1)
+          .zero_index_mod2(zero_index_mod2)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_div_channel_tile_unipass_fulltile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(TestParam().primary_tile)
+        .pooling_tile(TestParam().primary_tile)
+        .channels(channels)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_div_channel_tile_unipass_fulltile_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(TestParam().primary_tile)
+        .pooling_tile(TestParam().primary_tile)
+        .channels(channels)
+        .input_offset(channel_tile*8)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_div_channel_tile_unipass_fulltile_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile)
+          .pooling_tile(TestParam().primary_tile)
+          .channels(channels)
+          .input_offset(channel_tile*8)
+          .zero_index_mod2(zero_index_mod2)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_div_channel_tile_unipass_fulltile_with_qmin() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(TestParam().primary_tile)
+        .pooling_tile(TestParam().primary_tile)
+        .channels(channels)
+        .qmin(128)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_div_channel_tile_unipass_fulltile_with_qmax() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(TestParam().primary_tile)
+        .pooling_tile(TestParam().primary_tile)
+        .channels(channels)
+        .qmax(128)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_div_channel_tile_unipass_subtile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = 2; pooling_elements < TestParam().primary_tile; pooling_elements++) {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile)
+          .channels(channels)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_div_channel_tile_unipass_subtile_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = 2; pooling_elements < TestParam().primary_tile; pooling_elements++) {
+      for (size_t channels = TestParam().channel_tile * 2; channels < TestParam().channel_tile * 8; channels += TestParam().channel_tile) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile)
+          .channels(channels)
+          .input_offset(xnnpack::NextPrime(TestParam().channel_tile * 8))
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_div_channel_tile_unipass_subtile_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = 2; pooling_elements < TestParam().primary_tile; pooling_elements++) {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+        for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile)
+            .channels(channels)
+            .input_offset(channel_tile*8)
+            .zero_index_mod2(zero_index_mod2)
+            .Test(TestParam().fns);
+        }
+      }
+    }
+  }
+
+  void channels_lt_channel_tile_unipass_fulltile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(TestParam().primary_tile)
+        .pooling_tile(TestParam().primary_tile)
+        .channels(channels)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_lt_channel_tile_unipass_fulltile_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(TestParam().primary_tile)
+        .pooling_tile(TestParam().primary_tile)
+        .channels(channels)
+        .input_offset(TestParam().channel_scaled_tile == TestParam().channel_tile ?
+                      xnnpack::NextPrime(TestParam().channel_tile) :
+                      channel_tile)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_lt_channel_tile_unipass_fulltile_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile)
+          .pooling_tile(TestParam().primary_tile)
+          .channels(channels)
+          .input_offset(TestParam().channel_scaled_tile == TestParam().channel_tile ?
+                        xnnpack::NextPrime(TestParam().channel_tile) :
+                        channel_tile)
+          .zero_index_mod2(zero_index_mod2)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_lt_channel_tile_unipass_fulltile_with_qmin() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(TestParam().primary_tile)
+        .pooling_tile(TestParam().primary_tile)
+        .channels(channels)
+        .qmin(128)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_lt_channel_tile_unipass_fulltile_with_qmax() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(TestParam().primary_tile)
+        .pooling_tile(TestParam().primary_tile)
+        .channels(channels)
+        .qmax(128)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_lt_channel_tile_unipass_subtile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = 2; pooling_elements < TestParam().primary_tile; pooling_elements++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile)
+          .channels(channels)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_lt_channel_tile_unipass_subtile_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = 2; pooling_elements < TestParam().primary_tile; pooling_elements++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile)
+          .channels(channels)
+          .input_offset(TestParam().channel_scaled_tile == TestParam().channel_tile ?
+                        xnnpack::NextPrime(TestParam().channel_tile) :
+                        channel_tile)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_lt_channel_tile_unipass_subtile_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = 2; pooling_elements < TestParam().primary_tile; pooling_elements++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
+        for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile)
+            .channels(channels)
+            .input_offset(TestParam().channel_scaled_tile == TestParam().channel_tile ?
+                          xnnpack::NextPrime(TestParam().channel_tile) :
+                          channel_tile)
+            .zero_index_mod2(zero_index_mod2)
+            .Test(TestParam().fns);
+        }
+      }
+    }
+  }
+
+  void channels_gt_channel_tile_unipass_fulltile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile)
+          .pooling_tile(TestParam().primary_tile)
+          .channels(channels)
+          .Test(TestParam().fns);
+      }
+    } else {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile)
+          .pooling_tile(TestParam().primary_tile)
+          .channels(channels)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_gt_channel_tile_unipass_fulltile_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile)
+          .pooling_tile(TestParam().primary_tile)
+          .channels(channels)
+          .input_offset(xnnpack::NextPrime(TestParam().channel_tile * 2))
+          .Test(TestParam().fns);
+      }
+    } else {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile)
+          .pooling_tile(TestParam().primary_tile)
+          .channels(channels)
+          .input_offset(channel_tile*2)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_gt_channel_tile_unipass_fulltile_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+        for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(TestParam().primary_tile)
+            .pooling_tile(TestParam().primary_tile)
+            .channels(channels)
+            .input_offset(xnnpack::NextPrime(TestParam().channel_tile * 2))
+            .zero_index_mod2(zero_index_mod2)
+            .Test(TestParam().fns);
+        }
+      }
+    } else {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+        for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(TestParam().primary_tile)
+            .pooling_tile(TestParam().primary_tile)
+            .channels(channels)
+            .input_offset(channel_tile*2)
+            .zero_index_mod2(zero_index_mod2)
+            .Test(TestParam().fns);
+        }
+      }
+    }
+  }
+
+  void channels_gt_channel_tile_unipass_fulltile_with_qmin() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile)
+          .pooling_tile(TestParam().primary_tile)
+          .channels(channels)
+          .qmin(128)
+          .Test(TestParam().fns);
+      }
+    } else {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile)
+          .pooling_tile(TestParam().primary_tile)
+          .channels(channels)
+          .qmin(128)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_gt_channel_tile_unipass_fulltile_with_qmax() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile)
+          .pooling_tile(TestParam().primary_tile)
+          .channels(channels)
+          .qmax(128)
+          .Test(TestParam().fns);
+      }
+    } else {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile)
+          .pooling_tile(TestParam().primary_tile)
+          .channels(channels)
+          .qmax(128)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_gt_channel_tile_unipass_subtile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = 2; pooling_elements < TestParam().primary_tile; pooling_elements++) {
+      if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+        for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile)
+            .channels(channels)
+            .Test(TestParam().fns);
+        }
+      } else {
+        const size_t channel_tile = TestParam().channel_scaled_tile;
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile)
+            .channels(channels)
+            .Test(TestParam().fns);
+        }
+      }
+    }
+  }
+
+  void channels_gt_channel_tile_unipass_subtile_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = 2; pooling_elements < TestParam().primary_tile; pooling_elements++) {
+      if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+        for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile)
+            .channels(channels)
+            .input_offset(xnnpack::NextPrime(TestParam().channel_tile * 2))
+            .Test(TestParam().fns);
+        }
+      } else {
+        const size_t channel_tile = TestParam().channel_scaled_tile;
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile)
+            .channels(channels)
+            .input_offset(channel_tile*2)
+            .Test(TestParam().fns);
+        }
+      }
+    }
+  }
+
+  void channels_gt_channel_tile_unipass_subtile_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = 2; pooling_elements < TestParam().primary_tile; pooling_elements++) {
+      if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+        for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+          for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+            AvgPoolMicrokernelTester()
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile)
+              .channels(channels)
+              .input_offset(xnnpack::NextPrime(TestParam().channel_tile * 2))
+              .zero_index_mod2(zero_index_mod2)
+              .Test(TestParam().fns);
+          }
+        }
+      } else {
+        const size_t channel_tile = TestParam().channel_scaled_tile;
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+          for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+            AvgPoolMicrokernelTester()
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile)
+              .channels(channels)
+              .input_offset(channel_tile*2)
+              .zero_index_mod2(zero_index_mod2)
+              .Test(TestParam().fns);
+          }
+        }
+      }
+    }
+  }
+
+  void few_output_pixels_0() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, TestParam().primary_tile - 1, TestParam().primary_tile}}) {
+        if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+          for (size_t channels = 1; channels <= TestParam().channel_tile * 5; channels += std::max<size_t>(1, TestParam().channel_tile - 1)) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .Test(TestParam().fns);
+          }
+        } else {
+          const size_t channel_tile = TestParam().channel_scaled_tile;
+          for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .Test(TestParam().fns);
+          }
+        }
+      }
+    }
+  }
+
+  void few_output_pixels_with_input_offset_0() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, TestParam().primary_tile - 1, TestParam().primary_tile}}) {
+        if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+          for (size_t channels = 1; channels <= TestParam().channel_tile * 5; channels += std::max<size_t>(1, TestParam().channel_tile - 1)) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .input_offset(xnnpack::NextPrime(TestParam().channel_tile * 5 + 1))
+              .Test(TestParam().fns);
+          }
+        } else {
+          const size_t channel_tile = TestParam().channel_scaled_tile;
+          for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .input_offset(channel_tile*5+1)
+              .Test(TestParam().fns);
+          }
+        }
+      }
+    }
+  }
+
+  void few_output_pixels_with_zero_0() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, TestParam().primary_tile - 1, TestParam().primary_tile}}) {
+        if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+          for (size_t channels = 1; channels <= TestParam().channel_tile * 5; channels += std::max<size_t>(1, TestParam().channel_tile - 1)) {
+            for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+              AvgPoolMicrokernelTester()
+                .output_pixels(output_pixels)
+                .pooling_elements(pooling_elements)
+                .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+                .channels(channels)
+                .input_offset(xnnpack::NextPrime(TestParam().channel_tile * 5 + 1))
+                .zero_index_mod2(zero_index_mod2)
+                .Test(TestParam().fns);
+            }
+          }
+        } else {
+          const size_t channel_tile = TestParam().channel_scaled_tile;
+          for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
+            for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+              AvgPoolMicrokernelTester()
+                .output_pixels(output_pixels)
+                .pooling_elements(pooling_elements)
+                .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+                .channels(channels)
+                .input_offset(channel_tile*5+1)
+                .zero_index_mod2(zero_index_mod2)
+                .Test(TestParam().fns);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  void few_output_pixels_with_qmin_0() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, TestParam().primary_tile - 1, TestParam().primary_tile}}) {
+        if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+          for (size_t channels = 1; channels <= TestParam().channel_tile * 5; channels += std::max<size_t>(1, TestParam().channel_tile - 1)) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .qmin(128)
+              .Test(TestParam().fns);
+          }
+        } else {
+          const size_t channel_tile = TestParam().channel_scaled_tile;
+          for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .qmin(128)
+              .Test(TestParam().fns);
+          }
+        }
+      }
+    }
+  }
+
+  void few_output_pixels_with_qmax_0() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, TestParam().primary_tile - 1, TestParam().primary_tile}}) {
+        if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+          for (size_t channels = 1; channels <= TestParam().channel_tile * 5; channels += std::max<size_t>(1, TestParam().channel_tile - 1)) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .qmax(128)
+              .Test(TestParam().fns);
+          }
+        } else {
+          const size_t channel_tile = TestParam().channel_scaled_tile;
+          for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .qmax(128)
+              .Test(TestParam().fns);
+          }
+        }
+      }
+    }
+  }
+
+  void few_output_pixels_with_output_stride_0() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, TestParam().primary_tile - 1, TestParam().primary_tile}}) {
+        if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+          for (size_t channels = 1; channels <= TestParam().channel_tile * 5; channels += std::max<size_t>(1, TestParam().channel_tile - 1)) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .output_stride(xnnpack::NextPrime(TestParam().channel_tile * 5 + 1))
+              .Test(TestParam().fns);
+          }
+        } else {
+          const size_t channel_tile = TestParam().channel_scaled_tile;
+          for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .output_stride(channel_tile*5+1)
+              .Test(TestParam().fns);
+          }
+        }
+      }
+    }
+  }
+
+  void few_output_pixels_with_step_0() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile != 0) {
+      GTEST_SKIP();
+    }
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{2, TestParam().primary_tile - 1, TestParam().primary_tile}}) {
+        if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+          for (size_t channels = 1; channels <= TestParam().channel_tile * 5; channels += std::max<size_t>(1, TestParam().channel_tile - 1)) {
+            for (size_t step = 2; step <= pooling_elements; step++) {
+              AvgPoolMicrokernelTester()
+                .output_pixels(output_pixels)
+                .pooling_elements(pooling_elements)
+                .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+                .step(step)
+                .channels(channels)
+                .output_stride(xnnpack::NextPrime(TestParam().channel_tile * 5 + 1))
+                .Test(TestParam().fns);
+            }
+          }
+        } else {
+          const size_t channel_tile = TestParam().channel_scaled_tile;
+          for (size_t channels = 1; channels <= 3 * channel_tile; channels += channel_tile-1) {
+            for (size_t step = 2; step <= pooling_elements; step = xnnpack::NextPrime(step)) {
+              AvgPoolMicrokernelTester()
+                .output_pixels(output_pixels)
+                .pooling_elements(pooling_elements)
+                .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+                .step(step)
+                .channels(channels)
+                .output_stride(channel_tile*5+1)
+                .Test(TestParam().fns);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  void channels_eq_channel_tile_twopass_fulltile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    AvgPoolMicrokernelTester()
+      .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+      .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+      .channels(channel_tile)
+      .Test(TestParam().fns);
+  }
+
+  void channels_eq_channel_tile_twopass_fulltile_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    AvgPoolMicrokernelTester()
+      .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+      .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+      .channels(channel_tile)
+      .input_offset(TestParam().channel_scaled_tile == TestParam().channel_tile ?
+                    xnnpack::NextPrime(TestParam().channel_tile + 1) :
+                    channel_tile + 1)
+      .Test(TestParam().fns);
+  }
+
+  void channels_eq_channel_tile_twopass_fulltile_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+        .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+        .channels(channel_tile)
+        .input_offset(TestParam().channel_scaled_tile == TestParam().channel_tile ?
+                      xnnpack::NextPrime(TestParam().channel_tile + 1) :
+                      channel_tile + 1)
+        .zero_index_mod2(zero_index_mod2)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_eq_channel_tile_twopass_fulltile_with_qmin() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    AvgPoolMicrokernelTester()
+      .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+      .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+      .channels(channel_tile)
+      .qmin(128)
+      .Test(TestParam().fns);
+  }
+
+  void channels_eq_channel_tile_twopass_fulltile_with_qmax() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    AvgPoolMicrokernelTester()
+      .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+      .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+      .channels(channel_tile)
+      .qmax(128)
+      .Test(TestParam().fns);
+  }
+
+  void channels_eq_channel_tile_twopass_subtile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = TestParam().primary_tile + 1; pooling_elements < TestParam().primary_tile + TestParam().incremental_tile; pooling_elements++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+        .channels(channel_tile)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_eq_channel_tile_twopass_subtile_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = TestParam().primary_tile + 1; pooling_elements < TestParam().primary_tile + TestParam().incremental_tile; pooling_elements++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+        .channels(channel_tile)
+        .input_offset(TestParam().channel_scaled_tile == TestParam().channel_tile ?
+                      xnnpack::NextPrime(TestParam().channel_tile + 1) :
+                      channel_tile + 1)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_eq_channel_tile_twopass_subtile_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = TestParam().primary_tile + 1; pooling_elements < TestParam().primary_tile + TestParam().incremental_tile; pooling_elements++) {
+      for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channel_tile)
+          .input_offset(TestParam().channel_scaled_tile == TestParam().channel_tile ?
+                        xnnpack::NextPrime(TestParam().channel_tile + 1) :
+                        channel_tile + 1)
+          .zero_index_mod2(zero_index_mod2)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_div_channel_tile_twopass_fulltile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+        .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+        .channels(channels)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_div_channel_tile_twopass_fulltile_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+        .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+        .channels(channels)
+        .input_offset(channel_tile*5)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_div_channel_tile_twopass_fulltile_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .input_offset(channel_tile*5)
+          .zero_index_mod2(zero_index_mod2)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_div_channel_tile_twopass_fulltile_with_qmin() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+        .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+        .channels(channels)
+        .qmin(128)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_div_channel_tile_twopass_fulltile_with_qmax() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+        .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+        .channels(channels)
+        .qmax(128)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_div_channel_tile_twopass_subtile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = TestParam().primary_tile + 1; pooling_elements < TestParam().primary_tile + TestParam().incremental_tile; pooling_elements++) {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_div_channel_tile_twopass_subtile_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = TestParam().primary_tile + 1; pooling_elements < TestParam().primary_tile + TestParam().incremental_tile; pooling_elements++) {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .input_offset(channel_tile*8)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_div_channel_tile_twopass_subtile_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = TestParam().primary_tile + 1; pooling_elements < TestParam().primary_tile + TestParam().incremental_tile; pooling_elements++) {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+        for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+            .channels(channels)
+            .input_offset(channel_tile*8)
+            .zero_index_mod2(zero_index_mod2)
+            .Test(TestParam().fns);
+        }
+      }
+    }
+  }
+
+  void channels_lt_channel_tile_twopass_fulltile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+        .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+        .channels(channels)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_lt_channel_tile_twopass_fulltile_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+        .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+        .channels(channels)
+        .input_offset(TestParam().channel_scaled_tile == TestParam().channel_tile ?
+                      xnnpack::NextPrime(TestParam().channel_tile) :
+                      channel_tile)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_lt_channel_tile_twopass_fulltile_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .input_offset(TestParam().channel_scaled_tile == TestParam().channel_tile ?
+                        xnnpack::NextPrime(TestParam().channel_tile) :
+                        channel_tile)
+          .zero_index_mod2(zero_index_mod2)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_lt_channel_tile_twopass_fulltile_with_qmin() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+        .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+        .channels(channels)
+        .qmin(128)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_lt_channel_tile_twopass_fulltile_with_qmax() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+        .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+        .channels(channels)
+        .qmax(128)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_lt_channel_tile_twopass_subtile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = TestParam().primary_tile + 1; pooling_elements < TestParam().primary_tile + TestParam().incremental_tile; pooling_elements++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_lt_channel_tile_twopass_subtile_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = TestParam().primary_tile + 1; pooling_elements < TestParam().primary_tile + TestParam().incremental_tile; pooling_elements++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .input_offset(TestParam().channel_scaled_tile == TestParam().channel_tile ?
+                        xnnpack::NextPrime(TestParam().channel_tile) :
+                        channel_tile)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_lt_channel_tile_twopass_subtile_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = TestParam().primary_tile + 1; pooling_elements < TestParam().primary_tile + TestParam().incremental_tile; pooling_elements++) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
+        for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+            .channels(channels)
+            .input_offset(TestParam().channel_scaled_tile == TestParam().channel_tile ?
+                          xnnpack::NextPrime(TestParam().channel_tile) :
+                          channel_tile)
+            .zero_index_mod2(zero_index_mod2)
+            .Test(TestParam().fns);
+        }
+      }
+    }
+  }
+
+  void channels_gt_channel_tile_twopass_fulltile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .Test(TestParam().fns);
+      }
+    } else {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_gt_channel_tile_twopass_fulltile_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .input_offset(xnnpack::NextPrime(TestParam().channel_tile * 2))
+          .Test(TestParam().fns);
+      }
+    } else {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .input_offset(channel_tile*2)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_gt_channel_tile_twopass_fulltile_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+        for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+            .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+            .channels(channels)
+            .input_offset(xnnpack::NextPrime(TestParam().channel_tile * 2))
+            .zero_index_mod2(zero_index_mod2)
+            .Test(TestParam().fns);
+        }
+      }
+    } else {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+        for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+            .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+            .channels(channels)
+            .input_offset(channel_tile*2)
+            .zero_index_mod2(zero_index_mod2)
+            .Test(TestParam().fns);
+        }
+      }
+    }
+  }
+
+  void channels_gt_channel_tile_twopass_fulltile_with_qmin() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .qmin(128)
+          .Test(TestParam().fns);
+      }
+    } else {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .qmin(128)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_gt_channel_tile_twopass_fulltile_with_qmax() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .qmax(128)
+          .Test(TestParam().fns);
+      }
+    } else {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(TestParam().primary_tile + TestParam().incremental_tile)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .qmax(128)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_gt_channel_tile_twopass_subtile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = TestParam().primary_tile + 1; pooling_elements < TestParam().primary_tile + TestParam().incremental_tile; pooling_elements++) {
+      if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+        for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+            .channels(channels)
+            .Test(TestParam().fns);
+        }
+      } else {
+        const size_t channel_tile = TestParam().channel_scaled_tile;
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+            .channels(channels)
+            .Test(TestParam().fns);
+        }
+      }
+    }
+  }
+
+  void channels_gt_channel_tile_twopass_subtile_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = TestParam().primary_tile + 1; pooling_elements < TestParam().primary_tile + TestParam().incremental_tile; pooling_elements++) {
+      if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+        for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+            .channels(channels)
+            .input_offset(xnnpack::NextPrime(TestParam().channel_tile * 2))
+            .Test(TestParam().fns);
+        }
+      } else {
+        const size_t channel_tile = TestParam().channel_scaled_tile;
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+            .channels(channels)
+            .input_offset(channel_tile*2)
+            .Test(TestParam().fns);
+        }
+      }
+    }
+  }
+
+  void channels_gt_channel_tile_twopass_subtile_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = TestParam().primary_tile + 1; pooling_elements < TestParam().primary_tile + TestParam().incremental_tile; pooling_elements++) {
+      if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+        for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+          for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+            AvgPoolMicrokernelTester()
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .input_offset(xnnpack::NextPrime(TestParam().channel_tile * 2))
+              .zero_index_mod2(zero_index_mod2)
+              .Test(TestParam().fns);
+          }
+        }
+      } else {
+        const size_t channel_tile = TestParam().channel_scaled_tile;
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+          for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+            AvgPoolMicrokernelTester()
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .input_offset(channel_tile*2)
+              .zero_index_mod2(zero_index_mod2)
+              .Test(TestParam().fns);
+          }
+        }
+      }
+    }
+  }
+
+  void channels_eq_channel_tile_multipass() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+        .channels(channel_tile)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_eq_channel_tile_multipass_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+        .channels(channel_tile)
+        .input_offset(TestParam().channel_scaled_tile == TestParam().channel_tile ?
+                      xnnpack::NextPrime(TestParam().channel_tile + 1) :
+                      channel_tile + 1)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_eq_channel_tile_multipass_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channel_tile)
+          .input_offset(TestParam().channel_scaled_tile == TestParam().channel_tile ?
+                        xnnpack::NextPrime(TestParam().channel_tile + 1) :
+                        channel_tile + 1)
+          .zero_index_mod2(zero_index_mod2)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_eq_channel_tile_multipass_with_qmin() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+        .channels(channel_tile)
+        .qmin(128)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_eq_channel_tile_multipass_with_qmax() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      AvgPoolMicrokernelTester()
+        .pooling_elements(pooling_elements)
+        .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+        .channels(channel_tile)
+        .qmax(128)
+        .Test(TestParam().fns);
+    }
+  }
+
+  void channels_div_channel_tile_multipass() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_div_channel_tile_multipass_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .input_offset(channel_tile*8)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_div_channel_tile_multipass_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+        for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+            .channels(channels)
+            .input_offset(channel_tile*8)
+            .zero_index_mod2(zero_index_mod2)
+            .Test(TestParam().fns);
+        }
+      }
+    }
+  }
+
+  void channels_div_channel_tile_multipass_with_qmin() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .qmin(128)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_div_channel_tile_multipass_with_qmax() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      const size_t channel_tile = TestParam().channel_scaled_tile;
+      for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .qmax(128)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_lt_channel_tile_multipass() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+  void channels_lt_channel_tile_multipass_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .input_offset(channel_tile)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+
+  void channels_lt_channel_tile_multipass_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
+        for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+            .channels(channels)
+            .input_offset(channel_tile)
+            .zero_index_mod2(zero_index_mod2)
+            .Test(TestParam().fns);
+        }
+      }
+    }
+  }
+
+
+
+  void channels_lt_channel_tile_multipass_with_qmin() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .qmin(128)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+
+  void channels_lt_channel_tile_multipass_with_qmax() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    if (TestParam().channel_tile <= 1 || TestParam().channel_scaled_tile == TestParam().channel_tile) {
+      GTEST_SKIP();
+    }
+    const size_t channel_tile = TestParam().channel_scaled_tile;
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      for (size_t channels = 1; channels < channel_tile; channels++) {
+        AvgPoolMicrokernelTester()
+          .pooling_elements(pooling_elements)
+          .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+          .channels(channels)
+          .qmax(128)
+          .Test(TestParam().fns);
+      }
+    }
+  }
+
+
+  void channels_gt_channel_tile_multipass() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+        for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+            .channels(channels)
+            .Test(TestParam().fns);
+        }
+      } else {
+        const size_t channel_tile = TestParam().channel_scaled_tile;
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+            .channels(channels)
+            .Test(TestParam().fns);
+        }
+      }
+    }
+  }
+
+
+  void channels_gt_channel_tile_multipass_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+        for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+            .channels(channels)
+            .input_offset(xnnpack::NextPrime(TestParam().channel_tile * 2))
+            .Test(TestParam().fns);
+        }
+      } else {
+        const size_t channel_tile = TestParam().channel_scaled_tile;
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+            .channels(channels)
+            .input_offset(channel_tile*2)
+            .Test(TestParam().fns);
+        }
+      }
+    }
+  }
+
+
+  void channels_gt_channel_tile_multipass_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+        for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+          for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+            AvgPoolMicrokernelTester()
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .input_offset(xnnpack::NextPrime(TestParam().channel_tile * 2))
+              .zero_index_mod2(zero_index_mod2)
+              .Test(TestParam().fns);
+          }
+        }
+      } else {
+        const size_t channel_tile = TestParam().channel_scaled_tile;
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+          for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+            AvgPoolMicrokernelTester()
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .input_offset(channel_tile*2)
+              .zero_index_mod2(zero_index_mod2)
+              .Test(TestParam().fns);
+          }
+        }
+      }
+    }
+  }
+
+
+
+  void channels_gt_channel_tile_multipass_with_qmin() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+        for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+            .channels(channels)
+            .qmin(128)
+            .Test(TestParam().fns);
+        }
+      } else {
+        const size_t channel_tile = TestParam().channel_scaled_tile;
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+            .channels(channels)
+            .qmin(128)
+            .Test(TestParam().fns);
+        }
+      }
+    }
+  }
+
+
+  void channels_gt_channel_tile_multipass_with_qmax() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    for (size_t pooling_elements = TestParam().primary_tile + TestParam().incremental_tile + 1; pooling_elements <= TestParam().primary_tile + TestParam().incremental_tile * 3; pooling_elements = xnnpack::NextPrime(pooling_elements)) {
+      if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+        for (size_t channels = TestParam().channel_tile + 1; channels < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); channels++) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+            .channels(channels)
+            .qmax(128)
+            .Test(TestParam().fns);
+        }
+      } else {
+        const size_t channel_tile = TestParam().channel_scaled_tile;
+        for (size_t channels = channel_tile+1; channels < channel_tile*2; channels = xnnpack::NextPrime(channels)) {
+          AvgPoolMicrokernelTester()
+            .pooling_elements(pooling_elements)
+            .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+            .channels(channels)
+            .qmax(128)
+            .Test(TestParam().fns);
+        }
+      }
+    }
+  }
+
+
+  void few_output_pixels() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{TestParam().primary_tile + 1, TestParam().primary_tile + TestParam().incremental_tile - 1, TestParam().primary_tile + TestParam().incremental_tile + 1}}) {
+        if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+          for (size_t channels = 1; channels <= TestParam().channel_tile * 5; channels += std::max<size_t>(1, TestParam().channel_tile - 1)) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .Test(TestParam().fns);
+          }
+        } else {
+          const size_t channel_tile = TestParam().channel_scaled_tile;
+          for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .Test(TestParam().fns);
+          }
+        }
+      }
+    }
+  }
+
+
+  void few_output_pixels_with_input_offset() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{TestParam().primary_tile + 1, TestParam().primary_tile + TestParam().incremental_tile - 1, TestParam().primary_tile + TestParam().incremental_tile + 1}}) {
+        if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+          for (size_t channels = 1; channels <= TestParam().channel_tile * 5; channels += std::max<size_t>(1, TestParam().channel_tile - 1)) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .input_offset(xnnpack::NextPrime(TestParam().channel_tile * 5 + 1))
+              .Test(TestParam().fns);
+          }
+        } else {
+          const size_t channel_tile = TestParam().channel_scaled_tile;
+          for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .input_offset(channel_tile*5+1)
+              .Test(TestParam().fns);
+          }
+        }
+      }
+    }
+  }
+
+
+  void few_output_pixels_with_zero() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{TestParam().primary_tile + 1, TestParam().primary_tile + TestParam().incremental_tile - 1, TestParam().primary_tile + TestParam().incremental_tile + 1}}) {
+        if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+          for (size_t channels = 1; channels <= TestParam().channel_tile * 5; channels += std::max<size_t>(1, TestParam().channel_tile - 1)) {
+            for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+              AvgPoolMicrokernelTester()
+                .output_pixels(output_pixels)
+                .pooling_elements(pooling_elements)
+                .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+                .channels(channels)
+                .input_offset(xnnpack::NextPrime(TestParam().channel_tile * 5 + 1))
+                .zero_index_mod2(zero_index_mod2)
+                .Test(TestParam().fns);
+            }
+          }
+        } else {
+          const size_t channel_tile = TestParam().channel_scaled_tile;
+          for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
+            for (size_t zero_index_mod2 = 0; zero_index_mod2 < 2; zero_index_mod2++) {
+              AvgPoolMicrokernelTester()
+                .output_pixels(output_pixels)
+                .pooling_elements(pooling_elements)
+                .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+                .channels(channels)
+                .input_offset(channel_tile*5+1)
+                .zero_index_mod2(zero_index_mod2)
+                .Test(TestParam().fns);
+            }
+          }
+        }
+      }
+    }
+  }
+
+
+
+  void few_output_pixels_with_qmin() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{TestParam().primary_tile + 1, TestParam().primary_tile + TestParam().incremental_tile - 1, TestParam().primary_tile + TestParam().incremental_tile + 1}}) {
+        if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+          for (size_t channels = 1; channels <= TestParam().channel_tile * 5; channels += std::max<size_t>(1, TestParam().channel_tile - 1)) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .qmin(128)
+              .Test(TestParam().fns);
+          }
+        } else {
+          const size_t channel_tile = TestParam().channel_scaled_tile;
+          for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .qmin(128)
+              .Test(TestParam().fns);
+          }
+        }
+      }
+    }
+  }
+
+
+  void few_output_pixels_with_qmax() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{TestParam().primary_tile + 1, TestParam().primary_tile + TestParam().incremental_tile - 1, TestParam().primary_tile + TestParam().incremental_tile + 1}}) {
+        if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+          for (size_t channels = 1; channels <= TestParam().channel_tile * 5; channels += std::max<size_t>(1, TestParam().channel_tile - 1)) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .qmax(128)
+              .Test(TestParam().fns);
+          }
+        } else {
+          const size_t channel_tile = TestParam().channel_scaled_tile;
+          for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .qmax(128)
+              .Test(TestParam().fns);
+          }
+        }
+      }
+    }
+  }
+
+
+  void few_output_pixels_with_output_stride() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{TestParam().primary_tile + 1, TestParam().primary_tile + TestParam().incremental_tile - 1, TestParam().primary_tile + TestParam().incremental_tile + 1}}) {
+        if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+          for (size_t channels = 1; channels <= TestParam().channel_tile * 5; channels += std::max<size_t>(1, TestParam().channel_tile - 1)) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .output_stride(xnnpack::NextPrime(TestParam().channel_tile * 5 + 1))
+              .Test(TestParam().fns);
+          }
+        } else {
+          const size_t channel_tile = TestParam().channel_scaled_tile;
+          for (size_t channels = 1; channels <= channel_tile*5; channels += channel_tile-1) {
+            AvgPoolMicrokernelTester()
+              .output_pixels(output_pixels)
+              .pooling_elements(pooling_elements)
+              .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+              .channels(channels)
+              .output_stride(channel_tile*5+1)
+              .Test(TestParam().fns);
+          }
+        }
+      }
+    }
+  }
+
+
+  void few_output_pixels_with_step() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().incremental_tile == 0) {
+      GTEST_SKIP();
+    }
+    for (size_t output_pixels = 2; output_pixels <= 5; output_pixels++) {
+      for (size_t pooling_elements : std::vector<size_t>{{TestParam().primary_tile + 1, TestParam().primary_tile + TestParam().incremental_tile - 1, TestParam().primary_tile + TestParam().incremental_tile + 1}}) {
+        if (TestParam().channel_scaled_tile == TestParam().channel_tile) {
+          for (size_t channels = 1; channels <= TestParam().channel_tile * 5; channels += std::max<size_t>(1, TestParam().channel_tile - 1)) {
+            for (size_t step = 2; step <= pooling_elements; step++) {
+              AvgPoolMicrokernelTester()
+                .output_pixels(output_pixels)
+                .pooling_elements(pooling_elements)
+                .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+                .step(step)
+                .channels(channels)
+                .output_stride(xnnpack::NextPrime(TestParam().channel_tile * 5 + 1))
+                .Test(TestParam().fns);
+            }
+          }
+        } else {
+          const size_t channel_tile = TestParam().channel_scaled_tile;
+          for (size_t channels = 1; channels <= 3 * channel_tile; channels += channel_tile-1) {
+            for (size_t step = 2; step <= pooling_elements; step = xnnpack::NextPrime(step)) {
+              AvgPoolMicrokernelTester()
+                .output_pixels(output_pixels)
+                .pooling_elements(pooling_elements)
+                .pooling_tile(TestParam().primary_tile, TestParam().incremental_tile)
+                .step(step)
+                .channels(channels)
+                .output_stride(channel_tile*5+1)
+                .Test(TestParam().fns);
+            }
+          }
+        }
+      }
+    }
+  }
 };

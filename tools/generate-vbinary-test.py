@@ -26,519 +26,128 @@ parser.add_argument("-t", "--tester", metavar="TESTER", required=True,
                     help="Tester class to be used in the generated test")
 parser.add_argument("-b", "--broadcast_b", action="store_true",
                     help='Broadcast the RHS of the operation')
-parser.add_argument("-s", "--spec", metavar="FILE", required=True,
-                    help="Specification (YAML) file")
+parser.add_argument("-k", "--ukernel", required=True,
+                    help="Microkernel type")
 parser.add_argument("-o", "--output", metavar="FILE", required=True,
                     help='Output (C++ source) file')
 parser.set_defaults(defines=list())
 
-
-def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(qu8|qs8|f16|f32|s32)_v(add|cmul|copysign|div|max|min|mul|sqrdiff|sub|addc|copysignc|rcopysignc|divc|rdivc|maxc|minc|mulc|sqrdiffc|subc|rsubc)(_(minmax|relu)(_(fp32|rndnu))?)?_ukernel__(.+)_u(\d+)(v)?", name)
-  if match is None:
-    raise ValueError("Unexpected microkernel name: " + name)
-  op_type = {
-    "add": "Add",
-    "cmul": "CMul",
-    "copysign": "CopySign",
-    "div": "Div",
-    "max": "Max",
-    "min": "Min",
-    "mul": "Mul",
-    "sqrdiff": "SqrDiff",
-    "sub": "Sub",
-    "addc": "Add",
-    "copysignc": "CopySign",
-    "rcopysignc": "RCopySign",
-    "divc": "Div",
-    "rdivc": "RDiv",
-    "maxc": "Max",
-    "minc": "Min",
-    "mulc": "Mul",
-    "sqrdiffc": "SqrDiff",
-    "subc": "Sub",
-    "rsubc": "RSub",
-  }[match.group(2)]
-  batch_tile = int(match.group(8))
-  vector_tile = bool(match.group(9))
-  activation_type = match.group(4)
-  if activation_type is None:
-    activation_type = "LINEAR"
-  else:
-    activation_type = activation_type.upper()
-
-  arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(7))
-  return op_type, activation_type, batch_tile, vector_tile, arch, isa
-
-
-BINOP_TEST_TEMPLATE = """\
-TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}${BATCH_SUFFIX}) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  ${TESTER}()
-    .batch_size(${BATCH_TILE}${BATCH_SCALE})
-    ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
+OP_TYPES = {
+    "vadd": "Add",
+    "vaddc": "Add",
+    "vcopysign": "CopySign",
+    "vcopysignc": "CopySign",
+    "vrcopysign": "RCopySign",
+    "vrcopysignc": "RCopySign",
+    "vdiv": "Div",
+    "vdivc": "Div",
+    "vrdiv": "RDiv",
+    "vrdivc": "RDiv",
+    "vmax": "Max",
+    "vmaxc": "Max",
+    "vmin": "Min",
+    "vminc": "Min",
+    "vmul": "Mul",
+    "vmulc": "Mul",
+    "vcmul": "CMul",
+    "vsub": "Sub",
+    "vsubc": "Sub",
+    "vrsub": "RSub",
+    "vrsubc": "RSub",
+    "vsqrdiff": "SqrDiff",
+    "vsqrdiffc": "SqrDiff",
 }
 
-$if BATCH_TILE > 1 or BATCH_SCALE != "":
-  TEST(${TEST_NAME}, batch_div_${BATCH_TILE}${BATCH_SUFFIX}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    $if BATCH_SCALE == "":
-      for (size_t batch_size = ${BATCH_TILE*2}; batch_size < ${BATCH_TILE*10}; batch_size += ${BATCH_TILE}) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-      }
-    $else:
-      for (size_t batch_size = ${BATCH_TILE*2}${BATCH_SCALE};
-                  batch_size < ${BATCH_TILE*10}${BATCH_SCALE};
-                  batch_size += ${BATCH_TILE}${BATCH_SCALE}) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-      }
-  }
-
-  TEST(${TEST_NAME}, batch_lt_${BATCH_TILE}${BATCH_SUFFIX}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    $if BATCH_SCALE == "":
-      for (size_t batch_size = 1; batch_size < ${BATCH_TILE}; batch_size++) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-      }
-    $else:
-      for (size_t batch_size = 1${BATCH_SCALE};
-                  batch_size < ${BATCH_TILE}${BATCH_SCALE};
-                  batch_size++) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-      }
-  }
-
-TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}${BATCH_SUFFIX}) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  $if BATCH_SCALE == "":
-    for (size_t batch_size = ${BATCH_TILE+1}; batch_size < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch_size++) {
-      ${TESTER}()
-        .batch_size(batch_size)
-        ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-    }
-  $else:
-    for (size_t batch_size = ${BATCH_TILE+1}${BATCH_SCALE};
-                batch_size < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}${BATCH_SCALE};
-                batch_size += ${BATCH_TILE*2}) {
-      ${TESTER}()
-        .batch_size(batch_size)
-        ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-    }
-}
+BINOP_TEST_TEMPLATE = """
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)
+XNN_TEST_BINARY_BATCH_EQ(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
+XNN_TEST_BINARY_BATCH_DIV(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
+XNN_TEST_BINARY_BATCH_LT(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
+XNN_TEST_BINARY_BATCH_GT(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
 
 $if TESTER in ["VMulCMicrokernelTester"]:
-  TEST(${TEST_NAME}, inplace) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    $if BATCH_SCALE == "":
-      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          .inplace(true)
-          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-      }
-    $else:
-      for (size_t batch_size = 1;
-                  batch_size <= ${BATCH_TILE*5}${BATCH_SCALE};
-                  batch_size += ${max(1, BATCH_TILE-1)}${BATCH_SCALE}) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          .inplace(true)
-          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-      }
-  }
-$elif BROADCAST_B:
-  TEST(${TEST_NAME}, inplace) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    $if BATCH_SCALE == "":
-      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          .inplace_a(true)
-          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-      }
-    $else:
-      for (size_t batch_size = 1;
-                  batch_size <= ${BATCH_TILE*5}${BATCH_SCALE};
-                  batch_size += ${max(1, BATCH_TILE-1)}${BATCH_SCALE}) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          .inplace_a(true)
-          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-      }
-  }
+  XNN_TEST_BINARY_INPLACE_A(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
+$elif ${BROADCAST_B} == "true":
+  XNN_TEST_BINARY_INPLACE_A(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
 $else:
-  TEST(${TEST_NAME}, inplace_a) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    $if BATCH_SCALE == "":
-      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          .inplace_a(true)
-          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-      }
-    $else:
-      for (size_t batch_size = 1;
-                  batch_size <= ${BATCH_TILE*5}${BATCH_SCALE};
-                  batch_size += ${max(1, BATCH_TILE-1)}${BATCH_SCALE}) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          .inplace_a(true)
-          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-      }
-  }
+  XNN_TEST_BINARY_INPLACE_A(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
+  XNN_TEST_BINARY_INPLACE_B(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
+  XNN_TEST_BINARY_INPLACE_A_AND_B(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
 
-  TEST(${TEST_NAME}, inplace_b) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    $if BATCH_SCALE == "":
-      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          .inplace_b(true)
-          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-      }
-    $else:
-      for (size_t batch_size = 1;
-                  batch_size <= ${BATCH_TILE*5}${BATCH_SCALE};
-                  batch_size += ${max(1, BATCH_TILE-1)}${BATCH_SCALE}) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          .inplace_b(true)
-          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-      }
-  }
+$if DATATYPE.startswith("q"):
+  XNN_TEST_BINARY_A_ZERO_POINT(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
+  XNN_TEST_BINARY_B_ZERO_POINT(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
+  XNN_TEST_BINARY_Y_ZERO_POINT(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
+  XNN_TEST_BINARY_A_SCALE(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
+  XNN_TEST_BINARY_B_SCALE(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
+  XNN_TEST_BINARY_Y_SCALE(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
 
-  TEST(${TEST_NAME}, inplace_a_and_b) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    $if BATCH_SCALE == "":
-      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          .inplace_a(true)
-          .inplace_b(true)
-          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-      }
-    $else:
-      for (size_t batch_size = 1;
-                  batch_size <= ${BATCH_TILE*5}${BATCH_SCALE};
-                  batch_size += ${max(1, BATCH_TILE-1)}${BATCH_SCALE}) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          .inplace_a(true)
-          .inplace_b(true)
-          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-      }
-  }
-
-$if DATATYPE.startswith("Q"):
-  TEST(${TEST_NAME}, a_zero_point) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    $if BATCH_SCALE == "":
-      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        for (int32_t a_zero_point = -128; a_zero_point <= 127; a_zero_point += 51) {
-          ${TESTER}()
-            .batch_size(batch_size)
-            .a_zero_point(a_zero_point)
-            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-        }
-      }
-    $else:
-      for (size_t batch_size = 1;
-                  batch_size <= ${BATCH_TILE*5}${BATCH_SCALE};
-                  batch_size += ${max(1, BATCH_TILE-1)}${BATCH_SCALE}) {
-        for (int32_t a_zero_point = -128; a_zero_point <= 127; a_zero_point += 51) {
-          ${TESTER}()
-            .batch_size(batch_size)
-            .a_zero_point(a_zero_point)
-            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-        }
-      }
-  }
-
-  TEST(${TEST_NAME}, b_zero_point) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    $if BATCH_SCALE == "":
-      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        for (int32_t b_zero_point = -128; b_zero_point <= 127; b_zero_point += 51) {
-          ${TESTER}()
-            .batch_size(batch_size)
-            .b_zero_point(b_zero_point)
-            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-        }
-      }
-    $else:
-      for (size_t batch_size = 1;
-                  batch_size <= ${BATCH_TILE*5}${BATCH_SCALE};
-                  batch_size += ${max(1, BATCH_TILE-1)}${BATCH_SCALE}) {
-        for (int32_t b_zero_point = -128; b_zero_point <= 127; b_zero_point += 51) {
-          ${TESTER}()
-            .batch_size(batch_size)
-            .b_zero_point(b_zero_point)
-            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-        }
-      }
-  }
-
-  TEST(${TEST_NAME}, y_zero_point) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    $if BATCH_SCALE == "":
-      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        for (int32_t y_zero_point = -128; y_zero_point <= 127; y_zero_point += 51) {
-          ${TESTER}()
-            .batch_size(batch_size)
-            .y_zero_point(y_zero_point)
-            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-        }
-      }
-    $else:
-      for (size_t batch_size = 1;
-                  batch_size <= ${BATCH_TILE*5}${BATCH_SCALE};
-                  batch_size += ${max(1, BATCH_TILE-1)}${BATCH_SCALE}) {
-        for (int32_t y_zero_point = -128; y_zero_point <= 127; y_zero_point += 51) {
-          ${TESTER}()
-            .batch_size(batch_size)
-            .y_zero_point(y_zero_point)
-            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-        }
-      }
-  }
-
-  TEST(${TEST_NAME}, a_scale) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    $if BATCH_SCALE == "":
-      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        for (float a_scale = 0.1f; a_scale <= 10.0f; a_scale *= 3.14f) {
-          ${TESTER}()
-            .batch_size(batch_size)
-            .a_scale(a_scale)
-            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-        }
-      }
-    $else:
-      for (size_t batch_size = 1;
-                  batch_size <= ${BATCH_TILE*5}${BATCH_SCALE};
-                  batch_size += ${max(1, BATCH_TILE-1)}${BATCH_SCALE}) {
-        for (float a_scale = 0.1f; a_scale <= 10.0f; a_scale *= 3.14f) {
-          ${TESTER}()
-            .batch_size(batch_size)
-            .a_scale(a_scale)
-            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-        }
-      }
-  }
-
-  TEST(${TEST_NAME}, b_scale) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    $if BATCH_SCALE == "":
-      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        for (float b_scale = 0.1f; b_scale <= 10.0f; b_scale *= 3.14f) {
-          ${TESTER}()
-            .batch_size(batch_size)
-            .b_scale(b_scale)
-            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-        }
-      }
-    $else:
-      for (size_t batch_size = 1;
-                  batch_size <= ${BATCH_TILE*5}${BATCH_SCALE};
-                  batch_size += ${max(1, BATCH_TILE-1)}${BATCH_SCALE}) {
-        for (float b_scale = 0.1f; b_scale <= 10.0f; b_scale *= 3.14f) {
-          ${TESTER}()
-            .batch_size(batch_size)
-            .b_scale(b_scale)
-            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-        }
-      }
-  }
-
-  TEST(${TEST_NAME}, y_scale) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    $if BATCH_SCALE == "":
-      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        for (float y_scale = 0.1f; y_scale <= 10.0f; y_scale *= 3.14f) {
-          ${TESTER}()
-            .batch_size(batch_size)
-            .y_scale(y_scale)
-            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-        }
-      }
-    $else:
-      for (size_t batch_size = 1;
-                  batch_size <= ${BATCH_TILE*5}${BATCH_SCALE};
-                  batch_size += ${max(1, BATCH_TILE-1)}${BATCH_SCALE}) {
-        for (float y_scale = 0.1f; y_scale <= 10.0f; y_scale *= 3.14f) {
-          ${TESTER}()
-            .batch_size(batch_size)
-            .y_scale(y_scale)
-            ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-        }
-      }
-  }
-
-$if ACTIVATION_TYPE == "MINMAX":
-  TEST(${TEST_NAME}, qmin) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    $if BATCH_SCALE == "":
-      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          .qmin(128)
-          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-      }
-    $else:
-      for (size_t batch_size = 1;
-                  batch_size <= ${BATCH_TILE*5}${BATCH_SCALE};
-                  batch_size += ${max(1, BATCH_TILE-1)}${BATCH_SCALE}) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          .qmin(128)
-          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-      }
-  }
-
-  TEST(${TEST_NAME}, qmax) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    $if BATCH_SCALE == "":
-      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          .qmax(128)
-          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-      }
-    $else:
-      for (size_t batch_size = 1;
-                  batch_size <= ${BATCH_TILE*5}${BATCH_SCALE};
-                  batch_size += ${max(1, BATCH_TILE-1)}${BATCH_SCALE}) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          .qmax(128)
-          ${BROADCAST_B}.Test(${", ".join(TEST_ARGS)});
-      }
-  }
+$if "minmax" in ACTIVATION_TYPE:
+  XNN_TEST_BINARY_QMIN(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
+  XNN_TEST_BINARY_QMAX(ukernel, arch_flags, batch_tile, ${BROADCAST_B}, datatype, ${", ".join(TEST_ARGS)});
 """
-
-
-def generate_test_cases(ukernel, op_type, init_fn, activation_type,
-                        tester, broadcast_b, batch_tile, vector_tile, isa):
-  """Generates all tests cases for a Vector Binary Operation micro-kernel.
-
-  Args:
-    ukernel: C name of the micro-kernel function.
-    op_type: Operation type (ADD/MUL/SUB/etc).
-    init_fn: C name of the function to initialize microkernel parameters.
-    activation_type: Activation type (LINEAR/MINMAX/RELU).
-    broadcast_b: If the RHS should be broadcasted.
-    tester: C++ name of the tester class.
-    batch_tile: Number of batch elements processed per one iteration of the
-                inner loop of the micro-kernel.
-    vector_tile: Indicates if batch tile is specified in vectors rather than
-                 elements.
-    isa: instruction set required to run the micro-kernel. Generated unit test
-         will skip execution if the host processor doesn't support this ISA.
-
-  Returns:
-    Code for the test case.
-  """
-  _, test_name = ukernel.split("_", 1)
-  _, datatype, _ = ukernel.split("_", 2)
-  test_args = [ukernel]
-  if tester in ["VBinaryMicrokernelTester"] and not datatype in ['qs8', 'qu8']:
-    test_args.append("%s::OpType::%s" % (tester, op_type))
-  if init_fn:
-    test_args.append(init_fn)
-  batch_scale = ""
-  if vector_tile:
-    ctype = {"qs8": "int8_t", "qu8": "uint8_t", "f16": "uint16_t", "f32": "float"}[datatype]
-    batch_scale = {
-      "rvv": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype,
-      "rvvfp16arith": " * xnn_init_hardware_config()->vlenb / sizeof(%s)" % ctype,
-    }[isa]
-  return xngen.preprocess(BINOP_TEST_TEMPLATE, {
-      "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
-      "TEST_ARGS": test_args,
-      "TESTER": tester,
-      "BROADCAST_B": ".broadcast_b(true)" if broadcast_b else "",
-      "DATATYPE": datatype.upper(),
-      "BATCH_TILE": batch_tile,
-      "BATCH_SCALE": batch_scale,
-      "BATCH_SUFFIX": "v" if vector_tile else "",
-      "OP_TYPE": op_type,
-      "ACTIVATION_TYPE": activation_type,
-      "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
-    })
-
 
 def main(args):
   options = parser.parse_args(args)
 
-  with codecs.open(options.spec, "r", encoding="utf-8") as spec_file:
-    spec_yaml = yaml.safe_load(spec_file)
-    if not isinstance(spec_yaml, list):
-      raise ValueError("expected a list of micro-kernels in the spec")
-
-    tester_header = {
-      "VCMulMicrokernelTester": "vcmul-microkernel-tester.h",
-      "VBinaryMicrokernelTester": "vbinary-microkernel-tester.h",
-    }[options.tester]
-    tests = """\
+  tester = options.tester
+  tester_header = {
+    "VCMulMicrokernelTester": "vcmul-microkernel-tester.h",
+    "VBinaryMicrokernelTester": "vbinary-microkernel-tester.h",
+  }[tester]
+  tests = """\
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: {specification}
+//   Microkernel: {microkernel}
 //   Generator: {generator}
 
 
-#include <gtest/gtest.h>
-#include "xnnpack/common.h"
-#include "xnnpack/isa-checks.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/vbinary.h"
 #include "{tester_header}"
+
 """.format(
-        specification=options.spec,
-        generator=sys.argv[0],
-        tester_header=tester_header,
-    )
+      microkernel=options.ukernel,
+      generator=sys.argv[0],
+      tester_header=tester_header,
+  )
 
-    for ukernel_spec in spec_yaml:
-      name = ukernel_spec["name"]
-      init_fn = ukernel_spec.get("init")
-      op_type, activation_type, batch_tile, vector_tile, arch, isa = \
-        split_ukernel_name(name)
+  ukernel_parts = options.ukernel.split("-")
+  datatype = ukernel_parts[0]
+  op = ukernel_parts[1]
+  activation = ukernel_parts[2] if len(ukernel_parts) >= 3 else ""
 
-      test_case = generate_test_cases(name, op_type, init_fn, activation_type,
-                                      options.tester, options.broadcast_b,
-                                      batch_tile, vector_tile, isa)
-      tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
+  broadcast_b = False
+  if op[-1] == 'c':
+    broadcast_b = True
+  op_type = OP_TYPES[op]
 
-    xnncommon.overwrite_if_changed(options.output, tests)
+  test_args = ["ukernel"]
+  if tester in ["VBinaryMicrokernelTester"] and not datatype in ['qs8', 'qu8']:
+    test_args.append("%s::OpType::%s" % (tester, op_type))
+  test_args.append("init_params")
+  tests += xnncommon.make_multiline_macro(xngen.preprocess(
+      BINOP_TEST_TEMPLATE,
+      {
+          "TEST_ARGS": test_args,
+          "TESTER": tester,
+          "BROADCAST_B": str(broadcast_b).lower(),
+          "DATATYPE": datatype,
+          "OP_TYPE": op_type,
+          "ACTIVATION_TYPE": activation,
+      },
+  ))
+
+  folder = datatype + "-" + ("vbinary" if datatype.startswith("f") else op)
+  tests += f'#include "{xnncommon._XNNPACK_SRC}/{folder}/{options.ukernel}.h"\n'
+  tests += "#undef XNN_UKERNEL_WITH_PARAMS\n"
+  tests = tests.replace("src/s32-vmulc/s32-vmulc.h", "src/s32-vmul/s32-vmulc.h")
+
+  xnncommon.overwrite_if_changed(options.output, tests)
 
 
 if __name__ == "__main__":

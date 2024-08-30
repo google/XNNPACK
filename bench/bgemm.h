@@ -14,6 +14,13 @@
   BENCHMARK_CAPTURE(bgemm_fn, sd1x_encoder_decoder, "SD1.X Encoder-Decoder")->Apply(SD1XEncoderDecoderBgemmArguments)->UseRealTime(); \
   BENCHMARK_CAPTURE(bgemm_fn, sd1x_text_encoder, "SD1.X Text Encoder")->Apply(SD1XTextEncoderBgemmArguments)->UseRealTime();
 
+#define BENCHMARK_CAPTURE_BGEMM(bgemm_fn, name_prefix, ...) \
+  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##albert, "Albert", __VA_ARGS__)->Apply(AlbertBgemmArguments)->UseRealTime(); \
+  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##mobilebert, "MobileBert", __VA_ARGS__)->Apply(MobilebertBgemmArguments)->UseRealTime(); \
+  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##sd1x_diffusion, "SD1.X Diffusion", __VA_ARGS__)->Apply(SD1XDiffusionBgemmArguments)->UseRealTime(); \
+  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##sd1x_encoder_decoder, "SD1.X Encoder-Decoder", __VA_ARGS__)->Apply(SD1XEncoderDecoderBgemmArguments)->UseRealTime(); \
+  BENCHMARK_CAPTURE(bgemm_fn, name_prefix##sd1x_text_encoder, "SD1.X Text Encoder", __VA_ARGS__)->Apply(SD1XTextEncoderBgemmArguments)->UseRealTime();
+
 
 static void AlbertBgemmArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"B", "M", "N", "K"});

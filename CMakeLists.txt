@@ -426,7 +426,6 @@ SET(SUBGRAPH_SRCS
   src/subgraph/squared-difference.c
   src/subgraph/static-constant-pad.c
   src/subgraph/static-mean.c
-  src/subgraph/static-reshape.c
   src/subgraph/static-resize-bilinear-2d.c
   src/subgraph/static-slice.c
   src/subgraph/static-transpose.c
@@ -722,7 +721,7 @@ ADD_LIBRARY(indirection OBJECT src/indirection.c)
 ADD_LIBRARY(logging OBJECT ${LOGGING_SRCS})
 ADD_LIBRARY(microparams-init OBJECT src/microparams-init.c)
 ADD_LIBRARY(normalization OBJECT src/normalization.c)
-ADD_LIBRARY(packing OBJECT src/packing.c)
+ADD_LIBRARY(packing OBJECT src/packing.cc)
 TARGET_LINK_LIBRARIES(hardware-config PRIVATE xnnpack-base logging)
 TARGET_LINK_LIBRARIES(indirection PRIVATE xnnpack-base)
 TARGET_LINK_LIBRARIES(logging PRIVATE xnnpack-base)
@@ -956,9 +955,9 @@ ELSE()
 ENDIF()
 
 IF(XNNPACK_BUILD_ALL_MICROKERNELS)
-  TARGET_INCLUDE_DIRECTORIES(microkernels-all PRIVATE include src)
+  TARGET_INCLUDE_DIRECTORIES(microkernels-all PRIVATE . include src)
 ENDIF()
-TARGET_INCLUDE_DIRECTORIES(microkernels-prod PRIVATE include src)
+TARGET_INCLUDE_DIRECTORIES(microkernels-prod PRIVATE . include src)
 TARGET_INCLUDE_DIRECTORIES(hardware-config PRIVATE include src ${CPUINFO_SOURCE_DIR}/include)
 TARGET_INCLUDE_DIRECTORIES(indirection PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(microparams-init PRIVATE src)
@@ -967,13 +966,13 @@ TARGET_INCLUDE_DIRECTORIES(packing PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(logging PRIVATE include src)
 IF(XNNPACK_BUILD_LIBRARY)
   TARGET_INCLUDE_DIRECTORIES(XNNPACK PUBLIC include)
-  TARGET_INCLUDE_DIRECTORIES(XNNPACK PRIVATE src)
+  TARGET_INCLUDE_DIRECTORIES(XNNPACK PRIVATE . src)
   TARGET_INCLUDE_DIRECTORIES(allocator PRIVATE include src)
   TARGET_INCLUDE_DIRECTORIES(cache PRIVATE include src)
   TARGET_INCLUDE_DIRECTORIES(microkernel-utils PRIVATE include src)
-  TARGET_INCLUDE_DIRECTORIES(subgraph PRIVATE include src)
-  TARGET_INCLUDE_DIRECTORIES(operators PRIVATE include src)
-  TARGET_INCLUDE_DIRECTORIES(operator-run PRIVATE include src)
+  TARGET_INCLUDE_DIRECTORIES(subgraph PRIVATE . include src)
+  TARGET_INCLUDE_DIRECTORIES(operators PRIVATE . include src)
+  TARGET_INCLUDE_DIRECTORIES(operator-run PRIVATE . include src)
   TARGET_INCLUDE_DIRECTORIES(operator-utils PRIVATE include src)
   TARGET_INCLUDE_DIRECTORIES(memory PRIVATE include src)
   TARGET_INCLUDE_DIRECTORIES(mutex PRIVATE include src)
@@ -1223,7 +1222,7 @@ IF(XNNPACK_BUILD_TESTS)
   )
   FOREACH(TEST ${SHARDED_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
       fp16
       GTest::gtest
@@ -1250,7 +1249,7 @@ IF(XNNPACK_BUILD_TESTS)
     )
     FOREACH(TEST ${LIBRARY_SHARDED_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-      TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
+      TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . src test)
       TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         fp16
         GTest::gmock
@@ -1298,33 +1297,15 @@ IF(XNNPACK_BUILD_TESTS)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     ENDFOREACH()
 
-    SET(LIBRARY_BINARY_ELEMENTWISE_UNIT_TESTS
-        add-nd
-        add-nd-eager
-        copysign-nd
-        divide-nd
-        divide-nd-eager
-        maximum-nd
-        maximum-nd-eager
-        minimum-nd
-        minimum-nd-eager
-        multiply-nd
-        multiply-nd-eager
-        squared-difference-nd
-        squared-difference-nd-eager
-        subtract-nd
-        subtract-nd-eager)
-    FOREACH(TEST ${LIBRARY_BINARY_ELEMENTWISE_UNIT_TESTS})
-      ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-      TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
-      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        binary-elementwise-operator-tester
-        fp16
-        GTest::gtest
-        GTest::gtest_main
-        XNNPACK)
-      ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-    ENDFOREACH()
+    ADD_EXECUTABLE(binary-nd-test test/binary-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(binary-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(binary-nd-test PRIVATE
+      binary-elementwise-operator-tester
+      fp16
+      GTest::gtest
+      GTest::gtest_main
+      XNNPACK)
+    ADD_SHARDED_TEST(binary-nd-test 10)
 
     # ---[ Build subgraph optimizations unit tests
     SET(LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS
@@ -1542,7 +1523,7 @@ IF(XNNPACK_BUILD_TESTS)
       xx-transposev)
   FOREACH(TEST ${MICROKERNEL_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         fp16
         GTest::gmock
@@ -1634,7 +1615,7 @@ IF(XNNPACK_BUILD_TESTS)
       qu8-igemm-minmax-rndnu)
   FOREACH(TEST ${MICROKERNEL_GEMM_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         gemm-microkernel-tester
         fp16
@@ -1655,7 +1636,7 @@ IF(XNNPACK_BUILD_TESTS)
       x8-packq)
   FOREACH(TEST ${MICROKERNEL_PACKQ_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         packq-microkernel-tester
         fp16
@@ -1742,7 +1723,7 @@ IF(XNNPACK_BUILD_TESTS)
       s32-vmulc)
   FOREACH(TEST ${MICROKERNEL_VBINARY_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         vbinary-microkernel-tester
         fp16
@@ -1827,7 +1808,7 @@ IF(XNNPACK_BUILD_TESTS)
       u8-vclamp)
   FOREACH(TEST ${MICROKERNEL_VUNARY_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         vunary-microkernel-tester
         fp16

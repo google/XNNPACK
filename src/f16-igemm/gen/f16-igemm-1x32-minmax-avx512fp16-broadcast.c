@@ -72,10 +72,10 @@ void xnn_f16_igemm_minmax_ukernel_1x32__avx512fp16_broadcast(
       p -= 1 * sizeof(void*);
     } while (p != 0);
 
-    const __m512h vmin = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.min));
+    const __m512h vmin = _mm512_castsi512_ph(_mm512_set1_epi16(params->scalar.min));
     vacc0x0 = _mm512_max_ph(vmin, vacc0x0);
 
-    const __m512h vmax = _mm512_castsi512_ph(_mm512_set1_epi16(params->fp16arith.max));
+    const __m512h vmax = _mm512_castsi512_ph(_mm512_set1_epi16(params->scalar.max));
     vacc0x0 = _mm512_min_ph(vmax, vacc0x0);
 
     if XNN_LIKELY(nc >= 32) {

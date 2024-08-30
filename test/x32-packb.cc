@@ -12,10 +12,16 @@
 #include "xnnpack/packb.h"
 #include "packb-microkernel-tester.h"
 
+namespace {
+
 struct XnnTestParam {
   const char *name;
-  bool (*isa_check)();
-  xnn_x32_packb_gemm_ukernel_fn fn;
+  xnn_x32_packb_gemm_ukernel_fn ukernel;
+  uint64_t arch_flags;
+  size_t channel_tile, channel_subtile, channel_round;
+};
+
+struct XnnTestParamExtra {
   size_t channel_tile, channel_subtile, channel_round;
 };
 
@@ -26,21 +32,19 @@ std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) 
   return info.param.name;
 }
 
+#define XNN_UKERNEL(arch_flags, ukernel, channel_tile, channel_subtile, channel_round) \
+  { #ukernel, ukernel, arch_flags, channel_tile, channel_subtile, channel_round },
+
 const XnnTestParam xnn_test_params[] = {
-  { "X32_PACKB_GEMM_2C1S1R__SCALAR_FLOAT", []() { return true; }, xnn_x32_packb_gemm_ukernel_2c1s1r__scalar_float, /*channel_tile=*/2, /*channel_subtile=*/1, /*channel_round=*/1 },
-  { "X32_PACKB_GEMM_2C1S1R__SCALAR_INT", []() { return true; }, xnn_x32_packb_gemm_ukernel_2c1s1r__scalar_int, /*channel_tile=*/2, /*channel_subtile=*/1, /*channel_round=*/1 },
-  { "X32_PACKB_GEMM_2C2S1R__SCALAR_FLOAT", []() { return true; }, xnn_x32_packb_gemm_ukernel_2c2s1r__scalar_float, /*channel_tile=*/2, /*channel_subtile=*/2, /*channel_round=*/1 },
-  { "X32_PACKB_GEMM_2C2S1R__SCALAR_INT", []() { return true; }, xnn_x32_packb_gemm_ukernel_2c2s1r__scalar_int, /*channel_tile=*/2, /*channel_subtile=*/2, /*channel_round=*/1 },
-  { "X32_PACKB_GEMM_4C1S1R__SCALAR_FLOAT", []() { return true; }, xnn_x32_packb_gemm_ukernel_4c1s1r__scalar_float, /*channel_tile=*/4, /*channel_subtile=*/1, /*channel_round=*/1 },
-  { "X32_PACKB_GEMM_4C1S1R__SCALAR_INT", []() { return true; }, xnn_x32_packb_gemm_ukernel_4c1s1r__scalar_int, /*channel_tile=*/4, /*channel_subtile=*/1, /*channel_round=*/1 },
-  { "X32_PACKB_GEMM_4C4S1R__SCALAR_FLOAT", []() { return true; }, xnn_x32_packb_gemm_ukernel_4c4s1r__scalar_float, /*channel_tile=*/4, /*channel_subtile=*/4, /*channel_round=*/1 },
-  { "X32_PACKB_GEMM_4C4S1R__SCALAR_INT", []() { return true; }, xnn_x32_packb_gemm_ukernel_4c4s1r__scalar_int, /*channel_tile=*/4, /*channel_subtile=*/4, /*channel_round=*/1 },
+#include "src/x32-packb/x32-packb.h"
 };
 
+#undef XNN_UKERNEL
+
+}  // namespace
+
 TEST_P(XnnTest, n_eq_channel_tile) {
-  if (!GetParam().isa_check()) {
-    GTEST_SKIP();
-  }
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t k = 1; k < 4; k++) {
     PackBMicrokernelTester()
       .channels(GetParam().channel_tile)
@@ -48,14 +52,12 @@ TEST_P(XnnTest, n_eq_channel_tile) {
       .channel_tile(GetParam().channel_tile)
       .channel_subtile(GetParam().channel_subtile)
       .channel_round(GetParam().channel_round)
-      .Test(GetParam().fn);
+      .Test(GetParam().ukernel);
   }
 }
 
 TEST_P(XnnTest, n_div_channel_tile) {
-  if (!GetParam().isa_check()) {
-    GTEST_SKIP();
-  }
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   if (GetParam().channel_tile <= 1) {
     GTEST_SKIP();
   }
@@ -66,14 +68,12 @@ TEST_P(XnnTest, n_div_channel_tile) {
       .channel_tile(GetParam().channel_tile)
       .channel_subtile(GetParam().channel_subtile)
       .channel_round(GetParam().channel_round)
-      .Test(GetParam().fn);
+      .Test(GetParam().ukernel);
   }
 }
 
 TEST_P(XnnTest, n_lt_channel_tile) {
-  if (!GetParam().isa_check()) {
-    GTEST_SKIP();
-  }
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   if (GetParam().channel_tile <= 1) {
     GTEST_SKIP();
   }
@@ -85,15 +85,13 @@ TEST_P(XnnTest, n_lt_channel_tile) {
         .channel_tile(GetParam().channel_tile)
         .channel_subtile(GetParam().channel_subtile)
         .channel_round(GetParam().channel_round)
-        .Test(GetParam().fn);
+        .Test(GetParam().ukernel);
     }
   }
 }
 
 TEST_P(XnnTest, n_gt_channel_tile) {
-  if (!GetParam().isa_check()) {
-    GTEST_SKIP();
-  }
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t k = 1; k < 4; k++) {
     for (size_t n = GetParam().channel_tile + 1; n < (GetParam().channel_tile == 1 ? 10 : GetParam().channel_tile * 2); n++) {
       PackBMicrokernelTester()
@@ -102,15 +100,13 @@ TEST_P(XnnTest, n_gt_channel_tile) {
         .channel_tile(GetParam().channel_tile)
         .channel_subtile(GetParam().channel_subtile)
         .channel_round(GetParam().channel_round)
-        .Test(GetParam().fn);
+        .Test(GetParam().ukernel);
     }
   }
 }
 
 TEST_P(XnnTest, groups_gt_1) {
-  if (!GetParam().isa_check()) {
-    GTEST_SKIP();
-  }
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t g = 2; g <= 3; g++) {
     for (size_t kernel_tile = 1; kernel_tile < 4; kernel_tile++) {
       for (size_t n = GetParam().channel_tile + 1; n < (GetParam().channel_tile == 1 ? 10 : GetParam().channel_tile * 2); n++) {
@@ -121,7 +117,7 @@ TEST_P(XnnTest, groups_gt_1) {
           .channel_tile(GetParam().channel_tile)
           .channel_subtile(GetParam().channel_subtile)
           .channel_round(GetParam().channel_round)
-          .Test(GetParam().fn);
+          .Test(GetParam().ukernel);
       }
     }
   }

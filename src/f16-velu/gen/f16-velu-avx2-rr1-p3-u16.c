@@ -20,7 +20,7 @@ void xnn_f16_velu_ukernel__avx2_rr1_p3_u16(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_f16_elu_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f16_elu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
@@ -43,9 +43,9 @@ void xnn_f16_velu_ukernel__avx2_rr1_p3_u16(
   XNN_FORCE_REALIZATION(vc2);
   XNN_FORCE_REALIZATION(vc1);
 
-  const __m256 vprescale = _mm256_set1_ps(params->avx2.prescale);
-  const __m256 valpha = _mm256_set1_ps(params->avx2.alpha);
-  const __m256 vbeta = _mm256_set1_ps(params->avx2.beta);
+  const __m256 vprescale = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.prescale));
+  const __m256 valpha = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.alpha));
+  const __m256 vbeta = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.beta));
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;

@@ -20,7 +20,7 @@ void xnn_f32_vsigmoid_ukernel__avx512f_rr1_p5_scalef_div_u80(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);

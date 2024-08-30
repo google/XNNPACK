@@ -6,13 +6,6 @@
 #ifndef __XNNPACK_BENCH_F32_VUNARY_BENCHMARK_H_
 #define __XNNPACK_BENCH_F32_VUNARY_BENCHMARK_H_
 
-#include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/vunary.h"
-
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -22,6 +15,13 @@
 #include <vector>
 
 #include "bench/utils.h"
+#include "xnnpack.h"
+#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/common.h"
+#include "xnnpack/hardware-config.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/vunary.h"
 #include <benchmark/benchmark.h>
 
 // Parameter initialization function, templated on the `UKernelParams` type,
@@ -80,9 +80,9 @@ template <typename UKernelParams>
 void f32_vunary_benchmark(benchmark::State& state,
                           UKernelFunction<UKernelParams> ukernel,
                           InitParamsFunction<UKernelParams> init_params,
-                          benchmark::utils::IsaCheckFunction isa_check,
-                          float range_min, float range_max) {
-  if (isa_check != nullptr && !isa_check(state)) {
+                          uint64_t arch_flags, float range_min,
+                          float range_max) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -120,6 +120,15 @@ void f32_vunary_benchmark(benchmark::State& state,
   state.counters["bytes"] = benchmark::Counter(
       static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
       benchmark::Counter::kIsRate);
+}
+
+template <typename UKernelParams>
+void f32_vunary_benchmark(benchmark::State& state,
+                          UKernelFunction<UKernelParams> ukernel,
+                          uint64_t arch_flags, float range_min,
+                          float range_max) {
+  f32_vunary_benchmark<UKernelParams>(state, ukernel, arch_flags, range_min,
+                                      range_max);
 }
 
 #endif  // __XNNPACK_BENCH_F32_VUNARY_BENCHMARK_H_

@@ -22,6 +22,16 @@
     return hardware_config != nullptr && hardware_config->FLAG; \
 }()
 
+template <typename T>
+size_t get_batch_scale() {
+#if XNN_ARCH_RISCV
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  return hardware_config ? std::max<size_t>(1, hardware_config->vlenb / sizeof(T)) : 1;
+#else
+  return 1;
+#endif
+}
+
 #define TEST_REQUIRES_HWCONFIG_FLAG_NONE() \
   do { \
     if (!XNN_TEST_HWCONFIG_FLAG_NONE()) { \
@@ -30,10 +40,20 @@
   } while (0)
 
 #define TEST_REQUIRES_HWCONFIG_FLAG(FLAG) \
-  do { \
-    if (!XNN_TEST_HWCONFIG_FLAG(FLAG)) { \
-      GTEST_SKIP(); \
-    } \
+  do {                                    \
+    if (!XNN_TEST_HWCONFIG_FLAG(FLAG)) {  \
+      GTEST_SKIP();                       \
+    }                                     \
+  } while (0)
+
+#define TEST_REQUIRES_ARCH_FLAGS(FLAGS)                       \
+  do {                                                        \
+    const struct xnn_hardware_config* hardware_config =       \
+        xnn_init_hardware_config();                           \
+    if (hardware_config == nullptr ||                         \
+        (hardware_config->arch_flags & (FLAGS)) != (FLAGS)) { \
+      GTEST_SKIP();                                           \
+    }                                                         \
   } while (0)
 
 #if XNN_ARCH_X86
@@ -267,7 +287,7 @@
 #endif
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  #define TEST_REQUIRES_ARM_NEON_DOT_VALUE \
+  #define TEST_REQUIRES_ARM_NEON_DOT_FP16_ARITH_VALUE \
     []() -> bool { \
       const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config(); \
       return hardware_config != nullptr && hardware_config->use_arm_neon_dot && hardware_config->use_arm_neon_fp16_arith; \
@@ -280,8 +300,8 @@
       } \
     } while (0)
 #else
-  #define TEST_REQUIRES_ARM_NEON_DOT_VALUE (false)
-  #define TEST_REQUIRES_ARM_NEON_DOT do {} while (0)
+  #define TEST_REQUIRES_ARM_NEON_DOT_FP16_ARITH_VALUE (false)
+  #define TEST_REQUIRES_ARM_NEON_DOT_FP16_ARITH do {} while (0)
 #endif
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

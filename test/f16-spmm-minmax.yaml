@@ -5,38 +5,38 @@
 
 # ARM NEON+FP16ARITH
 - name: xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   k-block: 1
 - name: xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_pipelined
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   k-block: 1
 - name: xnn_f16_spmm_minmax_ukernel_8x1__neonfp16arith_x2
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   k-block: 2
 - name: xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   k-block: 1
 - name: xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_pipelined
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   k-block: 1
 - name: xnn_f16_spmm_minmax_ukernel_16x1__neonfp16arith_x2
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   k-block: 2
 - name: xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   k-block: 1
 - name: xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_pipelined
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   k-block: 1
 - name: xnn_f16_spmm_minmax_ukernel_24x1__neonfp16arith_x2
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   k-block: 2
 - name: xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   k-block: 1
 - name: xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_pipelined
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   k-block: 1
 - name: xnn_f16_spmm_minmax_ukernel_32x1__neonfp16arith_x2
-  init: xnn_init_f16_minmax_fp16arith_params
+  init: xnn_init_f16_minmax_scalar_params
   k-block: 2

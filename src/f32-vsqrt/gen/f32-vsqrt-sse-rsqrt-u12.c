@@ -40,7 +40,7 @@ void xnn_f32_vsqrt_ukernel__sse_rsqrt_u12(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_sqrt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_sqrt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);

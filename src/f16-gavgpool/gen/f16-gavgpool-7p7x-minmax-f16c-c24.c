@@ -24,7 +24,7 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c24(
     const void* zero,
     void* buffer,
     void* output,
-    const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(rows > 7);
   assert(channels != 0);
@@ -228,9 +228,9 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__f16c_c24(
   }
   uint16_t* o = (uint16_t*) output;
 
-  const __m256 vscale = _mm256_set1_ps(params->avx.scale);
-  const __m256 vmin = _mm256_set1_ps(params->avx.min);
-  const __m256 vmax = _mm256_set1_ps(params->avx.max);
+  const __m256 vscale = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.scale));
+  const __m256 vmin = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.min));
+  const __m256 vmax = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
   XNN_FORCE_REALIZATION(vscale);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);

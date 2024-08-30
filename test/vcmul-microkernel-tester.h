@@ -17,8 +17,8 @@
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
 #include "xnnpack.h"
+#include "xnnpack/isa-checks.h"
 #include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams.h"
 #include "replicable_random_device.h"
 
 class VCMulMicrokernelTester {
@@ -169,3 +169,93 @@ class VCMulMicrokernelTester {
   bool inplace_b_{false};
   size_t iterations_{15};
 };
+
+#define XNN_TEST_BINARY_BATCH_EQ(ukernel, arch_flags, batch_tile, is_binaryc, \
+                                 datatype, ...)                               \
+  TEST(ukernel, batch_eq) {                                                   \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                     \
+    const size_t batch_scale = get_batch_scale<datatype>();                   \
+    VCMulMicrokernelTester()                                                  \
+        .batch_size(batch_tile* batch_scale)                                  \
+        .Test(__VA_ARGS__);                                                   \
+  }
+
+#define XNN_TEST_BINARY_BATCH_DIV(ukernel, arch_flags, batch_tile, is_binaryc, \
+                                  datatype, ...)                               \
+  TEST(ukernel, batch_div) {                                                   \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                      \
+    const size_t batch_scale = get_batch_scale<datatype>();                    \
+    if (batch_tile == 1 && batch_scale == 1) return;                           \
+    for (size_t batch_size = batch_tile * batch_scale * 2;                     \
+         batch_size < batch_tile * batch_scale * 10;                           \
+         batch_size += batch_tile * batch_scale) {                             \
+      VCMulMicrokernelTester().batch_size(batch_size).Test(__VA_ARGS__);       \
+    }                                                                          \
+  }
+#define XNN_TEST_BINARY_BATCH_LT(ukernel, arch_flags, batch_tile, is_binaryc, \
+                                 datatype, ...)                               \
+  TEST(ukernel, batch_lt) {                                                   \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                     \
+    const size_t batch_scale = get_batch_scale<datatype>();                   \
+    if (batch_tile == 1 && batch_scale == 1) return;                          \
+    for (size_t batch_size = batch_scale;                                     \
+         batch_size < batch_tile * batch_scale; batch_size++) {               \
+      VCMulMicrokernelTester().batch_size(batch_size).Test(__VA_ARGS__);      \
+    }                                                                         \
+  }
+
+#define XNN_TEST_BINARY_BATCH_GT(ukernel, arch_flags, batch_tile, is_binaryc, \
+                                 datatype, ...)                               \
+  TEST(ukernel, batch_gt) {                                                   \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                     \
+    const size_t batch_scale = get_batch_scale<datatype>();                   \
+    const size_t batch_end = batch_tile == 1 ? 10 : batch_tile * 2;           \
+    const size_t batch_step = batch_scale == 1 ? 1 : batch_tile * 2;          \
+    for (size_t batch_size = batch_tile + 1; batch_size < batch_end;          \
+         batch_size += batch_step) {                                          \
+      VCMulMicrokernelTester().batch_size(batch_size).Test(__VA_ARGS__);      \
+    }                                                                         \
+  }
+
+#define XNN_TEST_BINARY_INPLACE_A(ukernel, arch_flags, batch_tile, is_binaryc, \
+                                  datatype, ...)                               \
+  TEST(ukernel, inplace_a) {                                                   \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                      \
+    const size_t batch_scale = get_batch_scale<datatype>();                    \
+    for (size_t batch_size = 1; batch_size <= batch_tile * batch_scale * 5;    \
+         batch_size += std::max(1, batch_tile - 1) * batch_scale) {            \
+      VCMulMicrokernelTester()                                                 \
+          .batch_size(batch_size)                                              \
+          .inplace_a(true)                                                     \
+          .Test(__VA_ARGS__);                                                  \
+    }                                                                          \
+  }
+
+#define XNN_TEST_BINARY_INPLACE_B(ukernel, arch_flags, batch_tile, is_binaryc, \
+                                  datatype, ...)                               \
+  TEST(ukernel, inplace_b) {                                                   \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                      \
+    const size_t batch_scale = get_batch_scale<datatype>();                    \
+    for (size_t batch_size = 1; batch_size <= batch_tile * batch_scale * 5;    \
+         batch_size += std::max(1, batch_tile - 1) * batch_scale) {            \
+      VCMulMicrokernelTester()                                                 \
+          .batch_size(batch_size)                                              \
+          .inplace_b(true)                                                     \
+          .Test(__VA_ARGS__);                                                  \
+    }                                                                          \
+  }
+
+#define XNN_TEST_BINARY_INPLACE_A_AND_B(ukernel, arch_flags, batch_tile,    \
+                                        is_binaryc, datatype, ...)          \
+  TEST(ukernel, inplace_a_and_b) {                                          \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                   \
+    const size_t batch_scale = get_batch_scale<datatype>();                 \
+    for (size_t batch_size = 1; batch_size <= batch_tile * batch_scale * 5; \
+         batch_size += std::max(1, batch_tile - 1) * batch_scale) {         \
+      VCMulMicrokernelTester()                                              \
+          .batch_size(batch_size)                                           \
+          .inplace_a(true)                                                  \
+          .inplace_b(true)                                                  \
+          .Test(__VA_ARGS__);                                               \
+    }                                                                       \
+  }

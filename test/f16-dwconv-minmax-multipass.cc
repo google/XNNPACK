@@ -297,7 +297,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*channel_subtile=*/8, /*channel_round=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f16_dwconv_minmax_ukernel_5f5m5l8c8s4r__neonfp16arith,
-                        xnn_init_f16_minmax_fp16arith_params);
+                        xnn_init_f16_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -317,7 +317,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*channel_subtile=*/8, /*channel_round=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f16_dwconv_minmax_ukernel_5f5m5l8c8s4r__neonfp16arith_acc2,
-                        xnn_init_f16_minmax_fp16arith_params);
+                        xnn_init_f16_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -337,7 +337,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*channel_subtile=*/8, /*channel_round=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f16_dwconv_minmax_ukernel_5f5m5l16c8s4r__neonfp16arith,
-                        xnn_init_f16_minmax_fp16arith_params);
+                        xnn_init_f16_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -357,7 +357,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*channel_subtile=*/8, /*channel_round=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f16_dwconv_minmax_ukernel_5f5m5l16c8s4r__neonfp16arith_acc2,
-                        xnn_init_f16_minmax_fp16arith_params);
+                        xnn_init_f16_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -377,7 +377,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*channel_subtile=*/8, /*channel_round=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f16_dwconv_minmax_ukernel_5f5m5l32c8s4r__neonfp16arith,
-                        xnn_init_f16_minmax_fp16arith_params);
+                        xnn_init_f16_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -397,7 +397,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*channel_subtile=*/8, /*channel_round=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f16_dwconv_minmax_ukernel_5f5m5l32c8s4r__neonfp16arith_acc2,
-                        xnn_init_f16_minmax_fp16arith_params);
+                        xnn_init_f16_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -417,7 +417,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*channel_subtile=*/8, /*channel_round=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f16_dwconv_minmax_ukernel_6f6m7l8c8s4r__neonfp16arith,
-                        xnn_init_f16_minmax_fp16arith_params);
+                        xnn_init_f16_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -437,7 +437,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*channel_subtile=*/8, /*channel_round=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f16_dwconv_minmax_ukernel_6f6m7l8c8s4r__neonfp16arith_acc2,
-                        xnn_init_f16_minmax_fp16arith_params);
+                        xnn_init_f16_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -457,7 +457,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*channel_subtile=*/8, /*channel_round=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f16_dwconv_minmax_ukernel_6f6m7l16c8s4r__neonfp16arith,
-                        xnn_init_f16_minmax_fp16arith_params);
+                        xnn_init_f16_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -477,7 +477,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*channel_subtile=*/8, /*channel_round=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f16_dwconv_minmax_ukernel_6f6m7l16c8s4r__neonfp16arith_acc2,
-                        xnn_init_f16_minmax_fp16arith_params);
+                        xnn_init_f16_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -497,7 +497,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*channel_subtile=*/8, /*channel_round=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f16_dwconv_minmax_ukernel_6f6m7l32c8s4r__neonfp16arith,
-                        xnn_init_f16_minmax_fp16arith_params);
+                        xnn_init_f16_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -517,7 +517,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*channel_subtile=*/8, /*channel_round=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f16_dwconv_minmax_ukernel_6f6m7l32c8s4r__neonfp16arith_acc2,
-                        xnn_init_f16_minmax_fp16arith_params);
+                        xnn_init_f16_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -537,7 +537,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*channel_subtile=*/8, /*channel_round=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f16_dwconv_minmax_ukernel_8f8m9l8c8s4r__neonfp16arith,
-                        xnn_init_f16_minmax_fp16arith_params);
+                        xnn_init_f16_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -557,7 +557,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*channel_subtile=*/8, /*channel_round=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f16_dwconv_minmax_ukernel_8f8m9l8c8s4r__neonfp16arith_acc2,
-                        xnn_init_f16_minmax_fp16arith_params);
+                        xnn_init_f16_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -577,7 +577,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*channel_subtile=*/8, /*channel_round=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f16_dwconv_minmax_ukernel_8f8m9l16c8s4r__neonfp16arith,
-                        xnn_init_f16_minmax_fp16arith_params);
+                        xnn_init_f16_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -597,7 +597,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*channel_subtile=*/8, /*channel_round=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f16_dwconv_minmax_ukernel_8f8m9l16c8s4r__neonfp16arith_acc2,
-                        xnn_init_f16_minmax_fp16arith_params);
+                        xnn_init_f16_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -617,7 +617,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*channel_subtile=*/8, /*channel_round=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f16_dwconv_minmax_ukernel_8f8m9l32c8s4r__neonfp16arith,
-                        xnn_init_f16_minmax_fp16arith_params);
+                        xnn_init_f16_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;
@@ -637,7 +637,7 @@ std::vector<DWConvTestParams> CreateTests1(
           /*channel_subtile=*/8, /*channel_round=*/4,
           [](DWConvMicrokernelTester& tester) {
             tester.Test(xnn_f16_dwconv_minmax_ukernel_8f8m9l32c8s4r__neonfp16arith_acc2,
-                        xnn_init_f16_minmax_fp16arith_params);
+                        xnn_init_f16_minmax_scalar_params);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FP16_ARITH;

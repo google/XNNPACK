@@ -120,7 +120,7 @@ class RSumMicrokernelTester {
       }
 
       // Prepare parameters
-      union xnn_qs8_rsum_params params;
+      struct xnn_qs8_rsum_params params;
       if (init_params) {
         init_params(&params);
       }

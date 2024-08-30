@@ -19,7 +19,7 @@ void xnn_qs8_rsum_ukernel__avxvnni_u128_acc4(
     size_t batch,
     const int8_t* input,
     int32_t* output,
-    const union xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(input != NULL);
@@ -36,26 +36,26 @@ void xnn_qs8_rsum_ukernel__avxvnni_u128_acc4(
   __m256i vacc2 = _mm256_setzero_si256();
   __m256i vacc3 = _mm256_setzero_si256();
   for (; batch >= 128; batch -= 128) {
-    vacc0 = _mm256_dpbusd_epi32(vacc0, vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
-    vacc1 = _mm256_dpbusd_epi32(vacc1, vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
-    vacc2 = _mm256_dpbusd_epi32(vacc2, vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
-    vacc3 = _mm256_dpbusd_epi32(vacc3, vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
+    vacc0 = _mm256_dpbusd_avx_epi32(vacc0, vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
+    vacc1 = _mm256_dpbusd_avx_epi32(vacc1, vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
+    vacc2 = _mm256_dpbusd_avx_epi32(vacc2, vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
+    vacc3 = _mm256_dpbusd_avx_epi32(vacc3, vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
   }
   if (XNN_UNLIKELY(batch != 0)) {
     for (; batch >= 32; batch -= 32) {
-      vacc0 = _mm256_dpbusd_epi32(vacc0, vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
+      vacc0 = _mm256_dpbusd_avx_epi32(vacc0, vone, _mm256_loadu_si256((const __m256i*) input)); input += 32;
     }
 
     // Remainder is between 17 and 31 bytes, so process 32 bytes (overread of up to 15)
     if (XNN_UNLIKELY(batch >= 17)) {
       assert(batch >= 17 && batch <= 31);
       const __m256i vonemask = _mm256_loadu_si256((const __m256i*) &onemask_table[32 - batch]);
-      vacc0 = _mm256_dpbusd_epi32(vacc0, vonemask, _mm256_loadu_si256((const __m256i*) input));
+      vacc0 = _mm256_dpbusd_avx_epi32(vacc0, vonemask, _mm256_loadu_si256((const __m256i*) input));
     // Remainder is between 1 and 16 bytes, so process 16 bytes (overread of up to 15)
     } else if (XNN_UNLIKELY(batch != 0)) {
       assert(batch >= 1 && batch <= 16);
       const __m256i vonemask = _mm256_loadu_si256((const __m256i*) &onemask_table[32 - batch]);
-      vacc0 = _mm256_dpbusd_epi32(vacc0, vonemask, _mm256_castsi128_si256(_mm_loadu_si128((const __m128i*) input)));
+      vacc0 = _mm256_dpbusd_avx_epi32(vacc0, vonemask, _mm256_castsi128_si256(_mm_loadu_si128((const __m128i*) input)));
     }
   }
   vacc0 = _mm256_add_epi32(vacc0, vacc1);

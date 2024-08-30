@@ -23,7 +23,7 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__neonfp16arith_c24(
     const void* zero,
     void* buffer,
     void* output,
-    const union xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(rows > 7);
   assert(channels != 0);
@@ -225,9 +225,9 @@ void xnn_f16_gavgpool_minmax_ukernel_7p7x__neonfp16arith_c24(
     i6 = (const uint16_t*) zero;
   }
 
-  const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.scale));
-  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.min));
-  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.max));
+  const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.scale));
+  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.min));
+  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.max));
   for (; channels >= 24; channels -= 24) {
     float16x8_t vacc01234567 = vreinterpretq_f16_u16(vld1q_u16(buffer)); buffer = (uint16_t*) buffer + 8;
     float16x8_t vacc89ABCDEF = vreinterpretq_f16_u16(vld1q_u16(buffer)); buffer = (uint16_t*) buffer + 8;

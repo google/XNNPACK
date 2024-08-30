@@ -99,7 +99,7 @@ class VLReLUMicrokernelTester {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
-      union xnn_qs8_lrelu_params params;
+      struct xnn_qs8_lrelu_params params;
       init_params(&params, positive_scale(), negative_scale(), input_zero_point(), output_zero_point());
 
       // Call optimized micro-kernel.
@@ -143,7 +143,7 @@ class VLReLUMicrokernelTester {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
-      union xnn_qu8_lrelu_params params;
+      struct xnn_qu8_lrelu_params params;
       init_params(&params, positive_scale(), negative_scale(), input_zero_point(), output_zero_point());
 
       // Call optimized micro-kernel.
@@ -178,3 +178,91 @@ class VLReLUMicrokernelTester {
   size_t batch_size_ = 1;
   size_t iterations_ = 15;
 };
+
+// TODO(b/361780131): This could probably be rewritten as some kind of GTest
+// instantiate thing instead of macros.
+#define XNN_TEST_UNARY_BATCH_EQ(ukernel, arch_flags, batch_tile, datatype, \
+                                ...)                                       \
+  TEST(ukernel, batch_eq) {                                                \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                  \
+    const size_t batch_scale = get_batch_scale<datatype>();                \
+    VLReLUMicrokernelTester()                                              \
+        .batch_size(batch_tile* batch_scale)                               \
+        .Test(__VA_ARGS__);                                                \
+  }
+
+#define XNN_TEST_UNARY_BATCH_DIV(ukernel, arch_flags, batch_tile, datatype, \
+                                 ...)                                       \
+  TEST(ukernel, batch_div) {                                                \
+    if (batch_tile == 1) return;                                            \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                   \
+    const size_t batch_scale = get_batch_scale<datatype>();                 \
+    const size_t batch_step = batch_tile * batch_scale;                     \
+    for (size_t batch_size = 2 * batch_step; batch_size < 10 * batch_step;  \
+         batch_size += batch_step) {                                        \
+      VLReLUMicrokernelTester().batch_size(batch_size).Test(__VA_ARGS__);   \
+    }                                                                       \
+  }
+
+#define XNN_TEST_UNARY_BATCH_LT(ukernel, arch_flags, batch_tile, datatype, \
+                                ...)                                       \
+  TEST(ukernel, batch_lt) {                                                \
+    if (batch_tile == 1) return;                                           \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                  \
+    const size_t batch_scale = get_batch_scale<datatype>();                \
+    const size_t batch_end = batch_tile * batch_scale;                     \
+    for (size_t batch_size = 1; batch_size < batch_end; batch_size++) {    \
+      VLReLUMicrokernelTester().batch_size(batch_size).Test(__VA_ARGS__);  \
+    }                                                                      \
+  }
+
+#define XNN_TEST_UNARY_BATCH_GT(ukernel, arch_flags, batch_tile, datatype, \
+                                ...)                                       \
+  TEST(ukernel, batch_gt) {                                                \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                  \
+    const size_t batch_scale = get_batch_scale<datatype>();                \
+    const size_t batch_step = batch_tile * batch_scale;                    \
+    const size_t batch_end = batch_tile == 1 ? 10 : 2 * batch_step;        \
+    for (size_t batch_size = batch_step + 1; batch_size < batch_end;       \
+         batch_size++) {                                                   \
+      VLReLUMicrokernelTester().batch_size(batch_size).Test(__VA_ARGS__);  \
+    }                                                                      \
+  }
+
+#define XNN_TEST_UNARY_INPLACE(ukernel, arch_flags, batch_tile, datatype, ...)
+
+#define XNN_TEST_UNARY_QMIN(ukernel, arch_flags, batch_tile, datatype, ...) \
+  TEST(ukernel, qmin) {                                                     \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                   \
+    const size_t batch_scale = get_batch_scale<datatype>();                 \
+    const size_t batch_end = batch_tile * batch_scale;                      \
+    const size_t batch_step =                                               \
+        batch_scale == 1 ? std::max(1, batch_tile - 1) : batch_end - 1;     \
+    for (size_t qmin = 1; qmin < 255; qmin = xnnpack::NextPrime(qmin)) {    \
+      for (size_t batch_size = 1; batch_size <= 5 * batch_end;              \
+           batch_size += batch_step) {                                      \
+        VLReLUMicrokernelTester()                                           \
+            .batch_size(batch_size)                                         \
+            .qmin(qmin)                                                     \
+            .Test(__VA_ARGS__);                                             \
+      }                                                                     \
+    }                                                                       \
+  }
+
+#define XNN_TEST_UNARY_QMAX(ukernel, arch_flags, batch_tile, datatype, ...) \
+  TEST(ukernel, qmax) {                                                     \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                   \
+    const size_t batch_scale = get_batch_scale<datatype>();                 \
+    const size_t batch_end = batch_tile * batch_scale;                      \
+    const size_t batch_step =                                               \
+        batch_scale == 1 ? std::max(1, batch_tile - 1) : batch_end - 1;     \
+    for (size_t qmax = 1; qmax < 255; qmax = xnnpack::NextPrime(qmax)) {    \
+      for (size_t batch_size = 1; batch_size <= 5 * batch_end;              \
+           batch_size += batch_step) {                                      \
+        VLReLUMicrokernelTester()                                           \
+            .batch_size(batch_size)                                         \
+            .qmax(qmax)                                                     \
+            .Test(__VA_ARGS__);                                             \
+      }                                                                     \
+    }                                                                       \
+  }

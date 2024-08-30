@@ -39,13 +39,13 @@ union xnn_f32_relu_params {
 
 // Scale: used by RSUM microkernels
 
-union xnn_f16_scale_params {
+struct xnn_f16_scale_params {
   struct {
     uint16_t scale;
   };
 };
 
-union xnn_f16_f32acc_scale_params {
+struct xnn_f16_f32acc_scale_params {
   struct {
     float scale;
   };
@@ -60,25 +60,15 @@ union xnn_f32_scale_params {
 
 // Scale+Min+Max: used by AVGPOOL/GAVGPOOL microkernels.
 
-union xnn_f16_scaleminmax_params {
-  char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+struct xnn_f16_scaleminmax_params {
   struct {
     uint16_t scale;
     uint16_t min;
     uint16_t max;
-  } fp16arith;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    float scale;
-    float min;
-    float max;
-  } avx;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+  } scalar;
 };
 
-union xnn_f32_scaleminmax_params {
+struct xnn_f32_scaleminmax_params {
   struct {
     float scale;
     float min;
@@ -100,13 +90,7 @@ union xnn_f16_minmax_params {
   struct {
     uint16_t min;
     uint16_t max;
-  } fp16arith;
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    float min;
-    float max;
   } scalar;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_f32_minmax_params {
@@ -120,13 +104,7 @@ union xnn_f16_qc4w_minmax_params {
   struct {
     uint16_t min;
     uint16_t max;
-  } fp16arith;
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    float min;
-    float max;
   } scalar;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_f16_qb4w_minmax_params {
@@ -134,14 +112,7 @@ union xnn_f16_qb4w_minmax_params {
     uint16_t min;
     uint16_t max;
     size_t blocksize;
-  } fp16arith;
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    float min;
-    float max;
-    size_t blocksize;
   } scalar;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
 union xnn_f32_qc4w_minmax_params {
@@ -396,7 +367,7 @@ union xnn_qu8_mul_minmax_params {
 
 
 // RSum params used by RSUM & RDSUM microkernels.
-union xnn_qs8_rsum_params {
+struct xnn_qs8_rsum_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
@@ -589,24 +560,16 @@ union xnn_qu8_avgpool_minmax_params {
 
 // Cvt (Convert): used by VCVT microkernels.
 
-union xnn_f16_qs8_cvt_params {
-  struct {
-    float scale;
-    int16_t output_zero_point;
-    int8_t output_min;
-    int8_t output_max;
-  } scalar;
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+struct xnn_f16_qs8_cvt_params {
   struct {
     uint16_t scale;
     int16_t output_zero_point;
     int8_t output_min;
     int8_t output_max;
-  } neonfp16arith;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+  } scalar;
 };
 
-union xnn_f32_qs8_cvt_params {
+struct xnn_f32_qs8_cvt_params {
   struct {
     float scale;
     int16_t output_zero_point;
@@ -615,7 +578,7 @@ union xnn_f32_qs8_cvt_params {
   } scalar;
 };
 
-union xnn_f32_qu8_cvt_params {
+struct xnn_f32_qu8_cvt_params {
   struct {
     float scale;
     int16_t output_zero_point;
@@ -624,7 +587,7 @@ union xnn_f32_qu8_cvt_params {
   } scalar;
 };
 
-union xnn_qs8_cvt_params {
+struct xnn_qs8_cvt_params {
   struct {
     int16_t input_zero_point;
     int32_t multiplier;
@@ -632,37 +595,28 @@ union xnn_qs8_cvt_params {
   } scalar;
 };
 
-union xnn_qs16_qs8_cvt_params {
+struct xnn_qs16_qs8_cvt_params {
   struct {
     int32_t multiplier;
     int32_t output_zero_point;
   } scalar;
 };
 
-union xnn_qs8_f16_cvt_params {
-  char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+struct xnn_qs8_f16_cvt_params {
   struct {
     int16_t zero_point;
     uint16_t scale;
-  } neon;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    int32_t zero_point;
-    float scale;
   } scalar;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
-union xnn_qs8_f32_cvt_params {
+struct xnn_qs8_f32_cvt_params {
   struct {
     int32_t zero_point;
     float scale;
   } scalar;
 };
 
-union xnn_qu8_cvt_params {
+struct xnn_qu8_cvt_params {
   struct {
     uint16_t input_zero_point;
     int16_t multiplier;
@@ -670,7 +624,7 @@ union xnn_qu8_cvt_params {
   } scalar;
 };
 
-union xnn_qu8_f32_cvt_params {
+struct xnn_qu8_f32_cvt_params {
   struct {
     int32_t zero_point;
     float scale;
@@ -680,22 +634,15 @@ union xnn_qu8_f32_cvt_params {
 
 // ELU: used by VELU microkernels.
 
-union xnn_f16_elu_params {
+struct xnn_f16_elu_params {
   struct {
     uint16_t prescale;
-    uint16_t minus_alpha;
+    uint16_t alpha;
     uint16_t beta;
   } scalar;
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    float prescale;
-    float alpha;
-    float beta;
-  } avx2;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
-union xnn_f32_elu_params {
+struct xnn_f32_elu_params {
   struct {
     float prescale;
     float alpha;
@@ -706,11 +653,11 @@ union xnn_f32_elu_params {
 
 // ExpMinus: used by RADDEXPMINUSMAX microkernels.
 
-union xnn_f16_expminus_params {
+struct xnn_f16_expminus_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
-union xnn_f32_expminus_params {
+struct xnn_f32_expminus_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
@@ -763,27 +710,19 @@ struct {
 
 // LReLU (Leaky ReLU): used by VLRELU microkernels.
 
-union xnn_f16_lrelu_params {
-  char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+struct xnn_f16_lrelu_params {
   struct {
     uint16_t slope;
-  } fp16arith;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    float slope;
   } scalar;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 };
 
-union xnn_f32_lrelu_params {
+struct xnn_f32_lrelu_params {
   struct {
     float slope;
   } scalar;
 };
 
-union xnn_qs8_lrelu_params {
+struct xnn_qs8_lrelu_params {
   struct {
     int32_t input_zero_point;
     int32_t positive_multiplier;
@@ -792,7 +731,7 @@ union xnn_qs8_lrelu_params {
   } scalar;
 };
 
-union xnn_qu8_lrelu_params {
+struct xnn_qu8_lrelu_params {
   struct {
     int32_t input_zero_point;
     int32_t positive_multiplier;
@@ -803,43 +742,43 @@ union xnn_qu8_lrelu_params {
 
 // Rnd (Round): used by VRNDNE/VRNDU/VRNDD/VRNDZ microkernels.
 
-union xnn_f16_rnd_params {
+struct xnn_f16_rnd_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
-union xnn_f32_rnd_params {
+struct xnn_f32_rnd_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
 
 // Sigmoid: used by VSIGMOID microkernels.
 
-union xnn_f16_sigmoid_params {
+struct xnn_f16_sigmoid_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
-union xnn_f32_sigmoid_params {
+struct xnn_f32_sigmoid_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
 
 // Sqrt (Square Root): used by VSQRT microkernels.
 
-union xnn_f16_sqrt_params {
+struct xnn_f16_sqrt_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
-union xnn_f32_sqrt_params {
+struct xnn_f32_sqrt_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
 // Rsqrt (Reciprocal Square Root): used by VRSQRT microkernels.
 
-union xnn_f16_rsqrt_params {
+struct xnn_f16_rsqrt_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
-union xnn_f32_rsqrt_params {
+struct xnn_f32_rsqrt_params {
   char _;  // Dummy member variable to comply with the C standard.
 };
 
@@ -984,15 +923,12 @@ union xnn_f32_tanh_params {
 // GAvgPool (Global Average Pool): used by GAVGPOOL microkernels in CHW layout with Scale+Min+Max parameters.
 
 union xnn_f16_gavgpool_params {
-  char _;  // Dummy member variable to comply with the C standard
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   struct {
     XNN_ALIGN(16) uint16_t mask[8];
     uint16_t multiplier;
     uint16_t output_min;
     uint16_t output_max;
-  } neonfp16arith;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64 */
+  } scalar;
 };
 
 union xnn_f32_gavgpool_params {

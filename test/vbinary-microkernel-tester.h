@@ -13,12 +13,10 @@
 #include <cstdlib>
 #include <type_traits>
 
+#include <gtest/gtest.h>
 #include <fp16/fp16.h>
-#include "xnnpack.h"
+#include "xnnpack/isa-checks.h"
 #include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-#include "xnnpack/microparams.h"
-#include "xnnpack/requantization.h"
 
 struct Float16 {
   uint16_t value;
@@ -193,19 +191,23 @@ class VBinaryMicrokernelTester {
 
   size_t iterations() const { return this->iterations_; }
 
-  void Test(xnn_f16_vbinary_ukernel_fn vbinary, OpType op_type) const;
+  void Test(xnn_f16_vbinary_ukernel_fn vbinary, OpType op_type,
+            xnn_init_f16_default_params_fn init_params = nullptr) const;
 
   void Test(xnn_f16_vbinary_minmax_ukernel_fn vbinary_minmax, OpType op_type,
             xnn_init_f16_minmax_params_fn init_params) const;
 
-  void Test(xnn_f32_vbinary_ukernel_fn vbinary, OpType op_type) const;
+  void Test(xnn_f32_vbinary_ukernel_fn vbinary, OpType op_type,
+            xnn_init_f32_default_params_fn init_params = nullptr) const;
 
   void Test(xnn_f32_vbinary_minmax_ukernel_fn vbinary_minmax, OpType op_type,
             xnn_init_f32_minmax_params_fn init_params) const;
 
-  void Test(xnn_s32_vbinary_ukernel_fn vbinary, OpType op_type) const;
+  void Test(xnn_s32_vbinary_ukernel_fn vbinary, OpType op_type,
+            xnn_init_s32_default_params_fn init_params = nullptr) const;
 
-  void Test(xnn_f32_vbinary_relu_ukernel_fn vbinary_relu, OpType op_type) const;
+  void Test(xnn_f32_vbinary_relu_ukernel_fn vbinary_relu, OpType op_type,
+            xnn_init_f32_relu_params_fn init_params = nullptr) const;
 
   void Test(xnn_qu8_vadd_minmax_ukernel_fn vadd_minmax,
             xnn_init_qu8_add_minmax_params_fn init_params) const;
@@ -234,3 +236,241 @@ class VBinaryMicrokernelTester {
   uint8_t qmax_{255};
   size_t iterations_{15};
 };
+
+#define XNN_TEST_BINARY_BATCH_EQ(ukernel, arch_flags, batch_tile, is_binaryc, \
+                                 datatype, ...)                               \
+  TEST(ukernel, batch_eq) {                                                   \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                     \
+    const size_t batch_scale = get_batch_scale<datatype>();                   \
+    VBinaryMicrokernelTester()                                                \
+        .batch_size(batch_tile* batch_scale)                                  \
+        .broadcast_b(is_binaryc)                                              \
+        .Test(__VA_ARGS__);                                                   \
+  }
+
+#define XNN_TEST_BINARY_BATCH_DIV(ukernel, arch_flags, batch_tile, is_binaryc, \
+                                  datatype, ...)                               \
+  TEST(ukernel, batch_div) {                                                   \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                      \
+    const size_t batch_scale = get_batch_scale<datatype>();                    \
+    if (batch_tile == 1 && batch_scale == 1) return;                           \
+    for (size_t batch_size = batch_tile * batch_scale * 2;                     \
+         batch_size < batch_tile * batch_scale * 10;                           \
+         batch_size += batch_tile * batch_scale) {                             \
+      VBinaryMicrokernelTester()                                               \
+          .batch_size(batch_size)                                              \
+          .broadcast_b(is_binaryc)                                             \
+          .Test(__VA_ARGS__);                                                  \
+    }                                                                          \
+  }
+#define XNN_TEST_BINARY_BATCH_LT(ukernel, arch_flags, batch_tile, is_binaryc, \
+                                 datatype, ...)                               \
+  TEST(ukernel, batch_lt) {                                                   \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                     \
+    const size_t batch_scale = get_batch_scale<datatype>();                   \
+    if (batch_tile == 1 && batch_scale == 1) return;                          \
+    for (size_t batch_size = batch_scale;                                     \
+         batch_size < batch_tile * batch_scale; batch_size++) {               \
+      VBinaryMicrokernelTester()                                              \
+          .batch_size(batch_size)                                             \
+          .broadcast_b(is_binaryc)                                            \
+          .Test(__VA_ARGS__);                                                 \
+    }                                                                         \
+  }
+
+#define XNN_TEST_BINARY_BATCH_GT(ukernel, arch_flags, batch_tile, is_binaryc, \
+                                 datatype, ...)                               \
+  TEST(ukernel, batch_gt) {                                                   \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                     \
+    const size_t batch_scale = get_batch_scale<datatype>();                   \
+    const size_t batch_end = batch_tile == 1 ? 10 : batch_tile * 2;           \
+    const size_t batch_step = batch_scale == 1 ? 1 : batch_tile * 2;          \
+    for (size_t batch_size = batch_tile + 1; batch_size < batch_end;          \
+         batch_size += batch_step) {                                          \
+      VBinaryMicrokernelTester()                                              \
+          .batch_size(batch_size)                                             \
+          .broadcast_b(is_binaryc)                                            \
+          .Test(__VA_ARGS__);                                                 \
+    }                                                                         \
+  }
+
+#define XNN_TEST_BINARY_INPLACE_A(ukernel, arch_flags, batch_tile, is_binaryc, \
+                                  datatype, ...)                               \
+  TEST(ukernel, inplace_a) {                                                   \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                      \
+    const size_t batch_scale = get_batch_scale<datatype>();                    \
+    for (size_t batch_size = 1; batch_size <= batch_tile * batch_scale * 5;    \
+         batch_size += std::max(1, batch_tile - 1) * batch_scale) {            \
+      VBinaryMicrokernelTester()                                               \
+          .batch_size(batch_size)                                              \
+          .inplace_a(true)                                                     \
+          .broadcast_b(is_binaryc)                                             \
+          .Test(__VA_ARGS__);                                                  \
+    }                                                                          \
+  }
+
+#define XNN_TEST_BINARY_INPLACE_B(ukernel, arch_flags, batch_tile, is_binaryc, \
+                                  datatype, ...)                               \
+  TEST(ukernel, inplace_b) {                                                   \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                      \
+    const size_t batch_scale = get_batch_scale<datatype>();                    \
+    for (size_t batch_size = 1; batch_size <= batch_tile * batch_scale * 5;    \
+         batch_size += std::max(1, batch_tile - 1) * batch_scale) {            \
+      VBinaryMicrokernelTester()                                               \
+          .batch_size(batch_size)                                              \
+          .inplace_b(true)                                                     \
+          .broadcast_b(is_binaryc)                                             \
+          .Test(__VA_ARGS__);                                                  \
+    }                                                                          \
+  }
+
+#define XNN_TEST_BINARY_INPLACE_A_AND_B(ukernel, arch_flags, batch_tile,    \
+                                        is_binaryc, datatype, ...)          \
+  TEST(ukernel, inplace_a_and_b) {                                          \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                   \
+    const size_t batch_scale = get_batch_scale<datatype>();                 \
+    for (size_t batch_size = 1; batch_size <= batch_tile * batch_scale * 5; \
+         batch_size += std::max(1, batch_tile - 1) * batch_scale) {         \
+      VBinaryMicrokernelTester()                                            \
+          .batch_size(batch_size)                                           \
+          .inplace_a(true)                                                  \
+          .inplace_b(true)                                                  \
+          .broadcast_b(is_binaryc)                                          \
+          .Test(__VA_ARGS__);                                               \
+    }                                                                       \
+  }
+
+#define XNN_TEST_BINARY_A_ZERO_POINT(ukernel, arch_flags, batch_tile,       \
+                                     is_binaryc, datatype, ...)             \
+  TEST(ukernel, a_zero_point) {                                             \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                   \
+    const size_t batch_scale = get_batch_scale<datatype>();                 \
+    for (size_t batch_size = 1; batch_size <= batch_tile * batch_scale * 5; \
+         batch_size += std::max(1, batch_tile - 1) * batch_scale) {         \
+      for (int32_t a_zero_point = -128; a_zero_point <= 127;                \
+           a_zero_point += 51) {                                            \
+        VBinaryMicrokernelTester()                                          \
+            .batch_size(batch_size)                                         \
+            .a_zero_point(a_zero_point)                                     \
+            .broadcast_b(is_binaryc)                                        \
+            .Test(__VA_ARGS__);                                             \
+      }                                                                     \
+    }                                                                       \
+  }
+
+#define XNN_TEST_BINARY_B_ZERO_POINT(ukernel, arch_flags, batch_tile,       \
+                                     is_binaryc, datatype, ...)             \
+  TEST(ukernel, b_zero_point) {                                             \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                   \
+    const size_t batch_scale = get_batch_scale<datatype>();                 \
+    for (size_t batch_size = 1; batch_size <= batch_tile * batch_scale * 5; \
+         batch_size += std::max(1, batch_tile - 1) * batch_scale) {         \
+      for (int32_t b_zero_point = -128; b_zero_point <= 127;                \
+           b_zero_point += 51) {                                            \
+        VBinaryMicrokernelTester()                                          \
+            .batch_size(batch_size)                                         \
+            .b_zero_point(b_zero_point)                                     \
+            .broadcast_b(is_binaryc)                                        \
+            .Test(__VA_ARGS__);                                             \
+      }                                                                     \
+    }                                                                       \
+  }
+
+#define XNN_TEST_BINARY_Y_ZERO_POINT(ukernel, arch_flags, batch_tile,       \
+                                     is_binaryc, datatype, ...)             \
+  TEST(ukernel, y_zero_point) {                                             \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                   \
+    const size_t batch_scale = get_batch_scale<datatype>();                 \
+    for (size_t batch_size = 1; batch_size <= batch_tile * batch_scale * 5; \
+         batch_size += std::max(1, batch_tile - 1) * batch_scale) {         \
+      for (int32_t y_zero_point = -128; y_zero_point <= 127;                \
+           y_zero_point += 51) {                                            \
+        VBinaryMicrokernelTester()                                          \
+            .batch_size(batch_size)                                         \
+            .y_zero_point(y_zero_point)                                     \
+            .broadcast_b(is_binaryc)                                        \
+            .Test(__VA_ARGS__);                                             \
+      }                                                                     \
+    }                                                                       \
+  }
+
+#define XNN_TEST_BINARY_A_SCALE(ukernel, arch_flags, batch_tile, is_binaryc, \
+                                datatype, ...)                               \
+  TEST(ukernel, a_scale) {                                                   \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                    \
+    const size_t batch_scale = get_batch_scale<datatype>();                  \
+    for (size_t batch_size = 1; batch_size <= batch_tile * batch_scale * 5;  \
+         batch_size += std::max(1, batch_tile - 1) * batch_scale) {          \
+      for (float a_scale = 0.1f; a_scale <= 10.0f; a_scale *= 3.14f) {       \
+        VBinaryMicrokernelTester()                                           \
+            .batch_size(batch_size)                                          \
+            .a_scale(a_scale)                                                \
+            .broadcast_b(is_binaryc)                                         \
+            .Test(__VA_ARGS__);                                              \
+      }                                                                      \
+    }                                                                        \
+  }
+
+#define XNN_TEST_BINARY_B_SCALE(ukernel, arch_flags, batch_tile, is_binaryc, \
+                                datatype, ...)                               \
+  TEST(ukernel, b_scale) {                                                   \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                    \
+    const size_t batch_scale = get_batch_scale<datatype>();                  \
+    for (size_t batch_size = 1; batch_size <= batch_tile * batch_scale * 5;  \
+         batch_size += std::max(1, batch_tile - 1) * batch_scale) {          \
+      for (float b_scale = 0.1f; b_scale <= 10.0f; b_scale *= 3.14f) {       \
+        VBinaryMicrokernelTester()                                           \
+            .batch_size(batch_size)                                          \
+            .b_scale(b_scale)                                                \
+            .broadcast_b(is_binaryc)                                         \
+            .Test(__VA_ARGS__);                                              \
+      }                                                                      \
+    }                                                                        \
+  }
+
+#define XNN_TEST_BINARY_Y_SCALE(ukernel, arch_flags, batch_tile, is_binaryc, \
+                                datatype, ...)                               \
+  TEST(ukernel, y_scale) {                                                   \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                    \
+    const size_t batch_scale = get_batch_scale<datatype>();                  \
+    for (size_t batch_size = 1; batch_size <= batch_tile * batch_scale * 5;  \
+         batch_size += std::max(1, batch_tile - 1) * batch_scale) {          \
+      for (float y_scale = 0.1f; y_scale <= 10.0f; y_scale *= 3.14f) {       \
+        VBinaryMicrokernelTester()                                           \
+            .batch_size(batch_size)                                          \
+            .y_scale(y_scale)                                                \
+            .broadcast_b(is_binaryc)                                         \
+            .Test(__VA_ARGS__);                                              \
+      }                                                                      \
+    }                                                                        \
+  }
+
+#define XNN_TEST_BINARY_QMIN(ukernel, arch_flags, batch_tile, is_binaryc,   \
+                             datatype, ...)                                 \
+  TEST(ukernel, qmin) {                                                     \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                   \
+    const size_t batch_scale = get_batch_scale<datatype>();                 \
+    for (size_t batch_size = 1; batch_size <= batch_tile * batch_scale * 5; \
+         batch_size += std::max(1, batch_tile - 1) * batch_scale) {         \
+      VBinaryMicrokernelTester()                                            \
+          .batch_size(batch_size)                                           \
+          .qmin(128)                                                        \
+          .broadcast_b(is_binaryc)                                          \
+          .Test(__VA_ARGS__);                                               \
+    }                                                                       \
+  }
+
+#define XNN_TEST_BINARY_QMAX(ukernel, arch_flags, batch_tile, is_binaryc,   \
+                             datatype, ...)                                 \
+  TEST(ukernel, qmax) {                                                     \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                   \
+    const size_t batch_scale = get_batch_scale<datatype>();                 \
+    for (size_t batch_size = 1; batch_size <= batch_tile * batch_scale * 5; \
+         batch_size += std::max(1, batch_tile - 1) * batch_scale) {         \
+      VBinaryMicrokernelTester()                                            \
+          .batch_size(batch_size)                                           \
+          .qmax(128)                                                        \
+          .broadcast_b(is_binaryc)                                          \
+          .Test(__VA_ARGS__);                                               \
+    }                                                                       \
+  }

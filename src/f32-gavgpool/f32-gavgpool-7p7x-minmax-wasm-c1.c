@@ -17,7 +17,7 @@ void xnn_f32_gavgpool_minmax_ukernel_7p7x__wasm_c1(
     const float* zero,
     float* buffer,
     float* output,
-    const union xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows > 7);
   assert(channels != 0);

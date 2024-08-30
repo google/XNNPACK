@@ -19,14 +19,14 @@ void xnn_f16_vlrelu_ukernel__neonfp16arith_u16(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_f16_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f16_lrelu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const float16x8_t vslope = vreinterpretq_f16_u16(vld1q_dup_u16(&params->fp16arith.slope));
+  const float16x8_t vslope = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.slope));
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
