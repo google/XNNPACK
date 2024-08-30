@@ -545,11 +545,11 @@ DECLARE_INIT_QU8_LRELU_PARAMS_FUNCTION(xnn_init_qu8_lrelu_scalar_params)
 
 #define DECLARE_INIT_F32_SQRT_PARAMS_FUNCTION(fn_name)      \
   XNN_INTERNAL size_t fn_name(                              \
-    union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
+    struct xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
 
 #define DECLARE_INIT_F32_RSQRT_PARAMS_FUNCTION(fn_name)      \
   XNN_INTERNAL size_t fn_name(                              \
-    union xnn_f32_rsqrt_params params[XNN_MIN_ELEMENTS(1)]);
+    struct xnn_f32_rsqrt_params params[XNN_MIN_ELEMENTS(1)]);
 
 
 #define DECLARE_INIT_S8_MINMAX_PARAMS_FUNCTION(fn_name)     \

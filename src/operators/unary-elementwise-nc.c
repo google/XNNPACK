@@ -1375,7 +1375,7 @@ enum xnn_status xnn_create_square_root_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_sqrt_config = xnn_init_f32_sqrt_config();
 
-  union xnn_f32_sqrt_params params;
+  struct xnn_f32_sqrt_params params;
   if XNN_LIKELY(f32_sqrt_config != NULL && f32_sqrt_config->init.f32_sqrt != NULL) {
     f32_sqrt_config->init.f32_sqrt(&params);
   }
@@ -1401,7 +1401,7 @@ enum xnn_status xnn_create_reciprocal_square_root_nc_f32(
   const struct xnn_unary_elementwise_config* f32_rsqrt_config =
       xnn_init_f32_rsqrt_config();
 
-  union xnn_f32_rsqrt_params params;
+  struct xnn_f32_rsqrt_params params;
   if XNN_LIKELY (f32_rsqrt_config != NULL &&
                  f32_rsqrt_config->init.f32_rsqrt != NULL) {
     f32_rsqrt_config->init.f32_rsqrt(&params);
@@ -3815,7 +3815,7 @@ enum xnn_status xnn_run_reciprocal_square_root_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_rsqrt_config = xnn_init_f32_rsqrt_config();
 
-  union xnn_f32_rsqrt_params params;
+  struct xnn_f32_rsqrt_params params;
   if XNN_LIKELY(f32_rsqrt_config != NULL && f32_rsqrt_config->init.f32_rsqrt != NULL) {
     f32_rsqrt_config->init.f32_rsqrt(&params);
   }
@@ -3899,7 +3899,7 @@ enum xnn_status xnn_run_square_root_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_sqrt_config = xnn_init_f32_sqrt_config();
 
-  union xnn_f32_sqrt_params params;
+  struct xnn_f32_sqrt_params params;
   if XNN_LIKELY(f32_sqrt_config != NULL && f32_sqrt_config->init.f32_sqrt != NULL) {
     f32_sqrt_config->init.f32_sqrt(&params);
   }

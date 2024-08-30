@@ -40,7 +40,7 @@
 
 void xnn_f32_vsqrt_ukernel__avx_rsqrt_u16(
     size_t batch, const float* input, float* output,
-    const union xnn_f32_sqrt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_sqrt_params params[restrict XNN_MIN_ELEMENTS(1)])
     XNN_OOB_READS {
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 

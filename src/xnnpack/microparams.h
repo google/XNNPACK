@@ -764,21 +764,21 @@ struct xnn_f32_sigmoid_params {
 
 // Sqrt (Square Root): used by VSQRT microkernels.
 
-union xnn_f16_sqrt_params {
+struct xnn_f16_sqrt_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
-union xnn_f32_sqrt_params {
+struct xnn_f32_sqrt_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
 // Rsqrt (Reciprocal Square Root): used by VRSQRT microkernels.
 
-union xnn_f16_rsqrt_params {
+struct xnn_f16_rsqrt_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
-union xnn_f32_rsqrt_params {
+struct xnn_f32_rsqrt_params {
   char _;  // Dummy member variable to comply with the C standard.
 };
 

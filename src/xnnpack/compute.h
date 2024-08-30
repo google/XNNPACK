@@ -1363,7 +1363,7 @@ struct univector_strided_context {
     struct xnn_f32_qu8_cvt_params f32_qu8_cvt;
     union xnn_f32_rnd_params f32_rnd;
     struct xnn_f32_sigmoid_params f32_sigmoid;
-    union xnn_f32_sqrt_params f32_sqrt;
+    struct xnn_f32_sqrt_params f32_sqrt;
     union xnn_f32_tanh_params f32_tanh;
     struct xnn_qs8_cvt_params qs8_cvt;
     struct xnn_qs16_qs8_cvt_params qs16_qs8_cvt;
@@ -1407,7 +1407,7 @@ struct univector_contiguous_context {
     struct xnn_f32_qu8_cvt_params f32_qu8_cvt;
     union xnn_f32_rnd_params f32_rnd;
     struct xnn_f32_sigmoid_params f32_sigmoid;
-    union xnn_f32_sqrt_params f32_sqrt;
+    struct xnn_f32_sqrt_params f32_sqrt;
     struct xnn_qs8_cvt_params qs8_cvt;
     struct xnn_qs16_qs8_cvt_params qs16_qs8_cvt;
     struct xnn_qs8_f32_cvt_params qs8_f32_cvt;

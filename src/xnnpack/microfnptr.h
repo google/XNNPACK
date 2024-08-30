@@ -2006,13 +2006,13 @@ typedef void (*xnn_f16_vsqrt_ukernel_fn)(
     size_t batch,
     const void* input,
     void* output,
-    const union xnn_f16_sqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f16_sqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_vsqrt_ukernel_fn)(
     size_t batch,
     const float* input,
     float* output,
-    const union xnn_f32_sqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f32_sqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // VSQRTSHIFT: Vector SQuare RooT and SHIFT elementwise
 
@@ -2026,11 +2026,11 @@ typedef void (*xnn_u64_u32_vsqrtshift_ukernel_fn)(
 
 typedef void (*xnn_f16_vrsqrt_ukernel_fn)(
     size_t batch, const void* input, void* output,
-    const union xnn_f16_rsqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f16_rsqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_vrsqrt_ukernel_fn)(
     size_t batch, const float* input, float* output,
-    const union xnn_f32_rsqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f32_rsqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // VTANH: Vector TANH elementwise
 
@@ -2804,16 +2804,16 @@ typedef size_t (*xnn_init_f32_sigmoid_params_fn)(
   struct xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f16_sqrt_params_fn)(
-  union xnn_f16_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
+  struct xnn_f16_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f32_sqrt_params_fn)(
-  union xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
+  struct xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f16_rsqrt_params_fn)(
-  union xnn_f16_rsqrt_params params[XNN_MIN_ELEMENTS(1)]);
+  struct xnn_f16_rsqrt_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f32_rsqrt_params_fn)(
-  union xnn_f32_rsqrt_params params[XNN_MIN_ELEMENTS(1)]);
+  struct xnn_f32_rsqrt_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_f16_tanh_params_fn)(
   union xnn_f16_tanh_params params[XNN_MIN_ELEMENTS(1)]);
