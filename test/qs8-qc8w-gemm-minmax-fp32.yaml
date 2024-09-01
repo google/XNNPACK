@@ -1270,6 +1270,16 @@
   pack: xnn_pack_qs8_to_qu8_gemm_goi_w
   k-block: 16
 
+# AVXVNNIINT8
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__avxvnniint8_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_avxvnni_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 16
+- name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_5x8c8__avxvnniint8_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_avxvnni_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 16
+
 # WAsm SIMD
 - name: xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4c2__wasmsimd_dot16x2_ld64
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params

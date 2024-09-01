@@ -876,6 +876,16 @@ static void GEMMEnd2EndBenchmark(
       /*mr=*/5, /*nr=*/8, /*log2_kr=*/3, /*log2_sr=*/0,
       benchmark::utils::CheckAVXVNNI);
   }
+  static void qs8_qc8w_gemm_5x8c8__avxvnni_prfm(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_5x8c8__avxvnni_prfm,
+      xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_5x8c8__avxvnni_prfm,
+      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__avxvnni_prfm,
+      xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c8__avxvnni_prfm,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      /*mr=*/5, /*nr=*/8, /*log2_kr=*/3, /*log2_sr=*/0,
+      benchmark::utils::CheckAVXVNNI);
+  }
   static void qs8_qc8w_gemm_6x8c8__avxvnni(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_6x8c8__avxvnni,
@@ -912,10 +922,25 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_QS8_END2END(qs8_qc8w_gemm_3x8c8__avxvnni);
   BENCHMARK_QS8_END2END(qs8_qc8w_gemm_4x8c8__avxvnni);
   BENCHMARK_QS8_END2END(qs8_qc8w_gemm_5x8c8__avxvnni);
+  BENCHMARK_QS8_END2END(qs8_qc8w_gemm_5x8c8__avxvnni_prfm);
   BENCHMARK_QS8_END2END(qs8_qc8w_gemm_6x8c8__avxvnni);
   BENCHMARK_QS8_END2END(qs8_qc8w_gemm_7x8c8__avxvnni);
   BENCHMARK_QS8_END2END(qs8_qc8w_gemm_8x8c8__avxvnni);
 #endif  // XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ENABLE_AVXVNNIINT8 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  static void qs8_qc8w_gemm_5x8c8__avxvnniint8_prfm(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_5x8c8__avxvnniint8_prfm,
+      xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_5x8c8__avxvnniint8_prfm,
+      xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__avxvnniint8_prfm,
+      xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c8__avxvnniint8_prfm,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+      /*mr=*/5, /*nr=*/8, /*log2_kr=*/3, /*log2_sr=*/0,
+      benchmark::utils::CheckAVXVNNIINT8);
+  }
+  BENCHMARK_QS8_END2END(qs8_qc8w_gemm_5x8c8__avxvnniint8_prfm);
+#endif  // XNN_ENABLE_AVXVNNIINT8 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   static void qs8_qc8w_gemm_1x16c4__avx512vnni(benchmark::State& state, models::ExecutionPlanFactory model) {

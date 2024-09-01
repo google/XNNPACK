@@ -509,6 +509,17 @@ bool CheckArchFlags(benchmark::State& state, uint64_t arch_flags) {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  bool CheckAVXVNNIINT8(benchmark::State& state) {
+    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    if (hardware_config == nullptr || !hardware_config->use_x86_avxvnniint8) {
+      state.SkipWithError("no AVX VNNI INT8 extension");
+      return false;
+    }
+    return true;
+  }
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   bool CheckAVX256SKX(benchmark::State& state) {
     const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     if (hardware_config == nullptr || !hardware_config->use_x86_avx256skx) {
