@@ -2767,7 +2767,7 @@
   static void qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__avxvnniint8_prfm(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__avxvnniint8_prfm,
-      xnn_init_qs8_qc8w_conv_minmax_fp32_avxvnni_params,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
       xnn_pack_qs8_gemm_goi_w,
       /*mr=*/1, /*nr=*/8, /*kr=*/8, /*sr=*/1,
       benchmark::utils::CheckAVXVNNIINT8);
@@ -2778,7 +2778,7 @@
   static void qs8_qc8w_gemm_minmax_fp32_ukernel_5x8c8__avxvnniint8_prfm(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_5x8c8__avxvnniint8_prfm,
-      xnn_init_qs8_qc8w_conv_minmax_fp32_avxvnni_params,
+      xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
       xnn_pack_qs8_gemm_goi_w,
       /*mr=*/5, /*nr=*/8, /*kr=*/8, /*sr=*/1,
       benchmark::utils::CheckAVXVNNIINT8);

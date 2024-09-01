@@ -1234,11 +1234,11 @@
 
 # x86 AVX VNNI INT8
 - name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c8__avxvnniint8_prfm
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_avxvnni_params
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 - name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_5x8c8__avxvnniint8_prfm
-  init: xnn_init_qs8_qc8w_conv_minmax_fp32_avxvnni_params
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 16
 
