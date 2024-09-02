@@ -30,12 +30,39 @@ std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) 
 
 #define XNN_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale) \
   { #ukernel, ukernel, arch_flags, nr, kr, sr, kblock, nr_scale },
+#define XNN_QS8_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale)
 
 const XnnTestParam xnn_test_params[] = {
 #include "src/x8-packw/x8-packw.h"
 };
 
 #undef XNN_UKERNEL
+#undef XNN_QS8_UKERNEL
+
+struct XnnTestQS8Param {
+  const char *name;
+  xnn_qs8_packw_gemm_goi_ukernel_fn ukernel;
+  uint64_t arch_flags;
+  size_t nr, kr, sr, kblock, nr_scale;
+};
+
+class XnnTestQS8 : public testing::TestWithParam<XnnTestQS8Param> {
+};
+
+std::string GetTestQS8Name(const testing::TestParamInfo<XnnTestQS8::ParamType>& info) {
+  return info.param.name;
+}
+
+#define XNN_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale)
+#define XNN_QS8_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale) \
+  { #ukernel, ukernel, arch_flags, nr, kr, sr, kblock, nr_scale },
+
+const XnnTestQS8Param xnn_test_qs8_params[] = {
+#include "src/x8-packw/x8-packw.h"
+};
+
+#undef XNN_UKERNEL
+#undef XNN_QS8_UKERNEL
 
 }  // namespace
 
@@ -236,8 +263,26 @@ TEST_P(XnnTest, null_bias) {
     }
   }
 }
+
 INSTANTIATE_TEST_SUITE_P(x8_packw,
                          XnnTest,
                          testing::ValuesIn(xnn_test_params),
                          GetTestName);
+
+
+TEST_P(XnnTestQS8, k_eq_kblock) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  PackWMicrokernelTester()
+    .n(GetParam().nr * GetParam().nr_scale)
+    .k(GetParam().kblock)
+    .nr(GetParam().nr * GetParam().nr_scale)
+    .kr(GetParam().kr)
+    .sr(GetParam().sr)
+    .Test(GetParam().ukernel);
+}
+
+INSTANTIATE_TEST_SUITE_P(qs8_packw,
+                         XnnTestQS8,
+                         testing::ValuesIn(xnn_test_qs8_params),
+                         GetTestQS8Name);
 

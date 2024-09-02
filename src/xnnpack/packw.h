@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+
 #define XNN_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale) \
   XNN_INTERNAL void ukernel(                                              \
       size_t g,                                                           \
@@ -30,9 +31,25 @@ extern "C" {
       size_t extra_bytes,                                                 \
       const void* params);
 
+#define XNN_QS8_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale) \
+  XNN_INTERNAL void ukernel(                                                  \
+      size_t g,                                                               \
+      size_t nc,                                                              \
+      size_t kc,                                                              \
+      size_t nr,                                                              \
+      size_t kr,                                                              \
+      size_t sr,                                                              \
+      const int8_t* weights,                                                  \
+      const int32_t* bias,                                                    \
+      const void* scale,                                                      \
+      int8_t* packed_weights,                                                 \
+      size_t extra_bytes,                                                     \
+      const void* params);
+
 #include "src/x8-packw/x8-packw.h"
 
 #undef XNN_UKERNEL
+#undef XNN_QS8_UKERNEL
 
 #define XNN_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale) \
   XNN_INTERNAL void ukernel(                                              \
