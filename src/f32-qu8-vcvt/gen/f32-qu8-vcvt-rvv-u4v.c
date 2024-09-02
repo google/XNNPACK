@@ -10,6 +10,7 @@
 #include <assert.h>
 
 #include <riscv_vector.h>
+
 #include "xnnpack/math.h"
 #include "xnnpack/vcvt.h"
 
@@ -18,7 +19,7 @@ void xnn_f32_qu8_vcvt_ukernel__rvv_u4v(
     size_t batch,
     const float* input,
     uint8_t* output,
-    const union xnn_f32_qu8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const union xnn_f32_qu8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
