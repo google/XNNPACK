@@ -131,7 +131,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vrsqrt/gen/f32-vrsqrt-scalar-rsqrt-u4.c
   src/f32-vsigmoid/gen/f32-vsigmoid-scalar-rr2-lut64-p2-div-u2.c
   src/f32-vsqrt/gen/f32-vsqrt-scalar-sqrt-u1.c
-  src/f32-vtanh/gen/f32-vtanh-scalar-rational-9-6-div.c
+  src/f32-vtanh/gen/f32-vtanh-scalar-rational-9-8-div.c
   src/f32-vunary/gen/f32-vabs-scalar.c
   src/f32-vunary/gen/f32-vneg-scalar.c
   src/f32-vunary/gen/f32-vsqr-scalar.c

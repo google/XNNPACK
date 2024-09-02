@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/f32-vtanh/rational-9-6.c.in
+//   Template: src/f32-vtanh/rational-9-8.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 Google LLC
@@ -18,7 +18,7 @@
 #include "xnnpack/vunary.h"
 
 
-void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u4(
+void xnn_f32_vtanh_ukernel__neon_rational_9_8_div_u4(
     size_t batch,
     const float* input,
     float* output,
@@ -34,26 +34,30 @@ void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u4(
   // this point. This value is chosen as the first floating point number as of
   // which the interpolation returns 1.0f.
   #if XNN_SIMD_HAS_NATIVE_FMA
-    XNN_SIMD_CONST_F32(vmax_x, 7.646893501282f);
-    XNN_SIMD_CONST_F32(vmin_x, -7.646893501282f);
+    XNN_SIMD_CONST_F32(vmax_x, 7.9807181358e+00);
+    XNN_SIMD_CONST_F32(vmin_x, -7.9807181358e+00);
   #else
-    XNN_SIMD_CONST_F32(vmax_x, 7.623543739319f);
-    XNN_SIMD_CONST_F32(vmin_x, -7.623543739319f);
+    XNN_SIMD_CONST_F32(vmax_x, 7.8522667885e+00);
+    XNN_SIMD_CONST_F32(vmin_x, -7.8522667885e+00);
   #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
-  XNN_SIMD_CONST_F32(valpha_1, -9.022999554873e-03f);
-  XNN_SIMD_CONST_F32(valpha_3, -1.146968104877e-03f);
-  XNN_SIMD_CONST_F32(valpha_5, -2.432360815874e-05f);
-  XNN_SIMD_CONST_F32(valpha_7, -6.458659385089e-08f);
-  XNN_SIMD_CONST_F32(valpha_9, 5.535878699892e-11f);
+  // XNN_SIMD_CONST_F32(valpha_1, 1.0000000000e+00f);
+  XNN_SIMD_CONST_F32(valpha_3, 1.3412411511e-01f);
+  XNN_SIMD_CONST_F32(valpha_5, 3.5330520477e-03f);
+  XNN_SIMD_CONST_F32(valpha_7, 2.1235626264e-05f);
+  XNN_SIMD_CONST_F32(valpha_9, 1.4248920266e-08f);
+
 
   // The monomial coefficients of the denominator polynomial (even).
-  XNN_SIMD_CONST_F32(vbeta_0, -9.023001417518e-03f);
-  XNN_SIMD_CONST_F32(vbeta_2, -4.154618829489e-03f);
-  XNN_SIMD_CONST_F32(vbeta_4, -2.061512641376e-04f);
-  XNN_SIMD_CONST_F32(vbeta_6, -1.774490101525e-06f);
+  // XNN_SIMD_CONST_F32(vbeta_0, 1.0000000000e+00f);
+  XNN_SIMD_CONST_F32(vbeta_2, 4.6745735407e-01f);
+  XNN_SIMD_CONST_F32(vbeta_4, 2.6018999517e-02f);
+  XNN_SIMD_CONST_F32(vbeta_6, 3.3472978976e-04f);
+  XNN_SIMD_CONST_F32(vbeta_8, 8.1365948290e-07f);
 
+  // Some useful constants.
+  XNN_SIMD_CONST_F32(vone, 1.0f);
 
   for (; batch >= xnn_simd_bytes_f32; batch -= xnn_simd_bytes_f32) {
     xnn_simd_f32_t vx = xnn_loadu_f32(input);
@@ -70,13 +74,14 @@ void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u4(
     xnn_simd_f32_t vp = xnn_fmadd_f32(vx2, valpha_9, valpha_7);
     vp = xnn_fmadd_f32(vx2, vp, valpha_5);
     vp = xnn_fmadd_f32(vx2, vp, valpha_3);
-    vp = xnn_fmadd_f32(vx2, vp, valpha_1);
+    vp = xnn_fmadd_f32(vx2, vp, vone);
     vp = xnn_mul_f32(vx, vp);
 
     // Evaluate the denominator polynomial q.
-    xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_6, vbeta_4);
+    xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_8, vbeta_6);
+    vq = xnn_fmadd_f32(vx2, vq, vbeta_4);
     vq = xnn_fmadd_f32(vx2, vq, vbeta_2);
-    vq = xnn_fmadd_f32(vx2, vq, vbeta_0);
+    vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator.
     const xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
@@ -98,13 +103,14 @@ void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u4(
     xnn_simd_f32_t vp = xnn_fmadd_f32(vx2, valpha_9, valpha_7);
     vp = xnn_fmadd_f32(vx2, vp, valpha_5);
     vp = xnn_fmadd_f32(vx2, vp, valpha_3);
-    vp = xnn_fmadd_f32(vx2, vp, valpha_1);
+    vp = xnn_fmadd_f32(vx2, vp, vone);
     vp = xnn_mul_f32(vx, vp);
 
     // Evaluate the denominator polynomial q.
-    xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_6, vbeta_4);
+    xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_8, vbeta_6);
+    vq = xnn_fmadd_f32(vx2, vq, vbeta_4);
     vq = xnn_fmadd_f32(vx2, vq, vbeta_2);
-    vq = xnn_fmadd_f32(vx2, vq, vbeta_0);
+    vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator.
     const xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
@@ -113,7 +119,7 @@ void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u4(
   }
 }
 
-void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u8(
+void xnn_f32_vtanh_ukernel__neon_rational_9_8_div_u8(
     size_t batch,
     const float* input,
     float* output,
@@ -129,26 +135,30 @@ void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u8(
   // this point. This value is chosen as the first floating point number as of
   // which the interpolation returns 1.0f.
   #if XNN_SIMD_HAS_NATIVE_FMA
-    XNN_SIMD_CONST_F32(vmax_x, 7.646893501282f);
-    XNN_SIMD_CONST_F32(vmin_x, -7.646893501282f);
+    XNN_SIMD_CONST_F32(vmax_x, 7.9807181358e+00);
+    XNN_SIMD_CONST_F32(vmin_x, -7.9807181358e+00);
   #else
-    XNN_SIMD_CONST_F32(vmax_x, 7.623543739319f);
-    XNN_SIMD_CONST_F32(vmin_x, -7.623543739319f);
+    XNN_SIMD_CONST_F32(vmax_x, 7.8522667885e+00);
+    XNN_SIMD_CONST_F32(vmin_x, -7.8522667885e+00);
   #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
-  XNN_SIMD_CONST_F32(valpha_1, -9.022999554873e-03f);
-  XNN_SIMD_CONST_F32(valpha_3, -1.146968104877e-03f);
-  XNN_SIMD_CONST_F32(valpha_5, -2.432360815874e-05f);
-  XNN_SIMD_CONST_F32(valpha_7, -6.458659385089e-08f);
-  XNN_SIMD_CONST_F32(valpha_9, 5.535878699892e-11f);
+  // XNN_SIMD_CONST_F32(valpha_1, 1.0000000000e+00f);
+  XNN_SIMD_CONST_F32(valpha_3, 1.3412411511e-01f);
+  XNN_SIMD_CONST_F32(valpha_5, 3.5330520477e-03f);
+  XNN_SIMD_CONST_F32(valpha_7, 2.1235626264e-05f);
+  XNN_SIMD_CONST_F32(valpha_9, 1.4248920266e-08f);
+
 
   // The monomial coefficients of the denominator polynomial (even).
-  XNN_SIMD_CONST_F32(vbeta_0, -9.023001417518e-03f);
-  XNN_SIMD_CONST_F32(vbeta_2, -4.154618829489e-03f);
-  XNN_SIMD_CONST_F32(vbeta_4, -2.061512641376e-04f);
-  XNN_SIMD_CONST_F32(vbeta_6, -1.774490101525e-06f);
+  // XNN_SIMD_CONST_F32(vbeta_0, 1.0000000000e+00f);
+  XNN_SIMD_CONST_F32(vbeta_2, 4.6745735407e-01f);
+  XNN_SIMD_CONST_F32(vbeta_4, 2.6018999517e-02f);
+  XNN_SIMD_CONST_F32(vbeta_6, 3.3472978976e-04f);
+  XNN_SIMD_CONST_F32(vbeta_8, 8.1365948290e-07f);
 
+  // Some useful constants.
+  XNN_SIMD_CONST_F32(vone, 1.0f);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     xnn_simd_f32_t vx_0 = xnn_loadu_f32(input);
@@ -172,18 +182,20 @@ void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u8(
     vp_1 = xnn_fmadd_f32(vx2_1, vp_1, valpha_5);
     vp_0 = xnn_fmadd_f32(vx2_0, vp_0, valpha_3);
     vp_1 = xnn_fmadd_f32(vx2_1, vp_1, valpha_3);
-    vp_0 = xnn_fmadd_f32(vx2_0, vp_0, valpha_1);
-    vp_1 = xnn_fmadd_f32(vx2_1, vp_1, valpha_1);
+    vp_0 = xnn_fmadd_f32(vx2_0, vp_0, vone);
+    vp_1 = xnn_fmadd_f32(vx2_1, vp_1, vone);
     vp_0 = xnn_mul_f32(vx_0, vp_0);
     vp_1 = xnn_mul_f32(vx_1, vp_1);
 
     // Evaluate the denominator polynomial q.
-    xnn_simd_f32_t vq_0 = xnn_fmadd_f32(vx2_0, vbeta_6, vbeta_4);
-    xnn_simd_f32_t vq_1 = xnn_fmadd_f32(vx2_1, vbeta_6, vbeta_4);
+    xnn_simd_f32_t vq_0 = xnn_fmadd_f32(vx2_0, vbeta_8, vbeta_6);
+    xnn_simd_f32_t vq_1 = xnn_fmadd_f32(vx2_1, vbeta_8, vbeta_6);
+    vq_0 = xnn_fmadd_f32(vx2_0, vq_0, vbeta_4);
+    vq_1 = xnn_fmadd_f32(vx2_1, vq_1, vbeta_4);
     vq_0 = xnn_fmadd_f32(vx2_0, vq_0, vbeta_2);
     vq_1 = xnn_fmadd_f32(vx2_1, vq_1, vbeta_2);
-    vq_0 = xnn_fmadd_f32(vx2_0, vq_0, vbeta_0);
-    vq_1 = xnn_fmadd_f32(vx2_1, vq_1, vbeta_0);
+    vq_0 = xnn_fmadd_f32(vx2_0, vq_0, vone);
+    vq_1 = xnn_fmadd_f32(vx2_1, vq_1, vone);
 
     // Divide the numerator by the denominator.
     const xnn_simd_f32_t vy_0 = xnn_div_f32(vp_0, vq_0);
@@ -208,13 +220,14 @@ void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u8(
     xnn_simd_f32_t vp = xnn_fmadd_f32(vx2, valpha_9, valpha_7);
     vp = xnn_fmadd_f32(vx2, vp, valpha_5);
     vp = xnn_fmadd_f32(vx2, vp, valpha_3);
-    vp = xnn_fmadd_f32(vx2, vp, valpha_1);
+    vp = xnn_fmadd_f32(vx2, vp, vone);
     vp = xnn_mul_f32(vx, vp);
 
     // Evaluate the denominator polynomial q.
-    xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_6, vbeta_4);
+    xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_8, vbeta_6);
+    vq = xnn_fmadd_f32(vx2, vq, vbeta_4);
     vq = xnn_fmadd_f32(vx2, vq, vbeta_2);
-    vq = xnn_fmadd_f32(vx2, vq, vbeta_0);
+    vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator.
     const xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
@@ -236,13 +249,14 @@ void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u8(
     xnn_simd_f32_t vp = xnn_fmadd_f32(vx2, valpha_9, valpha_7);
     vp = xnn_fmadd_f32(vx2, vp, valpha_5);
     vp = xnn_fmadd_f32(vx2, vp, valpha_3);
-    vp = xnn_fmadd_f32(vx2, vp, valpha_1);
+    vp = xnn_fmadd_f32(vx2, vp, vone);
     vp = xnn_mul_f32(vx, vp);
 
     // Evaluate the denominator polynomial q.
-    xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_6, vbeta_4);
+    xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_8, vbeta_6);
+    vq = xnn_fmadd_f32(vx2, vq, vbeta_4);
     vq = xnn_fmadd_f32(vx2, vq, vbeta_2);
-    vq = xnn_fmadd_f32(vx2, vq, vbeta_0);
+    vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator.
     const xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
@@ -251,7 +265,7 @@ void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u8(
   }
 }
 
-void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u12(
+void xnn_f32_vtanh_ukernel__neon_rational_9_8_div_u12(
     size_t batch,
     const float* input,
     float* output,
@@ -267,26 +281,30 @@ void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u12(
   // this point. This value is chosen as the first floating point number as of
   // which the interpolation returns 1.0f.
   #if XNN_SIMD_HAS_NATIVE_FMA
-    XNN_SIMD_CONST_F32(vmax_x, 7.646893501282f);
-    XNN_SIMD_CONST_F32(vmin_x, -7.646893501282f);
+    XNN_SIMD_CONST_F32(vmax_x, 7.9807181358e+00);
+    XNN_SIMD_CONST_F32(vmin_x, -7.9807181358e+00);
   #else
-    XNN_SIMD_CONST_F32(vmax_x, 7.623543739319f);
-    XNN_SIMD_CONST_F32(vmin_x, -7.623543739319f);
+    XNN_SIMD_CONST_F32(vmax_x, 7.8522667885e+00);
+    XNN_SIMD_CONST_F32(vmin_x, -7.8522667885e+00);
   #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
-  XNN_SIMD_CONST_F32(valpha_1, -9.022999554873e-03f);
-  XNN_SIMD_CONST_F32(valpha_3, -1.146968104877e-03f);
-  XNN_SIMD_CONST_F32(valpha_5, -2.432360815874e-05f);
-  XNN_SIMD_CONST_F32(valpha_7, -6.458659385089e-08f);
-  XNN_SIMD_CONST_F32(valpha_9, 5.535878699892e-11f);
+  // XNN_SIMD_CONST_F32(valpha_1, 1.0000000000e+00f);
+  XNN_SIMD_CONST_F32(valpha_3, 1.3412411511e-01f);
+  XNN_SIMD_CONST_F32(valpha_5, 3.5330520477e-03f);
+  XNN_SIMD_CONST_F32(valpha_7, 2.1235626264e-05f);
+  XNN_SIMD_CONST_F32(valpha_9, 1.4248920266e-08f);
+
 
   // The monomial coefficients of the denominator polynomial (even).
-  XNN_SIMD_CONST_F32(vbeta_0, -9.023001417518e-03f);
-  XNN_SIMD_CONST_F32(vbeta_2, -4.154618829489e-03f);
-  XNN_SIMD_CONST_F32(vbeta_4, -2.061512641376e-04f);
-  XNN_SIMD_CONST_F32(vbeta_6, -1.774490101525e-06f);
+  // XNN_SIMD_CONST_F32(vbeta_0, 1.0000000000e+00f);
+  XNN_SIMD_CONST_F32(vbeta_2, 4.6745735407e-01f);
+  XNN_SIMD_CONST_F32(vbeta_4, 2.6018999517e-02f);
+  XNN_SIMD_CONST_F32(vbeta_6, 3.3472978976e-04f);
+  XNN_SIMD_CONST_F32(vbeta_8, 8.1365948290e-07f);
 
+  // Some useful constants.
+  XNN_SIMD_CONST_F32(vone, 1.0f);
 
   for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {
     xnn_simd_f32_t vx_0 = xnn_loadu_f32(input);
@@ -317,23 +335,26 @@ void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u12(
     vp_0 = xnn_fmadd_f32(vx2_0, vp_0, valpha_3);
     vp_1 = xnn_fmadd_f32(vx2_1, vp_1, valpha_3);
     vp_2 = xnn_fmadd_f32(vx2_2, vp_2, valpha_3);
-    vp_0 = xnn_fmadd_f32(vx2_0, vp_0, valpha_1);
-    vp_1 = xnn_fmadd_f32(vx2_1, vp_1, valpha_1);
-    vp_2 = xnn_fmadd_f32(vx2_2, vp_2, valpha_1);
+    vp_0 = xnn_fmadd_f32(vx2_0, vp_0, vone);
+    vp_1 = xnn_fmadd_f32(vx2_1, vp_1, vone);
+    vp_2 = xnn_fmadd_f32(vx2_2, vp_2, vone);
     vp_0 = xnn_mul_f32(vx_0, vp_0);
     vp_1 = xnn_mul_f32(vx_1, vp_1);
     vp_2 = xnn_mul_f32(vx_2, vp_2);
 
     // Evaluate the denominator polynomial q.
-    xnn_simd_f32_t vq_0 = xnn_fmadd_f32(vx2_0, vbeta_6, vbeta_4);
-    xnn_simd_f32_t vq_1 = xnn_fmadd_f32(vx2_1, vbeta_6, vbeta_4);
-    xnn_simd_f32_t vq_2 = xnn_fmadd_f32(vx2_2, vbeta_6, vbeta_4);
+    xnn_simd_f32_t vq_0 = xnn_fmadd_f32(vx2_0, vbeta_8, vbeta_6);
+    xnn_simd_f32_t vq_1 = xnn_fmadd_f32(vx2_1, vbeta_8, vbeta_6);
+    xnn_simd_f32_t vq_2 = xnn_fmadd_f32(vx2_2, vbeta_8, vbeta_6);
+    vq_0 = xnn_fmadd_f32(vx2_0, vq_0, vbeta_4);
+    vq_1 = xnn_fmadd_f32(vx2_1, vq_1, vbeta_4);
+    vq_2 = xnn_fmadd_f32(vx2_2, vq_2, vbeta_4);
     vq_0 = xnn_fmadd_f32(vx2_0, vq_0, vbeta_2);
     vq_1 = xnn_fmadd_f32(vx2_1, vq_1, vbeta_2);
     vq_2 = xnn_fmadd_f32(vx2_2, vq_2, vbeta_2);
-    vq_0 = xnn_fmadd_f32(vx2_0, vq_0, vbeta_0);
-    vq_1 = xnn_fmadd_f32(vx2_1, vq_1, vbeta_0);
-    vq_2 = xnn_fmadd_f32(vx2_2, vq_2, vbeta_0);
+    vq_0 = xnn_fmadd_f32(vx2_0, vq_0, vone);
+    vq_1 = xnn_fmadd_f32(vx2_1, vq_1, vone);
+    vq_2 = xnn_fmadd_f32(vx2_2, vq_2, vone);
 
     // Divide the numerator by the denominator.
     const xnn_simd_f32_t vy_0 = xnn_div_f32(vp_0, vq_0);
@@ -360,13 +381,14 @@ void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u12(
     xnn_simd_f32_t vp = xnn_fmadd_f32(vx2, valpha_9, valpha_7);
     vp = xnn_fmadd_f32(vx2, vp, valpha_5);
     vp = xnn_fmadd_f32(vx2, vp, valpha_3);
-    vp = xnn_fmadd_f32(vx2, vp, valpha_1);
+    vp = xnn_fmadd_f32(vx2, vp, vone);
     vp = xnn_mul_f32(vx, vp);
 
     // Evaluate the denominator polynomial q.
-    xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_6, vbeta_4);
+    xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_8, vbeta_6);
+    vq = xnn_fmadd_f32(vx2, vq, vbeta_4);
     vq = xnn_fmadd_f32(vx2, vq, vbeta_2);
-    vq = xnn_fmadd_f32(vx2, vq, vbeta_0);
+    vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator.
     const xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
@@ -388,13 +410,14 @@ void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u12(
     xnn_simd_f32_t vp = xnn_fmadd_f32(vx2, valpha_9, valpha_7);
     vp = xnn_fmadd_f32(vx2, vp, valpha_5);
     vp = xnn_fmadd_f32(vx2, vp, valpha_3);
-    vp = xnn_fmadd_f32(vx2, vp, valpha_1);
+    vp = xnn_fmadd_f32(vx2, vp, vone);
     vp = xnn_mul_f32(vx, vp);
 
     // Evaluate the denominator polynomial q.
-    xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_6, vbeta_4);
+    xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_8, vbeta_6);
+    vq = xnn_fmadd_f32(vx2, vq, vbeta_4);
     vq = xnn_fmadd_f32(vx2, vq, vbeta_2);
-    vq = xnn_fmadd_f32(vx2, vq, vbeta_0);
+    vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator.
     const xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
@@ -403,7 +426,7 @@ void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u12(
   }
 }
 
-void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u16(
+void xnn_f32_vtanh_ukernel__neon_rational_9_8_div_u16(
     size_t batch,
     const float* input,
     float* output,
@@ -419,26 +442,30 @@ void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u16(
   // this point. This value is chosen as the first floating point number as of
   // which the interpolation returns 1.0f.
   #if XNN_SIMD_HAS_NATIVE_FMA
-    XNN_SIMD_CONST_F32(vmax_x, 7.646893501282f);
-    XNN_SIMD_CONST_F32(vmin_x, -7.646893501282f);
+    XNN_SIMD_CONST_F32(vmax_x, 7.9807181358e+00);
+    XNN_SIMD_CONST_F32(vmin_x, -7.9807181358e+00);
   #else
-    XNN_SIMD_CONST_F32(vmax_x, 7.623543739319f);
-    XNN_SIMD_CONST_F32(vmin_x, -7.623543739319f);
+    XNN_SIMD_CONST_F32(vmax_x, 7.8522667885e+00);
+    XNN_SIMD_CONST_F32(vmin_x, -7.8522667885e+00);
   #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
   // The monomial coefficients of the numerator polynomial (odd).
-  XNN_SIMD_CONST_F32(valpha_1, -9.022999554873e-03f);
-  XNN_SIMD_CONST_F32(valpha_3, -1.146968104877e-03f);
-  XNN_SIMD_CONST_F32(valpha_5, -2.432360815874e-05f);
-  XNN_SIMD_CONST_F32(valpha_7, -6.458659385089e-08f);
-  XNN_SIMD_CONST_F32(valpha_9, 5.535878699892e-11f);
+  // XNN_SIMD_CONST_F32(valpha_1, 1.0000000000e+00f);
+  XNN_SIMD_CONST_F32(valpha_3, 1.3412411511e-01f);
+  XNN_SIMD_CONST_F32(valpha_5, 3.5330520477e-03f);
+  XNN_SIMD_CONST_F32(valpha_7, 2.1235626264e-05f);
+  XNN_SIMD_CONST_F32(valpha_9, 1.4248920266e-08f);
+
 
   // The monomial coefficients of the denominator polynomial (even).
-  XNN_SIMD_CONST_F32(vbeta_0, -9.023001417518e-03f);
-  XNN_SIMD_CONST_F32(vbeta_2, -4.154618829489e-03f);
-  XNN_SIMD_CONST_F32(vbeta_4, -2.061512641376e-04f);
-  XNN_SIMD_CONST_F32(vbeta_6, -1.774490101525e-06f);
+  // XNN_SIMD_CONST_F32(vbeta_0, 1.0000000000e+00f);
+  XNN_SIMD_CONST_F32(vbeta_2, 4.6745735407e-01f);
+  XNN_SIMD_CONST_F32(vbeta_4, 2.6018999517e-02f);
+  XNN_SIMD_CONST_F32(vbeta_6, 3.3472978976e-04f);
+  XNN_SIMD_CONST_F32(vbeta_8, 8.1365948290e-07f);
 
+  // Some useful constants.
+  XNN_SIMD_CONST_F32(vone, 1.0f);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     xnn_simd_f32_t vx_0 = xnn_loadu_f32(input);
@@ -476,28 +503,32 @@ void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u16(
     vp_1 = xnn_fmadd_f32(vx2_1, vp_1, valpha_3);
     vp_2 = xnn_fmadd_f32(vx2_2, vp_2, valpha_3);
     vp_3 = xnn_fmadd_f32(vx2_3, vp_3, valpha_3);
-    vp_0 = xnn_fmadd_f32(vx2_0, vp_0, valpha_1);
-    vp_1 = xnn_fmadd_f32(vx2_1, vp_1, valpha_1);
-    vp_2 = xnn_fmadd_f32(vx2_2, vp_2, valpha_1);
-    vp_3 = xnn_fmadd_f32(vx2_3, vp_3, valpha_1);
+    vp_0 = xnn_fmadd_f32(vx2_0, vp_0, vone);
+    vp_1 = xnn_fmadd_f32(vx2_1, vp_1, vone);
+    vp_2 = xnn_fmadd_f32(vx2_2, vp_2, vone);
+    vp_3 = xnn_fmadd_f32(vx2_3, vp_3, vone);
     vp_0 = xnn_mul_f32(vx_0, vp_0);
     vp_1 = xnn_mul_f32(vx_1, vp_1);
     vp_2 = xnn_mul_f32(vx_2, vp_2);
     vp_3 = xnn_mul_f32(vx_3, vp_3);
 
     // Evaluate the denominator polynomial q.
-    xnn_simd_f32_t vq_0 = xnn_fmadd_f32(vx2_0, vbeta_6, vbeta_4);
-    xnn_simd_f32_t vq_1 = xnn_fmadd_f32(vx2_1, vbeta_6, vbeta_4);
-    xnn_simd_f32_t vq_2 = xnn_fmadd_f32(vx2_2, vbeta_6, vbeta_4);
-    xnn_simd_f32_t vq_3 = xnn_fmadd_f32(vx2_3, vbeta_6, vbeta_4);
+    xnn_simd_f32_t vq_0 = xnn_fmadd_f32(vx2_0, vbeta_8, vbeta_6);
+    xnn_simd_f32_t vq_1 = xnn_fmadd_f32(vx2_1, vbeta_8, vbeta_6);
+    xnn_simd_f32_t vq_2 = xnn_fmadd_f32(vx2_2, vbeta_8, vbeta_6);
+    xnn_simd_f32_t vq_3 = xnn_fmadd_f32(vx2_3, vbeta_8, vbeta_6);
+    vq_0 = xnn_fmadd_f32(vx2_0, vq_0, vbeta_4);
+    vq_1 = xnn_fmadd_f32(vx2_1, vq_1, vbeta_4);
+    vq_2 = xnn_fmadd_f32(vx2_2, vq_2, vbeta_4);
+    vq_3 = xnn_fmadd_f32(vx2_3, vq_3, vbeta_4);
     vq_0 = xnn_fmadd_f32(vx2_0, vq_0, vbeta_2);
     vq_1 = xnn_fmadd_f32(vx2_1, vq_1, vbeta_2);
     vq_2 = xnn_fmadd_f32(vx2_2, vq_2, vbeta_2);
     vq_3 = xnn_fmadd_f32(vx2_3, vq_3, vbeta_2);
-    vq_0 = xnn_fmadd_f32(vx2_0, vq_0, vbeta_0);
-    vq_1 = xnn_fmadd_f32(vx2_1, vq_1, vbeta_0);
-    vq_2 = xnn_fmadd_f32(vx2_2, vq_2, vbeta_0);
-    vq_3 = xnn_fmadd_f32(vx2_3, vq_3, vbeta_0);
+    vq_0 = xnn_fmadd_f32(vx2_0, vq_0, vone);
+    vq_1 = xnn_fmadd_f32(vx2_1, vq_1, vone);
+    vq_2 = xnn_fmadd_f32(vx2_2, vq_2, vone);
+    vq_3 = xnn_fmadd_f32(vx2_3, vq_3, vone);
 
     // Divide the numerator by the denominator.
     const xnn_simd_f32_t vy_0 = xnn_div_f32(vp_0, vq_0);
@@ -526,13 +557,14 @@ void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u16(
     xnn_simd_f32_t vp = xnn_fmadd_f32(vx2, valpha_9, valpha_7);
     vp = xnn_fmadd_f32(vx2, vp, valpha_5);
     vp = xnn_fmadd_f32(vx2, vp, valpha_3);
-    vp = xnn_fmadd_f32(vx2, vp, valpha_1);
+    vp = xnn_fmadd_f32(vx2, vp, vone);
     vp = xnn_mul_f32(vx, vp);
 
     // Evaluate the denominator polynomial q.
-    xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_6, vbeta_4);
+    xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_8, vbeta_6);
+    vq = xnn_fmadd_f32(vx2, vq, vbeta_4);
     vq = xnn_fmadd_f32(vx2, vq, vbeta_2);
-    vq = xnn_fmadd_f32(vx2, vq, vbeta_0);
+    vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator.
     const xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);
@@ -554,13 +586,14 @@ void xnn_f32_vtanh_ukernel__neon_rational_9_6_div_u16(
     xnn_simd_f32_t vp = xnn_fmadd_f32(vx2, valpha_9, valpha_7);
     vp = xnn_fmadd_f32(vx2, vp, valpha_5);
     vp = xnn_fmadd_f32(vx2, vp, valpha_3);
-    vp = xnn_fmadd_f32(vx2, vp, valpha_1);
+    vp = xnn_fmadd_f32(vx2, vp, vone);
     vp = xnn_mul_f32(vx, vp);
 
     // Evaluate the denominator polynomial q.
-    xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_6, vbeta_4);
+    xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_8, vbeta_6);
+    vq = xnn_fmadd_f32(vx2, vq, vbeta_4);
     vq = xnn_fmadd_f32(vx2, vq, vbeta_2);
-    vq = xnn_fmadd_f32(vx2, vq, vbeta_0);
+    vq = xnn_fmadd_f32(vx2, vq, vone);
 
     // Divide the numerator by the denominator.
     const xnn_simd_f32_t vy =  xnn_div_f32(vp, vq);

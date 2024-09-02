@@ -63,7 +63,7 @@ SET(PROD_AVX_MICROKERNEL_SRCS
   src/f32-vrsqrt/gen/f32-vrsqrt-avx-rsqrt-u16.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx-rr2-p5-nr2-u40.c
   src/f32-vsqrt/gen/f32-vsqrt-avx-rsqrt-u16.c
-  src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-div.c
+  src/f32-vtanh/gen/f32-vtanh-avx-rational-9-8-div.c
   src/f32-vunary/gen/f32-vabs-avx.c
   src/f32-vunary/gen/f32-vneg-avx.c
   src/f32-vunary/gen/f32-vsqr-avx.c
@@ -277,7 +277,7 @@ SET(NON_PROD_AVX_MICROKERNEL_SRCS
   src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt-u8.c
   src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt-u16.c
   src/f32-vsqrt/gen/f32-vsqrt-avx-sqrt-u32.c
-  src/f32-vtanh/gen/f32-vtanh-avx-rational-9-6-nr.c
+  src/f32-vtanh/gen/f32-vtanh-avx-rational-9-8-nr.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x4c8-minmax-avx-ld64.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-2x4c8-minmax-avx-ld64.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-2x4c8-minmax-avx-ld128.c
