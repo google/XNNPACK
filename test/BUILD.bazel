@@ -167,7 +167,8 @@ sh_test(
         "//gen:bzl_microkernel_lists",
     ],
     target_compatible_with = xnnpack_select_if(
-        "//build_config:emscripten",
+        "//build_config:linux",
+        [],
         ["@platforms//:incompatible"],
     ),
 )
