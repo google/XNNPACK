@@ -95,16 +95,16 @@ static void x16_packw(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto u16rng = std::bind(std::uniform_int_distribution<uint16_t>(), std::ref(rng));
+  auto u16rng = std::bind(std::uniform_int_distribution<xnn_float16>(), std::ref(rng));
 
   // Computer num_buffers that fit cache with source weights + packed_weights.
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
-      sizeof(uint16_t) * batch * (dim_n * dim_k + rounded_n * rounded_k + rounded_n));
+      sizeof(xnn_float16) * batch * (dim_n * dim_k + rounded_n * rounded_k + rounded_n));
 
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> weights(num_buffers * batch * dim_n * dim_k);
+  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> weights(num_buffers * batch * dim_n * dim_k);
   std::generate(weights.begin(), weights.end(), std::ref(u16rng));
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_weights(num_buffers * batch * (rounded_n * rounded_k + rounded_n));
+  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> packed_weights(num_buffers * batch * (rounded_n * rounded_k + rounded_n));
   std::fill(packed_weights.begin(), packed_weights.end(), 0);
 
   size_t buffer_index = 0;
@@ -114,9 +114,9 @@ static void x16_packw(benchmark::State& state,
     }
 
     packw(batch, dim_n, dim_k, nr, kr, sr,
-      reinterpret_cast<uint16_t*>(weights.data() + buffer_index * batch * dim_n * dim_k),
+      reinterpret_cast<xnn_float16*>(weights.data() + buffer_index * batch * dim_n * dim_k),
       /*bias=*/nullptr, /*scale=*/nullptr,
-      reinterpret_cast<uint16_t*>(packed_weights.data() + buffer_index * batch * (rounded_n * rounded_k + rounded_n)),
+      reinterpret_cast<xnn_float16*>(packed_weights.data() + buffer_index * batch * (rounded_n * rounded_k + rounded_n)),
       /*extra_bytes=*/0, /*params=*/nullptr);
   }
 
@@ -253,10 +253,10 @@ static void x16_packw__reference(
   size_t nr,
   size_t kr,
   size_t sr,
-  const uint16_t* weights,
-  const uint16_t* bias,
+  const xnn_float16* weights,
+  const xnn_float16* bias,
   const void* scale,
-  uint16_t* packed_weights,
+  xnn_float16* packed_weights,
   size_t extra_bytes,
   const void* params)
 {

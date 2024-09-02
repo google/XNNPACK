@@ -20,13 +20,13 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast
     size_t nc,
     size_t kc,
     size_t ks,
-    const void** restrict a,
-    const void* restrict w,
-    void* restrict c,
+    const xnn_float16** restrict a,
+    const xnn_float16* restrict w,
+    xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
-    const void* zero,
+    const xnn_float16* zero,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
@@ -65,14 +65,14 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast
     $for M in range(1, MR):
       $for N in range(0, NR, 32):
         __m512h vacc${M}x${N//32} = vacc0x${N//32};
-    w = (const uint16_t*) w + ${NR};
+    w = (const xnn_float16*) w + ${NR};
 
     size_t p = ks;
     do {
       $for M in range(MR):
         const uint16_t* restrict a${M} = (const uint16_t*) a[${M}];
         assert(a${M} != NULL);
-        if XNN_UNPREDICTABLE(a${M} != zero) {
+        if XNN_UNPREDICTABLE(a${M} != (const uint16_t*) zero) {
           a${M} = (const uint16_t*) ((uintptr_t) a${M} + a_offset);
         }
       a += ${MR};
@@ -82,7 +82,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast
         const __m512h vb0 = _mm512_load_ph(w);
         $for N in range(32, NR, 32):
           const __m512h vb${N//32} = _mm512_load_ph((const uint16_t*) w + ${N});
-        w = (const uint16_t*) w + ${NR};
+        w = (const xnn_float16*) w + ${NR};
 
         $for M in range(MR):
           const __m512h va${M} = _mm512_castsi512_ph(_mm512_set1_epi16(*a${M}));
@@ -96,12 +96,12 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
 
-    const __m512h vmin = _mm512_castsi512_ph(_mm512_set1_epi16(params->scalar.min));
+    const __m512h vmin = _mm512_castsi512_ph(_mm512_set1_epi16(*(const uint16_t*) &params->scalar.min));
     $for N in range(0, NR, 32):
       $for M in range(MR):
         vacc${M}x${N//32} = _mm512_max_ph(vmin, vacc${M}x${N//32});
 
-    const __m512h vmax = _mm512_castsi512_ph(_mm512_set1_epi16(params->scalar.max));
+    const __m512h vmax = _mm512_castsi512_ph(_mm512_set1_epi16(*(const uint16_t*) &params->scalar.max));
     $for N in range(0, NR, 32):
       $for M in range(MR):
         vacc${M}x${N//32} = _mm512_min_ph(vmax, vacc${M}x${N//32});
@@ -113,7 +113,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast
           _mm512_storeu_ph((uint16_t*) c${M} + ${N//32}, vacc${M}x${N//32});
         c${M} = (uint16_t*) ((uintptr_t) c${M} + cn_stride);
 
-      a = (const void**restrict) ((uintptr_t) a - ks);
+      a = (const xnn_float16**restrict) ((uintptr_t) a - ks);
       nc -= ${NR};
     } else {
       $for LOG2N in reversed(range(5, NR.bit_length())):

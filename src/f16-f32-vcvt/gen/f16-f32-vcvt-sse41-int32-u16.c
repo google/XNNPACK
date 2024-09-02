@@ -17,7 +17,7 @@
 
 void xnn_f16_f32_vcvt_ukernel__sse41_int32_u16(
     size_t batch,
-    const void* input,
+    const xnn_float16* input,
     float* output,
     const void* params) XNN_OOB_READS
 {

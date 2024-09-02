@@ -25,7 +25,7 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8c8__avx2(
     const int8_t* restrict a,
     size_t a_stride,
     const void* restrict w,
-    void* restrict c,
+    xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],

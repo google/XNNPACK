@@ -18,8 +18,8 @@ extern "C" {
 #define DECLARE_F16_RSUM_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                       \
       size_t batch,                                \
-      const void* input,                           \
-      void* output,                                \
+      const xnn_float16* input,           \
+      xnn_float16* output,                \
       const struct xnn_f16_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__neonfp16arith_u8)
@@ -38,8 +38,8 @@ DECLARE_F16_RSUM_UKERNEL_FUNCTION(xnn_f16_rsum_ukernel__avx512fp16_u128_acc4)
 #define DECLARE_F16_F32ACC_RSUM_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                              \
       size_t batch,                                       \
-      const void* input,                                  \
-      float* output,                                       \
+      const xnn_float16* input,                  \
+      float* output,                                      \
       const struct xnn_f16_f32acc_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_F32ACC_RSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rsum_ukernel__neonfp16arith_u4)
@@ -66,8 +66,8 @@ DECLARE_F16_F32ACC_RSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rsum_ukernel__f16c_u32_a
 #define DECLARE_F16_REDUCE_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                       \
       size_t batch,                                \
-      const void* input,                           \
-      void* output,                                \
+      const xnn_float16* input,           \
+      xnn_float16* output,                \
       const union xnn_f16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_REDUCE_UKERNEL_FUNCTION(xnn_f16_rmax_ukernel__neonfp16arith_u8)
@@ -438,10 +438,10 @@ DECLARE_F32_RDSUM_UKERNEL_FUNCTION(xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c64)
   XNN_INTERNAL void fn_name(                               \
       size_t rows,                                         \
       size_t channels,                                     \
-      const void* input,                                   \
+      const xnn_float16* input,                   \
       size_t input_stride,                                 \
-      const void* zero,                                    \
-      float* output,                                        \
+      const xnn_float16* zero,                    \
+      float* output,                                       \
       const struct xnn_f16_f32acc_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_F32ACC_RDSUM_UKERNEL_FUNCTION(xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c16)

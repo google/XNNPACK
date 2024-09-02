@@ -130,13 +130,13 @@ class PackWMicrokernelTester {
   }
 
   void Test(xnn_x16_packw_gemm_goi_ukernel_fn packw) const {
-    std::vector<uint16_t> weights(g() * n() * k());
-    std::vector<uint16_t> padded_weights(g() * n() * packed_k());
-    std::vector<uint16_t> bias(g() * n());
-    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_w(g() * (packed_n() * packed_k() + packed_n()));
-    std::vector<uint16_t> packed_w_ref(g() * (packed_n() * packed_k() + packed_n()));
+    std::vector<xnn_float16> weights(g() * n() * k());
+    std::vector<xnn_float16> padded_weights(g() * n() * packed_k());
+    std::vector<xnn_float16> bias(g() * n());
+    std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> packed_w(g() * (packed_n() * packed_k() + packed_n()));
+    std::vector<xnn_float16> packed_w_ref(g() * (packed_n() * packed_k() + packed_n()));
 
-    const uint16_t pad_value = std::max(sr(), kr()) == 1 ? UINT16_C(0xDEAD) : 0;
+    const xnn_float16 pad_value = std::max(sr(), kr()) == 1 ? UINT16_C(0xDEAD) : 0;
     std::iota(weights.begin(), weights.end(), UINT16_C(0x0001));
     std::iota(bias.begin(), bias.end(), UINT16_C(0x8000));
     std::fill(packed_w.begin(), packed_w.end(), UINT16_C(0xBEEF));
@@ -152,14 +152,14 @@ class PackWMicrokernelTester {
       }
     }
 
-    const uint16_t* bias_data = nullbias() ? nullptr : bias.data();
+    const xnn_float16* bias_data = nullbias() ? nullptr : bias.data();
 
     // Compute reference results.
     xnn_pack_f16_gemm_goi_w(g(), n(), packed_k(), nr(), kr(), sr(),
-      reinterpret_cast<const uint16_t*>(padded_weights.data()),
-      reinterpret_cast<const uint16_t*>(bias_data),
+      reinterpret_cast<const xnn_float16*>(padded_weights.data()),
+      reinterpret_cast<const xnn_float16*>(bias_data),
       /*scale=*/nullptr,
-      reinterpret_cast<uint16_t*>(packed_w_ref.data()),
+      reinterpret_cast<xnn_float16*>(packed_w_ref.data()),
       /*extra_bytes=*/0, /*params=*/nullptr);
 
     // Call optimized micro-kernel.

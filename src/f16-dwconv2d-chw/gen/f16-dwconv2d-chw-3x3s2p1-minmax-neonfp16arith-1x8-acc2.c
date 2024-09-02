@@ -19,10 +19,10 @@
 void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2(
     size_t input_height,
     size_t input_width,
-    const void* input,
-    const void* weights,
-    const void* zero,
-    void* output,
+    const xnn_float16* input,
+    const xnn_float16* weights,
+    const xnn_float16* zero,
+    xnn_float16* output,
     uint32_t padding_top,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
@@ -32,12 +32,12 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2(
   assert(padding_top <= 1);
 
   #if XNN_ARCH_ARM64
-    const uint16x8x2_t vminmax = vld2q_dup_u16(&params->scalar.min);
+    const uint16x8x2_t vminmax = vld2q_dup_u16((const uint16_t*) &params->scalar.min);
     const float16x8_t vmin = vreinterpretq_f16_u16(vminmax.val[0]);
     const float16x8_t vmax = vreinterpretq_f16_u16(vminmax.val[1]);
   #else
     // vld2_dup is to work around aarch32 clang bug with vld1q_dup
-    const uint16x4x2_t vminmax = vld2_dup_u16(&params->scalar.min);
+    const uint16x4x2_t vminmax = vld2_dup_u16((const uint16_t*) &params->scalar.min);
     const float16x8_t vmin = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[0], vminmax.val[0]));
     const float16x8_t vmax = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[1], vminmax.val[1]));
   #endif
@@ -55,17 +55,17 @@ void xnn_f16_dwconv2d_chw_ukernel_3x3s2p1__neonfp16arith_1x8_acc2(
   const uint16_t* i0 = (const uint16_t*) ((uintptr_t) input - ((-padding_top) & input_width));
   const uint16_t* i1 = (const uint16_t*) ((uintptr_t) i0 + input_width);
   if XNN_UNPREDICTABLE(padding_top != 0) {
-    i0 = zero;
+    i0 = (const uint16_t*) zero;
   }
   const uint16_t* i2 = (const uint16_t*) ((uintptr_t) i1 + input_width);
 
-  uint16_t* o0 = output;
+  uint16_t* o0 = (uint16_t*) output;
 
   size_t padded_input_height = input_height + padding_top + 1 /* padding bottom */;
   size_t output_height = (padded_input_height - 3 /* kernel size */ + 2 /* subsampling */) / 2;
   do {
     if XNN_UNPREDICTABLE(padded_input_height < 4) {
-      i2 = zero;
+      i2 = (const uint16_t*) zero;
     }
 
     float16x8_t vi0x13579BDF = vreinterpretq_f16_u16(vmovq_n_u16(0));

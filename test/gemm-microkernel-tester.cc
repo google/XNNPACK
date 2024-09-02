@@ -112,7 +112,7 @@ void GemmMicrokernelTester::Test(
   std::vector<float> bias(n());
   std::vector<float> kernel_scale(n());
   std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(ks() * packed_n() * packed_k() + packed_n() * (sizeof(int32_t) + sizeof(float) * 2));
-  std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
+  std::vector<xnn_float16> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n(), 0);
   std::vector<int8_t> junk(k() + XNN_EXTRA_BYTES / sizeof(int8_t));
   std::vector<const int8_t*> im2col(mr() * ks());
@@ -214,8 +214,8 @@ void GemmMicrokernelTester::Test(
     // Prepare parameters.
     xnn_f16_minmax_params params;
     init_params(&params,
-      fp16_ieee_from_fp32_value(c_min),
-      fp16_ieee_from_fp32_value(c_max));
+      xnn_float16_from_float(c_min),
+      xnn_float16_from_float(c_max));
 
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
@@ -225,7 +225,7 @@ void GemmMicrokernelTester::Test(
 
     igemm(m(), n(), k(), ks() * mr() * sizeof(void*),
         im2col.data(), static_cast<const void*>(packed_w.data()),
-        c.data(), cm_stride() * sizeof(uint16_t), cn_stride() * sizeof(uint16_t),
+        c.data(), cm_stride() * sizeof(xnn_float16), cn_stride() * sizeof(xnn_float16),
         a_offset() * sizeof(uint8_t), zero_sentinel, zero_data,
         &params, quantization_params.data());
 
@@ -233,7 +233,7 @@ void GemmMicrokernelTester::Test(
       for (size_t j = 0; j < n(); j++) {
         // Extract tolerance into variable to workaround test failures on Linux AArch64.
         const float tolerance = std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f);
-        EXPECT_NEAR(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], tolerance)
+        EXPECT_NEAR(xnn_float16_to_float(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << "), optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
             << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
@@ -859,7 +859,7 @@ void GemmMicrokernelTester::Test(
   std::vector<float> kernel_scale(n());
   std::vector<int8_t, AlignedAllocator<int8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() +
                                                              packed_n() * (sizeof(int32_t) + sizeof(float) * 2));
-  std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
+  std::vector<xnn_float16> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n(), 0);
 
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -941,8 +941,8 @@ void GemmMicrokernelTester::Test(
     // Prepare parameters.
     xnn_f16_minmax_params params;
     init_params(&params,
-      fp16_ieee_from_fp32_value(c_min),
-      fp16_ieee_from_fp32_value(c_max));
+      xnn_float16_from_float(c_min),
+      xnn_float16_from_float(c_max));
 
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
@@ -953,13 +953,13 @@ void GemmMicrokernelTester::Test(
     gemm(m(), n(), k(),
         a.data(), a_stride() * sizeof(int8_t),
         static_cast<const void*>(packed_w.data()),
-        c.data(), cm_stride() * sizeof(uint16_t), cn_stride() * sizeof(uint16_t), &params, quantization_params.data());
+        c.data(), cm_stride() * sizeof(xnn_float16), cn_stride() * sizeof(xnn_float16), &params, quantization_params.data());
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
         // Extract tolerance into variable to workaround test failures on Linux AArch64.
         const float tolerance = std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f);
-        EXPECT_NEAR(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], tolerance)
+        EXPECT_NEAR(xnn_float16_to_float(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << "), optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
             << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
@@ -1126,7 +1126,7 @@ void GemmMicrokernelTester::Test(
   std::vector<float> kernel_scale(n());
   std::vector<uint8_t, AlignedAllocator<uint8_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k_bytes +
                                                                packed_n() * (sizeof(int32_t) + sizeof(float) * 2));
-  std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
+  std::vector<xnn_float16> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<int32_t> acc(m() * n());
   std::vector<float> c_ref(m() * n(), 0.0f);
 
@@ -1209,8 +1209,8 @@ void GemmMicrokernelTester::Test(
     // Prepare parameters.
     xnn_f16_qc4w_minmax_params params;
     init_params(&params,
-      fp16_ieee_from_fp32_value(c_min),
-      fp16_ieee_from_fp32_value(c_max), 8);
+      xnn_float16_from_float(c_min),
+      xnn_float16_from_float(c_max), 8);
 
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
@@ -1221,13 +1221,13 @@ void GemmMicrokernelTester::Test(
     gemm(m(), n(), k2,
         a.data(), a_stride() * sizeof(int8_t),
         static_cast<const void*>(packed_w.data()),
-        c.data(), cm_stride() * sizeof(uint16_t), cn_stride() * sizeof(uint16_t), &params, quantization_params.data());
+        c.data(), cm_stride() * sizeof(xnn_float16), cn_stride() * sizeof(xnn_float16), &params, quantization_params.data());
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
         // Extract tolerance into variable to workaround test failures on Linux AArch64.
         const float tolerance = std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f);
-        EXPECT_NEAR(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], tolerance)
+        EXPECT_NEAR(xnn_float16_to_float(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << " (accumulator = " << acc[i * n() + j]
             << "), optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
@@ -1264,13 +1264,13 @@ void GemmMicrokernelTester::Test(
   std::vector<xnn_qd8_quantization_params> quantization_params(mr());
   std::vector<uint8_t> b(n() * k2 / 2);
   std::vector<float> bias(n());
-  std::vector<uint16_t> kernel_scale2d(n() * k2 / bl());
+  std::vector<xnn_float16> kernel_scale2d(n() * k2 / bl());
   std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> packed_w(packed_n() * packed_k_bytes +
                                                                /* vksum */ packed_n() * sizeof(float) +
-                                                               /* scales */ packed_n() * num_blocks * sizeof(uint16_t) +
+                                                               /* scales */ packed_n() * num_blocks * sizeof(xnn_float16) +
                                                                /* bias */ packed_n() * sizeof(float));
 
-  std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
+  std::vector<xnn_float16> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n(), 0);
 
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -1306,11 +1306,11 @@ void GemmMicrokernelTester::Test(
 
     pack(/*g=*/1, n(), k2, nr(), kr(), sr(), bl(),
       b.data(), /*bias=*/nullptr, /*scale=*/kernel_scale2d.data(),
-      packed_w.data(), sizeof(uint16_t) * nr(), sizeof(float) * nr(), &packing_params);
+      packed_w.data(), sizeof(xnn_float16) * nr(), sizeof(float) * nr(), &packing_params);
 
     // Fill in packed kernel scale
-    size_t stride =  nr() * (packed_k_bytes + /* scales= */ num_blocks * sizeof(uint16_t) + /* ksum= */ sizeof(float) + /* bias= */ sizeof(float));
-    size_t block_stride = (bl() / 2 + sizeof(uint16_t)) * nr();
+    size_t stride =  nr() * (packed_k_bytes + /* scales= */ num_blocks * sizeof(xnn_float16) + /* ksum= */ sizeof(float) + /* bias= */ sizeof(float));
+    size_t block_stride = (bl() / 2 + sizeof(xnn_float16)) * nr();
     size_t start_offset = nr() * (packed_k_bytes / num_blocks + sizeof(float));
     uintptr_t start = (uintptr_t) packed_w.data() + start_offset;
     xnn_init_blockwise_scale_bf16_params(
@@ -1370,8 +1370,8 @@ void GemmMicrokernelTester::Test(
     // Prepare parameters.
     xnn_f16_qb4w_minmax_params params;
     init_params(&params,
-      fp16_ieee_from_fp32_value(c_min),
-      fp16_ieee_from_fp32_value(c_max),
+      xnn_float16_from_float(c_min),
+      xnn_float16_from_float(c_max),
       8,
       bl());
 
@@ -1384,13 +1384,13 @@ void GemmMicrokernelTester::Test(
     gemm(m(), n(), k2,
         a.data(), a_stride() * sizeof(int8_t),
         static_cast<const void*>(packed_w.data()),
-        c.data(), cm_stride() * sizeof(uint16_t), cn_stride() * sizeof(uint16_t), &params, quantization_params.data());
+        c.data(), cm_stride() * sizeof(xnn_float16), cn_stride() * sizeof(xnn_float16), &params, quantization_params.data());
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
         // Extract tolerance into variable to workaround test failures on Linux AArch64.
         const float tolerance = std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-3f);
-        EXPECT_NEAR(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], tolerance)
+        EXPECT_NEAR(xnn_float16_to_float(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
             << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k2;
@@ -1561,7 +1561,7 @@ void GemmMicrokernelTester::Test(
   std::vector<xnn_qd8_quantization_params> quantization_params(mr());
   std::vector<uint8_t> b(n() * k2 / 2);
   std::vector<float> bias(n());
-  std::vector<uint16_t> kernel_scale2d(n() * k2 / bl());
+  std::vector<xnn_float16> kernel_scale2d(n() * k2 / bl());
   std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> packed_w(packed_n() * packed_k_bytes +
                                                                /* vksum */ packed_n() * sizeof(float) +
                                                                /* scales */ packed_n() * num_blocks * sizeof(float) +
@@ -1602,11 +1602,11 @@ void GemmMicrokernelTester::Test(
     const xnn_qs8_qc4w_packing_params packing_params = { /*input_zero_point=*/1, b_zero_point()};
     pack(/*g=*/1, n(), k2, nr(), kr(), sr(), bl(),
       b.data(), /*bias=*/nullptr, /*scale=*/kernel_scale2d.data(),
-      packed_w.data(), sizeof(uint16_t) * nr(), sizeof(float) * nr(), &packing_params);
+      packed_w.data(), sizeof(xnn_float16) * nr(), sizeof(float) * nr(), &packing_params);
 
     // Fill in packed kernel scale
-    size_t stride =  nr() * (packed_k_bytes + /* scales= */ num_blocks * sizeof(uint16_t) + /* ksum= */ sizeof(float) + /* bias= */ sizeof(float));
-    size_t block_stride = (bl() / 2 + sizeof(uint16_t)) * nr();
+    size_t stride =  nr() * (packed_k_bytes + /* scales= */ num_blocks * sizeof(xnn_float16) + /* ksum= */ sizeof(float) + /* bias= */ sizeof(float));
+    size_t block_stride = (bl() / 2 + sizeof(xnn_float16)) * nr();
     size_t start_offset = nr() * (packed_k_bytes / num_blocks + sizeof(float));
     uintptr_t start = (uintptr_t) packed_w.data() + start_offset;
     xnn_init_blockwise_scale_bf16_params(
@@ -2062,11 +2062,11 @@ void GemmMicrokernelTester::Test(
   xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.5f, 1.0f), std::ref(rng));
 
-  std::vector<uint16_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-  std::vector<uint16_t> b(n() * k());
-  std::vector<uint16_t, AlignedAllocator<uint16_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n());
-  std::vector<uint16_t> bias(n());
-  std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
+  std::vector<xnn_float16> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  std::vector<xnn_float16> b(n() * k());
+  std::vector<xnn_float16, AlignedAllocator<xnn_float16, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n());
+  std::vector<xnn_float16> bias(n());
+  std::vector<xnn_float16> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
 
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -2109,10 +2109,10 @@ void GemmMicrokernelTester::Test(
       c_value = std::max(std::min(c_value, c_max), c_min);
     }
 
-    gemm_minmax(m(), n(), k() * sizeof(uint16_t),
-      a.data(), a_stride() * sizeof(uint16_t),
+    gemm_minmax(m(), n(), k() * sizeof(xnn_float16),
+      a.data(), a_stride() * sizeof(xnn_float16),
       packed_w.data(),
-      c.data(), cm_stride() * sizeof(uint16_t), cn_stride() * sizeof(uint16_t),
+      c.data(), cm_stride() * sizeof(xnn_float16), cn_stride() * sizeof(xnn_float16),
       &params);
 
     // Validate micro-kernel outputs.
@@ -2140,13 +2140,13 @@ void GemmMicrokernelTester::Test(
 
   xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
-  auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
 
-  std::vector<uint16_t> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-  std::vector<uint16_t> b(n() * k());
-  std::vector<uint16_t, AlignedAllocator<uint16_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n());
-  std::vector<uint16_t> bias(n());
-  std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
+  std::vector<xnn_float16> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  std::vector<xnn_float16> b(n() * k());
+  std::vector<xnn_float16, AlignedAllocator<xnn_float16, XNN_ALLOCATION_ALIGNMENT>> packed_w(packed_n() * packed_k() + packed_n());
+  std::vector<xnn_float16> bias(n());
+  std::vector<xnn_float16> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
 
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -2167,40 +2167,40 @@ void GemmMicrokernelTester::Test(
           EXPECT_LT(m_index * n() + n_index, c_ref.size());
           EXPECT_LT(m_index * k() + k_index, a.size());
           c_ref[m_index * n() + n_index] +=
-            fp16_ieee_to_fp32_value(a[m_index * a_stride() + k_index]) *
-            fp16_ieee_to_fp32_value(b[n_index * k() + k_index]);
+            xnn_float16_to_float(a[m_index * a_stride() + k_index]) *
+            xnn_float16_to_float(b[n_index * k() + k_index]);
         }
-        c_ref[m_index * n() + n_index] += fp16_ieee_to_fp32_value(bias[n_index]);
+        c_ref[m_index * n() + n_index] += xnn_float16_to_float(bias[n_index]);
       }
     }
 
     const float accumulated_min = *std::min_element(c_ref.cbegin(), c_ref.cend());
     const float accumulated_max = *std::max_element(c_ref.cbegin(), c_ref.cend());
-    const float c_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin())));
-    const float c_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax())));
+    const float c_min = xnn_float16_to_float(xnn_float16_from_float(accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin())));
+    const float c_max = xnn_float16_to_float(xnn_float16_from_float(accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax())));
 
     // Prepare parameters.
     xnn_f16_minmax_params params;
     init_params(&params,
-      fp16_ieee_from_fp32_value(c_min),
-      fp16_ieee_from_fp32_value(c_max));
+      xnn_float16_from_float(c_min),
+      xnn_float16_from_float(c_max));
 
     for (float& c_value : c_ref) {
       c_value = std::max(std::min(c_value, c_max), c_min);
     }
 
-    gemm_minmax(m(), n(), k() * sizeof(uint16_t),
-      a.data(), a_stride() * sizeof(uint16_t),
+    gemm_minmax(m(), n(), k() * sizeof(xnn_float16),
+      a.data(), a_stride() * sizeof(xnn_float16),
       packed_w.data(),
-      c.data(), cm_stride() * sizeof(uint16_t), cn_stride() * sizeof(uint16_t),
+      c.data(), cm_stride() * sizeof(xnn_float16), cn_stride() * sizeof(xnn_float16),
       &params);
 
     // Validate micro-kernel outputs.
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_NEAR(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f))
+        EXPECT_NEAR(xnn_float16_to_float(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f))
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
-            << ", optimized = " << fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]) << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << ", optimized = " << xnn_float16_to_float(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]) << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
       }
     }
@@ -2216,16 +2216,16 @@ void GemmMicrokernelTester::Test(
 
   xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
-  auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
 
-  std::vector<uint16_t> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-  std::vector<uint16_t> b(n() * ks() * k());
-  std::vector<uint16_t, AlignedAllocator<uint16_t, XNN_ALLOCATION_ALIGNMENT>> packed_w(ks() * packed_k() * packed_n() + packed_n());
-  std::vector<uint16_t> bias(n());
-  std::vector<uint16_t> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
+  std::vector<xnn_float16> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  std::vector<xnn_float16> b(n() * ks() * k());
+  std::vector<xnn_float16, AlignedAllocator<xnn_float16, XNN_ALLOCATION_ALIGNMENT>> packed_w(ks() * packed_k() * packed_n() + packed_n());
+  std::vector<xnn_float16> bias(n());
+  std::vector<xnn_float16> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
   std::vector<float> c_ref(m() * n());
-  std::vector<uint16_t> junk(k() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-  std::vector<const uint16_t*> im2col(mr() * ks());
+  std::vector<xnn_float16> junk(k() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  std::vector<const xnn_float16*> im2col(mr() * ks());
   std::fill(junk.begin(), junk.end(), UINT16_C(0x7E00) /* NaN */);
 
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -2266,23 +2266,23 @@ void GemmMicrokernelTester::Test(
             EXPECT_LT(k_index, a_stride());
             if (im2col[ks_index * mr() + m_index] == a.data()) {
               c_ref[m_index * n() + n_index] +=
-                fp16_ieee_to_fp32_value(im2col[ks_index * mr() + m_index][k_index]) *
-                fp16_ieee_to_fp32_value(b[(n_index * ks() + ks_index) * k() + k_index]);
+                xnn_float16_to_float(im2col[ks_index * mr() + m_index][k_index]) *
+                xnn_float16_to_float(b[(n_index * ks() + ks_index) * k() + k_index]);
             } else {
               c_ref[m_index * n() + n_index] +=
-                fp16_ieee_to_fp32_value(im2col[ks_index * mr() + m_index][k_index + a_offset()]) *
-                fp16_ieee_to_fp32_value(b[(n_index * ks() + ks_index) * k() + k_index]);
+                xnn_float16_to_float(im2col[ks_index * mr() + m_index][k_index + a_offset()]) *
+                xnn_float16_to_float(b[(n_index * ks() + ks_index) * k() + k_index]);
             }
           }
         }
-        c_ref[m_index * n() + n_index] += fp16_ieee_to_fp32_value(bias[n_index]);
+        c_ref[m_index * n() + n_index] += xnn_float16_to_float(bias[n_index]);
       }
     }
 
     const float accumulated_min = *std::min_element(c_ref.cbegin(), c_ref.cend());
     const float accumulated_max = *std::max_element(c_ref.cbegin(), c_ref.cend());
-    const float c_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_min + (accumulated_max - accumulated_min) / 255.0f * uint16_t(qmin())));
-    const float c_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - (accumulated_max - accumulated_min) / 255.0f * uint16_t(255 - qmax())));
+    const float c_min = xnn_float16_to_float(xnn_float16_from_float(accumulated_min + (accumulated_max - accumulated_min) / 255.0f * xnn_float16(qmin())));
+    const float c_max = xnn_float16_to_float(xnn_float16_from_float(accumulated_max - (accumulated_max - accumulated_min) / 255.0f * xnn_float16(255 - qmax())));
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
         c_ref[m_index * n() + n_index] = std::min(c_ref[m_index * n() + n_index], c_max);
@@ -2293,35 +2293,35 @@ void GemmMicrokernelTester::Test(
     // Prepare parameters.
     xnn_f16_minmax_params params;
     init_params(&params,
-      fp16_ieee_from_fp32_value(c_min),
-      fp16_ieee_from_fp32_value(c_max));
+      xnn_float16_from_float(c_min),
+      xnn_float16_from_float(c_max));
 
     for (float& c_value : c_ref) {
       c_value = std::max(std::min(c_value, c_max), c_min);
     }
 
-    const uint16_t* zero_pointer = (zero_index() != SIZE_MAX) ? a.data() : nullptr;
+    const xnn_float16* zero_pointer = (zero_index() != SIZE_MAX) ? a.data() : nullptr;
 
     igemm_minmax(
-      m(), n(), k() * sizeof(uint16_t), ks() * mr() * sizeof(void*),
-      reinterpret_cast<const void**>(im2col.data()), packed_w.data(),
-      c.data(), cm_stride() * sizeof(uint16_t), cn_stride() * sizeof(uint16_t),
-      a_offset() * sizeof(uint16_t), zero_pointer,
+      m(), n(), k() * sizeof(xnn_float16), ks() * mr() * sizeof(void*),
+      reinterpret_cast<const xnn_float16**>(im2col.data()), packed_w.data(),
+      c.data(), cm_stride() * sizeof(xnn_float16), cn_stride() * sizeof(xnn_float16),
+      a_offset() * sizeof(xnn_float16), zero_pointer,
       &params);
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_LE(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_max)
+        EXPECT_LE(xnn_float16_to_float(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_max)
             << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
-            << ", optimized = " << fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]) << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << ", optimized = " << xnn_float16_to_float(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]) << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
-        EXPECT_GE(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_min)
+        EXPECT_GE(xnn_float16_to_float(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_min)
             << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
-            << ", optimized = " << fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]) << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << ", optimized = " << xnn_float16_to_float(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]) << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
-        EXPECT_NEAR(fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f))
+        EXPECT_NEAR(xnn_float16_to_float(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]), c_ref[i * n() + j], std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f))
             << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
-            << ", optimized = " << fp16_ieee_to_fp32_value(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]) << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << ", optimized = " << xnn_float16_to_float(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()]) << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
       }
     }

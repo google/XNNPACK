@@ -16,9 +16,9 @@ void xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8(
     size_t output_pixels,
     size_t kernel_elements,
     size_t channels,
-    const void** input,
+    const xnn_float16** input,
     size_t input_offset,
-    void* output,
+    xnn_float16* output,
     size_t input_increment,
     size_t output_increment,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
@@ -32,17 +32,17 @@ void xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8(
   XNN_FORCE_REALIZATION(voutput_min);
   XNN_FORCE_REALIZATION(voutput_max);
   do {
-    uint16_t* o = output;
+    uint16_t* o = (uint16_t*) output;
     {
-      const uint16_t* i0 = *input++;
-      const uint16_t* i1 = *input++;
-      const uint16_t* i2 = *input++;
-      const uint16_t* i3 = *input++;
-      const uint16_t* i4 = *input++;
-      const uint16_t* i5 = *input++;
-      const uint16_t* i6 = *input++;
-      const uint16_t* i7 = *input++;
-      const uint16_t* i8 = *input++;
+      const uint16_t* i0 = (const uint16_t*) *input++;
+      const uint16_t* i1 = (const uint16_t*) *input++;
+      const uint16_t* i2 = (const uint16_t*) *input++;
+      const uint16_t* i3 = (const uint16_t*) *input++;
+      const uint16_t* i4 = (const uint16_t*) *input++;
+      const uint16_t* i5 = (const uint16_t*) *input++;
+      const uint16_t* i6 = (const uint16_t*) *input++;
+      const uint16_t* i7 = (const uint16_t*) *input++;
+      const uint16_t* i8 = (const uint16_t*) *input++;
       i0 = (const uint16_t*) ((uintptr_t) i0 + input_offset);
       i1 = (const uint16_t*) ((uintptr_t) i1 + input_offset);
       i2 = (const uint16_t*) ((uintptr_t) i2 + input_offset);
@@ -160,14 +160,14 @@ void xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8(
     }
 
     for (ptrdiff_t k = (ptrdiff_t) kernel_elements - 9; k > 0; k -= 8) {
-      const uint16_t* i0 = *input++;
-      const uint16_t* i1 = *input++;
-      const uint16_t* i2 = *input++;
-      const uint16_t* i3 = *input++;
-      const uint16_t* i4 = *input++;
-      const uint16_t* i5 = *input++;
-      const uint16_t* i6 = *input++;
-      const uint16_t* i7 = *input++;
+      const uint16_t* i0 = (const uint16_t*) *input++;
+      const uint16_t* i1 = (const uint16_t*) *input++;
+      const uint16_t* i2 = (const uint16_t*) *input++;
+      const uint16_t* i3 = (const uint16_t*) *input++;
+      const uint16_t* i4 = (const uint16_t*) *input++;
+      const uint16_t* i5 = (const uint16_t*) *input++;
+      const uint16_t* i6 = (const uint16_t*) *input++;
+      const uint16_t* i7 = (const uint16_t*) *input++;
       i0 = (const uint16_t*) ((uintptr_t) i0 + input_offset);
       i1 = (const uint16_t*) ((uintptr_t) i1 + input_offset);
       i2 = (const uint16_t*) ((uintptr_t) i2 + input_offset);
@@ -198,7 +198,7 @@ void xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8(
         i7 = i0;
       }
 
-      o = output;
+      o = (uint16_t*) output;
       size_t c = channels;
       for (; c >= 8; c -= 8) {
         const __m256 vi0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0));
@@ -270,7 +270,7 @@ void xnn_f16_maxpool_minmax_ukernel_9p8x__f16c_c8(
         }
       }
     }
-    input = (const void**) ((uintptr_t) input + input_increment);
-    output = (uint16_t*) ((uintptr_t) o + output_increment);
+    input = (const xnn_float16**) ((uintptr_t) input + input_increment);
+    output = (xnn_float16*) ((uintptr_t) o + output_increment);
   } while (--output_pixels != 0);
 }

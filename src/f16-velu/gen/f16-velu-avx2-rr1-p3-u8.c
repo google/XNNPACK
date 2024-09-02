@@ -18,8 +18,8 @@
 
 void xnn_f16_velu_ukernel__avx2_rr1_p3_u8(
     size_t batch,
-    const void* input,
-    void* output,
+    const xnn_float16* input,
+    xnn_float16* output,
     const struct xnn_f16_elu_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
@@ -44,8 +44,7 @@ void xnn_f16_velu_ukernel__avx2_rr1_p3_u8(
   XNN_FORCE_REALIZATION(vc1);
 
   const __m256 vprescale = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.prescale));
-  const uint16_t alpha = (*(const uint16_t*) &params->scalar.minus_alpha) ^ UINT16_C(0x8000);
-  const __m256 valpha = _mm256_cvtph_ps(_mm_set1_epi16(alpha));
+  const __m256 valpha = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.alpha));
   const __m256 vbeta = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.beta));
 
   const uint16_t* i = (const uint16_t*) input;

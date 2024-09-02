@@ -17,9 +17,9 @@
 #include "xnnpack.h"
 #include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 
 #include <benchmark/benchmark.h>
-#include <fp16/fp16.h>
 #include "bench/utils.h"
 
 static void global_average_pooling_qu8(benchmark::State& state) {
@@ -175,11 +175,11 @@ static void global_average_pooling_f16(benchmark::State& state) {
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
-  auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
 
-  std::vector<uint16_t> input(batch_size * input_height * input_width * channels);
+  std::vector<xnn_float16> input(batch_size * input_height * input_width * channels);
   std::generate(input.begin(), input.end(), std::ref(f16rng));
-  std::vector<uint16_t> output(batch_size * channels);
+  std::vector<xnn_float16> output(batch_size * channels);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
@@ -232,7 +232,7 @@ static void global_average_pooling_f16(benchmark::State& state) {
 
   state.counters["bytes"] = benchmark::Counter(
     uint64_t(state.iterations()) *
-      batch_size * (input_height * input_width + 1) * channels * sizeof(uint16_t),
+      batch_size * (input_height * input_width + 1) * channels * sizeof(xnn_float16),
     benchmark::Counter::kIsRate);
 }
 

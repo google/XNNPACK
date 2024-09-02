@@ -24,7 +24,7 @@ $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QD8_F16" : "qd8_f16_qc8w", "
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if REQUANTIZATION == "FP32" and ARMV8 else "neon")
 $PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8": "union xnn_qs8_conv_minmax_params", "QD8_F16": "union xnn_f16_minmax_params", "QD8_F32": "union xnn_f32_minmax_params"}[DATATYPE]
-$OUT_T = {"QC8": "int8_t", "QD8_F16": "void", "QD8_F32": "float", "QS8": "int8_t"}[DATATYPE]
+$OUT_T = {"QC8": "int8_t", "QD8_F16": "xnn_float16", "QD8_F32": "float", "QS8": "int8_t"}[DATATYPE]
 $ISA = "neonfp16arith" if DATATYPE in ["QD8_F16"] else "neonv8" if ARMV8 else "neon"
 $ISA_SPEC = "" if DATATYPE in ["QD8_F16"] else "_mlal" if MLA else "_mull"
 void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c2s4__${ISA}${ISA_SPEC}(
@@ -190,12 +190,12 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
           $for N in range(0, NR, 8):
             float16x8_t vfp16out${M}x${ABC[N:N+8]} = vcombine_f16(vcvt_f16_f32(vout${M}x${ABC[N:N+4]}), vcvt_f16_f32(vout${M}x${ABC[N+4:N+8]}));
         #if XNN_ARCH_ARM64
-          const uint16x8x2_t voutput_minmax = vld2q_dup_u16(&params->scalar.min);
+          const uint16x8x2_t voutput_minmax = vld2q_dup_u16((const uint16_t*) &params->scalar.min);
           const float16x8_t voutput_min = vreinterpretq_f16_u16(voutput_minmax.val[0]);
           const float16x8_t voutput_max = vreinterpretq_f16_u16(voutput_minmax.val[1]);
         #else
           // vld2_dup is to work around aarch32 clang bug with vld1q_dup
-          const uint16x4x2_t vminmax = vld2_dup_u16(&params->scalar.min);
+          const uint16x4x2_t vminmax = vld2_dup_u16((const uint16_t*) &params->scalar.min);
           const float16x8_t voutput_min = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[0], vminmax.val[0]));
           const float16x8_t voutput_max = vreinterpretq_f16_u16(vcombine_u16(vminmax.val[1], vminmax.val[1]));
         #endif

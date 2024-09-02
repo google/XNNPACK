@@ -56,6 +56,9 @@ OP_TYPES = {
     "vrsubc": "RSub",
     "vsqrdiff": "SqrDiff",
     "vsqrdiffc": "SqrDiff",
+    "vprelu": "Prelu",
+    "vpreluc": "Prelu",
+    "vrpreluc": "RPrelu",
 }
 
 BINOP_TEST_TEMPLATE = """

@@ -106,6 +106,12 @@ SET(NON_PROD_SSE41_MICROKERNEL_SRCS
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse41-u8.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse41-u16.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse41-u24.c
+  src/f32-vbinary/gen/f32-vprelu-sse41-u4.c
+  src/f32-vbinary/gen/f32-vprelu-sse41-u8.c
+  src/f32-vbinary/gen/f32-vpreluc-sse41-u4.c
+  src/f32-vbinary/gen/f32-vpreluc-sse41-u8.c
+  src/f32-vbinary/gen/f32-vrpreluc-sse41-u4.c
+  src/f32-vbinary/gen/f32-vrpreluc-sse41-u8.c
   src/f32-velu/gen/f32-velu-sse41-rr2-lut16-p3-u4.c
   src/f32-velu/gen/f32-velu-sse41-rr2-lut16-p3-u8.c
   src/f32-velu/gen/f32-velu-sse41-rr2-lut16-p3-u12.c

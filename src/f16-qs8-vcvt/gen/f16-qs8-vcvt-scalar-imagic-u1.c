@@ -16,17 +16,17 @@
 
 void xnn_f16_qs8_vcvt_ukernel__scalar_imagic_u1(
     size_t batch,
-    const void* input,
+    const xnn_float16* input,
     int8_t* output,
     const struct xnn_f16_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
-  assert(batch % sizeof(uint16_t) == 0);
+  assert(batch % sizeof(xnn_float16) == 0);
   assert(input != NULL);
   assert(output != NULL);
 
-  const uint16_t* i = (const uint16_t*) input;
-  const float vscale = fp16_ieee_to_fp32_value(params->scalar.scale);
+  const xnn_float16* i = input;
+  const float vscale = xnn_float16_to_float(params->scalar.scale);
   const float vmagic_bias = 12582912.0f;
   const float output_min_less_zero_point = (float) ((int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point);
   const float output_max_less_zero_point = (float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point);
@@ -35,7 +35,7 @@ void xnn_f16_qs8_vcvt_ukernel__scalar_imagic_u1(
   const int32_t vmagic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point;
 
   do {
-    float vx = fp16_ieee_to_fp32_value(*i++);
+    float vx = xnn_float16_to_float(*i++);
     vx *= vscale;
     vx += vmagic_bias;
 
@@ -46,6 +46,6 @@ void xnn_f16_qs8_vcvt_ukernel__scalar_imagic_u1(
 
     *output++ = (int8_t) vy;
 
-    batch -= sizeof(uint16_t);
+    batch -= sizeof(xnn_float16);
   } while (batch != 0);
 }

@@ -96,39 +96,39 @@ class PReLUMicrokernelTester {
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
     std::uniform_real_distribution<float> w32dist(0.25f, 0.75f);
 
-    std::vector<uint16_t> x(channels() + (rows() - 1) * input_stride() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> w(channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> y(channels() + (rows() - 1) * output_stride() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<xnn_float16> x(channels() + (rows() - 1) * input_stride() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> w(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    std::vector<xnn_float16> y(channels() + (rows() - 1) * output_stride() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
     std::vector<float> y_ref(channels() * rows());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      std::generate(w.begin(), w.end(), [&]() { return fp16_ieee_from_fp32_value(w32dist(rng)); });
+      std::generate(x.begin(), x.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+      std::generate(w.begin(), w.end(), [&]() { return xnn_float16_from_float(w32dist(rng)); });
       if (inplace()) {
-        std::generate(y.begin(), y.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+        std::generate(y.begin(), y.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
       } else {
         std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
       }
-      const uint16_t* x_data = inplace() ? y.data() : x.data();
+      const xnn_float16* x_data = inplace() ? y.data() : x.data();
 
       // Compute reference results, without clamping.
       for (size_t n = 0; n < rows(); n++) {
         for (size_t c = 0; c < channels(); c++) {
-          const float x_value = fp16_ieee_to_fp32_value(x_data[n * input_stride() + c]);
+          const float x_value = xnn_float16_to_float(x_data[n * input_stride() + c]);
           y_ref[n * channels() + c] = std::signbit(x_value) ?
-              fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(x_value * fp16_ieee_to_fp32_value(w[c]))) : x_value;
+              xnn_float16_to_float(xnn_float16_from_float(x_value * xnn_float16_to_float(w[c]))) : x_value;
         }
       }
 
       // Call optimized micro-kernel.
-      prelu(rows(), channels() * sizeof(uint16_t),
-        x_data, input_stride() * sizeof(uint16_t),
+      prelu(rows(), channels() * sizeof(xnn_float16),
+        x_data, input_stride() * sizeof(xnn_float16),
         w.data(),
-        y.data(), output_stride() * sizeof(uint16_t));
+        y.data(), output_stride() * sizeof(xnn_float16));
 
       // Verify results.
       for (size_t n = 0; n < rows(); n++) {
         for (size_t c = 0; c < channels(); c++) {
-          EXPECT_EQ(fp16_ieee_to_fp32_value(y[n * output_stride() + c]), y_ref[n * channels() + c])
+          EXPECT_EQ(xnn_float16_to_float(y[n * output_stride() + c]), y_ref[n * channels() + c])
             << "at row " << n << " / " << rows()
             << ", channel " << c << " / " << channels();
         }

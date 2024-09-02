@@ -18,6 +18,7 @@
   #include <stdlib.h> // For _rotl.
 #endif
 
+#include <fp16/fp16.h>
 #include "xnnpack/common.h"
 
 // stdlib.h from Windows 10 SDK defines min & max macros.
@@ -410,7 +411,7 @@ XNN_INLINE static float math_cvt_fp32_bf16(uint16_t x) {
   return bits.as_float;
 }
 
-XNN_INLINE static float math_cvt_bf16_fp32(float x) {
+XNN_INLINE static uint16_t math_cvt_bf16_fp32(float x) {
    union {
     float as_float;
     uint32_t as_uint32;
@@ -419,6 +420,25 @@ XNN_INLINE static float math_cvt_bf16_fp32(float x) {
 
   // TODO Handle fraction rounding
   return bits.as_uint32 >> 16;
+}
+
+typedef uint16_t xnn_float16;
+typedef uint16_t xnn_bfloat16;
+
+XNN_INLINE static xnn_float16 xnn_float16_from_float(float f) {
+  return fp16_ieee_from_fp32_value(f);
+}
+
+XNN_INLINE static float xnn_float16_to_float(xnn_float16 fp16) {
+  return fp16_ieee_to_fp32_value(fp16);
+}
+
+XNN_INLINE static xnn_bfloat16 xnn_bfloat16_from_float(float f) {
+  return math_cvt_bf16_fp32(f);
+}
+
+XNN_INLINE static float xnn_bfloat16_to_float(xnn_bfloat16 bf16) {
+  return math_cvt_fp32_bf16(bf16);
 }
 
 #ifdef __cplusplus

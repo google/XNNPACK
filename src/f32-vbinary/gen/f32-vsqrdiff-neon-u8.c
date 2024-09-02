@@ -52,6 +52,7 @@ void xnn_f32_vsqrdiff_ukernel__neon_u8(
     float32x4_t vacc = vsubq_f32(va, vb);
     vacc = vmulq_f32(vacc, vacc);
 
+
     vst1q_f32(output, vacc); output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -60,6 +61,7 @@ void xnn_f32_vsqrdiff_ukernel__neon_u8(
 
     float32x4_t vacc = vsubq_f32(va, vb);
     vacc = vmulq_f32(vacc, vacc);
+
 
     float32x2_t vacc_lo = vget_low_f32(vacc);
     if (batch & (2 * sizeof(float))) {

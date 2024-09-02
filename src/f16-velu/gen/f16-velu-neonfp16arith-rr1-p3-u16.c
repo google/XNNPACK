@@ -17,8 +17,8 @@
 
 void xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_u16(
     size_t batch,
-    const void* input,
-    void* output,
+    const xnn_float16* input,
+    xnn_float16* output,
     const struct xnn_f16_elu_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
@@ -41,7 +41,7 @@ void xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_u16(
   XNN_FORCE_REALIZATION(vc2);
 
   const float16x8_t vprescale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.prescale));
-  const float16x8_t vminus_alpha = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.minus_alpha));
+  const float16x8_t vminus_alpha = vnegq_f16(vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.alpha)));
   const float16x8_t vbeta = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.beta));
 
   const uint16_t* i = (const uint16_t*) input;

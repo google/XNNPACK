@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/math.h"
 #include "replicable_random_device.h"
 
 class CopyOperatorTester {
@@ -129,12 +130,12 @@ class CopyOperatorTester {
 
   void TestX16() const {
     xnnpack::ReplicableRandomDevice rng;
-    std::uniform_int_distribution<uint16_t> u16dist;
+    std::uniform_int_distribution<xnn_float16> u16dist;
 
-    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<uint16_t> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<uint16_t> output_ref(batch_size() * channels());
+    std::vector<xnn_float16> output((batch_size() - 1) * output_stride() + channels());
+    std::vector<xnn_float16> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u16dist(rng); });
       std::fill(output.begin(), output.end(), UINT16_C(0xDEAD));

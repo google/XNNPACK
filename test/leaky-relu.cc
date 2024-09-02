@@ -18,7 +18,7 @@
 #include "xnnpack/subgraph.h"
 #include "subgraph-unary-tester.h"
 
-using LeakyReLUTestF16 = UnaryTest<uint16_t>;
+using LeakyReLUTestF16 = UnaryTest<xnn_float16>;
 using LeakyReLUTestF32 = UnaryTest<float>;
 using LeakyReLUTestQS8 = UnaryTest<int8_t>;
 using LeakyReLUTestQU8 = UnaryTest<uint8_t>;
@@ -188,7 +188,7 @@ TEST_F(LeakyReLUTestF16, matches_operator_api)
 {
   const float negative_slope = std::uniform_real_distribution<float>(0.1f, 10.0f)(rng);
   std::uniform_real_distribution<float> f32dist(-255.0f, 255.0f);
-  std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
   std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
   std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
 

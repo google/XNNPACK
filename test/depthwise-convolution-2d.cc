@@ -161,7 +161,7 @@ protected:
 using DepthwiseConvolutionTestQC8 = QuantizedDepthwiseConvolutionTestBase<int8_t>;
 using DepthwiseConvolutionTestQS8 = QuantizedDepthwiseConvolutionTestBase<int8_t>;
 using DepthwiseConvolutionTestQU8 = QuantizedDepthwiseConvolutionTestBase<uint8_t>;
-using DepthwiseConvolutionTestF16 = DepthwiseConvolutionTestBase<uint16_t, float>;
+using DepthwiseConvolutionTestF16 = DepthwiseConvolutionTestBase<xnn_float16, float>;
 using DepthwiseConvolutionTestF32 = DepthwiseConvolutionTestBase<float>;
 
 TEST_F(DepthwiseConvolutionTestQC8, define)
@@ -960,8 +960,8 @@ TEST_F(DepthwiseConvolutionTestF16, matches_operator_api)
 
   xnn_operator_t op = nullptr;
 
-  std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-  std::generate(filter.begin(), filter.end(), [&]() { return  fp16_ieee_from_fp32_value(f32dist(rng)); });
+  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+  std::generate(filter.begin(), filter.end(), [&]() { return  xnn_float16_from_float(f32dist(rng)); });
   std::generate(bias.begin(), bias.end(), [&]() { return  f32dist(rng); });
   std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
   std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);

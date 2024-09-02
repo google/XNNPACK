@@ -16,7 +16,7 @@
 
 void xnn_f16_f32_vcvt_ukernel__scalar_u1(
     size_t batch,
-    const void* input,
+    const xnn_float16* input,
     float* output,
     const void* params)
 {

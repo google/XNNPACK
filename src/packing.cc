@@ -150,7 +150,7 @@ void xnn_pack_f32_to_f16_gemm_goi_w(
   const float* k,
   const float* b,
   const void* scale,
-  uint16_t* packed_weights,
+  xnn_float16* packed_weights,
   size_t extra_bytes,
   const void* params)
 {
@@ -165,7 +165,7 @@ void xnn_pack_f32_to_f16_gemm_goi_w(
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          packed_weights[nr_block_offset] = fp16_ieee_from_fp32_value(b[nr_block_start + nr_block_offset]);
+          packed_weights[nr_block_offset] = xnn_float16_from_float(b[nr_block_start + nr_block_offset]);
         }
       } else {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
@@ -179,14 +179,14 @@ void xnn_pack_f32_to_f16_gemm_goi_w(
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
             const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
             if (kc_idx < kc) {
-              packed_weights[kr_block_offset] = fp16_ieee_from_fp32_value(k[(nr_block_start + nr_block_offset) * kc + kc_idx]);
+              packed_weights[kr_block_offset] = xnn_float16_from_float(k[(nr_block_start + nr_block_offset) * kc + kc_idx]);
             }
           }
           packed_weights += kr;
         }
         packed_weights += (nr - nr_block_size) * kr;
       }
-      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (xnn_float16*) ((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc * kc;
     if XNN_UNPREDICTABLE(b != nullptr) {
@@ -598,7 +598,7 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
   size_t bl,             // blocksize
   const uint8_t* k,      // kernel
   const float* bias,
-  const uint16_t* scale,
+  const xnn_bfloat16* scale,
   void* packed_weights,
   size_t extra_bytes_bl, // extra bytes per block
   size_t extra_bytes_n,  // extra bytes per n
@@ -661,7 +661,7 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
           size_t scale_index = (nr_block_start + nr_block_offset) * num_blocks + block_index;
           unaligned_indexed_store_f32(packed_b, nr_block_offset,
             unaligned_indexed_load_f32(packed_b, nr_block_offset) -
-              (float) ksum * izp * math_cvt_fp32_bf16(scale[scale_index]));
+              (float) ksum * izp * xnn_bfloat16_to_float(scale[scale_index]));
           packed_weights = (uint8_t*) packed_weights + kr;  // kr * 2 nibbles
         }
         if (((2 * kr) + kr_block_start) % bl == 0) {
@@ -688,7 +688,7 @@ void xnn_pack_qs8_qb4w_gemm_gio_w(
   size_t bl,              // block size
   const uint8_t* k,       // kernel
   const float* bias,
-  const uint16_t* scale,  // block scales (bf16 format)
+  const xnn_bfloat16* scale,  // block scales (bf16 format)
   void* packed_weights,
   size_t extra_bytes_bl,  // extra bytes per block
   size_t extra_bytes_n,   // extra bytes per n
@@ -751,7 +751,7 @@ void xnn_pack_qs8_qb4w_gemm_gio_w(
           size_t scale_index = (nr_block_start + nr_block_offset) * num_blocks + block_index;
           unaligned_indexed_store_f32(packed_b, nr_block_offset,
             unaligned_indexed_load_f32(packed_b, nr_block_offset) -
-              (float) ksum * izp * math_cvt_fp32_bf16(scale[scale_index]));
+              (float) ksum * izp * xnn_bfloat16_to_float(scale[scale_index]));
           packed_weights = (uint8_t*) packed_weights + kr;  // kr * 2 nibbles
         }
         if (((2 * kr) + kr_block_start) % bl == 0) {
@@ -1211,7 +1211,7 @@ void xnn_pack_f32_to_f16_gemm_gio_w(
   const float* k,
   const float* b,
   const void* scale,
-  uint16_t* packed_weights,
+  xnn_float16* packed_weights,
   size_t extra_bytes,
   const void* params)
 {
@@ -1226,7 +1226,7 @@ void xnn_pack_f32_to_f16_gemm_gio_w(
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          packed_weights[nr_block_offset] = fp16_ieee_from_fp32_value(b[nr_block_start + nr_block_offset]);
+          packed_weights[nr_block_offset] = xnn_float16_from_float(b[nr_block_start + nr_block_offset]);
         }
       } else {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
@@ -1240,14 +1240,14 @@ void xnn_pack_f32_to_f16_gemm_gio_w(
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
             const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
             if (kc_idx < kc) {
-              packed_weights[kr_block_offset] = fp16_ieee_from_fp32_value(k[kc_idx * k_stride + nr_block_start + nr_block_offset]);
+              packed_weights[kr_block_offset] = xnn_float16_from_float(k[kc_idx * k_stride + nr_block_start + nr_block_offset]);
             }
           }
           packed_weights += kr;
         }
         packed_weights += (nr - nr_block_size) * kr;
       }
-      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (xnn_float16*) ((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc * kc;
     if XNN_UNPREDICTABLE(b != nullptr) {
@@ -1858,7 +1858,7 @@ void xnn_pack_f32_to_f16_conv_goki_w(
   const float* k,
   const float* b,
   const void* scale,
-  uint16_t* packed_weights,
+  xnn_float16* packed_weights,
   size_t extra_bytes,
   const void* params)
 {
@@ -1873,7 +1873,7 @@ void xnn_pack_f32_to_f16_conv_goki_w(
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          packed_weights[nr_block_offset] = fp16_ieee_from_fp32_value(b[nr_block_start + nr_block_offset]);
+          packed_weights[nr_block_offset] = xnn_float16_from_float(b[nr_block_start + nr_block_offset]);
         }
       }
       packed_weights += nr;
@@ -1884,7 +1884,7 @@ void xnn_pack_f32_to_f16_conv_goki_w(
             for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
               const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
               if (kc_idx < kc) {
-                packed_weights[kr_block_offset] = fp16_ieee_from_fp32_value(k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_idx]);
+                packed_weights[kr_block_offset] = xnn_float16_from_float(k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_idx]);
               }
             }
             packed_weights += kr;
@@ -1892,7 +1892,7 @@ void xnn_pack_f32_to_f16_conv_goki_w(
           packed_weights += (nr - nr_block_size) * kr;
         }
       }
-      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (xnn_float16*) ((uintptr_t) packed_weights + extra_bytes);
     }
     k += ks * kc * nc;
     if XNN_UNPREDICTABLE(b != nullptr) {
@@ -2205,7 +2205,7 @@ void xnn_pack_f32_to_f16_conv_kgo_w(
   const float* k,
   const float* b,
   const void* scale,
-  uint16_t* packed_weights,
+  xnn_float16* packed_weights,
   size_t extra_bytes,
   const void* params)
 {
@@ -2219,7 +2219,7 @@ void xnn_pack_f32_to_f16_conv_kgo_w(
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       if XNN_LIKELY(b != nullptr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          packed_weights[nr_block_offset] = fp16_ieee_from_fp32_value(b[nr_block_start + nr_block_offset]);
+          packed_weights[nr_block_offset] = xnn_float16_from_float(b[nr_block_start + nr_block_offset]);
         }
       }
       packed_weights += nr;
@@ -2227,12 +2227,12 @@ void xnn_pack_f32_to_f16_conv_kgo_w(
       for (size_t ki = 0; ki < ks; ki++) {
         for (size_t sr_block_offset = 0; sr_block_offset < sr; sr_block_offset++) {
           for (size_t nr_block_offset = (-sr_block_offset) & (sr - 1); nr_block_offset < nr_block_size; nr_block_offset += sr) {
-            packed_weights[nr_block_offset * kr] = fp16_ieee_from_fp32_value(k[ki * g * nc + (nr_block_start + nr_block_offset)]);
+            packed_weights[nr_block_offset * kr] = xnn_float16_from_float(k[ki * g * nc + (nr_block_start + nr_block_offset)]);
           }
           packed_weights += nr * kr;
         }
       }
-      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (xnn_float16*) ((uintptr_t) packed_weights + extra_bytes);
     }
     k += nc;
     if XNN_UNPREDICTABLE(b != nullptr) {
@@ -2539,7 +2539,7 @@ void xnn_pack_f32_to_f16_deconv_goki_w(
   const float* k,
   const float* b,
   const void* scale,
-  uint16_t* packed_weights,
+  xnn_float16* packed_weights,
   size_t extra_bytes,
   struct subconvolution_params* subconv_params,
   const void* params)
@@ -2560,7 +2560,7 @@ void xnn_pack_f32_to_f16_deconv_goki_w(
           const size_t nr_block_size = min(nc - nr_block_start, nr);
           if XNN_LIKELY(b != nullptr) {
             for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-              packed_weights[nr_block_offset] = fp16_ieee_from_fp32_value(b[nr_block_start + nr_block_offset]);
+              packed_weights[nr_block_offset] = xnn_float16_from_float(b[nr_block_start + nr_block_offset]);
             }
           }
           packed_weights += nr;
@@ -2571,7 +2571,7 @@ void xnn_pack_f32_to_f16_deconv_goki_w(
                   for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
                     const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
                     if (kc_idx < kc) {
-                      packed_weights[kr_block_offset] = fp16_ieee_from_fp32_value(k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_idx]);
+                      packed_weights[kr_block_offset] = xnn_float16_from_float(k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_idx]);
                     }
                   }
                   packed_weights += kr;
@@ -2580,7 +2580,7 @@ void xnn_pack_f32_to_f16_deconv_goki_w(
               }
             }
           }
-          packed_weights = reinterpret_cast<uint16_t*>((uintptr_t) packed_weights + extra_bytes);
+          packed_weights = reinterpret_cast<xnn_float16*>((uintptr_t) packed_weights + extra_bytes);
         }
       }
     }
@@ -3191,7 +3191,7 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
   const float* k,
   const float* b,
   const void* scale,
-  uint16_t* packed_weights,
+  xnn_float16* packed_weights,
   size_t per_tile_extra_bytes,
   size_t per_subtile_extra_bytes,
   const void* params)
@@ -3222,7 +3222,7 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
       if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
-          *packed_weights++ = fp16_ieee_from_fp32_value(b[cr_block_start + cr_block_offset]);
+          *packed_weights++ = xnn_float16_from_float(b[cr_block_start + cr_block_offset]);
         }
       } else {
         size_t n = cr_block_size;
@@ -3238,7 +3238,7 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
       // to the smaller of the two.
       for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
-          const uint16_t kv = fp16_ieee_from_fp32_value(k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
+          const xnn_float16 kv = xnn_float16_from_float(k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
           *packed_weights++ = kv;
         }
         packed_weights += channel_tile - cr_block_size;
@@ -3252,7 +3252,7 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
       if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
-          *packed_weights++ = fp16_ieee_from_fp32_value(b[cr_block_start + cr_block_offset]);
+          *packed_weights++ = xnn_float16_from_float(b[cr_block_start + cr_block_offset]);
         }
       } else {
         size_t n = cr_block_size;
@@ -3268,7 +3268,7 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
       // to the smaller of the two.
       for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
-          const uint16_t kv = fp16_ieee_from_fp32_value(k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
+          const xnn_float16 kv = xnn_float16_from_float(k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
           *packed_weights++ = kv;
         }
         packed_weights += channel_subtile - cr_block_size;
@@ -3299,7 +3299,7 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
       for (size_t j = 0; j < middle_pass_tile; j++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
-          const uint16_t kv = fp16_ieee_from_fp32_value(k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
+          const xnn_float16 kv = xnn_float16_from_float(k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
           *packed_weights++ = kv;
         }
         packed_weights += channel_tile - cr_block_size;
@@ -3312,7 +3312,7 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
       for (size_t j = 0; j < middle_pass_tile; j++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
-          const uint16_t kv = fp16_ieee_from_fp32_value(k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
+          const xnn_float16 kv = xnn_float16_from_float(k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
           *packed_weights++ = kv;
         }
         packed_weights += channel_subtile - cr_block_size;
@@ -3334,7 +3334,7 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
       for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
-          const uint16_t kv = fp16_ieee_from_fp32_value(k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
+          const xnn_float16 kv = xnn_float16_from_float(k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
           *packed_weights++ = kv;
         }
         packed_weights += channel_tile - cr_block_size;
@@ -3342,7 +3342,7 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights += (last_pass_tile - kernel_size) * channel_tile;
-      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + per_tile_extra_bytes);
+      packed_weights = (xnn_float16*) ((uintptr_t) packed_weights + per_tile_extra_bytes);
     }
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       // Last pass does not pack to rounded c, since it handles remainder.
@@ -3351,7 +3351,7 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
       for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
-          const uint16_t kv = fp16_ieee_from_fp32_value(k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
+          const xnn_float16 kv = xnn_float16_from_float(k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
           *packed_weights++ = kv;
         }
         packed_weights += channel_subtile - cr_block_size;
@@ -3359,7 +3359,7 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights += (last_pass_tile - kernel_size) * channel_subtile;
-      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + per_subtile_extra_bytes);
+      packed_weights = (xnn_float16*) ((uintptr_t) packed_weights + per_subtile_extra_bytes);
     }
   }
 }
@@ -4233,7 +4233,7 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
   const float* k,
   const float* b,
   const void* scale,
-  uint16_t* packed_weights,
+  xnn_float16* packed_weights,
   size_t per_tile_extra_bytes,
   size_t per_subtile_extra_bytes,
   const void* params)
@@ -4264,7 +4264,7 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
       if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
-          *packed_weights++ = fp16_ieee_from_fp32_value(b[cr_block_start + cr_block_offset]);
+          *packed_weights++ = xnn_float16_from_float(b[cr_block_start + cr_block_offset]);
         }
       } else {
         size_t n = cr_block_size;
@@ -4280,7 +4280,7 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
       // to the smaller of the two.
       for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
-          const uint16_t kv = fp16_ieee_from_fp32_value(k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
+          const xnn_float16 kv = xnn_float16_from_float(k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
           *packed_weights++ = kv;
         }
         packed_weights += channel_tile - cr_block_size;
@@ -4296,7 +4296,7 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
       if XNN_LIKELY(b != nullptr) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
-          *packed_weights++ = fp16_ieee_from_fp32_value(b[cr_block_start + cr_block_offset]);
+          *packed_weights++ = xnn_float16_from_float(b[cr_block_start + cr_block_offset]);
         }
       } else {
         size_t n = cr_block_size;
@@ -4312,7 +4312,7 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
       // to the smaller of the two.
       for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
-          const uint16_t kv = fp16_ieee_from_fp32_value(k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
+          const xnn_float16 kv = xnn_float16_from_float(k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
           *packed_weights++ = kv;
         }
         packed_weights += channel_subtile - cr_block_size;
@@ -4346,7 +4346,7 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
       for (size_t j = 0; j < middle_pass_tile; j++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
-          const uint16_t kv = fp16_ieee_from_fp32_value(k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
+          const xnn_float16 kv = xnn_float16_from_float(k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
           *packed_weights++ = kv;
         }
         packed_weights += channel_tile - cr_block_size;
@@ -4362,7 +4362,7 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
       for (size_t j = 0; j < middle_pass_tile; j++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
-          const uint16_t kv = fp16_ieee_from_fp32_value(k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
+          const xnn_float16 kv = xnn_float16_from_float(k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
           *packed_weights++ = kv;
         }
         packed_weights += channel_subtile - cr_block_size;
@@ -4386,7 +4386,7 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
       const size_t cr_block_size = min(c - cr_block_start, channel_tile);
       for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
-          const uint16_t kv = fp16_ieee_from_fp32_value(k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
+          const xnn_float16 kv = xnn_float16_from_float(k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
           *packed_weights++ = kv;
         }
         packed_weights += channel_tile - cr_block_size;
@@ -4397,7 +4397,7 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights += (last_pass_tile - kernel_size) * channel_tile;
-      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + per_tile_extra_bytes);
+      packed_weights = (xnn_float16*) ((uintptr_t) packed_weights + per_tile_extra_bytes);
     }
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       x = processed_x;
@@ -4406,7 +4406,7 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
       for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
           const uint16_t kv = k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *packed_weights++ = fp16_ieee_from_fp32_value(kv);
+          *packed_weights++ = xnn_float16_from_float(kv);
         }
         packed_weights += channel_subtile - cr_block_size;
         if (++y == h) {
@@ -4416,7 +4416,7 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
       }
       // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights += (last_pass_tile - kernel_size) * channel_subtile;
-      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + per_subtile_extra_bytes);
+      packed_weights = (xnn_float16*) ((uintptr_t) packed_weights + per_subtile_extra_bytes);
     }
   }
 }
@@ -5000,7 +5000,7 @@ void xnn_pack_f32_to_f16_dconv_oki_w(
   size_t kw,
   const float* k,
   const float* b,
-  uint16_t* packed_weights,
+  xnn_float16* packed_weights,
   const void* params)
 {
   assert(k != nullptr);
@@ -5010,7 +5010,7 @@ void xnn_pack_f32_to_f16_dconv_oki_w(
     const size_t nr_block_size = min(nc - nr_block_start, nr);
     if XNN_LIKELY(b != nullptr) {
       for (size_t nr_block_offset = 0; nr_block_offset < nr; nr_block_offset++) {
-        *packed_weights++ = fp16_ieee_from_fp32_value(b[min(nr_block_offset, nr_block_size - 1)]);
+        *packed_weights++ = xnn_float16_from_float(b[min(nr_block_offset, nr_block_size - 1)]);
       }
     } else {
       size_t n = nr;
@@ -5023,7 +5023,7 @@ void xnn_pack_f32_to_f16_dconv_oki_w(
       for (size_t c = 0; c < kc; c++) {
         for (size_t ky = 0; ky < kh; ky++) {
           for (size_t nr_block_offset = 0; nr_block_offset < nr; nr_block_offset++) {
-            *packed_weights++ = fp16_ieee_from_fp32_value(k[(((nr_block_start + min(nr_block_offset, nr_block_size - 1)) * kh + ky) * kw + kx) * kc + c]);
+            *packed_weights++ = xnn_float16_from_float(k[(((nr_block_start + min(nr_block_offset, nr_block_size - 1)) * kh + ky) * kw + kx) * kc + c]);
           }
         }
       }
@@ -5105,7 +5105,7 @@ void xnn_pack_f32_to_f16_chw_dwconv_ghw_w(
   size_t groups,
   const float* k,
   const float* b,
-  uint16_t* packed_weights,
+  xnn_float16* packed_weights,
   const void* params)
 {
   assert(k != nullptr);
@@ -5113,13 +5113,13 @@ void xnn_pack_f32_to_f16_chw_dwconv_ghw_w(
 
   for (size_t g = 0; g < groups; g++) {
     if XNN_LIKELY(b != nullptr) {
-      *packed_weights = fp16_ieee_from_fp32_value(*b++);
+      *packed_weights = xnn_float16_from_float(*b++);
     } else {
       *packed_weights = 0;
     }
     packed_weights += 1;
     for (size_t i = 0; i < kernel_size; i++) {
-      *packed_weights++ = fp16_ieee_from_fp32_value(k[g * kernel_size + i]);
+      *packed_weights++ = xnn_float16_from_float(k[g * kernel_size + i]);
     }
   }
 }
@@ -5201,7 +5201,7 @@ void xnn_pack_f32_to_f16_chw_dwconv_hwg_w(
   size_t groups,
   const float* k,
   const float* b,
-  uint16_t* packed_weights,
+  xnn_float16* packed_weights,
   const void* params)
 {
   assert(k != nullptr);
@@ -5209,13 +5209,13 @@ void xnn_pack_f32_to_f16_chw_dwconv_hwg_w(
 
   for (size_t g = 0; g < groups; g++) {
     if XNN_LIKELY(b != nullptr) {
-      *packed_weights = fp16_ieee_from_fp32_value(*b++);
+      *packed_weights = xnn_float16_from_float(*b++);
     } else {
       *packed_weights = 0;
     }
     packed_weights += 1;
     for (size_t i = 0; i < kernel_size; i++) {
-      *packed_weights++ = fp16_ieee_from_fp32_value(k[i * groups + g]);
+      *packed_weights++ = xnn_float16_from_float(k[i * groups + g]);
     }
   }
 }
@@ -5288,7 +5288,7 @@ void xnn_pack_f32_to_f16_vmulcaddc_w(
   size_t cr,
   const float* s,
   const float* b,
-  uint16_t* packed_weights,
+  xnn_float16* packed_weights,
   const void* params)
 {
   assert(s != nullptr);
@@ -5297,12 +5297,12 @@ void xnn_pack_f32_to_f16_vmulcaddc_w(
   for (size_t cr_block_start = 0; cr_block_start < c; cr_block_start += cr) {
     const size_t cr_block_size = min(c - cr_block_start, cr);
     for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
-      *packed_weights++ = fp16_ieee_from_fp32_value(s[cr_block_start + cr_block_offset]);
+      *packed_weights++ = xnn_float16_from_float(s[cr_block_start + cr_block_offset]);
     }
     packed_weights += cr - cr_block_size;
     if XNN_LIKELY(b != nullptr) {
       for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
-        *packed_weights++ = fp16_ieee_from_fp32_value(b[cr_block_start + cr_block_offset]);
+        *packed_weights++ = xnn_float16_from_float(b[cr_block_start + cr_block_offset]);
       }
     } else {
       size_t n = cr_block_size;
@@ -5356,20 +5356,20 @@ void xnn_pack_f32_to_f16_prelu_w(
   size_t input_channels,
   size_t slope_channels,
   const float* s,
-  uint16_t* packed_weights)
+  xnn_float16* packed_weights)
 {
   assert(s != nullptr);
   assert(packed_weights != nullptr);
   assert(slope_channels == input_channels || slope_channels == 1);
 
   if (slope_channels == 1) {
-    uint16_t v =  fp16_ieee_from_fp32_value(*s);
+    xnn_float16 v =  xnn_float16_from_float(*s);
     for (size_t i = 0; i < input_channels; ++i) {
       packed_weights[i] = v;
     }
   } else {
     do {
-      *packed_weights++ = fp16_ieee_from_fp32_value(*s++);
+      *packed_weights++ = xnn_float16_from_float(*s++);
     } while (--input_channels != 0);
   }
 }
@@ -5423,7 +5423,7 @@ void xnn_analyze_f32_spmm_w(
 void xnn_analyze_f16_spmm_w(
   size_t group_output_channels,
   size_t group_input_channels,
-  const uint16_t* kernel,
+  const xnn_float16* kernel,
   struct xnn_spmm_packing_params* params)
 {
   assert(kernel != nullptr);
@@ -5567,7 +5567,7 @@ enum xnn_status xnn_pack_f32_to_f16_spmm_w(
   const float* bias,
   int32_t* input_channel_diffs,
   uint32_t* output_channel_nonzeros,
-  uint16_t* nonzero_values,  // fp16 values
+  xnn_float16* nonzero_values,  // fp16 values
   size_t* first_input_channel)
 {
   size_t first_ic = 0, last_ic = 0;
@@ -5575,7 +5575,7 @@ enum xnn_status xnn_pack_f32_to_f16_spmm_w(
   for (size_t ocb = 0; ocb < round_down_po2(group_output_channels, output_channels_block_size); ocb += output_channels_block_size) {
     if XNN_LIKELY(bias != nullptr) {
       for (size_t oco = 0; oco < output_channels_block_size; oco++) {
-        *nonzero_values++ = fp16_ieee_from_fp32_value(bias[ocb + oco]);
+        *nonzero_values++ = xnn_float16_from_float(bias[ocb + oco]);
       }
     } else {
       for (size_t oco = 0; oco < output_channels_block_size; oco++) {
@@ -5589,7 +5589,7 @@ enum xnn_status xnn_pack_f32_to_f16_spmm_w(
       }
       if (is_nonzero_block) {
         for (size_t oco = 0; oco < output_channels_block_size; oco++) {
-          *nonzero_values++ = fp16_ieee_from_fp32_value(kernel[(ocb + oco) * group_input_channels + ic]);
+          *nonzero_values++ = xnn_float16_from_float(kernel[(ocb + oco) * group_input_channels + ic]);
         }
         if (first_nonzero) {
           first_ic = ic;
@@ -5611,14 +5611,14 @@ enum xnn_status xnn_pack_f32_to_f16_spmm_w(
   }
   for (size_t oc = round_down_po2(group_output_channels, output_channels_block_size); oc < group_output_channels; oc++) {
     if XNN_LIKELY(bias != nullptr) {
-      *nonzero_values++ = fp16_ieee_from_fp32_value(bias[oc]);
+      *nonzero_values++ = xnn_float16_from_float(bias[oc]);
     } else {
       *nonzero_values++ = 0;
     }
     for (size_t ic = 0; ic < group_input_channels; ic++) {
       const float weight = kernel[oc * group_input_channels + ic];
       if (weight != 0.0f) {
-        *nonzero_values++ = fp16_ieee_from_fp32_value(weight);
+        *nonzero_values++ = xnn_float16_from_float(weight);
         if (first_nonzero) {
           first_ic = ic;
         } else {
@@ -5655,11 +5655,11 @@ enum xnn_status xnn_pack_f16_spmm_w(
   size_t group_output_channels,
   size_t output_channels_block_size,
   size_t group_input_channels,
-  const uint16_t* kernel,  // fp16 values
-  const uint16_t* bias,  // fp16 values
+  const xnn_float16* kernel,  // fp16 values
+  const xnn_float16* bias,  // fp16 values
   int32_t* input_channel_diffs,
   uint32_t* output_channel_nonzeros,
-  uint16_t* nonzero_values,  // fp16 values
+  xnn_float16* nonzero_values,  // fp16 values
   size_t* first_input_channel)
 {
   size_t first_ic = 0, last_ic = 0;

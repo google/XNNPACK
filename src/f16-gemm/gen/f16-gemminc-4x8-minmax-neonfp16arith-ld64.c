@@ -22,13 +22,13 @@ void xnn_f16_gemminc_minmax_ukernel_4x8__neonfp16arith_ld64(
     size_t mr,
     size_t nc,
     size_t kc,
-    const void* restrict a,
+    const xnn_float16* restrict a,
     size_t a_stride,
-    const void* restrict w,
-    void* restrict c,
+    const xnn_float16* restrict w,
+    xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const void* restrict acc,
+    const xnn_float16* restrict acc,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
@@ -63,10 +63,10 @@ void xnn_f16_gemminc_minmax_ukernel_4x8__neonfp16arith_ld64(
   }
 
   do {
-    float16x8_t vacc0x0 = vreinterpretq_f16_u16(vld1q_u16(acc)); acc = (const void*) ((uintptr_t) acc + sizeof(float16x8_t));
-    float16x8_t vacc1x0 = vreinterpretq_f16_u16(vld1q_u16(acc)); acc = (const void*) ((uintptr_t) acc + sizeof(float16x8_t));
-    float16x8_t vacc2x0 = vreinterpretq_f16_u16(vld1q_u16(acc)); acc = (const void*) ((uintptr_t) acc + sizeof(float16x8_t));
-    float16x8_t vacc3x0 = vreinterpretq_f16_u16(vld1q_u16(acc)); acc = (const void*) ((uintptr_t) acc + sizeof(float16x8_t));
+    float16x8_t vacc0x0 = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) acc)); acc = (const void*) ((uintptr_t) acc + sizeof(float16x8_t));
+    float16x8_t vacc1x0 = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) acc)); acc = (const void*) ((uintptr_t) acc + sizeof(float16x8_t));
+    float16x8_t vacc2x0 = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) acc)); acc = (const void*) ((uintptr_t) acc + sizeof(float16x8_t));
+    float16x8_t vacc3x0 = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) acc)); acc = (const void*) ((uintptr_t) acc + sizeof(float16x8_t));
 
     size_t k = kc;
     while (k >= 4 * sizeof(uint16_t)) {
@@ -75,7 +75,7 @@ void xnn_f16_gemminc_minmax_ukernel_4x8__neonfp16arith_ld64(
       const float16x4_t va2 = vreinterpret_f16_u16(vld1_u16(a2)); a2 += 4;
       const float16x4_t va3 = vreinterpret_f16_u16(vld1_u16(a3)); a3 += 4;
 
-      const float16x8_t vb0c0 = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const float16x8_t*) w + 1;
+      const float16x8_t vb0c0 = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) w)); w = (const xnn_float16*) w + 8;
 
       #if XNN_ARCH_ARM64
         vacc0x0 = vfmaq_lane_f16(vacc0x0, vb0c0, va0, 0);
@@ -88,7 +88,7 @@ void xnn_f16_gemminc_minmax_ukernel_4x8__neonfp16arith_ld64(
         vacc2x0 = vmlaq_lane_f16(vacc2x0, vb0c0, va2, 0);
         vacc3x0 = vmlaq_lane_f16(vacc3x0, vb0c0, va3, 0);
       #endif
-      const float16x8_t vb0c1 = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const float16x8_t*) w + 1;
+      const float16x8_t vb0c1 = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) w)); w = (const xnn_float16*) w + 8;
 
       #if XNN_ARCH_ARM64
         vacc0x0 = vfmaq_lane_f16(vacc0x0, vb0c1, va0, 1);
@@ -101,7 +101,7 @@ void xnn_f16_gemminc_minmax_ukernel_4x8__neonfp16arith_ld64(
         vacc2x0 = vmlaq_lane_f16(vacc2x0, vb0c1, va2, 1);
         vacc3x0 = vmlaq_lane_f16(vacc3x0, vb0c1, va3, 1);
       #endif
-      const float16x8_t vb0c2 = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const float16x8_t*) w + 1;
+      const float16x8_t vb0c2 = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) w)); w = (const xnn_float16*) w + 8;
 
       #if XNN_ARCH_ARM64
         vacc0x0 = vfmaq_lane_f16(vacc0x0, vb0c2, va0, 2);
@@ -114,7 +114,7 @@ void xnn_f16_gemminc_minmax_ukernel_4x8__neonfp16arith_ld64(
         vacc2x0 = vmlaq_lane_f16(vacc2x0, vb0c2, va2, 2);
         vacc3x0 = vmlaq_lane_f16(vacc3x0, vb0c2, va3, 2);
       #endif
-      const float16x8_t vb0c3 = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const float16x8_t*) w + 1;
+      const float16x8_t vb0c3 = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) w)); w = (const xnn_float16*) w + 8;
 
       #if XNN_ARCH_ARM64
         vacc0x0 = vfmaq_lane_f16(vacc0x0, vb0c3, va0, 3);
@@ -137,7 +137,7 @@ void xnn_f16_gemminc_minmax_ukernel_4x8__neonfp16arith_ld64(
         const float16x8_t va2 = vreinterpretq_f16_u16(vld1q_dup_u16(a2)); a2 += 1;
         const float16x8_t va3 = vreinterpretq_f16_u16(vld1q_dup_u16(a3)); a3 += 1;
 
-        const float16x8_t vb0 = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const float16x8_t*) w + 1;
+        const float16x8_t vb0 = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) w)); w = (const xnn_float16*) w + 8;
 
         vacc0x0 = vfmaq_f16(vacc0x0, va0, vb0);
         vacc1x0 = vfmaq_f16(vacc1x0, va1, vb0);
@@ -148,13 +148,13 @@ void xnn_f16_gemminc_minmax_ukernel_4x8__neonfp16arith_ld64(
       } while (k != 0);
     }
 
-    const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.min));
+    const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.min));
     vacc0x0 = vmaxq_f16(vacc0x0, vmin);
     vacc1x0 = vmaxq_f16(vacc1x0, vmin);
     vacc2x0 = vmaxq_f16(vacc2x0, vmin);
     vacc3x0 = vmaxq_f16(vacc3x0, vmin);
 
-    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.max));
+    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.max));
     vacc0x0 = vminq_f16(vacc0x0, vmax);
     vacc1x0 = vminq_f16(vacc1x0, vmax);
     vacc2x0 = vminq_f16(vacc2x0, vmax);

@@ -18,13 +18,13 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 void xnn_f16_dwconv_minmax_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__fma3${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t channels,
     size_t output_width,
-    const void** input,
-    const void* weights,
-    void* output,
+    const xnn_float16** input,
+    const xnn_float16* weights,
+    xnn_float16* output,
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
-    const void* zero,
+    const xnn_float16* zero,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(channels != 0);
@@ -38,15 +38,15 @@ void xnn_f16_dwconv_minmax_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__fma3${"" if 
   uint16_t* o = (uint16_t*) output;
   do {
     $for K in range(KERNEL_TILE):
-      const uint16_t* i${K} = input[${K}];
+      const uint16_t* i${K} = (const uint16_t*) input[${K}];
       assert(i${K} != NULL);
-      if XNN_UNPREDICTABLE(i${K} != zero) {
+      if XNN_UNPREDICTABLE(i${K} != (const uint16_t*) zero) {
         i${K} = (const uint16_t*) ((uintptr_t) i${K} + input_offset);
       }
-    input = (const void**) ((uintptr_t) input + input_stride);
+    input = (const xnn_float16**) ((uintptr_t) input + input_stride);
 
     size_t c = channels;
-    const uint16_t* w = weights;
+    const uint16_t* w = (const uint16_t*)weights;
     for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
       __m256 vacc${ABC[0:8]}p0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) w));
       $for C in range(8, CHANNEL_TILE, 8):

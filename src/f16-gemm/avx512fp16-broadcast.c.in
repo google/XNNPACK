@@ -19,10 +19,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,
-    const void* restrict a,
+    const xnn_float16* restrict a,
     size_t a_stride,
-    const void* restrict w,
-    void* restrict c,
+    const xnn_float16* restrict w,
+    xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     $if DATATYPE == "QC4":
@@ -68,14 +68,14 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast(
     $for M in range(1, MR):
       $for N in range(0, NR, 32):
         __m512h vacc${M}x${N//32} = vacc0x${N//32};
-    w = (const uint16_t*) w + ${NR};
+    w = (const xnn_float16*) w + ${NR};
 
     size_t k = kc;
     do {
       const __m512h vb0 = _mm512_load_ph(w);
       $for N in range(32, NR, 32):
         const __m512h vb${N//32} = _mm512_load_ph((const uint16_t*) w + ${N});
-      w = (const uint16_t*) w + ${NR};
+      w = (const xnn_float16*) w + ${NR};
 
       $for M in range(MR):
         const __m512h va${M} = _mm512_castsi512_ph(_mm512_set1_epi16(*a${M}));
@@ -86,12 +86,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}__avx512fp16_broadcast(
       k -= sizeof(uint16_t);
     } while (k != 0);
 
-    const __m512h vmin = _mm512_castsi512_ph(_mm512_set1_epi16(params->scalar.min));
+    const __m512h vmin = _mm512_castsi512_ph(_mm512_set1_epi16(*(const uint16_t*) &params->scalar.min));
     $for N in range(0, NR, 32):
       $for M in range(MR):
         vacc${M}x${N//32} = _mm512_max_ph(vmin, vacc${M}x${N//32});
 
-    const __m512h vmax = _mm512_castsi512_ph(_mm512_set1_epi16(params->scalar.max));
+    const __m512h vmax = _mm512_castsi512_ph(_mm512_set1_epi16(*(const uint16_t*) &params->scalar.max));
     $for N in range(0, NR, 32):
       $for M in range(MR):
         vacc${M}x${N//32} = _mm512_min_ph(vmax, vacc${M}x${N//32});

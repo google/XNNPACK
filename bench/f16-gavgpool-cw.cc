@@ -32,8 +32,8 @@ void f16_gavgpool_cw(
   const size_t channels = state.range(0);
   const size_t elements = state.range(1);
 
-  std::vector<int16_t, AlignedAllocator<int16_t, 64>> input(elements * channels + XNN_EXTRA_BYTES / sizeof(int16_t));
-  std::vector<int16_t> output(channels);
+  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> input(elements * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  std::vector<xnn_float16> output(channels);
   std::iota(input.begin(), input.end(), 0);
 
   // Prepare parameters.

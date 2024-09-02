@@ -19,7 +19,7 @@
 
 using TanhTestQS8 = UnaryTest<int8_t>;
 using TanhTestQU8 = UnaryTest<uint8_t>;
-using TanhTestF16 = UnaryTest<uint16_t>;
+using TanhTestF16 = UnaryTest<xnn_float16>;
 using TanhTestF32 = UnaryTest<float>;
 
 TEST_F(TanhTestQS8, define)
@@ -105,7 +105,7 @@ TEST_F(TanhTestQU8, define)
 TEST_F(TanhTestF16, define)
 {
   std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
-  std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -304,7 +304,7 @@ TEST_F(TanhTestQU8, matches_operator_api)
 TEST_F(TanhTestF16, matches_operator_api)
 {
   std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
-  std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

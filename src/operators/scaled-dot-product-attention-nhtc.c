@@ -131,7 +131,7 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f16(
 
   union xnn_f16_minmax_params minmax_params;
   if XNN_LIKELY(gemm_config->init.f16 != NULL) {
-    gemm_config->init.f16(&minmax_params, fp16_ieee_from_fp32_value(-INFINITY), fp16_ieee_from_fp32_value(INFINITY));
+    gemm_config->init.f16(&minmax_params, xnn_float16_from_float(-INFINITY), xnn_float16_from_float(INFINITY));
   }
 
   const struct xnn_raddstoreexpminusmax_config* raddstoreexpminusmax_config =
@@ -334,10 +334,10 @@ error:
 }
 
 static void compute_reciprocal_f16(
-    const uint16_t input[XNN_MIN_ELEMENTS(1)],
-    uint16_t output[XNN_MIN_ELEMENTS(1)])
+    const xnn_float16 input[XNN_MIN_ELEMENTS(1)],
+    xnn_float16 output[XNN_MIN_ELEMENTS(1)])
 {
-  *output = fp16_ieee_from_fp32_value(1.0f / fp16_ieee_to_fp32_value(*input));
+  *output = xnn_float16_from_float(1.0f / xnn_float16_to_float(*input));
 }
 
 static void compute_reciprocal_f32(
@@ -635,8 +635,8 @@ enum xnn_status xnn_reshape_scaled_dot_product_attention_nhtc_f16(
   size_t* workspace_alignment,
   pthreadpool_t threadpool)
 {
-  uint16_t cap = fp16_ieee_from_fp32_value(attention_op->attention.cap_params.cap);
-  uint16_t cap_reciprocal = fp16_ieee_from_fp32_value(1.0f / attention_op->attention.cap_params.cap);
+  xnn_float16 cap = xnn_float16_from_float(attention_op->attention.cap_params.cap);
+  xnn_float16 cap_reciprocal = xnn_float16_from_float(1.0f / attention_op->attention.cap_params.cap);
 
   return reshape_scaled_dot_product_attention_nhtc(
     attention_op,

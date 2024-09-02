@@ -12,6 +12,7 @@
 #include <stdint.h>
 
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microparams.h"
 
 #ifdef __cplusplus
@@ -21,7 +22,7 @@ extern "C" {
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, \
                                 datatype, params_type, init_params)           \
   XNN_INTERNAL void ukernel(                                                  \
-      size_t n, const void* a, const void* b, void* y,                        \
+      size_t n, const xnn_float16* a, const xnn_float16* b, xnn_float16* y,   \
       const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 #include "src/f16-vbinary/f16-vadd-minmax.h"
 #include "src/f16-vbinary/f16-vaddc-minmax.h"
@@ -34,6 +35,9 @@ extern "C" {
 #include "src/f16-vbinary/f16-vminc.h"
 #include "src/f16-vbinary/f16-vmul-minmax.h"
 #include "src/f16-vbinary/f16-vmulc-minmax.h"
+#include "src/f16-vbinary/f16-vprelu.h"
+#include "src/f16-vbinary/f16-vpreluc.h"
+#include "src/f16-vbinary/f16-vrpreluc.h"
 #include "src/f16-vbinary/f16-vrdivc-minmax.h"
 #include "src/f16-vbinary/f16-vrsubc-minmax.h"
 #include "src/f16-vbinary/f16-vsqrdiff.h"
@@ -72,6 +76,9 @@ extern "C" {
 #include "src/f32-vbinary/f32-vmulc-minmax.h"
 #include "src/f32-vbinary/f32-vmulc-relu.h"
 #include "src/f32-vbinary/f32-vmulc.h"
+#include "src/f32-vbinary/f32-vprelu.h"
+#include "src/f32-vbinary/f32-vpreluc.h"
+#include "src/f32-vbinary/f32-vrpreluc.h"
 #include "src/f32-vbinary/f32-vrcopysignc.h"
 #include "src/f32-vbinary/f32-vrdivc-minmax.h"
 #include "src/f32-vbinary/f32-vrdivc-relu.h"

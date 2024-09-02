@@ -42,7 +42,6 @@ void xnn_f32_vmin_ukernel__wasmsimd_x86_u8(
     v128_t vacc1 = wasm_f32x4_pmin(va1, vb1);
 
 
-
     wasm_v128_store(output, vacc0);
     wasm_v128_store(output + 4, vacc1);
     output += 8;

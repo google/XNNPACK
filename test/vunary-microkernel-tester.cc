@@ -78,9 +78,9 @@ void VUnaryMicrokernelTester::Test(xnn_f16_velu_ukernel_fn velu,
                                    Default) const {
   Test<Float16>(
       velu,
-      InitParamsWrapper(init_params, fp16_ieee_from_fp32_value(prescale()),
-                        fp16_ieee_from_fp32_value(alpha()),
-                        fp16_ieee_from_fp32_value(beta())),
+      InitParamsWrapper(init_params, xnn_float16_from_float(prescale()),
+                        xnn_float16_from_float(alpha()),
+                        xnn_float16_from_float(beta())),
       [this](float x) {
         return std::signbit(x) ? alpha() * std::expm1(x * prescale())
                                : x * beta();
@@ -137,8 +137,8 @@ void VUnaryMicrokernelTester::Test(xnn_f32_vhswish_ukernel_fn vhswish,
 void VUnaryMicrokernelTester::Test(xnn_f16_vlrelu_ukernel_fn vlrelu,
                                    xnn_init_f16_lrelu_params_fn init_params,
                                    Default) const {
-  const uint16_t slope_as_half = fp16_ieee_from_fp32_value(slope());
-  const float slope_as_float = fp16_ieee_to_fp32_value(slope_as_half);
+  const xnn_float16 slope_as_half = xnn_float16_from_float(slope());
+  const float slope_as_float = xnn_float16_to_float(slope_as_half);
   Test<Float16>(
       vlrelu, InitParamsWrapper(init_params, slope_as_half),
       [slope_as_float](float x) {
@@ -341,8 +341,8 @@ void VUnaryMicrokernelTester::Test(xnn_f16_vclamp_ukernel_fn vclamp,
   Test<Float16>(
       vclamp,
       InitParamsWrapper(init_params,
-                        fp16_ieee_from_fp32_value(static_cast<float>(qmin())),
-                        fp16_ieee_from_fp32_value(static_cast<float>(qmax()))),
+                        xnn_float16_from_float(static_cast<float>(qmin())),
+                        xnn_float16_from_float(static_cast<float>(qmax()))),
       [this](float x) {
         return std::max(std::min(x, static_cast<float>(qmax())),
                         static_cast<float>(qmin()));
@@ -463,7 +463,7 @@ void VUnaryMicrokernelTester::Test(xnn_u64_u32_vsqrtshift_ukernel_fn vsqrtshift,
             static_cast<uint32_t>(std::lrint(std::sqrt(static_cast<double>(
                 static_cast<int64_t>(static_cast<uint64_t>(x_value))))));
         y_value =
-            std::min<uint32_t>(y_value, std::numeric_limits<uint16_t>::max());
+            std::min<uint32_t>(y_value, std::numeric_limits<xnn_float16>::max());
       } else if (x_value != 0) {
         uint64_t y0 = x_value >> 1;
         uint64_t y1 = (y0 + x_value / y0) >> 1;

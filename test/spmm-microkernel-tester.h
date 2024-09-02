@@ -21,8 +21,8 @@
 #include "xnnpack/microparams.h"
 #include "replicable_random_device.h"
 
-static inline bool is_fp16_zero(uint16_t x) {
-  const uint16_t two_x = x + x;
+static inline bool is_fp16_zero(xnn_float16 x) {
+  const xnn_float16 two_x = x + x;
   return two_x == 0;
 }
 
@@ -297,30 +297,30 @@ class SpMMMicrokernelTester {
     std::uniform_real_distribution<float> f32dist;
     std::uniform_real_distribution<float> pdist;
 
-    std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> input(k() * m());
+    std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> input(k() * m());
     // Think of b as (n/nr + n % nr) x k, expansion happens later.
     const size_t ncols = n() / nr() + n() % nr();
-    std::vector<uint16_t> b(ncols * k());
-    std::vector<uint16_t> bias(n());
+    std::vector<xnn_float16> b(ncols * k());
+    std::vector<xnn_float16> bias(n());
     // Number of non-zero weights per N (output channel).
     std::vector<uint32_t> nmap(n());
     // Mapping from index of non-zero weight to increment of K (input channel) following this index.
     std::vector<int32_t> dmap(n() * k());
-    std::vector<uint16_t> w(n() * k() + n());
-    std::vector<uint16_t> output((n() - 1) * output_stride() + m());
+    std::vector<xnn_float16> w(n() * k() + n());
+    std::vector<xnn_float16> output((n() - 1) * output_stride() + m());
     std::vector<float> output_ref(n() * m());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      std::generate(b.begin(), b.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      std::generate(bias.begin(), bias.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+      std::generate(b.begin(), b.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+      std::generate(bias.begin(), bias.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
       std::fill(output_ref.begin(), output_ref.end(), 0.0f);
       std::fill(nmap.begin(), nmap.end(), 0);
       std::fill(dmap.begin(), dmap.end(), 0);
       std::fill(w.begin(), w.end(), 0);
 
-      for (uint16_t& b_value : b) {
+      for (xnn_float16& b_value : b) {
         if (pdist(rng) <= sparsity()) {
           b_value = 0;
         }
@@ -338,12 +338,12 @@ class SpMMMicrokernelTester {
           if (!is_fp16_zero(b[nn * k() + kk])) {
             // Every non-zero actually corresponds to nr adjacent non-zeros.
             for (size_t i = 0; i < nr(); ++i)
-              w[wcnt++] = fp16_ieee_from_fp32_value(fp16_ieee_to_fp32_value(b[nn * k() + kk]) + static_cast<float>(i));
+              w[wcnt++] = xnn_float16_from_float(xnn_float16_to_float(b[nn * k() + kk]) + static_cast<float>(i));
             // Skip the very first non-zero weight as we record only the difference.
             if (first_nzz) {
               first_kk = kk;
             } else {
-              const int32_t increment = int32_t(kk - last_kk) * int32_t(m() * sizeof(uint16_t));
+              const int32_t increment = int32_t(kk - last_kk) * int32_t(m() * sizeof(xnn_float16));
               dmap[nnz++] = increment;
             }
             last_kk = kk;
@@ -365,7 +365,7 @@ class SpMMMicrokernelTester {
             if (first_nzz) {
               first_kk = kk;
             } else {
-              const int32_t increment = int32_t(kk - last_kk) * int32_t(m() * sizeof(uint16_t));
+              const int32_t increment = int32_t(kk - last_kk) * int32_t(m() * sizeof(xnn_float16));
               dmap[nnz++] = increment;
             }
             last_kk = kk;
@@ -375,13 +375,13 @@ class SpMMMicrokernelTester {
         }
       }
       // In the end, we must return input pointer to the initial value.
-      const int64_t increment = int32_t(first_kk - last_kk) * int32_t(m() * sizeof(uint16_t));
+      const int64_t increment = int32_t(first_kk - last_kk) * int32_t(m() * sizeof(xnn_float16));
       dmap[nnz++] = increment;
 
       // Generate expanded b which will be used in reference calculation.
       // Everywhere there is input non-zero in the original we copy it and add an
       // adjacent non-zero with incremented weight value.
-      std::vector<uint16_t> b_full(n() * k());
+      std::vector<xnn_float16> b_full(n() * k());
       if (nr() == 1) {
          b_full = b;
       }
@@ -390,8 +390,8 @@ class SpMMMicrokernelTester {
           for (size_t kk = 0; kk < k(); kk++) {
             if (b[nn * k() + kk] != 0.0f) {
               for (size_t i = 0; i < nr(); ++i)
-                b_full[nr() * nn * k() + i * k() + kk] = fp16_ieee_from_fp32_value(
-                  fp16_ieee_to_fp32_value(b[nn * k() + kk]) + static_cast<float>(i));
+                b_full[nr() * nn * k() + i * k() + kk] = xnn_float16_from_float(
+                  xnn_float16_to_float(b[nn * k() + kk]) + static_cast<float>(i));
             }
           }
         }
@@ -406,9 +406,9 @@ class SpMMMicrokernelTester {
 
       for (size_t oc = 0; oc < n(); oc++) {
         for (size_t pxb = 0; pxb < m(); pxb++) {
-          output_ref[oc * m() + pxb] = fp16_ieee_to_fp32_value(bias[oc]);
+          output_ref[oc * m() + pxb] = xnn_float16_to_float(bias[oc]);
           for (size_t ic = 0; ic < k(); ic++) {
-            output_ref[oc * m() + pxb] += fp16_ieee_to_fp32_value(input[ic * m() + pxb]) * fp16_ieee_to_fp32_value(b_full[oc * k() + ic]);
+            output_ref[oc * m() + pxb] += xnn_float16_to_float(input[ic * m() + pxb]) * xnn_float16_to_float(b_full[oc * k() + ic]);
           }
         }
       }
@@ -431,19 +431,19 @@ class SpMMMicrokernelTester {
       // Prepare parameters.
       xnn_f16_minmax_params params;
       init_params(&params,
-        fp16_ieee_from_fp32_value(output_min), fp16_ieee_from_fp32_value(output_max));
+        xnn_float16_from_float(output_min), xnn_float16_from_float(output_max));
 
-      spmm(m() * sizeof(uint16_t), n(),
+      spmm(m() * sizeof(xnn_float16), n(),
         input.data() + first_kk * m(),
         w.data(), dmap.data(), nmap.data(),
-        output.data(), output_stride() * sizeof(uint16_t),
+        output.data(), output_stride() * sizeof(xnn_float16),
         &params);
 
       // Validate micro-kernel outputs.
       for (size_t i = 0; i < m(); i++) {
         for (size_t j = 0; j < n(); j++) {
           ASSERT_NEAR(
-              fp16_ieee_to_fp32_value(output[j * output_stride() + i]),
+              xnn_float16_to_float(output[j * output_stride() + i]),
               output_ref[j * m() + i],
               std::max(1.0e-4f, std::abs(output_ref[j * m() + i]) * 1.0e-2f))
             << "at M index " << i << " / " << m() << " (tile " << mr() << ")"

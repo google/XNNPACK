@@ -13,16 +13,7 @@
 #include <hexagon_protos.h>
 #include <hvx_hexagon_protos.h>
 #include "xnnpack/gemm.h"
-
-static XNN_INLINE
-void vstu_variable_scalar(char *bytes, size_t num_bytes, HVX_Vector vin) {
-  char temp[128]  __attribute__((aligned(128)));
-  *((HVX_Vector *)temp) = vin;
-  for (size_t idx = 0; idx < num_bytes; idx++){
-     *bytes = temp[idx];
-     bytes++;
-  }
-}
+#include "xnnpack/intrinsics-polyfill.h"
 
 void xnn_f32_gemm_minmax_ukernel_1x64__hvx_broadcast(
     size_t mr,
@@ -68,11 +59,11 @@ void xnn_f32_gemm_minmax_ukernel_1x64__hvx_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
-    const HVX_Vector vmin = *(const HVX_Vector *)((params->hvx.min));
+    const HVX_Vector vmin = Q6_V_vsplat_R(params->scalar.min);
     vacc0x0 = Q6_Vw_vmax_VwVw(vmin, vacc0x0);
     vacc0x1 = Q6_Vw_vmax_VwVw(vmin, vacc0x1);
 
-    const HVX_Vector vmax = *(const HVX_Vector *)((params->hvx.max));
+    const HVX_Vector vmax = Q6_V_vsplat_R(params->scalar.max);
     vacc0x0 = Q6_Vw_vmin_VwVw(vmax, vacc0x0);
     vacc0x1 = Q6_Vw_vmin_VwVw(vmax, vacc0x1);
 

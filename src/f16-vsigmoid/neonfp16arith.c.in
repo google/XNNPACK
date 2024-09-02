@@ -19,8 +19,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $ISA = "aarch64_neonfp16arith" if DIV_ALGO == "DIV" else "neonfp16arith"
 void xnn_f16_vsigmoid_ukernel__${ISA}_rr2_p2_${DIV_ALGO.lower()}_u${BATCH_TILE}(
     size_t batch,
-    const void* input,
-    void* output,
+    const xnn_float16* input,
+    xnn_float16* output,
     const struct xnn_f16_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);

@@ -19,8 +19,8 @@
 
 void xnn_f16_vsqrt_ukernel__fp16arith_sqrt_u4(
     size_t batch,
-    const void* input,
-    void* output,
+    const xnn_float16* input,
+    xnn_float16* output,
     const struct xnn_f16_sqrt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
