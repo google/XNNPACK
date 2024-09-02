@@ -129,6 +129,16 @@ DECLARE_U64_U32_VSQRTSHIFT_UKERNEL_FUNCTION(xnn_u64_u32_vsqrtshift_ukernel__scal
 
 DECLARE_XX_VUNARY_UKERNEL_FUNCTION(xnn_xx_copy_ukernel__scalar_memcpy)
 
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, fn_name, batch_tile, vector_tile, \
+                                datatype, params_union, init_params)           \
+  XNN_INTERNAL void fn_name(                            \
+      size_t n,                                         \
+      const int32_t* a,                                 \
+      int32_t* y,                                       \
+      const union params_union params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)] );
+
+#include "src/s32-vpopcnt/s32-vpopcnt.h"
+#undef XNN_UKERNEL_WITH_PARAMS
 
 #ifdef __cplusplus
 }  // extern "C"

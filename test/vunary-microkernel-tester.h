@@ -71,6 +71,7 @@ private:
 class VUnaryMicrokernelTester {
  public:
   enum class OpType {
+    PopCount,
     ReLU,
     RoundToNearestEven,
     RoundTowardsZero,
@@ -310,6 +311,9 @@ class VUnaryMicrokernelTester {
   void Test(xnn_u64_u32_vsqrtshift_ukernel_fn vsqrtshift, uint32_t,
             Default = Default()) const;
 
+  void Test(xnn_s32_vpopcnt_ukernel_fn vpopcnt,
+            xnn_init_s32_default_params_fn init_params = nullptr,
+            Default = Default()) const;
  private:
   template <typename T>
   using void_or_float = typename std::conditional<std::is_same<T, float>::value, float, uint16_t>::type;

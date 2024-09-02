@@ -288,6 +288,7 @@ SET(NON_PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt-u32.c
   src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt-u48.c
   src/f32-vtanh/gen/f32-vtanh-avx512f-rational-9-6-div.c
+  src/s32-vpopcnt/gen/s32-vpopcnt-avx512f.c
   src/x32-packw/gen/x32-packw-x16-gemm-goi-avx512f-u4.c)
 
 SET(ALL_AVX512F_MICROKERNEL_SRCS ${PROD_AVX512F_MICROKERNEL_SRCS} + ${NON_PROD_AVX512F_MICROKERNEL_SRCS})

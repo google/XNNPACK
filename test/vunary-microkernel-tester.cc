@@ -492,3 +492,40 @@ void VUnaryMicrokernelTester::Test(xnn_u64_u32_vsqrtshift_ukernel_fn vsqrtshift,
     }
   }
 }
+
+void VUnaryMicrokernelTester::Test(xnn_s32_vpopcnt_ukernel_fn vpopcnt,
+                                   xnn_init_s32_default_params_fn init_params, Default) const {
+  xnn_s32_default_params params;
+  xnnpack::ReplicableRandomDevice rng;
+  std::uniform_int_distribution<int32_t> s32rng(INT32_MIN, INT32_MAX);
+  std::vector<int32_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
+  std::vector<int32_t> y(batch_size());
+  std::vector<int32_t> y_ref(batch_size());
+
+  const static auto popcount = [](uint32_t a) -> int32_t {
+    int count = 0;
+    while (a) {
+        count += a & 1;
+        a >>= 1;
+    }
+    return count;
+  };
+
+  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::generate(x.begin(), x.end(), [&]() { return s32rng(rng); });
+    std::fill(y.begin(), y.end(), INT32_C(0x0));
+    // Calculate reference value
+    for (size_t i = 0; i < batch_size(); i++){
+      y_ref[i] = popcount(x[i]);
+    }
+  }
+
+  // Call optimized micro-kernel.
+  vpopcnt(batch_size() * sizeof(int32_t), x.data(), y.data(), &params);
+
+  // Verify results.
+  for (size_t i = 0; i < batch_size(); i++) {
+    EXPECT_EQ(y_ref[i], y[i]) << "at " << i << " / " << batch_size() << ", x["
+                              << i << "]: " << x[i] << ", shift: " << shift();
+  }
+}

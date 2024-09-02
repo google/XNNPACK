@@ -2032,6 +2032,14 @@ typedef void (*xnn_f32_vrsqrt_ukernel_fn)(
     size_t batch, const float* input, float* output,
     const struct xnn_f32_rsqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+// VPOPCOUNT: Vector Population Count of set bit
+
+typedef void (*xnn_s32_vpopcnt_ukernel_fn)(
+    size_t batch,
+    const int32_t* input,
+    int32_t* output,
+    const union xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    
 // VTANH: Vector TANH elementwise
 
 typedef void (*xnn_f16_vtanh_ukernel_fn)(

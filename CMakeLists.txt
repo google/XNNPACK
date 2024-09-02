@@ -1816,6 +1816,7 @@ IF(XNNPACK_BUILD_TESTS)
       f32-vrsqrt
       f32-vtanh
       s8-vclamp
+      s32-vpopcnt
       u8-vclamp)
   FOREACH(TEST ${MICROKERNEL_VUNARY_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
