@@ -8,6 +8,7 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "xnnpack.h"
@@ -288,11 +289,18 @@ static enum xnn_status reshape_transpose_nd(
       transpose_op->compute[0].tile[1] = transpose_config->x24.tile_size;
       context->const_size_ukernel = transpose_config->x24.const_size_ukernel;
       break;
-    case 4:
-      transpose_op->compute[0].tile[0] = transpose_config->x32.tile_size;
-      transpose_op->compute[0].tile[1] = transpose_config->x32.tile_size;
+    case 4: {
+      // Choose a tile size such that each call transposes up to 16 kb of data.
+      const size_t tile_size_squared =
+          max((1UL << 14) / normalized_element_size, 1);
+      const size_t tile_size =
+          min(sqrtf(tile_size_squared),
+              transpose_op->compute[0].range[normalized_dims - 1]);
+      transpose_op->compute[0].tile[1] = tile_size;
+      transpose_op->compute[0].tile[0] = tile_size_squared / tile_size;
       context->const_size_ukernel = transpose_config->x32.const_size_ukernel;
       break;
+    }
     default: {
       // Chose the tile size such that ~64k of data are processed per
       // microkernel call.
@@ -323,19 +331,23 @@ static enum xnn_status reshape_transpose_nd(
       univector_context->log2_ysize = 0;
       break;
     case 2:
-      transpose_op->compute[0].type = xnn_parallelization_type_2d_tile_2d;
+      transpose_op->compute[0].type = xnn_parallelization_type_2d_dynamic;
       if (variable_size_ukernel) {
-        transpose_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_transposev_2d;
+        transpose_op->compute[0].task_2d_dynamic =
+            (pthreadpool_task_2d_dynamic_t)xnn_compute_transposev_2d;
       } else {
-        transpose_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_transposec_2d;
+        transpose_op->compute[0].task_2d_dynamic =
+            (pthreadpool_task_2d_dynamic_t)xnn_compute_transposec_2d;
       }
       break;
     case 3:
-      transpose_op->compute[0].type = xnn_parallelization_type_3d_tile_2d;
+      transpose_op->compute[0].type = xnn_parallelization_type_3d_tile_2d_dynamic;
       if (variable_size_ukernel) {
-        transpose_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_transposev_3d;
+        transpose_op->compute[0].task_3d_tile_2d_dynamic =
+            (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_transposev_3d;
       } else {
-        transpose_op->compute[0].task_3d_tile_2d = (pthreadpool_task_3d_tile_2d_t) xnn_compute_transposec_3d;
+        transpose_op->compute[0].task_3d_tile_2d_dynamic =
+            (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_transposec_3d;
       }
       break;
     case 4:

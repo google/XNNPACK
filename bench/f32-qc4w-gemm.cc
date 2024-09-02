@@ -726,5 +726,5 @@ BENCHMARK_GEMM(f32_qc4w_gemm_2x4__scalar)
 BENCHMARK_GEMM(f32_qc4w_gemm_4x4__scalar)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

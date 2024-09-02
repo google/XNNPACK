@@ -393,5 +393,5 @@ BENCHMARK_OP_INTEGRAL(shift_right_logical);
 BENCHMARK_OP_INTEGRAL(shift_right_arithmetic);
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

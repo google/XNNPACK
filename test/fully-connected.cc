@@ -2855,7 +2855,7 @@ TEST_F(FullyConnectedTestQD8F16QC8W,
     return xnn_quantization_params{w8dist(rng), f32dist(rng)};
   });
   std::generate(convert_input.begin(), convert_input.end(),
-                [&]() { return f32dist(rng); });
+                [&]() { return xnn_float16_from_float(f32dist(rng)); });
 
   const float output_min = -std::numeric_limits<float>::infinity();
   const float output_max = std::numeric_limits<float>::infinity();

@@ -276,17 +276,15 @@ class Aarch64(base_architecture.BaseArchitecture):
   def increment_ptr(self, ptr, step):
     return f'add {ptr}, {ptr}, {step}\n'
 
-  def zero_gp_register(self, reg):
-    return f'eor {reg}, {reg}, {reg}\n'
+  def initialize_k_register(self, reg):
+    kc_register = self.kc_register()
+    return f'mov {reg}, {kc_register}\n'
 
   def cmp_k_and_jump_if_less(self, label):
     kc_register = self.kc_register()
     k_register = self.k_register()
-    return """add {k_register}, {k_register}, 4
-      cmp {kc_register}, {k_register}
-      bne {label}\n""".format(
-        label=label, k_register=k_register, kc_register=kc_register
-    )
+    return f"""subs {k_register}, {k_register}, 4
+      bne {label}\n"""
 
   def epilogue(self, M, N, isa):
     restore_stack = """

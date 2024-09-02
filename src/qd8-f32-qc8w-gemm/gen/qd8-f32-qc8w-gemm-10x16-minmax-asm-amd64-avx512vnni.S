@@ -177,7 +177,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_10x16c4__asm_amd64_avx512vnn
       vmovups zmmword ptr [rsp + 1040], zmm6
 
 outer_loop:
-      # Zero k counter.
+      # Initialize k counter.
       mov r11, 0
       # Read a pointers from stack into GP registers.
       mov rsi, [rsp - 128]

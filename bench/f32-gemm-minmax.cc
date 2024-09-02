@@ -3435,5 +3435,5 @@ static void f32_gemm_minmax_ukernel_4x4__scalar(benchmark::State& state, const c
 BENCHMARK_GEMM(f32_gemm_minmax_ukernel_4x4__scalar)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

@@ -1724,5 +1724,5 @@ BENCHMARK_DWCONV(qs8_dwconv_9p4c__scalar_lrintf);
 
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif
