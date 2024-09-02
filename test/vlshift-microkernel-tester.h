@@ -61,12 +61,12 @@ class VLShiftMicrokernelTester {
 
   void Test(xnn_i16_vlshift_ukernel_fn vlshift) const {
     xnnpack::ReplicableRandomDevice rng;
-    auto u16rng = std::bind(std::uniform_int_distribution<xnn_float16>(), std::ref(rng));
+    auto u16rng = std::bind(std::uniform_int_distribution<uint16_t>(), std::ref(rng));
 
-    std::vector<xnn_float16> input(batch() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<xnn_float16> output(batch() + (inplace() ? XNN_EXTRA_BYTES / sizeof(xnn_float16) : 0));
-    std::vector<xnn_float16> output_ref(batch());
-    const xnn_float16* input_data = inplace() ? output.data() : input.data();
+    std::vector<uint16_t> input(batch() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<uint16_t> output(batch() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint16_t) : 0));
+    std::vector<uint16_t> output_ref(batch());
+    const uint16_t* input_data = inplace() ? output.data() : input.data();
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(u16rng));
@@ -74,7 +74,7 @@ class VLShiftMicrokernelTester {
 
       // Compute reference results.
       for (size_t n = 0; n < batch(); n++) {
-        xnn_float16 value = input_data[n];
+        uint16_t value = input_data[n];
         value <<= shift();
         output_ref[n] = value;
       }

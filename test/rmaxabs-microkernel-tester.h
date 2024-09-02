@@ -60,7 +60,7 @@ class RMaxAbsMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      xnn_float16 output = UINT16_C(0xDEAD);
+      uint16_t output = UINT16_C(0xDEAD);
       rmaxabs(batch() * sizeof(int16_t), input.data(), &output);
 
       // Verify results.
