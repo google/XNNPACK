@@ -4405,8 +4405,8 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
       for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size; cr_block_offset++) {
-          const uint16_t kv = k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *packed_weights++ = xnn_float16_from_float(kv);
+          const xnn_float16 kv = xnn_float16_from_float(k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
+          *packed_weights++ = kv;
         }
         packed_weights += channel_subtile - cr_block_size;
         if (++y == h) {
