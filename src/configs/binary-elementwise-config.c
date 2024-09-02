@@ -560,19 +560,11 @@ static void init_f32_vdiv_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_arm_neon){
-      f32_vdiv_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdiv_minmax_ukernel__scalar_u2;
-      f32_vdiv_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdivc_minmax_ukernel__scalar_u2;
-      f32_vdiv_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrdivc_minmax_ukernel__scalar_u2;
-      f32_vdiv_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
-      f32_vdiv_config.minmax.element_tile = 2;
-    } else if (!XNN_PLATFORM_MOBILE) {
-      f32_vdiv_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdiv_minmax_ukernel__scalar_u2;
-      f32_vdiv_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdivc_minmax_ukernel__scalar_u2;
-      f32_vdiv_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrdivc_minmax_ukernel__scalar_u2;
-      f32_vdiv_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
-      f32_vdiv_config.minmax.element_tile = 2;
-    }
+    f32_vdiv_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdiv_minmax_ukernel__scalar_u2;
+    f32_vdiv_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdivc_minmax_ukernel__scalar_u2;
+    f32_vdiv_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrdivc_minmax_ukernel__scalar_u2;
+    f32_vdiv_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+    f32_vdiv_config.minmax.element_tile = 2;
   #elif XNN_ARCH_ARM64
     f32_vdiv_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdiv_minmax_ukernel__aarch64_neon_u8;
     f32_vdiv_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vdivc_minmax_ukernel__aarch64_neon_u8;
