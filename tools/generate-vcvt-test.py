@@ -346,7 +346,7 @@ def generate_test_cases(ukernel, init_fn, input_datatype, output_datatype,
       "qs8": "int8_t",
       "qs16": "int16_t",
       "qu8": "uint8_t",
-      "f16": "uint16_t",
+      "f16": "xnn_float16",
       "f32": "float",
   }
   assert(test_name.startswith(benchmark_fn))

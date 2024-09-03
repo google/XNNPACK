@@ -64,14 +64,14 @@ SPECIAL_VALUES_F32 = {
         4,  # Number of elements.
         "{0.0f, -0.0f, 1.0f, -1.0f}",  # Inputs.
         "{0.0f, -0.0f, 1.0f, NAN}",  # Expected outputs.
-        "xnn_f32_sqrt_params",  # Params name.
+        "struct xnn_f32_sqrt_params",  # Params name.
         1,  # Error margin in ULP.
     ),
     "TanH": (
         7,  # Number of elements.
         "{0.0f, -0.0f, 10.0f, -10.0f, INFINITY, -INFINITY, NAN}",
         "{0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN}",
-        "xnn_f32_tanh_params",
+        "union xnn_f32_tanh_params",
         # TODO: b/338934971 - This should be `1` ulp, but this fails on
         # `cmake-linux-riscv64-rvv` (but not on `cmake-linux-riscv64`).
         3,
@@ -80,21 +80,21 @@ SPECIAL_VALUES_F32 = {
         4,  # Number of elements.
         "{1.0f, -1.0f, 0.0f, -0.0f}",  # Inputs.
         "{0.0f, NAN, -INFINITY, -INFINITY}",  # Expected outputs.
-        "xnn_f32_default_params",
+        "union xnn_f32_default_params",
         1,  # Error margin in ULP.
     ),
     "GELU": (
         3,  # Number of elements.
         "{-6.0f, 6.0f, 0.0f}",  # Inputs.
         "{0.0f, 6.0f, 0.0f}",  # Expected outputs.
-        "xnn_f32_default_params",
+        "union xnn_f32_default_params",
         1,  # Error margin in ULP.
     ),
     "Exp": (
         3,  # Number of elements.
         "{0.0f, -1e3f, 1e3f}",  # Inputs.
         "{1.0f, 0.0f, INFINITY}",  # Expected outputs.
-        "xnn_f32_default_params",
+        "union xnn_f32_default_params",
         1,  # Error margin in ULP.
     ),
 }
@@ -229,7 +229,7 @@ $if DATATYPE == "f32" and OP_TYPE in SPECIAL_VALUES_F32:
     std::array<float, num_elements> expected =
         ${SPECIAL_VALUES_F32[OP_TYPE][2]};
     std::array<float, buffered_size> outputs;
-    union ${SPECIAL_VALUES_F32[OP_TYPE][3]} params;
+    ${SPECIAL_VALUES_F32[OP_TYPE][3]} params;
     if (${TEST_ARGS[1]}) {
       ${TEST_ARGS[1]}(&params);
     }
