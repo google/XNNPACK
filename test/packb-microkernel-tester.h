@@ -228,3 +228,99 @@ class PackBMicrokernelTester {
   size_t channel_round_{1};
   size_t kernel_tile_{1};
 };
+
+template<typename KernelFn>
+struct XnnPackBTestParam {
+  const char *name;
+  KernelFn kernel_fn;
+  uint64_t arch_flags;
+  size_t channel_tile, channel_subtile, channel_round;
+};
+
+template<typename KernelFn>
+class XnnPackBTest : public testing::TestWithParam<XnnPackBTestParam<KernelFn>> {
+protected:
+  const XnnPackBTestParam<KernelFn>& TestParam() const {
+    return this->GetParam();
+  }
+
+  void n_eq_channel_tile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    for (size_t k = 1; k < 4; k++) {
+      PackBMicrokernelTester()
+        .channels(TestParam().channel_tile)
+        .kernel_tile(k)
+        .channel_tile(TestParam().channel_tile)
+        .channel_subtile(TestParam().channel_subtile)
+        .channel_round(TestParam().channel_round)
+        .Test(TestParam().kernel_fn);
+    }
+  }
+
+  void n_div_channel_tile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().channel_tile <= 1) {
+      GTEST_SKIP();
+    }
+    for (size_t k = 1; k < 4; k++) {
+      PackBMicrokernelTester()
+        .channels(TestParam().channel_tile * 2)
+        .kernel_tile(k)
+        .channel_tile(TestParam().channel_tile)
+        .channel_subtile(TestParam().channel_subtile)
+        .channel_round(TestParam().channel_round)
+        .Test(TestParam().kernel_fn);
+    }
+  }
+
+  void n_lt_channel_tile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    if (TestParam().channel_tile <= 1) {
+      GTEST_SKIP();
+    }
+    for (size_t k = 1; k < 4; k++) {
+      for (size_t n = 1; n < TestParam().channel_tile; n++) {
+        PackBMicrokernelTester()
+          .channels(n)
+          .kernel_tile(k)
+          .channel_tile(TestParam().channel_tile)
+          .channel_subtile(TestParam().channel_subtile)
+          .channel_round(TestParam().channel_round)
+          .Test(TestParam().kernel_fn);
+      }
+    }
+  }
+
+  void n_gt_channel_tile() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    for (size_t k = 1; k < 4; k++) {
+      for (size_t n = TestParam().channel_tile + 1; n < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); n++) {
+        PackBMicrokernelTester()
+          .channels(n)
+          .kernel_tile(k)
+          .channel_tile(TestParam().channel_tile)
+          .channel_subtile(TestParam().channel_subtile)
+          .channel_round(TestParam().channel_round)
+          .Test(TestParam().kernel_fn);
+      }
+    }
+  }
+
+  void groups_gt_1() {
+    TEST_REQUIRES_ARCH_FLAGS(TestParam().arch_flags);
+    for (size_t g = 2; g <= 3; g++) {
+      for (size_t kernel_tile = 1; kernel_tile < 4; kernel_tile++) {
+        for (size_t n = TestParam().channel_tile + 1; n < (TestParam().channel_tile == 1 ? 10 : TestParam().channel_tile * 2); n++) {
+          PackBMicrokernelTester()
+            .groups(g)
+            .channels(n)
+            .kernel_tile(kernel_tile)
+            .channel_tile(TestParam().channel_tile)
+            .channel_subtile(TestParam().channel_subtile)
+            .channel_round(TestParam().channel_round)
+            .Test(TestParam().kernel_fn);
+        }
+      }
+    }
+  }
+};
