@@ -17,8 +17,8 @@
 
 void xnn_f16_rsum_ukernel__avx512fp16_u64_acc2(
     size_t batch,
-    const void* input,
-    void* output,
+    const xnn_float16* input,
+    xnn_float16* output,
     const struct xnn_f16_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
@@ -64,7 +64,7 @@ void xnn_f16_rsum_ukernel__avx512fp16_u64_acc2(
   vacc = _mm_add_ph(vacc, _mm_castps_ph(_mm_movehdup_ps(_mm_castph_ps(vacc))));
   vacc = _mm_add_sh(vacc, _mm_castsi128_ph(_mm_srli_epi32(_mm_castph_si128(vacc), 16)));
 
-  const __m128h vscale = _mm_castsi128_ph(_mm_set1_epi16(params->scale));
+  const __m128h vscale = _mm_castsi128_ph(_mm_set1_epi16(*(const uint16_t*) &params->scalar.scale));
 
   vacc = _mm_mul_sh(vacc, vscale);
   *((uint16_t*) o) = (uint16_t) _mm_extract_epi16(_mm_castph_si128(vacc), 0);

@@ -36,10 +36,10 @@ void xnn_f32_vmul_minmax_ukernel__avx_u8(
   XNN_FORCE_REALIZATION(voutput_max);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    __m256 vacc = _mm256_loadu_ps(input_a);
+    const __m256 va = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    vacc = _mm256_mul_ps(vacc, _mm256_loadu_ps(input_b));
+    __m256 vacc = _mm256_mul_ps(va, _mm256_loadu_ps(input_b));
     input_b += 8;
     vacc = _mm256_max_ps(voutput_min, vacc);
     vacc = _mm256_min_ps(voutput_max, vacc);
@@ -51,10 +51,10 @@ void xnn_f32_vmul_minmax_ukernel__avx_u8(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
-    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
+    const __m256 va = _mm256_maskload_ps(input_a, vmask);
     const __m256 vb = _mm256_maskload_ps(input_b, vmask);
 
-    vacc = _mm256_mul_ps(vacc, vb);
+    __m256 vacc = _mm256_mul_ps(va, vb);
     vacc = _mm256_max_ps(voutput_min, vacc);
     vacc = _mm256_min_ps(voutput_max, vacc);
 

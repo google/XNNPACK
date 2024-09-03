@@ -55,6 +55,7 @@ void xnn_f32_vadd_minmax_ukernel__neon_u8(
     const float32x4_t vb = vld1q_f32(input_b); input_b += 4;
 
     float32x4_t vacc = vaddq_f32(va, vb);
+
     vacc = vmaxq_f32(vacc, voutput_min);
     vacc = vminq_f32(vacc, voutput_max);
 
@@ -65,6 +66,7 @@ void xnn_f32_vadd_minmax_ukernel__neon_u8(
     const float32x4_t vb = vld1q_f32(input_b);
 
     float32x4_t vacc = vaddq_f32(va, vb);
+
     vacc = vmaxq_f32(vacc, voutput_min);
     vacc = vminq_f32(vacc, voutput_max);
 

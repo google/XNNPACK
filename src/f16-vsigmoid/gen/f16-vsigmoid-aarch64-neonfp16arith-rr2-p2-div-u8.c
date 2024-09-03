@@ -17,8 +17,8 @@
 
 void xnn_f16_vsigmoid_ukernel__aarch64_neonfp16arith_rr2_p2_div_u8(
     size_t batch,
-    const void* input,
-    void* output,
+    const xnn_float16* input,
+    xnn_float16* output,
     const struct xnn_f16_sigmoid_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);

@@ -538,7 +538,7 @@ enum xnn_status xnn_define_blockwise_quantized_tensor_value(
   value->type = xnn_value_type_dense_tensor;
   value->datatype = datatype;
   value->quantization.zero_point = zero_point;
-  value->quantization.blockwise_scale = scale;
+  value->quantization.blockwise_scale = (const xnn_bfloat16*) scale;
   value->quantization.channel_dimension_blockwise = channel_dim;
   value->quantization.block_size = block_size;
   set_shape(value, num_dims, dims);

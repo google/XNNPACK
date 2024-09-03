@@ -17,10 +17,10 @@
 
 void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u64_acc2(
     size_t batch,
-    const void* input,
-    const void* max,
-    void* output,
-    void* sum,
+    const xnn_float16* input,
+    const xnn_float16* max,
+    xnn_float16* output,
+    xnn_float16* sum,
     const struct xnn_f16_expminus_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);

@@ -20,8 +20,8 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
+#include "xnnpack/math.h"
 #include "replicable_random_device.h"
 
 class SoftMaxOperatorTester {
@@ -119,21 +119,21 @@ class SoftMaxOperatorTester {
     // However, the range is still narrow enough that single-precision exp doesn't overflow.
     std::uniform_real_distribution<float> f32dist(15.0f, 20.0f);
 
-    std::vector<uint16_t> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> output((batch_size() - 1) * output_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<xnn_float16> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    std::vector<xnn_float16> output((batch_size() - 1) * output_stride() + channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
         float sum_exp = 0.0;
         for (size_t c = 0; c < channels(); c++) {
-          sum_exp += std::exp(fp16_ieee_to_fp32_value(input[i * input_stride() + c]));
+          sum_exp += std::exp(xnn_float16_to_float(input[i * input_stride() + c]));
         }
         for (size_t c = 0; c < channels(); c++) {
-          output_ref[i * channels() + c] = std::exp(fp16_ieee_to_fp32_value(input[i * input_stride() + c])) / sum_exp;
+          output_ref[i * channels() + c] = std::exp(xnn_float16_to_float(input[i * input_stride() + c])) / sum_exp;
         }
       }
 
@@ -165,7 +165,7 @@ class SoftMaxOperatorTester {
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           ASSERT_NEAR(
-              fp16_ieee_to_fp32_value(output[i * output_stride() + c]),
+              xnn_float16_to_float(output[i * output_stride() + c]),
               output_ref[i * channels() + c],
               std::max(1.0e-4f, std::abs(output_ref[i * channels() + c]) * 5.0e-3f))
             << "element " << i << " / " << batch_size() << ", channel " << c << " / " << channels();

@@ -15,16 +15,13 @@ $assert IDATATYPE == "F16" and ODATATYPE == "QS8" or IDATATYPE == "F32"
 $if IDATATYPE == "F16":
   #include <fp16/fp16.h>
 
-$INPUT_T = {"F16": "uint16_t", "F32": "float"}[IDATATYPE]
+$INPUT_T = {"F16": "xnn_float16", "F32": "float"}[IDATATYPE]
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[ODATATYPE]
 $MIN_F32 = "__builtin_wasm_min_f32" if WASM else "math_min_f32"
 $MAX_F32 = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
 void xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_vcvt_ukernel__${"wasm" if WASM else "scalar"}_fmagic_u${BATCH_TILE}(
     size_t batch,
-    $if IDATATYPE == "F16":
-      const void* input,
-    $else:
-      const ${INPUT_T}* input,
+    const ${INPUT_T}* input,
     ${XINT8_T}* output,
     const struct xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
@@ -34,8 +31,8 @@ void xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_vcvt_ukernel__${"wasm" if WAS
   assert(output != NULL);
 
   $if IDATATYPE == "F16":
-    const uint16_t* i = (const uint16_t*) input;
-    const float vscale = fp16_ieee_to_fp32_value(params->scalar.scale);
+    const xnn_float16* i = input;
+    const float vscale = xnn_float16_to_float(params->scalar.scale);
   $else:
     const float* i = input;
     const float vscale = params->scalar.scale;
@@ -47,7 +44,7 @@ void xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_vcvt_ukernel__${"wasm" if WAS
   $if BATCH_TILE == 1:
     do {
       $if IDATATYPE == "F16":
-        float vx = fp16_ieee_to_fp32_value(*i++);
+        float vx = xnn_float16_to_float(*i++);
       $else:
         float vx = *i++;
       vx *= vscale;
@@ -66,7 +63,7 @@ void xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_vcvt_ukernel__${"wasm" if WAS
     for (; batch >= ${BATCH_TILE} * sizeof(${INPUT_T}); batch -= ${BATCH_TILE} * sizeof(${INPUT_T})) {
       $for N in range(BATCH_TILE):
         $if IDATATYPE == "F16":
-          float vx${N} = fp16_ieee_to_fp32_value(i[${N}]);
+          float vx${N} = xnn_float16_to_float(i[${N}]);
         $else:
           float vx${N} = i[${N}];
       i += ${BATCH_TILE};
@@ -96,7 +93,7 @@ void xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_vcvt_ukernel__${"wasm" if WAS
     $if BATCH_TILE == 2:
       if XNN_UNLIKELY(batch != 0) {
         $if IDATATYPE == "F16":
-          float vx = fp16_ieee_to_fp32_value(*i);
+          float vx = xnn_float16_to_float(*i);
         $else:
           float vx = *i;
         vx *= vscale;
@@ -113,7 +110,7 @@ void xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_vcvt_ukernel__${"wasm" if WAS
       if XNN_UNLIKELY(batch != 0) {
         do {
           $if IDATATYPE == "F16":
-            float vx = fp16_ieee_to_fp32_value(*i++);
+            float vx = xnn_float16_to_float(*i++);
           $else:
             float vx = *i++;
           vx *= vscale;

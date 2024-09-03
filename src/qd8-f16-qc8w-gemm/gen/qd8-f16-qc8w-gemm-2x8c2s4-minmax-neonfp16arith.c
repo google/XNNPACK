@@ -22,7 +22,7 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8c2s4__neonfp16arith(
     const int8_t* restrict a,
     size_t a_stride,
     const void* restrict w,
-    void* restrict c,
+    xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
@@ -222,12 +222,12 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8c2s4__neonfp16arith(
     float16x8_t vfp16out1x01234567 = vcombine_f16(vcvt_f16_f32(vout1x0123), vcvt_f16_f32(vout1x4567));
 
     #if XNN_ARCH_ARM64
-      const uint16x8x2_t voutput_minmax = vld2q_dup_u16(&params->scalar.min);
+      const uint16x8x2_t voutput_minmax = vld2q_dup_u16((const uint16_t*) &params->scalar.min);
       const float16x8_t voutput_min = vreinterpretq_f16_u16(voutput_minmax.val[0]);
       const float16x8_t voutput_max = vreinterpretq_f16_u16(voutput_minmax.val[1]);
     #else
-      const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.min));
-      const float16x8_t voutput_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.max));
+      const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.min));
+      const float16x8_t voutput_max = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.max));
     #endif
     vfp16out0x01234567 = vmaxq_f16(vfp16out0x01234567, voutput_min);
     vfp16out1x01234567 = vmaxq_f16(vfp16out1x01234567, voutput_min);

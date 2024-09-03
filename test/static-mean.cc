@@ -73,7 +73,7 @@ class MeanTestBase : public ::testing::TestWithParam<bool> {
   std::vector<T> subgraph_output;
 };
 
-using MeanTestF16 = MeanTestBase<uint16_t>;
+using MeanTestF16 = MeanTestBase<xnn_float16>;
 using MeanTestF32 = MeanTestBase<float>;
 
 INSTANTIATE_TEST_SUITE_P(KeepDims, MeanTestF16, testing::Bool());
@@ -169,7 +169,7 @@ TEST_P(MeanTestF16, matches_operator_api) {
 
   xnn_operator_t op = nullptr;
 
-  std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
   std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
   std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
 
@@ -242,8 +242,8 @@ TEST_P(MeanTestF16, matches_operator_api) {
 
   // Check outputs match.
   for (size_t i = 0; i < operator_output.size(); i++) {
-    float sub_out = fp16_ieee_to_fp32_value(subgraph_output[i]);
-    float op_out = fp16_ieee_to_fp32_value(operator_output[i]);
+    float sub_out = xnn_float16_to_float(subgraph_output[i]);
+    float op_out = xnn_float16_to_float(operator_output[i]);
     ASSERT_NEAR(sub_out, op_out, std::abs(0.05f * std::min(sub_out, op_out)));
   }
 }

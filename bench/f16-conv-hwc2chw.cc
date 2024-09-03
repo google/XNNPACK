@@ -11,7 +11,6 @@
 #include <vector>
 
 #include <benchmark/benchmark.h>
-#include <fp16/fp16.h>
 #include "bench/dconv.h"
 #include "bench/utils.h"
 
@@ -19,6 +18,7 @@
 #include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/conv.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pack.h"
@@ -40,7 +40,7 @@ static void f16_conv_hwc2chw(benchmark::State& state,
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
-  auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
 
   const size_t input_channels = 3;
   const size_t kernel_size = 3;
@@ -50,23 +50,23 @@ static void f16_conv_hwc2chw(benchmark::State& state,
   const size_t output_height = (input_height + 2 * padding - kernel_size) / subsampling + 1;
   const size_t output_width = (input_width + 2 * padding - kernel_size) / subsampling + 1;
 
-  std::vector<uint16_t> input(input_height * input_width * input_channels + XNN_EXTRA_BYTES / sizeof(uint16_t));
+  std::vector<xnn_float16> input(input_height * input_width * input_channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::generate(input.begin(), input.end(), std::ref(f16rng));
-  std::vector<uint16_t> kernel(output_channels * kernel_size * kernel_size * input_channels);
+  std::vector<xnn_float16> kernel(output_channels * kernel_size * kernel_size * input_channels);
   std::generate(kernel.begin(), kernel.end(), std::ref(f16rng));
-  std::vector<uint16_t> bias(output_channels);
+  std::vector<xnn_float16> bias(output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(f16rng));
 
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> zero(input_channels * input_width + XNN_EXTRA_BYTES / sizeof(uint16_t));
+  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> zero(input_channels * input_width + XNN_EXTRA_BYTES / sizeof(xnn_float16));
 
   const size_t weights_elements = (kernel_size * kernel_size * input_channels + 1) *
     benchmark::utils::RoundUp<size_t>(output_channels, output_channels_tile);
   const size_t output_elements = output_height * output_width * output_channels;
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
-      sizeof(uint16_t) * (weights_elements + output_elements));
+      sizeof(xnn_float16) * (weights_elements + output_elements));
 
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_weights(weights_elements * num_buffers);
+  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> packed_weights(weights_elements * num_buffers);
   std::fill(packed_weights.begin(), packed_weights.end(), UINT16_C(0));
   xnn_pack_f16_dconv_oki_w(
     output_channels, input_channels, output_channels_tile,
@@ -78,7 +78,7 @@ static void f16_conv_hwc2chw(benchmark::State& state,
       packed_weights.begin() + n * weights_elements);
   }
 
-  std::vector<uint16_t> output(output_elements * num_buffers);
+  std::vector<xnn_float16> output(output_elements * num_buffers);
   std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
   xnn_f16_minmax_params params;
@@ -87,7 +87,7 @@ static void f16_conv_hwc2chw(benchmark::State& state,
   size_t buffer_index = 0;
   for (auto _ : state) {
     state.PauseTiming();
-    benchmark::utils::PrefetchToL1(input.data(), input.size() * sizeof(uint16_t));
+    benchmark::utils::PrefetchToL1(input.data(), input.size() * sizeof(xnn_float16));
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
@@ -98,8 +98,8 @@ static void f16_conv_hwc2chw(benchmark::State& state,
       packed_weights.data() + buffer_index * weights_elements,
       output.data() + buffer_index * output_elements,
       padding, output_channels,
-      output_channels * output_width * sizeof(uint16_t),
-      output_channels * sizeof(uint16_t),
+      output_channels * output_width * sizeof(xnn_float16),
+      output_channels * sizeof(xnn_float16),
       &params);
   }
 

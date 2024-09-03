@@ -128,7 +128,7 @@ template <typename T> class EvenSplit4Test : public ::testing::Test {
 
 using EvenSplit4TestQS8 = EvenSplit4Test<int8_t>;
 using EvenSplit4TestQU8 = EvenSplit4Test<uint8_t>;
-using EvenSplit4TestF16 = EvenSplit4Test<uint16_t>;
+using EvenSplit4TestF16 = EvenSplit4Test<xnn_float16>;
 using EvenSplit4TestF32 = EvenSplit4Test<float>;
 
 TEST_F(EvenSplit4TestQS8, define)
@@ -633,7 +633,7 @@ TEST_F(EvenSplit4TestQU8, matches_operator_api)
 
 TEST_F(EvenSplit4TestF16, matches_operator_api)
 {
-  std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
   std::fill(operator_output1.begin(), operator_output1.end(), UINT16_C(0x7E00) /* NaN */);
   std::fill(operator_output2.begin(), operator_output2.end(), UINT16_C(0x7E00) /* NaN */);
   std::fill(operator_output3.begin(), operator_output3.end(), UINT16_C(0x7E00) /* NaN */);
@@ -670,13 +670,13 @@ TEST_F(EvenSplit4TestF16, matches_operator_api)
     xnn_setup_copy_nc_x16(op1, input.data(), operator_output1.data()));
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_copy_nc_x16(op2, (uint16_t*) input.data() + op1->channels, operator_output2.data()));
+    xnn_setup_copy_nc_x16(op2, (xnn_float16*) input.data() + op1->channels, operator_output2.data()));
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_copy_nc_x16(op3, (uint16_t*) input.data() + op1->channels * 2, operator_output3.data()));
+    xnn_setup_copy_nc_x16(op3, (xnn_float16*) input.data() + op1->channels * 2, operator_output3.data()));
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_copy_nc_x16(op4, (uint16_t*) input.data() + op1->channels * 3, operator_output4.data()));
+    xnn_setup_copy_nc_x16(op4, (xnn_float16*) input.data() + op1->channels * 3, operator_output4.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op1, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op2, /*threadpool=*/nullptr));

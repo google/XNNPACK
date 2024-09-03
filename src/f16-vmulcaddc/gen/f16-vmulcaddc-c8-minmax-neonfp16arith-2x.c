@@ -18,10 +18,10 @@
 void xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x(
     size_t rows,
     size_t channels,
-    const void* restrict input,
+    const xnn_float16* restrict input,
     size_t input_stride,
-    const void* restrict weights,
-    void* restrict output,
+    const xnn_float16* restrict weights,
+    xnn_float16* restrict output,
     size_t output_stride,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
@@ -37,8 +37,8 @@ void xnn_f16_vmulcaddc_minmax_ukernel_c8__neonfp16arith_2x(
   const size_t input_increment = input_stride * 2 - channels;
   const size_t output_increment = output_stride * 2 - channels;
 
-  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.min));
-  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.max));
+  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.min));
+  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.max));
   do {
     if XNN_UNPREDICTABLE(rows < 2) {
       i1 = i0;

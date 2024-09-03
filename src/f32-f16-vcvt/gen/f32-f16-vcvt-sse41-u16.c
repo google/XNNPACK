@@ -19,7 +19,7 @@
 void xnn_f32_f16_vcvt_ukernel__sse41_u16(
     size_t batch,
     const float* input,
-    void* output,
+    xnn_float16* output,
     const void* params) XNN_OOB_READS
 {
   assert(batch != 0);

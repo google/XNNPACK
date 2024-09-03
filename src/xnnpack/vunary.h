@@ -19,15 +19,15 @@ extern "C" {
 #define DECLARE_BF16_UKERNEL_FUNCTION(fn_name, params_type) \
   XNN_INTERNAL void fn_name(                                 \
       size_t n,                                              \
-      const void* x,                                         \
-      void* y,                                               \
+      const xnn_bfloat16* x,                                         \
+      xnn_bfloat16* y,                                               \
       const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 #define DECLARE_F16_UKERNEL_FUNCTION(fn_name, params_type) \
   XNN_INTERNAL void fn_name(                                \
       size_t n,                                             \
-      const void* x,                                        \
-      void* y,                                              \
+      const xnn_float16* x,                                        \
+      xnn_float16* y,                                              \
       const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 #define DECLARE_F32_UKERNEL_FUNCTION(fn_name, params_type) \

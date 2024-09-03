@@ -181,11 +181,11 @@ DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_spmm_minmax_ukernel_128x1__hvx_
   XNN_INTERNAL void fn_name(                              \
     size_t mc,                                            \
     size_t nc,                                            \
-    const void* input,                                    \
-    const void* weights,                                  \
+    const xnn_float16* input,                    \
+    const xnn_float16* weights,                  \
     const int32_t* widx_dmap,                             \
     const uint32_t* nidx_nnzmap,                          \
-    void* output,                                         \
+    xnn_float16* output,                         \
     size_t output_stride,                                 \
     const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 

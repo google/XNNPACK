@@ -17,8 +17,8 @@
 #include <random>
 #include <vector>
 
-#include <fp16/fp16.h>
 #include "bench/utils.h"
+#include "xnnpack/math.h"
 #include <benchmark/benchmark.h>
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/flatbuffers.h"
@@ -31,10 +31,10 @@
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 struct float16 {
-  uint16_t value;
+  xnn_float16 value;
 
   float16() = default;
-  float16(float value) : value(fp16_ieee_from_fp32_value(value)) {}  // NOLINT
+  float16(float value) : value(xnn_float16_from_float(value)) {}  // NOLINT
 };
 
 template <typename In, typename Out, typename Create, typename Reshape,
@@ -101,7 +101,7 @@ static void benchmark_unary_operator(Create create, Reshape reshape,
   state.counters["elements"] = benchmark::Counter(
       uint64_t(state.iterations()) * batch_size, benchmark::Counter::kIsRate);
 
-  const size_t bytes_per_iteration = 2 * batch_size * sizeof(uint16_t);
+  const size_t bytes_per_iteration = 2 * batch_size * sizeof(xnn_float16);
   state.counters["bytes"] =
       benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
                          benchmark::Counter::kIsRate);

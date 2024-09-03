@@ -17,8 +17,8 @@
 
 void xnn_f16_vhswish_ukernel__neonfp16arith_u16(
     size_t batch,
-    const void* restrict input,
-    void* restrict output,
+    const xnn_float16* restrict input,
+    xnn_float16* restrict output,
     const union xnn_f16_hswish_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);

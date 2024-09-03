@@ -149,7 +149,7 @@ protected:
 using DeconvolutionTestQS8 = QuantizedDeconvolutionTestBase<int8_t>;
 using DeconvolutionTestQU8 = QuantizedDeconvolutionTestBase<uint8_t>;
 using DeconvolutionTestQD8F32QC8W = DeconvolutionTestBase<float, int8_t, float>;
-using DeconvolutionTestF16 = DeconvolutionTestBase<uint16_t, float, float>;
+using DeconvolutionTestF16 = DeconvolutionTestBase<xnn_float16, float, float>;
 using DeconvolutionTestF32 = DeconvolutionTestBase<float>;
 
 TEST_F(DeconvolutionTestQS8, define)
@@ -810,9 +810,9 @@ TEST_F(DeconvolutionTestF16, matches_operator_api)
 
   xnn_operator_t op = nullptr;
 
-  std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-  std::generate(kernel.begin(), kernel.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-  std::generate(bias.begin(), bias.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+  std::generate(kernel.begin(), kernel.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+  std::generate(bias.begin(), bias.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
   std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
   std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
 

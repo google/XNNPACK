@@ -476,10 +476,10 @@ static enum xnn_status setup_softmax_nc_floating_point(
 }
 
 static void compute_reciprocal_f16(
-    const uint16_t input[XNN_MIN_ELEMENTS(1)],
-    uint16_t output[XNN_MIN_ELEMENTS(1)])
+    const xnn_float16 input[XNN_MIN_ELEMENTS(1)],
+    xnn_float16 output[XNN_MIN_ELEMENTS(1)])
 {
-  *output = fp16_ieee_from_fp32_value(1.0f / fp16_ieee_to_fp32_value(*input));
+  *output = xnn_float16_from_float(1.0f / xnn_float16_to_float(*input));
 }
 
 enum xnn_status xnn_setup_softmax_nc_f16(
@@ -530,7 +530,8 @@ enum xnn_status xnn_reshape_softmax_nc_f16(
 
   union xnn_f16_minmax_params minmax_params;
   if (f16_vmul_config->init.f16_minmax != NULL) {
-    f16_vmul_config->init.f16_minmax(&minmax_params, UINT16_C(0xFC00), UINT16_C(0x7C00));
+    f16_vmul_config->init.f16_minmax(&minmax_params, xnn_float16_from_float(-INFINITY), 
+                                     xnn_float16_from_float(INFINITY));
   }
   return reshape_softmax_nc_floating_point(
     softmax_op, xnn_operator_type_softmax_nc_f16,

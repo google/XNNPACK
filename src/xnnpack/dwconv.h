@@ -496,41 +496,41 @@ DECLARE_F32_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(xnn_f32_dwconv_minmax_ukernel
   XNN_INTERNAL void fn_name(                                 \
     size_t channels,                                         \
     size_t output_width,                                     \
-    const void** input,                                      \
-    const void* weights,                                     \
-    void* output,                                            \
+    const xnn_float16** input,                                      \
+    const xnn_float16* weights,                                     \
+    xnn_float16* output,                                            \
     intptr_t input_stride,                                   \
     size_t output_increment,                                 \
     size_t input_offset,                                     \
-    const void* zero,                                        \
+    const xnn_float16* zero,                                        \
     const union xnn_f16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 #define DECLARE_F16_DWCONV_MINMAX_UNIPASS_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                        \
     size_t channels,                                                \
     size_t output_width,                                            \
-    const void** input,                                             \
-    const void* weights,                                            \
-    void* output,                                                   \
+    const xnn_float16** input,                                             \
+    const xnn_float16* weights,                                            \
+    xnn_float16* output,                                                   \
     intptr_t input_stride,                                          \
     size_t output_increment,                                        \
     size_t input_offset,                                            \
-    const void* zero,                                               \
+    const xnn_float16* zero,                                               \
     const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 #define DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                        \
     size_t channels,                                                \
     size_t output_width,                                            \
-    const void** input,                                             \
-    const void* weights,                                            \
-    void* output,                                                   \
+    const xnn_float16** input,                                             \
+    const xnn_float16* weights,                                            \
+    xnn_float16* output,                                                   \
     intptr_t input_stride,                                          \
     size_t output_increment,                                        \
     size_t input_offset,                                            \
-    const void* zero,                                               \
+    const xnn_float16* zero,                                               \
     size_t kernel_size,                                             \
-    void* buffer,                                                  \
+    xnn_float16* buffer,                                                  \
     const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_DWCONV_MINMAX_MULTIPASS_UKERNEL_FUNCTION(xnn_f16_dwconv_minmax_ukernel_5f5m5l8c8s4r__neonfp16arith)
@@ -2083,10 +2083,10 @@ DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv2d_chw_ukernel_5x
   XNN_INTERNAL void fn_name(                                      \
     size_t input_height,                                          \
     size_t input_width,                                           \
-    const void* input,                                            \
-    const void* weights,                                          \
-    const void* zero,                                             \
-    void* output,                                                 \
+    const xnn_float16* input,                            \
+    const xnn_float16* weights,                          \
+    const xnn_float16* zero,                             \
+    xnn_float16* output,                                 \
     uint32_t padding_top,                                         \
     const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 

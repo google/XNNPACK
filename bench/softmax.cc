@@ -11,12 +11,11 @@
 #include <random>
 #include <vector>
 
-#include <fp16/fp16.h>
-
 #include "xnnpack.h"
 
 #include <benchmark/benchmark.h>
 #include "bench/utils.h"
+#include "xnnpack/math.h"
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "tensorflow/lite/interpreter.h"
@@ -180,10 +179,10 @@ static void xnnpack_softmax_f16(benchmark::State& state) {
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-100.0f, 100.0f), std::ref(rng));
-  auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
 
-  std::vector<uint16_t> input(batch_size * channels + XNN_EXTRA_BYTES / sizeof(uint16_t));
-  std::vector<uint16_t> output(batch_size * channels);
+  std::vector<xnn_float16> input(batch_size * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  std::vector<xnn_float16> output(batch_size * channels);
   std::generate(input.begin(), input.end(), std::ref(f16rng));
   std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
@@ -241,7 +240,7 @@ static void xnnpack_softmax_f16(benchmark::State& state) {
   state.counters["elements"] =
     benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration, benchmark::Counter::kIsRate);
 
-  const size_t bytes_per_iteration = 2 * elements_per_iteration * sizeof(uint16_t);
+  const size_t bytes_per_iteration = 2 * elements_per_iteration * sizeof(xnn_float16);
   state.counters["bytes"] =
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }

@@ -19,6 +19,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/math.h"
 
 class SliceOperatorTester {
  public:
@@ -183,9 +184,9 @@ class SliceOperatorTester {
       output_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = output_dim(i);
     }
 
-    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + num_input_elements());
-    std::vector<uint16_t> output(num_output_elements());
-    std::vector<uint16_t> output_ref(num_output_elements());
+    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) + num_input_elements());
+    std::vector<xnn_float16> output(num_output_elements());
+    std::vector<xnn_float16> output_ref(num_output_elements());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::iota(input.begin(), input.end(), UINT16_C(0));

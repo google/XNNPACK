@@ -21,8 +21,8 @@
 #include <utility>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
+#include "xnnpack/math.h"
 #include "pthreadpool.h"
 
 namespace xnnpack {
@@ -187,12 +187,12 @@ class UnaryOperatorTester {
         << "at batch " << batch << " / " << batch_size() << ", channel "
         << channel << " / " << channels() << ", input " << input;
   }
-  virtual void CheckResultF16(uint16_t y, float y_ref, size_t batch,
-                              size_t channel, uint16_t input) const {
-    EXPECT_NEAR(y_ref, fp16_ieee_to_fp32_value(y), AbsTolF16(y_ref))
+  virtual void CheckResultF16(xnn_float16 y, float y_ref, size_t batch,
+                              size_t channel, xnn_float16 input) const {
+    EXPECT_NEAR(y_ref, xnn_float16_to_float(y), AbsTolF16(y_ref))
         << "at batch " << batch << " / " << batch_size() << ", channel "
         << channel << " / " << channels() << ", input "
-        << fp16_ieee_to_fp32_value(input);
+        << xnn_float16_to_float(input);
   }
   virtual void CheckResultQS8(int8_t y, float y_ref, size_t batch,
                               size_t channel, int8_t input) const {

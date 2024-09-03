@@ -18,8 +18,8 @@
 
 void xnn_f16_vsqrt_ukernel__avx512skx_sqrt_u16(
     size_t batch,
-    const void* input,
-    void* output,
+    const xnn_float16* input,
+    xnn_float16* output,
     const struct xnn_f16_sqrt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);

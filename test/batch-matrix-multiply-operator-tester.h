@@ -18,10 +18,10 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "replicable_random_device.h"
 
 class BatchMatMulOperatorTester {
@@ -139,7 +139,7 @@ class BatchMatMulOperatorTester {
   }
 
   static void ComputeRefF16(size_t m, size_t k, size_t n, bool transpose_b,
-                            const uint16_t* input_a, const uint16_t* input_b,
+                            const xnn_float16* input_a, const xnn_float16* input_b,
                             float* output_ref) {
     if (transpose_b) {
       // lhs is B*M*K, rhs is B*N*K.
@@ -147,8 +147,8 @@ class BatchMatMulOperatorTester {
         for (size_t ni = 0; ni < n; ni++) {
           for (size_t ki = 0; ki < k; ki++) {
             output_ref[mi * n + ni] +=
-                fp16_ieee_to_fp32_value(input_a[mi * k + ki]) *
-                fp16_ieee_to_fp32_value(input_b[ni * k + ki]);
+                xnn_float16_to_float(input_a[mi * k + ki]) *
+                xnn_float16_to_float(input_b[ni * k + ki]);
           }
         }
       }
@@ -158,8 +158,8 @@ class BatchMatMulOperatorTester {
         for (size_t ni = 0; ni < n; ni++) {
           for (size_t ki = 0; ki < k; ki++) {
             output_ref[mi * n + ni] +=
-                fp16_ieee_to_fp32_value(input_a[mi * k + ki]) *
-                fp16_ieee_to_fp32_value(input_b[ki * n + ni]);
+                xnn_float16_to_float(input_a[mi * k + ki]) *
+                xnn_float16_to_float(input_b[ki * n + ni]);
           }
         }
       }
@@ -268,18 +268,18 @@ class BatchMatMulOperatorTester {
       batch_size_output *= batch_dims_output[k];
     }
 
-    std::vector<uint16_t> input_a(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+    std::vector<xnn_float16> input_a(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
                                   batch_size_a * m() * k());
-    std::vector<uint16_t> input_b(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+    std::vector<xnn_float16> input_b(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
                                   batch_size_b * k() * n());
-    std::vector<uint16_t> output(batch_size_output * m() * n());
+    std::vector<xnn_float16> output(batch_size_output * m() * n());
     std::vector<float> output_ref(batch_size_output * m() * n());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input_a.begin(), input_a.end(),
-                    [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+                    [&]() { return xnn_float16_from_float(f32dist(rng)); });
       std::generate(input_b.begin(), input_b.end(),
-                    [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+                    [&]() { return xnn_float16_from_float(f32dist(rng)); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
       std::fill(output_ref.begin(), output_ref.end(), 0.0f);
 
@@ -567,7 +567,7 @@ class BatchMatMulOperatorTester {
     }
   }
 
-  void VerifyF16(const std::vector<uint16_t>& output,
+  void VerifyF16(const std::vector<xnn_float16>& output,
                  const std::vector<float>& output_ref) const {
     const size_t batch_size_output = output.size() / (m() * n());
     for (size_t bi = 0; bi < batch_size_output; bi++) {
@@ -575,7 +575,7 @@ class BatchMatMulOperatorTester {
         for (size_t ni = 0; ni < n(); ni++) {
           ASSERT_NEAR(
               output_ref[bi * m() * n() + mi * n() + ni],
-              fp16_ieee_to_fp32_value(output[bi * m() * n() + mi * n() + ni]),
+              xnn_float16_to_float(output[bi * m() * n() + mi * n() + ni]),
               1.0e-2f * std::abs(output_ref[bi * m() * n() + mi * n() + ni]))
               << "batch = " << bi << " / " << batch_size_output
               << ", m = " << mi << " / " << m() << ", n = " << ni << " / "

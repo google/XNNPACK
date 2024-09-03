@@ -24,10 +24,10 @@ extern "C" {
       size_t mr,                                           \
       size_t nc,                                           \
       size_t kc,                                           \
-      const void* a,                                       \
+      const xnn_bfloat16* a,                                       \
       size_t a_stride,                                     \
-      const void* w,                                       \
-      void* c,                                             \
+      const xnn_bfloat16* w,                                       \
+      xnn_bfloat16* c,                                             \
       size_t cm_stride,                                    \
       size_t cn_stride,                                    \
       const union xnn_bf16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
@@ -67,10 +67,10 @@ DECLARE_BF16_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_gemm_minmax_ukernel_5x4c8__ne
       size_t mr,                                          \
       size_t nc,                                          \
       size_t kc,                                          \
-      const void* a,                                      \
+      const xnn_float16* a,                                      \
       size_t a_stride,                                    \
-      const void* w,                                      \
-      void* c,                                            \
+      const xnn_float16* w,                                      \
+      xnn_float16* c,                                            \
       size_t cm_stride,                                   \
       size_t cn_stride,                                   \
       const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
@@ -657,7 +657,7 @@ DECLARE_F32_QC4W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_qc4w_gemm_minmax_ukernel_4
       const int8_t* a,                                                                                 \
       size_t a_stride,                                                                                 \
       const void* w,                                                                                   \
-      uint16_t* c,                                                                                     \
+      xnn_float16* c,                                                                                     \
       size_t cm_stride,                                                                                \
       size_t cn_stride,                                                                                \
       const union xnn_f16_qb4w_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)],                 \
@@ -1523,7 +1523,7 @@ DECLARE_QU8_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_gemm_minmax_fp32_ukernel_4x4__s
       const int8_t* a,                                                                                 \
       size_t a_stride,                                                                                 \
       const void* w,                                                                                   \
-      void* c,                                                                                         \
+      xnn_float16* c,                                                                                         \
       size_t cm_stride,                                                                                \
       size_t cn_stride,                                                                                \
       const union xnn_f16_qc4w_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)],                 \
@@ -2246,7 +2246,7 @@ DECLARE_QD8_F32_QB4W_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_qd8_f32_qb4w_gemm_minmax_u
       const int8_t* a,                                                                                 \
       size_t a_stride,                                                                                 \
       const void* w,                                                                                   \
-      void* c,                                                                                         \
+      xnn_float16* c,                                                                                         \
       size_t cm_stride,                                                                                \
       size_t cn_stride,                                                                                \
       const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)],                      \

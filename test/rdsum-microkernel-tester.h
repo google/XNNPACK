@@ -171,12 +171,12 @@ class RDSumMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
-    std::vector<uint16_t> input((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(uint16_t), 0);
+    std::vector<xnn_float16> input((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    std::vector<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
     std::vector<float> output(channels());
     std::vector<float> output_ref(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
       std::generate(output.begin(), output.end(), [&]() { return f32dist(rng); });
       for (size_t i = 0; i < output.size(); ++i) {
         output_ref[i] = output[i];
@@ -186,7 +186,7 @@ class RDSumMicrokernelTester {
       for (size_t c = 0; c < channels(); c++) {
         float acc = 0.0f;
         for (size_t n = 0; n < rows(); n++) {
-          acc += fp16_ieee_to_fp32_value(input[n * input_stride() + c]);
+          acc += xnn_float16_to_float(input[n * input_stride() + c]);
         }
         output_ref[c] += acc / float(rows());
       }
@@ -196,7 +196,7 @@ class RDSumMicrokernelTester {
       init_params(&params, 1.f / float(rows()));
 
       // Call optimized micro-kernel.
-      rdsum(rows(), channels(), input.data(), input_stride() * sizeof(uint16_t), zero.data(), output.data(), &params);
+      rdsum(rows(), channels(), input.data(), input_stride() * sizeof(xnn_float16), zero.data(), output.data(), &params);
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {

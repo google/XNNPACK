@@ -5,12 +5,8 @@
 # LICENSE file in the root directory of this source tree.
 
 import argparse
-import codecs
-import math
 import os
-import re
 import sys
-import yaml
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import xngen
@@ -266,13 +262,13 @@ def main(args):
 
   tester = options.tester
   tester_header = {
-    "VLReLUMicrokernelTester": "vlrelu-microkernel-tester.h",
-    "VUnaryMicrokernelTester": "vunary-microkernel-tester.h",
+      "VLReLUMicrokernelTester": "vlrelu-microkernel-tester.h",
+      "VUnaryMicrokernelTester": "vunary-microkernel-tester.h",
   }[tester]
-  
+
   op_header = {
-    "VLReLUMicrokernelTester": "vlrelu.h",
-    "VUnaryMicrokernelTester": "vunary.h",
+      "VLReLUMicrokernelTester": "vlrelu.h",
+      "VUnaryMicrokernelTester": "vunary.h",
   }[tester]
   tests = """\
 // Copyright 2019 Google LLC
@@ -301,8 +297,12 @@ def main(args):
 #include "next_prime.h"
 #include "{tester_header}"
 
-""".format(microkernel=options.ukernel, generator=sys.argv[0], op_header=op_header, tester_header=tester_header)
-
+""".format(
+      microkernel=options.ukernel,
+      generator=sys.argv[0],
+      op_header=op_header,
+      tester_header=tester_header,
+  )
 
   test_args = ["ukernel"]
   if op_type.startswith("Round"):

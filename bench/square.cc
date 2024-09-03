@@ -26,7 +26,7 @@ static void xnnpack_square_f32(benchmark::State& state) {
 }
 
 BENCHMARK(xnnpack_square_f16)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<uint16_t, uint16_t>)
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<xnn_float16, xnn_float16>)
   ->UseRealTime();
 BENCHMARK(xnnpack_square_f32)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)

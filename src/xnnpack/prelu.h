@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,10 +20,10 @@ extern "C" {
   XNN_INTERNAL void fn_name(                        \
       size_t rows,                                  \
       size_t channels,                              \
-      const void* input,                            \
+      const xnn_float16* input,            \
       size_t input_stride,                          \
-      const void* weights,                          \
-      void* output,                                 \
+      const xnn_float16* weights,          \
+      xnn_float16* output,                 \
       size_t output_stride);
 
 DECLARE_F16_PRELU_UKERNEL_FUNCTION(xnn_f16_prelu_ukernel__neonfp16arith_2x8)

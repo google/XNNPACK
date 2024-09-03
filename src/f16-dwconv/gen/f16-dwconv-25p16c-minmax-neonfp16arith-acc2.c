@@ -17,21 +17,21 @@
 void xnn_f16_dwconv_minmax_ukernel_25p16c__neonfp16arith_acc2(
     size_t channels,
     size_t output_width,
-    const void** input,
-    const void* weights,
-    void* output_ptr,
+    const xnn_float16** input,
+    const xnn_float16* weights,
+    xnn_float16* output_ptr,
     intptr_t input_stride,
     size_t output_increment,
     size_t input_offset,
-    const void* zero,
+    const xnn_float16* zero,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(channels != 0);
   assert(output_width != 0);
 
   uint16_t* output = (uint16_t*) output_ptr;
-  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.min));
-  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.max));
+  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.min));
+  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.max));
   do {
     const uint16_t* i0 = (const uint16_t*) input[0];
     assert(i0 != NULL);
@@ -159,7 +159,7 @@ void xnn_f16_dwconv_minmax_ukernel_25p16c__neonfp16arith_acc2(
       i24 = (const uint16_t*) ((uintptr_t) i24 + input_offset);
     }
 
-    input = (const void**) ((uintptr_t) input + input_stride);
+    input = (const xnn_float16**) ((uintptr_t) input + input_stride);
 
     size_t c = channels;
     const uint16_t* w = (const uint16_t*) weights;
@@ -465,7 +465,7 @@ void xnn_f16_dwconv_minmax_ukernel_25p16c__neonfp16arith_acc2(
       float16x8_t vacc01234567 = vmaxq_f16(vacc01234567p0, vmin);
       vacc01234567 = vminq_f16(vacc01234567, vmax);
 
-      vst1q_u16(output, vreinterpretq_u16_f16(vacc01234567)); output += 8;
+      vst1q_u16((uint16_t*) output, vreinterpretq_u16_f16(vacc01234567)); output += 8;
     }
     if XNN_UNLIKELY(c != 0) {
       float16x8_t vacc01234567p0 = vreinterpretq_f16_u16(vld1q_u16(w));
@@ -579,7 +579,7 @@ void xnn_f16_dwconv_minmax_ukernel_25p16c__neonfp16arith_acc2(
 
       float16x4_t vacc0123 = vget_low_f16(vacc01234567);
       if (c & 4) {
-        vst1_u16(output, vreinterpret_u16_f16(vacc0123)); output += 4;
+        vst1_u16((uint16_t*) output, vreinterpret_u16_f16(vacc0123)); output += 4;
         vacc0123 = vget_high_f16(vacc01234567);
       }
       if (c & 2) {
@@ -587,7 +587,7 @@ void xnn_f16_dwconv_minmax_ukernel_25p16c__neonfp16arith_acc2(
         vacc0123 = vext_f16(vacc0123, vacc0123, 2);
       }
       if (c & 1) {
-        vst1_lane_u16(output, vreinterpret_u16_f16(vacc0123), 0); output += 1;
+        vst1_lane_u16((uint16_t*) output, vreinterpret_u16_f16(vacc0123), 0); output += 1;
       }
     }
 

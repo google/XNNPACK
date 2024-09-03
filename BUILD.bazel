@@ -177,6 +177,9 @@ MICROKERNEL_DEFS = [
     "src/f16-vbinary/f16-vsqrdiffc.h",
     "src/f16-vbinary/f16-vsub-minmax.h",
     "src/f16-vbinary/f16-vsubc-minmax.h",
+    "src/f16-vbinary/f16-vprelu.h",
+    "src/f16-vbinary/f16-vpreluc.h",
+    "src/f16-vbinary/f16-vrpreluc.h",
     "src/f16-vclamp/f16-vclamp.h",
     "src/f16-velu/f16-velu.h",
     "src/f16-vhswish/f16-vhswish.h",
@@ -235,6 +238,9 @@ MICROKERNEL_DEFS = [
     "src/f32-vbinary/f32-vsubc-minmax.h",
     "src/f32-vbinary/f32-vsubc-relu.h",
     "src/f32-vbinary/f32-vsubc.h",
+    "src/f32-vbinary/f32-vprelu.h",
+    "src/f32-vbinary/f32-vpreluc.h",
+    "src/f32-vbinary/f32-vrpreluc.h",
     "src/f32-vclamp/f32-vclamp.h",
     "src/f32-velu/f32-velu.h",
     "src/f32-vexp/f32-vexp.h",
@@ -528,10 +534,12 @@ xnnpack_cc_library(
         ":hardware_config",
         ":init_once",
         ":logging",
+        ":math",
         ":microkernels_h",
         ":microparams_init",
         ":packing",
         ":prod_microkernels",
+        "@FP16",
     ] + select({
         ":cpuinfo_enabled": ["@cpuinfo"],
         "//conditions:default": [],
@@ -558,6 +566,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":config_hdrs",
+        "@FP16",
     ],
 )
 
@@ -888,6 +897,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":math",
+        ":microparams",
         ":operator_h",
         ":xnnpack_h",
         "@FP16",
@@ -1019,6 +1029,7 @@ xnnpack_cc_library(
         ":operator_h",
         ":params",
         ":xnnpack_h",
+        "@FP16",
     ],
 )
 
@@ -1179,9 +1190,7 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":allocator",
-        ":build_identifier",
-        ":common",
-        ":config_hdrs",
+        ":hardware_config",
         ":init_once",
         ":logging",
         ":params",
@@ -1207,9 +1216,7 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":allocator",
-        ":build_identifier",
-        ":common",
-        ":config_hdrs",
+        ":hardware_config",
         ":init_once",
         ":logging",
         ":params",

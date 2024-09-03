@@ -16,8 +16,8 @@
 
 void xnn_f16_rmin_ukernel__scalar_u1(
     size_t batch,
-    const void* input,
-    void* output,
+    const xnn_float16* input,
+    xnn_float16* output,
     const union xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);

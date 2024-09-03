@@ -48,7 +48,6 @@ void xnn_f32_vmax_ukernel__wasmsimd_arm_u16(
     v128_t vacc3 = wasm_f32x4_max(va3, vb3);
 
 
-
     wasm_v128_store(output, vacc0);
     wasm_v128_store(output + 4, vacc1);
     wasm_v128_store(output + 8, vacc2);

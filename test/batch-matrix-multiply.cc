@@ -106,7 +106,7 @@ class BatchMatrixMultiplyTestBase : public ::testing::Test {
 };
 
 using BatchMatrixMultiplyTestF16 =
-    BatchMatrixMultiplyTestBase<uint16_t, uint16_t>;
+    BatchMatrixMultiplyTestBase<xnn_float16, xnn_float16>;
 using BatchMatrixMultiplyTestF32 = BatchMatrixMultiplyTestBase<float, float>;
 using BatchMatrixMultiplyTestQD8ToF32 =
     BatchMatrixMultiplyTestBase<int8_t, float>;
@@ -255,8 +255,8 @@ TEST_F(BatchMatrixMultiplyTestF16, matches_operator_api)
 
   xnn_operator_t op = nullptr;
 
-  std::generate(input1.begin(), input1.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-  std::generate(input2.begin(), input2.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+  std::generate(input1.begin(), input1.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+  std::generate(input2.begin(), input2.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
   std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
   std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
 

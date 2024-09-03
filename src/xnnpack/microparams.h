@@ -9,7 +9,7 @@
 #include <stdint.h>
 
 #include "xnnpack/common.h"
-
+#include "xnnpack/math.h"
 
 // Default: serves to differentiate pointer types for micro-kernels without fused activation.
 
@@ -41,20 +41,20 @@ union xnn_f32_relu_params {
 
 struct xnn_f16_scale_params {
   struct {
-    uint16_t scale;
-  };
+    xnn_float16 scale;
+  } scalar;
 };
 
 struct xnn_f16_f32acc_scale_params {
   struct {
     float scale;
-  };
+  } scalar;
 };
 
 union xnn_f32_scale_params {
   struct {
     float scale;
-  };
+  } scalar;
 };
 
 
@@ -62,9 +62,9 @@ union xnn_f32_scale_params {
 
 struct xnn_f16_scaleminmax_params {
   struct {
-    uint16_t scale;
-    uint16_t min;
-    uint16_t max;
+    xnn_float16 scale;
+    xnn_float16 min;
+    xnn_float16 max;
   } scalar;
 };
 
@@ -88,8 +88,8 @@ union xnn_bf16_minmax_params {
 
 union xnn_f16_minmax_params {
   struct {
-    uint16_t min;
-    uint16_t max;
+    xnn_float16 min;
+    xnn_float16 max;
   } scalar;
 };
 
@@ -102,15 +102,15 @@ union xnn_f32_minmax_params {
 
 union xnn_f16_qc4w_minmax_params {
   struct {
-    uint16_t min;
-    uint16_t max;
+    xnn_float16 min;
+    xnn_float16 max;
   } scalar;
 };
 
 union xnn_f16_qb4w_minmax_params {
   struct {
-    uint16_t min;
-    uint16_t max;
+    xnn_float16 min;
+    xnn_float16 max;
     size_t blocksize;
   } scalar;
 };
@@ -562,7 +562,7 @@ union xnn_qu8_avgpool_minmax_params {
 
 struct xnn_f16_qs8_cvt_params {
   struct {
-    uint16_t scale;
+    xnn_float16 scale;
     int16_t output_zero_point;
     int8_t output_min;
     int8_t output_max;
@@ -605,7 +605,7 @@ struct xnn_qs16_qs8_cvt_params {
 struct xnn_qs8_f16_cvt_params {
   struct {
     int16_t zero_point;
-    uint16_t scale;
+    xnn_float16 scale;
   } scalar;
 };
 
@@ -712,7 +712,7 @@ struct {
 
 struct xnn_f16_lrelu_params {
   struct {
-    uint16_t slope;
+    xnn_float16 slope;
   } scalar;
 };
 

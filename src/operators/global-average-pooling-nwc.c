@@ -237,7 +237,7 @@ enum xnn_status xnn_create_global_average_pooling_nwc_f16(
   struct xnn_f16_scaleminmax_params params;
   if (gavgpool_config->init.f16 != NULL) {
     gavgpool_config->init.f16(
-      &params, 0 /* scale */, fp16_ieee_from_fp32_value(output_min), fp16_ieee_from_fp32_value(output_max));
+      &params, /*scale=*/xnn_float16_from_float(0.0f), xnn_float16_from_float(output_min), xnn_float16_from_float(output_max));
   }
   return create_global_average_pooling_nwc(
     flags, /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
@@ -335,9 +335,9 @@ enum xnn_status xnn_create_global_sum_pooling_nwc_f16(
   if (gavgpool_config->init.f16 != NULL) {
     gavgpool_config->init.f16(
       &params,
-      /*scale=*/UINT16_C(0x3C00) /* 1.0h */,
-      fp16_ieee_from_fp32_value(output_min),
-      fp16_ieee_from_fp32_value(output_max));
+      /*scale=*/xnn_float16_from_float(1.0f),
+      xnn_float16_from_float(output_min),
+      xnn_float16_from_float(output_max));
   }
   return create_global_average_pooling_nwc(
     flags, /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
@@ -615,7 +615,7 @@ static void update_params_f16(
 {
   global_average_pooling_op->gavgpool_config->update.f16(
     &global_average_pooling_op->params.f16_scaleminmax,
-    fp16_ieee_from_fp32_value(1.0f / (float) width));
+    xnn_float16_from_float(1.0f / (float) width));
 }
 
 enum xnn_status xnn_reshape_global_average_pooling_nwc_f16(

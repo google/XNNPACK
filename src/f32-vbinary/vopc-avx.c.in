@@ -7,7 +7,7 @@ $assert BATCH_TILE % 8 == 0
 $assert BATCH_TILE >= 8
 $SIMD_TILE = BATCH_TILE // 8
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "PRELU", "RPRELU"]
 $assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
@@ -27,6 +27,8 @@ $  "MUL": lambda x: "_mm256_mul_ps(%s, vb)" % x,
 $  "SUB": lambda x: "_mm256_sub_ps(%s, vb)" % x,
 $  "RSUB": lambda x: "_mm256_sub_ps(vb, %s)" % x,
 $  "SQRDIFF": lambda x: "_mm256_sub_ps(%s, vb)" % x,
+$  "PRELU": lambda x: "_mm256_mul_ps(%s, vb)" % x,
+$  "RPRELU": lambda x: "_mm256_mul_ps(%s, vb)" % x,
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
 $PARAMS = {"LINEAR": "union xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
@@ -54,17 +56,23 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__avx_u${BATCH_TILE}(
 
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
-      __m256 vacc${ABC[0]} = _mm256_loadu_ps(input_a);
+      const __m256 va${ABC[0]} = _mm256_loadu_ps(input_a);
       $for N in range(1, SIMD_TILE):
-        __m256 vacc${ABC[N]} = _mm256_loadu_ps(input_a + ${N * 8});
+        const __m256 va${ABC[N]} = _mm256_loadu_ps(input_a + ${N * 8});
       input_a += ${BATCH_TILE};
 
       $for N in range(SIMD_TILE):
-        vacc${ABC[N]} = ${_MM256_OP_PS("vacc" + ABC[N])};
+        __m256 vacc${ABC[N]} = ${_MM256_OP_PS("va" + ABC[N])};
 
       $if OP == "SQRDIFF":
         $for N in range(SIMD_TILE):
           vacc${ABC[N]} = _mm256_mul_ps(vacc${ABC[N]}, vacc${ABC[N]});
+      $elif OP == "PRELU":
+        $for N in range(SIMD_TILE):
+          vacc${ABC[N]} = _mm256_blendv_ps(va${ABC[N]}, vacc${ABC[N]}, va${ABC[N]});
+      $elif OP == "RPRELU":
+        $for N in range(SIMD_TILE):
+          vacc${ABC[N]} = _mm256_blendv_ps(vb, vacc${ABC[N]}, vb);
 
       $if ACTIVATION == "MINMAX":
         $for N in range(SIMD_TILE):
@@ -79,12 +87,16 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__avx_u${BATCH_TILE}(
       output += ${BATCH_TILE};
     }
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
-    __m256 vacc = _mm256_loadu_ps(input_a);
+    const __m256 va = _mm256_loadu_ps(input_a);
     input_a += 8;
 
-    vacc = ${_MM256_OP_PS("vacc")};
+    __m256 vacc = ${_MM256_OP_PS("va")};
     $if OP == "SQRDIFF":
       vacc = _mm256_mul_ps(vacc, vacc);
+    $elif OP == "PRELU":
+      vacc = _mm256_blendv_ps(va, vacc, va);
+    $elif OP == "RPRELU":
+      vacc = _mm256_blendv_ps(vb, vacc, vb);
     $if ACTIVATION == "MINMAX":
       vacc = _mm256_max_ps(voutput_min, vacc);
       vacc = _mm256_min_ps(voutput_max, vacc);
@@ -96,11 +108,15 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__avx_u${BATCH_TILE}(
     assert(batch <= 7 * sizeof(float));
     const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
 
-    __m256 vacc = _mm256_maskload_ps(input_a, vmask);
+    __m256 va = _mm256_maskload_ps(input_a, vmask);
 
-    vacc = ${_MM256_OP_PS("vacc")};
+    __m256 vacc = ${_MM256_OP_PS("va")};
     $if OP == "SQRDIFF":
       vacc = _mm256_mul_ps(vacc, vacc);
+    $elif OP == "PRELU":
+      vacc = _mm256_blendv_ps(va, vacc, va);
+    $elif OP == "RPRELU":
+      vacc = _mm256_blendv_ps(vb, vacc, vb);
     $if ACTIVATION == "MINMAX":
       vacc = _mm256_max_ps(voutput_min, vacc);
       vacc = _mm256_min_ps(voutput_max, vacc);

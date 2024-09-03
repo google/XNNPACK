@@ -18,13 +18,13 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
     size_t nc,
     size_t kc,
     size_t ks,
-    const void** restrict a,
-    const void* restrict w,
-    void* restrict c,
+    const xnn_float16** restrict a,
+    const xnn_float16* restrict w,
+    xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
-    const void* zero,
+    const xnn_float16* zero,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
@@ -57,7 +57,7 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
 
   do {
     $for N in range(0, NR, 8):
-      float16x8_t vacc0x${N//8} = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const float16x8_t*) w + 1;
+      float16x8_t vacc0x${N//8} = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) w)); w = (const xnn_float16*) w + 8;
     $for M in range(1, MR):
       $for N in range(0, NR, 8):
         float16x8_t vacc${M}x${N//8} = vacc0x${N//8};
@@ -67,7 +67,7 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
       $for M in range(MR):
         const uint16_t* restrict a${M} = (const uint16_t*) a[${M}];
         assert(a${M} != NULL);
-        if XNN_UNPREDICTABLE(a${M} != zero) {
+        if XNN_UNPREDICTABLE(a${M} != (const uint16_t*) zero) {
           a${M} = (const uint16_t*) ((uintptr_t) a${M} + a_offset);
         }
       a += ${MR};
@@ -79,7 +79,7 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
 
         $for L in range(4):
           $for N in range(0, NR, 8):
-            const float16x8_t vb${N//8}c${L} = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const float16x8_t*) w + 1;
+            const float16x8_t vb${N//8}c${L} = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) w)); w = (const xnn_float16*) w + 8;
 
           #if XNN_ARCH_ARM64
             $for N in range(0, NR, 8):
@@ -97,7 +97,7 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
             const float16x8_t va${M} = vreinterpretq_f16_u16(vld1q_dup_u16(a${M})); a${M} += 1;
 
           $for N in range(0, NR, 8):
-            const float16x8_t vb${N//8} = vreinterpretq_f16_u16(vld1q_u16(w)); w = (const float16x8_t*) w + 1;
+            const float16x8_t vb${N//8} = vreinterpretq_f16_u16(vld1q_u16((const uint16_t*) w)); w = (const xnn_float16*) w + 8;
 
           $for N in range(0, NR, 8):
             $for M in range(MR):
@@ -110,12 +110,12 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
     } while (p != 0);
 
 
-    const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.min));
+    const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.min));
     $for N in range(0, NR, 8):
       $for M in range(MR):
         vacc${M}x${N//8} = vmaxq_f16(vacc${M}x${N//8}, vmin);
 
-    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.max));
+    const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.max));
     $for N in range(0, NR, 8):
       $for M in range(MR):
         vacc${M}x${N//8} = vminq_f16(vacc${M}x${N//8}, vmax);
@@ -127,7 +127,7 @@ void xnn_f16_igemm_minmax_ukernel_${MR}x${NR}__neonfp16arith_ld64(
           vst1q_u16(c${M} + ${N}, vreinterpretq_u16_f16(vacc${M}x${N//8}));
         c${M} = (uint16_t*) ((uintptr_t) c${M} + cn_stride);
 
-      a = (const void**restrict) ((uintptr_t) a - ks);
+      a = (const xnn_float16**restrict) ((uintptr_t) a - ks);
       nc -= ${NR};
     } else {
       $for LOG2N in reversed(range(NR.bit_length())):

@@ -108,7 +108,7 @@ template <class T> class MaxPooling2DTestBase : public ::testing::Test {
 
 using MaxPooling2DTestQS8 = MaxPooling2DTestBase<int8_t>;
 using MaxPooling2DTestQU8 = MaxPooling2DTestBase<uint8_t>;
-using MaxPooling2DTestF16 = MaxPooling2DTestBase<uint16_t>;
+using MaxPooling2DTestF16 = MaxPooling2DTestBase<xnn_float16>;
 using MaxPooling2DTestF32 = MaxPooling2DTestBase<float>;
 
 TEST_F(MaxPooling2DTestQS8, define)
@@ -465,7 +465,7 @@ TEST_F(MaxPooling2DTestQU8, matches_operator_api)
 TEST_F(MaxPooling2DTestF16, matches_operator_api)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-  std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
   std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
   std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
 

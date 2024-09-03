@@ -75,7 +75,13 @@ SET(NON_PROD_F16C_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vminc-f16c-u8.c
   src/f16-vbinary/gen/f16-vmul-minmax-f16c-u8.c
   src/f16-vbinary/gen/f16-vmulc-minmax-f16c-u8.c
+  src/f16-vbinary/gen/f16-vprelu-f16c-u8.c
+  src/f16-vbinary/gen/f16-vprelu-f16c-u16.c
+  src/f16-vbinary/gen/f16-vpreluc-f16c-u8.c
+  src/f16-vbinary/gen/f16-vpreluc-f16c-u16.c
   src/f16-vbinary/gen/f16-vrdivc-minmax-f16c-u16.c
+  src/f16-vbinary/gen/f16-vrpreluc-f16c-u8.c
+  src/f16-vbinary/gen/f16-vrpreluc-f16c-u16.c
   src/f16-vbinary/gen/f16-vrsubc-minmax-f16c-u8.c
   src/f16-vbinary/gen/f16-vsqrdiff-f16c-u8.c
   src/f16-vbinary/gen/f16-vsqrdiffc-f16c-u8.c

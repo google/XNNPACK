@@ -26,7 +26,7 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_16x64c4__avx512amx_prfm(
     const int8_t* restrict a,
     size_t a_stride,
     const void* restrict w,
-    void* restrict c,
+    xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
@@ -87,70 +87,70 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_16x64c4__avx512amx_prfm(
   //_tile_loadconfig(&tile_data);
   __asm__ volatile ("ldtilecfg %0" :: "m" (tile_data));
 
-  uint16_t* c0 = (uint16_t*) c;
-  uint16_t* c1 = (uint16_t*) ((uintptr_t) c0 + cm_stride);
+  xnn_float16* c0 = c;
+  xnn_float16* c1 = (xnn_float16*) ((uintptr_t) c0 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 2) {
     c1 = c0;
   }
-  uint16_t* c2 = (uint16_t*) ((uintptr_t) c1 + cm_stride);
+  xnn_float16* c2 = (xnn_float16*) ((uintptr_t) c1 + cm_stride);
   if XNN_UNPREDICTABLE(mr <= 2) {
     c2 = c1;
   }
-  uint16_t* c3 = (uint16_t*) ((uintptr_t) c2 + cm_stride);
+  xnn_float16* c3 = (xnn_float16*) ((uintptr_t) c2 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 4) {
     c3 = c2;
   }
-  uint16_t* c4 = (uint16_t*) ((uintptr_t) c3 + cm_stride);
+  xnn_float16* c4 = (xnn_float16*) ((uintptr_t) c3 + cm_stride);
   if XNN_UNPREDICTABLE(mr <= 4) {
     c4 = c3;
   }
-  uint16_t* c5 = (uint16_t*) ((uintptr_t) c4 + cm_stride);
+  xnn_float16* c5 = (xnn_float16*) ((uintptr_t) c4 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 6) {
     c5 = c4;
   }
-  uint16_t* c6 = (uint16_t*) ((uintptr_t) c5 + cm_stride);
+  xnn_float16* c6 = (xnn_float16*) ((uintptr_t) c5 + cm_stride);
   if XNN_UNPREDICTABLE(mr <= 6) {
     c6 = c5;
   }
-  uint16_t* c7 = (uint16_t*) ((uintptr_t) c6 + cm_stride);
+  xnn_float16* c7 = (xnn_float16*) ((uintptr_t) c6 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 8) {
     c7 = c6;
   }
-  uint16_t* c8 = (uint16_t*) ((uintptr_t) c7 + cm_stride);
+  xnn_float16* c8 = (xnn_float16*) ((uintptr_t) c7 + cm_stride);
   if XNN_UNPREDICTABLE(mr <= 8) {
     c8 = c7;
   }
-  uint16_t* c9 = (uint16_t*) ((uintptr_t) c8 + cm_stride);
+  xnn_float16* c9 = (xnn_float16*) ((uintptr_t) c8 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 10) {
     c9 = c8;
   }
-  uint16_t* c10 = (uint16_t*) ((uintptr_t) c9 + cm_stride);
+  xnn_float16* c10 = (xnn_float16*) ((uintptr_t) c9 + cm_stride);
   if XNN_UNPREDICTABLE(mr <= 10) {
     c10 = c9;
   }
-  uint16_t* c11 = (uint16_t*) ((uintptr_t) c10 + cm_stride);
+  xnn_float16* c11 = (xnn_float16*) ((uintptr_t) c10 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 12) {
     c11 = c10;
   }
-  uint16_t* c12 = (uint16_t*) ((uintptr_t) c11 + cm_stride);
+  xnn_float16* c12 = (xnn_float16*) ((uintptr_t) c11 + cm_stride);
   if XNN_UNPREDICTABLE(mr <= 12) {
     c12 = c11;
   }
-  uint16_t* c13 = (uint16_t*) ((uintptr_t) c12 + cm_stride);
+  xnn_float16* c13 = (xnn_float16*) ((uintptr_t) c12 + cm_stride);
   if XNN_UNPREDICTABLE(mr < 14) {
     c13 = c12;
   }
-  uint16_t* c14 = (uint16_t*) ((uintptr_t) c13 + cm_stride);
+  xnn_float16* c14 = (xnn_float16*) ((uintptr_t) c13 + cm_stride);
   if XNN_UNPREDICTABLE(mr <= 14) {
     c14 = c13;
   }
-  uint16_t* c15 = (uint16_t*) ((uintptr_t) c14 + cm_stride);
+  xnn_float16* c15 = (xnn_float16*) ((uintptr_t) c14 + cm_stride);
   if XNN_UNPREDICTABLE(mr != 16) {
     c15 = c14;
   }
 
-  const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
-  const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  const __m512 voutput_min = _mm512_cvtph_ps(_mm256_set1_epi16(*(const uint16_t*) &params->scalar.min));
+  const __m512 voutput_max = _mm512_cvtph_ps(_mm256_set1_epi16(*(const uint16_t*) &params->scalar.max));
   // XNN_FORCE_REALIZATION(voutput_min);
   // XNN_FORCE_REALIZATION(voutput_max);
 
@@ -822,82 +822,82 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_16x64c4__avx512amx_prfm(
       _mm256_storeu_si256((__m256i*) (c15 + 16), vfp16out15xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c15 + 32), vfp16out15xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c15 + 48), vfp16out15xmnopqrstuvwxyz01);
-      c15 = (uint16_t*) ((uintptr_t) c15 + cn_stride);
+      c15 = (xnn_float16*) ((uintptr_t) c15 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c14 + 0), vfp16out14x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c14 + 16), vfp16out14xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c14 + 32), vfp16out14xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c14 + 48), vfp16out14xmnopqrstuvwxyz01);
-      c14 = (uint16_t*) ((uintptr_t) c14 + cn_stride);
+      c14 = (xnn_float16*) ((uintptr_t) c14 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c13 + 0), vfp16out13x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c13 + 16), vfp16out13xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c13 + 32), vfp16out13xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c13 + 48), vfp16out13xmnopqrstuvwxyz01);
-      c13 = (uint16_t*) ((uintptr_t) c13 + cn_stride);
+      c13 = (xnn_float16*) ((uintptr_t) c13 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c12 + 0), vfp16out12x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c12 + 16), vfp16out12xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c12 + 32), vfp16out12xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c12 + 48), vfp16out12xmnopqrstuvwxyz01);
-      c12 = (uint16_t*) ((uintptr_t) c12 + cn_stride);
+      c12 = (xnn_float16*) ((uintptr_t) c12 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c11 + 0), vfp16out11x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c11 + 16), vfp16out11xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c11 + 32), vfp16out11xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c11 + 48), vfp16out11xmnopqrstuvwxyz01);
-      c11 = (uint16_t*) ((uintptr_t) c11 + cn_stride);
+      c11 = (xnn_float16*) ((uintptr_t) c11 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c10 + 0), vfp16out10x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c10 + 16), vfp16out10xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c10 + 32), vfp16out10xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c10 + 48), vfp16out10xmnopqrstuvwxyz01);
-      c10 = (uint16_t*) ((uintptr_t) c10 + cn_stride);
+      c10 = (xnn_float16*) ((uintptr_t) c10 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c9 + 0), vfp16out9x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c9 + 16), vfp16out9xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c9 + 32), vfp16out9xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c9 + 48), vfp16out9xmnopqrstuvwxyz01);
-      c9 = (uint16_t*) ((uintptr_t) c9 + cn_stride);
+      c9 = (xnn_float16*) ((uintptr_t) c9 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c8 + 0), vfp16out8x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c8 + 16), vfp16out8xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c8 + 32), vfp16out8xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c8 + 48), vfp16out8xmnopqrstuvwxyz01);
-      c8 = (uint16_t*) ((uintptr_t) c8 + cn_stride);
+      c8 = (xnn_float16*) ((uintptr_t) c8 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c7 + 0), vfp16out7x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c7 + 16), vfp16out7xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c7 + 32), vfp16out7xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c7 + 48), vfp16out7xmnopqrstuvwxyz01);
-      c7 = (uint16_t*) ((uintptr_t) c7 + cn_stride);
+      c7 = (xnn_float16*) ((uintptr_t) c7 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c6 + 0), vfp16out6x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c6 + 16), vfp16out6xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c6 + 32), vfp16out6xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c6 + 48), vfp16out6xmnopqrstuvwxyz01);
-      c6 = (uint16_t*) ((uintptr_t) c6 + cn_stride);
+      c6 = (xnn_float16*) ((uintptr_t) c6 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c5 + 0), vfp16out5x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c5 + 16), vfp16out5xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c5 + 32), vfp16out5xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c5 + 48), vfp16out5xmnopqrstuvwxyz01);
-      c5 = (uint16_t*) ((uintptr_t) c5 + cn_stride);
+      c5 = (xnn_float16*) ((uintptr_t) c5 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c4 + 0), vfp16out4x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c4 + 16), vfp16out4xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c4 + 32), vfp16out4xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c4 + 48), vfp16out4xmnopqrstuvwxyz01);
-      c4 = (uint16_t*) ((uintptr_t) c4 + cn_stride);
+      c4 = (xnn_float16*) ((uintptr_t) c4 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c3 + 0), vfp16out3x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c3 + 16), vfp16out3xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c3 + 32), vfp16out3xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c3 + 48), vfp16out3xmnopqrstuvwxyz01);
-      c3 = (uint16_t*) ((uintptr_t) c3 + cn_stride);
+      c3 = (xnn_float16*) ((uintptr_t) c3 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c2 + 0), vfp16out2x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c2 + 16), vfp16out2xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c2 + 32), vfp16out2xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c2 + 48), vfp16out2xmnopqrstuvwxyz01);
-      c2 = (uint16_t*) ((uintptr_t) c2 + cn_stride);
+      c2 = (xnn_float16*) ((uintptr_t) c2 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c1 + 0), vfp16out1x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c1 + 16), vfp16out1xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c1 + 32), vfp16out1xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c1 + 48), vfp16out1xmnopqrstuvwxyz01);
-      c1 = (uint16_t*) ((uintptr_t) c1 + cn_stride);
+      c1 = (xnn_float16*) ((uintptr_t) c1 + cn_stride);
       _mm256_storeu_si256((__m256i*) (c0 + 0), vfp16out0x0123456789ABCDEF);
       _mm256_storeu_si256((__m256i*) (c0 + 16), vfp16out0xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c0 + 32), vfp16out0xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c0 + 48), vfp16out0xmnopqrstuvwxyz01);
-      c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
+      c0 = (xnn_float16*) ((uintptr_t) c0 + cn_stride);
 
       a -= kc;
       nc -= 64;

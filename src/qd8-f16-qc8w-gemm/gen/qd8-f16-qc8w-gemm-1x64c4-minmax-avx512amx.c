@@ -25,7 +25,7 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x64c4__avx512amx(
     const int8_t* restrict a,
     size_t a_stride,
     const void* restrict w,
-    void* restrict c,
+    xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
@@ -86,10 +86,10 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x64c4__avx512amx(
   //_tile_loadconfig(&tile_data);
   __asm__ volatile ("ldtilecfg %0" :: "m" (tile_data));
 
-  uint16_t* c0 = (uint16_t*) c;
+  xnn_float16* c0 = c;
 
-  const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
-  const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
+  const __m512 voutput_min = _mm512_cvtph_ps(_mm256_set1_epi16(*(const uint16_t*) &params->scalar.min));
+  const __m512 voutput_max = _mm512_cvtph_ps(_mm256_set1_epi16(*(const uint16_t*) &params->scalar.max));
   // XNN_FORCE_REALIZATION(voutput_min);
   // XNN_FORCE_REALIZATION(voutput_max);
 
@@ -201,7 +201,7 @@ void xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x64c4__avx512amx(
       _mm256_storeu_si256((__m256i*) (c0 + 16), vfp16out0xGHIJKLMNOPQRSTUV);
       _mm256_storeu_si256((__m256i*) (c0 + 32), vfp16out0xWXYZabcdefghijkl);
       _mm256_storeu_si256((__m256i*) (c0 + 48), vfp16out0xmnopqrstuvwxyz01);
-      c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
+      c0 = (xnn_float16*) ((uintptr_t) c0 + cn_stride);
 
       a -= kc;
       nc -= 64;

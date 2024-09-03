@@ -16,9 +16,9 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/cache.h"
+#include "xnnpack/math.h"
 #include "replicable_random_device.h"
 
 class PReLUOperatorTester {
@@ -133,25 +133,25 @@ class PReLUOperatorTester {
     auto f32irng = std::uniform_real_distribution<float>(-1.0f, 1.0f);
     auto f32wrng = std::uniform_real_distribution<float>(0.25f, 0.75f);
 
-    std::vector<uint16_t> x((batch_size() - 1) * x_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
-    std::vector<uint16_t> w(input_channels());
+    std::vector<xnn_float16> x((batch_size() - 1) * x_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    std::vector<xnn_float16> w(input_channels());
     std::vector<float> w_as_float(input_channels());
-    std::vector<uint16_t> y((batch_size() - 1) * y_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<xnn_float16> y((batch_size() - 1) * y_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
     std::vector<float> y_ref(batch_size() * input_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), [&] { return fp16_ieee_from_fp32_value(f32irng(rng)); });
+      std::generate(x.begin(), x.end(), [&] { return xnn_float16_from_float(f32irng(rng)); });
       if (slope_channels() == 1) {
-        std::fill(w.begin(), w.end(), fp16_ieee_from_fp32_value(f32wrng(rng)));
+        std::fill(w.begin(), w.end(), xnn_float16_from_float(f32wrng(rng)));
       } else {
-        std::generate(w.begin(), w.end(), [&] { return fp16_ieee_from_fp32_value(f32wrng(rng)); });
+        std::generate(w.begin(), w.end(), [&] { return xnn_float16_from_float(f32wrng(rng)); });
       }
-      std::transform(w.cbegin(), w.cend(), w_as_float.begin(), fp16_ieee_to_fp32_value);
+      std::transform(w.cbegin(), w.cend(), w_as_float.begin(), xnn_float16_to_float);
       std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < input_channels(); c++) {
-          const float x_value = fp16_ieee_to_fp32_value(x[i * x_stride() + c]);
+          const float x_value = xnn_float16_to_float(x[i * x_stride() + c]);
           const float w_value = w_as_float[c];
           y_ref[i * input_channels() + c] = std::signbit(x_value) ? x_value * w_value : x_value;
         }
@@ -225,7 +225,7 @@ class PReLUOperatorTester {
         // Smart pointer to automatically delete prelu_op2.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_prelu_op(prelu_op2, xnn_delete_operator);
 
-        std::vector<uint16_t> y2(y.size(), UINT16_C(0x7E00) /* NaN */);
+        std::vector<xnn_float16> y2(y.size(), UINT16_C(0x7E00) /* NaN */);
         ASSERT_EQ(xnn_status_success,
                   xnn_reshape_prelu_nc_f16(
                       prelu_op2,
@@ -245,11 +245,11 @@ class PReLUOperatorTester {
     }
   }
 
-  void VerifyF16(const std::vector<uint16_t>& y, const std::vector<float>& y_ref) const {
+  void VerifyF16(const std::vector<xnn_float16>& y, const std::vector<float>& y_ref) const {
     for (size_t i = 0; i < batch_size(); i++) {
       for (size_t c = 0; c < input_channels(); c++) {
         ASSERT_NEAR(
-            fp16_ieee_to_fp32_value(y[i * y_stride() + c]),
+            xnn_float16_to_float(y[i * y_stride() + c]),
             y_ref[i * input_channels() + c],
             std::max(1.0e-4f, std::abs(y_ref[i * input_channels() + c]) * 1.0e-3f))
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << input_channels();
