@@ -42,7 +42,6 @@ void xnn_f32_vadd_relu_ukernel__wasmsimd_u8(
     v128_t vacc0 = wasm_f32x4_add(va0, vb0);
     v128_t vacc1 = wasm_f32x4_add(va1, vb1);
 
-
     vacc0 = wasm_i32x4_max(vacc0, vzero);
     vacc1 = wasm_i32x4_max(vacc1, vzero);
 

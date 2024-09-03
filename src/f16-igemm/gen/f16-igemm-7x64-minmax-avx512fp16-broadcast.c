@@ -20,13 +20,13 @@ void xnn_f16_igemm_minmax_ukernel_7x64__avx512fp16_broadcast(
     size_t nc,
     size_t kc,
     size_t ks,
-    const void** restrict a,
-    const void* restrict w,
-    void* restrict c,
+    const xnn_float16** restrict a,
+    const xnn_float16* restrict w,
+    xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
-    const void* zero,
+    const xnn_float16* zero,
     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
@@ -83,43 +83,43 @@ void xnn_f16_igemm_minmax_ukernel_7x64__avx512fp16_broadcast(
     __m512h vacc5x1 = vacc0x1;
     __m512h vacc6x0 = vacc0x0;
     __m512h vacc6x1 = vacc0x1;
-    w = (const uint16_t*) w + 64;
+    w = (const xnn_float16*) w + 64;
 
     size_t p = ks;
     do {
       const uint16_t* restrict a0 = (const uint16_t*) a[0];
       assert(a0 != NULL);
-      if XNN_UNPREDICTABLE(a0 != zero) {
+      if XNN_UNPREDICTABLE(a0 != (const uint16_t*) zero) {
         a0 = (const uint16_t*) ((uintptr_t) a0 + a_offset);
       }
       const uint16_t* restrict a1 = (const uint16_t*) a[1];
       assert(a1 != NULL);
-      if XNN_UNPREDICTABLE(a1 != zero) {
+      if XNN_UNPREDICTABLE(a1 != (const uint16_t*) zero) {
         a1 = (const uint16_t*) ((uintptr_t) a1 + a_offset);
       }
       const uint16_t* restrict a2 = (const uint16_t*) a[2];
       assert(a2 != NULL);
-      if XNN_UNPREDICTABLE(a2 != zero) {
+      if XNN_UNPREDICTABLE(a2 != (const uint16_t*) zero) {
         a2 = (const uint16_t*) ((uintptr_t) a2 + a_offset);
       }
       const uint16_t* restrict a3 = (const uint16_t*) a[3];
       assert(a3 != NULL);
-      if XNN_UNPREDICTABLE(a3 != zero) {
+      if XNN_UNPREDICTABLE(a3 != (const uint16_t*) zero) {
         a3 = (const uint16_t*) ((uintptr_t) a3 + a_offset);
       }
       const uint16_t* restrict a4 = (const uint16_t*) a[4];
       assert(a4 != NULL);
-      if XNN_UNPREDICTABLE(a4 != zero) {
+      if XNN_UNPREDICTABLE(a4 != (const uint16_t*) zero) {
         a4 = (const uint16_t*) ((uintptr_t) a4 + a_offset);
       }
       const uint16_t* restrict a5 = (const uint16_t*) a[5];
       assert(a5 != NULL);
-      if XNN_UNPREDICTABLE(a5 != zero) {
+      if XNN_UNPREDICTABLE(a5 != (const uint16_t*) zero) {
         a5 = (const uint16_t*) ((uintptr_t) a5 + a_offset);
       }
       const uint16_t* restrict a6 = (const uint16_t*) a[6];
       assert(a6 != NULL);
-      if XNN_UNPREDICTABLE(a6 != zero) {
+      if XNN_UNPREDICTABLE(a6 != (const uint16_t*) zero) {
         a6 = (const uint16_t*) ((uintptr_t) a6 + a_offset);
       }
       a += 7;
@@ -128,7 +128,7 @@ void xnn_f16_igemm_minmax_ukernel_7x64__avx512fp16_broadcast(
       do {
         const __m512h vb0 = _mm512_load_ph(w);
         const __m512h vb1 = _mm512_load_ph((const uint16_t*) w + 32);
-        w = (const uint16_t*) w + 64;
+        w = (const xnn_float16*) w + 64;
 
         const __m512h va0 = _mm512_castsi512_ph(_mm512_set1_epi16(*a0));
         vacc0x0 = _mm512_fmadd_ph(va0, vb0, vacc0x0);
@@ -165,7 +165,7 @@ void xnn_f16_igemm_minmax_ukernel_7x64__avx512fp16_broadcast(
       p -= 7 * sizeof(void*);
     } while (p != 0);
 
-    const __m512h vmin = _mm512_castsi512_ph(_mm512_set1_epi16(params->scalar.min));
+    const __m512h vmin = _mm512_castsi512_ph(_mm512_set1_epi16(*(const uint16_t*) &params->scalar.min));
     vacc0x0 = _mm512_max_ph(vmin, vacc0x0);
     vacc1x0 = _mm512_max_ph(vmin, vacc1x0);
     vacc2x0 = _mm512_max_ph(vmin, vacc2x0);
@@ -181,7 +181,7 @@ void xnn_f16_igemm_minmax_ukernel_7x64__avx512fp16_broadcast(
     vacc5x1 = _mm512_max_ph(vmin, vacc5x1);
     vacc6x1 = _mm512_max_ph(vmin, vacc6x1);
 
-    const __m512h vmax = _mm512_castsi512_ph(_mm512_set1_epi16(params->scalar.max));
+    const __m512h vmax = _mm512_castsi512_ph(_mm512_set1_epi16(*(const uint16_t*) &params->scalar.max));
     vacc0x0 = _mm512_min_ph(vmax, vacc0x0);
     vacc1x0 = _mm512_min_ph(vmax, vacc1x0);
     vacc2x0 = _mm512_min_ph(vmax, vacc2x0);
@@ -220,7 +220,7 @@ void xnn_f16_igemm_minmax_ukernel_7x64__avx512fp16_broadcast(
       _mm512_storeu_ph((uint16_t*) c0 + 1, vacc0x1);
       c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
 
-      a = (const void**restrict) ((uintptr_t) a - ks);
+      a = (const xnn_float16**restrict) ((uintptr_t) a - ks);
       nc -= 64;
     } else {
       if (nc & 32) {

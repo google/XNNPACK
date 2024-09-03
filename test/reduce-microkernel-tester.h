@@ -57,10 +57,10 @@ class ReduceMicrokernelTester {
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
     std::vector<float> input_float(batch_size());
-    std::vector<uint16_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(uint16_t));
+    std::vector<xnn_float16> input(batch_size() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input_float.begin(), input_float.end(), [&]() { return f32dist(rng); });
-      std::transform(input_float.begin(), input_float.end(), input.begin(), [](float f) { return fp16_ieee_from_fp32_value(f); });
+      std::transform(input_float.begin(), input_float.end(), input.begin(), [](float f) { return xnn_float16_from_float(f); });
 
       // Compute reference results.
       FloatIt min, max;
@@ -73,23 +73,23 @@ class ReduceMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      uint16_t output[2] = {UINT16_C(0x7E00) /* NaN */, UINT16_C(0x7E00)};
-      reduce(batch_size() * sizeof(uint16_t), input.data(), output, init_params != nullptr ? &params : nullptr);
+      xnn_float16 output[2] = {UINT16_C(0x7E00) /* NaN */, UINT16_C(0x7E00)};
+      reduce(batch_size() * sizeof(xnn_float16), input.data(), output, init_params != nullptr ? &params : nullptr);
 
       // Verify results.
       switch (op_type) {
         case OpType::Max:
-          EXPECT_EQ(output[0], fp16_ieee_from_fp32_value(*max))
+          EXPECT_EQ(output[0], xnn_float16_from_float(*max))
               << "with batch " << batch_size();
           break;
         case OpType::Min:
-          EXPECT_EQ(output[0], fp16_ieee_from_fp32_value(*min))
+          EXPECT_EQ(output[0], xnn_float16_from_float(*min))
               << "with batch " << batch_size();
           break;
         case OpType::MinMax:
-          EXPECT_EQ(output[0], fp16_ieee_from_fp32_value(*min))
+          EXPECT_EQ(output[0], xnn_float16_from_float(*min))
               << "with batch " << batch_size();
-          EXPECT_EQ(output[1], fp16_ieee_from_fp32_value(*max))
+          EXPECT_EQ(output[1], xnn_float16_from_float(*max))
               << "with batch " << batch_size();
           break;
       }

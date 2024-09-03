@@ -365,10 +365,10 @@ enum xnn_status xnn_create_clamp_nc_f16(
     return xnn_status_invalid_parameter;
   }
 
-  const uint16_t output_min_as_half = fp16_ieee_from_fp32_value(output_min);
-  const uint16_t output_max_as_half = fp16_ieee_from_fp32_value(output_max);
-  output_min = fp16_ieee_to_fp32_value(output_min_as_half);
-  output_max = fp16_ieee_to_fp32_value(output_max_as_half);
+  const xnn_float16 output_min_as_half = xnn_float16_from_float(output_min);
+  const xnn_float16 output_max_as_half = xnn_float16_from_float(output_max);
+  output_min = xnn_float16_to_float(output_min_as_half);
+  output_max = xnn_float16_to_float(output_max_as_half);
   if (output_min > output_max) {
     xnn_log_error(
       "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be less than or equal to upper bound",
@@ -711,7 +711,7 @@ enum xnn_status xnn_create_convert_nc_qs8_f16(
 
   const struct xnn_unary_elementwise_config* qs8_to_f16_cvt_config = xnn_init_qs8_to_f16_cvt_config();
 
-  const uint16_t fp16_input_scale = fp16_ieee_from_fp32_value(input_scale);
+  const xnn_float16 fp16_input_scale = xnn_float16_from_float(input_scale);
 
   struct xnn_qs8_f16_cvt_params params;
   if XNN_LIKELY(qs8_to_f16_cvt_config != NULL) {
@@ -899,8 +899,8 @@ enum xnn_status xnn_create_elu_nc_f16(
   uint32_t flags,
   xnn_operator_t* elu_op_out)
 {
-  const uint16_t alpha_as_half = fp16_ieee_from_fp32_value(alpha);
-  alpha = fp16_ieee_to_fp32_value(alpha_as_half);
+  const xnn_float16 alpha_as_half = xnn_float16_from_float(alpha);
+  alpha = xnn_float16_to_float(alpha_as_half);
   if (alpha <= 0.0f || !isnormal(alpha)) {
     xnn_log_error(
       "failed to create %s operator with %.7g alpha parameter: alpha must be finite, normalized, and positive",
@@ -914,7 +914,7 @@ enum xnn_status xnn_create_elu_nc_f16(
   if XNN_LIKELY(f16_elu_config != NULL) {
     assert(f16_elu_config->init.f16_elu != NULL);
     f16_elu_config->init.f16_elu(&params,
-      UINT16_C(0x3C00)  /* prescale = 1.0h */, alpha_as_half, UINT16_C(0x3C00)  /* beta = 1.0h */);
+      /*prescale=*/xnn_float16_from_float(1.0f), alpha_as_half, /*beta=*/xnn_float16_from_float(1.0f));
   }
 
   return create_unary_elementwise_nc(
@@ -1032,8 +1032,8 @@ enum xnn_status xnn_create_leaky_relu_nc_f16(
   uint32_t flags,
   xnn_operator_t* leaky_relu_op_out)
 {
-  const uint16_t negative_slope_as_half = fp16_ieee_from_fp32_value(negative_slope);
-  negative_slope = fp16_ieee_to_fp32_value(negative_slope_as_half);
+  const xnn_float16 negative_slope_as_half = xnn_float16_from_float(negative_slope);
+  negative_slope = xnn_float16_to_float(negative_slope_as_half);
   if (!isfinite(negative_slope)) {
     xnn_log_error(
       "failed to create %s operator with %f negative slope: finite number expected",

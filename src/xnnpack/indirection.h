@@ -13,6 +13,7 @@
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -127,7 +128,7 @@ XNN_INTERNAL void xnn_indirection_init_resize_bilinear2d_hwc_f16(
   size_t output_width,
   const void* input,
   const void** indirection_buffer,
-  void* packed_weights,
+  xnn_float16* packed_weights,
   bool align_corners,
   bool tensorflow_legacy);
 
@@ -179,7 +180,7 @@ XNN_INTERNAL void xnn_indirection_init_resize_bilinear2d_chw_f16(
   size_t output_width,
   const void* input,
   const void** indirection_buffer,
-  void* packed_weights,
+  xnn_float16* packed_weights,
   bool align_corners,
   bool tensorflow_legacy);
 
@@ -224,7 +225,7 @@ XNN_INTERNAL void xnn_indirection_init_pavgpool2d_f16(
   size_t stride_width,
   size_t padding_top,
   size_t padding_left,
-  uint16_t* pixelwise_buffer);
+  xnn_float16* pixelwise_buffer);
 
 XNN_INTERNAL void xnn_indirection_init_pavgpool2d_f32(
   size_t input_height,

@@ -35,8 +35,8 @@ void f16_rsum(
   const size_t rows = state.range(0);
   const size_t batch = state.range(0);
 
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> input(rows * batch + XNN_EXTRA_BYTES / sizeof(uint16_t));
-  std::vector<uint16_t> output(rows);
+  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> input(rows * batch + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  std::vector<xnn_float16> output(rows);
   std::iota(input.begin(), input.end(), 1);
 
   // Prepare parameters.
@@ -45,7 +45,7 @@ void f16_rsum(
 
   for (auto _ : state) {
     for (int i = 0; i < rows; ++i) {
-      rsum(batch * sizeof(uint16_t), &input[i * batch], &output[i], &params);
+      rsum(batch * sizeof(xnn_float16), &input[i * batch], &output[i], &params);
     }
   }
 
@@ -67,7 +67,7 @@ void f16_f32acc_rsum(
   const size_t rows = state.range(0);
   const size_t batch = state.range(0);
 
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> input(rows * batch + XNN_EXTRA_BYTES / sizeof(uint16_t));
+  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> input(rows * batch + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::vector<float> output(rows);
   std::iota(input.begin(), input.end(), 1);
 
@@ -77,7 +77,7 @@ void f16_f32acc_rsum(
 
   for (auto _ : state) {
     for (int i = 0; i < rows; ++i) {
-      rsum(batch * sizeof(uint16_t), &input[i * batch], &output[i], &params);
+      rsum(batch * sizeof(xnn_float16), &input[i * batch], &output[i], &params);
     }
   }
 
@@ -227,9 +227,9 @@ void f16_f32acc_rdsum(
   const size_t rows = state.range(0);
   const size_t channels = state.range(1);
 
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> input(rows * channels + XNN_EXTRA_BYTES / sizeof(uint16_t));
+  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> input(rows * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::vector<float> output(channels);
-  std::vector<uint16_t> zero(channels + XNN_EXTRA_BYTES / sizeof(uint16_t), 0);
+  std::vector<xnn_float16> zero(channels + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
   std::iota(input.begin(), input.end(), 0.0f);
 
   // Prepare parameters.
@@ -237,7 +237,7 @@ void f16_f32acc_rdsum(
   init_params(&params, /*scale=*/1.0f / rows);
 
   for (auto _ : state) {
-    rdsum(rows, channels, input.data(), channels * sizeof(uint16_t), zero.data(), output.data(), &params);
+    rdsum(rows, channels, input.data(), channels * sizeof(xnn_float16), zero.data(), output.data(), &params);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();

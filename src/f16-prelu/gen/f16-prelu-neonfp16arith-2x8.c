@@ -18,10 +18,10 @@
 void xnn_f16_prelu_ukernel__neonfp16arith_2x8(
     size_t rows,
     size_t channels,
-    const void* restrict input,
+    const xnn_float16* restrict input,
     size_t input_stride,
-    const void* restrict weights,
-    void* restrict output,
+    const xnn_float16* restrict weights,
+    xnn_float16* restrict output,
     size_t output_stride) XNN_OOB_READS
 {
   assert(rows != 0);

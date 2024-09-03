@@ -20,7 +20,7 @@
 
 using CopyTestQS8 = UnaryTest<int8_t>;
 using CopyTestQU8 = UnaryTest<uint8_t>;
-using CopyTestF16 = UnaryTest<uint16_t>;
+using CopyTestF16 = UnaryTest<xnn_float16>;
 using CopyTestF32 = UnaryTest<float>;
 
 TEST_F(CopyTestQS8, define)
@@ -287,7 +287,7 @@ TEST_F(CopyTestQU8, matches_operator_api)
 
 TEST_F(CopyTestF16, matches_operator_api)
 {
-  std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
   std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
   std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
 

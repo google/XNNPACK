@@ -1,4 +1,4 @@
-// Copyright 2_lo9 Google LLC
+// Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -6,8 +6,8 @@
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
 $SIMD_TILE = BATCH_TILE // 4
-$ABC = "_lo23456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+$assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "PRELU", "RPRELU"]
 $assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
@@ -27,6 +27,8 @@ $  "MUL": lambda x: "vmulq_f32(%s, vb)" % x,
 $  "SUB": lambda x: "vsubq_f32(%s, vb)" % x,
 $  "RSUB": lambda x: "vsubq_f32(vb, %s)" % x,
 $  "SQRDIFF": lambda x: "vsubq_f32(%s, vb)" % x,
+$  "PRELU": lambda x: "vmulq_f32(%s, vb)" % x,
+$  "RPRELU": lambda x: "vmulq_f32(%s, vb)" % x,
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
 $PARAMS = {"LINEAR": "union xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
@@ -49,17 +51,28 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__${ISA}_u${BATCH_TILE}(
     const float32x4_t voutput_max = vld1q_dup_f32(&params->scalar.max);
   const float32x4_t vb = vld1q_dup_f32(input_b);
 
+  $if OP == "RPRELU":
+    const uint32x4_t vm = vcltq_s32(vreinterpretq_s32_f32(vb), vmovq_n_s32(0));
   $if BATCH_TILE > 4:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       $for N in range(SIMD_TILE):
-        float32x4_t vacc${ABC[N]} = vld1q_f32(input_a); input_a += 4;
+        const float32x4_t va${ABC[N]} = vld1q_f32(input_a); input_a += 4;
 
       $for N in range(SIMD_TILE):
-        vacc${ABC[N]} = ${VOPQ_F32("vacc" + ABC[N])};
+        float32x4_t vacc${ABC[N]} = ${VOPQ_F32("va" + ABC[N])};
 
       $if OP == "SQRDIFF":
         $for N in range(SIMD_TILE):
           vacc${ABC[N]} = vmulq_f32(vacc${ABC[N]}, vacc${ABC[N]});
+      $elif OP == "PRELU":
+        $for N in range(SIMD_TILE):
+          const uint32x4_t vm${ABC[N]} = vcltq_s32(vreinterpretq_s32_f32(va${ABC[N]}), vmovq_n_s32(0));
+
+        $for N in range(SIMD_TILE):
+          vacc${ABC[N]} = vbslq_f32(vm${ABC[N]}, vacc${ABC[N]}, va${ABC[N]});
+      $elif OP == "RPRELU":
+        $for N in range(SIMD_TILE):
+          vacc${ABC[N]} = vbslq_f32(vm, vacc${ABC[N]}, vb);
 
       $if ACTIVATION == "MINMAX":
         $for N in range(SIMD_TILE):
@@ -77,6 +90,12 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__${ISA}_u${BATCH_TILE}(
     float32x4_t vacc = ${VOPQ_F32("va")};
     $if OP == "SQRDIFF":
       vacc = vmulq_f32(vacc, vacc);
+    $elif OP == "PRELU":
+      const uint32x4_t vm = vcltq_s32(vreinterpretq_s32_f32(va), vmovq_n_s32(0));
+      vacc = vbslq_f32(vm, vacc, va);
+    $elif OP == "RPRELU":
+      vacc = vbslq_f32(vm, vacc, vb);
+
     $if ACTIVATION == "MINMAX":
       vacc = vmaxq_f32(vacc, voutput_min);
       vacc = vminq_f32(vacc, voutput_max);
@@ -89,6 +108,12 @@ void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__${ISA}_u${BATCH_TILE}(
     float32x4_t vacc = ${VOPQ_F32("va")};
     $if OP == "SQRDIFF":
       vacc = vmulq_f32(vacc, vacc);
+    $elif OP == "PRELU":
+      const uint32x4_t vm = vcltq_s32(vreinterpretq_s32_f32(va), vmovq_n_s32(0));
+      vacc = vbslq_f32(vm, vacc, va);
+    $elif OP == "RPRELU":
+      vacc = vbslq_f32(vm, vacc, vb);
+
     $if ACTIVATION == "MINMAX":
       vacc = vmaxq_f32(vacc, voutput_min);
       vacc = vminq_f32(vacc, voutput_max);

@@ -16,7 +16,7 @@ $SIMD_TILE = BATCH_TILE // 8
 
 void xnn_f16_f32_vcvt_ukernel__f16c_u${BATCH_TILE}(
     size_t batch,
-    const void* input,
+    const xnn_float16* input,
     float* output,
     const void* params) XNN_OOB_READS
 {

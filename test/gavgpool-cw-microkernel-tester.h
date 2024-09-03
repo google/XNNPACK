@@ -126,20 +126,20 @@ void Test(xnn_f16_gavgpool_cw_ukernel_fn gavgpool, xnn_init_f16_gavgpool_neon_pa
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(0.1f, 10.0f);
 
-  std::vector<uint16_t> x(elements() * channels() +
-                          XNN_EXTRA_BYTES / sizeof(uint16_t));
-  std::vector<uint16_t> y(channels());
+  std::vector<xnn_float16> x(elements() * channels() +
+                          XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  std::vector<xnn_float16> y(channels());
   std::vector<float> y_ref(channels());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(x.begin(), x.end(),
-                  [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+                  [&]() { return xnn_float16_from_float(f32dist(rng)); });
     std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
 
     // Compute reference results, without clamping.
     for (size_t i = 0; i < channels(); i++) {
       float acc = 0.0f;
       for (size_t j = 0; j < elements(); j++) {
-        acc += fp16_ieee_to_fp32_value(x[i * elements() + j]);
+        acc += xnn_float16_to_float(x[i * elements() + j]);
       }
       y_ref[i] = acc / float(elements());
     }
@@ -150,16 +150,16 @@ void Test(xnn_f16_gavgpool_cw_ukernel_fn gavgpool, xnn_init_f16_gavgpool_neon_pa
     const float accumulated_max =
         *std::max_element(y_ref.cbegin(), y_ref.cend());
     const float accumulated_range = accumulated_max - accumulated_min;
-    const float y_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(
+    const float y_min = xnn_float16_to_float(xnn_float16_from_float(
         accumulated_min + accumulated_range / 255.0f * float(qmin())));
-    const float y_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(
+    const float y_max = xnn_float16_to_float(xnn_float16_from_float(
         accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
 
     // Prepare parameters.
     union xnn_f16_gavgpool_params params;
-    init_params(&params, fp16_ieee_from_fp32_value(1.0f / float(elements())),
-                fp16_ieee_from_fp32_value(y_min),
-                fp16_ieee_from_fp32_value(y_max), elements());
+    init_params(&params, xnn_float16_from_float(1.0f / float(elements())),
+                xnn_float16_from_float(y_min),
+                xnn_float16_from_float(y_max), elements());
 
     // Clamp reference results.
     for (float& y_value : y_ref) {
@@ -167,18 +167,18 @@ void Test(xnn_f16_gavgpool_cw_ukernel_fn gavgpool, xnn_init_f16_gavgpool_neon_pa
     }
 
     // Call optimized micro-kernel.
-    gavgpool(elements() * sizeof(uint16_t), channels(), x.data(), y.data(),
+    gavgpool(elements() * sizeof(xnn_float16), channels(), x.data(), y.data(),
              &params);
 
     // Verify results.
     for (size_t i = 0; i < channels(); i++) {
-      EXPECT_LE(fp16_ieee_to_fp32_value(y[i]), y_max)
+      EXPECT_LE(xnn_float16_to_float(y[i]), y_max)
           << "at position " << i << ", elements = " << elements()
           << ", channels = " << channels();
-      EXPECT_GE(fp16_ieee_to_fp32_value(y[i]), y_min)
+      EXPECT_GE(xnn_float16_to_float(y[i]), y_min)
           << "at position " << i << ", elements = " << elements()
           << ", channels = " << channels();
-      EXPECT_NEAR(fp16_ieee_to_fp32_value(y[i]), y_ref[i],
+      EXPECT_NEAR(xnn_float16_to_float(y[i]), y_ref[i],
                   1.0e-2f * std::abs(y_ref[i]))
           << "at position " << i << ", elements = " << elements()
           << ", channels = " << channels();

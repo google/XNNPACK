@@ -137,7 +137,8 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_f16(
 
   union xnn_f16_minmax_params params;
   if XNN_LIKELY(gemm_config->init.f16 != NULL) {
-    gemm_config->init.f16(&params, UINT16_C(0xFC00), UINT16_C(0x7C00));
+    gemm_config->init.f16(&params, xnn_float16_from_float(-INFINITY), 
+                          xnn_float16_from_float(INFINITY));
   }
 
   return create_batch_matrix_multiply_nc(

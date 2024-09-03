@@ -19,7 +19,7 @@
 
 using SigmoidTestQS8 = UnaryTest<int8_t>;
 using SigmoidTestQU8 = UnaryTest<uint8_t>;
-using SigmoidTestF16 = UnaryTest<uint16_t>;
+using SigmoidTestF16 = UnaryTest<xnn_float16>;
 using SigmoidTestF32 = UnaryTest<float>;
 
 TEST_F(SigmoidTestQS8, define)
@@ -105,7 +105,7 @@ TEST_F(SigmoidTestQU8, define)
 TEST_F(SigmoidTestF16, define)
 {
   std::uniform_real_distribution<float> f32dist(-255.0f, 255.0f);
-  std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -304,7 +304,7 @@ TEST_F(SigmoidTestQU8, matches_operator_api)
 TEST_F(SigmoidTestF16, matches_operator_api)
 {
   std::uniform_real_distribution<float> f32dist(-25.0f, 25.0f);
-  std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

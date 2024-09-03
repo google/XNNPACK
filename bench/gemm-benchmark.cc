@@ -25,7 +25,6 @@
 #include <random>
 #include <vector>
 
-#include <fp16/fp16.h>
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
@@ -254,14 +253,14 @@ void GEMMBenchmark(benchmark::State& state,
   const xnn_qs8_packing_params packing_params = {/*input_zero_point=*/1};
   pack(1, nc, kc, nr, kr, sr, k.data(), /*bias=*/nullptr, /*scale=*/nullptr,
        w.data(), sizeof(float) * 2 * nr, &packing_params);
-  std::vector<uint16_t> c(c_elements * num_buffers);
+  std::vector<xnn_float16> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), UINT16_C(0x7E00) /* NaN */);
 
   // Prepare parameters.
   xnn_f16_minmax_params params;
   init_params(&params,
-              fp16_ieee_from_fp32_value(std::numeric_limits<int8_t>::min()),
-              fp16_ieee_from_fp32_value(std::numeric_limits<int8_t>::max()));
+              xnn_float16_from_float(std::numeric_limits<int8_t>::min()),
+              xnn_float16_from_float(std::numeric_limits<int8_t>::max()));
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -279,8 +278,8 @@ void GEMMBenchmark(benchmark::State& state,
       const uint32_t mb = min(mc - m, mr);
       gemm(mb, nc, kc, a.data() + m * kc, kc * sizeof(int8_t),
            w.data() + w_elements * buffer_index,
-           c.data() + (buffer_index * mc + m) * nc, nc * sizeof(uint16_t),
-           nr * sizeof(uint16_t), &params, quantization_params.data() + m);
+           c.data() + (buffer_index * mc + m) * nc, nc * sizeof(xnn_float16),
+           nr * sizeof(xnn_float16), &params, quantization_params.data() + m);
     }
   }
 
@@ -417,7 +416,7 @@ void GEMMBenchmark(benchmark::State& state,
   std::generate(a.begin(), a.end(), std::ref(i8rng));
   std::vector<uint8_t> k(nc * kc / 2);
   std::generate(k.begin(), k.end(), std::ref(u8rng));
-  std::vector<uint16_t> kernel_scale2d(nc * k2 / bl);
+  std::vector<xnn_float16> kernel_scale2d(nc * k2 / bl);
   std::generate(k.begin(), k.end(), std::ref(u8rng));
   std::generate(kernel_scale2d.begin(), kernel_scale2d.end(),
                 [&]() { return math_cvt_bf16_fp32(scalerng()); });
@@ -432,7 +431,7 @@ void GEMMBenchmark(benchmark::State& state,
   const size_t c_elements = mc * nc;
   const size_t num_buffers = 1 + benchmark::utils::DivideRoundUp<size_t>(
                                      benchmark::utils::GetMaxCacheSize(),
-                                     w_bytes + sizeof(uint16_t) * c_elements);
+                                     w_bytes + sizeof(xnn_float16) * c_elements);
 
   std::vector<char, AlignedAllocator<char, 64>> w(w_bytes * num_buffers);
   std::fill(w.begin(), w.end(), 0);
@@ -442,14 +441,14 @@ void GEMMBenchmark(benchmark::State& state,
   pack(1, nc, k2, nr, kr, sr, bl, k.data(), /*bias=*/nullptr,
        /*scale=*/kernel_scale2d.data(), w.data(), sizeof(float) * nr,
        sizeof(float) * nr, &packing_params);
-  std::vector<uint16_t> c(c_elements * num_buffers);
+  std::vector<xnn_float16> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), std::nanf(""));
 
   // Prepare parameters.
   xnn_f16_qb4w_minmax_params params;
   init_params(
-      &params, fp16_ieee_from_fp32_value(std::numeric_limits<int8_t>::min()),
-      fp16_ieee_from_fp32_value(std::numeric_limits<int8_t>::max()), 8, bl);
+      &params, xnn_float16_from_float(std::numeric_limits<int8_t>::min()),
+      xnn_float16_from_float(std::numeric_limits<int8_t>::max()), 8, bl);
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -467,8 +466,8 @@ void GEMMBenchmark(benchmark::State& state,
       const uint32_t mb = min(mc - m, mr);
       gemm(mb, nc, kc, a.data() + m * kc, kc * sizeof(int8_t),
            w.data() + w_bytes * buffer_index,
-           c.data() + (buffer_index * mc + m) * nc, nc * sizeof(uint16_t),
-           nr * sizeof(uint16_t), &params, quantization_params.data() + m);
+           c.data() + (buffer_index * mc + m) * nc, nc * sizeof(xnn_float16),
+           nr * sizeof(xnn_float16), &params, quantization_params.data() + m);
     }
   }
 
@@ -531,14 +530,14 @@ void GEMMBenchmark(benchmark::State& state,
                                                       /*kernel_zero_point=*/8};
   pack(1, nc, kc, nr, kr, sr, k.data(), /*bias=*/nullptr, /*scale=*/nullptr,
        w.data(), sizeof(float) * 2 * nr, &packing_params);
-  std::vector<uint16_t> c(c_elements * num_buffers);
+  std::vector<xnn_float16> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), std::nanf(""));
 
   // Prepare parameters.
   xnn_f16_qc4w_minmax_params params;
   init_params(&params,
-              fp16_ieee_from_fp32_value(std::numeric_limits<int8_t>::min()),
-              fp16_ieee_from_fp32_value(std::numeric_limits<int8_t>::max()), 8);
+              xnn_float16_from_float(std::numeric_limits<int8_t>::min()),
+              xnn_float16_from_float(std::numeric_limits<int8_t>::max()), 8);
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -556,8 +555,8 @@ void GEMMBenchmark(benchmark::State& state,
       const uint32_t mb = min(mc - m, mr);
       gemm(mb, nc, kc, a.data() + m * kc, kc * sizeof(int8_t),
            w.data() + w_elements * buffer_index,
-           c.data() + (buffer_index * mc + m) * nc, nc * sizeof(uint16_t),
-           nr * sizeof(uint16_t), &params, quantization_params.data() + m);
+           c.data() + (buffer_index * mc + m) * nc, nc * sizeof(xnn_float16),
+           nr * sizeof(xnn_float16), &params, quantization_params.data() + m);
     }
   }
 
@@ -611,7 +610,7 @@ void GEMMBenchmark(benchmark::State& state,
   std::generate(a.begin(), a.end(), std::ref(i8rng));
   std::vector<uint8_t> k(nc * kc / 2);
   std::generate(k.begin(), k.end(), std::ref(u8rng));
-  std::vector<uint16_t> kernel_scale2d(nc * k2 / bl);
+  std::vector<xnn_float16> kernel_scale2d(nc * k2 / bl);
   std::generate(k.begin(), k.end(), std::ref(u8rng));
   std::generate(kernel_scale2d.begin(), kernel_scale2d.end(),
                 [&]() { return math_cvt_bf16_fp32(scalerng()); });
@@ -1130,13 +1129,13 @@ void GEMMBenchmark(benchmark::State& state, xnn_f16_gemm_minmax_ukernel_fn gemm,
   auto rng = std::mt19937(random_device());
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
-  auto f16rng = std::bind(fp16_ieee_from_fp32_value, f32rng);
+  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
 
-  std::vector<uint16_t> a(mc * kc + XNN_EXTRA_BYTES / sizeof(uint16_t));
+  std::vector<xnn_float16> a(mc * kc + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::generate(a.begin(), a.end(), std::ref(f16rng));
-  std::vector<uint16_t> k(nc * kc);
+  std::vector<xnn_float16> k(nc * kc);
   std::generate(k.begin(), k.end(), std::ref(f16rng));
-  std::vector<uint16_t> b(nc);
+  std::vector<xnn_float16> b(nc);
   std::generate(b.begin(), b.end(), std::ref(f16rng));
 
   const size_t w_elements = nc_stride * kc_stride + nc_stride;
@@ -1144,14 +1143,14 @@ void GEMMBenchmark(benchmark::State& state, xnn_f16_gemm_minmax_ukernel_fn gemm,
   const size_t num_buffers =
       1 + benchmark::utils::DivideRoundUp<size_t>(
               benchmark::utils::GetMaxCacheSize(),
-              sizeof(uint16_t) * (w_elements + c_elements));
+              sizeof(xnn_float16) * (w_elements + c_elements));
 
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> w(w_elements *
+  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> w(w_elements *
                                                           num_buffers);
   std::fill(w.begin(), w.end(), 0);
   pack(/*groups=*/1, nc, kc, nr, kr, sr, k.data(), b.data(), /*scale=*/nullptr,
        w.data(), /*extra_bytes=*/0, /*params=*/nullptr);
-  std::vector<uint16_t> c(c_elements * num_buffers);
+  std::vector<xnn_float16> c(c_elements * num_buffers);
   std::fill(c.begin(), c.end(), UINT16_C(0x7E00) /* NaN */);
 
   // Prepare minmax parameters.
@@ -1166,7 +1165,7 @@ void GEMMBenchmark(benchmark::State& state, xnn_f16_gemm_minmax_ukernel_fn gemm,
     // - W is not in cache (for any cache level)
     // - C is not in cache (for any cache level)
     state.PauseTiming();
-    benchmark::utils::PrefetchToL1(a.data(), a.size() * sizeof(uint16_t));
+    benchmark::utils::PrefetchToL1(a.data(), a.size() * sizeof(xnn_float16));
     buffer_index = (buffer_index + 1) % num_buffers;
     state.ResumeTiming();
 
@@ -1174,11 +1173,11 @@ void GEMMBenchmark(benchmark::State& state, xnn_f16_gemm_minmax_ukernel_fn gemm,
       const uint32_t mb = min(mc - m, mr);
       for (uint32_t n = 0; n < nc; n += nr) {
         const uint32_t nb = min(nc - n, nr);
-        gemm(mb, nb, kc * sizeof(uint16_t), a.data() + m * kc,
-             kc * sizeof(uint16_t),
+        gemm(mb, nb, kc * sizeof(xnn_float16), a.data() + m * kc,
+             kc * sizeof(xnn_float16),
              w.data() + (nc_stride * buffer_index + n) * (kc_stride + 1),
-             c.data() + (mc * buffer_index + m) * nc + n, nc * sizeof(uint16_t),
-             nr * sizeof(uint16_t), &params);
+             c.data() + (mc * buffer_index + m) * nc + n, nc * sizeof(xnn_float16),
+             nr * sizeof(xnn_float16), &params);
       }
     }
   }

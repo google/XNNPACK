@@ -17,7 +17,7 @@
 #include "xnnpack/subgraph.h"
 #include "subgraph-binary-tester.h"
 
-using Minimum2TestF16 = BinaryTest<uint16_t>;
+using Minimum2TestF16 = BinaryTest<xnn_float16>;
 using Minimum2TestF32 = BinaryTest<float>;
 
 TEST_F(Minimum2TestF16, define) {

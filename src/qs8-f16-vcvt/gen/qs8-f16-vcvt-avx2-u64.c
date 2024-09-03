@@ -19,7 +19,7 @@
 void xnn_qs8_f16_vcvt_ukernel__avx2_u64(
     size_t batch,
     const int8_t* input,
-    void* output,
+    xnn_float16* output,
     const struct xnn_qs8_f16_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);

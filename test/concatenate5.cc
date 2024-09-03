@@ -146,7 +146,7 @@ template <typename T> class Concatenate5Test : public ::testing::Test {
 
 using Concatenate5TestQS8 = Concatenate5Test<int8_t>;
 using Concatenate5TestQU8 = Concatenate5Test<uint8_t>;
-using Concatenate5TestF16 = Concatenate5Test<uint16_t>;
+using Concatenate5TestF16 = Concatenate5Test<xnn_float16>;
 using Concatenate5TestF32 = Concatenate5Test<float>;
 
 TEST_F(Concatenate5TestQS8, define)
@@ -707,11 +707,11 @@ TEST_F(Concatenate5TestQU8, matches_operator_api)
 
 TEST_F(Concatenate5TestF16, matches_operator_api)
 {
-  std::generate(input1.begin(), input1.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-  std::generate(input2.begin(), input2.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-  std::generate(input3.begin(), input3.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-  std::generate(input4.begin(), input4.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-  std::generate(input5.begin(), input5.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+  std::generate(input1.begin(), input1.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+  std::generate(input2.begin(), input2.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+  std::generate(input3.begin(), input3.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+  std::generate(input4.begin(), input4.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+  std::generate(input5.begin(), input5.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
   std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
   std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
 
@@ -746,18 +746,18 @@ TEST_F(Concatenate5TestF16, matches_operator_api)
     xnn_setup_copy_nc_x16(op1, input1.data(), operator_output.data()));
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_copy_nc_x16(op2, input2.data(), (uint16_t*) operator_output.data() + op1->channels));
+    xnn_setup_copy_nc_x16(op2, input2.data(), (xnn_float16*) operator_output.data() + op1->channels));
   ASSERT_EQ(
     xnn_status_success,
-    xnn_setup_copy_nc_x16(op3, input3.data(), (uint16_t*) operator_output.data() + op1->channels + op2->channels));
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_copy_nc_x16(
-      op4, input4.data(), (uint16_t*) operator_output.data() + op1->channels + op2->channels + op3->channels));
+    xnn_setup_copy_nc_x16(op3, input3.data(), (xnn_float16*) operator_output.data() + op1->channels + op2->channels));
   ASSERT_EQ(
     xnn_status_success,
     xnn_setup_copy_nc_x16(
-      op5, input5.data(), (uint16_t*) operator_output.data() + op1->channels + op2->channels + op3->channels + op4->channels));
+      op4, input4.data(), (xnn_float16*) operator_output.data() + op1->channels + op2->channels + op3->channels));
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_setup_copy_nc_x16(
+      op5, input5.data(), (xnn_float16*) operator_output.data() + op1->channels + op2->channels + op3->channels + op4->channels));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op1, /*threadpool=*/nullptr));
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op2, /*threadpool=*/nullptr));

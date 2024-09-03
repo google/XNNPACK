@@ -33,16 +33,16 @@ class Gelu {};
 class Default {};
 
 struct Float16 {
-  uint16_t value;
+  xnn_float16 value;
 
   Float16() = default;
-  Float16(float value) : value(fp16_ieee_from_fp32_value(value)) {}
+  Float16(float value) : value(xnn_float16_from_float(value)) {}
 
-  operator float() const { return fp16_ieee_to_fp32_value(value); }
+  operator float() const { return xnn_float16_to_float(value); }
 };
 
 struct BFloat16 {
-  uint16_t value;
+  xnn_float16 value;
 
   BFloat16() = default;
   BFloat16(float value) : value(cvt_f32_bf16(value)) {}
@@ -51,17 +51,17 @@ struct BFloat16 {
 
 private:
   union bf16float {
-    uint16_t bf[2];
+    xnn_float16 bf[2];
     float f;
   };
-  static float cvt_bf16_f32(uint16_t r) {
+  static float cvt_bf16_f32(xnn_float16 r) {
     bf16float q{};
     q.f = 0;
     q.bf[1] = r;
     return q.f;
   }
 
-  static uint16_t cvt_f32_bf16(float f) {
+  static xnn_float16 cvt_f32_bf16(float f) {
     bf16float q{};
     q.f = f;
     return q.bf[1];
@@ -312,7 +312,7 @@ class VUnaryMicrokernelTester {
 
  private:
   template <typename T>
-  using void_or_float = typename std::conditional<std::is_same<T, float>::value, float, void>::type;
+  using void_or_float = typename std::conditional<std::is_same<T, float>::value, float, uint16_t>::type;
 
   // Generic test function for `vunary` kernels.
   //
@@ -359,7 +359,7 @@ class VUnaryMicrokernelTester {
       const UKernelParamsType* params_ptr = init_params(&params);
 
       // Call optimized micro-kernel.
-      ukernel(batch_size() * sizeof(T), x_data, y.data(), params_ptr);
+      ukernel(batch_size() * sizeof(T), reinterpret_cast<const void_or_float<T>*>(x_data), reinterpret_cast<void_or_float<T>*>(y.data()), params_ptr);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

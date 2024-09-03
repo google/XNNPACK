@@ -429,13 +429,13 @@ DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_igemm_minmax_ukernel_16x32__hv
       size_t nr,                                           \
       size_t kc,                                           \
       size_t ks,                                           \
-      const void** a,                                      \
-      const void* w,                                       \
-      void* c,                                             \
+      const xnn_float16** a,                      \
+      const xnn_float16* w,                       \
+      xnn_float16*,                               \
       size_t cm_stride,                                    \
       size_t cn_stride,                                    \
       size_t a_offset,                                     \
-      const void* zero,                                    \
+      const xnn_float16* zero,                    \
       const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_igemm_minmax_ukernel_1x8__neonfp16arith_ld64)
@@ -761,7 +761,7 @@ DECLARE_QU8_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qu8_igemm_minmax_fp32_ukernel_4x4_
       size_t ks,                                                                  \
       const int8_t** a,                                                           \
       const void* w,                                                              \
-      void* c,                                                                    \
+      xnn_float16*,                                                      \
       size_t cm_stride,                                                           \
       size_t cn_stride,                                                           \
       size_t a_offset,                                                            \

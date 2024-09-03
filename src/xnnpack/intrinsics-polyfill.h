@@ -370,6 +370,16 @@ void Q6_V_vstu_variable(void *addr, uint32_t n, HVX_Vector vin)
     Q6_vmem_QnRIV(ql_not, (HVX_Vector*) addr, vin);
 }
 
+static XNN_INTRINSIC
+void vstu_variable_scalar(char *bytes, size_t num_bytes, HVX_Vector vin) {
+  char temp[128]  __attribute__((aligned(128)));
+  *((HVX_Vector *)temp) = vin;
+  for (size_t idx = 0; idx < num_bytes; idx++){
+     *bytes = temp[idx];
+     bytes++;
+  }
+}
+
 // 32x16 Integer Multiplication:
 // - multiplier: 32-bit integer
 // - vin: 16-bit signed integer

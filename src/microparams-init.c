@@ -491,7 +491,7 @@ void xnn_init_blockwise_scale_bf16_params(
   size_t num_blocks,
   size_t block_stride,
   size_t stride_offset,
-  const uint16_t scale[XNN_MIN_ELEMENTS(1)],
+  const xnn_bfloat16 scale[XNN_MIN_ELEMENTS(1)],
   void* packed_w)
 {
   void* packed_w_saved = packed_w;
@@ -504,7 +504,7 @@ void xnn_init_blockwise_scale_bf16_params(
       for (size_t tile_offset = 0; tile_offset < tile_size; tile_offset++) {
         size_t scale_index = (tile_start + tile_offset) * num_blocks + block_start;
         // 1/16 because the weight are << 4 in the innermost loop to save a shift
-        float scale_16 = math_cvt_bf16_fp32(math_cvt_fp32_bf16(scale[scale_index]) / 16.0f);
+        float scale_16 = math_cvt_bf16_fp32(xnn_bfloat16_to_float(scale[scale_index]) / 16.0f);
         unaligned_indexed_store_u16(packed_w, tile_offset, scale_16);
       }
       packed_w = (void*) ((uintptr_t) packed_w + stride);
@@ -517,7 +517,7 @@ void xnn_init_blockwise_scale_bf16_params(
       for (size_t tile_offset = 0; tile_offset < tile_size; tile_offset++) {
         size_t scale_index = (tile_start + tile_offset) * num_blocks + block_start;
         // 1/16 because the weight are << 4 in the innermost loop to save a shift
-        float scale_16 = math_cvt_bf16_fp32(math_cvt_fp32_bf16(scale[scale_index]) / 16.0f);
+        float scale_16 = math_cvt_bf16_fp32(xnn_bfloat16_to_float(scale[scale_index]) / 16.0f);
         unaligned_indexed_store_u16(packed_w, tile_offset, scale_16);
       }
       packed_w = (void*) ((uintptr_t) packed_w + substride);
@@ -1318,9 +1318,9 @@ void xnn_update_qu8_avgpool_minmax_fp32_wasmsimd_params(
 
 size_t xnn_init_f16_scale_scalar_params(
   struct xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t scale)
+  xnn_float16 scale)
 {
-  params->scale = scale;
+  params->scalar.scale = scale;
   return sizeof(params[0]);
 }
 
@@ -1328,7 +1328,7 @@ size_t xnn_init_f16_f32acc_scale_scalar_params(
   struct xnn_f16_f32acc_scale_params params[XNN_MIN_ELEMENTS(1)],
   float scale)
 {
-  params->scale = scale;
+  params->scalar.scale = scale;
   return sizeof(params[0]);
 }
 
@@ -1336,7 +1336,7 @@ size_t xnn_init_f32_scale_scalar_params(
   union xnn_f32_scale_params params[XNN_MIN_ELEMENTS(1)],
   float scale)
 {
-  params->scale = scale;
+  params->scalar.scale = scale;
   return sizeof(params[0]);
 }
 
@@ -1349,9 +1349,9 @@ void xnn_update_f32_scaleminmax_scalar_params(
 
 size_t xnn_init_f16_scaleminmax_scalar_params(
   struct xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t scale,
-  uint16_t min,
-  uint16_t max)
+  xnn_float16 scale,
+  xnn_float16 min,
+  xnn_float16 max)
 {
   params->scalar.scale = scale;
   params->scalar.min = min;
@@ -1361,7 +1361,7 @@ size_t xnn_init_f16_scaleminmax_scalar_params(
 
 void xnn_update_f16_scaleminmax_scalar_params(
   struct xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t scale)
+  xnn_float16 scale)
 {
   params->scalar.scale = scale;
 }
@@ -1519,18 +1519,18 @@ void xnn_update_f16_gavgpool_scalar_params(
 
 size_t xnn_init_bf16_minmax_scalar_params(
   union xnn_bf16_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t output_min,
-  uint16_t output_max)
+  xnn_bfloat16 output_min,
+  xnn_bfloat16 output_max)
 {
-  params->scalar.min = uint32_as_float((uint32_t) output_min << 16);
-  params->scalar.max = uint32_as_float((uint32_t) output_max << 16);
+  params->scalar.min = xnn_bfloat16_to_float(output_min);
+  params->scalar.max = xnn_bfloat16_to_float(output_max);
   return sizeof(params->scalar);
 }
 
 size_t xnn_init_f16_minmax_scalar_params(
   union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t min,
-  uint16_t max)
+  xnn_float16 min,
+  xnn_float16 max)
 {
   params->scalar.min = min;
   params->scalar.max = max;
@@ -1539,8 +1539,8 @@ size_t xnn_init_f16_minmax_scalar_params(
 
 size_t xnn_init_f16_qc4w_minmax_scalar_params(
   union xnn_f16_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t output_min,
-  uint16_t output_max,
+  xnn_float16 output_min,
+  xnn_float16 output_max,
   uint8_t kernel_zero_point)
 {
   assert(kernel_zero_point <= 15);
@@ -1551,8 +1551,8 @@ size_t xnn_init_f16_qc4w_minmax_scalar_params(
 
 size_t xnn_init_f16_qb4w_minmax_scalar_params(
   union xnn_f16_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t output_min,
-  uint16_t output_max,
+  xnn_float16 output_min,
+  xnn_float16 output_max,
   uint8_t kernel_zero_point,
   size_t blocksize)
 {
@@ -1867,9 +1867,9 @@ size_t xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params(
 
 size_t xnn_init_f16_elu_scalar_params(
   struct xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t prescale,
-  uint16_t alpha,
-  uint16_t beta)
+  xnn_float16 prescale,
+  xnn_float16 alpha,
+  xnn_float16 beta)
 {
   params->scalar.prescale = prescale;
   params->scalar.alpha = alpha;
@@ -1893,7 +1893,7 @@ size_t xnn_init_f32_elu_scalar_params(
 
 size_t xnn_init_f16_lrelu_scalar_params(
   struct xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t slope)
+  xnn_float16 slope)
 {
   params->scalar.slope = slope;
   return sizeof(params->scalar);
@@ -2217,7 +2217,7 @@ size_t xnn_init_qs8_mul_minmax_rndnu_neon_params(
 
 size_t xnn_init_f16_qs8_cvt_scalar_params(
   struct xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t scale,
+  xnn_float16 scale,
   int8_t output_zero_point,
   int8_t output_min,
   int8_t output_max)
@@ -2303,7 +2303,7 @@ size_t xnn_init_qs8_f32_cvt_scalar_params(
 
 size_t xnn_init_qs8_f16_cvt_scalar_params(
   struct xnn_qs8_f16_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t scale,
+  xnn_float16 scale,
   int8_t zero_point)
 {
   params->scalar.zero_point = (int16_t) zero_point;

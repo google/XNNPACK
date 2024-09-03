@@ -16,8 +16,8 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
+#include "xnnpack/math.h"
 #include "replicable_random_device.h"
 
 class RoPEOperatorTester {
@@ -83,10 +83,10 @@ class RoPEOperatorTester {
     std::uniform_real_distribution<float> f32rdist(1.0f, 10.0f);
     std::uniform_real_distribution<float> f32idist(0.01f, 0.1f);
 
-    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       batch_size() * tokens() * heads() * channels());
-    std::vector<uint16_t> weights(XNN_EXTRA_BYTES / sizeof(uint16_t) + tokens() * channels());
-    std::vector<uint16_t> output(batch_size() * tokens() * heads() * channels());
+    std::vector<xnn_float16> weights(XNN_EXTRA_BYTES / sizeof(xnn_float16) + tokens() * channels());
+    std::vector<xnn_float16> output(batch_size() * tokens() * heads() * channels());
     std::vector<float> output_ref(batch_size() * tokens() * heads() * channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -95,20 +95,20 @@ class RoPEOperatorTester {
           for (size_t h = 0; h < heads(); h++) {
             std::generate_n(input.begin() + ((n * tokens() + t) * heads() + h) * channels(),
                             channels() / 2,
-                            [&]() { return fp16_ieee_from_fp32_value(f32rdist(rng)); });
+                            [&]() { return xnn_float16_from_float(f32rdist(rng)); });
             std::generate_n(input.begin() + (((n * tokens() + t) * heads() + h) * channels() + channels() / 2),
                             channels() / 2,
-                            [&]() { return fp16_ieee_from_fp32_value(f32idist(rng)); });
+                            [&]() { return xnn_float16_from_float(f32idist(rng)); });
           }
         }
       }
       for (size_t t = 0; t < tokens(); t++) {
         std::generate_n(weights.begin() + t * channels(),
                         channels() / 2,
-                        [&]() { return fp16_ieee_from_fp32_value(f32rdist(rng)); });
+                        [&]() { return xnn_float16_from_float(f32rdist(rng)); });
         std::generate_n(weights.begin() + (t * channels() + channels() / 2),
                         channels() / 2,
-                        [&]() { return fp16_ieee_from_fp32_value(f32idist(rng)); });
+                        [&]() { return xnn_float16_from_float(f32idist(rng)); });
       }
       std::fill(output.begin(), output.end(), UINT16_C(0xDEAD));
       std::fill(output_ref.begin(), output_ref.end(), float(std::nan("")));
@@ -118,10 +118,10 @@ class RoPEOperatorTester {
         for (size_t t = 0; t < tokens(); t++) {
           for (size_t h = 0; h < heads(); h++) {
             for (size_t c = 0; c < channels() / 2; c++) {
-              float input_i = fp16_ieee_to_fp32_value(input[((n * tokens() + t) * heads() + h) * channels() + c]);
-              float weights_i = fp16_ieee_to_fp32_value(weights[t * channels() + c]);
-              float input_n = fp16_ieee_to_fp32_value(input[((n * tokens() + t) * heads() + h) * channels() + (c + channels() / 2)]);
-              float weights_n = fp16_ieee_to_fp32_value(weights[t * channels() + (c + channels() / 2)]);
+              float input_i = xnn_float16_to_float(input[((n * tokens() + t) * heads() + h) * channels() + c]);
+              float weights_i = xnn_float16_to_float(weights[t * channels() + c]);
+              float input_n = xnn_float16_to_float(input[((n * tokens() + t) * heads() + h) * channels() + (c + channels() / 2)]);
+              float weights_n = xnn_float16_to_float(weights[t * channels() + (c + channels() / 2)]);
               output_ref[((n * tokens() + t) * heads() + h) * channels() + c] = input_i * weights_i - input_n * weights_n;
               output_ref[((n * tokens() + t) * heads() + h) * channels() + (c + channels() / 2)] = input_i * weights_n + input_n * weights_i;
             }
@@ -165,7 +165,7 @@ class RoPEOperatorTester {
             for (size_t c = 0; c < channels(); c++) {
               const float tolerance = std::abs(output_ref[((n * tokens() + t) * heads() + h) * channels() + c]) * 1.0e-2f;
               ASSERT_NEAR(output_ref[((n * tokens() + t) * heads() + h) * channels() + c],
-                          fp16_ieee_to_fp32_value(output[((n * tokens() + t) * heads() + h) * channels() + c]),
+                          xnn_float16_to_float(output[((n * tokens() + t) * heads() + h) * channels() + c]),
                           tolerance)
                   << "batch " << n << " / " << batch_size()
                   << ", token " << t << " / " << tokens()

@@ -77,9 +77,9 @@ void BinaryElementwiseOperatorTester::TestQS8() const {
     output_stride *= output_dims[i - 1];
   }
 
-  std::vector<int8_t> input1(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+  std::vector<int8_t> input1(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
                              num_input1_elements());
-  std::vector<int8_t> input2(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+  std::vector<int8_t> input2(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
                              num_input2_elements());
   std::vector<int8_t> output(num_output_elements);
   std::vector<float> output_ref(num_output_elements);
@@ -290,9 +290,9 @@ void BinaryElementwiseOperatorTester::TestQU8() const {
     output_stride *= output_dims[i - 1];
   }
 
-  std::vector<uint8_t> input1(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+  std::vector<uint8_t> input1(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
                               num_input1_elements());
-  std::vector<uint8_t> input2(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+  std::vector<uint8_t> input2(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
                               num_input2_elements());
   std::vector<uint8_t> output(num_output_elements);
   std::vector<float> output_ref(num_output_elements);
@@ -495,17 +495,17 @@ void BinaryElementwiseOperatorTester::TestF16() const {
     output_stride *= output_dims[i - 1];
   }
 
-  std::vector<uint16_t> input1(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+  std::vector<xnn_float16> input1(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
                                num_input1_elements());
-  std::vector<uint16_t> input2(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+  std::vector<xnn_float16> input2(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
                                num_input2_elements());
-  std::vector<uint16_t> output(num_output_elements);
+  std::vector<xnn_float16> output(num_output_elements);
   std::vector<float> output_ref(num_output_elements);
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input1.begin(), input1.end(),
-                  [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+                  [&]() { return xnn_float16_from_float(f32dist(rng)); });
     std::generate(input2.begin(), input2.end(),
-                  [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+                  [&]() { return xnn_float16_from_float(f32dist(rng)); });
     std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
     // Compute reference results.
@@ -519,13 +519,13 @@ void BinaryElementwiseOperatorTester::TestF16() const {
                            k * output_strides[2] + l * output_strides[3] +
                            m * output_strides[4] + n * output_strides[5]] =
                     Compute(
-                        fp16_ieee_to_fp32_value(input1[i * input1_strides[0] +
+                        xnn_float16_to_float(input1[i * input1_strides[0] +
                                                        j * input1_strides[1] +
                                                        k * input1_strides[2] +
                                                        l * input1_strides[3] +
                                                        m * input1_strides[4] +
                                                        n * input1_strides[5]]),
-                        fp16_ieee_to_fp32_value(input2[i * input2_strides[0] +
+                        xnn_float16_to_float(input2[i * input2_strides[0] +
                                                        j * input2_strides[1] +
                                                        k * input2_strides[2] +
                                                        l * input2_strides[3] +
@@ -562,8 +562,8 @@ void BinaryElementwiseOperatorTester::TestF16() const {
     if (qmax() == std::numeric_limits<int16_t>::max()) {
       output_max = +std::numeric_limits<float>::infinity();
     }
-    output_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_min));
-    output_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_max));
+    output_min = xnn_float16_to_float(xnn_float16_from_float(output_min));
+    output_max = xnn_float16_to_float(xnn_float16_from_float(output_max));
 
     for (float& output_value : output_ref) {
       output_value = std::max(output_value, output_min);
@@ -711,7 +711,7 @@ void BinaryElementwiseOperatorTester::TestF16() const {
                     k * output_strides[2] + l * output_strides[3] +
                     m * output_strides[4] + n * output_strides[5];
                 ASSERT_NEAR(
-                    fp16_ieee_to_fp32_value(output[index]), output_ref[index],
+                    xnn_float16_to_float(output[index]), output_ref[index],
                     std::max(1.0e-4f, std::abs(output_ref[index]) * 1.0e-2f))
                     << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k
                     << ", " << l << ", " << m << ", " << n << ")";
@@ -1373,9 +1373,9 @@ void BinaryElementwiseOperatorTester::TestRunQS8() const {
     output_stride *= output_dims[i - 1];
   }
 
-  std::vector<int8_t> input1(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+  std::vector<int8_t> input1(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
                              num_input1_elements());
-  std::vector<int8_t> input2(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+  std::vector<int8_t> input2(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
                              num_input2_elements());
   std::vector<int8_t> output(num_output_elements);
   std::vector<float> output_ref(num_output_elements);
@@ -1547,9 +1547,9 @@ void BinaryElementwiseOperatorTester::TestRunQU8() const {
     output_stride *= output_dims[i - 1];
   }
 
-  std::vector<uint8_t> input1(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+  std::vector<uint8_t> input1(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
                               num_input1_elements());
-  std::vector<uint8_t> input2(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+  std::vector<uint8_t> input2(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
                               num_input2_elements());
   std::vector<uint8_t> output(num_output_elements);
   std::vector<float> output_ref(num_output_elements);

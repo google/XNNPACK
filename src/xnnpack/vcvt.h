@@ -19,7 +19,7 @@ extern "C" {
 #define DECLARE_F16_F32_VCVT_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                           \
       size_t n,                                        \
-      const void* input,                               \
+      const xnn_float16* input,               \
       float* output,                                   \
       const void* params);
 
@@ -102,7 +102,7 @@ DECLARE_F16_F32_VCVT_UKERNEL_FUNCTION(xnn_f16_f32_vcvt_ukernel__scalar_u4)
   XNN_INTERNAL void fn_name(                           \
       size_t n,                                        \
       const float* input,                              \
-      void* output,                                    \
+      xnn_float16* output,                    \
       const void* params);
 
 DECLARE_F32_F16_VCVT_UKERNEL_FUNCTION(xnn_f32_f16_vcvt_ukernel__neon_u8)
@@ -158,7 +158,7 @@ DECLARE_F32_F16_VCVT_UKERNEL_FUNCTION(xnn_f32_f16_vcvt_ukernel__scalar_fabsf_u4)
 #define DECLARE_F16_QS8_VCVT_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                           \
       size_t n,                                        \
-      const void* input,                               \
+      const xnn_float16* input,               \
       int8_t* output,                                  \
       const struct xnn_f16_qs8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
@@ -410,7 +410,7 @@ DECLARE_QS16_QS8_VCVT_UKERNEL_FUNCTION(xnn_qs16_qs8_vcvt_ukernel__scalar_u4)
   XNN_INTERNAL void fn_name(                           \
       size_t n,                                        \
       const int8_t* input,                             \
-      void* output,                                    \
+      xnn_float16* output,                    \
       const struct xnn_qs8_f16_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_QS8_F16_VCVT_UKERNEL_FUNCTION(xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u8)

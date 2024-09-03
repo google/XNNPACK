@@ -32,10 +32,10 @@ void xnn_f32_vminc_ukernel__avx512f_u16(
   const __m512 vb = _mm512_set1_ps(*input_b);
 
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
-    __m512 vacc0 = _mm512_loadu_ps(input_a);
+    const __m512 va0 = _mm512_loadu_ps(input_a);
     input_a += 16;
 
-    vacc0 = _mm512_min_ps(vacc0, vb);
+    __m512 vacc0 = _mm512_min_ps(va0, vb);
 
 
 
@@ -49,8 +49,9 @@ void xnn_f32_vminc_ukernel__avx512f_u16(
     batch >>= XNN_LOG2_SIZEOF_FLOAT;
     const __mmask16 vmask = _cvtu32_mask16((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
-    __m512 vacc = _mm512_maskz_loadu_ps(vmask, input_a);
-    vacc = _mm512_maskz_min_ps(vmask, vacc, vb);
+    __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
+    __m512 vacc = _mm512_min_ps(va, vb);
+
     _mm512_mask_storeu_ps(output, vmask, vacc);
   }
 }

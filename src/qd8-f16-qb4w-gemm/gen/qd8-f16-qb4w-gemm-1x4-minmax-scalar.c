@@ -21,7 +21,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x4__scalar(
     const int8_t* restrict a,
     size_t a_stride,
     const void* restrict w,
-    uint16_t* restrict c,
+    xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     const union xnn_f16_qb4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
@@ -37,7 +37,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x4__scalar(
   assert(bl % 32 == 0);
 
   const int8_t* a0 = a;
-  uint16_t* c0 = c;
+  xnn_float16* c0 = c;
 
 
   kc = round_up_po2(kc, 2);
@@ -127,38 +127,38 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x4__scalar(
 
     w = (const float*) w + 4;
 
-    const float voutput_min = fp16_ieee_to_fp32_value(params->scalar.min);
+    const float voutput_min = fp16_ieee_to_fp32_value(*(const uint16_t*) &params->scalar.min);
     vout0x0 = math_max_f32(vout0x0, voutput_min);
     vout0x1 = math_max_f32(vout0x1, voutput_min);
     vout0x2 = math_max_f32(vout0x2, voutput_min);
     vout0x3 = math_max_f32(vout0x3, voutput_min);
 
-    const float voutput_max = fp16_ieee_to_fp32_value(params->scalar.max);
+    const float voutput_max = fp16_ieee_to_fp32_value(*(const uint16_t*) &params->scalar.max);
     vout0x0 = math_min_f32(vout0x0, voutput_max);
     vout0x1 = math_min_f32(vout0x1, voutput_max);
     vout0x2 = math_min_f32(vout0x2, voutput_max);
     vout0x3 = math_min_f32(vout0x3, voutput_max);
 
     if XNN_LIKELY(nc >= 4) {
-      c0[0] = fp16_ieee_from_fp32_value(vout0x0);
-      c0[1] = fp16_ieee_from_fp32_value(vout0x1);
-      c0[2] = fp16_ieee_from_fp32_value(vout0x2);
-      c0[3] = fp16_ieee_from_fp32_value(vout0x3);
+      c0[0] = xnn_float16_from_float(vout0x0);
+      c0[1] = xnn_float16_from_float(vout0x1);
+      c0[2] = xnn_float16_from_float(vout0x2);
+      c0[3] = xnn_float16_from_float(vout0x3);
 
       a0 = (const int8_t*) ((uintptr_t) a0 - kc);
 
-      c0 = (uint16_t*) ((uintptr_t) c0 + cn_stride);
+      c0 = (xnn_float16*) ((uintptr_t) c0 + cn_stride);
 
       nc -= 4;
     } else {
       if (nc & 2) {
-        c0[0] = fp16_ieee_from_fp32_value(vout0x0);
-        c0[1] = fp16_ieee_from_fp32_value(vout0x1);
+        c0[0] = xnn_float16_from_float(vout0x0);
+        c0[1] = xnn_float16_from_float(vout0x1);
         vout0x0 = vout0x2;
         c0 += 2;
       }
       if (nc & 1) {
-        c0[0] = fp16_ieee_from_fp32_value(vout0x0);
+        c0[0] = xnn_float16_from_float(vout0x0);
       }
 
       nc = 0;

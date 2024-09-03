@@ -52,7 +52,6 @@ void xnn_f32_vsqrdiff_ukernel__wasmsimd_u16(
     vacc2 = wasm_f32x4_mul(vacc2, vacc2);
     vacc3 = wasm_f32x4_mul(vacc3, vacc3);
 
-
     wasm_v128_store(output, vacc0);
     wasm_v128_store(output + 4, vacc1);
     wasm_v128_store(output + 8, vacc2);

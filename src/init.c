@@ -23,8 +23,7 @@
 
 #include "xnnpack.h"
 #include "xnnpack/allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/config.h"
+#include "xnnpack/hardware-config.h"
 #include "xnnpack/init-once.h"
 #include "xnnpack/log.h"
 #include "xnnpack/params.h"

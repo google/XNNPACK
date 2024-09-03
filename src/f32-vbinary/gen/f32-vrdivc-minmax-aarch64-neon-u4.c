@@ -2,7 +2,7 @@
 //   Template: src/f32-vbinary/vopc-neon.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2_lo9 Google LLC
+// Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -36,6 +36,7 @@ void xnn_f32_vrdivc_minmax_ukernel__aarch64_neon_u4(
     const float32x4_t va = vld1q_f32(input_a); input_a += 4;
 
     float32x4_t vacc = vdivq_f32(vb, va);
+
     vacc = vmaxq_f32(vacc, voutput_min);
     vacc = vminq_f32(vacc, voutput_max);
 
@@ -45,6 +46,7 @@ void xnn_f32_vrdivc_minmax_ukernel__aarch64_neon_u4(
     const float32x4_t va = vld1q_f32(input_a);
 
     float32x4_t vacc = vdivq_f32(vb, va);
+
     vacc = vmaxq_f32(vacc, voutput_min);
     vacc = vminq_f32(vacc, voutput_max);
 

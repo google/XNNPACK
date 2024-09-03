@@ -126,7 +126,7 @@ void xnn_${DATATYPE.lower()}_r${OP.lower()}_ukernel__${ISA}_u${BATCH_TILE}${ACC_
       output[${MAX_POS}] = vmax0;
   $elif DATATYPE == "F16":
     $if EMIT_MIN:
-      o[0] = fp16_ieee_from_fp32_value(vmin0);
+      o[0] = xnn_float16_from_float(vmin0);
     $if EMIT_MAX:
-      o[${MAX_POS}] = fp16_ieee_from_fp32_value(vmax0);
+      o[${MAX_POS}] = xnn_float16_from_float(vmax0);
 }

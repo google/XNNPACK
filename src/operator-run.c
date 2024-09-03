@@ -2310,9 +2310,9 @@ void xnn_compute_f16_qd8_convert(
   const void* input = (const void*) ((uintptr_t) context->x + x_stride * batch_index);
   void* output = (void*) ((uintptr_t) context->y + y_stride * batch_index);
 
-  uint16_t minmax[2];
+  xnn_float16 minmax[2];
   context->rminmax_ukernel(n, input, minmax, &context->params);
-  uint16_t f16_scale;
+  xnn_float16 f16_scale;
   context->quantization_params[batch_index] = xnn_f16_qd8_asymmetric_quantization_params(minmax[0], minmax[1], &f16_scale);
 
   struct xnn_f16_qs8_cvt_params params;

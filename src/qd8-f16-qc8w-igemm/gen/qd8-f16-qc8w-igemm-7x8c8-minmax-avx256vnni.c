@@ -25,7 +25,7 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_7x8c8__avx256vnni(
     size_t ks,
     const int8_t** restrict a,
     const void* restrict w,
-    void* restrict c,
+    xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,

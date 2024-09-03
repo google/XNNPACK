@@ -14,11 +14,11 @@ void xnn_f16_avgpool_minmax_ukernel_9p8x__neonfp16arith_c8(
     size_t output_pixels,
     size_t kernel_elements,
     size_t channels,
-    const void** input,
+    const xnn_float16** input,
     size_t input_offset,
-    const void* zero,
-    void* buffer,
-    void* output,
+    const xnn_float16* zero,
+    xnn_float16* buffer,
+    xnn_float16* output,
     size_t input_increment,
     size_t output_increment,
     const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
@@ -33,49 +33,49 @@ void xnn_f16_avgpool_minmax_ukernel_9p8x__neonfp16arith_c8(
 
   do {
     {
-      const uint16_t* i0 = *input++;
+      const uint16_t* i0 = (const uint16_t*) *input++;
       assert(i0 != NULL);
-      if XNN_UNPREDICTABLE(i0 != zero) {
+      if XNN_UNPREDICTABLE(i0 != (const uint16_t*) zero) {
         i0 = (const uint16_t*) ((uintptr_t) i0 + input_offset);
       }
-      const uint16_t* i1 = *input++;
+      const uint16_t* i1 = (const uint16_t*) *input++;
       assert(i1 != NULL);
-      if XNN_UNPREDICTABLE(i1 != zero) {
+      if XNN_UNPREDICTABLE(i1 != (const uint16_t*) zero) {
         i1 = (const uint16_t*) ((uintptr_t) i1 + input_offset);
       }
-      const uint16_t* i2 = *input++;
+      const uint16_t* i2 = (const uint16_t*) *input++;
       assert(i2 != NULL);
-      if XNN_UNPREDICTABLE(i2 != zero) {
+      if XNN_UNPREDICTABLE(i2 != (const uint16_t*) zero) {
         i2 = (const uint16_t*) ((uintptr_t) i2 + input_offset);
       }
-      const uint16_t* i3 = *input++;
+      const uint16_t* i3 = (const uint16_t*) *input++;
       assert(i3 != NULL);
-      if XNN_UNPREDICTABLE(i3 != zero) {
+      if XNN_UNPREDICTABLE(i3 != (const uint16_t*) zero) {
         i3 = (const uint16_t*) ((uintptr_t) i3 + input_offset);
       }
-      const uint16_t* i4 = *input++;
+      const uint16_t* i4 = (const uint16_t*) *input++;
       assert(i4 != NULL);
-      if XNN_UNPREDICTABLE(i4 != zero) {
+      if XNN_UNPREDICTABLE(i4 != (const uint16_t*) zero) {
         i4 = (const uint16_t*) ((uintptr_t) i4 + input_offset);
       }
-      const uint16_t* i5 = *input++;
+      const uint16_t* i5 = (const uint16_t*) *input++;
       assert(i5 != NULL);
-      if XNN_UNPREDICTABLE(i5 != zero) {
+      if XNN_UNPREDICTABLE(i5 != (const uint16_t*) zero) {
         i5 = (const uint16_t*) ((uintptr_t) i5 + input_offset);
       }
-      const uint16_t* i6 = *input++;
+      const uint16_t* i6 = (const uint16_t*) *input++;
       assert(i6 != NULL);
-      if XNN_UNPREDICTABLE(i6 != zero) {
+      if XNN_UNPREDICTABLE(i6 != (const uint16_t*) zero) {
         i6 = (const uint16_t*) ((uintptr_t) i6 + input_offset);
       }
-      const uint16_t* i7 = *input++;
+      const uint16_t* i7 = (const uint16_t*) *input++;
       assert(i7 != NULL);
-      if XNN_UNPREDICTABLE(i7 != zero) {
+      if XNN_UNPREDICTABLE(i7 != (const uint16_t*) zero) {
         i7 = (const uint16_t*) ((uintptr_t) i7 + input_offset);
       }
-      const uint16_t* i8 = *input++;
+      const uint16_t* i8 = (const uint16_t*) *input++;
       assert(i8 != NULL);
-      if XNN_UNPREDICTABLE(i8 != zero) {
+      if XNN_UNPREDICTABLE(i8 != (const uint16_t*) zero) {
         i8 = (const uint16_t*) ((uintptr_t) i8 + input_offset);
       }
 
@@ -108,42 +108,42 @@ void xnn_f16_avgpool_minmax_ukernel_9p8x__neonfp16arith_c8(
     for (k -= 9; k > 8; k -= 8) {
       const uint16_t* i0 = (const uint16_t*) *input++;
       assert(i0 != NULL);
-      if XNN_UNPREDICTABLE(i0 != zero) {
+      if XNN_UNPREDICTABLE(i0 != (const uint16_t*) zero) {
         i0 = (const uint16_t*) ((uintptr_t) i0 + input_offset);
       }
       const uint16_t* i1 = (const uint16_t*) *input++;
       assert(i1 != NULL);
-      if XNN_UNPREDICTABLE(i1 != zero) {
+      if XNN_UNPREDICTABLE(i1 != (const uint16_t*) zero) {
         i1 = (const uint16_t*) ((uintptr_t) i1 + input_offset);
       }
       const uint16_t* i2 = (const uint16_t*) *input++;
       assert(i2 != NULL);
-      if XNN_UNPREDICTABLE(i2 != zero) {
+      if XNN_UNPREDICTABLE(i2 != (const uint16_t*) zero) {
         i2 = (const uint16_t*) ((uintptr_t) i2 + input_offset);
       }
       const uint16_t* i3 = (const uint16_t*) *input++;
       assert(i3 != NULL);
-      if XNN_UNPREDICTABLE(i3 != zero) {
+      if XNN_UNPREDICTABLE(i3 != (const uint16_t*) zero) {
         i3 = (const uint16_t*) ((uintptr_t) i3 + input_offset);
       }
       const uint16_t* i4 = (const uint16_t*) *input++;
       assert(i4 != NULL);
-      if XNN_UNPREDICTABLE(i4 != zero) {
+      if XNN_UNPREDICTABLE(i4 != (const uint16_t*) zero) {
         i4 = (const uint16_t*) ((uintptr_t) i4 + input_offset);
       }
       const uint16_t* i5 = (const uint16_t*) *input++;
       assert(i5 != NULL);
-      if XNN_UNPREDICTABLE(i5 != zero) {
+      if XNN_UNPREDICTABLE(i5 != (const uint16_t*) zero) {
         i5 = (const uint16_t*) ((uintptr_t) i5 + input_offset);
       }
       const uint16_t* i6 = (const uint16_t*) *input++;
       assert(i6 != NULL);
-      if XNN_UNPREDICTABLE(i6 != zero) {
+      if XNN_UNPREDICTABLE(i6 != (const uint16_t*) zero) {
         i6 = (const uint16_t*) ((uintptr_t) i6 + input_offset);
       }
       const uint16_t* i7 = (const uint16_t*) *input++;
       assert(i7 != NULL);
-      if XNN_UNPREDICTABLE(i7 != zero) {
+      if XNN_UNPREDICTABLE(i7 != (const uint16_t*) zero) {
         i7 = (const uint16_t*) ((uintptr_t) i7 + input_offset);
       }
 
@@ -183,7 +183,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p8x__neonfp16arith_c8(
       const uint16_t* i5 = (const uint16_t*) input[5];
       const uint16_t* i6 = (const uint16_t*) input[6];
       const uint16_t* i7 = (const uint16_t*) input[7];
-      input = (const void**) ((uintptr_t) input + input_increment);
+      input = (const xnn_float16**) ((uintptr_t) input + input_increment);
       if (k < 2) {
         i1 = (const uint16_t*) zero;
       }
@@ -212,28 +212,28 @@ void xnn_f16_avgpool_minmax_ukernel_9p8x__neonfp16arith_c8(
         i7 = (const uint16_t*) zero;
       }
       assert(i7 != NULL);
-      if XNN_UNPREDICTABLE(i0 != zero) {
+      if XNN_UNPREDICTABLE(i0 != (const uint16_t*) zero) {
         i0 = (const uint16_t*) ((uintptr_t) i0 + input_offset);
       }
-      if XNN_UNPREDICTABLE(i1 != zero) {
+      if XNN_UNPREDICTABLE(i1 != (const uint16_t*) zero) {
         i1 = (const uint16_t*) ((uintptr_t) i1 + input_offset);
       }
-      if XNN_UNPREDICTABLE(i2 != zero) {
+      if XNN_UNPREDICTABLE(i2 != (const uint16_t*) zero) {
         i2 = (const uint16_t*) ((uintptr_t) i2 + input_offset);
       }
-      if XNN_UNPREDICTABLE(i3 != zero) {
+      if XNN_UNPREDICTABLE(i3 != (const uint16_t*) zero) {
         i3 = (const uint16_t*) ((uintptr_t) i3 + input_offset);
       }
-      if XNN_UNPREDICTABLE(i4 != zero) {
+      if XNN_UNPREDICTABLE(i4 != (const uint16_t*) zero) {
         i4 = (const uint16_t*) ((uintptr_t) i4 + input_offset);
       }
-      if XNN_UNPREDICTABLE(i5 != zero) {
+      if XNN_UNPREDICTABLE(i5 != (const uint16_t*) zero) {
         i5 = (const uint16_t*) ((uintptr_t) i5 + input_offset);
       }
-      if XNN_UNPREDICTABLE(i6 != zero) {
+      if XNN_UNPREDICTABLE(i6 != (const uint16_t*) zero) {
         i6 = (const uint16_t*) ((uintptr_t) i6 + input_offset);
       }
-      if XNN_UNPREDICTABLE(i7 != zero) {
+      if XNN_UNPREDICTABLE(i7 != (const uint16_t*) zero) {
         i7 = (const uint16_t*) ((uintptr_t) i7 + input_offset);
       }
 
@@ -263,7 +263,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p8x__neonfp16arith_c8(
         vout = vmaxq_f16(vout, vmin);
         vout = vminq_f16(vout, vmax);
 
-        vst1q_u16(output, vreinterpretq_u16_f16(vout)); output = (uint16_t*) output + 8;
+        vst1q_u16((uint16_t*) output, vreinterpretq_u16_f16(vout)); output = (xnn_float16*) output + 8;
 
         c -= 8;
       }
@@ -293,18 +293,18 @@ void xnn_f16_avgpool_minmax_ukernel_9p8x__neonfp16arith_c8(
 
         float16x4_t vout_lo = vget_low_f16(vout);
         if (c & 4) {
-          vst1_u16(output, vreinterpret_u16_f16(vout_lo)); output = (uint16_t*) output + 4;
+          vst1_u16((uint16_t*) output, vreinterpret_u16_f16(vout_lo)); output = (xnn_float16*) output + 4;
           vout_lo = vget_high_f16(vout);
         }
         if (c & 2) {
-          vst1_lane_u32(output, vreinterpret_u32_f16(vout_lo), 0); output = (uint16_t*) output + 2;
+          vst1_lane_u32((uint16_t*) output, vreinterpret_u32_f16(vout_lo), 0); output = (xnn_float16*) output + 2;
           vout_lo = vext_f16(vout_lo, vout_lo, 2);
         }
         if (c & 1) {
-          vst1_lane_u16(output, vreinterpret_u16_f16(vout_lo), 0); output = (uint16_t*) output + 1;
+          vst1_lane_u16((uint16_t*) output, vreinterpret_u16_f16(vout_lo), 0); output = (xnn_float16*) output + 1;
         }
       }
     }
-    output = (uint16_t*) ((uintptr_t) output + output_increment);
+    output = (xnn_float16*) ((uintptr_t) output + output_increment);
   } while (--output_pixels != 0);
 }

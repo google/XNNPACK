@@ -14,17 +14,17 @@
 #include <type_traits>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack/isa-checks.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 
 struct Float16 {
-  uint16_t value;
+  xnn_float16 value;
 
   Float16() = default;
-  Float16(float value) : value(fp16_ieee_from_fp32_value(value)) {}
+  Float16(float value) : value(xnn_float16_from_float(value)) {}
 
-  operator float() const { return fp16_ieee_to_fp32_value(value); }
+  operator float() const { return xnn_float16_to_float(value); }
 };
 
 class VBinaryMicrokernelTester {
@@ -41,6 +41,8 @@ class VBinaryMicrokernelTester {
     Sub,
     RSub,
     SqrDiff,
+    Prelu,
+    RPrelu,
   };
 
   template <typename A, typename B, typename Result>
@@ -77,6 +79,12 @@ class VBinaryMicrokernelTester {
           } else {
             result[i] = a[i] * b[i * stride_b];
           }
+          break;
+        case OpType::Prelu:
+          result[i] = a[i] < 0 ? static_cast<Result>(a[i] * b[i * stride_b]) : static_cast<Result>(a[i]);
+          break;
+        case OpType::RPrelu:
+          result[i] = b[i * stride_b] < 0 ? static_cast<Result>(a[i] * b[i * stride_b]) : static_cast<Result>(b[i * stride_b]);
           break;
         case OpType::SqrDiff: {
           const double diff = static_cast<double>(a[i]) - static_cast<double>(b[i * stride_b]);

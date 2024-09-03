@@ -19,6 +19,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/math.h"
 
 class BinaryElementwiseOperatorTester {
  public:
@@ -302,13 +303,13 @@ class BinaryElementwiseOperatorTester {
 
   void Test(int8_t) { TestQS8(); }
   void Test(uint8_t) { TestQU8(); }
-  void Test(uint16_t) { TestF16(); }
+  void Test(xnn_float16) { TestF16(); }
   void Test(float) { TestF32(); }
   void Test(int32_t) { TestS32(); }
 
   void TestRun(int8_t) { TestRunQS8(); }
   void TestRun(uint8_t) { TestRunQU8(); }
-  void TestRun(uint16_t) {}
+  void TestRun(xnn_float16) {}
   void TestRun(float) { TestRunF32(); }
   void TestRun(int32_t) {}
 

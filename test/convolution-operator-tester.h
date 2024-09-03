@@ -865,7 +865,7 @@ class ConvolutionOperatorTester {
                                kernel_height() * kernel_width() *
                                group_input_channels());
     std::vector<float> bias(groups() * group_output_channels());
-    std::vector<uint16_t> output(
+    std::vector<xnn_float16> output(
         batch_size() *
         ((output_height() * output_width() - 1) * output_channel_stride() +
          groups() * group_output_channels()));
@@ -913,7 +913,7 @@ class ConvolutionOperatorTester {
       // Clamp reference results.
       for (size_t i = 0; i < output_ref.size(); ++i) {
         output_ref[i] = std::max(std::min(output_ref[i], output_max), output_min);
-        output_ref[i] = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_ref[i]));
+        output_ref[i] = xnn_float16_to_float(xnn_float16_from_float(output_ref[i]));
       }
 
 
@@ -1030,7 +1030,7 @@ class ConvolutionOperatorTester {
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
             auto_convolution_op(convolution_op2, xnn_delete_operator);
 
-        std::vector<uint16_t> output2(output.size(), UINT16_C(0xDEAD));
+        std::vector<xnn_float16> output2(output.size(), UINT16_C(0xDEAD));
         size_t workspace_size = SIZE_MAX;
         size_t workspace_alignment = SIZE_MAX;
         ASSERT_EQ(xnn_status_success,
@@ -2130,13 +2130,13 @@ class ConvolutionOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
-    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()));
-    std::vector<uint16_t> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
+    std::vector<xnn_float16> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
     std::vector<float> kernel_as_float(kernel.size());
-    std::vector<uint16_t> bias(groups() * group_output_channels());
+    std::vector<xnn_float16> bias(groups() * group_output_channels());
     std::vector<float> bias_as_float(bias.size());
-    std::vector<uint16_t> output(batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()));
+    std::vector<xnn_float16> output(batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()));
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -2150,11 +2150,11 @@ class ConvolutionOperatorTester {
         }
       }
 
-      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      std::generate(kernel.begin(), kernel.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      std::transform(kernel.cbegin(), kernel.cend(), kernel_as_float.begin(), fp16_ieee_to_fp32_value);
-      std::generate(bias.begin(), bias.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      std::transform(bias.cbegin(), bias.cend(), bias_as_float.begin(), fp16_ieee_to_fp32_value);
+      std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+      std::generate(kernel.begin(), kernel.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+      std::transform(kernel.cbegin(), kernel.cend(), kernel_as_float.begin(), xnn_float16_to_float);
+      std::generate(bias.begin(), bias.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+      std::transform(bias.cbegin(), bias.cend(), bias_as_float.begin(), xnn_float16_to_float);
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
 
@@ -2166,7 +2166,7 @@ class ConvolutionOperatorTester {
               for (size_t g = 0; g < groups(); g++) {
                 for (size_t oc = 0; oc < group_output_channels(); oc++) {
                   output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] =
-                    fp16_ieee_to_fp32_value(bias[g * group_output_channels() + oc]);
+                    xnn_float16_to_float(bias[g * group_output_channels() + oc]);
                 }
               }
             }
@@ -2190,8 +2190,8 @@ class ConvolutionOperatorTester {
                       for (size_t g = 0; g < groups(); g++) {
                         for (size_t oc = 0; oc < group_output_channels(); oc++) {
                           output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
-                            fp16_ieee_to_fp32_value(input[((i * input_height() + iy) * input_width() + ix) * input_channel_stride() + g]) *
-                            fp16_ieee_to_fp32_value(kernel[((ky * kernel_width() + kx) * groups() + g) * group_output_channels() + oc]);
+                            xnn_float16_to_float(input[((i * input_height() + iy) * input_width() + ix) * input_channel_stride() + g]) *
+                            xnn_float16_to_float(kernel[((ky * kernel_width() + kx) * groups() + g) * group_output_channels() + oc]);
                         }
                       }
                     }
@@ -2215,8 +2215,8 @@ class ConvolutionOperatorTester {
                         for (size_t oc = 0; oc < group_output_channels(); oc++) {
                           for (size_t ic = 0; ic < group_input_channels(); ic++) {
                             output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
-                              fp16_ieee_to_fp32_value(input[((i * input_height() + iy) * input_width() + ix) * input_channel_stride() + g * group_input_channels() + ic]) *
-                              fp16_ieee_to_fp32_value(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
+                              xnn_float16_to_float(input[((i * input_height() + iy) * input_width() + ix) * input_channel_stride() + g * group_input_channels() + ic]) *
+                              xnn_float16_to_float(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
                           }
                         }
                       }
@@ -2233,8 +2233,8 @@ class ConvolutionOperatorTester {
       const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
       const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
       const float accumulated_range = accumulated_max - accumulated_min;
-      const float scaled_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_min + accumulated_range / 255.0f * float(qmin())));
-      const float scaled_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
+      const float scaled_min = xnn_float16_to_float(xnn_float16_from_float(accumulated_min + accumulated_range / 255.0f * float(qmin())));
+      const float scaled_max = xnn_float16_to_float(xnn_float16_from_float(accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
       const float output_min = scaled_min == scaled_max ? -std::numeric_limits<float>::infinity() : scaled_min;
       const float output_max = scaled_min == scaled_max ? +std::numeric_limits<float>::infinity() : scaled_max;
 
@@ -2354,7 +2354,7 @@ class ConvolutionOperatorTester {
         // Smart pointer to automatically delete convolution_op.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op2, xnn_delete_operator);
 
-        std::vector<uint16_t> output2(output.size(), UINT16_C(0x7E00) /* NaN */);
+        std::vector<xnn_float16> output2(output.size(), UINT16_C(0x7E00) /* NaN */);
         size_t workspace_size = SIZE_MAX;
         size_t workspace_alignment = SIZE_MAX;
         ASSERT_EQ(
@@ -2384,7 +2384,7 @@ class ConvolutionOperatorTester {
     }
   }
 
-  void VerifyNHWCxF16(const std::vector<uint16_t> &output,
+  void VerifyNHWCxF16(const std::vector<xnn_float16> &output,
                       const std::vector<float> &output_ref,
                       const float output_min, const float output_max,
                       size_t bs, size_t oh, size_t ow) const {
@@ -2396,16 +2396,16 @@ class ConvolutionOperatorTester {
               // FP16 saturates, it's the nature of the beast. If both reference and
               // actual are infinity, then consider the output to be correct.
               const bool reference_infinity = std::isinf(output_ref[(((i * oh + y) * ow + x) * groups() + g) * group_output_channels() + c]);
-              const bool actual_infinity = std::isinf(fp16_ieee_to_fp32_value(output[((i * oh + y) * ow + x) * output_channel_stride() + g * group_output_channels() + c]));
+              const bool actual_infinity = std::isinf(xnn_float16_to_float(output[((i * oh + y) * ow + x) * output_channel_stride() + g * group_output_channels() + c]));
               const float tolerance = std::max(1.0e-4f, std::abs(output_ref[(((i * oh + y) * ow + x) * groups() + g) * group_output_channels() + c]) * 2.0e-2f);
               if (reference_infinity && actual_infinity) {
                 continue;
               }
-              EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * oh + y) * ow + x) * output_channel_stride() + g * group_output_channels() + c]), output_min)
+              EXPECT_GE(xnn_float16_to_float(output[((i * oh + y) * ow + x) * output_channel_stride() + g * group_output_channels() + c]), output_min)
                 << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * oh + y) * ow + x) * output_channel_stride() + g * group_output_channels() + c]), output_max)
+              EXPECT_LE(xnn_float16_to_float(output[((i * oh + y) * ow + x) * output_channel_stride() + g * group_output_channels() + c]), output_max)
                 << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_NEAR(output_ref[(((i * oh + y) * ow + x) * groups() + g) * group_output_channels() + c], fp16_ieee_to_fp32_value(output[((i * oh + y) * ow + x) * output_channel_stride() + g * group_output_channels() + c]), tolerance)
+              EXPECT_NEAR(output_ref[(((i * oh + y) * ow + x) * groups() + g) * group_output_channels() + c], xnn_float16_to_float(output[((i * oh + y) * ow + x) * output_channel_stride() + g * group_output_channels() + c]), tolerance)
                << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
             }
           }
@@ -2690,14 +2690,14 @@ class ConvolutionOperatorTester {
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
     std::uniform_real_distribution<float> pdist;
 
-    std::vector<uint16_t> input(2 * XNN_EXTRA_BYTES / sizeof(uint16_t) +
+    std::vector<xnn_float16> input(2 * XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       ((batch_size() - 1) * input_channel_stride() + groups() * group_input_channels()) * input_height() * input_width());
-    std::vector<uint16_t> kernel(
+    std::vector<xnn_float16> kernel(
       groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
     std::vector<float> kernel_as_float(kernel.size());
-    std::vector<uint16_t> bias(groups() * group_output_channels());
+    std::vector<xnn_float16> bias(groups() * group_output_channels());
     std::vector<float> bias_as_float(bias.size());
-    std::vector<uint16_t> output(
+    std::vector<xnn_float16> output(
       ((batch_size() - 1) * output_channel_stride() + groups() * group_output_channels()) * output_height() * output_width());
     std::vector<float> output_ref(batch_size() * groups() * group_output_channels() * output_height() * output_width());
 
@@ -2712,16 +2712,16 @@ class ConvolutionOperatorTester {
         }
       }
 
-      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      std::generate(kernel.begin(), kernel.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      for (uint16_t& k : kernel) {
+      std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+      std::generate(kernel.begin(), kernel.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+      for (xnn_float16& k : kernel) {
         if (pdist(rng) <= sparsity()) {
           k = 0;
         }
       }
-      std::transform(kernel.cbegin(), kernel.cend(), kernel_as_float.begin(), fp16_ieee_to_fp32_value);
-      std::generate(bias.begin(), bias.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      std::transform(bias.cbegin(), bias.cend(), bias_as_float.begin(), fp16_ieee_to_fp32_value);
+      std::transform(kernel.cbegin(), kernel.cend(), kernel_as_float.begin(), xnn_float16_to_float);
+      std::generate(bias.begin(), bias.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+      std::transform(bias.cbegin(), bias.cend(), bias_as_float.begin(), xnn_float16_to_float);
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       // Compute reference results, without clamping.
@@ -2732,7 +2732,7 @@ class ConvolutionOperatorTester {
               for (size_t g = 0; g < groups(); g++) {
                 for (size_t oc = 0; oc < group_output_channels(); oc++) {
                   output_ref[(((i * groups() + g) * group_output_channels() + oc) * output_height() + oy) * output_width() + ox] =
-                    fp16_ieee_to_fp32_value(bias[g * group_output_channels() + oc]);
+                    xnn_float16_to_float(bias[g * group_output_channels() + oc]);
                 }
               }
             }
@@ -2755,8 +2755,8 @@ class ConvolutionOperatorTester {
                         for (size_t oc = 0; oc < group_output_channels(); oc++) {
                           for (size_t ic = 0; ic < group_input_channels(); ic++) {
                             output_ref[(((i * groups() + g) * group_output_channels() + oc) * output_height() + oy) * output_width() + ox] +=
-                              fp16_ieee_to_fp32_value(input[((((i * input_height() + iy) * input_width() + ix) * groups() + g) * group_input_channels() + ic)]) *
-                              fp16_ieee_to_fp32_value(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
+                              xnn_float16_to_float(input[((((i * input_height() + iy) * input_width() + ix) * groups() + g) * group_input_channels() + ic)]) *
+                              xnn_float16_to_float(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
                           }
                         }
                       }
@@ -2782,8 +2782,8 @@ class ConvolutionOperatorTester {
                       for (size_t g = 0; g < groups(); g++) {
                         for (size_t oc = 0; oc < group_output_channels(); oc++) {
                           output_ref[(((i * groups() + g) * group_output_channels() + oc) * output_height() + oy) * output_width() + ox] +=
-                            fp16_ieee_to_fp32_value(input[((i * input_channel_stride() + g) * input_height() + iy) * input_width() + ix]) *
-                            fp16_ieee_to_fp32_value(kernel[((ky * kernel_width() + kx) * groups() + g) * group_output_channels() + oc]);
+                            xnn_float16_to_float(input[((i * input_channel_stride() + g) * input_height() + iy) * input_width() + ix]) *
+                            xnn_float16_to_float(kernel[((ky * kernel_width() + kx) * groups() + g) * group_output_channels() + oc]);
                         }
                       }
                     }
@@ -2807,8 +2807,8 @@ class ConvolutionOperatorTester {
                         for (size_t oc = 0; oc < group_output_channels(); oc++) {
                           for (size_t ic = 0; ic < group_input_channels(); ic++) {
                             output_ref[(((i * groups() + g) * group_output_channels() + oc) * output_height() + oy) * output_width() + ox] +=
-                              fp16_ieee_to_fp32_value(input[((i * input_channel_stride() + g * group_input_channels() + ic) * input_height() + iy) * input_width() + ix]) *
-                              fp16_ieee_to_fp32_value(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
+                              xnn_float16_to_float(input[((i * input_channel_stride() + g * group_input_channels() + ic) * input_height() + iy) * input_width() + ix]) *
+                              xnn_float16_to_float(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
                           }
                         }
                       }
@@ -2825,8 +2825,8 @@ class ConvolutionOperatorTester {
       const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
       const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
       const float accumulated_range = accumulated_max - accumulated_min;
-      const float scaled_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_min + accumulated_range / 255.0f * float(qmin())));
-      const float scaled_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
+      const float scaled_min = xnn_float16_to_float(xnn_float16_from_float(accumulated_min + accumulated_range / 255.0f * float(qmin())));
+      const float scaled_max = xnn_float16_to_float(xnn_float16_from_float(accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
       const float output_min = scaled_min == scaled_max ? -std::numeric_limits<float>::infinity() : scaled_min;
       const float output_max = scaled_min == scaled_max ? +std::numeric_limits<float>::infinity() : scaled_max;
 
@@ -2923,7 +2923,7 @@ class ConvolutionOperatorTester {
 
         // Smart pointer to automatically delete convolution_op2.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convolution_op(convolution_op2, xnn_delete_operator);
-        std::vector<uint16_t> output2(output.size(), UINT16_C(0x7E00) /* NaN */);
+        std::vector<xnn_float16> output2(output.size(), UINT16_C(0x7E00) /* NaN */);
 
         ASSERT_EQ(
           xnn_status_success,
@@ -2943,7 +2943,7 @@ class ConvolutionOperatorTester {
     }
   }
 
-  void VerifyNCHWxF16(const std::vector<uint16_t> &output,
+  void VerifyNCHWxF16(const std::vector<xnn_float16> &output,
                       const std::vector<float> &output_ref,
                       const float output_min, const float output_max) const {
     for (size_t i = 0; i < batch_size(); i++) {
@@ -2951,11 +2951,11 @@ class ConvolutionOperatorTester {
         for (size_t x = 0; x < output_width(); x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
-              EXPECT_GE(fp16_ieee_to_fp32_value(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x]), output_min)
+              EXPECT_GE(xnn_float16_to_float(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x]), output_min)
                 << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c << ", image = " << i;
-              EXPECT_LE(fp16_ieee_to_fp32_value(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x]), output_max)
+              EXPECT_LE(xnn_float16_to_float(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x]), output_max)
                 << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c << ", image = " << i;
-              EXPECT_NEAR(output_ref[(((i * groups() + g) * group_output_channels() + c) * output_height() + y) * output_width() + x], fp16_ieee_to_fp32_value(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x]), std::max(1.0e-4f, std::abs(output_ref[(((i * groups() + g) * group_output_channels() + c) * output_height() + y) * output_width() + x]) * 1.0e-2f))
+              EXPECT_NEAR(output_ref[(((i * groups() + g) * group_output_channels() + c) * output_height() + y) * output_width() + x], xnn_float16_to_float(output[((i * output_channel_stride() + g * group_output_channels() + c) * output_height() + y) * output_width() + x]), std::max(1.0e-4f, std::abs(output_ref[(((i * groups() + g) * group_output_channels() + c) * output_height() + y) * output_width() + x]) * 1.0e-2f))
                 << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c << ", image = " << i;
             }
           }
@@ -3748,12 +3748,12 @@ class ConvolutionOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
-    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) + std::max(
+    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) + std::max(
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()),
       next_batch_size() * ((next_input_height() * next_input_width() - 1) * input_channel_stride() + groups() * group_input_channels())));
-    std::vector<uint16_t> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
-    std::vector<uint16_t> bias(groups() * group_output_channels());
-    std::vector<uint16_t> output(std::max(
+    std::vector<xnn_float16> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
+    std::vector<xnn_float16> bias(groups() * group_output_channels());
+    std::vector<xnn_float16> output(std::max(
       batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()),
       next_batch_size() * ((next_output_height() * next_output_width() - 1) * output_channel_stride() + groups() * group_output_channels())));
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
@@ -3770,9 +3770,9 @@ class ConvolutionOperatorTester {
         }
       }
 
-      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      std::generate(kernel.begin(), kernel.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
-      std::generate(bias.begin(), bias.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+      std::generate(kernel.begin(), kernel.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+      std::generate(bias.begin(), bias.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       // Compute reference results, without clamping.
@@ -3783,7 +3783,7 @@ class ConvolutionOperatorTester {
               for (size_t g = 0; g < groups(); g++) {
                 for (size_t oc = 0; oc < group_output_channels(); oc++) {
                   output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] =
-                    fp16_ieee_to_fp32_value(bias[g * group_output_channels() + oc]);
+                    xnn_float16_to_float(bias[g * group_output_channels() + oc]);
                 }
               }
             }
@@ -3805,8 +3805,8 @@ class ConvolutionOperatorTester {
                       for (size_t oc = 0; oc < group_output_channels(); oc++) {
                         for (size_t ic = 0; ic < group_input_channels(); ic++) {
                           output_ref[(((i * output_height() + oy) * output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
-                            fp16_ieee_to_fp32_value(input[((i * input_height() + iy) * input_width() + ix) * input_channel_stride() + g * group_input_channels() + ic]) *
-                            fp16_ieee_to_fp32_value(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
+                            xnn_float16_to_float(input[((i * input_height() + iy) * input_width() + ix) * input_channel_stride() + g * group_input_channels() + ic]) *
+                            xnn_float16_to_float(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
                         }
                       }
                     }
@@ -3822,8 +3822,8 @@ class ConvolutionOperatorTester {
       const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
       const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
       const float accumulated_range = accumulated_max - accumulated_min;
-      const float scaled_min = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_min + accumulated_range / 255.0f * float(qmin())));
-      const float scaled_max = fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
+      const float scaled_min = xnn_float16_to_float(xnn_float16_from_float(accumulated_min + accumulated_range / 255.0f * float(qmin())));
+      const float scaled_max = xnn_float16_to_float(xnn_float16_from_float(accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
       const float output_min = scaled_min == scaled_max ? -std::numeric_limits<float>::infinity() : scaled_min;
       const float output_max = scaled_min == scaled_max ? +std::numeric_limits<float>::infinity() : scaled_max;
 
@@ -3873,7 +3873,7 @@ class ConvolutionOperatorTester {
       VerifyNHWCxF16(output, output_ref, output_min, output_max, batch_size(), output_height(), output_width());
 
       // Re-generate data for the second run.
-      std::generate(input.begin(), input.end(), [&]() { return fp16_ieee_from_fp32_value(f32dist(rng)); });
+      std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
       std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
 
       // Compute reference results for the second run, including clamping.
@@ -3884,7 +3884,7 @@ class ConvolutionOperatorTester {
               for (size_t g = 0; g < groups(); g++) {
                 for (size_t oc = 0; oc < group_output_channels(); oc++) {
                   next_output_ref[(((i * next_output_height() + oy) * next_output_width() + ox) * groups() + g) * group_output_channels() + oc] =
-                    fp16_ieee_to_fp32_value(bias[g * group_output_channels() + oc]);
+                    xnn_float16_to_float(bias[g * group_output_channels() + oc]);
                 }
               }
             }
@@ -3906,8 +3906,8 @@ class ConvolutionOperatorTester {
                       for (size_t oc = 0; oc < group_output_channels(); oc++) {
                         for (size_t ic = 0; ic < group_input_channels(); ic++) {
                           next_output_ref[(((i * next_output_height() + oy) * next_output_width() + ox) * groups() + g) * group_output_channels() + oc] +=
-                            fp16_ieee_to_fp32_value(input[((i * next_input_height() + iy) * next_input_width() + ix) * input_channel_stride() + g * group_input_channels() + ic]) *
-                            fp16_ieee_to_fp32_value(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
+                            xnn_float16_to_float(input[((i * next_input_height() + iy) * next_input_width() + ix) * input_channel_stride() + g * group_input_channels() + ic]) *
+                            xnn_float16_to_float(kernel[(((g * group_output_channels() + oc) * kernel_height() + ky) * kernel_width() + kx) * group_input_channels() + ic]);
                         }
                       }
                     }

@@ -24,11 +24,11 @@ extern "C" {
       size_t output_pixels,                                            \
       size_t kernel_elements,                                          \
       size_t channels,                                                 \
-      const void** input,                                              \
+      const xnn_float16** input,                              \
       size_t input_offset,                                             \
-      const void* zero,                                                \
-      void* buffer,                                                    \
-      void* output,                                                    \
+      const xnn_float16* zero,                                \
+      xnn_float16* buffer,                                    \
+      xnn_float16* output,                                    \
       size_t input_increment,                                          \
       size_t output_increment,                                         \
       const struct xnn_f16_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
@@ -38,10 +38,10 @@ extern "C" {
       size_t output_pixels,                                          \
       size_t kernel_elements,                                        \
       size_t channels,                                               \
-      const void** input,                                            \
+      const xnn_float16** input,                            \
       size_t input_offset,                                           \
-      const void* zero,                                              \
-      void* output,                                                  \
+      const xnn_float16* zero,                              \
+      xnn_float16* output,                                  \
       size_t input_increment,                                        \
       size_t output_increment,                                       \
       const struct xnn_f16_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);

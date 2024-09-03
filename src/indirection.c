@@ -14,10 +14,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
 #include "xnnpack/operator.h"
 
 void xnn_indirection_init_conv2d(
@@ -436,7 +436,7 @@ void xnn_indirection_init_resize_bilinear2d_hwc_f16(
   size_t output_width,
   const void* input,
   const void** indirection_buffer,
-  void* packed_weights,
+  xnn_float16* packed_weights,
   bool align_corners,
   bool tensorflow_legacy)
 {
@@ -456,7 +456,7 @@ void xnn_indirection_init_resize_bilinear2d_hwc_f16(
   const float height_scale =
     (float) ((int32_t) input_height - height_adjustment) / (float) ((int32_t) output_height - height_adjustment);
 
-  uint16_t* w = (uint16_t*) packed_weights;
+  xnn_float16* w = (xnn_float16*) packed_weights;
   indirection_buffer += 4 * output_y_start * output_width;
   w += 2 * output_y_start * output_width;
 
@@ -487,8 +487,8 @@ void xnn_indirection_init_resize_bilinear2d_hwc_f16(
           (void*) ((uintptr_t) input + (input_y_bottom * input_width + input_x_left) * input_pixel_stride);
         indirection_buffer[3] =
           (void*) ((uintptr_t) input + (input_y_bottom * input_width + input_x_right) * input_pixel_stride);
-        w[0] = fp16_ieee_from_fp32_value(alpha_x);
-        w[1] = fp16_ieee_from_fp32_value(alpha_y);
+        w[0] = xnn_float16_from_float(alpha_x);
+        w[1] = xnn_float16_from_float(alpha_y);
         indirection_buffer += 4;
         w += 2;
       }
@@ -518,8 +518,8 @@ void xnn_indirection_init_resize_bilinear2d_hwc_f16(
           (void*) ((uintptr_t) input + (input_y_bottom * input_width + input_x_left) * input_pixel_stride);
         indirection_buffer[3] =
           (void*) ((uintptr_t) input + (input_y_bottom * input_width + input_x_right) * input_pixel_stride);
-        w[0] = fp16_ieee_from_fp32_value(alpha_x);
-        w[1] = fp16_ieee_from_fp32_value(alpha_y);
+        w[0] = xnn_float16_from_float(alpha_x);
+        w[1] = xnn_float16_from_float(alpha_y);
         indirection_buffer += 4;
         w += 2;
       }
@@ -737,7 +737,7 @@ void xnn_indirection_init_resize_bilinear2d_chw_f16(
   size_t output_width,
   const void* input,
   const void** indirection_buffer,
-  void* packed_weights,
+  xnn_float16* packed_weights,
   bool align_corners,
   bool tensorflow_legacy)
 {
@@ -757,7 +757,7 @@ void xnn_indirection_init_resize_bilinear2d_chw_f16(
   const float height_scale =
     (float) ((int32_t) input_height - height_adjustment) / (float) ((int32_t) output_height - height_adjustment);
 
-  uint16_t* w = (uint16_t*) packed_weights;
+  xnn_float16* w = packed_weights;
   const uint32_t input_y_max = (uint32_t) input_height - 1;
   const uint32_t input_x_max = (uint32_t) input_width - 1;
   if (tensorflow_legacy || align_corners) {
@@ -787,8 +787,8 @@ void xnn_indirection_init_resize_bilinear2d_chw_f16(
           (void*) ((uintptr_t) input + (input_y_top * input_width + input_x_left) * input_pixel_stride);
        indirection_buffer[1] =
           (void*) ((uintptr_t) input + (input_y_bottom * input_width + input_x_left) * input_pixel_stride);
-        w[0] = fp16_ieee_from_fp32_value(alpha_x);
-        w[1] = fp16_ieee_from_fp32_value(alpha_y);
+        w[0] = xnn_float16_from_float(alpha_x);
+        w[1] = xnn_float16_from_float(alpha_y);
         indirection_buffer += 2;
         w += 2;
       }
@@ -821,8 +821,8 @@ void xnn_indirection_init_resize_bilinear2d_chw_f16(
           (void*) ((uintptr_t) input + (input_y_top * input_width + input_x_left) * input_pixel_stride);
         indirection_buffer[1] =
           (void*) ((uintptr_t) input + (input_y_bottom * input_width + input_x_left) * input_pixel_stride);
-        w[0] = fp16_ieee_from_fp32_value(alpha_x);
-        w[1] = fp16_ieee_from_fp32_value(alpha_y);
+        w[0] = xnn_float16_from_float(alpha_x);
+        w[1] = xnn_float16_from_float(alpha_y);
         indirection_buffer += 2;
         w += 2;
       }
@@ -975,7 +975,7 @@ void xnn_indirection_init_pavgpool2d_f16(
   size_t stride_width,
   size_t padding_top,
   size_t padding_left,
-  uint16_t* pixelwise_buffer)
+  xnn_float16* pixelwise_buffer)
 {
   for (size_t output_y = 0; output_y < output_height; output_y++) {
     const size_t input_y_start = doz(output_y * stride_height, padding_top);
@@ -985,7 +985,7 @@ void xnn_indirection_init_pavgpool2d_f16(
       const size_t input_x_start = doz(output_x * stride_width, padding_left);
       const size_t input_x_end = min(doz(output_x * stride_width + pooling_width, padding_left), input_width);
       const uint32_t input_x_range = (uint32_t) (input_x_end - input_x_start);
-      *pixelwise_buffer++ = fp16_ieee_from_fp32_value(1.0f / ((float) (int32_t) (input_y_range * input_x_range)));
+      *pixelwise_buffer++ = xnn_float16_from_float(1.0f / ((float) (int32_t) (input_y_range * input_x_range)));
     }
   }
 }

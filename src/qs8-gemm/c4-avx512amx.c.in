@@ -26,7 +26,7 @@ $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8_F16" : "qd8_f16_qc8w", "QD8_F32": "qd8
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar" if REQUANTIZATION else "scalar"
 $PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QD8_F16": "union xnn_f16_minmax_params", "QD8_F32": "union xnn_f32_minmax_params", "QC4_F32": "union xnn_f32_qc4w_minmax_params"}[DATATYPE]
-$OUT_T = {"QC8": "int8_t", "QD8_F16": "void", "QD8_F32": "float", "QC4_F32": "float"}[DATATYPE]
+$OUT_T = {"QC8": "int8_t", "QD8_F16": "xnn_float16", "QD8_F32": "float", "QC4_F32": "float"}[DATATYPE]
 $_MM_MAX_EPX8 = "_mm_max_epi8"
 $_MM512_CVTXEPI32_EPI8 = "_mm512_cvtsepi32_epi8"
 void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c4__avx512amx${"_prfm" if PREFETCH else ""}(
@@ -100,15 +100,9 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
   //_tile_loadconfig(&tile_data);
   __asm__ volatile ("ldtilecfg %0" :: "m" (tile_data));
 
-  $if DATATYPE in ["QD8_F16", "QC4_F16"]:
-    uint16_t* c0 = (uint16_t*) c;
-  $else:
-    ${OUT_T}* c0 = c;
+  ${OUT_T}* c0 = c;
   $for M in range(1, MR):
-    $if DATATYPE in ["QD8_F16", "QC4_F16"]:
-      uint16_t* c${M} = (uint16_t*) ((uintptr_t) c${M-1} + cm_stride);
-    $else:
-      ${OUT_T}* c${M} = (${OUT_T}*) ((uintptr_t) c${M-1} + cm_stride);
+    ${OUT_T}* c${M} = (${OUT_T}*) ((uintptr_t) c${M-1} + cm_stride);
     $if M % 2 == 0:
       if XNN_UNPREDICTABLE(mr <= ${M}) {
         c${M} = c${M-1};
@@ -123,8 +117,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
       }
 
   $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
-    const __m512 voutput_min = _mm512_set1_ps(params->${PARAMS_STRUCT}.min);
-    const __m512 voutput_max = _mm512_set1_ps(params->${PARAMS_STRUCT}.max);
+    $if "F16" in DATATYPE:
+      const __m512 voutput_min = _mm512_cvtph_ps(_mm256_set1_epi16(*(const uint16_t*) &params->${PARAMS_STRUCT}.min));
+      const __m512 voutput_max = _mm512_cvtph_ps(_mm256_set1_epi16(*(const uint16_t*) &params->${PARAMS_STRUCT}.max));
+    $else:
+      const __m512 voutput_min = _mm512_set1_ps(params->${PARAMS_STRUCT}.min);
+      const __m512 voutput_max = _mm512_set1_ps(params->${PARAMS_STRUCT}.max);
     // XNN_FORCE_REALIZATION(voutput_min);
     // XNN_FORCE_REALIZATION(voutput_max);
     $if DATATYPE in ["QC4_F32", "QC4_F16"]:
@@ -260,7 +258,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
           $for M in reversed(range(MR)):
             $for N in range(0, NR, 16):
               _mm256_storeu_si256((__m256i*) (c${M} + ${N}), vfp16out${M}x${ABC[N:N+16]});
-            c${M} = (uint16_t*) ((uintptr_t) c${M} + cn_stride);
+            c${M} = (${OUT_T}*) ((uintptr_t) c${M} + cn_stride);
 
           a -= kc;
           nc -= ${NR};
@@ -278,7 +276,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
           $for M in reversed(range(MR)):
             $for N in range(0, NR, 16):
               _mm512_storeu_ps(c${M} + ${N}, vscaled${M}x${ABC[N:N+16]});
-            c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
+            c${M} = (${OUT_T}*) ((uintptr_t) c${M} + cn_stride);
 
           a -= kc;
           nc -= ${NR};

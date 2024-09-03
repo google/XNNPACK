@@ -22,7 +22,7 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_6x32c4__neondotfp16arith(
     size_t ks,
     const int8_t** restrict a,
     const void* restrict w,
-    void* restrict c,
+    xnn_float16* restrict c,
     size_t cm_stride,
     size_t cn_stride,
     size_t a_offset,
@@ -628,7 +628,7 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_6x32c4__neondotfp16arith(
     float16x8_t vfp16out5xGHIJKLMN = vcombine_f16(vcvt_f16_f32(vout5xGHIJ), vcvt_f16_f32(vout5xKLMN));
     float16x8_t vfp16out5xOPQRSTUV = vcombine_f16(vcvt_f16_f32(vout5xOPQR), vcvt_f16_f32(vout5xSTUV));
 
-    const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.min));
+    const float16x8_t voutput_min = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.min));
     vfp16out0x01234567 = vmaxq_f16(vfp16out0x01234567, voutput_min);
     vfp16out0x89ABCDEF = vmaxq_f16(vfp16out0x89ABCDEF, voutput_min);
     vfp16out0xGHIJKLMN = vmaxq_f16(vfp16out0xGHIJKLMN, voutput_min);
@@ -653,7 +653,7 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_6x32c4__neondotfp16arith(
     vfp16out5x89ABCDEF = vmaxq_f16(vfp16out5x89ABCDEF, voutput_min);
     vfp16out5xGHIJKLMN = vmaxq_f16(vfp16out5xGHIJKLMN, voutput_min);
     vfp16out5xOPQRSTUV = vmaxq_f16(vfp16out5xOPQRSTUV, voutput_min);
-    const float16x8_t voutput_max = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.max));
+    const float16x8_t voutput_max = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.max));
     vfp16out0x01234567 = vminq_f16(vfp16out0x01234567, voutput_max);
     vfp16out0x89ABCDEF = vminq_f16(vfp16out0x89ABCDEF, voutput_max);
     vfp16out0xGHIJKLMN = vminq_f16(vfp16out0xGHIJKLMN, voutput_max);

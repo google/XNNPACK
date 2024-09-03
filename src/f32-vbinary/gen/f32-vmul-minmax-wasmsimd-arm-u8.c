@@ -45,7 +45,6 @@ void xnn_f32_vmul_minmax_ukernel__wasmsimd_arm_u8(
     v128_t vacc0 = wasm_f32x4_mul(va0, vb0);
     v128_t vacc1 = wasm_f32x4_mul(va1, vb1);
 
-
     vacc0 = wasm_f32x4_max(vacc0, voutput_min);
     vacc1 = wasm_f32x4_max(vacc1, voutput_min);
 
