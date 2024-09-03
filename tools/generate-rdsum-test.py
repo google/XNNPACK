@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"xnn_(qs8|f16_f32acc|f32)_rdsum?(_minmax)?(_(fp32|rndnu))?_ukernel_((\d+)p)?(\d+)x__(.+)_c(\d+)(_acc(\d+))?", name)
+  match = re.match(r"xnn_(qs8|f16_f32acc|f32)_rdsum?(_minmax)?(_(fp32|rndnu))?_ukernel_((\d+)p)?(\d+)x__(.+)_(c)?(u)?(\d+)(_acc(\d+))?(v)?", name)
 
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
@@ -35,135 +35,195 @@ def split_ukernel_name(name):
   requantization_type = match.group(4)
   primary_tile = int(match.group(6))
   incremental_tile = int(match.group(7))
-  channel_tile = int(match.group(9))
+  channel_tile = int(match.group(11))
   target_name = match.group(8)
+  vector_tile = bool(match.group(14))
 
   arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(8))
-  return requantization_type, primary_tile, incremental_tile, channel_tile, arch, isa
+  return requantization_type, primary_tile, incremental_tile, channel_tile, vector_tile, arch, isa
 
 
 RDSUM_TEST_TEMPLATE = """\
-TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_2pass_fulltile) {
+TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   RDSumMicrokernelTester()
     .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
-    .channels(${CHANNEL_TILE})
+    .channels(channel_tile)
     .Test(${", ".join(TEST_ARGS)});
 }
 
-TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_2pass_fulltile_with_input_stride) {
+TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile_with_input_stride) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   RDSumMicrokernelTester()
     .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
-    .channels(${CHANNEL_TILE})
-    .input_stride(${next_prime(CHANNEL_TILE+1)})
+    .channels(channel_tile)
+    $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+      .input_stride(${next_prime(CHANNEL_TILE+1)})
+    $else:
+      .input_stride(channel_tile+1)
     .Test(${", ".join(TEST_ARGS)});
 }
 
-TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_2pass_subtile) {
+TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
     RDSumMicrokernelTester()
       .rows(rows)
-      .channels(${CHANNEL_TILE})
+      .channels(channel_tile)
       .Test(${", ".join(TEST_ARGS)});
   }
 }
 
-TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_2pass_subtile_with_input_stride) {
+TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile_with_input_stride) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
     RDSumMicrokernelTester()
       .rows(rows)
-      .channels(${CHANNEL_TILE})
-      .input_stride(${next_prime(CHANNEL_TILE+1)})
+      .channels(channel_tile)
+      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+        .input_stride(${next_prime(CHANNEL_TILE+1)})
+      $else:
+        .input_stride(channel_tile+1)
       .Test(${", ".join(TEST_ARGS)});
   }
 }
 
-TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_multipass_fulltile) {
+TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
     RDSumMicrokernelTester()
       .rows(rows)
-      .channels(${CHANNEL_TILE})
+      .channels(channel_tile)
       .Test(${", ".join(TEST_ARGS)});
   }
 }
 
-TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}_multipass_fulltile_with_input_stride) {
+TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile_with_input_stride) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
   for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
     RDSumMicrokernelTester()
       .rows(rows)
-      .channels(${CHANNEL_TILE})
-      .input_stride(${next_prime(CHANNEL_TILE+1)})
+      .channels(channel_tile)
+      $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+        .input_stride(${next_prime(CHANNEL_TILE+1)})
+      $else:
+        .input_stride(channel_tile+1)
       .Test(${", ".join(TEST_ARGS)});
   }
 }
 
-TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}_2pass_fulltile) {
+TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-    RDSumMicrokernelTester()
-      .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
-      .channels(channels)
-      .Test(${", ".join(TEST_ARGS)});
-  }
-}
-
-TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}_2pass_subtile) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-    for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
+  $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
       RDSumMicrokernelTester()
-        .rows(rows)
+        .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
     }
-  }
-}
-
-TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}_multipass_fulltile) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-    for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
+  $else:
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
       RDSumMicrokernelTester()
-        .rows(rows)
+        .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
     }
-  }
 }
 
-TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}_multipass_fulltile_with_input_stride) {
+TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
-    for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
-      RDSumMicrokernelTester()
-        .rows(rows)
-        .channels(channels)
-        .input_stride(${next_prime(CHANNEL_TILE*16+1)})
-        .Test(${", ".join(TEST_ARGS)});
+  $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
+      for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(${", ".join(TEST_ARGS)});
+      }
     }
-  }
+  $else:
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
 }
 
-$if CHANNEL_TILE > 1:
-  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}_2pass_fulltile) {
+TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
+      for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  $else:
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+}
+
+TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile_with_input_stride) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*8}; channels += ${CHANNEL_TILE}) {
+      for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride(${next_prime(CHANNEL_TILE*16+1)})
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  $else:
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile*2; channels < channel_tile*8; channels += channel_tile) {
+      for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride(channel_tile*16+1)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+}
+
+$if CHANNEL_TILE > 1 or CHANNEL_SCALED_TILE != CHANNEL_TILE:
+  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       RDSumMicrokernelTester()
         .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
         .channels(channels)
@@ -171,10 +231,11 @@ $if CHANNEL_TILE > 1:
     }
   }
 
-  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}_2pass_subtile) {
+  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -184,10 +245,11 @@ $if CHANNEL_TILE > 1:
     }
   }
 
-  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}_multipass_fulltile) {
+  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -197,75 +259,123 @@ $if CHANNEL_TILE > 1:
     }
   }
 
-  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}_multipass_fulltile_with_input_stride) {
+  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile_with_input_stride) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= ${INCREMENTAL_TILE*5}; rows += ${INCREMENTAL_TILE}) {
         RDSumMicrokernelTester()
           .rows(rows)
           .channels(channels)
-          .input_stride(${next_prime(CHANNEL_TILE+1)})
+          $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+            .input_stride(${next_prime(CHANNEL_TILE+1)})
+          $else:
+            .input_stride(channel_tile+1)
           .Test(${", ".join(TEST_ARGS)});
       }
     }
   }
 
-TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_2pass_fulltile) {
+TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_fulltile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-    RDSumMicrokernelTester()
-      .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
-      .channels(channels)
-      .Test(${", ".join(TEST_ARGS)});
-  }
-}
-
-TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_2pass_subtile) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-    for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
+  $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
       RDSumMicrokernelTester()
-        .rows(rows)
+        .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
     }
-  }
-}
-
-TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_multipass_fulltile) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-    for (size_t rows = 1; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
+  $else:
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
       RDSumMicrokernelTester()
-        .rows(rows)
+        .rows(${PRIMARY_TILE+INCREMENTAL_TILE})
         .channels(channels)
         .Test(${", ".join(TEST_ARGS)});
     }
-  }
 }
 
-TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}_multipass_fulltile_with_input_stride) {
+TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_2pass_subtile) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-    for (size_t rows = 1; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
-      RDSumMicrokernelTester()
-        .rows(rows)
-        .channels(channels)
-        .input_stride(${next_prime(CHANNEL_TILE*2+11)})
-        .Test(${", ".join(TEST_ARGS)});
+  $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
+      for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(${", ".join(TEST_ARGS)});
+      }
     }
-  }
+  $else:
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t rows = 1; rows < ${PRIMARY_TILE+INCREMENTAL_TILE}; rows++) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+}
+
+TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
+      for (size_t rows = 1; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  $else:
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t rows = 1; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+}
+
+TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}${CHANNEL_SUFFIX}_multipass_fulltile_with_input_stride) {
+  $if ISA_CHECK:
+    ${ISA_CHECK};
+  $if CHANNEL_SCALED_TILE == CHANNEL_TILE:
+    for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
+      for (size_t rows = 1; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride(${next_prime(CHANNEL_TILE*2+11)})
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
+  $else:
+    const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+    for (size_t channels = channel_tile+1; channels < channel_tile*2; channels++) {
+      for (size_t rows = 1; rows < ${INCREMENTAL_TILE*5}; rows += ${PRIMARY_TILE+INCREMENTAL_TILE}) {
+        RDSumMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride(channel_tile*2+11)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    }
 }
 
 TEST(${TEST_NAME}, overflow_accumulator) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t channels = 1; channels < ${CHANNEL_TILE * 2}; ++channels) {
+  const size_t channel_tile = ${CHANNEL_SCALED_TILE};
+  for (size_t channels = 1; channels < channel_tile*2; ++channels) {
      RDSumMicrokernelTester()
        .rows(${257 + INCREMENTAL_TILE})
        .channels(channels)
@@ -276,7 +386,7 @@ TEST(${TEST_NAME}, overflow_accumulator) {
 
 
 def generate_test_cases(ukernel, init_fn, requantization_type, primary_tile,
-                        incremental_tile, channel_tile, isa):
+                        incremental_tile, channel_tile, vector_tile, isa):
   """Generates all tests cases for a RDSUM micro-kernel.
 
   Args:
@@ -289,6 +399,8 @@ def generate_test_cases(ukernel, init_fn, requantization_type, primary_tile,
                       the incremental outer loop of the micro-kernel.
     channel_tile: Number of channels processed per one iteration of the inner
                   loops of the micro-kernel.
+    vector_tile: Indicates if channels are specified in vectors rather than
+                 elements.
     isa: instruction set required to run the micro-kernel. Generated unit test
          will skip execution if the host processor doesn't support this ISA.
 
@@ -303,6 +415,10 @@ def generate_test_cases(ukernel, init_fn, requantization_type, primary_tile,
   if requantization_type:
     test_args.append("xnn_%s_requantize_%s" % \
       (datatype.lower(), requantization_type.lower()))
+  channel_scaled_tile = channel_tile
+  if vector_tile:
+    ctype = {"qs8": "int8_t", "f16": "uint16_t", "f32": "float"}[datatype]
+    channel_scaled_tile = {"rvv": "(%s*xnn_init_hardware_config()->vlenb/sizeof(%s))" % (str(channel_tile), ctype)}[isa]
   return xngen.preprocess(RDSUM_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
@@ -310,6 +426,8 @@ def generate_test_cases(ukernel, init_fn, requantization_type, primary_tile,
       "PRIMARY_TILE": primary_tile,
       "INCREMENTAL_TILE": incremental_tile,
       "CHANNEL_TILE": channel_tile,
+      "CHANNEL_SCALED_TILE": channel_scaled_tile,
+      "CHANNEL_SUFFIX": "v" if vector_tile else "",
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,
     })
@@ -345,12 +463,12 @@ def main(args):
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
       init_fn = ukernel_spec.get("init")
-      requantization_type, primary_tile, incremental_tile, channel_tile, arch, \
+      requantization_type, primary_tile, incremental_tile, channel_tile, vector_tile, arch, \
         isa = split_ukernel_name(name)
 
       test_case = generate_test_cases(name, init_fn, requantization_type,
                                       primary_tile, incremental_tile,
-                                      channel_tile, isa)
+                                      channel_tile, vector_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     xnncommon.overwrite_if_changed(options.output, tests)
