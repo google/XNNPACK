@@ -331,7 +331,7 @@ void VUnaryMicrokernelTester::Test(xnn_f32_vtanh_ukernel_fn vtanh,
   Test<float>(
       vtanh, InitParamsWrapper(init_params),
       [](float x) { return std::tanh(x); },
-      TolRelative(5.0f * std::numeric_limits<float>::epsilon()),  // 5 ULP.
+      TolRelative(4.0f * std::numeric_limits<float>::epsilon()),  // 4 ULP.
       -10.0f, 10.0f);
 }
 

@@ -42,7 +42,7 @@ class FilterbankAccumulateMicrokernelTester {
   void Test(xnn_u32_filterbank_accumulate_ukernel_fn filterbank_accumulate) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int32_t> u8dist(1, 10);
-    std::uniform_int_distribution<xnn_float16> u16dist;
+    std::uniform_int_distribution<uint16_t> u16dist;
     std::uniform_int_distribution<uint32_t> u32dist;
 
     std::vector<uint8_t> filterbank_widths(rows() + 1);
@@ -54,7 +54,7 @@ class FilterbankAccumulateMicrokernelTester {
       const size_t num_channels = std::accumulate(filterbank_widths.cbegin(), filterbank_widths.cend(), 0);
 
       std::vector<uint32_t> input(num_channels);
-      std::vector<xnn_float16> weights(num_channels * 2);
+      std::vector<uint16_t> weights(num_channels * 2);
       std::generate(input.begin(), input.end(), [&] { return u32dist(rng); });
       std::generate(weights.begin(), weights.end(), [&] { return u16dist(rng); });
       std::fill(output.begin(), output.end(), UINT64_C(0xCAFEB0BADEADBEAF));

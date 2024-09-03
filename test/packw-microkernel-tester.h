@@ -156,15 +156,17 @@ class PackWMicrokernelTester {
 
     // Compute reference results.
     xnn_pack_f16_gemm_goi_w(g(), n(), packed_k(), nr(), kr(), sr(),
-      reinterpret_cast<const xnn_float16*>(padded_weights.data()),
-      reinterpret_cast<const xnn_float16*>(bias_data),
+      reinterpret_cast<const uint16_t*>(padded_weights.data()),
+      reinterpret_cast<const uint16_t*>(bias_data),
       /*scale=*/nullptr,
-      reinterpret_cast<xnn_float16*>(packed_w_ref.data()),
+      reinterpret_cast<uint16_t*>(packed_w_ref.data()),
       /*extra_bytes=*/0, /*params=*/nullptr);
 
     // Call optimized micro-kernel.
     packw(g(), n(), k(), nr(), kr(), sr(),
-      weights.data(), bias_data, /*scale=*/nullptr, packed_w.data(),
+          reinterpret_cast<const uint16_t*>(weights.data()), 
+          reinterpret_cast<const uint16_t*>(bias_data), /*scale=*/nullptr, 
+          reinterpret_cast<uint16_t*>(packed_w.data()),
       /*extra_bytes=*/0, /*params=*/nullptr);
 
     // Verify results.

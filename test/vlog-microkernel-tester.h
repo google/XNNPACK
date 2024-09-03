@@ -21,7 +21,7 @@
 #include "xnnpack/microfnptr.h"
 #include "replicable_random_device.h"
 
-extern "C" XNN_INTERNAL const xnn_float16 xnn_table_vlog[129];
+extern "C" XNN_INTERNAL const uint16_t xnn_table_vlog[129];
 
 class VLogMicrokernelTester {
  public:
@@ -74,12 +74,12 @@ class VLogMicrokernelTester {
 
   void Test(xnn_u32_vlog_ukernel_fn vlog) const {
     xnnpack::ReplicableRandomDevice rng;
-    auto i16rng = std::bind(std::uniform_int_distribution<xnn_float16>(), std::ref(rng));
+    auto i16rng = std::bind(std::uniform_int_distribution<uint16_t>(), std::ref(rng));
     auto i32rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));
 
     std::vector<uint32_t> x(batch() + XNN_EXTRA_BYTES / sizeof(uint32_t));
-    std::vector<xnn_float16> y(batch() * (inplace() ? sizeof(uint32_t) / sizeof(xnn_float16) : 1) + XNN_EXTRA_BYTES / sizeof(uint32_t));
-    std::vector<xnn_float16> y_ref(batch());
+    std::vector<uint16_t> y(batch() * (inplace() ? sizeof(uint32_t) / sizeof(uint16_t) : 1) + XNN_EXTRA_BYTES / sizeof(uint32_t));
+    std::vector<uint16_t> y_ref(batch());
     const uint32_t* x_data = inplace() ? reinterpret_cast<const uint32_t*>(y.data()) : x.data();
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {

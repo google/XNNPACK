@@ -32,7 +32,7 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/f32-vrnd/gen/f32-vrndu-sse2-u8.c
   src/f32-vrnd/gen/f32-vrndz-sse2-u8.c
   src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-lut64-p2-div-u8.c
-  src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-6-div.c
+  src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-8-div.c
   src/f32-vunary/gen/f32-vabs-sse2.c
   src/f32-vunary/gen/f32-vneg-sse2.c
   src/f32-vunary/gen/f32-vsqr-sse2.c
@@ -169,7 +169,7 @@ SET(NON_PROD_SSE2_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-p5-div-u16.c
   src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-p5-div-u20.c
   src/f32-vsigmoid/gen/f32-vsigmoid-sse2-rr2-p5-div-u24.c
-  src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-6-nr.c
+  src/f32-vtanh/gen/f32-vtanh-sse2-rational-9-8-nr.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x4c8-minmax-sse2-ld64.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-2x4c8-minmax-sse2-ld64.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-2x4c8-minmax-sse2-ld128.c

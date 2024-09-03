@@ -948,7 +948,7 @@ NON_PROD_WASMSIMD_MICROKERNEL_SRCS = [
     "src/f32-vtanh/gen/f32-vtanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-pmax-u4.c",
     "src/f32-vtanh/gen/f32-vtanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-pmax-u8.c",
     "src/f32-vtanh/gen/f32-vtanh-wasmsimd-expm1minus-rr1-p6h5ts-div-nabs-pmax-u12.c",
-    "src/f32-vtanh/gen/f32-vtanh-wasmsimd-rational-9-6-div.c",
+    "src/f32-vtanh/gen/f32-vtanh-wasmsimd-rational-9-8-div.c",
     "src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x4c8-minmax-wasmsimd-dot16x2-ld64.c",
     "src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x4c8-minmax-wasmsimd-dot16x2-ld64.c",
     "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x4c2-minmax-wasmsimd-dot16x2-ld64.c",

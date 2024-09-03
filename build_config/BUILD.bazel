@@ -15,6 +15,13 @@ package(
 ############################# Build configurations #############################
 
 config_setting(
+    name = "linux",
+    constraint_values = [
+        "@platforms//os:linux",
+    ],
+)
+
+config_setting(
     name = "linux_arm64",
     values = {"cpu": "aarch64"},
 )

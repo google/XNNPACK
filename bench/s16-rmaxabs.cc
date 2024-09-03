@@ -33,7 +33,7 @@ void s16_rmaxabs(
       (channels) + XNN_EXTRA_BYTES / sizeof(int16_t));
   std::iota(input.begin(), input.end(), 0);
 
-  xnn_float16 output = UINT16_C(0);
+  uint16_t output = UINT16_C(0);
   for (auto _ : state) {
     rmaxabs(channels, input.data(), &output);
   }

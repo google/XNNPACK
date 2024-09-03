@@ -22,7 +22,7 @@ $for BATCH_TILE in BATCH_TILES:
   $assert BATCH_TILE >= SIMD_SIZE
   $SIMD_TILE = BATCH_TILE // SIMD_SIZE
 
-  void xnn_f32_vtanh_ukernel__${ARCH}_rational_9_6_${DIV.lower()}_u${BATCH_TILE}(
+  void xnn_f32_vtanh_ukernel__${ARCH}_rational_9_8_${DIV.lower()}_u${BATCH_TILE}(
       size_t batch,
       const float* input,
       float* output,
@@ -38,28 +38,43 @@ $for BATCH_TILE in BATCH_TILES:
     // this point. This value is chosen as the first floating point number as of
     // which the interpolation returns 1.0f.
     #if XNN_SIMD_HAS_NATIVE_FMA
-      XNN_SIMD_CONST_F32(vmax_x, 7.646893501282f);
-      XNN_SIMD_CONST_F32(vmin_x, -7.646893501282f);
+      $if DIV == "DIV":
+        XNN_SIMD_CONST_F32(vmax_x, 7.9807181358e+00);
+        XNN_SIMD_CONST_F32(vmin_x, -7.9807181358e+00);
+      $else:
+        $if ARCH == "avx512f":
+          XNN_SIMD_CONST_F32(vmax_x, 7.8473143578e+00);
+          XNN_SIMD_CONST_F32(vmin_x, -7.8473143578e+00);
+        $else:
+          XNN_SIMD_CONST_F32(vmax_x, 7.8947348595e+00);
+          XNN_SIMD_CONST_F32(vmin_x, -7.8947348595e+00);
     #else
-      XNN_SIMD_CONST_F32(vmax_x, 7.623543739319f);
-      XNN_SIMD_CONST_F32(vmin_x, -7.623543739319f);
+      $if DIV == "DIV":
+        XNN_SIMD_CONST_F32(vmax_x, 7.8522667885e+00);
+        XNN_SIMD_CONST_F32(vmin_x, -7.8522667885e+00);
+      $else:
+        XNN_SIMD_CONST_F32(vmax_x, 7.7497606277e+00);
+        XNN_SIMD_CONST_F32(vmin_x, -7.7497606277e+00);
     #endif  // XNN_SIMD_HAS_NATIVE_FMA
 
     // The monomial coefficients of the numerator polynomial (odd).
-    XNN_SIMD_CONST_F32(valpha_1, -9.022999554873e-03f);
-    XNN_SIMD_CONST_F32(valpha_3, -1.146968104877e-03f);
-    XNN_SIMD_CONST_F32(valpha_5, -2.432360815874e-05f);
-    XNN_SIMD_CONST_F32(valpha_7, -6.458659385089e-08f);
-    XNN_SIMD_CONST_F32(valpha_9, 5.535878699892e-11f);
+    // XNN_SIMD_CONST_F32(valpha_1, 1.0000000000e+00f);
+    XNN_SIMD_CONST_F32(valpha_3, 1.3412411511e-01f);
+    XNN_SIMD_CONST_F32(valpha_5, 3.5330520477e-03f);
+    XNN_SIMD_CONST_F32(valpha_7, 2.1235626264e-05f);
+    XNN_SIMD_CONST_F32(valpha_9, 1.4248920266e-08f);
+
 
     // The monomial coefficients of the denominator polynomial (even).
-    XNN_SIMD_CONST_F32(vbeta_0, -9.023001417518e-03f);
-    XNN_SIMD_CONST_F32(vbeta_2, -4.154618829489e-03f);
-    XNN_SIMD_CONST_F32(vbeta_4, -2.061512641376e-04f);
-    XNN_SIMD_CONST_F32(vbeta_6, -1.774490101525e-06f);
+    // XNN_SIMD_CONST_F32(vbeta_0, 1.0000000000e+00f);
+    XNN_SIMD_CONST_F32(vbeta_2, 4.6745735407e-01f);
+    XNN_SIMD_CONST_F32(vbeta_4, 2.6018999517e-02f);
+    XNN_SIMD_CONST_F32(vbeta_6, 3.3472978976e-04f);
+    XNN_SIMD_CONST_F32(vbeta_8, 8.1365948290e-07f);
 
+    // Some useful constants.
+    XNN_SIMD_CONST_F32(vone, 1.0f);
     $if DIV == "NR":
-      // Constant needed for the Newton-Raphson iteration of the reciprocal.
       XNN_SIMD_CONST_F32(vtwo, 2.0f);
 
     $if SIMD_TILE > 1:
@@ -87,17 +102,19 @@ $for BATCH_TILE in BATCH_TILES:
         $for N in range(SIMD_TILE):
           vp_${ABC[N]} = xnn_fmadd_f32(vx2_${ABC[N]}, vp_${ABC[N]}, valpha_3);
         $for N in range(SIMD_TILE):
-          vp_${ABC[N]} = xnn_fmadd_f32(vx2_${ABC[N]}, vp_${ABC[N]}, valpha_1);
+          vp_${ABC[N]} = xnn_fmadd_f32(vx2_${ABC[N]}, vp_${ABC[N]}, vone);
         $for N in range(SIMD_TILE):
           vp_${ABC[N]} = xnn_mul_f32(vx_${ABC[N]}, vp_${ABC[N]});
 
         // Evaluate the denominator polynomial q.
         $for N in range(SIMD_TILE):
-          xnn_simd_f32_t vq_${ABC[N]} = xnn_fmadd_f32(vx2_${ABC[N]}, vbeta_6, vbeta_4);
+          xnn_simd_f32_t vq_${ABC[N]} = xnn_fmadd_f32(vx2_${ABC[N]}, vbeta_8, vbeta_6);
+        $for N in range(SIMD_TILE):
+          vq_${ABC[N]} = xnn_fmadd_f32(vx2_${ABC[N]}, vq_${ABC[N]}, vbeta_4);
         $for N in range(SIMD_TILE):
           vq_${ABC[N]} = xnn_fmadd_f32(vx2_${ABC[N]}, vq_${ABC[N]}, vbeta_2);
         $for N in range(SIMD_TILE):
-          vq_${ABC[N]} = xnn_fmadd_f32(vx2_${ABC[N]}, vq_${ABC[N]}, vbeta_0);
+          vq_${ABC[N]} = xnn_fmadd_f32(vx2_${ABC[N]}, vq_${ABC[N]}, vone);
 
         // Divide the numerator by the denominator.
         $if DIV == "DIV":
@@ -133,13 +150,14 @@ $for BATCH_TILE in BATCH_TILES:
       xnn_simd_f32_t vp = xnn_fmadd_f32(vx2, valpha_9, valpha_7);
       vp = xnn_fmadd_f32(vx2, vp, valpha_5);
       vp = xnn_fmadd_f32(vx2, vp, valpha_3);
-      vp = xnn_fmadd_f32(vx2, vp, valpha_1);
+      vp = xnn_fmadd_f32(vx2, vp, vone);
       vp = xnn_mul_f32(vx, vp);
 
       // Evaluate the denominator polynomial q.
-      xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_6, vbeta_4);
+      xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_8, vbeta_6);
+      vq = xnn_fmadd_f32(vx2, vq, vbeta_4);
       vq = xnn_fmadd_f32(vx2, vq, vbeta_2);
-      vq = xnn_fmadd_f32(vx2, vq, vbeta_0);
+      vq = xnn_fmadd_f32(vx2, vq, vone);
 
       // Divide the numerator by the denominator.
       $if DIV == "DIV":
@@ -169,13 +187,14 @@ $for BATCH_TILE in BATCH_TILES:
         xnn_simd_f32_t vp = xnn_fmadd_f32(vx2, valpha_9, valpha_7);
         vp = xnn_fmadd_f32(vx2, vp, valpha_5);
         vp = xnn_fmadd_f32(vx2, vp, valpha_3);
-        vp = xnn_fmadd_f32(vx2, vp, valpha_1);
+        vp = xnn_fmadd_f32(vx2, vp, vone);
         vp = xnn_mul_f32(vx, vp);
 
         // Evaluate the denominator polynomial q.
-        xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_6, vbeta_4);
+        xnn_simd_f32_t vq = xnn_fmadd_f32(vx2, vbeta_8, vbeta_6);
+        vq = xnn_fmadd_f32(vx2, vq, vbeta_4);
         vq = xnn_fmadd_f32(vx2, vq, vbeta_2);
-        vq = xnn_fmadd_f32(vx2, vq, vbeta_0);
+        vq = xnn_fmadd_f32(vx2, vq, vone);
 
         // Divide the numerator by the denominator.
         $if DIV == "DIV":
