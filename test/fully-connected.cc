@@ -36,7 +36,7 @@ using testing::ElementsAreArray;
 
 template <class InputType, class KernelType = InputType,
           class BiasType = InputType, class OutputType = InputType, bool even_channels = false>
-class FullyConnectedTestBase : public ::testing::Test {
+class FullyConnectedTestBase : public ::testing::TestWithParam<bool> {
  protected:
   FullyConnectedTestBase() {
     f32dist = std::uniform_real_distribution<float>(0.1f, 1.0f);
@@ -72,7 +72,9 @@ class FullyConnectedTestBase : public ::testing::Test {
 
     input = std::vector<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) + NumElements(input_dims));
     kernel = std::vector<KernelType>(input_channels * output_channels);
+    kernel_fp16 = std::vector<xnn_float16>(input_channels * output_channels);
     bias = std::vector<BiasType>(output_channels);
+    bias_fp16 = std::vector<xnn_float16>(output_channels);
     operator_output = std::vector<OutputType>(NumElements(output_dims));
     subgraph_output = std::vector<OutputType>(operator_output.size());
     accumulators = std::vector<int32_t>(batch_size * output_channels);
@@ -115,6 +117,8 @@ class FullyConnectedTestBase : public ::testing::Test {
   std::vector<InputType> input;
   std::vector<KernelType> kernel;
   std::vector<BiasType> bias;
+  std::vector<xnn_float16> kernel_fp16;
+  std::vector<xnn_float16> bias_fp16;
   std::vector<OutputType> operator_output;
   std::vector<OutputType> subgraph_output;
   std::vector<int32_t> accumulators;
@@ -1042,8 +1046,9 @@ TEST_F(FullyConnectedTestQU8, define)
   ASSERT_EQ(node->flags, 0);
 }
 
-TEST_F(FullyConnectedTestF16, define)
+TEST_P(FullyConnectedTestF16, define)
 {
+  bool use_bias = GetParam();
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_subgraph_t subgraph = nullptr;
@@ -1065,10 +1070,12 @@ TEST_F(FullyConnectedTestF16, define)
       /*flags=*/0, &kernel_id));
 
   uint32_t bias_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, bias_dims.size(), bias_dims.data(), bias.data(),
-                          /*external_id=*/2, /*flags=*/0, &bias_id));
+  if (use_bias) {
+    ASSERT_EQ(
+      xnn_status_success, xnn_define_tensor_value(
+                            subgraph, xnn_datatype_fp32, bias_dims.size(), bias_dims.data(), bias.data(),
+                            /*external_id=*/2, /*flags=*/0, &bias_id));
+  }
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
@@ -1087,7 +1094,7 @@ TEST_F(FullyConnectedTestF16, define)
   ASSERT_EQ(node->compute_type, xnn_compute_type_fp16);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 3);
+  ASSERT_EQ(node->num_inputs, use_bias ? 3 : 2);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->inputs[1], kernel_id);
   ASSERT_EQ(node->inputs[2], bias_id);
@@ -1730,21 +1737,24 @@ TEST_F(FullyConnectedTestQU8, matches_operator_api)
   EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
-TEST_F(FullyConnectedTestF16, matches_operator_api)
+TEST_P(FullyConnectedTestF16, matches_operator_api)
 {
+  bool use_bias = GetParam();
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_operator_t op = nullptr;
 
   std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
-  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+  if (use_bias) {
+    std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+  }
   std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
   std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
 
   // Call operator API.
   const xnn_status status = xnn_create_fully_connected_nc_f16(
-    input_channels, output_channels, input_channels, output_channels, kernel.data(), bias.data(), output_min,
+    input_channels, output_channels, input_channels, output_channels, kernel.data(), use_bias ? bias.data() : nullptr, output_min,
     output_max, XNN_FLAG_FP32_STATIC_WEIGHTS, nullptr, nullptr, &op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
 
@@ -1778,10 +1788,98 @@ TEST_F(FullyConnectedTestF16, matches_operator_api)
                           /*external_id=*/1, /*flags=*/0, &kernel_id));
 
   uint32_t bias_id = XNN_INVALID_VALUE_ID;
+  if (use_bias) {
+    ASSERT_EQ(
+      xnn_status_success, xnn_define_tensor_value(
+                            subgraph, xnn_datatype_fp32, bias_dims.size(), bias_dims.data(), bias.data(),
+                            /*external_id=*/2, /*flags=*/0, &bias_id));
+  }
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
     xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, bias_dims.size(), bias_dims.data(), bias.data(),
-                          /*external_id=*/2, /*flags=*/0, &bias_id));
+                          subgraph, xnn_datatype_fp16, output_dims.size(), output_dims.data(), nullptr,
+                          /*external_id=*/3, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
+  ASSERT_EQ(
+    xnn_status_success,
+    xnn_define_fully_connected(subgraph, output_min, output_max, input_id, kernel_id, bias_id, output_id, /*flags=*/0));
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
+  std::array<xnn_external_value, 2> external = {
+    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+
+  // Check outputs match.
+  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    UseBias,
+    FullyConnectedTestF16,
+    ::testing::Bool());
+
+TEST_P(FullyConnectedTestF16, matches_operator_api_f16_weights)
+{
+  bool use_bias = GetParam();
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  xnn_operator_t op = nullptr;
+
+  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+  std::generate(kernel_fp16.begin(), kernel_fp16.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+  if (use_bias) {
+    std::generate(bias_fp16.begin(), bias_fp16.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+  }
+  std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
+  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
+
+  // Call operator API.
+  const xnn_status status = xnn_create_fully_connected_nc_f16(
+    input_channels, output_channels, input_channels, output_channels, kernel_fp16.data(), use_bias ? bias_fp16.data() : nullptr, output_min,
+    output_max, /*flags=*/0, nullptr, nullptr, &op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
+
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, op);
+  ASSERT_EQ(xnn_status_success, xnn_reshape_fully_connected_nc_f16(op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_fully_connected_nc_f16(op, input.data(), operator_output.data()));
+
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
+
+  // Call subgraph API.
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp16, input_dims.size(), input_dims.data(), nullptr,
+                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_VALUE_ID);
+
+  uint32_t kernel_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+    xnn_status_success, xnn_define_tensor_value(
+                          subgraph, xnn_datatype_fp16, kernel_dims.size(), kernel_dims.data(), kernel_fp16.data(),
+                          /*external_id=*/1, /*flags=*/0, &kernel_id));
+
+  uint32_t bias_id = XNN_INVALID_VALUE_ID;
+  if (use_bias) {
+    ASSERT_EQ(
+      xnn_status_success, xnn_define_tensor_value(
+                            subgraph, xnn_datatype_fp16, bias_dims.size(), bias_dims.data(), bias_fp16.data(),
+                            /*external_id=*/2, /*flags=*/0, &bias_id));
+  }
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
@@ -2200,15 +2298,23 @@ TEST_F(FullyConnectedTestF32QC8W, matches_operator_api_without_bias)
   EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
-TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel)
+INSTANTIATE_TEST_SUITE_P(
+    UseBias,
+    DynamicFullyConnectedTestF32,
+    ::testing::Bool());
+
+TEST_P(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel)
 {
+  bool use_bias = GetParam();
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_operator_t op = nullptr;
 
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
-  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+  if (use_bias) {
+    std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+  }
   std::fill(operator_output.begin(), operator_output.end(), nanf(""));
   std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
@@ -2235,7 +2341,7 @@ TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel)
   std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
   ASSERT_EQ(
     xnn_status_success, xnn_setup_dynamic_fully_connected_nc_f32(
-                          op, workspace.data(), input.data(), kernel.data(), bias.data(), operator_output.data()));
+                          op, workspace.data(), input.data(), kernel.data(), use_bias ? bias.data() : nullptr, operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
 
@@ -2258,10 +2364,12 @@ TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel)
                           /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &kernel_id));
 
   uint32_t bias_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, bias_dims.size(), bias_dims.data(), bias.data(),
-                          /*external_id=*/2, /*flags=*/0, &bias_id));
+  if (use_bias) {
+    ASSERT_EQ(
+        xnn_status_success, xnn_define_tensor_value(
+            subgraph, xnn_datatype_fp32, bias_dims.size(), bias_dims.data(), bias.data(),
+            /*external_id=*/2, /*flags=*/0, &bias_id));
+  }
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
@@ -2272,89 +2380,6 @@ TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel)
   ASSERT_EQ(
     xnn_status_success,
     xnn_define_fully_connected(subgraph, output_min, output_max, input_id, kernel_id, bias_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 3> external = {
-    xnn_external_value{input_id, input.data()},
-    xnn_external_value{kernel_id, kernel.data()},
-    xnn_external_value{output_id, subgraph_output.data()},
-  };
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  // Check outputs match.
-  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
-}
-
-TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel_no_bias)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_operator_t op = nullptr;
-
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
-
-  // Call operator API.
-  const xnn_status status = xnn_create_dynamic_fully_connected_nc_f32(output_min, output_max, /*flags=*/0, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-
-  size_t workspace_size = 0;
-  size_t workspace_alignment = 0;
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_dynamic_fully_connected_nc_f32(
-                          op, batch_size, input_channels, output_channels, input_channels, output_channels,
-                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
-  ASSERT_NE(workspace_size, 0);
-  ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
-  ASSERT_EQ(
-    xnn_status_success, xnn_setup_dynamic_fully_connected_nc_f32(
-                          op, workspace.data(), input.data(), kernel.data(), /*bias=*/nullptr, operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_VALUE_ID);
-
-  uint32_t kernel_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, kernel_dims.size(), kernel_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &kernel_id));
-
-  uint32_t output_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/3, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_fully_connected(
-      subgraph, output_min, output_max, input_id, kernel_id, /*bias_id=*/XNN_INVALID_VALUE_ID, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
