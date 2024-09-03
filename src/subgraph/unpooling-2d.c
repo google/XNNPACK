@@ -23,16 +23,16 @@ static enum xnn_status create_unpooling_operator(
   struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
-  assert(node->compute_type == xnn_compute_type_fp32);
-
   assert(node->num_inputs == 2);
   const uint32_t input_value_id = node->inputs[0];
   assert(input_value_id != XNN_INVALID_VALUE_ID);
   assert(input_value_id < num_values);
+  const struct xnn_value *input_value = &values[input_value_id];
+  assert(input_value->datatype == xnn_datatype_fp32);
 
   assert(node->num_outputs == 1);
 
-  const size_t channel_dim = values[input_value_id].shape.dim[3];
+  const size_t channel_dim = input_value->shape.dim[3];
   assert(channel_dim == values[node->inputs[1]].shape.dim[3]);
   assert(channel_dim == values[node->outputs[0]].shape.dim[3]);
 

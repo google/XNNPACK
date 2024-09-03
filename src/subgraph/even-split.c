@@ -23,6 +23,7 @@ static enum xnn_status create_even_split_operator_helper(
     const uint32_t output_id,
     const struct xnn_node* node,
     struct xnn_operator_data* opdata,
+    const enum xnn_datatype datatype,
     size_t index)
 {
   if (output_id == XNN_INVALID_VALUE_ID) {
@@ -30,15 +31,15 @@ static enum xnn_status create_even_split_operator_helper(
     return xnn_status_success;
   }
 
-  switch (node->compute_type) {
-    case xnn_compute_type_fp16:
+  switch (datatype) {
+    case xnn_datatype_fp16:
       return xnn_create_copy_nc_x16(
           node->flags, &opdata->operator_objects[index]);
-    case xnn_compute_type_fp32:
+    case xnn_datatype_fp32:
       return xnn_create_copy_nc_x32(
           node->flags, &opdata->operator_objects[index]);
-    case xnn_compute_type_qs8:
-    case xnn_compute_type_qu8:
+    case xnn_datatype_qint8:
+    case xnn_datatype_quint8:
       return xnn_create_copy_nc_x8(
           node->flags, &opdata->operator_objects[index]);
     default:
@@ -58,12 +59,15 @@ static enum xnn_status create_even_split_n_operator(
   assert(node->num_inputs == 1);
   assert(node->num_outputs == num_splits);
   uint32_t output_id[XNN_MAX_OPERATOR_OBJECTS];
+  enum xnn_datatype datatype;
   for (size_t i = 0; i < num_splits; ++i) {
     output_id[i] = opdata->outputs[i];
     assert(output_id[i] != XNN_INVALID_VALUE_ID);
     assert(output_id[i] < num_values);
     if (values[output_id[i]].type == xnn_value_type_invalid) {
       output_id[i] = XNN_INVALID_VALUE_ID;
+    } else {
+      datatype = values[output_id[i]].datatype;
     }
   }
 
@@ -71,7 +75,7 @@ static enum xnn_status create_even_split_n_operator(
   opdata->axis = axis;
   enum xnn_status status;
   for (size_t i = 0; i < num_splits; ++i) {
-    status = create_even_split_operator_helper(output_id[i], node, opdata, i);
+    status = create_even_split_operator_helper(output_id[i], node, opdata, datatype, i);
     if (status != xnn_status_success) {
       return status;
     }

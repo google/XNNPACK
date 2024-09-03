@@ -22,15 +22,16 @@
 static enum xnn_status create_concatenate_operator_helper(
   const struct xnn_node *node,
   struct xnn_operator_data *opdata,
+  const enum xnn_datatype datatype,
   size_t index)
 {
-  switch (node->compute_type) {
-    case xnn_compute_type_fp16:
+  switch (datatype) {
+    case xnn_datatype_fp16:
       return xnn_create_copy_nc_x16(node->flags, &opdata->operator_objects[index]);
-    case xnn_compute_type_fp32:
+    case xnn_datatype_fp32:
       return xnn_create_copy_nc_x32(node->flags, &opdata->operator_objects[index]);
-    case xnn_compute_type_qs8:
-    case xnn_compute_type_qu8:
+    case xnn_datatype_qint8:
+    case xnn_datatype_quint8:
       return xnn_create_copy_nc_x8(node->flags, &opdata->operator_objects[index]);
     default:
       XNN_UNREACHABLE;
@@ -49,8 +50,11 @@ static enum xnn_status create_concatenate_n_operator(
   enum xnn_status status;
   const int32_t axis = node->params.concatenate.axis;
   opdata->axis = axis;
+  const uint32_t input1_id = opdata->inputs[0];
+  assert(input1_id < num_values);
+  const struct xnn_value *input1_value = &values[input1_id];
   for (size_t i = 0; i < num_inputs; ++i) {
-    status = create_concatenate_operator_helper(node, opdata, i);
+    status = create_concatenate_operator_helper(node, opdata, input1_value->datatype, i);
     if (status != xnn_status_success) {
       return status;
     }

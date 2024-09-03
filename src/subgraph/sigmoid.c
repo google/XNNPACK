@@ -38,18 +38,20 @@ static enum xnn_status create_sigmoid_operator(
   assert(output_id < num_values);
 
   enum xnn_status status;
-  switch (node->compute_type) {
-    case xnn_compute_type_fp16:
+  assert(input_id < num_values);
+  const struct xnn_value *input_value = &values[input_id];
+  switch (input_value->datatype) {
+    case xnn_datatype_fp16:
       status = xnn_create_sigmoid_nc_f16(
         node->flags,
         &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_fp32:
+    case xnn_datatype_fp32:
       status = xnn_create_sigmoid_nc_f32(
         node->flags,
         &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_qs8:
+    case xnn_datatype_qint8:
     {
       status = xnn_create_sigmoid_nc_qs8(
         (int8_t) values[input_id].quantization.zero_point,
@@ -61,7 +63,7 @@ static enum xnn_status create_sigmoid_operator(
         &opdata->operator_objects[0]);
       break;
     }
-    case xnn_compute_type_qu8:
+    case xnn_datatype_quint8:
     {
       status = xnn_create_sigmoid_nc_qu8(
         (uint8_t) values[input_id].quantization.zero_point,

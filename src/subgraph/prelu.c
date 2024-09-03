@@ -47,9 +47,12 @@ static enum xnn_status create_prelu_operator(
   const size_t num_input_dims = values[input_id].shape.num_dims;
   const size_t input_channels = num_input_dims == 0 ? 1 : values[input_id].shape.dim[num_input_dims - 1];
 
+  const uint32_t input1_id = node->inputs[0];
+  assert(input_id < num_values);
+  const struct xnn_value *input1_value = &values[input1_id];
   enum xnn_status status;
-  switch (node->compute_type) {
-    case xnn_compute_type_fp16:
+  switch (input1_value->datatype) {
+    case xnn_datatype_fp16:
       status = xnn_create_prelu_nc_f16(
         input_channels,
         slope_channels,
@@ -61,7 +64,7 @@ static enum xnn_status create_prelu_operator(
         weights_cache,
         &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_fp32:
+    case xnn_datatype_fp32:
       status = xnn_create_prelu_nc_f32(
         input_channels,
         slope_channels,
