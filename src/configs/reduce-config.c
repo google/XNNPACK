@@ -289,6 +289,13 @@ static void init_f32_rdsum_config(void) {
       .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
       .element_tile = 16,
     };
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    f32_rdsum_config = (struct xnn_reduce_config) {
+      .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_f32_rdsum_ukernel_7p7x__rvv_u4v,
+      .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
+      .element_tile = hardware_config->vlenb,
+    };
   #else
     f32_rdsum_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_f32_rdsum_ukernel_7p7x__scalar_c4,
