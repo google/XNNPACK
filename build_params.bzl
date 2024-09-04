@@ -100,6 +100,10 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_AVXVNNI=1"],
         ["XNN_ENABLE_AVXVNNI=0"],
     ) + xnnpack_select_if(
+        ":avxvnniint8_enabled",
+        ["XNN_ENABLE_AVXVNNIINT8=1"],
+        ["XNN_ENABLE_AVXVNNIINT8=0"],
+    ) + xnnpack_select_if(
         ":avx256skx_enabled",
         ["XNN_ENABLE_AVX256SKX=1"],
         ["XNN_ENABLE_AVX256SKX=0"],
@@ -539,6 +543,17 @@ XNNPACK_PARAMS_FOR_ARCH = {
         gcc_x86_copts = [
             "-mavx2",
             "-mavxvnni",
+            "-mf16c",
+            "-mfma",
+        ],
+        msvc_x86_32_copts = ["/arch:AVX"],
+        msvc_x86_64_copts = ["/arch:AVX"],
+    ),
+    "avxvnniint8": _create_params(
+        cond = "//:avxvnniint8_enabled",
+        gcc_x86_copts = [
+            "-mavx2",
+            "-mavxvnniint8",
             "-mf16c",
             "-mfma",
         ],
