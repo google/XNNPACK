@@ -13,6 +13,13 @@
   init: xnn_init_f32_scaleminmax_scalar_params
 - name: xnn_f32_rdsum_ukernel_7p7x__neon_c64
   init: xnn_init_f32_scaleminmax_scalar_params
+# RISC-V Vector
+- name: xnn_f32_rdsum_ukernel_7p7x__rvv_u1v
+  init: xnn_init_f32_scaleminmax_scalar_params
+- name: xnn_f32_rdsum_ukernel_7p7x__rvv_u2v
+  init: xnn_init_f32_scaleminmax_scalar_params
+- name: xnn_f32_rdsum_ukernel_7p7x__rvv_u4v
+  init: xnn_init_f32_scaleminmax_scalar_params
 # x86 SSE
 - name: xnn_f32_rdsum_ukernel_7p7x__sse_c16
   init: xnn_init_f32_scaleminmax_scalar_params
