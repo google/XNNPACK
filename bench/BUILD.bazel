@@ -26,6 +26,7 @@ load(
 
 MICROKERNEL_BENCHMARK_DEPS = [
     ":bench_utils",
+    "@FP16",
     "//:aligned_allocator",
     "//:all_microkernels",
     "//:common",
@@ -46,6 +47,7 @@ OPERATOR_BENCHMARK_DEPS = [
     "//:cache",
     "//:common",
     "//:math",
+    "@FP16",
 ]
 
 xnnpack_cxx_library(

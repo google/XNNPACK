@@ -18,15 +18,6 @@
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 
-struct Float16 {
-  xnn_float16 value;
-
-  Float16() = default;
-  Float16(float value) : value(xnn_float16_from_float(value)) {}
-
-  operator float() const { return xnn_float16_to_float(value); }
-};
-
 class VBinaryMicrokernelTester {
  public:
   enum class OpType {

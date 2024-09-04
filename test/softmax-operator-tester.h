@@ -123,17 +123,17 @@ class SoftMaxOperatorTester {
     std::vector<xnn_float16> output((batch_size() - 1) * output_stride() + channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
         float sum_exp = 0.0;
         for (size_t c = 0; c < channels(); c++) {
-          sum_exp += std::exp(xnn_float16_to_float(input[i * input_stride() + c]));
+          sum_exp += std::exp(input[i * input_stride() + c]);
         }
         for (size_t c = 0; c < channels(); c++) {
-          output_ref[i * channels() + c] = std::exp(xnn_float16_to_float(input[i * input_stride() + c])) / sum_exp;
+          output_ref[i * channels() + c] = std::exp(input[i * input_stride() + c]) / sum_exp;
         }
       }
 
@@ -165,7 +165,7 @@ class SoftMaxOperatorTester {
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           ASSERT_NEAR(
-              xnn_float16_to_float(output[i * output_stride() + c]),
+              output[i * output_stride() + c],
               output_ref[i * channels() + c],
               std::max(1.0e-4f, std::abs(output_ref[i * channels() + c]) * 5.0e-3f))
             << "element " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
