@@ -1,0 +1,55 @@
+// Copyright 2023 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+//
+// Auto-generated file. Do not edit!
+//   Specification: test/qp8-f32-qb4w-gemm-minmax.yaml
+//   Generator: tools/generate-gemm-test.py
+
+#include <benchmark/benchmark.h>
+#include "bench/gemm-benchmark.h"
+#include "bench/utils.h"
+#include "xnnpack/common.h"
+#include "xnnpack/gemm.h"
+#include "xnnpack/isa-checks.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
+#include "xnnpack/pack.h"
+#include "xnnpack/packw.h"
+
+
+#if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64
+  #if XNN_ENABLE_KLEIDIAI
+  static void qp8_f32_qb4w_gemm_minmax_ukernel_1x4c16s2__aarch64_neondot(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x4c16s2__aarch64_neondot,
+      xnn_init_f32_qb4w_minmax_scalar_params,
+      xnn_pack_kai_qb4_weights_and_biases,
+      xnn_packed_stride_kai_qb4_weights_and_biases,
+      /*mr=*/1, /*nr=*/4, /*kr=*/16, /*sr=*/2,
+      /*mr_packed=*/1,
+      benchmark::utils::CheckNEONDOT);
+  }
+
+  BENCHMARK_GEMM_BL(qp8_f32_qb4w_gemm_minmax_ukernel_1x4c16s2__aarch64_neondot)
+
+  static void qp8_f32_qb4w_gemm_minmax_ukernel_1x8c16s2__aarch64_neondot(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x8c16s2__aarch64_neondot,
+      xnn_init_f32_qb4w_minmax_scalar_params,
+      xnn_pack_kai_qb4_weights_and_biases,
+      xnn_packed_stride_kai_qb4_weights_and_biases,
+      /*mr=*/1, /*nr=*/8, /*kr=*/16, /*sr=*/2,
+      /*mr_packed=*/1,
+      benchmark::utils::CheckNEONDOT);
+  }
+
+  BENCHMARK_GEMM_BL(qp8_f32_qb4w_gemm_minmax_ukernel_1x8c16s2__aarch64_neondot)
+  #endif  // XNN_ENABLE_KLEIDIAI
+#endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64
+
+
+#ifndef XNNPACK_BENCHMARK_NO_MAIN
+BENCHMARK_MAIN();
+#endif

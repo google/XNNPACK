@@ -1615,6 +1615,7 @@ IF(XNNPACK_BUILD_TESTS)
       qd8-f32-qc4w-gemm-minmax
       qd8-f32-qc8w-igemm-minmax
       qp8-f32-qc4w-gemm-minmax
+      qp8-f32-qb4w-gemm-minmax
       qs8-qc8w-gemm-minmax-fp32
       qs8-qc8w-igemm-minmax-fp32
       qu8-gemm-minmax-fp32
