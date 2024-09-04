@@ -22,6 +22,11 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_qs8_vhswish_ukernel__neon_u16, 16
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_qs8_vhswish_ukernel__neon_u32, 32, false, int8_t, union xnn_qs8_hswish_params, xnn_init_qs8_hswish_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+#if XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_qs8_vhswish_ukernel__rvv_u1v, 1, true, int8_t, union xnn_qs8_hswish_params, xnn_init_qs8_hswish_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_qs8_vhswish_ukernel__rvv_u2v, 2, true, int8_t, union xnn_qs8_hswish_params, xnn_init_qs8_hswish_scalar_params)
+#endif  // XNN_ENABLE_RISCV_VECTOR && (XNN_ARCH_RISCV)
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 XNN_UKERNEL_WITH_PARAMS(0, xnn_qs8_vhswish_ukernel__sse2_u16, 16, false, int8_t, union xnn_qs8_hswish_params, xnn_init_qs8_hswish_sse2_params)
 XNN_UKERNEL_WITH_PARAMS(0, xnn_qs8_vhswish_ukernel__sse2_u32, 32, false, int8_t, union xnn_qs8_hswish_params, xnn_init_qs8_hswish_sse2_params)

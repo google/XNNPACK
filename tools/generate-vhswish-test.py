@@ -33,28 +33,54 @@ def split_ukernel_name(name):
 
   datatype = match.group(1)
   batch_tile = int(match.group(3))
+  vector_tile = bool(match.group(4))
 
   arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(2))
-  return datatype, batch_tile, arch, isa
+  return datatype, batch_tile, vector_tile, arch, isa
 
 
 HSWISH_TEST_TEMPLATE = """\
-TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}) {
+TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}${BATCH_SUFFIX}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t batch_tile = ${BATCH_SCALED_TILE};
   VHSwishMicrokernelTester()
-    .batch_size(${BATCH_TILE})
+    .batch_size(batch_tile)
     $if DATATYPE == "QU8":
       .input_zero_point(150)
       .output_zero_point(100)
     .Test(${", ".join(TEST_ARGS)});
 }
 
-$if BATCH_TILE > 1:
-  TEST(${TEST_NAME}, batch_div_${BATCH_TILE}) {
+$if BATCH_TILE > 1 or BATCH_SCALED_TILE != BATCH_TILE:
+  TEST(${TEST_NAME}, batch_div_${BATCH_TILE}${BATCH_SUFFIX}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t batch_size = ${BATCH_TILE*2}; batch_size < ${BATCH_TILE*10}; batch_size += ${BATCH_TILE}) {
+    $if BATCH_SCALED_TILE == BATCH_TILE:
+      for (size_t batch_size = ${BATCH_TILE*2}; batch_size < ${BATCH_TILE*10}; batch_size += ${BATCH_TILE}) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          $if DATATYPE == "QU8":
+            .input_zero_point(150)
+            .output_zero_point(100)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    $else:
+      const size_t batch_tile = ${BATCH_SCALED_TILE};
+      for (size_t batch_size = batch_tile*2; batch_size < batch_tile*10; batch_size += batch_tile) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          $if DATATYPE == "QU8":
+            .input_zero_point(150)
+            .output_zero_point(100)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+  }
+
+  TEST(${TEST_NAME}, batch_lt_${BATCH_TILE}${BATCH_SUFFIX}) {
+    $if ISA_CHECK:
+      ${ISA_CHECK};
+    for (size_t batch_size = 1; batch_size < ${BATCH_SCALED_TILE}; batch_size++) {
       VHSwishMicrokernelTester()
         .batch_size(batch_size)
         $if DATATYPE == "QU8":
@@ -64,76 +90,113 @@ $if BATCH_TILE > 1:
     }
   }
 
-  TEST(${TEST_NAME}, batch_lt_${BATCH_TILE}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t batch_size = 1; batch_size < ${BATCH_TILE}; batch_size++) {
-      VHSwishMicrokernelTester()
-        .batch_size(batch_size)
-        $if DATATYPE == "QU8":
-          .input_zero_point(150)
-          .output_zero_point(100)
-        .Test(${", ".join(TEST_ARGS)});
-    }
-  }
-
-TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
+TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}${BATCH_SUFFIX}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t batch_size = ${BATCH_TILE+1}; batch_size < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch_size++) {
-    VHSwishMicrokernelTester()
-      .batch_size(batch_size)
-      $if DATATYPE == "QU8":
-        .input_zero_point(150)
-        .output_zero_point(100)
-      .Test(${", ".join(TEST_ARGS)});
-  }
+  $if BATCH_SCALED_TILE == BATCH_TILE:
+    for (size_t batch_size = ${BATCH_TILE+1}; batch_size < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch_size++) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        $if DATATYPE == "QU8":
+          .input_zero_point(150)
+          .output_zero_point(100)
+        .Test(${", ".join(TEST_ARGS)});
+    }
+  $else:
+    const size_t batch_tile = ${BATCH_SCALED_TILE};
+    for (size_t batch_size = batch_tile+1; batch_size < batch_tile*2; batch_size++) {
+      VHSwishMicrokernelTester()
+        .batch_size(batch_size)
+        $if DATATYPE == "QU8":
+          .input_zero_point(150)
+          .output_zero_point(100)
+        .Test(${", ".join(TEST_ARGS)});
+    }
 }
 
 TEST(${TEST_NAME}, input_scale) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-    for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
-      VHSwishMicrokernelTester()
-        .batch_size(batch_size)
-        .input_scale(input_scale)
-        $if DATATYPE == "QU8":
-          .input_zero_point(150)
-          .output_zero_point(100)
-        .Test(${", ".join(TEST_ARGS)});
-      }
-  }
+  $if BATCH_SCALED_TILE == BATCH_TILE:
+    for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_scale(input_scale)
+          $if DATATYPE == "QU8":
+            .input_zero_point(150)
+            .output_zero_point(100)
+          .Test(${", ".join(TEST_ARGS)});
+        }
+    }
+  $else:
+    const size_t batch_tile = ${BATCH_SCALED_TILE};
+    for (size_t batch_size = 1; batch_size <= batch_tile*5; batch_size += batch_tile-1) {
+      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_scale(input_scale)
+          $if DATATYPE == "QU8":
+            .input_zero_point(150)
+            .output_zero_point(100)
+          .Test(${", ".join(TEST_ARGS)});
+        }
+    }
 }
 
 TEST(${TEST_NAME}, output_scale) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-    for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
-      VHSwishMicrokernelTester()
-        .batch_size(batch_size)
-        .output_scale(output_scale)
-        $if DATATYPE == "QU8":
-          .input_zero_point(150)
-          .output_zero_point(100)
-        .Test(${", ".join(TEST_ARGS)});
-      }
-  }
+  $if BATCH_SCALED_TILE == BATCH_TILE:
+    for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .output_scale(output_scale)
+          $if DATATYPE == "QU8":
+            .input_zero_point(150)
+            .output_zero_point(100)
+          .Test(${", ".join(TEST_ARGS)});
+        }
+    }
+  $else:
+    const size_t batch_tile = ${BATCH_SCALED_TILE};
+    for (size_t batch_size = 1; batch_size <= batch_tile*5; batch_size += batch_tile-1) {
+      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .output_scale(output_scale)
+          $if DATATYPE == "QU8":
+            .input_zero_point(150)
+            .output_zero_point(100)
+          .Test(${", ".join(TEST_ARGS)});
+        }
+    }
 }
 
 TEST(${TEST_NAME}, input_zero_point) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (int16_t input_zero_point = 2; input_zero_point < 10; input_zero_point += 3) {
-    for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-      VHSwishMicrokernelTester()
-        .batch_size(batch_size)
-        .input_zero_point(input_zero_point)
-        $if DATATYPE == "QU8":
-          .output_zero_point(100)
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    $if BATCH_SCALED_TILE == BATCH_TILE:
+      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(input_zero_point)
+          $if DATATYPE == "QU8":
+            .output_zero_point(100)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    $else:
+      const size_t batch_tile = ${BATCH_SCALED_TILE};
+      for (size_t batch_size = 1; batch_size <= batch_tile*5; batch_size += batch_tile-1) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          .input_zero_point(input_zero_point)
+          $if DATATYPE == "QU8":
+            .output_zero_point(100)
+          .Test(${", ".join(TEST_ARGS)});
+      }
   }
 }
 
@@ -141,20 +204,31 @@ TEST(${TEST_NAME}, output_zero_point) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (int16_t output_zero_point = 2; output_zero_point < 10; output_zero_point += 3) {
-    for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-      VHSwishMicrokernelTester()
-        .batch_size(batch_size)
-        $if DATATYPE == "QU8":
-          .input_zero_point(150)
-        .output_zero_point(output_zero_point)
-        .Test(${", ".join(TEST_ARGS)});
-    }
+    $if BATCH_SCALED_TILE == BATCH_TILE:
+      for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          $if DATATYPE == "QU8":
+            .input_zero_point(150)
+          .output_zero_point(output_zero_point)
+          .Test(${", ".join(TEST_ARGS)});
+      }
+    $else:
+      const size_t batch_tile = ${BATCH_SCALED_TILE};
+      for (size_t batch_size = 1; batch_size <= batch_tile*5; batch_size += batch_tile-1) {
+        VHSwishMicrokernelTester()
+          .batch_size(batch_size)
+          $if DATATYPE == "QU8":
+            .input_zero_point(150)
+          .output_zero_point(output_zero_point)
+          .Test(${", ".join(TEST_ARGS)});
+      }
   }
 }
 """
 
 
-def generate_test_cases(ukernel, init_fn, datatype, batch_tile, isa):
+def generate_test_cases(ukernel, init_fn, datatype, batch_tile, vector_tile, isa):
   """Generates all tests cases for a Vector Hardswish micro-kernel.
 
   Args:
@@ -163,6 +237,8 @@ def generate_test_cases(ukernel, init_fn, datatype, batch_tile, isa):
     datatype: data type.
     batch_tile: Number of batch elements processed per one iteration of the
                 inner loop of the micro-kernel.
+    vector_tile: Indicates if batch are specified in vectors rather than
+                 elements.
     isa: instruction set required to run the micro-kernel. Generated unit test
          will skip execution if the host processor doesn't support this ISA.
 
@@ -173,10 +249,15 @@ def generate_test_cases(ukernel, init_fn, datatype, batch_tile, isa):
   test_args = [ukernel]
   if init_fn:
     test_args.append(init_fn)
+  batch_scaled_tile = batch_tile
+  if vector_tile:
+    batch_scaled_tile = {"rvv": "(%s*xnn_init_hardware_config()->vlenb/sizeof(int8_t))" % (str(batch_tile))}[isa]
   return xngen.preprocess(HSWISH_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
       "BATCH_TILE": batch_tile,
+      "BATCH_SCALED_TILE": batch_scaled_tile,
+      "BATCH_SUFFIX": "v" if vector_tile else "",
       "DATATYPE": datatype.upper(),
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
     })
@@ -214,10 +295,10 @@ def main(args):
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
       init_fn = ukernel_spec.get("init")
-      datatype, batch_tile, arch, isa = split_ukernel_name(name)
+      datatype, batch_tile, vector_tile, arch, isa = split_ukernel_name(name)
 
       test_case = generate_test_cases(
-        name, init_fn, datatype, batch_tile, isa)
+        name, init_fn, datatype, batch_tile, vector_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     xnncommon.overwrite_if_changed(options.output, tests)
