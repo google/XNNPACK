@@ -766,14 +766,14 @@ filegroup(
             name = arch + "_prod_microkernel_srcs",
             srcs = prod_c_srcs_for_arch(arch),
             outs = [arch + "_prod_microkernels.c"],
-            cmd = "if [ -z \"$(SRCS)\" ]; then echo \"\" > $@; else cat $(SRCS) > $@; fi",
+            cmd = "cat $(SRCS) > $@",
             compatible_with = [],
         ),
         genrule(
             name = arch + "_non_prod_microkernel_srcs",
             srcs = non_prod_c_srcs_for_arch(arch),
             outs = [arch + "_non_prod_microkernels.c"],
-            cmd = "if [ -z \"$(SRCS)\" ]; then echo \"\" > $@; else cat $(SRCS) > $@; fi",
+            cmd = "cat $(SRCS) > $@",
             compatible_with = [],
         ),
         xnnpack_cc_library_for_arch(
@@ -1349,18 +1349,6 @@ config_setting(
     define_values = {"xnn_enable_avxvnni": "false"},
 )
 
-# Enables usage of Intel AVX-VNNI-INT8 (integer dot product) kernels.
-config_setting(
-    name = "xnn_enable_avxvnniint8_explicit_true",
-    define_values = {"xnn_enable_avxvnniint8": "true"},
-)
-
-# Disables usage of Intel AVX-VNNI-INT8 (integer dot product) kernels.
-config_setting(
-    name = "xnn_enable_avxvnniint8_explicit_false",
-    define_values = {"xnn_enable_avxvnniint8": "false"},
-)
-
 # Enables usage of Intel AVX256SKX (evex256) kernels.
 config_setting(
     name = "xnn_enable_avx256skx_explicit_true",
@@ -1768,22 +1756,6 @@ alias(
         ":xnn_enable_avxvnni_explicit_true": ":xnn_enable_avxvnni_explicit_true",
         ":xnn_enable_avxvnni_explicit_false": ":xnn_enable_avxvnni_explicit_true",
         "//conditions:default": ":avxvnni_enabled_by_default",
-    }),
-)
-
-selects.config_setting_group(
-    name = "avxvnniint8_enabled_by_default",
-    match_any = [
-        "//build_config:x86",
-    ],
-)
-
-alias(
-    name = "avxvnniint8_enabled",
-    actual = select({
-        ":xnn_enable_avxvnniint8_explicit_true": ":xnn_enable_avxvnniint8_explicit_true",
-        ":xnn_enable_avxvnniint8_explicit_false": ":xnn_enable_avxvnniint8_explicit_true",
-        "//conditions:default": ":avxvnniint8_enabled_by_default",
     }),
 )
 

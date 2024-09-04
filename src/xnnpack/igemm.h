@@ -1639,9 +1639,6 @@ DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_uk
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_7x8c8__avxvnni_prfm)
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_8x8c8__avxvnni_prfm)
 
-DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c8__avxvnniint8_prfm)
-DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_5x8c8__avxvnniint8_prfm)
-
 #define DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL xnn_status_t fn_name(                     \
       struct xnn_code_buffer* code,                      \

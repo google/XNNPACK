@@ -141,11 +141,6 @@ static void init_hardware_config(void) {
 #else
     hardware_config.use_x86_avxvnni = 0;
 #endif
-#if XNN_ENABLE_AVXVNNIINT8
-    hardware_config.use_x86_avxvnniint8 = hardware_config.use_x86_avx2 && cpuinfo_has_x86_avx_vnni_int8();
-#else
-    hardware_config.use_x86_avxvnniint8 = 0;
-#endif
 #if XNN_ENABLE_AVX256SKX && XNN_ENABLE_AVX512AMX
     // Using cpuinfo_has_x86_amx_int8 as placeholder for cpuinfo_has_x86_avx10
     hardware_config.use_x86_avx256skx = hardware_config.use_x86_avx512skx || cpuinfo_has_x86_amx_int8();
