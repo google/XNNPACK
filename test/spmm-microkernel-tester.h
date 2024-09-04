@@ -21,10 +21,6 @@
 #include "xnnpack/microparams.h"
 #include "replicable_random_device.h"
 
-static inline bool is_fp16_zero(xnn_float16 x) {
-  const xnn_float16 two_x = x + x;
-  return two_x == 0;
-}
 
 class SpMMMicrokernelTester {
  public:
@@ -335,7 +331,7 @@ class SpMMMicrokernelTester {
         for (size_t i = 0; i < nr(); ++i)
           w[wcnt++] = bias[nr() * nn + i];
         for (size_t kk = 0; kk < k(); kk++) {
-          if (!is_fp16_zero(b[nn * k() + kk])) {
+          if (!xnn_float16_is_zero(b[nn * k() + kk])) {
             // Every non-zero actually corresponds to nr adjacent non-zeros.
             for (size_t i = 0; i < nr(); ++i)
               w[wcnt++] = xnn_float16_from_float(xnn_float16_to_float(b[nn * k() + kk]) + static_cast<float>(i));
@@ -358,7 +354,7 @@ class SpMMMicrokernelTester {
       for (size_t nn = n() / nr(); nn < ncols; nn++) {
         w[wcnt++] = bias[(n() / nr()) * nr() + (nn - n() / nr())];
         for (size_t kk = 0; kk < k(); kk++) {
-          if (!is_fp16_zero(b[nn * k() + kk])) {
+          if (!xnn_float16_is_zero(b[nn * k() + kk])) {
             // Every non-zero actually corresponds to nr adjacent non-zeros.
             w[wcnt++] = b[nn * k() + kk];
             // Skip the very first non-zero weight as we record only the difference.
