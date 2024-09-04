@@ -2070,8 +2070,157 @@ TEST(FULLY_CONNECTED_NC_QD8_F16_QB4W, bl_no_bias) {
         .input_channels(ic)
         .block_size(bs)
         .kernel_zero_point(8)
-        .iterations(3)
+        .iterations(1)
         .TestQD8F16QB4W();
+    } }
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QB4W, BL_BIAS) {
+  for (size_t ic=32; ic<=256; ic*=2){
+    for (size_t bs=32; bs<=ic; bs=bs*2) {
+      FullyConnectedOperatorTester()
+        .has_bias(true)
+        .batch_size(1)
+        .output_channels(16)
+        .input_channels(ic)
+        .block_size(bs)
+        .kernel_zero_point(8)
+        .iterations(3)
+        .TestQP8F32QB4W();
     }
   }
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QB4W, BL_NO_BIAS) {
+  for (size_t ic=32; ic<=256; ic*=2){
+    for (size_t bs=32; bs<=ic; bs=bs*2) {
+      FullyConnectedOperatorTester()
+        .has_bias(false)
+        .batch_size(1)
+        .output_channels(16)
+        .input_channels(ic)
+        .block_size(bs)
+        .kernel_zero_point(8)
+        .iterations(3)
+        .TestQP8F32QB4W();
+    }
+  }
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QB4W, unit_batch) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(32)
+    .output_channels(19)
+    .block_size(32)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQP8F32QB4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QB4W, unit_batch_with_qmin) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(32)
+    .output_channels(19)
+    .block_size(32)
+    .kernel_zero_point(8)
+    .qmin(128)
+    .iterations(3)
+    .TestQP8F32QB4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QB4W, unit_batch_with_qmax) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(32)
+    .output_channels(19)
+    .block_size(32)
+    .kernel_zero_point(8)
+    .qmax(128)
+    .iterations(3)
+    .TestQP8F32QB4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QB4W, unit_batch_with_input_stride) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(32)
+    .block_size(32)
+    .input_stride(38)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQP8F32QB4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QB4W, unit_batch_with_output_stride) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(32)
+    .block_size(32)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .output_stride(29)
+    .iterations(3)
+    .TestQP8F32QB4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QB4W, small_batch) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(32)
+    .block_size(32)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQP8F32QB4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QB4W, small_batch_with_qmin) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(32)
+    .block_size(32)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .qmin(128)
+    .iterations(3)
+    .TestQP8F32QB4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QB4W, small_batch_with_qmax) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(32)
+    .block_size(32)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .qmax(128)
+    .iterations(3)
+    .TestQP8F32QB4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QB4W, small_batch_with_input_stride) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(32)
+    .block_size(32)
+    .input_stride(38)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQP8F32QB4W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QB4W, small_batch_with_output_stride) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(32)
+    .block_size(32)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .output_stride(29)
+    .iterations(3)
+    .TestQP8F32QB4W();
 }

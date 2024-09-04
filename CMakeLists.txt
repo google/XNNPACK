@@ -1269,6 +1269,7 @@ IF(XNNPACK_BUILD_TESTS)
   IF(XNNPACK_BUILD_LIBRARY)
     # ---[ Launch heavy tests first.
     SET(LIBRARY_SHARDED_TESTS
+      fully-connected-nc
       batch-matrix-multiply-nc
       batch-matrix-multiply
       deconvolution-nhwc

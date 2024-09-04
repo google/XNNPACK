@@ -40,6 +40,7 @@ static struct xnn_gemm_config qd8_f32_qb4w_gemm_config = {0};
 static struct xnn_gemm_config qd8_f32_qc4w_gemm_config = {0};
 static struct xnn_gemm_config qd8_f32_qc8w_gemm_config = {0};
 static struct xnn_gemm_config qp8_f32_qc4w_gemm_config = {0};
+static struct xnn_gemm_config qp8_f32_qb4w_gemm_config = {0};
 static struct xnn_gemm_config qs8_qc8w_gemm_config = {0};
 static struct xnn_gemm_config qu8_gemm_config = {0};
 
@@ -55,6 +56,7 @@ XNN_INIT_ONCE_GUARD(qd8_f32_qb4w_gemm);
 XNN_INIT_ONCE_GUARD(qd8_f32_qc4w_gemm);
 XNN_INIT_ONCE_GUARD(qd8_f32_qc8w_gemm);
 XNN_INIT_ONCE_GUARD(qp8_f32_qc4w_gemm);
+XNN_INIT_ONCE_GUARD(qp8_f32_qb4w_gemm);
 XNN_INIT_ONCE_GUARD(qs8_qc8w_gemm);
 XNN_INIT_ONCE_GUARD(qu8_gemm);
 
@@ -1726,6 +1728,28 @@ static void init_qp8_f32_qc4w_gemm_config(void) {
     qp8_f32_qc4w_gemm_config.log2_sr = 1;
     qp8_f32_qc4w_gemm_config.planes = 2;
     qp8_f32_qc4w_gemm_config.mr_packed = 1;
+#endif  // XNN_ENABLE_ARM_DOTPROD
+  }
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+}
+
+static void init_qp8_f32_qb4w_gemm_config(void) {
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (XNN_ENABLE_ARM_DOTPROD && hardware_config->use_arm_neon_dot) {
+#if XNN_ENABLE_ARM_DOTPROD
+    qp8_f32_qb4w_gemm_config.minmax.qp8gemm_bl[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_qp8gemm_bl_ukernel(xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x8c16s2__aarch64_neondot);
+    qp8_f32_qb4w_gemm_config.init.f32_qb4w = xnn_init_f32_qb4w_minmax_scalar_params;
+    qp8_f32_qb4w_gemm_config.pack_weights_and_biases = xnn_pack_kai_qb4_weights_and_biases;
+    qp8_f32_qb4w_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_qb4_weights_and_biases;
+    qp8_f32_qb4w_gemm_config.mr = 1;
+    qp8_f32_qb4w_gemm_config.nr = 8;
+    qp8_f32_qb4w_gemm_config.log2_kr = 4;
+    qp8_f32_qb4w_gemm_config.log2_sr = 1;
+    qp8_f32_qb4w_gemm_config.planes = 2;
+    qp8_f32_qb4w_gemm_config.mr_packed = 1;
 #endif  // XNN_ENABLE_ARM_DOTPROD
   }
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
@@ -3876,6 +3900,20 @@ XNN_INIT_ONCE(qp8_f32_qc4w_gemm);
   // Only return the config pointer if it actually provides a kernel.
   if (qp8_f32_qc4w_gemm_config.minmax.qp8gemm[0].function[0] != NULL) {
     return &qp8_f32_qc4w_gemm_config;
+  }
+  return NULL;
+}
+
+const struct xnn_gemm_config* xnn_init_qp8_f32_qb4w_gemm_config() {
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+XNN_INIT_ONCE(qp8_f32_qb4w_gemm);
+  // Only return the config pointer if it actually provides a kernel.
+  if (qp8_f32_qb4w_gemm_config.minmax.qp8gemm[0].function[0] != NULL) {
+    return &qp8_f32_qb4w_gemm_config;
   }
   return NULL;
 }

@@ -1217,6 +1217,217 @@ class FullyConnectedOperatorTester {
     }
   }
 
+  void TestQP8F32QB4W() const {
+    // Get the parameters of this GEMM, skip if not available.
+    const struct xnn_gemm_config* gemm_config =
+        xnn_init_qp8_f32_qb4w_gemm_config();
+    if (gemm_config == nullptr) {
+      GTEST_SKIP();
+    }
+
+    // Note that the microkernel will force `mr` to 1 if `mc` is 1, so we have
+    // to anticipate that when packing the left-hand operand.
+    const uint32_t mr_packed = batch_size() > 1 ? gemm_config->mr_packed : 1;
+    const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+    const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
+    xnnpack::ReplicableRandomDevice rng;
+    std::uniform_real_distribution<float> f32dist(-1.f, 1.f);
+    std::uniform_real_distribution<float> f32idist(0.5f, 2.0f);
+    std::uniform_int_distribution<int32_t> w8dist(
+        std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
+
+    const size_t k2 =
+        round_up_po2(input_channels(), 2);  // tester assumes byte aligned rows
+
+    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+                             (batch_size() - 1) * input_stride() +
+                             input_channels());
+    const size_t kernel_stride = calc_kernel_stride();
+    std::vector<uint8_t> kernel((output_channels()) *
+                                kernel_stride);
+    std::vector<float> bias(output_channels());
+    std::vector<float> output((batch_size() - 1) * output_stride() +
+                              output_channels());
+    std::vector<float> output_ref(batch_size() * output_channels());
+    size_t num_blocks = k2 / block_size();
+    std::vector<uint16_t> kernel_scale2d(output_channels() * num_blocks);
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+      std::generate(kernel.begin(), kernel.end(),
+                    [&]() { return w8dist(rng); });
+      std::generate(kernel_scale2d.begin(), kernel_scale2d.end(), [&]() { return math_cvt_bf16_fp32(f32idist(rng)); });
+      std::fill(output.begin(), output.end(), nanf(""));
+      std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+
+      // Quantize the left-hand operand.
+      const size_t input_packed_size =
+          xnn_x8_packq_f32qp8_packed_size(batch_size(), k2, mr_packed, kr, sr);
+      std::vector<int8_t> input_qp8(input_packed_size);
+      xnn_x8_packq_f32qp8_ukernel__scalar_u1(
+          batch_size(), k2, mr_packed, kr, sr,
+          /*m_idx_start=*/0, input.data(),
+          /*lhs_stride=*/k2 * sizeof(float), input_qp8.data());
+
+      // Compute reference results, without renormalization.
+      std::fill(output_ref.begin(), output_ref.end(), 0);
+
+      for (size_t mi = 0; mi < batch_size(); mi++) {
+        for (size_t ni = 0; ni < output_channels(); ni++) {
+          float kfsum = 0.0;
+          for (size_t bi = 0; bi < num_blocks; bi++){
+            int32_t ksum = 0;
+            int32_t c_ref_acc = 0;
+            for (size_t ki = 0; ki < block_size(); ki++) {
+              const size_t k_index = bi * block_size() + ki;
+              const size_t nb_index = (ni * k2 + k_index) / 2;
+              const int32_t kernel_value = int32_t((k_index % 2 == 0) ? (kernel[nb_index] & UINT8_C(0xF)) : (kernel[nb_index] >> 4)) - kernel_zero_point();
+              ksum += kernel_value;
+              c_ref_acc += int32_t(xnn_x8_packq_f32qp8_get_quantized(mi, k_index, input_qp8.data(),
+                                                  k2, mr_packed, kr, sr)) * int32_t(kernel_value);
+            }
+            size_t scale_index = ni * num_blocks + bi;
+            float scale = math_cvt_fp32_bf16(kernel_scale2d[scale_index]);
+            output_ref[mi * output_channels() + ni] += c_ref_acc * scale;
+            kfsum += scale * ksum;
+          }
+          float inv_scale = xnn_x8_packq_f32qp8_get_recip_scale(mi, input_qp8.data(), k2, mr_packed, kr, sr);
+          int32_t neg_nudged_zero_point= xnn_x8_packq_f32qp8_get_neg_nudged_zp(mi, input_qp8.data(), k2, mr_packed, kr, sr);
+          output_ref[mi * output_channels() + ni] += (neg_nudged_zero_point * kfsum);
+          output_ref[mi * output_channels() + ni] *= inv_scale;
+          if (has_bias()) {
+            output_ref[mi * output_channels() + ni] += bias[ni];
+          }
+        }
+      }
+
+      // Compute clamping parameters.
+      const float accumulated_max =
+          *std::max_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_min =
+          *std::min_element(output_ref.cbegin(), output_ref.cend());
+
+      const float output_min =
+          qmin() == 0
+              ? -std::numeric_limits<float>::infinity()
+              : accumulated_min + (accumulated_max - accumulated_min) / 255.0f *
+                                      static_cast<float>(qmin());
+      const float output_max =
+          qmax() == 255
+              ? std::numeric_limits<float>::infinity()
+              : accumulated_max - (accumulated_max - accumulated_min) / 255.0f *
+                                      static_cast<float>(255 - qmax());
+
+      // Clamp reference results.
+      for (float& value : output_ref) {
+        value = std::max(std::min(value, output_max), output_min);
+      }
+
+      // Create, setup, run, and destroy Fully Connected operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+      xnn_operator_t fully_connected_op = nullptr;
+
+      struct xnn_internal_weights_cache* internal_weights_cache = nullptr;
+      std::unique_ptr<xnn_weights_cache_provider, decltype(&xnn_delete_weights_cache)> auto_weights_cache(
+        nullptr, xnn_delete_weights_cache);
+      if (use_weights_cache()) {
+        xnn_weights_cache_t weights_cache = nullptr;
+        xnn_create_weights_cache(&weights_cache);
+        auto_weights_cache.reset(weights_cache);
+        if (weights_cache) {
+          internal_weights_cache = (struct xnn_internal_weights_cache*) weights_cache->context;
+        }
+      }
+
+      const xnn_status status = xnn_create_fully_connected_nc_qp8_f32_qb4w(
+          input_channels(), output_channels(), 
+          input_stride(), output_stride(), 
+          block_size(),
+          kernel_zero_point(), 
+          kernel_scale2d.data(), 
+          kernel.data(),
+          has_bias() ? bias.data() : nullptr, 
+          output_min, output_max, 
+          0, //TODO Handle XNN_FLAG_TRANSPOSE_WEIGHTS
+          nullptr, auto_weights_cache.get(), &fully_connected_op);
+      if (status == xnn_status_unsupported_hardware) {
+        GTEST_SKIP();
+      }
+
+      ASSERT_EQ(xnn_status_success, status);
+      ASSERT_NE(nullptr, fully_connected_op);
+      if (use_weights_cache()) {
+        ASSERT_EQ(xnn_status_success,
+                  xnn_finalize_weights_cache(auto_weights_cache.get(), xnn_weights_cache_finalization_kind_soft));
+      }
+
+      // Smart pointer to automatically delete fully_connected_op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+          auto_fully_connected_op(fully_connected_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success, xnn_reshape_fully_connected_nc_qp8_f32_qb4w(
+                                        fully_connected_op, batch_size(),
+                                        /*threadpool=*/nullptr));
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_setup_fully_connected_nc_qp8_f32_qb4w(
+                    fully_connected_op, input_qp8.data(), output.data()));
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
+
+      // Verify results.
+      VerifyF32(output, output_ref, output_max, output_min);
+
+      if (use_weights_cache()) {
+        // Create another operator with the same weights cache.
+        xnn_operator_t fully_connected_op2 = nullptr;
+        size_t old_weights_cache_size = internal_weights_cache->cache.weights.size;
+
+        ASSERT_EQ(xnn_status_success, xnn_create_fully_connected_nc_qp8_f32_qb4w(
+            input_channels(), output_channels(),
+            input_stride(), output_stride(),
+            /*batch_size=*/ block_size(),
+            kernel_zero_point(),
+            kernel_scale2d.data(),
+            kernel.data(), has_bias() ? bias.data() : nullptr,
+            output_min, output_max,
+            0,
+            nullptr, auto_weights_cache.get(),
+            &fully_connected_op2));
+        ASSERT_NE(nullptr, fully_connected_op2);
+
+        // Smart pointer to automatically delete fully_connected_op.
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+            auto_fully_connected_op(fully_connected_op2, xnn_delete_operator);
+
+        ASSERT_EQ(xnn_status_success,
+          xnn_reshape_fully_connected_nc_qp8_f32_qb4w(
+            fully_connected_op2,
+            batch_size(),
+            /*threadpool=*/nullptr));
+
+        std::vector<float> output2(output.size(), nanf(""));
+        ASSERT_EQ(xnn_status_success,
+          xnn_setup_fully_connected_nc_qp8_f32_qb4w(
+            fully_connected_op2,
+            input_qp8.data(), output2.data()));
+
+
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_run_operator(fully_connected_op2, /*threadpool=*/nullptr));
+
+        VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
+
+        VerifyF32(output, output_ref, output_max, output_min);
+      }
+    }
+  }
+
   void TestQD8F16QC8W() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
