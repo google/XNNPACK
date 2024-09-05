@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
+#include <cstdint>
 #include <functional>
 #include <random>
 #include <vector>
@@ -47,14 +48,13 @@ static void f16_gemm(benchmark::State& state,
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
-  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
-
+  
   std::vector<xnn_float16> a(mc * kc + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  std::generate(a.begin(), a.end(), std::ref(f16rng));
+  std::generate(a.begin(), a.end(), f32rng);
   std::vector<xnn_float16> k(nc * kc);
-  std::generate(k.begin(), k.end(), std::ref(f16rng));
+  std::generate(k.begin(), k.end(), f32rng);
   std::vector<xnn_float16> b(nc);
-  std::generate(b.begin(), b.end(), std::ref(f16rng));
+  std::generate(b.begin(), b.end(), f32rng);
 
   const size_t w_elements = nc_stride * kc_stride + nc_stride;
   const size_t c_elements = mc * nc;
@@ -65,14 +65,18 @@ static void f16_gemm(benchmark::State& state,
   std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> w(w_elements * num_buffers);
   std::fill(w.begin(), w.end(), 0);
   xnn_pack_f16_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr,
-    k.data(), b.data(), /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, /*params=*/nullptr);
+                          reinterpret_cast<const uint16_t*>(k.data()), 
+                          reinterpret_cast<const uint16_t*>(b.data()), 
+                          /*scale=*/nullptr, 
+                          reinterpret_cast<uint16_t*>(w.data()), 
+                          /*extra_bytes=*/0, /*params=*/nullptr);
   std::vector<xnn_float16> c(c_elements * num_buffers);
-  std::fill(c.begin(), c.end(), UINT16_C(0x7E00) /* NaN */);
+  std::fill(c.begin(), c.end(), std::nanf(""));
 
   // Prepare minmax parameters.
   xnn_f16_minmax_params params;
   init_params(&params,
-    UINT16_C(0xFC00)  /* -inf */, UINT16_C(0x7C00)  /* inf */);
+    -INFINITY, INFINITY);
 
   size_t buffer_index = 0;
   for (auto _ : state) {

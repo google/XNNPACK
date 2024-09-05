@@ -10,6 +10,7 @@
 
 #include "unary_operator.h"
 #include "bench/utils.h"
+#include "xnnpack/math.h"
 #include <benchmark/benchmark.h>
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/flatbuffer_builder.h"
@@ -18,7 +19,7 @@
 
 
 static void xnnpack_leaky_relu_f16(benchmark::State& state) {
-  benchmark_unary_operator<float16, float16>(
+  benchmark_unary_operator<xnn_float16, xnn_float16>(
       [](uint32_t flags, xnn_operator_t* op) {
         return xnn_create_leaky_relu_nc_f16(
 

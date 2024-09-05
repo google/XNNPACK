@@ -40,14 +40,13 @@ static void f16_raddstoreexpminusmax(
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-100.0f, 100.0f), std::ref(rng));
-  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
-
+  
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_elements * sizeof(xnn_float16));
   std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> x(elements);
   std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> y(packed_elements * num_buffers);
 
-  std::generate(x.begin(), x.end(), std::ref(f16rng));
+  std::generate(x.begin(), x.end(), f32rng);
 
   benchmark::utils::DisableDenormals();
 
@@ -59,14 +58,14 @@ static void f16_raddstoreexpminusmax(
   size_t buffer_index = 0;
   for (auto _ : state) {
     state.PauseTiming();
-    xnn_float16 x_max = UINT16_C(0x7E00) /* NaN */;
+    xnn_float16 x_max = std::nanf("");
     rmax(elements * sizeof(xnn_float16), x.data(), &x_max, /*params=*/nullptr);
     if (++buffer_index == num_buffers) {
       buffer_index = 0;
     }
     state.ResumeTiming();
 
-    xnn_float16 y_sum = UINT16_C(0x7E00) /* NaN */;
+    xnn_float16 y_sum = std::nanf("");
     raddstoreexpminusmax(elements * sizeof(xnn_float16), x.data(), &x_max, y.data() + buffer_index * packed_elements, &y_sum, &params);
   }
 

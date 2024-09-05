@@ -95,20 +95,20 @@ class RoPEOperatorTester {
           for (size_t h = 0; h < heads(); h++) {
             std::generate_n(input.begin() + ((n * tokens() + t) * heads() + h) * channels(),
                             channels() / 2,
-                            [&]() { return xnn_float16_from_float(f32rdist(rng)); });
+                            [&]() { return f32rdist(rng); });
             std::generate_n(input.begin() + (((n * tokens() + t) * heads() + h) * channels() + channels() / 2),
                             channels() / 2,
-                            [&]() { return xnn_float16_from_float(f32idist(rng)); });
+                            [&]() { return f32idist(rng); });
           }
         }
       }
       for (size_t t = 0; t < tokens(); t++) {
         std::generate_n(weights.begin() + t * channels(),
                         channels() / 2,
-                        [&]() { return xnn_float16_from_float(f32rdist(rng)); });
+                        [&]() { return f32rdist(rng); });
         std::generate_n(weights.begin() + (t * channels() + channels() / 2),
                         channels() / 2,
-                        [&]() { return xnn_float16_from_float(f32idist(rng)); });
+                        [&]() { return f32idist(rng); });
       }
       std::fill(output.begin(), output.end(), UINT16_C(0xDEAD));
       std::fill(output_ref.begin(), output_ref.end(), float(std::nan("")));
@@ -118,10 +118,10 @@ class RoPEOperatorTester {
         for (size_t t = 0; t < tokens(); t++) {
           for (size_t h = 0; h < heads(); h++) {
             for (size_t c = 0; c < channels() / 2; c++) {
-              float input_i = xnn_float16_to_float(input[((n * tokens() + t) * heads() + h) * channels() + c]);
-              float weights_i = xnn_float16_to_float(weights[t * channels() + c]);
-              float input_n = xnn_float16_to_float(input[((n * tokens() + t) * heads() + h) * channels() + (c + channels() / 2)]);
-              float weights_n = xnn_float16_to_float(weights[t * channels() + (c + channels() / 2)]);
+              float input_i = input[((n * tokens() + t) * heads() + h) * channels() + c];
+              float weights_i = weights[t * channels() + c];
+              float input_n = input[((n * tokens() + t) * heads() + h) * channels() + (c + channels() / 2)];
+              float weights_n = weights[t * channels() + (c + channels() / 2)];
               output_ref[((n * tokens() + t) * heads() + h) * channels() + c] = input_i * weights_i - input_n * weights_n;
               output_ref[((n * tokens() + t) * heads() + h) * channels() + (c + channels() / 2)] = input_i * weights_n + input_n * weights_i;
             }
@@ -165,7 +165,7 @@ class RoPEOperatorTester {
             for (size_t c = 0; c < channels(); c++) {
               const float tolerance = std::abs(output_ref[((n * tokens() + t) * heads() + h) * channels() + c]) * 1.0e-2f;
               ASSERT_NEAR(output_ref[((n * tokens() + t) * heads() + h) * channels() + c],
-                          xnn_float16_to_float(output[((n * tokens() + t) * heads() + h) * channels() + c]),
+                          output[((n * tokens() + t) * heads() + h) * channels() + c],
                           tolerance)
                   << "batch " << n << " / " << batch_size()
                   << ", token " << t << " / " << tokens()

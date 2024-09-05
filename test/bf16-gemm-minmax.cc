@@ -316,7 +316,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_1x4c8__neonfma_shland,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FMA;
@@ -335,7 +335,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_2x4c8__neonfma_shland,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FMA;
@@ -354,7 +354,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_3x4c8__neonfma_shland,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FMA;
@@ -373,7 +373,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_4x4c8__neonfma_shland,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FMA;
@@ -392,7 +392,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_5x4c8__neonfma_shland,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FMA;
@@ -411,7 +411,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_1x4c8__neonfma_zip,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FMA;
@@ -430,7 +430,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_2x4c8__neonfma_zip,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FMA;
@@ -449,7 +449,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_3x4c8__neonfma_zip,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FMA;
@@ -468,7 +468,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_4x4c8__neonfma_zip,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FMA;
@@ -487,7 +487,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_5x4c8__neonfma_zip,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_FMA;
@@ -509,7 +509,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_1x8c2__neonbf16_bfdot_lane_ld128,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_BF16;
@@ -528,7 +528,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_4x8c2__neonbf16_bfdot_lane_ld128,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_BF16;
@@ -547,7 +547,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_5x8c2__neonbf16_bfdot_lane_ld128,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_BF16;
@@ -566,7 +566,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_6x8c2__neonbf16_bfdot_lane_ld128,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_BF16;
@@ -585,7 +585,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_1x4c8__neonbf16_bfdot,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_BF16;
@@ -604,7 +604,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_2x4c8__neonbf16_bfdot,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_BF16;
@@ -623,7 +623,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_3x4c8__neonbf16_bfdot,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_BF16;
@@ -642,7 +642,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_4x4c8__neonbf16_bfdot,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_BF16;
@@ -661,7 +661,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_5x4c8__neonbf16_bfdot,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_BF16;
@@ -680,7 +680,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_1x4c8__neonbf16_bfmlal,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_BF16;
@@ -699,7 +699,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_2x4c8__neonbf16_bfmlal,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_BF16;
@@ -718,7 +718,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_3x4c8__neonbf16_bfmlal,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_BF16;
@@ -737,7 +737,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_4x4c8__neonbf16_bfmlal,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_BF16;
@@ -756,7 +756,7 @@ std::vector<GemmTestParams> CreateTests1(
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_gemm_minmax_ukernel_5x4c8__neonbf16_bfmlal,
                         xnn_init_bf16_minmax_scalar_params,
-                        xnn_pack_f16_gemm_goi_w);
+                        xnn_pack_x16_gemm_goi_w);
           },
           []() {
             TEST_REQUIRES_ARM_NEON_BF16;

@@ -367,23 +367,23 @@ struct xnn_operator {
     struct {
       struct dwconv_context dwconv;
       struct dwconv_indirection_init_context dwconv_indirection_init;
-    };
+    } dwconv;
     struct elementwise_binary_context elementwise_binary;
     // PACKW GEMM GOI + GEMM are used together in Dynamic Fully Connected.
     struct {
       union {
         struct gemm_context gemm;
         struct scaled_dot_product_attention_context attention;
-      };
+      } gemm;
       struct packw_gemm_goi_context packw_gemm_goi;
       struct packw_gemm_gio_context packw_gemm_gio;
-    };
+    } gemm;
     struct global_average_pooling_nwc_context global_average_pooling_nwc;
     struct global_average_pooling_ncw_context global_average_pooling_ncw;
     struct {
       struct igemm_context igemm;
       struct conv2d_igemm_indirection_init_context conv2d_igemm_indirection_init;
-    };
+    } igemm;
     struct lut_contiguous_context lut_contiguous;
     struct lut_strided_context lut_strided;
     struct max_pooling_context max_pooling;

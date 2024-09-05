@@ -53,24 +53,24 @@ class RAddStoreExpMinusMaxMicrokernelTester {
     std::vector<xnn_float16> y(elements());
     std::vector<float> y_ref(elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-      std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
+      std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
+      std::fill(y.begin(), y.end(), std::nanf(""));
 
       // Compute reference results.
       float sum_ref = 0.0f;
       float x_max_as_float = -std::numeric_limits<float>::infinity();
       for (size_t i = 0; i < elements(); i++) {
-        x_max_as_float = std::max(x_max_as_float, xnn_float16_to_float(x[i]));
+        x_max_as_float = std::max<float>(x_max_as_float, x[i]);
       }
-      const xnn_float16 x_max_as_half = xnn_float16_from_float(x_max_as_float);
+      const xnn_float16 x_max_as_half = x_max_as_float;
       for (size_t i = 0; i < elements(); i++) {
-        const float y_ref_value = exp(xnn_float16_to_float(x[i]) - x_max_as_float);
+        const float y_ref_value = exp(x[i] - x_max_as_float);
         y_ref[i] = y_ref_value;
         sum_ref += y_ref_value;
       }
 
       // Call optimized micro-kernel.
-      xnn_float16 sum = UINT16_C(0x7E00) /* NaN */;
+      xnn_float16 sum = std::nanf("");
       xnn_f16_expminus_params params;
       if (init_params) {
         init_params(&params);
@@ -79,10 +79,10 @@ class RAddStoreExpMinusMaxMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < elements(); i++) {
-      EXPECT_NEAR(y_ref[i], xnn_float16_to_float(y[i]), std::abs(y_ref[i]) * 5.0e-3f)
+      EXPECT_NEAR(y_ref[i], y[i], std::abs(y_ref[i]) * 5.0e-3f)
         << "element " << i << " / " << elements() << ", x_max " << x_max_as_float;
       }
-      ASSERT_NEAR(sum_ref, xnn_float16_to_float(sum), std::abs(sum_ref) * 5.0e-3f)
+      ASSERT_NEAR(sum_ref, sum, std::abs(sum_ref) * 5.0e-3f)
         << "batch " << elements() << ", x_max " << x_max_as_float;
     }
   }

@@ -179,12 +179,11 @@ static void xnnpack_softmax_f16(benchmark::State& state) {
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-100.0f, 100.0f), std::ref(rng));
-  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
-
+  
   std::vector<xnn_float16> input(batch_size * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::vector<xnn_float16> output(batch_size * channels);
-  std::generate(input.begin(), input.end(), std::ref(f16rng));
-  std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+  std::generate(input.begin(), input.end(), f32rng);
+  std::fill(output.begin(), output.end(), std::nanf(""));
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
