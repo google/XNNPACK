@@ -50,7 +50,9 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vrpreluc_ukernel__wasm_u4, 4, false, float, u
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vrpreluc_ukernel__scalar_u1, 1, false, float, union xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vrpreluc_ukernel__scalar_u2, 2, false, float, union xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vrpreluc_ukernel__scalar_u4, 4, false, float, union xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vrpreluc_ukernel__scalar_u8, 8, false, float, union xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 
 #ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS
 #undef XNN_DEFINED_UKERNEL_WITH_PARAMS
