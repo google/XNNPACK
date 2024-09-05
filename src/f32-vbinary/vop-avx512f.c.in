@@ -126,7 +126,7 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__avx512f_u${BATCH_TILE}(
     const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
     $if OP == "PRELU":
       const __mmask16 vsign = _mm512_cmp_ps_mask(va, vzero, _CMP_LT_OQ);
-      __m512 vacc = _mm512_mask_mul_ps(va, vsign, va, _mm512_loadu_ps(input_b));
+      __m512 vacc = _mm512_mask_mul_ps(va, vsign, va, _mm512_maskz_loadu_ps(vmask, input_b));
       input_b += 16;
     $else:
       __m512 vacc = ${_MM512_MASKZ_OP_PS}(vmask, va, _mm512_maskz_loadu_ps(vmask, input_b));
