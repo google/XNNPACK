@@ -240,6 +240,21 @@ static void qu8_vlrelu(
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(qu8_vlrelu, rvv_u1v,
+                    xnn_qu8_vlrelu_ukernel__rvv_u1v,
+                    xnn_init_qu8_lrelu_scalar_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::BinaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+  BENCHMARK_CAPTURE(qu8_vlrelu, rvv_u2v,
+                    xnn_qu8_vlrelu_ukernel__rvv_u2v,
+                    xnn_init_qu8_lrelu_scalar_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(benchmark::utils::BinaryElementwiseParameters<uint8_t, uint8_t>)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
 BENCHMARK_CAPTURE(qu8_vlrelu, scalar_andxor_u1,
                   xnn_qu8_vlrelu_ukernel__scalar_andxor_u1,
                   xnn_init_qu8_lrelu_scalar_params)
