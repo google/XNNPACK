@@ -405,6 +405,28 @@ sh_test(
     name = "%s_test" % kernel,
     srcs = [
         "%s.cc" % kernel.replace("_", "-"),
+        "reducewindow-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+) for kernel in [
+    "f32_rwsum",
+]]
+
+[xnnpack_unit_test(
+    name = "%s_test" % kernel,
+    srcs = [
+        "%s.cc" % kernel.replace("_", "-"),
+        "rwd-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+) for kernel in [
+    "f32_rwdsum",
+]]
+
+[xnnpack_unit_test(
+    name = "%s_test" % kernel,
+    srcs = [
+        "%s.cc" % kernel.replace("_", "-"),
         "rsum-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,

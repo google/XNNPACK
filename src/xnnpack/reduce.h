@@ -341,6 +341,37 @@ DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__wasmsimd_u12_acc3)
 DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__wasmsimd_u16_acc2)
 DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__wasmsimd_u16_acc4)
 
+#define DECLARE_F32_RW_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                         \
+      size_t batch,                                   \
+      const float* input,                            \
+      float init_value,                                 \
+      int* padding,                                    \
+      int base_dilation,                             \
+      int window_dilation,                           \
+      int window_dimension,                          \
+      int window_stride,                              \
+      float* output,                                 \
+      const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+DECLARE_F32_RW_UKERNEL_FUNCTION(xnn_f32_rwsum_ukernel__scalar_u1)
+
+#define DECLARE_F32_RWD_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                         \
+      size_t row,                                      \
+      size_t channels,                                   \
+      const float* input,                            \
+      float init_value,                                 \
+      int* padding,                                    \
+      int base_dilation,                             \
+      int window_dilation,                           \
+      int window_dimension,                          \
+      int window_stride,                              \
+      float* output,                                 \
+      const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+DECLARE_F32_RWD_UKERNEL_FUNCTION(xnn_f32_rwdsum_ukernel_1p1x__scalar_c1)
+
 #define DECLARE_QS8_RSUM_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                       \
       size_t batch,                                \
