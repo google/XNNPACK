@@ -1788,25 +1788,25 @@ static enum xnn_status reshape_fully_connected_nc(
         fully_connected_op->compute[0].task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_gemm;
       }
     } else {
-      fully_connected_op->compute[0].type = xnn_parallelization_type_2d_tile_2d;
+      fully_connected_op->compute[0].type = xnn_parallelization_type_2d_dynamic;
       if (dynamic_quantization) {
-        fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_dqgemm;
+        fully_connected_op->compute[0].task_2d_dynamic = (pthreadpool_task_2d_dynamic_t) xnn_compute_dqgemm;
       } else if (is_qp8_ukernel) {
-        fully_connected_op->compute[0].task_2d_tile_2d =
-            (pthreadpool_task_2d_tile_2d_t)xnn_compute_qp8gemm;
+        fully_connected_op->compute[0].task_2d_dynamic =
+            (pthreadpool_task_2d_dynamic_t)xnn_compute_qp8gemm;
       } else {
-        fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
+        fully_connected_op->compute[0].task_2d_dynamic = (pthreadpool_task_2d_dynamic_t) xnn_compute_gemm;
       }
     }
   #else
-    fully_connected_op->compute[0].type = xnn_parallelization_type_2d_tile_2d;
+    fully_connected_op->compute[0].type = xnn_parallelization_type_2d_dynamic;
     if (dynamic_quantization) {
-      fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_dqgemm;
+      fully_connected_op->compute[0].task_2d_dynamic = (pthreadpool_task_2d_dynamic_t) xnn_compute_dqgemm;
     } else if (is_qp8_ukernel) {
-      fully_connected_op->compute[0].task_2d_tile_2d =
-          (pthreadpool_task_2d_tile_2d_t)xnn_compute_qp8gemm;
+      fully_connected_op->compute[0].task_2d_dynamic =
+          (pthreadpool_task_2d_dynamic_t)xnn_compute_qp8gemm;
     } else {
-      fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
+      fully_connected_op->compute[0].task_2d_dynamic = (pthreadpool_task_2d_dynamic_t) xnn_compute_gemm;
     }
 #endif
     fully_connected_op->compute[0].range[0] = batch_size;

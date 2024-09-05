@@ -442,9 +442,9 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
                 .gc_stride = input_b_batch_stride,
             };
         batch_matrix_multiply_op->compute[0].type =
-            xnn_parallelization_type_2d_tile_1d;
-        batch_matrix_multiply_op->compute[0].task_2d_tile_1d =
-            (pthreadpool_task_2d_tile_1d_t)xnn_compute_batched_packw_gemm_goi;
+            xnn_parallelization_type_2d_dynamic_1d;
+        batch_matrix_multiply_op->compute[0].task_2d_dynamic_1d =
+            (pthreadpool_task_2d_dynamic_1d_t)xnn_compute_batched_packw_gemm_goi;
         batch_matrix_multiply_op->compute[0].context_offset =
             offsetof(struct xnn_operator, context.gemm.packw_gemm_goi) -
             offsetof(struct xnn_operator, context);
@@ -473,9 +473,9 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
             };
 
         batch_matrix_multiply_op->compute[0].type =
-            xnn_parallelization_type_2d_tile_1d;
-        batch_matrix_multiply_op->compute[0].task_2d_tile_1d =
-            (pthreadpool_task_2d_tile_1d_t)xnn_compute_batched_packw_gemm_gio;
+            xnn_parallelization_type_2d_dynamic_1d;
+        batch_matrix_multiply_op->compute[0].task_2d_dynamic_1d =
+            (pthreadpool_task_2d_dynamic_1d_t)xnn_compute_batched_packw_gemm_gio;
         batch_matrix_multiply_op->compute[0].context_offset =
             offsetof(struct xnn_operator, context.gemm.packw_gemm_gio) -
             offsetof(struct xnn_operator, context);
@@ -520,39 +520,29 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
   memcpy(&batch_matrix_multiply_op->context.gemm.gemm.gemm.params, params, params_size);
   batch_matrix_multiply_op->context.gemm.gemm.gemm.fused_params = &batch_matrix_multiply_op->context.gemm.gemm.gemm.params;
 
-  size_t nc = n;
-  if (num_threads > 1) {
-    const size_t num_other_tiles = divide_round_up(m, mr);
-    const size_t target_tiles_per_thread = 5;
-    const size_t max_nc = divide_round_up(n * num_other_tiles, num_threads * target_tiles_per_thread);
-    if (max_nc < nc) {
-      nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
-    }
+#if XNN_MAX_UARCH_TYPES > 1
+  if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
+    gemm_compute->type = xnn_parallelization_type_3d_tile_2d_with_uarch;
+    gemm_compute->task_3d_tile_2d_with_id =
+        (pthreadpool_task_3d_tile_2d_with_id_t)xnn_compute_hmp_grouped_gemm;
+  } else {
+    gemm_compute->type = xnn_parallelization_type_3d_dynamic_2d;
+    gemm_compute->task_3d_dynamic_2d =
+        (pthreadpool_task_3d_dynamic_2d_t)xnn_compute_grouped_gemm;
   }
-
-  #if XNN_MAX_UARCH_TYPES > 1
-    if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
-      gemm_compute->type = xnn_parallelization_type_3d_tile_2d_with_uarch;
-      gemm_compute->task_3d_tile_2d_with_id =
-          (pthreadpool_task_3d_tile_2d_with_id_t)xnn_compute_hmp_grouped_gemm;
-    } else {
-      gemm_compute->type = xnn_parallelization_type_3d_tile_2d;
-      gemm_compute->task_3d_tile_2d =
-          (pthreadpool_task_3d_tile_2d_t)xnn_compute_grouped_gemm;
-    }
-  #else
-    gemm_compute->type = xnn_parallelization_type_3d_tile_2d;
-    gemm_compute->task_3d_tile_2d =
-        (pthreadpool_task_3d_tile_2d_t)xnn_compute_grouped_gemm;
+#else
+  gemm_compute->type = xnn_parallelization_type_3d_dynamic_2d;
+  gemm_compute->task_3d_dynamic_2d =
+      (pthreadpool_task_3d_dynamic_2d_t)xnn_compute_grouped_gemm;
 #endif
-    gemm_compute->range[0] = batch_size_c;
-    gemm_compute->range[1] = m;
-    gemm_compute->range[2] = n;
-    gemm_compute->tile[0] = mr;
-    gemm_compute->tile[1] = nc;
-    batch_matrix_multiply_op->state = xnn_run_state_needs_setup;
+  gemm_compute->range[0] = batch_size_c;
+  gemm_compute->range[1] = m;
+  gemm_compute->range[2] = n;
+  gemm_compute->tile[0] = mr;
+  gemm_compute->tile[1] = nr;
+  batch_matrix_multiply_op->state = xnn_run_state_needs_setup;
 
-    return xnn_status_success;
+  return xnn_status_success;
 }
 
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f16(

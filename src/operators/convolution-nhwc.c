@@ -1750,6 +1750,7 @@ static enum xnn_status reshape_gemm(
   struct xnn_hmp_gemm_ukernel gemm_ukernel = gemm_cases[mr - 1];
 
   convolution_op->context.gemm.gemm.gemm = (struct gemm_context){
+      .mr = mr,
       .k_scaled = group_input_channels << log2_input_element_size,
       .a_stride = convolution_op->input_pixel_stride << log2_input_element_size,
       .ga_stride = group_input_channels << log2_input_element_size,
@@ -1786,17 +1787,19 @@ static enum xnn_status reshape_gemm(
         convolution_op->compute[0].type = xnn_parallelization_type_2d_tile_2d_with_uarch;
         convolution_op->compute[0].task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_gemm;
       } else {
-        convolution_op->compute[0].type = xnn_parallelization_type_2d_tile_2d;
-        convolution_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
+        convolution_op->compute[0].type = xnn_parallelization_type_2d_dynamic;
+        convolution_op->compute[0].task_2d_dynamic =
+            (pthreadpool_task_2d_dynamic_t)xnn_compute_gemm;
       }
     #else
-      convolution_op->compute[0].type = xnn_parallelization_type_2d_tile_2d;
-      convolution_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
-    #endif
-    convolution_op->compute[0].range[0] = batch_output_size;
-    convolution_op->compute[0].range[1] = group_output_channels;
-    convolution_op->compute[0].tile[0] = mr;
-    convolution_op->compute[0].tile[1] = nc;
+    convolution_op->compute[0].type = xnn_parallelization_type_2d_dynamic;
+    convolution_op->compute[0].task_2d_dynamic =
+        (pthreadpool_task_2d_dynamic_t)xnn_compute_gemm;
+#endif
+      convolution_op->compute[0].range[0] = batch_output_size;
+      convolution_op->compute[0].range[1] = group_output_channels;
+      convolution_op->compute[0].tile[0] = mr;
+      convolution_op->compute[0].tile[1] = nc;
   } else {
     #if XNN_MAX_UARCH_TYPES > 1
       if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
@@ -1937,7 +1940,7 @@ static enum xnn_status reshape_igemm(
   const size_t w_stride = extra_weights_elements_size +
     (round_up_po2(group_input_channels, convolution_op->ukernel.igemm.kr * convolution_op->ukernel.igemm.sr) * kernel_size << log2_filter_element_size);
   const size_t group_output_channels = convolution_op->group_output_channels;
-  convolution_op->context.igemm.igemm = (struct igemm_context) {
+  convolution_op->context.igemm.igemm = (struct igemm_context){
       .ks = kernel_size,
       .ks_scaled = kernel_size * mr * sizeof(void*),
       .kc = group_input_channels << log2_input_element_size,
@@ -1945,13 +1948,17 @@ static enum xnn_status reshape_igemm(
       .indirect_a = convolution_op->indirection_buffer,
       .zero = convolution_op->zero_buffer,
       .packed_w = packed_weights(convolution_op),
-      .cm_stride = convolution_op->output_pixel_stride << log2_output_element_size,
+      .cm_stride = convolution_op->output_pixel_stride
+                   << log2_output_element_size,
       .cn_stride = nr << log2_output_element_size,
       .ga_stride = group_input_channels << log2_input_element_size,
       .gw_stride = w_stride * round_up(group_output_channels, nr),
       .gc_stride = group_output_channels << log2_output_element_size,
-      .ba_stride = input_height * input_width * convolution_op->input_pixel_stride << log2_input_element_size,
-      .bc_stride = output_size * convolution_op->output_pixel_stride << log2_output_element_size,
+      .ba_stride =
+          input_height * input_width * convolution_op->input_pixel_stride
+          << log2_input_element_size,
+      .bc_stride = output_size * convolution_op->output_pixel_stride
+                   << log2_output_element_size,
       .log2_csize = log2_output_element_size,
       .ukernel = igemm_ukernel,
   };

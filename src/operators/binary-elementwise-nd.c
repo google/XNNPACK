@@ -1133,7 +1133,6 @@ static enum xnn_status reshape_binary_elementwise_nd(
     y_stride *= compressed_output_shape[i];
   }
 
-  const size_t num_threads = pthreadpool_get_threads_count(threadpool);
   const size_t element_tile = binary_elementwise_op->binary_elementwise_subconfig->element_tile;
   if (compressed_output_shape[5] == 1) {
     if (compressed_output_shape[4] == 1) {
@@ -1144,14 +1143,16 @@ static enum xnn_status reshape_binary_elementwise_nd(
             binary_elementwise_op->context.elementwise_binary.b_stride[4] = compressed_b_shape[0] == 1 ? 0 : (1 << log2_element_size);
             binary_elementwise_op->context.elementwise_binary.y_stride[4] = (1 << log2_element_size);
             binary_elementwise_op->context.elementwise_binary.elements = (1 << log2_element_size);
-            binary_elementwise_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
-            binary_elementwise_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_elementwise_binary_1d_tile;
+            binary_elementwise_op->compute[0].type = xnn_parallelization_type_1d_dynamic;
+            binary_elementwise_op->compute[0].task_1d_dynamic = (pthreadpool_task_1d_dynamic_t) xnn_compute_elementwise_binary_1d_tile;
             binary_elementwise_op->compute[0].range[0] = compressed_output_shape[0] * (1 << log2_element_size);
-            binary_elementwise_op->compute[0].tile[0] = max(element_tile, round_up_po2(binary_elementwise_op->compute[0].range[0] / num_threads, (1 << log2_element_size)));
+            binary_elementwise_op->compute[0].tile[0] =
+                max(element_tile << log2_element_size, 4096);
           } else {
-            binary_elementwise_op->compute[0].type = xnn_parallelization_type_1d;
-            binary_elementwise_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_elementwise_binary_1d;
+            binary_elementwise_op->compute[0].type = xnn_parallelization_type_1d_dynamic;
+            binary_elementwise_op->compute[0].task_1d_dynamic = (pthreadpool_task_1d_dynamic_t) xnn_compute_elementwise_binary_1d;
             binary_elementwise_op->compute[0].range[0] = compressed_output_shape[1];
+            binary_elementwise_op->compute[0].tile[0] = 1;
           }
         } else {
           binary_elementwise_op->compute[0].type = xnn_parallelization_type_2d;

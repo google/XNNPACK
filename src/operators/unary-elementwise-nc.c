@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
@@ -19,6 +18,7 @@
 #include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
 #include "xnnpack/log.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/operator-type.h"
@@ -163,10 +163,8 @@ static enum xnn_status reshape_unary_elementwise_nc(
   unary_elementwise_op->output_pixel_stride = output_stride;
 
   const xnn_vunary_ukernel_fn ukernel = unary_elementwise_op->unary_elementwise_config->ukernel;
-  const size_t num_threads = pthreadpool_get_threads_count(threadpool);
-  if ((((input_stride ^ channels) | (output_stride ^ channels)) == 0) || batch_size == 1) {
-    const size_t block_size = 4096;
-
+  if ((((input_stride ^ channels) | (output_stride ^ channels)) == 0) ||
+      batch_size == 1) {
     unary_elementwise_op->context.univector_contiguous = (struct univector_contiguous_context) {
       .log2_xsize = log2_input_size,
       .log2_ysize = log2_output_size,
@@ -177,10 +175,14 @@ static enum xnn_status reshape_unary_elementwise_nc(
     }
 
     const size_t range = (batch_size * channels) << log2_input_size;
-    unary_elementwise_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
-    unary_elementwise_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_contiguous;
+    unary_elementwise_op->compute[0].type = xnn_parallelization_type_1d_dynamic;
+    unary_elementwise_op->compute[0].task_1d_dynamic =
+        (pthreadpool_task_1d_dynamic_t)xnn_compute_univector_contiguous;
     unary_elementwise_op->compute[0].range[0] = range;
-    unary_elementwise_op->compute[0].tile[0] = (num_threads == 1) ? range : block_size;;
+    unary_elementwise_op->compute[0].tile[0] =
+        max(unary_elementwise_op->unary_elementwise_config->element_tile
+                << log2_input_size,
+            4096);
   } else {
     unary_elementwise_op->context.univector_strided = (struct univector_strided_context) {
       .n = channels << log2_input_size,
@@ -192,10 +194,11 @@ static enum xnn_status reshape_unary_elementwise_nc(
       memcpy(&unary_elementwise_op->context.univector_strided.params, params, params_size);
     }
 
-    unary_elementwise_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
-    unary_elementwise_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_strided;
+    unary_elementwise_op->compute[0].type = xnn_parallelization_type_1d_dynamic;
+    unary_elementwise_op->compute[0].task_1d_dynamic =
+        (pthreadpool_task_1d_dynamic_t)xnn_compute_univector_strided;
     unary_elementwise_op->compute[0].range[0] = batch_size;
-    unary_elementwise_op->compute[0].tile[0] = (num_threads == 1) ? batch_size : 1;
+    unary_elementwise_op->compute[0].tile[0] = 1;
   }
   unary_elementwise_op->state = xnn_run_state_needs_setup;
 
@@ -1741,9 +1744,10 @@ enum xnn_status xnn_reshape_convert_nc_f16_qd8(
   };
   memcpy(&convert_op->context.f16_qd8_convert.params, &convert_op->params.f16_default, sizeof(convert_op->params.f16_default));
 
-  convert_op->compute[0].type = xnn_parallelization_type_1d;
-  convert_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_f16_qd8_convert;
+  convert_op->compute[0].type = xnn_parallelization_type_1d_dynamic;
+  convert_op->compute[0].task_1d_dynamic = (pthreadpool_task_1d_dynamic_t) xnn_compute_f16_qd8_convert;
   convert_op->compute[0].range[0] = batch_size;
+  convert_op->compute[0].tile[0] = 1;
 
   convert_op->compute[1].type = xnn_parallelization_type_1d;
   convert_op->compute[1].task_1d = (pthreadpool_task_1d_t) xnn_compute_pad_qd8_params;
@@ -1794,9 +1798,10 @@ enum xnn_status xnn_reshape_convert_nc_f32_qd8(
   };
   memcpy(&convert_op->context.f32_qd8_convert.params, &convert_op->params.f32_default, sizeof(convert_op->params.f32_default));
 
-  convert_op->compute[0].type = xnn_parallelization_type_1d;
-  convert_op->compute[0].task_1d = (pthreadpool_task_1d_t) xnn_compute_f32_qd8_convert;
+  convert_op->compute[0].type = xnn_parallelization_type_1d_dynamic;
+  convert_op->compute[0].task_1d_dynamic = (pthreadpool_task_1d_dynamic_t) xnn_compute_f32_qd8_convert;
   convert_op->compute[0].range[0] = batch_size;
+  convert_op->compute[0].tile[0] = 1;
 
   convert_op->compute[1].type = xnn_parallelization_type_1d;
   convert_op->compute[1].task_1d = (pthreadpool_task_1d_t) xnn_compute_pad_qd8_params;
@@ -1853,12 +1858,11 @@ enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,
                            convert_op->unary_elementwise_config->ukernel,
   };
 
-  // TODO(b/340399245) - Ideally, this should parallelize along `batch` in
-  // groups of `mr`.
-  convert_op->compute[0].type = xnn_parallelization_type_1d;
-  convert_op->compute[0].task_1d =
-      (pthreadpool_task_1d_t)xnn_compute_f32_qp8_convert;
+  convert_op->compute[0].type = xnn_parallelization_type_1d_dynamic;
+  convert_op->compute[0].task_1d_dynamic =
+      (pthreadpool_task_1d_dynamic_t)xnn_compute_f32_qp8_convert;
   convert_op->compute[0].range[0] = batch_size;
+  convert_op->compute[0].tile[0] = mr_packed;
 
   convert_op->state = xnn_run_state_needs_setup;
 

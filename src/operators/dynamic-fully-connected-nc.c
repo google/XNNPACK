@@ -9,7 +9,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
@@ -18,6 +17,7 @@
 #include "xnnpack/config.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
+#include "xnnpack/microfnptr.h"
 #include "xnnpack/microkernel-type.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/operator-type.h"
@@ -375,13 +375,15 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
   }
 
   dynamic_fully_connected_op->context.gemm.gemm.gemm = (struct gemm_context){
-    .k_scaled = input_channels << log2_input_element_size,
-    .w_stride = bias_element_size + (round_up_po2(input_channels, kr * sr) << log2_input_element_size),
-    .a_stride = input_stride << log2_input_element_size,
-    .cm_stride = output_stride << log2_output_element_size,
-    .cn_stride = nr << log2_output_element_size,
-    .log2_csize = log2_output_element_size,
-    .ukernel = gemm_ukernel,
+      .k_scaled = input_channels << log2_input_element_size,
+      .w_stride = bias_element_size + (round_up_po2(input_channels, kr * sr)
+                                       << log2_input_element_size),
+      .a_stride = input_stride << log2_input_element_size,
+      .cm_stride = output_stride << log2_output_element_size,
+      .cn_stride = nr << log2_output_element_size,
+      .log2_csize = log2_output_element_size,
+      .ukernel = gemm_ukernel,
+      .mr = mr,
   };
   memcpy(&dynamic_fully_connected_op->context.gemm.gemm.gemm.params, params, params_size);
   dynamic_fully_connected_op->context.gemm.gemm.gemm.fused_params = &dynamic_fully_connected_op->context.gemm.gemm.gemm.params;
@@ -406,13 +408,17 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
       dynamic_fully_connected_op->compute[1].type = xnn_parallelization_type_2d_tile_2d_with_uarch;
       dynamic_fully_connected_op->compute[1].task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_gemm;
     } else {
-      dynamic_fully_connected_op->compute[1].type = xnn_parallelization_type_2d_tile_2d;
-      dynamic_fully_connected_op->compute[1].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
+      dynamic_fully_connected_op->compute[1].type =
+          xnn_parallelization_type_2d_dynamic;
+      dynamic_fully_connected_op->compute[1].task_2d_dynamic =
+          (pthreadpool_task_2d_dynamic_t)xnn_compute_gemm;
     }
   #else
-    dynamic_fully_connected_op->compute[1].type = xnn_parallelization_type_2d_tile_2d;
-    dynamic_fully_connected_op->compute[1].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
-  #endif
+  dynamic_fully_connected_op->compute[1].type =
+      xnn_parallelization_type_2d_dynamic;
+  dynamic_fully_connected_op->compute[1].task_2d_dynamic =
+      (pthreadpool_task_2d_dynamic_t)xnn_compute_gemm;
+#endif
   dynamic_fully_connected_op->compute[1].range[0] = batch_size;
   dynamic_fully_connected_op->compute[1].range[1] = output_channels;
   dynamic_fully_connected_op->compute[1].tile[0] = mr;
