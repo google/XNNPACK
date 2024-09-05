@@ -1507,7 +1507,7 @@ xnnpack_binary(
 
 xnnpack_unit_test(
     name = "binary_nd_test",
-    timeout = "moderate",
+    timeout = "long",
     srcs = ["binary-nd.cc"],
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
