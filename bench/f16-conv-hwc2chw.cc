@@ -40,8 +40,7 @@ static void f16_conv_hwc2chw(benchmark::State& state,
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
-  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
-
+  
   const size_t input_channels = 3;
   const size_t kernel_size = 3;
   const size_t padding = 1;
@@ -51,11 +50,11 @@ static void f16_conv_hwc2chw(benchmark::State& state,
   const size_t output_width = (input_width + 2 * padding - kernel_size) / subsampling + 1;
 
   std::vector<xnn_float16> input(input_height * input_width * input_channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  std::generate(input.begin(), input.end(), std::ref(f16rng));
+  std::generate(input.begin(), input.end(), f32rng);
   std::vector<xnn_float16> kernel(output_channels * kernel_size * kernel_size * input_channels);
-  std::generate(kernel.begin(), kernel.end(), std::ref(f16rng));
+  std::generate(kernel.begin(), kernel.end(), f32rng);
   std::vector<xnn_float16> bias(output_channels);
-  std::generate(bias.begin(), bias.end(), std::ref(f16rng));
+  std::generate(bias.begin(), bias.end(), f32rng);
 
   std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> zero(input_channels * input_width + XNN_EXTRA_BYTES / sizeof(xnn_float16));
 
@@ -71,7 +70,8 @@ static void f16_conv_hwc2chw(benchmark::State& state,
   xnn_pack_f16_dconv_oki_w(
     output_channels, input_channels, output_channels_tile,
     kernel_size /* kernel height */, kernel_size /* kernel width */,
-    kernel.data(), bias.data(), packed_weights.data(), nullptr);
+    reinterpret_cast<const uint16_t*>(kernel.data()), 
+    reinterpret_cast<const uint16_t*>(bias.data()), reinterpret_cast<uint16_t*>(packed_weights.data()), nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(packed_weights.cbegin(),
       packed_weights.cbegin() + weights_elements,
@@ -79,7 +79,7 @@ static void f16_conv_hwc2chw(benchmark::State& state,
   }
 
   std::vector<xnn_float16> output(output_elements * num_buffers);
-  std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+  std::fill(output.begin(), output.end(), std::nanf(""));
 
   xnn_f16_minmax_params params;
   init_params(&params, 0x7C00 /* inf */, 0xFC00 /* -inf */);

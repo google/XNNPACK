@@ -189,10 +189,10 @@ class UnaryOperatorTester {
   }
   virtual void CheckResultF16(xnn_float16 y, float y_ref, size_t batch,
                               size_t channel, xnn_float16 input) const {
-    EXPECT_NEAR(y_ref, xnn_float16_to_float(y), AbsTolF16(y_ref))
+    EXPECT_NEAR(y_ref, y, AbsTolF16(y_ref))
         << "at batch " << batch << " / " << batch_size() << ", channel "
         << channel << " / " << channels() << ", input "
-        << xnn_float16_to_float(input);
+        << input;
   }
   virtual void CheckResultQS8(int8_t y, float y_ref, size_t batch,
                               size_t channel, int8_t input) const {

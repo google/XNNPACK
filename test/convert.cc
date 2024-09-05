@@ -370,7 +370,7 @@ TEST_F(ConvertTestQU8ToQU8, define)
 TEST_F(ConvertTestF16ToF32, matches_operator_api)
 {
   std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
-  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::fill(operator_output.begin(), operator_output.end(), nanf(""));
   std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
@@ -427,8 +427,8 @@ TEST_F(ConvertTestF32ToF16, matches_operator_api)
 {
   std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
+  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
+  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -539,8 +539,8 @@ TEST_F(ConvertTestF32ToQS8, matches_operator_api)
 TEST_F(ConvertTestQS8ToF16, matches_operator_api)
 {
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
+  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
+  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

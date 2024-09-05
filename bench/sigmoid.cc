@@ -18,7 +18,7 @@
 
 
 static void xnnpack_sigmoid_f16(benchmark::State& state) {
-  benchmark_unary_operator<float16, float16>(xnn_create_sigmoid_nc_f16,
+  benchmark_unary_operator<xnn_float16, xnn_float16>(xnn_create_sigmoid_nc_f16,
                                              xnn_reshape_sigmoid_nc_f16,
                                              xnn_setup_sigmoid_nc_f16, state);
 }

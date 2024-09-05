@@ -2344,8 +2344,8 @@ xnnpack_unit_test(
     ],
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
+        "//:math",
         "//:node_type",
         "//:operators",
         "//:subgraph",

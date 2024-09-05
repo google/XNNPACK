@@ -255,10 +255,10 @@ TEST_F(BatchMatrixMultiplyTestF16, matches_operator_api)
 
   xnn_operator_t op = nullptr;
 
-  std::generate(input1.begin(), input1.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-  std::generate(input2.begin(), input2.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-  std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
+  std::generate(input1.begin(), input1.end(), [&]() { return f32dist(rng); });
+  std::generate(input2.begin(), input2.end(), [&]() { return f32dist(rng); });
+  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
+  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_batch_matrix_multiply_nc_f16(/*flags=*/0, &op);

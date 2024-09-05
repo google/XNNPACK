@@ -21,9 +21,9 @@ void f16_velu(benchmark::State& state, uint64_t arch_flags, xnn_f16_velu_ukernel
       state, ukernel,
       [init_params](xnn_f16_elu_params* params) -> size_t {
         init_params(params,
-                    /*prescale=*/UINT16_C(0x3C00),  // prescale = 1.0h
-                    /*alpha=*/UINT16_C(0x3C00),     // alpha = 1.0h
-                    /*beta=*/UINT16_C(0x3C00));     // beta = 1.0h
+                    /*prescale=*/1.0f,
+                    /*alpha=*/1.0f,
+                    /*beta=*/1.0f);
         return sizeof(*params);
       },
       arch_flags,

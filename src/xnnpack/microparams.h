@@ -654,9 +654,9 @@ struct xnn_qu8_f32_cvt_params {
 
 struct xnn_f16_elu_params {
   struct {
-    uint16_t prescale;
-    uint16_t alpha;
-    uint16_t beta;
+    xnn_float16 prescale;
+    xnn_float16 alpha;
+    xnn_float16 beta;
   } scalar;
 };
 
