@@ -285,6 +285,7 @@ MICROKERNEL_DEFS = [
     "src/u64-u32-vsqrtshift/u64-u32-vsqrtshift.h",
     "src/x8-packq/x8-packq.h",
     "src/x8-packw/x8-packw.h",
+    "src/qs8-packw/qs8-packw.h",
     "src/x16-packw/x16-packw.h",
     "src/x32-packb/x32-packb.h",
     "src/x32-packw/x32-packw.h",

@@ -541,6 +541,18 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qs8_packw_bench",
+    srcs = [
+        "bgemm.h",
+        "packw-benchmark.h",
+        "qs8-packw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:allocator",
+    ],
+)
+
+xnnpack_benchmark(
     name = "x16_packw_bench",
     srcs = [
         "bgemm.h",

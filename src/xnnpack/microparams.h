@@ -956,6 +956,10 @@ union xnn_f32_gavgpool_params {
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64 */
 };
 
+struct xnn_qs8_packw_params {
+  int8_t input_zero_point;
+};
+
 // Forward declare for use in microkernel headers for JIT generator functions.
 struct xnn_code_buffer;
 
