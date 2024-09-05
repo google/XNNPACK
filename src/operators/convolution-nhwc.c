@@ -1749,7 +1749,7 @@ static enum xnn_status reshape_gemm(
 
   struct xnn_hmp_gemm_ukernel gemm_ukernel = gemm_cases[mr - 1];
 
-  convolution_op->context.gemm = (struct gemm_context){
+  convolution_op->context.gemm.gemm.gemm = (struct gemm_context){
       .k_scaled = group_input_channels << log2_input_element_size,
       .a_stride = convolution_op->input_pixel_stride << log2_input_element_size,
       .ga_stride = group_input_channels << log2_input_element_size,
@@ -1764,11 +1764,11 @@ static enum xnn_status reshape_gemm(
       .num_batch_dims = 1,
       .ukernel = gemm_ukernel,
   };
-  convolution_op->context.gemm.batch_dims_a[0] = groups;
-  convolution_op->context.gemm.batch_dims_b[0] = groups;
-  convolution_op->context.gemm.batch_strides_c[0] = 1;
-  memcpy(&convolution_op->context.gemm.params, &convolution_op->params, sizeof(convolution_op->context.gemm.params));
-  convolution_op->context.gemm.fused_params = &convolution_op->context.gemm.params;
+  convolution_op->context.gemm.gemm.gemm.batch_dims_a[0] = groups;
+  convolution_op->context.gemm.gemm.gemm.batch_dims_b[0] = groups;
+  convolution_op->context.gemm.gemm.gemm.batch_strides_c[0] = 1;
+  memcpy(&convolution_op->context.gemm.gemm.gemm.params, &convolution_op->params, sizeof(convolution_op->context.gemm.gemm.gemm.params));
+  convolution_op->context.gemm.gemm.gemm.fused_params = &convolution_op->context.gemm.gemm.gemm.params;
 
   size_t nc = group_output_channels;
   if (num_threads > 1) {
@@ -1868,7 +1868,7 @@ static enum xnn_status reshape_igemm(
     *workspace_alignment = XNN_ALLOCATION_ALIGNMENT;
     igemm_compute_index = 1;
 
-    convolution_op->context.conv2d_igemm_indirection_init = (struct conv2d_igemm_indirection_init_context) {
+    convolution_op->context.igemm.conv2d_igemm_indirection_init = (struct conv2d_igemm_indirection_init_context) {
       .zero_buffer = convolution_op->zero_buffer,
       .input_pixel_stride = convolution_op->input_pixel_stride << log2_input_element_size,
       .input_height = input_height,
@@ -1886,7 +1886,7 @@ static enum xnn_status reshape_igemm(
     };
 
     convolution_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
-    convolution_op->compute[0].context_offset = offsetof(struct xnn_operator, context.conv2d_igemm_indirection_init) - offsetof(struct xnn_operator, context);
+    convolution_op->compute[0].context_offset = offsetof(struct xnn_operator, context.igemm.conv2d_igemm_indirection_init) - offsetof(struct xnn_operator, context);
     convolution_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_conv2d_igemm_indirection;
     convolution_op->compute[0].range[0] = tiled_output_size;
     convolution_op->compute[0].tile[0] = mr;
@@ -1937,7 +1937,7 @@ static enum xnn_status reshape_igemm(
   const size_t w_stride = extra_weights_elements_size +
     (round_up_po2(group_input_channels, convolution_op->ukernel.igemm.kr * convolution_op->ukernel.igemm.sr) * kernel_size << log2_filter_element_size);
   const size_t group_output_channels = convolution_op->group_output_channels;
-  convolution_op->context.igemm = (struct igemm_context) {
+  convolution_op->context.igemm.igemm = (struct igemm_context) {
       .ks = kernel_size,
       .ks_scaled = kernel_size * mr * sizeof(void*),
       .kc = group_input_channels << log2_input_element_size,
@@ -1955,7 +1955,7 @@ static enum xnn_status reshape_igemm(
       .log2_csize = log2_output_element_size,
       .ukernel = igemm_ukernel,
   };
-  memcpy(&convolution_op->context.igemm.params, &convolution_op->params, sizeof(convolution_op->context.igemm.params));
+  memcpy(&convolution_op->context.igemm.igemm.params, &convolution_op->params, sizeof(convolution_op->context.igemm.igemm.params));
 
   size_t nc = group_output_channels;
   if (num_threads > 1) {
@@ -2139,7 +2139,7 @@ static enum xnn_status reshape_dwconv(
     total_workspace_size += indirection_buffer_size;
     dwconv_compute_index = 1;
 
-    convolution_op->context.dwconv_indirection_init = (struct dwconv_indirection_init_context) {
+    convolution_op->context.dwconv.dwconv_indirection_init = (struct dwconv_indirection_init_context) {
       .zero_buffer = convolution_op->zero_buffer,
       .input_pixel_stride = convolution_op->input_pixel_stride << log2_input_element_size,
       .input_height = input_height,
@@ -2160,7 +2160,7 @@ static enum xnn_status reshape_dwconv(
     };
 
     convolution_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
-    convolution_op->compute[0].context_offset = offsetof(struct xnn_operator, context.dwconv_indirection_init) - offsetof(struct xnn_operator, context);
+    convolution_op->compute[0].context_offset = offsetof(struct xnn_operator, context.dwconv.dwconv_indirection_init) - offsetof(struct xnn_operator, context);
     convolution_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_dwconv_indirection;
     convolution_op->compute[0].range[0] = output_height;
 
@@ -2210,7 +2210,7 @@ static enum xnn_status reshape_dwconv(
 
   const size_t groups = convolution_op->groups;
   int32_t extra_input_advanced = is_unipass ? 0 : tile_size - convolution_op->ukernel.dwconv.last_tile;
-  convolution_op->context.dwconv = (struct dwconv_context) {
+  convolution_op->context.dwconv.dwconv = (struct dwconv_context) {
       .kernel_size = kernel_size,
       .indirect_input = convolution_op->indirection_buffer,
       .indirect_input_width_stride = (kernel_height * step_width - extra_input_advanced) * sizeof(void*),
@@ -2225,7 +2225,7 @@ static enum xnn_status reshape_dwconv(
       .zero = convolution_op->zero_buffer,
       .output_increment = (convolution_op->output_pixel_stride - groups) << log2_output_element_size,
   };
-  memcpy(&convolution_op->context.dwconv.params, &convolution_op->params, sizeof(convolution_op->context.dwconv.params));
+  memcpy(&convolution_op->context.dwconv.dwconv.params, &convolution_op->params, sizeof(convolution_op->context.dwconv.dwconv.params));
 
   const size_t batch_size = convolution_op->batch_size;
   convolution_op->compute[dwconv_compute_index].range[0] = batch_size;
@@ -2235,15 +2235,15 @@ static enum xnn_status reshape_dwconv(
   if (is_unipass) {
     convolution_op->compute[dwconv_compute_index].type = xnn_parallelization_type_2d;
     convolution_op->compute[dwconv_compute_index].task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv_unipass;
-    convolution_op->context.dwconv.unipass_ukernel = convolution_op->ukernel.dwconv.unipass_fn;
+    convolution_op->context.dwconv.dwconv.unipass_ukernel = convolution_op->ukernel.dwconv.unipass_fn;
   } else {
     const size_t buffer_size =
       round_up_po2(
         (groups + (XNN_MULTIPASS_EXTRA_BYTES >> log2_input_element_size)) << log2_accumulator_element_size,
         XNN_ALLOCATION_ALIGNMENT);
-    convolution_op->context.dwconv.buffer_size = buffer_size;
+    convolution_op->context.dwconv.dwconv.buffer_size = buffer_size;
     if (is_transient_indirection_buffer) {
-      convolution_op->context.dwconv.multipass_buffer_offset = indirection_buffer_size;
+      convolution_op->context.dwconv.dwconv.multipass_buffer_offset = indirection_buffer_size;
     }
     const bool use_threads_workspace_size = num_threads < batch_size * output_height;
     if (use_threads_workspace_size) {
@@ -2258,7 +2258,7 @@ static enum xnn_status reshape_dwconv(
       total_workspace_size += batch_size * output_height * buffer_size;
     }
 
-    convolution_op->context.dwconv.multipass_ukernel = convolution_op->ukernel.dwconv.multipass_fn;
+    convolution_op->context.dwconv.dwconv.multipass_ukernel = convolution_op->ukernel.dwconv.multipass_fn;
   }
 
   *workspace_size = total_workspace_size;
@@ -2629,9 +2629,9 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_f32(
 
 static enum xnn_status setup_gemm(xnn_operator_t convolution_op)
 {
-  convolution_op->context.gemm.a = convolution_op->input;
-  convolution_op->context.gemm.c = convolution_op->output;
-  convolution_op->context.gemm.quantization_params = convolution_op->quantization_params;
+  convolution_op->context.gemm.gemm.gemm.a = convolution_op->input;
+  convolution_op->context.gemm.gemm.gemm.c = convolution_op->output;
+  convolution_op->context.gemm.gemm.gemm.quantization_params = convolution_op->quantization_params;
   convolution_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
@@ -2643,17 +2643,17 @@ static enum xnn_status setup_igemm(
     uint32_t log2_input_element_size)
 {
   if (convolution_op->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER) {
-    convolution_op->context.igemm.a_offset = (size_t) 0;
-    convolution_op->context.igemm.indirect_a = (const void**) workspace;
-    convolution_op->context.conv2d_igemm_indirection_init.indirection_buffer = (const void**) workspace;
-    convolution_op->context.conv2d_igemm_indirection_init.input = convolution_op->input;
+    convolution_op->context.igemm.igemm.a_offset = (size_t) 0;
+    convolution_op->context.igemm.igemm.indirect_a = (const void**) workspace;
+    convolution_op->context.igemm.conv2d_igemm_indirection_init.indirection_buffer = (const void**) workspace;
+    convolution_op->context.igemm.conv2d_igemm_indirection_init.input = convolution_op->input;
   } else {
-    convolution_op->context.igemm.a_offset = (size_t) ((uintptr_t) convolution_op->input - (uintptr_t) convolution_op->last_input);
+    convolution_op->context.igemm.igemm.a_offset = (size_t) ((uintptr_t) convolution_op->input - (uintptr_t) convolution_op->last_input);
   }
-  convolution_op->context.igemm.zero_size = convolution_op->zero_size;
-  convolution_op->context.igemm.zero_buffers = convolution_op->zero_buffers;
-  convolution_op->context.igemm.c = convolution_op->output;
-  convolution_op->context.igemm.quantization_params = convolution_op->quantization_params;
+  convolution_op->context.igemm.igemm.zero_size = convolution_op->zero_size;
+  convolution_op->context.igemm.igemm.zero_buffers = convolution_op->zero_buffers;
+  convolution_op->context.igemm.igemm.c = convolution_op->output;
+  convolution_op->context.igemm.igemm.quantization_params = convolution_op->quantization_params;
   convolution_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
@@ -2665,21 +2665,21 @@ static enum xnn_status setup_dwconv(
     uint32_t log2_input_element_size)
 {
   if (convolution_op->flags & XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER) {
-    convolution_op->context.dwconv.input_offset = (size_t) 0;
-    convolution_op->context.dwconv.indirect_input = (const void**) workspace;
-    convolution_op->context.dwconv_indirection_init.input = convolution_op->input;
-    convolution_op->context.dwconv_indirection_init.indirection_buffer = (const void**) workspace;
+    convolution_op->context.dwconv.dwconv.input_offset = (size_t) 0;
+    convolution_op->context.dwconv.dwconv.indirect_input = (const void**) workspace;
+    convolution_op->context.dwconv.dwconv_indirection_init.input = convolution_op->input;
+    convolution_op->context.dwconv.dwconv_indirection_init.indirection_buffer = (const void**) workspace;
   } else {
-    convolution_op->context.dwconv.input_offset = (size_t) ((uintptr_t) convolution_op->input - (uintptr_t) convolution_op->last_input);
+    convolution_op->context.dwconv.dwconv.input_offset = (size_t) ((uintptr_t) convolution_op->input - (uintptr_t) convolution_op->last_input);
   }
 
-  if (convolution_op->context.dwconv.buffer_size) {
+  if (convolution_op->context.dwconv.dwconv.buffer_size) {
     assert(workspace != NULL);
-    convolution_op->context.dwconv.multipass_buffer =
-      (void*) ((uintptr_t) workspace + convolution_op->context.dwconv.multipass_buffer_offset);
+    convolution_op->context.dwconv.dwconv.multipass_buffer =
+      (void*) ((uintptr_t) workspace + convolution_op->context.dwconv.dwconv.multipass_buffer_offset);
   }
 
-  convolution_op->context.dwconv.output = convolution_op->output;
+  convolution_op->context.dwconv.dwconv.output = convolution_op->output;
   convolution_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
