@@ -168,4 +168,18 @@ tools/xngen src/qs8-gavgpool/multipass-sse4.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 
 tools/xngen src/qs8-gavgpool/multipass-sse4.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=16 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-gavgpool/gen/qu8-gavgpool-7p7x-minmax-fp32-sse41-c16.c &
 tools/xngen src/qs8-gavgpool/multipass-sse4.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D CHANNEL_TILE=24 -D REQUANTIZATION=FP32 -D DATATYPE=QU8 -o src/qu8-gavgpool/gen/qu8-gavgpool-7p7x-minmax-fp32-sse41-c24.c &
 
+
+################################ RISC-V Vector ################################
+tools/xngen src/qs8-gavgpool/unipass-rvv.c.in -D ROW_TILE=7 -D REQUANTIZATION=FP32 -D LMUL=1 -D DATATYPE=QS8 -o src/qs8-gavgpool/gen/qs8-gavgpool-7x-minmax-fp32-rvv-c1v.c &
+tools/xngen src/qs8-gavgpool/unipass-rvv.c.in -D ROW_TILE=7 -D REQUANTIZATION=FP32 -D LMUL=2 -D DATATYPE=QS8 -o src/qs8-gavgpool/gen/qs8-gavgpool-7x-minmax-fp32-rvv-c2v.c &
+
+tools/xngen src/qs8-gavgpool/unipass-rvv.c.in -D ROW_TILE=7 -D REQUANTIZATION=FP32 -D LMUL=1 -D DATATYPE=QU8 -o src/qu8-gavgpool/gen/qu8-gavgpool-7x-minmax-fp32-rvv-c1v.c &
+tools/xngen src/qs8-gavgpool/unipass-rvv.c.in -D ROW_TILE=7 -D REQUANTIZATION=FP32 -D LMUL=2 -D DATATYPE=QU8 -o src/qu8-gavgpool/gen/qu8-gavgpool-7x-minmax-fp32-rvv-c2v.c &
+
+tools/xngen src/qs8-gavgpool/multipass-rvv.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D REQUANTIZATION=FP32 -D LMUL=1 -D DATATYPE=QS8 -o src/qs8-gavgpool/gen/qs8-gavgpool-7p7x-minmax-fp32-rvv-c1v.c &
+tools/xngen src/qs8-gavgpool/multipass-rvv.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D REQUANTIZATION=FP32 -D LMUL=2 -D DATATYPE=QS8 -o src/qs8-gavgpool/gen/qs8-gavgpool-7p7x-minmax-fp32-rvv-c2v.c &
+
+tools/xngen src/qs8-gavgpool/multipass-rvv.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D REQUANTIZATION=FP32 -D LMUL=1 -D DATATYPE=QU8 -o src/qu8-gavgpool/gen/qu8-gavgpool-7p7x-minmax-fp32-rvv-c1v.c &
+tools/xngen src/qs8-gavgpool/multipass-rvv.c.in -D ROW_TILE=7 -D ROW_SUBTILE=7 -D REQUANTIZATION=FP32 -D LMUL=2 -D DATATYPE=QU8 -o src/qu8-gavgpool/gen/qu8-gavgpool-7p7x-minmax-fp32-rvv-c2v.c &
+
 wait
