@@ -5186,12 +5186,31 @@ enum xnn_status xnn_create_mean_nd_f32(
   uint32_t flags,
   xnn_operator_t* mean_op_out);
 
+enum xnn_status xnn_create_mean_nd_qs8(
+  float scale,
+  int8_t input_zero_point,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max,
+  uint32_t flags,
+  xnn_operator_t* mean_op_out);
+
 enum xnn_status xnn_reshape_mean_nd_f32(
   xnn_operator_t mean_op,
   size_t num_reduction_axes,
   const size_t* reduction_axes,
   size_t num_input_dims,
   const size_t* input_shape,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_reshape_mean_nd_qs8(
+  xnn_operator_t mean_op,
+  size_t num_reduction_axes,
+  const size_t* reduction_axes,
+  size_t num_input_dims,
+  const size_t* input_shape,
+  size_t* workspace_size,
+  size_t* workspace_alignment,
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_mean_nd_f32(
@@ -5210,6 +5229,12 @@ enum xnn_status xnn_reshape_minimum_nd_f16(
   size_t num_input2_dims,
   const size_t* input2_shape,
   pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_mean_nd_qs8(
+  xnn_operator_t mean_op,
+  void* workspace,
+  const void* input,
+  void* output);
 
 enum xnn_status xnn_setup_minimum_nd_f16(
   xnn_operator_t minimum_op,

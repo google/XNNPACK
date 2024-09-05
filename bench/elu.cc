@@ -18,7 +18,7 @@
 
 
 static void xnnpack_elu_f16(benchmark::State& state) {
-  benchmark_unary_operator<float16, float16>(
+  benchmark_unary_operator<xnn_float16, xnn_float16>(
       [](uint32_t flags, xnn_operator_t* op) {
         return xnn_create_elu_nc_f16(
             /*alpha=*/1.0f, flags, op);

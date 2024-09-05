@@ -187,8 +187,8 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
 
   // Check if we've already cached the packed data for `B`.
   uint32_t cache_seed =
-      murmur_hash3(&batch_matrix_multiply_op->context.gemm,
-                   sizeof(batch_matrix_multiply_op->context.gemm), k * n);
+      murmur_hash3(&batch_matrix_multiply_op->context.gemm.gemm.gemm,
+                   sizeof(batch_matrix_multiply_op->context.gemm.gemm.gemm), k * n);
   if (batch_matrix_multiply_op->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     cache_seed = ~cache_seed;
   }
@@ -424,7 +424,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
 
       if (batch_matrix_multiply_op->flags & XNN_FLAG_TRANSPOSE_B) {
         assert(batch_matrix_multiply_op->ukernel.gemm.packw_gemm_goi != NULL);
-        batch_matrix_multiply_op->context.packw_gemm_goi =
+        batch_matrix_multiply_op->context.gemm.packw_gemm_goi =
             (struct packw_gemm_goi_context){
                 .kc = k,
                 .nr = nr,
@@ -446,14 +446,14 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
         batch_matrix_multiply_op->compute[0].task_2d_tile_1d =
             (pthreadpool_task_2d_tile_1d_t)xnn_compute_batched_packw_gemm_goi;
         batch_matrix_multiply_op->compute[0].context_offset =
-            offsetof(struct xnn_operator, context.packw_gemm_goi) -
+            offsetof(struct xnn_operator, context.gemm.packw_gemm_goi) -
             offsetof(struct xnn_operator, context);
         batch_matrix_multiply_op->compute[0].range[0] = batch_size_b;
         batch_matrix_multiply_op->compute[0].range[1] = n;
         batch_matrix_multiply_op->compute[0].tile[0] = nr;
       } else {
         assert(batch_matrix_multiply_op->ukernel.gemm.packw_gemm_gio != NULL);
-        batch_matrix_multiply_op->context.packw_gemm_gio =
+        batch_matrix_multiply_op->context.gemm.packw_gemm_gio =
             (struct packw_gemm_gio_context){
                 .n_stride = 1 << log2_input_b_element_size,
                 .k_stride_elements = n,
@@ -477,7 +477,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
         batch_matrix_multiply_op->compute[0].task_2d_tile_1d =
             (pthreadpool_task_2d_tile_1d_t)xnn_compute_batched_packw_gemm_gio;
         batch_matrix_multiply_op->compute[0].context_offset =
-            offsetof(struct xnn_operator, context.packw_gemm_gio) -
+            offsetof(struct xnn_operator, context.gemm.packw_gemm_gio) -
             offsetof(struct xnn_operator, context);
         batch_matrix_multiply_op->compute[0].range[0] = batch_size_b;
         batch_matrix_multiply_op->compute[0].range[1] = n;
@@ -492,7 +492,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
       (round_up_po2(k, kr * sr) << log2_input_a_element_size) +
       bias_element_size + w_stride_extra_bytes;
   const size_t k_scaled = k << log2_input_a_element_size;
-  batch_matrix_multiply_op->context.gemm = (struct gemm_context){
+  batch_matrix_multiply_op->context.gemm.gemm.gemm = (struct gemm_context){
       .k_scaled = k_scaled,
       .a_stride = k_scaled,
       .ga_stride = m * k_scaled,
@@ -511,14 +511,14 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
   // Copy the batch dimensions into the `gemm_context` struct since we don't
   // know if these pointers will be valid by the time the GEMM is actually
   // called.
-  memcpy(batch_matrix_multiply_op->context.gemm.batch_dims_a, batch_dims_a,
+  memcpy(batch_matrix_multiply_op->context.gemm.gemm.gemm.batch_dims_a, batch_dims_a,
          sizeof(size_t) * num_batch_dims);
-  memcpy(batch_matrix_multiply_op->context.gemm.batch_dims_b, batch_dims_b,
+  memcpy(batch_matrix_multiply_op->context.gemm.gemm.gemm.batch_dims_b, batch_dims_b,
          sizeof(size_t) * num_batch_dims);
-  memcpy(batch_matrix_multiply_op->context.gemm.batch_strides_c,
+  memcpy(batch_matrix_multiply_op->context.gemm.gemm.gemm.batch_strides_c,
          batch_strides_c, sizeof(size_t) * num_batch_dims);
-  memcpy(&batch_matrix_multiply_op->context.gemm.params, params, params_size);
-  batch_matrix_multiply_op->context.gemm.fused_params = &batch_matrix_multiply_op->context.gemm.params;
+  memcpy(&batch_matrix_multiply_op->context.gemm.gemm.gemm.params, params, params_size);
+  batch_matrix_multiply_op->context.gemm.gemm.gemm.fused_params = &batch_matrix_multiply_op->context.gemm.gemm.gemm.params;
 
   size_t nc = n;
   if (num_threads > 1) {
@@ -640,21 +640,21 @@ static enum xnn_status setup_batch_matrix_multiply_nc(
   }
 
   if (batch_matrix_multiply_op->flags & XNN_FLAG_TRANSPOSE_B) {
-    batch_matrix_multiply_op->context.packw_gemm_goi.kernel = input_b;
-    batch_matrix_multiply_op->context.packw_gemm_goi.bias = NULL;
-    batch_matrix_multiply_op->context.packw_gemm_goi.packed_weights =
+    batch_matrix_multiply_op->context.gemm.packw_gemm_goi.kernel = input_b;
+    batch_matrix_multiply_op->context.gemm.packw_gemm_goi.bias = NULL;
+    batch_matrix_multiply_op->context.gemm.packw_gemm_goi.packed_weights =
         packed_weights;
   } else {
-    batch_matrix_multiply_op->context.packw_gemm_gio.kernel = input_b;
-    batch_matrix_multiply_op->context.packw_gemm_gio.bias = NULL;
-    batch_matrix_multiply_op->context.packw_gemm_gio.packed_weights =
+    batch_matrix_multiply_op->context.gemm.packw_gemm_gio.kernel = input_b;
+    batch_matrix_multiply_op->context.gemm.packw_gemm_gio.bias = NULL;
+    batch_matrix_multiply_op->context.gemm.packw_gemm_gio.packed_weights =
         packed_weights;
   }
 
-  batch_matrix_multiply_op->context.gemm.a = input_a;
-  batch_matrix_multiply_op->context.gemm.packed_w = packed_weights;
-  batch_matrix_multiply_op->context.gemm.c = output;
-  batch_matrix_multiply_op->context.gemm.quantization_params =
+  batch_matrix_multiply_op->context.gemm.gemm.gemm.a = input_a;
+  batch_matrix_multiply_op->context.gemm.gemm.gemm.packed_w = packed_weights;
+  batch_matrix_multiply_op->context.gemm.gemm.gemm.c = output;
+  batch_matrix_multiply_op->context.gemm.gemm.gemm.quantization_params =
       (const void*)quantization_params;
 
   batch_matrix_multiply_op->state = xnn_run_state_ready;

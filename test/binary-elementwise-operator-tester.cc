@@ -21,8 +21,8 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
+#include "xnnpack/math.h"
 #include "replicable_random_device.h"
 #include <climits>
 
@@ -503,10 +503,10 @@ void BinaryElementwiseOperatorTester::TestF16() const {
   std::vector<float> output_ref(num_output_elements);
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input1.begin(), input1.end(),
-                  [&]() { return xnn_float16_from_float(f32dist(rng)); });
+                  [&]() { return f32dist(rng); });
     std::generate(input2.begin(), input2.end(),
-                  [&]() { return xnn_float16_from_float(f32dist(rng)); });
-    std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+                  [&]() { return f32dist(rng); });
+    std::fill(output.begin(), output.end(), std::nanf(""));
 
     // Compute reference results.
     for (size_t i = 0; i < output_dims[0]; i++) {
@@ -519,18 +519,18 @@ void BinaryElementwiseOperatorTester::TestF16() const {
                            k * output_strides[2] + l * output_strides[3] +
                            m * output_strides[4] + n * output_strides[5]] =
                     Compute(
-                        xnn_float16_to_float(input1[i * input1_strides[0] +
-                                                       j * input1_strides[1] +
-                                                       k * input1_strides[2] +
-                                                       l * input1_strides[3] +
-                                                       m * input1_strides[4] +
-                                                       n * input1_strides[5]]),
-                        xnn_float16_to_float(input2[i * input2_strides[0] +
-                                                       j * input2_strides[1] +
-                                                       k * input2_strides[2] +
-                                                       l * input2_strides[3] +
-                                                       m * input2_strides[4] +
-                                                       n * input2_strides[5]]));
+                        input1[i * input1_strides[0] +
+                               j * input1_strides[1] +
+                               k * input1_strides[2] +
+                               l * input1_strides[3] +
+                               m * input1_strides[4] +
+                               n * input1_strides[5]],
+                        input2[i * input2_strides[0] +
+                               j * input2_strides[1] +
+                               k * input2_strides[2] +
+                               l * input2_strides[3] +
+                               m * input2_strides[4] +
+                               n * input2_strides[5]]);
               }
             }
           }
@@ -562,8 +562,8 @@ void BinaryElementwiseOperatorTester::TestF16() const {
     if (qmax() == std::numeric_limits<int16_t>::max()) {
       output_max = +std::numeric_limits<float>::infinity();
     }
-    output_min = xnn_float16_to_float(xnn_float16_from_float(output_min));
-    output_max = xnn_float16_to_float(xnn_float16_from_float(output_max));
+    output_min = xnn_float16(output_min);
+    output_max = xnn_float16(output_max);
 
     for (float& output_value : output_ref) {
       output_value = std::max(output_value, output_min);
@@ -711,7 +711,7 @@ void BinaryElementwiseOperatorTester::TestF16() const {
                     k * output_strides[2] + l * output_strides[3] +
                     m * output_strides[4] + n * output_strides[5];
                 ASSERT_NEAR(
-                    xnn_float16_to_float(output[index]), output_ref[index],
+                    output[index], output_ref[index],
                     std::max(1.0e-4f, std::abs(output_ref[index]) * 1.0e-2f))
                     << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k
                     << ", " << l << ", " << m << ", " << n << ")";

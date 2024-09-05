@@ -13,7 +13,7 @@
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 static void xnnpack_bankers_rounding_f16(benchmark::State& state) {
-  benchmark_unary_operator<float16, float16>(
+  benchmark_unary_operator<xnn_float16, xnn_float16>(
       xnn_create_bankers_rounding_nc_f16, xnn_reshape_bankers_rounding_nc_f16,
       xnn_setup_bankers_rounding_nc_f16, state);
 }

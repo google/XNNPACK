@@ -243,6 +243,7 @@ struct xnn_operator {
     union xnn_f32_qc4w_minmax_params f32_qc4w_minmax;
     struct xnn_f32_qs8_cvt_params f32_qs8_cvt;
     struct xnn_f32_qu8_cvt_params f32_qu8_cvt;
+    struct xnn_s32_f32_cvt_params s32_f32_cvt;
     struct xnn_qs8_cvt_params qs8_cvt;
     struct xnn_qs8_f16_cvt_params qs8_f16_cvt;
     struct xnn_qs8_f32_cvt_params qs8_f32_cvt;
@@ -257,6 +258,7 @@ struct xnn_operator {
       union xnn_qs8_avgpool_minmax_params qs8_avgpool;
       union xnn_qs8_avgpool_minmax_params qs8_gavgpool;
     };
+    union xnn_qs8_mean_minmax_params qs8_mean;
     union xnn_qs8_add_minmax_params qs8_add;
     union xnn_qs8_mul_minmax_params qs8_mul;
     union xnn_qu8_add_minmax_params qu8_add;
@@ -314,6 +316,7 @@ struct xnn_operator {
       const struct xnn_reduce_config* rdsum_config;
       const struct xnn_reduce_config* rsum_config;
       const struct xnn_unary_elementwise_config* cvt_config;
+      const struct xnn_unary_elementwise_config* s32_f32_cvt_config;
     };
     const struct xnn_gavgpool_cw_config* gavgpool_cw_config;
     const struct xnn_ibilinear_chw_config* ibilinear_chw_config;
@@ -367,23 +370,23 @@ struct xnn_operator {
     struct {
       struct dwconv_context dwconv;
       struct dwconv_indirection_init_context dwconv_indirection_init;
-    };
+    } dwconv;
     struct elementwise_binary_context elementwise_binary;
     // PACKW GEMM GOI + GEMM are used together in Dynamic Fully Connected.
     struct {
       union {
         struct gemm_context gemm;
         struct scaled_dot_product_attention_context attention;
-      };
+      } gemm;
       struct packw_gemm_goi_context packw_gemm_goi;
       struct packw_gemm_gio_context packw_gemm_gio;
-    };
+    } gemm;
     struct global_average_pooling_nwc_context global_average_pooling_nwc;
     struct global_average_pooling_ncw_context global_average_pooling_ncw;
     struct {
       struct igemm_context igemm;
       struct conv2d_igemm_indirection_init_context conv2d_igemm_indirection_init;
-    };
+    } igemm;
     struct lut_contiguous_context lut_contiguous;
     struct lut_strided_context lut_strided;
     struct max_pooling_context max_pooling;

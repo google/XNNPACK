@@ -371,6 +371,17 @@ struct xnn_qs8_rsum_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
+union xnn_qs8_mean_minmax_params {
+  struct {
+    float scale;
+    int32_t num_elements;
+    int8_t input_zero_point;
+    int8_t output_zero_point;
+    int8_t output_min;
+    int8_t output_max;
+  } scalar;
+};
+
 // AvgPool w. Min+Max: used by quantized GAVGPOOL microkernels with MINMAX activation.
 
 union xnn_qs8_avgpool_minmax_params {
@@ -587,6 +598,13 @@ struct xnn_f32_qu8_cvt_params {
   } scalar;
 };
 
+struct xnn_s32_f32_cvt_params {
+  struct {
+    int32_t num_elements;
+    int8_t zero_point;
+  } scalar;
+};
+
 struct xnn_qs8_cvt_params {
   struct {
     int16_t input_zero_point;
@@ -636,9 +654,9 @@ struct xnn_qu8_f32_cvt_params {
 
 struct xnn_f16_elu_params {
   struct {
-    uint16_t prescale;
-    uint16_t alpha;
-    uint16_t beta;
+    xnn_float16 prescale;
+    xnn_float16 alpha;
+    xnn_float16 beta;
   } scalar;
 };
 

@@ -99,9 +99,9 @@ TEST_F(SoftmaxTestF16, matches_operator_api)
   // Choose such range that expf(x[i]) overflows, but expf(x[i] - x_max) doesn't.
   // However, the range is still narrow enough that single-precision exp doesn't overflow.
   std::uniform_real_distribution<float> f32dist(90.0f, 100.0f);
-  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-  std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
+  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
+  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

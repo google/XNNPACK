@@ -166,10 +166,10 @@ TEST_F(PreluTestF16, matches_operator_api)
 {
   std::uniform_real_distribution<float> f32idist(-1.0f, 1.0f);
   std::uniform_real_distribution<float> f32wdist(0.25f, 0.75f);
-  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32idist(rng)); });
+  std::generate(input.begin(), input.end(), [&]() { return f32idist(rng); });
   std::generate(slope.begin(), slope.end(), [&]() { return f32wdist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
+  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
+  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

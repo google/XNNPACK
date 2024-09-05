@@ -11,6 +11,7 @@
 #include <vector>
 
 #include <benchmark/benchmark.h>
+#include <fp16/fp16.h>
 #include "bench/utils.h"
 
 #include "xnnpack.h"
@@ -37,11 +38,10 @@ static void f16_f32_vcvt(
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f), std::ref(rng));
-  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
-
+  
   std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> x(num_elements + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::vector<float, AlignedAllocator<float, 64>> y(num_elements);
-  std::generate(x.begin(), x.end(), std::ref(f16rng));
+  std::generate(x.begin(), x.end(), f32rng);
   std::fill(y.begin(), y.end(), std::nanf(""));
 
   for (auto _ : state) {
@@ -81,7 +81,7 @@ static void f32_f16_vcvt(
   std::vector<float, AlignedAllocator<float, 64>> x(num_elements + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> y(num_elements);
   std::generate(x.begin(), x.end(), std::ref(f32rng));
-  std::fill(y.begin(), y.end(), UINT16_C(0x7E00));
+  std::fill(y.begin(), y.end(), std::nanf(""));
 
   for (auto _ : state) {
     cvt(num_elements * sizeof(xnn_float16), x.data(), y.data(), nullptr);
@@ -342,11 +342,11 @@ static void qs8_f16_vcvt(
   std::vector<int8_t, AlignedAllocator<int8_t, 64>> x(num_elements + XNN_EXTRA_BYTES / sizeof(int8_t));
   std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> y(num_elements);
   std::generate(x.begin(), x.end(), std::ref(i8rng));
-  std::fill(y.begin(), y.end(), UINT16_C(0x7E00));
+  std::fill(y.begin(), y.end(), std::nanf(""));
 
   xnn_qs8_f16_cvt_params params;
   init_params(&params,
-    xnn_float16_from_float(0.25f) /* scale */,
+    0.25f /* scale */,
     1 /* output zero point */);
   for (auto _ : state) {
     cvt(num_elements * sizeof(int8_t), x.data(), y.data(), &params);

@@ -30,13 +30,6 @@
 #include "tensorflow/lite/version.h"
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
-struct float16 {
-  xnn_float16 value;
-
-  float16() = default;
-  float16(float value) : value(xnn_float16_from_float(value)) {}  // NOLINT
-};
-
 template <typename In, typename Out, typename Create, typename Reshape,
           typename Setup>
 static void benchmark_unary_operator(Create create, Reshape reshape,
@@ -101,7 +94,7 @@ static void benchmark_unary_operator(Create create, Reshape reshape,
   state.counters["elements"] = benchmark::Counter(
       uint64_t(state.iterations()) * batch_size, benchmark::Counter::kIsRate);
 
-  const size_t bytes_per_iteration = 2 * batch_size * sizeof(xnn_float16);
+  const size_t bytes_per_iteration = batch_size * (sizeof(In) + sizeof(Out));
   state.counters["bytes"] =
       benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
                          benchmark::Counter::kIsRate);
@@ -114,8 +107,12 @@ struct TypeToTfliteType {
   using type = T;
 };
 template <>
-struct TypeToTfliteType<float16> {
+struct TypeToTfliteType<xnn_float16> {
   using type = TfLiteFloat16;
+};
+template <>
+struct TypeToTfliteType<xnn_bfloat16> {
+  using type = TfLiteBFloat16;
 };
 
 template <typename In, typename Out, class BuildInQuantization,

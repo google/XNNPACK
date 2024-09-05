@@ -767,14 +767,14 @@ filegroup(
             name = arch + "_prod_microkernel_srcs",
             srcs = prod_c_srcs_for_arch(arch),
             outs = [arch + "_prod_microkernels.c"],
-            cmd = "cat $(SRCS) > $@",
+            cmd = "if [ -z \"$(SRCS)\" ]; then echo \"\" > $@; else cat $(SRCS) > $@; fi",
             compatible_with = [],
         ),
         genrule(
             name = arch + "_non_prod_microkernel_srcs",
             srcs = non_prod_c_srcs_for_arch(arch),
             outs = [arch + "_non_prod_microkernels.c"],
-            cmd = "cat $(SRCS) > $@",
+            cmd = "if [ -z \"$(SRCS)\" ]; then echo \"\" > $@; else cat $(SRCS) > $@; fi",
             compatible_with = [],
         ),
         xnnpack_cc_library_for_arch(

@@ -21,6 +21,7 @@
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microkernel-type.h"
 #include "xnnpack/microparams.h"
+#include "xnnpack/microparams-init.h"
 #include "xnnpack/operator-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/packq.h"
@@ -2221,10 +2222,21 @@ void xnn_compute_contiguous_reduce(
   }
   // Convert to output datatype if accumulation type != output type.
   if (context->workspace) {
-    const void* workspace_ptr = (void*) ((uintptr_t) context->workspace + workspace_offset);
+    void* workspace_ptr = (void*) ((uintptr_t) context->workspace + workspace_offset);
     output_ptr = (void*) ((uintptr_t) context->output + output_offset);
+
+    if (context->s32_f32_cvt_ukernel) {
+      struct xnn_s32_f32_cvt_params s32_f32_cvt_params;
+      xnn_init_s32_f32_cvt_scalar_params(&s32_f32_cvt_params, context->params.qs8_mean.scalar.num_elements, context->params.qs8_mean.scalar.input_zero_point);
+      context->s32_f32_cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
+                                   workspace_ptr, /*params=*/&s32_f32_cvt_params);
+    }
+
+    struct xnn_f32_qs8_cvt_params cvt_params;
+    xnn_init_f32_qs8_cvt_scalar_params(&cvt_params, context->params.qs8_mean.scalar.scale, context->params.qs8_mean.scalar.output_zero_point,
+                                context->params.qs8_mean.scalar.output_min, context->params.qs8_mean.scalar.output_max);
     context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
-                         output_ptr, /*params=*/NULL);
+                         output_ptr, /*params=*/&cvt_params);
   }
 }
 
@@ -2282,10 +2294,21 @@ void xnn_compute_discontiguous_reduce(
   }
   // Convert to output datatype if accumulation type != output type.
   if (context->workspace) {
-    const void* workspace_ptr = (void*) ((uintptr_t) context->workspace + workspace_offset);
+    void* workspace_ptr = (void*) ((uintptr_t) context->workspace + workspace_offset);
     output_ptr = (void*) ((uintptr_t) context->output + output_offset);
+
+    if (context->s32_f32_cvt_ukernel) {
+      struct xnn_s32_f32_cvt_params s32_f32_cvt_params;
+      xnn_init_s32_f32_cvt_scalar_params(&s32_f32_cvt_params, context->params.qs8_mean.scalar.num_elements, context->params.qs8_mean.scalar.input_zero_point);
+      context->s32_f32_cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
+                                   workspace_ptr, /*params=*/&s32_f32_cvt_params);
+    }
+
+    struct xnn_f32_qs8_cvt_params cvt_params;
+    xnn_init_f32_qs8_cvt_scalar_params(&cvt_params, context->params.qs8_mean.scalar.scale, context->params.qs8_mean.scalar.output_zero_point,
+                                context->params.qs8_mean.scalar.output_min, context->params.qs8_mean.scalar.output_max);
     context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
-                         output_ptr, /*params=*/NULL);
+                         output_ptr, /*params=*/&cvt_params);
   }
 }
 

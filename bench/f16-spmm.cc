@@ -52,10 +52,10 @@ static void f16_spmm(benchmark::State& state,
   std::vector<xnn_float16> w(nc * kc + nc);
   std::vector<xnn_float16> output(nc * mc);
 
-  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-  std::generate(b.begin(), b.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-  std::generate(bias.begin(), bias.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-  std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+  std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
+  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+  std::fill(output.begin(), output.end(), std::nanf(""));
   std::fill(nmap.begin(), nmap.end(), 0);
   std::fill(dmap.begin(), dmap.end(), 0);
   std::fill(w.begin(), w.end(), 0);
@@ -78,7 +78,7 @@ static void f16_spmm(benchmark::State& state,
       if (!xnn_float16_is_zero(b[nn * kc + kk])) {
         // Every non-zero actually corresponds to nr adjacent non-zeros.
         for (size_t i = 0; i < nr; ++i)
-          w[wcnt++] = xnn_float16_from_float(fp16_ieee_to_fp32_value(b[nn * kc + kk]) + static_cast<float>(i));
+          w[wcnt++] = xnn_float16(b[nn * kc + kk]) + static_cast<float>(i);
         // Skip the very first non-zero weight as we record only the difference.
         if (first_nzz) {
           first_kk = kk;
@@ -130,8 +130,8 @@ static void f16_spmm(benchmark::State& state,
       for (size_t kk = 0; kk < kc; kk++) {
         if (b[nn * kc + kk] != 0.0f) {
           for (size_t i = 0; i < nr; ++i)
-            b_full[nr * nn * kc + i * kc + kk] = xnn_float16_from_float(
-              fp16_ieee_to_fp32_value(b[nn * kc + kk]) + static_cast<float>(i));
+            b_full[nr * nn * kc + i * kc + kk] = xnn_float16(
+              b[nn * kc + kk]) + static_cast<float>(i);
         }
       }
     }
