@@ -6,7 +6,6 @@
 
 import argparse
 import codecs
-import math
 import os
 import re
 import sys
@@ -33,7 +32,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(f16|f32|qs16|qs8|qu8)(_(f16|f32|qs8|qu8))?_vcvt_ukernel__(.+)_u(\d+)(v)?", name)
+  match = re.fullmatch(r"xnn_(f16|f32|qs16|qs8|qu8|s32)(_(f16|f32|qs8|qu8))?_vcvt_ukernel__(.+)_u(\d+)(v)?", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
 
@@ -74,6 +73,8 @@ TEST(${TEST_NAME}, batch_eq_${BATCH_TILE}) {
     ${ISA_CHECK};
   VCvtMicrokernelTester()
     .batch_size(${BATCH_TILE})
+    $if INPUT_DATATYPE == "S32":
+      .input_zero_point(0)
     $if INPUT_DATATYPE == "QS16":
       .input_zero_point(0)
     $if OUTPUT_DATATYPE == "QS8":
@@ -92,6 +93,8 @@ $if BATCH_TILE > 1:
     for (size_t batch_size = ${BATCH_TILE*2}; batch_size < ${BATCH_TILE*10}; batch_size += ${BATCH_TILE}) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
+        $if INPUT_DATATYPE == "S32":
+          .input_zero_point(0)
         $if INPUT_DATATYPE == "QS16":
           .input_zero_point(0)
         $if OUTPUT_DATATYPE == "QS8":
@@ -110,6 +113,8 @@ $if BATCH_TILE > 1:
     for (size_t batch_size = 1; batch_size < ${BATCH_TILE}; batch_size++) {
       VCvtMicrokernelTester()
         .batch_size(batch_size)
+        $if INPUT_DATATYPE == "S32":
+          .input_zero_point(0)
         $if INPUT_DATATYPE == "QS16":
           .input_zero_point(0)
         $if OUTPUT_DATATYPE == "QS8":
@@ -128,6 +133,8 @@ TEST(${TEST_NAME}, batch_gt_${BATCH_TILE}) {
   for (size_t batch_size = ${BATCH_TILE+1}; batch_size < ${10 if BATCH_TILE == 1 else BATCH_TILE*2}; batch_size++) {
     VCvtMicrokernelTester()
       .batch_size(batch_size)
+      $if INPUT_DATATYPE == "S32":
+        .input_zero_point(0)
       $if INPUT_DATATYPE == "QS16":
         .input_zero_point(0)
       $if OUTPUT_DATATYPE == "QS8":
@@ -343,6 +350,7 @@ def generate_test_cases(ukernel, init_fn, input_datatype, output_datatype,
   else:
     benchmark_fn = f"{input_datatype}_{output_datatype}_vcvt"
   type_to_ctype = {
+      "s32": "int32_t",
       "qs8": "int8_t",
       "qs16": "int16_t",
       "qu8": "uint8_t",

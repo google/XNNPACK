@@ -70,6 +70,7 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/qu8-vaddc/gen/qu8-vaddc-minmax-avx2-mul32-ld64-u16.c
   src/qu8-vcvt/gen/qu8-vcvt-avx2-u32.c
   src/qu8-vlrelu/gen/qu8-vlrelu-avx2-u32.c
+  src/s32-f32-vcvt/gen/s32-f32-vcvt-avx2.c
   src/s32-vmul/gen/s32-vmul-avx2.c
   src/s32-vmul/gen/s32-vmulc-avx2.c
   src/x8-lut/gen/x8-lut-avx2-u128.c

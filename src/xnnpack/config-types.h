@@ -80,6 +80,7 @@ struct xnn_binary_elementwise_config {
 struct xnn_unary_elementwise_config {
   xnn_vunary_ukernel_fn ukernel;
   union {
+    xnn_init_s32_f32_cvt_params_fn s32_f32_cvt;
     xnn_init_f16_qs8_cvt_params_fn f16_qs8_cvt;
     xnn_init_f16_default_params_fn f16_default;
     xnn_init_f16_elu_params_fn f16_elu;

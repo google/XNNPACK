@@ -390,6 +390,7 @@ sh_test(
     "f32_f16_vcvt",
     "f32_qs8_vcvt",
     "f32_qu8_vcvt",
+    "s32_f32_vcvt",
     "qs16_qs8_vcvt",
     "qs8_f16_vcvt",
     "qs8_f32_vcvt",

@@ -1757,6 +1757,7 @@ IF(XNNPACK_BUILD_TESTS)
       f32-f16-vcvt
       f32-qs8-vcvt
       f32-qu8-vcvt
+      s32-f32-vcvt
       qs8-f16-vcvt
       qs8-f32-vcvt
       qs8-vcvt
