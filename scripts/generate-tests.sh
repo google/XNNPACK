@@ -387,6 +387,7 @@ tools/xngen test/s32-simd.cc.in -D ARCH=sse41 -D ARCH_MACRO="XNN_ARCH_X86 || XNN
 tools/xngen test/s32-simd.cc.in -D ARCH=avx2 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_AVX2 -o test/s32-simd-avx2.cc &
 tools/xngen test/s32-simd.cc.in -D ARCH=avx512f -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_AVX512F -o test/s32-simd-avx512f.cc &
 tools/xngen test/s32-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/s32-simd-wasmsimd.cc &
+tools/xngen test/s32-simd.cc.in -D ARCH=hvx -D ARCH_MACRO="XNN_ENABLE_HVX && XNN_ARCH_HEXAGON" -D TEST_REQUIRES=TEST_REQUIRES_HVX -o test/s32-simd-hvx.cc &
 
 tools/xngen test/s8-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/s8-simd-scalar.cc &
 
