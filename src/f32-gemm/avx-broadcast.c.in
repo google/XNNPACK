@@ -15,12 +15,14 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include "xnnpack/gemm.h"
 $if AVX == 1 and DATATYPE == "QC8":
   #include "xnnpack/unaligned.h"
+$if PREFETCH:
+  #include "xnnpack/prefetch.h"
 
 
 $RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))
 $ISA = {0: "avx", 3: "fma3"}[FMA] if AVX == 1 else "avx2"
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w"}[DATATYPE]
-void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_broadcast(
+void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}__${ISA}_broadcast${"_prfm" if PREFETCH else ""}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -101,6 +103,8 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
         a${M} += 1;
 
       $if DATATYPE == "F32":
+        $if PREFETCH:
+          xnn_prefetch_to_l1(w + 1024);
         const __m256 vb${ABC[0:8]} = _mm256_load_ps(w);
         $for N in range(8, NR, 8):
           const __m256 vb${ABC[N:N+8]} = _mm256_load_ps(w + ${N});
