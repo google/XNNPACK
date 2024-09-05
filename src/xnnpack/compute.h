@@ -1445,7 +1445,9 @@ struct reduce_context {
     xnn_rdsum_ukernel_fn rdsum;
   } ukernel;
   xnn_vunary_ukernel_fn cvt_ukernel;
+  xnn_vunary_ukernel_fn s32_f32_cvt_ukernel;
   union {
+    union xnn_qs8_mean_minmax_params qs8_mean;
     union xnn_f32_default_params f32_default;
     struct xnn_f16_f32acc_scale_params scale_params;
     union xnn_f32_scale_params f32_scale;

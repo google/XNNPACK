@@ -243,6 +243,7 @@ struct xnn_operator {
     union xnn_f32_qc4w_minmax_params f32_qc4w_minmax;
     struct xnn_f32_qs8_cvt_params f32_qs8_cvt;
     struct xnn_f32_qu8_cvt_params f32_qu8_cvt;
+    struct xnn_s32_f32_cvt_params s32_f32_cvt;
     struct xnn_qs8_cvt_params qs8_cvt;
     struct xnn_qs8_f16_cvt_params qs8_f16_cvt;
     struct xnn_qs8_f32_cvt_params qs8_f32_cvt;
@@ -257,6 +258,7 @@ struct xnn_operator {
       union xnn_qs8_avgpool_minmax_params qs8_avgpool;
       union xnn_qs8_avgpool_minmax_params qs8_gavgpool;
     };
+    union xnn_qs8_mean_minmax_params qs8_mean;
     union xnn_qs8_add_minmax_params qs8_add;
     union xnn_qs8_mul_minmax_params qs8_mul;
     union xnn_qu8_add_minmax_params qu8_add;
@@ -314,6 +316,7 @@ struct xnn_operator {
       const struct xnn_reduce_config* rdsum_config;
       const struct xnn_reduce_config* rsum_config;
       const struct xnn_unary_elementwise_config* cvt_config;
+      const struct xnn_unary_elementwise_config* s32_f32_cvt_config;
     };
     const struct xnn_gavgpool_cw_config* gavgpool_cw_config;
     const struct xnn_ibilinear_chw_config* ibilinear_chw_config;

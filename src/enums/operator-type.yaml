@@ -229,6 +229,8 @@
   string: "Mean (ND, F16)"
 - name: xnn_operator_type_mean_nd_f32
   string: "Mean (ND, F32)"
+- name: xnn_operator_type_mean_nd_qs8
+  string: "Mean (ND, QS8)"
 - name: xnn_operator_type_minimum_nd_f16
   string: "Minimum (ND, F16)"
 - name: xnn_operator_type_minimum_nd_f32

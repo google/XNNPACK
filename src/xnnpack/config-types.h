@@ -128,6 +128,8 @@ struct xnn_reduce_config {
   xnn_reduce_ukernel_fn ukernel;
   xnn_rdsum_ukernel_fn rd_ukernel;
   union {
+    xnn_init_qs8_mean_minmax_params_fn qs8_mean;
+    xnn_init_f32_qs8_cvt_params_fn f32_qs8_cvt;
     xnn_init_f16_f32acc_scale_params_fn f16_f32acc_scale;
     xnn_init_f16_default_params_fn f16_default;
     xnn_init_f32_default_params_fn f32_default;

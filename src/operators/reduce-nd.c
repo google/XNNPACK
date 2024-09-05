@@ -32,6 +32,7 @@ static enum xnn_status create_mean_nd(
     const struct xnn_reduce_config* rdsum_config,
     const struct xnn_reduce_config* rsum_config,
     const struct xnn_unary_elementwise_config* cvt_config,
+    const struct xnn_unary_elementwise_config* s32_f32_cvt_config,
     const void* params,
     size_t params_size,
     xnn_operator_t* mean_op_out)
@@ -60,6 +61,7 @@ static enum xnn_status create_mean_nd(
   mean_op->rdsum_config = rdsum_config;
   mean_op->rsum_config = rsum_config;
   mean_op->cvt_config = cvt_config;
+  mean_op->s32_f32_cvt_config = s32_f32_cvt_config;
   if (params_size != 0) {
     memcpy(&mean_op->params, params, params_size);
   }
@@ -72,6 +74,37 @@ static enum xnn_status create_mean_nd(
 error:
   xnn_delete_operator(mean_op);
   return status;
+}
+
+enum xnn_status xnn_create_mean_nd_qs8(
+  float scale,
+  int8_t input_zero_point,
+  int8_t output_zero_point,
+  int8_t output_min,
+  int8_t output_max,
+  uint32_t flags,
+  xnn_operator_t* mean_op_out)
+{
+  const struct xnn_reduce_config* rsum_config = xnn_init_qs8_rsum_config();
+  const struct xnn_reduce_config* rdsum_config = xnn_init_qs8_rdsum_config();
+  const struct xnn_unary_elementwise_config* f32_qs8_cvt_config = xnn_init_f32_to_qs8_cvt_config();
+  const struct xnn_unary_elementwise_config* s32_f32_cvt_config = xnn_init_s32_to_f32_cvt_config();
+  if (rdsum_config == NULL || rsum_config == NULL || f32_qs8_cvt_config == NULL || s32_f32_cvt_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_mean_nd_qs8));
+    return xnn_status_unsupported_hardware;
+  }
+
+  union xnn_qs8_mean_minmax_params params;
+  rsum_config->init.qs8_mean(&params, scale, -1, input_zero_point, output_zero_point, output_min, output_max);
+
+  return create_mean_nd(
+    flags,
+    /*log2_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    xnn_operator_type_mean_nd_qs8,
+    rdsum_config, rsum_config, f32_qs8_cvt_config, s32_f32_cvt_config,
+    &params, sizeof(params),
+    mean_op_out);
 }
 
 enum xnn_status xnn_create_mean_nd_f16(
@@ -92,7 +125,7 @@ enum xnn_status xnn_create_mean_nd_f16(
     flags,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
     xnn_operator_type_mean_nd_f16,
-    rdsum_config, rsum_config, f32_to_f16_cvt_config,
+    rdsum_config, rsum_config, f32_to_f16_cvt_config, /*s32_f32_cvt_config=*/NULL,
     &params, sizeof(params),
     mean_op_out);
 }
@@ -115,7 +148,7 @@ enum xnn_status xnn_create_mean_nd_f32(
     flags,
     /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     xnn_operator_type_mean_nd_f32,
-    rdsum_config, rsum_config, /*cvt_config=*/NULL,
+    rdsum_config, rsum_config, /*cvt_config=*/NULL, /*s32_f32_cvt_config=*/NULL,
     &params, sizeof(params),
     mean_op_out);
 }
@@ -256,6 +289,10 @@ static enum xnn_status reshape_mean_nd(
     for (int i = XNN_MAX_TENSOR_DIMS / 2 -  2; i >= 0; --i) {
       mean_op->context.reduce.output_stride[i] =  (mean_op->context.reduce.output_stride[i + 1] * normalized_input_shape[(i + 1) * 2]);
     }
+
+    if (mean_op->s32_f32_cvt_config) {
+      mean_op->context.reduce.s32_f32_cvt_ukernel = mean_op->s32_f32_cvt_config->ukernel;
+    }
   } else {
     // Reduction along the non-innermost dimension
     const size_t channel_like_dim = normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1];
@@ -305,6 +342,9 @@ static enum xnn_status reshape_mean_nd(
   mean_op->context.reduce.input_stride[XNN_MAX_TENSOR_DIMS - 1] = (1 << log2_data_element_size);
   if (mean_op->cvt_config) {
     mean_op->context.reduce.cvt_ukernel = mean_op->cvt_config->ukernel;
+  }
+  if (mean_op->s32_f32_cvt_config) {
+    mean_op->context.reduce.s32_f32_cvt_ukernel = mean_op->s32_f32_cvt_config->ukernel;
   }
   for (int i = XNN_MAX_TENSOR_DIMS -  2; i >= 0; --i) {
     mean_op->context.reduce.input_stride[i] =  (mean_op->context.reduce.input_stride[i + 1] * normalized_input_shape[i + 1]);
@@ -378,6 +418,37 @@ enum xnn_status xnn_reshape_mean_nd_f32(
     threadpool);
 }
 
+static void update_params_mean_qs8(
+  xnn_operator_t mean_op,
+  size_t num_elements) {
+  mean_op->params.qs8_mean.scalar.scale *= 1.0f / (float) (double) num_elements;
+  mean_op->params.qs8_mean.scalar.num_elements = num_elements;
+}
+
+enum xnn_status xnn_reshape_mean_nd_qs8(
+    xnn_operator_t mean_op,
+    size_t num_reduction_axes,
+    const size_t* reduction_axes,
+    size_t num_input_dims,
+    const size_t* input_shape,
+    size_t* workspace_size,
+    size_t* workspace_alignment,
+    pthreadpool_t threadpool)
+{
+  return reshape_mean_nd(
+    mean_op,
+    num_reduction_axes, reduction_axes,
+    num_input_dims, input_shape,
+    workspace_size, workspace_alignment,
+    /*log2_data_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    xnn_operator_type_mean_nd_qs8,
+    /*scale_params=*/&mean_op->params.qs8_mean,
+    /*scale_params_size=*/sizeof(mean_op->params.qs8_mean),
+    update_params_mean_qs8,
+    threadpool);
+}
+
 static enum xnn_status setup_mean_nd(
     xnn_operator_t mean_op,
     void* workspace,
@@ -436,4 +507,16 @@ enum xnn_status xnn_setup_mean_nd_f32(
     mean_op,
     /*workspace=*/NULL, input, output,
     xnn_operator_type_mean_nd_f32);
+}
+
+enum xnn_status xnn_setup_mean_nd_qs8(
+    xnn_operator_t mean_op,
+    void* workspace,
+    const void* input,
+    void* output)
+{
+  return setup_mean_nd(
+    mean_op,
+    workspace, input, output,
+    xnn_operator_type_mean_nd_qs8);
 }
