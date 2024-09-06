@@ -1248,6 +1248,9 @@ IF(XNNPACK_BUILD_TESTS)
     f32-pavgpool-minmax
     f32-vclamp
     f32-vlrelu
+    f32-rdsum
+    f32-velu
+    f32-argmaxpool
   )
   FOREACH(TEST ${SHARDED_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
@@ -1484,7 +1487,6 @@ IF(XNNPACK_BUILD_TESTS)
       f16-spmm-minmax
       f16-vcmul
       f16-vmulcaddc-minmax
-      f32-argmaxpool
       f32-conv-hwc
       f32-conv-hwc2chw
       f32-gavgpool-cw
@@ -1495,7 +1497,6 @@ IF(XNNPACK_BUILD_TESTS)
       f32-raddexpminusmax
       f32-raddextexp
       f32-raddstoreexpminusmax
-      f32-rdsum
       f32-rmax
       f32-rmin
       f32-rminmax
@@ -1826,7 +1827,6 @@ IF(XNNPACK_BUILD_TESTS)
       f16-vtanh
       f32-vabs
       f32-vhswish
-      f32-velu
       f32-vgelu
       f32-vexp
       f32-vlog
