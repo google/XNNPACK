@@ -262,7 +262,7 @@ static enum xnn_status reshape_mean_nd(
     }
     if (workspace_size != NULL) {
       const size_t num_output_elements = normalized_input_shape[0] * normalized_input_shape[2] * normalized_input_shape[4];
-      *workspace_size = num_output_elements << log2_accumulator_element_size;
+      *workspace_size = (num_output_elements << log2_accumulator_element_size) + XNN_EXTRA_BYTES;
     }
     const size_t scale_dim = normalized_input_shape[1] * normalized_input_shape[3] * normalized_input_shape[5];
     const size_t axis_dim = normalized_input_shape[5];
@@ -298,7 +298,7 @@ static enum xnn_status reshape_mean_nd(
     const size_t channel_like_dim = normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1];
     if (workspace_size != NULL) {
       const size_t num_output_elements = normalized_input_shape[1] * normalized_input_shape[3] * normalized_input_shape[5];
-      *workspace_size = num_output_elements << log2_accumulator_element_size;
+      *workspace_size = (num_output_elements << log2_accumulator_element_size) + XNN_EXTRA_BYTES;
     }
     const size_t scale_dim = normalized_input_shape[0] * normalized_input_shape[2] * normalized_input_shape[4];
     const size_t axis_dim = normalized_input_shape[4];
