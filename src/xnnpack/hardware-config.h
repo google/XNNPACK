@@ -78,13 +78,13 @@ struct xnn_hardware_config {
 #if XNN_ARCH_ARM
   bool use_arm_v6;
   bool use_arm_vfpv2;
+#endif  // XNN_ARCH_ARM
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   bool use_arm_vfpv3;
   bool use_arm_neon;
   bool use_arm_neon_fp16;
   bool use_arm_neon_fma;
   bool use_arm_neon_v8;
-#endif  // XNN_ARCH_ARM
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
   bool use_arm_fp16_arith;
   bool use_arm_neon_fp16_arith;
   bool use_arm_neon_bf16;
