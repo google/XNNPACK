@@ -42,6 +42,9 @@ void xnnpack_prelu_f32(benchmark::State& state, const char* net) {
   std::generate(slope.begin(), slope.end(), std::ref(f32wrng));
   std::vector<float> output(batch_size * height * width * channels);
 
+  const size_t input_shape[4] = {batch_size, height, width, channels};
+  const size_t slope_shape[1] = {channels};
+
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
@@ -49,27 +52,24 @@ void xnnpack_prelu_f32(benchmark::State& state, const char* net) {
   }
 
   xnn_operator_t prelu_op = nullptr;
-  status = xnn_create_prelu_nc_f32(
-    channels, /*slope_channels=*/channels, /*input_stride=*/channels , /*output_stride=*/channels,
-    slope.data(),
-    0 /* flags */, nullptr, nullptr, &prelu_op);
+  status = xnn_create_prelu_nd_f32(-std::numeric_limits<float>::infinity(),
+                                   std::numeric_limits<float>::infinity(),
+                                   0 /* flags */, &prelu_op);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to create FP32 PReLU operator");
     return;
   }
 
-  status = xnn_reshape_prelu_nc_f32(
-    prelu_op,
-    batch_size * height * width,
-    /*threadpool=*/nullptr);
+  status =
+      xnn_reshape_prelu_nd_f32(prelu_op, 4, &input_shape[0], 1, &slope_shape[0],
+                               /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape FP32 PReLU operator");
     return;
   }
 
-  status = xnn_setup_prelu_nc_f32(
-    prelu_op,
-    input.data(), output.data());
+  status = xnn_setup_prelu_nd_f32(prelu_op, input.data(), slope.data(),
+                                  output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup FP32 PReLU operator");
     return;

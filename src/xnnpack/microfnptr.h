@@ -777,35 +777,6 @@ typedef void (*xnn_f32_vmulcaddc_ukernel_fn)(
     size_t output_stride,
     const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-// PRELU: Parametric RELU
-
-typedef void (*xnn_prelu_ukernel_fn)(
-    size_t batch,
-    size_t channels,
-    const void* input,
-    size_t input_stride,
-    const void* weights,
-    void* output,
-    size_t output_stride);
-
-typedef void (*xnn_f16_prelu_ukernel_fn)(
-    size_t batch,
-    size_t channels,
-    const xnn_float16* input,
-    size_t input_stride,
-    const xnn_float16* weights,
-    xnn_float16* output,
-    size_t output_stride);
-
-typedef void (*xnn_f32_prelu_ukernel_fn)(
-    size_t batch,
-    size_t channels,
-    const float* input,
-    size_t input_stride,
-    const float* weights,
-    float* output,
-    size_t output_stride);
-
 // IBILINEAR: Indirect BILINEAR interpolation
 
 typedef void (*xnn_ibilinear_ukernel_fn)(

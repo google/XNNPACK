@@ -36,7 +36,6 @@ void xnn_f16_vsub_minmax_ukernel__avx512fp16_u32(
   const __m512h voutput_min = _mm512_castsi512_ph(_mm512_set1_epi16(*(const uint16_t*) &params->scalar.min));
   const __m512h voutput_max = _mm512_castsi512_ph(_mm512_set1_epi16(*(const uint16_t*) &params->scalar.max));
 
-
   for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
     const __m512h va = _mm512_loadu_ph(a);
     a += 32;

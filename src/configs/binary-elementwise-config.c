@@ -18,6 +18,7 @@ static struct xnn_binary_elementwise_config f16_vdiv_config = {0};
 static struct xnn_binary_elementwise_config f16_vmax_config = {0};
 static struct xnn_binary_elementwise_config f16_vmin_config = {0};
 static struct xnn_binary_elementwise_config f16_vmul_config = {0};
+static struct xnn_binary_elementwise_config f16_vprelu_config = {0};
 static struct xnn_binary_elementwise_config f16_vsub_config = {0};
 static struct xnn_binary_elementwise_config f16_vsqrdiff_config = {0};
 
@@ -27,6 +28,7 @@ static struct xnn_binary_elementwise_config f32_vdiv_config = {0};
 static struct xnn_binary_elementwise_config f32_vmax_config = {0};
 static struct xnn_binary_elementwise_config f32_vmin_config = {0};
 static struct xnn_binary_elementwise_config f32_vmul_config = {0};
+static struct xnn_binary_elementwise_config f32_vprelu_config = {0};
 static struct xnn_binary_elementwise_config f32_vsub_config = {0};
 static struct xnn_binary_elementwise_config f32_vsqrdiff_config = {0};
 
@@ -44,6 +46,7 @@ XNN_INIT_ONCE_GUARD(f16_vdiv);
 XNN_INIT_ONCE_GUARD(f16_vmax);
 XNN_INIT_ONCE_GUARD(f16_vmin);
 XNN_INIT_ONCE_GUARD(f16_vmul);
+XNN_INIT_ONCE_GUARD(f16_vprelu);
 XNN_INIT_ONCE_GUARD(f16_vsub);
 XNN_INIT_ONCE_GUARD(f16_vsqrdiff);
 XNN_INIT_ONCE_GUARD(f32_vadd);
@@ -52,6 +55,7 @@ XNN_INIT_ONCE_GUARD(f32_vdiv);
 XNN_INIT_ONCE_GUARD(f32_vmax);
 XNN_INIT_ONCE_GUARD(f32_vmin);
 XNN_INIT_ONCE_GUARD(f32_vmul);
+XNN_INIT_ONCE_GUARD(f32_vprelu);
 XNN_INIT_ONCE_GUARD(f32_vsub);
 XNN_INIT_ONCE_GUARD(f32_vsqrdiff);
 XNN_INIT_ONCE_GUARD(s32_vmul);
@@ -266,6 +270,49 @@ static void init_f16_vmul_config(void) {
       f16_vmul_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vmulc_minmax_ukernel__f16c_u16;
       f16_vmul_config.init.f16_minmax = xnn_init_f16_minmax_scalar_params;
       f16_vmul_config.minmax.element_tile = 16;
+    }
+  #endif
+}
+
+static void init_f16_vprelu_config(void) {
+  #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_arm_neon_fp16_arith) {
+      f16_vprelu_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vprelu_ukernel__neonfp16arith_u16;
+      f16_vprelu_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vpreluc_ukernel__neonfp16arith_u16;
+      f16_vprelu_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vrpreluc_ukernel__neonfp16arith_u16;
+      f16_vprelu_config.init.f16_minmax = xnn_init_f16_minmax_scalar_params;
+      f16_vprelu_config.minmax.element_tile = 16;
+    }
+  #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_arm_neon_fp16_arith) {
+      f16_vprelu_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vprelu_ukernel__neonfp16arith_u16;
+      f16_vprelu_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vpreluc_ukernel__neonfp16arith_u16;
+      f16_vprelu_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vrpreluc_ukernel__neonfp16arith_u16;
+      f16_vprelu_config.init.f16_minmax = xnn_init_f16_minmax_scalar_params;
+      f16_vprelu_config.minmax.element_tile = 16;
+    }
+  #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    #if XNN_ENABLE_AVX512FP16
+      if (hardware_config->use_x86_avx512fp16) {
+        f16_vprelu_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vprelu_ukernel__avx512fp16_u64;
+        f16_vprelu_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vpreluc_ukernel__avx512fp16_u64;
+        f16_vprelu_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vrpreluc_ukernel__avx512fp16_u64;
+        f16_vprelu_config.init.f16_minmax = xnn_init_f16_minmax_scalar_params;
+        f16_vprelu_config.minmax.element_tile = 64;
+      } else
+    #endif
+    if (hardware_config->use_x86_f16c) {
+      f16_vprelu_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vprelu_ukernel__f16c_u16;
+      f16_vprelu_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vpreluc_ukernel__f16c_u16;
+      f16_vprelu_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f16_vrpreluc_ukernel__f16c_u16;
+      f16_vprelu_config.init.f16_minmax = xnn_init_f16_minmax_scalar_params;
+      f16_vprelu_config.minmax.element_tile = 16;
     }
   #endif
 }
@@ -882,6 +929,74 @@ static void init_f32_vmul_config(void) {
   #endif
 }
 
+static void init_f32_vprelu_config(void) {
+  #if XNN_ARCH_ARM
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_arm_neon){
+      f32_vprelu_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vprelu_ukernel__neon_u8;
+      f32_vprelu_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vpreluc_ukernel__neon_u8;
+      f32_vprelu_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrpreluc_ukernel__neon_u8;
+      f32_vprelu_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+      f32_vprelu_config.minmax.element_tile = 8;
+    } else if (!XNN_PLATFORM_MOBILE) {
+      f32_vprelu_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vprelu_ukernel__scalar_u8;
+      f32_vprelu_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vpreluc_ukernel__scalar_u8;
+      f32_vprelu_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrpreluc_ukernel__scalar_u8;
+      f32_vprelu_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+      f32_vprelu_config.minmax.element_tile = 8;
+    }
+  #elif XNN_ARCH_ARM64
+    f32_vprelu_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vprelu_ukernel__neon_u8;
+    f32_vprelu_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vpreluc_ukernel__neon_u8;
+    f32_vprelu_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrpreluc_ukernel__neon_u8;
+    f32_vprelu_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+    f32_vprelu_config.minmax.element_tile = 8;
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+      f32_vprelu_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vprelu_ukernel__avx512f_u32;
+      f32_vprelu_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vpreluc_ukernel__avx512f_u32;
+      f32_vprelu_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrpreluc_ukernel__avx512f_u32;
+      f32_vprelu_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+      f32_vprelu_config.minmax.element_tile = 32;
+    } else if (hardware_config->use_x86_avx) {
+      f32_vprelu_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vprelu_ukernel__avx_u16;
+      f32_vprelu_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vpreluc_ukernel__avx_u16;
+      f32_vprelu_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrpreluc_ukernel__avx_u16;
+      f32_vprelu_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+      f32_vprelu_config.minmax.element_tile = 16;
+    } else {
+      f32_vprelu_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vprelu_ukernel__sse2_u8;
+      f32_vprelu_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vpreluc_ukernel__sse2_u8;
+      f32_vprelu_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrpreluc_ukernel__sse2_u8;
+      f32_vprelu_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+      f32_vprelu_config.minmax.element_tile = 8;
+    }
+  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    f32_vprelu_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vprelu_ukernel__wasmsimd_u16;
+    f32_vprelu_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vpreluc_ukernel__wasmsimd_u16;
+    f32_vprelu_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrpreluc_ukernel__wasmsimd_u16;
+    f32_vprelu_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+    f32_vprelu_config.minmax.element_tile = 16;
+  #elif XNN_ARCH_WASM
+    f32_vprelu_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vprelu_ukernel__wasm_u8;
+    f32_vprelu_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vpreluc_ukernel__wasm_u8;
+    f32_vprelu_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrpreluc_ukernel__wasm_u8;
+    f32_vprelu_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+    f32_vprelu_config.minmax.element_tile = 8;
+  #else
+    f32_vprelu_config.minmax.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vprelu_ukernel__scalar_u8;
+    f32_vprelu_config.minmax.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vpreluc_ukernel__scalar_u8;
+    f32_vprelu_config.minmax.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrpreluc_ukernel__scalar_u8;
+    f32_vprelu_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+    f32_vprelu_config.minmax.element_tile = 8;
+  #endif
+}
+
 static void init_f32_vsub_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -1352,6 +1467,15 @@ const struct xnn_binary_elementwise_config* xnn_init_f16_vmul_config() {
   return &f16_vmul_config;
 }
 
+const struct xnn_binary_elementwise_config* xnn_init_f16_vprelu_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(f16_vprelu);
+  return &f16_vprelu_config;
+}
+
 const struct xnn_binary_elementwise_config* xnn_init_f16_vsub_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
@@ -1431,6 +1555,15 @@ const struct xnn_binary_elementwise_config* xnn_init_f32_vmul_config() {
   }
   XNN_INIT_ONCE(f32_vmul);
   return &f32_vmul_config;
+}
+
+const struct xnn_binary_elementwise_config* xnn_init_f32_vprelu_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(f32_vprelu);
+  return &f32_vprelu_config;
 }
 
 const struct xnn_binary_elementwise_config* xnn_init_f32_vsub_config() {

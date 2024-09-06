@@ -173,14 +173,12 @@ int main(int argc, char** argv) {
         op, NULL, NULL, NULL);
       break;
     case 29:
-      xnn_create_prelu_nc_f32(
-        0, 0, 0, 0,
-        NULL, 0, NULL, NULL, &op);
+      xnn_create_prelu_nd_f32(
+        0.0f, 0.0f, 0, &op);
       break;
     case 30:
-      xnn_setup_prelu_nc_f32(
-        op,
-        NULL, NULL);
+      xnn_setup_prelu_nd_f32(
+        op, NULL, NULL, NULL);
       break;
     case 31:
       xnn_create_resize_bilinear2d_nhwc_f32(

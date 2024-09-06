@@ -5458,47 +5458,58 @@ enum xnn_status xnn_run_negate_nc_f32(
   uint32_t flags,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_create_prelu_nc_f16(
-  size_t input_channels,
-  size_t slope_channels,
-  size_t input_stride,
-  size_t output_stride,
-  const void* negative_slope,
+enum xnn_status xnn_create_prelu_nd_f16(
+  float output_min,
+  float output_max,
   uint32_t flags,
-  xnn_code_cache_t code_cache,
-  xnn_weights_cache_t weights_cache,
   xnn_operator_t* prelu_op_out);
 
-enum xnn_status xnn_reshape_prelu_nc_f16(
+enum xnn_status xnn_reshape_prelu_nd_f16(
   xnn_operator_t prelu_op,
-  size_t batch_size,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_setup_prelu_nc_f16(
+enum xnn_status xnn_setup_prelu_nd_f16(
   xnn_operator_t prelu_op,
-  const void* input,
+  const void* input1,
+  const void* input2,
   void* output);
 
-enum xnn_status xnn_create_prelu_nc_f32(
-  size_t input_channels,
-  size_t slope_channels,
-  size_t input_stride,
-  size_t output_stride,
-  const float* negative_slope,
+enum xnn_status xnn_create_prelu_nd_f32(
+  float output_min,
+  float output_max,
   uint32_t flags,
-  xnn_code_cache_t code_cache,
-  xnn_weights_cache_t weights_cache,
   xnn_operator_t* prelu_op_out);
 
-enum xnn_status xnn_reshape_prelu_nc_f32(
+enum xnn_status xnn_reshape_prelu_nd_f32(
   xnn_operator_t prelu_op,
-  size_t batch_size,
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_setup_prelu_nc_f32(
+enum xnn_status xnn_setup_prelu_nd_f32(
   xnn_operator_t prelu_op,
-  const float* input,
+  const float* input1,
+  const float* input2,
   float* output);
+
+enum xnn_status xnn_run_prelu_nd_f32(
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const float* input1,
+  const float* input2,
+  float* output,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_resize_bilinear2d_nchw_f32(
   size_t output_height,

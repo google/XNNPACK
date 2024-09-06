@@ -33,7 +33,6 @@ void xnn_f16_vprelu_ukernel__avx512fp16_u32(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
-
   const __m512h vzero = _mm512_setzero_ph();
 
   for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {

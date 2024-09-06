@@ -1479,23 +1479,6 @@ struct reduce_context {
       size_t output2_block_size);
 #endif
 
-struct prelu_context {
-  size_t n;
-  const void* x;
-  size_t x_stride;
-  const void* w;
-  void* y;
-  size_t y_stride;
-  xnn_prelu_ukernel_fn ukernel;
-};
-
-#ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_prelu(
-      const struct prelu_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_start,
-      size_t batch_range);
-#endif
-
 struct vmulcaddc_context {
   size_t n;
   const void* x;

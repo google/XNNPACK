@@ -40,7 +40,6 @@ SET(PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-maxpool/f16-maxpool-9p8x-minmax-neonfp16arith-c8.c
   src/f16-pavgpool/f16-pavgpool-9p8x-minmax-neonfp16arith-c8.c
   src/f16-pavgpool/f16-pavgpool-9x-minmax-neonfp16arith-c8.c
-  src/f16-prelu/gen/f16-prelu-neonfp16arith-2x16.c
   src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonfp16arith-u32.c
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u32.c
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u40.c
@@ -55,6 +54,9 @@ SET(PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vminc-neonfp16arith-u16.c
   src/f16-vbinary/gen/f16-vmul-minmax-neonfp16arith-u16.c
   src/f16-vbinary/gen/f16-vmulc-minmax-neonfp16arith-u16.c
+  src/f16-vbinary/gen/f16-vprelu-neonfp16arith-u16.c
+  src/f16-vbinary/gen/f16-vpreluc-neonfp16arith-u16.c
+  src/f16-vbinary/gen/f16-vrpreluc-neonfp16arith-u16.c
   src/f16-vbinary/gen/f16-vrsubc-minmax-neonfp16arith-u16.c
   src/f16-vbinary/gen/f16-vsqrdiff-neonfp16arith-u16.c
   src/f16-vbinary/gen/f16-vsqrdiffc-neonfp16arith-u16.c
@@ -195,7 +197,6 @@ SET(NON_PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-igemm/gen/f16-igemm-4x16-minmax-neonfp16arith-ld64.c
   src/f16-igemm/gen/f16-igemm-8x8-minmax-neonfp16arith-ld64.c
   src/f16-igemm/gen/f16-igemm-8x16-minmax-neonfp16arith-ld64.c
-  src/f16-prelu/gen/f16-prelu-neonfp16arith-2x8.c
   src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonfp16arith-u8.c
   src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonfp16arith-u16.c
   src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonfp16arith-u24.c
@@ -271,11 +272,8 @@ SET(NON_PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vmul-minmax-neonfp16arith-u8.c
   src/f16-vbinary/gen/f16-vmulc-minmax-neonfp16arith-u8.c
   src/f16-vbinary/gen/f16-vprelu-neonfp16arith-u8.c
-  src/f16-vbinary/gen/f16-vprelu-neonfp16arith-u16.c
   src/f16-vbinary/gen/f16-vpreluc-neonfp16arith-u8.c
-  src/f16-vbinary/gen/f16-vpreluc-neonfp16arith-u16.c
   src/f16-vbinary/gen/f16-vrpreluc-neonfp16arith-u8.c
-  src/f16-vbinary/gen/f16-vrpreluc-neonfp16arith-u16.c
   src/f16-vbinary/gen/f16-vrsubc-minmax-neonfp16arith-u8.c
   src/f16-vbinary/gen/f16-vsqrdiff-neonfp16arith-u8.c
   src/f16-vbinary/gen/f16-vsqrdiffc-neonfp16arith-u8.c

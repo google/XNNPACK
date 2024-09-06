@@ -41,7 +41,6 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-maxpool/f32-maxpool-9p8x-minmax-neon-c4.c
   src/f32-pavgpool/f32-pavgpool-9p8x-minmax-neon-c4.c
   src/f32-pavgpool/f32-pavgpool-9x-minmax-neon-c4.c
-  src/f32-prelu/gen/f32-prelu-neon-2x8.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x8-minmax-neon-lane-ld64.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x8-minmax-neon-lane-ld64.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-neon-lane-ld64.c
@@ -62,6 +61,9 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vminc-neon-u8.c
   src/f32-vbinary/gen/f32-vmul-minmax-neon-u8.c
   src/f32-vbinary/gen/f32-vmulc-minmax-neon-u8.c
+  src/f32-vbinary/gen/f32-vprelu-neon-u8.c
+  src/f32-vbinary/gen/f32-vpreluc-neon-u8.c
+  src/f32-vbinary/gen/f32-vrpreluc-neon-u8.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-neon-u8.c
   src/f32-vbinary/gen/f32-vsqrdiff-neon-u8.c
   src/f32-vbinary/gen/f32-vsqrdiffc-neon-u8.c
@@ -343,14 +345,6 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/f32-ppmm/gen/f32-ppmm-4x16-minmax-neon.c
   src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neon-prfm.c
   src/f32-ppmm/gen/f32-ppmm-8x8-minmax-neon.c
-  src/f32-prelu/gen/f32-prelu-neon-1x4.c
-  src/f32-prelu/gen/f32-prelu-neon-1x8.c
-  src/f32-prelu/gen/f32-prelu-neon-1x16.c
-  src/f32-prelu/gen/f32-prelu-neon-2x4.c
-  src/f32-prelu/gen/f32-prelu-neon-2x16.c
-  src/f32-prelu/gen/f32-prelu-neon-4x4.c
-  src/f32-prelu/gen/f32-prelu-neon-4x8.c
-  src/f32-prelu/gen/f32-prelu-neon-4x16.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x8-minmax-neon-dup-ld64.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x8-minmax-neon-dup-ld64.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x8-minmax-neon-lane-ld64.c
@@ -432,11 +426,8 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vmul-minmax-neon-u4.c
   src/f32-vbinary/gen/f32-vmulc-minmax-neon-u4.c
   src/f32-vbinary/gen/f32-vprelu-neon-u4.c
-  src/f32-vbinary/gen/f32-vprelu-neon-u8.c
   src/f32-vbinary/gen/f32-vpreluc-neon-u4.c
-  src/f32-vbinary/gen/f32-vpreluc-neon-u8.c
   src/f32-vbinary/gen/f32-vrpreluc-neon-u4.c
-  src/f32-vbinary/gen/f32-vrpreluc-neon-u8.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-neon-u4.c
   src/f32-vbinary/gen/f32-vsqrdiff-neon-u4.c
   src/f32-vbinary/gen/f32-vsqrdiffc-neon-u4.c

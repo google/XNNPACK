@@ -30,6 +30,7 @@ XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vdiv_confi
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vmax_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vmin_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vmul_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vprelu_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vsub_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vsqrdiff_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vadd_config();
@@ -39,6 +40,7 @@ XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vdiv_confi
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vmax_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vmin_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vmul_config();
+XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vprelu_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vsub_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f32_vsqrdiff_config();
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_qs8_vadd_config();
@@ -151,9 +153,6 @@ XNN_INTERNAL const struct xnn_ibilinear_config* xnn_init_u8_ibilinear_config();
 // Bilinear interpolation (2D) in CHW layout.
 XNN_INTERNAL const struct xnn_ibilinear_chw_config* xnn_init_f16_ibilinear_chw_config();
 XNN_INTERNAL const struct xnn_ibilinear_chw_config* xnn_init_f32_ibilinear_chw_config();
-
-XNN_INTERNAL const struct xnn_prelu_config* xnn_init_f16_prelu_config();
-XNN_INTERNAL const struct xnn_prelu_config* xnn_init_f32_prelu_config();
 
 static inline struct xnn_hmp_dqgemm_ukernel xnn_init_hmp_dqgemm_ukernel(
     xnn_dqgemm_ukernel_fn function) {

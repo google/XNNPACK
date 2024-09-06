@@ -593,6 +593,10 @@ void BinaryElementwiseOperatorTester::TestF16() const {
         status = xnn_create_multiply_nd_f16(output_min, output_max, 0,
                                             &binary_elementwise_op);
         break;
+      case OperationType::Prelu:
+        status = xnn_create_prelu_nd_f16(output_min, output_max, 0,
+                                         &binary_elementwise_op);
+        break;
       case OperationType::SquaredDifference:
         status =
             xnn_create_squared_difference_nd_f16(0, &binary_elementwise_op);
@@ -669,6 +673,17 @@ void BinaryElementwiseOperatorTester::TestF16() const {
         ASSERT_EQ(xnn_status_success, xnn_setup_multiply_nd_f16(
                                           binary_elementwise_op, input1.data(),
                                           input2.data(), output.data()));
+        break;
+      case OperationType::Prelu:
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_reshape_prelu_nd_f16(binary_elementwise_op, num_input1_dims(),
+                                     input1_shape().data(), num_input2_dims(),
+                                     input2_shape().data(),
+                                     /*threadpool=*/nullptr));
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_prelu_nd_f16(binary_elementwise_op, input1.data(),
+                                         input2.data(), output.data()));
         break;
       case OperationType::SquaredDifference:
         ASSERT_EQ(
@@ -995,6 +1010,11 @@ void BinaryElementwiseOperatorTester::TestF32() const {
                   xnn_create_multiply_nd_f32(output_min, output_max, 0,
                                              &binary_elementwise_op));
         break;
+      case OperationType::Prelu:
+        ASSERT_EQ(xnn_status_success,
+                  xnn_create_prelu_nd_f32(output_min, output_max, 0,
+                                          &binary_elementwise_op));
+        break;
       case OperationType::Subtract:
         ASSERT_EQ(xnn_status_success,
                   xnn_create_subtract_nd_f32(output_min, output_max, 0,
@@ -1079,6 +1099,17 @@ void BinaryElementwiseOperatorTester::TestF32() const {
         ASSERT_EQ(xnn_status_success, xnn_setup_multiply_nd_f32(
                                           binary_elementwise_op, input1.data(),
                                           input2.data(), output.data()));
+        break;
+      case OperationType::Prelu:
+        ASSERT_EQ(
+            xnn_status_success,
+            xnn_reshape_prelu_nd_f32(binary_elementwise_op, num_input1_dims(),
+                                     input1_shape().data(), num_input2_dims(),
+                                     input2_shape().data(),
+                                     /*threadpool=*/nullptr));
+        ASSERT_EQ(xnn_status_success,
+                  xnn_setup_prelu_nd_f32(binary_elementwise_op, input1.data(),
+                                         input2.data(), output.data()));
         break;
       case OperationType::Subtract:
         ASSERT_EQ(
@@ -1278,6 +1309,14 @@ void BinaryElementwiseOperatorTester::TestRunF32() const {
                       input2.data(), output.data(), output_min, output_max, 0,
                       /*threadpool=*/nullptr));
         break;
+      case OperationType::Prelu:
+        ASSERT_EQ(xnn_status_success,
+                  xnn_run_prelu_nd_f32(num_input1_dims(), input1_shape().data(),
+                                       num_input2_dims(), input2_shape().data(),
+                                       input1.data(), input2.data(),
+                                       output.data(), output_min, output_max, 0,
+                                       /*threadpool=*/nullptr));
+        break;
       case OperationType::Subtract:
         ASSERT_EQ(xnn_status_success,
                   xnn_run_subtract_nd_f32(
@@ -1312,7 +1351,15 @@ void BinaryElementwiseOperatorTester::TestRunF32() const {
                 ASSERT_NEAR(output[index], output_ref[index],
                             1.0e-6f * std::abs(output_ref[index]))
                     << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k
-                    << ", " << l << ", " << m << ", " << n << ")";
+                    << ", " << l << ", " << m << ", " << n << ")" <<
+
+                    input1[i * input1_strides[0] + j * input1_strides[1] +
+                           k * input1_strides[2] + l * input1_strides[3] +
+                           m * input1_strides[4] + n * input1_strides[5]]
+                    << " "
+                    << input2[i * input2_strides[0] + j * input2_strides[1] +
+                              k * input2_strides[2] + l * input2_strides[3] +
+                              m * input2_strides[4] + n * input2_strides[5]];
               }
             }
           }

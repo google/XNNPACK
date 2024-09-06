@@ -70,7 +70,6 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-maxpool/f32-maxpool-9p8x-minmax-scalar-c1.c
   src/f32-pavgpool/f32-pavgpool-9p8x-minmax-scalar-c1.c
   src/f32-pavgpool/f32-pavgpool-9x-minmax-scalar-c1.c
-  src/f32-prelu/gen/f32-prelu-scalar-2x4.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x4-minmax-scalar.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x4-minmax-scalar.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x4-minmax-scalar.c
@@ -99,7 +98,10 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vminc-scalar-u8.c
   src/f32-vbinary/gen/f32-vmul-minmax-scalar-u8.c
   src/f32-vbinary/gen/f32-vmulc-minmax-scalar-u8.c
+  src/f32-vbinary/gen/f32-vprelu-scalar-u8.c
+  src/f32-vbinary/gen/f32-vpreluc-scalar-u8.c
   src/f32-vbinary/gen/f32-vrdivc-minmax-scalar-u2.c
+  src/f32-vbinary/gen/f32-vrpreluc-scalar-u8.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-scalar-u8.c
   src/f32-vbinary/gen/f32-vsqrdiff-scalar-u8.c
   src/f32-vbinary/gen/f32-vsqrdiffc-scalar-u8.c
@@ -391,7 +393,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-ppmm/gen/f32-ppmm-3x3-minmax-scalar.c
   src/f32-ppmm/gen/f32-ppmm-4x2-minmax-scalar.c
   src/f32-ppmm/gen/f32-ppmm-4x4-minmax-scalar.c
-  src/f32-prelu/gen/f32-prelu-scalar-2x1.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-2x4-minmax-scalar.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x2-minmax-scalar.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x4-relu-scalar.c
@@ -544,11 +545,9 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vprelu-scalar-u1.c
   src/f32-vbinary/gen/f32-vprelu-scalar-u2.c
   src/f32-vbinary/gen/f32-vprelu-scalar-u4.c
-  src/f32-vbinary/gen/f32-vprelu-scalar-u8.c
   src/f32-vbinary/gen/f32-vpreluc-scalar-u1.c
   src/f32-vbinary/gen/f32-vpreluc-scalar-u2.c
   src/f32-vbinary/gen/f32-vpreluc-scalar-u4.c
-  src/f32-vbinary/gen/f32-vpreluc-scalar-u8.c
   src/f32-vbinary/gen/f32-vrdivc-minmax-scalar-u1.c
   src/f32-vbinary/gen/f32-vrdivc-minmax-scalar-u4.c
   src/f32-vbinary/gen/f32-vrdivc-minmax-scalar-u8.c
@@ -563,7 +562,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vrpreluc-scalar-u1.c
   src/f32-vbinary/gen/f32-vrpreluc-scalar-u2.c
   src/f32-vbinary/gen/f32-vrpreluc-scalar-u4.c
-  src/f32-vbinary/gen/f32-vrpreluc-scalar-u8.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-scalar-u1.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-scalar-u2.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-scalar-u4.c

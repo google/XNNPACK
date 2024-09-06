@@ -34,7 +34,6 @@ void xnn_f16_vmax_ukernel__avx512fp16_u64(
   uint16_t* o = (uint16_t*) output;
 
 
-
   for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
     const __m512h va0 = _mm512_loadu_ph(a);
     const __m512h va1 = _mm512_loadu_ph(a + 32);

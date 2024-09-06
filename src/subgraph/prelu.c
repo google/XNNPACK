@@ -5,6 +5,7 @@
 
 #include <assert.h>
 #include <inttypes.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -15,6 +16,7 @@
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator-type.h"
 #include "xnnpack/operator.h"
+#include "xnnpack/reshape-helpers.h"
 #include "xnnpack/subgraph-validation.h"
 #include "xnnpack/subgraph.h"
 #include "pthreadpool.h"
@@ -28,52 +30,25 @@ static enum xnn_status create_prelu_operator(
   xnn_weights_cache_t weights_cache)
 {
   assert(node->num_inputs == 2);
-  const uint32_t input_id = node->inputs[0];
-  assert(input_id != XNN_INVALID_VALUE_ID);
-  assert(input_id < num_values);
-
-  const uint32_t slope_id = node->inputs[1];
-  assert(slope_id != XNN_INVALID_VALUE_ID);
-  assert(slope_id < num_values);
-
-  const void* slope_data = values[slope_id].fp32_data != NULL ? values[slope_id].fp32_data : values[slope_id].data;
-  assert(slope_data != NULL);
-
   assert(node->num_outputs == 1);
 
-  const size_t num_slope_dims = values[slope_id].shape.num_dims;
-  const size_t slope_channels = num_slope_dims == 0 ? 1 : values[slope_id].shape.dim[num_slope_dims - 1];
-
-  const size_t num_input_dims = values[input_id].shape.num_dims;
-  const size_t input_channels = num_input_dims == 0 ? 1 : values[input_id].shape.dim[num_input_dims - 1];
-
-  const uint32_t input1_id = node->inputs[0];
-  assert(input_id < num_values);
-  const struct xnn_value *input1_value = &values[input1_id];
   enum xnn_status status;
+  const uint32_t input1_id = node->inputs[0];
+  assert(input1_id < num_values);
+  const struct xnn_value *input1_value = &values[input1_id];
   switch (input1_value->datatype) {
     case xnn_datatype_fp16:
-      status = xnn_create_prelu_nc_f16(
-        input_channels,
-        slope_channels,
-        /*input_stride=*/input_channels,
-        /*output_stride=*/input_channels,
-        /*negative_slope=*/slope_data,
-        node->flags | XNN_FLAG_FP32_STATIC_WEIGHTS,
-        code_cache,
-        weights_cache,
+      status = xnn_create_prelu_nd_f16(
+        node->activation.output_min,
+        node->activation.output_max,
+        node->flags,
         &opdata->operator_objects[0]);
       break;
     case xnn_datatype_fp32:
-      status = xnn_create_prelu_nc_f32(
-        input_channels,
-        slope_channels,
-        /*input_stride=*/input_channels,
-        /*output_stride=*/input_channels,
-        /*negative_slope=*/slope_data,
+      status = xnn_create_prelu_nd_f32(
+        node->activation.output_min,
+        node->activation.output_max,
         node->flags,
-        code_cache,
-        weights_cache,
         &opdata->operator_objects[0]);
       break;
     default:
@@ -88,46 +63,74 @@ static enum xnn_status reshape_prelu_operator(
   size_t num_values,
   pthreadpool_t threadpool)
 {
-  const uint32_t input_id = opdata->inputs[0];
-  assert(input_id < num_values);
-  const struct xnn_value* input_value = values + input_id;
-  const size_t batch_size = xnn_shape_multiply_non_channel_dims(&input_value->shape);
+  const uint32_t input1_id = opdata->inputs[0];
+  assert(input1_id < num_values);
+  const uint32_t input2_id = opdata->inputs[1];
+  assert(input2_id < num_values);
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id < num_values);
 
+  opdata->shape1.num_dims = values[input1_id].shape.num_dims;
+  opdata->shape2.num_dims = values[input2_id].shape.num_dims;
+  if (values[output_id].layout == xnn_layout_type_nchw) {
+    assert(values[input1_id].layout == xnn_layout_type_nchw);
+    assert(values[input2_id].layout == xnn_layout_type_nchw);
+    opdata->shape1.dim[0] = values[input1_id].shape.dim[0];
+    opdata->shape1.dim[1] = values[input1_id].shape.dim[values[input1_id].shape.num_dims - 1];
+    if (values[input1_id].shape.num_dims > 2) {
+      memcpy(&opdata->shape1.dim[2], &values[input1_id].shape.dim[1], (values[input1_id].shape.num_dims - 2) * sizeof(size_t));
+    }
+    opdata->shape2.dim[0] = values[input2_id].shape.dim[0];
+    opdata->shape2.dim[1] = values[input2_id].shape.dim[values[input2_id].shape.num_dims - 1];
+    if (values[input1_id].shape.num_dims > 2) {
+      memcpy(&opdata->shape2.dim[2], &values[input2_id].shape.dim[1], (values[input2_id].shape.num_dims - 2) * sizeof(size_t));
+    }
+  } else {
+    assert(values[output_id].layout == xnn_layout_type_nhwc);
+    assert(values[input1_id].layout == xnn_layout_type_nhwc);
+    assert(values[input2_id].layout == xnn_layout_type_nhwc);
+    memcpy(opdata->shape1.dim, values[input1_id].shape.dim, values[input1_id].shape.num_dims * sizeof(size_t));
+    memcpy(opdata->shape2.dim, values[input2_id].shape.dim, values[input2_id].shape.num_dims * sizeof(size_t));
+  }
+
+  // Handle scalars. Although the output shape is dimensionless, the reshape
+  // function must be passed a valid shape to prevent skipping the op.
+  if (opdata->shape1.num_dims == 0) {
+    opdata->shape1.num_dims = 1;
+    opdata->shape1.dim[0] = 1;
+  }
+  if (opdata->shape2.num_dims == 0) {
+    opdata->shape2.num_dims = 1;
+    opdata->shape2.dim[0] = 1;
+  }
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;
   switch (opdata->operator_objects[0]->type) {
-    case xnn_operator_type_prelu_nc_f16:
-      status = xnn_reshape_prelu_nc_f16(
+    case xnn_operator_type_prelu_nd_f16:
+      status = xnn_reshape_prelu_nd_f16(
         opdata->operator_objects[0],
-        batch_size,
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->shape2.num_dims,
+        opdata->shape2.dim,
         threadpool);
-        break;
-    case xnn_operator_type_prelu_nc_f32:
-      status = xnn_reshape_prelu_nc_f32(
+      break;
+    case xnn_operator_type_prelu_nd_f32:
+      status = xnn_reshape_prelu_nd_f32(
         opdata->operator_objects[0],
-        batch_size,
+        opdata->shape1.num_dims,
+        opdata->shape1.dim,
+        opdata->shape2.num_dims,
+        opdata->shape2.dim,
         threadpool);
-        break;
+      break;
     default:
       XNN_UNREACHABLE;
   }
   if (status != xnn_status_success) {
     return status;
   }
-
-  const uint32_t output_id = opdata->outputs[0];
-  assert(output_id < num_values);
-  struct xnn_value* output_value = values + output_id;
-
-  memcpy(output_value->shape.dim, input_value->shape.dim, input_value->shape.num_dims * sizeof(size_t));
-  const size_t new_size = xnn_tensor_get_size(output_value);
-  if (new_size > output_value->size || opdata->workspace_size > old_workspace_size) {
-    output_value->size = new_size;
-    return xnn_status_reallocation_required;
-  }
-
-  return xnn_status_success;
-
+  return resize_binary_elementwise_output_tensor(opdata, values, num_values, old_workspace_size, threadpool);
 }
 
 static enum xnn_status setup_prelu_operator(
@@ -136,33 +139,39 @@ static enum xnn_status setup_prelu_operator(
   size_t num_values,
   pthreadpool_t threadpool)
 {
-  const uint32_t input_id = opdata->inputs[0];
-  assert(input_id != XNN_INVALID_VALUE_ID);
-  assert(input_id < num_values);
+  const uint32_t input1_id = opdata->inputs[0];
+  assert(input1_id != XNN_INVALID_VALUE_ID);
+  assert(input1_id < num_values);
+
+  const uint32_t input2_id = opdata->inputs[1];
+  assert(input2_id != XNN_INVALID_VALUE_ID);
+  assert(input2_id < num_values);
 
   const uint32_t output_id = opdata->outputs[0];
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  const struct xnn_value* input_value = values + input_id;
-  const void* input_data = input_value->data;
-  assert(input_data != NULL);
+  const struct xnn_value* input1_value = values + input1_id;
+  const void* input1_data = input1_value->data;
+  assert(input1_data != NULL);
+
+  const struct xnn_value* input2_value = values + input2_id;
+  const void* input2_data = input2_value->data;
+  assert(input2_data != NULL);
 
   const struct xnn_value* output_value = values + output_id;
   void* output_data = output_value->data;
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {
-    case xnn_operator_type_prelu_nc_f16:
-      return xnn_setup_prelu_nc_f16(
+    case xnn_operator_type_prelu_nd_f16:
+      return xnn_setup_prelu_nd_f16(
         opdata->operator_objects[0],
-        input_data,
-        output_data);
-    case xnn_operator_type_prelu_nc_f32:
-      return xnn_setup_prelu_nc_f32(
+        input1_data, input2_data, output_data);
+    case xnn_operator_type_prelu_nd_f32:
+      return xnn_setup_prelu_nd_f32(
         opdata->operator_objects[0],
-        input_data,
-        output_data);
+        input1_data, input2_data, output_data);
     default:
       XNN_UNREACHABLE;
   }
@@ -170,8 +179,8 @@ static enum xnn_status setup_prelu_operator(
 
 enum xnn_status xnn_define_prelu(
   xnn_subgraph_t subgraph,
-  uint32_t input_id,
-  uint32_t slope_id,
+  uint32_t input1_id,
+  uint32_t input2_id,
   uint32_t output_id,
   uint32_t flags)
 {
@@ -180,59 +189,51 @@ enum xnn_status xnn_define_prelu(
     return status;
   }
 
-  if ((status = xnn_subgraph_check_input_node_id(xnn_node_type_prelu, input_id, subgraph->num_values)) !=
-      xnn_status_success) {
+  if ((status = xnn_subgraph_check_nth_input_node_id(
+        xnn_node_type_prelu, input1_id, subgraph->num_values, 1)) != xnn_status_success) {
     return status;
   }
 
-  const struct xnn_value* input_value = &subgraph->values[input_id];
-  status = xnn_subgraph_check_input_type_dense(xnn_node_type_prelu, input_id, input_value);
+  const struct xnn_value* input1_value = &subgraph->values[input1_id];
+  status = xnn_subgraph_check_nth_input_type_dense(xnn_node_type_prelu, input1_id, input1_value, 1);
   if (status != xnn_status_success) {
     return status;
   }
 
-  switch (input_value->datatype) {
+  switch (input1_value->datatype) {
     case xnn_datatype_fp16:
+      break;
     case xnn_datatype_fp32:
       break;
     default:
       xnn_log_error(
-        "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(xnn_node_type_prelu), input_id,
-        xnn_datatype_to_string(input_value->datatype), input_value->datatype);
+        "failed to define %s operator with the first input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+        xnn_node_type_to_string(xnn_node_type_prelu), input1_id,
+        xnn_datatype_to_string(input1_value->datatype), input1_value->datatype);
       return xnn_status_invalid_parameter;
   }
 
-  if (slope_id >= subgraph->num_values) {
-    xnn_log_error(
-      "failed to define %s operator with slope ID #%" PRIu32 ": invalid Value ID",
-      xnn_node_type_to_string(xnn_node_type_prelu), slope_id);
-    return xnn_status_invalid_parameter;
+  if ((status = xnn_subgraph_check_nth_input_node_id(
+        xnn_node_type_prelu, input2_id, subgraph->num_values, 2)) != xnn_status_success) {
+    return status;
   }
 
-  const struct xnn_value* slope_value = &subgraph->values[slope_id];
-  if (slope_value->type != xnn_value_type_dense_tensor) {
-    xnn_log_error(
-      "failed to define %s operator with slope ID #%" PRIu32 ": unsupported Value type %d (expected dense tensor)",
-      xnn_node_type_to_string(xnn_node_type_prelu), slope_id, slope_value->type);
-    return xnn_status_invalid_parameter;
+  const struct xnn_value* input2_value = &subgraph->values[input2_id];
+  status = xnn_subgraph_check_nth_input_type_dense(xnn_node_type_prelu, input2_id, input2_value, 2);
+  if (status != xnn_status_success) {
+    return status;
   }
 
-  if (slope_value->data == NULL) {
-    xnn_log_error(
-      "failed to define %s operator with slope ID #%" PRIu32 ": non-static Value",
-      xnn_node_type_to_string(xnn_node_type_prelu), slope_id);
-    return xnn_status_invalid_parameter;
-  }
-
-  switch (slope_value->datatype) {
+  switch (input2_value->datatype) {
+    case xnn_datatype_fp16:
+      break;
     case xnn_datatype_fp32:
       break;
     default:
       xnn_log_error(
-        "failed to define %s operator with slope ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(xnn_node_type_prelu), slope_id,
-        xnn_datatype_to_string(slope_value->datatype), slope_value->datatype);
+        "failed to define %s operator with the second input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+        xnn_node_type_to_string(xnn_node_type_prelu), input2_id,
+        xnn_datatype_to_string(input2_value->datatype), input2_value->datatype);
       return xnn_status_invalid_parameter;
   }
 
@@ -270,9 +271,11 @@ enum xnn_status xnn_define_prelu(
 
   node->type = xnn_node_type_prelu;
   node->compute_type = compute_type;
+  node->activation.output_min = -INFINITY;
+  node->activation.output_max = INFINITY;
   node->num_inputs = 2;
-  node->inputs[0] = input_id;
-  node->inputs[1] = slope_id;
+  node->inputs[0] = input1_id;
+  node->inputs[1] = input2_id;
   node->num_outputs = 1;
   node->outputs[0] = output_id;
   node->flags = flags;

@@ -51,8 +51,6 @@ SET(PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-6x8-minmax-wasmrelaxedsimd-fma-splat.c
   src/f32-igemm/gen/f32-igemm-6x8-relu-wasmrelaxedsimd-fma-splat.c
   src/f32-igemm/gen/f32-igemm-6x8-wasmrelaxedsimd-fma-splat.c
-  src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-2x4.c
-  src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-2x4.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmrelaxedsimd-fma-loadsplat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmrelaxedsimd-fma-splat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-relu-wasmrelaxedsimd-fma-loadsplat.c
@@ -271,22 +269,6 @@ SET(NON_PROD_WASMRELAXEDSIMD_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-6x8s4-minmax-wasmrelaxedsimd.c
   src/f32-igemm/gen/f32-igemm-6x8s4-relu-wasmrelaxedsimd-fma.c
   src/f32-igemm/gen/f32-igemm-6x8s4-wasmrelaxedsimd-fma.c
-  src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-1x4.c
-  src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-1x8.c
-  src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-1x16.c
-  src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-2x8.c
-  src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-2x16.c
-  src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-4x4.c
-  src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-4x8.c
-  src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-iminmax-4x16.c
-  src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-1x4.c
-  src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-1x8.c
-  src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-1x16.c
-  src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-2x8.c
-  src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-2x16.c
-  src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-4x4.c
-  src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-4x8.c
-  src/f32-prelu/gen/f32-prelu-wasmrelaxedsimd-laneselect-4x16.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmrelaxedsimd-loadsplat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmrelaxedsimd-splat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8s4-minmax-wasmrelaxedsimd-fma.c

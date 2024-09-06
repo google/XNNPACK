@@ -1596,19 +1596,6 @@ void xnn_compute_resize_bilinear_chw(
     context->input_channel_stride);
 }
 
-void xnn_compute_prelu(
-    const struct prelu_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_start,
-    size_t batch_range)
-{
-  const size_t x_stride = context->x_stride;
-  const size_t y_stride = context->y_stride;
-  const void* x = (const void*) ((uintptr_t) context->x + x_stride * batch_start);
-  void* y = (void*) ((uintptr_t) context->y + y_stride * batch_start);
-
-  context->ukernel(batch_range, context->n, x, x_stride, context->w, y, y_stride);
-}
-
 void xnn_compute_pad_5d(
     const struct pad_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t i, size_t j, size_t k, size_t l, size_t m)

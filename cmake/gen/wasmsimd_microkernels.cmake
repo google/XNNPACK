@@ -100,8 +100,6 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-pavgpool/f32-pavgpool-9p8x-minmax-wasmsimd-x86-c4.c
   src/f32-pavgpool/f32-pavgpool-9x-minmax-wasmsimd-arm-c4.c
   src/f32-pavgpool/f32-pavgpool-9x-minmax-wasmsimd-x86-c4.c
-  src/f32-prelu/gen/f32-prelu-wasmsimd-iminmax-2x8.c
-  src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-2x8.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-arm-splat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-x86-splat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-relu-wasmsimd-splat.c
@@ -147,9 +145,12 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vmulc-minmax-wasmsimd-arm-u16.c
   src/f32-vbinary/gen/f32-vmulc-minmax-wasmsimd-x86-u16.c
   src/f32-vbinary/gen/f32-vmulc-wasmsimd-u16.c
+  src/f32-vbinary/gen/f32-vprelu-wasmsimd-u16.c
+  src/f32-vbinary/gen/f32-vpreluc-wasmsimd-u16.c
   src/f32-vbinary/gen/f32-vrdivc-minmax-wasmsimd-arm-u16.c
   src/f32-vbinary/gen/f32-vrdivc-minmax-wasmsimd-x86-u16.c
   src/f32-vbinary/gen/f32-vrdivc-wasmsimd-u16.c
+  src/f32-vbinary/gen/f32-vrpreluc-wasmsimd-u16.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-wasmsimd-arm-u16.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-wasmsimd-x86-u16.c
   src/f32-vbinary/gen/f32-vrsubc-wasmsimd-u16.c
@@ -584,22 +585,6 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-6x8s4-wasmsimd.c
   src/f32-ppmm/gen/f32-ppmm-4x8-minmax-wasmsimd-arm-splat.c
   src/f32-ppmm/gen/f32-ppmm-4x8-minmax-wasmsimd-x86-splat.c
-  src/f32-prelu/gen/f32-prelu-wasmsimd-iminmax-1x4.c
-  src/f32-prelu/gen/f32-prelu-wasmsimd-iminmax-1x8.c
-  src/f32-prelu/gen/f32-prelu-wasmsimd-iminmax-1x16.c
-  src/f32-prelu/gen/f32-prelu-wasmsimd-iminmax-2x4.c
-  src/f32-prelu/gen/f32-prelu-wasmsimd-iminmax-2x16.c
-  src/f32-prelu/gen/f32-prelu-wasmsimd-iminmax-4x4.c
-  src/f32-prelu/gen/f32-prelu-wasmsimd-iminmax-4x8.c
-  src/f32-prelu/gen/f32-prelu-wasmsimd-iminmax-4x16.c
-  src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-1x4.c
-  src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-1x8.c
-  src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-1x16.c
-  src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-2x4.c
-  src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-2x16.c
-  src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-4x4.c
-  src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-4x8.c
-  src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-4x16.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-arm-loadsplat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-x86-loadsplat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-relu-wasmsimd-loadsplat.c
@@ -823,10 +808,8 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vmulc-wasmsimd-u8.c
   src/f32-vbinary/gen/f32-vprelu-wasmsimd-u4.c
   src/f32-vbinary/gen/f32-vprelu-wasmsimd-u8.c
-  src/f32-vbinary/gen/f32-vprelu-wasmsimd-u16.c
   src/f32-vbinary/gen/f32-vpreluc-wasmsimd-u4.c
   src/f32-vbinary/gen/f32-vpreluc-wasmsimd-u8.c
-  src/f32-vbinary/gen/f32-vpreluc-wasmsimd-u16.c
   src/f32-vbinary/gen/f32-vrdivc-minmax-wasmsimd-arm-u4.c
   src/f32-vbinary/gen/f32-vrdivc-minmax-wasmsimd-arm-u8.c
   src/f32-vbinary/gen/f32-vrdivc-minmax-wasmsimd-x86-u4.c
@@ -838,7 +821,6 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vrdivc-wasmsimd-u8.c
   src/f32-vbinary/gen/f32-vrpreluc-wasmsimd-u4.c
   src/f32-vbinary/gen/f32-vrpreluc-wasmsimd-u8.c
-  src/f32-vbinary/gen/f32-vrpreluc-wasmsimd-u16.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-wasmsimd-arm-u4.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-wasmsimd-arm-u8.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-wasmsimd-x86-u4.c

@@ -127,6 +127,7 @@ INSTANTIATE_TEST_SUITE_P(
             BinaryElementwiseOperatorTester::OperationType::Maximum,
             BinaryElementwiseOperatorTester::OperationType::Minimum,
             BinaryElementwiseOperatorTester::OperationType::Multiply,
+            BinaryElementwiseOperatorTester::OperationType::Prelu,
             BinaryElementwiseOperatorTester::OperationType::SquaredDifference,
             BinaryElementwiseOperatorTester::OperationType::Subtract),
         testing::ValuesIn(kBroadcastRanks), testing::ValuesIn(kBroadcastRanks)),
@@ -141,6 +142,7 @@ INSTANTIATE_TEST_SUITE_P(
             BinaryElementwiseOperatorTester::OperationType::Maximum,
             BinaryElementwiseOperatorTester::OperationType::Minimum,
             BinaryElementwiseOperatorTester::OperationType::Multiply,
+            BinaryElementwiseOperatorTester::OperationType::Prelu,
             BinaryElementwiseOperatorTester::OperationType::SquaredDifference,
             BinaryElementwiseOperatorTester::OperationType::Subtract),
         testing::ValuesIn(kBroadcastRanks), testing::ValuesIn(kBroadcastRanks)),
@@ -157,8 +159,9 @@ INSTANTIATE_TEST_SUITE_P(
             BinaryElementwiseOperatorTester::OperationType::Maximum,
             BinaryElementwiseOperatorTester::OperationType::Minimum,
             BinaryElementwiseOperatorTester::OperationType::Multiply,
-            BinaryElementwiseOperatorTester::OperationType::Subtract,
-            BinaryElementwiseOperatorTester::OperationType::SquaredDifference),
+            BinaryElementwiseOperatorTester::OperationType::Prelu,
+            BinaryElementwiseOperatorTester::OperationType::SquaredDifference,
+            BinaryElementwiseOperatorTester::OperationType::Subtract),
         testing::ValuesIn(kBroadcastRanks), testing::ValuesIn(kBroadcastRanks)),
     [](const auto& info) { return ToString(info.param); });
 INSTANTIATE_TEST_SUITE_P(
@@ -171,8 +174,9 @@ INSTANTIATE_TEST_SUITE_P(
             BinaryElementwiseOperatorTester::OperationType::Maximum,
             BinaryElementwiseOperatorTester::OperationType::Minimum,
             BinaryElementwiseOperatorTester::OperationType::Multiply,
-            BinaryElementwiseOperatorTester::OperationType::Subtract,
-            BinaryElementwiseOperatorTester::OperationType::SquaredDifference),
+            BinaryElementwiseOperatorTester::OperationType::Prelu,
+            BinaryElementwiseOperatorTester::OperationType::SquaredDifference,
+            BinaryElementwiseOperatorTester::OperationType::Subtract),
         testing::ValuesIn(kBroadcastRanks), testing::ValuesIn(kBroadcastRanks)),
     [](const auto& info) { return ToString(info.param); });
 INSTANTIATE_TEST_SUITE_P(

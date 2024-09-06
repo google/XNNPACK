@@ -562,6 +562,36 @@ enum xnn_status xnn_create_multiply_nd_f32(
     multiply_op_out);
 }
 
+enum xnn_status xnn_create_prelu_nd_f16(
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* prelu_op_out)
+{
+  return create_binary_elementwise_nd_f16(
+    output_min,
+    output_max,
+    flags,
+    xnn_operator_type_prelu_nd_f16,
+    xnn_init_f16_vprelu_config(),
+    prelu_op_out);
+}
+
+enum xnn_status xnn_create_prelu_nd_f32(
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_operator_t* prelu_op_out)
+{
+  return create_binary_elementwise_nd_f32(
+    output_min,
+    output_max,
+    flags,
+    xnn_operator_type_prelu_nd_f32,
+    xnn_init_f32_vprelu_config(),
+    prelu_op_out);
+}
+
 enum xnn_status xnn_create_multiply_nd_qs8(
     int8_t input1_zero_point,
     float input1_scale,
@@ -1583,6 +1613,36 @@ enum xnn_status xnn_reshape_subtract_nd_qu8(
     threadpool);
 }
 
+enum xnn_status xnn_reshape_prelu_nd_f16(
+    xnn_operator_t prelu_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    pthreadpool_t threadpool)
+{
+  return reshape_binary_elementwise_nd_f16(
+    prelu_op, xnn_operator_type_prelu_nd_f16,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    threadpool);
+}
+
+enum xnn_status xnn_reshape_prelu_nd_f32(
+    xnn_operator_t prelu_op,
+    size_t num_input1_dims,
+    const size_t* input1_shape,
+    size_t num_input2_dims,
+    const size_t* input2_shape,
+    pthreadpool_t threadpool)
+{
+  return reshape_binary_elementwise_nd_f32(
+    prelu_op, xnn_operator_type_prelu_nd_f32,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    threadpool);
+}
+
 static enum xnn_status setup_binary_elementwise_nd(
     xnn_operator_t binary_elementwise_op,
     enum xnn_operator_type expected_operator_type,
@@ -1867,6 +1927,28 @@ enum xnn_status xnn_setup_subtract_nd_qu8(
 {
   return setup_binary_elementwise_nd(
     subtract_op, xnn_operator_type_subtract_nd_qu8,
+    input1, input2, output);
+}
+
+enum xnn_status xnn_setup_prelu_nd_f16(
+    xnn_operator_t prelu_op,
+    const void* input1,
+    const void* input2,
+    void* output)
+{
+  return setup_binary_elementwise_nd(
+    prelu_op, xnn_operator_type_prelu_nd_f16,
+    input1, input2, output);
+}
+
+enum xnn_status xnn_setup_prelu_nd_f32(
+    xnn_operator_t prelu_op,
+    const float* input1,
+    const float* input2,
+    float* output)
+{
+  return setup_binary_elementwise_nd(
+    prelu_op, xnn_operator_type_prelu_nd_f32,
     input1, input2, output);
 }
 
@@ -2771,6 +2853,30 @@ enum xnn_status xnn_run_subtract_nd_qu8(
     &params,
     &params2,
     sizeof(params),
+    flags,
+    threadpool);
+}
+
+enum xnn_status xnn_run_prelu_nd_f32(
+  size_t num_input1_dims,
+  const size_t* input1_shape,
+  size_t num_input2_dims,
+  const size_t* input2_shape,
+  const float* input1,
+  const float* input2,
+  float* output,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  pthreadpool_t threadpool)
+{
+  return run_binary_elementwise_nd_f32(
+    xnn_operator_type_prelu_nd_f32,
+    num_input1_dims, input1_shape,
+    num_input2_dims, input2_shape,
+    input1, input2, output,
+    output_min, output_max,
+    xnn_init_f32_vprelu_config(),
     flags,
     threadpool);
 }

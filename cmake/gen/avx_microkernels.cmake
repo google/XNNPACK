@@ -21,7 +21,6 @@ SET(PROD_AVX_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-5x16-minmax-avx-broadcast.c
   src/f32-igemm/gen/f32-igemm-1x16-minmax-avx-broadcast.c
   src/f32-igemm/gen/f32-igemm-5x16-minmax-avx-broadcast.c
-  src/f32-prelu/gen/f32-prelu-avx-2x16.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x16-minmax-avx-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x16-minmax-avx-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x16-minmax-avx-broadcast.c
@@ -42,7 +41,10 @@ SET(PROD_AVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vminc-avx-u16.c
   src/f32-vbinary/gen/f32-vmul-minmax-avx-u16.c
   src/f32-vbinary/gen/f32-vmulc-minmax-avx-u16.c
+  src/f32-vbinary/gen/f32-vprelu-avx-u16.c
+  src/f32-vbinary/gen/f32-vpreluc-avx-u16.c
   src/f32-vbinary/gen/f32-vrdivc-minmax-avx-u16.c
+  src/f32-vbinary/gen/f32-vrpreluc-avx-u16.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-avx-u16.c
   src/f32-vbinary/gen/f32-vsqrdiff-avx-u16.c
   src/f32-vbinary/gen/f32-vsqrdiffc-avx-u16.c
@@ -165,7 +167,6 @@ SET(NON_PROD_AVX_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-6x8-minmax-avx-broadcast.c
   src/f32-igemm/gen/f32-igemm-6x16-minmax-avx-broadcast.c
   src/f32-igemm/gen/f32-igemm-7x8-minmax-avx-broadcast.c
-  src/f32-prelu/gen/f32-prelu-avx-2x8.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-2x16-minmax-avx-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x16-minmax-avx-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x16-minmax-avx-broadcast.c
@@ -214,12 +215,9 @@ SET(NON_PROD_AVX_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vmul-minmax-avx-u8.c
   src/f32-vbinary/gen/f32-vmulc-minmax-avx-u8.c
   src/f32-vbinary/gen/f32-vprelu-avx-u8.c
-  src/f32-vbinary/gen/f32-vprelu-avx-u16.c
   src/f32-vbinary/gen/f32-vpreluc-avx-u8.c
-  src/f32-vbinary/gen/f32-vpreluc-avx-u16.c
   src/f32-vbinary/gen/f32-vrdivc-minmax-avx-u8.c
   src/f32-vbinary/gen/f32-vrpreluc-avx-u8.c
-  src/f32-vbinary/gen/f32-vrpreluc-avx-u16.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-avx-u8.c
   src/f32-vbinary/gen/f32-vsqrdiff-avx-u8.c
   src/f32-vbinary/gen/f32-vsqrdiffc-avx-u8.c

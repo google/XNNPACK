@@ -31,8 +31,9 @@ class BinaryElementwiseOperatorTester {
     Maximum,
     Minimum,
     Multiply,
-    Subtract,
+    Prelu,
     SquaredDifference,
+    Subtract,
   };
 
   static std::string ToString(OperationType operation_type) {
@@ -51,10 +52,12 @@ class BinaryElementwiseOperatorTester {
         return "Minimum";
       case OperationType::Multiply:
         return "Multiply";
-      case OperationType::Subtract:
-        return "Subtract";
+      case OperationType::Prelu:
+        return "Prelu";
       case OperationType::SquaredDifference:
         return "SquaredDifference";
+      case OperationType::Subtract:
+        return "Subtract";
       default:
         return "Unknown";
     }
@@ -253,10 +256,12 @@ class BinaryElementwiseOperatorTester {
         return std::min<float>(a, b);
       case OperationType::Multiply:
         return a * b;
-      case OperationType::Subtract:
-        return a - b;
+      case OperationType::Prelu:
+        return a < 0 ? a * b : a;
       case OperationType::SquaredDifference:
         return (a - b) * (a - b);
+      case OperationType::Subtract:
+        return a - b;
       default:
         return std::nanf("");
     }
@@ -276,10 +281,10 @@ class BinaryElementwiseOperatorTester {
         return std::min<int32_t>(a, b);
       case OperationType::Multiply:
         return a * b;
-      case OperationType::Subtract:
-        return a - b;
       case OperationType::SquaredDifference:
         return (a - b) * (a - b);
+      case OperationType::Subtract:
+        return a - b;
       default:
         return INT_MAX;
 
