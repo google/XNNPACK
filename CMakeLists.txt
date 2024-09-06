@@ -2039,6 +2039,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       qd8-f32-qc4w-gemm
       qd8-f32-qc8w-gemm
       qp8-f32-qc4w-gemm
+      qp8-f32-qb4w-gemm
       qs16-qs8-vcvt
       qs8-dwconv
       qs8-f16-vcvt
