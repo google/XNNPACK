@@ -1243,9 +1243,8 @@ IF(XNNPACK_BUILD_TESTS)
 
   # ---[ Launch heavy tests first.
   SET(SHARDED_TESTS
-    f32-avgpool-minmax
-    f32-maxpool-minmax
-    f32-pavgpool-minmax
+    avgpool-minmax
+    maxpool-minmax
     f32-vclamp
     f32-vlrelu
     f32-rdsum
@@ -1470,7 +1469,6 @@ IF(XNNPACK_BUILD_TESTS)
       cs16-bfly4
       cs16-fftr
       cs16-vsquareabs
-      f16-avgpool-minmax
       f16-conv-hwc2chw
       f16-f32acc-rdsum
       f16-f32acc-rsum
@@ -1478,8 +1476,6 @@ IF(XNNPACK_BUILD_TESTS)
       f16-gavgpool-minmax
       f16-ibilinear-chw
       f16-ibilinear
-      f16-maxpool-minmax
-      f16-pavgpool-minmax
       f16-prelu
       f16-raddstoreexpminusmax
       f16-rmax
@@ -1516,7 +1512,6 @@ IF(XNNPACK_BUILD_TESTS)
       qs8-rsum
       qs8-vhswish
       qs8-vlrelu
-      qu8-avgpool-minmax-fp32
       qu8-gavgpool-minmax-fp32
       qu8-gavgpool-minmax-rndnu
       qu8-requantization
@@ -1525,13 +1520,11 @@ IF(XNNPACK_BUILD_TESTS)
       s16-rmaxabs
       s16-window
       s8-ibilinear
-      s8-maxpool-minmax
       u32-filterbank-accumulate
       u32-filterbank-subtract
       u32-vlog
       u8-ibilinear
       u8-lut32norm
-      u8-maxpool-minmax
       u8-rmax
       x16-packw
       x16-transpose
@@ -1541,7 +1534,6 @@ IF(XNNPACK_BUILD_TESTS)
       x32-packx
       x32-transpose
       x32-unpool
-      x32-zerob
       x32-zip
       x64-transpose
       x8-lut
