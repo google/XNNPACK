@@ -14,7 +14,7 @@ $assert LMUL in [1, 2, 4, 8]
 
 
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
-void xnn_${DATATYPE.lower()}_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__rvv_c${LMUL}v(
+void xnn_${DATATYPE.lower()}_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__rvv_u${LMUL}v(
     size_t rows,
     size_t channels,
     const ${XINT8_T}* input,

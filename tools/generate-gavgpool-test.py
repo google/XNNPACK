@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"xnn_(qs8|qu8|f16|f32)_(gavgpool|rdsum)(_(minmax))?(_(fp32|rndnu))?_ukernel_((\d+)p)?(\d+)x__(.+)_c(\d+)(_acc(\d+))?(v)?", name)
+  match = re.match(r"xnn_(qs8|qu8|f16|f32)_(gavgpool|rdsum)(_(minmax))?(_(fp32|rndnu))?_ukernel_((\d+)p)?(\d+)x__(.+)_(c)?(u)?(\d+)(_acc(\d+))?(v)?", name)
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
 
@@ -38,8 +38,9 @@ def split_ukernel_name(name):
   else:
     primary_tile = int(match.group(9))
     incremental_tile = 0
-  channel_tile = int(match.group(11))
-  vector_tile = bool(match.group(12))
+  channel_tile = int(match.group(13))
+  vector_tile = bool(match.group(16))
+  
 
   arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(10))
   return requantization_type, primary_tile, incremental_tile, channel_tile, vector_tile, arch, isa

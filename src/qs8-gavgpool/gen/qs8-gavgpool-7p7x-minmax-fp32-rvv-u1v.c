@@ -15,7 +15,7 @@
 #include "xnnpack/math.h"
 
 
-void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_c1v(
+void xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v(
     size_t rows,
     size_t channels,
     const int8_t* input,
