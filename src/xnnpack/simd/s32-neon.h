@@ -38,6 +38,11 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return vminq_s32(a, b);
 }
 
+static XNN_INLINE xnn_simd_s32_t xnn_sub_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  return vsubq_s32(a, b);
+}
+
 // Load/store operations.
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {
   return vld1q_s32(ptr);
@@ -85,6 +90,13 @@ static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,
   if (num_elements & 1) {
     vst1_lane_s32(output, v_low, 0);
   }
+}
+
+// Conversion operations.
+
+static XNN_INLINE float32x4_t
+xnn_cvt_f32_s32(xnn_simd_s32_t a) {
+  return vcvtq_f32_s32(a);
 }
 
 #endif  // __XNNPACK_SRC_XNNPACK_SIMD_S32_NEON_H_

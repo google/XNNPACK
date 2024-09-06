@@ -15,11 +15,42 @@
 extern "C" {
 #endif
 
+#define DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                           \
+      size_t n,                                        \
+      const int32_t* input,                            \
+      float* output,                                   \
+      const struct xnn_s32_f32_cvt_params* params);
+
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__neon_u4)
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__neon_u8)
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__neon_u12)
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__neon_u16)
+
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__avx2_u8)
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__avx2_u16)
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__avx2_u24)
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__avx2_u32)
+
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__avx512f_u16)
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__avx512f_u32)
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__avx512f_u48)
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__avx512f_u64)
+
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__wasmsimd_u4)
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__wasmsimd_u8)
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__wasmsimd_u12)
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__wasmsimd_u16)
+
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__scalar_u1)
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__scalar_u2)
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__scalar_u3)
+DECLARE_S32_F32_VCVT_UKERNEL_FUNCTION(xnn_s32_f32_vcvt_ukernel__scalar_u4)
 
 #define DECLARE_F16_F32_VCVT_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                           \
       size_t n,                                        \
-      const xnn_float16* input,               \
+      const xnn_float16* input,                        \
       float* output,                                   \
       const void* params);
 

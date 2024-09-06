@@ -84,6 +84,9 @@ class VCvtMicrokernelTester {
   void Test(xnn_f32_qu8_vcvt_ukernel_fn vcvt,
             xnn_init_f32_qu8_cvt_params_fn init_params) const;
 
+  void Test(xnn_s32_f32_vcvt_ukernel_fn vcvt,
+            xnn_init_s32_f32_cvt_params_fn init_params) const;
+
   void Test(xnn_qs8_vcvt_ukernel_fn vcvt,
             xnn_init_qs8_cvt_params_fn init_params) const;
 

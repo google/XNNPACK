@@ -390,6 +390,7 @@ sh_test(
     "f32_f16_vcvt",
     "f32_qs8_vcvt",
     "f32_qu8_vcvt",
+    "s32_f32_vcvt",
     "qs16_qs8_vcvt",
     "qs8_f16_vcvt",
     "qs8_f32_vcvt",
@@ -1385,6 +1386,7 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS,
 ) for kernel in [
     "x8_packw",
+    "qs8_packw",
     "x16_packw",
     "x32_packw",
 ]]
@@ -1506,7 +1508,7 @@ xnnpack_binary(
 
 xnnpack_unit_test(
     name = "binary_nd_test",
-    timeout = "moderate",
+    timeout = "long",
     srcs = ["binary-nd.cc"],
     shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
@@ -1733,7 +1735,7 @@ xnnpack_unit_test(
         "mean-nd.cc",
         "mean-operator-tester.h",
     ],
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + ["//:requantization"],
 )
 
 xnnpack_unit_test(
@@ -2342,8 +2344,8 @@ xnnpack_unit_test(
     ],
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
+        "//:math",
         "//:node_type",
         "//:operators",
         "//:subgraph",

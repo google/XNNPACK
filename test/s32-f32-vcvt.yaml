@@ -1,0 +1,50 @@
+# Copyright 2024 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# ARM NEON
+- name: xnn_s32_f32_vcvt_ukernel__neon_u4
+  init: xnn_init_s32_f32_cvt_scalar_params
+- name: xnn_s32_f32_vcvt_ukernel__neon_u8
+  init: xnn_init_s32_f32_cvt_scalar_params
+- name: xnn_s32_f32_vcvt_ukernel__neon_u12
+  init: xnn_init_s32_f32_cvt_scalar_params
+- name: xnn_s32_f32_vcvt_ukernel__neon_u16
+  init: xnn_init_s32_f32_cvt_scalar_params
+# x86 AVX
+- name: xnn_s32_f32_vcvt_ukernel__avx2_u8
+  init: xnn_init_s32_f32_cvt_scalar_params
+- name: xnn_s32_f32_vcvt_ukernel__avx2_u16
+  init: xnn_init_s32_f32_cvt_scalar_params
+- name: xnn_s32_f32_vcvt_ukernel__avx2_u24
+  init: xnn_init_s32_f32_cvt_scalar_params
+- name: xnn_s32_f32_vcvt_ukernel__avx2_u32
+  init: xnn_init_s32_f32_cvt_scalar_params
+# x86 AVX512
+- name: xnn_s32_f32_vcvt_ukernel__avx512f_u16
+  init: xnn_init_s32_f32_cvt_scalar_params
+- name: xnn_s32_f32_vcvt_ukernel__avx512f_u32
+  init: xnn_init_s32_f32_cvt_scalar_params
+- name: xnn_s32_f32_vcvt_ukernel__avx512f_u48
+  init: xnn_init_s32_f32_cvt_scalar_params
+- name: xnn_s32_f32_vcvt_ukernel__avx512f_u64
+  init: xnn_init_s32_f32_cvt_scalar_params
+# WAsm SIMD
+- name: xnn_s32_f32_vcvt_ukernel__wasmsimd_u4
+  init: xnn_init_s32_f32_cvt_scalar_params
+- name: xnn_s32_f32_vcvt_ukernel__wasmsimd_u8
+  init: xnn_init_s32_f32_cvt_scalar_params
+- name: xnn_s32_f32_vcvt_ukernel__wasmsimd_u12
+  init: xnn_init_s32_f32_cvt_scalar_params
+- name: xnn_s32_f32_vcvt_ukernel__wasmsimd_u16
+  init: xnn_init_s32_f32_cvt_scalar_params
+# Scalar
+- name: xnn_s32_f32_vcvt_ukernel__scalar_u1
+  init: xnn_init_s32_f32_cvt_scalar_params
+- name: xnn_s32_f32_vcvt_ukernel__scalar_u2
+  init: xnn_init_s32_f32_cvt_scalar_params
+- name: xnn_s32_f32_vcvt_ukernel__scalar_u3
+  init: xnn_init_s32_f32_cvt_scalar_params
+- name: xnn_s32_f32_vcvt_ukernel__scalar_u4
+  init: xnn_init_s32_f32_cvt_scalar_params

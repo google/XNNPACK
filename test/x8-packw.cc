@@ -236,6 +236,7 @@ TEST_P(XnnTest, null_bias) {
     }
   }
 }
+
 INSTANTIATE_TEST_SUITE_P(x8_packw,
                          XnnTest,
                          testing::ValuesIn(xnn_test_params),

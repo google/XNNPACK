@@ -140,25 +140,25 @@ class RSumMicrokernelTester {
 
     std::vector<xnn_float16> input(batch_size() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
       // Compute reference results.
       float output_ref = 0.0f;
       for (size_t i = 0; i < batch_size(); i++) {
-        output_ref += xnn_float16_to_float(input[i]);
+        output_ref += input[i];
       }
       output_ref *= scale();
 
       // Prepare parameters.
       xnn_f16_scale_params params;
-      init_params(&params, xnn_float16_from_float(scale()));
+      init_params(&params, scale());
 
       // Call optimized micro-kernel.
-      xnn_float16 output = UINT16_C(0x7E00);  /* NaN */
+      xnn_float16 output = std::nanf("");  /* NaN */
       rsum(batch_size() * sizeof(xnn_float16), input.data(), &output, &params);
 
       // Verify results.
-      EXPECT_NEAR(xnn_float16_to_float(output), output_ref, std::abs(output_ref) * 4.0e-3f)
+      EXPECT_NEAR(output, output_ref, std::abs(output_ref) * 4.0e-3f)
         << "with batch " << batch_size() << ", scale " << scale();
     }
   }
@@ -169,12 +169,12 @@ class RSumMicrokernelTester {
 
     std::vector<xnn_float16> input(batch_size() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
       // Compute reference results.
       float output_ref = 0.0f;
       for (size_t i = 0; i < batch_size(); i++) {
-        output_ref += xnn_float16_to_float(input[i]);
+        output_ref += input[i];
       }
       output_ref *= scale();
 

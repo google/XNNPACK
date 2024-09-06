@@ -36,17 +36,16 @@ static void f16_rmin(
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), std::ref(rng));
-  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
-
+  
   std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> input(elements);
-  std::generate(input.begin(), input.end(), std::ref(f16rng));
+  std::generate(input.begin(), input.end(), f32rng);
 
   xnn_f16_default_params params;
   if (init_params != nullptr) {
     init_params(&params);
   }
 
-  xnn_float16 output = UINT16_C(0x7E00) /* NaN */;
+  xnn_float16 output = std::nanf("");
   for (auto _ : state) {
     rmin(elements * sizeof(xnn_float16), input.data(), &output, &params);
   }

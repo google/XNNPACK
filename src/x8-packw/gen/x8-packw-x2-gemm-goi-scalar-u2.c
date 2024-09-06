@@ -16,7 +16,7 @@
 #include "xnnpack/packw.h"
 #include "xnnpack/unaligned.h"
 
-void xnn_x8_packw_gemm_goi_ukernel_x2__scalar_int_u4(
+void xnn_x8_packw_gemm_goi_ukernel_x2__scalar_u2(
   size_t g,
   size_t nc,
   size_t kc,
@@ -59,28 +59,20 @@ void xnn_x8_packw_gemm_goi_ukernel_x2__scalar_int_u4(
 
       const int8_t* w1 = w0 + kc;
 
-      // KC main loop multiple of 2x4
+      // KC main loop multiple of 2x2
       size_t k = kc;
-      for (; k >= 4; k -= 4) {
+      for (; k >= 2; k -= 2) {
         const int8_t v00 = w0[0];
         const int8_t v01 = w0[1];
-        const int8_t v02 = w0[2];
-        const int8_t v03 = w0[3];
-        w0 += 4;
+        w0 += 2;
         const int8_t v10 = w1[0];
         const int8_t v11 = w1[1];
-        const int8_t v12 = w1[2];
-        const int8_t v13 = w1[3];
-        w1 += 4;
+        w1 += 2;
         out[0] = v00;
         out[1] = v10;
         out[2] = v01;
         out[3] = v11;
-        out[4] = v02;
-        out[5] = v12;
-        out[6] = v03;
-        out[7] = v13;
-        out += 8;
+        out += 4;
       }
 
       // KC remainder
@@ -113,22 +105,18 @@ void xnn_x8_packw_gemm_goi_ukernel_x2__scalar_int_u4(
       out += (2 - n) * sizeof(uint32_t);
 
 
-      // KC main loop multiple of 2x4
+      // KC main loop multiple of 2x2
       size_t k = kc;
-      for (; k >= 4; k -= 4) {
+      for (; k >= 2; k -= 2) {
         const int8_t v00 = w0[0];
         const int8_t v01 = w0[1];
-        const int8_t v02 = w0[2];
-        const int8_t v03 = w0[3];
-        w0 += 4;
+        w0 += 2;
         out[0] = v00;
         out[2] = v01;
-        out[4] = v02;
-        out[6] = v03;
-        out += 8;
+        out += 4;
       }
 
-      // KC remainder of 1..3
+      // KC remainder of 1..1
       for (; k != 0; --k) {
         const int8_t v0 = *w0++;
         out[0] = v0;

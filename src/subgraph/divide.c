@@ -32,15 +32,18 @@ static enum xnn_status create_divide_operator(
   assert(node->num_outputs == 1);
 
   enum xnn_status status;
-  switch (node->compute_type) {
-    case xnn_compute_type_fp16:
+  const uint32_t input1_id = opdata->inputs[0];
+  assert(input1_id < num_values);
+  const struct xnn_value *input1_value = &values[input1_id];
+  switch (input1_value->datatype) {
+    case xnn_datatype_fp16:
       status = xnn_create_divide_nd_f16(
         node->activation.output_min,
         node->activation.output_max,
         node->flags,
         &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_fp32:
+    case xnn_datatype_fp32:
       status = xnn_create_divide_nd_f32(
         node->activation.output_min,
         node->activation.output_max,

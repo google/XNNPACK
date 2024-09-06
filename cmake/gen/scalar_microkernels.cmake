@@ -176,6 +176,8 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x4-minmax-fp32-scalar-lrintf.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x2-minmax-fp32-scalar-imagic.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x4-minmax-fp32-scalar-lrintf.c
+  src/qs8-rdsum/gen/qs8-rdsum-minmax-fp32-scalar-u1-acc1.c
+  src/qs8-rsum/gen/qs8-rsum-scalar-u4.c
   src/qs8-vadd/gen/qs8-vadd-minmax-scalar-u1.c
   src/qs8-vadd/gen/qs8-vadd-minmax-scalar-u4.c
   src/qs8-vaddc/gen/qs8-vaddc-minmax-scalar-u1.c
@@ -222,6 +224,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/s8-ibilinear/gen/s8-ibilinear-scalar-c1.c
   src/s8-maxpool/s8-maxpool-9p8x-minmax-scalar-c1.c
   src/s8-vclamp/s8-vclamp-scalar-u4.c
+  src/s32-f32-vcvt/gen/s32-f32-vcvt-scalar.c
   src/s32-vmul/gen/s32-vmul-scalar.c
   src/s32-vmul/gen/s32-vmulc-scalar.c
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c1.c
@@ -231,10 +234,10 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/u8-vclamp/u8-vclamp-scalar-u4.c
   src/x8-lut/gen/x8-lut-scalar-u4.c
   src/x8-packq/x8-packq-scalar-f32qp8-u1.c
-  src/x8-packw/gen/x8-packw-x4-gemm-goi-scalar-int-u2.c
-  src/x8-packw/gen/x8-packw-x8-gemm-goi-scalar-int-u2.c
-  src/x8-packw/gen/x8-packw-x16-gemm-goi-scalar-int-u2.c
-  src/x8-packw/gen/x8-packw-x32-gemm-goi-scalar-int-u2.c
+  src/x8-packw/gen/x8-packw-x4-gemm-goi-scalar-u2.c
+  src/x8-packw/gen/x8-packw-x8-gemm-goi-scalar-u2.c
+  src/x8-packw/gen/x8-packw-x16-gemm-goi-scalar-u2.c
+  src/x8-packw/gen/x8-packw-x32-gemm-goi-scalar-u2.c
   src/x8-transposec/gen/x8-transposec-2x4-scalar-int.c
   src/x8-zip/x8-zip-x2-scalar.c
   src/x8-zip/x8-zip-x3-scalar.c
@@ -733,6 +736,10 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-gavgpool/gen/qs8-gavgpool-7x-minmax-fp32-scalar-lrintf-c1.c
   src/qs8-gavgpool/gen/qs8-gavgpool-7x-minmax-fp32-scalar-lrintf-c2.c
   src/qs8-gavgpool/gen/qs8-gavgpool-7x-minmax-fp32-scalar-lrintf-c4.c
+  src/qs8-packw/gen/qs8-packw-x8c4-gemm-goi-scalar.c
+  src/qs8-packw/gen/qs8-packw-x16c4-gemm-goi-scalar.c
+  src/qs8-packw/gen/qs8-packw-x32c4-gemm-goi-scalar.c
+  src/qs8-packw/gen/qs8-packw-x64c4-gemm-goi-scalar.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-4p2c-minmax-fp32-scalar-imagic.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-5f5m5l1c1s1r-minmax-fp32-scalar-fmagic.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-5f5m5l1c1s1r-minmax-fp32-scalar-imagic.c
@@ -813,7 +820,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4-minmax-fp32-scalar-fmagic.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4-minmax-fp32-scalar-imagic.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4-minmax-fp32-scalar-lrintf.c
-  src/qs8-rdsum/gen/qs8-rdsum-minmax-fp32-scalar-u1-acc1.c
   src/qs8-requantization/qs8-requantization-fp32-scalar-fmagic.c
   src/qs8-requantization/qs8-requantization-fp32-scalar-lrintf.c
   src/qs8-requantization/qs8-requantization-gemmlowp-scalar.c
@@ -823,7 +829,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-requantization/qs8-requantization-rndnu-scalar.c
   src/qs8-rsum/gen/qs8-rsum-scalar-u1.c
   src/qs8-rsum/gen/qs8-rsum-scalar-u2.c
-  src/qs8-rsum/gen/qs8-rsum-scalar-u4.c
   src/qs8-vadd/gen/qs8-vadd-minmax-scalar-u2.c
   src/qs8-vaddc/gen/qs8-vaddc-minmax-scalar-u2.c
   src/qs8-vcvt/gen/qs8-vcvt-scalar-u2.c
@@ -997,12 +1002,12 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/x8-lut/gen/x8-lut-scalar-u2.c
   src/x8-lut/gen/x8-lut-scalar-u8.c
   src/x8-lut/gen/x8-lut-scalar-u16.c
-  src/x8-packw/gen/x8-packw-x2-gemm-goi-scalar-int-u2.c
-  src/x8-packw/gen/x8-packw-x2-gemm-goi-scalar-int-u4.c
-  src/x8-packw/gen/x8-packw-x4-gemm-goi-scalar-int-u4.c
-  src/x8-packw/gen/x8-packw-x8-gemm-goi-scalar-int-u4.c
-  src/x8-packw/gen/x8-packw-x16-gemm-goi-scalar-int-u4.c
-  src/x8-packw/gen/x8-packw-x32-gemm-goi-scalar-int-u4.c
+  src/x8-packw/gen/x8-packw-x2-gemm-goi-scalar-u2.c
+  src/x8-packw/gen/x8-packw-x2-gemm-goi-scalar-u4.c
+  src/x8-packw/gen/x8-packw-x4-gemm-goi-scalar-u4.c
+  src/x8-packw/gen/x8-packw-x8-gemm-goi-scalar-u4.c
+  src/x8-packw/gen/x8-packw-x16-gemm-goi-scalar-u4.c
+  src/x8-packw/gen/x8-packw-x32-gemm-goi-scalar-u4.c
   src/x8-transposec/gen/x8-transposec-1x2-scalar-int.c
   src/x8-transposec/gen/x8-transposec-1x4-scalar-int.c
   src/x8-transposec/gen/x8-transposec-2x1-scalar-int.c

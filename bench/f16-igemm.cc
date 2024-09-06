@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
+#include <cstdint>
 #include <functional>
 #include <random>
 #include <vector>
@@ -50,8 +51,7 @@ static void f16_igemm(benchmark::State& state,
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
-  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
-
+  
   const size_t output_pixel_stride = group_output_channels;
   const size_t input_pixel_stride = group_input_channels;
   const size_t effective_kernel_height = (kernel_height - 1) * dilation + 1;
@@ -67,11 +67,11 @@ static void f16_igemm(benchmark::State& state,
   const size_t kc_stride = benchmark::utils::RoundUp<size_t>(group_input_channels, kr * sr);
 
   std::vector<xnn_float16> a(input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  std::generate(a.begin(), a.end(), std::ref(f16rng));
+  std::generate(a.begin(), a.end(), f32rng);
   std::vector<xnn_float16> k(group_output_channels * kernel_height * kernel_width * group_input_channels);
-  std::generate(k.begin(), k.end(), std::ref(f16rng));
+  std::generate(k.begin(), k.end(), f32rng);
   std::vector<xnn_float16> b(group_output_channels);
-  std::generate(b.begin(), b.end(), std::ref(f16rng));
+  std::generate(b.begin(), b.end(), f32rng);
 
   std::vector<xnn_float16> z(group_input_channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
 
@@ -85,7 +85,11 @@ static void f16_igemm(benchmark::State& state,
   std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> w(w_elements * num_buffers);
   std::fill(w.begin(), w.end(), 0);
   xnn_pack_f16_conv_goki_w(/*groups=*/1, group_output_channels, kernel_size, group_input_channels, nr, kr, sr,
-    k.data(), b.data(), /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, /*params=*/nullptr);
+                           reinterpret_cast<const uint16_t*>(k.data()), 
+                           reinterpret_cast<const uint16_t*>(b.data()), 
+                           /*scale=*/nullptr, 
+                           reinterpret_cast<uint16_t*>(w.data()), 
+                           /*extra_bytes=*/0, /*params=*/nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
   }
@@ -111,11 +115,11 @@ static void f16_igemm(benchmark::State& state,
   }
 
   std::vector<xnn_float16> c(c_elements * num_buffers);
-  std::fill(c.begin(), c.end(), UINT16_C(0x7E00) /* NaN */);
+  std::fill(c.begin(), c.end(), std::nanf(""));
 
   // Prepare minmax parameters.
   xnn_f16_minmax_params params;
-  init_params(&params, UINT16_C(0xFC00) /* -inf */, UINT16_C(0x7C00) /* inf */);
+  init_params(&params, -INFINITY, INFINITY);
 
   size_t buffer_index = 0;
   for (auto _ : state) {

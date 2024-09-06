@@ -19,8 +19,8 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include <fp16/fp16.h>
 #include "xnnpack.h"
-#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
 #include "next_prime.h"
@@ -318,8 +318,8 @@ class MaxPoolMicrokernelTester {
       (output_pixels() - 1) * output_stride() + channels());
     std::vector<float> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels() - input_offset();
@@ -332,7 +332,7 @@ class MaxPoolMicrokernelTester {
         for (size_t c = 0; c < channels(); c++) {
           float max_value = -std::numeric_limits<float>::infinity();
           for (size_t p = 0; p < pooling_elements(); p++) {
-            max_value = std::max(max_value, xnn_float16_to_float(indirect_input[x * step() + p][c + input_offset()]));
+            max_value = std::max<float>(max_value, indirect_input[x * step() + p][c + input_offset()]);
           }
           output_ref[x * channels() + c] = max_value;
         }
@@ -354,12 +354,12 @@ class MaxPoolMicrokernelTester {
       if (qmax() == std::numeric_limits<int16_t>::max()) {
         output_max = +std::numeric_limits<float>::infinity();
       }
-      output_min = xnn_float16_to_float(xnn_float16_from_float(output_min));
-      output_max = xnn_float16_to_float(xnn_float16_from_float(output_max));
+      output_min = xnn_float16(output_min);
+      output_max = xnn_float16(output_max);
 
       // Prepare parameters.
       xnn_f16_minmax_params params;
-      init_params(&params, xnn_float16_from_float(output_min), xnn_float16_from_float(output_max));
+      init_params(&params, output_min, output_max);
 
       // Clamp reference results.
       for (float& output_value : output_ref) {
@@ -376,15 +376,15 @@ class MaxPoolMicrokernelTester {
       // Verify results.
       for (size_t x = 0; x < output_pixels(); x++) {
         for (size_t c = 0; c < channels(); c++) {
-          ASSERT_GE(xnn_float16_to_float(output[x * output_stride() + c]), output_min)
+          ASSERT_GE(output[x * output_stride() + c], output_min)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          ASSERT_LE(xnn_float16_to_float(output[x * output_stride() + c]), output_max)
+          ASSERT_LE(output[x * output_stride() + c], output_max)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          EXPECT_EQ(xnn_float16_to_float(output[x * output_stride() + c]), output_ref[x * channels() + c])
+          EXPECT_EQ(output[x * output_stride() + c], output_ref[x * channels() + c])
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();

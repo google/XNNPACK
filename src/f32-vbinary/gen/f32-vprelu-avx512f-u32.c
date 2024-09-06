@@ -69,7 +69,7 @@ void xnn_f32_vprelu_ukernel__avx512f_u32(
 
     const __m512 va = _mm512_maskz_loadu_ps(vmask, input_a);
     const __mmask16 vsign = _mm512_cmp_ps_mask(va, vzero, _CMP_LT_OQ);
-    __m512 vacc = _mm512_mask_mul_ps(va, vsign, va, _mm512_loadu_ps(input_b));
+    __m512 vacc = _mm512_mask_mul_ps(va, vsign, va, _mm512_maskz_loadu_ps(vmask, input_b));
     input_b += 16;
 
     _mm512_mask_storeu_ps(output, vmask, vacc);

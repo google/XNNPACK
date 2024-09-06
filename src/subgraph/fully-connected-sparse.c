@@ -28,6 +28,9 @@ static enum xnn_status create_fully_connected_operator(
 {
   assert(node->num_inputs >= 2);
   assert(node->num_inputs <= 3);
+  const uint32_t input_id = node->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_values);
   const uint32_t filter_id = node->inputs[1];
   assert(filter_id != XNN_INVALID_VALUE_ID);
   assert(filter_id < num_values);
@@ -51,8 +54,9 @@ static enum xnn_status create_fully_connected_operator(
   }
 
   enum xnn_status status;
-  switch (node->compute_type) {
-    case xnn_compute_type_fp16:
+  enum xnn_datatype input_datatype = values[input_id].datatype;
+  switch (input_datatype) {
+    case xnn_datatype_fp16:
     {
       status = xnn_create_convolution2d_nchw_f16(
         /*input_padding_top=*/0,
@@ -80,7 +84,7 @@ static enum xnn_status create_fully_connected_operator(
         &opdata->operator_objects[0]);
       break;
     }
-    case xnn_compute_type_fp32:
+    case xnn_datatype_fp32:
     {
       assert(values[filter_id].datatype == xnn_datatype_fp32);
       status = xnn_create_convolution2d_nchw_f32(

@@ -106,6 +106,7 @@ struct xnn_hardware_config {
   bool use_x86_avx512amx;
   bool use_x86_avx512fp16;
   bool use_x86_avxvnni;
+  bool use_x86_avxvnniint8;
   bool use_x86_avx256skx;
   bool use_x86_avx256vnni;
   bool use_x86_avx256vnnigfni;

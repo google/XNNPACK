@@ -39,17 +39,19 @@ static enum xnn_status create_global_average_pooling_operator(
   assert(output_id < num_values);
 
   enum xnn_status status;
-  if (values[node->inputs[0]].layout == xnn_layout_type_nchw) {
-    assert(node->compute_type == xnn_compute_type_fp32 || node->compute_type == xnn_compute_type_fp16);
-    switch (node->compute_type) {
-      case xnn_compute_type_fp32:
+  const struct xnn_value *input_value = &values[input_id];
+  const enum xnn_datatype datatype = input_value->datatype;
+  if (input_value->layout == xnn_layout_type_nchw) {
+    assert(datatype == xnn_datatype_fp32 || datatype == xnn_datatype_fp16);
+    switch (datatype) {
+      case xnn_datatype_fp32:
         status = xnn_create_global_average_pooling_ncw_f32(
           node->activation.output_min,
           node->activation.output_max,
           node->flags,
           &opdata->operator_objects[0]);
         break;
-      case xnn_compute_type_fp16:
+      case xnn_datatype_fp16:
         status = xnn_create_global_average_pooling_ncw_f16(
           node->activation.output_min,
           node->activation.output_max,
@@ -62,22 +64,22 @@ static enum xnn_status create_global_average_pooling_operator(
   } else {
     assert(values[node->inputs[0]].layout == xnn_layout_type_nhwc);
     assert(values[node->outputs[0]].layout == xnn_layout_type_nhwc);
-    switch (node->compute_type) {
-      case xnn_compute_type_fp32:
+    switch (datatype) {
+      case xnn_datatype_fp32:
         status = xnn_create_global_average_pooling_nwc_f32(
           node->activation.output_min,
           node->activation.output_max,
           node->flags,
           &opdata->operator_objects[0]);
         break;
-      case xnn_compute_type_fp16:
+      case xnn_datatype_fp16:
         status = xnn_create_global_average_pooling_nwc_f16(
           node->activation.output_min,
           node->activation.output_max,
           node->flags,
           &opdata->operator_objects[0]);
         break;
-      case xnn_compute_type_qs8:
+      case xnn_datatype_qint8:
       {
         const float output_scale = values[output_id].quantization.scale;
         const int32_t output_zero_point = values[output_id].quantization.zero_point;
@@ -92,7 +94,7 @@ static enum xnn_status create_global_average_pooling_operator(
           &opdata->operator_objects[0]);
         break;
       }
-      case xnn_compute_type_qu8:
+      case xnn_datatype_quint8:
       {
         const float output_scale = values[output_id].quantization.scale;
         const int32_t output_zero_point = values[output_id].quantization.zero_point;
