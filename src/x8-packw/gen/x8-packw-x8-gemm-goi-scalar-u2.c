@@ -16,7 +16,7 @@
 #include "xnnpack/packw.h"
 #include "xnnpack/unaligned.h"
 
-void xnn_x8_packw_gemm_goi_ukernel_x8__scalar_int_u4(
+void xnn_x8_packw_gemm_goi_ukernel_x8__scalar_u2(
   size_t g,
   size_t nc,
   size_t kc,
@@ -77,49 +77,33 @@ void xnn_x8_packw_gemm_goi_ukernel_x8__scalar_int_u4(
       const int8_t* w6 = w5 + kc;
       const int8_t* w7 = w6 + kc;
 
-      // KC main loop multiple of 8x4
+      // KC main loop multiple of 8x2
       size_t k = kc;
-      for (; k >= 4; k -= 4) {
+      for (; k >= 2; k -= 2) {
         const int8_t v00 = w0[0];
         const int8_t v01 = w0[1];
-        const int8_t v02 = w0[2];
-        const int8_t v03 = w0[3];
-        w0 += 4;
+        w0 += 2;
         const int8_t v10 = w1[0];
         const int8_t v11 = w1[1];
-        const int8_t v12 = w1[2];
-        const int8_t v13 = w1[3];
-        w1 += 4;
+        w1 += 2;
         const int8_t v20 = w2[0];
         const int8_t v21 = w2[1];
-        const int8_t v22 = w2[2];
-        const int8_t v23 = w2[3];
-        w2 += 4;
+        w2 += 2;
         const int8_t v30 = w3[0];
         const int8_t v31 = w3[1];
-        const int8_t v32 = w3[2];
-        const int8_t v33 = w3[3];
-        w3 += 4;
+        w3 += 2;
         const int8_t v40 = w4[0];
         const int8_t v41 = w4[1];
-        const int8_t v42 = w4[2];
-        const int8_t v43 = w4[3];
-        w4 += 4;
+        w4 += 2;
         const int8_t v50 = w5[0];
         const int8_t v51 = w5[1];
-        const int8_t v52 = w5[2];
-        const int8_t v53 = w5[3];
-        w5 += 4;
+        w5 += 2;
         const int8_t v60 = w6[0];
         const int8_t v61 = w6[1];
-        const int8_t v62 = w6[2];
-        const int8_t v63 = w6[3];
-        w6 += 4;
+        w6 += 2;
         const int8_t v70 = w7[0];
         const int8_t v71 = w7[1];
-        const int8_t v72 = w7[2];
-        const int8_t v73 = w7[3];
-        w7 += 4;
+        w7 += 2;
         out[0] = v00;
         out[1] = v10;
         out[2] = v20;
@@ -136,23 +120,7 @@ void xnn_x8_packw_gemm_goi_ukernel_x8__scalar_int_u4(
         out[13] = v51;
         out[14] = v61;
         out[15] = v71;
-        out[16] = v02;
-        out[17] = v12;
-        out[18] = v22;
-        out[19] = v32;
-        out[20] = v42;
-        out[21] = v52;
-        out[22] = v62;
-        out[23] = v72;
-        out[24] = v03;
-        out[25] = v13;
-        out[26] = v23;
-        out[27] = v33;
-        out[28] = v43;
-        out[29] = v53;
-        out[30] = v63;
-        out[31] = v73;
-        out += 32;
+        out += 16;
       }
 
       // KC remainder
@@ -222,44 +190,30 @@ void xnn_x8_packw_gemm_goi_ukernel_x8__scalar_int_u4(
         w6 = w5;
       }
 
-      // KC main loop multiple of 8x4
+      // KC main loop multiple of 8x2
       size_t k = kc;
-      for (; k >= 4; k -= 4) {
+      for (; k >= 2; k -= 2) {
         const int8_t v00 = w0[0];
         const int8_t v01 = w0[1];
-        const int8_t v02 = w0[2];
-        const int8_t v03 = w0[3];
-        w0 += 4;
+        w0 += 2;
         const int8_t v10 = w1[0];
         const int8_t v11 = w1[1];
-        const int8_t v12 = w1[2];
-        const int8_t v13 = w1[3];
-        w1 += 4;
+        w1 += 2;
         const int8_t v20 = w2[0];
         const int8_t v21 = w2[1];
-        const int8_t v22 = w2[2];
-        const int8_t v23 = w2[3];
-        w2 += 4;
+        w2 += 2;
         const int8_t v30 = w3[0];
         const int8_t v31 = w3[1];
-        const int8_t v32 = w3[2];
-        const int8_t v33 = w3[3];
-        w3 += 4;
+        w3 += 2;
         const int8_t v40 = w4[0];
         const int8_t v41 = w4[1];
-        const int8_t v42 = w4[2];
-        const int8_t v43 = w4[3];
-        w4 += 4;
+        w4 += 2;
         const int8_t v50 = w5[0];
         const int8_t v51 = w5[1];
-        const int8_t v52 = w5[2];
-        const int8_t v53 = w5[3];
-        w5 += 4;
+        w5 += 2;
         const int8_t v60 = w6[0];
         const int8_t v61 = w6[1];
-        const int8_t v62 = w6[2];
-        const int8_t v63 = w6[3];
-        w6 += 4;
+        w6 += 2;
         out[0] = v00;
         out[1] = v10;
         out[2] = v20;
@@ -274,24 +228,10 @@ void xnn_x8_packw_gemm_goi_ukernel_x8__scalar_int_u4(
         out[12] = v41;
         out[13] = v51;
         out[14] = v61;
-        out[16] = v02;
-        out[17] = v12;
-        out[18] = v22;
-        out[19] = v32;
-        out[20] = v42;
-        out[21] = v52;
-        out[22] = v62;
-        out[24] = v03;
-        out[25] = v13;
-        out[26] = v23;
-        out[27] = v33;
-        out[28] = v43;
-        out[29] = v53;
-        out[30] = v63;
-        out += 32;
+        out += 16;
       }
 
-      // KC remainder of 1..3
+      // KC remainder of 1..1
       for (; k != 0; --k) {
         const int8_t v0 = *w0++;
         out[0] = v0;
