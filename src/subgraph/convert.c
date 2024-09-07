@@ -530,7 +530,8 @@ enum xnn_status xnn_define_convert(
   if ((flags & XNN_FLAG_MAYBE_PACK_FOR_GEMM) &&
       input_value->datatype == xnn_datatype_fp32 &&
       output_value->datatype == xnn_datatype_qdint8 &&
-      xnn_init_qp8_f32_qc4w_gemm_config() != NULL) {
+      (xnn_init_qp8_f32_qc4w_gemm_config() != NULL || 
+       xnn_init_qp8_f32_qb4w_gemm_config() != NULL)) {
     xnn_log_debug("Coercing type of output ID #%" PRIu32
                   " of %s operator from `%s` to `%s`.",
                   output_id, xnn_node_type_to_string(xnn_node_type_convert),
