@@ -10,7 +10,8 @@ $assert DATATYPE in ["QC8", "QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]
 
 #include <immintrin.h>
 
-#include <fp16/fp16.h>
+$if "F16" in DATATYPE:
+  #include <fp16/fp16.h>
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
