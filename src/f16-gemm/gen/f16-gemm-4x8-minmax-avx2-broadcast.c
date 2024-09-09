@@ -39,8 +39,8 @@ void xnn_f16_gemm_minmax_ukernel_4x8__avx2_broadcast(
   const uint16_t* a0 = (const uint16_t*) a;
   uint16_t* c0 = (uint16_t*) c;
 
-  const __m256 vmax = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
   const __m256 vmin = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.min));
+  const __m256 vmax = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 
