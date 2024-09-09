@@ -7477,6 +7477,852 @@
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U1V, channels_eq_1v_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    GAvgPoolMicrokernelTester()
+      .rows(7)
+      .channels((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+      .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U1V, channels_eq_1v_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t rows = 1; rows < 7; rows++) {
+      GAvgPoolMicrokernelTester()
+        .rows(rows)
+        .channels((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U1V, channels_eq_1v_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    GAvgPoolMicrokernelTester()
+      .rows(7)
+      .channels((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+      .input_stride((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1)
+      .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U1V, channels_eq_1v_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    GAvgPoolMicrokernelTester()
+      .rows(7)
+      .channels((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+      .qmax(128)
+      .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U1V, channels_eq_1v_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    GAvgPoolMicrokernelTester()
+      .rows(7)
+      .channels((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+      .qmin(128)
+      .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U1V, channels_div_1v_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))) {
+      GAvgPoolMicrokernelTester()
+        .rows(7)
+        .channels(channels)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U1V, channels_div_1v_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))) {
+      for (size_t rows = 1; rows < 7; rows++) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U1V, channels_lt_1v_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(7)
+        .channels(channels)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U1V, channels_lt_1v_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      for (size_t rows = 1; rows < 7; rows++) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U1V, channels_lt_1v_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(7)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U1V, channels_lt_1v_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(7)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U1V, channels_gt_1v_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(7)
+        .channels(channels)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U1V, channels_gt_1v_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      for (size_t rows = 1; rows < 7; rows++) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U1V, channels_gt_1v_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(7)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U1V, channels_gt_1v_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(7)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U2V, channels_eq_2v_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    GAvgPoolMicrokernelTester()
+      .rows(7)
+      .channels((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+      .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U2V, channels_eq_2v_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t rows = 1; rows < 7; rows++) {
+      GAvgPoolMicrokernelTester()
+        .rows(rows)
+        .channels((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U2V, channels_eq_2v_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    GAvgPoolMicrokernelTester()
+      .rows(7)
+      .channels((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+      .input_stride((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1)
+      .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U2V, channels_eq_2v_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    GAvgPoolMicrokernelTester()
+      .rows(7)
+      .channels((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+      .qmax(128)
+      .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U2V, channels_eq_2v_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    GAvgPoolMicrokernelTester()
+      .rows(7)
+      .channels((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+      .qmin(128)
+      .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U2V, channels_div_2v_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*8; channels += (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))) {
+      GAvgPoolMicrokernelTester()
+        .rows(7)
+        .channels(channels)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U2V, channels_div_2v_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*8; channels += (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))) {
+      for (size_t rows = 1; rows < 7; rows++) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U2V, channels_lt_2v_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(7)
+        .channels(channels)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U2V, channels_lt_2v_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      for (size_t rows = 1; rows < 7; rows++) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U2V, channels_lt_2v_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(7)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U2V, channels_lt_2v_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(7)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U2V, channels_gt_2v_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(7)
+        .channels(channels)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U2V, channels_gt_2v_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      for (size_t rows = 1; rows < 7; rows++) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U2V, channels_gt_2v_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(7)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7X__RVV_U2V, channels_gt_2v_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(7)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_eq_1v_2pass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    GAvgPoolMicrokernelTester()
+      .rows(14)
+      .channels((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+      .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_eq_1v_2pass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    GAvgPoolMicrokernelTester()
+      .rows(14)
+      .channels(1)
+      .input_stride((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1)
+      .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_eq_1v_2pass_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    GAvgPoolMicrokernelTester()
+      .rows(14)
+      .channels((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+      .qmax(128)
+      .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_eq_1v_2pass_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    GAvgPoolMicrokernelTester()
+      .rows(14)
+      .channels((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+      .qmin(128)
+      .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_eq_1v_2pass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t rows = 8; rows < 14; rows++) {
+      GAvgPoolMicrokernelTester()
+        .rows(rows)
+        .channels((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_eq_1v_2pass_subtile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t rows = 8; rows < 14; rows++) {
+      GAvgPoolMicrokernelTester()
+        .rows(rows)
+        .channels((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+        .input_stride((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_eq_1v_multipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t rows = 14; rows <= 35; rows += 7) {
+      GAvgPoolMicrokernelTester()
+        .rows(rows)
+        .channels((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_eq_1v_multipass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t rows = 14; rows <= 35; rows += 7) {
+      GAvgPoolMicrokernelTester()
+        .rows(rows)
+        .channels((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+        .input_stride((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_div_1v_2pass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))) {
+      GAvgPoolMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_div_1v_2pass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))) {
+      for (size_t rows = 8; rows < 14; rows++) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_div_1v_multipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))) {
+      for (size_t rows = 14; rows <= 35; rows += 7) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_div_1v_multipass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*8; channels += (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))) {
+      for (size_t rows = 14; rows <= 35; rows += 7) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*16+1)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_lt_1v_2pass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_lt_1v_2pass_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_lt_1v_2pass_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_lt_1v_2pass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      for (size_t rows = 8; rows < 14; rows++) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_lt_1v_multipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      for (size_t rows = 14; rows <= 35; rows += 7) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_lt_1v_multipass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      for (size_t rows = 14; rows <= 35; rows += 7) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_gt_1v_2pass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_gt_1v_2pass_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_gt_1v_2pass_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_gt_1v_2pass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      for (size_t rows = 8; rows < 14; rows++) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_gt_1v_multipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      for (size_t rows = 14; rows < 35; rows += 14) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U1V, channels_gt_1v_multipass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      for (size_t rows = 14; rows < 35; rows += 14) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride((1*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2+11)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u1v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_eq_2v_2pass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    GAvgPoolMicrokernelTester()
+      .rows(14)
+      .channels((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+      .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_eq_2v_2pass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    GAvgPoolMicrokernelTester()
+      .rows(14)
+      .channels(2)
+      .input_stride((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1)
+      .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_eq_2v_2pass_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    GAvgPoolMicrokernelTester()
+      .rows(14)
+      .channels((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+      .qmax(128)
+      .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_eq_2v_2pass_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    GAvgPoolMicrokernelTester()
+      .rows(14)
+      .channels((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+      .qmin(128)
+      .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_eq_2v_2pass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t rows = 8; rows < 14; rows++) {
+      GAvgPoolMicrokernelTester()
+        .rows(rows)
+        .channels((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_eq_2v_2pass_subtile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t rows = 8; rows < 14; rows++) {
+      GAvgPoolMicrokernelTester()
+        .rows(rows)
+        .channels((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+        .input_stride((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_eq_2v_multipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t rows = 14; rows <= 35; rows += 7) {
+      GAvgPoolMicrokernelTester()
+        .rows(rows)
+        .channels((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_eq_2v_multipass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t rows = 14; rows <= 35; rows += 7) {
+      GAvgPoolMicrokernelTester()
+        .rows(rows)
+        .channels((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)))
+        .input_stride((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_div_2v_2pass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*8; channels += (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))) {
+      GAvgPoolMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_div_2v_2pass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*8; channels += (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))) {
+      for (size_t rows = 8; rows < 14; rows++) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_div_2v_multipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*8; channels += (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))) {
+      for (size_t rows = 14; rows <= 35; rows += 7) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_div_2v_multipass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*8; channels += (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))) {
+      for (size_t rows = 14; rows <= 35; rows += 7) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*16+1)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_lt_2v_2pass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_lt_2v_2pass_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_lt_2v_2pass_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_lt_2v_2pass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      for (size_t rows = 8; rows < 14; rows++) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_lt_2v_multipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      for (size_t rows = 14; rows <= 35; rows += 7) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_lt_2v_multipass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = 1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t)); channels++) {
+      for (size_t rows = 14; rows <= 35; rows += 7) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_gt_2v_2pass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_gt_2v_2pass_fulltile_with_qmax) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .qmax(128)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_gt_2v_2pass_fulltile_with_qmin) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      GAvgPoolMicrokernelTester()
+        .rows(14)
+        .channels(channels)
+        .qmin(128)
+        .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_gt_2v_2pass_subtile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      for (size_t rows = 8; rows < 14; rows++) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_gt_2v_multipass_fulltile) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      for (size_t rows = 14; rows < 35; rows += 14) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+
+  TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__RVV_U2V, channels_gt_2v_multipass_fulltile_with_input_stride) {
+    TEST_REQUIRES_RISCV_VECTOR;
+    for (size_t channels = (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))+1; channels < (2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2; channels++) {
+      for (size_t rows = 14; rows < 35; rows += 14) {
+        GAvgPoolMicrokernelTester()
+          .rows(rows)
+          .channels(channels)
+          .input_stride((2*xnn_init_hardware_config()->vlenb/sizeof(int8_t))*2+11)
+          .Test(xnn_qs8_gavgpool_minmax_fp32_ukernel_7p7x__rvv_u2v, xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params, xnn_qs8_requantize_fp32);
+      }
+    }
+  }
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
 TEST(QS8_GAVGPOOL_MINMAX_FP32_7P7X__SCALAR_FMAGIC_C1, channels_eq_1_2pass_fulltile) {
   GAvgPoolMicrokernelTester()
     .rows(14)
