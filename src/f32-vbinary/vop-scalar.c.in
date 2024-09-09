@@ -27,7 +27,7 @@ $  "SQRDIFF": lambda x, y: "%s - %s" % (x, y),
 $  "PRELU": lambda x, y: "%s * %s" % (x, y),
 $}[OP]
 $SUFFIX = {"LINEAR": "", "RELU": "_relu", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "union xnn_f32_default_params", "RELU": "union xnn_f32_relu_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
+$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "RELU": "struct xnn_f32_relu_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
 void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,

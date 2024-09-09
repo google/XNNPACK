@@ -80,21 +80,21 @@ SPECIAL_VALUES_F32 = {
         4,  # Number of elements.
         "{1.0f, -1.0f, 0.0f, -0.0f}",  # Inputs.
         "{0.0f, NAN, -INFINITY, -INFINITY}",  # Expected outputs.
-        "union xnn_f32_default_params",
+        "struct xnn_f32_default_params",
         1,  # Error margin in ULP.
     ),
     "GELU": (
         3,  # Number of elements.
         "{-6.0f, 6.0f, 0.0f}",  # Inputs.
         "{0.0f, 6.0f, 0.0f}",  # Expected outputs.
-        "union xnn_f32_default_params",
+        "struct xnn_f32_default_params",
         1,  # Error margin in ULP.
     ),
     "Exp": (
         3,  # Number of elements.
         "{0.0f, -1e3f, 1e3f}",  # Inputs.
         "{1.0f, 0.0f, INFINITY}",  # Expected outputs.
-        "union xnn_f32_default_params",
+        "struct xnn_f32_default_params",
         1,  # Error margin in ULP.
     ),
 }

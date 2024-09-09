@@ -468,7 +468,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qc4w(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f16_qc4w_minmax_params params;
+  struct xnn_f16_qc4w_minmax_params params;
   if XNN_LIKELY(gemm_config->init.f16_qc4w != NULL) {
     gemm_config->init.f16_qc4w(&params, fp16_output_min, fp16_output_max, kernel_zero_point);
   }
@@ -597,7 +597,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f16_qb4w_minmax_params params;
+  struct xnn_f16_qb4w_minmax_params params;
   if XNN_LIKELY(gemm_config->init.f16_qb4w != NULL) {
     gemm_config->init.f16_qb4w(&params, fp16_output_min, fp16_output_max, kernel_zero_point, block_size);
   }
@@ -689,7 +689,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc4w(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f32_qc4w_minmax_params params;
+  struct xnn_f32_qc4w_minmax_params params;
   if XNN_LIKELY(gemm_config->init.f32_qc4w != NULL) {
     gemm_config->init.f32_qc4w(&params, output_min, output_max, kernel_zero_point);
   }
@@ -910,7 +910,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
     }
   }
 
-  union xnn_f32_qb4w_minmax_params params;
+  struct xnn_f32_qb4w_minmax_params params;
   if XNN_LIKELY(gemm_config->init.f32_qb4w != NULL) {
     gemm_config->init.f32_qb4w(&params, output_min, output_max, kernel_zero_point, block_size);
   }
@@ -1259,7 +1259,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc4w(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f32_qc4w_minmax_params params;
+  struct xnn_f32_qc4w_minmax_params params;
   if XNN_LIKELY(gemm_config->init.f32_qc4w != NULL) {
     gemm_config->init.f32_qc4w(&params, output_min, output_max, kernel_zero_point);
   }

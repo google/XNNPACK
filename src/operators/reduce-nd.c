@@ -95,7 +95,7 @@ enum xnn_status xnn_create_mean_nd_qs8(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_qs8_mean_minmax_params params;
+  struct xnn_qs8_mean_minmax_params params;
   rsum_config->init.qs8_mean(&params, scale, -1, input_zero_point, output_zero_point, output_min, output_max);
 
   return create_mean_nd(

@@ -30,7 +30,7 @@ $  "PRELU": lambda x: "vmulq_f16(%s, vb)" % x,
 $  "RPRELU": lambda x: "vmulq_f16(%s, vb)" % x,
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "union xnn_f16_default_params", "MINMAX": "union xnn_f16_minmax_params"}[ACTIVATION]
+$PARAMS = {"LINEAR": "struct xnn_f16_default_params", "MINMAX": "union xnn_f16_minmax_params"}[ACTIVATION]
 $ISA = "aarch64_neonfp16arith" if OP in ["DIV", "RDIV"] else "neonfp16arith"
 void xnn_f16_v${OP.lower()}c${SUFFIX}_ukernel__${ISA}_u${BATCH_TILE}(
     size_t batch,

@@ -32,7 +32,7 @@ extern "C" {
       size_t cn_stride,                             \
       size_t a_offset,                              \
       const float* zero,                            \
-      const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 #define DECLARE_F32_IGEMM_RELU_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                             \
@@ -47,7 +47,7 @@ extern "C" {
       size_t cn_stride,                                  \
       size_t a_offset,                                   \
       const float* zero,                                 \
-      const union xnn_f32_relu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_f32_relu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 #define DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                               \

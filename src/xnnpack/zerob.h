@@ -22,7 +22,7 @@ extern "C" {
       uint32_t* packed_weights,                                                        \
       size_t channel_tile_stride,                                                      \
       size_t channel_subtile_stride,                                                   \
-      const union xnn_x32_packb_params* params);                                       \
+      const struct xnn_x32_packb_params* params);                                       \
 
 #include "src/x32-zerob/x32-zerob.h"
 
