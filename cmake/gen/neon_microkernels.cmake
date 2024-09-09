@@ -84,7 +84,7 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-vrnd/gen/f32-vrndz-neon-u8.c
   src/f32-vrsqrt/gen/f32-vrsqrt-neon-rsqrt-u16.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut64-p2-nr2recps-u8.c
-  src/f32-vtanh/gen/f32-vtanh-neon-expm1minus-rr1-p6h5ts-nr2recps-u8.c
+  src/f32-vtanh/gen/f32-vtanh-neon-rational-9-8-div.c
   src/f32-vunary/gen/f32-vabs-neon.c
   src/f32-vunary/gen/f32-vneg-neon.c
   src/f32-vunary/gen/f32-vsqr-neon.c
@@ -487,10 +487,6 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-p5-nr2recps-u16.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-p5-nr2recps-u20.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-p5-nr2recps-u24.c
-  src/f32-vtanh/gen/f32-vtanh-neon-expm1minus-rr1-p6h5ts-nr2recps-u4.c
-  src/f32-vtanh/gen/f32-vtanh-neon-expm1minus-rr1-p6h5ts-nr2recps-u12.c
-  src/f32-vtanh/gen/f32-vtanh-neon-expm1minus-rr1-p6h5ts-nr2recps-u16.c
-  src/f32-vtanh/gen/f32-vtanh-neon-rational-9-8-div.c
   src/f32-vtanh/gen/f32-vtanh-neon-rational-9-8-nr.c
   src/i16-vlshift/gen/i16-vlshift-neon-u8.c
   src/i16-vlshift/gen/i16-vlshift-neon-u16.c
