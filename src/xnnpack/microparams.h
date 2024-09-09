@@ -377,8 +377,6 @@ struct xnn_qs8_mean_minmax_params {
     int32_t num_elements;
     int8_t input_zero_point;
     int8_t output_zero_point;
-    int8_t output_min;
-    int8_t output_max;
   } scalar;
 };
 

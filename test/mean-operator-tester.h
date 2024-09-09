@@ -434,7 +434,6 @@ class MeanOperatorTester {
 
       const xnn_status status = xnn_create_mean_nd_qs8(
           input_scale * output_scale, input_zero_point, output_zero_point,
-          quantized_output_min, quantized_output_max,
           /*flags=*/0, &mean_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();

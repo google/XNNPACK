@@ -7,6 +7,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -2233,8 +2234,7 @@ void xnn_compute_contiguous_reduce(
     }
 
     struct xnn_f32_qs8_cvt_params cvt_params;
-    xnn_init_f32_qs8_cvt_scalar_params(&cvt_params, context->params.qs8_mean.scalar.scale, context->params.qs8_mean.scalar.output_zero_point,
-                                context->params.qs8_mean.scalar.output_min, context->params.qs8_mean.scalar.output_max);
+    xnn_init_f32_qs8_cvt_scalar_params(&cvt_params, context->params.qs8_mean.scalar.scale, context->params.qs8_mean.scalar.output_zero_point, INT8_MIN, INT8_MAX);
     context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
                          output_ptr, /*params=*/&cvt_params);
   }
@@ -2305,8 +2305,7 @@ void xnn_compute_discontiguous_reduce(
     }
 
     struct xnn_f32_qs8_cvt_params cvt_params;
-    xnn_init_f32_qs8_cvt_scalar_params(&cvt_params, context->params.qs8_mean.scalar.scale, context->params.qs8_mean.scalar.output_zero_point,
-                                context->params.qs8_mean.scalar.output_min, context->params.qs8_mean.scalar.output_max);
+    xnn_init_f32_qs8_cvt_scalar_params(&cvt_params, context->params.qs8_mean.scalar.scale, context->params.qs8_mean.scalar.output_zero_point, INT8_MIN, INT8_MAX);
     context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
                          output_ptr, /*params=*/&cvt_params);
   }

@@ -2248,16 +2248,12 @@ size_t xnn_init_qs8_mean_minmax_scalar_params(
   float scale,
   int32_t num_elements,
   int8_t input_zero_point,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max)
+  int8_t output_zero_point)
 {
   params->scalar.scale = scale;
   params->scalar.num_elements = num_elements;
   params->scalar.input_zero_point = input_zero_point;
   params->scalar.output_zero_point = output_zero_point;
-  params->scalar.output_min = output_min;
-  params->scalar.output_max = output_max;
   return sizeof(params->scalar);
 }
 

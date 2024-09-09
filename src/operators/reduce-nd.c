@@ -80,8 +80,6 @@ enum xnn_status xnn_create_mean_nd_qs8(
   float scale,
   int8_t input_zero_point,
   int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max,
   uint32_t flags,
   xnn_operator_t* mean_op_out)
 {
@@ -96,7 +94,7 @@ enum xnn_status xnn_create_mean_nd_qs8(
   }
 
   struct xnn_qs8_mean_minmax_params params;
-  rsum_config->init.qs8_mean(&params, scale, -1, input_zero_point, output_zero_point, output_min, output_max);
+  rsum_config->init.qs8_mean(&params, scale, -1, input_zero_point, output_zero_point);
 
   return create_mean_nd(
     flags,

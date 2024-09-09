@@ -243,9 +243,7 @@ XNN_INTERNAL size_t xnn_init_f32_scale_scalar_params(
     float scale,                                                  \
     int32_t num_elements,                                         \
     int8_t input_zero_point,                                      \
-    int8_t output_zero_point,                                     \
-    int8_t output_min,                                            \
-    int8_t output_max);
+    int8_t output_zero_point);
 
 DECLARE_INIT_QS8_MEAN_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mean_minmax_scalar_params)
 
