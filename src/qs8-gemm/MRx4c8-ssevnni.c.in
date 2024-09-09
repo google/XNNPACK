@@ -10,8 +10,6 @@ $assert DATATYPE in ["QC8", "QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]
 
 #include <immintrin.h>
 
-$if "F16" in DATATYPE:
-  #include <fp16/fp16.h>
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
@@ -90,8 +88,8 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__$
     $for M in range(MR):
       const __m128i vinput_zero_point${M} = _mm_set1_epi32((int) quantization_params[${M}].zero_point + 128);
     $if "F16" in DATATYPE:
-      const __m128 voutput_min = _mm_set1_ps(fp16_ieee_to_fp32_value(params->scalar.min));
-      const __m128 voutput_max = _mm_set1_ps(fp16_ieee_to_fp32_value(params->scalar.max));
+      const __m128 voutput_min = _mm_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.min));
+      const __m128 voutput_max = _mm_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
     $else:
       const __m128 voutput_min = _mm_set1_ps(params->scalar.min);
       const __m128 voutput_max = _mm_set1_ps(params->scalar.max);
