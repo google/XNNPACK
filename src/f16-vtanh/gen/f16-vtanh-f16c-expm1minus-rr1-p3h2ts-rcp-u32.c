@@ -18,6 +18,7 @@
 #include "xnnpack/microparams.h"
 #include "xnnpack/vunary.h"
 
+
 void xnn_f16_vtanh_ukernel__f16c_expm1minus_rr1_p3h2ts_rcp_u32(
     size_t batch,
     const xnn_float16* input,
@@ -29,15 +30,24 @@ void xnn_f16_vtanh_ukernel__f16c_expm1minus_rr1_p3h2ts_rcp_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vsign_mask = _mm_load_si128((const __m128i*) params->avx_expm1minus_rr1_p3h2.sign_mask);
-  const __m256 vsat_cutoff = _mm256_load_ps(params->avx_expm1minus_rr1_p3h2.sat_cutoff);
-  const __m256 vlog2e = _mm256_load_ps(params->avx_expm1minus_rr1_p3h2.log2e);
-  const __m256 vmagic_bias = _mm256_load_ps(params->avx_expm1minus_rr1_p3h2.magic_bias);
-  const __m256 vminus_ln2 = _mm256_load_ps(params->avx_expm1minus_rr1_p3h2.minus_ln2);
-  const __m256 vc3 = _mm256_load_ps(params->avx_expm1minus_rr1_p3h2.c3);
-  const __m256 vc2 = _mm256_load_ps(params->avx_expm1minus_rr1_p3h2.c2);
-  const __m256 vtwo = _mm256_load_ps(params->avx_expm1minus_rr1_p3h2.two);
-  const __m256 vminus_one = _mm256_load_ps(params->avx_expm1minus_rr1_p3h2.minus_one);
+  const __m128i vsign_mask = _mm_set1_epi16(UINT16_C(0x8000));
+  const __m256 vsat_cutoff = _mm256_set1_ps(-0x1.208000p+2f);
+  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
+  const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp+22f);
+  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
+  XNN_FORCE_REALIZATION(vsign_mask);
+  XNN_FORCE_REALIZATION(vsat_cutoff);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vminus_ln2);
+  const __m256 vc3 = _mm256_set1_ps(0x1.560722p+0f);
+  XNN_FORCE_REALIZATION(vc3);
+  const __m256 vc2 = _mm256_set1_ps(0x1.01E2A2p+1f);
+  XNN_FORCE_REALIZATION(vc2);
+  const __m256 vtwo = _mm256_set1_ps(2.0f);
+  XNN_FORCE_REALIZATION(vtwo);
+  const __m256 vminus_one = _mm256_set1_ps(-1.0f);
+  XNN_FORCE_REALIZATION(vminus_one);
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;

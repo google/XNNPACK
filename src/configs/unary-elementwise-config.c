@@ -496,11 +496,11 @@ static void init_f16_tanh_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_fma3) {
       f16_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_u32;
-      f16_tanh_config.init.f16_tanh = xnn_init_f16_tanh_avx_polynomial_p19h9t2_params;
+      f16_tanh_config.init.f16_tanh = NULL;
       f16_tanh_config.element_tile = 32;
     } else if (hardware_config->use_x86_f16c) {
       f16_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vtanh_ukernel__f16c_expm1minus_rr1_p3h2ts_rcp_u72;
-      f16_tanh_config.init.f16_tanh = xnn_init_f16_tanh_avx_expm1minus_rr1_p3h2_params;
+      f16_tanh_config.init.f16_tanh = NULL;
       f16_tanh_config.element_tile = 72;
     }
   #endif
