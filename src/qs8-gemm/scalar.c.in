@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert DATATYPE in ["QD8", "QC4", "QB4_F16", "QB4_F32"] or REQUANTIZATION in ["FP32", "RNDNU"]
+$assert DATATYPE in ["QD8", "QC4", "QB4_F16", "QB4_F32"] or REQUANTIZATION in ["FP32", "RNDNU", "RNDNU16"]
 $assert REQUANTIZATION != "FP32" or VARIANT in ["FMAGIC", "IMAGIC", "LRINTF"]
 $assert DATATYPE in ["QC8", "QS8", "QU8", "QD8", "QC4", "QB4_F16", "QB4_F32"]
 #include <assert.h>
@@ -115,6 +115,13 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
         const float voutput_max_less_zero_point = output_max_less_zero_point;
         const int32_t voutput_zero_point = params->${PARAMS_STRUCT}.output_zero_point;
     $elif REQUANTIZATION == "RNDNU":
+      const int32_t vmultiplier = params->${PARAMS_STRUCT}.multiplier;
+      const int64_t vrounding = params->${PARAMS_STRUCT}.rounding;
+      const uint32_t vshift = params->${PARAMS_STRUCT}.shift;
+      const int32_t voutput_min_less_zero_point = (int32_t) params->${PARAMS_STRUCT}.output_min - (int32_t) params->${PARAMS_STRUCT}.output_zero_point;
+      const int32_t voutput_max_less_zero_point = (int32_t) params->${PARAMS_STRUCT}.output_max - (int32_t) params->${PARAMS_STRUCT}.output_zero_point;
+      const int32_t voutput_zero_point = params->${PARAMS_STRUCT}.output_zero_point;
+    $elif REQUANTIZATION == "RNDNU16":
       const int32_t vmultiplier = params->${PARAMS_STRUCT}.multiplier;
       const int64_t vrounding = params->${PARAMS_STRUCT}.rounding;
       const uint32_t vshift = params->${PARAMS_STRUCT}.shift;
@@ -405,6 +412,26 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
             $for N in range(NR):
               int32_t vout${M}x${N} = vrndacc${M}x${N} + voutput_zero_point;
       $elif REQUANTIZATION == "RNDNU":
+        $for M in range(MR):
+          $for N in range(NR):
+            const int64_t vextacc${M}x${N} = math_mulext_s32(vacc${M}x${N}, vmultiplier) + vrounding;
+
+        $for M in range(MR):
+          $for N in range(NR):
+            int32_t vout${M}x${N} = (int32_t) math_asr_s64(vextacc${M}x${N}, vshift);
+
+        $for M in range(MR):
+          $for N in range(NR):
+            vout${M}x${N} = math_max_s32(vout${M}x${N}, voutput_min_less_zero_point);
+
+        $for M in range(MR):
+          $for N in range(NR):
+            vout${M}x${N} = math_min_s32(vout${M}x${N}, voutput_max_less_zero_point);
+
+        $for M in range(MR):
+          $for N in range(NR):
+            vout${M}x${N} += voutput_zero_point;
+      $elif REQUANTIZATION == "RNDNU16":
         $for M in range(MR):
           $for N in range(NR):
             const int64_t vextacc${M}x${N} = math_mulext_s32(vacc${M}x${N}, vmultiplier) + vrounding;

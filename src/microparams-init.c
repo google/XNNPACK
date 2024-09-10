@@ -267,6 +267,43 @@ size_t xnn_init_qu8_conv_minmax_rndnu_scalar_params(
   return sizeof(params->rndnu_scalar);
 }
 
+size_t xnn_init_qu8_conv_minmax_rndnu16_scalar_params(
+  union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t kernel_zero_point,
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 256.0f);
+
+  // Compute requantization parameters.
+  const uint32_t scale_bits = float_as_uint32(scale);
+
+  // Multiplier is in [0x00800000, 0x007FFFFF] range.
+  const int32_t multiplier = ((int32_t) scale_bits & INT32_C(0x007FFFFF)) | INT32_C(0x00800000);
+  assert(multiplier >= INT32_C(0x00800000));
+  assert(multiplier <= INT32_C(0x00FFFFFF));
+
+  // Shift is in [16, 55] range.
+  const uint32_t shift = 127 + 23 - (scale_bits >> 23);
+  assert(shift >= 16);
+  assert(shift < 56);
+
+  const int64_t rounding = INT64_C(1) << (shift - 1);
+
+  params->rndnu_scalar.kernel_zero_point = (int32_t) kernel_zero_point;
+  params->rndnu_scalar.multiplier = multiplier;
+  params->rndnu_scalar.rounding = rounding;
+  params->rndnu_scalar.shift = shift;
+  params->rndnu_scalar.output_min = output_min;
+  params->rndnu_scalar.output_max = output_max;
+  params->rndnu_scalar.output_zero_point = (int32_t) output_zero_point;
+  return sizeof(params->rndnu_scalar);
+}
+
+
 
 #if XNN_ARCH_ARM
 size_t xnn_init_qu8_conv_minmax_fp32_armsimd32_params(
