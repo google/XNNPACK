@@ -33,9 +33,16 @@
 
 using testing::ElementsAreArray;
 
+struct FullyConnectedTestParam {
+  bool use_bias;
+  int8_t kernel_zero_point;
+};
+
 template <class InputType, class KernelType = InputType,
-          class BiasType = InputType, class OutputType = InputType, bool even_channels = false>
-class FullyConnectedTestBase : public ::testing::TestWithParam<bool> {
+          class BiasType = InputType, class OutputType = InputType,
+          bool even_channels = false>
+class FullyConnectedTestBase
+    : public ::testing::TestWithParam<FullyConnectedTestParam> {
  protected:
   FullyConnectedTestBase() {
     f32dist = std::uniform_real_distribution<float>(0.1f, 1.0f);
@@ -126,7 +133,7 @@ class FullyConnectedTestBase : public ::testing::TestWithParam<bool> {
 class FullyConnectedTestQP8F32QC4W
     : public FullyConnectedTestBase<int8_t, uint8_t, float, float, true> {};
 
-TEST_F(FullyConnectedTestQP8F32QC4W, define) {
+TEST_P(FullyConnectedTestQP8F32QC4W, define) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   if (xnn_init_qp8_f32_qc4w_gemm_config() == nullptr) {
@@ -151,7 +158,7 @@ TEST_F(FullyConnectedTestQP8F32QC4W, define) {
   const size_t rounded_input_channels = round_up_po2(input_channels, 2);
   kernel = xnnpack::Buffer<uint8_t>(output_channels * rounded_input_channels);
 
-  const uint8_t kernel_zero_point = 8;
+  const uint8_t kernel_zero_point = GetParam().kernel_zero_point;
   xnnpack::Buffer<float> kernel_scale(output_channels);
   std::generate(kernel_scale.begin(), kernel_scale.end(),
                 [&]() { return scale_dist(rng); });
@@ -197,7 +204,7 @@ TEST_F(FullyConnectedTestQP8F32QC4W, define) {
   ASSERT_EQ(node->flags, 0);
 }
 
-TEST_F(FullyConnectedTestQP8F32QC4W, matches_qd8_f32_qc4w) {
+TEST_P(FullyConnectedTestQP8F32QC4W, matches_qd8_f32_qc4w) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   if (xnn_init_qp8_f32_qc4w_gemm_config() == nullptr) {
@@ -237,7 +244,7 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_qd8_f32_qc4w) {
   const float output_min = -std::numeric_limits<float>::infinity();
   const float output_max = std::numeric_limits<float>::infinity();
 
-  const uint8_t kernel_zero_point = 8;
+  const uint8_t kernel_zero_point = GetParam().kernel_zero_point;
 
   // Call operator API for `qp8`.
   xnn_operator_t qp8_convert_op = nullptr;
@@ -343,7 +350,7 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_qd8_f32_qc4w) {
   }
 }
 
-TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api) {
+TEST_P(FullyConnectedTestQP8F32QC4W, matches_operator_api) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   if (xnn_init_qp8_f32_qc4w_gemm_config() == nullptr) {
@@ -379,7 +386,7 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api) {
   const float output_min = -std::numeric_limits<float>::infinity();
   const float output_max = std::numeric_limits<float>::infinity();
 
-  const uint8_t kernel_zero_point = 8;
+  const uint8_t kernel_zero_point = GetParam().kernel_zero_point;
 
   // Call operator API.
   xnn_operator_t convert_op = nullptr;
@@ -492,7 +499,7 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api) {
   EXPECT_EQ(subgraph_output, operator_output);
 }
 
-TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_with_reshape) {
+TEST_P(FullyConnectedTestQP8F32QC4W, matches_operator_api_with_reshape) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   if (xnn_init_qp8_f32_qc4w_gemm_config() == nullptr) {
@@ -534,7 +541,7 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_with_reshape) {
   const float output_min = -std::numeric_limits<float>::infinity();
   const float output_max = std::numeric_limits<float>::infinity();
 
-  const uint8_t kernel_zero_point = 8;
+  const uint8_t kernel_zero_point = GetParam().kernel_zero_point;
 
   // Call operator API.
   xnn_operator_t convert_op = nullptr;
@@ -686,8 +693,7 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_with_reshape) {
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 }
 
-// TODO(b/355416339): Re-enable once we can handle strides again
-TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_transposed_weights) {
+TEST_P(FullyConnectedTestQP8F32QC4W, matches_operator_api_transposed_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   if (xnn_init_qp8_f32_qc4w_gemm_config() == nullptr) {
@@ -724,7 +730,7 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_transposed_weights) {
   const float output_min = -std::numeric_limits<float>::infinity();
   const float output_max = std::numeric_limits<float>::infinity();
 
-  const uint8_t kernel_zero_point = 8;
+  const uint8_t kernel_zero_point = GetParam().kernel_zero_point;
 
   // Call operator API.
   xnn_operator_t convert_op = nullptr;
@@ -836,6 +842,11 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_transposed_weights) {
 
   EXPECT_EQ(subgraph_output, operator_output);
 }
+
+INSTANTIATE_TEST_SUITE_P(FullyConnectedTestQP8F32QC4W, FullyConnectedTestQP8F32QC4W,
+                         testing::ValuesIn<FullyConnectedTestParam>(
+                             {{.use_bias = true, .kernel_zero_point = 0},
+                              {.use_bias = true, .kernel_zero_point = 8}}));
 
 template <class T> class QuantizedFullyConnectedTestBase : public FullyConnectedTestBase<T, T, int32_t> {
 protected:
@@ -1026,7 +1037,7 @@ TEST_F(FullyConnectedTestQU8, define)
 
 TEST_P(FullyConnectedTestF16, define)
 {
-  bool use_bias = GetParam();
+  bool use_bias = GetParam().use_bias;
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_subgraph_t subgraph = nullptr;
@@ -1704,7 +1715,7 @@ TEST_F(FullyConnectedTestQU8, matches_operator_api)
 
 TEST_P(FullyConnectedTestF16, matches_operator_api)
 {
-  bool use_bias = GetParam();
+  bool use_bias = GetParam().use_bias;
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_operator_t op = nullptr;
@@ -1781,14 +1792,14 @@ TEST_P(FullyConnectedTestF16, matches_operator_api)
   EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    UseBias,
-    FullyConnectedTestF16,
-    ::testing::Bool());
+INSTANTIATE_TEST_SUITE_P(UseBias, FullyConnectedTestF16,
+                         testing::ValuesIn<FullyConnectedTestParam>(
+                             {{.use_bias = false, .kernel_zero_point = 0},
+                              {.use_bias = true, .kernel_zero_point = 0}}));
 
 TEST_P(FullyConnectedTestF16, matches_operator_api_f16_weights)
 {
-  bool use_bias = GetParam();
+  bool use_bias = GetParam().use_bias;
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_operator_t op = nullptr;
@@ -2249,14 +2260,14 @@ TEST_F(FullyConnectedTestF32QC8W, matches_operator_api_without_bias)
   EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    UseBias,
-    DynamicFullyConnectedTestF32,
-    ::testing::Bool());
+INSTANTIATE_TEST_SUITE_P(UseBias, DynamicFullyConnectedTestF32,
+                         testing::ValuesIn<FullyConnectedTestParam>(
+                             {{.use_bias = false, .kernel_zero_point = 0},
+                              {.use_bias = true, .kernel_zero_point = 0}}));
 
 TEST_P(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel)
 {
-  bool use_bias = GetParam();
+  bool use_bias = GetParam().use_bias;
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_operator_t op = nullptr;
