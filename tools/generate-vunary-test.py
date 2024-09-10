@@ -336,7 +336,7 @@ def main(args):
   if "rnd" in folder:
     folder = folder[0:8]
 
-  tests += f'#include "{xnncommon._XNNPACK_SRC}/{folder}/{options.ukernel}.h"\n'
+  tests += f'#include "{xnncommon.xnnpack_src()}/{folder}/{options.ukernel}.h"\n'
   tests += "#undef XNN_UKERNEL_WITH_PARAMS\n"
 
   xnncommon.overwrite_if_changed(options.output, tests)

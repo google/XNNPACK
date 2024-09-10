@@ -423,7 +423,7 @@ def main(args):
 #include "xnnpack/vcvt.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
-    isa_hierarchy = xnncommon._ISA_HIERARCHY_MAP
+    isa_hierarchy = xnncommon.isa_hierarchy_map()
     benches = [""] * len(isa_hierarchy)
 
     for ukernel_spec in spec_yaml:
