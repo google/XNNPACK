@@ -102,6 +102,9 @@ static void init_hardware_config(void) {
 
   #if XNN_ARCH_ARM64
     hardware_config.use_arm_neon_i8mm = cpuinfo_has_arm_i8mm();
+    hardware_config.use_arm_sve = cpuinfo_has_arm_sve();
+    hardware_config.use_arm_sve2 = cpuinfo_has_arm_sve2();
+    hardware_config.use_arm_sme = cpuinfo_has_arm_sme();
   #endif
 
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -285,7 +288,7 @@ static void init_hardware_config(void) {
   #if XNN_ARCH_ARM
     if (hardware_config.use_arm_v6) hardware_config.arch_flags |= xnn_arch_arm_v6;
     if (hardware_config.use_arm_vfpv2) hardware_config.arch_flags |= xnn_arch_arm_vfpv2;
-  #endif
+  #endif  // XNN_ARCH_ARM
   #if XNN_ARCH_ARM || XNN_ARCH_ARM64
     if (hardware_config.use_arm_vfpv3) hardware_config.arch_flags |= xnn_arch_arm_vfpv3;
     if (hardware_config.use_arm_neon) hardware_config.arch_flags |= xnn_arch_arm_neon;
@@ -296,8 +299,13 @@ static void init_hardware_config(void) {
     if (hardware_config.use_arm_neon_fp16_arith) hardware_config.arch_flags |= xnn_arch_arm_neon_fp16_arith;
     if (hardware_config.use_arm_neon_bf16) hardware_config.arch_flags |= xnn_arch_arm_neon_bf16;
     if (hardware_config.use_arm_neon_dot) hardware_config.arch_flags |= xnn_arch_arm_neon_dot;
-    if (hardware_config.use_arm_neon_i8mm) hardware_config.arch_flags |= xnn_arch_arm_neon_i8mm;
   #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+  #if XNN_ARCH_ARM64
+    if (hardware_config.use_arm_neon_i8mm) hardware_config.arch_flags |= xnn_arch_arm_neon_i8mm;
+    if (hardware_config.use_arm_sve) hardware_config.arch_flags |= xnn_arch_arm_sve;
+    if (hardware_config.use_arm_sve2) hardware_config.arch_flags |= xnn_arch_arm_sve2;
+    if (hardware_config.use_arm_sme) hardware_config.arch_flags |= xnn_arch_arm_sme;
+  #endif  // XNN_ARCH_ARM64
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     if (hardware_config.use_x86_ssse3) hardware_config.arch_flags |= xnn_arch_x86_ssse3;
     if (hardware_config.use_x86_sse4_1) hardware_config.arch_flags |= xnn_arch_x86_sse4_1;

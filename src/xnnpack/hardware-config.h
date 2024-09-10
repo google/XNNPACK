@@ -29,6 +29,9 @@ enum xnn_arch_flags {
   xnn_arch_arm_neon_bf16 = 1 << 9,
   xnn_arch_arm_neon_dot = 1 << 10,
   xnn_arch_arm_neon_i8mm = 1 << 11,
+  xnn_arch_arm_sve = 1 << 12,
+  xnn_arch_arm_sve2 = 1 << 13,
+  xnn_arch_arm_sme = 1 << 14,
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   xnn_arch_x86_ssse3 = 1 << 0,
@@ -89,8 +92,13 @@ struct xnn_hardware_config {
   bool use_arm_neon_fp16_arith;
   bool use_arm_neon_bf16;
   bool use_arm_neon_dot;
-  bool use_arm_neon_i8mm;
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_ARM64
+  bool use_arm_neon_i8mm;
+  bool use_arm_sve;
+  bool use_arm_sve2;
+  bool use_arm_sme;
+#endif  // XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   bool use_x86_ssse3;
   bool use_x86_sse4_1;

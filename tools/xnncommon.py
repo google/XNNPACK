@@ -88,7 +88,7 @@ _ISA_TO_ARCH_MAP = {
   "neonbf16": ["aarch32", "aarch64"],
   "neondot": ["aarch32", "aarch64"],
   "neondotfp16arith": ["aarch32", "aarch64"],
-  "neoni8mm": ["aarch32", "aarch64"],
+  "neoni8mm": ["aarch64"],
   "sse": ["x86-32", "x86-64"],
   "sse2": ["x86-32", "x86-64"],
   "ssse3": ["x86-32", "x86-64"],

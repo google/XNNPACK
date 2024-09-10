@@ -218,7 +218,6 @@ def main(args):
   c_microkernels_per_isa['neondot_aarch64'] = list()
   c_microkernels_per_isa['neonfma_aarch64'] = list()
   c_microkernels_per_isa['neonfp16arith_aarch64'] = list()
-  c_microkernels_per_isa['neoni8mm_aarch64'] = list()
   asm_microkernels_per_arch = {arch: [] for arch in ARCH_LIST}
   microkernel_name_to_filename = dict()
   for root, _, files in os.walk(src_dir, topdown=False):
