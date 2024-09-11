@@ -146,7 +146,7 @@ def main(args):
   ))
 
   folder = datatype + "-" + ("vbinary" if datatype.startswith("f") else op)
-  tests += f'#include "{xnncommon._XNNPACK_SRC}/{folder}/{options.ukernel}.h"\n'
+  tests += f'#include "{xnncommon.xnnpack_src()}/{folder}/{options.ukernel}.h"\n'
   tests += "#undef XNN_UKERNEL_WITH_PARAMS\n"
   tests = tests.replace("src/s32-vmulc/s32-vmulc.h", "src/s32-vmul/s32-vmulc.h")
 

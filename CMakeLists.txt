@@ -79,7 +79,7 @@ ELSEIF(CMAKE_GENERATOR MATCHES "^Visual Studio " AND CMAKE_GENERATOR_PLATFORM)
   ELSEIF(CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
     SET(XNNPACK_TARGET_PROCESSOR "arm64")
   ELSEIF(CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64EC")
-    SET(XNNPACK_TARGET_PROCESSOR "arm64ec")
+    SET(XNNPACK_TARGET_PROCESSOR "arm64")
   ELSE()
     MESSAGE(FATAL_ERROR "Unsupported Visual Studio architecture \"${CMAKE_GENERATOR_PLATFORM}\"")
   ENDIF()
@@ -106,10 +106,16 @@ OPTION(XNNPACK_ENABLE_ARM_FP16_VECTOR "Build XNNPACK with ARM FP16 (FP16 data pr
 OPTION(XNNPACK_ENABLE_ARM_BF16 "Build XNNPACK with ARM BF16 (BFLOAT16) micro-kernels" ON)
 OPTION(XNNPACK_ENABLE_ARM_DOTPROD "Build XNNPACK with ARM DotProd (integer dot product) micro-kernels" ON)
 OPTION(XNNPACK_ENABLE_ARM_I8MM "Build XNNPACK with ARM I8MM (8-bit integer matrix multiply accumulate) micro-kernels" ON)
-IF(CMAKE_C_COMPILER_ID STREQUAL "Clang")
-  IF(CMAKE_C_COMPILER_VERSION VERSION_LESS "11")
-    SET(XNNPACK_ENABLE_ARM_I8MM OFF)
-  ENDIF()
+IF(NOT XNNPACK_TARGET_PROCESSOR MATCHES "arm(64)?")
+  SET(XNNPACK_ENABLE_ARM_FP16_SCALAR OFF)
+  SET(XNNPACK_ENABLE_ARM_FP16_VECTOR OFF)
+  SET(XNNPACK_ENABLE_ARM_BF16 OFF)
+  SET(XNNPACK_ENABLE_ARM_DOTPROD OFF)
+ENDIF()
+IF(NOT XNNPACK_TARGET_PROCESSOR STREQUAL "arm64")
+  SET(XNNPACK_ENABLE_ARM_I8MM OFF)
+ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_C_COMPILER_VERSION VERSION_LESS "11")
+  SET(XNNPACK_ENABLE_ARM_I8MM OFF)
 ENDIF()
 OPTION(XNNPACK_ENABLE_RISCV_VECTOR "Build XNNPACK with RISC-V Vector micro-kernels" ON)
 OPTION(XNNPACK_ENABLE_VSX "Build XNNPACK with VSX Vector micro-kernels for Power" ON)
@@ -522,9 +528,6 @@ IF(XNNPACK_TARGET_PROCESSOR STREQUAL "arm")
   IF(XNNPACK_ENABLE_ARM_DOTPROD AND XNNPACK_ENABLE_ARM_FP16_VECTOR)
     LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONDOTFP16ARITH_MICROKERNEL_SRCS})
   ENDIF()
-  IF(XNNPACK_ENABLE_ARM_I8MM)
-    LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONI8MM_MICROKERNEL_SRCS})
-  ENDIF()
   LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_ARMSIMD32_MICROKERNEL_SRCS})
   LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_NEON_MICROKERNEL_SRCS})
   LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_NEONFP16_MICROKERNEL_SRCS})
@@ -544,9 +547,6 @@ IF(XNNPACK_TARGET_PROCESSOR STREQUAL "arm")
   ENDIF()
   IF(XNNPACK_ENABLE_ARM_DOTPROD)
     LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_NEONDOT_MICROKERNEL_SRCS})
-  ENDIF()
-  IF(XNNPACK_ENABLE_ARM_I8MM)
-    LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_NEONI8MM_MICROKERNEL_SRCS})
   ENDIF()
   IF(XNNPACK_ENABLE_ASSEMBLY)
     LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_AARCH32_ASM_MICROKERNEL_SRCS})
@@ -575,7 +575,6 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^arm64")
     LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONDOTFP16ARITH_MICROKERNEL_SRCS})
   ENDIF()
   IF(XNNPACK_ENABLE_ARM_I8MM)
-    LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONI8MM_AARCH64_MICROKERNEL_SRCS})
     LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONI8MM_MICROKERNEL_SRCS})
   ENDIF()
   LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_NEON_MICROKERNEL_SRCS})
@@ -602,7 +601,6 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^arm64")
     LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_NEONDOT_AARCH64_MICROKERNEL_SRCS})
   ENDIF()
   IF(XNNPACK_ENABLE_ARM_I8MM)
-    LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_NEONI8MM_AARCH64_MICROKERNEL_SRCS})
     LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_NEONI8MM_MICROKERNEL_SRCS})
   ENDIF()
   IF(XNNPACK_ENABLE_ASSEMBLY)
@@ -783,8 +781,8 @@ IF(XNNPACK_BUILD_LIBRARY)
   TARGET_LINK_LIBRARIES(operator-run PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(operator-utils PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(subgraph PRIVATE xnnpack-base allocator logging memory mutex operators operator-run)
-  TARGET_LINK_LIBRARIES(XNNPACK PRIVATE allocator cache hardware-config indirection logging memory microkernel-utils microparams-init mutex normalization operators operator-run operator-utils packing microkernels-prod subgraph)
-  TARGET_LINK_LIBRARIES(XNNPACK PUBLIC xnnpack-base)
+  TARGET_LINK_LIBRARIES(XNNPACK PRIVATE xnnpack-base allocator cache hardware-config indirection logging memory microkernel-utils microparams-init mutex normalization operators operator-run operator-utils packing microkernels-prod subgraph)
+  TARGET_LINK_LIBRARIES(XNNPACK PUBLIC pthreadpool)
   SET_TARGET_PROPERTIES(XNNPACK PROPERTIES C_EXTENSIONS YES)
 ENDIF()
 IF(NOT MSVC)
@@ -812,7 +810,6 @@ IF(XNNPACK_TARGET_PROCESSOR STREQUAL "arm")
   SET_PROPERTY(SOURCE ${ALL_NEONFP16ARITH_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+fp16 -mfpu=neon-fp-armv8 ")
   SET_PROPERTY(SOURCE ${ALL_NEONBF16_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+bf16 -mfpu=neon-fp-armv8 ")
   SET_PROPERTY(SOURCE ${ALL_NEONDOT_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+dotprod -mfpu=neon-fp-armv8 ")
-  SET_PROPERTY(SOURCE ${ALL_NEONI8MM_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+i8mm+fp16 -mfpu=neon-fp-armv8 ")
   SET_PROPERTY(SOURCE ${ALL_AARCH32_ASM_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+dotprod+fp16 -mfpu=neon-fp-armv8 ")
   # Workground the neon detection bug in ARM v8
   # Related links:
@@ -1243,9 +1240,8 @@ IF(XNNPACK_BUILD_TESTS)
 
   # ---[ Launch heavy tests first.
   SET(SHARDED_TESTS
-    f32-avgpool-minmax
-    f32-maxpool-minmax
-    f32-pavgpool-minmax
+    avgpool-minmax
+    maxpool-minmax
     f32-vclamp
     f32-vlrelu
     f32-rdsum
@@ -1470,7 +1466,6 @@ IF(XNNPACK_BUILD_TESTS)
       cs16-bfly4
       cs16-fftr
       cs16-vsquareabs
-      f16-avgpool-minmax
       f16-conv-hwc2chw
       f16-f32acc-rdsum
       f16-f32acc-rsum
@@ -1478,8 +1473,6 @@ IF(XNNPACK_BUILD_TESTS)
       f16-gavgpool-minmax
       f16-ibilinear-chw
       f16-ibilinear
-      f16-maxpool-minmax
-      f16-pavgpool-minmax
       f16-prelu
       f16-raddstoreexpminusmax
       f16-rmax
@@ -1516,7 +1509,6 @@ IF(XNNPACK_BUILD_TESTS)
       qs8-rsum
       qs8-vhswish
       qs8-vlrelu
-      qu8-avgpool-minmax-fp32
       qu8-gavgpool-minmax-fp32
       qu8-gavgpool-minmax-rndnu
       qu8-requantization
@@ -1525,13 +1517,11 @@ IF(XNNPACK_BUILD_TESTS)
       s16-rmaxabs
       s16-window
       s8-ibilinear
-      s8-maxpool-minmax
       u32-filterbank-accumulate
       u32-filterbank-subtract
       u32-vlog
       u8-ibilinear
       u8-lut32norm
-      u8-maxpool-minmax
       u8-rmax
       x16-packw
       x16-transpose
@@ -1541,7 +1531,6 @@ IF(XNNPACK_BUILD_TESTS)
       x32-packx
       x32-transpose
       x32-unpool
-      x32-zerob
       x32-zip
       x64-transpose
       x8-lut

@@ -767,14 +767,24 @@ filegroup(
             name = arch + "_prod_microkernel_srcs",
             srcs = prod_c_srcs_for_arch(arch),
             outs = [arch + "_prod_microkernels.c"],
-            cmd = "if [ -z \"$(SRCS)\" ]; then echo \"\" > $@; else cat $(SRCS) > $@; fi",
+            cmd = "if [ -z \"$(SRCS)\" ]; then " +
+                  "  echo \"\" > $@; " +
+                  "else " +
+                  "  cat $(SRCS) | grep -E '^#include ' | sort -u > $@; " +
+                  "  cat $(SRCS) | grep -v -E '^#include ' >> $@; " +
+                  "fi",
             compatible_with = [],
         ),
         genrule(
             name = arch + "_non_prod_microkernel_srcs",
             srcs = non_prod_c_srcs_for_arch(arch),
             outs = [arch + "_non_prod_microkernels.c"],
-            cmd = "if [ -z \"$(SRCS)\" ]; then echo \"\" > $@; else cat $(SRCS) > $@; fi",
+            cmd = "if [ -z \"$(SRCS)\" ]; then " +
+                  "  echo \"\" > $@; " +
+                  "else " +
+                  "  cat $(SRCS) | grep -E '^#include ' | sort -u > $@; " +
+                  "  cat $(SRCS) | grep -v -E '^#include ' >> $@; " +
+                  "fi",
             compatible_with = [],
         ),
         xnnpack_cc_library_for_arch(
@@ -1684,7 +1694,6 @@ selects.config_setting_group(
 selects.config_setting_group(
     name = "arm_i8mm_enabled_by_default",
     match_any = [
-        "//build_config:aarch32",
         "//build_config:aarch64",
     ],
 )
@@ -1696,14 +1705,6 @@ alias(
         ":xnn_enable_arm_i8mm_explicit_false": ":xnn_enable_arm_i8mm_explicit_true",
         "//conditions:default": ":arm_i8mm_enabled_by_default",
     }),
-)
-
-selects.config_setting_group(
-    name = "arm_aarch64_i8mm_enabled",
-    match_all = [
-        ":arm_i8mm_enabled",
-        "//build_config:aarch64",
-    ],
 )
 
 selects.config_setting_group(

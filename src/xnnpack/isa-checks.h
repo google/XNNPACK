@@ -312,13 +312,13 @@ size_t get_batch_scale() {
   #define TEST_REQUIRES_ARM_NEON_DOT_FP16_ARITH do {} while (0)
 #endif
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_ARM64
   #define TEST_REQUIRES_ARM_NEON_I8MM_VALUE XNN_TEST_HWCONFIG_FLAG(use_arm_neon_i8mm)
   #define TEST_REQUIRES_ARM_NEON_I8MM TEST_REQUIRES_HWCONFIG_FLAG(use_arm_neon_i8mm)
 #else
   #define TEST_REQUIRES_ARM_NEON_I8MM_VALUE (false)
   #define TEST_REQUIRES_ARM_NEON_I8MM do {} while (0)
-#endif
+#endif  // XNN_ARCH_ARM64
 
 #if XNN_ARCH_RISCV
   #define TEST_REQUIRES_RISCV_VECTOR_VALUE XNN_TEST_HWCONFIG_FLAG(use_riscv_vector)

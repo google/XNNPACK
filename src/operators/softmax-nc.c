@@ -517,7 +517,7 @@ enum xnn_status xnn_reshape_softmax_nc_f16(
     size_t batch_size,
     pthreadpool_t threadpool)
 {
-  union xnn_f16_default_params rmax_params;
+  struct xnn_f16_default_params rmax_params;
   if (softmax_op->rmax_config->init.f16 != NULL) {
     softmax_op->rmax_config->init.f16(&rmax_params);
   }
@@ -555,7 +555,7 @@ enum xnn_status xnn_reshape_softmax_nc_f32(
 {
   const struct xnn_binary_elementwise_config* f32_vmul_config = softmax_op->vmul_config;
 
-  union xnn_f32_default_params rmax_params;
+  struct xnn_f32_default_params rmax_params;
   if (softmax_op->rmax_config->init.f32 != NULL) {
     softmax_op->rmax_config->init.f32(&rmax_params);
   }

@@ -80,21 +80,21 @@ SPECIAL_VALUES_F32 = {
         4,  # Number of elements.
         "{1.0f, -1.0f, 0.0f, -0.0f}",  # Inputs.
         "{0.0f, NAN, -INFINITY, -INFINITY}",  # Expected outputs.
-        "union xnn_f32_default_params",
+        "struct xnn_f32_default_params",
         1,  # Error margin in ULP.
     ),
     "GELU": (
         3,  # Number of elements.
         "{-6.0f, 6.0f, 0.0f}",  # Inputs.
         "{0.0f, 6.0f, 0.0f}",  # Expected outputs.
-        "union xnn_f32_default_params",
+        "struct xnn_f32_default_params",
         1,  # Error margin in ULP.
     ),
     "Exp": (
         3,  # Number of elements.
         "{0.0f, -1e3f, 1e3f}",  # Inputs.
         "{1.0f, 0.0f, INFINITY}",  # Expected outputs.
-        "union xnn_f32_default_params",
+        "struct xnn_f32_default_params",
         1,  # Error margin in ULP.
     ),
 }
@@ -336,7 +336,7 @@ def main(args):
   if "rnd" in folder:
     folder = folder[0:8]
 
-  tests += f'#include "{xnncommon._XNNPACK_SRC}/{folder}/{options.ukernel}.h"\n'
+  tests += f'#include "{xnncommon.xnnpack_src()}/{folder}/{options.ukernel}.h"\n'
   tests += "#undef XNN_UKERNEL_WITH_PARAMS\n"
 
   xnncommon.overwrite_if_changed(options.output, tests)

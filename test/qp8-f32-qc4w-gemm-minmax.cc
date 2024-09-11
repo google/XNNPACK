@@ -374,7 +374,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*mr_packed=*/4,
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_4x4c16s2__aarch64_neoni8mm,
+            tester.Test(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_4x4c16s2__neoni8mm,
                         xnn_init_f32_minmax_scalar_params,
                         xnn_pack_kai_qs4_weights_and_biases,
                         xnn_packed_stride_kai_qs4_weights_and_biases);
@@ -396,7 +396,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*mr_packed=*/4,
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_4x8c16s2__aarch64_neoni8mm,
+            tester.Test(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_4x8c16s2__neoni8mm,
                         xnn_init_f32_minmax_scalar_params,
                         xnn_pack_kai_qs4_weights_and_biases,
                         xnn_packed_stride_kai_qs4_weights_and_biases);
@@ -418,7 +418,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*mr_packed=*/4,
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_8x4c16s2__aarch64_neoni8mm_mstep2,
+            tester.Test(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_8x4c16s2__neoni8mm_mstep2,
                         xnn_init_f32_minmax_scalar_params,
                         xnn_pack_kai_qs4_weights_and_biases,
                         xnn_packed_stride_kai_qs4_weights_and_biases);
@@ -440,7 +440,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*mr_packed=*/4,
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_8x8c16s2__aarch64_neoni8mm_mstep2,
+            tester.Test(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_8x8c16s2__neoni8mm_mstep2,
                         xnn_init_f32_minmax_scalar_params,
                         xnn_pack_kai_qs4_weights_and_biases,
                         xnn_packed_stride_kai_qs4_weights_and_biases);

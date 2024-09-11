@@ -21,7 +21,7 @@ $if REQUANTIZATION == "FP32":
 
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QD8_F16" : "qd8_f16_qc8w", "QD8_F32": "qd8_f32_qc8w", "QC4_F16": "qd8_f16_qc4w", "QC4_F32": "qd8_f32_qc4w"}[DATATYPE]
 $PARAMS_STRUCT = REQUANTIZATION.lower() + "_" + ("neonv8" if REQUANTIZATION == "FP32" else "neon")
-$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8": "union xnn_qs8_conv_minmax_params", "QD8_F16": "union xnn_f16_minmax_params", "QD8_F32": "union xnn_f32_minmax_params", "QC4_F16": "union xnn_f16_qc4w_minmax_params", "QC4_F32": "union xnn_f32_qc4w_minmax_params"}[DATATYPE]
+$PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QS8": "union xnn_qs8_conv_minmax_params", "QD8_F16": "union xnn_f16_minmax_params", "QD8_F32": "union xnn_f32_minmax_params", "QC4_F16": "struct xnn_f16_qc4w_minmax_params", "QC4_F32": "struct xnn_f32_qc4w_minmax_params"}[DATATYPE]
 $REQUANTIZATION_SPEC = "_" + REQUANTIZATION.lower() if REQUANTIZATION else ""
 $OUT_T = {"QC8": "int8_t", "QD8_F16": "xnn_float16", "QD8_F32": "float", "QC4_F16": "xnn_float16", "QC4_F32": "float", "QS8": "int8_t"}[DATATYPE]
 void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c8__neoni8mm(
@@ -87,35 +87,17 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
         $for N in range(0, NR, 4):
           const int32x4_t vksumzp${M}x${ABC[N:N+4]} = vksumzp0x${ABC[N:N+4]};
 
-      #if XNN_ARCH_ARM64
-        $for M in range(0, MR, 2):
-          $for N in range(0, NR, 4):
-            $if M + 1 < MR:
-              int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M+1}x${ABC[N:N+4]})));
-              int32x4_t vacc${M}${M+1}x${ABC[N+2:N+4]} = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M+1}x${ABC[N:N+4]})));
-            $else:
-              int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]})));
-              int32x4_t vacc${M}${M+1}x${ABC[N+2:N+4]} = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]})));
-      #else
-        $for M in range(0, MR, 2):
-          $for N in range(0, NR, 4):
-            $if M + 1 < MR:
-              int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vcombine_s32(vget_low_s32(vksumzp${M}x${ABC[N:N+4]}), vget_low_s32(vksumzp${M+1}x${ABC[N:N+4]}));
-              int32x4_t vacc${M}${M+1}x${ABC[N+2:N+4]} = vcombine_s32(vget_high_s32(vksumzp${M}x${ABC[N:N+4]}), vget_high_s32(vksumzp${M+1}x${ABC[N:N+4]}));
-            $else:
-              int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vcombine_s32(vget_low_s32(vksumzp${M}x${ABC[N:N+4]}), vget_low_s32(vksumzp${M}x${ABC[N:N+4]}));
-              int32x4_t vacc${M}${M+1}x${ABC[N+2:N+4]} = vcombine_s32(vget_high_s32(vksumzp${M}x${ABC[N:N+4]}), vget_high_s32(vksumzp${M}x${ABC[N:N+4]}));
-      #endif
+      $for M in range(0, MR, 2):
+        $for N in range(0, NR, 4):
+          $if M + 1 < MR:
+            int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M+1}x${ABC[N:N+4]})));
+            int32x4_t vacc${M}${M+1}x${ABC[N+2:N+4]} = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M+1}x${ABC[N:N+4]})));
+          $else:
+            int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vreinterpretq_s32_u64(vtrn1q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]})));
+            int32x4_t vacc${M}${M+1}x${ABC[N+2:N+4]} = vreinterpretq_s32_u64(vtrn2q_u64(vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]}), vreinterpretq_u64_s32(vksumzp${M}x${ABC[N:N+4]})));
     $else:
-      #if XNN_ARCH_ARM64
-        $for N in range(0, NR, 4):
-          const uint64x2x2_t vbias01x${ABC[N:N+4]} = vld2q_dup_u64(w); w = (const int32_t*) w + 4;
-      #else
-        $for N in range(0, NR, 4):
-          uint64x2x2_t vbias01x${ABC[N:N+4]};
-          vbias01x${ABC[N:N+4]}.val[0] = vld1q_dup_u64(w); w = (const int32_t*) w + 2;
-          vbias01x${ABC[N:N+4]}.val[1] = vld1q_dup_u64(w); w = (const int32_t*) w + 2;
-      #endif
+      $for N in range(0, NR, 4):
+        const uint64x2x2_t vbias01x${ABC[N:N+4]} = vld2q_dup_u64(w); w = (const int32_t*) w + 4;
       $for M in range(0, MR, 2):
         $for N in range(0, NR, 4):
           int32x4_t vacc${M}${M+1}x${ABC[N:N+2]} = vreinterpretq_s32_u64(vbias01x${ABC[N:N+4]}.val[0]);
@@ -143,21 +125,11 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
       // 2x partial unrolled loop to load 8 bytes at a time.
       while (k >= 16 * sizeof(int8_t)) {
         // Load a ${MR}x16 block of activations.
-        #if XNN_ARCH_ARM64
-          $for M in range(0, MR, 2):
-            va${M}${M+1}x${ABC[0:16]} = vld2q_lane_u64((const void*) a${M}, va${M}${M+1}x${ABC[0:16]}, 0); a${M} += 16;
-          $for M in range(0, MR, 2):
-            $if M + 1 < MR:
-              va${M}${M+1}x${ABC[0:16]} = vld2q_lane_u64((const void*) a${M+1}, va${M}${M+1}x${ABC[0:16]}, 1); a${M+1} += 16;
-        #else
-          $for M in range(0, MR, 2):
-            va${M}${M+1}x${ABC[0:16]}.val[0] = vld1q_lane_u64((const void*) a${M}, va${M}${M+1}x${ABC[0:16]}.val[0], 0); a${M} += 8;
-            va${M}${M+1}x${ABC[0:16]}.val[1] = vld1q_lane_u64((const void*) a${M}, va${M}${M+1}x${ABC[0:16]}.val[1], 0); a${M} += 8;
-          $for M in range(0, MR, 2):
-            $if M + 1 < MR:
-              va${M}${M+1}x${ABC[0:16]}.val[0] = vld1q_lane_u64((const void*) a${M+1}, va${M}${M+1}x${ABC[0:16]}.val[0], 1); a${M+1} += 8;
-              va${M}${M+1}x${ABC[0:16]}.val[1] = vld1q_lane_u64((const void*) a${M+1}, va${M}${M+1}x${ABC[0:16]}.val[1], 1); a${M+1} += 8;
-        #endif
+        $for M in range(0, MR, 2):
+          va${M}${M+1}x${ABC[0:16]} = vld2q_lane_u64((const void*) a${M}, va${M}${M+1}x${ABC[0:16]}, 0); a${M} += 16;
+        $for M in range(0, MR, 2):
+          $if M + 1 < MR:
+            va${M}${M+1}x${ABC[0:16]} = vld2q_lane_u64((const void*) a${M+1}, va${M}${M+1}x${ABC[0:16]}, 1); a${M+1} += 16;
 
         // Load a 16x${NR} block of weights.
         $for N in range(0, NR, 2):

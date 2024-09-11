@@ -21,9 +21,9 @@
 
 #if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
   #if XNN_ENABLE_KLEIDIAI
-  static void qp8_f32_qc4w_gemm_minmax_ukernel_4x4c16s2__aarch64_neoni8mm(benchmark::State& state, const char* net) {
+  static void qp8_f32_qc4w_gemm_minmax_ukernel_4x4c16s2__neoni8mm(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
-      xnn_qp8_f32_qc4w_gemm_minmax_ukernel_4x4c16s2__aarch64_neoni8mm,
+      xnn_qp8_f32_qc4w_gemm_minmax_ukernel_4x4c16s2__neoni8mm,
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_kai_qs4_weights_and_biases,
       xnn_packed_stride_kai_qs4_weights_and_biases,
@@ -32,11 +32,11 @@
       benchmark::utils::CheckNEONI8MM);
   }
 
-  BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_4x4c16s2__aarch64_neoni8mm)
+  BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_4x4c16s2__neoni8mm)
 
-  static void qp8_f32_qc4w_gemm_minmax_ukernel_4x8c16s2__aarch64_neoni8mm(benchmark::State& state, const char* net) {
+  static void qp8_f32_qc4w_gemm_minmax_ukernel_4x8c16s2__neoni8mm(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
-      xnn_qp8_f32_qc4w_gemm_minmax_ukernel_4x8c16s2__aarch64_neoni8mm,
+      xnn_qp8_f32_qc4w_gemm_minmax_ukernel_4x8c16s2__neoni8mm,
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_kai_qs4_weights_and_biases,
       xnn_packed_stride_kai_qs4_weights_and_biases,
@@ -45,11 +45,11 @@
       benchmark::utils::CheckNEONI8MM);
   }
 
-  BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_4x8c16s2__aarch64_neoni8mm)
+  BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_4x8c16s2__neoni8mm)
 
-  static void qp8_f32_qc4w_gemm_minmax_ukernel_8x4c16s2__aarch64_neoni8mm_mstep2(benchmark::State& state, const char* net) {
+  static void qp8_f32_qc4w_gemm_minmax_ukernel_8x4c16s2__neoni8mm_mstep2(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
-      xnn_qp8_f32_qc4w_gemm_minmax_ukernel_8x4c16s2__aarch64_neoni8mm_mstep2,
+      xnn_qp8_f32_qc4w_gemm_minmax_ukernel_8x4c16s2__neoni8mm_mstep2,
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_kai_qs4_weights_and_biases,
       xnn_packed_stride_kai_qs4_weights_and_biases,
@@ -58,11 +58,11 @@
       benchmark::utils::CheckNEONI8MM);
   }
 
-  BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_8x4c16s2__aarch64_neoni8mm_mstep2)
+  BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_8x4c16s2__neoni8mm_mstep2)
 
-  static void qp8_f32_qc4w_gemm_minmax_ukernel_8x8c16s2__aarch64_neoni8mm_mstep2(benchmark::State& state, const char* net) {
+  static void qp8_f32_qc4w_gemm_minmax_ukernel_8x8c16s2__neoni8mm_mstep2(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
-      xnn_qp8_f32_qc4w_gemm_minmax_ukernel_8x8c16s2__aarch64_neoni8mm_mstep2,
+      xnn_qp8_f32_qc4w_gemm_minmax_ukernel_8x8c16s2__neoni8mm_mstep2,
       xnn_init_f32_minmax_scalar_params,
       xnn_pack_kai_qs4_weights_and_biases,
       xnn_packed_stride_kai_qs4_weights_and_biases,
@@ -71,7 +71,7 @@
       benchmark::utils::CheckNEONI8MM);
   }
 
-  BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_8x8c16s2__aarch64_neoni8mm_mstep2)
+  BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_8x8c16s2__neoni8mm_mstep2)
   #endif  // XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
 

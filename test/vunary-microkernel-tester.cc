@@ -381,7 +381,7 @@ void VUnaryMicrokernelTester::Test(xnn_s8_vclamp_ukernel_fn vclamp,
     }
 
     // Prepare parameters.
-    union xnn_s8_minmax_params params;
+    struct xnn_s8_minmax_params params;
     init_params(&params, static_cast<int8_t>(qmin() - 0x80),
                 static_cast<int8_t>(qmax() - 0x80));
 
@@ -424,7 +424,7 @@ void VUnaryMicrokernelTester::Test(xnn_u8_vclamp_ukernel_fn vclamp,
     }
 
     // Prepare parameters.
-    union xnn_u8_minmax_params params;
+    struct xnn_u8_minmax_params params;
     init_params(&params, qmin(), qmax());
 
     // Call optimized micro-kernel.

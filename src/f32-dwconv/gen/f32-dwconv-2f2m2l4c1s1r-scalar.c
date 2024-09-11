@@ -27,7 +27,7 @@ void xnn_f32_dwconv_ukernel_2f2m2l4c1s1r__scalar(
     const float* zero,
     size_t kernel_size,
     float* buffer,
-    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(channels != 0);
   assert(output_width != 0);

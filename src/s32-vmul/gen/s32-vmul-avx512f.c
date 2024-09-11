@@ -23,7 +23,7 @@ void xnn_s32_vmul_ukernel__avx512f_u16(
     const int32_t* input_a,
     const int32_t* input_b,
     int32_t* output,
-    const union xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int32_t) == 0);
@@ -60,7 +60,7 @@ void xnn_s32_vmul_ukernel__avx512f_u32(
     const int32_t* input_a,
     const int32_t* input_b,
     int32_t* output,
-    const union xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int32_t) == 0);
@@ -113,7 +113,7 @@ void xnn_s32_vmul_ukernel__avx512f_u48(
     const int32_t* input_a,
     const int32_t* input_b,
     int32_t* output,
-    const union xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int32_t) == 0);
@@ -170,7 +170,7 @@ void xnn_s32_vmul_ukernel__avx512f_u64(
     const int32_t* input_a,
     const int32_t* input_b,
     int32_t* output,
-    const union xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int32_t) == 0);

@@ -39,7 +39,7 @@ $  "SQRDIFF": "_mm512_maskz_sub_ps",
 $  "PRELU": "_mm512_maskz_mul_ps",
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "union xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
+$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
 void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__avx512f_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,

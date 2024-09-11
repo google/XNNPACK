@@ -24,22 +24,6 @@ def _remove_duplicate_newlines(text):
 
 _XNNPACK_SRC = "src"
 
-_DATATYPE_TO_CTYPE_MAP = {
-    "s8": "int8_t",
-    "u8": "uint8_t",
-    "qs8": "int8_t",
-    "qu8": "uint8_t",
-    "s16": "int16_t",
-    "u16": "uint16_t",
-    "s32": "int32_t",
-    "u32": "uint32_t",
-    "s64": "int64_t",
-    "u64": "uint64_t",
-    "f16": "uint16_t",
-    "bf16": "uint16_t",
-    "f32": "float",
-}
-
 _ARCH_TO_MACRO_MAP = {
   "aarch32": "XNN_ARCH_ARM",
   "aarch64": "XNN_ARCH_ARM64",
@@ -88,7 +72,7 @@ _ISA_TO_ARCH_MAP = {
   "neonbf16": ["aarch32", "aarch64"],
   "neondot": ["aarch32", "aarch64"],
   "neondotfp16arith": ["aarch32", "aarch64"],
-  "neoni8mm": ["aarch32", "aarch64"],
+  "neoni8mm": ["aarch64"],
   "sse": ["x86-32", "x86-64"],
   "sse2": ["x86-32", "x86-64"],
   "ssse3": ["x86-32", "x86-64"],
@@ -202,6 +186,14 @@ _ISA_TO_CHECK_MAP = {
   "wasmusdot": "TEST_REQUIRES_WASM_USDOT",
   "wasmblendvps": "TEST_REQUIRES_WASM_BLENDVPS",
 }
+
+
+def xnnpack_src():
+  return _XNNPACK_SRC
+
+
+def isa_hierarchy_map():
+  return _ISA_HIERARCHY_MAP
 
 
 def parse_target_name(target_name):

@@ -42,7 +42,7 @@ TEST(ukernel, special_values) {                                                 
   std::array<float, num_elements> expected =                                                                     \
       {0.0f, 6.0f, 0.0f};                                                                                        \
   std::array<float, buffered_size> outputs;                                                                      \
-  union xnn_f32_default_params params;                                                                           \
+  struct xnn_f32_default_params params;                                                                          \
   if (init_params) {                                                                                             \
     init_params(&params);                                                                                        \
   }                                                                                                              \
