@@ -31,8 +31,11 @@ static enum xnn_status create_scaled_dot_product_attention_operator(
   assert(node->num_outputs == 1);
 
   enum xnn_status status;
-  switch (node->compute_type) {
-    case xnn_compute_type_fp32:
+  const uint32_t input_id = node->inputs[0];
+  assert(input_id < num_values);
+  const struct xnn_value *input_value = &values[input_id];
+  switch (input_value->datatype) {
+    case xnn_datatype_fp32:
     {
       status = xnn_create_scaled_dot_product_attention_nhtc_f32(
         node->params.scaled_dot_product_attention.cap_type,
@@ -41,7 +44,7 @@ static enum xnn_status create_scaled_dot_product_attention_operator(
         &opdata->operator_objects[0]);
       break;
     }
-    case xnn_compute_type_fp16:
+    case xnn_datatype_fp16:
     {
       status = xnn_create_scaled_dot_product_attention_nhtc_f16(
         node->params.scaled_dot_product_attention.cap_type,

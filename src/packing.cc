@@ -169,7 +169,7 @@ void xnn_pack_f32_to_f16_gemm_goi_w(
         }
       } else {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          packed_weights[nr_block_offset] = 0;
+          packed_weights[nr_block_offset] = xnn_float16_zero();
         }
       }
       packed_weights += nr;
@@ -1230,7 +1230,7 @@ void xnn_pack_f32_to_f16_gemm_gio_w(
         }
       } else {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          packed_weights[nr_block_offset] = 0.0f;
+          packed_weights[nr_block_offset] = xnn_float16_zero();
         }
       }
       packed_weights += nr;
@@ -3227,7 +3227,7 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
       } else {
         size_t n = cr_block_size;
         do {
-          *packed_weights++ = 0;
+          *packed_weights++ = xnn_float16_zero();
         } while (--n != 0);
       }
       packed_weights += channel_tile - cr_block_size;
@@ -3257,7 +3257,7 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
       } else {
         size_t n = cr_block_size;
         do {
-          *packed_weights++ = 0;
+          *packed_weights++ = xnn_float16_zero();
         } while (--n != 0);
       }
       packed_weights += channel_subtile - cr_block_size;
@@ -4269,7 +4269,7 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
       } else {
         size_t n = cr_block_size;
         do {
-          *packed_weights++ = 0;
+          *packed_weights++ = xnn_float16_zero();
         } while (--n != 0);
       }
       packed_weights += channel_tile - cr_block_size;
@@ -4301,7 +4301,7 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
       } else {
         size_t n = cr_block_size;
         do {
-          *packed_weights++ = 0;
+          *packed_weights++ = xnn_float16_zero();
         } while (--n != 0);
       }
       packed_weights += channel_subtile - cr_block_size;
@@ -5015,7 +5015,7 @@ void xnn_pack_f32_to_f16_dconv_oki_w(
     } else {
       size_t n = nr;
       do {
-        *packed_weights++ = 0;
+        *packed_weights++ = xnn_float16_zero();
       } while (--n != 0);
     }
 
@@ -5115,7 +5115,7 @@ void xnn_pack_f32_to_f16_chw_dwconv_ghw_w(
     if XNN_LIKELY(b != nullptr) {
       *packed_weights = xnn_float16_from_float(*b++);
     } else {
-      *packed_weights = 0;
+      *packed_weights = xnn_float16_zero();
     }
     packed_weights += 1;
     for (size_t i = 0; i < kernel_size; i++) {
@@ -5211,7 +5211,7 @@ void xnn_pack_f32_to_f16_chw_dwconv_hwg_w(
     if XNN_LIKELY(b != nullptr) {
       *packed_weights = xnn_float16_from_float(*b++);
     } else {
-      *packed_weights = 0;
+      *packed_weights = xnn_float16_zero();
     }
     packed_weights += 1;
     for (size_t i = 0; i < kernel_size; i++) {
@@ -5307,7 +5307,7 @@ void xnn_pack_f32_to_f16_vmulcaddc_w(
     } else {
       size_t n = cr_block_size;
       do {
-        *packed_weights++ = 0;
+        *packed_weights++ = xnn_float16_zero();
       } while (--n != 0);
     }
     packed_weights += cr - cr_block_size;
@@ -5435,10 +5435,10 @@ void xnn_analyze_f16_spmm_w(
   size_t num_nonzero_blocks4 = 0;
   for (size_t oc = 0; oc < round_down_po2(group_output_channels, 4); oc += 4) {
     for (size_t ic = 0; ic < group_input_channels; ic++) {
-      const size_t row0_nonzero = (size_t) (kernel[oc * group_input_channels + ic] != 0);
-      const size_t row1_nonzero = (size_t) (kernel[(oc + 1) * group_input_channels + ic] != 0);
-      const size_t row2_nonzero = (size_t) (kernel[(oc + 2) * group_input_channels + ic] != 0);
-      const size_t row3_nonzero = (size_t) (kernel[(oc + 3) * group_input_channels + ic] != 0);
+      const size_t row0_nonzero = (size_t) !xnn_float16_is_zero(kernel[oc * group_input_channels + ic]);
+      const size_t row1_nonzero = (size_t) !xnn_float16_is_zero(kernel[(oc + 1) * group_input_channels + ic]);
+      const size_t row2_nonzero = (size_t) !xnn_float16_is_zero(kernel[(oc + 2) * group_input_channels + ic]);
+      const size_t row3_nonzero = (size_t) !xnn_float16_is_zero(kernel[(oc + 3) * group_input_channels + ic]);
       num_nonzeroes += row0_nonzero + row1_nonzero + row2_nonzero + row3_nonzero;
       num_nonzero_blocks2 += (row0_nonzero | row1_nonzero) + (row2_nonzero | row3_nonzero);
       num_nonzero_blocks4 += (row0_nonzero | row1_nonzero | row2_nonzero | row3_nonzero);
@@ -5447,8 +5447,8 @@ void xnn_analyze_f16_spmm_w(
   const size_t num_block4_nonzeroes = num_nonzeroes;
   for (size_t oc = round_down_po2(group_output_channels, 4); oc < round_down_po2(group_output_channels, 2); oc += 2) {
     for (size_t ic = 0; ic < group_input_channels; ic++) {
-      const size_t row0_nonzero = (size_t) (kernel[oc * group_input_channels + ic] != 0);
-      const size_t row1_nonzero = (size_t) (kernel[(oc + 1) * group_input_channels + ic] != 0);
+      const size_t row0_nonzero = (size_t) !xnn_float16_is_zero(kernel[oc * group_input_channels + ic]);
+      const size_t row1_nonzero = (size_t) !xnn_float16_is_zero(kernel[(oc + 1) * group_input_channels + ic]);
       num_nonzeroes += row0_nonzero + row1_nonzero;
       num_nonzero_blocks2 += (row0_nonzero | row1_nonzero);
     }
@@ -5456,7 +5456,7 @@ void xnn_analyze_f16_spmm_w(
   const size_t num_block2_nonzeroes = num_nonzeroes;
   for (size_t oc = round_down_po2(group_output_channels, 2); oc < group_output_channels; oc++) {
     for (size_t ic = 0; ic < group_input_channels; ic++) {
-      num_nonzeroes += (size_t) (kernel[oc * group_input_channels + ic] != 0);
+      num_nonzeroes += (size_t) !xnn_float16_is_zero(kernel[oc * group_input_channels + ic]);
     }
   }
   params->num_nonzeroes = num_nonzeroes;
@@ -5579,7 +5579,7 @@ enum xnn_status xnn_pack_f32_to_f16_spmm_w(
       }
     } else {
       for (size_t oco = 0; oco < output_channels_block_size; oco++) {
-        *nonzero_values++ = 0;
+        *nonzero_values++ = xnn_float16_zero();
       }
     }
     for (size_t ic = 0; ic < group_input_channels; ic++) {
@@ -5613,7 +5613,7 @@ enum xnn_status xnn_pack_f32_to_f16_spmm_w(
     if XNN_LIKELY(bias != nullptr) {
       *nonzero_values++ = xnn_float16_from_float(bias[oc]);
     } else {
-      *nonzero_values++ = 0;
+      *nonzero_values++ = xnn_float16_zero();
     }
     for (size_t ic = 0; ic < group_input_channels; ic++) {
       const float weight = kernel[oc * group_input_channels + ic];
@@ -5671,13 +5671,13 @@ enum xnn_status xnn_pack_f16_spmm_w(
       }
     } else {
       for (size_t oco = 0; oco < output_channels_block_size; oco++) {
-        *nonzero_values++ = 0;
+        *nonzero_values++ = xnn_float16_zero();
       }
     }
     for (size_t ic = 0; ic < group_input_channels; ic++) {
       bool is_nonzero_block = false;
       for (size_t oco = 0; oco < output_channels_block_size; oco++) {
-        is_nonzero_block |= (kernel[(ocb + oco) * group_input_channels + ic] != 0);
+        is_nonzero_block |= !xnn_float16_is_zero(kernel[(ocb + oco) * group_input_channels + ic]);
       }
       if (is_nonzero_block) {
         for (size_t oco = 0; oco < output_channels_block_size; oco++) {
@@ -5705,11 +5705,11 @@ enum xnn_status xnn_pack_f16_spmm_w(
     if XNN_LIKELY(bias != nullptr) {
       *nonzero_values++ = bias[oc];
     } else {
-      *nonzero_values++ = 0;
+      *nonzero_values++ = xnn_float16_zero();
     }
     for (size_t ic = 0; ic < group_input_channels; ic++) {
-      const float weight = kernel[oc * group_input_channels + ic];
-      if (weight != 0) {
+      const xnn_float16 weight = kernel[oc * group_input_channels + ic];
+      if (!xnn_float16_is_zero(weight)) {
         *nonzero_values++ = weight;
         if (first_nonzero) {
           first_ic = ic;

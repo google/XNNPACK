@@ -44,25 +44,26 @@ static enum xnn_status create_multiply_operator(
   assert(output_id < num_values);
 
   enum xnn_status status;
-  switch (node->compute_type) {
-    case xnn_compute_type_fp16:
+  const struct xnn_value *input1_value = &values[input1_id];
+  switch (input1_value->datatype) {
+    case xnn_datatype_fp16:
       status = xnn_create_multiply_nd_f16(
         node->activation.output_min,
         node->activation.output_max,
         node->flags,
         &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_fp32:
+    case xnn_datatype_fp32:
       status = xnn_create_multiply_nd_f32(
         node->activation.output_min,
         node->activation.output_max,
         node->flags,
         &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_s32:
+    case xnn_datatype_int32:
       status = xnn_create_multiply_nd_s32(node->flags, &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_qs8:
+    case xnn_datatype_qint8:
     {
       const float output_scale = values[output_id].quantization.scale;
       const int32_t output_zero_point = values[output_id].quantization.zero_point;
@@ -78,7 +79,7 @@ static enum xnn_status create_multiply_operator(
         &opdata->operator_objects[0]);
       break;
     }
-    case xnn_compute_type_qu8:
+    case xnn_datatype_quint8:
     {
       const float output_scale = values[output_id].quantization.scale;
       const int32_t output_zero_point = values[output_id].quantization.zero_point;

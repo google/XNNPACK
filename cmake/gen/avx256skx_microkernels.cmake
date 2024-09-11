@@ -25,7 +25,8 @@ SET(PROD_AVX256SKX_MICROKERNEL_SRCS
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-avx256skx.c
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x8c8-minmax-fp32-avx256skx.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c8-minmax-fp32-avx256skx.c
-  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8c8-minmax-fp32-avx256skx.c)
+  src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8c8-minmax-fp32-avx256skx.c
+  src/qs8-rsum/gen/qs8-rsum-avx256skx-u64.c)
 
 SET(NON_PROD_AVX256SKX_MICROKERNEL_SRCS
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx256skx-madd.c
@@ -86,7 +87,6 @@ SET(NON_PROD_AVX256SKX_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x8c8-minmax-fp32-avx256skx.c
   src/qs8-rsum/gen/qs8-rsum-avx256skx-u32.c
   src/qs8-rsum/gen/qs8-rsum-avx256skx-u64-acc2.c
-  src/qs8-rsum/gen/qs8-rsum-avx256skx-u64.c
   src/qs8-rsum/gen/qs8-rsum-avx256skx-u128-acc2.c
   src/qs8-rsum/gen/qs8-rsum-avx256skx-u128-acc4.c
   src/qs8-rsum/gen/qs8-rsum-avx256skx-u128.c

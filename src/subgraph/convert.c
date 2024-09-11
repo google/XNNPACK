@@ -41,88 +41,111 @@ static enum xnn_status create_convert_operator(
   const struct xnn_value* output_value = values + output_id;
 
   enum xnn_status status = xnn_status_uninitialized;
-  switch (node->compute_type) {
-    case xnn_compute_type_fp32_to_fp16:
-      status = xnn_create_convert_nc_f32_f16(
-        node->flags,
-        &opdata->operator_objects[0]);
+  const enum xnn_datatype input_datatype = values[input_id].datatype;
+  const enum xnn_datatype output_datatype = values[output_id].datatype;
+  switch (input_datatype) {
+    case xnn_datatype_fp32:
+      switch (output_datatype) {
+        case xnn_datatype_fp16:
+          status = xnn_create_convert_nc_f32_f16(
+              node->flags,
+              &opdata->operator_objects[0]);
+          break;
+        case xnn_datatype_qdint8:
+          status = xnn_create_convert_nc_f32_qd8(
+              node->flags,
+              &opdata->operator_objects[0]);
+          break;
+        case xnn_datatype_qpint8:
+          status = xnn_create_convert_nc_f32_qp8(node->flags,
+                                                 &opdata->operator_objects[0]);
+          break;
+        case xnn_datatype_qint8:
+          status = xnn_create_convert_nc_f32_qs8(
+              output_value->quantization.scale,
+              (int8_t) output_value->quantization.zero_point,
+              INT8_MIN, INT8_MAX,
+              node->flags,
+              &opdata->operator_objects[0]);
+           break;
+        case xnn_datatype_quint8:
+          status = xnn_create_convert_nc_f32_qu8(
+            output_value->quantization.scale,
+            (uint8_t) output_value->quantization.zero_point,
+            0, UINT8_MAX,
+            node->flags,
+            &opdata->operator_objects[0]);
+          break;
+        default:
+          XNN_UNREACHABLE;
+      }
       break;
-    case xnn_compute_type_fp16_to_qd8: {
-      status = xnn_create_convert_nc_f16_qd8(
-        node->flags,
-        &opdata->operator_objects[0]);
+    case xnn_datatype_fp16:
+      switch (output_datatype) {
+        case xnn_datatype_qdint8:
+          status = xnn_create_convert_nc_f16_qd8(
+            node->flags,
+            &opdata->operator_objects[0]);
+          break;
+        case xnn_datatype_fp32:
+          status = xnn_create_convert_nc_f16_f32(
+            node->flags,
+            &opdata->operator_objects[0]);
+          break;
+        default:
+          XNN_UNREACHABLE;
+      }
       break;
-    }
-    case xnn_compute_type_fp32_to_qd8: {
-      status = xnn_create_convert_nc_f32_qd8(
-        node->flags,
-        &opdata->operator_objects[0]);
+    case xnn_datatype_qint8:
+      switch (output_datatype) {
+        case xnn_datatype_qint8:
+          status = xnn_create_convert_nc_qs8(
+            input_value->quantization.scale,
+            (int8_t) input_value->quantization.zero_point,
+            output_value->quantization.scale,
+            (int8_t) output_value->quantization.zero_point,
+            node->flags,
+            &opdata->operator_objects[0]);
+          break;
+        case xnn_datatype_fp16:
+          status = xnn_create_convert_nc_qs8_f16(
+            input_value->quantization.scale,
+            (int8_t) input_value->quantization.zero_point,
+            node->flags,
+            &opdata->operator_objects[0]);
+          break;
+        case xnn_datatype_fp32:
+          status = xnn_create_convert_nc_qs8_f32(
+            input_value->quantization.scale,
+            (int8_t) input_value->quantization.zero_point,
+            node->flags,
+            &opdata->operator_objects[0]);
+          break;
+        default:
+          XNN_UNREACHABLE;
+      }
       break;
-    }
-    case xnn_compute_type_fp32_to_qp8: {
-      status = xnn_create_convert_nc_f32_qp8(node->flags,
-                                             &opdata->operator_objects[0]);
-      break;
-    }
-    case xnn_compute_type_fp32_to_qs8:
-      status = xnn_create_convert_nc_f32_qs8(
-        output_value->quantization.scale,
-        (int8_t) output_value->quantization.zero_point,
-        INT8_MIN, INT8_MAX,
-        node->flags,
-        &opdata->operator_objects[0]);
-      break;
-    case xnn_compute_type_fp32_to_qu8:
-      status = xnn_create_convert_nc_f32_qu8(
-        output_value->quantization.scale,
-        (uint8_t) output_value->quantization.zero_point,
-        0, UINT8_MAX,
-        node->flags,
-        &opdata->operator_objects[0]);
-      break;
-    case xnn_compute_type_fp16_to_fp32:
-      status = xnn_create_convert_nc_f16_f32(
-        node->flags,
-        &opdata->operator_objects[0]);
-      break;
-    case xnn_compute_type_qs8:
-      status = xnn_create_convert_nc_qs8(
-        input_value->quantization.scale,
-        (int8_t) input_value->quantization.zero_point,
-        output_value->quantization.scale,
-        (int8_t) output_value->quantization.zero_point,
-        node->flags,
-        &opdata->operator_objects[0]);
-      break;
-    case xnn_compute_type_qs8_to_fp16:
-      status = xnn_create_convert_nc_qs8_f16(
-        input_value->quantization.scale,
-        (int8_t) input_value->quantization.zero_point,
-        node->flags,
-        &opdata->operator_objects[0]);
-      break;
-    case xnn_compute_type_qs8_to_fp32:
-      status = xnn_create_convert_nc_qs8_f32(
-        input_value->quantization.scale,
-        (int8_t) input_value->quantization.zero_point,
-        node->flags,
-        &opdata->operator_objects[0]);
-      break;
-    case xnn_compute_type_qu8:
-      status = xnn_create_convert_nc_qu8(
-        input_value->quantization.scale,
-        (uint8_t) input_value->quantization.zero_point,
-        output_value->quantization.scale,
-        (uint8_t) output_value->quantization.zero_point,
-        node->flags,
-        &opdata->operator_objects[0]);
-      break;
-    case xnn_compute_type_qu8_to_fp32:
-      status = xnn_create_convert_nc_qu8_f32(
-        input_value->quantization.scale,
-        (uint8_t) input_value->quantization.zero_point,
-        node->flags,
-        &opdata->operator_objects[0]);
+    case xnn_datatype_quint8:
+      switch (output_datatype) {
+        case xnn_datatype_quint8:
+          status = xnn_create_convert_nc_qu8(
+            input_value->quantization.scale,
+            (uint8_t) input_value->quantization.zero_point,
+            output_value->quantization.scale,
+            (uint8_t) output_value->quantization.zero_point,
+            node->flags,
+            &opdata->operator_objects[0]);
+          break;
+        case xnn_datatype_fp32:
+          status = xnn_create_convert_nc_qu8_f32(
+            input_value->quantization.scale,
+            (uint8_t) input_value->quantization.zero_point,
+            node->flags,
+            &opdata->operator_objects[0]);
+          break;
+        default:
+          XNN_UNREACHABLE;
+      }
       break;
     default:
       XNN_UNREACHABLE;

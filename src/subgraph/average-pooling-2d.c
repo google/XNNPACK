@@ -31,8 +31,11 @@ static enum xnn_status create_average_pooling_operator(
   assert(node->num_outputs == 1);
 
   enum xnn_status status;
-  switch (node->compute_type) {
-    case xnn_compute_type_fp16:
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id < num_values);
+  const struct xnn_value *input_value = &values[input_id];
+  switch (input_value->datatype) {
+    case xnn_datatype_fp16:
       status = xnn_create_average_pooling2d_nhwc_f16(
         node->params.pooling_2d.padding_top,
         node->params.pooling_2d.padding_right,
@@ -47,7 +50,7 @@ static enum xnn_status create_average_pooling_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_fp32:
+    case xnn_datatype_fp32:
       status = xnn_create_average_pooling2d_nhwc_f32(
         node->params.pooling_2d.padding_top,
         node->params.pooling_2d.padding_right,

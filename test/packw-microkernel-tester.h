@@ -94,6 +94,52 @@ class PackWMicrokernelTester {
     return this->nullbias_;
   }
 
+  void Test(xnn_qs8_packw_gemm_goi_ukernel_fn packw) const {
+    std::vector<int8_t> weights(n() * k());
+    std::vector<int32_t> bias(n());
+    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(uint32_t));
+    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w_ref(packed_n() * packed_k() + packed_n() * sizeof(uint32_t));
+
+    std::iota(weights.begin(), weights.end(), 0);
+    std::iota(bias.begin(), bias.end(), UINT32_C(0));
+    std::fill(packed_w.begin(), packed_w.end(), INT8_C(0x12));
+    std::fill(packed_w_ref.begin(), packed_w_ref.end(), INT8_C(0x7B));
+
+    const int32_t* bias_data = nullbias() ? nullptr : bias.data();
+    const xnn_qs8_packing_params packing_params = { 0 };
+
+    // Compute reference results.
+    xnn_pack_qs8_gemm_goi_w(/*g=*/1, n(), k(), nr(), kr(), sr(),
+      reinterpret_cast<const int8_t *>(weights.data()),
+      bias_data,
+      /*scale=*/nullptr,
+      reinterpret_cast<void *>(packed_w_ref.data()),
+      /*extra_bytes=*/0, &packing_params);
+
+    // Call optimized micro-kernel.
+    packw(/*g=*/1, n(), k(), nr(), kr(), sr(),
+      weights.data(), bias_data, /*scale=*/nullptr, packed_w.data(), /*extra_bytes=*/0, &packing_params);
+
+    // Verify bias results.
+    for (size_t i = 0; i < packed_n() * sizeof(int32_t); i++) {
+      EXPECT_EQ((int32_t) packed_w[i], (int32_t) packed_w_ref[i]);
+    }
+
+    // Verify weights results.
+    // NOTE remainder KC is different so k() is used instead of packed_k() for loop
+    for (size_t ki = 0; ki < k(); ki++) {
+      for (size_t ni = 0; ni < (n()); ni++) {
+        const size_t i = packed_n() * sizeof(int32_t) + ki * packed_n() + ni;
+        if (packed_w_ref[i] != INT8_C(0x7B)) {  // Allow pad to differ
+          EXPECT_EQ((int32_t) packed_w[i], (int32_t) packed_w_ref[i])
+              << "kr " << kr() << " of kc " << k() << " packed_k " << packed_k() << "\n"
+              << "nr " << nr() << " of nc " << n() << " packed_n " << packed_n() << "\n"
+              << "at n " << i << " of " << (int32_t) (packed_n() * packed_k() + packed_n() * sizeof(int32_t));
+        }
+      }
+    }
+  }
+
   void Test(xnn_x8_packw_gemm_goi_ukernel_fn packw) const {
     std::vector<int8_t> weights(n() * k());
     std::vector<uint32_t> bias(n());

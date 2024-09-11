@@ -20,7 +20,7 @@ $  "SUB": "xnn_sub_f32",
 $  "SQRDIFF": "xnn_sub_f32",
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "union xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
+$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
 void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__hvx_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,

@@ -32,7 +32,7 @@ extern "C" {
       size_t cn_stride,                             \
       size_t a_offset,                              \
       const float* zero,                            \
-      const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 #define DECLARE_F32_IGEMM_RELU_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                             \
@@ -47,7 +47,7 @@ extern "C" {
       size_t cn_stride,                                  \
       size_t a_offset,                                   \
       const float* zero,                                 \
-      const union xnn_f32_relu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_f32_relu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 #define DECLARE_F32_IGEMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                               \
@@ -1638,6 +1638,9 @@ DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_uk
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_6x8c8__avxvnni_prfm)
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_7x8c8__avxvnni_prfm)
 DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_8x8c8__avxvnni_prfm)
+
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8c8__avxvnniint8_prfm)
+DECLARE_QS8_QC8W_IGEMM_MINMAX_UKERNEL_FUNCTION(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_5x8c8__avxvnniint8_prfm)
 
 #define DECLARE_GENERATE_IGEMM_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL xnn_status_t fn_name(                     \

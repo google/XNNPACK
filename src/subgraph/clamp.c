@@ -35,22 +35,25 @@ static enum xnn_status create_clamp_operator(
   assert(output_id < num_values);
 
   enum xnn_status status;
-  switch (node->compute_type) {
-    case xnn_compute_type_fp16:
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id < num_values);
+  const struct xnn_value *input_value = &values[input_id];
+  switch (input_value->datatype) {
+    case xnn_datatype_fp16:
       status = xnn_create_clamp_nc_f16(
         node->activation.output_min,
         node->activation.output_max,
         node->flags,
         &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_fp32:
+    case xnn_datatype_fp32:
       status = xnn_create_clamp_nc_f32(
         node->activation.output_min,
         node->activation.output_max,
         node->flags,
         &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_qs8:
+    case xnn_datatype_qint8:
     {
       const float output_scale = values[output_id].quantization.scale;
       const int32_t output_zero_point = values[output_id].quantization.zero_point;
@@ -63,7 +66,7 @@ static enum xnn_status create_clamp_operator(
         &opdata->operator_objects[0]);
       break;
     }
-    case xnn_compute_type_qu8:
+    case xnn_datatype_quint8:
     {
       const float output_scale = values[output_id].quantization.scale;
       const int32_t output_zero_point = values[output_id].quantization.zero_point;

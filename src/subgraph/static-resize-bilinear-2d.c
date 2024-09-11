@@ -41,15 +41,18 @@ static enum xnn_status create_resize_bilinear_operator(
   const size_t output_height = node->params.static_resize.new_height;
   const size_t output_width = node->params.static_resize.new_width;
   enum xnn_status status;
-  if (values[input_id].layout == xnn_layout_type_nchw) {
-    switch (node->compute_type) {
-      case xnn_compute_type_fp16:
+
+  const struct xnn_value *input_value = &values[input_id];
+
+  if (input_value->layout == xnn_layout_type_nchw) {
+    switch (input_value->datatype) {
+      case xnn_datatype_fp16:
         status = xnn_create_resize_bilinear2d_nchw_f16(
           output_height, output_width,
           node->flags,
           &opdata->operator_objects[0]);
         break;
-      case xnn_compute_type_fp32:
+      case xnn_datatype_fp32:
         status = xnn_create_resize_bilinear2d_nchw_f32(
           output_height, output_width,
           node->flags,
@@ -61,26 +64,26 @@ static enum xnn_status create_resize_bilinear_operator(
   } else {
     assert(values[input_id].layout == xnn_layout_type_nhwc);
     assert(values[output_id].layout == xnn_layout_type_nhwc);
-    switch (node->compute_type) {
-      case xnn_compute_type_fp16:
+    switch (input_value->datatype) {
+      case xnn_datatype_fp16:
         status = xnn_create_resize_bilinear2d_nhwc_f16(
           output_height, output_width,
           node->flags,
           &opdata->operator_objects[0]);
         break;
-      case xnn_compute_type_fp32:
+      case xnn_datatype_fp32:
         status = xnn_create_resize_bilinear2d_nhwc_f32(
           output_height, output_width,
           node->flags,
           &opdata->operator_objects[0]);
         break;
-      case xnn_compute_type_qs8:
+      case xnn_datatype_qint8:
         status = xnn_create_resize_bilinear2d_nhwc_s8(
           output_height, output_width,
           node->flags,
           &opdata->operator_objects[0]);
         break;
-      case xnn_compute_type_qu8:
+      case xnn_datatype_quint8:
         status = xnn_create_resize_bilinear2d_nhwc_u8(
           output_height, output_width,
           node->flags,

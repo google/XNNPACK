@@ -32,42 +32,6 @@ class Exp {};
 class Gelu {};
 class Default {};
 
-struct Float16 {
-  xnn_float16 value;
-
-  Float16() = default;
-  Float16(float value) : value(xnn_float16_from_float(value)) {}
-
-  operator float() const { return xnn_float16_to_float(value); }
-};
-
-struct BFloat16 {
-  xnn_float16 value;
-
-  BFloat16() = default;
-  BFloat16(float value) : value(cvt_f32_bf16(value)) {}
-
-  operator float() const { return cvt_bf16_f32(value); }
-
-private:
-  union bf16float {
-    xnn_float16 bf[2];
-    float f;
-  };
-  static float cvt_bf16_f32(xnn_float16 r) {
-    bf16float q{};
-    q.f = 0;
-    q.bf[1] = r;
-    return q.f;
-  }
-
-  static xnn_float16 cvt_f32_bf16(float f) {
-    bf16float q{};
-    q.f = f;
-    return q.bf[1];
-  }
-};
-
 class VUnaryMicrokernelTester {
  public:
   enum class OpType {
@@ -311,9 +275,6 @@ class VUnaryMicrokernelTester {
             Default = Default()) const;
 
  private:
-  template <typename T>
-  using void_or_float = typename std::conditional<std::is_same<T, float>::value, float, uint16_t>::type;
-
   // Generic test function for `vunary` kernels.
   //
   // The function is templated on the type of the kernel parameters and takes
@@ -329,7 +290,7 @@ class VUnaryMicrokernelTester {
   //  * `range_min`, `range_max`: Limits for the range of input values.
   template <typename T, typename UKernelParamsType, typename InitParamsFunc,
             typename ReferenceFunc, typename ToleranceFunc>
-  void Test(void (*ukernel)(size_t, const void_or_float<T>*, void_or_float<T>*,
+  void Test(void (*ukernel)(size_t, const T*, T*,
                                 const UKernelParamsType*),
                 InitParamsFunc init_params, ReferenceFunc ref,
                 ToleranceFunc tol, float range_min, float range_max) const {
@@ -359,7 +320,7 @@ class VUnaryMicrokernelTester {
       const UKernelParamsType* params_ptr = init_params(&params);
 
       // Call optimized micro-kernel.
-      ukernel(batch_size() * sizeof(T), reinterpret_cast<const void_or_float<T>*>(x_data), reinterpret_cast<void_or_float<T>*>(y.data()), params_ptr);
+      ukernel(batch_size() * sizeof(T), x_data, y.data(), params_ptr);
 
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {

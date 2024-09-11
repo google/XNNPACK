@@ -18,7 +18,7 @@ void xnn_u8_maxpool_minmax_ukernel_9p8x__scalar_c1(
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_u8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_u8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(output_pixels != 0);
   assert(kernel_elements != 0);

@@ -4,19 +4,19 @@
 # LICENSE file in the root directory of this source tree.
 
 # SSE4 MADD
-- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4c8__sse41_madd
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4c8__ssse3_madd
   init: xnn_init_f32_qc4w_minmax_scalar_params
   pack: xnn_pack_qs8_qc4uw_gemm_goi_w
   k-block: 16
-- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x4c8__sse41_madd
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x4c8__ssse3_madd
   init: xnn_init_f32_qc4w_minmax_scalar_params
   pack: xnn_pack_qs8_qc4uw_gemm_goi_w
   k-block: 16
-- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x4c8__sse41_madd
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x4c8__ssse3_madd
   init: xnn_init_f32_qc4w_minmax_scalar_params
   pack: xnn_pack_qs8_qc4uw_gemm_goi_w
   k-block: 16
-- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4c8__sse41_madd
+- name: xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4c8__ssse3_madd
   init: xnn_init_f32_qc4w_minmax_scalar_params
   pack: xnn_pack_qs8_qc4uw_gemm_goi_w
   k-block: 16

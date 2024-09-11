@@ -44,7 +44,7 @@ static void qs8_vaddc(
   std::generate(a.begin(), a.end(), std::ref(i8rng));
   const int8_t b = i8rng();
 
-  union xnn_qs8_add_minmax_params params;
+  struct xnn_qs8_add_minmax_params params;
   init_params(&params,
     1 /* a zero point */, 1 /* b zero point */, 1 /* output zero point */,
     0.5f /* a-output scale */, 0.75f /* b-output scale */,

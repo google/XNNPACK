@@ -55,6 +55,36 @@ BENCHMARK_CAPTURE(f32_rdsum, scalar_c4,
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(f32_rdsum, rvv_u1v,
+                    xnn_f32_rdsum_ukernel_7p7x__rvv_u1v,
+                    xnn_init_f32_scaleminmax_scalar_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(BenchmarkRDSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(f32_rdsum, rvv_u2v,
+                    xnn_f32_rdsum_ukernel_7p7x__rvv_u2v,
+                    xnn_init_f32_scaleminmax_scalar_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(BenchmarkRDSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(f32_rdsum, rvv_u4v,
+                    xnn_f32_rdsum_ukernel_7p7x__rvv_u4v,
+                    xnn_init_f32_scaleminmax_scalar_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(BenchmarkRDSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rdsum, sse_c16,
                     xnn_f32_rdsum_ukernel_7p7x__sse_c16,

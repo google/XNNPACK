@@ -206,7 +206,7 @@ static inline uint8_t xnn_qu8_requantize_rndnu(
 
 static inline uint8_t xnn_qu8_quantize_add(
   uint8_t a, uint8_t b,
-  union xnn_qu8_add_minmax_params params)
+  struct xnn_qu8_add_minmax_params params)
 {
   // Multiply by factors and accumulate products.
   int32_t acc = params.scalar.bias + (int32_t) (uint32_t) a * params.scalar.a_multiplier + (int32_t) (uint32_t) b * params.scalar.b_multiplier;
@@ -223,7 +223,7 @@ static inline uint8_t xnn_qu8_quantize_add(
 
 static inline int8_t xnn_qs8_quantize_add(
   int8_t a, int8_t b,
-  union xnn_qs8_add_minmax_params params)
+  struct xnn_qs8_add_minmax_params params)
 {
   // Multiply by factors and accumulate products.
   int32_t acc = params.scalar.bias + (int32_t) a * params.scalar.a_multiplier + (int32_t) b * params.scalar.b_multiplier;

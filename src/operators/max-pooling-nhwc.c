@@ -186,7 +186,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_s8(
 
   const struct xnn_maxpool_config* maxpool_config = xnn_init_s8_maxpool_config();
   assert(maxpool_config != NULL);
-  union xnn_s8_minmax_params params;
+  struct xnn_s8_minmax_params params;
   maxpool_config->init.s8(&params, output_min, output_max);
   return create_max_pooling2d_nhwc(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
@@ -225,7 +225,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_u8(
 
   const struct xnn_maxpool_config* maxpool_config = xnn_init_u8_maxpool_config();
   assert(maxpool_config != NULL);
-  union xnn_u8_minmax_params params;
+  struct xnn_u8_minmax_params params;
   maxpool_config->init.u8(&params, output_min, output_max);
   return create_max_pooling2d_nhwc(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
