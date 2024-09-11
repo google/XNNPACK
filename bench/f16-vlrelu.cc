@@ -20,7 +20,7 @@ void f16_vlrelu(benchmark::State& state, uint64_t arch_flags, xnn_f16_vlrelu_uke
   f16_vunary_benchmark<xnn_f16_lrelu_params>(
       state, ukernel,
       [init_params](xnn_f16_lrelu_params* params) -> size_t {
-        init_params(params, UINT16_C(0x1F00));  // 0.01h
+        init_params(params, 0.01f);
         return sizeof(*params);
       },
       arch_flags,

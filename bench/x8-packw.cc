@@ -23,7 +23,6 @@ static void x8_packw(benchmark::State& state, const char* net,
 BENCHMARK_CAPTURE_BGEMM(x8_packw, ukernel##_, ukernel, arch_flags, nr, kr, sr);
 
 #include "src/x8-packw/x8-packw.h"
-
 #undef XNN_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

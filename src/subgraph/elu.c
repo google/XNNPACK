@@ -28,30 +28,29 @@ static enum xnn_status create_elu_operator(
   struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
-  assert(node->num_inputs == 1);
-  const uint32_t input_id = node->inputs[0];
-  assert(input_id < num_values);
-
   assert(node->num_outputs == 1);
   const uint32_t output_id = node->outputs[0];
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
   enum xnn_status status;
-  switch (node->compute_type) {
-    case xnn_compute_type_fp16:
+  const uint32_t input_id = opdata->inputs[0];
+  assert(input_id < num_values);
+  const struct xnn_value *input_value = &values[input_id];
+  switch (input_value->datatype) {
+    case xnn_datatype_fp16:
       status = xnn_create_elu_nc_f16(
         node->params.elu.alpha,
         node->flags,
         &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_fp32:
+    case xnn_datatype_fp32:
       status = xnn_create_elu_nc_f32(
         node->params.elu.alpha,
         node->flags,
         &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_qs8:
+    case xnn_datatype_qint8:
       status = xnn_create_elu_nc_qs8(
         node->params.elu.alpha,
         (int8_t) values[input_id].quantization.zero_point,

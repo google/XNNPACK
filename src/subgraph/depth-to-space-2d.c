@@ -34,16 +34,17 @@ static enum xnn_status create_depth_to_space_operator(
   assert(node->num_outputs == 1);
 
   enum xnn_status status;
+  const struct xnn_value *input_value = &values[input_id];
   if (values[input_id].layout == xnn_layout_type_nchw) {
     assert(values[node->outputs[0]].layout == xnn_layout_type_nhwc);
-    switch (node->compute_type) {
-      case xnn_compute_type_fp16:
+    switch (input_value->datatype) {
+      case xnn_datatype_fp16:
         status = xnn_create_depth_to_space_nchw2nhwc_x16(
             node->params.depth_to_space_2d.block_size,
             node->flags,
             &opdata->operator_objects[0]);
         break;
-      case xnn_compute_type_fp32:
+      case xnn_datatype_fp32:
         status = xnn_create_depth_to_space_nchw2nhwc_x32(
             node->params.depth_to_space_2d.block_size,
             node->flags,
@@ -55,21 +56,21 @@ static enum xnn_status create_depth_to_space_operator(
   } else {
     assert(values[input_id].layout == xnn_layout_type_nhwc);
     assert(values[node->outputs[0]].layout == xnn_layout_type_nhwc);
-    switch (node->compute_type) {
-      case xnn_compute_type_fp16:
+    switch (input_value->datatype) {
+      case xnn_datatype_fp16:
         status = xnn_create_depth_to_space_nhwc_x16(
             node->params.depth_to_space_2d.block_size,
             node->flags,
             &opdata->operator_objects[0]);
         break;
-      case xnn_compute_type_fp32:
+      case xnn_datatype_fp32:
         status = xnn_create_depth_to_space_nhwc_x32(
             node->params.depth_to_space_2d.block_size,
             node->flags,
             &opdata->operator_objects[0]);
         break;
-      case xnn_compute_type_qs8:
-      case xnn_compute_type_qu8:
+      case xnn_datatype_qint8:
+      case xnn_datatype_quint8:
         status = xnn_create_depth_to_space_nhwc_x8(
             node->params.depth_to_space_2d.block_size,
             node->flags,

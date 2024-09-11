@@ -37,21 +37,22 @@ static enum xnn_status create_leaky_relu_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
+  const struct xnn_value *input_value = &values[input_id];
   enum xnn_status status;
-  switch (node->compute_type) {
-    case xnn_compute_type_fp16:
+  switch (input_value->datatype) {
+    case xnn_datatype_fp16:
       status = xnn_create_leaky_relu_nc_f16(
         node->params.leaky_relu.negative_slope,
         node->flags,
         &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_fp32:
+    case xnn_datatype_fp32:
       status = xnn_create_leaky_relu_nc_f32(
         node->params.leaky_relu.negative_slope,
         node->flags,
         &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_qs8:
+    case xnn_datatype_qint8:
       status = xnn_create_leaky_relu_nc_qs8(
         node->params.leaky_relu.negative_slope,
         (int8_t) values[input_id].quantization.zero_point, values[input_id].quantization.scale,
@@ -59,7 +60,7 @@ static enum xnn_status create_leaky_relu_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_qu8:
+    case xnn_datatype_quint8:
       status = xnn_create_leaky_relu_nc_qu8(
         node->params.leaky_relu.negative_slope,
         (uint8_t) values[input_id].quantization.zero_point, values[input_id].quantization.scale,

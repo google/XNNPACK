@@ -17,53 +17,59 @@
 
 
 TEST(QS8_RDSUM_7P7X__SCALAR_C4, channels_eq_4_2pass_fulltile) {
+  const size_t channel_tile = 4;
   RDSumMicrokernelTester()
     .rows(14)
-    .channels(4)
+    .channels(channel_tile)
     .Test(xnn_qs8_rdsum_ukernel_7p7x__scalar_c4);
 }
 
 TEST(QS8_RDSUM_7P7X__SCALAR_C4, channels_eq_4_2pass_fulltile_with_input_stride) {
+  const size_t channel_tile = 4;
   RDSumMicrokernelTester()
     .rows(14)
-    .channels(4)
+    .channels(channel_tile)
     .input_stride(7)
     .Test(xnn_qs8_rdsum_ukernel_7p7x__scalar_c4);
 }
 
 TEST(QS8_RDSUM_7P7X__SCALAR_C4, channels_eq_4_2pass_subtile) {
+  const size_t channel_tile = 4;
   for (size_t rows = 1; rows < 14; rows++) {
     RDSumMicrokernelTester()
       .rows(rows)
-      .channels(4)
+      .channels(channel_tile)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__scalar_c4);
   }
 }
 
 TEST(QS8_RDSUM_7P7X__SCALAR_C4, channels_eq_4_2pass_subtile_with_input_stride) {
+  const size_t channel_tile = 4;
   for (size_t rows = 1; rows < 14; rows++) {
     RDSumMicrokernelTester()
       .rows(rows)
-      .channels(4)
+      .channels(channel_tile)
       .input_stride(7)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__scalar_c4);
   }
 }
 
 TEST(QS8_RDSUM_7P7X__SCALAR_C4, channels_eq_4_multipass_fulltile) {
+  const size_t channel_tile = 4;
   for (size_t rows = 1; rows <= 35; rows += 7) {
     RDSumMicrokernelTester()
       .rows(rows)
-      .channels(4)
+      .channels(channel_tile)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__scalar_c4);
   }
 }
 
 TEST(QS8_RDSUM_7P7X__SCALAR_C4, channels_eq_4_multipass_fulltile_with_input_stride) {
+  const size_t channel_tile = 4;
   for (size_t rows = 1; rows <= 35; rows += 7) {
     RDSumMicrokernelTester()
       .rows(rows)
-      .channels(4)
+      .channels(channel_tile)
       .input_stride(7)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__scalar_c4);
   }
@@ -113,7 +119,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, channels_div_4_multipass_fulltile_with_input_str
 }
 
 TEST(QS8_RDSUM_7P7X__SCALAR_C4, channels_lt_4_2pass_fulltile) {
-  for (size_t channels = 1; channels < 4; channels++) {
+  const size_t channel_tile = 4;
+  for (size_t channels = 1; channels < channel_tile; channels++) {
     RDSumMicrokernelTester()
       .rows(14)
       .channels(channels)
@@ -122,7 +129,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, channels_lt_4_2pass_fulltile) {
 }
 
 TEST(QS8_RDSUM_7P7X__SCALAR_C4, channels_lt_4_2pass_subtile) {
-  for (size_t channels = 1; channels < 4; channels++) {
+  const size_t channel_tile = 4;
+  for (size_t channels = 1; channels < channel_tile; channels++) {
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
@@ -133,7 +141,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, channels_lt_4_2pass_subtile) {
 }
 
 TEST(QS8_RDSUM_7P7X__SCALAR_C4, channels_lt_4_multipass_fulltile) {
-  for (size_t channels = 1; channels < 4; channels++) {
+  const size_t channel_tile = 4;
+  for (size_t channels = 1; channels < channel_tile; channels++) {
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
@@ -144,7 +153,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, channels_lt_4_multipass_fulltile) {
 }
 
 TEST(QS8_RDSUM_7P7X__SCALAR_C4, channels_lt_4_multipass_fulltile_with_input_stride) {
-  for (size_t channels = 1; channels < 4; channels++) {
+  const size_t channel_tile = 4;
+  for (size_t channels = 1; channels < channel_tile; channels++) {
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
@@ -199,7 +209,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, channels_gt_4_multipass_fulltile_with_input_stri
 }
 
 TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
-  for (size_t channels = 1; channels < 8; ++channels) {
+  const size_t channel_tile = 4;
+  for (size_t channels = 1; channels < channel_tile*2; ++channels) {
      RDSumMicrokernelTester()
        .rows(264)
        .channels(channels)
@@ -210,37 +221,41 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(QS8_RDSUM_7P7X__NEON_C16, channels_eq_16_2pass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(16)
+      .channels(channel_tile)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c16);
   }
 
   TEST(QS8_RDSUM_7P7X__NEON_C16, channels_eq_16_2pass_fulltile_with_input_stride) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(16)
+      .channels(channel_tile)
       .input_stride(19)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c16);
   }
 
   TEST(QS8_RDSUM_7P7X__NEON_C16, channels_eq_16_2pass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(16)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c16);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__NEON_C16, channels_eq_16_2pass_subtile_with_input_stride) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(16)
+        .channels(channel_tile)
         .input_stride(19)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c16);
     }
@@ -248,20 +263,22 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__NEON_C16, channels_eq_16_multipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(16)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c16);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__NEON_C16, channels_eq_16_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 16;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(16)
+        .channels(channel_tile)
         .input_stride(19)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c16);
     }
@@ -316,7 +333,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__NEON_C16, channels_lt_16_2pass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
@@ -326,7 +344,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__NEON_C16, channels_lt_16_2pass_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows < 14; rows++) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -338,7 +357,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__NEON_C16, channels_lt_16_multipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -350,7 +370,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__NEON_C16, channels_lt_16_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -410,7 +431,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__NEON_C16, overflow_accumulator) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 32; ++channels) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile*2; ++channels) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
@@ -423,37 +445,41 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(QS8_RDSUM_7P7X__NEON_C32, channels_eq_32_2pass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 32;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(32)
+      .channels(channel_tile)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c32);
   }
 
   TEST(QS8_RDSUM_7P7X__NEON_C32, channels_eq_32_2pass_fulltile_with_input_stride) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 32;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(32)
+      .channels(channel_tile)
       .input_stride(37)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c32);
   }
 
   TEST(QS8_RDSUM_7P7X__NEON_C32, channels_eq_32_2pass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 32;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(32)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c32);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__NEON_C32, channels_eq_32_2pass_subtile_with_input_stride) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 32;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(32)
+        .channels(channel_tile)
         .input_stride(37)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c32);
     }
@@ -461,20 +487,22 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__NEON_C32, channels_eq_32_multipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 32;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(32)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c32);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__NEON_C32, channels_eq_32_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 32;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(32)
+        .channels(channel_tile)
         .input_stride(37)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c32);
     }
@@ -529,7 +557,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__NEON_C32, channels_lt_32_2pass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 32; channels++) {
+    const size_t channel_tile = 32;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
@@ -539,7 +568,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__NEON_C32, channels_lt_32_2pass_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 32; channels++) {
+    const size_t channel_tile = 32;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows < 14; rows++) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -551,7 +581,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__NEON_C32, channels_lt_32_multipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 32; channels++) {
+    const size_t channel_tile = 32;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -563,7 +594,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__NEON_C32, channels_lt_32_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 32; channels++) {
+    const size_t channel_tile = 32;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -623,7 +655,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__NEON_C32, overflow_accumulator) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 64; ++channels) {
+    const size_t channel_tile = 32;
+    for (size_t channels = 1; channels < channel_tile*2; ++channels) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
@@ -636,37 +669,41 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   TEST(QS8_RDSUM_7P7X__NEON_C64, channels_eq_64_2pass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 64;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(64)
+      .channels(channel_tile)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c64);
   }
 
   TEST(QS8_RDSUM_7P7X__NEON_C64, channels_eq_64_2pass_fulltile_with_input_stride) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 64;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(64)
+      .channels(channel_tile)
       .input_stride(67)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c64);
   }
 
   TEST(QS8_RDSUM_7P7X__NEON_C64, channels_eq_64_2pass_subtile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 64;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(64)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c64);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__NEON_C64, channels_eq_64_2pass_subtile_with_input_stride) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 64;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(64)
+        .channels(channel_tile)
         .input_stride(67)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c64);
     }
@@ -674,20 +711,22 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__NEON_C64, channels_eq_64_multipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 64;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(64)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c64);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__NEON_C64, channels_eq_64_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_ARM_NEON;
+    const size_t channel_tile = 64;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(64)
+        .channels(channel_tile)
         .input_stride(67)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__neon_c64);
     }
@@ -742,7 +781,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__NEON_C64, channels_lt_64_2pass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 64; channels++) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
@@ -752,7 +792,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__NEON_C64, channels_lt_64_2pass_subtile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 64; channels++) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows < 14; rows++) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -764,7 +805,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__NEON_C64, channels_lt_64_multipass_fulltile) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 64; channels++) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -776,7 +818,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__NEON_C64, channels_lt_64_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 64; channels++) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -836,7 +879,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__NEON_C64, overflow_accumulator) {
     TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 128; ++channels) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile*2; ++channels) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
@@ -849,37 +893,41 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(QS8_RDSUM_7P7X__SSE41_C16, channels_eq_16_2pass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(16)
+      .channels(channel_tile)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c16);
   }
 
   TEST(QS8_RDSUM_7P7X__SSE41_C16, channels_eq_16_2pass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(16)
+      .channels(channel_tile)
       .input_stride(19)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c16);
   }
 
   TEST(QS8_RDSUM_7P7X__SSE41_C16, channels_eq_16_2pass_subtile) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(16)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c16);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__SSE41_C16, channels_eq_16_2pass_subtile_with_input_stride) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(16)
+        .channels(channel_tile)
         .input_stride(19)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c16);
     }
@@ -887,20 +935,22 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__SSE41_C16, channels_eq_16_multipass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(16)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c16);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__SSE41_C16, channels_eq_16_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 16;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(16)
+        .channels(channel_tile)
         .input_stride(19)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c16);
     }
@@ -955,7 +1005,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__SSE41_C16, channels_lt_16_2pass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
@@ -965,7 +1016,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__SSE41_C16, channels_lt_16_2pass_subtile) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows < 14; rows++) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -977,7 +1029,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__SSE41_C16, channels_lt_16_multipass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -989,7 +1042,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__SSE41_C16, channels_lt_16_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 16; channels++) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -1049,7 +1103,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__SSE41_C16, overflow_accumulator) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 32; ++channels) {
+    const size_t channel_tile = 16;
+    for (size_t channels = 1; channels < channel_tile*2; ++channels) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
@@ -1062,37 +1117,41 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(QS8_RDSUM_7P7X__SSE41_C32, channels_eq_32_2pass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 32;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(32)
+      .channels(channel_tile)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c32);
   }
 
   TEST(QS8_RDSUM_7P7X__SSE41_C32, channels_eq_32_2pass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 32;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(32)
+      .channels(channel_tile)
       .input_stride(37)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c32);
   }
 
   TEST(QS8_RDSUM_7P7X__SSE41_C32, channels_eq_32_2pass_subtile) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 32;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(32)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c32);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__SSE41_C32, channels_eq_32_2pass_subtile_with_input_stride) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 32;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(32)
+        .channels(channel_tile)
         .input_stride(37)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c32);
     }
@@ -1100,20 +1159,22 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__SSE41_C32, channels_eq_32_multipass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 32;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(32)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c32);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__SSE41_C32, channels_eq_32_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 32;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(32)
+        .channels(channel_tile)
         .input_stride(37)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c32);
     }
@@ -1168,7 +1229,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__SSE41_C32, channels_lt_32_2pass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 32; channels++) {
+    const size_t channel_tile = 32;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
@@ -1178,7 +1240,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__SSE41_C32, channels_lt_32_2pass_subtile) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 32; channels++) {
+    const size_t channel_tile = 32;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows < 14; rows++) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -1190,7 +1253,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__SSE41_C32, channels_lt_32_multipass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 32; channels++) {
+    const size_t channel_tile = 32;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -1202,7 +1266,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__SSE41_C32, channels_lt_32_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 32; channels++) {
+    const size_t channel_tile = 32;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -1262,7 +1327,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__SSE41_C32, overflow_accumulator) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 64; ++channels) {
+    const size_t channel_tile = 32;
+    for (size_t channels = 1; channels < channel_tile*2; ++channels) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
@@ -1275,37 +1341,41 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(QS8_RDSUM_7P7X__SSE41_C64, channels_eq_64_2pass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 64;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(64)
+      .channels(channel_tile)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c64);
   }
 
   TEST(QS8_RDSUM_7P7X__SSE41_C64, channels_eq_64_2pass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 64;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(64)
+      .channels(channel_tile)
       .input_stride(67)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c64);
   }
 
   TEST(QS8_RDSUM_7P7X__SSE41_C64, channels_eq_64_2pass_subtile) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 64;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(64)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c64);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__SSE41_C64, channels_eq_64_2pass_subtile_with_input_stride) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 64;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(64)
+        .channels(channel_tile)
         .input_stride(67)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c64);
     }
@@ -1313,20 +1383,22 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__SSE41_C64, channels_eq_64_multipass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 64;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(64)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c64);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__SSE41_C64, channels_eq_64_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_SSE41;
+    const size_t channel_tile = 64;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(64)
+        .channels(channel_tile)
         .input_stride(67)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__sse41_c64);
     }
@@ -1381,7 +1453,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__SSE41_C64, channels_lt_64_2pass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 64; channels++) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
@@ -1391,7 +1464,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__SSE41_C64, channels_lt_64_2pass_subtile) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 64; channels++) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows < 14; rows++) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -1403,7 +1477,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__SSE41_C64, channels_lt_64_multipass_fulltile) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 64; channels++) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -1415,7 +1490,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__SSE41_C64, channels_lt_64_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 64; channels++) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -1475,7 +1551,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__SSE41_C64, overflow_accumulator) {
     TEST_REQUIRES_X86_SSE41;
-    for (size_t channels = 1; channels < 128; ++channels) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile*2; ++channels) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
@@ -1488,37 +1565,41 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(QS8_RDSUM_7P7X__AVX2_C32, channels_eq_32_2pass_fulltile) {
     TEST_REQUIRES_X86_AVX2;
+    const size_t channel_tile = 32;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(32)
+      .channels(channel_tile)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__avx2_c32);
   }
 
   TEST(QS8_RDSUM_7P7X__AVX2_C32, channels_eq_32_2pass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_AVX2;
+    const size_t channel_tile = 32;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(32)
+      .channels(channel_tile)
       .input_stride(37)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__avx2_c32);
   }
 
   TEST(QS8_RDSUM_7P7X__AVX2_C32, channels_eq_32_2pass_subtile) {
     TEST_REQUIRES_X86_AVX2;
+    const size_t channel_tile = 32;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(32)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx2_c32);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__AVX2_C32, channels_eq_32_2pass_subtile_with_input_stride) {
     TEST_REQUIRES_X86_AVX2;
+    const size_t channel_tile = 32;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(32)
+        .channels(channel_tile)
         .input_stride(37)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx2_c32);
     }
@@ -1526,20 +1607,22 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX2_C32, channels_eq_32_multipass_fulltile) {
     TEST_REQUIRES_X86_AVX2;
+    const size_t channel_tile = 32;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(32)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx2_c32);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__AVX2_C32, channels_eq_32_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_AVX2;
+    const size_t channel_tile = 32;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(32)
+        .channels(channel_tile)
         .input_stride(37)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx2_c32);
     }
@@ -1594,7 +1677,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX2_C32, channels_lt_32_2pass_fulltile) {
     TEST_REQUIRES_X86_AVX2;
-    for (size_t channels = 1; channels < 32; channels++) {
+    const size_t channel_tile = 32;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
@@ -1604,7 +1688,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX2_C32, channels_lt_32_2pass_subtile) {
     TEST_REQUIRES_X86_AVX2;
-    for (size_t channels = 1; channels < 32; channels++) {
+    const size_t channel_tile = 32;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows < 14; rows++) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -1616,7 +1701,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX2_C32, channels_lt_32_multipass_fulltile) {
     TEST_REQUIRES_X86_AVX2;
-    for (size_t channels = 1; channels < 32; channels++) {
+    const size_t channel_tile = 32;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -1628,7 +1714,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX2_C32, channels_lt_32_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_AVX2;
-    for (size_t channels = 1; channels < 32; channels++) {
+    const size_t channel_tile = 32;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -1688,7 +1775,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX2_C32, overflow_accumulator) {
     TEST_REQUIRES_X86_AVX2;
-    for (size_t channels = 1; channels < 64; ++channels) {
+    const size_t channel_tile = 32;
+    for (size_t channels = 1; channels < channel_tile*2; ++channels) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
@@ -1701,37 +1789,41 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(QS8_RDSUM_7P7X__AVX2_C64, channels_eq_64_2pass_fulltile) {
     TEST_REQUIRES_X86_AVX2;
+    const size_t channel_tile = 64;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(64)
+      .channels(channel_tile)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__avx2_c64);
   }
 
   TEST(QS8_RDSUM_7P7X__AVX2_C64, channels_eq_64_2pass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_AVX2;
+    const size_t channel_tile = 64;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(64)
+      .channels(channel_tile)
       .input_stride(67)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__avx2_c64);
   }
 
   TEST(QS8_RDSUM_7P7X__AVX2_C64, channels_eq_64_2pass_subtile) {
     TEST_REQUIRES_X86_AVX2;
+    const size_t channel_tile = 64;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(64)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx2_c64);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__AVX2_C64, channels_eq_64_2pass_subtile_with_input_stride) {
     TEST_REQUIRES_X86_AVX2;
+    const size_t channel_tile = 64;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(64)
+        .channels(channel_tile)
         .input_stride(67)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx2_c64);
     }
@@ -1739,20 +1831,22 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX2_C64, channels_eq_64_multipass_fulltile) {
     TEST_REQUIRES_X86_AVX2;
+    const size_t channel_tile = 64;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(64)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx2_c64);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__AVX2_C64, channels_eq_64_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_AVX2;
+    const size_t channel_tile = 64;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(64)
+        .channels(channel_tile)
         .input_stride(67)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx2_c64);
     }
@@ -1807,7 +1901,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX2_C64, channels_lt_64_2pass_fulltile) {
     TEST_REQUIRES_X86_AVX2;
-    for (size_t channels = 1; channels < 64; channels++) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
@@ -1817,7 +1912,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX2_C64, channels_lt_64_2pass_subtile) {
     TEST_REQUIRES_X86_AVX2;
-    for (size_t channels = 1; channels < 64; channels++) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows < 14; rows++) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -1829,7 +1925,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX2_C64, channels_lt_64_multipass_fulltile) {
     TEST_REQUIRES_X86_AVX2;
-    for (size_t channels = 1; channels < 64; channels++) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -1841,7 +1938,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX2_C64, channels_lt_64_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_AVX2;
-    for (size_t channels = 1; channels < 64; channels++) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -1901,7 +1999,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX2_C64, overflow_accumulator) {
     TEST_REQUIRES_X86_AVX2;
-    for (size_t channels = 1; channels < 128; ++channels) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile*2; ++channels) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
@@ -1914,37 +2013,41 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C64, channels_eq_64_2pass_fulltile) {
     TEST_REQUIRES_X86_AVX512SKX;
+    const size_t channel_tile = 64;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(64)
+      .channels(channel_tile)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c64);
   }
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C64, channels_eq_64_2pass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_AVX512SKX;
+    const size_t channel_tile = 64;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(64)
+      .channels(channel_tile)
       .input_stride(67)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c64);
   }
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C64, channels_eq_64_2pass_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
+    const size_t channel_tile = 64;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(64)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c64);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C64, channels_eq_64_2pass_subtile_with_input_stride) {
     TEST_REQUIRES_X86_AVX512SKX;
+    const size_t channel_tile = 64;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(64)
+        .channels(channel_tile)
         .input_stride(67)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c64);
     }
@@ -1952,20 +2055,22 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C64, channels_eq_64_multipass_fulltile) {
     TEST_REQUIRES_X86_AVX512SKX;
+    const size_t channel_tile = 64;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(64)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c64);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C64, channels_eq_64_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_AVX512SKX;
+    const size_t channel_tile = 64;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(64)
+        .channels(channel_tile)
         .input_stride(67)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c64);
     }
@@ -2020,7 +2125,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C64, channels_lt_64_2pass_fulltile) {
     TEST_REQUIRES_X86_AVX512SKX;
-    for (size_t channels = 1; channels < 64; channels++) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
@@ -2030,7 +2136,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C64, channels_lt_64_2pass_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
-    for (size_t channels = 1; channels < 64; channels++) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows < 14; rows++) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -2042,7 +2149,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C64, channels_lt_64_multipass_fulltile) {
     TEST_REQUIRES_X86_AVX512SKX;
-    for (size_t channels = 1; channels < 64; channels++) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -2054,7 +2162,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C64, channels_lt_64_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_AVX512SKX;
-    for (size_t channels = 1; channels < 64; channels++) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -2114,7 +2223,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C64, overflow_accumulator) {
     TEST_REQUIRES_X86_AVX512SKX;
-    for (size_t channels = 1; channels < 128; ++channels) {
+    const size_t channel_tile = 64;
+    for (size_t channels = 1; channels < channel_tile*2; ++channels) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)
@@ -2127,37 +2237,41 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C128, channels_eq_128_2pass_fulltile) {
     TEST_REQUIRES_X86_AVX512SKX;
+    const size_t channel_tile = 128;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(128)
+      .channels(channel_tile)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c128);
   }
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C128, channels_eq_128_2pass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_AVX512SKX;
+    const size_t channel_tile = 128;
     RDSumMicrokernelTester()
       .rows(14)
-      .channels(128)
+      .channels(channel_tile)
       .input_stride(131)
       .Test(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c128);
   }
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C128, channels_eq_128_2pass_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
+    const size_t channel_tile = 128;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(128)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c128);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C128, channels_eq_128_2pass_subtile_with_input_stride) {
     TEST_REQUIRES_X86_AVX512SKX;
+    const size_t channel_tile = 128;
     for (size_t rows = 1; rows < 14; rows++) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(128)
+        .channels(channel_tile)
         .input_stride(131)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c128);
     }
@@ -2165,20 +2279,22 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C128, channels_eq_128_multipass_fulltile) {
     TEST_REQUIRES_X86_AVX512SKX;
+    const size_t channel_tile = 128;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(128)
+        .channels(channel_tile)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c128);
     }
   }
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C128, channels_eq_128_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_AVX512SKX;
+    const size_t channel_tile = 128;
     for (size_t rows = 1; rows <= 35; rows += 7) {
       RDSumMicrokernelTester()
         .rows(rows)
-        .channels(128)
+        .channels(channel_tile)
         .input_stride(131)
         .Test(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c128);
     }
@@ -2233,7 +2349,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C128, channels_lt_128_2pass_fulltile) {
     TEST_REQUIRES_X86_AVX512SKX;
-    for (size_t channels = 1; channels < 128; channels++) {
+    const size_t channel_tile = 128;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       RDSumMicrokernelTester()
         .rows(14)
         .channels(channels)
@@ -2243,7 +2360,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C128, channels_lt_128_2pass_subtile) {
     TEST_REQUIRES_X86_AVX512SKX;
-    for (size_t channels = 1; channels < 128; channels++) {
+    const size_t channel_tile = 128;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows < 14; rows++) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -2255,7 +2373,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C128, channels_lt_128_multipass_fulltile) {
     TEST_REQUIRES_X86_AVX512SKX;
-    for (size_t channels = 1; channels < 128; channels++) {
+    const size_t channel_tile = 128;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -2267,7 +2386,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C128, channels_lt_128_multipass_fulltile_with_input_stride) {
     TEST_REQUIRES_X86_AVX512SKX;
-    for (size_t channels = 1; channels < 128; channels++) {
+    const size_t channel_tile = 128;
+    for (size_t channels = 1; channels < channel_tile; channels++) {
       for (size_t rows = 1; rows <= 35; rows += 7) {
         RDSumMicrokernelTester()
           .rows(rows)
@@ -2327,7 +2447,8 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C128, overflow_accumulator) {
     TEST_REQUIRES_X86_AVX512SKX;
-    for (size_t channels = 1; channels < 256; ++channels) {
+    const size_t channel_tile = 128;
+    for (size_t channels = 1; channels < channel_tile*2; ++channels) {
        RDSumMicrokernelTester()
          .rows(264)
          .channels(channels)

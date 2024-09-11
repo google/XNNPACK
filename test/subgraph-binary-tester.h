@@ -23,6 +23,24 @@
 #include "xnnpack/subgraph.h"
 #include "replicable_random_device.h"
 
+template <typename T>
+class NumericLimits {
+public:
+  static constexpr T min() { return std::numeric_limits<T>::min(); }
+  static constexpr T max() { return std::numeric_limits<T>::max(); }
+};
+
+template <>
+class NumericLimits<xnn_float16> {
+public:
+  static xnn_float16 min() { 
+    return -std::numeric_limits<float>::infinity(); 
+  }
+  static xnn_float16 max() { 
+    return +std::numeric_limits<float>::infinity(); 
+  }
+};
+
 template <typename T> class BinaryTest : public ::testing::Test {
  protected:
   BinaryTest() {
@@ -129,8 +147,8 @@ template <typename T> class BinaryTest : public ::testing::Test {
   std::uniform_int_distribution<int32_t> s32dist;
 
 
-  T output_min = std::numeric_limits<T>::min();
-  T output_max = std::numeric_limits<T>::max();
+  T output_min = NumericLimits<T>::min();
+  T output_max = NumericLimits<T>::max();
 
   std::vector<size_t> input1_dims;
   std::vector<size_t> input2_dims;

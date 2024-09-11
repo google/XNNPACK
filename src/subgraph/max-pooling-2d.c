@@ -33,9 +33,14 @@ static enum xnn_status create_max_pooling_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
+  const uint32_t input_id = node->inputs[0];
+  assert(input_id < num_values);
+  const struct xnn_value *input_value = &values[input_id];
+  const enum xnn_datatype datatype = input_value->datatype;
+
   enum xnn_status status;
-  switch (node->compute_type) {
-    case xnn_compute_type_fp16:
+  switch (datatype) {
+    case xnn_datatype_fp16:
       status = xnn_create_max_pooling2d_nhwc_f16(
         node->params.pooling_2d.padding_top,
         node->params.pooling_2d.padding_right,
@@ -52,7 +57,7 @@ static enum xnn_status create_max_pooling_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_fp32:
+    case xnn_datatype_fp32:
       status = xnn_create_max_pooling2d_nhwc_f32(
         node->params.pooling_2d.padding_top,
         node->params.pooling_2d.padding_right,
@@ -69,7 +74,7 @@ static enum xnn_status create_max_pooling_operator(
         node->flags,
         &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_qs8:
+    case xnn_datatype_qint8:
     {
       const float output_scale = values[output_id].quantization.scale;
       const int32_t output_zero_point = values[output_id].quantization.zero_point;
@@ -92,7 +97,7 @@ static enum xnn_status create_max_pooling_operator(
         &opdata->operator_objects[0]);
       break;
     }
-    case xnn_compute_type_qu8:
+    case xnn_datatype_quint8:
     {
       const float output_scale = values[output_id].quantization.scale;
       const int32_t output_zero_point = values[output_id].quantization.zero_point;

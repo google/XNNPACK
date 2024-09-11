@@ -992,20 +992,23 @@ void DWConvMicrokernelTester::Test(
 
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(),
-                  [&]() { return xnn_float16_from_float(f32dist(rng)); });
+                  [&]() { return f32dist(rng); });
     std::generate(kernel.begin(), kernel.end(),
-                  [&]() { return xnn_float16_from_float(f32dist(rng)); });
+                  [&]() { return f32dist(rng); });
     std::generate(bias.begin(), bias.end(),
-                  [&]() { return xnn_float16_from_float(f32dist(rng)); });
+                  [&]() { return f32dist(rng); });
     std::fill(zero.begin(), zero.end(), 0);
     std::fill(output_ref.begin(), output_ref.end(), 0.0f);
-    std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+    std::fill(output.begin(), output.end(), std::nanf(""));
 
     std::fill(packed_weights.begin(), packed_weights.end(), 0);
     xnn_pack_f16_dwconv_ghw_w(
         kernel_tile(), 0, 0, kernel_tile(), 1, channels(), channel_tile(),
-        channel_tile(), channel_tile(), kernel.data(), bias.data(),
-        /*scale=*/nullptr, packed_weights.data(),
+        channel_tile(), channel_tile(), 
+        reinterpret_cast<const uint16_t*>(kernel.data()), 
+        reinterpret_cast<const uint16_t*>(bias.data()),
+        /*scale=*/nullptr, 
+        reinterpret_cast<uint16_t*>(packed_weights.data()),
         /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0,
         /*params=*/nullptr);
     for (size_t i = 0; i < indirection.size(); i++) {
@@ -1021,12 +1024,11 @@ void DWConvMicrokernelTester::Test(
     // Compute reference results, without clamping.
     for (size_t x = 0; x < width(); x++) {
       for (size_t c = 0; c < channels(); c++) {
-        float acc = xnn_float16_to_float(bias[c]);
+        float acc = bias[c];
         for (size_t k = 0; k < kernel_tile(); k++) {
           if (indirection[x * step() + k] != zero.data()) {
-            acc += xnn_float16_to_float(
-                       indirection[x * step() + k][c + input_offset()]) *
-                   xnn_float16_to_float(kernel[c * kernel_tile() + k]);
+            acc += indirection[x * step() + k][c + input_offset()] *
+                   kernel[c * kernel_tile() + k];
           }
         }
         output_ref[x * channels() + c] = acc;
@@ -1039,17 +1041,17 @@ void DWConvMicrokernelTester::Test(
     const float accumulated_max =
         *std::max_element(output_ref.cbegin(), output_ref.cend());
     const float accumulated_range = accumulated_max - accumulated_min;
-    const float output_min = xnn_float16_to_float(xnn_float16_from_float(
+    const float output_min = xnn_float16(
         accumulated_min +
-        accumulated_range / 255.0f * static_cast<float>(qmin())));
-    const float output_max = xnn_float16_to_float(xnn_float16_from_float(
+        accumulated_range / 255.0f * static_cast<float>(qmin()));
+    const float output_max = xnn_float16(
         accumulated_max -
-        accumulated_range / 255.0f * static_cast<float>(255 - qmax())));
+        accumulated_range / 255.0f * static_cast<float>(255 - qmax()));
 
     // Prepare parameters.
     xnn_f16_minmax_params params;
-    init_params(&params, xnn_float16_from_float(output_min),
-                xnn_float16_from_float(output_max));
+    init_params(&params, output_min,
+                output_max);
 
     // Clamp reference results.
     for (float& output_val : output_ref) {
@@ -1066,14 +1068,14 @@ void DWConvMicrokernelTester::Test(
     // Verify results.
     for (size_t x = 0; x < width(); x++) {
       for (size_t c = 0; c < channels(); c++) {
-        EXPECT_GE(xnn_float16_to_float(output[x * output_stride() + c]),
+        EXPECT_GE(output[x * output_stride() + c],
                   output_min)
             << "x = " << x << ", channel = " << c;
-        EXPECT_LE(xnn_float16_to_float(output[x * output_stride() + c]),
+        EXPECT_LE(output[x * output_stride() + c],
                   output_max)
             << "x = " << x << ", channel = " << c;
         EXPECT_NEAR(output_ref[x * channels() + c],
-                    xnn_float16_to_float(output[x * output_stride() + c]),
+                    output[x * output_stride() + c],
                     std::max(1.0e-4f, std::abs(output_ref[x * channels() + c]) *
                                           1.0e-2f))
             << "x = " << x << ", channel = " << c;
@@ -1110,20 +1112,22 @@ void DWConvMicrokernelTester::Test(
 
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(),
-                  [&]() { return xnn_float16_from_float(f32dist(rng)); });
+                  [&]() { return f32dist(rng); });
     std::generate(kernel.begin(), kernel.end(),
-                  [&]() { return xnn_float16_from_float(f32dist(rng)); });
+                  [&]() { return f32dist(rng); });
     std::generate(bias.begin(), bias.end(),
-                  [&]() { return xnn_float16_from_float(f32dist(rng)); });
+                  [&]() { return f32dist(rng); });
     std::fill(zero.begin(), zero.end(), 0);
     std::fill(output_ref.begin(), output_ref.end(), 0.0f);
-    std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+    std::fill(output.begin(), output.end(), std::nanf(""));
 
     std::fill(packed_weights.begin(), packed_weights.end(), 0);
     xnn_pack_f16_dwconv_ghw_w(
         first_pass_tile(), middle_pass_tile(), last_pass_tile(), kernel_size(),
         1, channels(), channel_tile(), channel_subtile(), channel_round(),
-        kernel.data(), bias.data(), /*scale=*/nullptr, packed_weights.data(),
+        reinterpret_cast<const uint16_t*>(kernel.data()), 
+        reinterpret_cast<const uint16_t*>(bias.data()), /*scale=*/nullptr, 
+        reinterpret_cast<uint16_t*>(packed_weights.data()),
         /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0,
         /*params=*/nullptr);
     for (size_t i = 0; i < indirection.size(); i++) {
@@ -1139,12 +1143,11 @@ void DWConvMicrokernelTester::Test(
     // Compute reference results, without clamping.
     for (size_t x = 0; x < width(); x++) {
       for (size_t c = 0; c < channels(); c++) {
-        float acc = xnn_float16_to_float(bias[c]);
+        float acc = bias[c];
         for (size_t k = 0; k < kernel_size(); k++) {
           if (indirection[x * step() + k] != zero.data()) {
-            acc += xnn_float16_to_float(
-                       indirection[x * step() + k][c + input_offset()]) *
-                   xnn_float16_to_float(kernel[c * kernel_size() + k]);
+            acc += indirection[x * step() + k][c + input_offset()] *
+                   kernel[c * kernel_size() + k];
           }
         }
         output_ref[x * channels() + c] = acc;
@@ -1157,17 +1160,17 @@ void DWConvMicrokernelTester::Test(
     const float accumulated_max =
         *std::max_element(output_ref.cbegin(), output_ref.cend());
     const float accumulated_range = accumulated_max - accumulated_min;
-    const float output_min = xnn_float16_to_float(xnn_float16_from_float(
+    const float output_min = xnn_float16(
         accumulated_min +
-        accumulated_range / 255.0f * static_cast<float>(qmin())));
-    const float output_max = xnn_float16_to_float(xnn_float16_from_float(
+        accumulated_range / 255.0f * static_cast<float>(qmin()));
+    const float output_max = xnn_float16(
         accumulated_max -
-        accumulated_range / 255.0f * static_cast<float>(255 - qmax())));
+        accumulated_range / 255.0f * static_cast<float>(255 - qmax()));
 
     // Prepare parameters.
     xnn_f16_minmax_params params;
-    init_params(&params, xnn_float16_from_float(output_min),
-                xnn_float16_from_float(output_max));
+    init_params(&params, output_min,
+                output_max);
 
     // Clamp reference results.
     for (float& output_val : output_ref) {
@@ -1193,14 +1196,14 @@ void DWConvMicrokernelTester::Test(
     // Verify results.
     for (size_t x = 0; x < width(); x++) {
       for (size_t c = 0; c < channels(); c++) {
-        EXPECT_GE(xnn_float16_to_float(output[x * output_stride() + c]),
+        EXPECT_GE(output[x * output_stride() + c],
                   output_min)
             << "x = " << x << ", channel = " << c;
-        EXPECT_LE(xnn_float16_to_float(output[x * output_stride() + c]),
+        EXPECT_LE(output[x * output_stride() + c],
                   output_max)
             << "x = " << x << ", channel = " << c;
         EXPECT_NEAR(output_ref[x * channels() + c],
-                    xnn_float16_to_float(output[x * output_stride() + c]),
+                    output[x * output_stride() + c],
                     std::max(1.0e-4f, std::abs(output_ref[x * channels() + c]) *
                                           1.0e-2f))
             << "x = " << x << ", channel = " << c

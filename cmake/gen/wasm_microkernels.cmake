@@ -59,7 +59,6 @@ SET(PROD_WASM_MICROKERNEL_SRCS
   src/f32-vhswish/gen/f32-vhswish-wasm-u4.c
   src/f32-vmulcaddc/gen/f32-vmulcaddc-c1-minmax-wasm-2x.c
   src/f32-vrelu/gen/f32-vrelu-wasm-u8.c
-  src/f32-vtanh/gen/f32-vtanh-wasm-expm1minus-rr1-p6h5ts-div-u4.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x4-minmax-wasm.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x4-minmax-wasm.c
   src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x4-minmax-wasm.c
@@ -257,11 +256,6 @@ SET(NON_PROD_WASM_MICROKERNEL_SRCS
   src/f32-vrelu/gen/f32-vrelu-wasm-u1.c
   src/f32-vrelu/gen/f32-vrelu-wasm-u2.c
   src/f32-vrelu/gen/f32-vrelu-wasm-u4.c
-  src/f32-vtanh/gen/f32-vtanh-wasm-expm1minus-rr1-lut8-p4h3ts-div-u1.c
-  src/f32-vtanh/gen/f32-vtanh-wasm-expm1minus-rr1-lut8-p4h3ts-div-u2.c
-  src/f32-vtanh/gen/f32-vtanh-wasm-expm1minus-rr1-lut8-p4h3ts-div-u4.c
-  src/f32-vtanh/gen/f32-vtanh-wasm-expm1minus-rr1-p6h5ts-div-u1.c
-  src/f32-vtanh/gen/f32-vtanh-wasm-expm1minus-rr1-p6h5ts-div-u2.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x2-minmax-wasm.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8-minmax-wasm.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x2-minmax-wasm.c

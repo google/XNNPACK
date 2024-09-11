@@ -31,17 +31,24 @@ static enum xnn_status create_global_sum_pooling_operator(
   assert(node->num_outputs == 1);
 
   enum xnn_status status;
-  assert(values[node->inputs[0]].layout == xnn_layout_type_nhwc);
+  const uint32_t input_id = node->inputs[0];
+  assert(input_id != XNN_INVALID_VALUE_ID);
+  assert(input_id < num_values);
+
+  const struct xnn_value *input_value = &values[input_id];
+  const enum xnn_datatype datatype = input_value->datatype;
+
+  assert(input_value->layout == xnn_layout_type_nhwc);
   assert(values[node->outputs[0]].layout == xnn_layout_type_nhwc);
-  switch (node->compute_type) {
-    case xnn_compute_type_fp32:
+  switch (datatype) {
+    case xnn_datatype_fp32:
       status = xnn_create_global_sum_pooling_nwc_f32(
           node->activation.output_min,
           node->activation.output_max,
           node->flags,
           &opdata->operator_objects[0]);
       break;
-    case xnn_compute_type_fp16:
+    case xnn_datatype_fp16:
       status = xnn_create_global_sum_pooling_nwc_f16(
           node->activation.output_min,
           node->activation.output_max,

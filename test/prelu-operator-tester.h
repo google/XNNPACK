@@ -139,19 +139,19 @@ class PReLUOperatorTester {
     std::vector<xnn_float16> y((batch_size() - 1) * y_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
     std::vector<float> y_ref(batch_size() * input_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), [&] { return xnn_float16_from_float(f32irng(rng)); });
+      std::generate(x.begin(), x.end(), [&] { return f32irng(rng); });
       if (slope_channels() == 1) {
-        std::fill(w.begin(), w.end(), xnn_float16_from_float(f32wrng(rng)));
+        std::fill(w.begin(), w.end(), f32wrng(rng));
       } else {
-        std::generate(w.begin(), w.end(), [&] { return xnn_float16_from_float(f32wrng(rng)); });
+        std::generate(w.begin(), w.end(), [&] { return f32wrng(rng); });
       }
-      std::transform(w.cbegin(), w.cend(), w_as_float.begin(), xnn_float16_to_float);
-      std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
+      std::copy(w.cbegin(), w.cend(), w_as_float.begin());
+      std::fill(y.begin(), y.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < input_channels(); c++) {
-          const float x_value = xnn_float16_to_float(x[i * x_stride() + c]);
+          const float x_value = x[i * x_stride() + c];
           const float w_value = w_as_float[c];
           y_ref[i * input_channels() + c] = std::signbit(x_value) ? x_value * w_value : x_value;
         }
@@ -225,7 +225,7 @@ class PReLUOperatorTester {
         // Smart pointer to automatically delete prelu_op2.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_prelu_op(prelu_op2, xnn_delete_operator);
 
-        std::vector<xnn_float16> y2(y.size(), UINT16_C(0x7E00) /* NaN */);
+        std::vector<xnn_float16> y2(y.size(), std::nanf(""));
         ASSERT_EQ(xnn_status_success,
                   xnn_reshape_prelu_nc_f16(
                       prelu_op2,
@@ -249,7 +249,7 @@ class PReLUOperatorTester {
     for (size_t i = 0; i < batch_size(); i++) {
       for (size_t c = 0; c < input_channels(); c++) {
         ASSERT_NEAR(
-            xnn_float16_to_float(y[i * y_stride() + c]),
+            y[i * y_stride() + c],
             y_ref[i * input_channels() + c],
             std::max(1.0e-4f, std::abs(y_ref[i * input_channels() + c]) * 1.0e-3f))
             << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << input_channels();

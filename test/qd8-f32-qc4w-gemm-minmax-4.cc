@@ -647,19 +647,19 @@ std::vector<GemmTestParams> CreateTests1(
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   INSTANTIATE_TEST_SUITE_P(
-      QD8_F32_QC4W_GEMM_MINMAX_3X4C8__SSE41_MADD, GemmTest,
+      QD8_F32_QC4W_GEMM_MINMAX_3X4C8__SSSE3_MADD, GemmTest,
       testing::ValuesIn(CreateTests1(
           /*k_block=*/16,
           /*adj_k_block=*/16,
           /*mr=*/3, /*nr=*/4, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x4c8__sse41_madd,
+            tester.Test(xnn_qd8_f32_qc4w_gemm_minmax_ukernel_3x4c8__ssse3_madd,
                         xnn_init_f32_qc4w_minmax_scalar_params,
                         xnn_pack_qs8_qc4uw_gemm_goi_w);
           },
           []() {
-            TEST_REQUIRES_X86_SSE41;
+            TEST_REQUIRES_X86_SSSE3;
           })),
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
@@ -1116,7 +1116,7 @@ std::vector<GemmTestParams> CreateTests1(
 #endif  // XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
   INSTANTIATE_TEST_SUITE_P(
       QD8_F32_QC4W_GEMM_MINMAX_2X32C8__NEONI8MM, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -1249,7 +1249,7 @@ std::vector<GemmTestParams> CreateTests1(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ENABLE_ARM_I8MM && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
 
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64

@@ -29,7 +29,7 @@ void xnn_f32_dwconv_ukernel_3f3m3l4c4s4r__wasmsimd(
     const float* zero,
     size_t kernel_size,
     float* buffer,
-    const union xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(channels != 0);
   assert(output_width != 0);

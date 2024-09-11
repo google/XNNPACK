@@ -61,7 +61,7 @@ extern "C" {
       uint8_t* output,                                                                                                  \
       size_t input_increment,                                                                                           \
       size_t output_increment,                                                                                          \
-      const union xnn_u8_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_u8_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 
 #include "src/u8-maxpool/u8-maxpool-minmax.h"
@@ -78,7 +78,7 @@ extern "C" {
       int8_t* output,                                                                                                   \
       size_t input_increment,                                                                                           \
       size_t output_increment,                                                                                          \
-      const union xnn_s8_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_s8_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 
 #include "src/s8-maxpool/s8-maxpool-minmax.h"

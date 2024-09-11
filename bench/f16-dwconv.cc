@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
+#include <cstdint>
 #include <functional>
 #include <random>
 #include <vector>
@@ -55,8 +56,7 @@ static void f16_dwconv(benchmark::State& state,
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
-  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
-
+  
   const size_t effective_kernel_height = (kernel_height - 1) * dilation + 1;
   const size_t effective_kernel_width = (kernel_width - 1) * dilation + 1;
   const size_t padding_left = padding_width / 2;
@@ -70,11 +70,11 @@ static void f16_dwconv(benchmark::State& state,
   const size_t c_stride = benchmark::utils::RoundUp<size_t>(channels, channel_tile);
 
   std::vector<xnn_float16> a(channels * input_height * input_width + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  std::generate(a.begin(), a.end(), std::ref(f16rng));
+  std::generate(a.begin(), a.end(), f32rng);
   std::vector<xnn_float16> k(channels * kernel_height * kernel_width);
-  std::generate(k.begin(), k.end(), std::ref(f16rng));
+  std::generate(k.begin(), k.end(), f32rng);
   std::vector<xnn_float16> b(channels);
-  std::generate(b.begin(), b.end(), std::ref(f16rng));
+  std::generate(b.begin(), b.end(), f32rng);
 
   std::vector<xnn_float16> z(channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
 
@@ -90,7 +90,9 @@ static void f16_dwconv(benchmark::State& state,
   std::fill(w.begin(), w.end(), UINT16_C(0));
   xnn_pack_f16_dwconv_ghw_w(primary_tile, 0, 0, kernel_height, kernel_width, channels,
                             channel_tile, channel_tile, /*channel_round=*/1,
-                            k.data(), b.data(), /*scale=*/nullptr, w.data(),
+                            reinterpret_cast<const uint16_t*>(k.data()),
+                            reinterpret_cast<const uint16_t*>(b.data()), 
+                            /*scale=*/nullptr, reinterpret_cast<uint16_t*>(w.data()),
                             /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, /*params=*/nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
@@ -115,10 +117,10 @@ static void f16_dwconv(benchmark::State& state,
   }
 
   std::vector<xnn_float16> c(c_elements * num_buffers);
-  std::fill(c.begin(), c.end(), UINT16_C(0x7E00) /* NaN */);
+  std::fill(c.begin(), c.end(), std::nanf(""));
 
   xnn_f16_minmax_params params;
-  init_params(&params, UINT16_C(0xFC00) /* -inf */, UINT16_C(0x7C00) /* inf */);
+  init_params(&params, -INFINITY, INFINITY);
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -185,8 +187,7 @@ static void f16_dwconv(benchmark::State& state,
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
-  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
-
+  
   const size_t effective_kernel_height = (kernel_height - 1) * dilation + 1;
   const size_t effective_kernel_width = (kernel_width - 1) * dilation + 1;
   const size_t padding_left = padding_width / 2;
@@ -198,11 +199,11 @@ static void f16_dwconv(benchmark::State& state,
   const size_t step_height = kernel_size + (output_width - 1) * step_width * kernel_height;
 
   std::vector<xnn_float16> a(channels * input_height * input_width + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  std::generate(a.begin(), a.end(), std::ref(f16rng));
+  std::generate(a.begin(), a.end(), f32rng);
   std::vector<xnn_float16> k(channels * kernel_size);
-  std::generate(k.begin(), k.end(), std::ref(f16rng));
+  std::generate(k.begin(), k.end(), f32rng);
   std::vector<xnn_float16> b(channels);
-  std::generate(b.begin(), b.end(), std::ref(f16rng));
+  std::generate(b.begin(), b.end(), f32rng);
 
   std::vector<xnn_float16> z(channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> buffer(channels + XNN_MULTIPASS_EXTRA_BYTES / sizeof(xnn_float16));
@@ -227,7 +228,10 @@ static void f16_dwconv(benchmark::State& state,
     first_pass_tile, middle_pass_tile, last_pass_tile,
     kernel_height, kernel_width,
     channels, channel_tile, channel_subtile, channel_round,
-    k.data(), b.data(), /*scale=*/nullptr, w.data(), /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, nullptr);
+    reinterpret_cast<const uint16_t*>(k.data()), 
+    reinterpret_cast<const uint16_t*>(b.data()), 
+    /*scale=*/nullptr, reinterpret_cast<uint16_t*>(w.data()), 
+    /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
   }
@@ -251,10 +255,10 @@ static void f16_dwconv(benchmark::State& state,
   }
 
   std::vector<xnn_float16> c(c_elements * num_buffers);
-  std::fill(c.begin(), c.end(), UINT16_C(0x7E00) /* NaN */);
+  std::fill(c.begin(), c.end(), std::nanf(""));
 
   xnn_f16_minmax_params params;
-  init_params(&params, UINT16_C(0xFC00) /* -inf */, UINT16_C(0x7C00) /* inf */);
+  init_params(&params, -INFINITY, INFINITY);
 
   const int input_advanced = tile_size - last_pass_tile;
   const int input_stride_elements = kernel_height * step_width - input_advanced;

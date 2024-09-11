@@ -33,14 +33,36 @@ static enum xnn_status create_batch_matrix_multiply_operator(
   assert(node->num_outputs == 1);
 
   enum xnn_status status;
-  switch (node->compute_type) {
-    case xnn_compute_type_fp16:
-      status = xnn_create_batch_matrix_multiply_nc_f16(node->flags, &opdata->operator_objects[0]);
+
+  const uint32_t input_a_id = opdata->inputs[0];
+  assert(input_a_id != XNN_INVALID_VALUE_ID);
+  assert(input_a_id < num_values);
+  const uint32_t input_b_id = opdata->inputs[1];
+  assert(input_b_id != XNN_INVALID_VALUE_ID);
+  assert(input_b_id < num_values);
+  const enum xnn_datatype inputa_datatype = values[input_a_id].datatype;
+  const enum xnn_datatype inputb_datatype = values[input_b_id].datatype;
+
+  switch (inputa_datatype) {
+    case xnn_datatype_fp16:
+      switch (inputb_datatype) {
+        case xnn_datatype_fp16:
+          status = xnn_create_batch_matrix_multiply_nc_f16(node->flags, &opdata->operator_objects[0]);
+          break;
+        default:
+          XNN_UNREACHABLE;
+      }
       break;
-    case xnn_compute_type_fp32:
-      status = xnn_create_batch_matrix_multiply_nc_f32(node->flags, &opdata->operator_objects[0]);
+    case xnn_datatype_fp32:
+      switch (inputb_datatype) {
+        case xnn_datatype_fp32:
+          status = xnn_create_batch_matrix_multiply_nc_f32(node->flags, &opdata->operator_objects[0]);
+          break;
+        default:
+          XNN_UNREACHABLE;
+      }
       break;
-    case xnn_compute_type_qd8_to_fp32: {
+    case xnn_datatype_qdint8: {
       // Get the shape and size of the second input.
       const uint32_t input_b_id = opdata->inputs[1];
       assert(input_b_id != XNN_INVALID_VALUE_ID);
@@ -65,10 +87,16 @@ static enum xnn_status create_batch_matrix_multiply_operator(
                            ? input_b->shape.dim[input_b->shape.num_dims - 2]
                            : input_b->shape.dim[input_b->shape.num_dims - 1];
 
-      status = xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
-          batch_size_b, k, n, input_b->data,
-          input_b->quantization.channelwise_scale, node->flags,
-          &opdata->operator_objects[0]);
+      switch (inputb_datatype) {
+        case xnn_datatype_qcint8:
+          status = xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
+              batch_size_b, k, n, input_b->data,
+              input_b->quantization.channelwise_scale, node->flags,
+              &opdata->operator_objects[0]);
+          break;
+        default:
+          XNN_UNREACHABLE;
+      }
       break;
     }
     default:

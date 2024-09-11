@@ -1,0 +1,65 @@
+// Copyright 2024 Imagination Technologies, inc.
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert LMUL in [1, 2, 4, 8]
+#include <assert.h>
+
+#include <riscv_vector.h>
+
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
+
+
+void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__rvv_u${LMUL}v(
+    size_t rows,
+    size_t channels,
+    const float* input,
+    size_t input_stride,
+    const float* zero,
+    float* output,
+    const struct xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(rows != 0);
+  assert(channels != 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const float scale = params->scalar.scale;
+  const float min = params->scalar.min;
+  const float max = params->scalar.max;
+
+  size_t input_increment = ${ACCUMULATORS} * input_stride;
+  for (; channels > 0; ) {
+    size_t n = __riscv_vsetvl_e32m${LMUL}(channels); channels -= n;
+    const float* i0 = input;
+    $for i in range(1, ACCUMULATORS):
+      const float* i${i} = (const float*) ((uintptr_t) i${i - 1} + input_stride);
+    vfloat32m${LMUL}_t acc_f32v = __riscv_vfmv_v_f_f32m${LMUL}(0.f, n);
+
+    for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
+      $for N in range(1, ACCUMULATORS, 2):
+        if XNN_UNPREDICTABLE(r < ${N+1}) {
+          i${N} = zero;
+        }
+        if XNN_UNPREDICTABLE(r <= ${N+1}) {
+          i${N+1} = zero;
+        }
+
+      $for N in range(0, ACCUMULATORS):
+        vfloat32m${LMUL}_t in${N}_f32v = __riscv_vle32_v_f32m${LMUL}(i${N}, n);
+        acc_f32v = __riscv_vfadd_vv_f32m${LMUL}(acc_f32v, in${N}_f32v, n);
+
+      $for N in range(0, ACCUMULATORS):
+        i${N} = (const float*) ((uintptr_t) i${N} + input_increment);
+    }
+    acc_f32v = __riscv_vfmul_vf_f32m${LMUL}(acc_f32v, scale, n);
+    acc_f32v = __riscv_vfmin_vf_f32m${LMUL}(__riscv_vfmax_vf_f32m${LMUL}(acc_f32v, min, n), max, n);
+    vfloat32m${LMUL}_t out_f32v = __riscv_vle32_v_f32m${LMUL}(output, n);
+    out_f32v = __riscv_vfadd_vv_f32m${LMUL}(out_f32v, acc_f32v, n);
+    __riscv_vse32_v_f32m${LMUL}(output, out_f32v, n); output += n;
+
+    input = (const float*) ((uintptr_t) input + n * sizeof(float));
+  }
+}

@@ -1156,7 +1156,7 @@ static enum xnn_status reshape_conv_path(
 
   const size_t w_stride = extra_weights_element_size +
     (round_up_po2(group_input_channels, deconvolution_op->ukernel.igemm.kr * deconvolution_op->ukernel.igemm.sr) * kernel_size << log2_filter_element_size);
-  deconvolution_op->context.igemm = (struct igemm_context){
+  deconvolution_op->context.igemm.igemm = (struct igemm_context){
     .ks = kernel_size,
     .ks_scaled = kernel_size * mr * sizeof(void*),
     .kc = group_input_channels << log2_input_element_size,
@@ -1174,7 +1174,7 @@ static enum xnn_status reshape_conv_path(
     .log2_csize = log2_output_element_size,
     .ukernel = igemm_ukernel,
   };
-  memcpy(&deconvolution_op->context.igemm.params, params, params_size);
+  memcpy(&deconvolution_op->context.igemm.igemm.params, params, params_size);
 
   size_t nc = group_output_channels;
   if (num_threads > 1) {
@@ -1868,11 +1868,11 @@ static enum xnn_status setup_conv_path(
 {
   assert(deconvolution_op->ukernel.type == xnn_microkernel_type_igemm);
 
-  deconvolution_op->context.igemm.a_offset = (size_t) ((uintptr_t) input - (uintptr_t) deconvolution_op->last_input);
-  deconvolution_op->context.igemm.c = deconvolution_op->output;
-  deconvolution_op->context.igemm.zero_size = deconvolution_op->zero_size;
-  deconvolution_op->context.igemm.zero_buffers = deconvolution_op->zero_buffers;
-  deconvolution_op->context.igemm.quantization_params = deconvolution_op->quantization_params;
+  deconvolution_op->context.igemm.igemm.a_offset = (size_t) ((uintptr_t) input - (uintptr_t) deconvolution_op->last_input);
+  deconvolution_op->context.igemm.igemm.c = deconvolution_op->output;
+  deconvolution_op->context.igemm.igemm.zero_size = deconvolution_op->zero_size;
+  deconvolution_op->context.igemm.igemm.zero_buffers = deconvolution_op->zero_buffers;
+  deconvolution_op->context.igemm.igemm.quantization_params = deconvolution_op->quantization_params;
 
   deconvolution_op->state = xnn_run_state_ready;
   return xnn_status_success;
