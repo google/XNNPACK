@@ -29,7 +29,8 @@ def main():
 
                     # if file doesn't exist
                     if not files_exist[file_name]:
-                        # if output file doesn't exist
+                        # if output file does nott exist
+                        print(file_name)
                         if i > 1:
                             file_edit_dates[file_name] = 0
                         else:
