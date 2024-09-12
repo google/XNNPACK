@@ -98,6 +98,12 @@ static enum xnn_status create_binary_elementwise_nd_f16(
     const struct xnn_binary_elementwise_config* config,
     xnn_operator_t* binary_elementwise_op_out)
 {
+  if (output_min != -INFINITY || output_max != INFINITY) {
+    xnn_log_error(
+      "failed to create %s operator with bounded outputs [%.7g, %.7g]",
+      xnn_operator_type_to_string(operator_type), output_min, output_max);
+    return xnn_status_invalid_parameter;
+  }
   if (isnan(output_min)) {
     xnn_log_error(
       "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
@@ -154,6 +160,12 @@ static enum xnn_status create_binary_elementwise_nd_f32(
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(operator_type));
     return xnn_status_uninitialized;
+  }
+  if (output_min != -INFINITY || output_max != INFINITY) {
+    xnn_log_error(
+      "failed to create %s operator with bounded outputs [%.7g, %.7g]",
+      xnn_operator_type_to_string(operator_type), output_min, output_max);
+    return xnn_status_invalid_parameter;
   }
 
   if (isnan(output_min)) {
