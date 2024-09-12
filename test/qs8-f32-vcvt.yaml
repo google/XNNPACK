@@ -46,6 +46,15 @@
   init: xnn_init_qs8_f32_cvt_scalar_params
 - name: xnn_qs8_f32_vcvt_ukernel__avx2_u32
   init: xnn_init_qs8_f32_cvt_scalar_params
+# x86 AV512
+- name: xnn_qs8_f32_vcvt_ukernel__avx512skx_u16
+  init: xnn_init_qs8_f32_cvt_scalar_params
+- name: xnn_qs8_f32_vcvt_ukernel__avx512skx_u32
+  init: xnn_init_qs8_f32_cvt_scalar_params
+- name: xnn_qs8_f32_vcvt_ukernel__avx512skx_u48
+  init: xnn_init_qs8_f32_cvt_scalar_params
+- name: xnn_qs8_f32_vcvt_ukernel__avx512skx_u64
+  init: xnn_init_qs8_f32_cvt_scalar_params
 # WAsm SIMD
 - name: xnn_qs8_f32_vcvt_ukernel__wasmsimd_u8
   init: xnn_init_qs8_f32_cvt_scalar_params

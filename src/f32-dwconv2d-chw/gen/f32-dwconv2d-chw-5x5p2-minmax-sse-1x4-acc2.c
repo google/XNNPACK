@@ -30,8 +30,8 @@ void xnn_f32_dwconv2d_chw_ukernel_5x5p2__sse_1x4_acc2(
   assert(input_width % sizeof(float) == 0);
   assert(padding_top == 2);
 
-  const __m128 vmax = _mm_set1_ps(params->scalar.max);
   const __m128 vmin = _mm_set1_ps(params->scalar.min);
+  const __m128 vmax = _mm_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 

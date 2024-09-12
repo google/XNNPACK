@@ -59,8 +59,8 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_3x16__avx_broadcast(
   XNN_FORCE_REALIZATION(vmagic_bias_plus_kernel_zero_point_c0);
   XNN_FORCE_REALIZATION(vmagic_bias_plus_kernel_zero_point_c1);
 
-  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 
