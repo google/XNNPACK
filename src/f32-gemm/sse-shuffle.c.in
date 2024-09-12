@@ -79,8 +79,8 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
     const __m128i vminus_kernel_zero_point = _mm_set1_epi32(-params->scalar.kernel_zero_point);
     const __m128i vmask = _mm_set1_epi8(params->scalar.mask);
 
-  const __m128 vmax = _mm_set1_ps(params->scalar.max);
   const __m128 vmin = _mm_set1_ps(params->scalar.min);
+  const __m128 vmax = _mm_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 
