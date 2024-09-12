@@ -58,8 +58,8 @@ void xnn_f32_igemm_minmax_ukernel_5x8__avx_broadcast(
     c4 = c3;
   }
 
-  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 
