@@ -1780,7 +1780,7 @@ IF(XNNPACK_BUILD_TESTS)
       qu8-vcvt)
   FOREACH(TEST ${MICROKERNEL_VCVT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         vcvt-microkernel-tester
         fp16
