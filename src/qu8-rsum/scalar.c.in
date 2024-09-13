@@ -1,0 +1,61 @@
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert CHANNEL_TILE >= 1
+#include <assert.h>
+
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/reduce.h"
+
+
+void xnn_qu8_rsum_ukernel__scalar_u${CHANNEL_TILE}(
+    size_t batch,
+    const uint8_t* restrict input,
+    uint32_t* restrict output,
+    const struct xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(input != NULL);
+  assert(output != NULL);
+  assert(params != NULL);
+
+  $for A in range(ACCUMULATORS):
+    uint32_t vacc${A} = 0;
+  $if CHANNEL_TILE == 1:
+    do {
+      const uint32_t vt = (uint32_t) *input++;
+      vacc0 += vt;
+      batch -= sizeof(uint8_t);
+    } while (batch != 0);
+  $else:
+    for (; batch >= ${CHANNEL_TILE}; batch -= ${CHANNEL_TILE}) {
+      $for N in range(CHANNEL_TILE):
+        const uint32_t vt${N} = (uint32_t) input[${N}];
+      input += ${CHANNEL_TILE};
+
+      $for N in range(CHANNEL_TILE):
+        vacc${N % ACCUMULATORS} += vt${N};
+    }
+    $if ACCUMULATORS > 1:
+      $ACC_SLICE = 1
+      $while ACC_SLICE < ACCUMULATORS:
+        $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
+          $if A + ACC_SLICE < ACCUMULATORS:
+            vacc${A} += vacc${A + ACC_SLICE};
+        $ACC_SLICE *= 2
+
+    if XNN_UNLIKELY(batch != 0) {
+      $if CHANNEL_TILE == 2:
+        const uint32_t vt = (uint32_t) *input;
+        vacc0 += vt;
+      $else:
+        do {
+          const uint32_t vt = (uint32_t) *input++;
+          vacc0 += vt;
+          batch -= sizeof(uint8_t);
+        } while (batch != 0);
+    }
+
+  *output += vacc0;
+}

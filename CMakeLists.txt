@@ -1507,6 +1507,7 @@ IF(XNNPACK_BUILD_TESTS)
       qs8-requantization
       qs8-rdsum-minmax-fp32
       qs8-rsum
+      qu8-rsum
       qs8-vhswish
       qs8-vlrelu
       qu8-gavgpool-minmax-fp32
@@ -2121,6 +2122,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       qs8-qc8w-gemm-fp32
       qs8-requantization
       qs8-rsum
+      qu8-rsum
       qs8-vadd
       qs8-vaddc
       qs8-vcvt

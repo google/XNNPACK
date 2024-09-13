@@ -218,6 +218,7 @@ xnnpack_benchmark(
 ) for kernel in [
     "qs8_rdsum",
     "qs8_rsum",
+    "qu8_rsum",
     "f16_rsum",
     "f16_f32acc_rsum",
     "f32_rsum",

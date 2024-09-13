@@ -406,6 +406,26 @@ DECLARE_QS8_RSUM_UKERNEL_FUNCTION(xnn_qs8_rsum_ukernel__ssse3_u64)
 DECLARE_QS8_RSUM_UKERNEL_FUNCTION(xnn_qs8_rsum_ukernel__ssse3_u64_acc2)
 DECLARE_QS8_RSUM_UKERNEL_FUNCTION(xnn_qs8_rsum_ukernel__ssse3_u64_acc4)
 
+#define DECLARE_QU8_RSUM_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                       \
+      size_t batch,                                \
+      const uint8_t* input,                         \
+      uint32_t* output,                             \
+      const struct xnn_qs8_rsum_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+DECLARE_QU8_RSUM_UKERNEL_FUNCTION(xnn_qu8_rsum_ukernel__neon_u16)
+DECLARE_QU8_RSUM_UKERNEL_FUNCTION(xnn_qu8_rsum_ukernel__neon_u32)
+DECLARE_QU8_RSUM_UKERNEL_FUNCTION(xnn_qu8_rsum_ukernel__neon_u32_acc2)
+DECLARE_QU8_RSUM_UKERNEL_FUNCTION(xnn_qu8_rsum_ukernel__neon_u64)
+DECLARE_QU8_RSUM_UKERNEL_FUNCTION(xnn_qu8_rsum_ukernel__neon_u64_acc2)
+DECLARE_QU8_RSUM_UKERNEL_FUNCTION(xnn_qu8_rsum_ukernel__neon_u64_acc4)
+DECLARE_QU8_RSUM_UKERNEL_FUNCTION(xnn_qu8_rsum_ukernel__scalar_u1)
+DECLARE_QU8_RSUM_UKERNEL_FUNCTION(xnn_qu8_rsum_ukernel__scalar_u2)
+DECLARE_QU8_RSUM_UKERNEL_FUNCTION(xnn_qu8_rsum_ukernel__scalar_u4)
+DECLARE_QU8_RSUM_UKERNEL_FUNCTION(xnn_qu8_rsum_ukernel__ssse3_u16)
+DECLARE_QU8_RSUM_UKERNEL_FUNCTION(xnn_qu8_rsum_ukernel__ssse3_u32)
+DECLARE_QU8_RSUM_UKERNEL_FUNCTION(xnn_qu8_rsum_ukernel__ssse3_u64)
+
 #define DECLARE_F32_RDSUM_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                        \
       size_t rows,                                  \

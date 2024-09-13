@@ -417,6 +417,7 @@ sh_test(
     "f16_f32acc_rsum",
     "f32_rsum",
     "qs8_rsum",
+    "qu8_rsum",
 ]]
 
 [xnnpack_unit_test(
