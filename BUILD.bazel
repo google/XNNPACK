@@ -309,6 +309,8 @@ MICROKERNEL_DEFS = [
     "src/x32-transposec/x32-transposec.h",
     "src/x64-transposec/x64-transposec.h",
     "src/xx-transposev/xx-transposev.h",
+    "src/xx-fill/xx-fill.h",
+    "src/xx-pad/xx-pad.h",
 ]
 
 MICROKERNEL_HDRS = [

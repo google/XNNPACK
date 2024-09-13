@@ -1387,19 +1387,13 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "xx_fill_test",
-    srcs = [
-        "fill-microkernel-tester.h",
-        "xx-fill.cc",
-    ],
+    srcs = ["xx-fill.cc"],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "xx_pad_test",
-    srcs = [
-        "pad-microkernel-tester.h",
-        "xx-pad.cc",
-    ],
+    srcs = ["xx-pad.cc"],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
