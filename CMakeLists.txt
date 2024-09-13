@@ -1690,46 +1690,36 @@ IF(XNNPACK_BUILD_TESTS)
       f16-vsubc-minmax
       f32-vadd
       f32-vadd-minmax
-      f32-vadd-relu
       f32-vaddc
       f32-vaddc-minmax
-      f32-vaddc-relu
       f32-vcopysign
       f32-vcopysignc
       f32-vdiv
       f32-vdiv-minmax
-      f32-vdiv-relu
       f32-vdivc
       f32-vdivc-minmax
-      f32-vdivc-relu
       f32-vmax
       f32-vmaxc
       f32-vmin
       f32-vminc
       f32-vmul
       f32-vmul-minmax
-      f32-vmul-relu
       f32-vmulc
       f32-vmulc-minmax
-      f32-vmulc-relu
       f32-vprelu
       f32-vpreluc
       f32-vrpreluc
       f32-vrcopysignc
       f32-vrdivc
       f32-vrdivc-minmax
-      f32-vrdivc-relu
       f32-vrsubc
       f32-vrsubc-minmax
-      f32-vrsubc-relu
       f32-vsqrdiff
       f32-vsqrdiffc
       f32-vsub
       f32-vsub-minmax
-      f32-vsub-relu
       f32-vsubc
       f32-vsubc-minmax
-      f32-vsubc-relu
       qs8-vadd-minmax
       qs8-vaddc-minmax
       qs8-vmul-minmax-fp32

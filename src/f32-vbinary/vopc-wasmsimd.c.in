@@ -8,7 +8,7 @@ $assert BATCH_TILE >= 4
 $SIMD_TILE = BATCH_TILE // 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "PRELU", "RPRELU"]
-$assert ACTIVATION in ["LINEAR", "MINMAX", "RELU"]
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
 #include <wasm_simd128.h>
@@ -31,11 +31,11 @@ $  "SQRDIFF": lambda x: "wasm_f32x4_sub(%s, vb)" % x,
 $  "PRELU": lambda x: "wasm_f32x4_mul(%s, vb)" % x,
 $  "RPRELU": lambda x: "wasm_f32x4_mul(%s, vb)" % x,
 $}[OP]
-$assert ACTIVATION in ["LINEAR", "RELU", "MINMAX"]
-$ARCH_SUFFIX = "" if ACTIVATION in ["LINEAR", "RELU"] and OP not in ["MIN", "MAX"] else "_x86" if X86 else "_arm"
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
+$ARCH_SUFFIX = "" if ACTIVATION in ["LINEAR"] and OP not in ["MIN", "MAX"] else "_x86" if X86 else "_arm"
 $RELAXED_SUFFIX = "relaxed" if RELAXED else ""
 $ACTIVATION_SUFFIX = {"LINEAR": ""}.get(ACTIVATION, "_" + ACTIVATION.lower())
-$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "RELU": "struct xnn_f32_relu_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
+$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
 void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasm${RELAXED_SUFFIX}simd${ARCH_SUFFIX}_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,
@@ -54,8 +54,6 @@ void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasm${RELAXED_SUFFIX}s
     const v128_t voutput_max = wasm_v128_load32_splat(&params->scalar.max);
     XNN_FORCE_REALIZATION(voutput_min);
     XNN_FORCE_REALIZATION(voutput_max);
-  $elif ACTIVATION == "RELU":
-    const v128_t vzero = wasm_i32x4_const_splat(0);
   const v128_t vb = wasm_v128_load32_splat(input_b);
 
   $if OP == "RPRELU":
@@ -96,9 +94,6 @@ void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasm${RELAXED_SUFFIX}s
 
           $for N in range(SIMD_TILE):
             vy${ABC[N]} = wasm_f32x4_min(vy${ABC[N]}, voutput_max);
-      $elif ACTIVATION == "RELU":
-        $for N in range(SIMD_TILE):
-          vy${ABC[N]} = wasm_i32x4_max(vy${ABC[N]}, vzero);
 
       wasm_v128_store(output, vy${ABC[0]});
       $for N in range(1, SIMD_TILE):
@@ -125,8 +120,6 @@ void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasm${RELAXED_SUFFIX}s
       $else:
         vy = wasm_f32x4_max(vy, voutput_min);
         vy = wasm_f32x4_min(vy, voutput_max);
-    $elif ACTIVATION == "RELU":
-      vy = wasm_i32x4_max(vy, vzero);
 
     wasm_v128_store(output, vy);
     output += 4;
@@ -150,8 +143,6 @@ void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasm${RELAXED_SUFFIX}s
       $else:
         vy = wasm_f32x4_max(vy, voutput_min);
         vy = wasm_f32x4_min(vy, voutput_max);
-    $elif ACTIVATION == "RELU":
-      vy = wasm_i32x4_max(vy, vzero);
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vy, 0);

@@ -202,48 +202,6 @@ void VBinaryMicrokernelTester::Test(xnn_s32_vbinary_ukernel_fn vbinary,
 }
 
 void VBinaryMicrokernelTester::Test(
-    xnn_f32_vbinary_relu_ukernel_fn vbinary_relu, OpType op_type,
-    xnn_init_f32_relu_params_fn) const {
-  xnnpack::ReplicableRandomDevice rng;
-  std::uniform_real_distribution<float> lhs_f32dist(-1.0f, 1.0f);
-  // For denominator, avoid 0 so we don't get Infinity as the result.
-  std::uniform_real_distribution<float> rhs_f32dist(0.1, 1.0f);
-
-  std::vector<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<float> b(broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<float> y(batch_size() + (inplace_a() || inplace_b()
-                                           ? XNN_EXTRA_BYTES / sizeof(float)
-                                           : 0));
-  std::vector<float> y_ref(batch_size());
-  for (size_t iteration = 0; iteration < iterations(); iteration++) {
-    std::generate(a.begin(), a.end(), [&]() { return lhs_f32dist(rng); });
-    std::generate(b.begin(), b.end(), [&]() { return rhs_f32dist(rng); });
-    if (inplace_a() || inplace_b()) {
-      std::generate(y.begin(), y.end(), [&]() { return lhs_f32dist(rng); });
-    } else {
-      std::fill(y.begin(), y.end(), nanf(""));
-    }
-    const float* a_data = inplace_a() ? y.data() : a.data();
-    const float* b_data = inplace_b() ? y.data() : b.data();
-    reference_op_impl(a_data, b_data, y_ref.data(), batch_size(), op_type);
-    for (size_t i = 0; i < batch_size(); i++) {
-      y_ref[i] = std::max(y_ref[i], 0.0f);
-    }
-
-    // Call optimized micro-kernel.
-    vbinary_relu(batch_size() * sizeof(float), a_data, b_data, y.data(),
-                 nullptr);
-
-    // Verify results.
-    for (size_t i = 0; i < batch_size(); i++) {
-      EXPECT_GE(y[i], 0.0f) << "at " << i << " / " << batch_size();
-      EXPECT_NEAR(y[i], y_ref[i], std::abs(y_ref[i]) * 1.0e-6f)
-          << "at " << i << " / " << batch_size();
-    }
-  }
-}
-
-void VBinaryMicrokernelTester::Test(
     xnn_f32_vbinary_minmax_ukernel_fn vbinary_minmax, OpType op_type,
     xnn_init_f32_minmax_params_fn init_params) const {
   xnnpack::ReplicableRandomDevice rng;
