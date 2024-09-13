@@ -1524,23 +1524,18 @@ IF(XNNPACK_BUILD_TESTS)
       u8-lut32norm
       u8-rmax
       x16-packw
-      x16-transpose
-      x24-transpose
       x32-packb
       x32-packw
       x32-packx
-      x32-transpose
       x32-unpool
       x32-zip
-      x64-transpose
       x8-lut
       x8-packw
       qs8-packw
-      x8-transpose
       x8-zip
+      xN-transpose
       xx-fill
-      xx-pad
-      xx-transposev)
+      xx-pad)
   FOREACH(TEST ${MICROKERNEL_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
@@ -2162,15 +2157,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       u32-vlog
       u64-u32-vsqrtshift
       x16-packw
-      x16-transpose
-      x24-transpose
       x32-packw
-      x32-transpose
-      x64-transpose
       x8-lut
       x8-packq
       x8-packw
-      x8-transpose
+      xN-transposec
       xx-transposev)
   FOREACH(BENCH ${MICROKERNEL_BENCHMARKS})
     ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)

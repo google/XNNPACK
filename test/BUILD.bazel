@@ -1361,21 +1361,11 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS,
 )
 
-[xnnpack_unit_test(
-    name = "%s_test" % kernel,
-    srcs = [
-        "transpose-microkernel-tester.h",
-        "%s.cc" % kernel.replace("_", "-"),
-    ],
+xnnpack_unit_test(
+    name = "xN_transpose_test",
+    srcs = ["xN-transpose.cc"],
     deps = MICROKERNEL_TEST_DEPS,
-) for kernel in [
-    "x8_transpose",
-    "x16_transpose",
-    "x24_transpose",
-    "x32_transpose",
-    "x64_transpose",
-    "xx_transposev",
-]]
+)
 
 xnnpack_unit_test(
     name = "x32_unpool_test",

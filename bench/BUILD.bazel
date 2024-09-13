@@ -272,11 +272,7 @@ xnnpack_benchmark(
     "cs16_fftr",
     "x8_lut",
     "xx_transposev",
-    "x8_transpose",
-    "x16_transpose",
-    "x24_transpose",
-    "x32_transpose",
-    "x64_transpose",
+    "xN_transposec",
 ]]
 
 xnnpack_benchmark(

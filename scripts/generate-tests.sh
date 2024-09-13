@@ -234,14 +234,6 @@ tools/generate-fill-test.py --spec test/xx-fill.yaml --output test/xx-fill.cc &
 ### Tests for Pad micro-kernels
 tools/generate-pad-test.py --spec test/xx-pad.yaml --output test/xx-pad.cc &
 
-### Tests for Transpose micro-kernels
-tools/generate-transpose-test.py --spec test/x8-transpose.yaml  --output test/x8-transpose.cc &
-tools/generate-transpose-test.py --spec test/x16-transpose.yaml --output test/x16-transpose.cc &
-tools/generate-transpose-test.py --spec test/x24-transpose.yaml --output test/x24-transpose.cc &
-tools/generate-transpose-test.py --spec test/x32-transpose.yaml --output test/x32-transpose.cc &
-tools/generate-transpose-test.py --spec test/x64-transpose.yaml --output test/x64-transpose.cc &
-tools/generate-transpose-test.py --spec test/xx-transposev.yaml  --output test/xx-transposev.cc &
-
 ### Tests for LUT micro-kernels
 tools/generate-lut-test.py --spec test/x8-lut.yaml --output test/x8-lut.cc &
 
