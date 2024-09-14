@@ -199,20 +199,10 @@ static void init_qu8_rsum_config(void) {
       .element_tile = 16,
     };
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-
-    if (hardware_config->use_x86_sse4_1) {
-      qu8_rsum_config = (struct xnn_reduce_config) {
-        .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__ssse3_u64,
-        .element_tile = 64,
-      };
-    } else {
-      qu8_rsum_config = (struct xnn_reduce_config) {
-        .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__scalar_u4,
-        .element_tile = 4,
-      };
-    }
+    qu8_rsum_config = (struct xnn_reduce_config) {
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__sse2_u64,
+      .element_tile = 64,
+    };
   #else
     qu8_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__scalar_u4,

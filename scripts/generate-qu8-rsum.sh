@@ -17,9 +17,9 @@ tools/xngen src/qs8-rsum/neon.c.in   -D CHANNEL_TILE=64 -D ACCUMULATORS=1 -D DAT
 tools/xngen src/qs8-rsum/neon.c.in   -D CHANNEL_TILE=64 -D ACCUMULATORS=2 -D DATATYPE=QU8 -o src/qu8-rsum/gen/qu8-rsum-neon-u64-acc2.c &
 tools/xngen src/qs8-rsum/neon.c.in   -D CHANNEL_TILE=64 -D ACCUMULATORS=4 -D DATATYPE=QU8 -o src/qu8-rsum/gen/qu8-rsum-neon-u64-acc4.c &
 
-################################### x86 SSSE3 #################################
-tools/xngen src/qu8-rsum/ssse3.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=16  -o src/qu8-rsum/gen/qu8-rsum-ssse3-u16.c &
-tools/xngen src/qu8-rsum/ssse3.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=32  -o src/qu8-rsum/gen/qu8-rsum-ssse3-u32.c &
-tools/xngen src/qu8-rsum/ssse3.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=64  -o src/qu8-rsum/gen/qu8-rsum-ssse3-u64.c &
+################################### x86 SSE2 #################################
+tools/xngen src/qu8-rsum/sse2.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=16 -o src/qu8-rsum/gen/qu8-rsum-sse2-u16.c &
+tools/xngen src/qu8-rsum/sse2.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=32 -o src/qu8-rsum/gen/qu8-rsum-sse2-u32.c &
+tools/xngen src/qu8-rsum/sse2.c.in -D ACCUMULATORS=1 -D CHANNEL_TILE=64 -o src/qu8-rsum/gen/qu8-rsum-sse2-u64.c &
 
 wait

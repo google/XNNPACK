@@ -98,30 +98,27 @@ BENCHMARK_CAPTURE(qu8_rsum, scalar_u4,
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(qu8_rsum, ssse3_u16,
-                    xnn_qu8_rsum_ukernel__ssse3_u16,
-                    /*init_params=*/nullptr,
-                    benchmark::utils::CheckSSSE3)
+  BENCHMARK_CAPTURE(qu8_rsum, sse2_u16,
+                    xnn_qu8_rsum_ukernel__sse2_u16,
+                    /*init_params=*/nullptr)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(qu8_rsum, ssse3_u32,
-                    xnn_qu8_rsum_ukernel__ssse3_u32,
-                    /*init_params=*/nullptr,
-                    benchmark::utils::CheckSSSE3)
+  BENCHMARK_CAPTURE(qu8_rsum, sse2_u32,
+                    xnn_qu8_rsum_ukernel__sse2_u32,
+                    /*init_params=*/nullptr)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(qu8_rsum, ssse3_u64,
-                    xnn_qu8_rsum_ukernel__ssse3_u64,
-                    /*init_params=*/nullptr,
-                    benchmark::utils::CheckSSSE3)
+  BENCHMARK_CAPTURE(qu8_rsum, sse2_u64,
+                    xnn_qu8_rsum_ukernel__sse2_u64,
+                    /*init_params=*/nullptr)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
