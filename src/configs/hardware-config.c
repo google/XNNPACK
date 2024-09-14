@@ -324,6 +324,7 @@ static void init_hardware_config(void) {
     if (hardware_config.use_x86_avx256skx) hardware_config.arch_flags |= xnn_arch_x86_avx256skx;
     if (hardware_config.use_x86_avx256vnni) hardware_config.arch_flags |= xnn_arch_x86_avx256vnni;
     if (hardware_config.use_x86_avx256vnnigfni) hardware_config.arch_flags |= xnn_arch_x86_avx256vnnigfni;
+    if (hardware_config.use_x86_avxvnniint8) hardware_config.arch_flags |= xnn_arch_x86_avxvnniint8;
   #endif
   #if XNN_ARCH_RISCV
     if (hardware_config.use_riscv_vector) hardware_config.arch_flags |= xnn_arch_riscv_vector;
