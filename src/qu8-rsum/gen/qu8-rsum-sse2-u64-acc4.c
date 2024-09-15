@@ -13,7 +13,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/reduce.h"
 
-void xnn_qu8_rsum_ukernel__sse2_u32(
+void xnn_qu8_rsum_ukernel__sse2_u64_acc4(
     size_t batch,
     const uint8_t* input,
     uint32_t* output,
@@ -31,16 +31,28 @@ void xnn_qu8_rsum_ukernel__sse2_u32(
 
   const __m128i vzero = _mm_setzero_si128();
   __m128i vacc0 = _mm_setzero_si128();
+  __m128i vacc1 = _mm_setzero_si128();
+  __m128i vacc2 = _mm_setzero_si128();
+  __m128i vacc3 = _mm_setzero_si128();
 
-  for (; batch >= 32; batch -= 32) {
+  for (; batch >= 64; batch -= 64) {
     const __m128i vin0 = _mm_loadu_si128((const __m128i*) (input + 0));
     const __m128i vin1 = _mm_loadu_si128((const __m128i*) (input + 16));
-    input += 32;
+    const __m128i vin2 = _mm_loadu_si128((const __m128i*) (input + 32));
+    const __m128i vin3 = _mm_loadu_si128((const __m128i*) (input + 48));
+    input += 64;
     const __m128i vt0 = _mm_sad_epu8(vin0, vzero);
     const __m128i vt1 = _mm_sad_epu8(vin1, vzero);
+    const __m128i vt2 = _mm_sad_epu8(vin2, vzero);
+    const __m128i vt3 = _mm_sad_epu8(vin3, vzero);
      vacc0 = _mm_add_epi32(vacc0, vt0);
-     vacc0 = _mm_add_epi32(vacc0, vt1);
+     vacc1 = _mm_add_epi32(vacc1, vt1);
+     vacc2 = _mm_add_epi32(vacc2, vt2);
+     vacc3 = _mm_add_epi32(vacc3, vt3);
   }
+  vacc0 = _mm_add_epi32(vacc0, vacc1);
+  vacc2 = _mm_add_epi32(vacc2, vacc3);
+  vacc0 = _mm_add_epi32(vacc0, vacc2);
 
   for (; batch >= 16; batch -= 16) {
     const __m128i vin = _mm_loadu_si128((const __m128i*) input);

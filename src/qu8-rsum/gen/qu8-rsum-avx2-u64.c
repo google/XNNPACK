@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qu8-rsum/sse2.c.in
+//   Template: src/qu8-rsum/avx2.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 Google LLC
@@ -13,7 +13,8 @@
 #include "xnnpack/common.h"
 #include "xnnpack/reduce.h"
 
-void xnn_qu8_rsum_ukernel__sse2_u32(
+
+void xnn_qu8_rsum_ukernel__avx2_u64(
     size_t batch,
     const uint8_t* input,
     uint32_t* output,
@@ -29,35 +30,39 @@ void xnn_qu8_rsum_ukernel__sse2_u32(
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
 
-  const __m128i vzero = _mm_setzero_si128();
-  __m128i vacc0 = _mm_setzero_si128();
+  const __m256i vzero = _mm256_setzero_si256();
+  __m256i vacc0 = _mm256_setzero_si256();
 
-  for (; batch >= 32; batch -= 32) {
-    const __m128i vin0 = _mm_loadu_si128((const __m128i*) (input + 0));
-    const __m128i vin1 = _mm_loadu_si128((const __m128i*) (input + 16));
-    input += 32;
-    const __m128i vt0 = _mm_sad_epu8(vin0, vzero);
-    const __m128i vt1 = _mm_sad_epu8(vin1, vzero);
-     vacc0 = _mm_add_epi32(vacc0, vt0);
-     vacc0 = _mm_add_epi32(vacc0, vt1);
+  for (; batch >= 64; batch -= 64) {
+    const __m256i vin0 = _mm256_loadu_si256((const __m256i*) (input + 0));
+    const __m256i vin1 = _mm256_loadu_si256((const __m256i*) (input + 32));
+    input += 64;
+    const __m256i vt0 = _mm256_sad_epu8(vin0, vzero);
+    const __m256i vt1 = _mm256_sad_epu8(vin1, vzero);
+     vacc0 = _mm256_add_epi32(vacc0, vt0);
+     vacc0 = _mm256_add_epi32(vacc0, vt1);
   }
+
+  __m128i vacc = _mm_add_epi32(_mm256_castsi256_si128(vacc0), _mm256_extractf128_si256(vacc0, 1));
 
   for (; batch >= 16; batch -= 16) {
     const __m128i vin = _mm_loadu_si128((const __m128i*) input);
     input += 16;
-    const __m128i vt = _mm_sad_epu8(vin, vzero);
-    vacc0 = _mm_add_epi32(vacc0, vt);
+    const __m128i vt = _mm_sad_epu8(vin, _mm_setzero_si128());
+    vacc = _mm_add_epi32(vacc, vt);
   }
 
   if (XNN_UNLIKELY(batch != 0)) {
     assert(batch >= 1 && batch <= 15);
     const __m128i vmask = _mm_loadu_si128((const __m128i*) &mask_table[16 - batch]);
-    const __m128i vt = _mm_sad_epu8(_mm_and_si128(_mm_loadu_si128((const __m128i*) input), vmask), vzero);
-    vacc0 = _mm_add_epi32(vacc0, vt);
+    const __m128i vt = _mm_sad_epu8(_mm_and_si128(_mm_loadu_si128((const __m128i*) input), vmask), _mm_setzero_si128());
+    vacc = _mm_add_epi32(vacc, vt);
   }
 
-  vacc0 = _mm_add_epi32(vacc0, _mm_castps_si128(_mm_movehl_ps(_mm_castsi128_ps(vacc0), _mm_castsi128_ps(vacc0))));
-  vacc0 = _mm_add_epi32(vacc0, _mm_shuffle_epi32(vacc0, _MM_SHUFFLE(1, 1, 1, 1)));
-
-  *output += (uint32_t)_mm_cvtsi128_si32(vacc0);
+  vacc = _mm_hadd_epi32(vacc, vacc);
+  vacc = _mm_hadd_epi32(vacc, vacc);
+  *output += (uint32_t)_mm_cvtsi128_si32(vacc);
 }
+
+
+

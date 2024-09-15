@@ -13,7 +13,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/reduce.h"
 
-void xnn_qu8_rsum_ukernel__sse2_u32(
+void xnn_qu8_rsum_ukernel__sse2_u32_acc2(
     size_t batch,
     const uint8_t* input,
     uint32_t* output,
@@ -31,6 +31,7 @@ void xnn_qu8_rsum_ukernel__sse2_u32(
 
   const __m128i vzero = _mm_setzero_si128();
   __m128i vacc0 = _mm_setzero_si128();
+  __m128i vacc1 = _mm_setzero_si128();
 
   for (; batch >= 32; batch -= 32) {
     const __m128i vin0 = _mm_loadu_si128((const __m128i*) (input + 0));
@@ -39,8 +40,9 @@ void xnn_qu8_rsum_ukernel__sse2_u32(
     const __m128i vt0 = _mm_sad_epu8(vin0, vzero);
     const __m128i vt1 = _mm_sad_epu8(vin1, vzero);
      vacc0 = _mm_add_epi32(vacc0, vt0);
-     vacc0 = _mm_add_epi32(vacc0, vt1);
+     vacc1 = _mm_add_epi32(vacc1, vt1);
   }
+  vacc0 = _mm_add_epi32(vacc0, vacc1);
 
   for (; batch >= 16; batch -= 16) {
     const __m128i vin = _mm_loadu_si128((const __m128i*) input);

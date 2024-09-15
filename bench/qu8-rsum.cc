@@ -116,9 +116,96 @@ BENCHMARK_CAPTURE(qu8_rsum, scalar_u4,
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qu8_rsum, sse2_u32_acc2,
+                    xnn_qu8_rsum_ukernel__sse2_u32_acc2,
+                    /*init_params=*/nullptr)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(qu8_rsum, sse2_u64,
                     xnn_qu8_rsum_ukernel__sse2_u64,
                     /*init_params=*/nullptr)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qu8_rsum, sse2_u64_acc2,
+                    xnn_qu8_rsum_ukernel__sse2_u64_acc2,
+                    /*init_params=*/nullptr)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qu8_rsum, sse2_u64_acc4,
+                    xnn_qu8_rsum_ukernel__sse2_u64_acc4,
+                    /*init_params=*/nullptr)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qu8_rsum, avx2_u32,
+                    xnn_qu8_rsum_ukernel__avx2_u32,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qu8_rsum, avx2_u64,
+                    xnn_qu8_rsum_ukernel__avx2_u64,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qu8_rsum, avx2_u64_acc2,
+                    xnn_qu8_rsum_ukernel__avx2_u64_acc2,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qu8_rsum, avx2_u128,
+                    xnn_qu8_rsum_ukernel__avx2_u128,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qu8_rsum, avx2_u128_acc2,
+                    xnn_qu8_rsum_ukernel__avx2_u128_acc2,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX2)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+  BENCHMARK_CAPTURE(qu8_rsum, avx2_u128_acc4,
+                    xnn_qu8_rsum_ukernel__avx2_u128_acc4,
+                    /*init_params=*/nullptr,
+                    benchmark::utils::CheckAVX2)
     ->Apply(BenchmarkRSUM)
     ->UseRealTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
