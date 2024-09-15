@@ -52,10 +52,8 @@ void xnn_qu8_rsum_ukernel__sse2_u16(
     }
   }
 
-  __m128i vacc_lo = _mm_unpacklo_epi32(vacc0, vacc0);
-  __m128i vacc_hi = _mm_unpackhi_epi32(vacc0, vacc0);
-  vacc_lo = _mm_add_epi32(vacc_lo, vacc0);
-  vacc_lo = _mm_add_epi32(vacc_hi, vacc0);
+  vacc0 = _mm_add_epi32(vacc0, _mm_castps_si128(_mm_movehl_ps(_mm_castsi128_ps(vacc0), _mm_castsi128_ps(vacc0))));
+  vacc0 = _mm_add_epi32(vacc0, _mm_shuffle_epi32(vacc0, _MM_SHUFFLE(1, 1, 1, 1)));
 
-  *output += (uint32_t)_mm_cvtsi128_si32(vacc_lo);
+  *output += (uint32_t)_mm_cvtsi128_si32(vacc0);
 }
