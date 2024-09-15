@@ -205,7 +205,7 @@ static void init_qu8_rsum_config(void) {
     };
   #else
     qu8_rsum_config = (struct xnn_reduce_config) {
-      .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__scalar_u4,
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__scalar_u4,
       .element_tile = 4,
     };
   #endif
