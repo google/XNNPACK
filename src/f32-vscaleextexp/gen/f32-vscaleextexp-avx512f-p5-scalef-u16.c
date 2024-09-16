@@ -147,5 +147,4 @@ void xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u16(
     // Store up to 15 results at a time.
     _mm512_mask_storeu_ps(output, vmask, vf);
   }
-  _mm256_zeroupper();
 }
