@@ -1,0 +1,33 @@
+# Copyright 2024 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Scalar
+- name: xnn_qu8_rsum_ukernel__scalar_u1
+- name: xnn_qu8_rsum_ukernel__scalar_u2
+- name: xnn_qu8_rsum_ukernel__scalar_u4
+
+# ARM NEON
+- name: xnn_qu8_rsum_ukernel__neon_u16
+- name: xnn_qu8_rsum_ukernel__neon_u32
+- name: xnn_qu8_rsum_ukernel__neon_u32_acc2
+- name: xnn_qu8_rsum_ukernel__neon_u64
+- name: xnn_qu8_rsum_ukernel__neon_u64_acc2
+- name: xnn_qu8_rsum_ukernel__neon_u64_acc4
+
+# x86 SSE2
+- name: xnn_qu8_rsum_ukernel__sse2_u16
+- name: xnn_qu8_rsum_ukernel__sse2_u32
+- name: xnn_qu8_rsum_ukernel__sse2_u32_acc2
+- name: xnn_qu8_rsum_ukernel__sse2_u64
+- name: xnn_qu8_rsum_ukernel__sse2_u64_acc2
+- name: xnn_qu8_rsum_ukernel__sse2_u64_acc4
+
+# x86 AVX2
+- name: xnn_qu8_rsum_ukernel__avx2_u32
+- name: xnn_qu8_rsum_ukernel__avx2_u64
+- name: xnn_qu8_rsum_ukernel__avx2_u64_acc2
+- name: xnn_qu8_rsum_ukernel__avx2_u128
+- name: xnn_qu8_rsum_ukernel__avx2_u128_acc2
+- name: xnn_qu8_rsum_ukernel__avx2_u128_acc4

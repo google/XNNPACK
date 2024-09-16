@@ -153,6 +153,40 @@ void qs8_rsum(
   }
 }
 
+void qu8_rsum(
+    benchmark::State& state,
+    xnn_qu8_rsum_ukernel_fn rsum,
+    xnn_init_qs8_rsum_params_fn init_params,
+    benchmark::utils::IsaCheckFunction isa_check = nullptr)
+{
+  if (isa_check != nullptr && !isa_check(state)) {
+    return;
+  }
+  const size_t rows = state.range(0);
+  const size_t batch = state.range(0);
+
+  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> input(rows * batch + XNN_EXTRA_BYTES);
+  std::vector<uint32_t> output(rows);
+  std::iota(input.begin(), input.end(), 1);
+
+  // Prepare parameters.
+  struct xnn_qs8_rsum_params params;
+  if (init_params) {
+    init_params(&params);
+  }
+
+  for (auto _ : state) {
+    for (int i = 0; i < rows; ++i) {
+      rsum(batch, &input[i * batch], &output[i], &params);
+    }
+  }
+
+  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
+  if (cpu_frequency != 0) {
+    state.counters["cpufreq"] = cpu_frequency;
+  }
+}
+
 void f32_rdsum(
     benchmark::State& state,
     xnn_f32_rdsum_ukernel_fn rdsum,

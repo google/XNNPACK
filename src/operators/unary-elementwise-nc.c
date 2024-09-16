@@ -257,7 +257,7 @@ enum xnn_status xnn_create_abs_nc_f16(
 {
   const struct xnn_unary_elementwise_config* f16_abs_config = xnn_init_f16_abs_config();
 
-  union xnn_f16_default_params params;
+  struct xnn_f16_default_params params;
   if XNN_LIKELY(f16_abs_config != NULL && f16_abs_config->init.f16_default != NULL) {
     f16_abs_config->init.f16_default(&params);
   }
@@ -274,7 +274,7 @@ enum xnn_status xnn_create_abs_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_abs_config = xnn_init_f32_abs_config();
 
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if XNN_LIKELY(f32_abs_config != NULL && f32_abs_config->init.f32_default != NULL) {
     f32_abs_config->init.f32_default(&params);
   }
@@ -454,7 +454,7 @@ enum xnn_status xnn_create_clamp_nc_s8(
   const struct xnn_unary_elementwise_config* s8_clamp_config = xnn_init_s8_clamp_config();
   assert(s8_clamp_config != NULL);
 
-  union xnn_s8_minmax_params params;
+  struct xnn_s8_minmax_params params;
   assert(s8_clamp_config->init.s8_minmax != NULL);
   s8_clamp_config->init.s8_minmax(&params, output_min, output_max);
 
@@ -480,7 +480,7 @@ enum xnn_status xnn_create_clamp_nc_u8(
   const struct xnn_unary_elementwise_config* u8_clamp_config = xnn_init_u8_clamp_config();
   assert(u8_clamp_config != NULL);
 
-  union xnn_u8_minmax_params params;
+  struct xnn_u8_minmax_params params;
   assert(u8_clamp_config->init.u8_minmax != NULL);
   u8_clamp_config->init.u8_minmax(&params, output_min, output_max);
 
@@ -562,7 +562,7 @@ enum xnn_status xnn_create_convert_nc_f16_qd8(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f16_default_params params;
+  struct xnn_f16_default_params params;
   if (f16_rminmax_config->init.f16_default != NULL) {
     f16_rminmax_config->init.f16_default(&params);
   }
@@ -585,7 +585,7 @@ enum xnn_status xnn_create_convert_nc_f32_qd8(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if (f32_rminmax_config->init.f32_default != NULL) {
     f32_rminmax_config->init.f32_default(&params);
   }
@@ -607,7 +607,7 @@ enum xnn_status xnn_create_convert_nc_f32_qp8(uint32_t flags,
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if (f32_rminmax_config->init.f32_default != NULL) {
     f32_rminmax_config->init.f32_default(&params);
   }
@@ -981,7 +981,7 @@ enum xnn_status xnn_create_gelu_nc_f32(uint32_t flags,
   const struct xnn_unary_elementwise_config* f32_gelu_config =
       xnn_init_f32_gelu_config();
 
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if XNN_LIKELY (f32_gelu_config != NULL) {
     if (f32_gelu_config->init.f32_default != NULL) {
       f32_gelu_config->init.f32_default(&params);
@@ -999,7 +999,7 @@ enum xnn_status xnn_create_hardswish_nc_f16(
 {
   const struct xnn_unary_elementwise_config* f16_hswish_config = xnn_init_f16_hswish_config();
 
-  union xnn_f16_hswish_params params;
+  struct xnn_f16_hswish_params params;
   if XNN_LIKELY(f16_hswish_config != NULL && f16_hswish_config->init.f16_hswish != NULL) {
     f16_hswish_config->init.f16_hswish(&params);
   }
@@ -1016,7 +1016,7 @@ enum xnn_status xnn_create_hardswish_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_hswish_config = xnn_init_f32_hswish_config();
 
-  union xnn_f32_hswish_params params;
+  struct xnn_f32_hswish_params params;
   if XNN_LIKELY(f32_hswish_config != NULL && f32_hswish_config->init.f32_hswish != NULL) {
     f32_hswish_config->init.f32_hswish(&params);
   }
@@ -1089,7 +1089,7 @@ enum xnn_status xnn_create_log_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_log_config = xnn_init_f32_log_config();
 
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if XNN_LIKELY(f32_log_config != NULL) {
     if (f32_log_config->init.f32_default != NULL) {
       f32_log_config->init.f32_default(&params);
@@ -1270,7 +1270,7 @@ enum xnn_status xnn_create_negate_nc_f16(
 {
   const struct xnn_unary_elementwise_config* f16_neg_config = xnn_init_f16_neg_config();
 
-  union xnn_f16_default_params params;
+  struct xnn_f16_default_params params;
   if XNN_LIKELY(f16_neg_config != NULL && f16_neg_config->init.f16_default != NULL) {
     f16_neg_config->init.f16_default(&params);
   }
@@ -1287,7 +1287,7 @@ enum xnn_status xnn_create_negate_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_neg_config = xnn_init_f32_neg_config();
 
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if XNN_LIKELY(f32_neg_config != NULL && f32_neg_config->init.f32_default != NULL) {
     f32_neg_config->init.f32_default(&params);
   }
@@ -1348,7 +1348,7 @@ enum xnn_status xnn_create_square_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_sqr_config = xnn_init_f32_sqr_config();
 
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if XNN_LIKELY(f32_sqr_config != NULL && f32_sqr_config->init.f32_default != NULL) {
     f32_sqr_config->init.f32_default(&params);
   }
@@ -2105,7 +2105,7 @@ enum xnn_status xnn_create_exp_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_exp_config = xnn_init_f32_exp_config();
 
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if XNN_LIKELY(f32_exp_config != NULL) {
     if (f32_exp_config->init.f32_default != NULL) {
       f32_exp_config->init.f32_default(&params);
@@ -3218,7 +3218,7 @@ enum xnn_status xnn_run_abs_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_abs_config = xnn_init_f32_abs_config();
 
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if XNN_LIKELY(f32_abs_config != NULL && f32_abs_config->init.f32_default != NULL) {
     f32_abs_config->init.f32_default(&params);
   }
@@ -3695,7 +3695,7 @@ enum xnn_status xnn_run_gelu_nc_f32(size_t channels, size_t input_stride,
   const struct xnn_unary_elementwise_config* f32_gelu_config =
       xnn_init_f32_gelu_config();
 
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if XNN_LIKELY (f32_gelu_config != NULL) {
     if (f32_gelu_config->init.f32_default != NULL) {
       f32_gelu_config->init.f32_default(&params);
@@ -3721,7 +3721,7 @@ enum xnn_status xnn_run_hardswish_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_hswish_config = xnn_init_f32_hswish_config();
 
-  union xnn_f32_hswish_params params;
+  struct xnn_f32_hswish_params params;
   if XNN_LIKELY(f32_hswish_config != NULL && f32_hswish_config->init.f32_hswish != NULL) {
     f32_hswish_config->init.f32_hswish(&params);
   }
@@ -3787,7 +3787,7 @@ enum xnn_status xnn_run_negate_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_neg_config = xnn_init_f32_neg_config();
 
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if XNN_LIKELY(f32_neg_config != NULL && f32_neg_config->init.f32_default != NULL) {
     f32_neg_config->init.f32_default(&params);
   }
@@ -3871,7 +3871,7 @@ enum xnn_status xnn_run_square_nc_f32(
 {
   const struct xnn_unary_elementwise_config* f32_sqr_config = xnn_init_f32_sqr_config();
 
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if XNN_LIKELY(f32_sqr_config != NULL && f32_sqr_config->init.f32_default != NULL) {
     f32_sqr_config->init.f32_default(&params);
   }

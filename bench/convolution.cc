@@ -325,8 +325,7 @@ void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
-  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
-
+  
   const size_t output_pixel_stride = groups * group_output_channels;
   const size_t input_pixel_stride = groups * group_input_channels;
   const size_t effective_kernel_height = (kernel_height - 1) * dilation + 1;
@@ -339,11 +338,11 @@ void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
   const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
 
   std::vector<xnn_float16> input(batch_size * input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  std::generate(input.begin(), input.end(), std::ref(f16rng));
+  std::generate(input.begin(), input.end(), f32rng);
   std::vector<xnn_float16> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
-  std::generate(kernel.begin(), kernel.end(), std::ref(f16rng));
+  std::generate(kernel.begin(), kernel.end(), f32rng);
   std::vector<xnn_float16> bias(groups * group_output_channels);
-  std::generate(bias.begin(), bias.end(), std::ref(f16rng));
+  std::generate(bias.begin(), bias.end(), f32rng);
   const size_t output_elements = batch_size * output_height * output_width * output_pixel_stride;
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);

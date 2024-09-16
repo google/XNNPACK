@@ -15,9 +15,9 @@
 #define XNN_DEFINED_UKERNEL
 #endif
 
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vexp_ukernel__scalar_exp_u1, 1, false, float, union xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vexp_ukernel__scalar_exp_u2, 2, false, float, union xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vexp_ukernel__scalar_exp_u4, 4, false, float, union xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vexp_ukernel__scalar_exp_u1, 1, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vexp_ukernel__scalar_exp_u2, 2, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vexp_ukernel__scalar_exp_u4, 4, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 
 #ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS
 #undef XNN_DEFINED_UKERNEL_WITH_PARAMS

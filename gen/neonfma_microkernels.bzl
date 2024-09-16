@@ -25,7 +25,6 @@ PROD_NEONFMA_MICROKERNEL_SRCS = [
     "src/f32-velu/gen/f32-velu-neonfma-rr1-p6-u8.c",
     "src/f32-vmulcaddc/gen/f32-vmulcaddc-c4-minmax-neonfma-2x.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-lut64-p2-nr2recps-u16.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2fma-u8.c",
 ]
 
 NON_PROD_NEONFMA_MICROKERNEL_SRCS = [
@@ -202,25 +201,6 @@ NON_PROD_NEONFMA_MICROKERNEL_SRCS = [
     "src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-p5-nr2recps-u16.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-p5-nr2recps-u20.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-neonfma-rr1-p5-nr2recps-u24.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-lut8-p4h3ts-nr1recps1fma-u4.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-lut8-p4h3ts-nr1recps1fma-u8.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-lut8-p4h3ts-nr1recps1fma-u12.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-lut8-p4h3ts-nr1recps1fma-u16.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-lut8-p4h3ts-nr2fma-u4.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-lut8-p4h3ts-nr2fma-u8.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-lut8-p4h3ts-nr2fma-u12.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-lut8-p4h3ts-nr2fma-u16.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr1recps1fma-u4.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr1recps1fma-u8.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr1recps1fma-u12.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr1recps1fma-u16.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2fma-u4.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2fma-u12.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2fma-u16.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2recps-u4.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2recps-u8.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2recps-u12.c",
-    "src/f32-vtanh/gen/f32-vtanh-neonfma-expm1minus-rr1-p6h5ts-nr2recps-u16.c",
 ]
 
 ALL_NEONFMA_MICROKERNEL_SRCS = PROD_NEONFMA_MICROKERNEL_SRCS + NON_PROD_NEONFMA_MICROKERNEL_SRCS

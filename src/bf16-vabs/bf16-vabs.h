@@ -17,9 +17,9 @@
 
 
 #if XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon_bf16, xnn_bf16_vabs_ukernel__neonbf16_u8, 8, false, uint16_t, union xnn_bf16_default_params, ((xnn_init_bf16_default_params_fn) NULL))
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon_bf16, xnn_bf16_vabs_ukernel__neonbf16_u16, 16, false, uint16_t, union xnn_bf16_default_params, ((xnn_init_bf16_default_params_fn) NULL))
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon_bf16, xnn_bf16_vabs_ukernel__neonbf16_u24, 24, false, uint16_t, union xnn_bf16_default_params, ((xnn_init_bf16_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon_bf16, xnn_bf16_vabs_ukernel__neonbf16_u8, 8, false, uint16_t, struct xnn_bf16_default_params, ((xnn_init_bf16_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon_bf16, xnn_bf16_vabs_ukernel__neonbf16_u16, 16, false, uint16_t, struct xnn_bf16_default_params, ((xnn_init_bf16_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon_bf16, xnn_bf16_vabs_ukernel__neonbf16_u24, 24, false, uint16_t, struct xnn_bf16_default_params, ((xnn_init_bf16_default_params_fn) NULL))
 #endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 

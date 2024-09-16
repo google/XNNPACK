@@ -147,8 +147,8 @@ class BatchMatMulOperatorTester {
         for (size_t ni = 0; ni < n; ni++) {
           for (size_t ki = 0; ki < k; ki++) {
             output_ref[mi * n + ni] +=
-                xnn_float16_to_float(input_a[mi * k + ki]) *
-                xnn_float16_to_float(input_b[ni * k + ki]);
+                input_a[mi * k + ki] *
+                input_b[ni * k + ki];
           }
         }
       }
@@ -158,8 +158,8 @@ class BatchMatMulOperatorTester {
         for (size_t ni = 0; ni < n; ni++) {
           for (size_t ki = 0; ki < k; ki++) {
             output_ref[mi * n + ni] +=
-                xnn_float16_to_float(input_a[mi * k + ki]) *
-                xnn_float16_to_float(input_b[ki * n + ni]);
+                input_a[mi * k + ki] *
+                input_b[ki * n + ni];
           }
         }
       }
@@ -277,10 +277,10 @@ class BatchMatMulOperatorTester {
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input_a.begin(), input_a.end(),
-                    [&]() { return xnn_float16_from_float(f32dist(rng)); });
+                    [&]() { return f32dist(rng); });
       std::generate(input_b.begin(), input_b.end(),
-                    [&]() { return xnn_float16_from_float(f32dist(rng)); });
-      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+                    [&]() { return f32dist(rng); });
+      std::fill(output.begin(), output.end(), std::nanf(""));
       std::fill(output_ref.begin(), output_ref.end(), 0.0f);
 
       // Compute reference results.
@@ -575,7 +575,7 @@ class BatchMatMulOperatorTester {
         for (size_t ni = 0; ni < n(); ni++) {
           ASSERT_NEAR(
               output_ref[bi * m() * n() + mi * n() + ni],
-              xnn_float16_to_float(output[bi * m() * n() + mi * n() + ni]),
+              output[bi * m() * n() + mi * n() + ni],
               1.0e-2f * std::abs(output_ref[bi * m() * n() + mi * n() + ni]))
               << "batch = " << bi << " / " << batch_size_output
               << ", m = " << mi << " / " << m() << ", n = " << ni << " / "

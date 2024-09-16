@@ -18,13 +18,13 @@
 
 
 void xnnpack_convert_f16_f32(benchmark::State& state) {
-  benchmark_unary_operator<float16, float>(xnn_create_convert_nc_f16_f32,
+  benchmark_unary_operator<xnn_float16, float>(xnn_create_convert_nc_f16_f32,
                                            xnn_reshape_convert_nc_f16_f32,
                                            xnn_setup_convert_nc_f16_f32, state);
 }
 
 void xnnpack_convert_f32_f16(benchmark::State& state) {
-  benchmark_unary_operator<float, float16>(xnn_create_convert_nc_f32_f16,
+  benchmark_unary_operator<float, xnn_float16>(xnn_create_convert_nc_f32_f16,
                                            xnn_reshape_convert_nc_f32_f16,
                                            xnn_setup_convert_nc_f32_f16, state);
 }
@@ -91,7 +91,7 @@ void xnnpack_convert_qu8_f32(benchmark::State& state) {
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
 void tflite_convert_f16_f32(benchmark::State& state) {
-  benchmark_tflite_unary_operator<float16, float>(
+  benchmark_tflite_unary_operator<xnn_float16, float>(
       state, tflite::BuiltinOperator_DEQUANTIZE);
 }
 
