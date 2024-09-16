@@ -41,7 +41,7 @@ static void f16_vcmul(benchmark::State& state, uint64_t arch_flags,
   std::generate(a.begin(), a.end(), std::ref(f16rng));
   std::generate(b.begin(), b.end(), std::ref(f16rng));
 
-  union xnn_f16_default_params params;
+  struct xnn_f16_default_params params;
   if (init_params != nullptr) {
     init_params(&params);
   }

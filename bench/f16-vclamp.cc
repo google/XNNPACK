@@ -20,9 +20,7 @@ void f16_vclamp(benchmark::State& state, uint64_t arch_flags, xnn_f16_vclamp_uke
   f16_vunary_benchmark<xnn_f16_minmax_params>(
       state, ukernel,
       [init_params](xnn_f16_minmax_params* params) -> size_t {
-        init_params(params,
-            UINT16_C(0xAC00),  // -1.0h
-            UINT16_C(0x3C00));  // 1.0h
+        init_params(params, -1.0f, 1.0f);
         return sizeof(*params);
       },
       arch_flags,

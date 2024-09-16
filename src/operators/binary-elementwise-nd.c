@@ -267,8 +267,8 @@ enum xnn_status xnn_create_add_nd_qs8(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_qs8_add_minmax_params params;
-  union xnn_qs8_add_minmax_params params2;
+  struct xnn_qs8_add_minmax_params params;
+  struct xnn_qs8_add_minmax_params params2;
   assert(qs8_vadd_config->init.qs8_add != NULL);
   qs8_vadd_config->init.qs8_add(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
@@ -350,8 +350,8 @@ enum xnn_status xnn_create_add_nd_qu8(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_qu8_add_minmax_params params;
-  union xnn_qu8_add_minmax_params params2;
+  struct xnn_qu8_add_minmax_params params;
+  struct xnn_qu8_add_minmax_params params2;
   assert(qu8_vadd_config->init.qu8_add != NULL);
   qu8_vadd_config->init.qu8_add(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
@@ -474,7 +474,7 @@ enum xnn_status xnn_create_maximum_nd_f32(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if (f32_vmax_config->init.f32_default != NULL) {
     f32_vmax_config->init.f32_default(&params);
   }
@@ -518,7 +518,7 @@ enum xnn_status xnn_create_minimum_nd_f32(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if (f32_vmin_config->init.f32_default != NULL) {
     f32_vmin_config->init.f32_default(&params);
   }
@@ -744,7 +744,7 @@ enum xnn_status xnn_create_squared_difference_nd_f32(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if (f32_vsqrdiff_config->init.f32_default != NULL) {
     f32_vsqrdiff_config->init.f32_default(&params);
   }
@@ -770,7 +770,7 @@ enum xnn_status xnn_create_multiply_nd_s32(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_s32_default_params params;
+  struct xnn_s32_default_params params;
 
   return create_binary_elementwise_nd(
     flags,
@@ -876,8 +876,8 @@ enum xnn_status xnn_create_subtract_nd_qs8(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_qs8_add_minmax_params params;
-  union xnn_qs8_add_minmax_params params2;
+  struct xnn_qs8_add_minmax_params params;
+  struct xnn_qs8_add_minmax_params params2;
   assert(qs8_vadd_config->init.qs8_add != NULL);
   qs8_vadd_config->init.qs8_add(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
@@ -959,8 +959,8 @@ enum xnn_status xnn_create_subtract_nd_qu8(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_qu8_add_minmax_params params;
-  union xnn_qu8_add_minmax_params params2;
+  struct xnn_qu8_add_minmax_params params;
+  struct xnn_qu8_add_minmax_params params2;
   assert(qu8_vadd_config->init.qu8_add != NULL);
   qu8_vadd_config->init.qu8_add(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
@@ -2061,7 +2061,7 @@ enum xnn_status xnn_run_maximum_nd_f32(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if (f32_vmax_config->init.f32_default != NULL) {
     f32_vmax_config->init.f32_default(&params);
   }
@@ -2102,7 +2102,7 @@ enum xnn_status xnn_run_minimum_nd_f32(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if (f32_vmin_config->init.f32_default != NULL) {
     f32_vmin_config->init.f32_default(&params);
   }
@@ -2190,7 +2190,7 @@ enum xnn_status xnn_run_squared_difference_nd_f32(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if (f32_vsqrdiff_config->init.f32_default != NULL) {
     f32_vsqrdiff_config->init.f32_default(&params);
   }
@@ -2283,8 +2283,8 @@ enum xnn_status xnn_run_add_nd_qs8(
       xnn_operator_type_to_string(xnn_operator_type_add_nd_qs8));
     return xnn_status_unsupported_hardware;
   }
-  union xnn_qs8_add_minmax_params params;
-  union xnn_qs8_add_minmax_params params2;
+  struct xnn_qs8_add_minmax_params params;
+  struct xnn_qs8_add_minmax_params params2;
   assert(qs8_vadd_config->init.qs8_add != NULL);
   qs8_vadd_config->init.qs8_add(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
@@ -2469,8 +2469,8 @@ enum xnn_status xnn_run_subtract_nd_qs8(
       xnn_operator_type_to_string(xnn_operator_type_subtract_nd_qs8));
     return xnn_status_unsupported_hardware;
   }
-  union xnn_qs8_add_minmax_params params;
-  union xnn_qs8_add_minmax_params params2;
+  struct xnn_qs8_add_minmax_params params;
+  struct xnn_qs8_add_minmax_params params2;
   assert(qs8_vadd_config->init.qs8_add != NULL);
   qs8_vadd_config->init.qs8_add(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
@@ -2564,8 +2564,8 @@ enum xnn_status xnn_run_add_nd_qu8(
       xnn_operator_type_to_string(xnn_operator_type_add_nd_qu8));
     return xnn_status_unsupported_hardware;
   }
-  union xnn_qu8_add_minmax_params params;
-  union xnn_qu8_add_minmax_params params2;
+  struct xnn_qu8_add_minmax_params params;
+  struct xnn_qu8_add_minmax_params params2;
   assert(qu8_vadd_config->init.qu8_add != NULL);
   qu8_vadd_config->init.qu8_add(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
@@ -2749,8 +2749,8 @@ enum xnn_status xnn_run_subtract_nd_qu8(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_qu8_add_minmax_params params;
-  union xnn_qu8_add_minmax_params params2;
+  struct xnn_qu8_add_minmax_params params;
+  struct xnn_qu8_add_minmax_params params2;
   assert(qu8_vadd_config->init.qu8_add != NULL);
   qu8_vadd_config->init.qu8_add(
     &params, input1_zero_point, input2_zero_point, output_zero_point,

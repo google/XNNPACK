@@ -496,7 +496,7 @@ def main(args):
     test_outputs = collections.defaultdict(lambda: tests)
     bench_outputs = benches
     sorted_spec_yaml = collections.defaultdict(list)
-    isa_hierarchy = xnncommon._ISA_HIERARCHY_MAP
+    isa_hierarchy = xnncommon.isa_hierarchy_map()
 
     benches = [""] * len(isa_hierarchy)
     for ukernel_spec in spec_yaml:

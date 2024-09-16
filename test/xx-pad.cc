@@ -2,846 +2,402 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
-//
-// Auto-generated file. Do not edit!
-//   Specification: test/xx-pad.yaml
-//   Generator: tools/generate-pad-test.py
 
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <functional>
+#include <iomanip>
+#include <ios>
+#include <limits>
+#include <random>
+#include <vector>
 
 #include <gtest/gtest.h>
+#include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
+#include "xnnpack/microfnptr.h"
 #include "xnnpack/pad.h"
-#include "pad-microkernel-tester.h"
+#include "replicable_random_device.h"
 
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(XX_PAD_P16__NEON_U16, fulltile_copy_channels_eq_16) {
-    TEST_REQUIRES_ARM_NEON;
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(16)
-      .Test(xnn_xx_pad_ukernel_p16__neon_u16);
+class PadMicrokernelTester {
+ public:
+  PadMicrokernelTester& rows(size_t rows) {
+    assert(rows != 0);
+    this->rows_ = rows;
+    return *this;
   }
 
-  TEST(XX_PAD_P16__NEON_U16, fulltile_copy_channels_div_16) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 32; channels <= 48; channels += 16) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(channels)
-        .Test(xnn_xx_pad_ukernel_p16__neon_u16);
+  size_t rows() const { return this->rows_; }
+
+  PadMicrokernelTester& input_channels(size_t input_channels) {
+    assert(input_channels != 0);
+    this->input_channels_ = input_channels;
+    return *this;
+  }
+
+  size_t input_channels() const { return this->input_channels_; }
+
+  PadMicrokernelTester& pre_padding(size_t pre_padding) {
+    this->pre_padding_ = pre_padding;
+    return *this;
+  }
+
+  size_t pre_padding() const { return this->pre_padding_; }
+
+  PadMicrokernelTester& post_padding(size_t post_padding) {
+    this->post_padding_ = post_padding;
+    return *this;
+  }
+
+  size_t post_padding() const { return this->post_padding_; }
+
+  size_t output_channels() const {
+    return pre_padding() + input_channels() + post_padding();
+  }
+
+  PadMicrokernelTester& input_stride(size_t input_stride) {
+    assert(input_stride != 0);
+    this->input_stride_ = input_stride;
+    return *this;
+  }
+
+  size_t input_stride() const {
+    if (this->input_stride_ == 0) {
+      return input_channels();
+    } else {
+      assert(this->input_stride_ >= input_channels());
+      return this->input_stride_;
     }
   }
 
-  TEST(XX_PAD_P16__NEON_U16, fulltile_copy_channels_lt_16) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 16; channels++) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(channels)
-        .Test(xnn_xx_pad_ukernel_p16__neon_u16);
+  PadMicrokernelTester& output_stride(size_t output_stride) {
+    assert(output_stride != 0);
+    this->output_stride_ = output_stride;
+    return *this;
+  }
+
+  size_t output_stride() const {
+    if (this->output_stride_ == 0) {
+      return pre_padding() + input_channels() + post_padding();
+    } else {
+      assert(this->output_stride_ >=
+             pre_padding() + input_channels() + post_padding());
+      return this->output_stride_;
     }
   }
 
-  TEST(XX_PAD_P16__NEON_U16, fulltile_copy_channels_gt_16) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 17; channels < 32; channels++) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(channels)
-        .Test(xnn_xx_pad_ukernel_p16__neon_u16);
-    }
+  PadMicrokernelTester& iterations(size_t iterations) {
+    this->iterations_ = iterations;
+    return *this;
   }
 
-  TEST(XX_PAD_P16__NEON_U16, fulltile_pre_padding_eq_1) {
-    TEST_REQUIRES_ARM_NEON;
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .pre_padding(1)
-      .Test(xnn_xx_pad_ukernel_p16__neon_u16);
-  }
+  size_t iterations() const { return this->iterations_; }
 
-  TEST(XX_PAD_P16__NEON_U16, fulltile_pre_padding_eq_2) {
-    TEST_REQUIRES_ARM_NEON;
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .pre_padding(2)
-      .Test(xnn_xx_pad_ukernel_p16__neon_u16);
-  }
+  void Test(xnn_pad_ukernel_fn pad) const {
+    xnnpack::ReplicableRandomDevice rng;
+    auto u8rng = [&rng]() {
+      return std::uniform_int_distribution<uint32_t>(
+          0, std::numeric_limits<uint8_t>::max())(rng);
+    };
 
-  TEST(XX_PAD_P16__NEON_U16, fulltile_pre_padding_eq_4) {
-    TEST_REQUIRES_ARM_NEON;
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .pre_padding(4)
-      .Test(xnn_xx_pad_ukernel_p16__neon_u16);
-  }
+    std::vector<uint8_t> input(input_channels() +
+                               (rows() - 1) * input_stride() +
+                               XNN_EXTRA_BYTES / sizeof(uint8_t));
+    std::vector<uint8_t> output(
+        (pre_padding() + input_channels() + post_padding()) +
+        (rows() - 1) * output_stride());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), std::ref(u8rng));
+      std::generate(output.begin(), output.end(), std::ref(u8rng));
+      std::array<uint8_t, 4> fill_pattern;
+      std::generate(fill_pattern.begin(), fill_pattern.end(), std::ref(u8rng));
+      uint32_t fill_value = 0;
+      memcpy(&fill_value, fill_pattern.data(), sizeof(fill_value));
 
-  TEST(XX_PAD_P16__NEON_U16, fulltile_pre_padding_eq_16) {
-    TEST_REQUIRES_ARM_NEON;
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .pre_padding(16)
-      .Test(xnn_xx_pad_ukernel_p16__neon_u16);
-  }
+      // Call optimized micro-kernel.
+      pad(rows(), input_channels() * sizeof(uint8_t),
+          pre_padding() * sizeof(uint8_t), post_padding() * sizeof(uint8_t),
+          input.data(), input_stride() * sizeof(uint8_t), output.data(),
+          output_stride() * sizeof(uint8_t), fill_value);
 
-  TEST(XX_PAD_P16__NEON_U16, fulltile_pre_padding_div_16) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t pre_padding = 32; pre_padding <= 48; pre_padding += 16) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(1)
-        .pre_padding(pre_padding)
-        .Test(xnn_xx_pad_ukernel_p16__neon_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__NEON_U16, fulltile_pre_padding_lt_16) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t pre_padding = 1; pre_padding < 16; pre_padding++) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(1)
-        .pre_padding(pre_padding)
-        .Test(xnn_xx_pad_ukernel_p16__neon_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__NEON_U16, fulltile_pre_padding_gt_16) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t pre_padding = 17; pre_padding < 32; pre_padding++) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(1)
-        .pre_padding(pre_padding)
-        .Test(xnn_xx_pad_ukernel_p16__neon_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__NEON_U16, fulltile_post_padding_eq_1) {
-    TEST_REQUIRES_ARM_NEON;
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .post_padding(1)
-      .Test(xnn_xx_pad_ukernel_p16__neon_u16);
-  }
-
-  TEST(XX_PAD_P16__NEON_U16, fulltile_post_padding_eq_2) {
-    TEST_REQUIRES_ARM_NEON;
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .post_padding(2)
-      .Test(xnn_xx_pad_ukernel_p16__neon_u16);
-  }
-
-  TEST(XX_PAD_P16__NEON_U16, fulltile_post_padding_eq_4) {
-    TEST_REQUIRES_ARM_NEON;
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .post_padding(4)
-      .Test(xnn_xx_pad_ukernel_p16__neon_u16);
-  }
-
-  TEST(XX_PAD_P16__NEON_U16, fulltile_post_padding_eq_16) {
-    TEST_REQUIRES_ARM_NEON;
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .post_padding(16)
-      .Test(xnn_xx_pad_ukernel_p16__neon_u16);
-  }
-
-  TEST(XX_PAD_P16__NEON_U16, fulltile_post_padding_div_16) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t post_padding = 32; post_padding <= 48; post_padding += 16) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(1)
-        .post_padding(post_padding)
-        .Test(xnn_xx_pad_ukernel_p16__neon_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__NEON_U16, fulltile_post_padding_lt_16) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t post_padding = 1; post_padding < 16; post_padding++) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(1)
-        .post_padding(post_padding)
-        .Test(xnn_xx_pad_ukernel_p16__neon_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__NEON_U16, fulltile_post_padding_gt_16) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t post_padding = 17; post_padding < 32; post_padding++) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(1)
-        .post_padding(post_padding)
-        .Test(xnn_xx_pad_ukernel_p16__neon_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__NEON_U16, multitile) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t rows = 2; rows <= 5; rows++) {
-      for (size_t channels = 1; channels < 48; channels += 3) {
-        PadMicrokernelTester()
-          .rows(rows)
-          .input_channels(channels)
-          .pre_padding(channels)
-          .post_padding(channels)
-          .Test(xnn_xx_pad_ukernel_p16__neon_u16);
+      // Verify results.
+      for (size_t i = 0; i < rows(); i++) {
+        for (size_t l = 0; l < pre_padding(); l++) {
+          ASSERT_EQ(uint32_t(output[i * output_stride() + l]),
+                    uint32_t(fill_pattern[l % fill_pattern.size()]))
+              << "at row " << i << " / " << rows() << ", channel " << i << " / "
+              << output_channels() << " (" << pre_padding() << " + "
+              << input_channels() << " + " << post_padding() << ")"
+              << ", fill value 0x" << std::hex << std::setw(8)
+              << std::setfill('0') << fill_value << ", output value 0x"
+              << std::hex << std::setw(2) << std::setfill('0')
+              << uint32_t(output[i * output_stride() + l]);
+        }
+        for (size_t c = 0; c < input_channels(); c++) {
+          ASSERT_EQ(uint32_t(output[i * output_stride() + pre_padding() + c]),
+                    uint32_t(input[i * input_stride() + c]))
+              << "at row " << i << " / " << rows() << ", channel " << i << " / "
+              << output_channels() << " (" << pre_padding() << " + "
+              << input_channels() << " + " << post_padding() << ")"
+              << ", fill value 0x" << std::hex << std::setw(8)
+              << std::setfill('0') << fill_value << ", output value 0x"
+              << std::hex << std::setw(2) << std::setfill('0')
+              << uint32_t(output[i * output_stride() + pre_padding() + c]);
+        }
+        for (size_t r = 0; r < post_padding(); r++) {
+          ASSERT_EQ(uint32_t(output[i * output_stride() + pre_padding() +
+                                    input_channels() + r]),
+                    uint32_t(fill_pattern[r % fill_pattern.size()]))
+              << "at row " << i << " / " << rows() << ", channel " << i << " / "
+              << output_channels() << " (" << pre_padding() << " + "
+              << input_channels() << " + " << post_padding() << ")"
+              << ", fill value 0x" << std::hex << std::setw(8)
+              << std::setfill('0') << fill_value << ", output value 0x"
+              << std::hex << std::setw(2) << std::setfill('0')
+              << uint32_t(output[i * output_stride() + pre_padding() +
+                                 input_channels() + r]);
+        }
       }
     }
   }
 
-  TEST(XX_PAD_P16__NEON_U16, multitile_with_input_stride) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t rows = 2; rows <= 5; rows++) {
-      for (size_t channels = 1; channels < 48; channels += 3) {
-        PadMicrokernelTester()
+ private:
+  size_t rows_{1};
+  size_t input_channels_{1};
+  size_t pre_padding_{0};
+  size_t post_padding_{0};
+  size_t input_stride_{0};
+  size_t output_stride_{0};
+  size_t iterations_{15};
+};
+
+struct TestParams {
+  const char* name;
+  uint64_t arch_flags;
+  xnn_pad_ukernel_fn ukernel;
+  size_t tile_size;
+};
+
+#define XNN_PAD_UKERNEL(arch_flags, ukernel, tile_size) \
+  {#ukernel, arch_flags, ukernel, tile_size},
+TestParams test_params[] = {
+#include "src/xx-pad/xx-pad.h"
+};
+#undef XNN_PAD_UKERNEL
+
+class PadTest : public testing::TestWithParam<TestParams> {};
+
+TEST_P(PadTest, fulltile_copy_channels_eq_tile_size) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  const size_t tile_size = GetParam().tile_size;
+  PadMicrokernelTester().rows(1).input_channels(tile_size).Test(
+      GetParam().ukernel);
+}
+
+TEST_P(PadTest, fulltile_copy_channels_div_tile_size) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  const size_t tile_size = GetParam().tile_size;
+  for (size_t channels = tile_size * 2; channels <= tile_size * 3;
+       channels += tile_size) {
+    PadMicrokernelTester().rows(1).input_channels(channels).Test(
+        GetParam().ukernel);
+  }
+}
+
+TEST_P(PadTest, fulltile_copy_channels_lt_tile_size) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  const size_t tile_size = GetParam().tile_size;
+  for (size_t channels = 1; channels < tile_size; channels++) {
+    PadMicrokernelTester().rows(1).input_channels(channels).Test(
+        GetParam().ukernel);
+  }
+}
+
+TEST_P(PadTest, fulltile_copy_channels_gt_tile_size) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  const size_t tile_size = GetParam().tile_size;
+  for (size_t channels = 17; channels < tile_size * 2; channels++) {
+    PadMicrokernelTester().rows(1).input_channels(channels).Test(
+        GetParam().ukernel);
+  }
+}
+
+TEST_P(PadTest, fulltile_pre_padding_eq_1) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  PadMicrokernelTester().rows(1).input_channels(1).pre_padding(1).Test(
+      GetParam().ukernel);
+}
+
+TEST_P(PadTest, fulltile_pre_padding_eq_2) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  PadMicrokernelTester().rows(1).input_channels(1).pre_padding(2).Test(
+      GetParam().ukernel);
+}
+
+TEST_P(PadTest, fulltile_pre_padding_eq_4) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  PadMicrokernelTester().rows(1).input_channels(1).pre_padding(4).Test(
+      GetParam().ukernel);
+}
+
+TEST_P(PadTest, fulltile_pre_padding_eq_tile_size) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  const size_t tile_size = GetParam().tile_size;
+  PadMicrokernelTester().rows(1).input_channels(1).pre_padding(tile_size).Test(
+      GetParam().ukernel);
+}
+
+TEST_P(PadTest, fulltile_pre_padding_div_tile_size) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  const size_t tile_size = GetParam().tile_size;
+  for (size_t pre_padding = tile_size * 2; pre_padding <= tile_size * 3;
+       pre_padding += tile_size) {
+    PadMicrokernelTester()
+        .rows(1)
+        .input_channels(1)
+        .pre_padding(pre_padding)
+        .Test(GetParam().ukernel);
+  }
+}
+
+TEST_P(PadTest, fulltile_pre_padding_lt_tile_size) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  const size_t tile_size = GetParam().tile_size;
+  for (size_t pre_padding = 1; pre_padding < tile_size; pre_padding++) {
+    PadMicrokernelTester()
+        .rows(1)
+        .input_channels(1)
+        .pre_padding(pre_padding)
+        .Test(GetParam().ukernel);
+  }
+}
+
+TEST_P(PadTest, fulltile_pre_padding_gt_tile_size) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  const size_t tile_size = GetParam().tile_size;
+  for (size_t pre_padding = 17; pre_padding < tile_size * 2; pre_padding++) {
+    PadMicrokernelTester()
+        .rows(1)
+        .input_channels(1)
+        .pre_padding(pre_padding)
+        .Test(GetParam().ukernel);
+  }
+}
+
+TEST_P(PadTest, fulltile_post_padding_eq_1) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  PadMicrokernelTester().rows(1).input_channels(1).post_padding(1).Test(
+      GetParam().ukernel);
+}
+
+TEST_P(PadTest, fulltile_post_padding_eq_2) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  PadMicrokernelTester().rows(1).input_channels(1).post_padding(2).Test(
+      GetParam().ukernel);
+}
+
+TEST_P(PadTest, fulltile_post_padding_eq_4) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  PadMicrokernelTester().rows(1).input_channels(1).post_padding(4).Test(
+      GetParam().ukernel);
+}
+
+TEST_P(PadTest, fulltile_post_padding_eq_tile_size) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  const size_t tile_size = GetParam().tile_size;
+  PadMicrokernelTester().rows(1).input_channels(1).post_padding(tile_size).Test(
+      GetParam().ukernel);
+}
+
+TEST_P(PadTest, fulltile_post_padding_div_tile_size) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  const size_t tile_size = GetParam().tile_size;
+  for (size_t post_padding = tile_size * 2; post_padding <= tile_size * 3;
+       post_padding += tile_size) {
+    PadMicrokernelTester()
+        .rows(1)
+        .input_channels(1)
+        .post_padding(post_padding)
+        .Test(GetParam().ukernel);
+  }
+}
+
+TEST_P(PadTest, fulltile_post_padding_lt_tile_size) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  const size_t tile_size = GetParam().tile_size;
+  for (size_t post_padding = 1; post_padding < tile_size; post_padding++) {
+    PadMicrokernelTester()
+        .rows(1)
+        .input_channels(1)
+        .post_padding(post_padding)
+        .Test(GetParam().ukernel);
+  }
+}
+
+TEST_P(PadTest, fulltile_post_padding_gt_tile_size) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  const size_t tile_size = GetParam().tile_size;
+  for (size_t post_padding = 17; post_padding < tile_size * 2; post_padding++) {
+    PadMicrokernelTester()
+        .rows(1)
+        .input_channels(1)
+        .post_padding(post_padding)
+        .Test(GetParam().ukernel);
+  }
+}
+
+TEST_P(PadTest, multitile) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  const size_t tile_size = GetParam().tile_size;
+  for (size_t rows = 2; rows <= 5; rows++) {
+    for (size_t channels = 1; channels < tile_size * 3; channels += 3) {
+      PadMicrokernelTester()
+          .rows(rows)
+          .input_channels(channels)
+          .pre_padding(channels)
+          .post_padding(channels)
+          .Test(GetParam().ukernel);
+    }
+  }
+}
+
+TEST_P(PadTest, multitile_with_input_stride) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  const size_t tile_size = GetParam().tile_size;
+  for (size_t rows = 2; rows <= 5; rows++) {
+    for (size_t channels = 1; channels < tile_size * 3; channels += 3) {
+      PadMicrokernelTester()
           .rows(rows)
           .input_channels(channels)
           .pre_padding(channels)
           .post_padding(channels)
           .input_stride(51)
-          .Test(xnn_xx_pad_ukernel_p16__neon_u16);
-      }
+          .Test(GetParam().ukernel);
     }
   }
+}
 
-  TEST(XX_PAD_P16__NEON_U16, multitile_with_output_stride) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t rows = 2; rows <= 5; rows++) {
-      for (size_t channels = 1; channels < 48; channels += 3) {
-        PadMicrokernelTester()
+TEST_P(PadTest, multitile_with_output_stride) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  const size_t tile_size = GetParam().tile_size;
+  for (size_t rows = 2; rows <= 5; rows++) {
+    for (size_t channels = 1; channels < tile_size * 3; channels += 3) {
+      PadMicrokernelTester()
           .rows(rows)
           .input_channels(2 * channels)
           .pre_padding(channels)
           .post_padding(channels)
           .output_stride(193)
-          .Test(xnn_xx_pad_ukernel_p16__neon_u16);
-      }
-    }
-  }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(XX_PAD_P16__SSE2_U16, fulltile_copy_channels_eq_16) {
-    TEST_REQUIRES_X86_SSE2;
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(16)
-      .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, fulltile_copy_channels_div_16) {
-    TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 32; channels <= 48; channels += 16) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(channels)
-        .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, fulltile_copy_channels_lt_16) {
-    TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 16; channels++) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(channels)
-        .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, fulltile_copy_channels_gt_16) {
-    TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 17; channels < 32; channels++) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(channels)
-        .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, fulltile_pre_padding_eq_1) {
-    TEST_REQUIRES_X86_SSE2;
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .pre_padding(1)
-      .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, fulltile_pre_padding_eq_2) {
-    TEST_REQUIRES_X86_SSE2;
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .pre_padding(2)
-      .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, fulltile_pre_padding_eq_4) {
-    TEST_REQUIRES_X86_SSE2;
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .pre_padding(4)
-      .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, fulltile_pre_padding_eq_16) {
-    TEST_REQUIRES_X86_SSE2;
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .pre_padding(16)
-      .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, fulltile_pre_padding_div_16) {
-    TEST_REQUIRES_X86_SSE2;
-    for (size_t pre_padding = 32; pre_padding <= 48; pre_padding += 16) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(1)
-        .pre_padding(pre_padding)
-        .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, fulltile_pre_padding_lt_16) {
-    TEST_REQUIRES_X86_SSE2;
-    for (size_t pre_padding = 1; pre_padding < 16; pre_padding++) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(1)
-        .pre_padding(pre_padding)
-        .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, fulltile_pre_padding_gt_16) {
-    TEST_REQUIRES_X86_SSE2;
-    for (size_t pre_padding = 17; pre_padding < 32; pre_padding++) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(1)
-        .pre_padding(pre_padding)
-        .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, fulltile_post_padding_eq_1) {
-    TEST_REQUIRES_X86_SSE2;
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .post_padding(1)
-      .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, fulltile_post_padding_eq_2) {
-    TEST_REQUIRES_X86_SSE2;
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .post_padding(2)
-      .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, fulltile_post_padding_eq_4) {
-    TEST_REQUIRES_X86_SSE2;
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .post_padding(4)
-      .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, fulltile_post_padding_eq_16) {
-    TEST_REQUIRES_X86_SSE2;
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .post_padding(16)
-      .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, fulltile_post_padding_div_16) {
-    TEST_REQUIRES_X86_SSE2;
-    for (size_t post_padding = 32; post_padding <= 48; post_padding += 16) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(1)
-        .post_padding(post_padding)
-        .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, fulltile_post_padding_lt_16) {
-    TEST_REQUIRES_X86_SSE2;
-    for (size_t post_padding = 1; post_padding < 16; post_padding++) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(1)
-        .post_padding(post_padding)
-        .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, fulltile_post_padding_gt_16) {
-    TEST_REQUIRES_X86_SSE2;
-    for (size_t post_padding = 17; post_padding < 32; post_padding++) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(1)
-        .post_padding(post_padding)
-        .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, multitile) {
-    TEST_REQUIRES_X86_SSE2;
-    for (size_t rows = 2; rows <= 5; rows++) {
-      for (size_t channels = 1; channels < 48; channels += 3) {
-        PadMicrokernelTester()
-          .rows(rows)
-          .input_channels(channels)
-          .pre_padding(channels)
-          .post_padding(channels)
-          .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-      }
-    }
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, multitile_with_input_stride) {
-    TEST_REQUIRES_X86_SSE2;
-    for (size_t rows = 2; rows <= 5; rows++) {
-      for (size_t channels = 1; channels < 48; channels += 3) {
-        PadMicrokernelTester()
-          .rows(rows)
-          .input_channels(channels)
-          .pre_padding(channels)
-          .post_padding(channels)
-          .input_stride(51)
-          .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-      }
-    }
-  }
-
-  TEST(XX_PAD_P16__SSE2_U16, multitile_with_output_stride) {
-    TEST_REQUIRES_X86_SSE2;
-    for (size_t rows = 2; rows <= 5; rows++) {
-      for (size_t channels = 1; channels < 48; channels += 3) {
-        PadMicrokernelTester()
-          .rows(rows)
-          .input_channels(2 * channels)
-          .pre_padding(channels)
-          .post_padding(channels)
-          .output_stride(193)
-          .Test(xnn_xx_pad_ukernel_p16__sse2_u16);
-      }
-    }
-  }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_copy_channels_eq_16) {
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(16)
-      .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_copy_channels_div_16) {
-    for (size_t channels = 32; channels <= 48; channels += 16) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(channels)
-        .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_copy_channels_lt_16) {
-    for (size_t channels = 1; channels < 16; channels++) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(channels)
-        .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_copy_channels_gt_16) {
-    for (size_t channels = 17; channels < 32; channels++) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(channels)
-        .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_pre_padding_eq_1) {
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .pre_padding(1)
-      .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_pre_padding_eq_2) {
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .pre_padding(2)
-      .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_pre_padding_eq_4) {
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .pre_padding(4)
-      .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_pre_padding_eq_16) {
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .pre_padding(16)
-      .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_pre_padding_div_16) {
-    for (size_t pre_padding = 32; pre_padding <= 48; pre_padding += 16) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(1)
-        .pre_padding(pre_padding)
-        .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_pre_padding_lt_16) {
-    for (size_t pre_padding = 1; pre_padding < 16; pre_padding++) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(1)
-        .pre_padding(pre_padding)
-        .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_pre_padding_gt_16) {
-    for (size_t pre_padding = 17; pre_padding < 32; pre_padding++) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(1)
-        .pre_padding(pre_padding)
-        .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_post_padding_eq_1) {
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .post_padding(1)
-      .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_post_padding_eq_2) {
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .post_padding(2)
-      .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_post_padding_eq_4) {
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .post_padding(4)
-      .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_post_padding_eq_16) {
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .post_padding(16)
-      .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_post_padding_div_16) {
-    for (size_t post_padding = 32; post_padding <= 48; post_padding += 16) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(1)
-        .post_padding(post_padding)
-        .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_post_padding_lt_16) {
-    for (size_t post_padding = 1; post_padding < 16; post_padding++) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(1)
-        .post_padding(post_padding)
-        .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, fulltile_post_padding_gt_16) {
-    for (size_t post_padding = 17; post_padding < 32; post_padding++) {
-      PadMicrokernelTester()
-        .rows(1)
-        .input_channels(1)
-        .post_padding(post_padding)
-        .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-    }
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, multitile) {
-    for (size_t rows = 2; rows <= 5; rows++) {
-      for (size_t channels = 1; channels < 48; channels += 3) {
-        PadMicrokernelTester()
-          .rows(rows)
-          .input_channels(channels)
-          .pre_padding(channels)
-          .post_padding(channels)
-          .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-      }
-    }
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, multitile_with_input_stride) {
-    for (size_t rows = 2; rows <= 5; rows++) {
-      for (size_t channels = 1; channels < 48; channels += 3) {
-        PadMicrokernelTester()
-          .rows(rows)
-          .input_channels(channels)
-          .pre_padding(channels)
-          .post_padding(channels)
-          .input_stride(51)
-          .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-      }
-    }
-  }
-
-  TEST(XX_PAD_P16__WASMSIMD_U16, multitile_with_output_stride) {
-    for (size_t rows = 2; rows <= 5; rows++) {
-      for (size_t channels = 1; channels < 48; channels += 3) {
-        PadMicrokernelTester()
-          .rows(rows)
-          .input_channels(2 * channels)
-          .pre_padding(channels)
-          .post_padding(channels)
-          .output_stride(193)
-          .Test(xnn_xx_pad_ukernel_p16__wasmsimd_u16);
-      }
-    }
-  }
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-
-TEST(XX_PAD_P4__SCALAR_U16, fulltile_copy_channels_eq_16) {
-  PadMicrokernelTester()
-    .rows(1)
-    .input_channels(16)
-    .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
-}
-
-TEST(XX_PAD_P4__SCALAR_U16, fulltile_copy_channels_div_16) {
-  for (size_t channels = 32; channels <= 48; channels += 16) {
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(channels)
-      .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
-  }
-}
-
-TEST(XX_PAD_P4__SCALAR_U16, fulltile_copy_channels_lt_16) {
-  for (size_t channels = 1; channels < 16; channels++) {
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(channels)
-      .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
-  }
-}
-
-TEST(XX_PAD_P4__SCALAR_U16, fulltile_copy_channels_gt_16) {
-  for (size_t channels = 17; channels < 32; channels++) {
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(channels)
-      .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
-  }
-}
-
-TEST(XX_PAD_P4__SCALAR_U16, fulltile_pre_padding_eq_1) {
-  PadMicrokernelTester()
-    .rows(1)
-    .input_channels(1)
-    .pre_padding(1)
-    .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
-}
-
-TEST(XX_PAD_P4__SCALAR_U16, fulltile_pre_padding_eq_2) {
-  PadMicrokernelTester()
-    .rows(1)
-    .input_channels(1)
-    .pre_padding(2)
-    .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
-}
-
-TEST(XX_PAD_P4__SCALAR_U16, fulltile_pre_padding_eq_4) {
-  PadMicrokernelTester()
-    .rows(1)
-    .input_channels(1)
-    .pre_padding(4)
-    .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
-}
-
-TEST(XX_PAD_P4__SCALAR_U16, fulltile_pre_padding_div_4) {
-  for (size_t pre_padding = 8; pre_padding <= 12; pre_padding += 4) {
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .pre_padding(pre_padding)
-      .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
-  }
-}
-
-TEST(XX_PAD_P4__SCALAR_U16, fulltile_pre_padding_lt_4) {
-  for (size_t pre_padding = 1; pre_padding < 4; pre_padding++) {
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .pre_padding(pre_padding)
-      .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
-  }
-}
-
-TEST(XX_PAD_P4__SCALAR_U16, fulltile_pre_padding_gt_4) {
-  for (size_t pre_padding = 5; pre_padding < 8; pre_padding++) {
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .pre_padding(pre_padding)
-      .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
-  }
-}
-
-TEST(XX_PAD_P4__SCALAR_U16, fulltile_post_padding_eq_1) {
-  PadMicrokernelTester()
-    .rows(1)
-    .input_channels(1)
-    .post_padding(1)
-    .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
-}
-
-TEST(XX_PAD_P4__SCALAR_U16, fulltile_post_padding_eq_2) {
-  PadMicrokernelTester()
-    .rows(1)
-    .input_channels(1)
-    .post_padding(2)
-    .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
-}
-
-TEST(XX_PAD_P4__SCALAR_U16, fulltile_post_padding_eq_4) {
-  PadMicrokernelTester()
-    .rows(1)
-    .input_channels(1)
-    .post_padding(4)
-    .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
-}
-
-TEST(XX_PAD_P4__SCALAR_U16, fulltile_post_padding_div_4) {
-  for (size_t post_padding = 8; post_padding <= 12; post_padding += 4) {
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .post_padding(post_padding)
-      .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
-  }
-}
-
-TEST(XX_PAD_P4__SCALAR_U16, fulltile_post_padding_lt_4) {
-  for (size_t post_padding = 1; post_padding < 4; post_padding++) {
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .post_padding(post_padding)
-      .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
-  }
-}
-
-TEST(XX_PAD_P4__SCALAR_U16, fulltile_post_padding_gt_4) {
-  for (size_t post_padding = 5; post_padding < 8; post_padding++) {
-    PadMicrokernelTester()
-      .rows(1)
-      .input_channels(1)
-      .post_padding(post_padding)
-      .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
-  }
-}
-
-TEST(XX_PAD_P4__SCALAR_U16, multitile) {
-  for (size_t rows = 2; rows <= 5; rows++) {
-    for (size_t channels = 1; channels < 12; channels += 3) {
-      PadMicrokernelTester()
-        .rows(rows)
-        .input_channels(channels)
-        .pre_padding(channels)
-        .post_padding(channels)
-        .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
+          .Test(GetParam().ukernel);
     }
   }
 }
 
-TEST(XX_PAD_P4__SCALAR_U16, multitile_with_input_stride) {
-  for (size_t rows = 2; rows <= 5; rows++) {
-    for (size_t channels = 1; channels < 12; channels += 3) {
-      PadMicrokernelTester()
-        .rows(rows)
-        .input_channels(channels)
-        .pre_padding(channels)
-        .post_padding(channels)
-        .input_stride(51)
-        .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
-    }
-  }
-}
-
-TEST(XX_PAD_P4__SCALAR_U16, multitile_with_output_stride) {
-  for (size_t rows = 2; rows <= 5; rows++) {
-    for (size_t channels = 1; channels < 12; channels += 3) {
-      PadMicrokernelTester()
-        .rows(rows)
-        .input_channels(2 * channels)
-        .pre_padding(channels)
-        .post_padding(channels)
-        .output_stride(193)
-        .Test(xnn_xx_pad_ukernel_p4__scalar_u16);
-    }
-  }
-}
+INSTANTIATE_TEST_SUITE_P(pad, PadTest, ::testing::ValuesIn(test_params),
+                         [](const auto& info) { return info.param.name; });

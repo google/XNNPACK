@@ -26,6 +26,7 @@ load(
 
 MICROKERNEL_BENCHMARK_DEPS = [
     ":bench_utils",
+    "@FP16",
     "//:aligned_allocator",
     "//:all_microkernels",
     "//:common",
@@ -46,6 +47,7 @@ OPERATOR_BENCHMARK_DEPS = [
     "//:cache",
     "//:common",
     "//:math",
+    "@FP16",
 ]
 
 xnnpack_cxx_library(
@@ -203,6 +205,7 @@ xnnpack_benchmark(
     "f32_f16_vcvt",
     "f32_qs8_vcvt",
     "f32_qu8_vcvt",
+    "s32_f32_vcvt",
 ]]
 
 [xnnpack_benchmark(
@@ -215,6 +218,7 @@ xnnpack_benchmark(
 ) for kernel in [
     "qs8_rdsum",
     "qs8_rsum",
+    "qu8_rsum",
     "f16_rsum",
     "f16_f32acc_rsum",
     "f32_rsum",
@@ -269,11 +273,7 @@ xnnpack_benchmark(
     "cs16_fftr",
     "x8_lut",
     "xx_transposev",
-    "x8_transpose",
-    "x16_transpose",
-    "x24_transpose",
-    "x32_transpose",
-    "x64_transpose",
+    "xN_transposec",
 ]]
 
 xnnpack_benchmark(
@@ -534,6 +534,18 @@ xnnpack_benchmark(
         "bgemm.h",
         "packw-benchmark.h",
         "x8-packw.cc",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "//:allocator",
+    ],
+)
+
+xnnpack_benchmark(
+    name = "qs8_packw_bench",
+    srcs = [
+        "bgemm.h",
+        "packw-benchmark.h",
+        "qs8-packw.cc",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:allocator",

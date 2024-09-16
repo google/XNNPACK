@@ -43,6 +43,11 @@ static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
   return _mm256_min_epi32(a, b);
 }
 
+static XNN_INLINE xnn_simd_s32_t xnn_sub_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  return _mm256_sub_epi32(a, b);
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_s32_t xnn_loadu_s32(const int32_t* ptr) {
@@ -104,6 +109,13 @@ static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,
   if (num_elements & 1) {
     unaligned_store_u32(output, (uint32_t)_mm_cvtsi128_si32(v_lo));
   }
+}
+
+// Conversion operations.
+
+static XNN_INLINE __m256
+xnn_cvt_f32_s32(xnn_simd_s32_t a) {
+  return _mm256_cvtepi32_ps(a);
 }
 
 #endif  // __XNNPACK_SRC_XNNPACK_SIMD_S32_AVX2_H_

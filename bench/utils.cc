@@ -321,7 +321,7 @@ bool CheckArchFlags(benchmark::State& state, uint64_t arch_flags) {
   }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_ARM64
   bool CheckNEONI8MM(benchmark::State& state) {
     const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     if (hardware_config == nullptr || !hardware_config->use_arm_neon_i8mm) {
@@ -330,7 +330,7 @@ bool CheckArchFlags(benchmark::State& state, uint64_t arch_flags) {
     }
     return true;
   }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64
 
 #if XNN_ARCH_RISCV
   bool CheckRVV(benchmark::State& state) {

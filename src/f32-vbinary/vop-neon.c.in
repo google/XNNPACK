@@ -28,7 +28,7 @@ $  "SQRDIFF": "vsubq_f32",
 $  "PRELU": "vmulq_f32",
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "union xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
+$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
 $ISA = "aarch64_neon" if OP == "DIV" else "neon"
 void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__${ISA}_u${BATCH_TILE}(
     size_t batch,

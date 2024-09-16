@@ -5,6 +5,8 @@
 # LICENSE file in the root directory of this source tree.
 
 import argparse
+import codecs
+import io
 import os
 import re
 import sys
@@ -30,7 +32,7 @@ parser.add_argument(
 
 TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 
-ISA_LIST = frozenset({
+_ISA_LIST = frozenset({
     'armsimd32',
     'avx',
     'avx2',
@@ -76,14 +78,14 @@ ISA_LIST = frozenset({
     'wasmsimd',
 })
 
-ISA_MAP = {
+_ISA_MAP = {
     'wasmblendvps': 'wasmrelaxedsimd',
     'wasmpshufb': 'wasmrelaxedsimd',
     'wasmsdot': 'wasmrelaxedsimd',
     'wasmusdot': 'wasmrelaxedsimd',
 }
 
-ARCH_LIST = frozenset({
+_ARCH_LIST = frozenset({
     'aarch32',
     'aarch64',
     'wasm32',
@@ -91,67 +93,28 @@ ARCH_LIST = frozenset({
     'wasmrelaxedsimd32',
 })
 
-ISA_TO_HEADER_MAP = {
-    'armsimd32': 'arm_acle.h',
-    'avx': 'immintrin.h',
-    'avx2': 'immintrin.h',
-    'avx512f': 'immintrin.h',
-    'avx512skx': 'immintrin.h',
-    'avx512vbmi': 'immintrin.h',
-    'avx512vnni': 'immintrin.h',
-    'avx512vnnigfni': 'immintrin.h',
-    'avx512amx': 'immintrin.h',
-    'avx512fp16': 'immintrin.h',
-    'avxvnni': 'immintrin.h',
-    'avxvnniint8': 'immintrin.h',
-    'avx256skx': 'immintrin.h',
-    'avx256vnni': 'immintrin.h',
-    'avx256vnnigfni': 'immintrin.h',
-    'f16c': 'immintrin.h',
-    'fma3': 'immintrin.h',
-    'fp16arith': 'arm_fp16.h',
-    'neon': 'arm_neon.h',
-    'neonbf16': 'arm_neon.h',
-    'neondot': 'arm_neon.h',
-    'neondotfp16arith': 'arm_neon.h',
-    'neoni8mm': 'arm_neon.h',
-    'neonfma': 'arm_neon.h',
-    'neonfp16': 'arm_neon.h',
-    'neonfp16arith': 'arm_neon.h',
-    'neonv8': 'arm_neon.h',
-    'rvv': 'riscv_vector.h',
-    'rvvfp16arith': 'riscv_vector.h',
-    'sse': 'immintrin.h',
-    'sse2': 'immintrin.h',
-    'sse41': 'immintrin.h',
-    'ssse3': 'immintrin.h',
-    'wasmrelaxedsimd': 'wasm_simd128.h',
-    'wasmsimd': 'wasm_simd128.h',
-}
-
-MICROKERNEL_NAME_REGEX = re.compile(
+_MICROKERNEL_NAME_REGEX = re.compile(
     r'\bxnn_(?:[a-z0-9]+(?:_[a-z0-9]+)*)_ukernel(?:_[a-z0-9]+)*__(?:[a-z0-9]+(?:_[a-z0-9]+)*)\b'
 )
 
-VERIFICATION_IGNORE_SUBDIRS = {
+_VERIFICATION_IGNORE_SUBDIRS = {
     os.path.join('src', 'qs8-requantization'),
     os.path.join('src', 'qu8-requantization'),
     os.path.join('src', 'xnnpack', 'simd'),
 }
 
-UNWANTED_INCLUDES = (
-    '<arm_acle.h>',
-    '<arm_fp16.h>',
-    '<arm_neon.h>',
-    '<emmintrin.h>',
-    '<immintrin.h>',
-    '<nmmintrin.h>',
-    '<smmintrin.h>',
-    '<tmmintrin.h>',
-    '<xmmintrin.h>',
-    '<riscv_vector.h>',
-    '<wasm_simd128.h>',
-)
+
+def overwrite_if_changed(filepath, content):
+  if isinstance(content, io.IOBase):
+    content.seek(0)
+    content = content.read()
+  txt_changed = True
+  if os.path.exists(filepath):
+    with codecs.open(filepath, 'r', encoding='utf-8') as output_file:
+      txt_changed = output_file.read() != content
+  if txt_changed:
+    with codecs.open(filepath, 'w', encoding='utf-8') as output_file:
+      output_file.write(content)
 
 
 def human_sort_key(text):
@@ -213,13 +176,12 @@ def main(args):
       os.path.join(src_dir, 'tables'),
       os.path.join(src_dir, 'xnnpack'),
   }
-  c_microkernels_per_isa = {isa: [] for isa in ISA_LIST if isa not in ISA_MAP}
+  c_microkernels_per_isa = {isa: [] for isa in _ISA_LIST if isa not in _ISA_MAP}
   c_microkernels_per_isa['neon_aarch64'] = list()
   c_microkernels_per_isa['neondot_aarch64'] = list()
   c_microkernels_per_isa['neonfma_aarch64'] = list()
   c_microkernels_per_isa['neonfp16arith_aarch64'] = list()
-  c_microkernels_per_isa['neoni8mm_aarch64'] = list()
-  asm_microkernels_per_arch = {arch: [] for arch in ARCH_LIST}
+  asm_microkernels_per_arch = {arch: [] for arch in _ARCH_LIST}
   microkernel_name_to_filename = dict()
   for root, _, files in os.walk(src_dir, topdown=False):
     if root in ignore_roots:
@@ -240,9 +202,9 @@ def main(args):
       # Build microkernel name -> microkernel filepath mapping
       with open(os.path.join(root_dir, filepath), 'r', encoding='utf-8') as f:
         content = f.read()
-        microkernels = re.findall(MICROKERNEL_NAME_REGEX, content)
+        microkernels = re.findall(_MICROKERNEL_NAME_REGEX, content)
         if not microkernels:
-          if subdir in VERIFICATION_IGNORE_SUBDIRS:
+          if subdir in _VERIFICATION_IGNORE_SUBDIRS:
             microkernel_name_to_filename[
                 os.path.splitext(os.path.basename(filepath))[0]
             ] = filepath
@@ -259,7 +221,10 @@ def main(args):
                       lambda fn: fn.startswith('xnn_generate_'), microkernels
                   )
               )
-              if not microkernels and subdir not in VERIFICATION_IGNORE_SUBDIRS:
+              if (
+                  not microkernels
+                  and subdir not in _VERIFICATION_IGNORE_SUBDIRS
+              ):
                 print('No microkernel generator found in %s' % filepath)
 
               for microkernel in microkernels:
@@ -272,7 +237,7 @@ def main(args):
                   microkernel_name_to_filename[microkernel] = filepath
             else:
               # Extract the individual function names and their offsets.
-              matches = list(re.finditer(MICROKERNEL_NAME_REGEX, content))
+              matches = list(re.finditer(_MICROKERNEL_NAME_REGEX, content))
 
               # Write them to temporary files.
               for k, match in enumerate(matches):
@@ -302,10 +267,10 @@ def main(args):
       if ext == '.c':
         arch = None
         for component in basename.split('-'):
-          if component in ARCH_LIST:
+          if component in _ARCH_LIST:
             arch = component
-          elif component in ISA_LIST:
-            isa = ISA_MAP.get(component, component)
+          elif component in _ISA_LIST:
+            isa = _ISA_MAP.get(component, component)
             key = isa if arch is None else f'{isa}_{arch}'
             c_microkernels_per_isa[key].append(filepath)
             break
@@ -313,7 +278,7 @@ def main(args):
           print('Unknown ISA for C microkernel %s' % filepath)
       elif ext == '.S':
         for component in basename.split('-'):
-          if component in ARCH_LIST:
+          if component in _ARCH_LIST:
             asm_microkernels_per_arch[component].append(filepath)
             break
         else:
@@ -326,7 +291,7 @@ def main(args):
         os.path.join(configs_dir, configs_filepath), 'r', encoding='utf-8'
     ) as config_file:
       content = config_file.read()
-      microkernels = re.findall(MICROKERNEL_NAME_REGEX, content)
+      microkernels = re.findall(_MICROKERNEL_NAME_REGEX, content)
       prod_microkernels.update(microkernels)
   prod_microkernels = set(
       map(microkernel_name_to_filename.get, prod_microkernels)
@@ -352,9 +317,7 @@ def main(args):
         v for v in microkernels if v not in prod_microkernels
     ]
 
-  with open(
-      os.path.join(bzl_gen_dir, 'microkernels.bzl'), 'w'
-  ) as microkernels_bzl:
+  with io.StringIO() as microkernels_bzl:
     microkernels_bzl.write('''\
 """
 Microkernel filenames lists.
@@ -375,9 +338,7 @@ Auto-generated file. Do not edit!
     exports = ['\n']
     for key in keys:
       arch_microkernels_bzl_filename = key + '_microkernels.bzl'
-      with open(
-          os.path.join(bzl_gen_dir, arch_microkernels_bzl_filename), 'w'
-      ) as arch_microkernels_bzl:
+      with io.StringIO() as arch_microkernels_bzl:
         arch_microkernels_bzl.write(f'''\
 """
 Microkernel filenames lists for {key}.
@@ -442,6 +403,11 @@ Auto-generated file. Do not edit!
         for var in all_vars:
           exports.append(f'{var} = _{var}\n')
 
+        overwrite_if_changed(
+            os.path.join(bzl_gen_dir, arch_microkernels_bzl_filename),
+            arch_microkernels_bzl,
+        )
+
     # Generate dictionaries of microkernel lists per arch.
     microkernels_bzl.write(''.join(sorted(exports)))
     microkernels_bzl.write('\nPROD_C_SRCS_FOR_ARCH = {\n')
@@ -489,9 +455,11 @@ def all_srcs_for_arch(arch):
     return all_c_srcs_for_arch(arch) + all_asm_srcs_for_arch(arch)
 """)
 
-  with open(
-      os.path.join(cmake_gen_dir, 'microkernels.cmake'), 'w'
-  ) as microkernels_cmake:
+    overwrite_if_changed(
+        os.path.join(bzl_gen_dir, 'microkernels.bzl'), microkernels_bzl
+    )
+
+  with io.StringIO() as microkernels_cmake:
     microkernels_cmake.write("""\
 # Copyright 2022 Google LLC
 #
@@ -511,9 +479,7 @@ def all_srcs_for_arch(arch):
     )
     for key in keys:
       arch_microkernels_cmake_filename = key + '_microkernels.cmake'
-      with open(
-          os.path.join(cmake_gen_dir, arch_microkernels_cmake_filename), 'w'
-      ) as arch_microkernels_cmake:
+      with io.StringIO() as arch_microkernels_cmake:
         arch_microkernels_cmake.write(f"""\
 # Copyright 2022 Google LLC
 #
@@ -567,6 +533,14 @@ def all_srcs_for_arch(arch):
         microkernels_cmake.write(
             f'INCLUDE(cmake/gen/{arch_microkernels_cmake_filename})\n'
         )
+        overwrite_if_changed(
+            os.path.join(cmake_gen_dir, arch_microkernels_cmake_filename),
+            arch_microkernels_cmake,
+        )
+
+    overwrite_if_changed(
+        os.path.join(cmake_gen_dir, 'microkernels.cmake'), microkernels_cmake
+    )
 
 
 if __name__ == '__main__':

@@ -15,7 +15,7 @@ extern "C" {
 #endif
 
 
-#define DECLARE_PAD_UKERNEL_FUNCTION(fn_name) \
+#define XNN_PAD_UKERNEL(arch_flags, fn_name, tile_size) \
   XNN_INTERNAL void fn_name(                  \
     size_t rows,                              \
     size_t channels,                          \
@@ -26,11 +26,8 @@ extern "C" {
     void* output,                             \
     size_t output_stride,                     \
     const uint32_t fill_pattern);
-
-DECLARE_PAD_UKERNEL_FUNCTION(xnn_xx_pad_ukernel_p4__scalar_u16)
-DECLARE_PAD_UKERNEL_FUNCTION(xnn_xx_pad_ukernel_p16__neon_u16)
-DECLARE_PAD_UKERNEL_FUNCTION(xnn_xx_pad_ukernel_p16__sse2_u16)
-DECLARE_PAD_UKERNEL_FUNCTION(xnn_xx_pad_ukernel_p16__wasmsimd_u16)
+#include "src/xx-pad/xx-pad.h"
+#undef XNN_PAD_UKERNEL
 
 
 #ifdef __cplusplus

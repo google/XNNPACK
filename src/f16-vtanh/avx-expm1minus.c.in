@@ -22,6 +22,11 @@ $SIMD_TILE = BATCH_TILE // 8
 #include "xnnpack/microparams.h"
 #include "xnnpack/vunary.h"
 
+$COEFS = {
+$  3: "0x1.560722p+0f", 
+$  2: "0x1.01E2A2p+1f",
+$}
+
 $POLY_SUFFIX = "p%dh%d%s" % (P, H, "ps" if PS else "ts")
 $DIV_SUFFIX = DIV.lower()
 $PARAMS_STRUCT = "avx_expm1minus_rr1_" + ("p%dh%d" % (P, H))
@@ -37,18 +42,27 @@ void xnn_f16_vtanh_ukernel__${ISA}_expm1minus_rr1_${POLY_SUFFIX}_${DIV_SUFFIX}_u
   assert(input != NULL);
   assert(output != NULL);
 
-  const __m128i vsign_mask = _mm_load_si128((const __m128i*) params->${PARAMS_STRUCT}.sign_mask);
-  const __m256 vsat_cutoff = _mm256_load_ps(params->${PARAMS_STRUCT}.sat_cutoff);
-  const __m256 vlog2e = _mm256_load_ps(params->${PARAMS_STRUCT}.log2e);
-  const __m256 vmagic_bias = _mm256_load_ps(params->${PARAMS_STRUCT}.magic_bias);
-  const __m256 vminus_ln2 = _mm256_load_ps(params->${PARAMS_STRUCT}.minus_ln2);
+  const __m128i vsign_mask = _mm_set1_epi16(UINT16_C(0x8000));
+  const __m256 vsat_cutoff = _mm256_set1_ps(-0x1.208000p+2f);
+  const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
+  const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp+22f);
+  const __m256 vminus_ln2 = _mm256_set1_ps(-0x1.62E430p-1f);
+  XNN_FORCE_REALIZATION(vsign_mask);
+  XNN_FORCE_REALIZATION(vsat_cutoff);
+  XNN_FORCE_REALIZATION(vlog2e);
+  XNN_FORCE_REALIZATION(vmagic_bias);
+  XNN_FORCE_REALIZATION(vminus_ln2);
   $for i in reversed(range(2, P+1)):
-    const __m256 vc${i} = _mm256_load_ps(params->${PARAMS_STRUCT}.c${i});
+    const __m256 vc${i} = _mm256_set1_ps(${COEFS[i]});
+    XNN_FORCE_REALIZATION(vc${i});
   $if P != H + 1:
-    const __m256 vminus_one = _mm256_load_ps(params->${PARAMS_STRUCT}.minus_one);
-  const __m256 vtwo = _mm256_load_ps(params->${PARAMS_STRUCT}.two);
+    const __m256 vminus_one = _mm256_set1_ps(-1.0f);
+    XNN_FORCE_REALIZATION(vminus_one);
+  const __m256 vtwo = _mm256_set1_ps(2.0f);
+  XNN_FORCE_REALIZATION(vtwo);
   $if P == H + 1:
-    const __m256 vminus_one = _mm256_load_ps(params->${PARAMS_STRUCT}.minus_one);
+    const __m256 vminus_one = _mm256_set1_ps(-1.0f);
+    XNN_FORCE_REALIZATION(vminus_one);
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;

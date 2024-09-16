@@ -468,7 +468,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qc4w(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f16_qc4w_minmax_params params;
+  struct xnn_f16_qc4w_minmax_params params;
   if XNN_LIKELY(gemm_config->init.f16_qc4w != NULL) {
     gemm_config->init.f16_qc4w(&params, fp16_output_min, fp16_output_max, kernel_zero_point);
   }
@@ -597,7 +597,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f16_qb4w_minmax_params params;
+  struct xnn_f16_qb4w_minmax_params params;
   if XNN_LIKELY(gemm_config->init.f16_qb4w != NULL) {
     gemm_config->init.f16_qb4w(&params, fp16_output_min, fp16_output_max, kernel_zero_point, block_size);
   }
@@ -689,7 +689,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc4w(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f32_qc4w_minmax_params params;
+  struct xnn_f32_qc4w_minmax_params params;
   if XNN_LIKELY(gemm_config->init.f32_qc4w != NULL) {
     gemm_config->init.f32_qc4w(&params, output_min, output_max, kernel_zero_point);
   }
@@ -910,7 +910,7 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qb4w(
     }
   }
 
-  union xnn_f32_qb4w_minmax_params params;
+  struct xnn_f32_qb4w_minmax_params params;
   if XNN_LIKELY(gemm_config->init.f32_qb4w != NULL) {
     gemm_config->init.f32_qb4w(&params, output_min, output_max, kernel_zero_point, block_size);
   }
@@ -1259,7 +1259,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc4w(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f32_qc4w_minmax_params params;
+  struct xnn_f32_qc4w_minmax_params params;
   if XNN_LIKELY(gemm_config->init.f32_qc4w != NULL) {
     gemm_config->init.f32_qc4w(&params, output_min, output_max, kernel_zero_point);
   }
@@ -1743,7 +1743,7 @@ static enum xnn_status reshape_fully_connected_nc(
   const bool is_qp8_ukernel = fully_connected_op->type ==
                               xnn_operator_type_fully_connected_nc_qp8_f32_qc4w;
 
-  fully_connected_op->context.gemm = (struct gemm_context){
+  fully_connected_op->context.gemm.gemm.gemm = (struct gemm_context){
       .k_scaled = input_channels << log2_input_element_size,
       .w_stride = fully_connected_op->weights_stride,
       .a_stride = is_qp8_ukernel ? xnn_x8_packq_f32qp8_packed_offset(
@@ -1762,8 +1762,8 @@ static enum xnn_status reshape_fully_connected_nc(
       .kr = fully_connected_op->ukernel.gemm.kr,
       .sr = fully_connected_op->ukernel.gemm.sr,
   };
-  memcpy(&fully_connected_op->context.gemm.params, params, params_size);
-  fully_connected_op->context.gemm.fused_params = &fully_connected_op->context.gemm.params;
+  memcpy(&fully_connected_op->context.gemm.gemm.gemm.params, params, params_size);
+  fully_connected_op->context.gemm.gemm.gemm.fused_params = &fully_connected_op->context.gemm.gemm.gemm.params;
 
   size_t nc = output_channels;
   const size_t num_threads = pthreadpool_get_threads_count(threadpool);
@@ -2110,9 +2110,9 @@ static enum xnn_status setup_fully_connected_nc(
       break;
   }
 
-  fully_connected_op->context.gemm.a = input;
-  fully_connected_op->context.gemm.c = output;
-  fully_connected_op->context.gemm.quantization_params = quantization_params;
+  fully_connected_op->context.gemm.gemm.gemm.a = input;
+  fully_connected_op->context.gemm.gemm.gemm.c = output;
+  fully_connected_op->context.gemm.gemm.gemm.quantization_params = quantization_params;
 
   fully_connected_op->state = xnn_run_state_ready;
 

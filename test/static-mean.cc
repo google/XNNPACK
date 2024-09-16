@@ -169,9 +169,9 @@ TEST_P(MeanTestF16, matches_operator_api) {
 
   xnn_operator_t op = nullptr;
 
-  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-  std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
+  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
+  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   uint32_t flags = keep_dims ? XNN_FLAG_KEEP_DIMS : 0;
   // Call operator API.
@@ -242,8 +242,8 @@ TEST_P(MeanTestF16, matches_operator_api) {
 
   // Check outputs match.
   for (size_t i = 0; i < operator_output.size(); i++) {
-    float sub_out = xnn_float16_to_float(subgraph_output[i]);
-    float op_out = xnn_float16_to_float(operator_output[i]);
+    float sub_out = subgraph_output[i];
+    float op_out = operator_output[i];
     ASSERT_NEAR(sub_out, op_out, std::abs(0.05f * std::min(sub_out, op_out)));
   }
 }

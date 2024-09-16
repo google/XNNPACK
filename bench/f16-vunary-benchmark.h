@@ -95,12 +95,11 @@ void f16_vunary_benchmark(benchmark::State& state,
   auto f32rng =
       std::bind(std::uniform_real_distribution<float>(range_min, range_max),
                 std::ref(rng));
-  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
 
   std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> x(num_elements);
   std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> y(num_elements);
-  std::generate(x.begin(), x.end(), std::ref(f16rng));
-  std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
+  std::generate(x.begin(), x.end(), f32rng);
+  std::fill(y.begin(), y.end(), std::nanf(""));
 
   UKernelParams params;
   if (init_params != nullptr) {

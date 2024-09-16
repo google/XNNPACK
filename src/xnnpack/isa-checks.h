@@ -22,14 +22,18 @@
     return hardware_config != nullptr && hardware_config->FLAG; \
 }()
 
-template <typename T>
-size_t get_batch_scale() {
+inline size_t get_batch_scale(size_t element_size) {
 #if XNN_ARCH_RISCV
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  return hardware_config ? std::max<size_t>(1, hardware_config->vlenb / sizeof(T)) : 1;
+  return hardware_config ? std::max<size_t>(1, hardware_config->vlenb / element_size) : 1;
 #else
   return 1;
 #endif
+}
+
+template <typename T>
+size_t get_batch_scale() {
+  return get_batch_scale(sizeof(T));
 }
 
 #define TEST_REQUIRES_HWCONFIG_FLAG_NONE() \
@@ -312,13 +316,13 @@ size_t get_batch_scale() {
   #define TEST_REQUIRES_ARM_NEON_DOT_FP16_ARITH do {} while (0)
 #endif
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_ARM64
   #define TEST_REQUIRES_ARM_NEON_I8MM_VALUE XNN_TEST_HWCONFIG_FLAG(use_arm_neon_i8mm)
   #define TEST_REQUIRES_ARM_NEON_I8MM TEST_REQUIRES_HWCONFIG_FLAG(use_arm_neon_i8mm)
 #else
   #define TEST_REQUIRES_ARM_NEON_I8MM_VALUE (false)
   #define TEST_REQUIRES_ARM_NEON_I8MM do {} while (0)
-#endif
+#endif  // XNN_ARCH_ARM64
 
 #if XNN_ARCH_RISCV
   #define TEST_REQUIRES_RISCV_VECTOR_VALUE XNN_TEST_HWCONFIG_FLAG(use_riscv_vector)

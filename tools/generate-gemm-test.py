@@ -895,7 +895,7 @@ def main(args):
     test_outputs = collections.defaultdict(str)
     bench_outputs = benches
 
-    isa_hierarchy = xnncommon._ISA_HIERARCHY_MAP
+    isa_hierarchy = xnncommon.isa_hierarchy_map()
 
     # Cached `CreateTests` functions.
     idx_from_create_tests_hash = collections.defaultdict(

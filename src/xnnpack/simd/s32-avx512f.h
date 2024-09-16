@@ -23,7 +23,7 @@ typedef __m512i xnn_simd_s32_t;
 #define xnn_simd_bytes_s32 (xnn_simd_size_s32 * sizeof(int32_t))
 
 #define XNN_SIMD_CONST_S32(var, val) \
-  const xnn_simd_s32_t var = _mm_set1_epi32(val);
+  const xnn_simd_s32_t var = _mm512_set1_epi32(val);
 
 // Arithmetic operations.
 
@@ -40,6 +40,11 @@ static XNN_INLINE xnn_simd_s32_t xnn_max_s32(xnn_simd_s32_t a,
 static XNN_INLINE xnn_simd_s32_t xnn_min_s32(xnn_simd_s32_t a,
                                              xnn_simd_s32_t b) {
   return _mm512_min_epi32(a, b);
+}
+
+static XNN_INLINE xnn_simd_s32_t xnn_sub_s32(xnn_simd_s32_t a,
+                                             xnn_simd_s32_t b) {
+  return _mm512_sub_epi32(a, b);
 }
 
 // Load/store operations.
@@ -90,6 +95,13 @@ static XNN_INLINE void xnn_store_tail_s32(int32_t* output, xnn_simd_s32_t v,
   const __mmask16 vmask =
       _cvtu32_mask16((uint32_t)((UINT32_C(1) << num_elements) - UINT32_C(1)));
   _mm512_mask_storeu_epi32(output, vmask, v);
+}
+
+// Conversion operations.
+
+static XNN_INLINE __m512
+xnn_cvt_f32_s32(xnn_simd_s32_t a) {
+  return _mm512_cvtepi32_ps(a);
 }
 
 #endif  // __XNNPACK_SRC_XNNPACK_SIMD_S32_AVX512F_H_

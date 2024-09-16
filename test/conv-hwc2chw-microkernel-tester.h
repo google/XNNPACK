@@ -409,10 +409,10 @@ class ConvHWC2CHWMicrokernelTester {
     std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> packed_weights((input_channels() * kernel_height() * kernel_width() + 1) * packed_output_channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-      std::generate(kernel.begin(), kernel.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-      std::generate(bias.begin(), bias.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+      std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
+      std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+      std::fill(output.begin(), output.end(), std::nanf(""));
       std::fill(packed_weights.begin(), packed_weights.end(), 0);
 
       xnn_pack_f16_dconv_oki_w(
@@ -420,14 +420,16 @@ class ConvHWC2CHWMicrokernelTester {
         input_channels(),
         output_channels_tile(),
         kernel_height(), kernel_width(),
-        kernel.data(), bias.data(), packed_weights.data(), nullptr);
+        reinterpret_cast<const uint16_t*>(kernel.data()), 
+        reinterpret_cast<const uint16_t*>(bias.data()), 
+        reinterpret_cast<uint16_t*>(packed_weights.data()), nullptr);
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t oy = 0; oy < output_height(); oy++) {
           for (size_t ox = 0; ox < output_width(); ox++) {
             for (size_t oc = 0; oc < output_channels(); oc++) {
-              float acc = xnn_float16_to_float(bias[oc]);
+              float acc = bias[oc];
               for (size_t ky = 0; ky < kernel_height(); ky++) {
                 const size_t iy = oy * subsampling_height() + ky - padding_top();
                 if (iy < input_height()) {
@@ -436,8 +438,8 @@ class ConvHWC2CHWMicrokernelTester {
                     if (ix < input_width()) {
                       for (size_t ic = 0; ic < input_channels(); ic++) {
                         acc +=
-                          xnn_float16_to_float(input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + ic]) *
-                          xnn_float16_to_float(kernel[((oc * kernel_height() + ky) * kernel_width() + kx) * input_channels() + ic]);
+                          input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + ic] *
+                          kernel[((oc * kernel_height() + ky) * kernel_width() + kx) * input_channels() + ic];
                       }
                     }
                   }
@@ -453,8 +455,8 @@ class ConvHWC2CHWMicrokernelTester {
       const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
       const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
       const float accumulated_range = accumulated_max - accumulated_min;
-      const float output_min = xnn_float16_to_float(xnn_float16_from_float(accumulated_min + accumulated_range / 255.0f * float(qmin())));
-      const float output_max = xnn_float16_to_float(xnn_float16_from_float(accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
+      const float output_min = xnn_float16(accumulated_min + accumulated_range / 255.0f * float(qmin()));
+      const float output_max = xnn_float16(accumulated_max - accumulated_range / 255.0f * float(255 - qmax()));
 
       // Clamp reference results.
       for (float& value : output_ref) {
@@ -463,7 +465,7 @@ class ConvHWC2CHWMicrokernelTester {
 
       // Prepare parameters.
       xnn_f16_minmax_params params;
-      init_params(&params, xnn_float16_from_float(output_min), xnn_float16_from_float(output_max));
+      init_params(&params, output_min, output_max);
 
       // Call optimized micro-kernel.
       conv(
@@ -480,13 +482,13 @@ class ConvHWC2CHWMicrokernelTester {
         for (size_t y = output_y_start(); y < output_y_end(); y++) {
           for (size_t x = 0; x < output_width(); x++) {
             for (size_t c = 0; c < output_channels(); c++) {
-              EXPECT_GE(xnn_float16_to_float(output[((i * output_channels() + c) * output_height() + y) * output_width() + x]), output_min)
+              EXPECT_GE(output[((i * output_channels() + c) * output_height() + y) * output_width() + x], output_min)
                 << "(x, y) = (" << x << ", " << y << "), channel = " << c;
-              EXPECT_LE(xnn_float16_to_float(output[((i * output_channels() + c) * output_height() + y) * output_width() + x]), output_max)
+              EXPECT_LE(output[((i * output_channels() + c) * output_height() + y) * output_width() + x], output_max)
                 << "(x, y) = (" << x << ", " << y << "), channel = " << c;
               EXPECT_NEAR(
                   output_ref[((i * output_channels() + c) * output_height() + y) * output_width() + x],
-                  xnn_float16_to_float(output[((i * output_channels() + c) * output_height() + y) * output_width() + x]),
+                  output[((i * output_channels() + c) * output_height() + y) * output_width() + x],
                   std::max(1.0e-4f, 1.0e-2f * std::abs(output_ref[((i * output_channels() + c) * output_height() + y) * output_width() + x])))
                 << "(x, y) = (" << x << ", " << y << "), channel = " << c;
             }

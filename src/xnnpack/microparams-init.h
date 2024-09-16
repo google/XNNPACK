@@ -234,8 +234,18 @@ XNN_INTERNAL size_t xnn_init_f16_f32acc_scale_scalar_params(
   float scale);
 
 XNN_INTERNAL size_t xnn_init_f32_scale_scalar_params(
-  union xnn_f32_scale_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f32_scale_params params[XNN_MIN_ELEMENTS(1)],
   float scale);
+
+#define DECLARE_INIT_QS8_MEAN_MINMAX_PARAMS_FUNCTION(fn_name)     \
+  XNN_INTERNAL size_t fn_name(                                    \
+    struct xnn_qs8_mean_minmax_params params[XNN_MIN_ELEMENTS(1)], \
+    float scale,                                                  \
+    int32_t num_elements,                                         \
+    int8_t input_zero_point,                                      \
+    int8_t output_zero_point);
+
+DECLARE_INIT_QS8_MEAN_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mean_minmax_scalar_params)
 
 XNN_INTERNAL size_t xnn_init_f16_scaleminmax_scalar_params(
   struct xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -294,17 +304,17 @@ XNN_INTERNAL void xnn_update_f32_gavgpool_params(
 
 
 XNN_INTERNAL size_t xnn_init_s8_minmax_scalar_params(
-  union xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_min,
   int8_t output_max);
 
 XNN_INTERNAL size_t xnn_init_u8_minmax_scalar_params(
-  union xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_u8_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t output_min,
   uint8_t output_max);
 
 XNN_INTERNAL size_t xnn_init_bf16_minmax_scalar_params(
-  union xnn_bf16_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_bf16_minmax_params params[XNN_MIN_ELEMENTS(1)],
   xnn_bfloat16 output_min,
   xnn_bfloat16 output_max);
 
@@ -321,26 +331,26 @@ XNN_INTERNAL size_t xnn_init_f32_minmax_scalar_params(
 
 
 XNN_INTERNAL size_t xnn_init_f16_qc4w_minmax_scalar_params(
-  union xnn_f16_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f16_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
   xnn_float16 output_min,
   xnn_float16 output_max,
   uint8_t kernel_zero_point);
 
 XNN_INTERNAL size_t xnn_init_f16_qb4w_minmax_scalar_params(
-  union xnn_f16_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f16_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
   xnn_float16 output_min,
   xnn_float16 output_max,
   uint8_t kernel_zero_point,
   size_t blocksize);
 
 XNN_INTERNAL size_t xnn_init_f32_qc4w_minmax_scalar_params(
-  union xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f32_qc4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float output_min,
   float output_max,
   uint8_t kernel_zero_point);
 
 XNN_INTERNAL size_t xnn_init_f32_qb4w_minmax_scalar_params(
-  union xnn_f32_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f32_qb4w_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float output_min,
   float output_max,
   uint8_t kernel_zero_point,
@@ -371,34 +381,6 @@ DECLARE_INIT_QU8_HSWISH_PARAMS_FUNCTION(xnn_init_qu8_hswish_scalar_params)
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   DECLARE_INIT_QU8_HSWISH_PARAMS_FUNCTION(xnn_init_qu8_hswish_sse2_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-
-#define DECLARE_INIT_F16_TANH_PARAMS_FUNCTION(fn_name)      \
-  XNN_INTERNAL size_t fn_name(                              \
-    union xnn_f16_tanh_params params[XNN_MIN_ELEMENTS(1)]);
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F16_TANH_PARAMS_FUNCTION(xnn_init_f16_tanh_avx_expm1minus_rr1_p3h2_params)
-  DECLARE_INIT_F16_TANH_PARAMS_FUNCTION(xnn_init_f16_tanh_avx_polynomial_p19h9t2_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-
-#define DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(fn_name)      \
-  XNN_INTERNAL size_t fn_name(                              \
-    union xnn_f32_tanh_params params[XNN_MIN_ELEMENTS(1)]);
-
-DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_scalar_expm1minus_rr1_lut8_p4h3_params)
-DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_scalar_expm1minus_rr1_p6h5_params)
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_lut8_p4h3_abs_params)
-  DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_abs_params)
-  DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_lut8_p4h3_nabs_params)
-  DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_wasmsimd_expm1minus_rr1_p6h5_nabs_params)
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_neon_expm1minus_rr1_lut8_p4h3_params)
-  DECLARE_INIT_F32_TANH_PARAMS_FUNCTION(xnn_init_f32_tanh_neon_expm1minus_rr1_p6h5_params)
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 XNN_INTERNAL size_t xnn_init_f16_elu_scalar_params(
   struct xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)],
@@ -435,7 +417,7 @@ XNN_INTERNAL size_t xnn_init_qu8_lrelu_scalar_params(
   uint8_t output_zero_point);
 
 XNN_INTERNAL size_t xnn_init_qs8_add_minmax_scalar_params(
-  union xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t x_zero_point,
   int8_t y_zero_point,
   int8_t output_zero_point,
@@ -445,7 +427,7 @@ XNN_INTERNAL size_t xnn_init_qs8_add_minmax_scalar_params(
   int8_t output_max);
 
 XNN_INTERNAL size_t xnn_init_qu8_add_minmax_scalar_params(
-  union xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
   uint8_t x_zero_point,
   uint8_t y_zero_point,
   uint8_t output_zero_point,
@@ -507,6 +489,11 @@ XNN_INTERNAL size_t xnn_init_f32_qu8_cvt_scalar_params(
   uint8_t zero_point,
   uint8_t output_min,
   uint8_t output_max);
+
+XNN_INTERNAL size_t xnn_init_s32_f32_cvt_scalar_params(
+  struct xnn_s32_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
+  int32_t num_elements,
+  int8_t zero_point);
 
 XNN_INTERNAL size_t xnn_init_qs8_cvt_scalar_params(
   struct xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
