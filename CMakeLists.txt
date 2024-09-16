@@ -79,7 +79,7 @@ ELSEIF(CMAKE_GENERATOR MATCHES "^Visual Studio " AND CMAKE_GENERATOR_PLATFORM)
   ELSEIF(CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
     SET(XNNPACK_TARGET_PROCESSOR "arm64")
   ELSEIF(CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64EC")
-    SET(XNNPACK_TARGET_PROCESSOR "arm64ec")
+    SET(XNNPACK_TARGET_PROCESSOR "arm64")
   ELSE()
     MESSAGE(FATAL_ERROR "Unsupported Visual Studio architecture \"${CMAKE_GENERATOR_PLATFORM}\"")
   ENDIF()
@@ -106,10 +106,16 @@ OPTION(XNNPACK_ENABLE_ARM_FP16_VECTOR "Build XNNPACK with ARM FP16 (FP16 data pr
 OPTION(XNNPACK_ENABLE_ARM_BF16 "Build XNNPACK with ARM BF16 (BFLOAT16) micro-kernels" ON)
 OPTION(XNNPACK_ENABLE_ARM_DOTPROD "Build XNNPACK with ARM DotProd (integer dot product) micro-kernels" ON)
 OPTION(XNNPACK_ENABLE_ARM_I8MM "Build XNNPACK with ARM I8MM (8-bit integer matrix multiply accumulate) micro-kernels" ON)
-IF(CMAKE_C_COMPILER_ID STREQUAL "Clang")
-  IF(CMAKE_C_COMPILER_VERSION VERSION_LESS "11")
-    SET(XNNPACK_ENABLE_ARM_I8MM OFF)
-  ENDIF()
+IF(NOT XNNPACK_TARGET_PROCESSOR MATCHES "arm(64)?")
+  SET(XNNPACK_ENABLE_ARM_FP16_SCALAR OFF)
+  SET(XNNPACK_ENABLE_ARM_FP16_VECTOR OFF)
+  SET(XNNPACK_ENABLE_ARM_BF16 OFF)
+  SET(XNNPACK_ENABLE_ARM_DOTPROD OFF)
+ENDIF()
+IF(NOT XNNPACK_TARGET_PROCESSOR STREQUAL "arm64")
+  SET(XNNPACK_ENABLE_ARM_I8MM OFF)
+ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_C_COMPILER_VERSION VERSION_LESS "11")
+  SET(XNNPACK_ENABLE_ARM_I8MM OFF)
 ENDIF()
 OPTION(XNNPACK_ENABLE_RISCV_VECTOR "Build XNNPACK with RISC-V Vector micro-kernels" ON)
 OPTION(XNNPACK_ENABLE_VSX "Build XNNPACK with VSX Vector micro-kernels for Power" ON)
@@ -124,12 +130,15 @@ ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "Clang")
   ENDIF()
 ENDIF()
 OPTION(XNNPACK_ENABLE_AVXVNNIINT8 "Build XNNPACK with AVX-VNNI-INT8 micro-kernels" ON)
+IF(CMAKE_SYSTEM_NAME MATCHES "^(Android|Darwin|iOS)$")
+  SET(XNNPACK_ENABLE_AVXVNNIINT8 OFF)
+ENDIF()
 IF(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-  IF(CMAKE_C_COMPILER_VERSION VERSION_LESS "13")
+  IF(CMAKE_C_COMPILER_VERSION VERSION_LESS "17")
     SET(XNNPACK_ENABLE_AVXVNNIINT8 OFF)
   ENDIF()
 ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "Clang")
-  IF(CMAKE_C_COMPILER_VERSION VERSION_LESS "16")
+  IF(CMAKE_C_COMPILER_VERSION VERSION_LESS "17")
     SET(XNNPACK_ENABLE_AVXVNNIINT8 OFF)
   ENDIF()
 ENDIF()
@@ -519,9 +528,6 @@ IF(XNNPACK_TARGET_PROCESSOR STREQUAL "arm")
   IF(XNNPACK_ENABLE_ARM_DOTPROD AND XNNPACK_ENABLE_ARM_FP16_VECTOR)
     LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONDOTFP16ARITH_MICROKERNEL_SRCS})
   ENDIF()
-  IF(XNNPACK_ENABLE_ARM_I8MM)
-    LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONI8MM_MICROKERNEL_SRCS})
-  ENDIF()
   LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_ARMSIMD32_MICROKERNEL_SRCS})
   LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_NEON_MICROKERNEL_SRCS})
   LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_NEONFP16_MICROKERNEL_SRCS})
@@ -541,9 +547,6 @@ IF(XNNPACK_TARGET_PROCESSOR STREQUAL "arm")
   ENDIF()
   IF(XNNPACK_ENABLE_ARM_DOTPROD)
     LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_NEONDOT_MICROKERNEL_SRCS})
-  ENDIF()
-  IF(XNNPACK_ENABLE_ARM_I8MM)
-    LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_NEONI8MM_MICROKERNEL_SRCS})
   ENDIF()
   IF(XNNPACK_ENABLE_ASSEMBLY)
     LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_AARCH32_ASM_MICROKERNEL_SRCS})
@@ -572,7 +575,6 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^arm64")
     LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONDOTFP16ARITH_MICROKERNEL_SRCS})
   ENDIF()
   IF(XNNPACK_ENABLE_ARM_I8MM)
-    LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONI8MM_AARCH64_MICROKERNEL_SRCS})
     LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_NEONI8MM_MICROKERNEL_SRCS})
   ENDIF()
   LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_NEON_MICROKERNEL_SRCS})
@@ -599,7 +601,6 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^arm64")
     LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_NEONDOT_AARCH64_MICROKERNEL_SRCS})
   ENDIF()
   IF(XNNPACK_ENABLE_ARM_I8MM)
-    LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_NEONI8MM_AARCH64_MICROKERNEL_SRCS})
     LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_NEONI8MM_MICROKERNEL_SRCS})
   ENDIF()
   IF(XNNPACK_ENABLE_ASSEMBLY)
@@ -780,8 +781,8 @@ IF(XNNPACK_BUILD_LIBRARY)
   TARGET_LINK_LIBRARIES(operator-run PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(operator-utils PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(subgraph PRIVATE xnnpack-base allocator logging memory mutex operators operator-run)
-  TARGET_LINK_LIBRARIES(XNNPACK PRIVATE allocator cache hardware-config indirection logging memory microkernel-utils microparams-init mutex normalization operators operator-run operator-utils packing microkernels-prod subgraph)
-  TARGET_LINK_LIBRARIES(XNNPACK PUBLIC xnnpack-base)
+  TARGET_LINK_LIBRARIES(XNNPACK PRIVATE xnnpack-base allocator cache hardware-config indirection logging memory microkernel-utils microparams-init mutex normalization operators operator-run operator-utils packing microkernels-prod subgraph)
+  TARGET_LINK_LIBRARIES(XNNPACK PUBLIC pthreadpool)
   SET_TARGET_PROPERTIES(XNNPACK PROPERTIES C_EXTENSIONS YES)
 ENDIF()
 IF(NOT MSVC)
@@ -809,7 +810,6 @@ IF(XNNPACK_TARGET_PROCESSOR STREQUAL "arm")
   SET_PROPERTY(SOURCE ${ALL_NEONFP16ARITH_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+fp16 -mfpu=neon-fp-armv8 ")
   SET_PROPERTY(SOURCE ${ALL_NEONBF16_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+bf16 -mfpu=neon-fp-armv8 ")
   SET_PROPERTY(SOURCE ${ALL_NEONDOT_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+dotprod -mfpu=neon-fp-armv8 ")
-  SET_PROPERTY(SOURCE ${ALL_NEONI8MM_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+i8mm+fp16 -mfpu=neon-fp-armv8 ")
   SET_PROPERTY(SOURCE ${ALL_AARCH32_ASM_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -march=armv8.2-a+dotprod+fp16 -mfpu=neon-fp-armv8 ")
   # Workground the neon detection bug in ARM v8
   # Related links:
@@ -878,7 +878,7 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^x86(_64)?$")
       SET_PROPERTY(SOURCE ${ALL_FMA3_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mno-avx2 ")
       SET_PROPERTY(SOURCE ${ALL_AVX2_MICROKERNEL_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx2 ")
       SET_PROPERTY(SOURCE ${ALL_AVXVNNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx2 -clang:-mavxvnni ")
-      SET_PROPERTY(SOURCE ${ALL_AVXVNNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx2 -clang:-mavxvnniint8 ")
+      SET_PROPERTY(SOURCE ${ALL_AVXVNNIINT8_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx2 -clang:-mavxvnniint8 ")
       SET_PROPERTY(SOURCE ${ALL_AVX256SKX_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx512f -clang:-mavx512cd -clang:-mavx512bw -clang:-mavx512dq -clang:-mavx512vl ")
       SET_PROPERTY(SOURCE ${ALL_AVX256VNNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx512f -clang:-mavx512cd -clang:-mavx512bw -clang:-mavx512dq -clang:-mavx512vl -clang:-mavx512vnni ")
       SET_PROPERTY(SOURCE ${ALL_AVX256VNNIGFNI_MICROKERNEL_SRCS} APPEND_STRIDE PROPERTY COMPILE_FLAGS " -clang:-mf16c -clang:-mfma -clang:-mavx512f -clang:-mavx512cd -clang:-mavx512bw -clang:-mavx512dq -clang:-mavx512vl -clang:-mavx512vnni -clang:-mgfni ")
@@ -1240,11 +1240,13 @@ IF(XNNPACK_BUILD_TESTS)
 
   # ---[ Launch heavy tests first.
   SET(SHARDED_TESTS
-    f32-avgpool-minmax
-    f32-maxpool-minmax
-    f32-pavgpool-minmax
+    avgpool-minmax
+    maxpool-minmax
     f32-vclamp
     f32-vlrelu
+    f32-rdsum
+    f32-velu
+    f32-argmaxpool
   )
   FOREACH(TEST ${SHARDED_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
@@ -1464,7 +1466,6 @@ IF(XNNPACK_BUILD_TESTS)
       cs16-bfly4
       cs16-fftr
       cs16-vsquareabs
-      f16-avgpool-minmax
       f16-conv-hwc2chw
       f16-f32acc-rdsum
       f16-f32acc-rsum
@@ -1472,8 +1473,6 @@ IF(XNNPACK_BUILD_TESTS)
       f16-gavgpool-minmax
       f16-ibilinear-chw
       f16-ibilinear
-      f16-maxpool-minmax
-      f16-pavgpool-minmax
       f16-prelu
       f16-raddstoreexpminusmax
       f16-rmax
@@ -1481,7 +1480,6 @@ IF(XNNPACK_BUILD_TESTS)
       f16-spmm-minmax
       f16-vcmul
       f16-vmulcaddc-minmax
-      f32-argmaxpool
       f32-conv-hwc
       f32-conv-hwc2chw
       f32-gavgpool-cw
@@ -1492,7 +1490,6 @@ IF(XNNPACK_BUILD_TESTS)
       f32-raddexpminusmax
       f32-raddextexp
       f32-raddstoreexpminusmax
-      f32-rdsum
       f32-rmax
       f32-rmin
       f32-rminmax
@@ -1510,9 +1507,9 @@ IF(XNNPACK_BUILD_TESTS)
       qs8-requantization
       qs8-rdsum-minmax-fp32
       qs8-rsum
+      qu8-rsum
       qs8-vhswish
       qs8-vlrelu
-      qu8-avgpool-minmax-fp32
       qu8-gavgpool-minmax-fp32
       qu8-gavgpool-minmax-rndnu
       qu8-requantization
@@ -1521,32 +1518,25 @@ IF(XNNPACK_BUILD_TESTS)
       s16-rmaxabs
       s16-window
       s8-ibilinear
-      s8-maxpool-minmax
       u32-filterbank-accumulate
       u32-filterbank-subtract
       u32-vlog
       u8-ibilinear
       u8-lut32norm
-      u8-maxpool-minmax
       u8-rmax
       x16-packw
-      x16-transpose
-      x24-transpose
       x32-packb
       x32-packw
       x32-packx
-      x32-transpose
       x32-unpool
-      x32-zerob
       x32-zip
-      x64-transpose
       x8-lut
       x8-packw
-      x8-transpose
+      qs8-packw
       x8-zip
+      xN-transpose
       xx-fill
-      xx-pad
-      xx-transposev)
+      xx-pad)
   FOREACH(TEST ${MICROKERNEL_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
@@ -1701,46 +1691,36 @@ IF(XNNPACK_BUILD_TESTS)
       f16-vsubc-minmax
       f32-vadd
       f32-vadd-minmax
-      f32-vadd-relu
       f32-vaddc
       f32-vaddc-minmax
-      f32-vaddc-relu
       f32-vcopysign
       f32-vcopysignc
       f32-vdiv
       f32-vdiv-minmax
-      f32-vdiv-relu
       f32-vdivc
       f32-vdivc-minmax
-      f32-vdivc-relu
       f32-vmax
       f32-vmaxc
       f32-vmin
       f32-vminc
       f32-vmul
       f32-vmul-minmax
-      f32-vmul-relu
       f32-vmulc
       f32-vmulc-minmax
-      f32-vmulc-relu
       f32-vprelu
       f32-vpreluc
       f32-vrpreluc
       f32-vrcopysignc
       f32-vrdivc
       f32-vrdivc-minmax
-      f32-vrdivc-relu
       f32-vrsubc
       f32-vrsubc-minmax
-      f32-vrsubc-relu
       f32-vsqrdiff
       f32-vsqrdiffc
       f32-vsub
       f32-vsub-minmax
-      f32-vsub-relu
       f32-vsubc
       f32-vsubc-minmax
-      f32-vsubc-relu
       qs8-vadd-minmax
       qs8-vaddc-minmax
       qs8-vmul-minmax-fp32
@@ -1777,6 +1757,7 @@ IF(XNNPACK_BUILD_TESTS)
       f32-f16-vcvt
       f32-qs8-vcvt
       f32-qu8-vcvt
+      s32-f32-vcvt
       qs8-f16-vcvt
       qs8-f32-vcvt
       qs8-vcvt
@@ -1785,7 +1766,7 @@ IF(XNNPACK_BUILD_TESTS)
       qu8-vcvt)
   FOREACH(TEST ${MICROKERNEL_VCVT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         vcvt-microkernel-tester
         fp16
@@ -1821,7 +1802,6 @@ IF(XNNPACK_BUILD_TESTS)
       f16-vtanh
       f32-vabs
       f32-vhswish
-      f32-velu
       f32-vgelu
       f32-vexp
       f32-vlog
@@ -2142,6 +2122,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       qs8-qc8w-gemm-fp32
       qs8-requantization
       qs8-rsum
+      qu8-rsum
       qs8-vadd
       qs8-vaddc
       qs8-vcvt
@@ -2168,15 +2149,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       u32-vlog
       u64-u32-vsqrtshift
       x16-packw
-      x16-transpose
-      x24-transpose
       x32-packw
-      x32-transpose
-      x64-transpose
       x8-lut
       x8-packq
       x8-packw
-      x8-transpose
+      xN-transposec
       xx-transposev)
   FOREACH(BENCH ${MICROKERNEL_BENCHMARKS})
     ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)

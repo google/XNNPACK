@@ -73,8 +73,7 @@ static void f16_dwconv2d_chw(benchmark::State& state,
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
-  auto f16rng = std::bind(xnn_float16_from_float, f32rng);
-
+  
   const size_t effective_kernel_height = (kernel_height - 1) * dilation + 1;
   const size_t effective_kernel_width = (kernel_width - 1) * dilation + 1;
   const size_t output_height = (input_height + padding_height - effective_kernel_height) / subsampling + 1;
@@ -85,11 +84,11 @@ static void f16_dwconv2d_chw(benchmark::State& state,
   const size_t output_size = output_height * output_width;
 
   std::vector<xnn_float16> input(inputSize * channels + 2 * XNN_EXTRA_BYTES);
-  std::generate(input.begin(), input.end(), std::ref(f16rng));
+  std::generate(input.begin(), input.end(), f32rng);
   std::vector<xnn_float16> bias(channels);
-  std::generate(bias.begin(), bias.end(), std::ref(f16rng));
+  std::generate(bias.begin(), bias.end(), f32rng);
   std::vector<xnn_float16> kernel(channels * kernel_size);
-  std::generate(kernel.begin(), kernel.end(), std::ref(f16rng));
+  std::generate(kernel.begin(), kernel.end(), f32rng);
   std::vector<xnn_float16> zero(input_width + padding_width);
 
   const size_t w_elements = (kernel_size + 1) * channels;
@@ -111,7 +110,7 @@ static void f16_dwconv2d_chw(benchmark::State& state,
   }
 
   std::vector<xnn_float16> output(o_elements * num_buffers);
-  std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+  std::fill(output.begin(), output.end(), std::nanf(""));
 
   xnn_f16_minmax_params chw_params;
   init_params(&chw_params, 0xFC00 /* -inf */, 0x7C00 /* inf */);

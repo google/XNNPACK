@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <functional>
 #include <numeric>
 #include <vector>
 
@@ -220,6 +221,20 @@ class PackBMicrokernelTester {
     }
   }
 
+  struct Kernel {
+    explicit Kernel(xnn_x32_packb_gemm_ukernel_fn packb) {
+      dispatch = [packb](const PackBMicrokernelTester& tester) { tester.Test(packb); };
+    }
+    explicit Kernel(xnn_x32_zerob_gemm_ukernel_fn zerob) {
+      dispatch = [zerob](const PackBMicrokernelTester& tester) { tester.Test(zerob); };
+    }
+    std::function<void(const PackBMicrokernelTester)> dispatch;
+  };
+
+  void Test(const Kernel& kernel) const {
+    kernel.dispatch(*this);
+  }
+
  private:
   size_t groups_{1};
   size_t channels_{1};
@@ -228,3 +243,4 @@ class PackBMicrokernelTester {
   size_t channel_round_{1};
   size_t kernel_tile_{1};
 };
+

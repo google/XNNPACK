@@ -8,7 +8,9 @@
 #include "xnnpack/microparams.h"
 
 #if XNN_ENABLE_KLEIDIAI
-#include "kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi4cxp/kai_matmul_clamp_f32_qai8dxp1x8_qsi4cxp4x8_1x4x32_neon_dotprod.h"
+  // Keep this line indented to avoid it being pulled out of the #ifdef when the
+  // sources are amalgamated.
+  #include "kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi4cxp/kai_matmul_clamp_f32_qai8dxp1x8_qsi4cxp4x8_1x4x32_neon_dotprod.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
 // Wraps the

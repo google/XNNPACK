@@ -27,8 +27,7 @@ SET(PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-aarch64-neonfma-lane-ld64.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-aarch64-neonfma-lane-ld64.c
   src/f32-spmm/gen/f32-spmm-32x2-minmax-aarch64-neonfma.c
-  src/f32-spmm/gen/f32-spmm-32x4-minmax-aarch64-neonfma.c
-  src/f32-vtanh/gen/f32-vtanh-aarch64-neonfma-expm1minus-rr1-p6h5ts-div-u16.c)
+  src/f32-spmm/gen/f32-spmm-32x4-minmax-aarch64-neonfma.c)
 
 SET(NON_PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS
   src/f32-conv-hwc/gen/f32-conv-hwc-3x3s2p0p1c3x4-aarch64-neonfma-2x1.c
@@ -151,13 +150,6 @@ SET(NON_PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-p5-div-u12.c
   src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-p5-div-u16.c
   src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-p5-div-u20.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-p5-div-u24.c
-  src/f32-vtanh/gen/f32-vtanh-aarch64-neonfma-expm1minus-rr1-lut8-p4h3ts-div-u4.c
-  src/f32-vtanh/gen/f32-vtanh-aarch64-neonfma-expm1minus-rr1-lut8-p4h3ts-div-u8.c
-  src/f32-vtanh/gen/f32-vtanh-aarch64-neonfma-expm1minus-rr1-lut8-p4h3ts-div-u12.c
-  src/f32-vtanh/gen/f32-vtanh-aarch64-neonfma-expm1minus-rr1-lut8-p4h3ts-div-u16.c
-  src/f32-vtanh/gen/f32-vtanh-aarch64-neonfma-expm1minus-rr1-p6h5ts-div-u4.c
-  src/f32-vtanh/gen/f32-vtanh-aarch64-neonfma-expm1minus-rr1-p6h5ts-div-u8.c
-  src/f32-vtanh/gen/f32-vtanh-aarch64-neonfma-expm1minus-rr1-p6h5ts-div-u12.c)
+  src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-p5-div-u24.c)
 
 SET(ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS ${PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS} + ${NON_PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS})

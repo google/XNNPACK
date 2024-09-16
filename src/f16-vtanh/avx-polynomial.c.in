@@ -21,6 +21,17 @@ $SIMD_TILE = BATCH_TILE // 8
 #include "xnnpack/microparams.h"
 #include "xnnpack/vunary.h"
 
+$COEFS = {
+$  19: "-0x1.1D841Cp-32f",
+$  17: "0x1.C4FC88p-26f",
+$  15: "-0x1.332066p-20f",
+$  13: "0x1.D1AEA2p-16f",
+$  11: "-0x1.B2782Ep-12f",
+$  9: "0x1.03CAEAp-8f",
+$  7: "-0x1.967628p-6f",
+$  5: "0x1.ABC35Cp-4f",
+$  3: "-0x1.499D08p-2f",
+$}
 
 $POLY_SUFFIX = "p%dh%dt2" % (P, H)
 $PARAMS_STRUCT = "avx_polynomial_" + POLY_SUFFIX
@@ -36,11 +47,13 @@ void xnn_f16_vtanh_ukernel__${ISA}_polynomial_${POLY_SUFFIX}_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-
-  const __m256 vneg_sat_cutoff = _mm256_load_ps(params->${PARAMS_STRUCT}.neg_sat_cutoff);
-  const __m256 vpos_sat_cutoff = _mm256_load_ps(params->${PARAMS_STRUCT}.pos_sat_cutoff);
+  const __m256 vneg_sat_cutoff = _mm256_set1_ps(-0x1.1F0000p+2f);
+  const __m256 vpos_sat_cutoff = _mm256_set1_ps(0x1.1F0000p+2f);
+  XNN_FORCE_REALIZATION(vneg_sat_cutoff);
+  XNN_FORCE_REALIZATION(vpos_sat_cutoff);
   $for i in reversed(range(3, P+1, 2)):
-    const __m256 vc${i} = _mm256_load_ps(params->${PARAMS_STRUCT}.c${i});
+    const __m256 vc${i} = _mm256_set1_ps(${COEFS[i]});
+    XNN_FORCE_REALIZATION(vc${i});
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;

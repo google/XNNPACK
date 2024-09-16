@@ -23,7 +23,7 @@ void xnn_f32_vcopysignc_ukernel__scalar_u1(
     const float* mag,
     const float* sign,
     float* output,
-    const union xnn_f32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -52,7 +52,7 @@ void xnn_f32_vcopysignc_ukernel__scalar_u2(
     const float* mag,
     const float* sign,
     float* output,
-    const union xnn_f32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -94,7 +94,7 @@ void xnn_f32_vcopysignc_ukernel__scalar_u4(
     const float* mag,
     const float* sign,
     float* output,
-    const union xnn_f32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -142,7 +142,7 @@ void xnn_f32_vcopysignc_ukernel__scalar_u8(
     const float* mag,
     const float* sign,
     float* output,
-    const union xnn_f32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params unused_params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);

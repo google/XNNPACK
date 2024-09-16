@@ -23,7 +23,7 @@ void xnn_s32_vmulc_ukernel__scalar_u1(
     const int32_t* input1,
     const int32_t* input2,
     int32_t* output,
-    const union xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int32_t) == 0);
@@ -50,7 +50,7 @@ void xnn_s32_vmulc_ukernel__scalar_u2(
     const int32_t* input1,
     const int32_t* input2,
     int32_t* output,
-    const union xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int32_t) == 0);
@@ -90,7 +90,7 @@ void xnn_s32_vmulc_ukernel__scalar_u4(
     const int32_t* input1,
     const int32_t* input2,
     int32_t* output,
-    const union xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int32_t) == 0);
@@ -136,7 +136,7 @@ void xnn_s32_vmulc_ukernel__scalar_u8(
     const int32_t* input1,
     const int32_t* input2,
     int32_t* output,
-    const union xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_s32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(int32_t) == 0);

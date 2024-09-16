@@ -105,7 +105,7 @@ TEST_F(TanhTestQU8, define)
 TEST_F(TanhTestF16, define)
 {
   std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
-  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -304,7 +304,7 @@ TEST_F(TanhTestQU8, matches_operator_api)
 TEST_F(TanhTestF16, matches_operator_api)
 {
   std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
-  std::generate(input.begin(), input.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

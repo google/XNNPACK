@@ -19,8 +19,8 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/aligned-allocator.h"
-#include "xnnpack/common.h"
 #include "xnnpack/math.h"
+#include "xnnpack/common.h"
 #include "replicable_random_device.h"
 #include "pthreadpool.h"
 
@@ -156,13 +156,13 @@ class ScaledDotProductAttentionOperatorTester {
         }
       }
 
-      std::generate(query.begin(), query.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+      std::generate(query.begin(), query.end(), [&]() { return f32dist(rng); });
       // Use a different distribution to avoid divide by 0.
-      std::generate(scale.begin(), scale.end(), [&]() { return xnn_float16_from_float(scaledist(rng)); });
-      std::generate(key.begin(), key.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-      std::generate(value.begin(), value.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-      std::generate(mask.begin(), mask.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-      std::fill(output.begin(), output.end(), UINT16_C(0x7E00) /* NaN */);
+      std::generate(scale.begin(), scale.end(), [&]() { return scaledist(rng); });
+      std::generate(key.begin(), key.end(), [&]() { return f32dist(rng); });
+      std::generate(value.begin(), value.end(), [&]() { return f32dist(rng); });
+      std::generate(mask.begin(), mask.end(), [&]() { return f32dist(rng); });
+      std::fill(output.begin(), output.end(), std::nanf(""));
 
       const size_t query_batch_stride = query_heads() *  query_tokens() * query_key_channels();
       const size_t query_head_stride = query_tokens() * query_key_channels();
@@ -181,8 +181,8 @@ class ScaledDotProductAttentionOperatorTester {
           for (size_t n = 0; n < query_tokens(); n++) {
             for (size_t k = 0; k < query_key_channels(); k++) {
               q_scaled[n * query_key_channels() + k] =
-                xnn_float16_to_float(query[b * query_batch_stride + h * query_head_stride + n * query_key_channels() + k]) *
-                xnn_float16_to_float(scale[k]);
+                query[b * query_batch_stride + h * query_head_stride + n * query_key_channels() + k] *
+                scale[k];
             }
           }
 
@@ -192,7 +192,7 @@ class ScaledDotProductAttentionOperatorTester {
               for (size_t ki = 0; ki < query_key_channels(); ki++) {
                 logits[n_0 * key_value_tokens() + n_1] +=
                   (q_scaled[n_0 * query_key_channels() + ki]) *
-                  xnn_float16_to_float(key[b * key_batch_stride + h * key_head_stride + n_1 * query_key_channels() + ki]);
+                  key[b * key_batch_stride + h * key_head_stride + n_1 * query_key_channels() + ki];
               }
               if (cap_type() == xnn_attention_logits_cap_type_tanh) {
                 // Cap and tanh.
@@ -201,7 +201,7 @@ class ScaledDotProductAttentionOperatorTester {
               }
               // Mask.
               logits[n_0 * key_value_tokens() + n_1] +=
-                xnn_float16_to_float(mask[n_0 * key_value_tokens() + n_1]);
+                mask[n_0 * key_value_tokens() + n_1];
             }
           }
 
@@ -228,7 +228,7 @@ class ScaledDotProductAttentionOperatorTester {
               for (size_t di = 0; di < value_channels(); di++) {
                 output_ref[b * output_batch_stride + h * output_head_stride + ni * value_channels() + di] +=
                     weights[ni * key_value_tokens() + nj] *
-                    xnn_float16_to_float(value[b * value_batch_stride + h * value_head_stride + nj * value_channels() + di]);
+                    value[b * value_batch_stride + h * value_head_stride + nj * value_channels() + di];
               }
             }
           }
@@ -281,7 +281,7 @@ class ScaledDotProductAttentionOperatorTester {
           for (size_t i = 0; i < query_tokens(); i++) {
             for (size_t j = 0; j < value_channels(); j++) {
               EXPECT_NEAR(output_ref[(b * query_heads() + h) * query_tokens() * value_channels() + i * value_channels() + j],
-                          xnn_float16_to_float(output[(b * query_heads() + h) * query_tokens() * value_channels() + i * value_channels() + j]),
+                          output[(b * query_heads() + h) * query_tokens() * value_channels() + i * value_channels() + j],
                           1e-2)
                   << " batch : " << b << " / "  << batch_size()
                   << " head : " << h << " / "  << query_heads()

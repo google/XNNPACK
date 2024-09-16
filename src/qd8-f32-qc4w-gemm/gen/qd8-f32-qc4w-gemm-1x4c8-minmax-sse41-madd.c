@@ -11,7 +11,6 @@
 
 #include <immintrin.h>
 
-#include <fp16/fp16.h>
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
@@ -28,7 +27,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4c8__sse41_madd(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f32_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_f32_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
@@ -53,9 +52,9 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4c8__sse41_madd(
   XNN_FORCE_REALIZATION(vmask);
   do {
     const __m128i vksum0123 = _mm_load_si128(w);
-    __m128i vsum0x0123 = _mm_mullo_epi32(vksum0123, vinput_zero_point0);
-    __m128i vacc0x01 = _mm_cvtepu32_epi64(vsum0x0123);
-    __m128i vacc0x23 = _mm_cvtepu32_epi64(_mm_castps_si128(_mm_movehl_ps(_mm_castsi128_ps(vsum0x0123), _mm_castsi128_ps(vsum0x0123))));
+    const __m128i vsum0x0123 = _mm_mullo_epi32(vksum0123, vinput_zero_point0);
+    __m128i vacc0x01 = _mm_unpacklo_epi32(vsum0x0123, _mm_setzero_si128());
+    __m128i vacc0x23 = _mm_unpackhi_epi32(vsum0x0123, _mm_setzero_si128());
     __m128i vacc1x0x01 = _mm_setzero_si128();
     __m128i vacc1x0x23 = _mm_setzero_si128();
     w = (const int32_t*) w + 4;

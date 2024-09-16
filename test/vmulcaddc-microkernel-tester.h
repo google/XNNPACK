@@ -128,31 +128,34 @@ class VMulCAddCMicrokernelTester {
     std::vector<float> y_ref(rows() * channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(scale.begin(), scale.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-      std::generate(bias.begin(), bias.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
-      std::generate(x.begin(), x.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
+      std::generate(scale.begin(), scale.end(), [&]() { return f32dist(rng); });
+      std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+      std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
       if (inplace()) {
         std::copy(x.cbegin(), x.cend(), y.begin());
       } else {
-        std::fill(y.begin(), y.end(), UINT16_C(0x7E00) /* NaN */);
+        std::fill(y.begin(), y.end(), std::nanf(""));
       }
       const xnn_float16* x_data = inplace() ? y.data() : x.data();
 
-      std::fill(packed_w.begin(), packed_w.end(), UINT16_C(0x7E00) /* NaN */);
+      std::fill(packed_w.begin(), packed_w.end(), std::nanf(""));
       xnn_pack_f16_vmulcaddc_w(channels(), channel_tile(),
-        scale.data(), bias.data(), packed_w.data(), nullptr);
+                               reinterpret_cast<const uint16_t*>(scale.data()), 
+                               reinterpret_cast<const uint16_t*>(bias.data()), 
+                               reinterpret_cast<uint16_t*>(packed_w.data()), 
+                               nullptr);
 
       // Compute reference results.
       for (size_t i = 0; i < rows(); i++) {
         for (size_t j = 0; j < channels(); j++) {
-          y_ref[i * channels() + j] = xnn_float16_to_float(x_data[i * input_stride() + j]) * xnn_float16_to_float(scale[j]) + xnn_float16_to_float(bias[j]);
+          y_ref[i * channels() + j] = x_data[i * input_stride() + j] * scale[j] + bias[j];
         }
       }
       const float accumulated_min = *std::min_element(y_ref.cbegin(), y_ref.cend());
       const float accumulated_max = *std::max_element(y_ref.cbegin(), y_ref.cend());
       const float accumulated_range = accumulated_max - accumulated_min;
-      const float y_max = xnn_float16_to_float(xnn_float16_from_float(accumulated_max - accumulated_range / 255.0f * float(255 - qmax())));
-      const float y_min = xnn_float16_to_float(xnn_float16_from_float(accumulated_min + accumulated_range / 255.0f * float(qmin())));
+      const float y_max = xnn_float16(accumulated_max - accumulated_range / 255.0f * float(255 - qmax()));
+      const float y_min = xnn_float16(accumulated_min + accumulated_range / 255.0f * float(qmin()));
 
       for (float& y_value : y_ref) {
         y_value = std::max(std::min(y_value, y_max), y_min);
@@ -160,7 +163,7 @@ class VMulCAddCMicrokernelTester {
 
       // Prepare parameters.
       xnn_f16_minmax_params params;
-      init_params(&params, xnn_float16_from_float(y_min), xnn_float16_from_float(y_max));
+      init_params(&params, y_min, y_max);
 
       // Call optimized micro-kernel.
       vmulcaddc(rows(), channels() * sizeof(xnn_float16),
@@ -172,7 +175,7 @@ class VMulCAddCMicrokernelTester {
       // Verify results.
       for (size_t i = 0; i < rows(); i++) {
         for (size_t j = 0; j < channels(); j++) {
-          EXPECT_NEAR(xnn_float16_to_float(y[i * output_stride() + j]), y_ref[i * channels() + j], std::max(1.0e-4f, std::abs(y_ref[i * channels() + j]) * 1.0e-2f))
+          EXPECT_NEAR(y[i * output_stride() + j], y_ref[i * channels() + j], std::max(1.0e-4f, std::abs(y_ref[i * channels() + j]) * 1.0e-2f))
             << "at pixel " << i << " / " << rows()
             << ", channel = " << j << " / " << channels();
         }

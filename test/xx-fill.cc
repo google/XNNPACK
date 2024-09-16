@@ -2,248 +2,185 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
-//
-// Auto-generated file. Do not edit!
-//   Specification: test/xx-fill.yaml
-//   Generator: tools/generate-fill-test.py
 
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <functional>
+#include <iomanip>
+#include <ios>
+#include <limits>
+#include <random>
+#include <vector>
 
 #include <gtest/gtest.h>
 #include "xnnpack/common.h"
 #include "xnnpack/fill.h"
 #include "xnnpack/isa-checks.h"
-#include "fill-microkernel-tester.h"
+#include "xnnpack/microfnptr.h"
+#include "replicable_random_device.h"
 
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(XX_FILL__NEON_U64, channels_eq_64) {
-    TEST_REQUIRES_ARM_NEON;
-    FillMicrokernelTester()
-      .channels(64)
-      .Test(xnn_xx_fill_ukernel__neon_u64);
+class FillMicrokernelTester {
+ public:
+  FillMicrokernelTester& rows(size_t rows) {
+    assert(rows != 0);
+    this->rows_ = rows;
+    return *this;
   }
 
-  TEST(XX_FILL__NEON_U64, channels_div_64) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 128; channels <= 192; channels += 64) {
-      FillMicrokernelTester()
-        .channels(channels)
-        .Test(xnn_xx_fill_ukernel__neon_u64);
+  size_t rows() const { return this->rows_; }
+
+  FillMicrokernelTester& channels(size_t channels) {
+    assert(channels != 0);
+    this->channels_ = channels;
+    return *this;
+  }
+
+  size_t channels() const { return this->channels_; }
+
+  FillMicrokernelTester& output_stride(size_t output_stride) {
+    assert(output_stride != 0);
+    this->output_stride_ = output_stride;
+    return *this;
+  }
+
+  size_t output_stride() const {
+    if (this->output_stride_ == 0) {
+      return channels();
+    } else {
+      return this->output_stride_;
     }
   }
 
-  TEST(XX_FILL__NEON_U64, channels_lt_64) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 1; channels < 64; channels++) {
-      FillMicrokernelTester()
-        .channels(channels)
-        .Test(xnn_xx_fill_ukernel__neon_u64);
-    }
+  FillMicrokernelTester& iterations(size_t iterations) {
+    this->iterations_ = iterations;
+    return *this;
   }
 
-  TEST(XX_FILL__NEON_U64, channels_gt_64) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t channels = 65; channels < 128; channels++) {
-      FillMicrokernelTester()
-        .channels(channels)
-        .Test(xnn_xx_fill_ukernel__neon_u64);
-    }
-  }
+  size_t iterations() const { return this->iterations_; }
 
-  TEST(XX_FILL__NEON_U64, multiple_rows) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t rows = 2; rows < 5; rows++) {
-      for (size_t channels = 1; channels < 192; channels += 15) {
-        FillMicrokernelTester()
-          .channels(channels)
-          .rows(rows)
-          .Test(xnn_xx_fill_ukernel__neon_u64);
+  void Test(xnn_fill_ukernel_fn fill) const {
+    ASSERT_GE(output_stride(), channels());
+
+    xnnpack::ReplicableRandomDevice rng;
+    auto u8rng = [&rng]() {
+      return std::uniform_int_distribution<uint32_t>(
+          0, std::numeric_limits<uint8_t>::max())(rng);
+    };
+
+    std::vector<uint8_t> output((rows() - 1) * output_stride() + channels());
+    std::vector<uint8_t> output_copy(output.size());
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(output.begin(), output.end(), std::ref(u8rng));
+      std::copy(output.cbegin(), output.cend(), output_copy.begin());
+      std::array<uint8_t, 4> fill_pattern;
+      std::generate(fill_pattern.begin(), fill_pattern.end(), std::ref(u8rng));
+      uint32_t fill_value = 0;
+      memcpy(&fill_value, fill_pattern.data(), sizeof(fill_value));
+
+      // Call optimized micro-kernel.
+      fill(rows(), channels() * sizeof(uint8_t), output.data(),
+           output_stride() * sizeof(uint8_t), fill_value);
+
+      // Verify results.
+      for (size_t i = 0; i < rows(); i++) {
+        for (size_t c = 0; c < channels(); c++) {
+          EXPECT_EQ(uint32_t(output[i * output_stride() + c]),
+                    uint32_t(fill_pattern[c % fill_pattern.size()]))
+              << "at row " << i << " / " << rows() << ", channel " << c << " / "
+              << channels() << ", fill value 0x" << std::hex << std::setw(8)
+              << std::setfill('0') << fill_value << ", output value 0x"
+              << std::hex << std::setw(8) << std::setfill('0')
+              << output[i * output_stride() + c];
+        }
+      }
+      for (size_t i = 0; i + 1 < rows(); i++) {
+        for (size_t c = channels(); c < output_stride(); c++) {
+          EXPECT_EQ(uint32_t(output[i * output_stride() + c]),
+                    uint32_t(output_copy[i * output_stride() + c]))
+              << "at row " << i << " / " << rows() << ", channel " << c << " / "
+              << channels() << ", original value 0x" << std::hex << std::setw(8)
+              << std::setfill('0') << output_copy[i * output_stride() + c]
+              << ", output value 0x" << std::hex << std::setw(8)
+              << std::setfill('0') << output[i * output_stride() + c];
+        }
       }
     }
   }
 
-  TEST(XX_FILL__NEON_U64, multiple_rows_with_output_stride) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t rows = 2; rows < 5; rows++) {
-      for (size_t channels = 1; channels < 192; channels += 15) {
-        FillMicrokernelTester()
-          .channels(channels)
-          .rows(rows)
-          .output_stride(193)
-          .Test(xnn_xx_fill_ukernel__neon_u64);
-      }
-    }
-  }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+ private:
+  size_t rows_{1};
+  size_t channels_{1};
+  size_t output_stride_{0};
+  size_t iterations_{15};
+};
 
+struct TestParams {
+  const char* name;
+  uint64_t arch_flags;
+  xnn_fill_ukernel_fn ukernel;
+};
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  TEST(XX_FILL__SSE2_U64, channels_eq_64) {
-    TEST_REQUIRES_X86_SSE2;
-    FillMicrokernelTester()
-      .channels(64)
-      .Test(xnn_xx_fill_ukernel__sse2_u64);
-  }
+#define XNN_FILL_UKERNEL(arch_flags, ukernel) {#ukernel, arch_flags, ukernel},
+TestParams test_params[] = {
+#include "src/xx-fill/xx-fill.h"
+};
+#undef XNN_FILL_UKERNEL
 
-  TEST(XX_FILL__SSE2_U64, channels_div_64) {
-    TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 128; channels <= 192; channels += 64) {
-      FillMicrokernelTester()
-        .channels(channels)
-        .Test(xnn_xx_fill_ukernel__sse2_u64);
-    }
-  }
+class FillTest : public testing::TestWithParam<TestParams> {};
 
-  TEST(XX_FILL__SSE2_U64, channels_lt_64) {
-    TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 1; channels < 64; channels++) {
-      FillMicrokernelTester()
-        .channels(channels)
-        .Test(xnn_xx_fill_ukernel__sse2_u64);
-    }
-  }
-
-  TEST(XX_FILL__SSE2_U64, channels_gt_64) {
-    TEST_REQUIRES_X86_SSE2;
-    for (size_t channels = 65; channels < 128; channels++) {
-      FillMicrokernelTester()
-        .channels(channels)
-        .Test(xnn_xx_fill_ukernel__sse2_u64);
-    }
-  }
-
-  TEST(XX_FILL__SSE2_U64, multiple_rows) {
-    TEST_REQUIRES_X86_SSE2;
-    for (size_t rows = 2; rows < 5; rows++) {
-      for (size_t channels = 1; channels < 192; channels += 15) {
-        FillMicrokernelTester()
-          .channels(channels)
-          .rows(rows)
-          .Test(xnn_xx_fill_ukernel__sse2_u64);
-      }
-    }
-  }
-
-  TEST(XX_FILL__SSE2_U64, multiple_rows_with_output_stride) {
-    TEST_REQUIRES_X86_SSE2;
-    for (size_t rows = 2; rows < 5; rows++) {
-      for (size_t channels = 1; channels < 192; channels += 15) {
-        FillMicrokernelTester()
-          .channels(channels)
-          .rows(rows)
-          .output_stride(193)
-          .Test(xnn_xx_fill_ukernel__sse2_u64);
-      }
-    }
-  }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  TEST(XX_FILL__WASMSIMD_U64, channels_eq_64) {
-    FillMicrokernelTester()
-      .channels(64)
-      .Test(xnn_xx_fill_ukernel__wasmsimd_u64);
-  }
-
-  TEST(XX_FILL__WASMSIMD_U64, channels_div_64) {
-    for (size_t channels = 128; channels <= 192; channels += 64) {
-      FillMicrokernelTester()
-        .channels(channels)
-        .Test(xnn_xx_fill_ukernel__wasmsimd_u64);
-    }
-  }
-
-  TEST(XX_FILL__WASMSIMD_U64, channels_lt_64) {
-    for (size_t channels = 1; channels < 64; channels++) {
-      FillMicrokernelTester()
-        .channels(channels)
-        .Test(xnn_xx_fill_ukernel__wasmsimd_u64);
-    }
-  }
-
-  TEST(XX_FILL__WASMSIMD_U64, channels_gt_64) {
-    for (size_t channels = 65; channels < 128; channels++) {
-      FillMicrokernelTester()
-        .channels(channels)
-        .Test(xnn_xx_fill_ukernel__wasmsimd_u64);
-    }
-  }
-
-  TEST(XX_FILL__WASMSIMD_U64, multiple_rows) {
-    for (size_t rows = 2; rows < 5; rows++) {
-      for (size_t channels = 1; channels < 192; channels += 15) {
-        FillMicrokernelTester()
-          .channels(channels)
-          .rows(rows)
-          .Test(xnn_xx_fill_ukernel__wasmsimd_u64);
-      }
-    }
-  }
-
-  TEST(XX_FILL__WASMSIMD_U64, multiple_rows_with_output_stride) {
-    for (size_t rows = 2; rows < 5; rows++) {
-      for (size_t channels = 1; channels < 192; channels += 15) {
-        FillMicrokernelTester()
-          .channels(channels)
-          .rows(rows)
-          .output_stride(193)
-          .Test(xnn_xx_fill_ukernel__wasmsimd_u64);
-      }
-    }
-  }
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-
-TEST(XX_FILL__SCALAR_U16, channels_eq_16) {
-  FillMicrokernelTester()
-    .channels(16)
-    .Test(xnn_xx_fill_ukernel__scalar_u16);
+TEST_P(FillTest, channels_eq_64) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  FillMicrokernelTester().channels(64).Test(GetParam().ukernel);
 }
 
-TEST(XX_FILL__SCALAR_U16, channels_div_16) {
-  for (size_t channels = 32; channels <= 48; channels += 16) {
-    FillMicrokernelTester()
-      .channels(channels)
-      .Test(xnn_xx_fill_ukernel__scalar_u16);
+TEST_P(FillTest, channels_div_64) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  for (size_t channels = 128; channels <= 192; channels += 64) {
+    FillMicrokernelTester().channels(channels).Test(GetParam().ukernel);
   }
 }
 
-TEST(XX_FILL__SCALAR_U16, channels_lt_16) {
-  for (size_t channels = 1; channels < 16; channels++) {
-    FillMicrokernelTester()
-      .channels(channels)
-      .Test(xnn_xx_fill_ukernel__scalar_u16);
+TEST_P(FillTest, channels_lt_64) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  for (size_t channels = 1; channels < 64; channels++) {
+    FillMicrokernelTester().channels(channels).Test(GetParam().ukernel);
   }
 }
 
-TEST(XX_FILL__SCALAR_U16, channels_gt_16) {
-  for (size_t channels = 17; channels < 32; channels++) {
-    FillMicrokernelTester()
-      .channels(channels)
-      .Test(xnn_xx_fill_ukernel__scalar_u16);
+TEST_P(FillTest, channels_gt_64) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  for (size_t channels = 65; channels < 128; channels++) {
+    FillMicrokernelTester().channels(channels).Test(GetParam().ukernel);
   }
 }
 
-TEST(XX_FILL__SCALAR_U16, multiple_rows) {
+TEST_P(FillTest, multiple_rows) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t rows = 2; rows < 5; rows++) {
-    for (size_t channels = 1; channels < 48; channels += 3) {
-      FillMicrokernelTester()
-        .channels(channels)
-        .rows(rows)
-        .Test(xnn_xx_fill_ukernel__scalar_u16);
+    for (size_t channels = 1; channels < 192; channels += 15) {
+      FillMicrokernelTester().channels(channels).rows(rows).Test(
+          GetParam().ukernel);
     }
   }
 }
 
-TEST(XX_FILL__SCALAR_U16, multiple_rows_with_output_stride) {
+TEST_P(FillTest, multiple_rows_with_output_stride) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t rows = 2; rows < 5; rows++) {
-    for (size_t channels = 1; channels < 48; channels += 3) {
+    for (size_t channels = 1; channels < 192; channels += 15) {
       FillMicrokernelTester()
-        .channels(channels)
-        .rows(rows)
-        .output_stride(49)
-        .Test(xnn_xx_fill_ukernel__scalar_u16);
+          .channels(channels)
+          .rows(rows)
+          .output_stride(193)
+          .Test(GetParam().ukernel);
     }
   }
 }
+
+INSTANTIATE_TEST_SUITE_P(fill, FillTest, ::testing::ValuesIn(test_params),
+                         [](const auto& info) { return info.param.name; });
