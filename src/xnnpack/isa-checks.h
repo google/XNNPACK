@@ -22,14 +22,18 @@
     return hardware_config != nullptr && hardware_config->FLAG; \
 }()
 
-template <typename T>
-size_t get_batch_scale() {
+inline size_t get_batch_scale(size_t element_size) {
 #if XNN_ARCH_RISCV
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  return hardware_config ? std::max<size_t>(1, hardware_config->vlenb / sizeof(T)) : 1;
+  return hardware_config ? std::max<size_t>(1, hardware_config->vlenb / element_size) : 1;
 #else
   return 1;
 #endif
+}
+
+template <typename T>
+size_t get_batch_scale() {
+  return get_batch_scale(sizeof(T));
 }
 
 #define TEST_REQUIRES_HWCONFIG_FLAG_NONE() \

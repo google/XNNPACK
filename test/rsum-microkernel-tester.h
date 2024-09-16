@@ -134,6 +134,40 @@ class RSumMicrokernelTester {
     }
   }
 
+  void Test(xnn_qu8_rsum_ukernel_fn rsum,
+      xnn_init_qs8_rsum_params_fn init_params = nullptr) const {
+    xnnpack::ReplicableRandomDevice rng;
+    std::uniform_int_distribution<uint32_t> u8dist(
+      std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
+
+    std::vector<uint8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
+
+      // Compute reference results.
+      // The accumulator is not initialized to zero to verify that the
+      // microkernel doesn't overwrite the output.
+      uint32_t output_init = u8dist(rng);
+      uint32_t output_ref = output_init;
+      for (size_t i = 0; i < batch_size(); i++) {
+        output_ref += uint32_t(input[i]);
+      }
+
+      // Prepare parameters
+      struct xnn_qs8_rsum_params params;
+      if (init_params) {
+        init_params(&params);
+      }
+
+      // Call optimized micro-kernel.
+      uint32_t output = output_init;
+      rsum(batch_size() * sizeof(uint8_t), input.data(), &output, &params);
+
+      // Verify results.
+      EXPECT_EQ(output_ref, output);
+    }
+  }
+
   void Test(xnn_f16_rsum_ukernel_fn rsum, xnn_init_f16_scale_params_fn init_params) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);

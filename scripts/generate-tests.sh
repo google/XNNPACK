@@ -97,47 +97,37 @@ tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b -
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f16-vrsubc-minmax --output test/f16-vrsubc-minmax.cc &
 
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f32-vadd-minmax --output test/f32-vadd-minmax.cc &
-tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f32-vadd-relu   --output test/f32-vadd-relu.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f32-vadd        --output test/f32-vadd.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f32-vcopysign   --output test/f32-vcopysign.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f32-vdiv-minmax --output test/f32-vdiv-minmax.cc &
-tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f32-vdiv-relu   --output test/f32-vdiv-relu.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f32-vdiv        --output test/f32-vdiv.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f32-vmax        --output test/f32-vmax.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f32-vmin        --output test/f32-vmin.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f32-vmul-minmax --output test/f32-vmul-minmax.cc &
-tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f32-vmul-relu   --output test/f32-vmul-relu.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f32-vmul        --output test/f32-vmul.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f32-vprelu      --output test/f32-vprelu.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f32-vsqrdiff    --output test/f32-vsqrdiff.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f32-vsub-minmax --output test/f32-vsub-minmax.cc &
-tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f32-vsub-relu   --output test/f32-vsub-relu.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f32-vsub        --output test/f32-vsub.cc &
 
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vaddc-minmax  --output test/f32-vaddc-minmax.cc &
-tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vaddc-relu    --output test/f32-vaddc-relu.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vaddc         --output test/f32-vaddc.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vcopysignc    --output test/f32-vcopysignc.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vdivc-minmax  --output test/f32-vdivc-minmax.cc &
-tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vdivc-relu    --output test/f32-vdivc-relu.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vdivc         --output test/f32-vdivc.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vmaxc         --output test/f32-vmaxc.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vminc         --output test/f32-vminc.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vmulc-minmax  --output test/f32-vmulc-minmax.cc &
-tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vmulc-relu    --output test/f32-vmulc-relu.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vmulc         --output test/f32-vmulc.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vpreluc       --output test/f32-vpreluc.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vrpreluc      --output test/f32-vrpreluc.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vrcopysignc   --output test/f32-vrcopysignc.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vrdivc-minmax --output test/f32-vrdivc-minmax.cc &
-tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vrdivc-relu   --output test/f32-vrdivc-relu.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vrdivc        --output test/f32-vrdivc.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vrsubc-minmax --output test/f32-vrsubc-minmax.cc &
-tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vrsubc-relu   --output test/f32-vrsubc-relu.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vrsubc        --output test/f32-vrsubc.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vsqrdiffc     --output test/f32-vsqrdiffc.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vsubc-minmax  --output test/f32-vsubc-minmax.cc &
-tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vsubc-relu    --output test/f32-vsubc-relu.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel f32-vsubc         --output test/f32-vsubc.cc &
 
 tools/generate-vbinary-test.py --tester VCMulMicrokernelTester --ukernel f16-vcmul --output test/f16-vcmul.cc &
@@ -220,6 +210,7 @@ tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f32-r
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f32-rminmax.yaml --output test/f32-rminmax.cc &
 
 tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/qs8-rsum.yaml --output test/qs8-rsum.cc &
+tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/qu8-rsum.yaml --output test/qu8-rsum.cc &
 tools/generate-reduce-test.py --tester RSumMicrokernelTester --spec test/f32-rsum.yaml --output test/f32-rsum.cc &
 
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/u8-rmax.yaml --output test/u8-rmax.cc &
@@ -227,20 +218,6 @@ tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/u8-rm
 tools/generate-rdsum-test.py --spec test/f16-f32acc-rdsum.yaml --output test/f16-f32acc-rdsum.cc &
 tools/generate-rdsum-test.py --spec test/f32-rdsum.yaml --output test/f32-rdsum.cc &
 tools/generate-rdsum-test.py --spec test/qs8-rdsum-minmax-fp32.yaml --output test/qs8-rdsum-minmax-fp32.cc &
-
-### Tests for Fill micro-kernels
-tools/generate-fill-test.py --spec test/xx-fill.yaml --output test/xx-fill.cc &
-
-### Tests for Pad micro-kernels
-tools/generate-pad-test.py --spec test/xx-pad.yaml --output test/xx-pad.cc &
-
-### Tests for Transpose micro-kernels
-tools/generate-transpose-test.py --spec test/x8-transpose.yaml  --output test/x8-transpose.cc &
-tools/generate-transpose-test.py --spec test/x16-transpose.yaml --output test/x16-transpose.cc &
-tools/generate-transpose-test.py --spec test/x24-transpose.yaml --output test/x24-transpose.cc &
-tools/generate-transpose-test.py --spec test/x32-transpose.yaml --output test/x32-transpose.cc &
-tools/generate-transpose-test.py --spec test/x64-transpose.yaml --output test/x64-transpose.cc &
-tools/generate-transpose-test.py --spec test/xx-transposev.yaml  --output test/xx-transposev.cc &
 
 ### Tests for LUT micro-kernels
 tools/generate-lut-test.py --spec test/x8-lut.yaml --output test/x8-lut.cc &
@@ -278,20 +255,6 @@ tools/generate-dwconv-multipass-test.py --spec test/qu8-dwconv-minmax-multipass-
 ### Tests for DWConv CHW layout micro-kernels
 tools/generate-dwconv2d-chw-test.py --spec test/f16-dwconv2d-chw.yaml --output test/f16-dwconv2d-chw.cc &
 tools/generate-dwconv2d-chw-test.py --spec test/f32-dwconv2d-chw.yaml --output test/f32-dwconv2d-chw.cc &
-
-### Tests for VConvert micro-kernels
-tools/generate-vcvt-test.py --spec test/qs8-vcvt.yaml --output test/qs8-vcvt.cc --output-bench bench/qs8-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/qu8-vcvt.yaml --output test/qu8-vcvt.cc --output-bench bench/qu8-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/qs8-f16-vcvt.yaml --output test/qs8-f16-vcvt.cc --output-bench bench/qs8-f16-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/qs8-f32-vcvt.yaml --output test/qs8-f32-vcvt.cc --output-bench bench/qs8-f32-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/qu8-f32-vcvt.yaml --output test/qu8-f32-vcvt.cc --output-bench bench/qu8-f32-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/f16-qs8-vcvt.yaml --output test/f16-qs8-vcvt.cc --output-bench bench/f16-qs8-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/f32-qs8-vcvt.yaml --output test/f32-qs8-vcvt.cc --output-bench bench/f32-qs8-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/f32-qu8-vcvt.yaml --output test/f32-qu8-vcvt.cc --output-bench bench/f32-qu8-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/f32-f16-vcvt.yaml --output test/f32-f16-vcvt.cc --output-bench bench/f32-f16-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/f16-f32-vcvt.yaml --output test/f16-f32-vcvt.cc --output-bench bench/f16-f32-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/qs16-qs8-vcvt.yaml --output test/qs16-qs8-vcvt.cc --output-bench bench/qs16-qs8-vcvt.cc &
-tools/generate-vcvt-test.py --spec test/s32-f32-vcvt.yaml --output test/s32-f32-vcvt.cc --output-bench bench/s32-f32-vcvt.cc &
 
 ### Tests for VLShift micro-kernels
 tools/generate-vlshift-test.py --spec test/i16-vlshift.yaml --output test/i16-vlshift.cc &

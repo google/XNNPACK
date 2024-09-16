@@ -1676,6 +1676,12 @@ typedef void (*xnn_qs8_rsum_ukernel_fn)(
     int32_t* output,
     const struct xnn_qs8_rsum_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+typedef void (*xnn_qu8_rsum_ukernel_fn)(
+    size_t batch,
+    const uint8_t* input,
+    uint32_t* output,
+    const struct xnn_qs8_rsum_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 // RMAX: Reduce-MAX
 
 typedef void (*xnn_rmax_ukernel_fn)(
@@ -2127,15 +2133,6 @@ typedef void (*xnn_s32_vbinary_ukernel_fn)(
     const int32_t* input_y,
     int32_t* output,
     const struct xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VBINARY: Vector BINARY elementwise with ReLU activation
-
-typedef void (*xnn_f32_vbinary_relu_ukernel_fn)(
-    size_t batch,
-    const float* input_x,
-    const float* input_y,
-    float* output,
-    const struct xnn_f32_relu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // VBINARY: Vector BINARY elementwise with Min+Max activation
 

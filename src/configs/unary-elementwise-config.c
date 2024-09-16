@@ -1093,9 +1093,10 @@ static void init_f32_rndd_config(void) {
   #elif XNN_ARCH_WASM
     f32_rndd_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndd_ukernel__scalar_libm_u4;
     f32_rndd_config.element_tile = 4;
-  #elif XNN_ARCH_RISCV
-    f32_rndd_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndd_ukernel__scalar_libm_u1;
-    f32_rndd_config.element_tile = 1;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    f32_rndd_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndd_ukernel__rvv_u4v;
+    f32_rndd_config.element_tile = hardware_config->vlenb / sizeof(float) * 4; // (VLENB/sizeof)*LMUL
   #else
     f32_rndd_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndd_ukernel__scalar_libm_u1;
     f32_rndd_config.element_tile = 1;
@@ -1143,9 +1144,10 @@ static void init_f32_rndne_config(void) {
   #elif XNN_ARCH_WASM
     f32_rndne_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndne_ukernel__scalar_libm_u4;
     f32_rndne_config.element_tile = 4;
-  #elif XNN_ARCH_RISCV
-    f32_rndne_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndne_ukernel__scalar_libm_u1;
-    f32_rndne_config.element_tile = 1;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    f32_rndne_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndne_ukernel__rvv_u4v;
+    f32_rndne_config.element_tile = hardware_config->vlenb / sizeof(float) * 4; // (VLENB/sizeof)*LMUL
   #else
     f32_rndne_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndne_ukernel__scalar_libm_u1;
     f32_rndne_config.element_tile = 1;
@@ -1193,9 +1195,10 @@ static void init_f32_rndu_config(void) {
   #elif XNN_ARCH_WASM
     f32_rndu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndu_ukernel__scalar_libm_u4;
     f32_rndu_config.element_tile = 4;
-  #elif XNN_ARCH_RISCV
-    f32_rndu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndu_ukernel__scalar_libm_u1;
-    f32_rndu_config.element_tile = 1;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    f32_rndu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndu_ukernel__rvv_u4v;
+    f32_rndu_config.element_tile = hardware_config->vlenb / sizeof(float) * 4; // (VLENB/sizeof)*LMUL
   #else
     f32_rndu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndu_ukernel__scalar_libm_u1;
     f32_rndu_config.element_tile = 1;
@@ -1243,9 +1246,10 @@ static void init_f32_rndz_config(void) {
   #elif XNN_ARCH_WASM
     f32_rndz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndz_ukernel__scalar_libm_u4;
     f32_rndz_config.element_tile = 4;
-  #elif XNN_ARCH_RISCV
-    f32_rndz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndz_ukernel__scalar_libm_u1;
-    f32_rndz_config.element_tile = 1;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    f32_rndz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndz_ukernel__rvv_u4v;
+    f32_rndz_config.element_tile = hardware_config->vlenb / sizeof(float) * 4; // (VLENB/sizeof)*LMUL
   #else
     f32_rndz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndz_ukernel__scalar_libm_u1;
     f32_rndz_config.element_tile = 1;
