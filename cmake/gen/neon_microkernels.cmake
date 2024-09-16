@@ -109,9 +109,7 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-2x8c2s4-minmax-fp32-neon-mlal.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c2s4-minmax-fp32-neon-mlal.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-2x8c2s4-minmax-fp32-neon-mlal.c
-  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-neon-c16.c
   src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-neon-c32.c
-  src/qs8-rsum/gen/qs8-rsum-neon-u16.c
   src/qs8-rsum/gen/qs8-rsum-neon-u32-acc2.c
   src/qs8-vadd/gen/qs8-vadd-minmax-neon-ld64-u16.c
   src/qs8-vadd/gen/qs8-vadd-minmax-neon-ld64-u32.c
@@ -137,7 +135,6 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/qu8-igemm/gen/qu8-igemm-1x16-minmax-rndnu-neon-mlal-lane.c
   src/qu8-igemm/gen/qu8-igemm-3x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-igemm/gen/qu8-igemm-4x16-minmax-rndnu-neon-mlal-lane.c
-  src/qu8-rsum/gen/qu8-rsum-neon-u16.c
   src/qu8-rsum/gen/qu8-rsum-neon-u32-acc2.c
   src/qu8-vadd/gen/qu8-vadd-minmax-neon-ld64-u16.c
   src/qu8-vadd/gen/qu8-vadd-minmax-neon-ld64-u32.c
@@ -746,12 +743,14 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x8-minmax-fp32-neon-mlal-lane.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x16-minmax-fp32-neon-mlal-lane-prfm.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-6x16-minmax-fp32-neon-mlal-lane.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-neon-c16.c
   src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-neon-c64.c
   src/qs8-requantization/qs8-requantization-fp32-neon.c
   src/qs8-requantization/qs8-requantization-gemmlowp-neon.c
   src/qs8-requantization/qs8-requantization-rndna-neon.c
   src/qs8-requantization/qs8-requantization-rndnu-neon-mull.c
   src/qs8-requantization/qs8-requantization-rndnu-neon-qdmulh.c
+  src/qs8-rsum/gen/qs8-rsum-neon-u16.c
   src/qs8-rsum/gen/qs8-rsum-neon-u32.c
   src/qs8-rsum/gen/qs8-rsum-neon-u64-acc2.c
   src/qs8-rsum/gen/qs8-rsum-neon-u64-acc4.c
@@ -866,6 +865,7 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/qu8-requantization/qu8-requantization-fp32-neon.c
   src/qu8-requantization/qu8-requantization-gemmlowp-neon.c
   src/qu8-requantization/qu8-requantization-rndna-neon.c
+  src/qu8-rsum/gen/qu8-rsum-neon-u16.c
   src/qu8-rsum/gen/qu8-rsum-neon-u32.c
   src/qu8-rsum/gen/qu8-rsum-neon-u64-acc2.c
   src/qu8-rsum/gen/qu8-rsum-neon-u64-acc4.c

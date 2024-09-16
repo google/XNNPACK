@@ -72,8 +72,8 @@ static void init_qs8_rsum_config(void) {
       #endif  // XNN_ENABLE_ARM_DOTPROD
     } else {
       qs8_rsum_config = (struct xnn_reduce_config) {
-        .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__neon_u16,
-        .element_tile = 16,
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__neon_u32_acc2,
+        .element_tile = 32,
       };
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -142,8 +142,8 @@ static void init_qs8_rdsum_config(void) {
     }
   #elif XNN_ARCH_ARM64
     qs8_rdsum_config = (struct xnn_reduce_config) {
-      .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_qs8_rdsum_ukernel_7p7x__neon_c16,
-      .element_tile = 16,
+      .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_qs8_rdsum_ukernel_7p7x__neon_c32,
+      .element_tile = 32,
     };
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -195,8 +195,8 @@ static void init_qu8_rsum_config(void) {
     }
   #elif XNN_ARCH_ARM64
     qu8_rsum_config = (struct xnn_reduce_config) {
-      .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__neon_u16,
-      .element_tile = 16,
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__neon_u32_acc2,
+      .element_tile = 32,
     };
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
