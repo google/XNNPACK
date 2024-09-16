@@ -31,8 +31,12 @@ SET(NON_PROD_SSSE3_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-ssse3-4x4.c
   src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-ssse3-5x4.c
   src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-ssse3-6x4.c
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x4c8-minmax-ssse3-madd-prfm.c
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x4c8-minmax-ssse3-madd-prfm.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x4c8-minmax-ssse3-madd.c
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x4c8-minmax-ssse3-madd-prfm.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x4c8-minmax-ssse3-madd.c
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x4c8-minmax-ssse3-madd-prfm.c
   src/qs8-requantization/qs8-requantization-gemmlowp-ssse3.c
   src/qs8-requantization/qs8-requantization-rndna-ssse3.c
   src/qs8-rsum/gen/qs8-rsum-ssse3-u16.c

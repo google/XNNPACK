@@ -212,6 +212,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qu8-igemm/gen/qu8-igemm-1x4-minmax-fp32-scalar-lrintf.c
   src/qu8-igemm/gen/qu8-igemm-2x2-minmax-fp32-scalar-imagic.c
   src/qu8-igemm/gen/qu8-igemm-3x4-minmax-fp32-scalar-lrintf.c
+  src/qu8-rsum/gen/qu8-rsum-scalar-u4.c
   src/qu8-vadd/gen/qu8-vadd-minmax-scalar-u1.c
   src/qu8-vadd/gen/qu8-vadd-minmax-scalar-u4.c
   src/qu8-vaddc/gen/qu8-vaddc-minmax-scalar-u1.c
@@ -467,10 +468,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vadd-minmax-scalar-u1.c
   src/f32-vbinary/gen/f32-vadd-minmax-scalar-u2.c
   src/f32-vbinary/gen/f32-vadd-minmax-scalar-u4.c
-  src/f32-vbinary/gen/f32-vadd-relu-scalar-u1.c
-  src/f32-vbinary/gen/f32-vadd-relu-scalar-u2.c
-  src/f32-vbinary/gen/f32-vadd-relu-scalar-u4.c
-  src/f32-vbinary/gen/f32-vadd-relu-scalar-u8.c
   src/f32-vbinary/gen/f32-vadd-scalar-u1.c
   src/f32-vbinary/gen/f32-vadd-scalar-u2.c
   src/f32-vbinary/gen/f32-vadd-scalar-u4.c
@@ -478,10 +475,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vaddc-minmax-scalar-u1.c
   src/f32-vbinary/gen/f32-vaddc-minmax-scalar-u2.c
   src/f32-vbinary/gen/f32-vaddc-minmax-scalar-u4.c
-  src/f32-vbinary/gen/f32-vaddc-relu-scalar-u1.c
-  src/f32-vbinary/gen/f32-vaddc-relu-scalar-u2.c
-  src/f32-vbinary/gen/f32-vaddc-relu-scalar-u4.c
-  src/f32-vbinary/gen/f32-vaddc-relu-scalar-u8.c
   src/f32-vbinary/gen/f32-vaddc-scalar-u1.c
   src/f32-vbinary/gen/f32-vaddc-scalar-u2.c
   src/f32-vbinary/gen/f32-vaddc-scalar-u4.c
@@ -489,10 +482,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vdiv-minmax-scalar-u1.c
   src/f32-vbinary/gen/f32-vdiv-minmax-scalar-u4.c
   src/f32-vbinary/gen/f32-vdiv-minmax-scalar-u8.c
-  src/f32-vbinary/gen/f32-vdiv-relu-scalar-u1.c
-  src/f32-vbinary/gen/f32-vdiv-relu-scalar-u2.c
-  src/f32-vbinary/gen/f32-vdiv-relu-scalar-u4.c
-  src/f32-vbinary/gen/f32-vdiv-relu-scalar-u8.c
   src/f32-vbinary/gen/f32-vdiv-scalar-u1.c
   src/f32-vbinary/gen/f32-vdiv-scalar-u2.c
   src/f32-vbinary/gen/f32-vdiv-scalar-u4.c
@@ -500,10 +489,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vdivc-minmax-scalar-u1.c
   src/f32-vbinary/gen/f32-vdivc-minmax-scalar-u4.c
   src/f32-vbinary/gen/f32-vdivc-minmax-scalar-u8.c
-  src/f32-vbinary/gen/f32-vdivc-relu-scalar-u1.c
-  src/f32-vbinary/gen/f32-vdivc-relu-scalar-u2.c
-  src/f32-vbinary/gen/f32-vdivc-relu-scalar-u4.c
-  src/f32-vbinary/gen/f32-vdivc-relu-scalar-u8.c
   src/f32-vbinary/gen/f32-vdivc-scalar-u1.c
   src/f32-vbinary/gen/f32-vdivc-scalar-u2.c
   src/f32-vbinary/gen/f32-vdivc-scalar-u4.c
@@ -523,10 +508,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vmul-minmax-scalar-u1.c
   src/f32-vbinary/gen/f32-vmul-minmax-scalar-u2.c
   src/f32-vbinary/gen/f32-vmul-minmax-scalar-u4.c
-  src/f32-vbinary/gen/f32-vmul-relu-scalar-u1.c
-  src/f32-vbinary/gen/f32-vmul-relu-scalar-u2.c
-  src/f32-vbinary/gen/f32-vmul-relu-scalar-u4.c
-  src/f32-vbinary/gen/f32-vmul-relu-scalar-u8.c
   src/f32-vbinary/gen/f32-vmul-scalar-u1.c
   src/f32-vbinary/gen/f32-vmul-scalar-u2.c
   src/f32-vbinary/gen/f32-vmul-scalar-u4.c
@@ -534,10 +515,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vmulc-minmax-scalar-u1.c
   src/f32-vbinary/gen/f32-vmulc-minmax-scalar-u2.c
   src/f32-vbinary/gen/f32-vmulc-minmax-scalar-u4.c
-  src/f32-vbinary/gen/f32-vmulc-relu-scalar-u1.c
-  src/f32-vbinary/gen/f32-vmulc-relu-scalar-u2.c
-  src/f32-vbinary/gen/f32-vmulc-relu-scalar-u4.c
-  src/f32-vbinary/gen/f32-vmulc-relu-scalar-u8.c
   src/f32-vbinary/gen/f32-vmulc-scalar-u1.c
   src/f32-vbinary/gen/f32-vmulc-scalar-u2.c
   src/f32-vbinary/gen/f32-vmulc-scalar-u4.c
@@ -553,10 +530,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vrdivc-minmax-scalar-u1.c
   src/f32-vbinary/gen/f32-vrdivc-minmax-scalar-u4.c
   src/f32-vbinary/gen/f32-vrdivc-minmax-scalar-u8.c
-  src/f32-vbinary/gen/f32-vrdivc-relu-scalar-u1.c
-  src/f32-vbinary/gen/f32-vrdivc-relu-scalar-u2.c
-  src/f32-vbinary/gen/f32-vrdivc-relu-scalar-u4.c
-  src/f32-vbinary/gen/f32-vrdivc-relu-scalar-u8.c
   src/f32-vbinary/gen/f32-vrdivc-scalar-u1.c
   src/f32-vbinary/gen/f32-vrdivc-scalar-u2.c
   src/f32-vbinary/gen/f32-vrdivc-scalar-u4.c
@@ -568,10 +541,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vrsubc-minmax-scalar-u1.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-scalar-u2.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-scalar-u4.c
-  src/f32-vbinary/gen/f32-vrsubc-relu-scalar-u1.c
-  src/f32-vbinary/gen/f32-vrsubc-relu-scalar-u2.c
-  src/f32-vbinary/gen/f32-vrsubc-relu-scalar-u4.c
-  src/f32-vbinary/gen/f32-vrsubc-relu-scalar-u8.c
   src/f32-vbinary/gen/f32-vrsubc-scalar-u1.c
   src/f32-vbinary/gen/f32-vrsubc-scalar-u2.c
   src/f32-vbinary/gen/f32-vrsubc-scalar-u4.c
@@ -585,10 +554,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsub-minmax-scalar-u1.c
   src/f32-vbinary/gen/f32-vsub-minmax-scalar-u2.c
   src/f32-vbinary/gen/f32-vsub-minmax-scalar-u4.c
-  src/f32-vbinary/gen/f32-vsub-relu-scalar-u1.c
-  src/f32-vbinary/gen/f32-vsub-relu-scalar-u2.c
-  src/f32-vbinary/gen/f32-vsub-relu-scalar-u4.c
-  src/f32-vbinary/gen/f32-vsub-relu-scalar-u8.c
   src/f32-vbinary/gen/f32-vsub-scalar-u1.c
   src/f32-vbinary/gen/f32-vsub-scalar-u2.c
   src/f32-vbinary/gen/f32-vsub-scalar-u4.c
@@ -596,10 +561,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vsubc-minmax-scalar-u1.c
   src/f32-vbinary/gen/f32-vsubc-minmax-scalar-u2.c
   src/f32-vbinary/gen/f32-vsubc-minmax-scalar-u4.c
-  src/f32-vbinary/gen/f32-vsubc-relu-scalar-u1.c
-  src/f32-vbinary/gen/f32-vsubc-relu-scalar-u2.c
-  src/f32-vbinary/gen/f32-vsubc-relu-scalar-u4.c
-  src/f32-vbinary/gen/f32-vsubc-relu-scalar-u8.c
   src/f32-vbinary/gen/f32-vsubc-scalar-u1.c
   src/f32-vbinary/gen/f32-vsubc-scalar-u2.c
   src/f32-vbinary/gen/f32-vsubc-scalar-u4.c
@@ -959,6 +920,8 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qu8-requantization/qu8-requantization-rndna-scalar-signed64.c
   src/qu8-requantization/qu8-requantization-rndna-scalar-unsigned32.c
   src/qu8-requantization/qu8-requantization-rndna-scalar-unsigned64.c
+  src/qu8-rsum/gen/qu8-rsum-scalar-u1.c
+  src/qu8-rsum/gen/qu8-rsum-scalar-u2.c
   src/qu8-vadd/gen/qu8-vadd-minmax-scalar-u2.c
   src/qu8-vaddc/gen/qu8-vaddc-minmax-scalar-u2.c
   src/qu8-vcvt/gen/qu8-vcvt-scalar-u2.c

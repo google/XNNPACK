@@ -21,6 +21,7 @@ static struct xnn_reduce_config f32_rsum_config = {0};
 static struct xnn_reduce_config f32_rdsum_config = {0};
 static struct xnn_reduce_config qs8_rsum_config = {0};
 static struct xnn_reduce_config qs8_rdsum_config = {0};
+static struct xnn_reduce_config qu8_rsum_config = {0};
 
 XNN_INIT_ONCE_GUARD(f16_f32acc_rsum);
 XNN_INIT_ONCE_GUARD(f16_f32acc_rdsum);
@@ -30,6 +31,7 @@ XNN_INIT_ONCE_GUARD(f32_rsum);
 XNN_INIT_ONCE_GUARD(f32_rdsum);
 XNN_INIT_ONCE_GUARD(qs8_rsum);
 XNN_INIT_ONCE_GUARD(qs8_rdsum);
+XNN_INIT_ONCE_GUARD(qu8_rsum);
 
 static void init_qs8_rsum_config(void) {
   #if XNN_ARCH_ARM
@@ -70,8 +72,8 @@ static void init_qs8_rsum_config(void) {
       #endif  // XNN_ENABLE_ARM_DOTPROD
     } else {
       qs8_rsum_config = (struct xnn_reduce_config) {
-        .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__neon_u16,
-        .element_tile = 16,
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__neon_u32_acc2,
+        .element_tile = 32,
       };
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -140,8 +142,8 @@ static void init_qs8_rdsum_config(void) {
     }
   #elif XNN_ARCH_ARM64
     qs8_rdsum_config = (struct xnn_reduce_config) {
-      .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_qs8_rdsum_ukernel_7p7x__neon_c16,
-      .element_tile = 16,
+      .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_qs8_rdsum_ukernel_7p7x__neon_c32,
+      .element_tile = 32,
     };
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -173,6 +175,52 @@ static void init_qs8_rdsum_config(void) {
       .element_tile = 4,
     };
   #endif
+}
+
+static void init_qu8_rsum_config(void) {
+  #if XNN_ARCH_ARM
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+
+    if (hardware_config->use_arm_neon) {
+      qu8_rsum_config = (struct xnn_reduce_config) {
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__neon_u32_acc2,
+        .element_tile = 32,
+      };
+    } else {
+      qu8_rsum_config = (struct xnn_reduce_config) {
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__scalar_u4,
+        .element_tile = 4,
+      };
+    }
+  #elif XNN_ARCH_ARM64
+    qu8_rsum_config = (struct xnn_reduce_config) {
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__neon_u32_acc2,
+      .element_tile = 32,
+    };
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+
+    if (hardware_config->use_x86_avx2) {
+      qu8_rsum_config = (struct xnn_reduce_config) {
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__avx2_u64,
+        .element_tile = 64,
+      };
+    } else {
+      qu8_rsum_config = (struct xnn_reduce_config) {
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__sse2_u32,
+        .element_tile = 32,
+      };
+    }
+  #else
+    qu8_rsum_config = (struct xnn_reduce_config) {
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__scalar_u4,
+      .element_tile = 4,
+    };
+  #endif
+
+  qu8_rsum_config.init.qs8_mean = xnn_init_qs8_mean_minmax_scalar_params;
 }
 
 static void init_f16_f32acc_rsum_config(void) {
@@ -523,4 +571,13 @@ const struct xnn_reduce_config* xnn_init_qs8_rdsum_config() {
   }
   XNN_INIT_ONCE(qs8_rdsum);
   return &qs8_rdsum_config;
+}
+
+const struct xnn_reduce_config* xnn_init_qu8_rsum_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(qu8_rsum);
+  return &qu8_rsum_config;
 }

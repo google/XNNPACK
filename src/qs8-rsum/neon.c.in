@@ -7,6 +7,24 @@ $assert CHANNEL_TILE % 16 == 0
 $assert CHANNEL_TILE >= 16
 $SIMD_TILE = CHANNEL_TILE // 16
 $assert ACCUMULATORS <= SIMD_TILE
+$assert DATATYPE in ["QS8", "QU8"]
+$DATATYPE_SPEC = DATATYPE.lower()
+$XINT8 = "uint8" if DATATYPE == "QU8" else "int8"
+$XINT16 = "uint16" if DATATYPE == "QU8" else "int16"
+$XINT32 = "uint32" if DATATYPE == "QU8" else "int32"
+$VLD1Q_X8 = "vld1q_u8" if DATATYPE == "QU8" else "vld1q_s8"
+$VPADALQ_X8 = "vpadalq_u8" if DATATYPE == "QU8" else "vpadalq_s8"
+$VMULQ_X8 = "vmulq_u8" if DATATYPE == "QU8" else "vmulq_s8"
+$VMOVQ_N_X16 = "vmovq_n_u16" if DATATYPE == "QU8" else "vmovq_n_s16"
+$VMOVQ_N_X32 = "vmovq_n_u32" if DATATYPE == "QU8" else "vmovq_n_s32"
+$VPADALQ_X16 = "vpadalq_u16" if DATATYPE == "QU8" else "vpadalq_s16"
+$VADDQ_X32 = "vaddq_u32" if DATATYPE == "QU8" else "vaddq_s32"
+$VADDVQ_X32 = "vaddvq_u32" if DATATYPE == "QU8" else "vaddvq_s32"
+$VADD_X32 = "vadd_u32" if DATATYPE == "QU8" else "vadd_s32"
+$VGET_LOW_X32 = "vget_low_u32" if DATATYPE == "QU8" else "vget_low_s32"
+$VGET_HIGH_X32 = "vget_high_u32" if DATATYPE == "QU8" else "vget_high_s32"
+$VPADD_X32 = "vpadd_u32" if DATATYPE == "QU8" else "vpadd_s32"
+$VGET_LANE_X32 = "vget_lane_u32" if DATATYPE == "QU8" else "vget_lane_s32"
 
 #include <assert.h>
 
@@ -16,10 +34,10 @@ $assert ACCUMULATORS <= SIMD_TILE
 #include "xnnpack/reduce.h"
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
-void xnn_qs8_rsum_ukernel__neon_u${CHANNEL_TILE}${ACC_SUFFIX}(
+void xnn_${DATATYPE_SPEC}_rsum_ukernel__neon_u${CHANNEL_TILE}${ACC_SUFFIX}(
     size_t batch,
-    const int8_t* input,
-    int32_t* output,
+    const ${XINT8}_t* input,
+    ${XINT32}_t* output,
     const struct xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
@@ -27,72 +45,72 @@ void xnn_qs8_rsum_ukernel__neon_u${CHANNEL_TILE}${ACC_SUFFIX}(
   assert(output != NULL);
   assert(params != NULL);
 
-  XNN_ALIGN(16) static const int8_t onemask_table[32] = {
+  XNN_ALIGN(16) static const ${XINT8}_t onemask_table[32] = {
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   };
 
   $for A in range(ACCUMULATORS):
-    int32x4_t vacc${A} = vmovq_n_s32(0);
+    ${XINT32}x4_t vacc${A} = ${VMOVQ_N_X32}(0);
 
-  // 256 int8s may be summed into an int16 before overflowing.
+  // 256 ${XINT8}s may be summed into an ${XINT16} before overflowing.
   // Each register has 8 lanes and there are ${ACCUMULATORS} accumulators so batch size is ${ACCUMULATORS*256*8}
 
   for (; batch >= ${ACCUMULATORS*256*8}; batch -= ${ACCUMULATORS*256*8}) {
     $for A in range(ACCUMULATORS):
-      int16x8_t vacc16_${A} = vmovq_n_s16(0);
+      ${XINT16}x8_t vacc16_${A} = ${VMOVQ_N_X16}(0);
     for (size_t current_batch = ${ACCUMULATORS*256*8}; current_batch > 0; current_batch -= ${CHANNEL_TILE}) {
       $for N in range(SIMD_TILE):
-        const int8x16_t vt${N} = vld1q_s8(input); input += 16;
+        const ${XINT8}x16_t vt${N} = ${VLD1Q_X8}(input); input += 16;
       $for N in range(SIMD_TILE):
-        vacc16_${N % ACCUMULATORS} = vpadalq_s8(vacc16_${N % ACCUMULATORS}, vt${N});
+        vacc16_${N % ACCUMULATORS} = ${VPADALQ_X8}(vacc16_${N % ACCUMULATORS}, vt${N});
     }
     $for A in range(ACCUMULATORS):
-      vacc${A} = vpadalq_s16(vacc${A}, vacc16_${A});
+      vacc${A} = ${VPADALQ_X16}(vacc${A}, vacc16_${A});
   }
 
   $if CHANNEL_TILE > 16:
     if (XNN_LIKELY(batch >= ${CHANNEL_TILE})) {
       assert(batch >= 1 && batch < ${ACCUMULATORS*256*8});
       $for A in range(ACCUMULATORS):
-        int16x8_t vacc16_${A} = vmovq_n_s16(0);
+        ${XINT16}x8_t vacc16_${A} = ${VMOVQ_N_X16}(0);
       for (; batch >= ${CHANNEL_TILE}; batch -= ${CHANNEL_TILE}) {
         $for N in range(SIMD_TILE):
-          const int8x16_t vt${N} = vld1q_s8(input); input += 16;
+          const ${XINT8}x16_t vt${N} = ${VLD1Q_X8}(input); input += 16;
         $for N in range(SIMD_TILE):
-          vacc16_${N % ACCUMULATORS} = vpadalq_s8(vacc16_${N % ACCUMULATORS}, vt${N});
+          vacc16_${N % ACCUMULATORS} = ${VPADALQ_X8}(vacc16_${N % ACCUMULATORS}, vt${N});
       }
       $for A in range(ACCUMULATORS):
-        vacc${A} = vpadalq_s16(vacc${A}, vacc16_${A});
+        vacc${A} = ${VPADALQ_X16}(vacc${A}, vacc16_${A});
     }
   if (XNN_UNLIKELY(batch != 0)) {
     assert(batch >= 1 && batch < ${256*8});
-    int16x8_t vacc16 = vmovq_n_s16(0);
+    ${XINT16}x8_t vacc16 = ${VMOVQ_N_X16}(0);
     for (; batch >= 16; batch -= 16) {
-      const int8x16_t vt = vld1q_s8(input); input += 16;
-      vacc16 = vpadalq_s8(vacc16, vt);
+      const ${XINT8}x16_t vt = ${VLD1Q_X8}(input); input += 16;
+      vacc16 = ${VPADALQ_X8}(vacc16, vt);
     }
     if (XNN_UNLIKELY(batch != 0)) {
-      const int8x16_t vt = vld1q_s8(input);
-      const int8x16_t vonemask = vld1q_s8(&onemask_table[16 - batch]);
-      const int8x16_t vtm = vmulq_s8(vt, vonemask);
-      vacc16 = vpadalq_s8(vacc16, vtm);
+      const ${XINT8}x16_t vt = ${VLD1Q_X8}(input);
+      const ${XINT8}x16_t vonemask = ${VLD1Q_X8}(&onemask_table[16 - batch]);
+      const ${XINT8}x16_t vtm = ${VMULQ_X8}(vt, vonemask);
+      vacc16 = ${VPADALQ_X8}(vacc16, vtm);
     }
-    vacc0 = vpadalq_s16(vacc0, vacc16);
+    vacc0 = ${VPADALQ_X16}(vacc0, vacc16);
   }
   $if ACCUMULATORS > 1:
     $ACC_SLICE = 1
     $while ACC_SLICE < ACCUMULATORS:
       $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
         $if A + ACC_SLICE < ACCUMULATORS:
-          vacc${A} = vaddq_s32(vacc${A}, vacc${A + ACC_SLICE});
+          vacc${A} = ${VADDQ_X32}(vacc${A}, vacc${A + ACC_SLICE});
       $ACC_SLICE *= 2
   #if XNN_ARCH_ARM64
-    const int32_t vacc = vaddvq_s32(vacc0);
+    const ${XINT32}_t vacc = ${VADDVQ_X32}(vacc0);
   #else
-    int32x2_t vacc_lo = vadd_s32(vget_low_s32(vacc0), vget_high_s32(vacc0));
-    vacc_lo = vpadd_s32(vacc_lo, vacc_lo);
-    const int32_t vacc = vget_lane_s32(vacc_lo, 0);
+    ${XINT32}x2_t vacc_lo = ${VADD_X32}(${VGET_LOW_X32}(vacc0), ${VGET_HIGH_X32}(vacc0));
+    vacc_lo = ${VPADD_X32}(vacc_lo, vacc_lo);
+    const ${XINT32}_t vacc = ${VGET_LANE_X32}(vacc_lo, 0);
   #endif
 
   *output += vacc;

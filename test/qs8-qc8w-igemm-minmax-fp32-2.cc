@@ -1724,6 +1724,26 @@ std::vector<GemmTestParams> CreateTests1(
       });
 
   INSTANTIATE_TEST_SUITE_P(
+      QS8_QC8W_IGEMM_MINMAX_FP32_4X16C4__AVX512VNNI, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
+          /*mr=*/4, /*nr=*/16, /*kr=*/4, /*sr=*/1,
+          /*is_igemm=*/false,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x16c4__avx512vnni,
+                        xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
+                        xnn_pack_qs8_to_qu8_conv_goki_w,
+                        xnn_qs8_requantize_fp32);
+          },
+          []() {
+            TEST_REQUIRES_X86_AVX512VNNI;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  INSTANTIATE_TEST_SUITE_P(
       QS8_QC8W_IGEMM_MINMAX_FP32_7X16C4__AVX512VNNI, GemmTest,
       testing::ValuesIn(CreateTests1(
           /*k_block=*/8,
@@ -1772,26 +1792,6 @@ std::vector<GemmTestParams> CreateTests1(
           /*is_igemm=*/false,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_9x16c4__avx512vnni,
-                        xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
-                        xnn_pack_qs8_to_qu8_conv_goki_w,
-                        xnn_qs8_requantize_fp32);
-          },
-          []() {
-            TEST_REQUIRES_X86_AVX512VNNI;
-          })),
-      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-
-  INSTANTIATE_TEST_SUITE_P(
-      QS8_QC8W_IGEMM_MINMAX_FP32_28X16C4__AVX512VNNI, GemmTest,
-      testing::ValuesIn(CreateTests1(
-          /*k_block=*/8,
-          /*adj_k_block=*/8,
-          /*mr=*/28, /*nr=*/16, /*kr=*/4, /*sr=*/1,
-          /*is_igemm=*/false,
-          [](GemmMicrokernelTester& tester) {
-            tester.Test(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_28x16c4__avx512vnni,
                         xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
                         xnn_pack_qs8_to_qu8_conv_goki_w,
                         xnn_qs8_requantize_fp32);

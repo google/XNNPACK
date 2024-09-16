@@ -1507,6 +1507,7 @@ IF(XNNPACK_BUILD_TESTS)
       qs8-requantization
       qs8-rdsum-minmax-fp32
       qs8-rsum
+      qu8-rsum
       qs8-vhswish
       qs8-vlrelu
       qu8-gavgpool-minmax-fp32
@@ -1524,23 +1525,18 @@ IF(XNNPACK_BUILD_TESTS)
       u8-lut32norm
       u8-rmax
       x16-packw
-      x16-transpose
-      x24-transpose
       x32-packb
       x32-packw
       x32-packx
-      x32-transpose
       x32-unpool
       x32-zip
-      x64-transpose
       x8-lut
       x8-packw
       qs8-packw
-      x8-transpose
       x8-zip
+      xN-transpose
       xx-fill
-      xx-pad
-      xx-transposev)
+      xx-pad)
   FOREACH(TEST ${MICROKERNEL_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
@@ -1695,46 +1691,36 @@ IF(XNNPACK_BUILD_TESTS)
       f16-vsubc-minmax
       f32-vadd
       f32-vadd-minmax
-      f32-vadd-relu
       f32-vaddc
       f32-vaddc-minmax
-      f32-vaddc-relu
       f32-vcopysign
       f32-vcopysignc
       f32-vdiv
       f32-vdiv-minmax
-      f32-vdiv-relu
       f32-vdivc
       f32-vdivc-minmax
-      f32-vdivc-relu
       f32-vmax
       f32-vmaxc
       f32-vmin
       f32-vminc
       f32-vmul
       f32-vmul-minmax
-      f32-vmul-relu
       f32-vmulc
       f32-vmulc-minmax
-      f32-vmulc-relu
       f32-vprelu
       f32-vpreluc
       f32-vrpreluc
       f32-vrcopysignc
       f32-vrdivc
       f32-vrdivc-minmax
-      f32-vrdivc-relu
       f32-vrsubc
       f32-vrsubc-minmax
-      f32-vrsubc-relu
       f32-vsqrdiff
       f32-vsqrdiffc
       f32-vsub
       f32-vsub-minmax
-      f32-vsub-relu
       f32-vsubc
       f32-vsubc-minmax
-      f32-vsubc-relu
       qs8-vadd-minmax
       qs8-vaddc-minmax
       qs8-vmul-minmax-fp32
@@ -1780,7 +1766,7 @@ IF(XNNPACK_BUILD_TESTS)
       qu8-vcvt)
   FOREACH(TEST ${MICROKERNEL_VCVT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         vcvt-microkernel-tester
         fp16
@@ -2136,6 +2122,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       qs8-qc8w-gemm-fp32
       qs8-requantization
       qs8-rsum
+      qu8-rsum
       qs8-vadd
       qs8-vaddc
       qs8-vcvt
@@ -2162,15 +2149,11 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       u32-vlog
       u64-u32-vsqrtshift
       x16-packw
-      x16-transpose
-      x24-transpose
       x32-packw
-      x32-transpose
-      x64-transpose
       x8-lut
       x8-packq
       x8-packw
-      x8-transpose
+      xN-transposec
       xx-transposev)
   FOREACH(BENCH ${MICROKERNEL_BENCHMARKS})
     ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)

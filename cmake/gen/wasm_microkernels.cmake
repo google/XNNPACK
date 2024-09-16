@@ -142,31 +142,15 @@ SET(NON_PROD_WASM_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vadd-minmax-wasm-u1.c
   src/f32-vbinary/gen/f32-vadd-minmax-wasm-u2.c
   src/f32-vbinary/gen/f32-vadd-minmax-wasm-u4.c
-  src/f32-vbinary/gen/f32-vadd-relu-wasm-u1.c
-  src/f32-vbinary/gen/f32-vadd-relu-wasm-u2.c
-  src/f32-vbinary/gen/f32-vadd-relu-wasm-u4.c
-  src/f32-vbinary/gen/f32-vadd-relu-wasm-u8.c
   src/f32-vbinary/gen/f32-vaddc-minmax-wasm-u1.c
   src/f32-vbinary/gen/f32-vaddc-minmax-wasm-u2.c
   src/f32-vbinary/gen/f32-vaddc-minmax-wasm-u4.c
-  src/f32-vbinary/gen/f32-vaddc-relu-wasm-u1.c
-  src/f32-vbinary/gen/f32-vaddc-relu-wasm-u2.c
-  src/f32-vbinary/gen/f32-vaddc-relu-wasm-u4.c
-  src/f32-vbinary/gen/f32-vaddc-relu-wasm-u8.c
   src/f32-vbinary/gen/f32-vdiv-minmax-wasm-u1.c
   src/f32-vbinary/gen/f32-vdiv-minmax-wasm-u2.c
   src/f32-vbinary/gen/f32-vdiv-minmax-wasm-u4.c
-  src/f32-vbinary/gen/f32-vdiv-relu-wasm-u1.c
-  src/f32-vbinary/gen/f32-vdiv-relu-wasm-u2.c
-  src/f32-vbinary/gen/f32-vdiv-relu-wasm-u4.c
-  src/f32-vbinary/gen/f32-vdiv-relu-wasm-u8.c
   src/f32-vbinary/gen/f32-vdivc-minmax-wasm-u1.c
   src/f32-vbinary/gen/f32-vdivc-minmax-wasm-u2.c
   src/f32-vbinary/gen/f32-vdivc-minmax-wasm-u4.c
-  src/f32-vbinary/gen/f32-vdivc-relu-wasm-u1.c
-  src/f32-vbinary/gen/f32-vdivc-relu-wasm-u2.c
-  src/f32-vbinary/gen/f32-vdivc-relu-wasm-u4.c
-  src/f32-vbinary/gen/f32-vdivc-relu-wasm-u8.c
   src/f32-vbinary/gen/f32-vmax-wasm-u1.c
   src/f32-vbinary/gen/f32-vmax-wasm-u2.c
   src/f32-vbinary/gen/f32-vmax-wasm-u4.c
@@ -182,17 +166,9 @@ SET(NON_PROD_WASM_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vmul-minmax-wasm-u1.c
   src/f32-vbinary/gen/f32-vmul-minmax-wasm-u2.c
   src/f32-vbinary/gen/f32-vmul-minmax-wasm-u4.c
-  src/f32-vbinary/gen/f32-vmul-relu-wasm-u1.c
-  src/f32-vbinary/gen/f32-vmul-relu-wasm-u2.c
-  src/f32-vbinary/gen/f32-vmul-relu-wasm-u4.c
-  src/f32-vbinary/gen/f32-vmul-relu-wasm-u8.c
   src/f32-vbinary/gen/f32-vmulc-minmax-wasm-u1.c
   src/f32-vbinary/gen/f32-vmulc-minmax-wasm-u2.c
   src/f32-vbinary/gen/f32-vmulc-minmax-wasm-u4.c
-  src/f32-vbinary/gen/f32-vmulc-relu-wasm-u1.c
-  src/f32-vbinary/gen/f32-vmulc-relu-wasm-u2.c
-  src/f32-vbinary/gen/f32-vmulc-relu-wasm-u4.c
-  src/f32-vbinary/gen/f32-vmulc-relu-wasm-u8.c
   src/f32-vbinary/gen/f32-vprelu-wasm-u1.c
   src/f32-vbinary/gen/f32-vprelu-wasm-u2.c
   src/f32-vbinary/gen/f32-vprelu-wasm-u4.c
@@ -204,10 +180,6 @@ SET(NON_PROD_WASM_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vrdivc-minmax-wasm-u1.c
   src/f32-vbinary/gen/f32-vrdivc-minmax-wasm-u2.c
   src/f32-vbinary/gen/f32-vrdivc-minmax-wasm-u4.c
-  src/f32-vbinary/gen/f32-vrdivc-relu-wasm-u1.c
-  src/f32-vbinary/gen/f32-vrdivc-relu-wasm-u2.c
-  src/f32-vbinary/gen/f32-vrdivc-relu-wasm-u4.c
-  src/f32-vbinary/gen/f32-vrdivc-relu-wasm-u8.c
   src/f32-vbinary/gen/f32-vrpreluc-wasm-u1.c
   src/f32-vbinary/gen/f32-vrpreluc-wasm-u2.c
   src/f32-vbinary/gen/f32-vrpreluc-wasm-u4.c
@@ -215,24 +187,12 @@ SET(NON_PROD_WASM_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vrsubc-minmax-wasm-u1.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-wasm-u2.c
   src/f32-vbinary/gen/f32-vrsubc-minmax-wasm-u4.c
-  src/f32-vbinary/gen/f32-vrsubc-relu-wasm-u1.c
-  src/f32-vbinary/gen/f32-vrsubc-relu-wasm-u2.c
-  src/f32-vbinary/gen/f32-vrsubc-relu-wasm-u4.c
-  src/f32-vbinary/gen/f32-vrsubc-relu-wasm-u8.c
   src/f32-vbinary/gen/f32-vsub-minmax-wasm-u1.c
   src/f32-vbinary/gen/f32-vsub-minmax-wasm-u2.c
   src/f32-vbinary/gen/f32-vsub-minmax-wasm-u4.c
-  src/f32-vbinary/gen/f32-vsub-relu-wasm-u1.c
-  src/f32-vbinary/gen/f32-vsub-relu-wasm-u2.c
-  src/f32-vbinary/gen/f32-vsub-relu-wasm-u4.c
-  src/f32-vbinary/gen/f32-vsub-relu-wasm-u8.c
   src/f32-vbinary/gen/f32-vsubc-minmax-wasm-u1.c
   src/f32-vbinary/gen/f32-vsubc-minmax-wasm-u2.c
   src/f32-vbinary/gen/f32-vsubc-minmax-wasm-u4.c
-  src/f32-vbinary/gen/f32-vsubc-relu-wasm-u1.c
-  src/f32-vbinary/gen/f32-vsubc-relu-wasm-u2.c
-  src/f32-vbinary/gen/f32-vsubc-relu-wasm-u4.c
-  src/f32-vbinary/gen/f32-vsubc-relu-wasm-u8.c
   src/f32-vclamp/gen/f32-vclamp-wasm-u1.c
   src/f32-vclamp/gen/f32-vclamp-wasm-u2.c
   src/f32-velu/gen/f32-velu-wasm-rr2-lut16-p3-u1.c

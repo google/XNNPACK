@@ -2,100 +2,39 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
-//
-// Auto-generated file. Do not edit!
-//   Specification: test/qs8-f16-vcvt.yaml
-//   Generator: tools/generate-vcvt-test.py
-
 
 #include <benchmark/benchmark.h>
 #include "bench/utils.h"
 #include "bench/vcvt-benchmark.h"
 #include "xnnpack.h"
 #include "xnnpack/common.h"
+#include "xnnpack/hardware-config.h"
 #include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/vcvt.h"
 
+static void qs8_f16_vcvt(
+  benchmark::State& state,
+  uint64_t arch_flags,
+  xnn_qs8_f16_vcvt_ukernel_fn cvt,
+  xnn_init_qs8_f16_cvt_params_fn init_params)
+{
+  xnn_qs8_f16_cvt_params params;
+  init_params(&params,
+    0.25f /* scale */,
+    1 /* output zero point */);
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(qs8_f16_vcvt, avx2_u16,
-                    xnn_qs8_f16_vcvt_ukernel__avx2_u16,
-                    xnn_init_qs8_f16_cvt_scalar_params,
-                    benchmark::utils::CheckAVX2)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, xnn_float16>)
-    ->UseRealTime();
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+  cvt_benchmark<int8_t, xnn_float16>(state, arch_flags, cvt, &params);
+}
 
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(qs8_f16_vcvt, avx2_u24,
-                    xnn_qs8_f16_vcvt_ukernel__avx2_u24,
-                    xnn_init_qs8_f16_cvt_scalar_params,
-                    benchmark::utils::CheckAVX2)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, xnn_float16>)
-    ->UseRealTime();
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(qs8_f16_vcvt, avx2_u32,
-                    xnn_qs8_f16_vcvt_ukernel__avx2_u32,
-                    xnn_init_qs8_f16_cvt_scalar_params,
-                    benchmark::utils::CheckAVX2)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, xnn_float16>)
-    ->UseRealTime();
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  BENCHMARK_CAPTURE(qs8_f16_vcvt, avx2_u64,
-                    xnn_qs8_f16_vcvt_ukernel__avx2_u64,
-                    xnn_init_qs8_f16_cvt_scalar_params,
-                    benchmark::utils::CheckAVX2)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, xnn_float16>)
-    ->UseRealTime();
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  BENCHMARK_CAPTURE(qs8_f16_vcvt, neonfp16arith_u8,
-                    xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u8,
-                    xnn_init_qs8_f16_cvt_scalar_params,
-                    benchmark::utils::CheckNEONFP16ARITH)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, xnn_float16>)
-    ->UseRealTime();
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-
-
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  BENCHMARK_CAPTURE(qs8_f16_vcvt, neonfp16arith_u16,
-                    xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u16,
-                    xnn_init_qs8_f16_cvt_scalar_params,
-                    benchmark::utils::CheckNEONFP16ARITH)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, xnn_float16>)
-    ->UseRealTime();
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-
-
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  BENCHMARK_CAPTURE(qs8_f16_vcvt, neonfp16arith_u24,
-                    xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u24,
-                    xnn_init_qs8_f16_cvt_scalar_params,
-                    benchmark::utils::CheckNEONFP16ARITH)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, xnn_float16>)
-    ->UseRealTime();
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-
-
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  BENCHMARK_CAPTURE(qs8_f16_vcvt, neonfp16arith_u32,
-                    xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u32,
-                    xnn_init_qs8_f16_cvt_scalar_params,
-                    benchmark::utils::CheckNEONFP16ARITH)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<int8_t, xnn_float16>)
-    ->UseRealTime();
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+#define XNN_CVT_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile,   \
+                                datatype_in, datatype_out, params_type, init_params)\
+BENCHMARK_CAPTURE(qs8_f16_vcvt, ukernel, arch_flags, ukernel, init_params)          \
+  ->Apply(benchmark::utils::UnaryElementwiseParameters<datatype_in, datatype_out>)  \
+  ->UseRealTime();
+#include "src/qs8-f16-vcvt/qs8-f16-vcvt.h"
+#undef XNN_CVT_UKERNEL_WITH_PARAMS
 
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

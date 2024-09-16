@@ -6,7 +6,7 @@
 $assert BATCH_TILE >= 1
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB", "SQRDIFF", "PRELU"]
-$assert ACTIVATION in ["LINEAR", "MINMAX", "RELU"]
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
 #include "xnnpack/common.h"
@@ -26,8 +26,8 @@ $  "SUB": lambda x, y: "%s - %s" % (x, y),
 $  "SQRDIFF": lambda x, y: "%s - %s" % (x, y),
 $  "PRELU": lambda x, y: "%s * %s" % (x, y),
 $}[OP]
-$SUFFIX = {"LINEAR": "", "RELU": "_relu", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "RELU": "struct xnn_f32_relu_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
+$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
 void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,
@@ -57,8 +57,6 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_u$
       $if ACTIVATION == "MINMAX":
         vacc = ${MAX_F32}(vacc, voutput_min);
         vacc = ${MIN_F32}(vacc, voutput_max);
-      $elif ACTIVATION == "RELU":
-        vacc = ${MAX_F32}(vacc, 0.0f);
       *output++ = vacc;
     }
   $else:
@@ -87,9 +85,6 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_u$
 
         $for N in range(BATCH_TILE):
           vacc${ABC[N]} = ${MIN_F32}(vacc${ABC[N]}, voutput_max);
-      $elif ACTIVATION == "RELU":
-        $for N in range(BATCH_TILE):
-          vacc${ABC[N]} = ${MAX_F32}(vacc${ABC[N]}, 0.0f);
 
       $for N in range(BATCH_TILE):
         output[${N}] = vacc${ABC[N]};
@@ -108,8 +103,6 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_u$
         $if ACTIVATION == "MINMAX":
           vacc = ${MAX_F32}(vacc, voutput_min);
           vacc = ${MIN_F32}(vacc, voutput_max);
-        $elif ACTIVATION == "RELU":
-          vacc = ${MAX_F32}(vacc, 0.0f);
         *output = vacc;
       $else:
         do {
@@ -123,8 +116,6 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_u$
           $if ACTIVATION == "MINMAX":
             vacc = ${MAX_F32}(vacc, voutput_min);
             vacc = ${MIN_F32}(vacc, voutput_max);
-          $elif ACTIVATION == "RELU":
-            vacc = ${MAX_F32}(vacc, 0.0f);
           *output++ = vacc;
           batch -= sizeof(float);
         } while (batch != 0);

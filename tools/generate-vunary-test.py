@@ -293,7 +293,7 @@ def main(args):
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
-#include "src/xnnpack/{op_header}"
+#include "xnnpack/{op_header}"
 #include "next_prime.h"
 #include "{tester_header}"
 
