@@ -217,6 +217,7 @@ xnnpack_benchmark(
     deps = MICROKERNEL_BENCHMARK_DEPS,
 ) for kernel in [
     "qs8_rdsum",
+    "qu8_rdsum",
     "qs8_rsum",
     "qu8_rsum",
     "f16_rsum",

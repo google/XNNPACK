@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.match(r"xnn_(qs8|f16_f32acc|f32)_rdsum?(_minmax)?(_(fp32|rndnu))?_ukernel_((\d+)p)?(\d+)x__(.+)_(c)?(u)?(\d+)(_acc(\d+))?(v)?", name)
+  match = re.fullmatch(r"xnn_(qs8|qu8|f16_f32acc|f32)_rdsum?(_minmax)?(_(fp32|rndnu))?_ukernel_((\d+)p)?(\d+)x__(.+)_(c)?(u)?(\d+)(_acc(\d+))?(v)?", name)
 
   if match is None:
     raise ValueError("Unexpected microkernel name: " + name)
@@ -417,7 +417,7 @@ def generate_test_cases(ukernel, init_fn, requantization_type, primary_tile,
       (datatype.lower(), requantization_type.lower()))
   channel_scaled_tile = channel_tile
   if vector_tile:
-    ctype = {"qs8": "int8_t", "f16": "uint16_t", "f32": "float"}[datatype]
+    ctype = {"qs8": "int8_t", "qu8": "uint8_t", "f16": "uint16_t", "f32": "float"}[datatype]
     channel_scaled_tile = {"rvv": "(%s*xnn_init_hardware_config()->vlenb/sizeof(%s))" % (str(channel_tile), ctype)}[isa]
   return xngen.preprocess(RDSUM_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),

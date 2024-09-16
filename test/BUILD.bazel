@@ -1086,6 +1086,14 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qu8_rdsum_test",
+    srcs = [
+        "qu8-rdsum.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [":rdsum_microkernel_tester"],
+)
+
+xnnpack_unit_test(
     name = "qs8_vhswish_test",
     srcs = [
         "qs8-vhswish.cc",

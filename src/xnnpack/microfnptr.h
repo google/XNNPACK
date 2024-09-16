@@ -1650,6 +1650,15 @@ typedef void (*xnn_qs8_rdsum_ukernel_fn)(
     const int8_t* zero,
     int32_t* output,
     const struct xnn_qs8_rsum_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+typedef void (*xnn_qu8_rdsum_ukernel_fn)(
+    size_t rows,
+    size_t channels,
+    const uint8_t* input,
+    size_t input_stride,
+    const uint8_t* zero,
+    uint32_t* output,
+    const struct xnn_qs8_rsum_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 // RSUM: Reduce-Sum
 
 typedef void (*xnn_f16_rsum_ukernel_fn)(
