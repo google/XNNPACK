@@ -235,7 +235,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x4c8__$
     $for M in range(MR):
       __m128i vacc${M}x0123 = _mm_hadd_epi32(vacc${M}x01, vacc${M}x23);
 
-    $if DATATYPE in ["QC4_F16", "QC4_F32"]:
+    $if DATATYPE in ["QC4_F16", "QC4_F32"] and VARIANT != "MADD":
       $for M in range(MR):
         vacc${M}x0123 = _mm_srai_epi32(vacc${M}x0123, 4);
     $for M in range(MR):

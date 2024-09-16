@@ -111,7 +111,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x4c8__ssse3_madd_prfm(
     // Add adjacent pairs
     __m128i vacc0x0123 = _mm_hadd_epi32(vacc0x01, vacc0x23);
 
-    vacc0x0123 = _mm_srai_epi32(vacc0x0123, 4);
     __m128 vout0x0123 = _mm_cvtepi32_ps(vacc0x0123);
 
     vout0x0123 = _mm_mul_ps(vout0x0123, _mm_set1_ps(quantization_params[0].inv_scale));

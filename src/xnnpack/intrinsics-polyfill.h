@@ -180,10 +180,10 @@ void _mm512_storeu_epi32 (void* mem_addr, __m512i a) {
 static XNN_INTRINSIC
 __m512i _mm512_dpbusd_epi32_madd(__m512i i32, const __m512i u8, const __m512i u4) {
   const __m512i vzero_point = _mm512_set1_epi8(8);
-  const __m512i vsixteen = _mm512_set1_epi16(16);
-  const __m512i i4 = _mm512_sub_epi8(u4, vzero_point);  // convert uint4 to int4
+  const __m512i vone = _mm512_set1_epi16(1);
+  const __m512i i4 = _mm512_sub_epi8(u4, vzero_point);
   const __m512i i12 = _mm512_maddubs_epi16(u8, i4);  // u8 * i4 = i12
-  const __m512i v = _mm512_madd_epi16(i12, vsixteen);  // convert 16 bits to 32 bits
+  const __m512i v = _mm512_madd_epi16(i12, vone);  // convert 16 bits to 32 bits
   return _mm512_add_epi32(i32, v);
 }
 #endif  // __AVX512BW__
@@ -196,10 +196,10 @@ __m512i _mm512_dpbusd_epi32_madd(__m512i i32, const __m512i u8, const __m512i u4
 static XNN_INTRINSIC
 __m256i _mm256_dpbusd_epi32_madd(__m256i i32, const __m256i u8, const __m256i u4) {
   const __m256i vzero_point = _mm256_set1_epi8(8);
-  const __m256i vsixteen = _mm256_set1_epi16(16);  // accumulators are times 16
+  const __m256i vone = _mm256_set1_epi16(1);
   const __m256i i4 = _mm256_sub_epi8(u4, vzero_point);  // convert uint4 to int4
   const __m256i i12 = _mm256_maddubs_epi16(u8, i4);  // u8 * i4 = i12
-  const __m256i v = _mm256_madd_epi16(i12, vsixteen);  // convert 16 bits to 32 bits
+  const __m256i v = _mm256_madd_epi16(i12, vone);  // convert 16 bits to 32 bits
   return _mm256_add_epi32(i32, v);
 }
 
@@ -214,10 +214,10 @@ __m256i _mm256_dpbusd_epi32_madd(__m256i i32, const __m256i u8, const __m256i u4
 static XNN_INTRINSIC
 __m128i _mm_dpbusd_epi32_madd(__m128i i32, const __m128i u8, const __m128i u4) {
   const __m128i vzero_point = _mm_set1_epi8(8);
-  const __m128i vsixteen = _mm_set1_epi16(16);  // accumulators are times 16
+  const __m128i vone = _mm_set1_epi16(1);
   const __m128i i4 = _mm_sub_epi8(u4, vzero_point);  // convert uint4 to int4
   const __m128i i12 = _mm_maddubs_epi16(u8, i4);  // u8 * i4 = i12
-  const __m128i v = _mm_madd_epi16(i12, vsixteen);  // convert 16 bits to 32 bits
+  const __m128i v = _mm_madd_epi16(i12, vone);  // convert 16 bits to 32 bits
   return _mm_add_epi32(i32, v);
 }
 

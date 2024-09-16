@@ -491,6 +491,7 @@ void xnn_pack_qs8_qc4w_gemm_goi_w(
 
 // Same as qc4w but unsigned 4 bit output
 // Applies kv ^ 0x88 to convert int4 to uint4
+// Does not multiply bias by 16
 void xnn_pack_qs8_qc4uw_gemm_goi_w(
   size_t g,
   size_t nc,
@@ -573,7 +574,7 @@ void xnn_pack_qs8_qc4uw_gemm_goi_w(
               ((uint8_t*) packed_weights)[kr_block_offset] = kv ^ 0x88; // Convert to uint4
             }
           }
-          unaligned_indexed_store_u32(packed_b, nr_block_offset, unaligned_indexed_load_u32(packed_b, nr_block_offset) - ksum * izp * 16);
+          unaligned_indexed_store_u32(packed_b, nr_block_offset, unaligned_indexed_load_u32(packed_b, nr_block_offset) - ksum * izp);
           packed_weights = (uint8_t*) packed_weights + kr;  // kr * 2 nibbles
         }
         packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;  // skip NR remainder
@@ -867,6 +868,7 @@ void xnn_pack_qs8_qc4w_gemm_gio_w(
 
 // Same as qc4w but unsigned 4 bit output
 // Applies kv ^ 0x88 to convert int4 to uint4
+// Does not multiply bias by 16
 void xnn_pack_qs8_qc4uw_gemm_gio_w(
   size_t g,
   size_t nc,
@@ -950,7 +952,7 @@ void xnn_pack_qs8_qc4uw_gemm_gio_w(
               ((uint8_t*) packed_weights)[kr_block_offset] = kv ^ 0x88; // Convert to uint4
             }
           }
-          unaligned_indexed_store_u32(packed_b, nr_block_offset, unaligned_indexed_load_u32(packed_b, nr_block_offset) - ksum * izp * 16);
+          unaligned_indexed_store_u32(packed_b, nr_block_offset, unaligned_indexed_load_u32(packed_b, nr_block_offset) - ksum * izp);
           packed_weights = (uint8_t*) packed_weights + kr;  // kr * 2 nibbles
         }
         packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;  // skip NR remainder

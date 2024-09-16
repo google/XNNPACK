@@ -133,8 +133,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x4c8__sse41_madd_prfm(
     __m128i vacc0x0123 = _mm_hadd_epi32(vacc0x01, vacc0x23);
     __m128i vacc1x0123 = _mm_hadd_epi32(vacc1x01, vacc1x23);
 
-    vacc0x0123 = _mm_srai_epi32(vacc0x0123, 4);
-    vacc1x0123 = _mm_srai_epi32(vacc1x0123, 4);
     __m128 vout0x0123 = _mm_cvtepi32_ps(vacc0x0123);
     __m128 vout1x0123 = _mm_cvtepi32_ps(vacc1x0123);
 
