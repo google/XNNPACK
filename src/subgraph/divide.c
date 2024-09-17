@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <math.h>
 #include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -288,5 +289,8 @@ enum xnn_status xnn_define_divide(
   node->reshape = reshape_divide_operator;
   node->setup = setup_divide_operator;
 
+  if (output_min != -INFINITY && output_max != INFINITY) {
+    xnn_insert_clamp_node(subgraph, output_min, output_max, node);
+  }
   return xnn_status_success;
 }

@@ -372,5 +372,8 @@ enum xnn_status xnn_define_subtract(
   node->reshape = reshape_subtract_operator;
   node->setup = setup_subtract_operator;
 
+  if (output_min != -INFINITY && output_max != INFINITY) {
+    xnn_insert_clamp_node(subgraph, output_min, output_max, node);
+  }
   return xnn_status_success;
 }
