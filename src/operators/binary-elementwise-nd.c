@@ -91,36 +91,11 @@ static enum xnn_status create_binary_elementwise_nd(
 }
 
 static enum xnn_status create_binary_elementwise_nd_f16(
-    float output_min,
-    float output_max,
     uint32_t flags,
     enum xnn_operator_type operator_type,
     const struct xnn_binary_elementwise_config* config,
     xnn_operator_t* binary_elementwise_op_out)
 {
-  if (isnan(output_min)) {
-    xnn_log_error(
-      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
-      xnn_operator_type_to_string(operator_type));
-    return xnn_status_invalid_parameter;
-  }
-
-  if (isnan(output_max)) {
-    xnn_log_error(
-      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
-      xnn_operator_type_to_string(operator_type));
-    return xnn_status_invalid_parameter;
-  }
-
-  if (fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_min)) >= fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_max))) {
-    xnn_log_error(
-      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be below upper bound",
-      xnn_operator_type_to_string(operator_type),
-      fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_min)),
-      fp16_ieee_to_fp32_value(fp16_ieee_from_fp32_value(output_max)));
-    return xnn_status_invalid_parameter;
-  }
-
   if (config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
       xnn_operator_type_to_string(operator_type));
@@ -130,7 +105,7 @@ static enum xnn_status create_binary_elementwise_nd_f16(
   union xnn_f16_minmax_params params;
   assert(config->init.f16_minmax != NULL);
   config->init.f16_minmax(&params,
-    xnn_float16_from_float(output_min), xnn_float16_from_float(output_max));
+    xnn_float16_from_float(-INFINITY), xnn_float16_from_float(INFINITY));
 
   return create_binary_elementwise_nd(
     flags,
@@ -143,8 +118,6 @@ static enum xnn_status create_binary_elementwise_nd_f16(
 }
 
 static enum xnn_status create_binary_elementwise_nd_f32(
-    float output_min,
-    float output_max,
     uint32_t flags,
     enum xnn_operator_type operator_type,
     const struct xnn_binary_elementwise_config* config,
@@ -156,44 +129,21 @@ static enum xnn_status create_binary_elementwise_nd_f32(
     return xnn_status_uninitialized;
   }
 
-  if (isnan(output_min)) {
-    xnn_log_error(
-      "failed to create %s operator with NaN output lower bound: lower bound must be non-NaN",
-      xnn_operator_type_to_string(operator_type));
-    return xnn_status_invalid_parameter;
-  }
-
-  if (isnan(output_max)) {
-    xnn_log_error(
-      "failed to create %s operator with NaN output upper bound: upper bound must be non-NaN",
-      xnn_operator_type_to_string(operator_type));
-    return xnn_status_invalid_parameter;
-  }
-
-  if (output_min > output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(operator_type), output_min, output_max);
-    return xnn_status_invalid_parameter;
-  }
-
   if (config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
       xnn_operator_type_to_string(operator_type));
     return xnn_status_unsupported_hardware;
   }
 
-  const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
   const struct xnn_binary_elementwise_subconfig* binary_elementwise_subconfig = &config->minmax;
-  if (linear_activation && config->linear.op_ukernel != NULL) {
+  if (config->linear.op_ukernel != NULL) {
     binary_elementwise_subconfig = &config->linear;
   }
 
   union xnn_f32_minmax_params params;
   if (config->init.f32_minmax != NULL) {
-    config->init.f32_minmax(&params, output_min, output_max);
+    config->init.f32_minmax(&params, -INFINITY, INFINITY);
   }
-
   return create_binary_elementwise_nd(
     flags,
     &params,
@@ -211,8 +161,6 @@ enum xnn_status xnn_create_add_nd_qs8(
     float input2_scale,
     int8_t output_zero_point,
     float output_scale,
-    int8_t output_min,
-    int8_t output_max,
     uint32_t flags,
     xnn_operator_t* add_op_out)
 {
@@ -234,13 +182,6 @@ enum xnn_status xnn_create_add_nd_qs8(
     xnn_log_error(
       "failed to create %s operator with %.7g output scale: scale must be finite and positive",
       xnn_operator_type_to_string(xnn_operator_type_add_nd_qs8), output_scale);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (output_min > output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_add_nd_qs8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -272,10 +213,10 @@ enum xnn_status xnn_create_add_nd_qs8(
   assert(qs8_vadd_config->init.qs8_add != NULL);
   qs8_vadd_config->init.qs8_add(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
-    input1_output_scale, input2_output_scale, output_min, output_max);
+    input1_output_scale, input2_output_scale, INT8_MIN, INT8_MAX);
   qs8_vadd_config->init.qs8_add(
     &params2, input2_zero_point, input1_zero_point, output_zero_point,
-    input2_output_scale, input1_output_scale, output_min, output_max);
+    input2_output_scale, input1_output_scale, INT8_MIN, INT8_MAX);
 
   return create_binary_elementwise_nd(
     flags,
@@ -294,8 +235,6 @@ enum xnn_status xnn_create_add_nd_qu8(
     float input2_scale,
     uint8_t output_zero_point,
     float output_scale,
-    uint8_t output_min,
-    uint8_t output_max,
     uint32_t flags,
     xnn_operator_t* add_op_out)
 {
@@ -317,13 +256,6 @@ enum xnn_status xnn_create_add_nd_qu8(
     xnn_log_error(
       "failed to create %s operator with %.7g output scale: scale must be finite and positive",
       xnn_operator_type_to_string(xnn_operator_type_add_nd_qu8), output_scale);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (output_min > output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_add_nd_qu8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -355,10 +287,10 @@ enum xnn_status xnn_create_add_nd_qu8(
   assert(qu8_vadd_config->init.qu8_add != NULL);
   qu8_vadd_config->init.qu8_add(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
-    input1_output_scale, input2_output_scale, output_min, output_max);
+    input1_output_scale, input2_output_scale, /*output_min=*/0, UINT8_MAX);
   qu8_vadd_config->init.qu8_add(
     &params2, input2_zero_point, input1_zero_point, output_zero_point,
-    input2_output_scale, input1_output_scale, output_min, output_max);
+    input2_output_scale, input1_output_scale, /*output_min=*/0, UINT8_MAX);
 
   return create_binary_elementwise_nd(
     flags,
@@ -371,14 +303,10 @@ enum xnn_status xnn_create_add_nd_qu8(
 }
 
 enum xnn_status xnn_create_add_nd_f16(
-    float output_min,
-    float output_max,
     uint32_t flags,
     xnn_operator_t* add_op_out)
 {
   return create_binary_elementwise_nd_f16(
-    output_min,
-    output_max,
     flags,
     xnn_operator_type_add_nd_f16,
     xnn_init_f16_vadd_config(),
@@ -386,14 +314,10 @@ enum xnn_status xnn_create_add_nd_f16(
 }
 
 enum xnn_status xnn_create_add_nd_f32(
-    float output_min,
-    float output_max,
     uint32_t flags,
     xnn_operator_t* add_op_out)
 {
   return create_binary_elementwise_nd_f32(
-    output_min,
-    output_max,
     flags,
     xnn_operator_type_add_nd_f32,
     xnn_init_f32_vadd_config(),
@@ -401,14 +325,10 @@ enum xnn_status xnn_create_add_nd_f32(
 }
 
 enum xnn_status xnn_create_divide_nd_f16(
-    float output_min,
-    float output_max,
     uint32_t flags,
     xnn_operator_t* divide_op_out)
 {
   return create_binary_elementwise_nd_f16(
-    output_min,
-    output_max,
     flags,
     xnn_operator_type_divide_nd_f16,
     xnn_init_f16_vdiv_config(),
@@ -420,8 +340,6 @@ enum xnn_status xnn_create_copysign_nd_f32(
     xnn_operator_t* copysign_op_out)
 {
   return create_binary_elementwise_nd_f32(
-    -INFINITY,
-    INFINITY,
     flags,
     xnn_operator_type_copysign_nd_f32,
     xnn_init_f32_vcopysign_config(),
@@ -429,14 +347,10 @@ enum xnn_status xnn_create_copysign_nd_f32(
 }
 
 enum xnn_status xnn_create_divide_nd_f32(
-    float output_min,
-    float output_max,
     uint32_t flags,
     xnn_operator_t* divide_op_out)
 {
   return create_binary_elementwise_nd_f32(
-    output_min,
-    output_max,
     flags,
     xnn_operator_type_divide_nd_f32,
     xnn_init_f32_vdiv_config(),
@@ -533,14 +447,10 @@ enum xnn_status xnn_create_minimum_nd_f32(
 }
 
 enum xnn_status xnn_create_multiply_nd_f16(
-    float output_min,
-    float output_max,
     uint32_t flags,
     xnn_operator_t* multiply_op_out)
 {
   return create_binary_elementwise_nd_f16(
-    output_min,
-    output_max,
     flags,
     xnn_operator_type_multiply_nd_f16,
     xnn_init_f16_vmul_config(),
@@ -548,14 +458,10 @@ enum xnn_status xnn_create_multiply_nd_f16(
 }
 
 enum xnn_status xnn_create_multiply_nd_f32(
-    float output_min,
-    float output_max,
     uint32_t flags,
     xnn_operator_t* multiply_op_out)
 {
   return create_binary_elementwise_nd_f32(
-    output_min,
-    output_max,
     flags,
     xnn_operator_type_multiply_nd_f32,
     xnn_init_f32_vmul_config(),
@@ -569,8 +475,6 @@ enum xnn_status xnn_create_multiply_nd_qs8(
     float input2_scale,
     int8_t output_zero_point,
     float output_scale,
-    int8_t output_min,
-    int8_t output_max,
     uint32_t flags,
     xnn_operator_t* multiply_op_out)
 {
@@ -595,13 +499,6 @@ enum xnn_status xnn_create_multiply_nd_qs8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min > output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_multiply_nd_qs8), output_min, output_max);
-    return xnn_status_invalid_parameter;
-  }
-
   const float product_scale = input1_scale * input2_scale;
   const float product_output_scale = product_scale / output_scale;
   if (product_output_scale < 0x1.0p-16f || product_output_scale >= 0x1.0p+8f) {
@@ -623,10 +520,10 @@ enum xnn_status xnn_create_multiply_nd_qs8(
   assert(qs8_vmul_config->init.qs8_mul != NULL);
   qs8_vmul_config->init.qs8_mul(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
-    product_output_scale, output_min, output_max);
+    product_output_scale, INT8_MIN, INT8_MAX);
   qs8_vmul_config->init.qs8_mul(
     &params2, input2_zero_point, input1_zero_point, output_zero_point,
-    product_output_scale, output_min, output_max);
+    product_output_scale, INT8_MIN, INT8_MAX);
 
   return create_binary_elementwise_nd(
     flags,
@@ -645,8 +542,6 @@ enum xnn_status xnn_create_multiply_nd_qu8(
     float input2_scale,
     uint8_t output_zero_point,
     float output_scale,
-    uint8_t output_min,
-    uint8_t output_max,
     uint32_t flags,
     xnn_operator_t* multiply_op_out)
 {
@@ -671,13 +566,6 @@ enum xnn_status xnn_create_multiply_nd_qu8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min > output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_multiply_nd_qu8), output_min, output_max);
-    return xnn_status_invalid_parameter;
-  }
-
   const float product_scale = input1_scale * input2_scale;
   const float product_output_scale = product_scale / output_scale;
   if (product_output_scale < 0x1.0p-16f || product_output_scale >= 0x1.0p+8f) {
@@ -699,10 +587,10 @@ enum xnn_status xnn_create_multiply_nd_qu8(
   assert(qu8_vmul_config->init.qu8_mul != NULL);
   qu8_vmul_config->init.qu8_mul(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
-    product_output_scale, output_min, output_max);
+    product_output_scale, /*output_min=*/0, UINT8_MAX);
   qu8_vmul_config->init.qu8_mul(
     &params2, input2_zero_point, input1_zero_point, output_zero_point,
-    product_output_scale, output_min, output_max);
+    product_output_scale, /*output_min=*/0, UINT8_MAX);
   return create_binary_elementwise_nd(
     flags,
     &params,
@@ -784,14 +672,10 @@ enum xnn_status xnn_create_multiply_nd_s32(
 
 
 enum xnn_status xnn_create_subtract_nd_f16(
-    float output_min,
-    float output_max,
     uint32_t flags,
     xnn_operator_t* subtract_op_out)
 {
   return create_binary_elementwise_nd_f16(
-    output_min,
-    output_max,
     flags,
     xnn_operator_type_subtract_nd_f16,
     xnn_init_f16_vsub_config(),
@@ -799,14 +683,10 @@ enum xnn_status xnn_create_subtract_nd_f16(
 }
 
 enum xnn_status xnn_create_subtract_nd_f32(
-    float output_min,
-    float output_max,
     uint32_t flags,
     xnn_operator_t* subtract_op_out)
 {
   return create_binary_elementwise_nd_f32(
-    output_min,
-    output_max,
     flags,
     xnn_operator_type_subtract_nd_f32,
     xnn_init_f32_vsub_config(),
@@ -820,8 +700,6 @@ enum xnn_status xnn_create_subtract_nd_qs8(
     float input2_scale,
     int8_t output_zero_point,
     float output_scale,
-    int8_t output_min,
-    int8_t output_max,
     uint32_t flags,
     xnn_operator_t* subtract_op_out)
 {
@@ -843,13 +721,6 @@ enum xnn_status xnn_create_subtract_nd_qs8(
     xnn_log_error(
       "failed to create %s operator with %.7g output scale: scale must be finite and positive",
       xnn_operator_type_to_string(xnn_operator_type_subtract_nd_qs8), output_scale);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (output_min > output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_subtract_nd_qs8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -881,10 +752,10 @@ enum xnn_status xnn_create_subtract_nd_qs8(
   assert(qs8_vadd_config->init.qs8_add != NULL);
   qs8_vadd_config->init.qs8_add(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
-    input1_output_scale, -input2_output_scale, output_min, output_max);
+    input1_output_scale, -input2_output_scale, INT8_MIN, INT8_MAX);
   qs8_vadd_config->init.qs8_add(
     &params2, input2_zero_point, input1_zero_point, output_zero_point,
-    -input2_output_scale, input1_output_scale, output_min, output_max);
+    -input2_output_scale, input1_output_scale, INT8_MIN, INT8_MAX);
 
   return create_binary_elementwise_nd(
     flags,
@@ -903,8 +774,6 @@ enum xnn_status xnn_create_subtract_nd_qu8(
     float input2_scale,
     uint8_t output_zero_point,
     float output_scale,
-    uint8_t output_min,
-    uint8_t output_max,
     uint32_t flags,
     xnn_operator_t* subtract_op_out)
 {
@@ -926,13 +795,6 @@ enum xnn_status xnn_create_subtract_nd_qu8(
     xnn_log_error(
       "failed to create %s operator with %.7g output scale: scale must be finite and positive",
       xnn_operator_type_to_string(xnn_operator_type_subtract_nd_qu8), output_scale);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (output_min > output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_subtract_nd_qu8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -964,10 +826,10 @@ enum xnn_status xnn_create_subtract_nd_qu8(
   assert(qu8_vadd_config->init.qu8_add != NULL);
   qu8_vadd_config->init.qu8_add(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
-    input1_output_scale, -input2_output_scale, output_min, output_max);
+    input1_output_scale, -input2_output_scale, /*output_min=*/0, UINT8_MAX);
   qu8_vadd_config->init.qu8_add(
     &params2, input2_zero_point, input1_zero_point, output_zero_point,
-    -input2_output_scale, input1_output_scale, output_min, output_max);
+    -input2_output_scale, input1_output_scale, /*output_min=*/0, UINT8_MAX);
 
   return create_binary_elementwise_nd(
     flags,
@@ -1936,33 +1798,10 @@ static enum xnn_status run_binary_elementwise_nd_f32(
   const float* input1,
   const float* input2,
   float* output,
-  float output_min,
-  float output_max,
   const struct xnn_binary_elementwise_config* config,
   uint32_t flags,
   pthreadpool_t threadpool)
 {
-  if (isnan(output_min)) {
-    xnn_log_error(
-      "failed to run %s operator with NaN output lower bound: lower bound must be non-NaN",
-      xnn_operator_type_to_string(operator_type));
-    return xnn_status_invalid_parameter;
-  }
-
-  if (isnan(output_max)) {
-      xnn_log_error(
-        "failed to run %s operator with NaN output upper bound: upper bound must be non-NaN",
-        xnn_operator_type_to_string(operator_type));
-      return xnn_status_invalid_parameter;
-    }
-
-  if (output_min > output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be less than or equal to upper bound",
-        xnn_operator_type_to_string(operator_type), output_min, output_max);
-      return xnn_status_invalid_parameter;
-    }
-
   if (config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
       xnn_operator_type_to_string(operator_type));
@@ -1971,11 +1810,10 @@ static enum xnn_status run_binary_elementwise_nd_f32(
 
   union xnn_f32_minmax_params params;
   assert(config->init.f32_minmax != NULL);
-  config->init.f32_minmax(&params, output_min, output_max);
+  config->init.f32_minmax(&params, -INFINITY, INFINITY);
 
-  const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
   const struct xnn_binary_elementwise_subconfig* binary_elementwise_subconfig = &config->minmax;
-  if (linear_activation && config->linear.op_ukernel != NULL) {
+  if (config->linear.op_ukernel != NULL) {
     binary_elementwise_subconfig = &config->linear;
   }
 
@@ -1994,7 +1832,6 @@ static enum xnn_status run_binary_elementwise_nd_f32(
     flags,
     threadpool);
 }
-
 enum xnn_status xnn_run_add_nd_f32(
   size_t num_input1_dims,
   const size_t* input1_shape,
@@ -2003,8 +1840,6 @@ enum xnn_status xnn_run_add_nd_f32(
   const float* input1,
   const float* input2,
   float* output,
-  float output_min,
-  float output_max,
   uint32_t flags,
   pthreadpool_t threadpool)
 {
@@ -2013,7 +1848,6 @@ enum xnn_status xnn_run_add_nd_f32(
     num_input1_dims, input1_shape,
     num_input2_dims, input2_shape,
     input1, input2, output,
-    output_min, output_max,
     xnn_init_f32_vadd_config(),
     flags,
     threadpool);
@@ -2027,8 +1861,6 @@ enum xnn_status xnn_run_divide_nd_f32(
   const float* input1,
   const float* input2,
   float* output,
-  float output_min,
-  float output_max,
   uint32_t flags,
   pthreadpool_t threadpool)
 {
@@ -2037,7 +1869,6 @@ enum xnn_status xnn_run_divide_nd_f32(
     num_input1_dims, input1_shape,
     num_input2_dims, input2_shape,
     input1, input2, output,
-    output_min, output_max,
     xnn_init_f32_vdiv_config(),
     flags,
     threadpool);
@@ -2132,8 +1963,6 @@ enum xnn_status xnn_run_multiply_nd_f32(
   const float* input1,
   const float* input2,
   float* output,
-  float output_min,
-  float output_max,
   uint32_t flags,
   pthreadpool_t threadpool)
 {
@@ -2142,7 +1971,6 @@ enum xnn_status xnn_run_multiply_nd_f32(
     num_input1_dims, input1_shape,
     num_input2_dims, input2_shape,
     input1, input2, output,
-    output_min, output_max,
     xnn_init_f32_vmul_config(),
     flags,
     threadpool);
@@ -2156,8 +1984,6 @@ enum xnn_status xnn_run_subtract_nd_f32(
   const float* input1,
   const float* input2,
   float* output,
-  float output_min,
-  float output_max,
   uint32_t flags,
   pthreadpool_t threadpool)
 {
@@ -2166,7 +1992,6 @@ enum xnn_status xnn_run_subtract_nd_f32(
     num_input1_dims, input1_shape,
     num_input2_dims, input2_shape,
     input1, input2, output,
-    output_min, output_max,
     xnn_init_f32_vsub_config(),
     flags,
     threadpool);
@@ -2228,8 +2053,6 @@ enum xnn_status xnn_run_add_nd_qs8(
   int8_t* output,
   int8_t output_zero_point,
   float output_scale,
-  int8_t output_min,
-  int8_t output_max,
   uint32_t flags,
   pthreadpool_t threadpool)
 {
@@ -2251,13 +2074,6 @@ enum xnn_status xnn_run_add_nd_qs8(
     xnn_log_error(
       "failed to create %s operator with %.7g output scale: scale must be finite and positive",
       xnn_operator_type_to_string(xnn_operator_type_add_nd_qs8), output_scale);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (output_min > output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_add_nd_qs8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -2288,10 +2104,10 @@ enum xnn_status xnn_run_add_nd_qs8(
   assert(qs8_vadd_config->init.qs8_add != NULL);
   qs8_vadd_config->init.qs8_add(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
-    input1_output_scale, input2_output_scale, output_min, output_max);
+    input1_output_scale, input2_output_scale, INT8_MIN, INT8_MAX);
   qs8_vadd_config->init.qs8_add(
     &params2, input2_zero_point, input1_zero_point, output_zero_point,
-    input2_output_scale, input1_output_scale, output_min, output_max);
+    input2_output_scale, input1_output_scale, INT8_MIN, INT8_MAX);
 
 
   return run_binary_elementwise_nd(
@@ -2324,8 +2140,6 @@ enum xnn_status xnn_run_multiply_nd_qs8(
   int8_t* output,
   int8_t output_zero_point,
   float output_scale,
-  int8_t output_min,
-  int8_t output_max,
   uint32_t flags,
   pthreadpool_t threadpool)
 {
@@ -2347,13 +2161,6 @@ enum xnn_status xnn_run_multiply_nd_qs8(
     xnn_log_error(
       "failed to create %s operator with %.7g output scale: scale must be finite and positive",
       xnn_operator_type_to_string(xnn_operator_type_multiply_nd_qs8), output_scale);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (output_min > output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_multiply_nd_qs8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -2379,10 +2186,10 @@ enum xnn_status xnn_run_multiply_nd_qs8(
   assert(qs8_vmul_config->init.qs8_mul != NULL);
   qs8_vmul_config->init.qs8_mul(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
-    product_output_scale, output_min, output_max);
+    product_output_scale, INT8_MIN, INT8_MAX);
   qs8_vmul_config->init.qs8_mul(
     &params2, input2_zero_point, input1_zero_point, output_zero_point,
-    product_output_scale, output_min, output_max);
+    product_output_scale, INT8_MIN, INT8_MAX);
 
   return run_binary_elementwise_nd(
     xnn_operator_type_multiply_nd_qs8,
@@ -2414,8 +2221,6 @@ enum xnn_status xnn_run_subtract_nd_qs8(
   int8_t* output,
   int8_t output_zero_point,
   float output_scale,
-  int8_t output_min,
-  int8_t output_max,
   uint32_t flags,
   pthreadpool_t threadpool)
 {
@@ -2437,13 +2242,6 @@ enum xnn_status xnn_run_subtract_nd_qs8(
     xnn_log_error(
       "failed to create %s operator with %.7g output scale: scale must be finite and positive",
       xnn_operator_type_to_string(xnn_operator_type_subtract_nd_qs8), output_scale);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (output_min > output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_subtract_nd_qs8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -2474,10 +2272,10 @@ enum xnn_status xnn_run_subtract_nd_qs8(
   assert(qs8_vadd_config->init.qs8_add != NULL);
   qs8_vadd_config->init.qs8_add(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
-    input1_output_scale, -input2_output_scale, output_min, output_max);
+    input1_output_scale, -input2_output_scale, INT8_MIN, INT8_MAX);
   qs8_vadd_config->init.qs8_add(
     &params2, input2_zero_point, input1_zero_point, output_zero_point,
-    -input2_output_scale, input1_output_scale, output_min, output_max);
+    -input2_output_scale, input1_output_scale, INT8_MIN, INT8_MAX);
 
   return run_binary_elementwise_nd(
     xnn_operator_type_subtract_nd_qs8,
@@ -2509,8 +2307,6 @@ enum xnn_status xnn_run_add_nd_qu8(
   uint8_t* output,
   uint8_t output_zero_point,
   float output_scale,
-  uint8_t output_min,
-  uint8_t output_max,
   uint32_t flags,
   pthreadpool_t threadpool)
 {
@@ -2532,13 +2328,6 @@ enum xnn_status xnn_run_add_nd_qu8(
     xnn_log_error(
       "failed to create %s operator with %.7g output scale: scale must be finite and positive",
       xnn_operator_type_to_string(xnn_operator_type_add_nd_qu8), output_scale);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (output_min > output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_add_nd_qu8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -2569,10 +2358,10 @@ enum xnn_status xnn_run_add_nd_qu8(
   assert(qu8_vadd_config->init.qu8_add != NULL);
   qu8_vadd_config->init.qu8_add(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
-    input1_output_scale, input2_output_scale, output_min, output_max);
+    input1_output_scale, input2_output_scale, /*output_min=*/0, UINT8_MAX);
   qu8_vadd_config->init.qu8_add(
     &params2, input2_zero_point, input1_zero_point, output_zero_point,
-    input2_output_scale, input1_output_scale, output_min, output_max);
+    input2_output_scale, input1_output_scale, /*output_min=*/0, UINT8_MAX);
 
   return run_binary_elementwise_nd(
     xnn_operator_type_add_nd_qu8,
@@ -2604,8 +2393,6 @@ enum xnn_status xnn_run_multiply_nd_qu8(
   uint8_t* output,
   uint8_t output_zero_point,
   float output_scale,
-  uint8_t output_min,
-  uint8_t output_max,
   uint32_t flags,
   pthreadpool_t threadpool)
 {
@@ -2630,13 +2417,6 @@ enum xnn_status xnn_run_multiply_nd_qu8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min > output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_multiply_nd_qu8), output_min, output_max);
-    return xnn_status_invalid_parameter;
-  }
-
   const float product_scale = input1_scale * input2_scale;
   const float product_output_scale = product_scale / output_scale;
   if (product_output_scale < 0x1.0p-16f || product_output_scale >= 0x1.0p+8f) {
@@ -2658,10 +2438,10 @@ enum xnn_status xnn_run_multiply_nd_qu8(
   assert(qu8_vmul_config->init.qu8_mul != NULL);
   qu8_vmul_config->init.qu8_mul(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
-    product_output_scale, output_min, output_max);
+    product_output_scale, /*output_min=*/0, UINT8_MAX);
   qu8_vmul_config->init.qu8_mul(
     &params2, input2_zero_point, input1_zero_point, output_zero_point,
-    product_output_scale, output_min, output_max);
+    product_output_scale, /*output_min=*/0, UINT8_MAX);
 
   return run_binary_elementwise_nd(
     xnn_operator_type_multiply_nd_qu8,
@@ -2693,8 +2473,6 @@ enum xnn_status xnn_run_subtract_nd_qu8(
   uint8_t* output,
   uint8_t output_zero_point,
   float output_scale,
-  uint8_t output_min,
-  uint8_t output_max,
   uint32_t flags,
   pthreadpool_t threadpool)
 {
@@ -2716,13 +2494,6 @@ enum xnn_status xnn_run_subtract_nd_qu8(
     xnn_log_error(
       "failed to create %s operator with %.7g output scale: scale must be finite and positive",
       xnn_operator_type_to_string(xnn_operator_type_subtract_nd_qu8), output_scale);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (output_min > output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_subtract_nd_qu8), output_min, output_max);
     return xnn_status_invalid_parameter;
   }
 
@@ -2754,10 +2525,10 @@ enum xnn_status xnn_run_subtract_nd_qu8(
   assert(qu8_vadd_config->init.qu8_add != NULL);
   qu8_vadd_config->init.qu8_add(
     &params, input1_zero_point, input2_zero_point, output_zero_point,
-    input1_output_scale, -input2_output_scale, output_min, output_max);
+    input1_output_scale, -input2_output_scale, /*output_min=*/0, UINT8_MAX);
   qu8_vadd_config->init.qu8_add(
     &params2, input2_zero_point, input1_zero_point, output_zero_point,
-    -input2_output_scale, input1_output_scale, output_min, output_max);
+    -input2_output_scale, input1_output_scale, /*output_min=*/0, UINT8_MAX);
 
   return run_binary_elementwise_nd(
     xnn_operator_type_subtract_nd_qu8,

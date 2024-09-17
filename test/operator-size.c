@@ -27,7 +27,6 @@ int main(int argc, char** argv) {
       break;
     case 1:
       xnn_create_add_nd_f32(
-        0.0f, 0.0f,
         0, &op);
       break;
     case 2:
@@ -99,7 +98,7 @@ int main(int argc, char** argv) {
       break;
     case 13:
       xnn_create_divide_nd_f32(
-        0.0f, 0.0f, 0, &op);
+         0, &op);
       break;
     case 14:
       xnn_setup_divide_nd_f32(
@@ -165,7 +164,6 @@ int main(int argc, char** argv) {
       break;
     case 27:
       xnn_create_multiply_nd_f32(
-        0.0f, 0.0f,
         0, &op);
       break;
     case 28:
@@ -210,7 +208,6 @@ int main(int argc, char** argv) {
       break;
     case 37:
       xnn_create_subtract_nd_f32(
-        0.0f, 0.0f,
         0, &op);
       break;
     case 38:

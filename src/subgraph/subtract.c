@@ -47,15 +47,11 @@ static enum xnn_status create_subtract_operator(
   switch (input1_value->datatype) {
     case xnn_datatype_fp16:
       status = xnn_create_subtract_nd_f16(
-        node->activation.output_min,
-        node->activation.output_max,
         node->flags,
         &opdata->operator_objects[0]);
       break;
     case xnn_datatype_fp32:
       status = xnn_create_subtract_nd_f32(
-        node->activation.output_min,
-        node->activation.output_max,
         node->flags,
         &opdata->operator_objects[0]);
       break;
@@ -63,15 +59,13 @@ static enum xnn_status create_subtract_operator(
     {
       const float output_scale = values[output_id].quantization.scale;
       const int32_t output_zero_point = values[output_id].quantization.zero_point;
-      const int8_t output_min = xnn_qs8_quantize(node->activation.output_min, output_scale, output_zero_point);
-      const int8_t output_max = xnn_qs8_quantize(node->activation.output_max, output_scale, output_zero_point);
       status = xnn_create_subtract_nd_qs8(
         (int8_t) values[input1_id].quantization.zero_point,
         values[input1_id].quantization.scale,
         (int8_t) values[input2_id].quantization.zero_point,
         values[input2_id].quantization.scale,
         (int8_t) output_zero_point,
-        output_scale, output_min, output_max, node->flags,
+        output_scale, node->flags,
         &opdata->operator_objects[0]);
       break;
     }
@@ -79,15 +73,13 @@ static enum xnn_status create_subtract_operator(
     {
       const float output_scale = values[output_id].quantization.scale;
       const int32_t output_zero_point = values[output_id].quantization.zero_point;
-      const uint8_t output_min = xnn_qu8_quantize(node->activation.output_min, output_scale, output_zero_point);
-      const uint8_t output_max = xnn_qu8_quantize(node->activation.output_max, output_scale, output_zero_point);
       status = xnn_create_subtract_nd_qu8(
         (uint8_t) values[input1_id].quantization.zero_point,
         values[input1_id].quantization.scale,
         (uint8_t) values[input2_id].quantization.zero_point,
         values[input2_id].quantization.scale,
         (uint8_t) output_zero_point,
-        output_scale, output_min, output_max, node->flags,
+        output_scale, node->flags,
         &opdata->operator_objects[0]);
       break;
     }
@@ -372,5 +364,8 @@ enum xnn_status xnn_define_subtract(
   node->reshape = reshape_subtract_operator;
   node->setup = setup_subtract_operator;
 
+  if (output_min != -INFINITY && output_max != INFINITY) {
+    xnn_insert_clamp_node(subgraph, output_min, output_max, node);
+  }
   return xnn_status_success;
 }

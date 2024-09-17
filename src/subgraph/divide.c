@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <math.h>
 #include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -38,15 +39,11 @@ static enum xnn_status create_divide_operator(
   switch (input1_value->datatype) {
     case xnn_datatype_fp16:
       status = xnn_create_divide_nd_f16(
-        node->activation.output_min,
-        node->activation.output_max,
         node->flags,
         &opdata->operator_objects[0]);
       break;
     case xnn_datatype_fp32:
       status = xnn_create_divide_nd_f32(
-        node->activation.output_min,
-        node->activation.output_max,
         node->flags,
         &opdata->operator_objects[0]);
       break;
@@ -288,5 +285,8 @@ enum xnn_status xnn_define_divide(
   node->reshape = reshape_divide_operator;
   node->setup = setup_divide_operator;
 
+  if (output_min != -INFINITY && output_max != INFINITY) {
+    xnn_insert_clamp_node(subgraph, output_min, output_max, node);
+  }
   return xnn_status_success;
 }

@@ -92,10 +92,6 @@ class BinaryElementwiseOperatorTester {
                                           input2_zero_point())) /
                         output_scale() +
                     static_cast<float>(output_zero_point());
-                output_ref =
-                    std::max<float>(output_ref, static_cast<float>(qmin()));
-                output_ref =
-                    std::min<float>(output_ref, static_cast<float>(qmax()));
                 const size_t index =
                     i * output_strides[0] + j * output_strides[1] +
                     k * output_strides[2] + l * output_strides[3] +
@@ -210,20 +206,6 @@ class BinaryElementwiseOperatorTester {
 
   float output_scale() const { return this->output_scale_; }
 
-  BinaryElementwiseOperatorTester& qmin(int16_t qmin) {
-    this->qmin_ = qmin;
-    return *this;
-  }
-
-  int16_t qmin() const { return this->qmin_; }
-
-  BinaryElementwiseOperatorTester& qmax(int16_t qmax) {
-    this->qmax_ = qmax;
-    return *this;
-  }
-
-  int16_t qmax() const { return this->qmax_; }
-
   BinaryElementwiseOperatorTester& operation_type(
       OperationType operation_type) {
     this->operation_type_ = operation_type;
@@ -322,8 +304,6 @@ class BinaryElementwiseOperatorTester {
   float input2_scale_{1.0f};
   int16_t output_zero_point_{0};
   float output_scale_{1.0f};
-  int16_t qmin_{std::numeric_limits<int16_t>::min()};
-  int16_t qmax_{std::numeric_limits<int16_t>::max()};
   OperationType operation_type_{OperationType::Unknown};
   size_t iterations_{3};
 };
