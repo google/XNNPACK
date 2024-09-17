@@ -40,20 +40,29 @@ void xnn_f32_rwsum_ukernel__scalar_u1(
   int output_size = (padded_size < (window_dimensions - 1) * window_dilations + 1) ? 
                     0 : FLOOR((padded_size - (window_dimensions - 1) * window_dilations - 1) / (float)window_strides) + 1;
 
-    for (int i = 0; i < output_size; i++) {
-            float sum = init_value;
+  int64_t inverse_base_dilation = (1LL << 32) / base_dilation; // Scaled inverse
+  int padded_boundary = padded_size - padding[1];
+  for (int i = 0; i < output_size; i++) {
+    float sum = init_value;
+    int window_start_row = i * window_strides;
+        
+        for (int k = 0; k < window_dimensions; k++) {
+        int window_row = window_start_row + k * window_dilations;
+        int window_row_pad_adjusted = window_row - padding[0];
 
-            for (int k = 0; k < window_dimensions; k++) {
-                int window_row = i * window_strides + k * window_dilations;
-                if (window_row < padding[0] || 
-                    window_row >= padded_size - padding[1] || 
-                    (window_row - padding[0]) % base_dilation != 0) {
-                    sum += init_value;
-                    continue;
-                }
-                window_row = (window_row - padding[0]) / base_dilation;
-                sum += input[window_row]; 
-            }
-            output[i] = sum;   
+        // multiplicative inverse (optimized % base_dilation)
+        if (window_row_pad_adjusted < 0 || 
+            window_row >= padded_boundary || 
+            ((window_row_pad_adjusted * inverse_base_dilation) >> 32) * base_dilation != window_row_pad_adjusted) {
+                sum += init_value;
+                continue;
+        }
+
+        // Optimized division
+        window_row = (window_row_pad_adjusted * inverse_base_dilation) >> 32;
+        sum += input[window_row];
+    }
+
+    output[i] = sum;   
     }
 }
