@@ -205,9 +205,9 @@ __m256i _mm256_dpbusd_epi32_madd(__m256i i32, const __m256i u8, const __m256i u4
 
 #endif  // __AVX2__
 
-#if defined(__SSSE3__) || defined _M_X64 || (defined _M_IX86_FP && _M_IX86_FP >= 2)
+#if defined(__SSSE3__) || defined(_M_X64) || (defined _M_IX86_FP && _M_IX86_FP >= 2)
 
-#include <immintrin.h>
+#include <tmmintrin.h>
 
 // SSE VNNI replacement that uses vpmaddubsw.
 // u4 is uint4 in lower 4 bits.
