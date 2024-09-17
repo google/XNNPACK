@@ -9,7 +9,7 @@
 
 #include <assert.h>
 
-#include <immintrin.h>
+#include <tmmintrin.h>
 
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"

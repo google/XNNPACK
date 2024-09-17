@@ -9,7 +9,8 @@ $assert DATATYPE in ["QC4_F32"]
 $assert SSE in [3, 4]
 #include <assert.h>
 
-#include <immintrin.h>
+$SSE_HEADER = {3: "tmmintrin.h", 4: "smmintrin.h"}[SSE]
+#include <${SSE_HEADER}>
 
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
