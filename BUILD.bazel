@@ -34,6 +34,7 @@ load(
     "xnnpack_simd_s16_archs",
     "xnnpack_simd_s32_archs",
     "xnnpack_simd_s8_archs",
+    "xnnpack_simd_u32_archs",
 )
 load(
     "//gen:microkernels.bzl",
@@ -381,6 +382,9 @@ SIMD_HEADERS = [
 ] + [
     "src/xnnpack/simd/s8-" + arch + ".h"
     for arch in xnnpack_simd_s8_archs()
+] + [
+    "src/xnnpack/simd/u32-" + arch + ".h"
+    for arch in xnnpack_simd_u32_archs()
 ]
 
 exports_files(SIMD_HEADERS)
