@@ -355,7 +355,6 @@ MICROKERNEL_DEPS = [
     ":assembly",
     ":common",
     ":hardware_config",
-    ":logging",
     ":math",
     ":microkernels_h",
     ":microparams",
