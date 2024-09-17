@@ -1755,6 +1755,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   SET(MICROKERNEL_VCVT_TESTS
       f16-f32-vcvt
+      f16-qs8-vcvt
       f32-f16-vcvt
       f32-qs8-vcvt
       f32-qu8-vcvt

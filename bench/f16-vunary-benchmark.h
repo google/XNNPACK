@@ -82,9 +82,7 @@ void f16_vunary_benchmark(benchmark::State& state,
                           InitParamsFunction<UKernelParams> init_params,
                           uint64_t arch_flags, float range_min,
                           float range_max) {
-  const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config &&
-      (hardware_config->arch_flags & arch_flags) != arch_flags) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 

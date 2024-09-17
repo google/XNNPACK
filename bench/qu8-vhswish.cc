@@ -27,7 +27,7 @@ static void qu8_vhswish(
   xnn_qu8_vhswish_ukernel_fn hswish,
   xnn_init_qu8_hswish_params_fn init_params)
 {
-  if (benchmark::utils::CheckArchFlags(state, arch_flags)) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -45,7 +45,7 @@ static void qu8_vhswish(
   std::fill(y.begin(), y.end(), INT8_C(0xAA));
 
   xnn_qu8_hswish_params params;
-      init_params(&params, 1, 5, 128.0f, 128.0f);
+  init_params(&params, 1, 5, 128.0f, 128.0f);
   for (auto _ : state) {
     hswish(num_elements * sizeof(int8_t), x.data(), y.data(), &params);
   }
