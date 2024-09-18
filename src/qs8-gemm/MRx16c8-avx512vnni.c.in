@@ -279,7 +279,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c8__
       $for M in range(MR):
         ${_}__m512 vf${M}x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc${M}x0123456789ABCDEF);
 
-    $if DATATYPE == "QC4":
+    $if DATATYPE == "QC4" and VARIANT != "MADD":
       $for M in range(MR):
         ${_}vacc${M}x0123456789ABCDEF = _mm512_srai_epi32(vacc${M}x0123456789ABCDEF, 4);
     $if DATATYPE != "QB4":

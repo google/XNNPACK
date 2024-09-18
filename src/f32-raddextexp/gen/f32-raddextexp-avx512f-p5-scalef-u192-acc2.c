@@ -303,6 +303,4 @@ void xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_u192_acc2(
 
   sum[0] = _mm512_reduce_add_ps(_mm512_scalef_ps(vaccv, vdelta_acce));
   sum[1] = vmax_acce;
-
-  _mm256_zeroupper();
 }

@@ -9,7 +9,7 @@
 
 #include <assert.h>
 
-#include <xmmintrin.h>
+#include <emmintrin.h>
 
 #include "xnnpack/common.h"
 #include "xnnpack/intrinsics-polyfill.h"

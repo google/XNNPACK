@@ -212,6 +212,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qu8-igemm/gen/qu8-igemm-1x4-minmax-fp32-scalar-lrintf.c
   src/qu8-igemm/gen/qu8-igemm-2x2-minmax-fp32-scalar-imagic.c
   src/qu8-igemm/gen/qu8-igemm-3x4-minmax-fp32-scalar-lrintf.c
+  src/qu8-rdsum/gen/qu8-rdsum-scalar.c
   src/qu8-rsum/gen/qu8-rsum-scalar-u4.c
   src/qu8-vadd/gen/qu8-vadd-minmax-scalar-u1.c
   src/qu8-vadd/gen/qu8-vadd-minmax-scalar-u4.c
