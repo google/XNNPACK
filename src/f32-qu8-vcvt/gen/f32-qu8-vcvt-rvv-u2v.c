@@ -29,24 +29,21 @@ void xnn_f32_qu8_vcvt_ukernel__rvv_u2v(
   batch >>= XNN_LOG2_SIZEOF_FLOAT;
 
   const float scale = params->scalar.scale;
-  const vfloat32m2_t magic_bias_f32v = __riscv_vfmv_v_f_f32m2(12582912.0f, __riscv_vsetvl_e32m2(batch));
   const float output_min_less_zero_point = (float) ((int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point);
   const float output_max_less_zero_point = (float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point);
-  const int32_t magic_min = (int32_t) float_as_uint32(12582912.0f + output_min_less_zero_point);
-  const int32_t magic_max = (int32_t) float_as_uint32(12582912.0f + output_max_less_zero_point);
-  const int32_t magic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point;
+  const int32_t output_zero_point = params->scalar.output_zero_point;
 
   for (; batch > 0; ) {
     const int32_t n = __riscv_vsetvl_e32m2(batch); batch -= n;
 
     vfloat32m2_t x_f32v = __riscv_vle32_v_f32m2(input, n); input += n;
 
-    x_f32v = __riscv_vfmadd_vf_f32m2(x_f32v, scale, magic_bias_f32v, n);
+    x_f32v = __riscv_vfmul_vf_f32m2(x_f32v, scale, n);
+    x_f32v = __riscv_vfmax_vf_f32m2(x_f32v, output_min_less_zero_point, n);
+    x_f32v = __riscv_vfmin_vf_f32m2(x_f32v, output_max_less_zero_point, n);
 
-    vint32m2_t y_i32v = __riscv_vreinterpret_v_f32m2_i32m2(x_f32v);
-    y_i32v = __riscv_vmax_vx_i32m2(y_i32v, magic_min, n);
-    y_i32v = __riscv_vmin_vx_i32m2(y_i32v, magic_max, n);
-    y_i32v = __riscv_vssub_vx_i32m2(y_i32v, magic_bias_less_zero_point, n);
+    vint32m2_t y_i32v = __riscv_vfcvt_x_f_v_i32m2(x_f32v, n);
+    y_i32v = __riscv_vadd_vx_i32m2(y_i32v, output_zero_point, n);
 
     __riscv_vse8_v_u8mf2(output, __riscv_vncvt_x_x_w_u8mf2(__riscv_vncvt_x_x_w_u16m1(__riscv_vreinterpret_v_i32m2_u32m2(y_i32v), n), n), n); output += n;
   }

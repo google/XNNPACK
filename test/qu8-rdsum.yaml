@@ -1,0 +1,17 @@
+# Copyright 2024 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Scalar
+- name: xnn_qu8_rdsum_ukernel_7p7x__scalar_c4
+
+# ARM NEON
+- name: xnn_qu8_rdsum_ukernel_7p7x__neon_u16
+- name: xnn_qu8_rdsum_ukernel_7p7x__neon_u32
+- name: xnn_qu8_rdsum_ukernel_7p7x__neon_u64
+
+# x86 SSSE3
+- name: xnn_qu8_rdsum_ukernel_7p7x__ssse3_c16
+- name: xnn_qu8_rdsum_ukernel_7p7x__ssse3_c32
+- name: xnn_qu8_rdsum_ukernel_7p7x__ssse3_c64

@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <inttypes.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -26,6 +27,44 @@
 #ifndef XNN_ENABLE_SPARSE
   #error "XNN_ENABLE_SPARSE not defined"
 #endif
+
+enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min, float output_max, struct xnn_node *node) {
+  uint32_t output_id = node->outputs[0];
+  struct xnn_value* output_value = &subgraph->values[output_id];
+  uint32_t new_id = XNN_INVALID_VALUE_ID;
+  enum xnn_status status;
+  switch (output_value->datatype) {
+    case xnn_datatype_fp16:
+      status = xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp16, 0, NULL, NULL,
+          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
+      break;
+    case xnn_datatype_fp32:
+      status = xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 0, NULL, NULL,
+          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
+      break;
+    case xnn_datatype_quint8:
+      status = xnn_define_quantized_tensor_value(
+          subgraph, xnn_datatype_quint8, output_value->quantization.zero_point, output_value->quantization.scale, /*num_dims=*/0, /*dims=*/NULL, NULL,
+          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
+      break;
+    case xnn_datatype_qint8:
+      status = xnn_define_quantized_tensor_value(
+          subgraph, xnn_datatype_qint8, output_value->quantization.zero_point, output_value->quantization.scale, /*num_dims=*/0, /*dims=*/NULL, NULL,
+          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
+  if (status != xnn_status_success) {
+    return status;
+  }
+  node->outputs[0] = new_id;
+  node->activation.output_min = -INFINITY;
+  node->activation.output_max = INFINITY;
+  return xnn_define_clamp(subgraph, output_min, output_max, new_id, output_id, /*flags=*/0);
+}
 
 enum xnn_status xnn_create_subgraph(
     uint32_t external_value_ids,

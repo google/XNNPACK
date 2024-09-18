@@ -371,5 +371,8 @@ enum xnn_status xnn_define_add2(
   node->reshape = reshape_add_operator;
   node->setup = setup_add_operator;
 
+  if (output_min != -INFINITY && output_max != INFINITY) {
+    xnn_insert_clamp_node(subgraph, output_min, output_max, node);
+  }
   return xnn_status_success;
 }

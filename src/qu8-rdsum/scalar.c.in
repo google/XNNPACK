@@ -1,0 +1,88 @@
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <assert.h>
+
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/reduce.h"
+
+
+$CHANNELS_BATCH = 4
+void xnn_qu8_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__scalar_c4(
+    size_t rows,
+    size_t channels,
+    const uint8_t* input,
+    size_t input_stride,
+    const uint8_t* zero,
+    uint32_t* output,
+    const struct xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(rows != 0);
+  assert(channels != 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  size_t input_increment = ${ACCUMULATORS} * input_stride;
+  for (; channels >= ${CHANNELS_BATCH}; channels -= ${CHANNELS_BATCH}) {
+    const uint8_t* i0 = input;
+    $for ACC in range(1, ACCUMULATORS):
+      const uint8_t* i${ACC} = (const uint8_t*) ((uintptr_t) i${ACC - 1} + input_stride);
+    $for C in range(CHANNELS_BATCH):
+      uint32_t vacc${C} = 0;
+
+    for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
+      $for ACC in range(1, ACCUMULATORS, 2):
+        if XNN_UNPREDICTABLE(r < ${ACC+1}) {
+          i${ACC} = zero;
+        }
+        if XNN_UNPREDICTABLE(r <= ${ACC+1}) {
+          i${ACC+1} = zero;
+        }
+      $for ACC in range(ACCUMULATORS):
+        $for C in range(CHANNELS_BATCH):
+          vacc${C} += (uint32_t) i${ACC}[${C}];
+      $for ACC in range(ACCUMULATORS):
+        i${ACC} = (const uint8_t*) ((uintptr_t) i${ACC} + input_increment);
+    }
+
+    $for C in range(CHANNELS_BATCH):
+      *output++ += vacc${C};
+
+    input = (const uint8_t*) ((uintptr_t) input + ${CHANNELS_BATCH});
+  }
+  if (channels != 0) {
+    size_t input_increment = ${ACCUMULATORS} * input_stride;
+    const uint8_t* i0 = input;
+    $for i in range(1, ACCUMULATORS):
+      const uint8_t* i${i} = (const uint8_t*) ((uintptr_t) i${i - 1} + input_stride);
+    $for C in range(CHANNELS_BATCH - 1):
+      uint32_t vacc${C} = 0;
+
+    for (int r = rows; r > 0; r -= ${ACCUMULATORS}) {
+      $for N in range(1, ACCUMULATORS, 2):
+        if XNN_UNPREDICTABLE(r < ${N+1}) {
+          i${N} = zero;
+        }
+        if XNN_UNPREDICTABLE(r <= ${N+1}) {
+          i${N+1} = zero;
+        }
+      $for j in range(0, ACCUMULATORS):
+        $for C in range(CHANNELS_BATCH-1):
+          vacc${C} += (uint32_t) i${j}[${C}];
+      $for N in range(0, ACCUMULATORS):
+        i${N} = (const uint8_t*) ((uintptr_t) i${N} + input_increment);
+    }
+
+    if (channels & 2) {
+      *output++ += vacc0;
+      *output++ += vacc1;
+      vacc0 = vacc2;
+    }
+    if (channels & 1) {
+      *output += vacc0;
+    }
+  }
+}
