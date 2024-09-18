@@ -897,9 +897,6 @@ xnnpack_cc_library(
                 for arch in xnnpack_archs()
             ],
             [],
-        ) + xnnpack_select_if(
-            "//build_config:hexagon",
-            ["//base:system_malloc"],
         ),
     )
     for lib in ("prod", "all")
