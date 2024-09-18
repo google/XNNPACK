@@ -76,6 +76,7 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/s32-f32-vcvt/gen/s32-f32-vcvt-avx2.c
   src/s32-vmul/gen/s32-vmul-avx2.c
   src/s32-vmul/gen/s32-vmulc-avx2.c
+  src/u32-f32-vcvt/gen/u32-f32-vcvt-avx2.c
   src/x8-lut/gen/x8-lut-avx2-u128.c
   src/x8-transposec/gen/x8-transposec-32x32-reuse-switch-avx2.c
   src/x16-packw/gen/x16-packw-x16-gemm-goi-avx2-u16-prfm.c

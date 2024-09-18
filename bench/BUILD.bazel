@@ -212,6 +212,7 @@ xnnpack_benchmark(
     "f32_qs8_vcvt",
     "f32_qu8_vcvt",
     "s32_f32_vcvt",
+    "u32_f32_vcvt",
 ]]
 
 [xnnpack_benchmark(
@@ -549,6 +550,7 @@ xnnpack_benchmark(
         "bgemm.h",
         "x8-packq.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packq_benchmark",
         "//:allocator",

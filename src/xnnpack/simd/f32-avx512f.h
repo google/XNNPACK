@@ -25,7 +25,7 @@ typedef __m512 xnn_simd_f32_t;
 #define XNN_SIMD_CONST_F32(var, val) \
   const xnn_simd_f32_t var = _mm512_set1_ps(val);
 
-#define XNN_SIMD_CONST_U32(var, val) \
+#define XNN_SIMD_CONST_F32_FROM_INT32(var, val) \
   const __m512 var = _mm512_castsi512_ps(_mm512_set1_epi32(val));
 
 // Whether or not this architecture has native fused multiply-add support.
@@ -87,7 +87,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_min_f32(xnn_simd_f32_t a,
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_abs_f32(xnn_simd_f32_t a) {
-  XNN_SIMD_CONST_U32(vnonsign_mask, 0x7FFFFFFFUL);
+  XNN_SIMD_CONST_F32_FROM_INT32(vnonsign_mask, 0x7FFFFFFFUL);
   return _mm512_castsi512_ps(_mm512_and_epi32(
       _mm512_castps_si512(a), _mm512_castps_si512(vnonsign_mask)));
 }

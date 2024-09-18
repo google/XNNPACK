@@ -38,7 +38,7 @@ typedef __m256 xnn_simd_f32_t;
 #define XNN_SIMD_CONST_F32(var, val) \
   const xnn_simd_f32_t var = _mm256_set1_ps(val);
 
-#define XNN_SIMD_CONST_U32(var, val) \
+#define XNN_SIMD_CONST_F32_FROM_INT32(var, val) \
   const xnn_simd_f32_t var = _mm256_castsi256_ps(_mm256_set1_epi32(val));
 
 // Include the header for generic functions _after_ declaring the arch-specific
@@ -83,7 +83,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_min_f32(xnn_simd_f32_t a,
 }
 
 static XNN_INLINE xnn_simd_f32_t xnn_abs_f32(xnn_simd_f32_t a) {
-  XNN_SIMD_CONST_U32(vnonsign_mask, 0x7FFFFFFFUL);
+  XNN_SIMD_CONST_F32_FROM_INT32(vnonsign_mask, 0x7FFFFFFFUL);
   return _mm256_and_ps(a, vnonsign_mask);
 }
 

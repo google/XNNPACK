@@ -238,6 +238,7 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/u8-ibilinear/gen/u8-ibilinear-wasmsimd-dot16x2-c8.c
   src/u8-maxpool/u8-maxpool-9p8x-minmax-wasmsimd-c16.c
   src/u8-vclamp/u8-vclamp-wasmsimd-u64.c
+  src/u32-f32-vcvt/gen/u32-f32-vcvt-wasmsimd.c
   src/x8-lut/gen/x8-lut-wasmsimd-u32.c
   src/x8-transposec/gen/x8-transposec-16x16-reuse-mov-wasmsimd.c
   src/x16-transposec/gen/x16-transposec-8x8-reuse-mov-wasmsimd.c
