@@ -10,33 +10,30 @@
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/packb.h"
+#include "xnnpack/zerob.h"
 #include "packb-microkernel-tester.h"
 
 namespace {
 
 struct XnnTestParam {
   const char *name;
-  xnn_x32_packb_gemm_ukernel_fn ukernel;
+  PackBMicrokernelTester::Kernel kernel;
   uint64_t arch_flags;
   size_t channel_tile, channel_subtile, channel_round;
 };
 
-struct XnnTestParamExtra {
-  size_t channel_tile, channel_subtile, channel_round;
-};
-
-class XnnTest : public testing::TestWithParam<XnnTestParam> {
-};
+class XnnTest : public testing::TestWithParam<XnnTestParam> {};
 
 std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) {
   return info.param.name;
 }
 
 #define XNN_UKERNEL(arch_flags, ukernel, channel_tile, channel_subtile, channel_round) \
-  { #ukernel, ukernel, arch_flags, channel_tile, channel_subtile, channel_round },
+  { #ukernel, PackBMicrokernelTester::Kernel{ukernel}, arch_flags, channel_tile, channel_subtile, channel_round },
 
 const XnnTestParam xnn_test_params[] = {
 #include "src/x32-packb/x32-packb.h"
+#include "src/x32-zerob/x32-zerob.h"
 };
 
 #undef XNN_UKERNEL
@@ -52,7 +49,7 @@ TEST_P(XnnTest, n_eq_channel_tile) {
       .channel_tile(GetParam().channel_tile)
       .channel_subtile(GetParam().channel_subtile)
       .channel_round(GetParam().channel_round)
-      .Test(GetParam().ukernel);
+      .Test(GetParam().kernel);
   }
 }
 
@@ -68,7 +65,7 @@ TEST_P(XnnTest, n_div_channel_tile) {
       .channel_tile(GetParam().channel_tile)
       .channel_subtile(GetParam().channel_subtile)
       .channel_round(GetParam().channel_round)
-      .Test(GetParam().ukernel);
+      .Test(GetParam().kernel);
   }
 }
 
@@ -85,7 +82,7 @@ TEST_P(XnnTest, n_lt_channel_tile) {
         .channel_tile(GetParam().channel_tile)
         .channel_subtile(GetParam().channel_subtile)
         .channel_round(GetParam().channel_round)
-        .Test(GetParam().ukernel);
+        .Test(GetParam().kernel);
     }
   }
 }
@@ -100,7 +97,7 @@ TEST_P(XnnTest, n_gt_channel_tile) {
         .channel_tile(GetParam().channel_tile)
         .channel_subtile(GetParam().channel_subtile)
         .channel_round(GetParam().channel_round)
-        .Test(GetParam().ukernel);
+        .Test(GetParam().kernel);
     }
   }
 }
@@ -117,7 +114,7 @@ TEST_P(XnnTest, groups_gt_1) {
           .channel_tile(GetParam().channel_tile)
           .channel_subtile(GetParam().channel_subtile)
           .channel_round(GetParam().channel_round)
-          .Test(GetParam().ukernel);
+          .Test(GetParam().kernel);
       }
     }
   }

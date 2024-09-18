@@ -14,7 +14,9 @@
 #include "xnnpack/packq.h"
 
 #if XNN_ENABLE_KLEIDIAI
-#include "kai/ukernels/matmul/pack/kai_lhs_quant_pack_qai8dxp_f32.h"
+  // Keep this line indented to avoid it being pulled out of the #ifdef when the
+  // sources are amalgamated.
+  #include "kai/ukernels/matmul/pack/kai_lhs_quant_pack_qai8dxp_f32.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
 

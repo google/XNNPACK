@@ -31,7 +31,7 @@ $  "PRELU": lambda x: "_mm256_mul_ps(%s, vb)" % x,
 $  "RPRELU": lambda x: "_mm256_mul_ps(%s, vb)" % x,
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "union xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
+$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
 void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__avx_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,

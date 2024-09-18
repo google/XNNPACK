@@ -39,14 +39,14 @@ extern "C" {
 
 #define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype) \
   XNN_INTERNAL void fn_name(size_t n, const int8_t* x, int8_t* y,           \
-                            const union xnn_s8_minmax_params                \
+                            const struct xnn_s8_minmax_params                \
                                 params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 #include "src/s8-vclamp/s8-vclamp.h"
 #undef XNN_UKERNEL
 
 #define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype) \
   XNN_INTERNAL void fn_name(size_t n, const uint8_t* x, uint8_t* y,         \
-                            const union xnn_u8_minmax_params                \
+                            const struct xnn_u8_minmax_params                \
                                 params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 #include "src/u8-vclamp/u8-vclamp.h"
 #undef XNN_UKERNEL

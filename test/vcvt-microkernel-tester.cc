@@ -28,7 +28,7 @@
 #include "replicable_random_device.h"
 
 void VCvtMicrokernelTester::Test(
-    xnn_f16_f32_vcvt_ukernel_fn vcvt) const {
+    xnn_f16_f32_vcvt_ukernel_fn vcvt, const void*) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(-100.0f, 100.0f);
 
@@ -54,7 +54,7 @@ void VCvtMicrokernelTester::Test(
 }
 
 void VCvtMicrokernelTester::Test(
-    xnn_f32_f16_vcvt_ukernel_fn vcvt) const {
+    xnn_f32_f16_vcvt_ukernel_fn vcvt, const void*) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(-100.0f, 100.0f);
 

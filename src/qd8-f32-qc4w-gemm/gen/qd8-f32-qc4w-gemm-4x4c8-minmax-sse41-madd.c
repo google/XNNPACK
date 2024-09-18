@@ -9,9 +9,8 @@
 
 #include <assert.h>
 
-#include <immintrin.h>
+#include <smmintrin.h>
 
-#include <fp16/fp16.h>
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
@@ -28,7 +27,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4c8__sse41_madd(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f32_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_f32_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
@@ -74,18 +73,18 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4c8__sse41_madd(
   XNN_FORCE_REALIZATION(vmask);
   do {
     const __m128i vksum0123 = _mm_load_si128(w);
-    __m128i vsum0x0123 = _mm_mullo_epi32(vksum0123, vinput_zero_point0);
-    __m128i vacc0x01 = _mm_cvtepu32_epi64(vsum0x0123);
-    __m128i vacc0x23 = _mm_cvtepu32_epi64(_mm_castps_si128(_mm_movehl_ps(_mm_castsi128_ps(vsum0x0123), _mm_castsi128_ps(vsum0x0123))));
-    __m128i vsum1x0123 = _mm_mullo_epi32(vksum0123, vinput_zero_point1);
-    __m128i vacc1x01 = _mm_cvtepu32_epi64(vsum1x0123);
-    __m128i vacc1x23 = _mm_cvtepu32_epi64(_mm_castps_si128(_mm_movehl_ps(_mm_castsi128_ps(vsum1x0123), _mm_castsi128_ps(vsum1x0123))));
-    __m128i vsum2x0123 = _mm_mullo_epi32(vksum0123, vinput_zero_point2);
-    __m128i vacc2x01 = _mm_cvtepu32_epi64(vsum2x0123);
-    __m128i vacc2x23 = _mm_cvtepu32_epi64(_mm_castps_si128(_mm_movehl_ps(_mm_castsi128_ps(vsum2x0123), _mm_castsi128_ps(vsum2x0123))));
-    __m128i vsum3x0123 = _mm_mullo_epi32(vksum0123, vinput_zero_point3);
-    __m128i vacc3x01 = _mm_cvtepu32_epi64(vsum3x0123);
-    __m128i vacc3x23 = _mm_cvtepu32_epi64(_mm_castps_si128(_mm_movehl_ps(_mm_castsi128_ps(vsum3x0123), _mm_castsi128_ps(vsum3x0123))));
+    const __m128i vsum0x0123 = _mm_mullo_epi32(vksum0123, vinput_zero_point0);
+    __m128i vacc0x01 = _mm_unpacklo_epi32(vsum0x0123, _mm_setzero_si128());
+    __m128i vacc0x23 = _mm_unpackhi_epi32(vsum0x0123, _mm_setzero_si128());
+    const __m128i vsum1x0123 = _mm_mullo_epi32(vksum0123, vinput_zero_point1);
+    __m128i vacc1x01 = _mm_unpacklo_epi32(vsum1x0123, _mm_setzero_si128());
+    __m128i vacc1x23 = _mm_unpackhi_epi32(vsum1x0123, _mm_setzero_si128());
+    const __m128i vsum2x0123 = _mm_mullo_epi32(vksum0123, vinput_zero_point2);
+    __m128i vacc2x01 = _mm_unpacklo_epi32(vsum2x0123, _mm_setzero_si128());
+    __m128i vacc2x23 = _mm_unpackhi_epi32(vsum2x0123, _mm_setzero_si128());
+    const __m128i vsum3x0123 = _mm_mullo_epi32(vksum0123, vinput_zero_point3);
+    __m128i vacc3x01 = _mm_unpacklo_epi32(vsum3x0123, _mm_setzero_si128());
+    __m128i vacc3x23 = _mm_unpackhi_epi32(vsum3x0123, _mm_setzero_si128());
     w = (const int32_t*) w + 4;
 
     size_t k = kc;
@@ -167,10 +166,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4c8__sse41_madd(
     __m128i vacc2x0123 = _mm_hadd_epi32(vacc2x01, vacc2x23);
     __m128i vacc3x0123 = _mm_hadd_epi32(vacc3x01, vacc3x23);
 
-    vacc0x0123 = _mm_srai_epi32(vacc0x0123, 4);
-    vacc1x0123 = _mm_srai_epi32(vacc1x0123, 4);
-    vacc2x0123 = _mm_srai_epi32(vacc2x0123, 4);
-    vacc3x0123 = _mm_srai_epi32(vacc3x0123, 4);
     __m128 vout0x0123 = _mm_cvtepi32_ps(vacc0x0123);
     __m128 vout1x0123 = _mm_cvtepi32_ps(vacc1x0123);
     __m128 vout2x0123 = _mm_cvtepi32_ps(vacc2x0123);

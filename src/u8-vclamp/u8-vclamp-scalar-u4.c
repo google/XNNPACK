@@ -17,7 +17,7 @@ void xnn_u8_vclamp_ukernel__scalar_u4(
     size_t batch,
     const uint8_t* input,
     uint8_t* output,
-    const union xnn_u8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_u8_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(uint8_t) == 0);

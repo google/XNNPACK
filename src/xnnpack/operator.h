@@ -209,13 +209,13 @@ struct xnn_operator {
   uint32_t flags;
 
   union {
-    union xnn_f16_default_params f16_default;
-    union xnn_f16_hswish_params f16_hswish;
+    struct xnn_f16_default_params f16_default;
+    struct xnn_f16_hswish_params f16_hswish;
     struct xnn_f16_elu_params f16_elu;
     struct xnn_f16_lrelu_params f16_lrelu;
     struct xnn_f16_sigmoid_params f16_sigmoid;
     union xnn_f16_tanh_params f16_tanh;
-    union xnn_f32_default_params f32_default;
+    struct xnn_f32_default_params f32_default;
     struct xnn_f32_elu_params f32_elu;
     struct xnn_f32_lrelu_params f32_lrelu;
     struct xnn_f32_rnd_params f32_rnd;
@@ -226,7 +226,7 @@ struct xnn_operator {
     // Parameters for Global Average Pooling in CHW layout
     union xnn_f16_gavgpool_params f16_gavgpool;
     union xnn_f32_gavgpool_params f32_gavgpool;
-    union xnn_f32_hswish_params f32_hswish;
+    struct xnn_f32_hswish_params f32_hswish;
     union xnn_f16_minmax_params f16_minmax;
     struct xnn_f16_scaleminmax_params f16_scaleminmax;
     struct f16_f32acc_mean_params mean_params;
@@ -236,11 +236,11 @@ struct xnn_operator {
       union xnn_f32_minmax_params f32_minmax;
       struct xnn_f32_scaleminmax_params f32_scaleminmax;
     };
-    union xnn_f32_scale_params f32_scale;
+    struct xnn_f32_scale_params f32_scale;
     union xnn_f16_minmax_params f16_chw;
     union xnn_f32_minmax_params f32_chw;
-    union xnn_f32_qb4w_minmax_params f32_qb4w_minmax;
-    union xnn_f32_qc4w_minmax_params f32_qc4w_minmax;
+    struct xnn_f32_qb4w_minmax_params f32_qb4w_minmax;
+    struct xnn_f32_qc4w_minmax_params f32_qc4w_minmax;
     struct xnn_f32_qs8_cvt_params f32_qs8_cvt;
     struct xnn_f32_qu8_cvt_params f32_qu8_cvt;
     struct xnn_s32_f32_cvt_params s32_f32_cvt;
@@ -258,10 +258,10 @@ struct xnn_operator {
       union xnn_qs8_avgpool_minmax_params qs8_avgpool;
       union xnn_qs8_avgpool_minmax_params qs8_gavgpool;
     };
-    union xnn_qs8_mean_minmax_params qs8_mean;
-    union xnn_qs8_add_minmax_params qs8_add;
+    struct xnn_qs8_mean_minmax_params qs8_mean;
+    struct xnn_qs8_add_minmax_params qs8_add;
     union xnn_qs8_mul_minmax_params qs8_mul;
-    union xnn_qu8_add_minmax_params qu8_add;
+    struct xnn_qu8_add_minmax_params qu8_add;
     union xnn_qu8_mul_minmax_params qu8_mul;
     union xnn_qu8_conv_minmax_params qu8_conv_minmax;
     // Average Pooling normally use qu8_avgpool_params, but also initialize qu8_gavgpool_params in case it needs to switch
@@ -274,9 +274,9 @@ struct xnn_operator {
     union xnn_qu8_hswish_params qu8_hswish;
     struct xnn_qs8_lrelu_params qs8_lrelu;
     struct xnn_qu8_lrelu_params qu8_lrelu;
-    union xnn_s8_minmax_params s8_minmax;
-    union xnn_s32_default_params s32_default;
-    union xnn_u8_minmax_params u8_minmax;
+    struct xnn_s8_minmax_params s8_minmax;
+    struct xnn_s32_default_params s32_default;
+    struct xnn_u8_minmax_params u8_minmax;
   } params;
   // Second set of params. Operators like Dynamic Fully Connected only decides on the specific config to use during
   // reshape, so it needs to keep two sets of params around. Configs can have different initialization functions.
@@ -286,18 +286,18 @@ struct xnn_operator {
     struct xnn_f16_expminus_params f16_expminus_params;
     union xnn_f32_minmax_params f32_minmax;
     struct xnn_f32_expminus_params f32_expminus_params;
-    union xnn_f32_default_params f32_default;
-    union xnn_qs8_add_minmax_params qs8_add;
+    struct xnn_f32_default_params f32_default;
+    struct xnn_qs8_add_minmax_params qs8_add;
     union xnn_qs8_mul_minmax_params qs8_mul;
-    union xnn_qu8_add_minmax_params qu8_add;
+    struct xnn_qu8_add_minmax_params qu8_add;
     union xnn_qu8_mul_minmax_params qu8_mul;
-    union xnn_s8_minmax_params s8_minmax;
-    union xnn_u8_minmax_params u8_minmax;
+    struct xnn_s8_minmax_params s8_minmax;
+    struct xnn_u8_minmax_params u8_minmax;
   } params2;
   // Third set of params. Used by scaled dot attention operator.
   union {
-    union xnn_f16_default_params f16_rmax;
-    union xnn_f32_default_params f32_rmax;
+    struct xnn_f16_default_params f16_rmax;
+    struct xnn_f32_default_params f32_rmax;
   } params3;
   // Fourth set of params. Used by scaled dot attention operator.
   union {

@@ -63,8 +63,8 @@ void xnn_f32_igemm_minmax_ukernel_6x16__fma3_broadcast_prfm(
     c5 = c4;
   }
 
-  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   const __m256 vmin = _mm256_set1_ps(params->scalar.min);
+  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 

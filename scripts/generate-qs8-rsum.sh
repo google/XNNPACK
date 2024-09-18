@@ -10,12 +10,12 @@ tools/xngen src/qs8-rsum/scalar.c.in -D CHANNEL_TILE=2  -D ACCUMULATORS=1 -o src
 tools/xngen src/qs8-rsum/scalar.c.in -D CHANNEL_TILE=4  -D ACCUMULATORS=1 -o src/qs8-rsum/gen/qs8-rsum-scalar-u4.c &
 
 ################################## ARM NEON ###################################
-tools/xngen src/qs8-rsum/neon.c.in   -D CHANNEL_TILE=16 -D ACCUMULATORS=1 -o src/qs8-rsum/gen/qs8-rsum-neon-u16.c &
-tools/xngen src/qs8-rsum/neon.c.in   -D CHANNEL_TILE=32 -D ACCUMULATORS=1 -o src/qs8-rsum/gen/qs8-rsum-neon-u32.c &
-tools/xngen src/qs8-rsum/neon.c.in   -D CHANNEL_TILE=32 -D ACCUMULATORS=2 -o src/qs8-rsum/gen/qs8-rsum-neon-u32-acc2.c &
-tools/xngen src/qs8-rsum/neon.c.in   -D CHANNEL_TILE=64 -D ACCUMULATORS=1 -o src/qs8-rsum/gen/qs8-rsum-neon-u64.c &
-tools/xngen src/qs8-rsum/neon.c.in   -D CHANNEL_TILE=64 -D ACCUMULATORS=2 -o src/qs8-rsum/gen/qs8-rsum-neon-u64-acc2.c &
-tools/xngen src/qs8-rsum/neon.c.in   -D CHANNEL_TILE=64 -D ACCUMULATORS=4 -o src/qs8-rsum/gen/qs8-rsum-neon-u64-acc4.c &
+tools/xngen src/qs8-rsum/neon.c.in   -D CHANNEL_TILE=16 -D ACCUMULATORS=1 -D DATATYPE=QS8 -o src/qs8-rsum/gen/qs8-rsum-neon-u16.c &
+tools/xngen src/qs8-rsum/neon.c.in   -D CHANNEL_TILE=32 -D ACCUMULATORS=1 -D DATATYPE=QS8 -o src/qs8-rsum/gen/qs8-rsum-neon-u32.c &
+tools/xngen src/qs8-rsum/neon.c.in   -D CHANNEL_TILE=32 -D ACCUMULATORS=2 -D DATATYPE=QS8 -o src/qs8-rsum/gen/qs8-rsum-neon-u32-acc2.c &
+tools/xngen src/qs8-rsum/neon.c.in   -D CHANNEL_TILE=64 -D ACCUMULATORS=1 -D DATATYPE=QS8 -o src/qs8-rsum/gen/qs8-rsum-neon-u64.c &
+tools/xngen src/qs8-rsum/neon.c.in   -D CHANNEL_TILE=64 -D ACCUMULATORS=2 -D DATATYPE=QS8 -o src/qs8-rsum/gen/qs8-rsum-neon-u64-acc2.c &
+tools/xngen src/qs8-rsum/neon.c.in   -D CHANNEL_TILE=64 -D ACCUMULATORS=4 -D DATATYPE=QS8 -o src/qs8-rsum/gen/qs8-rsum-neon-u64-acc4.c &
 
 ################################## ARM NEONDOT ################################
 tools/xngen src/qs8-rsum/neondot.c.in -D CHANNEL_TILE=16 -D ACCUMULATORS=1 -o src/qs8-rsum/gen/qs8-rsum-neondot-u16.c &

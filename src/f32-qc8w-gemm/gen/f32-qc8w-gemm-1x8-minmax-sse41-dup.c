@@ -39,8 +39,8 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x8__sse41_dup(
   const float* a0 = a;
   float* c0 = c;
 
-  const __m128 vmax = _mm_set1_ps(params->scalar.max);
   const __m128 vmin = _mm_set1_ps(params->scalar.min);
+  const __m128 vmax = _mm_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 

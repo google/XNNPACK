@@ -100,6 +100,10 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_AVXVNNI=1"],
         ["XNN_ENABLE_AVXVNNI=0"],
     ) + xnnpack_select_if(
+        ":avxvnniint8_enabled",
+        ["XNN_ENABLE_AVXVNNIINT8=1"],
+        ["XNN_ENABLE_AVXVNNIINT8=0"],
+    ) + xnnpack_select_if(
         ":avx256skx_enabled",
         ["XNN_ENABLE_AVX256SKX=1"],
         ["XNN_ENABLE_AVX256SKX=0"],
@@ -239,6 +243,9 @@ def xnnpack_simd_s16_archs():
 
 def xnnpack_simd_s32_archs():
     return ["avx2", "avx512f", "neon", "scalar", "sse41", "hvx", "wasmsimd"]
+
+def xnnpack_simd_u32_archs():
+    return ["avx2", "avx512f", "neon", "scalar", "sse41", "wasmsimd"]
 
 def xnnpack_simd_s8_archs():
     return ["scalar"]
@@ -444,24 +451,6 @@ XNNPACK_PARAMS_FOR_ARCH = {
     ),
     "neoni8mm": _create_params(
         cond = "//:arm_i8mm_enabled",
-        copts = select({
-            "//build_config:aarch32": [
-                "-marm",
-                "-march=armv8.2-a+i8mm+fp16",
-                "-mfpu=neon-fp-armv8",
-            ],
-            "//build_config:aarch64": ["-march=armv8.2-a+i8mm+fp16"],
-            "//conditions:default": [],
-        }),
-        extra_deps = xnnpack_if_kleidiai_enabled([
-            "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp4x8_4x4x32_neon_i8mm",
-            "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp4x8_8x4x32_neon_i8mm",
-            "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp8x8_4x8x32_neon_i8mm",
-            "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp8x8_8x8x32_neon_i8mm",
-        ]),
-    ),
-    "neoni8mm_aarch64": _create_params(
-        cond = "//:arm_aarch64_i8mm_enabled",
         copts = ["-march=armv8.2-a+i8mm+fp16"],
         extra_deps = xnnpack_if_kleidiai_enabled([
             "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp4x8_4x4x32_neon_i8mm",
@@ -539,6 +528,17 @@ XNNPACK_PARAMS_FOR_ARCH = {
         gcc_x86_copts = [
             "-mavx2",
             "-mavxvnni",
+            "-mf16c",
+            "-mfma",
+        ],
+        msvc_x86_32_copts = ["/arch:AVX"],
+        msvc_x86_64_copts = ["/arch:AVX"],
+    ),
+    "avxvnniint8": _create_params(
+        cond = "//:avxvnniint8_enabled",
+        gcc_x86_copts = [
+            "-mavx2",
+            "-mavxvnniint8",
             "-mf16c",
             "-mfma",
         ],

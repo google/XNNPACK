@@ -179,7 +179,7 @@ def main(args):
   if "rnd" in folder:
     folder = folder[0:8]
 
-  benchmarks += f'#include "{xnncommon._XNNPACK_SRC}/{folder}/{options.ukernel}.h"\n'
+  benchmarks += f'#include "{xnncommon.xnnpack_src()}/{folder}/{options.ukernel}.h"\n'
   benchmarks += "#undef XNN_UKERNEL_WITH_PARAMS\n"
 
   # Footer with `main` function.

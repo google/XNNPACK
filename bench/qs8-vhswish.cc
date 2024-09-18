@@ -27,7 +27,7 @@ static void qs8_vhswish(
   xnn_qs8_vhswish_ukernel_fn hswish,
   xnn_init_qs8_hswish_params_fn init_params)
 {
-  if (benchmark::utils::CheckArchFlags(state, arch_flags)) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 

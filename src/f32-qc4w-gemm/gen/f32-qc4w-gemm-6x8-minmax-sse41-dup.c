@@ -25,7 +25,7 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_6x8__sse41_dup(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f32_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 6);
@@ -77,8 +77,8 @@ void xnn_f32_qc4w_gemm_minmax_ukernel_6x8__sse41_dup(
   XNN_FORCE_REALIZATION(vmagic_bias_plus_kernel_zero_point_c0);
   XNN_FORCE_REALIZATION(vmagic_bias_plus_kernel_zero_point_c1);
 
-  const __m128 vmax = _mm_set1_ps(params->scalar.max);
   const __m128 vmin = _mm_set1_ps(params->scalar.min);
+  const __m128 vmax = _mm_set1_ps(params->scalar.max);
   XNN_FORCE_REALIZATION(vmin);
   XNN_FORCE_REALIZATION(vmax);
 

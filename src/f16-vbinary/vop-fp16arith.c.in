@@ -28,7 +28,7 @@ $  "SUB": lambda x, y: "vsubh_f16(%s, %s)" % (x, y),
 $  "SQRDIFF": lambda x, y: "vsubh_f16(%s, %s)" % (x, y),
 $}[OP]
 $SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "union xnn_f16_default_params", "MINMAX": "union xnn_f16_minmax_params"}[ACTIVATION]
+$PARAMS = {"LINEAR": "struct xnn_f16_default_params", "MINMAX": "union xnn_f16_minmax_params"}[ACTIVATION]
 void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__fp16arith_u${BATCH_TILE}(
     size_t batch,
     const xnn_float16* restrict input_a,

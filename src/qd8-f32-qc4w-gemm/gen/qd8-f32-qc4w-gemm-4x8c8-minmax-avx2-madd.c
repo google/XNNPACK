@@ -27,7 +27,7 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x8c8__avx2_madd(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f32_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
+    const struct xnn_f32_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
@@ -172,10 +172,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x8c8__avx2_madd(
     const __m256i vsum3x02134657 = _mm256_hadd_epi32(vacc3x0123, vacc3x4567);
     __m256i vacc3x01234567 = _mm256_permute4x64_epi64(vsum3x02134657, _MM_SHUFFLE(3, 1, 2, 0));
 
-    vacc0x01234567 = _mm256_srai_epi32(vacc0x01234567, 4);
-    vacc1x01234567 = _mm256_srai_epi32(vacc1x01234567, 4);
-    vacc2x01234567 = _mm256_srai_epi32(vacc2x01234567, 4);
-    vacc3x01234567 = _mm256_srai_epi32(vacc3x01234567, 4);
     __m256 vout0x01234567 = _mm256_cvtepi32_ps(vacc0x01234567);
     __m256 vout1x01234567 = _mm256_cvtepi32_ps(vacc1x01234567);
     __m256 vout2x01234567 = _mm256_cvtepi32_ps(vacc2x01234567);

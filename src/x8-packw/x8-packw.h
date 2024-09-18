@@ -17,16 +17,16 @@
 
 // arch_flags, ukernel, nr, kr, sr, kblock, nr_scale
 
-XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x2__scalar_int_u2, 2, 1, 1, 2, 1)
-XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x4__scalar_int_u2, 4, 1, 1, 2, 1)
-XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x8__scalar_int_u2, 8, 1, 1, 2, 1)
-XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x16__scalar_int_u2, 16, 1, 1, 2, 1)
-XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x32__scalar_int_u2, 32, 1, 1, 2, 1)
-XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x2__scalar_int_u4, 2, 1, 1, 4, 1)
-XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x4__scalar_int_u4, 4, 1, 1, 4, 1)
-XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x8__scalar_int_u4, 8, 1, 1, 4, 1)
-XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x16__scalar_int_u4, 16, 1, 1, 4, 1)
-XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x32__scalar_int_u4, 32, 1, 1, 4, 1)
+XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x2__scalar_u2, 2, 1, 1, 2, 1)
+XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x4__scalar_u2, 4, 1, 1, 2, 1)
+XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x8__scalar_u2, 8, 1, 1, 2, 1)
+XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x16__scalar_u2, 16, 1, 1, 2, 1)
+XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x32__scalar_u2, 32, 1, 1, 2, 1)
+XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x2__scalar_u4, 2, 1, 1, 4, 1)
+XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x4__scalar_u4, 4, 1, 1, 4, 1)
+XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x8__scalar_u4, 8, 1, 1, 4, 1)
+XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x16__scalar_u4, 16, 1, 1, 4, 1)
+XNN_UKERNEL(0, xnn_x8_packw_gemm_goi_ukernel_x32__scalar_u4, 32, 1, 1, 4, 1)
 
 #ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS
 #undef XNN_DEFINED_UKERNEL_WITH_PARAMS

@@ -2747,9 +2747,9 @@ ExecutionPlan FP32MobileNetV3Small(pthreadpool_t threadpool) {
   status = xnn_reshape_hardswish_nc_f32(
     op37,
     /*batch_size=*/196,
-    120 /* channels */,
-    120 /* input stride */,
-    120 /* output stride */,
+    240 /* channels */,
+    240 /* input stride */,
+    240 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #37" << std::endl;
@@ -2881,9 +2881,9 @@ ExecutionPlan FP32MobileNetV3Small(pthreadpool_t threadpool) {
   status = xnn_reshape_hardswish_nc_f32(
     op47,
     /*batch_size=*/196,
-    144 /* channels */,
-    144 /* input stride */,
-    144 /* output stride */,
+    120 /* channels */,
+    120 /* input stride */,
+    120 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #47" << std::endl;
@@ -3002,9 +3002,9 @@ ExecutionPlan FP32MobileNetV3Small(pthreadpool_t threadpool) {
   status = xnn_reshape_hardswish_nc_f32(
     op56,
     /*batch_size=*/196,
-    288 /* channels */,
-    288 /* input stride */,
-    288 /* output stride */,
+    144 /* channels */,
+    144 /* input stride */,
+    144 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #56" << std::endl;
@@ -3136,9 +3136,9 @@ ExecutionPlan FP32MobileNetV3Small(pthreadpool_t threadpool) {
   status = xnn_reshape_hardswish_nc_f32(
     op66,
     /*batch_size=*/49,
-    576 /* channels */,
-    576 /* input stride */,
-    576 /* output stride */,
+    288 /* channels */,
+    288 /* input stride */,
+    288 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #66" << std::endl;
@@ -3499,9 +3499,9 @@ ExecutionPlan FP32MobileNetV3Small(pthreadpool_t threadpool) {
   status = xnn_reshape_hardswish_nc_f32(
     op93,
     /*batch_size=*/49,
-    1024 /* channels */,
-    1024 /* input stride */,
-    1024 /* output stride */,
+    576 /* channels */,
+    576 /* input stride */,
+    576 /* output stride */,
     /*threadpool=*/threadpool);
   if (status != xnn_status_success) {
     std::cerr << "failed to reshape operation #93" << std::endl;

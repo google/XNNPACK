@@ -23,7 +23,7 @@ extern "C" {
       uint32_t* packed_weights,                                                        \
       size_t channel_tile_stride,                                                      \
       size_t channel_subtile_stride,                                                   \
-      const union xnn_x32_packb_params params [XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);     \
+      const struct xnn_x32_packb_params params [XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);     \
 
 #include "src/x32-packb/x32-packb.h"
 

@@ -80,8 +80,6 @@ enum xnn_status xnn_create_mean_nd_qs8(
   float scale,
   int8_t input_zero_point,
   int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max,
   uint32_t flags,
   xnn_operator_t* mean_op_out)
 {
@@ -95,8 +93,8 @@ enum xnn_status xnn_create_mean_nd_qs8(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_qs8_mean_minmax_params params;
-  rsum_config->init.qs8_mean(&params, scale, -1, input_zero_point, output_zero_point, output_min, output_max);
+  struct xnn_qs8_mean_minmax_params params;
+  rsum_config->init.qs8_mean(&params, scale, -1, input_zero_point, output_zero_point);
 
   return create_mean_nd(
     flags,
@@ -262,7 +260,7 @@ static enum xnn_status reshape_mean_nd(
     }
     if (workspace_size != NULL) {
       const size_t num_output_elements = normalized_input_shape[0] * normalized_input_shape[2] * normalized_input_shape[4];
-      *workspace_size = num_output_elements << log2_accumulator_element_size;
+      *workspace_size = (num_output_elements << log2_accumulator_element_size) + XNN_EXTRA_BYTES;
     }
     const size_t scale_dim = normalized_input_shape[1] * normalized_input_shape[3] * normalized_input_shape[5];
     const size_t axis_dim = normalized_input_shape[5];
@@ -298,7 +296,7 @@ static enum xnn_status reshape_mean_nd(
     const size_t channel_like_dim = normalized_input_shape[XNN_MAX_TENSOR_DIMS - 1];
     if (workspace_size != NULL) {
       const size_t num_output_elements = normalized_input_shape[1] * normalized_input_shape[3] * normalized_input_shape[5];
-      *workspace_size = num_output_elements << log2_accumulator_element_size;
+      *workspace_size = (num_output_elements << log2_accumulator_element_size) + XNN_EXTRA_BYTES;
     }
     const size_t scale_dim = normalized_input_shape[0] * normalized_input_shape[2] * normalized_input_shape[4];
     const size_t axis_dim = normalized_input_shape[4];

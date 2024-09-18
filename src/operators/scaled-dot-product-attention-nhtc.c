@@ -156,7 +156,7 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f16(
     goto error;
   }
 
-  union xnn_f16_default_params rmax_params;
+  struct xnn_f16_default_params rmax_params;
   if (rmax_config->init.f16 != NULL) {
     rmax_config->init.f16(&rmax_params);
   }
@@ -266,7 +266,7 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f32(
     goto error;
   }
 
-  union xnn_f32_default_params rmax_params;
+  struct xnn_f32_default_params rmax_params;
   if (rmax_config->init.f32 != NULL) {
     rmax_config->init.f32(&rmax_params);
   }

@@ -20,6 +20,7 @@ load(
     "xnnpack_simd_s16_archs",
     "xnnpack_simd_s32_archs",
     "xnnpack_simd_s8_archs",
+    "xnnpack_simd_u32_archs",
 )
 
 MICROKERNEL_TEST_DEPS = [
@@ -245,6 +246,20 @@ sh_test(
     ],
 ) for arch in xnnpack_simd_s8_archs()]
 
+[xnnpack_unit_test(
+    name = "u32_simd_" + arch + "_test",
+    srcs = [
+        "u32-simd-" + arch + ".cc",
+    ],
+    copts = xnnpack_simd_copts_for_arch(arch),
+    deps = [
+        ":replicable_random_device",
+        "//:common",
+        "//:isa_checks",
+        "//:microkernels_h",
+    ],
+) for arch in xnnpack_simd_u32_archs()]
+
 ######################### Unit tests for micro-kernels #########################
 
 [xnnpack_unit_test(
@@ -322,46 +337,36 @@ sh_test(
     "f16_vsubc_minmax",
     "f32_vadd",
     "f32_vadd_minmax",
-    "f32_vadd_relu",
     "f32_vaddc",
     "f32_vaddc_minmax",
-    "f32_vaddc_relu",
     "f32_vcopysign",
     "f32_vcopysignc",
     "f32_vdiv",
     "f32_vdiv_minmax",
-    "f32_vdiv_relu",
     "f32_vdivc",
     "f32_vdivc_minmax",
-    "f32_vdivc_relu",
     "f32_vmax",
     "f32_vmaxc",
     "f32_vmin",
     "f32_vminc",
     "f32_vmul",
     "f32_vmul_minmax",
-    "f32_vmul_relu",
     "f32_vmulc",
     "f32_vmulc_minmax",
-    "f32_vmulc_relu",
     "f32_vprelu",
     "f32_vpreluc",
     "f32_vrpreluc",
     "f32_vrcopysignc",
     "f32_vrdivc",
     "f32_vrdivc_minmax",
-    "f32_vrdivc_relu",
     "f32_vrsubc",
     "f32_vrsubc_minmax",
-    "f32_vrsubc_relu",
     "f32_vsqrdiff",
     "f32_vsqrdiffc",
     "f32_vsub",
     "f32_vsub_minmax",
-    "f32_vsub_relu",
     "f32_vsubc",
     "f32_vsubc_minmax",
-    "f32_vsubc_relu",
     "qs8_vadd_minmax",
     "qs8_vaddc_minmax",
     "qs8_vmul_minmax_fp32",
@@ -427,6 +432,7 @@ sh_test(
     "f16_f32acc_rsum",
     "f32_rsum",
     "qs8_rsum",
+    "qu8_rsum",
 ]]
 
 [xnnpack_unit_test(
@@ -474,19 +480,15 @@ sh_test(
     ("qu8_dwconv_minmax_unipass_rndnu", 1),
 ]]
 
-[xnnpack_unit_test(
-    name = "%s_test" % kernel,
+xnnpack_unit_test(
+    name = "maxpool_minmax_test",
     srcs = [
-        "%s.cc" % kernel.replace("_", "-"),
         "maxpool-microkernel-tester.h",
+        "maxpool-minmax.cc",
     ],
+    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS,
-) for kernel in [
-    "f16_maxpool_minmax",
-    "s8_maxpool_minmax",
-    "u8_maxpool_minmax",
-    "f32_maxpool_minmax",
-]]
+)
 
 xnnpack_unit_test(
     name = "bf16_gemm_minmax_test",
@@ -499,11 +501,12 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f16_avgpool_minmax_test",
+    name = "avgpool_minmax_test",
     srcs = [
         "avgpool-microkernel-tester.h",
-        "f16-avgpool-minmax.cc",
+        "avgpool-minmax.cc",
     ],
+    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS,
 )
 
@@ -566,15 +569,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f16_pavgpool_minmax_test",
-    srcs = [
-        "avgpool-microkernel-tester.h",
-        "f16-pavgpool-minmax.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "f16_prelu_test",
     srcs = [
         "f16-prelu.cc",
@@ -615,15 +609,6 @@ xnnpack_unit_test(
     srcs = [
         "argmaxpool-microkernel-tester.h",
         "f32-argmaxpool.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "f32_avgpool_minmax_test",
-    srcs = [
-        "avgpool-microkernel-tester.h",
-        "f32-avgpool-minmax.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -816,15 +801,6 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
-)
-
-xnnpack_unit_test(
-    name = "f32_pavgpool_minmax_test",
-    srcs = [
-        "avgpool-microkernel-tester.h",
-        "f32-pavgpool-minmax.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -1125,6 +1101,14 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qu8_rdsum_test",
+    srcs = [
+        "qu8-rdsum.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [":rdsum_microkernel_tester"],
+)
+
+xnnpack_unit_test(
     name = "qs8_vhswish_test",
     srcs = [
         "qs8-vhswish.cc",
@@ -1138,15 +1122,6 @@ xnnpack_unit_test(
     srcs = [
         "qs8-vlrelu.cc",
         "vlrelu-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "qu8_avgpool_minmax_fp32_test",
-    srcs = [
-        "avgpool-microkernel-tester.h",
-        "qu8-avgpool-minmax-fp32.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -1400,36 +1375,17 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS,
 )
 
-[xnnpack_unit_test(
-    name = "%s_test" % kernel,
-    srcs = [
-        "transpose-microkernel-tester.h",
-        "%s.cc" % kernel.replace("_", "-"),
-    ],
+xnnpack_unit_test(
+    name = "xN_transpose_test",
+    srcs = ["xN-transpose.cc"],
     deps = MICROKERNEL_TEST_DEPS,
-) for kernel in [
-    "x8_transpose",
-    "x16_transpose",
-    "x24_transpose",
-    "x32_transpose",
-    "x64_transpose",
-    "xx_transposev",
-]]
+)
 
 xnnpack_unit_test(
     name = "x32_unpool_test",
     srcs = [
         "unpool-microkernel-tester.h",
         "x32-unpool.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "x32_zerob_test",
-    srcs = [
-        "packb-microkernel-tester.h",
-        "x32-zerob.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -1445,19 +1401,13 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "xx_fill_test",
-    srcs = [
-        "fill-microkernel-tester.h",
-        "xx-fill.cc",
-    ],
+    srcs = ["xx-fill.cc"],
     deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
     name = "xx_pad_test",
-    srcs = [
-        "pad-microkernel-tester.h",
-        "xx-pad.cc",
-    ],
+    srcs = ["xx-pad.cc"],
     deps = MICROKERNEL_TEST_DEPS,
 )
 

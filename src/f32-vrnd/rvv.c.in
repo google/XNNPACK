@@ -1,0 +1,43 @@
+// Copyright 2024 Imagination Technologies inc.
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert LMUL in [1, 2, 4, 8]
+$assert OP in ["RNDNE", "RNDZ", "RNDU", "RNDD"]
+#include <assert.h>
+
+#include <riscv_vector.h>
+
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
+#include "xnnpack/vunary.h"
+
+
+$ROUND_MODE = {
+$  "RNDNE": "__RISCV_FRM_RNE",
+$  "RNDZ": "__RISCV_FRM_RTZ",
+$  "RNDU": "__RISCV_FRM_RUP",
+$  "RNDD": "__RISCV_FRM_RDN",
+$}[OP]
+void xnn_f32_v${OP.lower()}_ukernel__rvv_u${LMUL}v(
+    size_t batch,
+    const float* input,
+    float* output,
+    const struct xnn_f32_rnd_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(float) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  batch >>= XNN_LOG2_SIZEOF_FLOAT;
+  do {
+    const size_t n = __riscv_vsetvl_e32m${LMUL}(batch);
+    vfloat32m${LMUL}_t x_f32v = __riscv_vle32_v_f32m${LMUL}(input, n); input += n;
+    vint32m${LMUL}_t x_rnd_i32v = __riscv_vfcvt_x_f_v_i32m${LMUL}_rm(x_f32v, ${ROUND_MODE}, n);
+    vfloat32m${LMUL}_t out_f32v = __riscv_vfcvt_f_x_v_f32m${LMUL}(x_rnd_i32v, n);
+    __riscv_vse32_v_f32m${LMUL}(output, out_f32v, n); output += n;
+    batch -= n;
+  } while (batch != 0);
+}
