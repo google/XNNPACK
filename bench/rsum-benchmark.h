@@ -32,10 +32,10 @@ void f16_rsum(
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
-  const size_t rows = state.range(0);
-  const size_t batch = state.range(0);
+  const size_t channels = state.range(0);
+  const size_t rows = state.range(1);
 
-  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> input(rows * batch + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> input(rows * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::vector<xnn_float16> output(rows);
   std::iota(input.begin(), input.end(), 1);
 
@@ -45,7 +45,7 @@ void f16_rsum(
 
   for (auto _ : state) {
     for (int i = 0; i < rows; ++i) {
-      rsum(batch * sizeof(xnn_float16), &input[i * batch], &output[i], &params);
+      rsum(channels * sizeof(xnn_float16), &input[i * channels], &output[i], &params);
     }
   }
 
@@ -64,10 +64,10 @@ void f16_f32acc_rsum(
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
-  const size_t rows = state.range(0);
-  const size_t batch = state.range(0);
+  const size_t channels = state.range(0);
+  const size_t rows = state.range(1);
 
-  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> input(rows * batch + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> input(rows * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::vector<float> output(rows);
   std::iota(input.begin(), input.end(), 1);
 
@@ -77,7 +77,7 @@ void f16_f32acc_rsum(
 
   for (auto _ : state) {
     for (int i = 0; i < rows; ++i) {
-      rsum(batch * sizeof(xnn_float16), &input[i * batch], &output[i], &params);
+      rsum(channels * sizeof(xnn_float16), &input[i * channels], &output[i], &params);
     }
   }
 
@@ -96,10 +96,10 @@ void f32_rsum(
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
-  const size_t rows = state.range(0);
-  const size_t batch = state.range(0);
+  const size_t channels = state.range(0);
+  const size_t rows = state.range(1);
 
-  std::vector<float, AlignedAllocator<float, 64>> input(rows * batch + XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<float, AlignedAllocator<float, 64>> input(rows * channels + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> output(rows);
   std::iota(input.begin(), input.end(), 1);
 
@@ -109,7 +109,7 @@ void f32_rsum(
 
   for (auto _ : state) {
     for (int i = 0; i < rows; ++i) {
-      rsum(batch * sizeof(float), &input[i * batch], &output[i], &params);
+      rsum(channels * sizeof(float), &input[i * channels], &output[i], &params);
     }
   }
 
@@ -128,10 +128,10 @@ void qs8_rsum(
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
-  const size_t rows = state.range(0);
-  const size_t batch = state.range(0);
+  const size_t channels = state.range(0);
+  const size_t rows = state.range(1);
 
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> input(rows * batch + XNN_EXTRA_BYTES);
+  std::vector<int8_t, AlignedAllocator<int8_t, 64>> input(rows * channels + XNN_EXTRA_BYTES);
   std::vector<int32_t> output(rows);
   std::iota(input.begin(), input.end(), 1);
 
@@ -143,7 +143,7 @@ void qs8_rsum(
 
   for (auto _ : state) {
     for (int i = 0; i < rows; ++i) {
-      rsum(batch, &input[i * batch], &output[i], &params);
+      rsum(channels, &input[i * channels], &output[i], &params);
     }
   }
 
@@ -162,10 +162,10 @@ void qu8_rsum(
   if (isa_check != nullptr && !isa_check(state)) {
     return;
   }
-  const size_t rows = state.range(0);
-  const size_t batch = state.range(0);
+  const size_t channels = state.range(0);
+  const size_t rows = state.range(1);
 
-  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> input(rows * batch + XNN_EXTRA_BYTES);
+  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> input(rows * channels + XNN_EXTRA_BYTES);
   std::vector<uint32_t> output(rows);
   std::iota(input.begin(), input.end(), 1);
 
@@ -177,7 +177,7 @@ void qu8_rsum(
 
   for (auto _ : state) {
     for (int i = 0; i < rows; ++i) {
-      rsum(batch, &input[i * batch], &output[i], &params);
+      rsum(channels, &input[i * channels], &output[i], &params);
     }
   }
 

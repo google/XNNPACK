@@ -39,7 +39,7 @@ void cvt_benchmark(
   std::generate(x.begin(), x.end(), f32rng);
 
   for (auto _ : state) {
-    cvt(num_elements * sizeof(Out), x.data(), y.data(), params);
+    cvt(num_elements * sizeof(In), x.data(), y.data(), params);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
