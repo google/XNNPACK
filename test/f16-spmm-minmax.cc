@@ -9,6 +9,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack/common.h"
+#include <xnnpack/config.h>
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/spmm.h"
