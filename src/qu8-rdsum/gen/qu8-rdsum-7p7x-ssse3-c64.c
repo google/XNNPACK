@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <math.h>
 
-#include <immintrin.h>
+#include <tmmintrin.h>
 
 #include "xnnpack/common.h"
 #include "xnnpack/intrinsics-polyfill.h"

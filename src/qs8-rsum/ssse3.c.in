@@ -9,7 +9,7 @@ $assert ACCUMULATORS <= SIMD_TILE
 
 #include <assert.h>
 
-#include <immintrin.h>
+#include <tmmintrin.h>
 
 #include "xnnpack/common.h"
 #include "xnnpack/reduce.h"
