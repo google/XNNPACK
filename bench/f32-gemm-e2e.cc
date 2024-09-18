@@ -1105,6 +1105,18 @@ static void GEMMEnd2EndBenchmark(
       /*mr=*/5, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
       benchmark::utils::CheckFMA3);
   }
+  static void f32_gemm_5x16__fma3_broadcast_prfm(benchmark::State& state, models::ExecutionPlanFactory model) {
+    GEMMEnd2EndBenchmark(state, model,
+      xnn_f32_gemm_minmax_ukernel_5x16__fma3_broadcast_prfm,
+      xnn_f32_igemm_minmax_ukernel_5x16__fma3_broadcast,
+      xnn_f32_gemm_minmax_ukernel_1x16__fma3_broadcast,
+      xnn_f32_igemm_minmax_ukernel_1x16__fma3_broadcast,
+      nullptr /* gemm_relu */, nullptr /* igemm_relu */, nullptr /* gemm1_relu */, nullptr /* igemm1_relu */,
+      nullptr /* gemm */, nullptr /* igemm */, nullptr /* gemm1 */, nullptr /* igemm1 */,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/5, /*nr=*/16, /*log2_kr=*/0, /*log2_sr=*/0,
+      benchmark::utils::CheckFMA3);
+  }
   static void f32_gemm_3x16s4__fma3_broadcast(benchmark::State& state, models::ExecutionPlanFactory model) {
     GEMMEnd2EndBenchmark(state, model,
       xnn_f32_gemm_minmax_ukernel_3x16s4__fma3_broadcast,
@@ -1341,6 +1353,7 @@ static void GEMMEnd2EndBenchmark(
   BENCHMARK_FP32_END2END(f32_gemm_3x16__fma3_broadcast);
   BENCHMARK_FP32_END2END(f32_gemm_4x16__fma3_broadcast);
   BENCHMARK_FP32_END2END(f32_gemm_5x16__fma3_broadcast);
+  BENCHMARK_FP32_END2END(f32_gemm_5x16__fma3_broadcast_prfm);
 
   BENCHMARK_FP32_END2END(f32_gemm_3x16s4__fma3_broadcast);
   BENCHMARK_FP32_END2END(f32_gemm_4x16s4__fma3_broadcast);

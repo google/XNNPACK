@@ -20,7 +20,7 @@
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
-#include "xnnpack/vunary.h"
+#include "src/xnnpack/vunary.h"
 #include "next_prime.h"
 #include "vunary-microkernel-tester.h"
 
