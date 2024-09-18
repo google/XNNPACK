@@ -322,6 +322,4 @@ void xnn_f32_raddextexp_ukernel__avx2_p5_u80(
 
   _mm_store_ss(&sum[0], vaccv_sum);
   _mm_store_ss(&sum[1], _mm256_castps256_ps128(vmax_acce));
-
-  _mm256_zeroupper();
 }

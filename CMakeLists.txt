@@ -744,9 +744,9 @@ TARGET_LINK_LIBRARIES(hardware-config PRIVATE xnnpack-base logging)
 TARGET_LINK_LIBRARIES(indirection PRIVATE xnnpack-base)
 TARGET_LINK_LIBRARIES(logging PRIVATE xnnpack-base)
 IF(XNNPACK_BUILD_ALL_MICROKERNELS)
-  TARGET_LINK_LIBRARIES(microkernels-all PRIVATE xnnpack-base logging)
+  TARGET_LINK_LIBRARIES(microkernels-all PRIVATE xnnpack-base)
 ENDIF()
-TARGET_LINK_LIBRARIES(microkernels-prod PRIVATE xnnpack-base logging)
+TARGET_LINK_LIBRARIES(microkernels-prod PRIVATE xnnpack-base)
 TARGET_LINK_LIBRARIES(microparams-init PRIVATE xnnpack-base)
 TARGET_LINK_LIBRARIES(normalization PRIVATE xnnpack-base)
 TARGET_LINK_LIBRARIES(packing PRIVATE xnnpack-base logging)
@@ -1506,6 +1506,7 @@ IF(XNNPACK_BUILD_TESTS)
       qs8-gavgpool-minmax-rndnu
       qs8-requantization
       qs8-rdsum-minmax-fp32
+      qu8-rdsum
       qs8-rsum
       qu8-rsum
       qs8-vhswish
@@ -1754,6 +1755,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   SET(MICROKERNEL_VCVT_TESTS
       f16-f32-vcvt
+      f16-qs8-vcvt
       f32-f16-vcvt
       f32-qs8-vcvt
       f32-qu8-vcvt
@@ -2121,6 +2123,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       qs8-gemm
       qs8-qc8w-gemm-fp32
       qs8-requantization
+      qu8-rdsum
       qs8-rsum
       qu8-rsum
       qs8-vadd

@@ -235,7 +235,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
       const __m256i vsum${M}x02134657 = _mm256_hadd_epi32(vacc${M}x0123, vacc${M}x4567);
       __m256i vacc${M}x01234567 = _mm256_permute4x64_epi64(vsum${M}x02134657, _MM_SHUFFLE(3, 1, 2, 0));
 
-    $if DATATYPE in ["QC4_F16", "QC4_F32"]:
+    $if DATATYPE in ["QC4_F16", "QC4_F32"] and VARIANT != "MADD":
       $for M in range(MR):
         vacc${M}x01234567 = _mm256_srai_epi32(vacc${M}x01234567, 4);
     $for M in range(MR):

@@ -83,6 +83,9 @@ def xnnpack_kleidiai_defines():
         not_enabled = ["XNN_ENABLE_KLEIDIAI=0"],
     )
 
+def xnnpack_slow_benchmark_tags():
+    return ["manual"]
+
 def xnnpack_cc_library(
         name,
         srcs = [],
@@ -388,7 +391,7 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = [], defines = []
       tags: The list of arbitrary text tags.
       defines: The list of arbitrary defines tags.
     """
-    native.cc_binary(
+    native.cc_test(
         name = name,
         srcs = srcs,
         copts = xnnpack_std_cxxopts() + [
@@ -416,6 +419,7 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = [], defines = []
         }),
         tags = tags,
         defines = defines,
+        args = ["--benchmark_min_time=1x"],
     )
 
 SrcListInfo = provider("A list of source files.", fields = {"srcs": "sources"})
