@@ -432,7 +432,6 @@ def generate_test_cases(ukernel, init_fn, mr, nr, k_block, is_pipelined, isa):
       "KBLOCK": k_block,
       "ADJKBLOCK": 2 * k_block if is_pipelined else k_block,
       "IS_PIPELINED": is_pipelined,
-      "ISA": isa,
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,
     })
@@ -443,7 +442,6 @@ def generate_test_cases(ukernel, init_fn, mr, nr, k_block, is_pipelined, isa):
       "MR": mr,
       "NR": nr,
       "INIT_PARAMS": init_fn,
-      "ISA": isa,
       "ISA_CHECK": xnncommon.generate_isa_utilcheck_macro(isa),
       "next_prime": next_prime,
     })
@@ -471,7 +469,6 @@ def main(args):
 
 #include <gtest/gtest.h>
 #include "xnnpack/common.h"
-#include <xnnpack/config.h>
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/spmm.h"
