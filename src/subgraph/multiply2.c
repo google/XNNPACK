@@ -357,6 +357,9 @@ enum xnn_status define_multiply2(
   node->reshape = reshape_multiply_operator;
   node->setup = setup_multiply_operator;
 
+  if (output_min != -INFINITY && output_max != INFINITY) {
+    xnn_insert_clamp_node(subgraph, output_min, output_max, node);
+  }
   return xnn_status_success;
 }
 

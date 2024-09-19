@@ -223,5 +223,4 @@ void xnn_f32_vscaleextexp_ukernel__avx2_p5_u32(
     // Store up to 7 inputs at a time.
     _mm256_maskstore_ps(output, vmask, vf);
   }
-  _mm256_zeroupper();
 }

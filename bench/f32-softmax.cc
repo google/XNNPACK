@@ -306,7 +306,10 @@ static void ThreePassSoftMaxWithReloading(
   if (init_rmax_params) {
     init_rmax_params(&rmax_params);
   }
-  init_expminus_params(&expminus_params);
+  if (init_expminus_params) {
+    init_expminus_params(&expminus_params);
+  }
+  assert(init_minmax_params);
   init_minmax_params(&minmax_params, -INFINITY, INFINITY);
 
   size_t buffer_index = 0;
@@ -410,7 +413,7 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
   b->Arg( 512);  // 20
   b->Arg(2048);  // 80
   b->Arg(8192);  // 320
-  for (int32_t n = 10000; n <= 100000000; n *= 10) {
+  for (int32_t n = 10000; n <= 1000000; n *= 10) {
     b->Arg(n);
   }
 }

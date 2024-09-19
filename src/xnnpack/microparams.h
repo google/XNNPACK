@@ -598,8 +598,13 @@ struct xnn_f32_qu8_cvt_params {
 
 struct xnn_s32_f32_cvt_params {
   struct {
-    int32_t num_elements;
-    int8_t zero_point;
+    int32_t zero_point;
+  } scalar;
+};
+
+struct xnn_u32_f32_cvt_params {
+  struct {
+    int32_t zero_point;
   } scalar;
 };
 

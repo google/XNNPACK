@@ -27,6 +27,7 @@ extern "C" {
 #include "src/qs8-f32-vcvt/qs8-f32-vcvt.h"
 #include "src/qu8-f32-vcvt/qu8-f32-vcvt.h"
 #include "src/s32-f32-vcvt/s32-f32-vcvt.h"
+#include "src/u32-f32-vcvt/u32-f32-vcvt.h"
 #include "src/qs8-vcvt/qs8-vcvt.h"
 #include "src/qu8-vcvt/qu8-vcvt.h"
 #undef XNN_CVT_UKERNEL_WITH_PARAMS

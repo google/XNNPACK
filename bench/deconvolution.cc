@@ -58,7 +58,7 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
   const size_t output_height = std::max(stride_height * (input_height - 1) + adjustment + effective_kernel_height, padding_height) - padding_height;
   const size_t output_width = std::max(stride_width * (input_width - 1) + adjustment + effective_kernel_width, padding_width) - padding_width;
 
-  std::vector<uint8_t> input(batch_size * input_height * input_width * input_channels);
+  std::vector<uint8_t> input(XNN_EXTRA_BYTES + batch_size * input_height * input_width * input_channels);
   std::generate(input.begin(), input.end(), std::ref(u8rng));
   std::vector<uint8_t> kernel(output_channels * kernel_height * kernel_width * input_channels);
   std::generate(kernel.begin(), kernel.end(), std::ref(u8rng));

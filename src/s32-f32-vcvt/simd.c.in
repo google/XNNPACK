@@ -31,7 +31,7 @@ $for BATCH_TILE in BATCH_TILES:
     assert(xnn_simd_size_f32 == ${SIMD_SIZE});
     assert(xnn_simd_size_s32 == ${SIMD_SIZE});
 
-    const xnn_simd_s32_t sub = xnn_set1_s32((int32_t) params->scalar.zero_point * params->scalar.num_elements);
+    const xnn_simd_s32_t sub = xnn_set1_s32(params->scalar.zero_point);
 
     $SIMD_TILE = BATCH_TILE // SIMD_SIZE
     $if SIMD_TILE > 1:

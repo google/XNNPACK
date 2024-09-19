@@ -107,6 +107,9 @@ class VCvtMicrokernelTester {
   void Test(xnn_qu8_f32_vcvt_ukernel_fn vcvt,
             xnn_init_qu8_f32_cvt_params_fn init_params) const;
 
+  void Test(xnn_u32_f32_vcvt_ukernel_fn vcvt,
+            xnn_init_u32_f32_cvt_params_fn init_params) const;
+
  private:
   float scale_ = 1.75f;
   int16_t input_zero_point_ = 0;

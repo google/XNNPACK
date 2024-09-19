@@ -18,6 +18,7 @@ xnnpack_cxx_library(
         "//:XNNPACK",
         "//:cache",
         "//:common",
+        "//:math",
         "//:models_h",
     ],
 )
@@ -43,6 +44,7 @@ xnnpack_cxx_library(
         "//:XNNPACK",
         "//:cache",
         "//:common",
+        "//:math",
         "//:models_h",
     ],
 )
@@ -164,6 +166,7 @@ xnnpack_cxx_library(
         "//:XNNPACK",
         "//:cache",
         "//:common",
+        "//:math",
         "//:models_h",
     ],
 )
@@ -189,6 +192,7 @@ xnnpack_cxx_library(
         "//:XNNPACK",
         "//:cache",
         "//:common",
+        "//:math",
         "//:models_h",
     ],
 )
@@ -214,6 +218,7 @@ xnnpack_cxx_library(
         "//:XNNPACK",
         "//:cache",
         "//:common",
+        "//:math",
         "//:models_h",
     ],
 )
@@ -239,6 +244,7 @@ xnnpack_cxx_library(
         "//:XNNPACK",
         "//:cache",
         "//:common",
+        "//:math",
         "//:models_h",
     ],
 )
@@ -264,6 +270,7 @@ xnnpack_cxx_library(
         "//:XNNPACK",
         "//:cache",
         "//:common",
+        "//:math",
         "//:models_h",
     ],
 )
@@ -289,6 +296,7 @@ xnnpack_cxx_library(
         "//:XNNPACK",
         "//:cache",
         "//:common",
+        "//:math",
         "//:models_h",
     ],
 )

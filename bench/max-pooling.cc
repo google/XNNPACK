@@ -7,18 +7,17 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
-#include <cfloat>
 #include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <limits>
 #include <random>
 #include <vector>
 
-#include "xnnpack.h"
-
-#include <benchmark/benchmark.h>
 #include "bench/utils.h"
-
+#include "xnnpack.h"
+#include <benchmark/benchmark.h>
 
 void max_pooling_u8(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
@@ -36,7 +35,8 @@ void max_pooling_u8(benchmark::State& state, const char* net) {
   const size_t output_height = (2 * padding_size + input_height - pooling_size) / stride + 1;
   const size_t output_width = (2 * padding_size + input_width - pooling_size) / stride + 1;
 
-  std::vector<uint8_t> input(batch_size * input_height * input_width * channels);
+  std::vector<uint8_t> input(
+      batch_size * input_height * input_width * channels + XNN_EXTRA_BYTES);
   std::generate(input.begin(), input.end(), std::ref(u8rng));
   std::vector<uint8_t> output(batch_size * output_height * output_width * channels);
   std::fill(output.begin(), output.end(), 0xA5);
@@ -121,7 +121,8 @@ void max_pooling_f32(benchmark::State& state, const char* net) {
   const size_t output_height = (2 * padding_size + input_height - pooling_size) / stride + 1;
   const size_t output_width = (2 * padding_size + input_width - pooling_size) / stride + 1;
 
-  std::vector<float> input(batch_size * input_height * input_width * channels);
+  std::vector<float> input(batch_size * input_height * input_width * channels +
+                           XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input.begin(), input.end(), std::ref(f32rng));
   std::vector<float> output(batch_size * output_height * output_width * channels);
   std::fill(output.begin(), output.end(), nanf(""));

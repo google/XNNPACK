@@ -9,7 +9,7 @@
 
 #include <assert.h>
 
-#include <immintrin.h>
+#include <smmintrin.h>
 
 #include "xnnpack/gemm.h"
 #include "xnnpack/intrinsics-polyfill.h"
@@ -166,10 +166,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x4c8__sse41_madd(
     __m128i vacc2x0123 = _mm_hadd_epi32(vacc2x01, vacc2x23);
     __m128i vacc3x0123 = _mm_hadd_epi32(vacc3x01, vacc3x23);
 
-    vacc0x0123 = _mm_srai_epi32(vacc0x0123, 4);
-    vacc1x0123 = _mm_srai_epi32(vacc1x0123, 4);
-    vacc2x0123 = _mm_srai_epi32(vacc2x0123, 4);
-    vacc3x0123 = _mm_srai_epi32(vacc3x0123, 4);
     __m128 vout0x0123 = _mm_cvtepi32_ps(vacc0x0123);
     __m128 vout1x0123 = _mm_cvtepi32_ps(vacc1x0123);
     __m128 vout2x0123 = _mm_cvtepi32_ps(vacc2x0123);

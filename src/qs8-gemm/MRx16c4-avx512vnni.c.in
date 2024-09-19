@@ -187,7 +187,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
       k -= 4 * sizeof(${XINT8_T});
     }
 
-    $if DATATYPE == "QC4":
+    $if DATATYPE == "QC4" and VARIANT != "MADD":
       $for M in range(MR):
         vacc${M}x0123456789ABCDEF = _mm512_srai_epi32(vacc${M}x0123456789ABCDEF, 4);
     $for M in range(MR):

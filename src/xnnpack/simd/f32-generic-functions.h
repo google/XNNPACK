@@ -31,7 +31,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_srl_f32(xnn_simd_f32_t a, uint8_t b);
 // Extracts the exponent of the input `a` as a `float` value.
 static XNN_INLINE xnn_simd_f32_t xnn_generic_getexp_f32(xnn_simd_f32_t a) {
   // Some useful constants.
-  XNN_SIMD_CONST_U32(exp_mask, 0x7f800000);
+  XNN_SIMD_CONST_F32_FROM_INT32(exp_mask, 0x7f800000);
   XNN_SIMD_CONST_F32(bias_256, 256.0f);
   XNN_SIMD_CONST_F32(bias_383, 383.0f);
 

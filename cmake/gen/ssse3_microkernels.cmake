@@ -17,6 +17,7 @@ SET(PROD_SSSE3_MICROKERNEL_SRCS
   src/qs8-vcvt/gen/qs8-vcvt-ssse3-u32.c
   src/qs8-vlrelu/gen/qs8-vlrelu-ssse3-u32.c
   src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-ssse3-u16.c
+  src/qu8-rdsum/gen/qu8-rdsum-7p7x-ssse3-c64.c
   src/qu8-vcvt/gen/qu8-vcvt-ssse3-u32.c
   src/qu8-vlrelu/gen/qu8-vlrelu-ssse3-u32.c
   src/x24-transposec/x24-transposec-4x4-ssse3.c)
@@ -50,6 +51,8 @@ SET(NON_PROD_SSSE3_MICROKERNEL_SRCS
   src/qs8-vlrelu/gen/qs8-vlrelu-ssse3-u16.c
   src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-ssse3-u4.c
   src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-ssse3-u8.c
+  src/qu8-rdsum/gen/qu8-rdsum-7p7x-ssse3-c16.c
+  src/qu8-rdsum/gen/qu8-rdsum-7p7x-ssse3-c32.c
   src/qu8-requantization/qu8-requantization-gemmlowp-ssse3.c
   src/qu8-requantization/qu8-requantization-rndna-ssse3.c
   src/qu8-vcvt/gen/qu8-vcvt-ssse3-u16.c
