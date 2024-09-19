@@ -24,7 +24,7 @@ typedef float32x4_t xnn_simd_f32_t;
 #define XNN_SIMD_CONST_F32(var, val) \
   const float32x4_t var = vdupq_n_f32(val);
 
-#define XNN_SIMD_CONST_U32(var, val) \
+#define XNN_SIMD_CONST_F32_FROM_INT32(var, val) \
   const float32x4_t var = vreinterpretq_f32_u32(vdupq_n_u32(val));
 
 // Whether or not this architecture has native fused multiply-add support.

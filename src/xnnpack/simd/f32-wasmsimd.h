@@ -26,7 +26,7 @@ typedef v128_t xnn_simd_f32_t;
   static const xnn_simd_f32_t var =  \
       (xnn_simd_f32_t)((__f32x4){(val), (val), (val), (val)});
 
-#define XNN_SIMD_CONST_U32(var, val) \
+#define XNN_SIMD_CONST_F32_FROM_INT32(var, val) \
   static const xnn_simd_f32_t var =  \
       (xnn_simd_f32_t)((__u32x4){(val), (val), (val), (val)});
 
