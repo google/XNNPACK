@@ -766,11 +766,13 @@ XNNPACK_PARAMS_FOR_ARCH = {
         copts = [
             "-mhvx-ieee-fp",
         ],
+        extra_deps = [],  # Extra deps for hexagon.
     ),
     "hvx": _create_params(
         cond = "//:hvx_enabled",
         copts = [
             "-mhvx-ieee-fp",
         ],
+        extra_deps = [],  # Extra deps for hexagon.
     ),
 }
