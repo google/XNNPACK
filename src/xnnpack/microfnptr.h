@@ -2055,14 +2055,6 @@ typedef void (*xnn_f32_vsqrt_ukernel_fn)(
     float* output,
     const struct xnn_f32_sqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-// VSQRTSHIFT: Vector SQuare RooT and SHIFT elementwise
-
-typedef void (*xnn_u64_u32_vsqrtshift_ukernel_fn)(
-    size_t batch,
-    const uint64_t* input,
-    uint32_t* output,
-    uint32_t shift);
-
 // VRSQRT: Vector Reciprocal SQuare RooT elementwise
 
 typedef void (*xnn_f16_vrsqrt_ukernel_fn)(
