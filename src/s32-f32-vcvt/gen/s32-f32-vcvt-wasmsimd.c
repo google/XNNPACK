@@ -31,7 +31,7 @@ void xnn_s32_f32_vcvt_ukernel__wasmsimd_u4(
   assert(xnn_simd_size_f32 == 4);
   assert(xnn_simd_size_s32 == 4);
 
-  const xnn_simd_s32_t sub = xnn_set1_s32((int32_t) params->scalar.zero_point * params->scalar.num_elements);
+  const xnn_simd_s32_t sub = xnn_set1_s32(params->scalar.zero_point);
 
 
   for (; batch >= xnn_simd_bytes_s32; batch -= xnn_simd_bytes_s32) {
@@ -67,7 +67,7 @@ void xnn_s32_f32_vcvt_ukernel__wasmsimd_u8(
   assert(xnn_simd_size_f32 == 4);
   assert(xnn_simd_size_s32 == 4);
 
-  const xnn_simd_s32_t sub = xnn_set1_s32((int32_t) params->scalar.zero_point * params->scalar.num_elements);
+  const xnn_simd_s32_t sub = xnn_set1_s32(params->scalar.zero_point);
 
   for (; batch >= 8 * sizeof(int32_t); batch -= 8 * sizeof(int32_t)) {
     const xnn_simd_s32_t vx0 = xnn_loadu_s32(input);
@@ -115,7 +115,7 @@ void xnn_s32_f32_vcvt_ukernel__wasmsimd_u12(
   assert(xnn_simd_size_f32 == 4);
   assert(xnn_simd_size_s32 == 4);
 
-  const xnn_simd_s32_t sub = xnn_set1_s32((int32_t) params->scalar.zero_point * params->scalar.num_elements);
+  const xnn_simd_s32_t sub = xnn_set1_s32(params->scalar.zero_point);
 
   for (; batch >= 12 * sizeof(int32_t); batch -= 12 * sizeof(int32_t)) {
     const xnn_simd_s32_t vx0 = xnn_loadu_s32(input);
@@ -166,7 +166,7 @@ void xnn_s32_f32_vcvt_ukernel__wasmsimd_u16(
   assert(xnn_simd_size_f32 == 4);
   assert(xnn_simd_size_s32 == 4);
 
-  const xnn_simd_s32_t sub = xnn_set1_s32((int32_t) params->scalar.zero_point * params->scalar.num_elements);
+  const xnn_simd_s32_t sub = xnn_set1_s32(params->scalar.zero_point);
 
   for (; batch >= 16 * sizeof(int32_t); batch -= 16 * sizeof(int32_t)) {
     const xnn_simd_s32_t vx0 = xnn_loadu_s32(input);

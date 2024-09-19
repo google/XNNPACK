@@ -23,7 +23,7 @@ typedef float xnn_simd_f32_t;
 #define XNN_SIMD_CONST_F32(var, val) \
   static const xnn_simd_f32_t var = val;
 
-#define XNN_SIMD_CONST_U32(var, val)             \
+#define XNN_SIMD_CONST_F32_FROM_INT32(var, val)             \
   static const int32_t _##var##_int_value = val; \
   const xnn_simd_f32_t var = *(const float *)&_##var##_int_value;
 
@@ -115,7 +115,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_sra_f32(xnn_simd_f32_t a, uint8_t bits) {
 
 static XNN_INLINE xnn_simd_f32_t xnn_cmpeq_f32(xnn_simd_f32_t a,
                                                xnn_simd_f32_t b) {
-  XNN_SIMD_CONST_U32(ones, 0xFFFFFFFF)
+  XNN_SIMD_CONST_F32_FROM_INT32(ones, 0xFFFFFFFF)
   return a == b ? ones : 0.0f;
 }
 

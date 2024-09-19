@@ -1765,7 +1765,8 @@ IF(XNNPACK_BUILD_TESTS)
       qs8-vcvt
       qs16-qs8-vcvt
       qu8-f32-vcvt
-      qu8-vcvt)
+      qu8-vcvt
+      u32-f32-vcvt)
   FOREACH(TEST ${MICROKERNEL_VCVT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
@@ -2047,21 +2048,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       f16-rminmax
       f16-rsum
       f16-spmm
-      f16-vabs
-      f16-vclamp
-      f16-velu
-      f16-vhswish
-      f16-vlrelu
-      f16-vneg
-      f16-vrndd
-      f16-vrndne
-      f16-vrndu
-      f16-vrndz
-      f16-vrsqrt
-      f16-vsigmoid
-      f16-vsqr
-      f16-vsqrt
-      f16-vtanh
       f32-bgemm
       f32-conv-hwc
       f32-conv-hwc2chw
@@ -2088,26 +2074,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       f32-rsum
       f32-softmax
       f32-spmm
-      f32-vabs
-      f32-vclamp
       f16-vcmul
       f32-vcmul
-      f32-velu
-      f32-vgelu
-      f32-vhswish
-      f32-vlrelu
-      f32-vneg
-      f32-vrelu
-      f32-vrndd
-      f32-vrndne
-      f32-vrndu
-      f32-vrndz
       f32-vscaleexpminusmax
       f32-vscaleextexp
-      f32-vsigmoid
-      f32-vsqr
-      f32-vsqrt
-      f32-vtanh
       i16-vlshift
       qd8-f16-qb4w-gemm
       qd8-f16-qc4w-gemm
@@ -2129,8 +2099,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       qs8-vadd
       qs8-vaddc
       qs8-vcvt
-      qs8-vhswish
-      qs8-vlrelu
       qs8-vmul
       qs8-vmulc
       qu8-f32-vcvt
@@ -2141,8 +2109,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       qu8-vadd
       qu8-vaddc
       qu8-vcvt
-      qu8-vhswish
-      qu8-vlrelu
       qu8-vmul
       qu8-vmulc
       s16-rmaxabs
