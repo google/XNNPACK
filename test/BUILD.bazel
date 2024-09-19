@@ -306,7 +306,6 @@ sh_test(
     "f32_vtanh",
     "s8_vclamp",
     "u8_vclamp",
-    "u64_u32_vsqrtshift",
 ]]
 
 [xnnpack_unit_test(
@@ -1213,87 +1212,6 @@ xnnpack_unit_test(
     srcs = [
         "qu8-vlrelu.cc",
         "vlrelu-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "s16_rmaxabs_test",
-    srcs = [
-        "rmaxabs-microkernel-tester.h",
-        "s16-rmaxabs.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "s16_window_test",
-    srcs = [
-        "s16-window.cc",
-        "window-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "u32_filterbank_accumulate_test",
-    srcs = [
-        "filterbank-accumulate-microkernel-tester.h",
-        "u32-filterbank-accumulate.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "u32_filterbank_subtract_test",
-    srcs = [
-        "filterbank-subtract-microkernel-tester.h",
-        "u32-filterbank-subtract.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "u32_vlog_test",
-    srcs = [
-        "u32-vlog.cc",
-        "vlog-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "i16_vlshift_test",
-    srcs = [
-        "i16-vlshift.cc",
-        "vlshift-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "cs16_vsquareabs_test",
-    srcs = [
-        "cs16-vsquareabs.cc",
-        "vsquareabs-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "cs16_bfly4_test",
-    srcs = [
-        "bfly4-microkernel-tester.h",
-        "cs16-bfly4.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "cs16_fftr_test",
-    srcs = [
-        "cs16-fftr.cc",
-        "fftr-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )

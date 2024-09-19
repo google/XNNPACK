@@ -257,20 +257,11 @@ tools/generate-dwconv-multipass-test.py --spec test/qu8-dwconv-minmax-multipass-
 tools/generate-dwconv2d-chw-test.py --spec test/f16-dwconv2d-chw.yaml --output test/f16-dwconv2d-chw.cc &
 tools/generate-dwconv2d-chw-test.py --spec test/f32-dwconv2d-chw.yaml --output test/f32-dwconv2d-chw.cc &
 
-### Tests for VLShift micro-kernels
-tools/generate-vlshift-test.py --spec test/i16-vlshift.yaml --output test/i16-vlshift.cc &
-
-### Tests for VLog micro-kernels
-tools/generate-vlog-test.py --spec test/u32-vlog.yaml --output test/u32-vlog.cc &
-
 ### Tests for VHSwish micro-kernels
 tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-vhswish --output test/f16-vhswish.cc &
 tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vhswish --output test/f32-vhswish.cc &
 tools/generate-vhswish-test.py --spec test/qs8-vhswish.yaml --output test/qs8-vhswish.cc &
 tools/generate-vhswish-test.py --spec test/qu8-vhswish.yaml --output test/qu8-vhswish.cc &
-
-### Tests for Window micro-kernels
-tools/generate-window-test.py --spec test/s16-window.yaml --output test/s16-window.cc &
 
 ### Tests for IBilinear micro-kernels
 tools/generate-ibilinear-test.py --spec test/f16-ibilinear.yaml --output test/f16-ibilinear.cc &
@@ -285,12 +276,6 @@ tools/generate-ibilinear-chw-test.py --spec test/f32-ibilinear-chw.yaml --output
 ### Tests for PRelu micro-kernels
 tools/generate-prelu-test.py --spec test/f16-prelu.yaml --output test/f16-prelu.cc &
 tools/generate-prelu-test.py --spec test/f32-prelu.yaml --output test/f32-prelu.cc &
-
-### Tests for FFTR micro-kernels
-tools/generate-fftr-test.py --spec test/cs16-fftr.yaml --output test/cs16-fftr.cc &
-
-### Tests for BFly4 micro-kernels
-tools/generate-bfly4-test.py --spec test/cs16-bfly4.yaml --output test/cs16-bfly4.cc &
 
 ### Tests for RAddExpMinusMax micro-kernels
 tools/generate-raddexpminusmax-test.py --spec test/f32-raddexpminusmax.yaml --output test/f32-raddexpminusmax.cc &
@@ -308,21 +293,9 @@ tools/generate-vscaleextexp-test.py --spec test/f32-vscaleextexp.yaml --output t
 ### Tests for VScaleExpMinusMax micro-kernels
 tools/generate-vscaleexpminusmax-test.py --spec test/f32-vscaleexpminusmax.yaml --output test/f32-vscaleexpminusmax.cc &
 
-### Tests for RMaxAbs micro-kernels
-tools/generate-rmaxabs-test.py --spec test/s16-rmaxabs.yaml --output test/s16-rmaxabs.cc &
-
 ### Tests for VMulCAddC micro-kernels
 tools/generate-vmulcaddc-test.py --spec test/f16-vmulcaddc-minmax.yaml --output test/f16-vmulcaddc-minmax.cc &
 tools/generate-vmulcaddc-test.py --spec test/f32-vmulcaddc-minmax.yaml --output test/f32-vmulcaddc-minmax.cc &
-
-### Tests for VSquareAbs micro-kernels
-tools/generate-vsquareabs-test.py --spec test/cs16-vsquareabs.yaml --output test/cs16-vsquareabs.cc &
-
-### Tests for FilterBank accumulate micro-kernels
-tools/generate-filterbank-accumulate-test.py --spec test/u32-filterbank-accumulate.yaml --output test/u32-filterbank-accumulate.cc &
-
-### Tests for FilterBank subtract micro-kernels
-tools/generate-filterbank-subtract-test.py --spec test/u32-filterbank-subtract.yaml --output test/u32-filterbank-subtract.cc &
 
 ### Tests for the portable SIMD wrappers.
 tools/xngen test/f32-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/f32-simd-scalar.cc &

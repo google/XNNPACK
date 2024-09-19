@@ -265,16 +265,6 @@ xnnpack_benchmark(
     "f32_vscaleextexp",
     "f16_vcmul",
     "f32_vcmul",
-    "s16_rmaxabs",
-    "s16_window",
-    "u32_filterbank_accumulate",
-    "u32_filterbank_subtract",
-    "u32_vlog",
-    "u64_u32_vsqrtshift",
-    "i16_vlshift",
-    "cs16_vsquareabs",
-    "cs16_bfly4",
-    "cs16_fftr",
     "x8_lut",
 ]]
 

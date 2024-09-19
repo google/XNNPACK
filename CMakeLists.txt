@@ -1463,9 +1463,6 @@ IF(XNNPACK_BUILD_TESTS)
 
   # ---[ Build microkernel-level unit tests
   SET(MICROKERNEL_UNIT_TESTS
-      cs16-bfly4
-      cs16-fftr
-      cs16-vsquareabs
       f16-conv-hwc2chw
       f16-f32acc-rdsum
       f16-f32acc-rsum
@@ -1499,7 +1496,6 @@ IF(XNNPACK_BUILD_TESTS)
       f32-vmulcaddc-minmax
       f32-vscaleexpminusmax
       f32-vscaleextexp
-      i16-vlshift
       indirection
       packing
       qs8-gavgpool-minmax-fp32
@@ -1516,12 +1512,7 @@ IF(XNNPACK_BUILD_TESTS)
       qu8-requantization
       qu8-vhswish
       qu8-vlrelu
-      s16-rmaxabs
-      s16-window
       s8-ibilinear
-      u32-filterbank-accumulate
-      u32-filterbank-subtract
-      u32-vlog
       u8-ibilinear
       u8-lut32norm
       u8-rmax
@@ -2027,9 +2018,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   # ---[ Build microkernel-level microbenchmarks
   SET(MICROKERNEL_BENCHMARKS
       bf16-gemm
-      cs16-bfly4
-      cs16-fftr
-      cs16-vsquareabs
       f16-conv-hwc2chw
       f16-dwconv
       f16-dwconv2d-chw
@@ -2078,7 +2066,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       f32-vcmul
       f32-vscaleexpminusmax
       f32-vscaleextexp
-      i16-vlshift
       qd8-f16-qb4w-gemm
       qd8-f16-qc4w-gemm
       qd8-f16-qc8w-gemm
@@ -2111,12 +2098,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       qu8-vcvt
       qu8-vmul
       qu8-vmulc
-      s16-rmaxabs
-      s16-window
-      u32-filterbank-accumulate
-      u32-filterbank-subtract
-      u32-vlog
-      u64-u32-vsqrtshift
       x16-packw
       x32-packw
       x8-lut
