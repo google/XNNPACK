@@ -212,6 +212,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qu8-igemm/gen/qu8-igemm-1x4-minmax-fp32-scalar-lrintf.c
   src/qu8-igemm/gen/qu8-igemm-2x2-minmax-fp32-scalar-imagic.c
   src/qu8-igemm/gen/qu8-igemm-3x4-minmax-fp32-scalar-lrintf.c
+  src/qu8-rdsum/gen/qu8-rdsum-scalar.c
   src/qu8-rsum/gen/qu8-rsum-scalar-u4.c
   src/qu8-vadd/gen/qu8-vadd-minmax-scalar-u1.c
   src/qu8-vadd/gen/qu8-vadd-minmax-scalar-u4.c
@@ -234,6 +235,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/u8-maxpool/u8-maxpool-9p8x-minmax-scalar-c1.c
   src/u8-rmax/u8-rmax-scalar-u2.c
   src/u8-vclamp/u8-vclamp-scalar-u4.c
+  src/u32-f32-vcvt/gen/u32-f32-vcvt-scalar.c
   src/x8-lut/gen/x8-lut-scalar-u4.c
   src/x8-packq/x8-packq-scalar-f32qp8-u1.c
   src/x8-packw/gen/x8-packw-x4-gemm-goi-scalar-u2.c

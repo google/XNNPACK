@@ -357,5 +357,4 @@ void xnn_f32_raddexpminusmax_ukernel__avx2_p5_u96_acc3(
   vacc_lo = _mm_add_ps(vacc_lo, _mm_movehl_ps(vacc_lo, vacc_lo));
   vacc_lo = _mm_add_ss(vacc_lo, _mm_movehdup_ps(vacc_lo));
   _mm_store_ss(sum, vacc_lo);
-  _mm256_zeroupper();
 }

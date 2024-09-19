@@ -52,7 +52,7 @@ static XNN_INLINE xnn_simd_f32_t xnn_signed_getexp_f32(xnn_simd_f32_t a) {
 
   // Some useful constants.
   XNN_SIMD_CONST_F32(sign_mask, -0.0f);
-  XNN_SIMD_CONST_U32(sign_and_exp_mask, 0xff800000);
+  XNN_SIMD_CONST_F32_FROM_INT32(sign_and_exp_mask, 0xff800000);
   XNN_SIMD_CONST_F32(bias_256, 256.0f);
   XNN_SIMD_CONST_F32(bias_383, 383.0f);
 
@@ -87,7 +87,7 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u4(
   // Some useful constants.
   XNN_SIMD_CONST_F32(vone, 1.0f);
   XNN_SIMD_CONST_F32(vln2, M_LN2);
-  XNN_SIMD_CONST_U32(vmantissa_bits_mask, 0x007FFFFFUL);
+  XNN_SIMD_CONST_F32_FROM_INT32(vmantissa_bits_mask, 0x007FFFFFUL);
 
   // Note that these two values are not _exactly_ `(float)M_SQRT2` and
   // `(float)M_SQRT1_2`, but are instead chosen such that their product is
@@ -186,7 +186,7 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u8(
   // Some useful constants.
   XNN_SIMD_CONST_F32(vone, 1.0f);
   XNN_SIMD_CONST_F32(vln2, M_LN2);
-  XNN_SIMD_CONST_U32(vmantissa_bits_mask, 0x007FFFFFUL);
+  XNN_SIMD_CONST_F32_FROM_INT32(vmantissa_bits_mask, 0x007FFFFFUL);
 
   // Note that these two values are not _exactly_ `(float)M_SQRT2` and
   // `(float)M_SQRT1_2`, but are instead chosen such that their product is
@@ -341,7 +341,7 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u12(
   // Some useful constants.
   XNN_SIMD_CONST_F32(vone, 1.0f);
   XNN_SIMD_CONST_F32(vln2, M_LN2);
-  XNN_SIMD_CONST_U32(vmantissa_bits_mask, 0x007FFFFFUL);
+  XNN_SIMD_CONST_F32_FROM_INT32(vmantissa_bits_mask, 0x007FFFFFUL);
 
   // Note that these two values are not _exactly_ `(float)M_SQRT2` and
   // `(float)M_SQRT1_2`, but are instead chosen such that their product is
@@ -510,7 +510,7 @@ void xnn_f32_vlog_ukernel__wasmsimd_rational_3_3_div_u16(
   // Some useful constants.
   XNN_SIMD_CONST_F32(vone, 1.0f);
   XNN_SIMD_CONST_F32(vln2, M_LN2);
-  XNN_SIMD_CONST_U32(vmantissa_bits_mask, 0x007FFFFFUL);
+  XNN_SIMD_CONST_F32_FROM_INT32(vmantissa_bits_mask, 0x007FFFFFUL);
 
   // Note that these two values are not _exactly_ `(float)M_SQRT2` and
   // `(float)M_SQRT1_2`, but are instead chosen such that their product is

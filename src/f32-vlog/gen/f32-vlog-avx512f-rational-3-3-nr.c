@@ -60,7 +60,7 @@ void xnn_f32_vlog_ukernel__avx512f_rational_3_3_nr_u16(
   // Some useful constants.
   XNN_SIMD_CONST_F32(vone, 1.0f);
   XNN_SIMD_CONST_F32(vln2, M_LN2);
-  XNN_SIMD_CONST_U32(vmantissa_bits_mask, 0x007FFFFFUL);
+  XNN_SIMD_CONST_F32_FROM_INT32(vmantissa_bits_mask, 0x007FFFFFUL);
 
   // Note that these two values are not _exactly_ `(float)M_SQRT2` and
   // `(float)M_SQRT1_2`, but are instead chosen such that their product is
@@ -169,7 +169,7 @@ void xnn_f32_vlog_ukernel__avx512f_rational_3_3_nr_u32(
   // Some useful constants.
   XNN_SIMD_CONST_F32(vone, 1.0f);
   XNN_SIMD_CONST_F32(vln2, M_LN2);
-  XNN_SIMD_CONST_U32(vmantissa_bits_mask, 0x007FFFFFUL);
+  XNN_SIMD_CONST_F32_FROM_INT32(vmantissa_bits_mask, 0x007FFFFFUL);
 
   // Note that these two values are not _exactly_ `(float)M_SQRT2` and
   // `(float)M_SQRT1_2`, but are instead chosen such that their product is
@@ -340,7 +340,7 @@ void xnn_f32_vlog_ukernel__avx512f_rational_3_3_nr_u48(
   // Some useful constants.
   XNN_SIMD_CONST_F32(vone, 1.0f);
   XNN_SIMD_CONST_F32(vln2, M_LN2);
-  XNN_SIMD_CONST_U32(vmantissa_bits_mask, 0x007FFFFFUL);
+  XNN_SIMD_CONST_F32_FROM_INT32(vmantissa_bits_mask, 0x007FFFFFUL);
 
   // Note that these two values are not _exactly_ `(float)M_SQRT2` and
   // `(float)M_SQRT1_2`, but are instead chosen such that their product is
@@ -527,7 +527,7 @@ void xnn_f32_vlog_ukernel__avx512f_rational_3_3_nr_u64(
   // Some useful constants.
   XNN_SIMD_CONST_F32(vone, 1.0f);
   XNN_SIMD_CONST_F32(vln2, M_LN2);
-  XNN_SIMD_CONST_U32(vmantissa_bits_mask, 0x007FFFFFUL);
+  XNN_SIMD_CONST_F32_FROM_INT32(vmantissa_bits_mask, 0x007FFFFFUL);
 
   // Note that these two values are not _exactly_ `(float)M_SQRT2` and
   // `(float)M_SQRT1_2`, but are instead chosen such that their product is

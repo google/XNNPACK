@@ -73,4 +73,4 @@ xnn_cvt_f32_s32(xnn_simd_s32_t a) {
   return (float) a;
 }
 
-#endif  // __XNNPACK_SRC_XNNPACK_SIMD_F32_SCALAR_H_
+#endif  // __XNNPACK_SRC_XNNPACK_SIMD_S32_SCALAR_H_

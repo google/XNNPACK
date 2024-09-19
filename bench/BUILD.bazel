@@ -17,6 +17,7 @@ load(
     "xnnpack_optional_ruy_deps",
     "xnnpack_optional_tflite_copts",
     "xnnpack_optional_tflite_deps",
+    "xnnpack_slow_benchmark_tags",
     "xnnpack_visibility",
 )
 load(
@@ -119,6 +120,7 @@ xnnpack_cxx_library(
     srcs = [
         "%s.cc" % kernel.replace("_", "-"),
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":gemm_benchmark",
         "//:allocator",
@@ -147,6 +149,7 @@ xnnpack_cxx_library(
         "%s.cc" % kernel.replace("_", "-"),
     ],
     copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":gemm_benchmark",
         "//:allocator",
@@ -168,6 +171,7 @@ xnnpack_benchmark(
         "f32-bgemm.cc",
     ],
     copts = xnnpack_optional_ruy_copts(),
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:allocator",
     ] + xnnpack_optional_ruy_deps(),
@@ -179,6 +183,7 @@ xnnpack_benchmark(
         "qp8-f32-qc4w-gemm.cc",
     ],
     defines = xnnpack_kleidiai_defines(),
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":gemm_benchmark",
         "//:isa_checks",
@@ -202,10 +207,12 @@ xnnpack_benchmark(
     "qu8_f32_vcvt",
     "qu8_vcvt",
     "f16_f32_vcvt",
+    "f16_qs8_vcvt",
     "f32_f16_vcvt",
     "f32_qs8_vcvt",
     "f32_qu8_vcvt",
     "s32_f32_vcvt",
+    "u32_f32_vcvt",
 ]]
 
 [xnnpack_benchmark(
@@ -217,6 +224,7 @@ xnnpack_benchmark(
     deps = MICROKERNEL_BENCHMARK_DEPS,
 ) for kernel in [
     "qs8_rdsum",
+    "qu8_rdsum",
     "qs8_rsum",
     "qu8_rsum",
     "f16_rsum",
@@ -235,14 +243,10 @@ xnnpack_benchmark(
 ) for kernel in [
     "qs8_vadd",
     "qs8_vaddc",
-    "qs8_vhswish",
-    "qs8_vlrelu",
     "qs8_vmul",
     "qs8_vmulc",
     "qu8_vadd",
     "qu8_vaddc",
-    "qu8_vhswish",
-    "qu8_vlrelu",
     "qu8_vmul",
     "qu8_vmulc",
     "f16_gavgpool_cw",
@@ -272,6 +276,16 @@ xnnpack_benchmark(
     "cs16_bfly4",
     "cs16_fftr",
     "x8_lut",
+]]
+
+[xnnpack_benchmark(
+    name = "%s_bench" % kernel,
+    srcs = [
+        "%s.cc" % kernel.replace("_", "-"),
+    ],
+    tags = xnnpack_slow_benchmark_tags(),
+    deps = MICROKERNEL_BENCHMARK_DEPS,
+) for kernel in [
     "xx_transposev",
     "xN_transposec",
 ]]
@@ -297,6 +311,7 @@ xnnpack_benchmark(
     srcs = [
         "qs8-dwconv.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":dwconv",
         "//:indirection",
@@ -310,6 +325,7 @@ xnnpack_benchmark(
     srcs = [
         "f16-f32acc-igemm.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":conv",
         "//:indirection",
@@ -321,70 +337,28 @@ xnnpack_benchmark(
     srcs = [
         "f16-igemm.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":conv",
         "//:indirection",
     ],
 )
 
-[xnnpack_benchmark(
-    name = "%s_bench" % kernel,
-    srcs = [
-        "%s.cc" % kernel.replace("_", "-"),
-        "f16-vunary-benchmark.h",
-    ],
+xnnpack_benchmark(
+    name = "vunary_bench",
+    srcs = ["vunary.cc"],
+    # TODO(b/367939259): This is not really that slow, but --config=ios_x86_64 fails to pass
+    # --benchmark_min_time=1x to the benchmark.
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS,
-) for kernel in [
-    "f16_vsigmoid",
-    "f16_vtanh",
-    "f16_velu",
-    "f16_vabs",
-    "f16_vhswish",
-    "f16_vlrelu",
-    "f16_vneg",
-    "f16_vrndd",
-    "f16_vrndne",
-    "f16_vrndu",
-    "f16_vrndz",
-    "f16_vsqr",
-    "f16_vsqrt",
-    "f16_vrsqrt",
-    "f16_vclamp",
-]]
-
-[xnnpack_benchmark(
-    name = "%s_bench" % kernel,
-    srcs = [
-        "%s.cc" % kernel.replace("_", "-"),
-        "f32-vunary-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-) for kernel in [
-    "f32_vabs",
-    "f32_velu",
-    "f32_vgelu",
-    "f32_vhswish",
-    "f32_vlog",
-    "f32_vlrelu",
-    "f32_vneg",
-    "f32_vrelu",
-    "f32_vrndd",
-    "f32_vrndne",
-    "f32_vrndu",
-    "f32_vrndz",
-    "f32_vsigmoid",
-    "f32_vsqr",
-    "f32_vsqrt",
-    "f32_vrsqrt",
-    "f32_vclamp",
-    "f32_vtanh",
-]]
+)
 
 xnnpack_benchmark(
     name = "f32_igemm_bench",
     srcs = [
         "f32-igemm.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":conv",
         "//:indirection",
@@ -423,6 +397,7 @@ xnnpack_benchmark(
     srcs = [
         "f16-dwconv.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":dwconv",
         "//:indirection",
@@ -435,6 +410,7 @@ xnnpack_benchmark(
     srcs = [
         "f32-dwconv.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":dwconv",
         "//:indirection",
@@ -447,6 +423,7 @@ xnnpack_benchmark(
     srcs = [
         "f32-dwconv2d-chw.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":dwconv",
         "//:indirection",
@@ -458,6 +435,7 @@ xnnpack_benchmark(
     srcs = [
         "f16-dwconv2d-chw.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":dwconv",
         "//:indirection",
@@ -470,6 +448,7 @@ xnnpack_benchmark(
         "f32-spmm.cc",
         "spmm-benchmark.h",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":spmm",
         "//:isa_checks",
@@ -498,6 +477,7 @@ xnnpack_benchmark(
     srcs = [
         "f32-im2col-gemm.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":conv",
         "//:im2col",
@@ -522,6 +502,7 @@ xnnpack_benchmark(
         "bgemm.h",
         "x8-packq.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packq_benchmark",
         "//:allocator",
@@ -535,6 +516,7 @@ xnnpack_benchmark(
         "packw-benchmark.h",
         "x8-packw.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:allocator",
     ],
@@ -547,6 +529,7 @@ xnnpack_benchmark(
         "packw-benchmark.h",
         "qs8-packw.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:allocator",
     ],
@@ -559,6 +542,7 @@ xnnpack_benchmark(
         "packw-benchmark.h",
         "x16-packw.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:allocator",
     ],
@@ -571,6 +555,7 @@ xnnpack_benchmark(
         "packw-benchmark.h",
         "x32-packw.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:allocator",
     ],
@@ -632,7 +617,9 @@ xnnpack_benchmark(
     name = "convolution_bench",
     srcs = ["convolution.cc"],
     copts = xnnpack_optional_tflite_copts(),
-    tags = ["nowin32"],
+    tags = xnnpack_slow_benchmark_tags() + [
+        "nowin32",
+    ],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
 )
 
@@ -640,7 +627,7 @@ xnnpack_benchmark(
     name = "deconvolution_bench",
     srcs = ["deconvolution.cc"],
     copts = xnnpack_optional_tflite_copts(),
-    tags = ["nowin32"],
+    tags = xnnpack_slow_benchmark_tags() + ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
 )
 
@@ -655,6 +642,7 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "global_average_pooling_bench",
     srcs = ["global-average-pooling.cc"],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = OPERATOR_BENCHMARK_DEPS,
 )
 
@@ -676,7 +664,9 @@ xnnpack_benchmark(
     name = "scaled_dot_product_attention_bench",
     srcs = ["scaled-dot-product-attention.cc"],
     copts = xnnpack_optional_tflite_copts(),
-    tags = ["nowin32"],
+    tags = xnnpack_slow_benchmark_tags() + [
+        "nowin32",
+    ],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
 )
 
@@ -688,6 +678,7 @@ xnnpack_benchmark(
         "end2end.h",
         "f16-dwconv-e2e.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:XNNPACK",
         "//:microkernel_configs",
@@ -705,6 +696,7 @@ xnnpack_benchmark(
         "end2end.h",
         "f16-gemm-e2e.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:XNNPACK",
         "//:microkernel_configs",
@@ -722,6 +714,7 @@ xnnpack_benchmark(
         "end2end.h",
         "f32-dwconv-e2e.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:XNNPACK",
         "//:microkernel_configs",
@@ -739,6 +732,7 @@ xnnpack_benchmark(
         "end2end.h",
         "f32-gemm-e2e.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:XNNPACK",
         "//:microkernel_configs",
@@ -756,6 +750,7 @@ xnnpack_benchmark(
         "end2end.h",
         "qs8-dwconv-e2e.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:XNNPACK",
         "//:microkernel_configs",
@@ -771,6 +766,7 @@ xnnpack_benchmark(
         "end2end.h",
         "qs8-gemm-e2e.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:XNNPACK",
         "//:microkernel_configs",
@@ -786,6 +782,7 @@ xnnpack_benchmark(
         "end2end.h",
         "qu8-gemm-e2e.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:XNNPACK",
         "//:microkernel_configs",
@@ -803,6 +800,7 @@ xnnpack_benchmark(
         "end2end.h",
         "qu8-dwconv-e2e.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         "//:XNNPACK",
         "//:microkernel_configs",
@@ -817,6 +815,7 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "end2end_bench",
     srcs = ["end2end.cc"],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = [
         ":bench_utils",
         "//:XNNPACK",

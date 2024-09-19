@@ -1,0 +1,149 @@
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$import math
+#include <assert.h>
+#include <math.h>
+
+#include <arm_neon.h>
+
+#include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/math.h"
+
+
+void xnn_qu8_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__neon_u${CHANNELS}(
+    size_t rows,
+    size_t channels,
+    const uint8_t* input,
+    size_t input_stride,
+    const uint8_t* zero,
+    uint32_t* output,
+    const struct xnn_qs8_rsum_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(rows != 0);
+  assert(channels != 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  size_t input_increment = ${ACCUMULATORS} * input_stride;
+  for (; channels >= ${CHANNELS}; channels -= ${CHANNELS}) {
+    const uint8_t* i0 = input;
+    $for ACC in range(1, ACCUMULATORS):
+      const uint8_t* i${ACC} = (const uint8_t*) ((uintptr_t) input + ${ACC} * input_stride);
+
+    $for C in range(0, CHANNELS, 4):
+      uint32x4_t vacc${C} = vdupq_n_u32(0);
+
+    // 256 uint8s may be summed into an uint16 before overflowing
+    // To prevent handling the tails of the inner 256 loop, we round 256 down to
+    // the nearest integer multiple of ACCUMULATORS.
+    $OVERFLOW = math.floor(256 / ACCUMULATORS) * ACCUMULATORS
+    int r = rows;
+    while (r > 0) {
+      $for C in range(0, CHANNELS, 8):
+        uint16x8_t vacc16_${C+4} = vmovq_n_u16(0);
+      for (int current_batch = min(r, ${OVERFLOW}); current_batch > 0; current_batch -= ${ACCUMULATORS}) {
+        $for N in range(1, ACCUMULATORS, 2):
+          if XNN_UNPREDICTABLE(current_batch < ${N+1}) {
+            i${N} = zero;
+          }
+          if XNN_UNPREDICTABLE(current_batch <= ${N+1}) {
+            i${N+1} = zero;
+          }
+        $for C in range(0, CHANNELS, 8):
+          uint8x16_t vin${C+4};
+        $for ACC in range(ACCUMULATORS):
+          $for C in range(0, CHANNELS, 8):
+            vin${C+4} = vld1q_u8(&i${ACC}[${C}]);
+          $for C in range(0, CHANNELS, 8):
+            vacc16_${C+4} = vaddw_u8(vacc16_${C+4}, vget_low_u8(vin${C+4}));
+        $for N in range(0, ACCUMULATORS):
+          i${N} = (const uint8_t*) ((uintptr_t) i${N} + input_increment);
+      }
+      $for C in range(0, CHANNELS, 8):
+        vacc${C} = vaddw_u16(vacc${C}, vget_low_u16(vacc16_${C+4}));
+        vacc${C+4} = vaddw_u16(vacc${C+4}, vget_high_u16(vacc16_${C+4}));
+      r = doz(r, ${OVERFLOW});
+    }
+
+    const uint32_t* o = output;
+    $for C in range(0, CHANNELS, 4):
+      uint32x4_t vo${C} = vld1q_u32(o); o += 4;
+    $for C in range(0, CHANNELS, 4):
+      vacc${C} = vaddq_u32(vo${C}, vacc${C});
+    $for C in range(0, CHANNELS, 4):
+      vst1q_u32(output, vacc${C}); output += 4;
+
+    input = (const uint8_t*) ((uintptr_t) input + ${CHANNELS} * sizeof(uint8_t));
+  }
+  if (channels != 0) {
+    assert(channels >= 1 && channels <= ${CHANNELS-1});
+
+    input_increment = ${ACCUMULATORS} * input_stride;
+    // 256 uint8s may be summed into an uint16 before overflowing.
+    do {
+      int num_batches = floor((rows + ${OVERFLOW - 1}) / ${OVERFLOW});
+      int r = rows;
+      const uint8_t* i0 = input;
+      $for ACC in range(1, ACCUMULATORS):
+        const uint8_t* i${ACC} = (const uint8_t*) ((uintptr_t) input + ${ACC} * input_stride);
+
+      uint32x4_t vacc0 = vdupq_n_u32(0);
+      uint32x4_t vacc1 = vdupq_n_u32(0);
+
+      for (; num_batches > 0; --num_batches) {
+        uint16x8_t vacc16 = vmovq_n_u16(0);
+        for (int current_batch = min(r, ${OVERFLOW}); current_batch > 0; current_batch -= ${ACCUMULATORS}) {
+          $for N in range(1, ACCUMULATORS, 2):
+            if XNN_UNPREDICTABLE(current_batch < ${N+1}) {
+              i${N} = zero;
+            }
+            if XNN_UNPREDICTABLE(current_batch <= ${N+1}) {
+              i${N+1} = zero;
+            }
+
+          $for ACC in range(ACCUMULATORS):
+            uint8x8_t vin${ACC} = vld1_u8(&i${ACC}[0]);
+          $for N in range(ACCUMULATORS):
+            i${N} = (const uint8_t*) ((uintptr_t) i${N} + input_increment);
+          $for ACC in range(ACCUMULATORS):
+            vacc16 = vaddw_u8(vacc16, vin${ACC});
+        }
+        vacc0 = vaddw_u16(vacc0, vget_low_u16(vacc16));
+        vacc1 = vaddw_u16(vacc1, vget_high_u16(vacc16));
+        r = doz(r, ${OVERFLOW});
+      }
+
+      if XNN_LIKELY(channels >= 8) {
+        uint32x4_t vo0 = vld1q_u32(output);
+        uint32x4_t vo1 = vld1q_u32(output + 4);
+        vo0 = vaddq_u32(vo0, vacc0);
+        vo1 = vaddq_u32(vo1, vacc1);
+        vst1q_u32(output, vo0); output += 4;
+        vst1q_u32(output, vo1); output += 4;
+        channels -= 8;
+        input = (const uint8_t*) ((uintptr_t) input + 8 * sizeof(uint8_t));
+      } else {
+        if (channels & 4) {
+          uint32x4_t vo = vld1q_u32(output);
+          vo = vaddq_u32(vo, vacc0);
+          vst1q_u32(output, vo); output += 4;
+          vacc0 = vacc1;
+        }
+        if (channels & 2) {
+          uint32x2_t vo = vld1_u32(output);
+          vo = vadd_u32(vo, vget_low_u32(vacc0));
+          vst1_u32(output, vo); output += 2;
+          vacc0 = vextq_u32(vacc0, vacc0, 2);
+        }
+        if (channels & 1) {
+          *output += vgetq_lane_u32(vacc0, 0);
+        }
+        channels = 0;
+      }
+    } while (channels != 0);
+  }
+}

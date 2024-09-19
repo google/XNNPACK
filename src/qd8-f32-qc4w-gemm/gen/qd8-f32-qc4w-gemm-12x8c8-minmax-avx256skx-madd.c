@@ -356,18 +356,6 @@ void xnn_qd8_f32_qc4w_gemm_minmax_ukernel_12x8c8__avx256skx_madd(
     const __m256i vsum11x02134657 = _mm256_hadd_epi32(vacc11x0123, vacc11x4567);
     __m256i vacc11x01234567 = _mm256_permute4x64_epi64(vsum11x02134657, _MM_SHUFFLE(3, 1, 2, 0));
 
-    vacc0x01234567 = _mm256_srai_epi32(vacc0x01234567, 4);
-    vacc1x01234567 = _mm256_srai_epi32(vacc1x01234567, 4);
-    vacc2x01234567 = _mm256_srai_epi32(vacc2x01234567, 4);
-    vacc3x01234567 = _mm256_srai_epi32(vacc3x01234567, 4);
-    vacc4x01234567 = _mm256_srai_epi32(vacc4x01234567, 4);
-    vacc5x01234567 = _mm256_srai_epi32(vacc5x01234567, 4);
-    vacc6x01234567 = _mm256_srai_epi32(vacc6x01234567, 4);
-    vacc7x01234567 = _mm256_srai_epi32(vacc7x01234567, 4);
-    vacc8x01234567 = _mm256_srai_epi32(vacc8x01234567, 4);
-    vacc9x01234567 = _mm256_srai_epi32(vacc9x01234567, 4);
-    vacc10x01234567 = _mm256_srai_epi32(vacc10x01234567, 4);
-    vacc11x01234567 = _mm256_srai_epi32(vacc11x01234567, 4);
     __m256 vout0x01234567 = _mm256_cvtepi32_ps(vacc0x01234567);
     __m256 vout1x01234567 = _mm256_cvtepi32_ps(vacc1x01234567);
     __m256 vout2x01234567 = _mm256_cvtepi32_ps(vacc2x01234567);

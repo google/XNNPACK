@@ -238,7 +238,7 @@ static void RuyBenchmark(benchmark::State& state, size_t threads)
   std::vector<int32_t> b(num_buffers * nc);
   std::generate(b.begin(), b.end(), std::ref(i32rng));
   std::vector<uint8_t> c(num_buffers * nc * mc);
-  std::fill(c.begin(), c.end(), std::nanf(""));
+  std::fill(c.begin(), c.end(), UINT8_C(0xDE));
 
   // Note: context must be static to avoid the cost of re-creating it for each benchmark.
   static ruy::Context context;
