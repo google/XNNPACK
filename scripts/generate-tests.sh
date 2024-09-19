@@ -190,8 +190,6 @@ tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vta
 tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel s8-vclamp --output test/s8-vclamp.cc &
 tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel u8-vclamp --output test/u8-vclamp.cc &
 
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel u64-u32-vsqrtshift --output test/u64-u32-vsqrtshift.cc &
-
 ### Tests for VLRelu micro-kernels
 tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-vlrelu --output test/f16-vlrelu.cc &
 tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vlrelu --output test/f32-vlrelu.cc &
@@ -231,27 +229,27 @@ tools/generate-conv-hwc2chw-test.py --spec test/f16-conv-hwc2chw.yaml --output t
 tools/generate-conv-hwc2chw-test.py --spec test/f32-conv-hwc2chw.yaml --output test/f32-conv-hwc2chw.cc &
 
 ### Tests for DWConv micro-kernels
-tools/generate-dwconv-unipass-test.py --spec test/f16-dwconv-minmax-unipass.yaml --output test/f16-dwconv-minmax-unipass.cc &
-tools/generate-dwconv-multipass-test.py --spec test/f16-dwconv-minmax-multipass.yaml --output test/f16-dwconv-minmax-multipass.cc &
+tools/generate-dwconv-unipass-test.py --ukernel f16-dwconv-minmax-unipass --output test/f16-dwconv-minmax-unipass.cc &
+tools/generate-dwconv-multipass-test.py --ukernel f16-dwconv-minmax-multipass --output test/f16-dwconv-minmax-multipass.cc &
 
-tools/generate-dwconv-unipass-test.py --spec test/f32-dwconv-unipass.yaml --output test/f32-dwconv-unipass.cc &
-tools/generate-dwconv-unipass-test.py --spec test/f32-dwconv-minmax-unipass.yaml --output test/f32-dwconv-minmax-unipass.cc &
-tools/generate-dwconv-multipass-test.py --spec test/f32-dwconv-multipass.yaml --output test/f32-dwconv-multipass.cc &
-tools/generate-dwconv-multipass-test.py --spec test/f32-dwconv-minmax-multipass.yaml --output test/f32-dwconv-minmax-multipass.cc &
+tools/generate-dwconv-unipass-test.py --ukernel f32-dwconv-unipass --output test/f32-dwconv-unipass.cc &
+tools/generate-dwconv-unipass-test.py --ukernel f32-dwconv-minmax-unipass --output test/f32-dwconv-minmax-unipass.cc &
+tools/generate-dwconv-multipass-test.py --ukernel f32-dwconv-multipass --output test/f32-dwconv-multipass.cc &
+tools/generate-dwconv-multipass-test.py --ukernel f32-dwconv-minmax-multipass --output test/f32-dwconv-minmax-multipass.cc &
 
-tools/generate-dwconv-unipass-test.py --spec test/qs8-qc8w-dwconv-minmax-unipass-fp32.yaml --output test/qs8-qc8w-dwconv-minmax-unipass-fp32.cc &
-tools/generate-dwconv-unipass-test.py --spec test/qs8-dwconv-minmax-unipass-fp32.yaml --output test/qs8-dwconv-minmax-unipass-fp32.cc &
-tools/generate-dwconv-unipass-test.py --spec test/qu8-dwconv-minmax-unipass-fp32.yaml --output test/qu8-dwconv-minmax-unipass-fp32.cc &
+tools/generate-dwconv-unipass-test.py --ukernel qs8-qc8w-dwconv-minmax-unipass-fp32 --output test/qs8-qc8w-dwconv-minmax-unipass-fp32.cc &
+tools/generate-dwconv-unipass-test.py --ukernel qs8-dwconv-minmax-unipass-fp32 --output test/qs8-dwconv-minmax-unipass-fp32.cc &
+tools/generate-dwconv-unipass-test.py --ukernel qu8-dwconv-minmax-unipass-fp32 --output test/qu8-dwconv-minmax-unipass-fp32.cc &
 
-tools/generate-dwconv-unipass-test.py --spec test/qs8-dwconv-minmax-unipass-rndnu.yaml --output test/qs8-dwconv-minmax-unipass-rndnu.cc &
-tools/generate-dwconv-unipass-test.py --spec test/qu8-dwconv-minmax-unipass-rndnu.yaml --output test/qu8-dwconv-minmax-unipass-rndnu.cc &
+tools/generate-dwconv-unipass-test.py --ukernel qs8-dwconv-minmax-unipass-rndnu --output test/qs8-dwconv-minmax-unipass-rndnu.cc &
+tools/generate-dwconv-unipass-test.py --ukernel qu8-dwconv-minmax-unipass-rndnu --output test/qu8-dwconv-minmax-unipass-rndnu.cc &
 
-tools/generate-dwconv-multipass-test.py --spec test/qs8-qc8w-dwconv-minmax-multipass-fp32.yaml --output test/qs8-qc8w-dwconv-minmax-multipass-fp32.cc &
-tools/generate-dwconv-multipass-test.py --spec test/qs8-dwconv-minmax-multipass-fp32.yaml --output test/qs8-dwconv-minmax-multipass-fp32.cc &
-tools/generate-dwconv-multipass-test.py --spec test/qu8-dwconv-minmax-multipass-fp32.yaml --output test/qu8-dwconv-minmax-multipass-fp32.cc &
+tools/generate-dwconv-multipass-test.py --ukernel qs8-qc8w-dwconv-minmax-multipass-fp32 --output test/qs8-qc8w-dwconv-minmax-multipass-fp32.cc &
+tools/generate-dwconv-multipass-test.py --ukernel qs8-dwconv-minmax-multipass-fp32 --output test/qs8-dwconv-minmax-multipass-fp32.cc &
+tools/generate-dwconv-multipass-test.py --ukernel qu8-dwconv-minmax-multipass-fp32 --output test/qu8-dwconv-minmax-multipass-fp32.cc &
 
-tools/generate-dwconv-multipass-test.py --spec test/qs8-dwconv-minmax-multipass-rndnu.yaml --output test/qs8-dwconv-minmax-multipass-rndnu.cc &
-tools/generate-dwconv-multipass-test.py --spec test/qu8-dwconv-minmax-multipass-rndnu.yaml --output test/qu8-dwconv-minmax-multipass-rndnu.cc &
+tools/generate-dwconv-multipass-test.py --ukernel qs8-dwconv-minmax-multipass-rndnu --output test/qs8-dwconv-minmax-multipass-rndnu.cc &
+tools/generate-dwconv-multipass-test.py --ukernel qu8-dwconv-minmax-multipass-rndnu --output test/qu8-dwconv-minmax-multipass-rndnu.cc &
 
 ### Tests for DWConv CHW layout micro-kernels
 tools/generate-dwconv2d-chw-test.py --spec test/f16-dwconv2d-chw.yaml --output test/f16-dwconv2d-chw.cc &

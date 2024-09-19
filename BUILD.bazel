@@ -302,6 +302,22 @@ MICROKERNEL_DEFS = [
     "src/xx-transposev/xx-transposev.h",
     "src/xx-fill/xx-fill.h",
     "src/xx-pad/xx-pad.h",
+    "src/f16-dwconv/f16-dwconv-minmax-unipass.h",
+    "src/f32-dwconv/f32-dwconv-minmax-unipass.h",
+    "src/f32-dwconv/f32-dwconv-unipass.h",
+    "src/qs8-dwconv/qs8-dwconv-minmax-unipass-fp32.h",
+    "src/qs8-dwconv/qs8-dwconv-minmax-unipass-rndnu.h",
+    "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-unipass-fp32.h",
+    "src/qu8-dwconv/qu8-dwconv-minmax-unipass-fp32.h",
+    "src/qu8-dwconv/qu8-dwconv-minmax-unipass-rndnu.h",
+    "src/f16-dwconv/f16-dwconv-minmax-multipass.h",
+    "src/f32-dwconv/f32-dwconv-minmax-multipass.h",
+    "src/f32-dwconv/f32-dwconv-multipass.h",
+    "src/qs8-dwconv/qs8-dwconv-minmax-multipass-fp32.h",
+    "src/qs8-dwconv/qs8-dwconv-minmax-multipass-rndnu.h",
+    "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-multipass-fp32.h",
+    "src/qu8-dwconv/qu8-dwconv-minmax-multipass-fp32.h",
+    "src/qu8-dwconv/qu8-dwconv-minmax-multipass-rndnu.h",
 ]
 
 MICROKERNEL_HDRS = [
