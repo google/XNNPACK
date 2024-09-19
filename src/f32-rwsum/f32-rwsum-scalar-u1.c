@@ -8,6 +8,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/reduce.h"
 
+#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define MAX(X,Y) (X > Y ? X : Y)
 #define CEILING_POS(X) ((X-(int)(X)) > 0 ? (int)(X+1) : (int)(X))
 #define CEILING_NEG(X) (int)(X)
@@ -40,29 +41,37 @@ void xnn_f32_rwsum_ukernel__scalar_u1(
   int output_size = (padded_size < (window_dimensions - 1) * window_dilations + 1) ? 
                     0 : FLOOR((padded_size - (window_dimensions - 1) * window_dilations - 1) / (float)window_strides) + 1;
 
-  int64_t inverse_base_dilation = (1LL << 32) / base_dilation; // Scaled inverse
-  int padded_boundary = padded_size - padding[1];
-  for (int i = 0; i < output_size; i++) {
-    float sum = init_value;
-    int window_start_row = i * window_strides;
-        
-        for (int k = 0; k < window_dimensions; k++) {
-        int window_row = window_start_row + k * window_dilations;
-        int window_row_pad_adjusted = window_row - padding[0];
 
-        // multiplicative inverse (optimized % base_dilation)
-        if (window_row_pad_adjusted < 0 || 
-            window_row >= padded_boundary || 
-            ((window_row_pad_adjusted * inverse_base_dilation) >> 32) * base_dilation != window_row_pad_adjusted) {
+  int64_t inverse_base_dilation = (1LL << 32) / base_dilation;
+  int64_t inverse_win_dilation = (1LL << 32) / window_dilations;
+
+    for (int i = 0; i < output_size; i++) {
+        float sum = init_value;
+        int window_start = i * window_strides;
+        int loop_end1 = CEIL((((padding[0] - window_start) * inverse_win_dilation) >> 32));
+        int loop_end2 = CEIL((((padded_size - padding[1] - window_start) * inverse_win_dilation) >> 32));
+        int k = 0;
+
+        int loop1 = MIN(loop_end1, window_dimensions);
+        loop1 = MAX(loop1 , 0);
+        sum += init_value * loop1;
+        k += loop1;
+
+        int offset = window_start - padding[0];
+        loop_end2 = MIN(loop_end2, window_dimensions);
+
+        for (; k < loop_end2; k++) {
+            int window_row = offset + k * window_dilations;
+            if (((window_row * inverse_base_dilation) >> 32) * base_dilation != window_row) {
                 sum += init_value;
-                continue;
+            } else {
+                window_row = (window_row * inverse_base_dilation) >> 32;;
+                sum += input[window_row];
+            }
         }
 
-        // Optimized division
-        window_row = (window_row_pad_adjusted * inverse_base_dilation) >> 32;
-        sum += input[window_row];
+        sum += init_value * MAX((window_dimensions - k), 0);
+        output[i] = sum;
     }
 
-    output[i] = sum;   
-    }
 }
