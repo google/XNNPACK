@@ -98,7 +98,7 @@ static void f16_dwconv2d_chw(benchmark::State& state,
       sizeof(xnn_float16) * (w_elements + o_elements));
 
   std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> packed_weights(w_elements * num_buffers);
-  std::fill(packed_weights.begin(), packed_weights.end(), UINT16_C(0));
+  std::fill(packed_weights.begin(), packed_weights.end(), 0);
   for (size_t c = 0; c < channels; c++) {
     packed_weights[c * kernel_size + c] = bias[c];
     for (size_t i = 0; i < kernel_size; i++) {
