@@ -69,6 +69,19 @@ tools/xngen src/qs8-vaddc/neon.c.in -D BATCH_TILE=32 -D LD128=0 -D DATATYPE=QU8 
 
 tools/xngen src/qs8-vaddc/neon.c.in -D BATCH_TILE=16 -D LD128=1 -D DATATYPE=QU8 -o src/qu8-vaddc/gen/qu8-vaddc-minmax-neon-ld128-u16.c &
 
+################################ RISC-V Vector ################################
+tools/xngen src/qs8-vadd/rvv.c.in -D LMUL=1 -D DATATYPE=QS8 -o src/qs8-vmul/gen/qs8-vadd-minmax-rvv-u1v.c &
+tools/xngen src/qs8-vadd/rvv.c.in -D LMUL=2 -D DATATYPE=QS8 -o src/qs8-vmul/gen/qs8-vadd-minmax-rvv-u2v.c &
+
+tools/xngen src/qs8-vadd/rvv.c.in -D LMUL=1 -D DATATYPE=QU8 -o src/qu8-vmul/gen/qu8-vadd-minmax-rvv-u1v.c &
+tools/xngen src/qs8-vadd/rvv.c.in -D LMUL=2 -D DATATYPE=QU8 -o src/qu8-vmul/gen/qu8-vadd-minmax-rvv-u2v.c &
+
+tools/xngen src/qs8-vaddc/rvv.c.in -D LMUL=1 -D DATATYPE=QS8 -o src/qs8-vmulc/gen/qs8-vaddc-minmax-rvv-u1v.c &
+tools/xngen src/qs8-vaddc/rvv.c.in -D LMUL=2 -D DATATYPE=QS8 -o src/qs8-vmulc/gen/qs8-vaddc-minmax-rvv-u2v.c &
+
+tools/xngen src/qs8-vaddc/rvv.c.in -D LMUL=1 -D DATATYPE=QU8 -o src/qu8-vmulc/gen/qu8-vaddc-minmax-rvv-u1v.c &
+tools/xngen src/qs8-vaddc/rvv.c.in -D LMUL=2 -D DATATYPE=QU8 -o src/qu8-vmulc/gen/qu8-vaddc-minmax-rvv-u2v.c &
+
 ################################### x86 SSE ###################################
 tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=8  -D SSE=2 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse2-mul16-ld64-u8.c &
 tools/xngen src/qs8-vadd/sse-mul16-ld64.c.in -D BATCH_TILE=16 -D SSE=2 -D AVX=0 -D DATATYPE=QS8 -o src/qs8-vadd/gen/qs8-vadd-minmax-sse2-mul16-ld64-u16.c &
