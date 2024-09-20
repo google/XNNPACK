@@ -1145,7 +1145,10 @@ enum xnn_status xnn_subgraph_fusion(
       struct xnn_node* producer = &subgraph->nodes[producer_id];
       assert(producer->type != xnn_node_type_invalid);
       struct xnn_node* consumer = &subgraph->nodes[consumer_id];
-      assert(consumer->type != xnn_node_type_invalid);
+      if (consumer->type == xnn_node_type_invalid) {
+        xnn_log_fatal("Node %u has no consumers. Should an external output have been set?", consumer_id);
+        return xnn_status_invalid_state;
+      }
 
       // Try to fuse Clamp Node upstream into producer Node
       if (consumer->type == xnn_node_type_clamp) {
