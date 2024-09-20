@@ -8,6 +8,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/reduce.h"
 
+#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define MAX(X,Y) (X > Y ? X : Y)
 #define CEILING_POS(X) ((X-(int)(X)) > 0 ? (int)(X+1) : (int)(X))
 #define CEILING_NEG(X) (int)(X)
@@ -39,22 +40,39 @@ void xnn_f32_rwdsum_ukernel_1p1x__scalar_c1(
   int output_size = (padded_size < (window_dimensions - 1) * window_dilations + 1) ? 
                     0 : FLOOR((padded_size - (window_dimensions - 1) * window_dilations - 1) / (float)window_strides) + 1;
 
-    for (int j = 0; j < output_size; j++) {
-        for (int i = 0; i < channels; i++) {
-            float sum = init_value;
+  int64_t inverse_base_dilation = (1LL << 32) / base_dilation;
+  int64_t inverse_win_dilation = (1LL << 32) / window_dilations;
 
-            for (int k = 0; k < window_dimensions; k++) {
-                int window_row = j * window_strides + k * window_dilations;
-                if (window_row < padding[0] || 
-                    window_row >= padded_size - padding[1] || 
-                    (window_row - padding[0]) % base_dilation != 0) {
-                    sum += init_value;
-                    continue;
+    for (int i = 0; i < output_size; i++) {
+        float sum = init_value;
+        int window_start = i * window_strides;
+        int loop_end1 = CEIL((((padding[0] - window_start) * inverse_win_dilation) >> 32));
+        int loop_end2 = CEIL((((padded_size - padding[1] - window_start) * inverse_win_dilation) >> 32));
+        int k = 0;
+
+        int loop1 = MIN(loop_end1, window_dimensions);
+        loop1 = MAX(loop1 , 0);
+        sum += init_value * loop1;
+        k += loop1;
+
+        int offset = window_start - padding[0];
+        loop_end2 = MIN(loop_end2, window_dimensions);
+
+        for (int j = 0; j < channels; j++) {
+            float sum2 = sum;
+            int k2 = k;
+            for (; k2 < loop_end2; k2++) {
+                int window_row = offset + k2 * window_dilations;
+                if (((window_row * inverse_base_dilation) >> 32) * base_dilation != window_row) {
+                    sum2 += init_value;
+                } else {
+                    window_row = (window_row * inverse_base_dilation) >> 32;;
+                    sum2 += input[window_row * channels + j];
                 }
-                window_row = (window_row - padding[0]) / base_dilation;
-                sum += input[window_row * channels + i];
             }
-            output[j * channels + i] = sum;
+
+            sum2 += init_value * MAX((window_dimensions - k2), 0);
+            output[i * channels + j] = sum2;
         }
     }
 }
