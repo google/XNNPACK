@@ -329,18 +329,12 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "vunary_bench",
     srcs = ["vunary.cc"],
-    # TODO(b/367939259): This is not really that slow, but --config=ios_x86_64 fails to pass
-    # --benchmark_min_time=1x to the benchmark.
-    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
 xnnpack_benchmark(
     name = "vbinary_bench",
     srcs = ["vbinary.cc"],
-    # TODO(b/367939259): This is not really that slow, but --config=ios_x86_64 fails to pass
-    # --benchmark_min_time=1x to the benchmark.
-    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS,
 )
 
