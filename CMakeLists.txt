@@ -2083,26 +2083,20 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       qu8-rdsum
       qs8-rsum
       qu8-rsum
-      qs8-vadd
-      qs8-vaddc
       qs8-vcvt
-      qs8-vmul
-      qs8-vmulc
       qu8-f32-vcvt
       qu8-gemm
       qu8-gemm-fp32
       qu8-gemm-rndnu
       qu8-requantization
-      qu8-vadd
-      qu8-vaddc
       qu8-vcvt
-      qu8-vmul
-      qu8-vmulc
       x16-packw
       x32-packw
       x8-lut
       x8-packq
       x8-packw
+      vunary
+      vbinary
       xN-transposec
       xx-transposev)
   FOREACH(BENCH ${MICROKERNEL_BENCHMARKS})
