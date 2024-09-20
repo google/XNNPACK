@@ -11,9 +11,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/allocator.h"
-#include "xnnpack/cache.h"
+#include "xnnpack.h"
+#include "xnnpack/common.h"
 #include "xnnpack/compute.h"
+#include "xnnpack/microfnptr.h"
 #include "xnnpack/microkernel-type.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/operator-type.h"
@@ -380,6 +381,7 @@ struct xnn_operator {
       } gemm;
       struct packw_gemm_goi_context packw_gemm_goi;
       struct packw_gemm_gio_context packw_gemm_gio;
+      bool const_weights;
     } gemm;
     struct global_average_pooling_nwc_context global_average_pooling_nwc;
     struct global_average_pooling_ncw_context global_average_pooling_ncw;

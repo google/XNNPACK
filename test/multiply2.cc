@@ -7,13 +7,13 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
+#include <limits>
 #include <memory>
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
-#include "xnnpack/node-type.h"
+#include "xnnpack/math.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/requantization.h"
 #include "xnnpack/subgraph.h"
@@ -347,8 +347,10 @@ TEST_F(MultiplyTestS32, matches_operator_api)
 {
   std::generate(input1.begin(), input1.end(), [&]() { return s32dist(rng); });
   std::generate(input2.begin(), input2.end(), [&]() { return s32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), INT_MAX);
-  std::fill(subgraph_output.begin(), subgraph_output.end(), INT_MAX);
+  std::fill(operator_output.begin(), operator_output.end(),
+            std::numeric_limits<int32_t>::max());
+  std::fill(subgraph_output.begin(), subgraph_output.end(),
+            std::numeric_limits<int32_t>::max());
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

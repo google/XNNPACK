@@ -1877,6 +1877,7 @@ xnnpack_unit_test(
         ":subgraph_binary_tester",
         "@FP16",
         "//:XNNPACK",
+        "//:math",
         "//:node_type",
         "//:operators",
         "//:requantization",
