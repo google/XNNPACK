@@ -1923,60 +1923,24 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
   IF(XNNPACK_BUILD_LIBRARY)
     # ---[ Build end-to-end microbenchmarks
-    ADD_LIBRARY(bench-models STATIC
-      models/fp16-mobilenet-v1.cc
-      models/fp16-mobilenet-v2.cc
-      models/fp16-mobilenet-v3-large.cc
-      models/fp16-mobilenet-v3-small.cc
-      models/fp16-sparse-mobilenet-v1.cc
-      models/fp16-sparse-mobilenet-v2.cc
-      models/fp16-sparse-mobilenet-v3-large.cc
-      models/fp16-sparse-mobilenet-v3-small.cc
-      models/fp32-mobilenet-v1.cc
-      models/fp32-mobilenet-v2.cc
-      models/fp32-mobilenet-v3-large.cc
-      models/fp32-mobilenet-v3-small.cc
-      models/fp32-sparse-mobilenet-v1.cc
-      models/fp32-sparse-mobilenet-v2.cc
-      models/fp32-sparse-mobilenet-v3-large.cc
-      models/fp32-sparse-mobilenet-v3-small.cc
-      models/qs8-qc8w-mobilenet-v1.cc
-      models/qs8-qc8w-mobilenet-v2.cc
-      models/qs8-mobilenet-v1.cc
-      models/qs8-mobilenet-v2.cc
-      models/qu8-mobilenet-v1.cc
-      models/qu8-mobilenet-v2.cc
-      models/qu8-mobilenet-v3-large.cc
-      models/qu8-mobilenet-v3-small.cc)
-    SET_TARGET_PROPERTIES(bench-models PROPERTIES CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(bench-models PRIVATE .)
-    TARGET_LINK_LIBRARIES(bench-models PRIVATE fp16 benchmark::benchmark)
-    TARGET_LINK_LIBRARIES(bench-models PRIVATE XNNPACK bench-utils)
+    ADD_LIBRARY(models STATIC
+      bench/models/fp32-mobilenet-v1.cc
+      bench/models/fp32-mobilenet-v2.cc
+      bench/models/fp32-mobilenet-v3-large.cc
+      bench/models/fp32-mobilenet-v3-small.cc
+      bench/models/qs8-mobilenet-v2.cc)
+    SET_TARGET_PROPERTIES(models PROPERTIES CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(models PRIVATE .)
+    TARGET_LINK_LIBRARIES(models PRIVATE XNNPACK)
 
-    SET(LIBRARY_END2END_BENCHMARKS
-        end2end
-        f16-gemm-e2e
-        f16-dwconv-e2e
-        f32-dwconv-e2e
-        f32-gemm-e2e
-        qs8-dwconv-e2e
-        qs8-gemm-e2e
-        qu8-gemm-e2e
-        qu8-dwconv-e2e)
-    FOREACH(BENCH ${LIBRARY_END2END_BENCHMARKS})
-      ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)
-      TARGET_INCLUDE_DIRECTORIES(${BENCH}-bench PRIVATE .)
-      TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
-        bench-models
-        bench-utils
-        benchmark::benchmark
-        fp16
-        hardware-config
-        logging
-        microkernels-all
-        microparams-init
-        XNNPACK)
-    ENDFOREACH()
+    ADD_EXECUTABLE(bench-models bench/models/benchmark.cc)
+    TARGET_INCLUDE_DIRECTORIES(bench-models PRIVATE .)
+    TARGET_LINK_LIBRARIES(bench-models PRIVATE
+      bench-utils
+      benchmark::benchmark
+      fp16
+      models
+      XNNPACK)
 
     # ---[ Build operator-level microbenchmarks
     SET(LIBRARY_OPERATOR_BENCHMARKS

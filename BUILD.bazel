@@ -17,7 +17,6 @@ load(
     "xnnpack_min_size_copts",
     "xnnpack_slinky_deps",
     "xnnpack_slinky_srcs",
-    "xnnpack_std_cxxopts",
     "xnnpack_transitive_source_list",
     "xnnpack_visibility",
 )
@@ -1240,21 +1239,6 @@ xnnpack_cc_library(
         ":logging",
         ":params",
         "@pthreadpool",
-    ],
-)
-
-############################# End-to-end benchmarks ############################
-
-# Helper library for benchmarks to depend on.
-xnnpack_cc_library(
-    name = "models_h",
-    hdrs = ["src/xnnpack/models.h"],
-    copts = xnnpack_std_cxxopts(),
-    deps = [
-        ":XNNPACK",
-        ":aligned_allocator",
-        ":common",
-        "@FP16",
     ],
 )
 
