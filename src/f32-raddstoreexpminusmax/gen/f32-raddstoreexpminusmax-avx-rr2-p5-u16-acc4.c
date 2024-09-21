@@ -15,7 +15,7 @@
 #include "xnnpack/raddstoreexpminusmax.h"
 
 
-void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_u16_acc4(
+void xnn_f32_raddstoreexpminusmax_ukernel__avx_rr2_p5_u16_acc4(
     size_t batch,
     const float* input,
     const float* max,

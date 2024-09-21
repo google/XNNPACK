@@ -15,7 +15,7 @@
 #include "xnnpack/raddstoreexpminusmax.h"
 
 
-void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_u16_acc4(
+void xnn_f32_raddstoreexpminusmax_ukernel__avx_rr2_p5_u16_acc2(
     size_t batch,
     const float* input,
     const float* max,
@@ -56,8 +56,6 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_u16_acc4(
 
   __m128 vacc0 = _mm_setzero_ps();
   __m128 vacc1 = _mm_setzero_ps();
-  __m128 vacc2 = _mm_setzero_ps();
-  __m128 vacc3 = _mm_setzero_ps();
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     // Load 16 (4x4) inputs at a time.
     const __m128 vi0 = _mm_loadu_ps(input);
@@ -155,13 +153,11 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_u16_acc4(
     // Accumulate computed exponents.
     vacc0 = _mm_add_ps(vacc0, vf0);
     vacc1 = _mm_add_ps(vacc1, vf1);
-    vacc2 = _mm_add_ps(vacc2, vf2);
-    vacc3 = _mm_add_ps(vacc3, vf3);
+    vacc0 = _mm_add_ps(vacc0, vf2);
+    vacc1 = _mm_add_ps(vacc1, vf3);
   }
   // Add up all accumulators to vacc0
   vacc0 = _mm_add_ps(vacc0, vacc1);
-  vacc2 = _mm_add_ps(vacc2, vacc3);
-  vacc0 = _mm_add_ps(vacc0, vacc2);
 
   __m128 vacc = vacc0;
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {

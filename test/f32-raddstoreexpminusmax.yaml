@@ -57,7 +57,7 @@
 - name: xnn_f32_raddstoreexpminusmax_ukernel__rvv_rr2_p6_u2v
 - name: xnn_f32_raddstoreexpminusmax_ukernel__rvv_rr2_p6_u4v
 
-# x86 SSE
+# x86 SSE2
 - name: xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_u4
 - name: xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_u8
 - name: xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_u8_acc2
@@ -72,6 +72,20 @@
 - name: xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_u20_acc5
 
 # x86 AVX
+- name: xnn_f32_raddstoreexpminusmax_ukernel__avx_rr2_p5_u4
+- name: xnn_f32_raddstoreexpminusmax_ukernel__avx_rr2_p5_u8
+- name: xnn_f32_raddstoreexpminusmax_ukernel__avx_rr2_p5_u8_acc2
+- name: xnn_f32_raddstoreexpminusmax_ukernel__avx_rr2_p5_u12
+- name: xnn_f32_raddstoreexpminusmax_ukernel__avx_rr2_p5_u12_acc2
+- name: xnn_f32_raddstoreexpminusmax_ukernel__avx_rr2_p5_u12_acc3
+- name: xnn_f32_raddstoreexpminusmax_ukernel__avx_rr2_p5_u16
+- name: xnn_f32_raddstoreexpminusmax_ukernel__avx_rr2_p5_u16_acc2
+- name: xnn_f32_raddstoreexpminusmax_ukernel__avx_rr2_p5_u16_acc4
+- name: xnn_f32_raddstoreexpminusmax_ukernel__avx_rr2_p5_u20
+- name: xnn_f32_raddstoreexpminusmax_ukernel__avx_rr2_p5_u20_acc2
+- name: xnn_f32_raddstoreexpminusmax_ukernel__avx_rr2_p5_u20_acc5
+
+# x86 AVX2
 - name: xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u32
 - name: xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u32_acc2
 - name: xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u32_acc4
