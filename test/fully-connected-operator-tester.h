@@ -44,6 +44,7 @@ class FullyConnectedOperatorTester {
  public:
   enum class WeightsType {
     Default,
+    FP16,
     FP32,
   };
 
@@ -2165,24 +2166,42 @@ class FullyConnectedOperatorTester {
     }
   }
 
-  void TestF32() const {
-    ASSERT_EQ(weights_type(), WeightsType::Default);
+  void TestF32() {
+    weights_type_ = WeightsType::FP32;
+    TestF32WeightsType();
+    weights_type_ = WeightsType::FP16;
+    TestF32WeightsType();
+  }
+
+  void TestF32WeightsType() const {
+    switch (weights_type()) {
+      case WeightsType::FP16:
+        break;
+      case WeightsType::FP32:
+        break;
+      default:
+        GTEST_FAIL() << "unexpected weights type";
+    }
 
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
     std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       (batch_size() - 1) * input_stride() + input_channels());
-    std::vector<float> kernel(output_channels() * input_channels());
-    std::vector<float> bias(output_channels());
+    std::vector<xnn_float16> kernel(output_channels() * input_channels());
+    std::vector<float> kernel_as_float(kernel.size());
+    std::vector<xnn_float16> bias(output_channels());
+    std::vector<float> bias_as_float(bias.size());
     std::vector<float> output((batch_size() - 1) * output_stride() + output_channels());
     std::vector<float> output_ref(batch_size() * output_channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
+      std::copy(kernel.cbegin(), kernel.cend(), kernel_as_float.begin());
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
+      std::copy(bias.cbegin(), bias.cend(), bias_as_float.begin());
+      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without renormalization.
       if (has_bias()) {
@@ -2245,14 +2264,33 @@ class FullyConnectedOperatorTester {
         }
       }
 
-      const xnn_status status = xnn_create_fully_connected_nc_f32(
-          input_channels(), output_channels(),
-          input_stride(), output_stride(),
-          kernel.data(), has_bias() ? bias.data() : nullptr,
-          output_min, output_max,
-          transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
-          auto_code_cache, auto_weights_cache.get(),
-          &fully_connected_op);
+      xnn_status status;
+
+      switch (weights_type()) {
+        case WeightsType::FP32:
+          status = xnn_create_fully_connected_nc_f32(
+              input_channels(), output_channels(),
+              input_stride(), output_stride(),
+              kernel_as_float.data(), has_bias() ? bias_as_float.data() : nullptr,
+              output_min, output_max,
+              transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
+              auto_code_cache, auto_weights_cache.get(),
+              &fully_connected_op);
+          break;
+        case WeightsType::FP16:
+          status = xnn_create_fully_connected_nc_f32_f16(
+              input_channels(), output_channels(),
+              input_stride(), output_stride(),
+              kernel.data(), has_bias() ? bias.data() : nullptr,
+              output_min, output_max,
+              transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
+              auto_code_cache, auto_weights_cache.get(),
+              &fully_connected_op);
+          break;
+        default:
+          GTEST_FAIL() <<"unexpected weights type";
+      }
+
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -2266,24 +2304,42 @@ class FullyConnectedOperatorTester {
       // Smart pointer to automatically delete fully_connected_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fully_connected_op(fully_connected_op, xnn_delete_operator);
 
-      #if XNN_PLATFORM_JIT
-        if (use_jit()) {
-          // Check that we actually generated code.
-          ASSERT_GT(code_cache.cache.code.size, 0);
-          xnn_finalize_code_memory(&code_cache.cache.code);
-        }
-      #endif
+      switch (weights_type()) {
+        case WeightsType::FP32:
+          ASSERT_EQ(xnn_status_success,
+                    xnn_reshape_fully_connected_nc_f32(
+                        fully_connected_op,
+                        batch_size(),
+                        /*threadpool=*/nullptr));
+          break;
+        case WeightsType::FP16:
+          ASSERT_EQ(xnn_status_success,
+                    xnn_reshape_fully_connected_nc_f32_f16(
+                        fully_connected_op,
+                        batch_size(),
+                        /*threadpool=*/nullptr));
+          break;
+        default:
+          GTEST_FAIL() <<"unexpected weights type";
+      }
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_reshape_fully_connected_nc_f32(
-          fully_connected_op,
-          batch_size(),
-          /*threadpool=*/nullptr));
 
-      ASSERT_EQ(xnn_status_success,
-        xnn_setup_fully_connected_nc_f32(
-          fully_connected_op,
-          input.data(), output.data()));
+      switch (weights_type()) {
+        case WeightsType::FP32:
+          ASSERT_EQ(xnn_status_success,
+            xnn_setup_fully_connected_nc_f32(
+              fully_connected_op,
+              input.data(), output.data()));
+          break;
+        case WeightsType::FP16:
+          ASSERT_EQ(xnn_status_success,
+            xnn_setup_fully_connected_nc_f32_f16(
+              fully_connected_op,
+              input.data(), output.data()));
+          break;
+        default:
+          GTEST_FAIL() <<"unexpected weights type";
+      }
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
@@ -2293,40 +2349,75 @@ class FullyConnectedOperatorTester {
       if (use_weights_cache()) {
         // We already finalized the code cache, so create a new code cache if we are testing JIT.
         xnn_code_cache_t auto_inner_code_cache = nullptr;
-        #if XNN_PLATFORM_JIT
-          xnn_code_cache inner_code_cache;
-          if (use_jit()) {
-            xnn_init_code_cache(&inner_code_cache);
-            auto_inner_code_cache.reset(&inner_code_cache);
-          }
-        #endif
         // Create another operator with the same weights cache.
         xnn_operator_t fully_connected_op2 = nullptr;
         size_t old_weights_cache_size = internal_weights_cache->cache.weights.size;
-        ASSERT_EQ(xnn_status_success,
-                  xnn_create_fully_connected_nc_f32(
-                      input_channels(), output_channels(), input_stride(),
-                      output_stride(), kernel.data(),
-                      has_bias() ? bias.data() : nullptr, output_min,
-                      output_max,
-                      transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
-                      auto_inner_code_cache, auto_weights_cache.get(),
-                      &fully_connected_op2));
+        switch (weights_type()) {
+          case WeightsType::FP32:
+            ASSERT_EQ(xnn_status_success,
+                      xnn_create_fully_connected_nc_f32(
+                          input_channels(), output_channels(), input_stride(),
+                          output_stride(), kernel_as_float.data(),
+                          has_bias() ? bias_as_float.data() : nullptr, output_min,
+                          output_max,
+                          transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
+                          auto_inner_code_cache, auto_weights_cache.get(),
+                          &fully_connected_op2));
+            break;
+          case WeightsType::FP16:
+            ASSERT_EQ(xnn_status_success,
+                      xnn_create_fully_connected_nc_f32_f16(
+                          input_channels(), output_channels(),
+                          input_stride(), output_stride(),
+                          kernel.data(), has_bias() ? bias.data() : nullptr,
+                          output_min, output_max,
+                          transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
+                          auto_code_cache, auto_weights_cache.get(),
+                          &fully_connected_op2));
+            break;
+          default:
+            GTEST_FAIL() <<"unexpected weights type";
+        }
         ASSERT_NE(nullptr, fully_connected_op2);
 
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fully_connected_op(fully_connected_op2, xnn_delete_operator);
 
-        ASSERT_EQ(xnn_status_success,
-                  xnn_reshape_fully_connected_nc_f32(
-                      fully_connected_op2,
-                      batch_size(),
-                      /*threadpool=*/nullptr));
+        switch (weights_type()) {
+          case WeightsType::FP32:
+            ASSERT_EQ(xnn_status_success,
+                      xnn_reshape_fully_connected_nc_f32(
+                          fully_connected_op2,
+                          batch_size(),
+                          /*threadpool=*/nullptr));
+            break;
+          case WeightsType::FP16:
+            ASSERT_EQ(xnn_status_success,
+                      xnn_reshape_fully_connected_nc_f32_f16(
+                          fully_connected_op2,
+                          batch_size(),
+                          /*threadpool=*/nullptr));
+            break;
+          default:
+            GTEST_FAIL() <<"unexpected weights type";
+        }
 
         std::vector<float> output2(output.size(), nanf(""));
-        ASSERT_EQ(xnn_status_success,
-                  xnn_setup_fully_connected_nc_f32(
-                      fully_connected_op2,
-                      input.data(), output2.data()));
+        switch (weights_type()) {
+          case WeightsType::FP32:
+            ASSERT_EQ(xnn_status_success,
+                      xnn_setup_fully_connected_nc_f32(
+                          fully_connected_op2,
+                          input.data(), output2.data()));
+            break;
+          case WeightsType::FP16:
+            ASSERT_EQ(xnn_status_success,
+                      xnn_setup_fully_connected_nc_f32_f16(
+                          fully_connected_op2,
+                          input.data(), output2.data()));
+            break;
+          default:
+            GTEST_FAIL() <<"unexpected weights type";
+        }
 
         ASSERT_EQ(xnn_status_success,
                   xnn_run_operator(fully_connected_op2, /*threadpool=*/nullptr));
