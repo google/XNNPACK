@@ -5,10 +5,12 @@
 
 #include <benchmark/benchmark.h>
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -18,6 +20,8 @@
 #include "xnnpack/allocator.h"
 #include "xnnpack/subgraph.h"
 #include "pthreadpool.h"
+
+int FLAGS_num_threads = 1;
 
 struct ModelRuntime {
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> model;
@@ -87,7 +91,7 @@ static void BenchmarkInvoke(benchmark::State& state,
     return;
   }
 
-  ModelRuntime model_runtime(state.range(0));
+  ModelRuntime model_runtime(FLAGS_num_threads);
   if (!model_runtime.CreateModel(model_factory)) {
     state.SkipWithError("failed to create model");
     return;
@@ -162,18 +166,34 @@ static void QS8MobileNetV2(benchmark::State& state) {
   BenchmarkInvoke(state, models::QS8MobileNetV2);
 }
 
-BENCHMARK(FP32MobileNetV1)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(FP32MobileNetV2)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(FP32MobileNetV3Large)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(FP32MobileNetV3Small)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(FP32MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(FP32MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(FP32MobileNetV3Large)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(FP32MobileNetV3Small)->Unit(benchmark::kMicrosecond)->UseRealTime();
 
-BENCHMARK(FP16MobileNetV1)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(FP16MobileNetV2)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(FP16MobileNetV3Large)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
-BENCHMARK(FP16MobileNetV3Small)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(FP16MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(FP16MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(FP16MobileNetV3Large)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(FP16MobileNetV3Small)->Unit(benchmark::kMicrosecond)->UseRealTime();
 
-BENCHMARK(QS8MobileNetV2)->Apply(benchmark::utils::MultiThreadingParameters)->Unit(benchmark::kMicrosecond)->UseRealTime();
+BENCHMARK(QS8MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 
-#ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
-#endif
+int main(int argc, char** argv) {
+  ::benchmark::Initialize(&argc, argv);
+  for (int i = 1; i < argc;) {
+    if (strncmp(argv[i], "--num_threads=", 14) == 0) {
+      FLAGS_num_threads = atoi(argv[i] + 14);
+      if (FLAGS_num_threads <= 0) {
+        std::cerr << "Invalid --num_threads: " << FLAGS_num_threads << "\n";
+        return 1;
+      }
+      std::copy(argv + i + 1, argv + argc, argv + i);
+      argc -= 1;
+    } else {
+      ++i;
+    }
+  }
+  if (::benchmark::ReportUnrecognizedArguments(argc, argv)) return 1;
+  ::benchmark::RunSpecifiedBenchmarks();
+}
+
