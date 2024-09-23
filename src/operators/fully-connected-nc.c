@@ -1913,11 +1913,6 @@ static enum xnn_status reshape_fully_connected_nc(
                               fully_connected_op->type == 
                               xnn_operator_type_fully_connected_nc_qp8_f32_qb4w;
 
-  const bool is_blockwise_kernel = fully_connected_op->type ==
-                                   xnn_operator_type_fully_connected_nc_qd8_f32_qb4w || 
-                                   fully_connected_op->type == 
-                                   xnn_operator_type_fully_connected_nc_qp8_f32_qb4w;
-
   fully_connected_op->context.gemm.gemm.gemm = (struct gemm_context){
       .k_scaled = input_channels << log2_input_element_size,
       .w_stride = fully_connected_op->weights_stride,
@@ -1955,38 +1950,20 @@ static enum xnn_status reshape_fully_connected_nc(
     if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
       fully_connected_op->compute[0].type = xnn_parallelization_type_2d_tile_2d_with_uarch;
       if (dynamic_quantization) {
-        if (is_blockwise_kernel) {
-          fully_connected_op->compute[0].task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_dqgemm_bl;
-        } else {
-          fully_connected_op->compute[0].task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_dqgemm;
-        }
+        fully_connected_op->compute[0].task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_dqgemm;
       } else if (is_qp8_ukernel) {
-        if (is_blockwise_kernel) {
-          fully_connected_op->compute[0].task_2d_tile_2d_with_id =
-              (pthreadpool_task_2d_tile_2d_with_id_t)xnn_compute_hmp_qp8gemm_bl;
-        } else {
-          fully_connected_op->compute[0].task_2d_tile_2d_with_id =
-              (pthreadpool_task_2d_tile_2d_with_id_t)xnn_compute_hmp_qp8gemm;
-        }
+        fully_connected_op->compute[0].task_2d_tile_2d_with_id =
+            (pthreadpool_task_2d_tile_2d_with_id_t)xnn_compute_hmp_qp8gemm;
       } else {
         fully_connected_op->compute[0].task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_gemm;
       }
     } else {
       fully_connected_op->compute[0].type = xnn_parallelization_type_2d_tile_2d;
       if (dynamic_quantization) {
-        if (is_blockwise_kernel) {
-          fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_dqgemm_bl;
-        } else {
-          fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_dqgemm;
-        }
+        fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_dqgemm;
       } else if (is_qp8_ukernel) {
-        if (is_blockwise_kernel) {
-          fully_connected_op->compute[0].task_2d_tile_2d =
-              (pthreadpool_task_2d_tile_2d_t)xnn_compute_qp8gemm_bl;
-        } else {
           fully_connected_op->compute[0].task_2d_tile_2d =
               (pthreadpool_task_2d_tile_2d_t)xnn_compute_qp8gemm;
-        }
       } else {
         fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
       }
@@ -1994,19 +1971,10 @@ static enum xnn_status reshape_fully_connected_nc(
   #else
     fully_connected_op->compute[0].type = xnn_parallelization_type_2d_tile_2d;
     if (dynamic_quantization) {
-      if (is_blockwise_kernel) {
-        fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_dqgemm_bl;
-      } else {
-        fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_dqgemm;
-      }
+      fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_dqgemm;
     } else if (is_qp8_ukernel) {
-      if (is_blockwise_kernel) {
-        fully_connected_op->compute[0].task_2d_tile_2d =
-            (pthreadpool_task_2d_tile_2d_t)xnn_compute_qp8gemm_bl;
-      } else {
-        fully_connected_op->compute[0].task_2d_tile_2d =
-            (pthreadpool_task_2d_tile_2d_t)xnn_compute_qp8gemm;
-      }
+      fully_connected_op->compute[0].task_2d_tile_2d =
+          (pthreadpool_task_2d_tile_2d_t)xnn_compute_qp8gemm;
     } else {
       fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
     }
