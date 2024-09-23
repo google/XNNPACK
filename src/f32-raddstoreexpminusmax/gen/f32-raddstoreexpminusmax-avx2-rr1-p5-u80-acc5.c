@@ -29,7 +29,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u80_acc5(
   assert(output != NULL);
   assert(sum != NULL);
 
-  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+  static const int32_t mask_table[16] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0};
 
   const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
   const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
@@ -264,7 +264,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u80_acc5(
   if (batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - batch));
+    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[8] - batch));
 
     const __m256 vi = _mm256_maskload_ps(input, vmask);
 

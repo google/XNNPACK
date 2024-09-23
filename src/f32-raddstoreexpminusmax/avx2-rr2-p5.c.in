@@ -60,7 +60,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr2_p5_u${BATCH_TILE}${"" if ACC
     // Load ${BATCH_TILE} (${SIMD_TILE}x4) inputs at a time.
     const __m256 vi0 = _mm256_loadu_ps(input);
     $for N in range(1, SIMD_TILE):
-      const __m256 vi${N} = _mm256_loadu_ps(input + ${N*8});
+      const __m256 vi${N} = _mm256_loadu_ps(input + ${N * 8});
     input += ${BATCH_TILE};
 
     // Subtract maximum input x := i - i_max. This implies x <= 0.
@@ -119,7 +119,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr2_p5_u${BATCH_TILE}${"" if ACC
     // Store ${BATCH_TILE} (${SIMD_TILE}x4) outputs at a time.
     _mm256_storeu_ps(output, vf0);
     $for N in range(1, SIMD_TILE):
-      _mm256_storeu_ps(output + ${N*8}, vf${N});
+      _mm256_storeu_ps(output + ${N * 8}, vf${N});
     output += ${BATCH_TILE};
 
     // Accumulate computed exponents.
