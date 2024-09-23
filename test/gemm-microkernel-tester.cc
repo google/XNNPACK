@@ -1903,7 +1903,6 @@ void GemmMicrokernelTester::Test(
       input_qp8.data()
     );
 
-
     // RHS packing.
     struct xnn_qs8_qc4w_packing_params params;
     params.input_zero_point = 1;
