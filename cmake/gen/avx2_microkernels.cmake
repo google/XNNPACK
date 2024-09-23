@@ -25,6 +25,7 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x16-minmax-avx2-broadcast.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx2-u64.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx2-u64.c
+  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx2-rr2-p5-u32-acc2.c
   src/f32-velu/gen/f32-velu-avx2-rr1-lut4-p4-perm-u56.c
   src/f32-vlog/gen/f32-vlog-avx2-rational-3-3-div.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-div-u40.c
@@ -248,7 +249,6 @@ SET(NON_PROD_AVX2_MICROKERNEL_SRCS
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx2-rr1-p5-u96-acc3.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx2-rr1-p5-u96-acc6.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx2-rr1-p5-u96.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx2-rr2-p5-u32-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx2-rr2-p5-u32-acc4.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx2-rr2-p5-u32.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx2-rr2-p5-u64-acc2.c
