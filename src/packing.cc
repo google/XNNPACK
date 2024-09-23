@@ -25,6 +25,7 @@
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4cxp_qsu4cxs1s0.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qsu4cxs1s0.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
 #include <fp16/fp16.h>
@@ -1684,16 +1685,16 @@ size_t xnn_packed_stride_kai_qb4_weights_and_biases(
     const struct xnn_gemm_config* gemm_config, size_t k, size_t block_size,
     size_t extra_bytes) {
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  const uint32_t nr = gemm_config->nr;
 
-  const size_t kai_num_bytes_sum_rhs = sizeof(float);
-  const size_t kai_num_bytes_bias = sizeof(float);
-  // perhaps derive Bf16 from gemm-config?
-  // This needs to be updated in the kleidi branch to be in header
-  // return kai_rhs_packed_stride(k, /*nr=*/1, kr, block_size, Bf16);
-  const size_t num_bytes_multiplier_rhs = sizeof(uint16_t);
-  const size_t num_blocks_per_row = k/block_size;
-  const size_t num_bytes_per_block = (block_size / 2) + num_bytes_multiplier_rhs;
-  return 1 * ((num_bytes_per_block * num_blocks_per_row) + kai_num_bytes_sum_rhs + kai_num_bytes_bias);
+  return kai_get_rhs_packed_stride_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0(
+      k, 
+      nr,
+      kr,
+      sr,
+      block_size,
+      kai_datatype::kai_dt_bf16);
 }
 
 void xnn_pack_kai_qb4_weights_and_biases(
@@ -1712,17 +1713,30 @@ void xnn_pack_kai_qb4_weights_and_biases(
       reinterpret_cast<const struct xnn_qs8_qc4w_packing_params*>(params);
 
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
-    // no nxk as of now
-    xnn_log_fatal(
-      "KleidiAI does not currently have gio packing routine"
-    );
+    struct kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0_params kai_params;
+    kai_params.lhs_zero_point = xnn_params->input_zero_point;
+    kai_params.rhs_zero_point = xnn_params->kernel_zero_point;
+    kai_params.scale_dt = kai_datatype::kai_dt_bf16;
+    size_t rhs_stride = (output_channels + 1) / 2;
+    size_t blocks_per_row = (input_channels + block_size - 1) / block_size;
+    kai_run_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0(
+      groups, output_channels, input_channels, nr, kr, sr, 
+      /*bl=*/block_size, 
+      /*rhs=*/reinterpret_cast<const uint8_t*>(weights),
+      /*rhs_stride=*/rhs_stride,
+      /*bias=*/reinterpret_cast<const float*>(extra_data0),
+      /*scale=*/reinterpret_cast<const uint16_t*>(extra_data1),
+      /*scale_stride=*/blocks_per_row * sizeof(uint16_t),
+      /*rhs_packed*/packed_weights_ptr,
+      /*extra_bytes=*/0,
+      &kai_params);
   } else {
     // Repack the packing params.
     struct kai_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0_params kai_params;
     kai_params.lhs_zero_point = xnn_params->input_zero_point;
     kai_params.rhs_zero_point = xnn_params->kernel_zero_point;
     kai_params.scale_dt = kai_datatype::kai_dt_bf16;
-    size_t rhs_stride = round_up_po2(input_channels, 2) / 2;
+    size_t rhs_stride = (input_channels + 1) / 2;
     size_t blocks_per_row = (input_channels + block_size - 1) / block_size;
     kai_run_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0(
       groups, output_channels, input_channels, nr, kr, sr, 

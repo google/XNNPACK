@@ -1246,7 +1246,7 @@ class FullyConnectedOperatorTester {
                              (batch_size() - 1) * input_stride() +
                              input_channels());
     const size_t kernel_stride = calc_kernel_stride();
-    std::vector<uint8_t> kernel((output_channels()) *
+    std::vector<uint8_t> kernel((transpose_weights() ? k2 : output_channels()) *
                                 kernel_stride);
     std::vector<float> bias(output_channels());
     std::vector<float> output((batch_size() - 1) * output_stride() +
@@ -1283,8 +1283,11 @@ class FullyConnectedOperatorTester {
             int32_t c_ref_acc = 0;
             for (size_t ki = 0; ki < block_size(); ki++) {
               const size_t k_index = bi * block_size() + ki;
-              const size_t nb_index = (ni * k2 + k_index) / 2;
-              const int32_t kernel_value = int32_t((k_index % 2 == 0) ? (kernel[nb_index] & UINT8_C(0xF)) : (kernel[nb_index] >> 4)) - kernel_zero_point();
+              const size_t nb_index = transpose_weights() ? 
+                                      (k_index * kernel_stride) + (ni / 2) : 
+                                      (ni * kernel_stride) + (k_index / 2);
+              const size_t plane_idx = transpose_weights() ? ni : ki;
+              const int32_t kernel_value = int32_t((plane_idx % 2 == 0) ? (kernel[nb_index] & UINT8_C(0xF)) : (kernel[nb_index] >> 4)) - kernel_zero_point();
               ksum += kernel_value;
               c_ref_acc += int32_t(xnn_x8_packq_f32qp8_get_quantized(mi, k_index, input_qp8.data(),
                                                   k2, mr_packed, kr, sr)) * int32_t(kernel_value);
@@ -1351,7 +1354,7 @@ class FullyConnectedOperatorTester {
           kernel.data(),
           has_bias() ? bias.data() : nullptr, 
           output_min, output_max, 
-          0, //TODO Handle XNN_FLAG_TRANSPOSE_WEIGHTS
+          transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
           nullptr, auto_weights_cache.get(), &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -1395,7 +1398,7 @@ class FullyConnectedOperatorTester {
             kernel_scale2d.data(),
             kernel.data(), has_bias() ? bias.data() : nullptr,
             output_min, output_max,
-            0,
+            transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
             nullptr, auto_weights_cache.get(),
             &fully_connected_op2));
         ASSERT_NE(nullptr, fully_connected_op2);
