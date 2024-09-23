@@ -111,6 +111,8 @@ XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rsum_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_f32_rdsum_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_qs8_rsum_config();
 XNN_INTERNAL const struct xnn_reduce_config* xnn_init_qs8_rdsum_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_qu8_rsum_config();
+XNN_INTERNAL const struct xnn_reduce_config* xnn_init_qu8_rdsum_config();
 
 XNN_INTERNAL const struct xnn_xx_fill_config* xnn_init_xx_fill_config();
 

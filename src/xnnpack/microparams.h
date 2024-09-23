@@ -380,6 +380,15 @@ struct xnn_qs8_mean_minmax_params {
   } scalar;
 };
 
+struct xnn_qu8_mean_minmax_params {
+  struct {
+    float scale;
+    int32_t num_elements;
+    uint8_t input_zero_point;
+    uint8_t output_zero_point;
+  } scalar;
+};
+
 // AvgPool w. Min+Max: used by quantized GAVGPOOL microkernels with MINMAX activation.
 
 union xnn_qs8_avgpool_minmax_params {
