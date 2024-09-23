@@ -379,8 +379,8 @@ void xnn_compute_batched_packw_gemm_goi(
 
 void xnn_compute_hmp_grouped_gemm(
     const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    uint32_t uarch_index, size_t group_index, size_t mr_block_start,
-    size_t nr_block_start, size_t mr_block_size, size_t nr_block_size) {
+    uint32_t uarch_index, size_t group_index, size_t nr_block_start,
+    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size) {
   const size_t k_scaled  = context->k_scaled;
   const size_t a_stride  = context->a_stride;
   const size_t cm_stride = context->cm_stride;
@@ -448,19 +448,19 @@ void xnn_compute_hmp_grouped_gemm(
 
 void xnn_compute_grouped_gemm(
     const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t group_index, size_t mr_block_start, size_t nr_block_start,
-    size_t mr_block_size, size_t nr_block_size) {
+    size_t group_index, size_t nr_block_start,
+    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size) {
   xnn_compute_hmp_grouped_gemm(context, XNN_UARCH_DEFAULT, group_index,
-                               mr_block_start, nr_block_start, mr_block_size,
-                               nr_block_size);
+                               nr_block_start, mr_block_start, nr_block_size,
+                               mr_block_size);
 }
 
 void xnn_compute_gemm(
     const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t mr_block_start,
     size_t nr_block_start,
-    size_t mr_block_size,
-    size_t nr_block_size)
+    size_t mr_block_start,
+    size_t nr_block_size,
+    size_t mr_block_size)
 {
   const size_t a_stride  = context->a_stride;
   const size_t cm_stride = context->cm_stride;
@@ -480,10 +480,10 @@ void xnn_compute_gemm(
 
 void xnn_compute_dqgemm(
     const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t mr_block_start,
     size_t nr_block_start,
-    size_t mr_block_size,
-    size_t nr_block_size)
+    size_t mr_block_start,
+    size_t nr_block_size,
+    size_t mr_block_size)
 {
   const size_t a_stride  = context->a_stride;
   const size_t cm_stride = context->cm_stride;
@@ -2463,8 +2463,8 @@ void xnn_compute_rope(
 #if XNN_MAX_UARCH_TYPES > 1
 void xnn_compute_hmp_gemm(
     const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    uint32_t uarch_index, size_t mr_block_start, size_t nr_block_start,
-    size_t mr_block_size, size_t nr_block_size) {
+    uint32_t uarch_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size) {
   const size_t a_stride = context->a_stride;
   const size_t cm_stride = context->cm_stride;
 
@@ -2482,10 +2482,10 @@ void xnn_compute_hmp_gemm(
   void xnn_compute_hmp_dqgemm(
       const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
       uint32_t uarch_index,
-      size_t mr_block_start,
       size_t nr_block_start,
-      size_t mr_block_size,
-      size_t nr_block_size)
+      size_t mr_block_start,
+      size_t nr_block_size,
+      size_t mr_block_size)
   {
     const size_t a_stride  = context->a_stride;
     const size_t cm_stride = context->cm_stride;

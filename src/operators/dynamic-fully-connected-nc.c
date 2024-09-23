@@ -413,10 +413,10 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
     dynamic_fully_connected_op->compute[1].type = xnn_parallelization_type_2d_tile_2d;
     dynamic_fully_connected_op->compute[1].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
   #endif
-  dynamic_fully_connected_op->compute[1].range[0] = batch_size;
-  dynamic_fully_connected_op->compute[1].range[1] = output_channels;
-  dynamic_fully_connected_op->compute[1].tile[0] = mr;
-  dynamic_fully_connected_op->compute[1].tile[1] = nc;
+  dynamic_fully_connected_op->compute[1].range[1] = batch_size;
+  dynamic_fully_connected_op->compute[1].range[0] = output_channels;
+  dynamic_fully_connected_op->compute[1].tile[1] = mr;
+  dynamic_fully_connected_op->compute[1].tile[0] = nc;
   dynamic_fully_connected_op->state = xnn_run_state_needs_setup;
 
   return xnn_status_success;
