@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <stddef.h>
-#include "xnnpack/log.h"
 #include "xnnpack/microparams.h"
 
 #if XNN_ENABLE_KLEIDIAI
@@ -25,8 +24,8 @@ void xnn_qp8_f32_qb4w_gemm_minmax_ukernel_8x4c16s2__neoni8mm_mstep2(
       m, n, k, minmax_params->scalar.blocksize, lhs_packed, rhs_packed, dst, dst_stride_row, dst_stride_col,
       minmax_params->scalar.min, minmax_params->scalar.max);
 #else
-  xnn_log_fatal(
+  assert(
       "Calling KleidiAI microkernel wrapper, but XNNPACK was compiled without "
-      "`XNN_ENABLE_KLEIDIAI`.");
+      "`XNN_ENABLE_KLEIDIAI`." && 0);
 #endif  // XNN_ENABLE_KLEIDIAI
 }
