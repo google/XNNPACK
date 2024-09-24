@@ -2212,7 +2212,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qc4w(
     xnn_operator_t fully_connected_op,
     const int8_t* input,
     void* output,
-    const struct xnn_dynamic_quantization_params* quantization_params)
+    const struct xnn_quantization_params* quantization_params)
 {
   return setup_fully_connected_nc(
     fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qc4w,
@@ -2223,7 +2223,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qb4w(
     xnn_operator_t fully_connected_op,
     const int8_t* input,
     void* output,
-    const struct xnn_dynamic_quantization_params* quantization_params)
+    const struct xnn_quantization_params* quantization_params)
 {
   return setup_fully_connected_nc(
     fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qb4w,
@@ -2234,7 +2234,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qc4w(
     xnn_operator_t fully_connected_op,
     const int8_t* input,
     float* output,
-    const struct xnn_dynamic_quantization_params* quantization_params)
+    const struct xnn_quantization_params* quantization_params)
 {
   return setup_fully_connected_nc(
     fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f32_qc4w,
@@ -2245,7 +2245,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qb4w(
     xnn_operator_t fully_connected_op,
     const int8_t* input,
     float* output,
-    const struct xnn_dynamic_quantization_params* quantization_params)
+    const struct xnn_quantization_params* quantization_params)
 {
   return setup_fully_connected_nc(
     fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f32_qb4w,
@@ -2256,7 +2256,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qc8w(
     xnn_operator_t fully_connected_op,
     const int8_t* input,
     void* output,
-    const struct xnn_dynamic_quantization_params* quantization_params)
+    const struct xnn_quantization_params* quantization_params)
 {
   return setup_fully_connected_nc(
     fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qc8w,
@@ -2274,7 +2274,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qc8w(
     xnn_operator_t fully_connected_op,
     const int8_t* input,
     float* output,
-    const struct xnn_dynamic_quantization_params* quantization_params)
+    const struct xnn_quantization_params* quantization_params)
 {
   return setup_fully_connected_nc(
     fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f32_qc8w,

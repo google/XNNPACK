@@ -660,7 +660,7 @@ size_t xnn_tensor_get_dynamic_quant_param_size(const struct xnn_value* value)
     case xnn_datatype_qdint8: {
       const size_t batch_dims_size = xnn_shape_multiply_batch_dims(
           &value->shape, value->quantization.num_nonbatch_dims);
-      return batch_dims_size * sizeof(struct xnn_dynamic_quantization_params);
+      return batch_dims_size * sizeof(struct xnn_quantization_params);
     }
     case xnn_datatype_qpint8:
       return 0;

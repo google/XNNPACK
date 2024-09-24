@@ -468,7 +468,7 @@ class BatchMatMulOperatorTester {
 
       // Create the dynamically quantized input data with the corresponding
       // `quantization_params`.
-      std::vector<xnn_dynamic_quantization_params> quantization_params(
+      std::vector<xnn_quantization_params> quantization_params(
           batch_size_a * m() + XNN_EXTRA_QUANTIZATION_PARAMS);
       std::vector<int8_t> input_a_qd8(batch_size_a * m() * k() +
                                       XNN_EXTRA_BYTES / sizeof(int8_t));

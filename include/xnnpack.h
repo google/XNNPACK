@@ -94,8 +94,8 @@ extern "C" {
 
 // Next unused flag value: 0x00000100.
 
-/// The number of entries in an array of xnn_dynamic_quantization_params that XNNPACK may read beyond array bounds.
-/// The caller must allocate at least this many extra xnn_dynamic_quantization_params before passing the array to XNNPACK.
+/// The number of entries in an array of xnn_quantization_params that XNNPACK may read beyond array bounds.
+/// The caller must allocate at least this many extra xnn_quantization_params before passing the array to XNNPACK.
 ///
 /// Note: XNNPACK reads, but never writes beyond array bounds.
 #define XNN_EXTRA_QUANTIZATION_PARAMS 10
@@ -103,7 +103,7 @@ extern "C" {
 /// The minimum blocksize for blockwise quantized operators.
 #define XNN_MIN_BLOCKSIZE 32
 
-struct xnn_dynamic_quantization_params {
+struct xnn_quantization_params {
   int32_t zero_point;
   float scale;
 };
@@ -2642,7 +2642,7 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
 
 enum xnn_status xnn_setup_batch_matrix_multiply_nc_qd8_f32_qc8w(
     xnn_operator_t batch_matrix_multiply_op, const int8_t* input_a,
-    const struct xnn_dynamic_quantization_params* quantization_params,
+    const struct xnn_quantization_params* quantization_params,
     float* output);
 
 enum xnn_status xnn_create_ceiling_nc_f16(
@@ -2944,7 +2944,7 @@ enum xnn_status xnn_setup_convert_nc_f16_qd8(
   xnn_operator_t convert_op,
   const void* input,
   int8_t* output,
-  struct xnn_dynamic_quantization_params* quantization_params);
+  struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_create_convert_nc_f32_qd8(
   uint32_t flags,
@@ -2963,7 +2963,7 @@ enum xnn_status xnn_setup_convert_nc_f32_qd8(
   xnn_operator_t convert_op,
   const float* input,
   int8_t* output,
-  struct xnn_dynamic_quantization_params* quantization_params);
+  struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_create_convert_nc_f32_f16(
   uint32_t flags,
@@ -3485,12 +3485,12 @@ enum xnn_status xnn_reshape_convolution2d_nhwc_qs8(
 enum xnn_status xnn_setup_convolution2d_nhwc_qd8_f16_qc8w(
     xnn_operator_t convolution_op, void* workspace, const int8_t* input,
     void* output,
-    const struct xnn_dynamic_quantization_params* quantization_params);
+    const struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_setup_convolution2d_nhwc_qd8_f32_qc8w(
     xnn_operator_t convolution_op, void* workspace, const int8_t* input,
     float* output,
-    const struct xnn_dynamic_quantization_params* quantization_params);
+    const struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_setup_convolution2d_nhwc_qs8(
   xnn_operator_t convolution_op,
@@ -3777,7 +3777,7 @@ enum xnn_status xnn_setup_deconvolution2d_nhwc_qd8_f32_qc8w(
   xnn_operator_t deconvolution_op,
   const int8_t* input,
   float* output,
-  const struct xnn_dynamic_quantization_params* quantization_params);
+  const struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_create_deconvolution2d_nhwc_qs8(
   uint32_t output_padding_top,
@@ -4419,7 +4419,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qc4w(
   xnn_operator_t fully_connected_op,
   const int8_t* input,
   void* output,
-  const struct xnn_dynamic_quantization_params* quantization_params);
+  const struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f16_qc4w(
   xnn_operator_t fully_connected_op,
@@ -4452,7 +4452,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qb4w(
     xnn_operator_t fully_connected_op,
     const int8_t* input,
     void* output,
-    const struct xnn_dynamic_quantization_params* quantization_params);
+    const struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_create_fully_connected_nc_qd8_f32_qc4w(
   size_t input_channels,
@@ -4474,7 +4474,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qc4w(
   xnn_operator_t fully_connected_op,
   const int8_t* input,
   float* output,
-  const struct xnn_dynamic_quantization_params* quantization_params);
+  const struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qc4w(
   xnn_operator_t fully_connected_op,
@@ -4507,7 +4507,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qb4w(
   xnn_operator_t fully_connected_op,
   const int8_t* input,
   float* output,
-  const struct xnn_dynamic_quantization_params* quantization_params);
+  const struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qc8w(
   size_t input_channels,
@@ -4528,7 +4528,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qc8w(
   xnn_operator_t fully_connected_op,
   const int8_t* input,
   void* output,
-  const struct xnn_dynamic_quantization_params* quantization_params);
+  const struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f16_qc8w(
   xnn_operator_t fully_connected_op,
@@ -4554,7 +4554,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qc8w(
   xnn_operator_t fully_connected_op,
   const int8_t* input,
   float* output,
-  const struct xnn_dynamic_quantization_params* quantization_params);
+  const struct xnn_quantization_params* quantization_params);
 
 enum xnn_status xnn_reshape_fully_connected_nc_qd8_f32_qc8w(
   xnn_operator_t fully_connected_op,

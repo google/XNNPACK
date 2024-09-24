@@ -726,7 +726,7 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
 static enum xnn_status setup_batch_matrix_multiply_nc(
     xnn_operator_t batch_matrix_multiply_op,
     enum xnn_operator_type expected_operator_type, const void* input_a,
-    const struct xnn_dynamic_quantization_params* quantization_params,
+    const struct xnn_quantization_params* quantization_params,
     const void* input_b, void* packed_weights, void* output) {
   if (batch_matrix_multiply_op->type != expected_operator_type) {
     xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
@@ -797,7 +797,7 @@ enum xnn_status xnn_setup_batch_matrix_multiply_nc_f32(
 
 enum xnn_status xnn_setup_batch_matrix_multiply_nc_qd8_f32_qc8w(
     xnn_operator_t batch_matrix_multiply_op, const int8_t* input_a,
-    const struct xnn_dynamic_quantization_params* quantization_params,
+    const struct xnn_quantization_params* quantization_params,
     float* output) {
   return setup_batch_matrix_multiply_nc(
       batch_matrix_multiply_op,

@@ -97,8 +97,8 @@ struct xnn_value {
         /// Number of non-batch dimensions. 1 for FC, 3 for Conv2D.
         size_t num_nonbatch_dims;
         /// Per-batch quantization parameters factor to convert quantized elements to real representation.
-        struct xnn_dynamic_quantization_params* dynamic_params;
-        /// Number of (struct xnn_dynamic_quantization_params) * sizeof(struct xnn_dynamic_quantization_params)
+        struct xnn_quantization_params* dynamic_params;
+        /// Number of (struct xnn_quantization_params) * sizeof(struct xnn_quantization_params)
         size_t dynamic_params_size;
       };
     };
@@ -545,7 +545,7 @@ XNN_INLINE static size_t xnn_tensor_get_rounded_dynamic_quant_param_size(const s
 
   // We may read out of bounds for qparams.
   return xnn_get_rounded_size(value->quantization.dynamic_params_size
-    + XNN_EXTRA_QUANTIZATION_PARAMS * sizeof(struct xnn_dynamic_quantization_params));
+    + XNN_EXTRA_QUANTIZATION_PARAMS * sizeof(struct xnn_quantization_params));
 }
 
 
