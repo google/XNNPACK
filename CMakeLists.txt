@@ -1323,7 +1323,6 @@ IF(XNNPACK_BUILD_TESTS)
       GTest::gtest
       GTest::gtest_main
       XNNPACK)
-    ADD_SHARDED_TEST(binary-elementwise-nd-test 10)
 
     # ---[ Build subgraph optimizations unit tests
     SET(LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS

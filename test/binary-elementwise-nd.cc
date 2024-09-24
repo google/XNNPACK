@@ -25,17 +25,6 @@
 #include "xnnpack/math.h"
 #include "replicable_random_device.h"
 
-constexpr size_t kDim1 = 2;
-constexpr size_t kDim2 = 3;
-constexpr size_t kDim3 = 4;
-constexpr size_t kDim4 = 5;
-constexpr size_t kDim5 = 6;
-constexpr size_t kDim6 = 7;
-const size_t kDims[] = {kDim1, kDim2, kDim3, kDim4, kDim5, kDim6};
-
-const size_t kBroadcastRanks[] = {0, 1, 2, 3, 4, 5, 6};
-const size_t kTestRank = 4;
-
 enum class RunMode {
   kCreateReshapeRun,
   kEager,
@@ -403,167 +392,153 @@ class BinaryElementwiseOperatorTester {
   size_t iterations_{3};
 };
 
-// Make a shape of `rank` dimensions, broadcasting in each dimension according
-// `broadcast_mask`.
-inline std::vector<size_t> MakeShapeOfRank(size_t rank, uint32_t broadcast_mask,
-                                           const size_t* dims) {
-  std::vector<size_t> shape;
+template <typename Rng>
+std::vector<size_t> RandomShape(Rng& rng) {
+  const size_t rank = rng() % XNN_MAX_TENSOR_DIMS;
+  std::vector<size_t> dims(rank);
   for (size_t i = 0; i < rank; i++) {
-    const bool broadcast = (broadcast_mask & (uint32_t(1) << i)) != 0;
-    shape.push_back(broadcast ? 1 : dims[i]);
+    dims[i] = rng() % 10 + 1;
   }
-  std::reverse(shape.begin(), shape.end());
-  return shape;
+  return dims;
+}
+
+template <typename Rng>
+std::vector<size_t> RandomBroadcast(Rng& rng, std::vector<size_t> dims) {
+  // Randomly assign some dimensions to 1.
+  for (size_t i = 0; i < dims.size(); i++) {
+    if (rng() % 8 == 0) {
+      dims[i] = 1;
+    }
+  }
+  // Possibly remove leading 1s.
+  if (rng() % 2 == 0) {
+    while (!dims.empty() && dims.front() == 1) {
+      dims.erase(dims.begin());
+    }
+  }
+  return dims;
 }
 
 template <typename T>
-void RunBinaryOpTester(size_t rank_a, size_t rank_b, const size_t* dims,
-                       RunMode run_mode,
+void RunBinaryOpTester(RunMode run_mode,
                        BinaryElementwiseOperatorTester& tester) {
-  for (uint32_t bm1 = 0; bm1 < (uint32_t(1) << rank_a); bm1++) {
-    for (uint32_t bm2 = 0; bm2 < (uint32_t(1) << rank_b); bm2++) {
-      tester.input1_shape(MakeShapeOfRank(rank_a, bm1, dims))
-          .input2_shape(MakeShapeOfRank(rank_b, bm2, dims));
-      tester.Test<T>(run_mode);
-    }
+  xnnpack::ReplicableRandomDevice rng;
+  for (int iterations = 0; iterations < 100; iterations++) {
+    std::vector<size_t> output_shape = RandomShape(rng);
+    tester.input1_shape(RandomBroadcast(rng, output_shape))
+        .input2_shape(RandomBroadcast(rng, output_shape));
+    tester.Test<T>(run_mode);
   }
 }
 
 template <typename T, typename Params>
-void BroadcastNDTestImpl(const Params& params) {
+void BinaryNDTestImpl(const Params& params) {
   RunMode mode = std::get<0>(params);
   xnn_binary_operator op = std::get<1>(params);
-  const size_t rank_a = std::get<2>(params);
-  const size_t rank_b = std::get<3>(params);
   BinaryElementwiseOperatorTester tester;
   tester.operation_type(op);
-  RunBinaryOpTester<T>(rank_a, rank_b, kDims, mode, tester);
+  RunBinaryOpTester<T>(mode, tester);
 }
 
 template <typename T>
-class BroadcastNDTest
+class BinaryNDTest
     : public testing::TestWithParam<
-          std::tuple<RunMode, xnn_binary_operator, size_t, size_t>> {};
+          std::tuple<RunMode, xnn_binary_operator>> {};
 
-using BroadcastNDTestQS8 = BroadcastNDTest<int8_t>;
-using BroadcastNDTestQU8 = BroadcastNDTest<uint8_t>;
+using BinaryNDTestQS8 = BinaryNDTest<int8_t>;
+using BinaryNDTestQU8 = BinaryNDTest<uint8_t>;
 #ifndef XNN_EXCLUDE_F16_TESTS
-using BroadcastNDTestF16 = BroadcastNDTest<xnn_float16>;
+using BinaryNDTestF16 = BinaryNDTest<xnn_float16>;
 #endif  // XNN_EXCLUDE_F16_TESTS
-using BroadcastNDTestF32 = BroadcastNDTest<float>;
-using BroadcastNDTestS32 = BroadcastNDTest<int32_t>;
+using BinaryNDTestF32 = BinaryNDTest<float>;
+using BinaryNDTestS32 = BinaryNDTest<int32_t>;
 
-TEST_P(BroadcastNDTestQS8, op) { BroadcastNDTestImpl<int8_t>(GetParam()); }
-TEST_P(BroadcastNDTestQU8, op) { BroadcastNDTestImpl<uint8_t>(GetParam()); }
+TEST_P(BinaryNDTestQS8, op) { BinaryNDTestImpl<int8_t>(GetParam()); }
+TEST_P(BinaryNDTestQU8, op) { BinaryNDTestImpl<uint8_t>(GetParam()); }
 #ifndef XNN_EXCLUDE_F16_TESTS
-TEST_P(BroadcastNDTestF16, op) { BroadcastNDTestImpl<xnn_float16>(GetParam()); }
+TEST_P(BinaryNDTestF16, op) { BinaryNDTestImpl<xnn_float16>(GetParam()); }
 #endif  // XNN_EXCLUDE_F16_TESTS
-TEST_P(BroadcastNDTestF32, op) { BroadcastNDTestImpl<float>(GetParam()); }
-TEST_P(BroadcastNDTestS32, op) { BroadcastNDTestImpl<int32_t>(GetParam()); }
-
-std::string ToString(
-    const std::tuple<RunMode, xnn_binary_operator, size_t, size_t>& param) {
-  return BinaryElementwiseOperatorTester::ToString(std::get<1>(param)) + "_" +
-         std::to_string(std::get<2>(param)) + "d_x_" +
-         std::to_string(std::get<3>(param)) + "d";
-}
+TEST_P(BinaryNDTestF32, op) { BinaryNDTestImpl<float>(GetParam()); }
+TEST_P(BinaryNDTestS32, op) { BinaryNDTestImpl<int32_t>(GetParam()); }
 
 std::string ToString(const std::tuple<RunMode, xnn_binary_operator>& param) {
   return BinaryElementwiseOperatorTester::ToString(std::get<1>(param));
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    CreateReshapeRun, BroadcastNDTestQS8,
+    CreateReshapeRun, BinaryNDTestQS8,
     testing::Combine(testing::Values(RunMode::kCreateReshapeRun),
                      testing::Values(xnn_binary_add, xnn_binary_subtract,
-                                     xnn_binary_multiply),
-                     testing::ValuesIn(kBroadcastRanks),
-                     testing::ValuesIn(kBroadcastRanks)),
+                                     xnn_binary_multiply)),
     [](const auto& info) { return ToString(info.param); });
-INSTANTIATE_TEST_SUITE_P(Eager, BroadcastNDTestQS8,
+INSTANTIATE_TEST_SUITE_P(Eager, BinaryNDTestQS8,
                          testing::Combine(testing::Values(RunMode::kEager),
                                           testing::Values(xnn_binary_add,
                                                           xnn_binary_subtract,
-                                                          xnn_binary_multiply),
-                                          testing::ValuesIn(kBroadcastRanks),
-                                          testing::ValuesIn(kBroadcastRanks)),
+                                                          xnn_binary_multiply)),
                          [](const auto& info) { return ToString(info.param); });
 INSTANTIATE_TEST_SUITE_P(
-    CreateReshapeRun, BroadcastNDTestQU8,
+    CreateReshapeRun, BinaryNDTestQU8,
     testing::Combine(testing::Values(RunMode::kCreateReshapeRun),
                      testing::Values(xnn_binary_add, xnn_binary_subtract,
-                                     xnn_binary_multiply),
-                     testing::ValuesIn(kBroadcastRanks),
-                     testing::ValuesIn(kBroadcastRanks)),
+                                     xnn_binary_multiply)),
     [](const auto& info) { return ToString(info.param); });
-INSTANTIATE_TEST_SUITE_P(Eager, BroadcastNDTestQU8,
+INSTANTIATE_TEST_SUITE_P(Eager, BinaryNDTestQU8,
                          testing::Combine(testing::Values(RunMode::kEager),
                                           testing::Values(xnn_binary_add,
                                                           xnn_binary_subtract,
-                                                          xnn_binary_multiply),
-                                          testing::ValuesIn(kBroadcastRanks),
-                                          testing::ValuesIn(kBroadcastRanks)),
+                                                          xnn_binary_multiply)),
                          [](const auto& info) { return ToString(info.param); });
 #ifndef XNN_EXCLUDE_F16_TESTS
 INSTANTIATE_TEST_SUITE_P(
-    CreateReshapeRun, BroadcastNDTestF16,
+    CreateReshapeRun, BinaryNDTestF16,
     testing::Combine(
         testing::Values(RunMode::kCreateReshapeRun),
         testing::Values(xnn_binary_add, xnn_binary_divide, xnn_binary_maximum,
                         xnn_binary_minimum, xnn_binary_multiply,
-                        xnn_binary_squared_difference, xnn_binary_subtract),
-        testing::ValuesIn(kBroadcastRanks), testing::ValuesIn(kBroadcastRanks)),
+                        xnn_binary_squared_difference, xnn_binary_subtract)),
     [](const auto& info) { return ToString(info.param); });
 INSTANTIATE_TEST_SUITE_P(
-    Eager, BroadcastNDTestF16,
+    Eager, BinaryNDTestF16,
     testing::Combine(
         testing::Values(RunMode::kEager),
         testing::Values(xnn_binary_add, xnn_binary_divide, xnn_binary_maximum,
                         xnn_binary_minimum, xnn_binary_multiply,
-                        xnn_binary_squared_difference, xnn_binary_subtract),
-        testing::ValuesIn(kBroadcastRanks), testing::ValuesIn(kBroadcastRanks)),
+                        xnn_binary_squared_difference, xnn_binary_subtract)),
     [](const auto& info) { return ToString(info.param); });
 #endif
 INSTANTIATE_TEST_SUITE_P(
-    CreateReshapeRun, BroadcastNDTestF32,
+    CreateReshapeRun, BinaryNDTestF32,
     testing::Combine(testing::Values(RunMode::kCreateReshapeRun),
                      testing::Values(xnn_binary_add, xnn_binary_copysign,
                                      xnn_binary_divide, xnn_binary_maximum,
                                      xnn_binary_minimum, xnn_binary_multiply,
                                      xnn_binary_subtract,
-                                     xnn_binary_squared_difference),
-                     testing::ValuesIn(kBroadcastRanks),
-                     testing::ValuesIn(kBroadcastRanks)),
+                                     xnn_binary_squared_difference)),
     [](const auto& info) { return ToString(info.param); });
 INSTANTIATE_TEST_SUITE_P(
-    Eager, BroadcastNDTestF32,
+    Eager, BinaryNDTestF32,
     testing::Combine(testing::Values(RunMode::kEager),
                      testing::Values(xnn_binary_add, xnn_binary_divide,
                                      xnn_binary_maximum, xnn_binary_minimum,
                                      xnn_binary_multiply, xnn_binary_subtract,
-                                     xnn_binary_squared_difference),
-                     testing::ValuesIn(kBroadcastRanks),
-                     testing::ValuesIn(kBroadcastRanks)),
+                                     xnn_binary_squared_difference)),
     [](const auto& info) { return ToString(info.param); });
 INSTANTIATE_TEST_SUITE_P(
-    CreateReshapeRun, BroadcastNDTestS32,
+    CreateReshapeRun, BinaryNDTestS32,
     testing::Combine(testing::Values(RunMode::kCreateReshapeRun),
-                     testing::Values(xnn_binary_multiply),
-                     testing::ValuesIn(kBroadcastRanks),
-                     testing::ValuesIn(kBroadcastRanks)),
+                     testing::Values(xnn_binary_multiply)),
     [](const auto& info) { return ToString(info.param); });
-INSTANTIATE_TEST_SUITE_P(Eager, BroadcastNDTestS32,
+INSTANTIATE_TEST_SUITE_P(Eager, BinaryNDTestS32,
                          testing::Combine(testing::Values(RunMode::kEager),
-                                          testing::Values(xnn_binary_multiply),
-                                          testing::ValuesIn(kBroadcastRanks),
-                                          testing::ValuesIn(kBroadcastRanks)),
+                                          testing::Values(xnn_binary_multiply)),
                          [](const auto& info) { return ToString(info.param); });
 
 template <typename T, typename Params>
 void QuantizedTest_Input1Scale(Params params) {
   for (float input1_scale = 0.1f; input1_scale <= 10.0f;
        input1_scale *= 3.14f) {
-    RunBinaryOpTester<T>(kTestRank, kTestRank, kDims, std::get<0>(params),
+    RunBinaryOpTester<T>(std::get<0>(params),
                          BinaryElementwiseOperatorTester()
                              .operation_type(std::get<1>(params))
                              .input1_scale(input1_scale));
@@ -575,7 +550,7 @@ void QuantizedTest_Input1ZeroPoint(Params params) {
   for (int32_t input1_zero_point = std::numeric_limits<T>::min();
        input1_zero_point <= std::numeric_limits<T>::max();
        input1_zero_point += 51) {
-    RunBinaryOpTester<T>(kTestRank, kTestRank, kDims, std::get<0>(params),
+    RunBinaryOpTester<T>(std::get<0>(params),
                          BinaryElementwiseOperatorTester()
                              .operation_type(std::get<1>(params))
                              .input1_zero_point(input1_zero_point));
@@ -586,7 +561,7 @@ template <typename T, typename Params>
 void QuantizedTest_Input2Scale(Params params) {
   for (float input2_scale = 0.1f; input2_scale <= 10.0f;
        input2_scale *= 3.14f) {
-    RunBinaryOpTester<T>(kTestRank, kTestRank, kDims, std::get<0>(params),
+    RunBinaryOpTester<T>(std::get<0>(params),
                          BinaryElementwiseOperatorTester()
                              .operation_type(std::get<1>(params))
                              .input2_scale(input2_scale));
@@ -598,7 +573,7 @@ void QuantizedTest_Input2ZeroPoint(Params params) {
   for (int32_t input2_zero_point = std::numeric_limits<T>::min();
        input2_zero_point <= std::numeric_limits<T>::max();
        input2_zero_point += 51) {
-    RunBinaryOpTester<T>(kTestRank, kTestRank, kDims, std::get<0>(params),
+    RunBinaryOpTester<T>(std::get<0>(params),
                          BinaryElementwiseOperatorTester()
                              .operation_type(std::get<1>(params))
                              .input2_zero_point(input2_zero_point));
@@ -609,7 +584,7 @@ template <typename T, typename Params>
 void QuantizedTest_OutputScale(Params params) {
   for (float output_scale = 0.1f; output_scale <= 10.0f;
        output_scale *= 3.14f) {
-    RunBinaryOpTester<T>(kTestRank, kTestRank, kDims, std::get<0>(params),
+    RunBinaryOpTester<T>(std::get<0>(params),
                          BinaryElementwiseOperatorTester()
                              .operation_type(std::get<1>(params))
                              .output_scale(output_scale));
@@ -621,7 +596,7 @@ void QuantizedTest_OutputZeroPoint(Params params) {
   for (int32_t output_zero_point = std::numeric_limits<T>::min();
        output_zero_point <= std::numeric_limits<T>::max();
        output_zero_point += 51) {
-    RunBinaryOpTester<T>(kTestRank, kTestRank, kDims, std::get<0>(params),
+    RunBinaryOpTester<T>(std::get<0>(params),
                          BinaryElementwiseOperatorTester()
                              .operation_type(std::get<1>(params))
                              .output_zero_point(output_zero_point));
