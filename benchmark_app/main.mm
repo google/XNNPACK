@@ -1,23 +1,10 @@
-// Copyright 2022 Google LLC
-//
-// This source code is licensed under the BSD-style license found in the
-// LICENSE file in the root directory of this source tree.
+#include <iostream>
+#include <string>
+#include <random>
 
-#include <algorithm>  // For std::generate, std::min.
-#include <array>      // For std::array.
-#include <cassert>    // For std::cassert.
-#include <cmath>      // For std::lrintf.
-#include <cstddef>    // For size_t.
-#include <cstdint>    // For uint32_t.
-#include <functional>
-#include <limits>   // For std::numeric_limits.
-#include <memory>   // For std::unique_ptr.
-#include <numeric>  // For std::accumulate.
-#include <random>   // For std::uniform_real_distribution.
-#include <vector>   // For std::vector.
-
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
+
 #include "xnnpack.h"
 #include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
@@ -29,112 +16,17 @@
 #include "xnnpack/packq.h"
 #include "xnnpack/requantization.h"
 #include "xnnpack/subgraph.h"
-#include "replicable_random_device.h"
 
-using testing::ElementsAreArray;
+void run() {
+	  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
-template <class InputType, class KernelType = InputType,
-          class BiasType = InputType, class OutputType = InputType, bool even_channels = false>
-class FullyConnectedTestBase : public ::testing::TestWithParam<bool> {
- protected:
-  FullyConnectedTestBase() {
-    f32dist = std::uniform_real_distribution<float>(0.1f, 1.0f);
-    scale_dist = std::uniform_real_distribution<float>(1.0f, 5.0f);
-    i32dist = std::uniform_int_distribution<int32_t>(-10000, 10000);
-    auto shape_dist = std::uniform_int_distribution<size_t>(2, XNN_MAX_TENSOR_DIMS);
-    dim_dist = std::uniform_int_distribution<size_t>(5, 15);
-    i8dist =
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
-    w8dist =
-      std::uniform_int_distribution<int32_t>(-std::numeric_limits<uint8_t>::max(), std::numeric_limits<uint8_t>::max());
-
-    output_min = -std::numeric_limits<float>::infinity();
-    output_max = std::numeric_limits<float>::infinity();
-
-    size_t num_input_dims = shape_dist(rng);
-    input_dims = RandomShape(num_input_dims);
-    assert(input_dims.size() >= 2);
-    output_channels = dim_dist(rng);
-    input_channels = input_dims.back();
-    // Adjust number of kernel elements for QC4W. input_channels should be padded to byte boundary, hence even.
-    if (even_channels) {
-      input_channels = round_up_po2(input_channels, 2);
-      input_dims.back() = input_channels;
-    }
-    kernel_dims = {output_channels, input_channels};
-    kernel_dims_tranposed = {input_channels, output_channels};
-    bias_dims = {output_channels};
-    output_dims = input_dims;
-    output_dims[output_dims.size() - 1] = output_channels;
-
-    batch_size = NumElements(input_dims) / input_channels;
-
-    input = std::vector<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) + NumElements(input_dims));
-    kernel = std::vector<KernelType>(input_channels * output_channels);
-    kernel_fp16 = std::vector<xnn_float16>(input_channels * output_channels);
-    bias = std::vector<BiasType>(output_channels);
-    bias_fp16 = std::vector<xnn_float16>(output_channels);
-    operator_output = std::vector<OutputType>(NumElements(output_dims));
-    subgraph_output = std::vector<OutputType>(operator_output.size());
-    accumulators = std::vector<int32_t>(batch_size * output_channels);
-  }
-
-  std::vector<size_t> RandomShape(size_t num_dims)
-  {
-    std::vector<size_t> dims(num_dims);
-    std::generate(dims.begin(), dims.end(), [&] { return dim_dist(rng); });
-    return dims;
-  }
-
-  size_t NumElements(std::vector<size_t>& dims)
-  {
-    return std::accumulate(dims.begin(), dims.end(), size_t(1), std::multiplies<size_t>());
-  }
-
-  xnnpack::ReplicableRandomDevice rng;
-  std::uniform_int_distribution<int32_t> i32dist;
-  std::uniform_real_distribution<float> f32dist;
-  std::uniform_real_distribution<float> scale_dist;
-  std::uniform_int_distribution<size_t> dim_dist;
-  std::uniform_int_distribution<int32_t> i8dist;
-  std::uniform_int_distribution<int32_t> u8dist;
-  std::uniform_int_distribution<int32_t> w8dist;
-
-  uint32_t batch_size;
-  size_t input_channels;
-  size_t output_channels;
-
-  float output_min;
-  float output_max;
-
-  std::vector<size_t> input_dims;
-  std::vector<size_t> kernel_dims;
-  std::vector<size_t> kernel_dims_tranposed;
-  std::vector<size_t> bias_dims;
-  std::vector<size_t> output_dims;
-
-  std::vector<InputType> input;
-  std::vector<KernelType> kernel;
-  std::vector<BiasType> bias;
-  std::vector<xnn_float16> kernel_fp16;
-  std::vector<xnn_float16> bias_fp16;
-  std::vector<OutputType> operator_output;
-  std::vector<OutputType> subgraph_output;
-  std::vector<int32_t> accumulators;
-};
-
-using FullyConnectedTestF32 = FullyConnectedTestBase<float>;
-
-TEST_F(FullyConnectedTestF32, matches_operator_api)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnnpack::ReplicableRandomDevice rng;
+  std::mt19937 rng;
+  
   std::uniform_real_distribution<float> f32dist;
   f32dist = std::uniform_real_distribution<float>(-1.f, 1.0f);
   size_t batch_size = 1;
-  size_t input_channels = 1536/4;//1536;//6144/4;
-  size_t output_channels = 1536;//1536/16;
+  size_t input_channels = 112;//1536;//6144/4;
+  size_t output_channels = 33;//1536/16;
   float output_min = -std::numeric_limits<float>::infinity();
   float output_max = std::numeric_limits<float>::infinity();
   std::vector<size_t> input_dims{batch_size, input_channels};
@@ -223,16 +115,14 @@ TEST_F(FullyConnectedTestF32, matches_operator_api)
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 2> external = {
     xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  std::cout<<" SETTING UP " << std::endl;
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  printf("INVOKE\n");fflush(stdout);
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
   for (int i = 0; i < subgraph_output.size(); ++i) {
 	  float tolerance = std::max(1.0e-5f, std::abs(reference_output[i]) * 1.0e-6f);
 	  EXPECT_NEAR(subgraph_output[i], reference_output[i], tolerance) << " III " << i;
-  //std::cout<<" VAL " << subgraph_output[i] << " ref " << reference_output[i] << std::endl;
+//  std::cout<<" VAL " << subgraph_output[i] << " ref " << reference_output[i] << std::endl;
   }
   //for (int i = 0; i < subgraph_output.size(); ++i) {
   //        std::cout<< subgraph_output[i] << std::endl;
@@ -241,4 +131,12 @@ TEST_F(FullyConnectedTestF32, matches_operator_api)
   //for (int i = 0; i < reference_output.size(); ++i) {
   //        std::cout<< reference_output[i] << std::endl;
   //}
+}
+
+int main(int argc, char** argv) {
+  @autoreleasepool {
+	  run();
+  }
+
+  return 0;
 }
