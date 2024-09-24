@@ -48,6 +48,11 @@
 - name: xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_u64_acc2
 - name: xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_u64_acc4
 
+- name: xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u16
+- name: xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u32_acc2
+- name: xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u64_acc2
+- name: xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u64_acc4
+
 # WAsm SIMD
 - name: xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_u4
 - name: xnn_f32_raddstoreexpminusmax_ukernel__wasmsimd_rr2_p5_u8_acc2
