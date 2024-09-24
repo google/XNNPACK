@@ -164,6 +164,7 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_f32_const_weights(
     // Allocate the packed weights.
     void* packed_data = xnn_get_pointer_to_write_weights(
         batch_matrix_multiply_op, aligned_size, /*padding_byte=*/0);
+    batch_matrix_multiply_op->weights_stride = input_b_batch_stride / n_stride;
     if (packed_data == NULL) {
       xnn_log_error(
           "failed to allocate %zu bytes for %s operator packed weights",
