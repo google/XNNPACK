@@ -11,14 +11,8 @@
   string: "Abs (NC, F16)"
 - name: xnn_operator_type_abs_nc_f32
   string: "Abs (NC, F32)"
-- name: xnn_operator_type_add_nd_f16
-  string: "Add (ND, F16)"
-- name: xnn_operator_type_add_nd_f32
-  string: "Add (ND, F32)"
-- name: xnn_operator_type_add_nd_qs8
-  string: "Add (ND, QS8)"
-- name: xnn_operator_type_add_nd_qu8
-  string: "Add (ND, QU8)"
+- name: xnn_operator_type_add
+  string: "Add (ND)"
 - name: xnn_operator_type_argmax_pooling_nhwc_f32
   string: "ArgMax Pooling (NHWC, F32)"
 - name: xnn_operator_type_average_pooling_nhwc_f16
@@ -109,8 +103,8 @@
   string: "Copy (NC, X16)"
 - name: xnn_operator_type_copy_nc_x32
   string: "Copy (NC, X32)"
-- name: xnn_operator_type_copysign_nd_f32
-  string: "Copy Sign (NC, F32)"
+- name: xnn_operator_type_copysign
+  string: "Copy Sign (ND)"
 - name: xnn_operator_type_deconvolution_nhwc_f16
   string: "Deconvolution (NHWC, F16)"
 - name: xnn_operator_type_deconvolution_nhwc_f32
@@ -133,10 +127,8 @@
   string: "Depth To Space (NHWC, X16)"
 - name: xnn_operator_type_depth_to_space_nhwc_x32
   string: "Depth To Space (NHWC, X32)"
-- name: xnn_operator_type_divide_nd_f16
-  string: "Divide (ND, F16)"
-- name: xnn_operator_type_divide_nd_f32
-  string: "Divide (ND, F32)"
+- name: xnn_operator_type_divide
+  string: "Divide (ND)"
 - name: xnn_operator_type_dynamic_fully_connected_nc_f16
   string: "Dynamic Fully Connected (NC, F16)"
 - name: xnn_operator_type_dynamic_fully_connected_nc_f32
@@ -221,10 +213,8 @@
   string: "Max Pooling (NHWC, S8)"
 - name: xnn_operator_type_max_pooling_nhwc_u8
   string: "Max Pooling (NHWC, U8)"
-- name: xnn_operator_type_maximum_nd_f16
-  string: "Maximum (ND, F16)"
-- name: xnn_operator_type_maximum_nd_f32
-  string: "Maximum (ND, F32)"
+- name: xnn_operator_type_maximum
+  string: "Maximum (ND)"
 - name: xnn_operator_type_mean_nd_f16
   string: "Mean (ND, F16)"
 - name: xnn_operator_type_mean_nd_f32
@@ -233,20 +223,10 @@
   string: "Mean (ND, QS8)"
 - name: xnn_operator_type_mean_nd_qu8
   string: "Mean (ND, QU8)"
-- name: xnn_operator_type_minimum_nd_f16
-  string: "Minimum (ND, F16)"
-- name: xnn_operator_type_minimum_nd_f32
-  string: "Minimum (ND, F32)"
-- name: xnn_operator_type_multiply_nd_f16
-  string: "Multiply (ND, F16)"
-- name: xnn_operator_type_multiply_nd_f32
-  string: "Multiply (ND, F32)"
-- name: xnn_operator_type_multiply_nd_qs8
-  string: "Multiply (ND, QS8)"
-- name: xnn_operator_type_multiply_nd_qu8
-  string: "Multiply (ND, QU8)"
-- name: xnn_operator_type_multiply_nd_s32
-  string: "Multiply (ND, S32)"
+- name: xnn_operator_type_minimum
+  string: "Minimum (ND)"
+- name: xnn_operator_type_multiply
+  string: "Multiply (ND)"
 - name: xnn_operator_type_negate_nc_f16
   string: "Negate (NC, F16)"
 - name: xnn_operator_type_negate_nc_f32
@@ -313,18 +293,10 @@
   string: "Square Root (NC, F16)"
 - name: xnn_operator_type_square_root_nc_f32
   string: "Square Root (NC, F32)"
-- name: xnn_operator_type_squared_difference_nd_f16
-  string: "Squared Difference (NC, F16)"
-- name: xnn_operator_type_squared_difference_nd_f32
-  string: "Squared Difference (NC, F32)"
-- name: xnn_operator_type_subtract_nd_f16
-  string: "Subtract (ND, F16)"
-- name: xnn_operator_type_subtract_nd_f32
-  string: "Subtract (ND, F32)"
-- name: xnn_operator_type_subtract_nd_qs8
-  string: "Subtract (ND, QS8)"
-- name: xnn_operator_type_subtract_nd_qu8
-  string: "Subtract (ND, QU8)"
+- name: xnn_operator_type_squared_difference
+  string: "Squared Difference (NC)"
+- name: xnn_operator_type_subtract
+  string: "Subtract (ND)"
 - name: xnn_operator_type_tanh_nc_f16
   string: "Tanh (NC, F16)"
 - name: xnn_operator_type_tanh_nc_f32

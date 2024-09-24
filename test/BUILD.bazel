@@ -101,14 +101,6 @@ xnnpack_cxx_library(
 )
 
 xnnpack_cxx_library(
-    name = "binary_elementwise_operator_tester",
-    testonly = True,
-    srcs = ["binary-elementwise-operator-tester.cc"],
-    hdrs = ["binary-elementwise-operator-tester.h"],
-    deps = OPERATOR_TEST_DEPS + xnnpack_test_deps_for_library(),
-)
-
-xnnpack_cxx_library(
     name = "vunary_microkernel_tester",
     testonly = True,
     srcs = ["vunary-microkernel-tester.cc"],
@@ -1376,11 +1368,11 @@ xnnpack_binary(
 ]]
 
 xnnpack_unit_test(
-    name = "binary_nd_test",
+    name = "binary_elementwise_nd_test",
     timeout = "long",
-    srcs = ["binary-nd.cc"],
+    srcs = ["binary-elementwise-nd.cc"],
     shard_count = 10,
-    deps = OPERATOR_TEST_DEPS + [":binary_elementwise_operator_tester"],
+    deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -1868,40 +1860,16 @@ xnnpack_unit_test(
     ],
 )
 
-[xnnpack_unit_test(
-    name = "%s_test" % operator,
-    srcs = [
-        "%s.cc" % operator.replace("_", "-"),
-    ],
+xnnpack_unit_test(
+    name = "binary_test",
+    srcs = ["binary.cc"],
     deps = [
-        ":subgraph_binary_tester",
-        "@FP16",
+        ":replicable_random_device",
         "//:XNNPACK",
+        "//:aligned_allocator",
         "//:math",
         "//:node_type",
         "//:operators",
-        "//:requantization",
-        "//:subgraph",
-    ],
-) for operator in [
-    "add2",
-    "copysign",
-    "divide2",
-    "maximum2",
-    "minimum2",
-    "multiply2",
-    "squared_difference",
-    "subtract2",
-]]
-
-xnnpack_unit_test(
-    name = "add2_reshape_test",
-    srcs = [
-        "add2-reshape.cc",
-    ],
-    deps = [
-        "//:XNNPACK",
-        "//:node_type",
         "//:subgraph",
     ],
 )

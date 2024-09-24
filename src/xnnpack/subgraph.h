@@ -585,6 +585,9 @@ enum xnn_status resize_fully_connected_output_tensor(
   size_t old_workspace_size,
   pthreadpool_t threadpool);
 
+XNN_INTERNAL enum xnn_node_type xnn_binary_operator_to_node_type(enum xnn_binary_operator type);
+XNN_INTERNAL enum xnn_binary_operator xnn_node_type_to_binary_operator(enum xnn_node_type type);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

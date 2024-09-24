@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microparams.h"
@@ -1802,16 +1803,36 @@ size_t xnn_init_u8_minmax_scalar_params(
   return sizeof(params->scalar);
 }
 
+size_t xnn_init_f16_minmax_binary_params(
+    union xnn_f16_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
+    const struct xnn_quantization_params* a_quantization,
+    const struct xnn_quantization_params* b_quantization,
+    const struct xnn_quantization_params* output_quantization) {
+  uparams->scalar.min = xnn_float16_from_float(-INFINITY);
+  uparams->scalar.max = xnn_float16_from_float(+INFINITY);
+  return sizeof(uparams->scalar);
+}
+
+size_t xnn_init_f32_minmax_binary_params(
+    union xnn_f32_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
+    const struct xnn_quantization_params* a_quantization,
+    const struct xnn_quantization_params* b_quantization,
+    const struct xnn_quantization_params* output_quantization) {
+  uparams->scalar.min = -INFINITY;
+  uparams->scalar.max = +INFINITY;
+  return sizeof(uparams->scalar);
+}
+
 size_t xnn_init_qu8_add_minmax_scalar_params(
-  struct xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint8_t a_zero_point,
-  uint8_t b_zero_point,
-  uint8_t output_zero_point,
-  float a_output_scale,
-  float b_output_scale,
-  uint8_t output_min,
-  uint8_t output_max)
-{
+    struct xnn_qu8_add_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
+    const struct xnn_quantization_params* a_quantization,
+    const struct xnn_quantization_params* b_quantization,
+    const struct xnn_quantization_params* output_quantization) {
+  assert(a_quantization);
+  assert(b_quantization);
+  assert(output_quantization);
+  const float a_output_scale = a_quantization->scale / output_quantization->scale;
+  const float b_output_scale = b_quantization->scale / output_quantization->scale;
   const float abs_a_output_scale = fabsf(a_output_scale);
   const float abs_b_output_scale = fabsf(b_output_scale);
   assert(abs_a_output_scale >= 0x1.0p-10f);
@@ -1842,28 +1863,30 @@ size_t xnn_init_qu8_add_minmax_scalar_params(
   const int32_t b_multiplier = signbit(b_output_scale) ? -abs_b_multiplier : abs_b_multiplier;
 
   const int32_t rounding = INT32_C(1) << (shift - 1);
-  params->scalar.bias = rounding - a_multiplier * (int32_t) (uint32_t) a_zero_point - b_multiplier * (int32_t) (uint32_t) b_zero_point;
-  params->scalar.a_zero_point = a_zero_point;
-  params->scalar.b_zero_point = b_zero_point;
-  params->scalar.a_multiplier = a_multiplier;
-  params->scalar.b_multiplier = b_multiplier;
-  params->scalar.shift = shift;
-  params->scalar.output_min = (int32_t) (uint32_t) output_min;
-  params->scalar.output_max = (int32_t) (uint32_t) output_max;
-  params->scalar.output_zero_point = (int32_t) (uint32_t) output_zero_point;
-  return sizeof(params->scalar);
+  uparams->scalar.bias = rounding -
+                         a_multiplier * (int32_t)(uint32_t)a_quantization->zero_point -
+                         b_multiplier * (int32_t)(uint32_t)b_quantization->zero_point;
+  uparams->scalar.a_zero_point = a_quantization->zero_point;
+  uparams->scalar.b_zero_point = b_quantization->zero_point;
+  uparams->scalar.a_multiplier = a_multiplier;
+  uparams->scalar.b_multiplier = b_multiplier;
+  uparams->scalar.shift = shift;
+  uparams->scalar.output_min = 0;
+  uparams->scalar.output_max = UINT8_MAX;
+  uparams->scalar.output_zero_point = (int32_t)(uint32_t)output_quantization->zero_point;
+  return sizeof(uparams->scalar);
 }
 
 size_t xnn_init_qs8_add_minmax_scalar_params(
-  struct xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int8_t a_zero_point,
-  int8_t b_zero_point,
-  int8_t output_zero_point,
-  float a_output_scale,
-  float b_output_scale,
-  int8_t output_min,
-  int8_t output_max)
-{
+    struct xnn_qs8_add_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
+    const struct xnn_quantization_params* a_quantization,
+    const struct xnn_quantization_params* b_quantization,
+    const struct xnn_quantization_params* output_quantization) {
+  assert(a_quantization);
+  assert(b_quantization);
+  assert(output_quantization);
+  const float a_output_scale = a_quantization->scale / output_quantization->scale;
+  const float b_output_scale = b_quantization->scale / output_quantization->scale;
   const float abs_a_output_scale = fabsf(a_output_scale);
   const float abs_b_output_scale = fabsf(b_output_scale);
   assert(abs_a_output_scale >= 0x1.0p-10f);
@@ -1894,49 +1917,53 @@ size_t xnn_init_qs8_add_minmax_scalar_params(
   const int32_t b_multiplier = signbit(b_output_scale) ? -abs_b_multiplier : abs_b_multiplier;
 
   const int32_t rounding = INT32_C(1) << (shift - 1);
-  params->scalar.bias = rounding - a_multiplier * (int32_t) a_zero_point - b_multiplier * (int32_t) b_zero_point;
-  params->scalar.a_zero_point = a_zero_point;
-  params->scalar.b_zero_point = b_zero_point;
-  params->scalar.a_multiplier = a_multiplier;
-  params->scalar.b_multiplier = b_multiplier;
-  params->scalar.shift = shift;
-  params->scalar.output_zero_point = (int32_t) output_zero_point;
-  params->scalar.output_min = (int32_t) output_min;
-  params->scalar.output_max = (int32_t) output_max;
-  return sizeof(params->scalar);
+  uparams->scalar.bias = rounding - a_multiplier * (int32_t)a_quantization->zero_point -
+                         b_multiplier * (int32_t)b_quantization->zero_point;
+  uparams->scalar.a_zero_point = a_quantization->zero_point;
+  uparams->scalar.b_zero_point = b_quantization->zero_point;
+  uparams->scalar.a_multiplier = a_multiplier;
+  uparams->scalar.b_multiplier = b_multiplier;
+  uparams->scalar.shift = shift;
+  uparams->scalar.output_zero_point = (int32_t)output_quantization->zero_point;
+  uparams->scalar.output_min = INT8_MIN;
+  uparams->scalar.output_max = INT8_MAX;
+  return sizeof(uparams->scalar);
 }
 
 size_t xnn_init_qu8_mul_minmax_scalar_params(
-  union xnn_qu8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint8_t a_zero_point,
-  uint8_t b_zero_point,
-  uint8_t output_zero_point,
-  float product_output_scale,
-  uint8_t output_min,
-  uint8_t output_max)
-{
+    union xnn_qu8_mul_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
+    const struct xnn_quantization_params* a_quantization,
+    const struct xnn_quantization_params* b_quantization,
+    const struct xnn_quantization_params* output_quantization) {
+  assert(a_quantization);
+  assert(b_quantization);
+  assert(output_quantization);
+  const float product_scale = a_quantization->scale * b_quantization->scale;
+  const float product_output_scale = product_scale / output_quantization->scale;
   assert(product_output_scale >= 0x1.0p-16f);
   assert(product_output_scale < 0x1.0p+8f);
 
-  params->scalar.a_zero_point = a_zero_point;
-  params->scalar.b_zero_point = b_zero_point;
-  params->scalar.scale = product_output_scale;
-  params->scalar.output_zero_point = output_zero_point;
-  params->scalar.output_min = output_min;
-  params->scalar.output_max = output_max;
-  return sizeof(params->scalar);
+  uparams->scalar.a_zero_point = a_quantization->zero_point;
+  uparams->scalar.b_zero_point = b_quantization->zero_point;
+  uparams->scalar.scale = product_output_scale;
+  uparams->scalar.output_zero_point = output_quantization->zero_point;
+  uparams->scalar.output_min = 0;
+  uparams->scalar.output_max = UINT8_MAX;
+  return sizeof(uparams->scalar);
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_qu8_mul_minmax_rndnu_neon_params(
-  union xnn_qu8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint8_t a_zero_point,
-  uint8_t b_zero_point,
-  uint8_t output_zero_point,
-  float product_output_scale,
-  uint8_t output_min,
-  uint8_t output_max)
-{
+    union xnn_qu8_mul_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
+    const struct xnn_quantization_params* a_quantization,
+    const struct xnn_quantization_params* b_quantization,
+    const struct xnn_quantization_params* output_quantization) {
+  assert(a_quantization);
+  assert(b_quantization);
+  assert(output_quantization);
+
+  const float product_scale = a_quantization->scale * b_quantization->scale;
+  const float product_output_scale = product_scale / output_quantization->scale;
   assert(product_output_scale >= 0x1.0p-16f);
   assert(product_output_scale < 0x1.0p+8f);
 
@@ -1957,49 +1984,51 @@ size_t xnn_init_qu8_mul_minmax_rndnu_neon_params(
   const int32_t post_shift = math_max_s32(shift, 1);
   const int32_t pre_shift = shift - post_shift;
 
-  params->rndnu_neon.a_zero_point = a_zero_point;
-  params->rndnu_neon.b_zero_point = b_zero_point;
-  params->rndnu_neon.left_pre_shift = -pre_shift;
-  params->rndnu_neon.multiplier = multiplier;
-  params->rndnu_neon.left_post_shift = -post_shift;
-  params->rndnu_neon.output_zero_point = (int16_t) output_zero_point;
-  params->rndnu_neon.output_min = output_min;
-  params->rndnu_neon.output_max = output_max;
-  return sizeof(params->rndnu_neon);
+  uparams->rndnu_neon.a_zero_point = a_quantization->zero_point;
+  uparams->rndnu_neon.b_zero_point = b_quantization->zero_point;
+  uparams->rndnu_neon.left_pre_shift = -pre_shift;
+  uparams->rndnu_neon.multiplier = multiplier;
+  uparams->rndnu_neon.left_post_shift = -post_shift;
+  uparams->rndnu_neon.output_zero_point = (int16_t)output_quantization->zero_point;
+  uparams->rndnu_neon.output_min = 0;
+  uparams->rndnu_neon.output_max = UINT8_MAX;
+  return sizeof(uparams->rndnu_neon);
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 size_t xnn_init_qs8_mul_minmax_scalar_params(
-  union xnn_qs8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int8_t a_zero_point,
-  int8_t b_zero_point,
-  int8_t output_zero_point,
-  float product_output_scale,
-  int8_t output_min,
-  int8_t output_max)
-{
+    union xnn_qs8_mul_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
+    const struct xnn_quantization_params* a_quantization,
+    const struct xnn_quantization_params* b_quantization,
+    const struct xnn_quantization_params* output_quantization) {
+  assert(a_quantization);
+  assert(b_quantization);
+  assert(output_quantization);
+  const float product_scale = a_quantization->scale * b_quantization->scale;
+  const float product_output_scale = product_scale / output_quantization->scale;
   assert(product_output_scale >= 0x1.0p-16f);
   assert(product_output_scale < 0x1.0p+8f);
 
-  params->scalar.a_zero_point = a_zero_point;
-  params->scalar.b_zero_point = b_zero_point;
-  params->scalar.scale = product_output_scale;
-  params->scalar.output_zero_point = output_zero_point;
-  params->scalar.output_min = output_min;
-  params->scalar.output_max = output_max;
-  return sizeof(params->scalar);
+  uparams->scalar.a_zero_point = a_quantization->zero_point;
+  uparams->scalar.b_zero_point = b_quantization->zero_point;
+  uparams->scalar.scale = product_output_scale;
+  uparams->scalar.output_zero_point = output_quantization->zero_point;
+  uparams->scalar.output_min = INT8_MIN;
+  uparams->scalar.output_max = INT8_MAX;
+  return sizeof(uparams->scalar);
 }
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
 size_t xnn_init_qs8_mul_minmax_rndnu_neon_params(
-  union xnn_qs8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int8_t a_zero_point,
-  int8_t b_zero_point,
-  int8_t output_zero_point,
-  float product_output_scale,
-  int8_t output_min,
-  int8_t output_max)
-{
+    union xnn_qs8_mul_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
+    const struct xnn_quantization_params* a_quantization,
+    const struct xnn_quantization_params* b_quantization,
+    const struct xnn_quantization_params* output_quantization) {
+  assert(a_quantization);
+  assert(b_quantization);
+  assert(output_quantization);
+  const float product_scale = a_quantization->scale * b_quantization->scale;
+  const float product_output_scale = product_scale / output_quantization->scale;
   assert(product_output_scale >= 0x1.0p-16f);
   assert(product_output_scale < 0x1.0p+8f);
 
@@ -2020,15 +2049,15 @@ size_t xnn_init_qs8_mul_minmax_rndnu_neon_params(
   const int32_t post_shift = math_max_s32(shift, 1);
   const int32_t pre_shift = shift - post_shift;
 
-  params->rndnu_neon.a_zero_point = a_zero_point;
-  params->rndnu_neon.b_zero_point = b_zero_point;
-  params->rndnu_neon.left_pre_shift = -pre_shift;
-  params->rndnu_neon.multiplier = multiplier;
-  params->rndnu_neon.left_post_shift = -post_shift;
-  params->rndnu_neon.output_zero_point = (int16_t) output_zero_point;
-  params->rndnu_neon.output_min = output_min;
-  params->rndnu_neon.output_max = output_max;
-  return sizeof(params->rndnu_neon);
+  uparams->rndnu_neon.a_zero_point = a_quantization->zero_point;
+  uparams->rndnu_neon.b_zero_point = b_quantization->zero_point;
+  uparams->rndnu_neon.left_pre_shift = -pre_shift;
+  uparams->rndnu_neon.multiplier = multiplier;
+  uparams->rndnu_neon.left_post_shift = -post_shift;
+  uparams->rndnu_neon.output_zero_point = (int16_t)output_quantization->zero_point;
+  uparams->rndnu_neon.output_min = INT8_MIN;
+  uparams->rndnu_neon.output_max = INT8_MAX;
+  return sizeof(uparams->rndnu_neon);
 }
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 

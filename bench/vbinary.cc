@@ -80,28 +80,30 @@ struct ParamsWrapper {
   Params params;
 };
 
+xnn_quantization_params quantization = {0, 1.0f};
+
 template <>
 struct ParamsWrapper<xnn_qs8_add_minmax_params> {
   xnn_qs8_add_minmax_params params = make_params<xnn_qs8_add_minmax_params>(
-      xnn_init_qs8_add_minmax_scalar_params, 0, 0, 0, 1.0f, 1.0f, -128, 127);
+      xnn_init_qs8_add_minmax_scalar_params, &quantization, &quantization, &quantization);
 };
 
 template <>
 struct ParamsWrapper<xnn_qu8_add_minmax_params> {
   xnn_qu8_add_minmax_params params = make_params<xnn_qu8_add_minmax_params>(
-      xnn_init_qu8_add_minmax_scalar_params, 0, 0, 0, 1.0f, 1.0f, 0, 255);
+      xnn_init_qu8_add_minmax_scalar_params, &quantization, &quantization, &quantization);
 };
 
 template <>
 struct ParamsWrapper<xnn_qs8_mul_minmax_params> {
   xnn_qs8_mul_minmax_params params = make_params<xnn_qs8_mul_minmax_params>(
-      xnn_init_qs8_mul_minmax_scalar_params, 0, 0, 0, 1.0f, -128, 127);
+      xnn_init_qs8_mul_minmax_scalar_params, &quantization, &quantization, &quantization);
 };
 
 template <>
 struct ParamsWrapper<xnn_qu8_mul_minmax_params> {
   xnn_qu8_mul_minmax_params params = make_params<xnn_qu8_mul_minmax_params>(
-      xnn_init_qu8_mul_minmax_scalar_params, 0, 0, 0, 1.0f, 0, 255);
+      xnn_init_qu8_mul_minmax_scalar_params, &quantization, &quantization, &quantization);
 };
 
 // Microkernel function, templated on the `params` type.

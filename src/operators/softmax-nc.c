@@ -296,7 +296,7 @@ enum xnn_status xnn_create_softmax_nc_f16(
   if (vmul_config == NULL) {
     xnn_log_error(
       "failed to create %s operator: unsupported hardware configuration",
-      xnn_operator_type_to_string(xnn_operator_type_multiply_nd_f16));
+      xnn_operator_type_to_string(xnn_operator_type_softmax_nc_f16));
     return xnn_status_unsupported_hardware;
   }
 
@@ -334,7 +334,7 @@ enum xnn_status xnn_create_softmax_nc_f32(
   if (vmul_config == NULL) {
     xnn_log_error(
       "failed to create %s operator: unsupported hardware configuration",
-      xnn_operator_type_to_string(xnn_operator_type_multiply_nd_f32));
+      xnn_operator_type_to_string(xnn_operator_type_softmax_nc_f32));
     return xnn_status_unsupported_hardware;
   }
 
@@ -528,10 +528,9 @@ enum xnn_status xnn_reshape_softmax_nc_f16(
   }
   const struct xnn_binary_elementwise_config* f16_vmul_config = softmax_op->vmul_config;
 
-  union xnn_f16_minmax_params minmax_params;
-  if (f16_vmul_config->init.f16_minmax != NULL) {
-    f16_vmul_config->init.f16_minmax(&minmax_params, xnn_float16_from_float(-INFINITY), 
-                                     xnn_float16_from_float(INFINITY));
+  union xnn_binary_uparams mul_params;
+  if (f16_vmul_config->init != NULL) {
+    f16_vmul_config->init(&mul_params, NULL, NULL, NULL);
   }
   return reshape_softmax_nc_floating_point(
     softmax_op, xnn_operator_type_softmax_nc_f16,
@@ -542,7 +541,7 @@ enum xnn_status xnn_reshape_softmax_nc_f16(
     (xnn_compute_reciprocal_fn) compute_reciprocal_f16,
     &rmax_params, sizeof(rmax_params),
     &expminus_params, sizeof(expminus_params),
-    &minmax_params, sizeof(minmax_params));
+    &mul_params, sizeof(mul_params));
 }
 
 enum xnn_status xnn_reshape_softmax_nc_f32(
@@ -564,9 +563,9 @@ enum xnn_status xnn_reshape_softmax_nc_f32(
   if (softmax_op->raddstoreexpminusmax_config->init.f32 != NULL) {
     softmax_op->raddstoreexpminusmax_config->init.f32(&expminus_params);
   }
-  union xnn_f32_minmax_params minmax_params;
-  if (f32_vmul_config->init.f32_minmax != NULL) {
-    f32_vmul_config->init.f32_minmax(&minmax_params, -INFINITY, INFINITY);
+  union xnn_binary_uparams mul_params;
+  if (f32_vmul_config->init != NULL) {
+    f32_vmul_config->init(&mul_params, NULL, NULL, NULL);
   }
   return reshape_softmax_nc_floating_point(
     softmax_op, xnn_operator_type_softmax_nc_f32,
@@ -577,5 +576,5 @@ enum xnn_status xnn_reshape_softmax_nc_f32(
     (xnn_compute_reciprocal_fn) compute_reciprocal_f32,
     &rmax_params, sizeof(rmax_params),
     &expminus_params, sizeof(expminus_params),
-    &minmax_params, sizeof(minmax_params));
+    &mul_params, sizeof(mul_params));
 }
