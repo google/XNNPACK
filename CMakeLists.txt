@@ -401,22 +401,21 @@ SET(SUBGRAPH_SRCS
   src/runtime.c
   src/subgraph.c
   src/subgraph/abs.c
-  src/subgraph/add2.c
   src/subgraph/argmax-pooling-2d.c
   src/subgraph/average-pooling-2d.c
   src/subgraph/bankers-rounding.c
   src/subgraph/batch-matrix-multiply.c
+  src/subgraph/binary.c
   src/subgraph/ceiling.c
   src/subgraph/clamp.c
   src/subgraph/concatenate.c
   src/subgraph/convert.c
   src/subgraph/convolution-2d.c
   src/subgraph/copy.c
-  src/subgraph/copysign.c
   src/subgraph/deconvolution-2d.c
+  src/subgraph/deprecated.c
   src/subgraph/depth-to-space-2d.c
   src/subgraph/depthwise-convolution-2d.c
-  src/subgraph/divide.c
   src/subgraph/elu.c
   src/subgraph/even-split.c
   src/subgraph/exp.c
@@ -430,9 +429,6 @@ SET(SUBGRAPH_SRCS
   src/subgraph/leaky-relu.c
   src/subgraph/log.c
   src/subgraph/max-pooling-2d.c
-  src/subgraph/maximum2.c
-  src/subgraph/minimum2.c
-  src/subgraph/multiply2.c
   src/subgraph/negate.c
   src/subgraph/prelu.c
   src/subgraph/reciprocal-square-root.c
@@ -443,13 +439,11 @@ SET(SUBGRAPH_SRCS
   src/subgraph/space-to-depth-2d.c
   src/subgraph/square-root.c
   src/subgraph/square.c
-  src/subgraph/squared-difference.c
   src/subgraph/static-constant-pad.c
   src/subgraph/static-mean.c
   src/subgraph/static-resize-bilinear-2d.c
   src/subgraph/static-slice.c
   src/subgraph/static-transpose.c
-  src/subgraph/subtract.c
   src/subgraph/tanh.c
   src/subgraph/unpooling-2d.c
   src/subgraph/validation.c
@@ -981,7 +975,7 @@ ENDIF()
 TARGET_INCLUDE_DIRECTORIES(microkernels-prod PRIVATE . include src)
 TARGET_INCLUDE_DIRECTORIES(hardware-config PRIVATE include src ${CPUINFO_SOURCE_DIR}/include)
 TARGET_INCLUDE_DIRECTORIES(indirection PRIVATE include src)
-TARGET_INCLUDE_DIRECTORIES(microparams-init PRIVATE src)
+TARGET_INCLUDE_DIRECTORIES(microparams-init PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(normalization PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(packing PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(logging PRIVATE include src)
@@ -1204,10 +1198,6 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(unary-operator-tester PRIVATE . include src test)
   TARGET_LINK_LIBRARIES(unary-operator-tester PRIVATE XNNPACK fp16 pthreadpool GTest::gtest)
 
-  ADD_LIBRARY(binary-elementwise-operator-tester STATIC test/binary-elementwise-operator-tester.cc)
-  TARGET_INCLUDE_DIRECTORIES(binary-elementwise-operator-tester PRIVATE . include src test)
-  TARGET_LINK_LIBRARIES(binary-elementwise-operator-tester PRIVATE XNNPACK fp16 pthreadpool GTest::gtest)
-
   ADD_LIBRARY(dwconv-microkernel-tester STATIC test/dwconv-microkernel-tester.cc)
   TARGET_INCLUDE_DIRECTORIES(dwconv-microkernel-tester PRIVATE . include src test)
   TARGET_LINK_LIBRARIES(dwconv-microkernel-tester PRIVATE XNNPACK fp16 pthreadpool GTest::gtest)
@@ -1326,15 +1316,14 @@ IF(XNNPACK_BUILD_TESTS)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     ENDFOREACH()
 
-    ADD_EXECUTABLE(binary-nd-test test/binary-nd.cc)
-    TARGET_INCLUDE_DIRECTORIES(binary-nd-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(binary-nd-test PRIVATE
-      binary-elementwise-operator-tester
+    ADD_EXECUTABLE(binary-elementwise-nd-test test/binary-elementwise-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(binary-elementwise-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(binary-elementwise-nd-test PRIVATE
       fp16
       GTest::gtest
       GTest::gtest_main
       XNNPACK)
-    ADD_SHARDED_TEST(binary-nd-test 10)
+    ADD_SHARDED_TEST(binary-elementwise-nd-test 10)
 
     # ---[ Build subgraph optimizations unit tests
     SET(LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS
@@ -1361,12 +1350,11 @@ IF(XNNPACK_BUILD_TESTS)
     SET(LIBRARY_SUBGRAPH_UNIT_TESTS
         abs
         abs-reshape
-        add2
-        add2-reshape
         argmax-pooling-2d
         average-pooling-2d
         average-pooling-2d-reshape
         bankers-rounding
+        binary
         ceiling
         clamp
         concatenate2
@@ -1375,9 +1363,7 @@ IF(XNNPACK_BUILD_TESTS)
         concatenate5
         convert
         copy
-        copysign
         depth-to-space-2d
-        divide2
         elu
         gelu
         exp
@@ -1393,9 +1379,6 @@ IF(XNNPACK_BUILD_TESTS)
         leaky-relu
         log
         max-pooling-2d
-        maximum2
-        minimum2
-        multiply2
         negate
         prelu
         reciprocal-square-root
@@ -1406,13 +1389,11 @@ IF(XNNPACK_BUILD_TESTS)
         space-to-depth-2d
         square
         square-root
-        squared-difference
         static-constant-pad
         static-mean
         static-reshape
         static-resize-bilinear-2d
         static-transpose
-        subtract2
         tanh
         transpose-reshape
         unpooling-2d)
@@ -1664,57 +1645,47 @@ IF(XNNPACK_BUILD_TESTS)
   ENDFOREACH()
 
   SET(MICROKERNEL_VBINARY_UNIT_TESTS
-      f16-vadd-minmax
-      f16-vaddc-minmax
-      f16-vdiv-minmax
-      f16-vdivc-minmax
+      f16-vadd
+      f16-vaddc
+      f16-vdiv
+      f16-vdivc
       f16-vmax
       f16-vmaxc
       f16-vmin
       f16-vminc
-      f16-vmul-minmax
-      f16-vmulc-minmax
+      f16-vmul
+      f16-vmulc
       f16-vprelu
       f16-vpreluc
       f16-vrpreluc
-      f16-vrdivc-minmax
-      f16-vrsubc-minmax
+      f16-vrdivc
+      f16-vrsubc
       f16-vsqrdiff
       f16-vsqrdiffc
-      f16-vsub-minmax
-      f16-vsubc-minmax
+      f16-vsub
+      f16-vsubc
       f32-vadd
-      f32-vadd-minmax
       f32-vaddc
-      f32-vaddc-minmax
       f32-vcopysign
       f32-vcopysignc
       f32-vdiv
-      f32-vdiv-minmax
       f32-vdivc
-      f32-vdivc-minmax
       f32-vmax
       f32-vmaxc
       f32-vmin
       f32-vminc
       f32-vmul
-      f32-vmul-minmax
       f32-vmulc
-      f32-vmulc-minmax
       f32-vprelu
       f32-vpreluc
       f32-vrpreluc
       f32-vrcopysignc
       f32-vrdivc
-      f32-vrdivc-minmax
       f32-vrsubc
-      f32-vrsubc-minmax
       f32-vsqrdiff
       f32-vsqrdiffc
       f32-vsub
-      f32-vsub-minmax
       f32-vsubc
-      f32-vsubc-minmax
       qs8-vadd-minmax
       qs8-vaddc-minmax
       qs8-vmul-minmax-fp32

@@ -1400,3 +1400,51 @@ enum xnn_status xnn_delete_subgraph(
   }
   return xnn_status_success;
 }
+
+enum xnn_node_type xnn_binary_operator_to_node_type(enum xnn_binary_operator op)
+{
+  switch (op) {
+    case xnn_binary_add:
+      return xnn_node_type_add2;
+    case xnn_binary_divide:
+      return xnn_node_type_divide;
+    case xnn_binary_multiply:
+      return xnn_node_type_multiply2;
+    case xnn_binary_subtract:
+      return xnn_node_type_subtract;
+    case xnn_binary_copysign:
+      return xnn_node_type_copysign;
+    case xnn_binary_squared_difference:
+      return xnn_node_type_squared_difference;
+    case xnn_binary_minimum:
+      return xnn_node_type_minimum2;
+    case xnn_binary_maximum:
+      return xnn_node_type_maximum2;
+    default:
+      return xnn_node_type_invalid;
+  }
+}
+
+enum xnn_binary_operator xnn_node_type_to_binary_operator(enum xnn_node_type op)
+{
+  switch (op) {
+    case xnn_node_type_add2:
+      return xnn_binary_add;
+    case xnn_node_type_divide:
+      return xnn_binary_divide;
+    case xnn_node_type_multiply2:
+      return xnn_binary_multiply;
+    case xnn_node_type_subtract:
+      return xnn_binary_subtract;
+    case xnn_node_type_copysign:
+      return xnn_binary_copysign;
+    case xnn_node_type_squared_difference:
+      return xnn_binary_squared_difference;
+    case xnn_node_type_minimum2:
+      return xnn_binary_minimum;
+    case xnn_node_type_maximum2:
+      return xnn_binary_maximum;
+    default:
+      return xnn_binary_invalid;
+  }
+}

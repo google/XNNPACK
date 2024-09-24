@@ -27,7 +27,6 @@ void xnn_f32_vdiv_ukernel__scalar_u4(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float va0 = input_a[0];
     const float va1 = input_a[1];
@@ -45,7 +44,6 @@ void xnn_f32_vdiv_ukernel__scalar_u4(
     float vacc1 = va1 / vb1;
     float vacc2 = va2 / vb2;
     float vacc3 = va3 / vb3;
-
 
 
     output[0] = vacc0;

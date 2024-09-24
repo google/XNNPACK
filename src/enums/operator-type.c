@@ -13,25 +13,23 @@
 #include "xnnpack/operator-type.h"
 
 static const uint16_t offset[172] = {
+
   0, 8, 22, 36, 50, 64, 78, 92, 119, 147, 175, 203, 230, 257, 289, 321, 364, 382, 400, 425, 451, 467, 483, 498, 513,
   535, 558, 581, 604, 627, 650, 673, 696, 719, 742, 760, 783, 806, 830, 848, 871, 895, 919, 943, 967, 1002, 1037, 1061,
   1085, 1109, 1123, 1138, 1153, 1173, 1199, 1225, 1262, 1288, 1318, 1344, 1376, 1408, 1434, 1461, 1488, 1505, 1522,
   1556, 1590, 1604, 1618, 1632, 1646, 1662, 1678, 1704, 1730, 1762, 1794, 1831, 1868, 1905, 1942, 1979, 2016, 2053,
-  2090, 2116, 2148, 2174, 2189, 2223, 2257, 2291, 2325, 2359, 2393, 2423, 2453, 2473, 2493, 2514, 2535, 2556, 2577,
-  2591, 2615, 2639, 2662, 2685, 2703, 2721, 2736, 2751, 2766, 2781, 2799, 2817, 2836, 2855, 2874, 2893, 2912, 2929,
-  2946, 2962, 2978, 3011, 3044, 3072, 3100, 3128, 3156, 3183, 3210, 3227, 3244, 3285, 3326, 3344, 3362, 3380, 3398,
-  3413, 3429, 3445, 3463, 3481, 3499, 3525, 3552, 3579, 3596, 3613, 3635, 3657, 3686, 3715, 3734, 3753, 3772, 3791,
-  3806, 3821, 3836, 3851, 3870, 3890, 3910, 3930, 3951, 3972
+  2079, 2111, 2137, 2152, 2186, 2220, 2254, 2288, 2322, 2356, 2386, 2416, 2436, 2456, 2477, 2498, 2519, 2540, 2554,
+  2578, 2602, 2625, 2648, 2666, 2684, 2699, 2714, 2729, 2747, 2765, 2784, 2803, 2822, 2841, 2860, 2877, 2894, 2910,
+  2926, 2959, 2992, 3020, 3048, 3076, 3104, 3131, 3158, 3175, 3192, 3233, 3274, 3292, 3310, 3328, 3346, 3361, 3377,
+  3393, 3411, 3429, 3447, 3473, 3500, 3527, 3544, 3561, 3583, 3605, 3634, 3663, 3682, 3701, 3720, 3739, 3754, 3769,
+  3784, 3799, 3818, 3838, 3858, 3878, 3899, 3920
 };
 
 static const char data[] =
   "Invalid\0"
   "Abs (NC, F16)\0"
   "Abs (NC, F32)\0"
-  "Add (ND, F16)\0"
-  "Add (ND, F32)\0"
-  "Add (ND, QS8)\0"
-  "Add (ND, QU8)\0"
+  "Add (ND)\0"
   "ArgMax Pooling (NHWC, F32)\0"
   "Average Pooling (NHWC, F16)\0"
   "Average Pooling (NHWC, F32)\0"
@@ -77,7 +75,7 @@ static const char data[] =
   "Copy (NC, X8)\0"
   "Copy (NC, X16)\0"
   "Copy (NC, X32)\0"
-  "Copy Sign (NC, F32)\0"
+  "Copy Sign (NC)\0"
   "Deconvolution (NHWC, F16)\0"
   "Deconvolution (NHWC, F32)\0"
   "Deconvolution (NHWC, QD8, F32, QC8W)\0"
@@ -89,8 +87,7 @@ static const char data[] =
   "Depth To Space (NHWC, X8)\0"
   "Depth To Space (NHWC, X16)\0"
   "Depth To Space (NHWC, X32)\0"
-  "Divide (ND, F16)\0"
-  "Divide (ND, F32)\0"
+  "Divide (ND)\0"
   "Dynamic Fully Connected (NC, F16)\0"
   "Dynamic Fully Connected (NC, F32)\0"
   "ELU (NC, F16)\0"
@@ -134,19 +131,13 @@ static const char data[] =
   "Max Pooling (NHWC, F32)\0"
   "Max Pooling (NHWC, S8)\0"
   "Max Pooling (NHWC, U8)\0"
-  "Maximum (ND, F16)\0"
-  "Maximum (ND, F32)\0"
+  "Maximum (ND)\0"
   "Mean (ND, F16)\0"
   "Mean (ND, F32)\0"
   "Mean (ND, QS8)\0"
   "Mean (ND, QU8)\0"
-  "Minimum (ND, F16)\0"
-  "Minimum (ND, F32)\0"
-  "Multiply (ND, F16)\0"
-  "Multiply (ND, F32)\0"
-  "Multiply (ND, QS8)\0"
-  "Multiply (ND, QU8)\0"
-  "Multiply (ND, S32)\0"
+  "Minimum (ND)\0"
+  "Multiply (ND)\0"
   "Negate (NC, F16)\0"
   "Negate (NC, F32)\0"
   "PReLU (NC, F16)\0"
@@ -180,12 +171,8 @@ static const char data[] =
   "Square (NC, F32)\0"
   "Square Root (NC, F16)\0"
   "Square Root (NC, F32)\0"
-  "Squared Difference (NC, F16)\0"
-  "Squared Difference (NC, F32)\0"
-  "Subtract (ND, F16)\0"
-  "Subtract (ND, F32)\0"
-  "Subtract (ND, QS8)\0"
-  "Subtract (ND, QU8)\0"
+  "Squared Difference (NC)\0"
+  "Subtract (ND)\0"
   "Tanh (NC, F16)\0"
   "Tanh (NC, F32)\0"
   "Tanh (NC, QS8)\0"

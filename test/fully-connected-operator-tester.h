@@ -366,7 +366,7 @@ class FullyConnectedOperatorTester {
         xnn_setup_fully_connected_nc_qd8_f16_qc4w(
           fully_connected_op,
           input.data(), output.data(),
-          reinterpret_cast<const struct xnn_dynamic_quantization_params*>(quantization_params.data())));
+          reinterpret_cast<const struct xnn_quantization_params*>(quantization_params.data())));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
@@ -406,7 +406,7 @@ class FullyConnectedOperatorTester {
           xnn_setup_fully_connected_nc_qd8_f16_qc4w(
             fully_connected_op2,
             input.data(), output2.data(),
-            reinterpret_cast<const struct xnn_dynamic_quantization_params*>(quantization_params.data())));
+            reinterpret_cast<const struct xnn_quantization_params*>(quantization_params.data())));
 
 
         ASSERT_EQ(
@@ -555,7 +555,7 @@ class FullyConnectedOperatorTester {
         xnn_setup_fully_connected_nc_qd8_f16_qb4w(
           fully_connected_op,
           input.data(), output.data(),
-          reinterpret_cast<const struct xnn_dynamic_quantization_params*>(quantization_params.data())));
+          reinterpret_cast<const struct xnn_quantization_params*>(quantization_params.data())));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
@@ -596,7 +596,7 @@ class FullyConnectedOperatorTester {
           xnn_setup_fully_connected_nc_qd8_f16_qb4w(
             fully_connected_op2,
             input.data(), output2.data(),
-            reinterpret_cast<const struct xnn_dynamic_quantization_params*>(quantization_params.data())));
+            reinterpret_cast<const struct xnn_quantization_params*>(quantization_params.data())));
 
 
         ASSERT_EQ(
@@ -751,7 +751,7 @@ class FullyConnectedOperatorTester {
         xnn_setup_fully_connected_nc_qd8_f32_qc4w(
           fully_connected_op,
           input.data(), output.data(),
-          reinterpret_cast<const struct xnn_dynamic_quantization_params*>(quantization_params.data())));
+          reinterpret_cast<const struct xnn_quantization_params*>(quantization_params.data())));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
@@ -791,7 +791,7 @@ class FullyConnectedOperatorTester {
           xnn_setup_fully_connected_nc_qd8_f32_qc4w(
             fully_connected_op2,
             input.data(), output2.data(),
-            reinterpret_cast<const struct xnn_dynamic_quantization_params*>(quantization_params.data())));
+            reinterpret_cast<const struct xnn_quantization_params*>(quantization_params.data())));
 
 
         ASSERT_EQ(
@@ -937,7 +937,7 @@ class FullyConnectedOperatorTester {
         xnn_setup_fully_connected_nc_qd8_f32_qb4w(
           fully_connected_op,
           input.data(), output.data(),
-          reinterpret_cast<const struct xnn_dynamic_quantization_params*>(quantization_params.data())));
+          reinterpret_cast<const struct xnn_quantization_params*>(quantization_params.data())));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
@@ -978,7 +978,7 @@ class FullyConnectedOperatorTester {
           xnn_setup_fully_connected_nc_qd8_f32_qb4w(
             fully_connected_op2,
             input.data(), output2.data(),
-            reinterpret_cast<const struct xnn_dynamic_quantization_params*>(quantization_params.data())));
+            reinterpret_cast<const struct xnn_quantization_params*>(quantization_params.data())));
 
 
         ASSERT_EQ(
@@ -1560,7 +1560,7 @@ class FullyConnectedOperatorTester {
         xnn_setup_fully_connected_nc_qd8_f16_qc8w(
           fully_connected_op,
           input.data(), output.data(),
-          reinterpret_cast<const struct xnn_dynamic_quantization_params*>(quantization_params.data())));
+          reinterpret_cast<const struct xnn_quantization_params*>(quantization_params.data())));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
@@ -1599,7 +1599,7 @@ class FullyConnectedOperatorTester {
           xnn_setup_fully_connected_nc_qd8_f16_qc8w(
             fully_connected_op2,
             input.data(), output2.data(),
-            reinterpret_cast<const struct xnn_dynamic_quantization_params*>(quantization_params.data())));
+            reinterpret_cast<const struct xnn_quantization_params*>(quantization_params.data())));
 
 
         ASSERT_EQ(
@@ -1736,7 +1736,7 @@ class FullyConnectedOperatorTester {
         xnn_setup_fully_connected_nc_qd8_f32_qc8w(
           fully_connected_op,
           input.data(), output.data(),
-          reinterpret_cast<const struct xnn_dynamic_quantization_params*>(quantization_params.data())));
+          reinterpret_cast<const struct xnn_quantization_params*>(quantization_params.data())));
 
       ASSERT_EQ(xnn_status_success,
         xnn_run_operator(fully_connected_op, /*threadpool=*/nullptr));
@@ -1775,7 +1775,7 @@ class FullyConnectedOperatorTester {
           xnn_setup_fully_connected_nc_qd8_f32_qc8w(
             fully_connected_op2,
             input.data(), output2.data(),
-            reinterpret_cast<const struct xnn_dynamic_quantization_params*>(quantization_params.data())));
+            reinterpret_cast<const struct xnn_quantization_params*>(quantization_params.data())));
 
 
         ASSERT_EQ(

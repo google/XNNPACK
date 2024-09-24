@@ -34,7 +34,6 @@ void xnn_f16_vmaxc_ukernel__fp16arith_u2(
   const float16_t* b = (const float16_t*) input_b;
   float16_t* o = (float16_t*) output;
 
-
   const float16_t vb = *b;
   for (; batch >= 2 * sizeof(float16_t); batch -= 2 * sizeof(float16_t)) {
     float16_t vacc0 = a[0];
@@ -43,7 +42,6 @@ void xnn_f16_vmaxc_ukernel__fp16arith_u2(
 
     vacc0 = vmaxnmh_f16(vacc0, vb);
     vacc1 = vmaxnmh_f16(vacc1, vb);
-
 
 
     o[0] = vacc0;

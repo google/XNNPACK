@@ -48,7 +48,6 @@ void xnn_f16_vpreluc_ukernel__avx512fp16_u64(
     const __mmask32 vsign1 = _mm512_cmp_ph_mask(va1, vzero, _CMP_LT_OQ);
     __m512h vacc1 = _mm512_mask_mul_ph(va1, vsign1, va1, vb);
 
-
     _mm512_storeu_ph(o, vacc0);
     _mm512_storeu_ph(o + 32, vacc1);
     o += 64;
@@ -59,7 +58,6 @@ void xnn_f16_vpreluc_ukernel__avx512fp16_u64(
 
     const __mmask32 vsign = _mm512_cmp_ph_mask(va, vzero, _CMP_LT_OQ);
     __m512h vacc = _mm512_mask_mul_ph(va, vsign, va, vb);
-
 
     _mm512_storeu_ph(o, vacc);
     o += 32;

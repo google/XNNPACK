@@ -30,7 +30,6 @@ void xnn_f32_vprelu_ukernel__avx_u8(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m256 va = _mm256_loadu_ps(input_a);
     input_a += 8;
