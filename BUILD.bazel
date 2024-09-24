@@ -610,7 +610,10 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "node_type",
-    hdrs = ["src/xnnpack/node-type.h"],
+    hdrs = [
+        "src/xnnpack/node-type.h",
+        "src/xnnpack/node-type-defs.h",
+    ],
     deps = [
         ":common",
     ],
@@ -618,7 +621,10 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "allocation_type",
-    hdrs = ["src/xnnpack/allocation-type.h"],
+    hdrs = [
+        "src/xnnpack/allocation-type.h",
+        "src/xnnpack/allocation-type-defs.h",
+    ],
     deps = [
         ":common",
     ],
@@ -626,7 +632,10 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "operator_type",
-    hdrs = ["src/xnnpack/operator-type.h"],
+    hdrs = [
+        "src/xnnpack/operator-type.h",
+        "src/xnnpack/operator-type-defs.h",
+    ],
     deps = [
         ":common",
     ],
@@ -634,7 +643,10 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "microkernel_type",
-    hdrs = ["src/xnnpack/microkernel-type.h"],
+    hdrs = [
+        "src/xnnpack/microkernel-type.h",
+        "src/xnnpack/microkernel-type-defs.h",
+    ],
     deps = [
         ":common",
     ],
