@@ -1643,57 +1643,47 @@ IF(XNNPACK_BUILD_TESTS)
   ENDFOREACH()
 
   SET(MICROKERNEL_VBINARY_UNIT_TESTS
-      f16-vadd-minmax
-      f16-vaddc-minmax
-      f16-vdiv-minmax
-      f16-vdivc-minmax
+      f16-vadd
+      f16-vaddc
+      f16-vdiv
+      f16-vdivc
       f16-vmax
       f16-vmaxc
       f16-vmin
       f16-vminc
-      f16-vmul-minmax
-      f16-vmulc-minmax
+      f16-vmul
+      f16-vmulc
       f16-vprelu
       f16-vpreluc
       f16-vrpreluc
-      f16-vrdivc-minmax
-      f16-vrsubc-minmax
+      f16-vrdivc
+      f16-vrsubc
       f16-vsqrdiff
       f16-vsqrdiffc
-      f16-vsub-minmax
-      f16-vsubc-minmax
+      f16-vsub
+      f16-vsubc
       f32-vadd
-      f32-vadd-minmax
       f32-vaddc
-      f32-vaddc-minmax
       f32-vcopysign
       f32-vcopysignc
       f32-vdiv
-      f32-vdiv-minmax
       f32-vdivc
-      f32-vdivc-minmax
       f32-vmax
       f32-vmaxc
       f32-vmin
       f32-vminc
       f32-vmul
-      f32-vmul-minmax
       f32-vmulc
-      f32-vmulc-minmax
       f32-vprelu
       f32-vpreluc
       f32-vrpreluc
       f32-vrcopysignc
       f32-vrdivc
-      f32-vrdivc-minmax
       f32-vrsubc
-      f32-vrsubc-minmax
       f32-vsqrdiff
       f32-vsqrdiffc
       f32-vsub
-      f32-vsub-minmax
       f32-vsubc
-      f32-vsubc-minmax
       qs8-vadd-minmax
       qs8-vaddc-minmax
       qs8-vmul-minmax-fp32

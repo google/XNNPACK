@@ -46,7 +46,6 @@ void xnn_f32_vrpreluc_ukernel__wasm_u4(
     vacc2 = vb < 0.0f ? vacc2 : vb;
     vacc3 = vb < 0.0f ? vacc3 : vb;
 
-
     output[0] = vacc0;
     output[1] = vacc1;
     output[2] = vacc2;

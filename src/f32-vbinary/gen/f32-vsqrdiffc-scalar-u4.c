@@ -46,7 +46,6 @@ void xnn_f32_vsqrdiffc_ukernel__scalar_u4(
     vacc2 = vacc2 * vacc2;
     vacc3 = vacc3 * vacc3;
 
-
     output[0] = vacc0;
     output[1] = vacc1;
     output[2] = vacc2;

@@ -5134,8 +5134,6 @@ enum xnn_status xnn_run_minimum_nd_f32(
   pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_multiply_nd_f16(
-  float output_min,
-  float output_max,
   uint32_t flags,
   xnn_operator_t* multiply_op_out);
 
@@ -5154,8 +5152,6 @@ enum xnn_status xnn_setup_multiply_nd_f16(
   void* output);
 
 enum xnn_status xnn_create_multiply_nd_f32(
-  float output_min,
-  float output_max,
   uint32_t flags,
   xnn_operator_t* multiply_op_out);
 
@@ -5181,8 +5177,6 @@ enum xnn_status xnn_run_multiply_nd_f32(
   const float* input1,
   const float* input2,
   float* output,
-  float output_min,
-  float output_max,
   uint32_t flags,
   pthreadpool_t threadpool);
 
@@ -5193,8 +5187,6 @@ enum xnn_status xnn_create_multiply_nd_qs8(
   float input2_scale,
   int8_t output_zero_point,
   float output_scale,
-  int8_t output_min,
-  int8_t output_max,
   uint32_t flags,
   xnn_operator_t* multiply_op_out);
 
@@ -5226,8 +5218,6 @@ enum xnn_status xnn_run_multiply_nd_qs8(
   int8_t* output,
   int8_t output_zero_point,
   float output_scale,
-  int8_t output_min,
-  int8_t output_max,
   uint32_t flags,
   pthreadpool_t threadpool);
 
@@ -5238,8 +5228,6 @@ enum xnn_status xnn_create_multiply_nd_qu8(
   float input2_scale,
   uint8_t output_zero_point,
   float output_scale,
-  uint8_t output_min,
-  uint8_t output_max,
   uint32_t flags,
   xnn_operator_t* multiply_op_out);
 
@@ -5271,8 +5259,6 @@ enum xnn_status xnn_run_multiply_nd_qu8(
   uint8_t* output,
   uint8_t output_zero_point,
   float output_scale,
-  uint8_t output_min,
-  uint8_t output_max,
   uint32_t flags,
   pthreadpool_t threadpool);
 

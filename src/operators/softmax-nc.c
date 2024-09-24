@@ -424,10 +424,10 @@ static enum xnn_status reshape_softmax_nc_floating_point(
     .rmax_ukernel = rmax,
     .raddstoreexpminusmax_ukernel = raddstoreexpminusmax->ukernel,
     .compute_reciprocal = compute_reciprocal,
-    .vmulc_ukernel = vmul->minmax.opc_ukernel,
+    .vmulc_ukernel = vmul->opc_ukernel,
   };
-  if (vmul->linear.opc_ukernel != NULL) {
-    softmax_op->context.floating_point_softmax.vmulc_ukernel = vmul->linear.opc_ukernel;
+  if (vmul->opc_ukernel != NULL) {
+    softmax_op->context.floating_point_softmax.vmulc_ukernel = vmul->opc_ukernel;
   };
   memcpy(&softmax_op->context.floating_point_softmax.rmax_params, rmax_params, rmax_params_size);
   memcpy(&softmax_op->context.floating_point_softmax.expminus_params, expminus_params, expminus_params_size);
@@ -528,10 +528,7 @@ enum xnn_status xnn_reshape_softmax_nc_f16(
   }
   const struct xnn_binary_elementwise_config* f16_vmul_config = softmax_op->vmul_config;
 
-  union xnn_binary_uparams mul_params;
-  if (f16_vmul_config->init != NULL) {
-    f16_vmul_config->init(&mul_params, NULL, NULL, NULL);
-  }
+  struct xnn_f16_default_params mul_params;
   return reshape_softmax_nc_floating_point(
     softmax_op, xnn_operator_type_softmax_nc_f16,
     channels, input_stride, output_stride,
@@ -563,10 +560,7 @@ enum xnn_status xnn_reshape_softmax_nc_f32(
   if (softmax_op->raddstoreexpminusmax_config->init.f32 != NULL) {
     softmax_op->raddstoreexpminusmax_config->init.f32(&expminus_params);
   }
-  union xnn_binary_uparams mul_params;
-  if (f32_vmul_config->init != NULL) {
-    f32_vmul_config->init(&mul_params, NULL, NULL, NULL);
-  }
+  struct xnn_f32_default_params mul_params;
   return reshape_softmax_nc_floating_point(
     softmax_op, xnn_operator_type_softmax_nc_f32,
     channels, input_stride, output_stride,

@@ -146,26 +146,6 @@ static const struct xnn_binary_elementwise_config* init_config(
   }
 }
 
-static bool can_use_subconfig(
-    const struct xnn_binary_elementwise_subconfig* subconfig) {
-  return subconfig->op_ukernel != NULL;
-}
-
-static const struct xnn_binary_elementwise_subconfig* init_subconfig(
-    const struct xnn_binary_elementwise_config* config,
-    enum xnn_binary_operator type) {
-  // We can use either a minmax or a linear config.
-  if (can_use_subconfig(&config->minmax)) {
-    return &config->minmax;
-  }
-  if (can_use_subconfig(&config->linear)) {
-    return &config->linear;
-  }
-  xnn_log_error("failed to create %s operator",
-                xnn_binary_operator_to_string(type));
-  return NULL;
-}
-
 static enum xnn_status init_binary_elementwise_nd(
     xnn_operator_t op, enum xnn_binary_operator type,
     enum xnn_datatype datatype,
@@ -186,14 +166,6 @@ static enum xnn_status init_binary_elementwise_nd(
         "failed to create %s operator: unsupported hardware configuration",
         xnn_binary_operator_to_string(type));
     return xnn_status_unsupported_hardware;
-  }
-
-  const struct xnn_binary_elementwise_subconfig* subconfig =
-      init_subconfig(config, type);
-  if (subconfig == NULL || !can_use_subconfig(subconfig)) {
-    xnn_log_error("failed to create %s operator",
-                  xnn_binary_operator_to_string(type));
-    return xnn_status_unsupported_parameter;
   }
 
   union xnn_binary_uparams uparams;
@@ -254,7 +226,7 @@ static enum xnn_status init_binary_elementwise_nd(
   memcpy(&op->params, &uparams, sizeof(uparams));
   memcpy(&op->params2, &uparams2, sizeof(uparams2));
 
-  op->binary_elementwise_subconfig = subconfig;
+  op->binary_elementwise_config = config;
   op->log2_elementwise_element_size =
       xnn_datatype_get_log2_element_size(datatype);
 
@@ -418,17 +390,17 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
   if (compressed_input1_shape[0] == 1) {
     op->context.elementwise_binary.flip_a_b = true;
     op->context.elementwise_binary.ukernel =
-        op->binary_elementwise_subconfig->ropc_ukernel;
+        op->binary_elementwise_config->ropc_ukernel;
     compressed_a_shape = compressed_input2_shape;
     compressed_b_shape = compressed_input1_shape;
     memcpy(&op->context.elementwise_binary.params, &op->params2.binary,
            sizeof(op->params.binary));
   } else if (compressed_input2_shape[0] == 1) {
     op->context.elementwise_binary.ukernel =
-        op->binary_elementwise_subconfig->opc_ukernel;
+        op->binary_elementwise_config->opc_ukernel;
   } else if (compressed_input1_shape[0] == compressed_input2_shape[0]) {
     op->context.elementwise_binary.ukernel =
-        op->binary_elementwise_subconfig->op_ukernel;
+        op->binary_elementwise_config->op_ukernel;
   }
   size_t a_stride = compressed_a_shape[0];
   size_t b_stride = compressed_b_shape[0];
@@ -450,7 +422,7 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
   }
 
   const size_t num_threads = pthreadpool_get_threads_count(threadpool);
-  const size_t element_tile = op->binary_elementwise_subconfig->element_tile;
+  const size_t element_tile = op->binary_elementwise_config->element_tile;
   if (compressed_output_shape[5] == 1) {
     if (compressed_output_shape[4] == 1) {
       if (compressed_output_shape[3] == 1) {

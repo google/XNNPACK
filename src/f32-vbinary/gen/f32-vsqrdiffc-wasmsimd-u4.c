@@ -37,7 +37,6 @@ void xnn_f32_vsqrdiffc_ukernel__wasmsimd_u4(
     v128_t vy = wasm_f32x4_sub(va, vb);
     vy = wasm_f32x4_mul(vy, vy);
 
-
     wasm_v128_store(output, vy);
     output += 4;
   }
@@ -46,7 +45,6 @@ void xnn_f32_vsqrdiffc_ukernel__wasmsimd_u4(
 
     v128_t vy = wasm_f32x4_sub(va, vb);
     vy = wasm_f32x4_mul(vy, vy);
-
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vy, 0);

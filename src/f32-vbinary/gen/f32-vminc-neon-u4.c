@@ -35,14 +35,12 @@ void xnn_f32_vminc_ukernel__neon_u4(
 
     float32x4_t vacc = vminq_f32(va, vb);
 
-
     vst1q_f32(output, vacc); output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
     const float32x4_t va = vld1q_f32(input_a);
 
     float32x4_t vacc = vminq_f32(va, vb);
-
 
     float32x2_t vacc_lo = vget_low_f32(vacc);
     if (batch & (2 * sizeof(float))) {
