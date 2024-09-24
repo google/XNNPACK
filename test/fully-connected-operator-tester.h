@@ -1224,7 +1224,7 @@ class FullyConnectedOperatorTester {
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
     std::uniform_real_distribution<float> f32idist(0.1f, 1.0f);
     std::uniform_int_distribution<int32_t> w8dist(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max());
-    // Weights typically have a Gaussian distrubution centred on zero. A
+    // Weights typically have a Gaussian distribution centred on zero. A
     // standard deviation of 40 means that > 99.99% of values fall in the
     // -127->127 range. However, the reduce the chance of overflow, we constrain
     // the weights further.
@@ -1845,7 +1845,7 @@ class FullyConnectedOperatorTester {
           accumulated_max = std::max(accumulated_max, accumulators[i * output_channels() + oc]);
         }
 
-        float requantization_scale = 0x1.0p-32f;
+        float requantization_scale = 2.3283064e-10;  // 0x1.0p-32f
         if (accumulated_max != 0) {
           requantization_scale = std::max(requantization_scale,
             float(int32_t(std::numeric_limits<int8_t>::max()) - int32_t(output_zero_point() - 0x80)) / float(accumulated_max));
@@ -1854,7 +1854,8 @@ class FullyConnectedOperatorTester {
           requantization_scale = std::max(requantization_scale,
             float(int32_t(std::numeric_limits<int8_t>::min()) - int32_t(output_zero_point() - 0x80)) / float(accumulated_min));
         }
-        requantization_scale = std::min(requantization_scale, 0x1.FFFFFEp-1f);
+        requantization_scale =
+            std::min(requantization_scale, 0.99999988079f /*0x1.FFFFFEp-1f*/);
         requantization_scales[oc] = requantization_scale;
       }
 

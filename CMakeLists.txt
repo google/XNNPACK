@@ -1230,6 +1230,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   # ---[ Launch heavy tests first.
   SET(SHARDED_TESTS
+    fully-connected-nc
     avgpool-minmax
     maxpool-minmax
     f32-vclamp
