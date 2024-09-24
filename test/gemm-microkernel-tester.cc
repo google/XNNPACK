@@ -3,7 +3,6 @@
 #include <stdint.h>
 
 #include <algorithm>
-#include "kai/kai_common.h"
 #include <cassert>
 #include <cmath>
 #include <cstddef>
