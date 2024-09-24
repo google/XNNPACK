@@ -184,18 +184,6 @@ SET(NON_PROD_AVX_MICROKERNEL_SRCS
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx-u8.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx-u16.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx-u24.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx-rr2-p5-u4.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx-rr2-p5-u8-acc2.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx-rr2-p5-u8.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx-rr2-p5-u12-acc2.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx-rr2-p5-u12-acc3.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx-rr2-p5-u12.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx-rr2-p5-u16-acc2.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx-rr2-p5-u16-acc4.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx-rr2-p5-u16.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx-rr2-p5-u20-acc2.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx-rr2-p5-u20-acc5.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx-rr2-p5-u20.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx-c16.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx-c64.c
   src/f32-rminmax/gen/f32-rmax-avx-u8.c

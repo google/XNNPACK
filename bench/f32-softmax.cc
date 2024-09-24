@@ -432,7 +432,7 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
   BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, avx2_p5,
     xnn_f32_rmax_ukernel__avx_u32_acc4,
     (xnn_init_f32_default_params_fn) nullptr,
-    xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u64_acc2,
+    xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u32_acc2,
     nullptr,
     xnn_f32_vmulc_ukernel__avx_u16,
     benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
@@ -450,7 +450,7 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
   BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, avx512f_p5_scalef,
     xnn_f32_rmax_ukernel__avx512f_u64_acc4,
     (xnn_init_f32_default_params_fn) nullptr,
-    xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_u128_acc2,
+    xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_u64_acc2,
     nullptr,
     xnn_f32_vmulc_ukernel__avx512f_u32,
     benchmark::utils::CheckAVX512F)->Apply(CharacteristicArguments)->UseManualTime();

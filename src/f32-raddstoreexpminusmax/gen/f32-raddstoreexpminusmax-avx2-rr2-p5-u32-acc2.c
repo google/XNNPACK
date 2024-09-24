@@ -11,6 +11,7 @@
 
 #include <immintrin.h>
 
+#include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/raddstoreexpminusmax.h"
 
 
@@ -58,7 +59,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr2_p5_u32_acc2(
   __m256 vacc0 = _mm256_setzero_ps();
   __m256 vacc1 = _mm256_setzero_ps();
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
-    // Load 32 (4x4) inputs at a time.
+    // Load 32 (4x8) inputs at a time.
     const __m256 vi0 = _mm256_loadu_ps(input);
     const __m256 vi1 = _mm256_loadu_ps(input + 8);
     const __m256 vi2 = _mm256_loadu_ps(input + 16);
@@ -144,7 +145,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr2_p5_u32_acc2(
     vf2 = _mm256_andnot_ps(_mm256_cmp_ps(vx2, vdenorm_cutoff, _CMP_LT_OS), vf2);
     vf3 = _mm256_andnot_ps(_mm256_cmp_ps(vx3, vdenorm_cutoff, _CMP_LT_OS), vf3);
 
-    // Store 32 (4x4) outputs at a time.
+    // Store 32 (4x8) outputs at a time.
     _mm256_storeu_ps(output, vf0);
     _mm256_storeu_ps(output + 8, vf1);
     _mm256_storeu_ps(output + 16, vf2);

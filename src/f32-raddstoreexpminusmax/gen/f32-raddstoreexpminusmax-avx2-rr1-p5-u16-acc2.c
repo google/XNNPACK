@@ -11,10 +11,11 @@
 
 #include <immintrin.h>
 
+#include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/raddstoreexpminusmax.h"
 
 
-void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u32(
+void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u16_acc2(
     size_t batch,
     const float* input,
     const float* max,
@@ -54,84 +55,56 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u32(
   const __m256 vi_max = _mm256_broadcast_ss(max);
 
   __m256 vacc0 = _mm256_setzero_ps();
-  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+  __m256 vacc1 = _mm256_setzero_ps();
+  for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m256 vi0 = _mm256_loadu_ps(input);
     const __m256 vi1 = _mm256_loadu_ps(input + 8);
-    const __m256 vi2 = _mm256_loadu_ps(input + 16);
-    const __m256 vi3 = _mm256_loadu_ps(input + 24);
-    input += 32;
+    input += 16;
 
     const __m256 vx0 = _mm256_sub_ps(vi0, vi_max);
     const __m256 vx1 = _mm256_sub_ps(vi1, vi_max);
-    const __m256 vx2 = _mm256_sub_ps(vi2, vi_max);
-    const __m256 vx3 = _mm256_sub_ps(vi3, vi_max);
 
     __m256 vn0 = _mm256_fmadd_ps(vx0, vlog2e, vmagic_bias);
     __m256 vn1 = _mm256_fmadd_ps(vx1, vlog2e, vmagic_bias);
-    __m256 vn2 = _mm256_fmadd_ps(vx2, vlog2e, vmagic_bias);
-    __m256 vn3 = _mm256_fmadd_ps(vx3, vlog2e, vmagic_bias);
 
     const __m256 vs0 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn0), 23));
     const __m256 vs1 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn1), 23));
-    const __m256 vs2 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn2), 23));
-    const __m256 vs3 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn3), 23));
 
     vn0 = _mm256_sub_ps(vn0, vmagic_bias);
     vn1 = _mm256_sub_ps(vn1, vmagic_bias);
-    vn2 = _mm256_sub_ps(vn2, vmagic_bias);
-    vn3 = _mm256_sub_ps(vn3, vmagic_bias);
 
     __m256 vt0 = _mm256_fmadd_ps(vn0, vminus_ln2, vx0);
     __m256 vt1 = _mm256_fmadd_ps(vn1, vminus_ln2, vx1);
-    __m256 vt2 = _mm256_fmadd_ps(vn2, vminus_ln2, vx2);
-    __m256 vt3 = _mm256_fmadd_ps(vn3, vminus_ln2, vx3);
 
     __m256 vp0 = _mm256_fmadd_ps(vc5, vt0, vc4);
     __m256 vp1 = _mm256_fmadd_ps(vc5, vt1, vc4);
-    __m256 vp2 = _mm256_fmadd_ps(vc5, vt2, vc4);
-    __m256 vp3 = _mm256_fmadd_ps(vc5, vt3, vc4);
 
     vp0 = _mm256_fmadd_ps(vp0, vt0, vc3);
     vp1 = _mm256_fmadd_ps(vp1, vt1, vc3);
-    vp2 = _mm256_fmadd_ps(vp2, vt2, vc3);
-    vp3 = _mm256_fmadd_ps(vp3, vt3, vc3);
 
     vp0 = _mm256_fmadd_ps(vp0, vt0, vc2);
     vp1 = _mm256_fmadd_ps(vp1, vt1, vc2);
-    vp2 = _mm256_fmadd_ps(vp2, vt2, vc2);
-    vp3 = _mm256_fmadd_ps(vp3, vt3, vc2);
 
     vp0 = _mm256_fmadd_ps(vp0, vt0, vc1);
     vp1 = _mm256_fmadd_ps(vp1, vt1, vc1);
-    vp2 = _mm256_fmadd_ps(vp2, vt2, vc1);
-    vp3 = _mm256_fmadd_ps(vp3, vt3, vc1);
 
     vt0 = _mm256_mul_ps(vt0, vs0);
     vt1 = _mm256_mul_ps(vt1, vs1);
-    vt2 = _mm256_mul_ps(vt2, vs2);
-    vt3 = _mm256_mul_ps(vt3, vs3);
 
     __m256 vf0 = _mm256_fmadd_ps(vt0, vp0, vs0);
     __m256 vf1 = _mm256_fmadd_ps(vt1, vp1, vs1);
-    __m256 vf2 = _mm256_fmadd_ps(vt2, vp2, vs2);
-    __m256 vf3 = _mm256_fmadd_ps(vt3, vp3, vs3);
 
     vf0 = _mm256_andnot_ps(_mm256_cmp_ps(vx0, vdenorm_cutoff, _CMP_LT_OS), vf0);
     vf1 = _mm256_andnot_ps(_mm256_cmp_ps(vx1, vdenorm_cutoff, _CMP_LT_OS), vf1);
-    vf2 = _mm256_andnot_ps(_mm256_cmp_ps(vx2, vdenorm_cutoff, _CMP_LT_OS), vf2);
-    vf3 = _mm256_andnot_ps(_mm256_cmp_ps(vx3, vdenorm_cutoff, _CMP_LT_OS), vf3);
 
     _mm256_storeu_ps(output, vf0);
     _mm256_storeu_ps(output + 8, vf1);
-    _mm256_storeu_ps(output + 16, vf2);
-    _mm256_storeu_ps(output + 24, vf3);
-    output += 32;
+    output += 16;
 
     vacc0 = _mm256_add_ps(vacc0, vf0);
-    vacc0 = _mm256_add_ps(vacc0, vf1);
-    vacc0 = _mm256_add_ps(vacc0, vf2);
-    vacc0 = _mm256_add_ps(vacc0, vf3);
+    vacc1 = _mm256_add_ps(vacc1, vf1);
   }
+  vacc0 = _mm256_add_ps(vacc0, vacc1);
 
   __m256 vacc = vacc0;
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {

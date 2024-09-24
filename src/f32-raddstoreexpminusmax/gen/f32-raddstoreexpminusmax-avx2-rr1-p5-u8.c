@@ -1,11 +1,12 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-raddstoreexpminusmax/avx2-rr1-p5.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert BATCH_TILE % 8 == 0
-$assert BATCH_TILE >= 8
-$SIMD_TILE = BATCH_TILE // 8
 #include <assert.h>
 
 #include <immintrin.h>
@@ -14,7 +15,7 @@ $SIMD_TILE = BATCH_TILE // 8
 #include "xnnpack/raddstoreexpminusmax.h"
 
 
-void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u8(
     size_t batch,
     const float* input,
     const float* max,
@@ -53,65 +54,40 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u${BATCH_TILE}${"" if ACC
 
   const __m256 vi_max = _mm256_broadcast_ss(max);
 
-  $for K in range(ACCUMULATORS):
-    __m256 vacc${K} = _mm256_setzero_ps();
-  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
+  __m256 vacc0 = _mm256_setzero_ps();
+  for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m256 vi0 = _mm256_loadu_ps(input);
-    $for N in range(1, SIMD_TILE):
-      const __m256 vi${N} = _mm256_loadu_ps(input + ${N * 8});
-    input += ${BATCH_TILE};
+    input += 8;
 
-    $for N in range(SIMD_TILE):
-      const __m256 vx${N} = _mm256_sub_ps(vi${N}, vi_max);
+    const __m256 vx0 = _mm256_sub_ps(vi0, vi_max);
 
-    $for N in range(SIMD_TILE):
-      __m256 vn${N} = _mm256_fmadd_ps(vx${N}, vlog2e, vmagic_bias);
+    __m256 vn0 = _mm256_fmadd_ps(vx0, vlog2e, vmagic_bias);
 
-    $for N in range(SIMD_TILE):
-      const __m256 vs${N} = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn${N}), 23));
+    const __m256 vs0 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn0), 23));
 
-    $for N in range(SIMD_TILE):
-      vn${N} = _mm256_sub_ps(vn${N}, vmagic_bias);
+    vn0 = _mm256_sub_ps(vn0, vmagic_bias);
 
-    $for N in range(SIMD_TILE):
-      __m256 vt${N} = _mm256_fmadd_ps(vn${N}, vminus_ln2, vx${N});
+    __m256 vt0 = _mm256_fmadd_ps(vn0, vminus_ln2, vx0);
 
-    $for N in range(SIMD_TILE):
-      __m256 vp${N} = _mm256_fmadd_ps(vc5, vt${N}, vc4);
+    __m256 vp0 = _mm256_fmadd_ps(vc5, vt0, vc4);
 
-    $for N in range(SIMD_TILE):
-      vp${N} = _mm256_fmadd_ps(vp${N}, vt${N}, vc3);
+    vp0 = _mm256_fmadd_ps(vp0, vt0, vc3);
 
-    $for N in range(SIMD_TILE):
-      vp${N} = _mm256_fmadd_ps(vp${N}, vt${N}, vc2);
+    vp0 = _mm256_fmadd_ps(vp0, vt0, vc2);
 
-    $for N in range(SIMD_TILE):
-      vp${N} = _mm256_fmadd_ps(vp${N}, vt${N}, vc1);
+    vp0 = _mm256_fmadd_ps(vp0, vt0, vc1);
 
-    $for N in range(SIMD_TILE):
-      vt${N} = _mm256_mul_ps(vt${N}, vs${N});
+    vt0 = _mm256_mul_ps(vt0, vs0);
 
-    $for N in range(SIMD_TILE):
-      __m256 vf${N} = _mm256_fmadd_ps(vt${N}, vp${N}, vs${N});
+    __m256 vf0 = _mm256_fmadd_ps(vt0, vp0, vs0);
 
-    $for N in range(SIMD_TILE):
-      vf${N} = _mm256_andnot_ps(_mm256_cmp_ps(vx${N}, vdenorm_cutoff, _CMP_LT_OS), vf${N});
+    vf0 = _mm256_andnot_ps(_mm256_cmp_ps(vx0, vdenorm_cutoff, _CMP_LT_OS), vf0);
 
     _mm256_storeu_ps(output, vf0);
-    $for N in range(1, SIMD_TILE):
-      _mm256_storeu_ps(output + ${N * 8}, vf${N});
-    output += ${BATCH_TILE};
+    output += 8;
 
-    $for N in range(SIMD_TILE):
-      vacc${N % ACCUMULATORS} = _mm256_add_ps(vacc${N % ACCUMULATORS}, vf${N});
+    vacc0 = _mm256_add_ps(vacc0, vf0);
   }
-  $if ACCUMULATORS > 1:
-    $ACC_SLICE = 1
-    $while ACC_SLICE < ACCUMULATORS:
-      $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-        $if A + ACC_SLICE < ACCUMULATORS:
-          vacc${A} = _mm256_add_ps(vacc${A}, vacc${A + ACC_SLICE});
-      $ACC_SLICE *= 2
 
   __m256 vacc = vacc0;
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
