@@ -53,14 +53,19 @@ struct xnn_cmul_config {
   size_t element_tile;
 };
 
-struct xnn_binary_elementwise_config {
+struct xnn_binary_elementwise_subconfig {
   xnn_vbinary_ukernel_fn op_ukernel;
   xnn_vbinary_ukernel_fn opc_ukernel;
   xnn_vbinary_ukernel_fn ropc_ukernel;
-  xnn_init_binary_params_fn init;
   // Number of elements in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
   size_t element_tile;
+};
+
+struct xnn_binary_elementwise_config {
+  struct xnn_binary_elementwise_subconfig minmax;
+  struct xnn_binary_elementwise_subconfig linear;
+  xnn_init_binary_params_fn init;
 };
 
 struct xnn_unary_elementwise_config {

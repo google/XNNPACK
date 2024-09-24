@@ -36,6 +36,7 @@ void xnn_f32_vrsubc_ukernel__wasmsimd_u4(
 
     v128_t vy = wasm_f32x4_sub(vb, va);
 
+
     wasm_v128_store(output, vy);
     output += 4;
   }
@@ -43,6 +44,7 @@ void xnn_f32_vrsubc_ukernel__wasmsimd_u4(
     const v128_t va = wasm_v128_load(input_a);
 
     v128_t vy = wasm_f32x4_sub(vb, va);
+
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vy, 0);

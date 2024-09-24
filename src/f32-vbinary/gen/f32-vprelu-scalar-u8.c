@@ -27,6 +27,7 @@ void xnn_f32_vprelu_ukernel__scalar_u8(
   assert(input_b != NULL);
   assert(output != NULL);
 
+
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const float va0 = input_a[0];
     const float va1 = input_a[1];
@@ -65,6 +66,7 @@ void xnn_f32_vprelu_ukernel__scalar_u8(
     vacc5 = XNN_UNPREDICTABLE(va5 < 0.0f) ? va5 * vb5 : va5;
     vacc6 = XNN_UNPREDICTABLE(va6 < 0.0f) ? va6 * vb6 : va6;
     vacc7 = XNN_UNPREDICTABLE(va7 < 0.0f) ? va7 * vb7 : va7;
+
 
     output[0] = vacc0;
     output[1] = vacc1;

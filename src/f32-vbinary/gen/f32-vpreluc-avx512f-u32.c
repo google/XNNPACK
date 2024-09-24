@@ -7,7 +7,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-
 #include <assert.h>
 
 #include <immintrin.h>
@@ -43,6 +42,7 @@ void xnn_f32_vpreluc_ukernel__avx512f_u32(
     const __mmask16 vsign1 = _mm512_cmp_ps_mask(va1, vzero, _CMP_LT_OQ);
     __m512 vacc1 = _mm512_mask_mul_ps(va1, vsign1, va1, vb);
 
+
     _mm512_storeu_ps(output, vacc0);
     _mm512_storeu_ps(output + 16, vacc1);
     output += 32;
@@ -53,6 +53,7 @@ void xnn_f32_vpreluc_ukernel__avx512f_u32(
 
     const __mmask16 vsign = _mm512_cmp_ps_mask(va, vzero, _CMP_LT_OQ);
     __m512 vacc = _mm512_mask_mul_ps(va, vsign, va, vb);
+
 
     _mm512_storeu_ps(output, vacc);
     output += 16;

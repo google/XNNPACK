@@ -43,6 +43,7 @@ void xnn_f32_vpreluc_ukernel__sse41_u8(
     vacc0 = _mm_blendv_ps(va0, vacc0, va0);
     vacc1 = _mm_blendv_ps(va1, vacc1, va1);
 
+
     _mm_storeu_ps(output, vacc0);
     _mm_storeu_ps(output + 4, vacc1);
     output += 8;

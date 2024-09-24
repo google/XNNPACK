@@ -29,6 +29,7 @@ void xnn_f32_vsqrdiff_ukernel__sse_u8(
   assert(input_b != NULL);
   assert(output != NULL);
 
+
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m128 va0 = _mm_loadu_ps(input_a);
     const __m128 va1 = _mm_loadu_ps(input_a + 4);
@@ -43,6 +44,7 @@ void xnn_f32_vsqrdiff_ukernel__sse_u8(
 
     vacc0 = _mm_mul_ps(vacc0, vacc0);
     vacc1 = _mm_mul_ps(vacc1, vacc1);
+
 
     _mm_storeu_ps(output, vacc0);
     _mm_storeu_ps(output + 4, vacc1);

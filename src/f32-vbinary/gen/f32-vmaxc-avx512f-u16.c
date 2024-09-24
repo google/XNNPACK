@@ -7,7 +7,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-
 #include <assert.h>
 
 #include <immintrin.h>
@@ -37,6 +36,7 @@ void xnn_f32_vmaxc_ukernel__avx512f_u16(
     input_a += 16;
 
     __m512 vacc0 = _mm512_max_ps(va0, vb);
+
 
 
     _mm512_storeu_ps(output, vacc0);

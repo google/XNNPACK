@@ -29,6 +29,7 @@ void xnn_f32_vprelu_ukernel__sse2_u8(
   assert(input_b != NULL);
   assert(output != NULL);
 
+
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m128 va0 = _mm_loadu_ps(input_a);
     const __m128 va1 = _mm_loadu_ps(input_a + 4);
@@ -46,6 +47,7 @@ void xnn_f32_vprelu_ukernel__sse2_u8(
 
     vacc0 = _mm_or_ps(_mm_and_ps(vacc0, vmask0), _mm_andnot_ps(vmask0, va0));
     vacc1 = _mm_or_ps(_mm_and_ps(vacc1, vmask1), _mm_andnot_ps(vmask1, va1));
+
 
     _mm_storeu_ps(output, vacc0);
     _mm_storeu_ps(output + 4, vacc1);

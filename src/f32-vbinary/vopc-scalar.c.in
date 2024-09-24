@@ -6,6 +6,7 @@
 $assert BATCH_TILE >= 1
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "PRELU", "RPRELU"]
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
 #include "xnnpack/common.h"
@@ -28,12 +29,14 @@ $  "SQRDIFF": lambda x: "%s - vb" % x,
 $  "PRELU": lambda x: "%s * vb" % x,
 $  "RPRELU": lambda x: "%s * vb" % x,
 $}[OP]
-void xnn_f32_v${OP.lower()}c_ukernel__${"wasm" if WASM else "scalar"}_u${BATCH_TILE}(
+$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
+void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__${"wasm" if WASM else "scalar"}_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,
     const float* input_b,
     float* output,
-    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -41,6 +44,9 @@ void xnn_f32_v${OP.lower()}c_ukernel__${"wasm" if WASM else "scalar"}_u${BATCH_T
   assert(input_b != NULL);
   assert(output != NULL);
 
+  $if ACTIVATION == "MINMAX":
+    const float voutput_min = params->scalar.min;
+    const float voutput_max = params->scalar.max;
   const float vb = *input_b;
 
   $if BATCH_TILE == 1:
@@ -53,6 +59,9 @@ void xnn_f32_v${OP.lower()}c_ukernel__${"wasm" if WASM else "scalar"}_u${BATCH_T
         vacc = XNN_UNPREDICTABLE(va < 0.0f) ? vacc : va;
       $elif OP == "RPRELU":
         vacc = (vb < 0.0f) ? vacc : vb;
+      $if ACTIVATION == "MINMAX":
+        vacc = ${MAX_F32}(vacc, voutput_min);
+        vacc = ${MIN_F32}(vacc, voutput_max);
       *output++ = vacc;
     }
   $else:
@@ -74,6 +83,13 @@ void xnn_f32_v${OP.lower()}c_ukernel__${"wasm" if WASM else "scalar"}_u${BATCH_T
         $for N in range(BATCH_TILE):
           vacc${ABC[N]} = vb < 0.0f ? vacc${ABC[N]} : vb;
 
+      $if ACTIVATION == "MINMAX":
+        $for N in range(BATCH_TILE):
+          vacc${ABC[N]} = ${MAX_F32}(vacc${ABC[N]}, voutput_min);
+
+        $for N in range(BATCH_TILE):
+          vacc${ABC[N]} = ${MIN_F32}(vacc${ABC[N]}, voutput_max);
+
       $for N in range(BATCH_TILE):
         output[${N}] = vacc${ABC[N]};
       output += ${BATCH_TILE};
@@ -89,6 +105,9 @@ void xnn_f32_v${OP.lower()}c_ukernel__${"wasm" if WASM else "scalar"}_u${BATCH_T
           vacc = XNN_UNPREDICTABLE(va < 0.0f) ? vacc : va;
         $elif OP == "RPRELU":
           vacc = XNN_UNPREDICTABLE(vb < 0.0f) ? vacc : vb;
+        $if ACTIVATION == "MINMAX":
+          vacc = ${MAX_F32}(vacc, voutput_min);
+          vacc = ${MIN_F32}(vacc, voutput_max);
         *output = vacc;
       $else:
         do {
@@ -100,6 +119,9 @@ void xnn_f32_v${OP.lower()}c_ukernel__${"wasm" if WASM else "scalar"}_u${BATCH_T
             vacc = XNN_UNPREDICTABLE(va < 0.0f) ? vacc : va;
           $elif OP == "RPRELU":
             vacc = XNN_UNPREDICTABLE(vb < 0.0f) ? vacc : vb;
+          $if ACTIVATION == "MINMAX":
+            vacc = ${MAX_F32}(vacc, voutput_min);
+            vacc = ${MIN_F32}(vacc, voutput_max);
           *output++ = vacc;
           batch -= sizeof(float);
         } while (batch != 0);

@@ -5,6 +5,7 @@
 
 $assert LMUL in [1, 2, 4, 8]
 $assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
 #include <riscv_vector.h>
@@ -24,12 +25,14 @@ $  "SUB": "__riscv_vfsub_vf_f32",
 $  "RSUB": "__riscv_vfrsub_vf_f32",
 $  "SQRDIFF": "__riscv_vfsub_vf_f32",
 $}[OP]
-void xnn_f32_v${OP.lower()}c_ukernel__rvv_u${LMUL}v(
+$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
+void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__rvv_u${LMUL}v(
     size_t batch,
     const float* input_a,
     const float* input_b,
     float* output,
-    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -37,6 +40,9 @@ void xnn_f32_v${OP.lower()}c_ukernel__rvv_u${LMUL}v(
   assert(input_b != NULL);
   assert(output != NULL);
 
+  $if ACTIVATION == "MINMAX":
+    const float output_min = params->scalar.min;
+    const float output_max = params->scalar.max;
   const float b = *input_b;
   size_t n = batch >> 2;
 
@@ -48,6 +54,9 @@ void xnn_f32_v${OP.lower()}c_ukernel__rvv_u${LMUL}v(
     vfloat32m${LMUL}_t vacc = ${OP_FUNC}m${LMUL}(va, b, vl);
     $if OP == "SQRDIFF":
       vacc = __riscv_vfmul_vv_f32m${LMUL}(vacc, vacc, vl);
+    $if ACTIVATION == "MINMAX":
+      vacc = __riscv_vfmax_vf_f32m${LMUL}(vacc, output_min, vl);
+      vacc = __riscv_vfmin_vf_f32m${LMUL}(vacc, output_max, vl);
     __riscv_vse32_v_f32m${LMUL}(output, vacc, vl);
     output += vl;
   } while (n > 0);

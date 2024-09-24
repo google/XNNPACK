@@ -23,6 +23,7 @@ void xnn_f32_vmin_ukernel__hvx_u64(
   assert(input_b != NULL);
   assert(output != NULL);
 
+
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
     HVX_Vector va0 = xnn_loadu_f32(input_a);
     HVX_Vector va1 = xnn_loadu_f32(input_a + 32);
@@ -33,6 +34,7 @@ void xnn_f32_vmin_ukernel__hvx_u64(
 
     HVX_Vector vacc0 = xnn_min_f32(va0, vb0);
     HVX_Vector vacc1 = xnn_min_f32(va1, vb1);
+
 
 
     xnn_storeu_f32(output, vacc0);
@@ -55,7 +57,7 @@ void xnn_f32_vmin_ukernel__hvx_u64(
      HVX_Vector vb = xnn_loadu_f32(input_b);
 
      HVX_Vector vacc = xnn_min_f32(va, vb);
-
+     
      Q6_V_vstu_variable(output, batch, vacc);
   }
 }

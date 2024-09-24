@@ -33,6 +33,7 @@ void xnn_f16_vprelu_ukernel__avx512fp16_u32(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
+
   const __m512h vzero = _mm512_setzero_ph();
 
   for (; batch >= 32 * sizeof(uint16_t); batch -= 32 * sizeof(uint16_t)) {
@@ -42,6 +43,7 @@ void xnn_f16_vprelu_ukernel__avx512fp16_u32(
     const __mmask32 vsign = _mm512_cmp_ph_mask(va, vzero, _CMP_LT_OQ);
     __m512h vacc = _mm512_mask_mul_ph(va, vsign, va, _mm512_loadu_ph(b));
     b += 32;
+
 
     _mm512_storeu_ph(o, vacc);
     o += 32;

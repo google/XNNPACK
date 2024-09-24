@@ -38,6 +38,7 @@ void xnn_f32_vrpreluc_ukernel__wasmrelaxedsimd_u4(
     v128_t vy = wasm_f32x4_mul(va, vb);
     vy = wasm_i32x4_relaxed_laneselect(vy, vb, vmask);
 
+
     wasm_v128_store(output, vy);
     output += 4;
   }
@@ -46,6 +47,7 @@ void xnn_f32_vrpreluc_ukernel__wasmrelaxedsimd_u4(
 
     v128_t vy = wasm_f32x4_mul(va, vb);
     vy = wasm_i32x4_relaxed_laneselect(vy, vb, vmask);
+
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vy, 0);

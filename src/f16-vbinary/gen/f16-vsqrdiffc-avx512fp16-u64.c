@@ -48,6 +48,7 @@ void xnn_f16_vsqrdiffc_ukernel__avx512fp16_u64(
     vacc0 = _mm512_mul_ph(vacc0, vacc0);
     vacc1 = _mm512_mul_ph(vacc1, vacc1);
 
+
     _mm512_storeu_ph(o, vacc0);
     _mm512_storeu_ph(o + 32, vacc1);
     o += 64;
@@ -58,6 +59,7 @@ void xnn_f16_vsqrdiffc_ukernel__avx512fp16_u64(
 
     __m512h vacc = _mm512_sub_ph(va, vb);
     vacc = _mm512_mul_ph(vacc, vacc);
+
 
     _mm512_storeu_ph(o, vacc);
     o += 32;

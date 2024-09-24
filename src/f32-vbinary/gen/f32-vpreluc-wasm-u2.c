@@ -40,6 +40,7 @@ void xnn_f32_vpreluc_ukernel__wasm_u2(
     vacc0 = XNN_UNPREDICTABLE(va0 < 0.0f) ? vacc0 : va0;
     vacc1 = XNN_UNPREDICTABLE(va1 < 0.0f) ? vacc1 : va1;
 
+
     output[0] = vacc0;
     output[1] = vacc1;
     output += 2;

@@ -42,6 +42,7 @@ void xnn_f32_vminc_ukernel__wasm_u4(
     float vacc3 = __builtin_wasm_min_f32(va3, vb);
 
 
+
     output[0] = vacc0;
     output[1] = vacc1;
     output[2] = vacc2;

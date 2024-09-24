@@ -45,6 +45,7 @@ void xnn_f16_vrpreluc_ukernel__avx512fp16_u32(
 
     __m512h vacc0 = _mm512_mask_mul_ph(vb, vsign, va0, vb);
 
+
     _mm512_storeu_ph(o, vacc0);
     o += 32;
   }

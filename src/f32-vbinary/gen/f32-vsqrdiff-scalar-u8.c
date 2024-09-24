@@ -27,6 +27,7 @@ void xnn_f32_vsqrdiff_ukernel__scalar_u8(
   assert(input_b != NULL);
   assert(output != NULL);
 
+
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const float va0 = input_a[0];
     const float va1 = input_a[1];
@@ -65,6 +66,7 @@ void xnn_f32_vsqrdiff_ukernel__scalar_u8(
     vacc5 = vacc5 * vacc5;
     vacc6 = vacc6 * vacc6;
     vacc7 = vacc7 * vacc7;
+
 
     output[0] = vacc0;
     output[1] = vacc1;

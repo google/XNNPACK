@@ -32,6 +32,7 @@ void xnn_f16_vsqrdiffc_ukernel__neonfp16arith_u16(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
+
   const float16x8_t vb = vreinterpretq_f16_u16(vld1q_dup_u16(b));
   for (; batch >= 16 * sizeof(uint16_t); batch -= 16 * sizeof(uint16_t)) {
     const float16x8_t va01234567 = vreinterpretq_f16_u16(vld1q_u16(a)); a += 8;
@@ -42,6 +43,7 @@ void xnn_f16_vsqrdiffc_ukernel__neonfp16arith_u16(
 
     vy01234567 = vmulq_f16(vy01234567, vy01234567);
     vy456789AB = vmulq_f16(vy456789AB, vy456789AB);
+
 
     vst1q_u16(o, vreinterpretq_u16_f16(vy01234567)); o += 8;
     vst1q_u16(o, vreinterpretq_u16_f16(vy456789AB)); o += 8;

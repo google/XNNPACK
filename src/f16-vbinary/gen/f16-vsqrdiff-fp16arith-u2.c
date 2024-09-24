@@ -33,6 +33,7 @@ void xnn_f16_vsqrdiff_ukernel__fp16arith_u2(
   const float16_t* b = (const float16_t*) input_b;
   float16_t* o = (float16_t*) output;
 
+
   for (; batch >= 2 * sizeof(float16_t); batch -= 2 * sizeof(float16_t)) {
     const float16_t va0 = *a++;
     const float16_t va1 = *a++;
@@ -45,6 +46,7 @@ void xnn_f16_vsqrdiff_ukernel__fp16arith_u2(
 
     vacc0 = vmulh_f16(vacc0, vacc0);
     vacc1 = vmulh_f16(vacc1, vacc1);
+
 
     *o++ = vacc0;
     *o++ = vacc1;

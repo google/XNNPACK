@@ -555,9 +555,9 @@ static enum xnn_status reshape_scaled_dot_product_attention_nhtc(
     .compute_reciprocal = compute_reciprocal,
     .raddstoreexpminusmax_ukernel = attention_op->attention.raddstoreexpminusmax_config->ukernel,
     .rmax_ukernel = attention_op->attention.rmax_config->ukernel,
-    .vadd_ukernel = attention_op->attention.vadd_config->op_ukernel,
-    .vmul_ukernel = attention_op->attention.vmul_config->op_ukernel,
-    .vmulc_ukernel = attention_op->attention.vmul_config->opc_ukernel,
+    .vadd_ukernel = attention_op->attention.vadd_config->minmax.op_ukernel,
+    .vmul_ukernel = attention_op->attention.vmul_config->minmax.op_ukernel,
+    .vmulc_ukernel = attention_op->attention.vmul_config->minmax.opc_ukernel,
     .vtanh_ukernel = attention_op->attention.vtanh_config->ukernel,
   };
 

@@ -33,6 +33,7 @@ void xnn_f16_vmax_ukernel__f16c_u8(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
+
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {
     const __m256 va = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) a));
     const __m256 vb = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) b));
@@ -40,6 +41,7 @@ void xnn_f16_vmax_ukernel__f16c_u8(
     b += 8;
 
     __m256 vy = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_max_ps(va, vb), _MM_FROUND_TO_NEAREST_INT));
+
 
     _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vy, _MM_FROUND_TO_NEAREST_INT));
     o += 8;
@@ -49,6 +51,7 @@ void xnn_f16_vmax_ukernel__f16c_u8(
     const __m256 vb = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) b));
 
     __m256 vy = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_max_ps(va, vb), _MM_FROUND_TO_NEAREST_INT));
+
 
     __m128i vh = _mm256_cvtps_ph(vy, _MM_FROUND_TO_NEAREST_INT);
     if (batch & (4 * sizeof(uint16_t))) {

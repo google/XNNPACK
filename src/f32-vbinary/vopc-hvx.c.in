@@ -3,6 +3,7 @@ $assert BATCH_TILE % 32 == 0
 $assert BATCH_TILE >= 32
 $SIMD_TILE = BATCH_TILE // 32
 $assert OP in ["ADD", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF"]
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
 #include "xnnpack/simd/f32-hvx.h"
@@ -19,12 +20,14 @@ $  "SUB": lambda x: "xnn_sub_f32(%s, vb)" % x,
 $  "RSUB": lambda x: "xnn_sub_f32(vb, %s)" % x,
 $  "SQRDIFF": lambda x: "xnn_sub_f32(%s, vb)" % x,
 $}[OP]
-void xnn_f32_v${OP.lower()}c_ukernel__hvx_u${BATCH_TILE}(
+$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
+void xnn_f32_v${OP.lower()}c${SUFFIX}_ukernel__hvx_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,
     const float* input_b,
     float* output,
-    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -32,6 +35,9 @@ void xnn_f32_v${OP.lower()}c_ukernel__hvx_u${BATCH_TILE}(
   assert(input_b != NULL);
   assert(output != NULL);
 
+  $if ACTIVATION == "MINMAX":
+    const HVX_Vector voutput_min = xnn_set1_f32(params->scalar.min);
+    const HVX_Vector voutput_max = xnn_set1_f32(params->scalar.max);
   HVX_Vector vb = xnn_set1_f32(*input_b);
 
   $if BATCH_TILE > 32:
@@ -48,6 +54,13 @@ void xnn_f32_v${OP.lower()}c_ukernel__hvx_u${BATCH_TILE}(
         $for N in range(SIMD_TILE):
           vacc${N} = xnn_mul_f32(vacc${N}, vacc${N});
 
+      $if ACTIVATION == "MINMAX":
+        $for N in range(SIMD_TILE):
+          vacc${N} = xnn_max_f32(vacc${N}, voutput_min);
+
+        $for N in range(SIMD_TILE):
+          vacc${N} = xnn_min_f32(vacc${N}, voutput_max);
+
      xnn_storeu_f32(output, vacc0);
       $for N in range(32, BATCH_TILE, 32):
         xnn_storeu_f32(output + ${N}, vacc${int(N/32)});
@@ -60,6 +73,9 @@ void xnn_f32_v${OP.lower()}c_ukernel__hvx_u${BATCH_TILE}(
     HVX_Vector vacc = ${_HEXAGON_OP_HVX("va")};
     $if OP == "SQRDIFF":
       vacc = xnn_mul_f32(vacc, vacc);
+    $if ACTIVATION == "MINMAX":
+      vacc = xnn_max_f32(vacc, voutput_min);
+      vacc = xnn_min_f32(vacc, voutput_max);
 
     xnn_storeu_f32(output, vacc);
     output+= 32;
@@ -70,6 +86,9 @@ void xnn_f32_v${OP.lower()}c_ukernel__hvx_u${BATCH_TILE}(
     HVX_Vector vacc = ${_HEXAGON_OP_HVX("va")};
     $if OP == "SQRDIFF":
       vacc = xnn_mul_f32(vacc, vacc);
+    $if ACTIVATION == "MINMAX":
+      vacc = xnn_max_f32(vacc, voutput_min);
+      vacc = xnn_min_f32(vacc, voutput_max);
 
     Q6_V_vstu_variable(output, batch, vacc);
   }

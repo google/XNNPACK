@@ -34,6 +34,7 @@ void xnn_f16_vmin_ukernel__avx512fp16_u64(
   uint16_t* o = (uint16_t*) output;
 
 
+
   for (; batch >= 64 * sizeof(uint16_t); batch -= 64 * sizeof(uint16_t)) {
     const __m512h va0 = _mm512_loadu_ph(a);
     const __m512h va1 = _mm512_loadu_ph(a + 32);
@@ -42,6 +43,7 @@ void xnn_f16_vmin_ukernel__avx512fp16_u64(
     __m512h vacc0 = _mm512_min_ph(va0, _mm512_loadu_ph(b));
     __m512h vacc1 = _mm512_min_ph(va1, _mm512_loadu_ph(b + 32));
     b += 64;
+
 
 
     _mm512_storeu_ph(o, vacc0);
@@ -54,6 +56,7 @@ void xnn_f16_vmin_ukernel__avx512fp16_u64(
 
     __m512h vacc = _mm512_min_ph(va, _mm512_loadu_ph(b));
     b += 32;
+
 
 
     _mm512_storeu_ph(o, vacc);

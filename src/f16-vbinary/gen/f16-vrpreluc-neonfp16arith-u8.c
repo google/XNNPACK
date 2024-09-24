@@ -32,6 +32,7 @@ void xnn_f16_vrpreluc_ukernel__neonfp16arith_u8(
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
 
+
   const float16x8_t vb = vreinterpretq_f16_u16(vld1q_dup_u16(b));
   const uint16x8_t vm = vcltq_s16(vreinterpretq_s16_f16(vb), vmovq_n_s16(0));
   for (; batch >= 8 * sizeof(uint16_t); batch -= 8 * sizeof(uint16_t)) {

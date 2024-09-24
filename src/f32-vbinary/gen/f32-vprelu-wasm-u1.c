@@ -27,6 +27,7 @@ void xnn_f32_vprelu_ukernel__wasm_u1(
   assert(input_b != NULL);
   assert(output != NULL);
 
+
   for (; batch >= sizeof(float); batch -= sizeof(float)) {
     const float va = *input_a++;
     const float vb = *input_b++;

@@ -30,6 +30,7 @@ void xnn_f32_vsqrdiff_ukernel__avx512f_u16(
   assert(output != NULL);
 
 
+
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m512 va = _mm512_loadu_ps(input_a);
     input_a += 16;
@@ -38,6 +39,7 @@ void xnn_f32_vsqrdiff_ukernel__avx512f_u16(
     input_b += 16;
 
     vacc = _mm512_mul_ps(vacc, vacc);
+
 
     _mm512_storeu_ps(output, vacc);
     output += 16;

@@ -30,12 +30,14 @@ void xnn_f32_vmax_ukernel__avx512f_u16(
   assert(output != NULL);
 
 
+
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {
     const __m512 va = _mm512_loadu_ps(input_a);
     input_a += 16;
 
     __m512 vacc = _mm512_max_ps(va, _mm512_loadu_ps(input_b));
     input_b += 16;
+
 
 
     _mm512_storeu_ps(output, vacc);

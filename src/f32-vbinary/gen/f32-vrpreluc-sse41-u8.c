@@ -42,6 +42,7 @@ void xnn_f32_vrpreluc_ukernel__sse41_u8(
     vacc0 = _mm_blendv_ps(vb, vacc0, vb);
     vacc1 = _mm_blendv_ps(vb, vacc1, vb);
 
+
     _mm_storeu_ps(output, vacc0);
     _mm_storeu_ps(output + 4, vacc1);
     output += 8;

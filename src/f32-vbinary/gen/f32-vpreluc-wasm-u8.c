@@ -58,6 +58,7 @@ void xnn_f32_vpreluc_ukernel__wasm_u8(
     vacc6 = XNN_UNPREDICTABLE(va6 < 0.0f) ? vacc6 : va6;
     vacc7 = XNN_UNPREDICTABLE(va7 < 0.0f) ? vacc7 : va7;
 
+
     output[0] = vacc0;
     output[1] = vacc1;
     output[2] = vacc2;

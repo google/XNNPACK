@@ -39,6 +39,7 @@ void xnn_f32_vrdivc_ukernel__wasmsimd_u8(
     v128_t vy1 = wasm_f32x4_div(vb, va1);
 
 
+
     wasm_v128_store(output, vy0);
     wasm_v128_store(output + 4, vy1);
     output += 8;
@@ -49,6 +50,7 @@ void xnn_f32_vrdivc_ukernel__wasmsimd_u8(
 
     v128_t vy = wasm_f32x4_div(vb, va);
 
+
     wasm_v128_store(output, vy);
     output += 4;
   }
@@ -56,6 +58,7 @@ void xnn_f32_vrdivc_ukernel__wasmsimd_u8(
     const v128_t va = wasm_v128_load(input_a);
 
     v128_t vy = wasm_f32x4_div(vb, va);
+
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vy, 0);

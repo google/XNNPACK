@@ -27,6 +27,7 @@ void xnn_f32_vmin_ukernel__wasm_u2(
   assert(input_b != NULL);
   assert(output != NULL);
 
+
   for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
     const float va0 = input_a[0];
     const float va1 = input_a[1];
@@ -38,6 +39,7 @@ void xnn_f32_vmin_ukernel__wasm_u2(
 
     float vacc0 = __builtin_wasm_min_f32(va0, vb0);
     float vacc1 = __builtin_wasm_min_f32(va1, vb1);
+
 
 
     output[0] = vacc0;

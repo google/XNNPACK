@@ -8,6 +8,7 @@ $assert BATCH_TILE >= 4
 $SIMD_TILE = BATCH_TILE // 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB", "SQRDIFF", "PRELU"]
+$assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
 $SSE_HEADER = {1: "xmmintrin.h", 2: "emmintrin.h", 4: "smmintrin.h"}[SSE]
@@ -28,19 +29,27 @@ $  "SUB": "_mm_sub_ps",
 $  "SQRDIFF": "_mm_sub_ps",
 $  "PRELU": "_mm_mul_ps",
 $}[OP]
+$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
+$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
 $ISA = {1: "sse", 2: "sse2", 4: "sse41"}[SSE]
-void xnn_f32_v${OP.lower()}_ukernel__${ISA}_u${BATCH_TILE}(
+void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__${ISA}_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,
     const float* input_b,
     float* output,
-    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input_a != NULL);
   assert(input_b != NULL);
   assert(output != NULL);
+
+  $if ACTIVATION == "MINMAX":
+    const __m128 voutput_min = _mm_set1_ps(params->scalar.min);
+    const __m128 voutput_max = _mm_set1_ps(params->scalar.max);
+    XNN_FORCE_REALIZATION(voutput_min);
+    XNN_FORCE_REALIZATION(voutput_max);
 
   $if BATCH_TILE > 4:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
@@ -71,6 +80,13 @@ void xnn_f32_v${OP.lower()}_ukernel__${ISA}_u${BATCH_TILE}(
           $elif SSE == 4:
             vacc${ABC[N]} = _mm_blendv_ps(va${ABC[N]}, vacc${ABC[N]}, va${ABC[N]});
 
+      $if ACTIVATION == "MINMAX":
+        $for N in range(SIMD_TILE):
+          vacc${ABC[N]} = _mm_max_ps(vacc${ABC[N]}, voutput_min);
+
+        $for N in range(SIMD_TILE):
+          vacc${ABC[N]} = _mm_min_ps(vacc${ABC[N]}, voutput_max);
+
       _mm_storeu_ps(output, vacc${ABC[0]});
       $for N in range(1, SIMD_TILE):
         _mm_storeu_ps(output + ${N * 4}, vacc${ABC[N]});
@@ -92,6 +108,9 @@ void xnn_f32_v${OP.lower()}_ukernel__${ISA}_u${BATCH_TILE}(
         vacc = _mm_or_ps(_mm_and_ps(vacc, vmask), _mm_andnot_ps(vmask, va));
       $elif SSE == 4:
         vacc = _mm_blendv_ps(va, vacc, va);
+    $if ACTIVATION == "MINMAX":
+      vacc = _mm_max_ps(vacc, voutput_min);
+      vacc = _mm_min_ps(vacc, voutput_max);
 
     _mm_storeu_ps(output, vacc);
     output += 4;
@@ -109,6 +128,9 @@ void xnn_f32_v${OP.lower()}_ukernel__${ISA}_u${BATCH_TILE}(
         vacc = _mm_or_ps(_mm_and_ps(vacc, vmask), _mm_andnot_ps(vmask, va));
       $elif SSE == 4:
         vacc = _mm_blendv_ps(va, vacc, va);
+    $if ACTIVATION == "MINMAX":
+      vacc = _mm_max_ps(vacc, voutput_min);
+      vacc = _mm_min_ps(vacc, voutput_max);
 
     if (batch & (2 * sizeof(float))) {
       _mm_storel_pi((__m64*) output, vacc);
