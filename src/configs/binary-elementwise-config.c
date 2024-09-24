@@ -374,8 +374,6 @@ static void init_f32_vadd_config(void) {
       f32_vadd_config.element_tile = 8;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
     f32_vadd_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vadd_ukernel__wasmsimd_u16;
     f32_vadd_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_ukernel__wasmsimd_u16;
     f32_vadd_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vaddc_ukernel__wasmsimd_u16;
