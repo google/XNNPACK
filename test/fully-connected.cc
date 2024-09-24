@@ -706,7 +706,7 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_with_reshape) {
 }
 
 // TODO(b/355416339): Re-enable once we can handle strides again
-TEST_F(FullyConnectedTestQP8F32QC4W, DISABLED_matches_operator_api_transposed_weights) {
+TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_transposed_weights) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   if (xnn_init_qp8_f32_qc4w_gemm_config() == nullptr) {
