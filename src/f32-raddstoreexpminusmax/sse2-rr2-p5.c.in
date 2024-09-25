@@ -6,7 +6,6 @@
 $assert BATCH_TILE % 4 == 0
 $assert BATCH_TILE >= 4
 $SIMD_TILE = BATCH_TILE // 4
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <emmintrin.h>
@@ -15,7 +14,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include "xnnpack/raddstoreexpminusmax.h"
 
 
-void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_u${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+$ISA = {0: "sse2", 1: "avx"}[AVX]
+void xnn_f32_raddstoreexpminusmax_ukernel__${ISA}_rr2_p5_u${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
     size_t batch,
     const float* input,
     const float* max,
@@ -58,73 +58,73 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_u${BATCH_TILE}${"" if ACC
     __m128 vacc${K} = _mm_setzero_ps();
   for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
     // Load ${BATCH_TILE} (${SIMD_TILE}x4) inputs at a time.
-    const __m128 vi${ABC[0:4]} = _mm_loadu_ps(input);
-    $for N in range(4, BATCH_TILE, 4):
-      const __m128 vi${ABC[N:N+4]} = _mm_loadu_ps(input + ${N});
+    const __m128 vi0 = _mm_loadu_ps(input);
+    $for N in range(1, SIMD_TILE):
+      const __m128 vi${N} = _mm_loadu_ps(input + ${N*4});
     input += ${BATCH_TILE};
 
     // Subtract maximum input x := i - i_max. This implies x <= 0.
-    $for N in range(0, BATCH_TILE, 4):
-      const __m128 vx${ABC[N:N+4]} = _mm_sub_ps(vi${ABC[N:N+4]}, vi_max);
+    $for N in range(SIMD_TILE):
+      const __m128 vx${N} = _mm_sub_ps(vi${N}, vi_max);
 
     // Compute reduced argument batch := round(x / log(2)).
-    $for N in range(0, BATCH_TILE, 4):
-      __m128 vn${ABC[N:N+4]} = _mm_add_ps(_mm_mul_ps(vx${ABC[N:N+4]}, vlog2e), vmagic_bias);
+    $for N in range(SIMD_TILE):
+      __m128 vn${N} = _mm_add_ps(_mm_mul_ps(vx${N}, vlog2e), vmagic_bias);
 
     // Create a floating-point number s (scale) such that s == 2**batch for inputs which don't cause underflow, i.e.
     // -87.33642 <= x <= 0.0, and -126 <= batch <= 0 accordingly.
-    $for N in range(0, BATCH_TILE, 4):
-      const __m128 vs${ABC[N:N+4]} = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn${ABC[N:N+4]}), 23));
+    $for N in range(SIMD_TILE):
+      const __m128 vs${N} = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn${N}), 23));
 
     // Subtract the large number back to get final batch := round(x / log(2)).
-    $for N in range(0, BATCH_TILE, 4):
-      vn${ABC[N:N+4]} = _mm_sub_ps(vn${ABC[N:N+4]}, vmagic_bias);
+    $for N in range(SIMD_TILE):
+      vn${N} = _mm_sub_ps(vn${N}, vmagic_bias);
 
     // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    $for N in range(0, BATCH_TILE, 4):
-      __m128 vt${ABC[N:N+4]} = _mm_add_ps(_mm_mul_ps(vn${ABC[N:N+4]}, vminus_ln2_hi), vx${ABC[N:N+4]});
+    $for N in range(SIMD_TILE):
+      __m128 vt${N} = _mm_add_ps(_mm_mul_ps(vn${N}, vminus_ln2_hi), vx${N});
 
-    $for N in range(0, BATCH_TILE, 4):
-      vt${ABC[N:N+4]} = _mm_add_ps(_mm_mul_ps(vn${ABC[N:N+4]}, vminus_ln2_lo), vt${ABC[N:N+4]});
+    $for N in range(SIMD_TILE):
+      vt${N} = _mm_add_ps(_mm_mul_ps(vn${N}, vminus_ln2_lo), vt${N});
 
     // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
-    $for N in range(0, BATCH_TILE, 4):
-      __m128 vp${ABC[N:N+4]} = _mm_add_ps(_mm_mul_ps(vc5, vt${ABC[N:N+4]}), vc4);
+    $for N in range(SIMD_TILE):
+      __m128 vp${N} = _mm_add_ps(_mm_mul_ps(vc5, vt${N}), vc4);
 
-    $for N in range(0, BATCH_TILE, 4):
-      vp${ABC[N:N+4]} = _mm_add_ps(_mm_mul_ps(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}), vc3);
+    $for N in range(SIMD_TILE):
+      vp${N} = _mm_add_ps(_mm_mul_ps(vp${N}, vt${N}), vc3);
 
-    $for N in range(0, BATCH_TILE, 4):
-      vp${ABC[N:N+4]} = _mm_add_ps(_mm_mul_ps(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}), vc2);
+    $for N in range(SIMD_TILE):
+      vp${N} = _mm_add_ps(_mm_mul_ps(vp${N}, vt${N}), vc2);
 
-    $for N in range(0, BATCH_TILE, 4):
-      vp${ABC[N:N+4]} = _mm_add_ps(_mm_mul_ps(vp${ABC[N:N+4]}, vt${ABC[N:N+4]}), vc1);
+    $for N in range(SIMD_TILE):
+      vp${N} = _mm_add_ps(_mm_mul_ps(vp${N}, vt${N}), vc1);
 
     // Reconstruct the final f value:
     //   f = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
     //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
     //     = s + (t * s) * p
-    $for N in range(0, BATCH_TILE, 4):
-      vt${ABC[N:N+4]} = _mm_mul_ps(vt${ABC[N:N+4]}, vs${ABC[N:N+4]});
+    $for N in range(SIMD_TILE):
+      vt${N} = _mm_mul_ps(vt${N}, vs${N});
 
-    $for N in range(0, BATCH_TILE, 4):
-      __m128 vf${ABC[N:N+4]} = _mm_add_ps(_mm_mul_ps(vt${ABC[N:N+4]}, vp${ABC[N:N+4]}), vs${ABC[N:N+4]});
+    $for N in range(SIMD_TILE):
+      __m128 vf${N} = _mm_add_ps(_mm_mul_ps(vt${N}, vp${N}), vs${N});
 
     // For inputs below zero cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    $for N in range(0, BATCH_TILE, 4):
-      vf${ABC[N:N+4]} = _mm_andnot_ps(_mm_cmplt_ps(vx${ABC[N:N+4]}, vdenorm_cutoff), vf${ABC[N:N+4]});
+    $for N in range(SIMD_TILE):
+      vf${N} = _mm_andnot_ps(_mm_cmplt_ps(vx${N}, vdenorm_cutoff), vf${N});
 
     // Store ${BATCH_TILE} (${SIMD_TILE}x4) outputs at a time.
-    _mm_storeu_ps(output, vf${ABC[0:4]});
-    $for N in range(4, BATCH_TILE, 4):
-      _mm_storeu_ps(output + ${N}, vf${ABC[N:N+4]});
+    _mm_storeu_ps(output, vf0);
+    $for N in range(1, SIMD_TILE):
+      _mm_storeu_ps(output + ${N*4}, vf${N});
     output += ${BATCH_TILE};
 
     // Accumulate computed exponents.
-    $for N in range(0, BATCH_TILE, 4):
-      vacc${N % ACCUMULATORS} = _mm_add_ps(vacc${N % ACCUMULATORS}, vf${ABC[N:N+4]});
+    $for N in range(SIMD_TILE):
+      vacc${N % ACCUMULATORS} = _mm_add_ps(vacc${N % ACCUMULATORS}, vf${N});
   }
   $if ACCUMULATORS > 1:
     // Add up all accumulators to vacc0

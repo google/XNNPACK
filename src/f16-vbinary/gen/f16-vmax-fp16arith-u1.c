@@ -33,7 +33,6 @@ void xnn_f16_vmax_ukernel__fp16arith_u1(
   const float16_t* b = (const float16_t*) input_b;
   float16_t* o = (float16_t*) output;
 
-
   do {
     const float16_t va = *a++;
     const float16_t vb = *b++;

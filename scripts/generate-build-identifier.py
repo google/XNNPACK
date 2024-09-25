@@ -22,15 +22,18 @@ parser = argparse.ArgumentParser(
         " output."
     ),
 )
+
 parser.add_argument(
     "--output", required=True, action="store", help="Set the output"
 )
+
 parser.add_argument(
     "--input_file_list",
     required=False,
     action="store",
     help="Set an input file list to use instead of the arguments.",
 )
+
 parser.add_argument(
     "inputs",
     nargs="*",

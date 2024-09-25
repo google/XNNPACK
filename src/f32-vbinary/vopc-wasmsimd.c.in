@@ -8,7 +8,6 @@ $assert BATCH_TILE >= 4
 $SIMD_TILE = BATCH_TILE // 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "RDIV", "MAX", "MIN", "MUL", "SUB", "RSUB", "SQRDIFF", "PRELU", "RPRELU"]
-$assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
 #include <wasm_simd128.h>
@@ -31,17 +30,14 @@ $  "SQRDIFF": lambda x: "wasm_f32x4_sub(%s, vb)" % x,
 $  "PRELU": lambda x: "wasm_f32x4_mul(%s, vb)" % x,
 $  "RPRELU": lambda x: "wasm_f32x4_mul(%s, vb)" % x,
 $}[OP]
-$assert ACTIVATION in ["LINEAR", "MINMAX"]
-$ARCH_SUFFIX = "" if ACTIVATION in ["LINEAR"] and OP not in ["MIN", "MAX"] else "_x86" if X86 else "_arm"
+$ARCH_SUFFIX = "" if OP not in ["MIN", "MAX"] else "_x86" if X86 else "_arm"
 $RELAXED_SUFFIX = "relaxed" if RELAXED else ""
-$ACTIVATION_SUFFIX = {"LINEAR": ""}.get(ACTIVATION, "_" + ACTIVATION.lower())
-$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
-void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasm${RELAXED_SUFFIX}simd${ARCH_SUFFIX}_u${BATCH_TILE}(
+void xnn_f32_v${OP.lower()}c_ukernel__wasm${RELAXED_SUFFIX}simd${ARCH_SUFFIX}_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,
     const float* input_b,
     float* output,
-    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -49,11 +45,6 @@ void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasm${RELAXED_SUFFIX}s
   assert(input_b != NULL);
   assert(output != NULL);
 
-  $if ACTIVATION == "MINMAX":
-    const v128_t voutput_min = wasm_v128_load32_splat(&params->scalar.min);
-    const v128_t voutput_max = wasm_v128_load32_splat(&params->scalar.max);
-    XNN_FORCE_REALIZATION(voutput_min);
-    XNN_FORCE_REALIZATION(voutput_max);
   const v128_t vb = wasm_v128_load32_splat(input_b);
 
   $if OP == "RPRELU":
@@ -81,20 +72,6 @@ void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasm${RELAXED_SUFFIX}s
         $for N in range(SIMD_TILE):
           vy${ABC[N]} = ${WASM_V32X4_LANESELECT}(vy${ABC[N]}, vb, vmask);
 
-      $if ACTIVATION == "MINMAX":
-        $if X86:
-          $for N in range(SIMD_TILE):
-            vy${ABC[N]} = wasm_f32x4_pmax(voutput_min, vy${ABC[N]});
-
-          $for N in range(SIMD_TILE):
-            vy${ABC[N]} = wasm_f32x4_pmin(voutput_max, vy${ABC[N]});
-        $else:
-          $for N in range(SIMD_TILE):
-            vy${ABC[N]} = wasm_f32x4_max(vy${ABC[N]}, voutput_min);
-
-          $for N in range(SIMD_TILE):
-            vy${ABC[N]} = wasm_f32x4_min(vy${ABC[N]}, voutput_max);
-
       wasm_v128_store(output, vy${ABC[0]});
       $for N in range(1, SIMD_TILE):
         wasm_v128_store(output + ${N * 4}, vy${ABC[N]});
@@ -113,14 +90,6 @@ void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasm${RELAXED_SUFFIX}s
     $elif OP == "RPRELU":
       vy = ${WASM_V32X4_LANESELECT}(vy, vb, vmask);
 
-    $if ACTIVATION == "MINMAX":
-      $if X86:
-        vy = wasm_f32x4_pmax(voutput_min, vy);
-        vy = wasm_f32x4_pmin(voutput_max, vy);
-      $else:
-        vy = wasm_f32x4_max(vy, voutput_min);
-        vy = wasm_f32x4_min(vy, voutput_max);
-
     wasm_v128_store(output, vy);
     output += 4;
   }
@@ -135,14 +104,6 @@ void xnn_f32_v${OP.lower()}c${ACTIVATION_SUFFIX}_ukernel__wasm${RELAXED_SUFFIX}s
       vy = ${WASM_V32X4_LANESELECT}(vy, va, vmask);
     $elif OP == "RPRELU":
       vy = ${WASM_V32X4_LANESELECT}(vy, vb, vmask);
-
-    $if ACTIVATION == "MINMAX":
-      $if X86:
-        vy = wasm_f32x4_pmax(voutput_min, vy);
-        vy = wasm_f32x4_pmin(voutput_max, vy);
-      $else:
-        vy = wasm_f32x4_max(vy, voutput_min);
-        vy = wasm_f32x4_min(vy, voutput_max);
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vy, 0);

@@ -66,7 +66,7 @@ static void f16_conv_hwc2chw(benchmark::State& state,
       sizeof(xnn_float16) * (weights_elements + output_elements));
 
   std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> packed_weights(weights_elements * num_buffers);
-  std::fill(packed_weights.begin(), packed_weights.end(), UINT16_C(0));
+  std::fill(packed_weights.begin(), packed_weights.end(), 0);
   xnn_pack_f16_dconv_oki_w(
     output_channels, input_channels, output_channels_tile,
     kernel_size /* kernel height */, kernel_size /* kernel width */,

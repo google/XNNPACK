@@ -7,7 +7,6 @@ $assert BATCH_TILE % 8 == 0
 $assert BATCH_TILE >= 8
 $ABC = "01234567456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB", "SQRDIFF", "PRELU"]
-$assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
 #include <immintrin.h>
@@ -27,14 +26,12 @@ $  "SUB": lambda x, y: "_mm256_sub_ps(%s, %s)" % (x, y),
 $  "SQRDIFF": lambda x, y: "_mm256_sub_ps(%s, %s)" % (x, y),
 $  "PRELU": lambda x, y: "_mm256_mul_ps(%s, %s)" % (x, y),
 $}[OP]
-$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "struct xnn_f16_default_params", "MINMAX": "union xnn_f16_minmax_params"}[ACTIVATION]
-void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__f16c_u${BATCH_TILE}(
+void xnn_f16_v${OP.lower()}_ukernel__f16c_u${BATCH_TILE}(
     size_t batch,
     const xnn_float16* restrict input_a,
     const xnn_float16* restrict input_b,
     xnn_float16* restrict output,
-    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
@@ -45,12 +42,6 @@ void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__f16c_u${BATCH_TILE}(
   const uint16_t* a = (const uint16_t*) input_a;
   const uint16_t* b = (const uint16_t*) input_b;
   uint16_t* o = (uint16_t*) output;
-
-  $if ACTIVATION == "MINMAX":
-    const __m256 vy_min = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.min));
-    const __m256 vy_max = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
-    XNN_FORCE_REALIZATION(vy_min);
-    XNN_FORCE_REALIZATION(vy_max);
 
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
@@ -72,13 +63,6 @@ void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__f16c_u${BATCH_TILE}(
         $for N in range(0, BATCH_TILE, 8):
           vy${ABC[N:N+8]} = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_blendv_ps(va${ABC[N:N+8]}, vy${ABC[N:N+8]}, va${ABC[N:N+8]}), _MM_FROUND_TO_NEAREST_INT));
 
-      $if ACTIVATION == "MINMAX":
-        $for N in range(0, BATCH_TILE, 8):
-          vy${ABC[N:N+8]} = _mm256_max_ps(vy${ABC[N:N+8]}, vy_min);
-
-        $for N in range(0, BATCH_TILE, 8):
-          vy${ABC[N:N+8]} = _mm256_min_ps(vy${ABC[N:N+8]}, vy_max);
-
       _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vy${ABC[0:8]}, _MM_FROUND_TO_NEAREST_INT));
       $for N in range(8, BATCH_TILE, 8):
         _mm_storeu_si128((__m128i*) (o + ${N}), _mm256_cvtps_ph(vy${ABC[N:N+8]}, _MM_FROUND_TO_NEAREST_INT));
@@ -96,10 +80,6 @@ void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__f16c_u${BATCH_TILE}(
     $elif OP == "PRELU":
       vy = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_blendv_ps(va, vy, va), _MM_FROUND_TO_NEAREST_INT));
 
-    $if ACTIVATION == "MINMAX":
-      vy = _mm256_max_ps(vy, vy_min);
-      vy = _mm256_min_ps(vy, vy_max);
-
     _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vy, _MM_FROUND_TO_NEAREST_INT));
     o += 8;
   }
@@ -112,10 +92,6 @@ void xnn_f16_v${OP.lower()}${SUFFIX}_ukernel__f16c_u${BATCH_TILE}(
       vy = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_mul_ps(vy, vy), _MM_FROUND_TO_NEAREST_INT));
     $elif OP == "PRELU":
       vy = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_blendv_ps(va, vy, va), _MM_FROUND_TO_NEAREST_INT));
-
-    $if ACTIVATION == "MINMAX":
-      vy = _mm256_max_ps(vy, vy_min);
-      vy = _mm256_min_ps(vy, vy_max);
 
     __m128i vh = _mm256_cvtps_ph(vy, _MM_FROUND_TO_NEAREST_INT);
     if (batch & (4 * sizeof(uint16_t))) {

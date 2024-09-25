@@ -9,6 +9,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microparams.h"
 
@@ -2055,14 +2056,6 @@ typedef void (*xnn_f32_vsqrt_ukernel_fn)(
     float* output,
     const struct xnn_f32_sqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-// VSQRTSHIFT: Vector SQuare RooT and SHIFT elementwise
-
-typedef void (*xnn_u64_u32_vsqrtshift_ukernel_fn)(
-    size_t batch,
-    const uint64_t* input,
-    uint32_t* output,
-    uint32_t shift);
-
 // VRSQRT: Vector Reciprocal SQuare RooT elementwise
 
 typedef void (*xnn_f16_vrsqrt_ukernel_fn)(
@@ -2514,6 +2507,12 @@ typedef void (*xnn_f32_vscaleextexp_ukernel_fn)(
 
 /***************** Microkernel parameter initializer pointers ****************/
 
+typedef size_t (*xnn_init_binary_params_fn)(
+  union xnn_binary_uparams* uparams,
+  const struct xnn_quantization_params* a_quantization,
+  const struct xnn_quantization_params* b_quantization,
+  const struct xnn_quantization_params* output_quantization);
+
 typedef size_t (*xnn_init_f16_qs8_cvt_params_fn)(
   struct xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   xnn_float16 scale,
@@ -2534,6 +2533,13 @@ typedef size_t (*xnn_init_qs8_mean_minmax_params_fn)(
   int32_t num_elements,
   int8_t input_zero_point,
   int8_t output_zero_point);
+
+typedef size_t (*xnn_init_qu8_mean_minmax_params_fn)(
+  struct xnn_qu8_mean_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int32_t num_elements,
+  uint8_t input_zero_point,
+  uint8_t output_zero_point);
 
 typedef size_t (*xnn_init_f32_qu8_cvt_params_fn)(
   struct xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
@@ -2639,41 +2645,27 @@ typedef void (*xnn_update_f16_gavgpool_scalar_params_fn)(
 
 typedef size_t (*xnn_init_qs8_add_minmax_params_fn)(
   struct xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int8_t input_x_zero_point,
-  int8_t input_y_zero_point,
-  int8_t output_zero_point,
-  float input_x_output_scale,
-  float input_y_output_scale,
-  int8_t output_min,
-  int8_t output_max);
+  const struct xnn_quantization_params* a_quantization,
+  const struct xnn_quantization_params* b_quantization,
+  const struct xnn_quantization_params* output_quantization);
 
 typedef size_t (*xnn_init_qu8_add_minmax_params_fn)(
   struct xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint8_t input_x_zero_point,
-  uint8_t input_y_zero_point,
-  uint8_t output_zero_point,
-  float input_x_output_scale,
-  float input_y_output_scale,
-  uint8_t output_min,
-  uint8_t output_max);
+  const struct xnn_quantization_params* a_quantization,
+  const struct xnn_quantization_params* b_quantization,
+  const struct xnn_quantization_params* output_quantization);
 
 typedef size_t (*xnn_init_qs8_mul_minmax_params_fn)(
   union xnn_qs8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int8_t input_x_zero_point,
-  int8_t input_y_zero_point,
-  int8_t output_zero_point,
-  float product_output_scale,
-  int8_t output_min,
-  int8_t output_max);
+  const struct xnn_quantization_params* a_quantization,
+  const struct xnn_quantization_params* b_quantization,
+  const struct xnn_quantization_params* output_quantization);
 
 typedef size_t (*xnn_init_qu8_mul_minmax_params_fn)(
   union xnn_qu8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint8_t input_x_zero_point,
-  uint8_t input_y_zero_point,
-  uint8_t output_zero_point,
-  float product_output_scale,
-  uint8_t output_min,
-  uint8_t output_max);
+  const struct xnn_quantization_params* a_quantization,
+  const struct xnn_quantization_params* b_quantization,
+  const struct xnn_quantization_params* output_quantization);
 
 typedef size_t (*xnn_init_bf16_default_params_fn)(
   struct xnn_bf16_default_params params[XNN_MIN_ELEMENTS(1)]);

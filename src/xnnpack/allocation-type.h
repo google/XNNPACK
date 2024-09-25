@@ -2,10 +2,6 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
-//
-// Auto-generated file. Do not edit!
-//   Specification: src/enums/allocation-type.yaml
-//   Generator: tools/generate-enum.py
 
 #pragma once
 
@@ -17,12 +13,11 @@ extern "C" {
 #endif
 
 enum xnn_allocation_type {
-  xnn_allocation_type_invalid = 0,
-  xnn_allocation_type_static,
-  xnn_allocation_type_workspace,
-  xnn_allocation_type_external,
-  xnn_allocation_type_persistent,
-  xnn_allocation_type_dynamic,
+#define XNN_ENUM_ITEM_0(enum_name, enum_string) enum_name = 0,
+#define XNN_ENUM_ITEM(enum_name, enum_string) enum_name,
+  #include "xnnpack/allocation-type-defs.h"
+#undef XNN_ENUM_ITEM_0
+#undef XNN_ENUM_ITEM
 };
 
 #if XNN_LOG_LEVEL <= 0

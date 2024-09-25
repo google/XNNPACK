@@ -38,7 +38,6 @@ void xnn_f32_vminc_ukernel__hvx_u128(
     HVX_Vector vacc3 = xnn_min_f32(va3, vb);
 
 
-
    xnn_storeu_f32(output, vacc0);
     xnn_storeu_f32(output + 32, vacc1);
     xnn_storeu_f32(output + 64, vacc2);
