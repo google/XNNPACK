@@ -23,7 +23,6 @@ void xnn_f32_vsqrdiff_ukernel__hvx_u32(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     HVX_Vector va = xnn_loadu_f32(input_a);
     HVX_Vector vb = xnn_loadu_f32(input_b);
@@ -42,7 +41,7 @@ void xnn_f32_vsqrdiff_ukernel__hvx_u32(
 
      HVX_Vector vacc = xnn_sub_f32(va, vb);
      vacc = xnn_mul_f32(vacc, vacc);
-     
+
      Q6_V_vstu_variable(output, batch, vacc);
   }
 }

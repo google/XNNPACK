@@ -15,6 +15,7 @@
 #include "xnnpack/math.h"
 #include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"  // For xnn_operator definition.
+#include "xnnpack/operator-type.h"
 
 void* xnn_get_pointer_to_write_weights(
   xnn_operator_t op,
@@ -145,4 +146,28 @@ uint32_t xnn_get_heuristic_mr_igemm(
     }
   }
   return best_mr;
+}
+
+enum xnn_operator_type xnn_binary_operator_to_operator_type(enum xnn_binary_operator op)
+{
+  switch (op) {
+    case xnn_binary_add:
+      return xnn_operator_type_add;
+    case xnn_binary_subtract:
+      return xnn_operator_type_subtract;
+    case xnn_binary_multiply:
+      return xnn_operator_type_multiply;
+    case xnn_binary_divide:
+      return xnn_operator_type_divide;
+    case xnn_binary_maximum:
+      return xnn_operator_type_maximum;
+    case xnn_binary_minimum:
+      return xnn_operator_type_minimum;
+    case xnn_binary_copysign:
+      return xnn_operator_type_copysign;
+    case xnn_binary_squared_difference:
+      return xnn_operator_type_squared_difference;
+    default:
+      return xnn_operator_type_invalid;
+  }
 }

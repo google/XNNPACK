@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microparams.h"
 
@@ -237,15 +238,25 @@ XNN_INTERNAL size_t xnn_init_f32_scale_scalar_params(
   struct xnn_f32_scale_params params[XNN_MIN_ELEMENTS(1)],
   float scale);
 
-#define DECLARE_INIT_QS8_MEAN_MINMAX_PARAMS_FUNCTION(fn_name)     \
-  XNN_INTERNAL size_t fn_name(                                    \
+#define DECLARE_INIT_QS8_MEAN_MINMAX_PARAMS_FUNCTION(fn_name)      \
+  XNN_INTERNAL size_t fn_name(                                     \
     struct xnn_qs8_mean_minmax_params params[XNN_MIN_ELEMENTS(1)], \
-    float scale,                                                  \
-    int32_t num_elements,                                         \
-    int8_t input_zero_point,                                      \
+    float scale,                                                   \
+    int32_t num_elements,                                          \
+    int8_t input_zero_point,                                       \
     int8_t output_zero_point);
 
 DECLARE_INIT_QS8_MEAN_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mean_minmax_scalar_params)
+
+#define DECLARE_INIT_QU8_MEAN_MINMAX_PARAMS_FUNCTION(fn_name)      \
+  XNN_INTERNAL size_t fn_name(                                     \
+    struct xnn_qu8_mean_minmax_params params[XNN_MIN_ELEMENTS(1)], \
+    float scale,                                                   \
+    int32_t num_elements,                                          \
+    uint8_t input_zero_point,                                      \
+    uint8_t output_zero_point);
+
+DECLARE_INIT_QU8_MEAN_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mean_minmax_scalar_params)
 
 XNN_INTERNAL size_t xnn_init_f16_scaleminmax_scalar_params(
   struct xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -416,54 +427,51 @@ XNN_INTERNAL size_t xnn_init_qu8_lrelu_scalar_params(
   uint8_t input_zero_point,
   uint8_t output_zero_point);
 
+XNN_INTERNAL size_t xnn_init_f16_minmax_binary_params(
+    union xnn_f16_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
+    const struct xnn_quantization_params* a_quantization,
+    const struct xnn_quantization_params* b_quantization,
+    const struct xnn_quantization_params* output_quantization);
+
+XNN_INTERNAL size_t xnn_init_f32_minmax_binary_params(
+    union xnn_f32_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
+    const struct xnn_quantization_params* a_quantization,
+    const struct xnn_quantization_params* b_quantization,
+    const struct xnn_quantization_params* output_quantization);
+
 XNN_INTERNAL size_t xnn_init_qs8_add_minmax_scalar_params(
-  struct xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int8_t x_zero_point,
-  int8_t y_zero_point,
-  int8_t output_zero_point,
-  float x_output_scale,
-  float y_output_scale,
-  int8_t output_min,
-  int8_t output_max);
+    struct xnn_qs8_add_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
+    const struct xnn_quantization_params* a_quantization,
+    const struct xnn_quantization_params* b_quantization,
+    const struct xnn_quantization_params* output_quantization);
 
 XNN_INTERNAL size_t xnn_init_qu8_add_minmax_scalar_params(
-  struct xnn_qu8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  uint8_t x_zero_point,
-  uint8_t y_zero_point,
-  uint8_t output_zero_point,
-  float x_output_scale,
-  float y_output_scale,
-  uint8_t output_min,
-  uint8_t output_max);
+    struct xnn_qu8_add_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
+    const struct xnn_quantization_params* a_quantization,
+    const struct xnn_quantization_params* b_quantization,
+    const struct xnn_quantization_params* output_quantization);
 
-
-#define DECLARE_INIT_QS8_MUL_MINMAX_PARAMS_FUNCTION(fn_name)     \
-  XNN_INTERNAL size_t fn_name(                                   \
-    union xnn_qs8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)], \
-    int8_t a_zero_point,                                         \
-    int8_t b_zero_point,                                         \
-    int8_t output_zero_point,                                    \
-    float product_output_scale,                                  \
-    int8_t output_min,                                           \
-    int8_t output_max);
+#define DECLARE_INIT_QS8_MUL_MINMAX_PARAMS_FUNCTION(fn_name)        \
+  XNN_INTERNAL size_t fn_name(                                      \
+      union xnn_qs8_mul_minmax_params uparams[XNN_MIN_ELEMENTS(1)], \
+      const struct xnn_quantization_params* a_quantization,         \
+      const struct xnn_quantization_params* b_quantization,         \
+      const struct xnn_quantization_params* output_quantization);
 
 DECLARE_INIT_QS8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mul_minmax_scalar_params)
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_QS8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mul_minmax_rndnu_neon_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+#define DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(fn_name)        \
+  XNN_INTERNAL size_t fn_name(                                      \
+      union xnn_qu8_mul_minmax_params uparams[XNN_MIN_ELEMENTS(1)], \
+      const struct xnn_quantization_params* a_quantization,         \
+      const struct xnn_quantization_params* b_quantization,         \
+      const struct xnn_quantization_params* output_quantization);
 
-#define DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(fn_name)     \
-  XNN_INTERNAL size_t fn_name(                                   \
-    union xnn_qu8_mul_minmax_params params[XNN_MIN_ELEMENTS(1)], \
-    uint8_t a_zero_point,                                        \
-    uint8_t b_zero_point,                                        \
-    uint8_t output_zero_point,                                   \
-    float product_output_scale,                                  \
-    uint8_t output_min,                                          \
-    uint8_t output_max);
-
-DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mul_minmax_scalar_params)
+  DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(
+      xnn_init_qu8_mul_minmax_scalar_params)
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
   DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mul_minmax_rndnu_neon_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64

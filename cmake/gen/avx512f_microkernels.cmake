@@ -20,26 +20,27 @@ SET(PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-1x16-minmax-avx512f-broadcast.c
   src/f32-igemm/gen/f32-igemm-7x16-minmax-avx512f-broadcast.c
   src/f32-prelu/gen/f32-prelu-avx512f-2x16.c
+  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u64-acc2.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c64.c
   src/f32-rminmax/gen/f32-rmax-avx512f-u64-acc4.c
   src/f32-rminmax/gen/f32-rminmax-avx512f-u64-acc4.c
   src/f32-rsum/gen/f32-rsum-avx512f-u64-acc4.c
-  src/f32-vbinary/gen/f32-vadd-minmax-avx512f-u32.c
-  src/f32-vbinary/gen/f32-vaddc-minmax-avx512f-u32.c
-  src/f32-vbinary/gen/f32-vdiv-minmax-avx512f-u32.c
-  src/f32-vbinary/gen/f32-vdivc-minmax-avx512f-u32.c
+  src/f32-vbinary/gen/f32-vadd-avx512f-u32.c
+  src/f32-vbinary/gen/f32-vaddc-avx512f-u32.c
+  src/f32-vbinary/gen/f32-vdiv-avx512f-u32.c
+  src/f32-vbinary/gen/f32-vdivc-avx512f-u32.c
   src/f32-vbinary/gen/f32-vmax-avx512f-u32.c
   src/f32-vbinary/gen/f32-vmaxc-avx512f-u32.c
   src/f32-vbinary/gen/f32-vmin-avx512f-u32.c
   src/f32-vbinary/gen/f32-vminc-avx512f-u32.c
-  src/f32-vbinary/gen/f32-vmul-minmax-avx512f-u32.c
-  src/f32-vbinary/gen/f32-vmulc-minmax-avx512f-u32.c
-  src/f32-vbinary/gen/f32-vrdivc-minmax-avx512f-u32.c
-  src/f32-vbinary/gen/f32-vrsubc-minmax-avx512f-u32.c
+  src/f32-vbinary/gen/f32-vmul-avx512f-u32.c
+  src/f32-vbinary/gen/f32-vmulc-avx512f-u32.c
+  src/f32-vbinary/gen/f32-vrdivc-avx512f-u32.c
+  src/f32-vbinary/gen/f32-vrsubc-avx512f-u32.c
   src/f32-vbinary/gen/f32-vsqrdiff-avx512f-u32.c
   src/f32-vbinary/gen/f32-vsqrdiffc-avx512f-u32.c
-  src/f32-vbinary/gen/f32-vsub-minmax-avx512f-u32.c
-  src/f32-vbinary/gen/f32-vsubc-minmax-avx512f-u32.c
+  src/f32-vbinary/gen/f32-vsub-avx512f-u32.c
+  src/f32-vbinary/gen/f32-vsubc-avx512f-u32.c
   src/f32-vclamp/gen/f32-vclamp-avx512f-u16.c
   src/f32-vcmul/gen/f32-vcmul-avx512f-u32.c
   src/f32-vcopysign/gen/f32-vcopysign-avx512f.c
@@ -128,21 +129,13 @@ SET(NON_PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-raddextexp/gen/f32-raddextexp-avx512f-p5-scalef-u192-acc3.c
   src/f32-raddextexp/gen/f32-raddextexp-avx512f-p5-scalef-u192-acc6.c
   src/f32-raddextexp/gen/f32-raddextexp-avx512f-p5-scalef-u192.c
+  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u16.c
+  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u32-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u64-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u64-acc4.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u64.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u128-acc2.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u128-acc4.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u128.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u144-acc3.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u144.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u160-acc2.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u160-acc5.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u160.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u192-acc2.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u192-acc3.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u192-acc6.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr1-p5-scalef-u192.c
+  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u16.c
+  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u32-acc2.c
+  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u64-acc4.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c16.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c32.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c128.c
@@ -163,28 +156,28 @@ SET(NON_PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-rsum/gen/f32-rsum-avx512f-u32-acc2.c
   src/f32-rsum/gen/f32-rsum-avx512f-u48-acc3.c
   src/f32-rsum/gen/f32-rsum-avx512f-u64-acc2.c
-  src/f32-vbinary/gen/f32-vadd-minmax-avx512f-u16.c
-  src/f32-vbinary/gen/f32-vaddc-minmax-avx512f-u16.c
-  src/f32-vbinary/gen/f32-vdiv-minmax-avx512f-u16.c
-  src/f32-vbinary/gen/f32-vdivc-minmax-avx512f-u16.c
+  src/f32-vbinary/gen/f32-vadd-avx512f-u16.c
+  src/f32-vbinary/gen/f32-vaddc-avx512f-u16.c
+  src/f32-vbinary/gen/f32-vdiv-avx512f-u16.c
+  src/f32-vbinary/gen/f32-vdivc-avx512f-u16.c
   src/f32-vbinary/gen/f32-vmax-avx512f-u16.c
   src/f32-vbinary/gen/f32-vmaxc-avx512f-u16.c
   src/f32-vbinary/gen/f32-vmin-avx512f-u16.c
   src/f32-vbinary/gen/f32-vminc-avx512f-u16.c
-  src/f32-vbinary/gen/f32-vmul-minmax-avx512f-u16.c
-  src/f32-vbinary/gen/f32-vmulc-minmax-avx512f-u16.c
+  src/f32-vbinary/gen/f32-vmul-avx512f-u16.c
+  src/f32-vbinary/gen/f32-vmulc-avx512f-u16.c
   src/f32-vbinary/gen/f32-vprelu-avx512f-u16.c
   src/f32-vbinary/gen/f32-vprelu-avx512f-u32.c
   src/f32-vbinary/gen/f32-vpreluc-avx512f-u16.c
   src/f32-vbinary/gen/f32-vpreluc-avx512f-u32.c
-  src/f32-vbinary/gen/f32-vrdivc-minmax-avx512f-u16.c
+  src/f32-vbinary/gen/f32-vrdivc-avx512f-u16.c
   src/f32-vbinary/gen/f32-vrpreluc-avx512f-u16.c
   src/f32-vbinary/gen/f32-vrpreluc-avx512f-u32.c
-  src/f32-vbinary/gen/f32-vrsubc-minmax-avx512f-u16.c
+  src/f32-vbinary/gen/f32-vrsubc-avx512f-u16.c
   src/f32-vbinary/gen/f32-vsqrdiff-avx512f-u16.c
   src/f32-vbinary/gen/f32-vsqrdiffc-avx512f-u16.c
-  src/f32-vbinary/gen/f32-vsub-minmax-avx512f-u16.c
-  src/f32-vbinary/gen/f32-vsubc-minmax-avx512f-u16.c
+  src/f32-vbinary/gen/f32-vsub-avx512f-u16.c
+  src/f32-vbinary/gen/f32-vsubc-avx512f-u16.c
   src/f32-vclamp/gen/f32-vclamp-avx512f-u32.c
   src/f32-vcmul/gen/f32-vcmul-avx512f-u16.c
   src/f32-vcmul/gen/f32-vcmul-avx512f-u64.c

@@ -50,7 +50,6 @@ void xnn_f32_vaddc_ukernel__scalar_u8(
     float vacc7 = va7 + vb;
 
 
-
     output[0] = vacc0;
     output[1] = vacc1;
     output[2] = vacc2;

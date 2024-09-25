@@ -72,11 +72,6 @@ PROD_AARCH32_ASM_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_AARCH32_ASM_MICROKERNEL_SRCS = [
-    "src/cs16-bfly4/cs16-bfly4-samples1-asm-aarch32-neon-x1.S",
-    "src/cs16-bfly4/cs16-bfly4-samples1-asm-aarch32-neon-x2.S",
-    "src/cs16-bfly4/cs16-bfly4-samples1-asm-aarch32-neon-x4.S",
-    "src/cs16-fftr/cs16-fftr-asm-aarch32-neon-x1.S",
-    "src/cs16-fftr/cs16-fftr-asm-aarch32-neon-x4.S",
     "src/f32-gemm/gen/f32-gemm-4x4-asm-aarch32-vfp-ld64.S",
     "src/f32-gemm/gen/f32-gemm-4x4-minmax-asm-aarch32-vfp-ld64.S",
     "src/f32-gemm/gen/f32-gemm-4x8-minmax-asm-aarch32-neon-ld64.S",
@@ -93,9 +88,6 @@ NON_PROD_AARCH32_ASM_MICROKERNEL_SRCS = [
     "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8-minmax-fp32-asm-aarch32-neon-mlal-lane-cortex-a53.S",
     "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8-minmax-fp32-asm-aarch32-neon-mlal-lane-ld64-prfm.S",
     "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8-minmax-fp32-asm-aarch32-neonv8-mlal-lane-cortex-a35-prfm.S",
-    "src/u32-filterbank-accumulate/u32-filterbank-accumulate-asm-aarch32-arm-x1.S",
-    "src/u32-filterbank-accumulate/u32-filterbank-accumulate-asm-aarch32-neon-x1.S",
-    "src/u32-filterbank-accumulate/u32-filterbank-accumulate-asm-aarch32-neon-x2.S",
 ]
 
 AARCH32_ASM_MICROKERNEL_SRCS = PROD_AARCH32_ASM_MICROKERNEL_SRCS + NON_PROD_AARCH32_ASM_MICROKERNEL_SRCS

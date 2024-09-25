@@ -126,10 +126,8 @@ VCvtMicrokernelTester make_vcvt_tester() {
     return VCvtMicrokernelTester()
         .qmin(std::numeric_limits<T>::min())
         .qmax(std::numeric_limits<T>::max())
-        .output_zero_point((static_cast<int>(std::numeric_limits<T>::min()) +
-                            static_cast<int>(std::numeric_limits<T>::max()) +
-                            1) /
-                           2);
+        .output_zero_point(std::numeric_limits<T>::min() / 2 +
+                           std::numeric_limits<T>::max() / 2 + 1);
   } else {
     return VCvtMicrokernelTester();
   }

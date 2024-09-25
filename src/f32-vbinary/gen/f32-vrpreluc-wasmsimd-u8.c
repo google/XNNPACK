@@ -42,7 +42,6 @@ void xnn_f32_vrpreluc_ukernel__wasmsimd_u8(
     vy0 = wasm_v128_bitselect(vy0, vb, vmask);
     vy1 = wasm_v128_bitselect(vy1, vb, vmask);
 
-
     wasm_v128_store(output, vy0);
     wasm_v128_store(output + 4, vy1);
     output += 8;
@@ -54,7 +53,6 @@ void xnn_f32_vrpreluc_ukernel__wasmsimd_u8(
     v128_t vy = wasm_f32x4_mul(va, vb);
     vy = wasm_v128_bitselect(vy, vb, vmask);
 
-
     wasm_v128_store(output, vy);
     output += 4;
   }
@@ -63,7 +61,6 @@ void xnn_f32_vrpreluc_ukernel__wasmsimd_u8(
 
     v128_t vy = wasm_f32x4_mul(va, vb);
     vy = wasm_v128_bitselect(vy, vb, vmask);
-
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vy, 0);

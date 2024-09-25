@@ -46,7 +46,7 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u72(
   XNN_FORCE_REALIZATION(vc1);
   XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
-  const float16x8_t vi_max = vreinterpretq_f16_u16(vld1q_dup_u16(max));
+  const float16x8_t vi_max = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*)max));
 
   const uint16_t* i = (const uint16_t*) input;
   uint16_t* o = (uint16_t*) output;

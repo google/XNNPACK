@@ -1145,22 +1145,21 @@ enum xnn_status xnn_subgraph_fusion(
       struct xnn_node* producer = &subgraph->nodes[producer_id];
       assert(producer->type != xnn_node_type_invalid);
       struct xnn_node* consumer = &subgraph->nodes[consumer_id];
-      assert(consumer->type != xnn_node_type_invalid);
+      if (consumer->type == xnn_node_type_invalid) {
+        xnn_log_fatal("Node %u has no consumers. Should an external output have been set?", consumer_id);
+        return xnn_status_invalid_state;
+      }
 
       // Try to fuse Clamp Node upstream into producer Node
       if (consumer->type == xnn_node_type_clamp) {
         switch (producer->type) {
-          case xnn_node_type_add2:
           case xnn_node_type_average_pooling_2d:
           case xnn_node_type_clamp:
           case xnn_node_type_convolution_2d:
-          case xnn_node_type_divide:
           case xnn_node_type_deconvolution_2d:
           case xnn_node_type_depthwise_convolution_2d:
           case xnn_node_type_fully_connected:
-          case xnn_node_type_multiply2:
           case xnn_node_type_max_pooling_2d:
-          case xnn_node_type_subtract:
             xnn_log_info("fuse Clamp Node #%"PRIu32" into upstream Node #%"PRIu32, consumer_id, producer_id);
             assert(producer->num_outputs == 1);
             assert(consumer->num_inputs == 1);
@@ -1400,4 +1399,52 @@ enum xnn_status xnn_delete_subgraph(
     xnn_release_memory(subgraph);
   }
   return xnn_status_success;
+}
+
+enum xnn_node_type xnn_binary_operator_to_node_type(enum xnn_binary_operator op)
+{
+  switch (op) {
+    case xnn_binary_add:
+      return xnn_node_type_add2;
+    case xnn_binary_divide:
+      return xnn_node_type_divide;
+    case xnn_binary_multiply:
+      return xnn_node_type_multiply2;
+    case xnn_binary_subtract:
+      return xnn_node_type_subtract;
+    case xnn_binary_copysign:
+      return xnn_node_type_copysign;
+    case xnn_binary_squared_difference:
+      return xnn_node_type_squared_difference;
+    case xnn_binary_minimum:
+      return xnn_node_type_minimum2;
+    case xnn_binary_maximum:
+      return xnn_node_type_maximum2;
+    default:
+      return xnn_node_type_invalid;
+  }
+}
+
+enum xnn_binary_operator xnn_node_type_to_binary_operator(enum xnn_node_type op)
+{
+  switch (op) {
+    case xnn_node_type_add2:
+      return xnn_binary_add;
+    case xnn_node_type_divide:
+      return xnn_binary_divide;
+    case xnn_node_type_multiply2:
+      return xnn_binary_multiply;
+    case xnn_node_type_subtract:
+      return xnn_binary_subtract;
+    case xnn_node_type_copysign:
+      return xnn_binary_copysign;
+    case xnn_node_type_squared_difference:
+      return xnn_binary_squared_difference;
+    case xnn_node_type_minimum2:
+      return xnn_binary_minimum;
+    case xnn_node_type_maximum2:
+      return xnn_binary_maximum;
+    default:
+      return xnn_binary_invalid;
+  }
 }
