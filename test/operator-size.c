@@ -26,12 +26,11 @@ int main(int argc, char** argv) {
       xnn_run_operator(op, NULL);
       break;
     case 1:
-      xnn_create_add_nd_f32(
-        0.0f, 0.0f,
-        0, &op);
+      xnn_create_binary_elementwise_nd(
+        xnn_binary_add, xnn_datatype_fp32, NULL, NULL, NULL, 0, &op);
       break;
     case 2:
-      xnn_setup_add_nd_f32(
+      xnn_setup_binary_elementwise_nd(
         op, NULL, NULL, NULL);
       break;
     case 3:
@@ -97,14 +96,6 @@ int main(int argc, char** argv) {
       xnn_setup_deconvolution2d_nhwc_f32(
         op, NULL, NULL);
       break;
-    case 13:
-      xnn_create_divide_nd_f32(
-        0.0f, 0.0f, 0, &op);
-      break;
-    case 14:
-      xnn_setup_divide_nd_f32(
-        op, NULL, NULL, NULL);
-      break;
     case 15:
       xnn_create_fully_connected_nc_f32(
         0, 0, 0, 0,
@@ -147,31 +138,6 @@ int main(int argc, char** argv) {
       xnn_setup_max_pooling2d_nhwc_f32(
         op, NULL, NULL);
       break;
-    case 23:
-      xnn_create_maximum_nd_f32(
-        0, &op);
-      break;
-    case 24:
-      xnn_setup_maximum_nd_f32(
-        op, NULL, NULL, NULL);
-      break;
-    case 25:
-      xnn_create_minimum_nd_f32(
-        0, &op);
-      break;
-    case 26:
-      xnn_setup_minimum_nd_f32(
-        op, NULL, NULL, NULL);
-      break;
-    case 27:
-      xnn_create_multiply_nd_f32(
-        0.0f, 0.0f,
-        0, &op);
-      break;
-    case 28:
-      xnn_setup_multiply_nd_f32(
-        op, NULL, NULL, NULL);
-      break;
     case 29:
       xnn_create_prelu_nc_f32(
         0, 0, 0, 0,
@@ -207,15 +173,6 @@ int main(int argc, char** argv) {
     case 36:
       xnn_setup_softmax_nc_f32(
         op, NULL, NULL);
-      break;
-    case 37:
-      xnn_create_subtract_nd_f32(
-        0.0f, 0.0f,
-        0, &op);
-      break;
-    case 38:
-      xnn_setup_subtract_nd_f32(
-        op, NULL, NULL, NULL);
       break;
     case 39:
       xnn_create_channel_shuffle_nc_x32(

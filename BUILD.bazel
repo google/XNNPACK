@@ -17,7 +17,6 @@ load(
     "xnnpack_min_size_copts",
     "xnnpack_slinky_deps",
     "xnnpack_slinky_srcs",
-    "xnnpack_std_cxxopts",
     "xnnpack_transitive_source_list",
     "xnnpack_visibility",
 )
@@ -87,22 +86,21 @@ SUBGRAPH_SRCS = [
     "src/runtime.c",
     "src/subgraph.c",
     "src/subgraph/abs.c",
-    "src/subgraph/add2.c",
     "src/subgraph/argmax-pooling-2d.c",
     "src/subgraph/average-pooling-2d.c",
     "src/subgraph/bankers-rounding.c",
     "src/subgraph/batch-matrix-multiply.c",
+    "src/subgraph/binary.c",
     "src/subgraph/ceiling.c",
     "src/subgraph/clamp.c",
     "src/subgraph/concatenate.c",
     "src/subgraph/convert.c",
     "src/subgraph/convolution-2d.c",
     "src/subgraph/copy.c",
-    "src/subgraph/copysign.c",
     "src/subgraph/deconvolution-2d.c",
+    "src/subgraph/deprecated.c",
     "src/subgraph/depth-to-space-2d.c",
     "src/subgraph/depthwise-convolution-2d.c",
-    "src/subgraph/divide.c",
     "src/subgraph/elu.c",
     "src/subgraph/even-split.c",
     "src/subgraph/exp.c",
@@ -116,9 +114,6 @@ SUBGRAPH_SRCS = [
     "src/subgraph/leaky-relu.c",
     "src/subgraph/log.c",
     "src/subgraph/max-pooling-2d.c",
-    "src/subgraph/maximum2.c",
-    "src/subgraph/minimum2.c",
-    "src/subgraph/multiply2.c",
     "src/subgraph/negate.c",
     "src/subgraph/prelu.c",
     "src/subgraph/reciprocal-square-root.c",
@@ -130,13 +125,11 @@ SUBGRAPH_SRCS = [
     "src/subgraph/space-to-depth-2d.c",
     "src/subgraph/square-root.c",
     "src/subgraph/square.c",
-    "src/subgraph/squared-difference.c",
     "src/subgraph/static-constant-pad.c",
     "src/subgraph/static-mean.c",
     "src/subgraph/static-resize-bilinear-2d.c",
     "src/subgraph/static-slice.c",
     "src/subgraph/static-transpose.c",
-    "src/subgraph/subtract.c",
     "src/subgraph/tanh.c",
     "src/subgraph/unpooling-2d.c",
     "src/subgraph/validation.c",
@@ -161,26 +154,26 @@ MICROKERNEL_DEFS = [
     "src/f16-maxpool/f16-maxpool-minmax.h",
     "src/f16-pavgpool/f16-pavgpool-minmax.h",
     "src/f16-vabs/f16-vabs.h",
-    "src/f16-vbinary/f16-vadd-minmax.h",
-    "src/f16-vbinary/f16-vaddc-minmax.h",
+    "src/f16-vbinary/f16-vadd.h",
+    "src/f16-vbinary/f16-vaddc.h",
     "src/f16-vbinary/f16-vcmul.h",
-    "src/f16-vbinary/f16-vdiv-minmax.h",
-    "src/f16-vbinary/f16-vdivc-minmax.h",
+    "src/f16-vbinary/f16-vdiv.h",
+    "src/f16-vbinary/f16-vdivc.h",
     "src/f16-vbinary/f16-vmax.h",
     "src/f16-vbinary/f16-vmaxc.h",
     "src/f16-vbinary/f16-vmin.h",
     "src/f16-vbinary/f16-vminc.h",
-    "src/f16-vbinary/f16-vmul-minmax.h",
-    "src/f16-vbinary/f16-vmulc-minmax.h",
+    "src/f16-vbinary/f16-vmul.h",
+    "src/f16-vbinary/f16-vmulc.h",
     "src/f16-vbinary/f16-vprelu.h",
     "src/f16-vbinary/f16-vpreluc.h",
-    "src/f16-vbinary/f16-vrdivc-minmax.h",
+    "src/f16-vbinary/f16-vrdivc.h",
     "src/f16-vbinary/f16-vrpreluc.h",
-    "src/f16-vbinary/f16-vrsubc-minmax.h",
+    "src/f16-vbinary/f16-vrsubc.h",
     "src/f16-vbinary/f16-vsqrdiff.h",
     "src/f16-vbinary/f16-vsqrdiffc.h",
-    "src/f16-vbinary/f16-vsub-minmax.h",
-    "src/f16-vbinary/f16-vsubc-minmax.h",
+    "src/f16-vbinary/f16-vsub.h",
+    "src/f16-vbinary/f16-vsubc.h",
     "src/f16-vclamp/f16-vclamp.h",
     "src/f16-velu/f16-velu.h",
     "src/f16-vhswish/f16-vhswish.h",
@@ -199,38 +192,28 @@ MICROKERNEL_DEFS = [
     "src/f32-maxpool/f32-maxpool-minmax.h",
     "src/f32-pavgpool/f32-pavgpool-minmax.h",
     "src/f32-vabs/f32-vabs.h",
-    "src/f32-vbinary/f32-vadd-minmax.h",
     "src/f32-vbinary/f32-vadd.h",
-    "src/f32-vbinary/f32-vaddc-minmax.h",
     "src/f32-vbinary/f32-vaddc.h",
     "src/f32-vbinary/f32-vcmul.h",
     "src/f32-vbinary/f32-vcopysign.h",
     "src/f32-vbinary/f32-vcopysignc.h",
-    "src/f32-vbinary/f32-vdiv-minmax.h",
     "src/f32-vbinary/f32-vdiv.h",
-    "src/f32-vbinary/f32-vdivc-minmax.h",
     "src/f32-vbinary/f32-vdivc.h",
     "src/f32-vbinary/f32-vmax.h",
     "src/f32-vbinary/f32-vmaxc.h",
     "src/f32-vbinary/f32-vmin.h",
     "src/f32-vbinary/f32-vminc.h",
-    "src/f32-vbinary/f32-vmul-minmax.h",
     "src/f32-vbinary/f32-vmul.h",
-    "src/f32-vbinary/f32-vmulc-minmax.h",
     "src/f32-vbinary/f32-vmulc.h",
     "src/f32-vbinary/f32-vprelu.h",
     "src/f32-vbinary/f32-vpreluc.h",
     "src/f32-vbinary/f32-vrcopysignc.h",
-    "src/f32-vbinary/f32-vrdivc-minmax.h",
     "src/f32-vbinary/f32-vrdivc.h",
     "src/f32-vbinary/f32-vrpreluc.h",
-    "src/f32-vbinary/f32-vrsubc-minmax.h",
     "src/f32-vbinary/f32-vrsubc.h",
     "src/f32-vbinary/f32-vsqrdiff.h",
     "src/f32-vbinary/f32-vsqrdiffc.h",
-    "src/f32-vbinary/f32-vsub-minmax.h",
     "src/f32-vbinary/f32-vsub.h",
-    "src/f32-vbinary/f32-vsubc-minmax.h",
     "src/f32-vbinary/f32-vsubc.h",
     "src/f32-vclamp/f32-vclamp.h",
     "src/f32-velu/f32-velu.h",
@@ -563,6 +546,7 @@ xnnpack_cc_library(
         ":microparams_init",
         ":packing",
         ":prod_microkernels",
+        ":xnnpack_h",
         "@FP16",
     ] + select({
         ":cpuinfo_enabled": ["@cpuinfo"],
@@ -621,13 +605,15 @@ xnnpack_cc_library(
         ":microparams",
         ":unaligned",
         ":xnnpack_h",
-        "@FP16",
     ],
 )
 
 xnnpack_cc_library(
     name = "node_type",
-    hdrs = ["src/xnnpack/node-type.h"],
+    hdrs = [
+        "src/xnnpack/node-type.h",
+        "src/xnnpack/node-type-defs.h",
+    ],
     deps = [
         ":common",
     ],
@@ -635,7 +621,10 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "allocation_type",
-    hdrs = ["src/xnnpack/allocation-type.h"],
+    hdrs = [
+        "src/xnnpack/allocation-type.h",
+        "src/xnnpack/allocation-type-defs.h",
+    ],
     deps = [
         ":common",
     ],
@@ -643,7 +632,10 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "operator_type",
-    hdrs = ["src/xnnpack/operator-type.h"],
+    hdrs = [
+        "src/xnnpack/operator-type.h",
+        "src/xnnpack/operator-type-defs.h",
+    ],
     deps = [
         ":common",
     ],
@@ -651,7 +643,10 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "microkernel_type",
-    hdrs = ["src/xnnpack/microkernel-type.h"],
+    hdrs = [
+        "src/xnnpack/microkernel-type.h",
+        "src/xnnpack/microkernel-type-defs.h",
+    ],
     deps = [
         ":common",
     ],
@@ -798,18 +793,6 @@ filegroup(
                   "fi",
             compatible_with = [],
         ),
-        genrule(
-            name = arch + "_non_prod_microkernel_srcs",
-            srcs = non_prod_c_srcs_for_arch(arch),
-            outs = [arch + "_non_prod_microkernels.c"],
-            cmd = "if [ -z \"$(SRCS)\" ]; then " +
-                  "  echo \"\" > $@; " +
-                  "else " +
-                  "  cat $(SRCS) | grep -E '^#include ' | sort -u > $@; " +
-                  "  cat $(SRCS) | grep -v -E '^#include ' >> $@; " +
-                  "fi",
-            compatible_with = [],
-        ),
         xnnpack_cc_library_for_arch(
             name = arch + "_prod_microkernels",
             srcs = prod_asm_srcs_for_arch(arch) + [":" + arch + "_prod_microkernel_srcs"],
@@ -821,7 +804,7 @@ filegroup(
         ),
         xnnpack_cc_library_for_arch(
             name = arch + "_all_microkernels",
-            srcs = non_prod_asm_srcs_for_arch(arch) + [":" + arch + "_non_prod_microkernel_srcs"],
+            srcs = non_prod_asm_srcs_for_arch(arch) + non_prod_c_srcs_for_arch(arch),
             arch = arch,
             compatible_with = [],
             defines = xnnpack_configurable_defines(),
@@ -1058,9 +1041,9 @@ xnnpack_cc_library(
         ":logging",
         ":math",
         ":operator_h",
+        ":operator_type",
         ":params",
         ":xnnpack_h",
-        "@FP16",
     ],
 )
 
@@ -1252,21 +1235,6 @@ xnnpack_cc_library(
         ":logging",
         ":params",
         "@pthreadpool",
-    ],
-)
-
-############################# End-to-end benchmarks ############################
-
-# Helper library for benchmarks to depend on.
-xnnpack_cc_library(
-    name = "models_h",
-    hdrs = ["src/xnnpack/models.h"],
-    copts = xnnpack_std_cxxopts(),
-    deps = [
-        ":XNNPACK",
-        ":aligned_allocator",
-        ":common",
-        "@FP16",
     ],
 )
 

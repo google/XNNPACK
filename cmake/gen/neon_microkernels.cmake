@@ -48,25 +48,24 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-neon-lane-ld64.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-neon-u32.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-neon-u32.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-lut64-p2-u8.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-neon-c16.c
   src/f32-rminmax/gen/f32-rmax-neon-u16-acc4.c
   src/f32-rminmax/gen/f32-rminmax-neon-u16-acc4.c
   src/f32-rsum/gen/f32-rsum-neon-u16-acc4.c
   src/f32-spmm/gen/f32-spmm-32x1-minmax-neon.c
-  src/f32-vbinary/gen/f32-vadd-minmax-neon-u8.c
-  src/f32-vbinary/gen/f32-vaddc-minmax-neon-u8.c
+  src/f32-vbinary/gen/f32-vadd-neon-u8.c
+  src/f32-vbinary/gen/f32-vaddc-neon-u8.c
   src/f32-vbinary/gen/f32-vmax-neon-u8.c
   src/f32-vbinary/gen/f32-vmaxc-neon-u8.c
   src/f32-vbinary/gen/f32-vmin-neon-u8.c
   src/f32-vbinary/gen/f32-vminc-neon-u8.c
-  src/f32-vbinary/gen/f32-vmul-minmax-neon-u8.c
-  src/f32-vbinary/gen/f32-vmulc-minmax-neon-u8.c
-  src/f32-vbinary/gen/f32-vrsubc-minmax-neon-u8.c
+  src/f32-vbinary/gen/f32-vmul-neon-u8.c
+  src/f32-vbinary/gen/f32-vmulc-neon-u8.c
+  src/f32-vbinary/gen/f32-vrsubc-neon-u8.c
   src/f32-vbinary/gen/f32-vsqrdiff-neon-u8.c
   src/f32-vbinary/gen/f32-vsqrdiffc-neon-u8.c
-  src/f32-vbinary/gen/f32-vsub-minmax-neon-u8.c
-  src/f32-vbinary/gen/f32-vsubc-minmax-neon-u8.c
+  src/f32-vbinary/gen/f32-vsub-neon-u8.c
+  src/f32-vbinary/gen/f32-vsubc-neon-u8.c
   src/f32-vclamp/gen/f32-vclamp-neon-u16.c
   src/f32-vcmul/gen/f32-vcmul-neon-u8.c
   src/f32-vcopysign/gen/f32-vcopysign-neon.c
@@ -364,27 +363,12 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-neon-u24.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-lut64-p2-u4.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-lut64-p2-u8-acc2.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-lut64-p2-u12-acc2.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-lut64-p2-u12-acc3.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-lut64-p2-u12.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-lut64-p2-u16-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-lut64-p2-u16-acc4.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-lut64-p2-u16.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-lut64-p2-u20-acc2.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-lut64-p2-u20-acc5.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-lut64-p2-u20.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u4.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u8-acc2.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u8.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u12-acc2.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u12-acc3.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u12.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u16-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u16-acc4.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u16.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u20-acc2.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u20-acc5.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-neon-rr2-p5-u20.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-neon-c32.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-neon-c64.c
   src/f32-rminmax/gen/f32-rmax-neon-u4.c
@@ -416,25 +400,25 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/f32-spmm/gen/f32-spmm-16x1-minmax-neon.c
   src/f32-spmm/gen/f32-spmm-32x1-minmax-neon-pipelined.c
   src/f32-spmm/gen/f32-spmm-32x1-minmax-neon-x2.c
-  src/f32-vbinary/gen/f32-vadd-minmax-neon-u4.c
-  src/f32-vbinary/gen/f32-vaddc-minmax-neon-u4.c
+  src/f32-vbinary/gen/f32-vadd-neon-u4.c
+  src/f32-vbinary/gen/f32-vaddc-neon-u4.c
   src/f32-vbinary/gen/f32-vmax-neon-u4.c
   src/f32-vbinary/gen/f32-vmaxc-neon-u4.c
   src/f32-vbinary/gen/f32-vmin-neon-u4.c
   src/f32-vbinary/gen/f32-vminc-neon-u4.c
-  src/f32-vbinary/gen/f32-vmul-minmax-neon-u4.c
-  src/f32-vbinary/gen/f32-vmulc-minmax-neon-u4.c
+  src/f32-vbinary/gen/f32-vmul-neon-u4.c
+  src/f32-vbinary/gen/f32-vmulc-neon-u4.c
   src/f32-vbinary/gen/f32-vprelu-neon-u4.c
   src/f32-vbinary/gen/f32-vprelu-neon-u8.c
   src/f32-vbinary/gen/f32-vpreluc-neon-u4.c
   src/f32-vbinary/gen/f32-vpreluc-neon-u8.c
   src/f32-vbinary/gen/f32-vrpreluc-neon-u4.c
   src/f32-vbinary/gen/f32-vrpreluc-neon-u8.c
-  src/f32-vbinary/gen/f32-vrsubc-minmax-neon-u4.c
+  src/f32-vbinary/gen/f32-vrsubc-neon-u4.c
   src/f32-vbinary/gen/f32-vsqrdiff-neon-u4.c
   src/f32-vbinary/gen/f32-vsqrdiffc-neon-u4.c
-  src/f32-vbinary/gen/f32-vsub-minmax-neon-u4.c
-  src/f32-vbinary/gen/f32-vsubc-minmax-neon-u4.c
+  src/f32-vbinary/gen/f32-vsub-neon-u4.c
+  src/f32-vbinary/gen/f32-vsubc-neon-u4.c
   src/f32-vclamp/gen/f32-vclamp-neon-u4.c
   src/f32-vclamp/gen/f32-vclamp-neon-u8.c
   src/f32-vcmul/gen/f32-vcmul-neon-u4.c

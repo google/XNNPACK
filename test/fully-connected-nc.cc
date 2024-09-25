@@ -708,28 +708,6 @@ TEST(FULLY_CONNECTED_NC_F32, weights_cache_unit_batch_transpose_weights) {
     .TestF32();
 }
 
-#if !XNN_ARCH_WASM && XNN_ENABLE_JIT //  TODO(b/290880274)
-TEST(FULLY_CONNECTED_NC_F32, unit_batch_with_jit) {
-  FullyConnectedOperatorTester()
-    .batch_size(1)
-    .input_channels(22)
-    .output_channels(19)
-    .use_jit(true)
-    .iterations(3)
-    .TestF32();
-}
-
-TEST(FULLY_CONNECTED_NC_F32, small_batch_with_jit) {
-  FullyConnectedOperatorTester()
-    .batch_size(12)
-    .input_channels(22)
-    .output_channels(19)
-    .use_jit(true)
-    .iterations(3)
-    .TestF32();
-}
-#endif  // !XNN_ARCH_WASM && XNN_ENABLE_JIT
-
 TEST(FULLY_CONNECTED_NC_F32_QC4W, unit_batch) {
   FullyConnectedOperatorTester()
     .batch_size(1)
