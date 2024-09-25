@@ -42,7 +42,6 @@ void xnn_f32_vrdivc_ukernel__scalar_u4(
     float vacc3 = vb / va3;
 
 
-
     output[0] = vacc0;
     output[1] = vacc1;
     output[2] = vacc2;

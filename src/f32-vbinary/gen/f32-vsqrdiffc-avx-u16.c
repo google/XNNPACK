@@ -43,7 +43,6 @@ void xnn_f32_vsqrdiffc_ukernel__avx_u16(
     vacc0 = _mm256_mul_ps(vacc0, vacc0);
     vacc1 = _mm256_mul_ps(vacc1, vacc1);
 
-
     _mm256_storeu_ps(output, vacc0);
     _mm256_storeu_ps(output + 8, vacc1);
     output += 16;

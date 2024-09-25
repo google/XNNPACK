@@ -43,7 +43,6 @@ void xnn_f32_vpreluc_ukernel__avx_u16(
     vacc0 = _mm256_blendv_ps(va0, vacc0, va0);
     vacc1 = _mm256_blendv_ps(va1, vacc1, va1);
 
-
     _mm256_storeu_ps(output, vacc0);
     _mm256_storeu_ps(output + 8, vacc1);
     output += 16;

@@ -34,7 +34,6 @@ void xnn_f32_vminc_ukernel__hvx_u64(
     HVX_Vector vacc1 = xnn_min_f32(va1, vb);
 
 
-
    xnn_storeu_f32(output, vacc0);
     xnn_storeu_f32(output + 32, vacc1);
     output += 64;

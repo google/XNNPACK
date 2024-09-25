@@ -1251,7 +1251,7 @@ static void init_qu8_dwconv_config(void) {
   #endif
 }
 
-struct xnn_dwconv_config* xnn_init_f16_dwconv_config() {
+const struct xnn_dwconv_config* xnn_init_f16_dwconv_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
@@ -1260,7 +1260,7 @@ struct xnn_dwconv_config* xnn_init_f16_dwconv_config() {
   return f16_dwconv_config;
 }
 
-struct xnn_dwconv_config* xnn_init_f32_dwconv_config() {
+const struct xnn_dwconv_config* xnn_init_f32_dwconv_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
@@ -1269,7 +1269,7 @@ struct xnn_dwconv_config* xnn_init_f32_dwconv_config() {
   return f32_dwconv_config;
 }
 
-struct xnn_dwconv_config* xnn_init_qs8_qc8w_dwconv_config() {
+const struct xnn_dwconv_config* xnn_init_qs8_qc8w_dwconv_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
@@ -1278,7 +1278,7 @@ struct xnn_dwconv_config* xnn_init_qs8_qc8w_dwconv_config() {
   return qs8_qc8w_dwconv_config;
 }
 
-struct xnn_dwconv_config* xnn_init_qs8_dwconv_config() {
+const struct xnn_dwconv_config* xnn_init_qs8_dwconv_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
@@ -1287,7 +1287,7 @@ struct xnn_dwconv_config* xnn_init_qs8_dwconv_config() {
   return qs8_dwconv_config;
 }
 
-struct xnn_dwconv_config* xnn_init_qu8_dwconv_config() {
+const struct xnn_dwconv_config* xnn_init_qu8_dwconv_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;

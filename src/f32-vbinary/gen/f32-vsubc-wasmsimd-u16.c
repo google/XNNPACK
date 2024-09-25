@@ -43,7 +43,6 @@ void xnn_f32_vsubc_ukernel__wasmsimd_u16(
     v128_t vy3 = wasm_f32x4_sub(va3, vb);
 
 
-
     wasm_v128_store(output, vy0);
     wasm_v128_store(output + 4, vy1);
     wasm_v128_store(output + 8, vy2);
@@ -56,7 +55,6 @@ void xnn_f32_vsubc_ukernel__wasmsimd_u16(
 
     v128_t vy = wasm_f32x4_sub(va, vb);
 
-
     wasm_v128_store(output, vy);
     output += 4;
   }
@@ -64,7 +62,6 @@ void xnn_f32_vsubc_ukernel__wasmsimd_u16(
     const v128_t va = wasm_v128_load(input_a);
 
     v128_t vy = wasm_f32x4_sub(va, vb);
-
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vy, 0);

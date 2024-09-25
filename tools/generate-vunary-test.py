@@ -55,7 +55,6 @@ OP_TYPES = {
     "vsigmoid": "Sigmoid",
     "vsqr": "Square",
     "vsqrt": "SquareRoot",
-    "vsqrtshift": "SquareRootShift",
     "vtanh": "TanH",
 }
 
