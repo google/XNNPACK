@@ -52,9 +52,8 @@ void xnn_qu8_vadd_minmax_ukernel__rvv_u1v(
     acc_i32v = __riscv_vadd_vv_i32m4(acc_i32v, b_i32v, n);
     vint32m4_t out_i32v = __riscv_vsra_vx_i32m4(acc_i32v, shift, n);
     out_i32v = __riscv_vadd_vx_i32m4(out_i32v, output_zero_point, n);
-    out_i32v = __riscv_vmax_vx_i32m4(out_i32v, output_min, n);
-    out_i32v = __riscv_vmin_vx_i32m4(out_i32v, output_max, n);
-    vint16m2_t out_i16v = __riscv_vncvt_x_x_w_i16m2(out_i32v, n);
+    vint16m2_t out_i16v = __riscv_vnclip_wx_i16m2(out_i32v, output_max, __RISCV_VXRM_RNE, n);
+    out_i16v = __riscv_vmax_vx_i16m2(out_i16v, output_min, n);
     a_u16v = __riscv_vreinterpret_v_i16m2_u16m2(out_i16v);
     vuint8m1_t out_u8v = __riscv_vncvt_x_x_w_u8m1(a_u16v, n);
     __riscv_vse8_v_u8m1(output, out_u8v, n); output += n;
