@@ -26,6 +26,50 @@
 #include "xnnpack/vlrelu.h"
 #include <benchmark/benchmark.h>
 
+template <typename T>
+struct UniformDistribution {
+  std::uniform_real_distribution<T> dist{-10.0f, 10.0f};
+
+  template <class Generator>
+  T operator()(Generator& g) {
+    return dist(g);
+  }
+};
+
+template <>
+struct UniformDistribution<xnn_float16> {
+  std::uniform_real_distribution<float> dist{-10.0f, 10.0f};
+
+  template <class Generator>
+  xnn_float16 operator()(Generator& g) {
+    return dist(g);
+  }
+};
+
+template <>
+struct UniformDistribution<int8_t> {
+  std::uniform_int_distribution<int> dist{
+      std::numeric_limits<int8_t>::lowest(),
+      std::numeric_limits<int8_t>::max()};
+
+  template <class Generator>
+  int8_t operator()(Generator& g) {
+    return dist(g);
+  }
+};
+
+template <>
+struct UniformDistribution<uint8_t> {
+  std::uniform_int_distribution<int> dist{
+      std::numeric_limits<uint8_t>::lowest(),
+      std::numeric_limits<uint8_t>::max()};
+
+  template <class Generator>
+  uint8_t operator()(Generator& g) {
+    return dist(g);
+  }
+};
+
 template <typename T, typename InitFn, typename... Args>
 T make_params(InitFn init_fn, Args... args) {
   T result;
@@ -36,96 +80,70 @@ T make_params(InitFn init_fn, Args... args) {
 template <typename TIn, typename Params>
 struct Config {
   Params params;
-  static constexpr TIn min = std::numeric_limits<TIn>::lowest();
-  static constexpr TIn max = std::numeric_limits<TIn>::max();
 };
 
 template <>
 struct Config<xnn_float16, xnn_f16_minmax_params> {
   xnn_f16_minmax_params params = {{-1.0f, 1.0f}};
-  static constexpr float min = -std::numeric_limits<float>::infinity();
-  static constexpr float max = +std::numeric_limits<float>::infinity();
 };
 
 template <>
 struct Config<float, xnn_f32_minmax_params> {
   xnn_f32_minmax_params params = {{-1.0f, 1.0f}};
-  static constexpr float min = -std::numeric_limits<float>::infinity();
-  static constexpr float max = +std::numeric_limits<float>::infinity();
 };
 
 template <>
 struct Config<xnn_float16, xnn_f16_elu_params> {
   xnn_f16_elu_params params = {{1.0f, 1.0f, 1.0f}};
-  static constexpr float min = -std::numeric_limits<float>::infinity();
-  static constexpr float max = +std::numeric_limits<float>::infinity();
 };
 
 template <>
 struct Config<float, xnn_f32_elu_params> {
   xnn_f32_elu_params params = {{1.0f, 1.0f, 1.0f}};
-  static constexpr float min = -std::numeric_limits<float>::infinity();
-  static constexpr float max = +std::numeric_limits<float>::infinity();
 };
 
 template <>
 struct Config<xnn_float16, xnn_f16_lrelu_params> {
   xnn_f16_lrelu_params params = {{0.01f}};
-  static constexpr float min = -std::numeric_limits<float>::infinity();
-  static constexpr float max = +std::numeric_limits<float>::infinity();
 };
 
 template <>
 struct Config<float, xnn_f32_lrelu_params> {
   xnn_f32_lrelu_params params = {{0.01f}};
-  static constexpr float min = -std::numeric_limits<float>::infinity();
-  static constexpr float max = +std::numeric_limits<float>::infinity();
 };
 
 template <>
 struct Config<int8_t, xnn_s8_minmax_params> {
   xnn_s8_minmax_params params = {{-100, 100}};
-  static constexpr int8_t min = std::numeric_limits<int8_t>::lowest();
-  static constexpr int8_t max = std::numeric_limits<int8_t>::max();
 };
 
 template <>
 struct Config<uint8_t, xnn_u8_minmax_params> {
   xnn_u8_minmax_params params = {{0, 200}};
-  static constexpr uint8_t min = std::numeric_limits<uint8_t>::lowest();
-  static constexpr uint8_t max = std::numeric_limits<uint8_t>::max();
 };
 
 template <>
 struct Config<int8_t, xnn_qs8_lrelu_params> {
   xnn_qs8_lrelu_params params = make_params<xnn_qs8_lrelu_params>(
       xnn_init_qs8_lrelu_scalar_params, 0.1f, 1.0f, 1, 1);
-  static constexpr int8_t min = std::numeric_limits<int8_t>::lowest();
-  static constexpr int8_t max = std::numeric_limits<int8_t>::max();
 };
 
 template <>
 struct Config<uint8_t, xnn_qu8_lrelu_params> {
   xnn_qu8_lrelu_params params = make_params<xnn_qu8_lrelu_params>(
       xnn_init_qu8_lrelu_scalar_params, 0.1f, 1.0f, 1, 1);
-  static constexpr int8_t min = std::numeric_limits<int8_t>::lowest();
-  static constexpr int8_t max = std::numeric_limits<int8_t>::max();
 };
 
 template <>
 struct Config<int8_t, xnn_qs8_hswish_params> {
   xnn_qs8_hswish_params params = make_params<xnn_qs8_hswish_params>(
       xnn_init_qs8_hswish_scalar_params, 0, 0, 1.0f, 1.0f);
-  static constexpr int8_t min = std::numeric_limits<int8_t>::lowest();
-  static constexpr int8_t max = std::numeric_limits<int8_t>::max();
 };
 
 template <>
 struct Config<uint8_t, xnn_qu8_hswish_params> {
   xnn_qu8_hswish_params params = make_params<xnn_qu8_hswish_params>(
       xnn_init_qu8_hswish_scalar_params, 0, 0, 1.0f, 1.0f);
-  static constexpr int8_t min = std::numeric_limits<int8_t>::lowest();
-  static constexpr int8_t max = std::numeric_limits<int8_t>::max();
 };
 
 // Microkernel function, templated on the `params` type.
@@ -146,13 +164,11 @@ void vunary(benchmark::State& state, uint64_t arch_flags,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng =
-      std::bind(std::uniform_real_distribution<float>(config.min, config.max),
-                std::ref(rng));
+  UniformDistribution<TIn> dist;
 
   std::vector<TIn, AlignedAllocator<TIn, 64>> x(num_elements);
   std::vector<TOut, AlignedAllocator<TOut, 64>> y(num_elements);
-  std::generate(x.begin(), x.end(), f32rng);
+  std::generate(x.begin(), x.end(), [&]() { return dist(rng); });
   std::fill(y.begin(), y.end(), 0);
 
   for (auto _ : state) {

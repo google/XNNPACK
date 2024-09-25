@@ -43,7 +43,6 @@ void xnn_f32_vpreluc_ukernel__neon_u8(
     vacc0 = vbslq_f32(vm0, vacc0, va0);
     vacc1 = vbslq_f32(vm1, vacc1, va1);
 
-
     vst1q_f32(output, vacc0); output += 4;
     vst1q_f32(output, vacc1); output += 4;
   }
@@ -54,7 +53,6 @@ void xnn_f32_vpreluc_ukernel__neon_u8(
     const uint32x4_t vm = vcltq_s32(vreinterpretq_s32_f32(va), vmovq_n_s32(0));
     vacc = vbslq_f32(vm, vacc, va);
 
-
     vst1q_f32(output, vacc); output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -63,7 +61,6 @@ void xnn_f32_vpreluc_ukernel__neon_u8(
     float32x4_t vacc = vmulq_f32(va, vb);
     const uint32x4_t vm = vcltq_s32(vreinterpretq_s32_f32(va), vmovq_n_s32(0));
     vacc = vbslq_f32(vm, vacc, va);
-
 
     float32x2_t vacc_lo = vget_low_f32(vacc);
     if (batch & (2 * sizeof(float))) {

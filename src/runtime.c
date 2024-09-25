@@ -464,9 +464,8 @@ enum xnn_status xnn_create_runtime_v4(
   }
 
   if (workspace == NULL) {
-    xnn_log_error("failed to create runtime: workspace is NULL");
-    status = xnn_status_invalid_parameter;
-    goto error;
+    xnn_log_debug("Allocating non-shared workspace");
+    workspace = xnn_allocate_zero_simd_memory(sizeof(struct xnn_workspace));
   }
 
   const uint32_t optimization_flags = XNN_FLAG_HINT_SPARSE_INFERENCE | XNN_FLAG_HINT_FP16_INFERENCE |

@@ -8,7 +8,6 @@ $assert BATCH_TILE >= 16
 $SIMD_TILE = BATCH_TILE // 16
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB", "SQRDIFF", "PRELU"]
-$assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
 #include <immintrin.h>
@@ -38,24 +37,18 @@ $  "SUB": "_mm512_maskz_sub_ps",
 $  "SQRDIFF": "_mm512_maskz_sub_ps",
 $  "PRELU": "_mm512_maskz_mul_ps",
 $}[OP]
-$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
-void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__avx512f_u${BATCH_TILE}(
+void xnn_f32_v${OP.lower()}_ukernel__avx512f_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,
     const float* input_b,
     float* output,
-    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input_a != NULL);
   assert(input_b != NULL);
   assert(output != NULL);
-
-  $if ACTIVATION == "MINMAX":
-    const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
-    const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
 
   $if OP == "PRELU":
     const __m512 vzero = _mm512_setzero_ps();
@@ -82,13 +75,6 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__avx512f_u${BATCH_TILE}(
           $for N in range(SIMD_TILE):
             vacc${ABC[N]} = _mm512_mul_ps(vacc${ABC[N]}, vacc${ABC[N]});
 
-      $if ACTIVATION == "MINMAX":
-        $for N in range(SIMD_TILE):
-          vacc${ABC[N]} = _mm512_max_ps(voutput_min, vacc${ABC[N]});
-
-        $for N in range(SIMD_TILE):
-          vacc${ABC[N]} = _mm512_min_ps(voutput_max, vacc${ABC[N]});
-
       _mm512_storeu_ps(output, vacc${ABC[0]});
       $for N in range(1, SIMD_TILE):
         _mm512_storeu_ps(output + ${N * 16}, vacc${ABC[N]});
@@ -108,10 +94,6 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__avx512f_u${BATCH_TILE}(
 
       $if OP == "SQRDIFF":
         vacc = _mm512_mul_ps(vacc, vacc);
-
-    $if ACTIVATION == "MINMAX":
-      vacc = _mm512_max_ps(voutput_min, vacc);
-      vacc = _mm512_min_ps(voutput_max, vacc);
 
     _mm512_storeu_ps(output, vacc);
     output += 16;
@@ -133,9 +115,6 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__avx512f_u${BATCH_TILE}(
       $if OP == "SQRDIFF":
         vacc = _mm512_maskz_mul_ps(vmask, vacc, vacc);
 
-    $if ACTIVATION == "MINMAX":
-      vacc = _mm512_maskz_max_ps(vmask, voutput_min, vacc);
-      vacc = _mm512_maskz_min_ps(vmask, voutput_max, vacc);
     _mm512_mask_storeu_ps(output, vmask, vacc);
   }
 }

@@ -40,7 +40,6 @@ void xnn_f32_vrpreluc_ukernel__scalar_u2(
     vacc0 = vb < 0.0f ? vacc0 : vb;
     vacc1 = vb < 0.0f ? vacc1 : vb;
 
-
     output[0] = vacc0;
     output[1] = vacc1;
     output += 2;

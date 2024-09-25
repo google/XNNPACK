@@ -7,6 +7,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+
 #include <assert.h>
 
 #include <immintrin.h>
@@ -38,7 +39,6 @@ void xnn_f32_vsqrdiffc_ukernel__avx512f_u16(
     __m512 vacc0 = _mm512_sub_ps(va0, vb);
 
     vacc0 = _mm512_mul_ps(vacc0, vacc0);
-
 
     _mm512_storeu_ps(output, vacc0);
     output += 16;

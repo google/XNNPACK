@@ -44,7 +44,6 @@ void xnn_f16_vminc_ukernel__avx512fp16_u32(
     __m512h vacc0 = _mm512_min_ph(va0, vb);
 
 
-
     _mm512_storeu_ph(o, vacc0);
     o += 32;
   }

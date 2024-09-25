@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2020 Google LLC
+# Copyright 2024 Google LLC
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
@@ -25,17 +25,17 @@ tools/xngen src/f32-vunary/simd.c.in -D OP=ABS -D ARCH=scalar -D BATCH_TILES="1,
 tools/xngen src/f32-vunary/simd.c.in -D OP=NEG -D ARCH=scalar -D BATCH_TILES="1,2,4" -o src/f32-vunary/gen/f32-vneg-scalar.c
 tools/xngen src/f32-vunary/simd.c.in -D OP=SQR -D ARCH=scalar -D BATCH_TILES="1,2,4" -o src/f32-vunary/gen/f32-vsqr-scalar.c
 
-################################# x86 128-bit #################################
+################################# x86 SSE2 #################################
 tools/xngen src/f32-vunary/simd.c.in -D OP=ABS -D ARCH=sse2 -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vabs-sse2.c
 tools/xngen src/f32-vunary/simd.c.in -D OP=NEG -D ARCH=sse2 -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vneg-sse2.c
 tools/xngen src/f32-vunary/simd.c.in -D OP=SQR -D ARCH=sse2 -D BATCH_TILES="4,8,12" -o src/f32-vunary/gen/f32-vsqr-sse2.c
 
-################################# x86 256-bit #################################
+################################# x86 AVX #################################
 tools/xngen src/f32-vunary/simd.c.in -D OP=ABS -D ARCH=avx -D BATCH_TILES="8,16,24" -o src/f32-vunary/gen/f32-vabs-avx.c
 tools/xngen src/f32-vunary/simd.c.in -D OP=NEG -D ARCH=avx -D BATCH_TILES="8,16,24" -o src/f32-vunary/gen/f32-vneg-avx.c
 tools/xngen src/f32-vunary/simd.c.in -D OP=SQR -D ARCH=avx -D BATCH_TILES="8,16,24" -o src/f32-vunary/gen/f32-vsqr-avx.c
 
-################################# x86 512-bit #################################
+################################# x86 AVX512 #################################
 tools/xngen src/f32-vunary/simd.c.in -D OP=ABS -D ARCH=avx512f -D BATCH_TILES="16,32,48" -o src/f32-vunary/gen/f32-vabs-avx512f.c
 tools/xngen src/f32-vunary/simd.c.in -D OP=NEG -D ARCH=avx512f -D BATCH_TILES="16,32,48" -o src/f32-vunary/gen/f32-vneg-avx512f.c
 tools/xngen src/f32-vunary/simd.c.in -D OP=SQR -D ARCH=avx512f -D BATCH_TILES="16,32,48" -o src/f32-vunary/gen/f32-vsqr-avx512f.c

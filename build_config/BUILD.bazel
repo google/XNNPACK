@@ -210,6 +210,13 @@ config_setting(
 )
 
 config_setting(
+    name = "ios",
+    values = {
+        "apple_platform_type": "ios",
+    },
+)
+
+config_setting(
     name = "watchos_arm64_32",
     values = {
         "apple_platform_type": "watchos",

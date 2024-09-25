@@ -89,10 +89,11 @@ void DefineGraphWithStaticData(xnn_subgraph_t* subgraph, std::array<size_t, 4> d
     XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
+  struct xnn_binary_params params = {-std::numeric_limits<float>::infinity(),
+                                     std::numeric_limits<float>::infinity()};
   ASSERT_EQ(xnn_status_success,
-            xnn_define_add2(*subgraph, -std::numeric_limits<float>::infinity(),
-                            std::numeric_limits<float>::infinity(), input_id,
-                            static_value_id, output_id, /*flags=*/0));
+            xnn_define_binary(*subgraph, xnn_binary_add, &params, input_id,
+                              static_value_id, output_id, /*flags=*/0));
 }
 
 void DefineGraphWithPersistentTensors(xnn_subgraph_t* subgraph, std::array<size_t, 4> dims)
@@ -818,7 +819,7 @@ TEST(WORKSPACE, internally_allocated_dynamic_quantization_parameters)
   std::vector<float> input(batch_size * input_channels + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> subgraph_output(batch_size * output_channels);
   std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
-  std::vector<xnn_dynamic_quantization_params> quantization_params(3 + XNN_EXTRA_QUANTIZATION_PARAMS);
+  std::vector<xnn_quantization_params> quantization_params(3 + XNN_EXTRA_QUANTIZATION_PARAMS);
   std::vector<float> kernel_scale(output_channels);
   std::vector<float> bias(output_channels);
   std::vector<int8_t> kernel(input_channels * output_channels);

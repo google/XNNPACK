@@ -87,7 +87,7 @@ static void f16_dwconv(benchmark::State& state,
       sizeof(xnn_float16) * (w_elements + c_elements) + sizeof(void*) * i_elements);
 
   std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> w(w_elements * num_buffers);
-  std::fill(w.begin(), w.end(), UINT16_C(0));
+  std::fill(w.begin(), w.end(), 0);
   xnn_pack_f16_dwconv_ghw_w(primary_tile, 0, 0, kernel_height, kernel_width, channels,
                             channel_tile, channel_tile, /*channel_round=*/1,
                             reinterpret_cast<const uint16_t*>(k.data()),
@@ -223,7 +223,7 @@ static void f16_dwconv(benchmark::State& state,
       sizeof(xnn_float16) * (w_elements + c_elements) + sizeof(void*) * i_elements);
 
   std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> w(w_elements * num_buffers);
-  std::fill(w.begin(), w.end(), UINT16_C(0));
+  std::fill(w.begin(), w.end(), 0);
   xnn_pack_f16_dwconv_ghw_w(
     first_pass_tile, middle_pass_tile, last_pass_tile,
     kernel_height, kernel_width,
