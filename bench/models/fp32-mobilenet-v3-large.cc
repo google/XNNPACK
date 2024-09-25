@@ -32,13 +32,16 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+
   uint32_t v0 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> v0_dims = {{1, 224, 224, 3}};
   status = xnn_define_tensor_value(
     subgraph, xnn_datatype_fp32,
     v0_dims.size(), v0_dims.data(),
     /*data=*/nullptr,
-    1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &v0);
+    0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &v0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v0" << std::endl;
     return nullptr;
@@ -1514,7 +1517,7 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     subgraph, xnn_datatype_fp32,
     v123_dims.size(), v123_dims.data(),
     /*data=*/nullptr,
-    0, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &v123);
+    1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &v123);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v123" << std::endl;
     return nullptr;
@@ -3288,8 +3291,6 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, +1.0f), std::ref(rng));
   std::generate(w124_data.begin(), w124_data.end(), std::ref(f32rng));
   std::generate(w125_data.begin(), w125_data.end(), std::ref(f32rng));

@@ -13,7 +13,6 @@ xnn_subgraph_t FP32MobileNetV1();
 xnn_subgraph_t FP32MobileNetV2();
 xnn_subgraph_t FP32MobileNetV3Large();
 xnn_subgraph_t FP32MobileNetV3Small();
-
 xnn_subgraph_t QS8MobileNetV2();
 
 }  // namespace models

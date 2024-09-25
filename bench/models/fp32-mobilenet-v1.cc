@@ -32,6 +32,9 @@ xnn_subgraph_t FP32MobileNetV1() {
     return nullptr;
   }
 
+  std::random_device random_device;
+  auto rng = std::mt19937(random_device());
+
   uint32_t v0 = XNN_INVALID_VALUE_ID;
   std::array<size_t, 4> v0_dims = {{1, 224, 224, 3}};
   status = xnn_define_tensor_value(
@@ -1120,8 +1123,6 @@ xnn_subgraph_t FP32MobileNetV1() {
     return nullptr;
   }
 
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, +1.0f), std::ref(rng));
   std::generate(w30_data.begin(), w30_data.end(), std::ref(f32rng));
   std::generate(w31_data.begin(), w31_data.end(), std::ref(f32rng));
