@@ -42,7 +42,6 @@ void xnn_f32_vsqrdiffc_ukernel__sse_u8(
     vacc0 = _mm_mul_ps(vacc0, vacc0);
     vacc1 = _mm_mul_ps(vacc1, vacc1);
 
-
     _mm_storeu_ps(output, vacc0);
     _mm_storeu_ps(output + 4, vacc1);
     output += 8;

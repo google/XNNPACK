@@ -110,15 +110,6 @@ extern "C" {
 #undef XNN_UKERNEL
 #undef XNN_UKERNEL_WITH_PARAMS
 
-#define DECLARE_U64_U32_VSQRTSHIFT_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                 \
-      size_t n,                                              \
-      const uint64_t* x,                                     \
-      uint32_t* y,                                           \
-      uint32_t shift);
-
-DECLARE_U64_U32_VSQRTSHIFT_UKERNEL_FUNCTION(xnn_u64_u32_vsqrtshift_ukernel__scalar_cvtu32_sqrt_cvtu32f64_u1)
-
 
 #define DECLARE_XX_VUNARY_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                        \

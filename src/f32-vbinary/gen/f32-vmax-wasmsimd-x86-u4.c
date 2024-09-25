@@ -28,7 +28,6 @@ void xnn_f32_vmax_ukernel__wasmsimd_x86_u4(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const v128_t va = wasm_v128_load(input_a);
     input_a += 4;
@@ -38,7 +37,6 @@ void xnn_f32_vmax_ukernel__wasmsimd_x86_u4(
 
     v128_t vacc = wasm_f32x4_pmax(va, vb);
 
-
     wasm_v128_store(output, vacc);
     output += 4;
   }
@@ -47,7 +45,6 @@ void xnn_f32_vmax_ukernel__wasmsimd_x86_u4(
     const v128_t vb = wasm_v128_load(input_b);
 
     v128_t vacc = wasm_f32x4_pmax(va, vb);
-
 
     if (batch & (2 * sizeof(float))) {
       wasm_v128_store64_lane(output, vacc, 0);

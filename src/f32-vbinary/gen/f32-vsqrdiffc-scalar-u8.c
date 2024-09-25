@@ -58,7 +58,6 @@ void xnn_f32_vsqrdiffc_ukernel__scalar_u8(
     vacc6 = vacc6 * vacc6;
     vacc7 = vacc7 * vacc7;
 
-
     output[0] = vacc0;
     output[1] = vacc1;
     output[2] = vacc2;

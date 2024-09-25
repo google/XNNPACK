@@ -8,7 +8,7 @@
 // LICENSE file in the root directory of this source tree.
 #include <assert.h>
 
-#include <immintrin.h>
+#include <emmintrin.h>
 
 #include "xnnpack/common.h"
 #include "xnnpack/reduce.h"

@@ -8,7 +8,6 @@ $assert BATCH_TILE >= 4
 $SIMD_TILE = BATCH_TILE // 4
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $assert OP in ["ADD", "DIV", "MAX", "MIN", "MUL", "SUB", "SQRDIFF", "PRELU"]
-$assert ACTIVATION in ["LINEAR", "MINMAX"]
 #include <assert.h>
 
 #include <arm_neon.h>
@@ -27,25 +26,19 @@ $  "SUB": "vsubq_f32",
 $  "SQRDIFF": "vsubq_f32",
 $  "PRELU": "vmulq_f32",
 $}[OP]
-$SUFFIX = {"LINEAR": "", "MINMAX": "_minmax"}[ACTIVATION]
-$PARAMS = {"LINEAR": "struct xnn_f32_default_params", "MINMAX": "union xnn_f32_minmax_params"}[ACTIVATION]
 $ISA = "aarch64_neon" if OP == "DIV" else "neon"
-void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__${ISA}_u${BATCH_TILE}(
+void xnn_f32_v${OP.lower()}_ukernel__${ISA}_u${BATCH_TILE}(
     size_t batch,
     const float* input_a,
     const float* input_b,
     float* output,
-    const ${PARAMS} params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
   assert(input_a != NULL);
   assert(input_b != NULL);
   assert(output != NULL);
-
-  $if ACTIVATION == "MINMAX":
-    const float32x4_t voutput_min = vld1q_dup_f32(&params->scalar.min);
-    const float32x4_t voutput_max = vld1q_dup_f32(&params->scalar.max);
 
   $if BATCH_TILE > 4:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
@@ -66,13 +59,6 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__${ISA}_u${BATCH_TILE}(
         $for N in range(SIMD_TILE):
           vacc${ABC[N]} = vbslq_f32(vm${ABC[N]}, vacc${ABC[N]}, va${ABC[N]});
 
-      $if ACTIVATION == "MINMAX":
-        $for N in range(SIMD_TILE):
-          vacc${ABC[N]} = vmaxq_f32(vacc${ABC[N]}, voutput_min);
-
-        $for N in range(SIMD_TILE):
-          vacc${ABC[N]} = vminq_f32(vacc${ABC[N]}, voutput_max);
-
       $for N in range(SIMD_TILE):
         vst1q_f32(output, vacc${ABC[N]}); output += 4;
     }
@@ -87,10 +73,6 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__${ISA}_u${BATCH_TILE}(
       const uint32x4_t vm = vcltq_s32(vreinterpretq_s32_f32(va), vmovq_n_s32(0));
       vacc = vbslq_f32(vm, vacc, va);
 
-    $if ACTIVATION == "MINMAX":
-      vacc = vmaxq_f32(vacc, voutput_min);
-      vacc = vminq_f32(vacc, voutput_max);
-
     vst1q_f32(output, vacc); output += 4;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -103,10 +85,6 @@ void xnn_f32_v${OP.lower()}${SUFFIX}_ukernel__${ISA}_u${BATCH_TILE}(
     $elif OP == "PRELU":
       const uint32x4_t vm = vcltq_s32(vreinterpretq_s32_f32(va), vmovq_n_s32(0));
       vacc = vbslq_f32(vm, vacc, va);
-
-    $if ACTIVATION == "MINMAX":
-      vacc = vmaxq_f32(vacc, voutput_min);
-      vacc = vminq_f32(vacc, voutput_max);
 
     float32x2_t vacc_lo = vget_low_f32(vacc);
     if (batch & (2 * sizeof(float))) {
