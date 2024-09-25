@@ -271,9 +271,6 @@ class VUnaryMicrokernelTester {
             xnn_init_u8_minmax_params_fn init_params,
             Default = Default()) const;
 
-  void Test(xnn_u64_u32_vsqrtshift_ukernel_fn vsqrtshift, uint32_t,
-            Default = Default()) const;
-
  private:
   // Generic test function for `vunary` kernels.
   //

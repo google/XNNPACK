@@ -6,10 +6,9 @@ $assert CHANNEL_TILE % 16 == 0
 $assert CHANNEL_TILE >= 16
 $SIMD_TILE = CHANNEL_TILE // 16
 $assert ACCUMULATORS <= SIMD_TILE
-
 #include <assert.h>
 
-#include <immintrin.h>
+#include <tmmintrin.h>
 
 #include "xnnpack/common.h"
 #include "xnnpack/reduce.h"

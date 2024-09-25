@@ -3767,7 +3767,7 @@ static void init_qu8_gemm_config(void) {
   #endif
 }
 
-struct xnn_gemm_config* xnn_init_f16_gemm_config() {
+const struct xnn_gemm_config* xnn_init_f16_gemm_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
@@ -3776,7 +3776,7 @@ struct xnn_gemm_config* xnn_init_f16_gemm_config() {
   return &f16_gemm_config;
 }
 
-struct xnn_gemm_config* xnn_init_f32_gemm_config() {
+const struct xnn_gemm_config* xnn_init_f32_gemm_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
@@ -3785,7 +3785,7 @@ struct xnn_gemm_config* xnn_init_f32_gemm_config() {
   return &f32_gemm_config;
 }
 
-struct xnn_gemm_config* xnn_init_f32_gemm_nr2_config() {
+const struct xnn_gemm_config* xnn_init_f32_gemm_nr2_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
@@ -3794,7 +3794,7 @@ struct xnn_gemm_config* xnn_init_f32_gemm_nr2_config() {
   return &f32_gemm_nr2_config;
 }
 
-struct xnn_gemm_config* xnn_init_f32_qc4w_gemm_config() {
+const struct xnn_gemm_config* xnn_init_f32_qc4w_gemm_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
@@ -3803,7 +3803,7 @@ struct xnn_gemm_config* xnn_init_f32_qc4w_gemm_config() {
   return &f32_qc4w_gemm_config;
 }
 
-struct xnn_gemm_config* xnn_init_f32_qc8w_gemm_config() {
+const struct xnn_gemm_config* xnn_init_f32_qc8w_gemm_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
@@ -3812,7 +3812,7 @@ struct xnn_gemm_config* xnn_init_f32_qc8w_gemm_config() {
   return &f32_qc8w_gemm_config;
 }
 
-struct xnn_gemm_config* xnn_init_qd8_f16_qc8w_gemm_config() {
+const struct xnn_gemm_config* xnn_init_qd8_f16_qc8w_gemm_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
@@ -3821,7 +3821,7 @@ struct xnn_gemm_config* xnn_init_qd8_f16_qc8w_gemm_config() {
   return &qd8_f16_qc8w_gemm_config;
 }
 
-struct xnn_gemm_config* xnn_init_qd8_f16_qc4w_gemm_config() {
+const struct xnn_gemm_config* xnn_init_qd8_f16_qc4w_gemm_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
@@ -3830,7 +3830,7 @@ struct xnn_gemm_config* xnn_init_qd8_f16_qc4w_gemm_config() {
   return &qd8_f16_qc4w_gemm_config;
 }
 
-struct xnn_gemm_config* xnn_init_qd8_f16_qb4w_gemm_config() {
+const struct xnn_gemm_config* xnn_init_qd8_f16_qb4w_gemm_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
     return NULL;
@@ -3839,7 +3839,7 @@ struct xnn_gemm_config* xnn_init_qd8_f16_qb4w_gemm_config() {
   return &qd8_f16_qb4w_gemm_config;
 }
 
-struct xnn_gemm_config* xnn_init_qd8_f32_qc4w_gemm_config() {
+const struct xnn_gemm_config* xnn_init_qd8_f32_qc4w_gemm_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
@@ -3848,7 +3848,7 @@ struct xnn_gemm_config* xnn_init_qd8_f32_qc4w_gemm_config() {
   return &qd8_f32_qc4w_gemm_config;
 }
 
-struct xnn_gemm_config* xnn_init_qd8_f32_qb4w_gemm_config() {
+const struct xnn_gemm_config* xnn_init_qd8_f32_qb4w_gemm_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
@@ -3857,7 +3857,7 @@ struct xnn_gemm_config* xnn_init_qd8_f32_qb4w_gemm_config() {
   return &qd8_f32_qb4w_gemm_config;
 }
 
-struct xnn_gemm_config* xnn_init_qd8_f32_qc8w_gemm_config() {
+const struct xnn_gemm_config* xnn_init_qd8_f32_qc8w_gemm_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
@@ -3866,7 +3866,7 @@ struct xnn_gemm_config* xnn_init_qd8_f32_qc8w_gemm_config() {
   return &qd8_f32_qc8w_gemm_config;
 }
 
-struct xnn_gemm_config* xnn_init_qp8_f32_qc4w_gemm_config() {
+const struct xnn_gemm_config* xnn_init_qp8_f32_qc4w_gemm_config() {
   const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();
   if (hardware_config == NULL) {
@@ -3880,7 +3880,7 @@ XNN_INIT_ONCE(qp8_f32_qc4w_gemm);
   return NULL;
 }
 
-struct xnn_gemm_config* xnn_init_qs8_qc8w_gemm_config() {
+const struct xnn_gemm_config* xnn_init_qs8_qc8w_gemm_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;
@@ -3889,7 +3889,7 @@ struct xnn_gemm_config* xnn_init_qs8_qc8w_gemm_config() {
   return &qs8_qc8w_gemm_config;
 }
 
-struct xnn_gemm_config* xnn_init_qu8_gemm_config() {
+const struct xnn_gemm_config* xnn_init_qu8_gemm_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL) {
     return NULL;

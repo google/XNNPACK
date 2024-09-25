@@ -1218,7 +1218,7 @@ void DWConvMicrokernelTester::Test(
 }
 
 void DWConvMicrokernelTester::Test(
-    xnn_f32_dwconv_unipass_ukernel_fn dwconv) const {
+    xnn_f32_dwconv_unipass_ukernel_fn dwconv, const void*) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist;
 
@@ -1390,7 +1390,7 @@ void DWConvMicrokernelTester::Test(
 }
 
 void DWConvMicrokernelTester::Test(
-    xnn_f32_dwconv_multipass_ukernel_fn dwconv) const {
+    xnn_f32_dwconv_multipass_ukernel_fn dwconv, const void*) const {
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist;
 

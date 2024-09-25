@@ -401,22 +401,21 @@ SET(SUBGRAPH_SRCS
   src/runtime.c
   src/subgraph.c
   src/subgraph/abs.c
-  src/subgraph/add2.c
   src/subgraph/argmax-pooling-2d.c
   src/subgraph/average-pooling-2d.c
   src/subgraph/bankers-rounding.c
   src/subgraph/batch-matrix-multiply.c
+  src/subgraph/binary.c
   src/subgraph/ceiling.c
   src/subgraph/clamp.c
   src/subgraph/concatenate.c
   src/subgraph/convert.c
   src/subgraph/convolution-2d.c
   src/subgraph/copy.c
-  src/subgraph/copysign.c
   src/subgraph/deconvolution-2d.c
+  src/subgraph/deprecated.c
   src/subgraph/depth-to-space-2d.c
   src/subgraph/depthwise-convolution-2d.c
-  src/subgraph/divide.c
   src/subgraph/elu.c
   src/subgraph/even-split.c
   src/subgraph/exp.c
@@ -430,9 +429,6 @@ SET(SUBGRAPH_SRCS
   src/subgraph/leaky-relu.c
   src/subgraph/log.c
   src/subgraph/max-pooling-2d.c
-  src/subgraph/maximum2.c
-  src/subgraph/minimum2.c
-  src/subgraph/multiply2.c
   src/subgraph/negate.c
   src/subgraph/prelu.c
   src/subgraph/reciprocal-square-root.c
@@ -443,13 +439,11 @@ SET(SUBGRAPH_SRCS
   src/subgraph/space-to-depth-2d.c
   src/subgraph/square-root.c
   src/subgraph/square.c
-  src/subgraph/squared-difference.c
   src/subgraph/static-constant-pad.c
   src/subgraph/static-mean.c
   src/subgraph/static-resize-bilinear-2d.c
   src/subgraph/static-slice.c
   src/subgraph/static-transpose.c
-  src/subgraph/subtract.c
   src/subgraph/tanh.c
   src/subgraph/unpooling-2d.c
   src/subgraph/validation.c
@@ -981,7 +975,7 @@ ENDIF()
 TARGET_INCLUDE_DIRECTORIES(microkernels-prod PRIVATE . include src)
 TARGET_INCLUDE_DIRECTORIES(hardware-config PRIVATE include src ${CPUINFO_SOURCE_DIR}/include)
 TARGET_INCLUDE_DIRECTORIES(indirection PRIVATE include src)
-TARGET_INCLUDE_DIRECTORIES(microparams-init PRIVATE src)
+TARGET_INCLUDE_DIRECTORIES(microparams-init PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(normalization PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(packing PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(logging PRIVATE include src)
@@ -1204,10 +1198,6 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(unary-operator-tester PRIVATE . include src test)
   TARGET_LINK_LIBRARIES(unary-operator-tester PRIVATE XNNPACK fp16 pthreadpool GTest::gtest)
 
-  ADD_LIBRARY(binary-elementwise-operator-tester STATIC test/binary-elementwise-operator-tester.cc)
-  TARGET_INCLUDE_DIRECTORIES(binary-elementwise-operator-tester PRIVATE . include src test)
-  TARGET_LINK_LIBRARIES(binary-elementwise-operator-tester PRIVATE XNNPACK fp16 pthreadpool GTest::gtest)
-
   ADD_LIBRARY(dwconv-microkernel-tester STATIC test/dwconv-microkernel-tester.cc)
   TARGET_INCLUDE_DIRECTORIES(dwconv-microkernel-tester PRIVATE . include src test)
   TARGET_LINK_LIBRARIES(dwconv-microkernel-tester PRIVATE XNNPACK fp16 pthreadpool GTest::gtest)
@@ -1240,6 +1230,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   # ---[ Launch heavy tests first.
   SET(SHARDED_TESTS
+    fully-connected-nc
     avgpool-minmax
     maxpool-minmax
     f32-vclamp
@@ -1325,15 +1316,13 @@ IF(XNNPACK_BUILD_TESTS)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     ENDFOREACH()
 
-    ADD_EXECUTABLE(binary-nd-test test/binary-nd.cc)
-    TARGET_INCLUDE_DIRECTORIES(binary-nd-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(binary-nd-test PRIVATE
-      binary-elementwise-operator-tester
+    ADD_EXECUTABLE(binary-elementwise-nd-test test/binary-elementwise-nd.cc)
+    TARGET_INCLUDE_DIRECTORIES(binary-elementwise-nd-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(binary-elementwise-nd-test PRIVATE
       fp16
       GTest::gtest
       GTest::gtest_main
       XNNPACK)
-    ADD_SHARDED_TEST(binary-nd-test 10)
 
     # ---[ Build subgraph optimizations unit tests
     SET(LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS
@@ -1360,12 +1349,11 @@ IF(XNNPACK_BUILD_TESTS)
     SET(LIBRARY_SUBGRAPH_UNIT_TESTS
         abs
         abs-reshape
-        add2
-        add2-reshape
         argmax-pooling-2d
         average-pooling-2d
         average-pooling-2d-reshape
         bankers-rounding
+        binary
         ceiling
         clamp
         concatenate2
@@ -1374,9 +1362,7 @@ IF(XNNPACK_BUILD_TESTS)
         concatenate5
         convert
         copy
-        copysign
         depth-to-space-2d
-        divide2
         elu
         gelu
         exp
@@ -1392,9 +1378,6 @@ IF(XNNPACK_BUILD_TESTS)
         leaky-relu
         log
         max-pooling-2d
-        maximum2
-        minimum2
-        multiply2
         negate
         prelu
         reciprocal-square-root
@@ -1405,13 +1388,11 @@ IF(XNNPACK_BUILD_TESTS)
         space-to-depth-2d
         square
         square-root
-        squared-difference
         static-constant-pad
         static-mean
         static-reshape
         static-resize-bilinear-2d
         static-transpose
-        subtract2
         tanh
         transpose-reshape
         unpooling-2d)
@@ -1463,9 +1444,6 @@ IF(XNNPACK_BUILD_TESTS)
 
   # ---[ Build microkernel-level unit tests
   SET(MICROKERNEL_UNIT_TESTS
-      cs16-bfly4
-      cs16-fftr
-      cs16-vsquareabs
       f16-conv-hwc2chw
       f16-f32acc-rdsum
       f16-f32acc-rsum
@@ -1499,7 +1477,6 @@ IF(XNNPACK_BUILD_TESTS)
       f32-vmulcaddc-minmax
       f32-vscaleexpminusmax
       f32-vscaleextexp
-      i16-vlshift
       indirection
       packing
       qs8-gavgpool-minmax-fp32
@@ -1516,12 +1493,7 @@ IF(XNNPACK_BUILD_TESTS)
       qu8-requantization
       qu8-vhswish
       qu8-vlrelu
-      s16-rmaxabs
-      s16-window
       s8-ibilinear
-      u32-filterbank-accumulate
-      u32-filterbank-subtract
-      u32-vlog
       u8-ibilinear
       u8-lut32norm
       u8-rmax
@@ -1580,7 +1552,7 @@ IF(XNNPACK_BUILD_TESTS)
       qu8-dwconv-minmax-unipass-rndnu)
   FOREACH(TEST ${MICROKERNEL_DWCONV_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         dwconv-microkernel-tester
         fp16
@@ -1671,57 +1643,47 @@ IF(XNNPACK_BUILD_TESTS)
   ENDFOREACH()
 
   SET(MICROKERNEL_VBINARY_UNIT_TESTS
-      f16-vadd-minmax
-      f16-vaddc-minmax
-      f16-vdiv-minmax
-      f16-vdivc-minmax
+      f16-vadd
+      f16-vaddc
+      f16-vdiv
+      f16-vdivc
       f16-vmax
       f16-vmaxc
       f16-vmin
       f16-vminc
-      f16-vmul-minmax
-      f16-vmulc-minmax
+      f16-vmul
+      f16-vmulc
       f16-vprelu
       f16-vpreluc
       f16-vrpreluc
-      f16-vrdivc-minmax
-      f16-vrsubc-minmax
+      f16-vrdivc
+      f16-vrsubc
       f16-vsqrdiff
       f16-vsqrdiffc
-      f16-vsub-minmax
-      f16-vsubc-minmax
+      f16-vsub
+      f16-vsubc
       f32-vadd
-      f32-vadd-minmax
       f32-vaddc
-      f32-vaddc-minmax
       f32-vcopysign
       f32-vcopysignc
       f32-vdiv
-      f32-vdiv-minmax
       f32-vdivc
-      f32-vdivc-minmax
       f32-vmax
       f32-vmaxc
       f32-vmin
       f32-vminc
       f32-vmul
-      f32-vmul-minmax
       f32-vmulc
-      f32-vmulc-minmax
       f32-vprelu
       f32-vpreluc
       f32-vrpreluc
       f32-vrcopysignc
       f32-vrdivc
-      f32-vrdivc-minmax
       f32-vrsubc
-      f32-vrsubc-minmax
       f32-vsqrdiff
       f32-vsqrdiffc
       f32-vsub
-      f32-vsub-minmax
       f32-vsubc
-      f32-vsubc-minmax
       qs8-vadd-minmax
       qs8-vaddc-minmax
       qs8-vmul-minmax-fp32
@@ -1932,60 +1894,24 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
   IF(XNNPACK_BUILD_LIBRARY)
     # ---[ Build end-to-end microbenchmarks
-    ADD_LIBRARY(bench-models STATIC
-      models/fp16-mobilenet-v1.cc
-      models/fp16-mobilenet-v2.cc
-      models/fp16-mobilenet-v3-large.cc
-      models/fp16-mobilenet-v3-small.cc
-      models/fp16-sparse-mobilenet-v1.cc
-      models/fp16-sparse-mobilenet-v2.cc
-      models/fp16-sparse-mobilenet-v3-large.cc
-      models/fp16-sparse-mobilenet-v3-small.cc
-      models/fp32-mobilenet-v1.cc
-      models/fp32-mobilenet-v2.cc
-      models/fp32-mobilenet-v3-large.cc
-      models/fp32-mobilenet-v3-small.cc
-      models/fp32-sparse-mobilenet-v1.cc
-      models/fp32-sparse-mobilenet-v2.cc
-      models/fp32-sparse-mobilenet-v3-large.cc
-      models/fp32-sparse-mobilenet-v3-small.cc
-      models/qs8-qc8w-mobilenet-v1.cc
-      models/qs8-qc8w-mobilenet-v2.cc
-      models/qs8-mobilenet-v1.cc
-      models/qs8-mobilenet-v2.cc
-      models/qu8-mobilenet-v1.cc
-      models/qu8-mobilenet-v2.cc
-      models/qu8-mobilenet-v3-large.cc
-      models/qu8-mobilenet-v3-small.cc)
-    SET_TARGET_PROPERTIES(bench-models PROPERTIES CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(bench-models PRIVATE .)
-    TARGET_LINK_LIBRARIES(bench-models PRIVATE fp16 benchmark::benchmark)
-    TARGET_LINK_LIBRARIES(bench-models PRIVATE XNNPACK bench-utils)
+    ADD_LIBRARY(models STATIC
+      bench/models/fp32-mobilenet-v1.cc
+      bench/models/fp32-mobilenet-v2.cc
+      bench/models/fp32-mobilenet-v3-large.cc
+      bench/models/fp32-mobilenet-v3-small.cc
+      bench/models/qs8-mobilenet-v2.cc)
+    SET_TARGET_PROPERTIES(models PROPERTIES CXX_EXTENSIONS YES)
+    TARGET_INCLUDE_DIRECTORIES(models PRIVATE .)
+    TARGET_LINK_LIBRARIES(models PRIVATE XNNPACK)
 
-    SET(LIBRARY_END2END_BENCHMARKS
-        end2end
-        f16-gemm-e2e
-        f16-dwconv-e2e
-        f32-dwconv-e2e
-        f32-gemm-e2e
-        qs8-dwconv-e2e
-        qs8-gemm-e2e
-        qu8-gemm-e2e
-        qu8-dwconv-e2e)
-    FOREACH(BENCH ${LIBRARY_END2END_BENCHMARKS})
-      ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)
-      TARGET_INCLUDE_DIRECTORIES(${BENCH}-bench PRIVATE .)
-      TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
-        bench-models
-        bench-utils
-        benchmark::benchmark
-        fp16
-        hardware-config
-        logging
-        microkernels-all
-        microparams-init
-        XNNPACK)
-    ENDFOREACH()
+    ADD_EXECUTABLE(bench-models bench/models/benchmark.cc)
+    TARGET_INCLUDE_DIRECTORIES(bench-models PRIVATE .)
+    TARGET_LINK_LIBRARIES(bench-models PRIVATE
+      bench-utils
+      benchmark::benchmark
+      fp16
+      models
+      XNNPACK)
 
     # ---[ Build operator-level microbenchmarks
     SET(LIBRARY_OPERATOR_BENCHMARKS
@@ -2027,9 +1953,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   # ---[ Build microkernel-level microbenchmarks
   SET(MICROKERNEL_BENCHMARKS
       bf16-gemm
-      cs16-bfly4
-      cs16-fftr
-      cs16-vsquareabs
       f16-conv-hwc2chw
       f16-dwconv
       f16-dwconv2d-chw
@@ -2078,7 +2001,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       f32-vcmul
       f32-vscaleexpminusmax
       f32-vscaleextexp
-      i16-vlshift
       qd8-f16-qb4w-gemm
       qd8-f16-qc4w-gemm
       qd8-f16-qc8w-gemm
@@ -2096,32 +2018,20 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       qu8-rdsum
       qs8-rsum
       qu8-rsum
-      qs8-vadd
-      qs8-vaddc
       qs8-vcvt
-      qs8-vmul
-      qs8-vmulc
       qu8-f32-vcvt
       qu8-gemm
       qu8-gemm-fp32
       qu8-gemm-rndnu
       qu8-requantization
-      qu8-vadd
-      qu8-vaddc
       qu8-vcvt
-      qu8-vmul
-      qu8-vmulc
-      s16-rmaxabs
-      s16-window
-      u32-filterbank-accumulate
-      u32-filterbank-subtract
-      u32-vlog
-      u64-u32-vsqrtshift
       x16-packw
       x32-packw
       x8-lut
       x8-packq
       x8-packw
+      vunary
+      vbinary
       xN-transposec
       xx-transposev)
   FOREACH(BENCH ${MICROKERNEL_BENCHMARKS})

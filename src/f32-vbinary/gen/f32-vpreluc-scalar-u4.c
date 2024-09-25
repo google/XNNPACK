@@ -46,7 +46,6 @@ void xnn_f32_vpreluc_ukernel__scalar_u4(
     vacc2 = XNN_UNPREDICTABLE(va2 < 0.0f) ? vacc2 : va2;
     vacc3 = XNN_UNPREDICTABLE(va3 < 0.0f) ? vacc3 : va3;
 
-
     output[0] = vacc0;
     output[1] = vacc1;
     output[2] = vacc2;

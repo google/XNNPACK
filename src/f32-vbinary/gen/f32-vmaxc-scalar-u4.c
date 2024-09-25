@@ -42,7 +42,6 @@ void xnn_f32_vmaxc_ukernel__scalar_u4(
     float vacc3 = math_max_f32(va3, vb);
 
 
-
     output[0] = vacc0;
     output[1] = vacc1;
     output[2] = vacc2;
