@@ -29,7 +29,6 @@ void xnn_f32_vprelu_ukernel__avx512f_u32(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   const __m512 vzero = _mm512_setzero_ps();
 
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
@@ -43,7 +42,6 @@ void xnn_f32_vprelu_ukernel__avx512f_u32(
     __m512 vacc1 = _mm512_mask_mul_ps(va1, vsign1, va1, _mm512_loadu_ps(input_b + 16));
     input_b += 32;
 
-
     _mm512_storeu_ps(output, vacc0);
     _mm512_storeu_ps(output + 16, vacc1);
     output += 32;
@@ -55,7 +53,6 @@ void xnn_f32_vprelu_ukernel__avx512f_u32(
     const __mmask16 vsign = _mm512_cmp_ps_mask(va, vzero, _CMP_LT_OQ);
     __m512 vacc = _mm512_mask_mul_ps(va, vsign, va, _mm512_loadu_ps(input_b));
     input_b += 16;
-
 
     _mm512_storeu_ps(output, vacc);
     output += 16;

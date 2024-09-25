@@ -115,9 +115,9 @@ xnn_runtime_t SetupBinary(const std::vector<size_t> &input0_dims,
     return nullptr;
   }
 
-  const float output_min = -std::numeric_limits<float>::infinity();
-  const float output_max = std::numeric_limits<float>::infinity();
-  if (xnn_define_add2(subgraph, output_min, output_max, input0_id, input1_id,
+  struct xnn_binary_params params = {-std::numeric_limits<float>::infinity(),
+                                     std::numeric_limits<float>::infinity()};
+  if (xnn_define_binary(subgraph, xnn_binary_add, &params, input0_id, input1_id,
                       output_id, /*flags=*/0) != xnn_status_success) {
     return nullptr;
   }

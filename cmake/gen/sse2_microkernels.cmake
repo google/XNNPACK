@@ -20,7 +20,7 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/f32-prelu/gen/f32-prelu-sse2-2x8.c
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse2-u32.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-sse2-u32.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u20-acc2.c
+  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u16-acc2.c
   src/f32-vcopysign/gen/f32-vcopysign-sse2.c
   src/f32-vcopysign/gen/f32-vcopysignc-sse2.c
   src/f32-vcopysign/gen/f32-vrcopysignc-sse2.c
@@ -127,15 +127,7 @@ SET(NON_PROD_SSE2_MICROKERNEL_SRCS
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-sse2-u24.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u4.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u8-acc2.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u8.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u12-acc2.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u12-acc3.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u12.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u16-acc2.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u16-acc4.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u16.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u20-acc5.c
-  src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u20.c
   src/f32-vbinary/gen/f32-vprelu-sse2-u4.c
   src/f32-vbinary/gen/f32-vprelu-sse2-u8.c
   src/f32-vbinary/gen/f32-vpreluc-sse2-u4.c

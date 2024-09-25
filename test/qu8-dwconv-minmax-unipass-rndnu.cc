@@ -7,7 +7,7 @@
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: test/qu8-dwconv-minmax-unipass-rndnu.yaml
+//   Microkernel: qu8-dwconv-minmax-unipass-rndnu
 //   Generator: tools/generate-dwconv-unipass-test.py
 
 
@@ -28,10 +28,10 @@
 
 namespace {
 
-std::vector<DWConvTestParams> CreateTests1(
-    size_t c_block, size_t adj_c_block, size_t cr, size_t kr,
-    std::function<void(DWConvMicrokernelTester& tester)> test_func,
-    std::function<void()> isa_check = nullptr) {
+std::vector<DWConvTestParams> CreateTests(
+    size_t c_block, bool is_pipelined, size_t cr, size_t kr,
+    std::function<void(DWConvMicrokernelTester& tester)> test_func) {
+  size_t adj_c_block = is_pipelined ? c_block * 2 : c_block;
   const std::string cbs = std::to_string(c_block);
   const std::string acbs = std::to_string(adj_c_block);
 
@@ -44,8 +44,17 @@ std::vector<DWConvTestParams> CreateTests1(
           .channel_tile(cr)
           .kernel_tile(kr)
           .channels(c_block)
-      , test_func, isa_check));
+      , test_func));
 
+  if (is_pipelined) {
+    tests.push_back(DWConvTestParams(
+        "c_eq_" + std::to_string(c_block * 2),
+        DWConvMicrokernelTester()
+            .channel_tile(cr)
+            .kernel_tile(kr)
+            .channels(c_block * 2)
+        , test_func));
+  }
 
   if (c_block > 1) {
     tests.push_back(DWConvTestParams(
@@ -53,7 +62,7 @@ std::vector<DWConvTestParams> CreateTests1(
         DWConvMicrokernelTester()
             .channel_tile(cr)
             .kernel_tile(kr)
-        , test_func, isa_check)
+        , test_func)
         .loop_channels(adj_c_block + c_block, cr * 16 - 1, cr * 3));
 
     tests.push_back(DWConvTestParams(
@@ -62,7 +71,7 @@ std::vector<DWConvTestParams> CreateTests1(
             .channel_tile(cr)
             .kernel_tile(kr)
             .qmin(128)
-        , test_func, isa_check)
+        , test_func)
         .loop_channels(adj_c_block + c_block, cr * 16 - 1, cr * 3));
 
     tests.push_back(DWConvTestParams(
@@ -71,7 +80,7 @@ std::vector<DWConvTestParams> CreateTests1(
             .channel_tile(cr)
             .kernel_tile(kr)
             .qmax(128)
-        , test_func, isa_check)
+        , test_func)
         .loop_channels(adj_c_block + c_block, cr * 16 - 1, cr * 3));
 
     tests.push_back(DWConvTestParams(
@@ -79,7 +88,7 @@ std::vector<DWConvTestParams> CreateTests1(
         DWConvMicrokernelTester()
             .channel_tile(cr)
             .kernel_tile(kr)
-        , test_func, isa_check)
+        , test_func)
       .loop_channels(1, adj_c_block - 1));
   }
 
@@ -88,7 +97,7 @@ std::vector<DWConvTestParams> CreateTests1(
       DWConvMicrokernelTester()
           .channel_tile(cr)
           .kernel_tile(kr)
-      , test_func, isa_check)
+      , test_func)
       .loop_channels(adj_c_block + 1, (c_block == 1 ? 10 : adj_c_block + c_block) - 1));
 
   tests.push_back(DWConvTestParams(
@@ -97,7 +106,7 @@ std::vector<DWConvTestParams> CreateTests1(
           .channel_tile(cr)
           .kernel_tile(kr)
           .qmin(128)
-      , test_func, isa_check)
+      , test_func)
       .loop_channels(adj_c_block + 1, (c_block == 1 ? 10 : adj_c_block + c_block) - 1));
 
   tests.push_back(DWConvTestParams(
@@ -106,7 +115,7 @@ std::vector<DWConvTestParams> CreateTests1(
           .channel_tile(cr)
           .kernel_tile(kr)
           .qmax(128)
-      , test_func, isa_check)
+      , test_func)
       .loop_channels(adj_c_block + 1, (c_block == 1 ? 10 : adj_c_block + c_block) - 1));
 
   tests.push_back(DWConvTestParams(
@@ -115,7 +124,7 @@ std::vector<DWConvTestParams> CreateTests1(
           .channel_tile(cr)
           .kernel_tile(kr)
           .width(3)
-      , test_func, isa_check)
+      , test_func)
       .loop_channels(1, c_block * 5, std::max(size_t(1), c_block - 1)));
 
   tests.push_back(DWConvTestParams(
@@ -124,7 +133,7 @@ std::vector<DWConvTestParams> CreateTests1(
             .channel_tile(cr)
             .kernel_tile(kr)
             .width(3)
-        , test_func, isa_check)
+        , test_func)
         .loop_channels(1, c_block * 5, std::max(size_t(1), c_block - 1))
         .loop_step(2, kr));
 
@@ -135,7 +144,7 @@ std::vector<DWConvTestParams> CreateTests1(
           .kernel_tile(kr)
           .width(5)
           .output_stride(xnnpack::NextPrime(cr * 5 + 1))
-      , test_func, isa_check)
+      , test_func)
       .loop_channels(1, c_block * 5, std::max(size_t(1), c_block - 1)));
 
   tests.push_back(DWConvTestParams(
@@ -145,7 +154,7 @@ std::vector<DWConvTestParams> CreateTests1(
           .kernel_tile(kr)
           .width(3)
           .qmin(128)
-      , test_func, isa_check)
+      , test_func)
     .loop_channels(1, c_block * 5, std::max(size_t(1), c_block - 1)));
 
   tests.push_back(DWConvTestParams(
@@ -155,7 +164,7 @@ std::vector<DWConvTestParams> CreateTests1(
           .kernel_tile(kr)
           .width(3)
           .qmax(128)
-      , test_func, isa_check)
+      , test_func)
       .loop_channels(1, c_block * 5, std::max(size_t(1), c_block - 1)));
 
   tests.push_back(DWConvTestParams(
@@ -166,7 +175,7 @@ std::vector<DWConvTestParams> CreateTests1(
           .width(3)
           .input_zero_point(255)
           .kernel_zero_point(0)
-      , test_func, isa_check)
+      , test_func)
       .loop_channels(1, c_block * 5, std::max(size_t(1), c_block - 1)));
 
   tests.push_back(DWConvTestParams(
@@ -177,7 +186,7 @@ std::vector<DWConvTestParams> CreateTests1(
           .width(3)
           .input_zero_point(0)
           .kernel_zero_point(255)
-      , test_func, isa_check)
+      , test_func)
       .loop_channels(1, c_block * 5, std::max(size_t(1), c_block - 1)));
 
   tests.push_back(DWConvTestParams(
@@ -186,7 +195,7 @@ std::vector<DWConvTestParams> CreateTests1(
           .channel_tile(cr)
           .kernel_tile(kr)
           .input_offset(xnnpack::NextPrime(cr + 1) * 16)
-      , test_func, isa_check)
+      , test_func)
       .loop_channels(adj_c_block + c_block, cr * 16 - 1, cr * 3));
 
   tests.push_back(DWConvTestParams(
@@ -195,7 +204,7 @@ std::vector<DWConvTestParams> CreateTests1(
           .channel_tile(cr)
           .kernel_tile(kr)
           .input_offset(xnnpack::NextPrime(cr + 1) * 16)
-      , test_func, isa_check)
+      , test_func)
       .loop_zi(0, kr - 1)
       .loop_channels(adj_c_block + c_block, cr * 16 - 1, cr * 3));
 
@@ -204,270 +213,17 @@ std::vector<DWConvTestParams> CreateTests1(
 
 }  // namespace
 
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_DWCONV_MINMAX_RNDNU_9P8C__NEON_MUL8, DWConvTest,
-      testing::ValuesIn(CreateTests1(
-          /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
-          [](DWConvMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_9p8c__neon_mul8,
-                        xnn_init_qu8_conv_minmax_rndnu_neon_params,
-                        xnn_qu8_requantize_rndnu);
-          },
-          []() {
-            TEST_REQUIRES_ARM_NEON;
-          })),
-      [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_DWCONV_MINMAX_RNDNU_9P8C__NEON_MUL16, DWConvTest,
-      testing::ValuesIn(CreateTests1(
-          /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/9,
-          [](DWConvMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_9p8c__neon_mul16,
-                        xnn_init_qu8_conv_minmax_rndnu_neon_params,
-                        xnn_qu8_requantize_rndnu);
-          },
-          []() {
-            TEST_REQUIRES_ARM_NEON;
-          })),
-      [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_DWCONV_MINMAX_RNDNU_9P16C__NEON_MUL8, DWConvTest,
-      testing::ValuesIn(CreateTests1(
-          /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
-          [](DWConvMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_9p16c__neon_mul8,
-                        xnn_init_qu8_conv_minmax_rndnu_neon_params,
-                        xnn_qu8_requantize_rndnu);
-          },
-          []() {
-            TEST_REQUIRES_ARM_NEON;
-          })),
-      [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_DWCONV_MINMAX_RNDNU_9P16C__NEON_MUL16, DWConvTest,
-      testing::ValuesIn(CreateTests1(
-          /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/9,
-          [](DWConvMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_9p16c__neon_mul16,
-                        xnn_init_qu8_conv_minmax_rndnu_neon_params,
-                        xnn_qu8_requantize_rndnu);
-          },
-          []() {
-            TEST_REQUIRES_ARM_NEON;
-          })),
-      [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_DWCONV_MINMAX_RNDNU_9P32C__NEON_MUL8, DWConvTest,
-      testing::ValuesIn(CreateTests1(
-          /*c_block=*/32, /*adj_c_block=*/32, /*cr=*/32, /*kr=*/9,
-          [](DWConvMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_9p32c__neon_mul8,
-                        xnn_init_qu8_conv_minmax_rndnu_neon_params,
-                        xnn_qu8_requantize_rndnu);
-          },
-          []() {
-            TEST_REQUIRES_ARM_NEON;
-          })),
-      [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_DWCONV_MINMAX_RNDNU_9P32C__NEON_MUL16, DWConvTest,
-      testing::ValuesIn(CreateTests1(
-          /*c_block=*/32, /*adj_c_block=*/32, /*cr=*/32, /*kr=*/9,
-          [](DWConvMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_9p32c__neon_mul16,
-                        xnn_init_qu8_conv_minmax_rndnu_neon_params,
-                        xnn_qu8_requantize_rndnu);
-          },
-          []() {
-            TEST_REQUIRES_ARM_NEON;
-          })),
-      [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_DWCONV_MINMAX_RNDNU_25P8C__NEON_MUL8, DWConvTest,
-      testing::ValuesIn(CreateTests1(
-          /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
-          [](DWConvMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_25p8c__neon_mul8,
-                        xnn_init_qu8_conv_minmax_rndnu_neon_params,
-                        xnn_qu8_requantize_rndnu);
-          },
-          []() {
-            TEST_REQUIRES_ARM_NEON;
-          })),
-      [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_DWCONV_MINMAX_RNDNU_25P8C__NEON_MUL16, DWConvTest,
-      testing::ValuesIn(CreateTests1(
-          /*c_block=*/8, /*adj_c_block=*/8, /*cr=*/8, /*kr=*/25,
-          [](DWConvMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_25p8c__neon_mul16,
-                        xnn_init_qu8_conv_minmax_rndnu_neon_params,
-                        xnn_qu8_requantize_rndnu);
-          },
-          []() {
-            TEST_REQUIRES_ARM_NEON;
-          })),
-      [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_DWCONV_MINMAX_RNDNU_25P16C__NEON_MUL8, DWConvTest,
-      testing::ValuesIn(CreateTests1(
-          /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
-          [](DWConvMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_25p16c__neon_mul8,
-                        xnn_init_qu8_conv_minmax_rndnu_neon_params,
-                        xnn_qu8_requantize_rndnu);
-          },
-          []() {
-            TEST_REQUIRES_ARM_NEON;
-          })),
-      [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_DWCONV_MINMAX_RNDNU_25P16C__NEON_MUL16, DWConvTest,
-      testing::ValuesIn(CreateTests1(
-          /*c_block=*/16, /*adj_c_block=*/16, /*cr=*/16, /*kr=*/25,
-          [](DWConvMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_25p16c__neon_mul16,
-                        xnn_init_qu8_conv_minmax_rndnu_neon_params,
-                        xnn_qu8_requantize_rndnu);
-          },
-          []() {
-            TEST_REQUIRES_ARM_NEON;
-          })),
-      [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_DWCONV_MINMAX_RNDNU_25P32C__NEON_MUL8, DWConvTest,
-      testing::ValuesIn(CreateTests1(
-          /*c_block=*/32, /*adj_c_block=*/32, /*cr=*/32, /*kr=*/25,
-          [](DWConvMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_25p32c__neon_mul8,
-                        xnn_init_qu8_conv_minmax_rndnu_neon_params,
-                        xnn_qu8_requantize_rndnu);
-          },
-          []() {
-            TEST_REQUIRES_ARM_NEON;
-          })),
-      [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  INSTANTIATE_TEST_SUITE_P(
-      QU8_DWCONV_MINMAX_RNDNU_25P32C__NEON_MUL16, DWConvTest,
-      testing::ValuesIn(CreateTests1(
-          /*c_block=*/32, /*adj_c_block=*/32, /*cr=*/32, /*kr=*/25,
-          [](DWConvMicrokernelTester& tester) {
-            tester.Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_25p32c__neon_mul16,
-                        xnn_init_qu8_conv_minmax_rndnu_neon_params,
-                        xnn_qu8_requantize_rndnu);
-          },
-          []() {
-            TEST_REQUIRES_ARM_NEON;
-          })),
-      [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
-        return info.param.test_name;
-      });
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-INSTANTIATE_TEST_SUITE_P(
-    QU8_DWCONV_MINMAX_RNDNU_9P1C__SCALAR, DWConvTest,
-    testing::ValuesIn(CreateTests1(
-        /*c_block=*/1, /*adj_c_block=*/1, /*cr=*/1, /*kr=*/9,
-        [](DWConvMicrokernelTester& tester) {
-          tester.Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_9p1c__scalar,
-                      xnn_init_qu8_conv_minmax_rndnu_scalar_params,
-                      xnn_qu8_requantize_rndnu);
-        })),
-    [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
-      return info.param.test_name;
+#define XNN_DWCONV_UNIPASS(arch_flags, ukernel, c_block, is_pipelined, cr, kr, datatype, weights_type, params_type, init_params)\
+INSTANTIATE_TEST_SUITE_P(                                                                                                       \
+    ukernel, DWConvTest,                                                                                                        \
+    testing::ValuesIn(CreateTests(                                                                                              \
+        c_block, is_pipelined, cr, kr,                                                                                          \
+        [](DWConvMicrokernelTester& tester) {                                                                                   \
+          TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                                 \
+          tester.Test(ukernel, init_params, xnn_qu8_requantize_rndnu);                                                          \
+        })),                                                                                                                    \
+    [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {                                                             \
+      return info.param.test_name;                                                                                              \
     });
-
-INSTANTIATE_TEST_SUITE_P(
-    QU8_DWCONV_MINMAX_RNDNU_9P2C__SCALAR, DWConvTest,
-    testing::ValuesIn(CreateTests1(
-        /*c_block=*/2, /*adj_c_block=*/2, /*cr=*/2, /*kr=*/9,
-        [](DWConvMicrokernelTester& tester) {
-          tester.Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_9p2c__scalar,
-                      xnn_init_qu8_conv_minmax_rndnu_scalar_params,
-                      xnn_qu8_requantize_rndnu);
-        })),
-    [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
-      return info.param.test_name;
-    });
-
-INSTANTIATE_TEST_SUITE_P(
-    QU8_DWCONV_MINMAX_RNDNU_9P4C__SCALAR, DWConvTest,
-    testing::ValuesIn(CreateTests1(
-        /*c_block=*/4, /*adj_c_block=*/4, /*cr=*/4, /*kr=*/9,
-        [](DWConvMicrokernelTester& tester) {
-          tester.Test(xnn_qu8_dwconv_minmax_rndnu_ukernel_9p4c__scalar,
-                      xnn_init_qu8_conv_minmax_rndnu_scalar_params,
-                      xnn_qu8_requantize_rndnu);
-        })),
-    [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {
-      return info.param.test_name;
-    });
+#include "src/qu8-dwconv/qu8-dwconv-minmax-unipass-rndnu.h"
+#undef XNN_UKERNEL_WITH_PARAMS

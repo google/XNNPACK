@@ -8,7 +8,7 @@ $SIMD_TILE = CHANNEL_TILE // 16
 $assert ACCUMULATORS <= SIMD_TILE
 #include <assert.h>
 
-#include <immintrin.h>
+#include <emmintrin.h>
 
 #include "xnnpack/common.h"
 #include "xnnpack/reduce.h"

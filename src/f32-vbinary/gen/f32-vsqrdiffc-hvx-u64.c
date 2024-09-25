@@ -36,7 +36,6 @@ void xnn_f32_vsqrdiffc_ukernel__hvx_u64(
     vacc0 = xnn_mul_f32(vacc0, vacc0);
     vacc1 = xnn_mul_f32(vacc1, vacc1);
 
-
    xnn_storeu_f32(output, vacc0);
     xnn_storeu_f32(output + 32, vacc1);
     output += 64;

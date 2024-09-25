@@ -40,7 +40,6 @@ void xnn_f32_vmaxc_ukernel__sse_u8(
     __m128 vacc1 = _mm_max_ps(va1, vb);
 
 
-
     _mm_storeu_ps(output, vacc0);
     _mm_storeu_ps(output + 4, vacc1);
     output += 8;

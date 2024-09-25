@@ -23,7 +23,6 @@ void xnn_f32_vmax_ukernel__hvx_u32(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     HVX_Vector va = xnn_loadu_f32(input_a);
     HVX_Vector vb = xnn_loadu_f32(input_b);
@@ -40,7 +39,7 @@ void xnn_f32_vmax_ukernel__hvx_u32(
      HVX_Vector vb = xnn_loadu_f32(input_b);
 
      HVX_Vector vacc = xnn_max_f32(va, vb);
-     
+
      Q6_V_vstu_variable(output, batch, vacc);
   }
 }
