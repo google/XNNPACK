@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <limits>
+#include <cstdint>
 
 #include "unary_operator.h"
 #include "utils.h"
@@ -18,71 +18,41 @@
 
 
 void xnnpack_convert_f16_f32(benchmark::State& state) {
-  benchmark_unary_operator<xnn_float16, float>(xnn_create_convert_nc_f16_f32,
-                                           xnn_reshape_convert_nc_f16_f32,
-                                           xnn_setup_convert_nc_f16_f32, state);
+  benchmark_unary_operator<xnn_float16, float>(state, xnn_unary_convert);
 }
 
 void xnnpack_convert_f32_f16(benchmark::State& state) {
-  benchmark_unary_operator<float, xnn_float16>(xnn_create_convert_nc_f32_f16,
-                                           xnn_reshape_convert_nc_f32_f16,
-                                           xnn_setup_convert_nc_f32_f16, state);
+  benchmark_unary_operator<float, xnn_float16>(state, xnn_unary_convert);
 }
 
 void xnnpack_convert_f32_qs8(benchmark::State& state) {
   benchmark_unary_operator<float, int8_t>(
-      [](uint32_t flags, xnn_operator_t* op) {
-        return xnn_create_convert_nc_f32_qs8(
-            1.0f / 128.0f /* scale */, 1 /* zero point */, flags, op);
-      },
-      xnn_reshape_convert_nc_f32_qs8, xnn_setup_convert_nc_f32_qs8, state);
+      state, xnn_unary_convert, nullptr, {0, 1.0f}, {1, 1.0f / 128.0f});
 }
 
 void xnnpack_convert_f32_qu8(benchmark::State& state) {
   benchmark_unary_operator<float, uint8_t>(
-      [](uint32_t flags, xnn_operator_t* op) {
-        return xnn_create_convert_nc_f32_qu8(
-            1.0f / 128.0f /* scale */, 127 /* zero point */, flags, op);
-      },
-      xnn_reshape_convert_nc_f32_qu8, xnn_setup_convert_nc_f32_qu8, state);
+      state, xnn_unary_convert, nullptr, {0, 1.0f}, {127, 1.0f / 128.0f});
 }
 
 void xnnpack_convert_qs8(benchmark::State& state) {
   benchmark_unary_operator<int8_t, int8_t>(
-      [](uint32_t flags, xnn_operator_t* op) {
-        return xnn_create_convert_nc_qs8(
-            0.75f /* input scale */, -1 /* input zero point */,
-            0.5f /* output scale */, 1 /* output zero point */, flags, op);
-      },
-      xnn_reshape_convert_nc_qs8, xnn_setup_convert_nc_qs8, state);
+      state, xnn_unary_convert, nullptr, {-1, 0.75f}, {1, 0.5f});
 }
 
 void xnnpack_convert_qs8_f32(benchmark::State& state) {
   benchmark_unary_operator<int8_t, float>(
-      [](uint32_t flags, xnn_operator_t* op) {
-        return xnn_create_convert_nc_qs8_f32(1.0f / 255.0f /* scale */,
-                                             -128 /* zero point */, flags, op);
-      },
-      xnn_reshape_convert_nc_qs8_f32, xnn_setup_convert_nc_qs8_f32, state);
+      state, xnn_unary_convert, nullptr, {-128, 1.0f / 255.0f});
 }
 
 void xnnpack_convert_qu8(benchmark::State& state) {
   benchmark_unary_operator<uint8_t, uint8_t>(
-      [](uint32_t flags, xnn_operator_t* op) {
-        return xnn_create_convert_nc_qu8(0.75f /* scale */,
-                                         125 /* zero point */, 0.5f /* scale */,
-                                         130 /* zero point */, flags, op);
-      },
-      xnn_reshape_convert_nc_qu8, xnn_setup_convert_nc_qu8, state);
+      state, xnn_unary_convert, nullptr, {125, 0.75f}, {130, 0.5f});
 }
 
 void xnnpack_convert_qu8_f32(benchmark::State& state) {
   benchmark_unary_operator<uint8_t, float>(
-      [](uint32_t flags, xnn_operator_t* op) {
-        return xnn_create_convert_nc_qu8_f32(1.0f / 128.0f /* scale */,
-                                             128 /* zero point */, flags, op);
-      },
-      xnn_reshape_convert_nc_qu8_f32, xnn_setup_convert_nc_qu8_f32, state);
+      state, xnn_unary_convert, nullptr, {128, 1.0f / 128.0f});
 }
 
 #ifdef BENCHMARK_TENSORFLOW_LITE

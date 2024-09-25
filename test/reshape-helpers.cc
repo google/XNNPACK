@@ -57,7 +57,7 @@ xnn_runtime_t SetupUnary(const std::vector<size_t> &dims) {
     return nullptr;
   }
 
-  if (xnn_define_abs(subgraph, input_id, output_id, /*flags=*/0) !=
+  if (xnn_define_unary(subgraph, xnn_unary_abs, /*params=*/nullptr, input_id, output_id, /*flags=*/0) !=
       xnn_status_success) {
     return nullptr;
   }

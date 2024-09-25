@@ -72,13 +72,7 @@ int main(int argc, char** argv) {
       xnn_define_binary(NULL, xnn_binary_add, NULL, 0, 0, 0, 0);
       break;
     case 10:
-      xnn_define_clamp(NULL, 0.0f, 0.0f, 0, 0, 0);
-      break;
-    case 11:
-      xnn_define_hardswish(NULL, 0, 0, 0);
-      break;
-    case 12:
-      xnn_define_sigmoid(NULL, 0, 0, 0);
+      xnn_define_unary(NULL, xnn_unary_negate, NULL, 0, 0, 0);
       break;
     case 13:
       xnn_define_softmax(NULL, 0, 0, 0);

@@ -16,12 +16,6 @@ import xnncommon
 parser = argparse.ArgumentParser(
     description="Vector unary operation microkernel test generator"
 )
-parser.add_argument("-t", "--tester", metavar="TESTER", required=True,
-                    choices=[
-                    "VHSwishMicrokernelTester",
-                    "VLReLUMicrokernelTester",
-                    "VUnaryMicrokernelTester"],
-                    help="Tester class to be used in the generated test")
 parser.add_argument(
     "-k",
     "--ukernel",
@@ -59,19 +53,19 @@ OP_TYPES = {
     "vtanh": "TanH",
 }
 
+PARAMS_TYPES = ["Clamp", "ELU", "LeakyReLU"]
+
 SPECIAL_VALUES_F32 = {
     "SquareRoot": (
         4,  # Number of elements.
         "{0.0f, -0.0f, 1.0f, -1.0f}",  # Inputs.
         "{0.0f, -0.0f, 1.0f, NAN}",  # Expected outputs.
-        "struct xnn_f32_sqrt_params",  # Params name.
         1,  # Error margin in ULP.
     ),
     "TanH": (
         7,  # Number of elements.
         "{0.0f, -0.0f, 10.0f, -10.0f, INFINITY, -INFINITY, NAN}",
         "{0.0f, -0.0f, 1.0f, -1.0f, 1.0f, -1.0f, NAN}",
-        "union xnn_f32_tanh_params",
         # TODO: b/338934971 - This should be `1` ulp, but this fails on
         # `cmake-linux-riscv64-rvv` (but not on `cmake-linux-riscv64`).
         3,
@@ -80,53 +74,68 @@ SPECIAL_VALUES_F32 = {
         4,  # Number of elements.
         "{1.0f, -1.0f, 0.0f, -0.0f}",  # Inputs.
         "{0.0f, NAN, -INFINITY, -INFINITY}",  # Expected outputs.
-        "struct xnn_f32_default_params",
         1,  # Error margin in ULP.
     ),
     "GELU": (
         3,  # Number of elements.
         "{-6.0f, 6.0f, 0.0f}",  # Inputs.
         "{0.0f, 6.0f, 0.0f}",  # Expected outputs.
-        "struct xnn_f32_default_params",
         1,  # Error margin in ULP.
     ),
     "Exp": (
         3,  # Number of elements.
         "{0.0f, -1e3f, 1e3f}",  # Inputs.
         "{1.0f, 0.0f, INFINITY}",  # Expected outputs.
-        "struct xnn_f32_default_params",
         1,  # Error margin in ULP.
     ),
 }
 
 TEST_TEMPLATE = """\
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)
-
-XNN_TEST_UNARY_BATCH_EQ(ukernel, arch_flags, batch_tile, datatype, ${", ".join(TEST_ARGS)});
-XNN_TEST_UNARY_BATCH_DIV(ukernel, arch_flags, batch_tile, datatype, ${", ".join(TEST_ARGS)});
-XNN_TEST_UNARY_BATCH_LT(ukernel, arch_flags, batch_tile, datatype, ${", ".join(TEST_ARGS)});
-XNN_TEST_UNARY_BATCH_GT(ukernel, arch_flags, batch_tile, datatype, ${", ".join(TEST_ARGS)});
-
-XNN_TEST_UNARY_INPLACE(ukernel, arch_flags, batch_tile, datatype, ${", ".join(TEST_ARGS)});
+  TEST(ukernel, batch_eq) { TestBatchEq<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
+  TEST(ukernel, batch_div) { TestBatchDiv<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
+  TEST(ukernel, batch_lt) { TestBatchLT<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
+  TEST(ukernel, batch_gt) { TestBatchGT<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
+  TEST(ukernel, inplace) { TestInPlace<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
 $if OP_TYPE == "Clamp":
-  XNN_TEST_UNARY_QMIN(ukernel, arch_flags, batch_tile, datatype, ${", ".join(TEST_ARGS)});
-  XNN_TEST_UNARY_QMAX(ukernel, arch_flags, batch_tile, datatype, ${", ".join(TEST_ARGS)});
-$if OP_TYPE == "ELU":
-  TEST(ukernel, prescale) {
+  TEST(ukernel, clamp_min) {
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);
     const size_t batch_scale = get_batch_scale<datatype>();
     const size_t batch_end = batch_tile * batch_scale;
-    const size_t batch_step = std::max(1, batch_tile - 1);
-    for (float prescale : std::array<float, 2>({0.1f, 10.0f})) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_end; batch_size += batch_step) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          .prescale(prescale)
-          .Test(${", ".join(TEST_ARGS)});
+    const size_t batch_step =
+        batch_scale == 1 ? std::max(1, batch_tile - 1) : batch_end - 1;
+    for (size_t min = 1; min < 255; min = xnnpack::NextPrime(min)) {
+      for (size_t batch_size = 1; batch_size <= 5 * batch_end;
+           batch_size += batch_step) {
+        xnn_unary_params params;
+        params.clamp.min = min;
+        params.clamp.max = 255;
+        VUnaryMicrokernelTester()
+            .batch_size(batch_size)
+            .Test<TestInfo>(ukernel, init_params, params);
       }
     }
   }
 
+  TEST(ukernel, clamp_max) {
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);
+    const size_t batch_scale = get_batch_scale<datatype>();
+    const size_t batch_end = batch_tile * batch_scale;
+    const size_t batch_step =
+        batch_scale == 1 ? std::max(1, batch_tile - 1) : batch_end - 1;
+    for (size_t max = 1; max < 255; max = xnnpack::NextPrime(max)) {
+      for (size_t batch_size = 1; batch_size <= 5 * batch_end;
+           batch_size += batch_step) {
+        xnn_unary_params params;
+        params.clamp.min = 0;
+        params.clamp.max = max;
+        VUnaryMicrokernelTester()
+            .batch_size(batch_size)
+            .Test<TestInfo>(ukernel, init_params, params);
+      }
+    }
+  }
+$if OP_TYPE == "ELU":
   TEST(ukernel, alpha) {
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);
     const size_t batch_scale = get_batch_scale<datatype>();
@@ -134,164 +143,42 @@ $if OP_TYPE == "ELU":
     const size_t batch_step = std::max(1, batch_tile - 1);
     for (float alpha : std::array<float, 2>({0.3f, 3.0f})) {
       for (size_t batch_size = 1; batch_size <= 5 * batch_end; batch_size += batch_step) {
+        xnn_unary_params params;
+        params.elu.alpha = alpha;
         ${TESTER}()
           .batch_size(batch_size)
-          .alpha(alpha)
-          .Test(${", ".join(TEST_ARGS)});
-      }
-    }
-  }
-
-  TEST(ukernel, beta) {
-    TEST_REQUIRES_ARCH_FLAGS(arch_flags);
-    const size_t batch_scale = get_batch_scale<datatype>();
-    const size_t batch_end = batch_tile * batch_scale;
-    const size_t batch_step = std::max(1, batch_tile - 1);
-    for (float beta : std::array<float, 2>({0.3f, 3.0f})) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_end; batch_size += batch_step) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          .beta(beta)
-          .Test(${", ".join(TEST_ARGS)});
+          .Test<TestInfo>(ukernel, init_params, params);
       }
     }
   }
 $if OP_TYPE == "LeakyReLU":
-  $if "f" in DATATYPE:
-    TEST(ukernel, slope) {
-      TEST_REQUIRES_ARCH_FLAGS(arch_flags);
-      const size_t batch_scale = get_batch_scale<datatype>();
-      const size_t batch_end = batch_tile * batch_scale;
-      const size_t batch_step = std::max(1, batch_tile - 1);
-      for (float slope : std::array<float, 3>({-0.7f, 0.3f, 1.3f})) {
-        for (size_t batch_size = 1; batch_size <= 5 * batch_end; batch_size += batch_step) {
-          ${TESTER}()
-            .batch_size(batch_size)
-            .slope(slope)
-            .Test(${", ".join(TEST_ARGS)});
-        }
+  TEST(ukernel, negative_slope) {
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);
+    const size_t batch_scale = get_batch_scale<datatype>();
+    const size_t batch_end = batch_tile * batch_scale;
+    const size_t batch_step = std::max(1, batch_tile - 1);
+    for (float negative_slope : std::array<float, 3>({0.01f, 0.3f, 1.3f})) {
+      xnn_unary_params params;
+      params.leaky_relu.negative_slope = negative_slope;
+      for (size_t batch_size = 1; batch_size <= 5 * batch_end; batch_size += batch_step) {
+        ${TESTER}()
+          .batch_size(batch_size)
+          .Test<TestInfo>(ukernel, init_params, params);
       }
     }
-  $else:
-    TEST(ukernel, positive_scale) {
-      TEST_REQUIRES_ARCH_FLAGS(arch_flags);
-      for (size_t batch_size = 1; batch_size <= batch_tile * 5; batch_size += std::max(1, batch_tile - 1)) {
-        for (float positive_scale : {1.0f / 256.0f, 0.3f, 1.3f, 128.0f}) {
-          ${TESTER}()
-            .batch_size(batch_size)
-            .positive_scale(positive_scale)
-            $if DATATYPE == "QU8":
-              .input_zero_point(150)
-              .output_zero_point(100)
-            .Test(${", ".join(TEST_ARGS)});
-          }
-      }
-    }
-
-    TEST(ukernel, negative_scale) {
-      TEST_REQUIRES_ARCH_FLAGS(arch_flags);
-      for (size_t batch_size = 1; batch_size <= batch_tile * 5; batch_size += std::max(1, batch_tile - 1)) {
-        for (float negative_scale : {-127.99609375f, -1.3f, -0.3f, -1.0f / 256.0f, 1 / 256.0f, 0.3f, 1.3f, 128.0f}) {
-          ${TESTER}()
-            .batch_size(batch_size)
-            .negative_scale(negative_scale)
-            $if DATATYPE == "QU8":
-              .input_zero_point(150)
-              .output_zero_point(100)
-            .Test(${", ".join(TEST_ARGS)});
-          }
-      }
-    }
-$if OP_TYPE == "HardSwish":
-  $if "f" not in DATATYPE:
-    TEST(ukernel, input_scale) {
-      TEST_REQUIRES_ARCH_FLAGS(arch_flags);
-      for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-        for (float input_scale : {4.0f, 16.0f, 64.0f}) {
-          VHSwishMicrokernelTester()
-            .batch_size(batch_size)
-            .input_scale(input_scale)
-            $if "qu8" in DATATYPE:
-              .input_zero_point(150)
-              .output_zero_point(100)
-            .Test(${", ".join(TEST_ARGS)});
-          }
-      }
-    }
-
-    TEST(ukernel, output_scale) {
-      TEST_REQUIRES_ARCH_FLAGS(arch_flags);
-      for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-        for (float output_scale : {4.0f, 16.0f, 64.0f}) {
-          VHSwishMicrokernelTester()
-            .batch_size(batch_size)
-            .output_scale(output_scale)
-            $if "qu8" in DATATYPE:
-              .input_zero_point(150)
-              .output_zero_point(100)
-            .Test(${", ".join(TEST_ARGS)});
-          }
-      }
-    }
-
-    TEST(ukernel, input_zero_point) {
-      TEST_REQUIRES_ARCH_FLAGS(arch_flags);
-      for (int16_t input_zero_point = 2; input_zero_point < 10; input_zero_point += 3) {
-        for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-          VHSwishMicrokernelTester()
-            .batch_size(batch_size)
-            .input_zero_point(input_zero_point)
-            $if "qu8" in DATATYPE:
-              .output_zero_point(100)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-      }
-    }
-
-    TEST(ukernel, output_zero_point) {
-      TEST_REQUIRES_ARCH_FLAGS(arch_flags);
-      for (int16_t output_zero_point = 2; output_zero_point < 10; output_zero_point += 3) {
-        for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-          VHSwishMicrokernelTester()
-            .batch_size(batch_size)
-            $if "qu8" in DATATYPE:
-              .input_zero_point(150)
-            .output_zero_point(output_zero_point)
-            .Test(${", ".join(TEST_ARGS)});
-        }
-      }
-    }
+  }
+$if "q" in DATATYPE:
+  TEST(ukernel, input_scale) { TestInputScale<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
+  TEST(ukernel, output_scale) { TestOutputScale<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
+  TEST(ukernel, input_zero_point) { TestInputZeroPoint<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
+  TEST(ukernel, output_zero_point) { TestOutputZeroPoint<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
 $if DATATYPE == "f32" and OP_TYPE in SPECIAL_VALUES_F32:
   TEST(ukernel, special_values) {
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);
-    constexpr size_t num_elements = ${SPECIAL_VALUES_F32[OP_TYPE][0]};
-    constexpr size_t buffered_size =
-        num_elements + XNN_EXTRA_BYTES / sizeof(float);
-    std::array<float, buffered_size> inputs =
-        ${SPECIAL_VALUES_F32[OP_TYPE][1]};
-    std::array<float, num_elements> expected =
-        ${SPECIAL_VALUES_F32[OP_TYPE][2]};
-    std::array<float, buffered_size> outputs;
-    ${SPECIAL_VALUES_F32[OP_TYPE][3]} params;
-    if (${TEST_ARGS[1]}) {
-      ${TEST_ARGS[1]}(&params);
-    }
-    ${TEST_ARGS[0]}(
-        num_elements * sizeof(float), inputs.data(), outputs.data(), &params);
-    for (int i = 0; i < num_elements; i++) {
-      if (std::isfinite(expected[i])) {
-        EXPECT_NEAR(
-            expected[i], outputs[i],
-            ${SPECIAL_VALUES_F32[OP_TYPE][4]} * std::abs(expected[i]) * std::numeric_limits<float>::epsilon())
-            << "for input " << inputs[i];
-      } else {
-        EXPECT_EQ(std::fpclassify(expected[i]), std::fpclassify(outputs[i]))
-            << "for input " << inputs[i] << " and output " << outputs[i]
-            << " (FP_INFINITE=" << FP_INFINITE << ", FP_NAN=" << FP_NAN
-            << ", FP_NORMAL=" << FP_NORMAL << ", FP_SUBNORMAL=" << FP_SUBNORMAL
-            << ", FP_ZERO=" << FP_ZERO << ")";
-      }
-    }
+    VUnaryMicrokernelTester().Test<TestInfo>(ukernel, init_params,
+      /*inputs=*/${SPECIAL_VALUES_F32[OP_TYPE][1]},
+      /*outputs=*/${SPECIAL_VALUES_F32[OP_TYPE][2]},
+      /*tolerance_ulp=*/${SPECIAL_VALUES_F32[OP_TYPE][3]});
   }
 """
 
@@ -303,13 +190,8 @@ def main(args):
   op = parts[-1]
   op_type = OP_TYPES[op]
 
-  tester = options.tester
-  tester_header = {
-      "VHSwishMicrokernelTester": "vhswish-microkernel-tester.h",
-      "VLReLUMicrokernelTester": "vlrelu-microkernel-tester.h",
-      "VUnaryMicrokernelTester": "vunary-microkernel-tester.h",
-  }[tester]
-
+  tester = "VUnaryMicrokernelTester"
+  tester_header = "vunary-microkernel-tester.h"
   op_header = "vunary.h"
   tests = """\
 // Copyright 2019 Google LLC
@@ -345,21 +227,12 @@ def main(args):
       tester_header=tester_header,
   )
 
-  test_args = ["ukernel"]
-  if op_type.startswith("Round"):
-    test_args.append(tester + "::OpType::" + op_type)
-  test_args.append("init_params")
+  test_args = ["ukernel", "init_params"]
 
-  disambiguate = {
-      "Abs": "Abs",
-      "GELU": "Gelu",
-      "Exp": "Exp",
-      "Log": "Log",
-      "Negate": "Neg",
-      "Square": "Sqr",
-  }.get(op_type, None)
-  if disambiguate:
-    test_args.append(disambiguate + "()")
+  tests += """\
+using TestInfo = {op_type};
+
+""".format(op_type=op_type)
 
   tests += xnncommon.make_multiline_macro(xngen.preprocess(
       TEST_TEMPLATE,
