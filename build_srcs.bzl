@@ -12,7 +12,7 @@ OPERATOR_SRCS = [
     "src/operators/argmax-pooling-nhwc.c",
     "src/operators/average-pooling-nhwc.c",
     "src/operators/batch-matrix-multiply-nc.c",
-    "src/operators/binary-elementwise-nd.c",
+    "src/operators/binary-elementwise-nd.cc",
     "src/operators/channel-shuffle-nc.c",
     "src/operators/constant-pad-nd.c",
     "src/operators/convolution-nchw.c",
@@ -33,7 +33,7 @@ OPERATOR_SRCS = [
     "src/operators/slice-nd.c",
     "src/operators/softmax-nc.c",
     "src/operators/transpose-nd.c",
-    "src/operators/unary-elementwise-nc.c",
+    "src/operators/unary-elementwise-nc.cc",
     "src/operators/unpooling-nhwc.c",
 ]
 

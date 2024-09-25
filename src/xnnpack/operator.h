@@ -20,6 +20,10 @@
 #include "xnnpack/operator-type.h"
 #include "pthreadpool.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Maximum number of pthreadpool parallelization invocations per operator.
 #define XNN_MAX_COMPUTE_INVOCATIONS 3
 
@@ -429,3 +433,7 @@ XNN_INTERNAL enum xnn_status xnn_run_operator_with_index(
 
 XNN_INTERNAL enum xnn_operator_type xnn_binary_operator_to_operator_type(
   enum xnn_binary_operator op);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif

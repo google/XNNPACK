@@ -67,7 +67,7 @@ static const struct xnn_binary_elementwise_config* init_config(
         case xnn_datatype_quint8:
           return xnn_init_qu8_vadd_config();
         default:
-          return NULL;
+          return nullptr;
       }
     case xnn_binary_subtract:
       *sign_b = -1;
@@ -81,7 +81,7 @@ static const struct xnn_binary_elementwise_config* init_config(
         case xnn_datatype_quint8:
           return xnn_init_qu8_vadd_config();
         default:
-          return NULL;
+          return nullptr;
       }
     case xnn_binary_multiply:
       switch (datatype) {
@@ -96,7 +96,7 @@ static const struct xnn_binary_elementwise_config* init_config(
         case xnn_datatype_int32:
           return xnn_init_s32_vmul_config();
         default:
-          return NULL;
+          return nullptr;
       }
     case xnn_binary_divide:
       switch (datatype) {
@@ -105,7 +105,7 @@ static const struct xnn_binary_elementwise_config* init_config(
         case xnn_datatype_fp16:
           return xnn_init_f16_vdiv_config();
         default:
-          return NULL;
+          return nullptr;
       }
     case xnn_binary_maximum:
       switch (datatype) {
@@ -114,7 +114,7 @@ static const struct xnn_binary_elementwise_config* init_config(
         case xnn_datatype_fp16:
           return xnn_init_f16_vmax_config();
         default:
-          return NULL;
+          return nullptr;
       }
     case xnn_binary_minimum:
       switch (datatype) {
@@ -123,14 +123,14 @@ static const struct xnn_binary_elementwise_config* init_config(
         case xnn_datatype_fp16:
           return xnn_init_f16_vmin_config();
         default:
-          return NULL;
+          return nullptr;
       }
     case xnn_binary_copysign:
       switch (datatype) {
         case xnn_datatype_fp32:
           return xnn_init_f32_vcopysign_config();
         default:
-          return NULL;
+          return nullptr;
       }
     case xnn_binary_squared_difference:
       switch (datatype) {
@@ -139,10 +139,10 @@ static const struct xnn_binary_elementwise_config* init_config(
         case xnn_datatype_fp16:
           return xnn_init_f16_vsqrdiff_config();
         default:
-          return NULL;
+          return nullptr;
       }
     default:
-      return NULL;
+      return nullptr;
   }
 }
 
@@ -161,7 +161,7 @@ static enum xnn_status init_binary_elementwise_nd(
   int sign_b = 1;
   const struct xnn_binary_elementwise_config* config =
       init_config(type, datatype, &sign_b);
-  if (config == NULL) {
+  if (config == nullptr) {
     xnn_log_error(
         "failed to create %s operator: unsupported hardware configuration",
         xnn_binary_operator_to_string(type));
@@ -170,11 +170,11 @@ static enum xnn_status init_binary_elementwise_nd(
 
   union xnn_binary_uparams uparams;
   union xnn_binary_uparams uparams2;
-  if (config->init != NULL) {
+  if (config->init != nullptr) {
     if (datatype == xnn_datatype_qint8 || datatype == xnn_datatype_quint8) {
       if (!a_quantization || !b_quantization || !output_quantization) {
         xnn_log_error(
-            "failed to create %s operator with NULL quantization params",
+            "failed to create %s operator with nullptr quantization params",
             xnn_binary_operator_to_string(type));
         return xnn_status_invalid_parameter;
       }
@@ -212,8 +212,8 @@ static enum xnn_status init_binary_elementwise_nd(
       config->init(&uparams2, &b_quantization_with_sign, a_quantization,
                   output_quantization);
     } else {
-      config->init(&uparams, NULL, NULL, NULL);
-      config->init(&uparams2, NULL, NULL, NULL);
+      config->init(&uparams, nullptr, nullptr, nullptr);
+      config->init(&uparams2, nullptr, nullptr, nullptr);
     }
   }
 
@@ -238,6 +238,8 @@ static enum xnn_status init_binary_elementwise_nd(
   return xnn_status_success;
 }
 
+extern "C" {
+
 enum xnn_status xnn_create_binary_elementwise_nd(
     enum xnn_binary_operator type, enum xnn_datatype datatype,
     const struct xnn_quantization_params* a_quantization,
@@ -251,8 +253,8 @@ enum xnn_status xnn_create_binary_elementwise_nd(
   }
 
   xnn_operator_t op =
-      xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
-  if (op == NULL) {
+      reinterpret_cast<xnn_operator_t>(xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator)));
+  if (op == nullptr) {
     xnn_log_error("failed to allocate %zu bytes for %s operator descriptor",
                   sizeof(struct xnn_operator),
                   xnn_binary_operator_to_string(type));
@@ -379,9 +381,8 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
   }
 
   const uint32_t log2_element_size = op->log2_elementwise_element_size;
-  op->context.elementwise_binary = (struct elementwise_binary_context){
-      .elements = compressed_output_shape[0] << log2_element_size,
-  };
+  op->context.elementwise_binary.elements =
+      compressed_output_shape[0] << log2_element_size;
   memcpy(&op->context.elementwise_binary.params, &op->params.binary,
          sizeof(op->params.binary));
 
@@ -554,3 +555,5 @@ enum xnn_status xnn_run_binary_elementwise_nd(
 
   return xnn_run_operator(&op, threadpool);
 }
+
+}  // extern "C"

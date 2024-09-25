@@ -913,7 +913,7 @@ xnnpack_cc_library(
     ],
 )
 
-xnnpack_cc_library(
+xnnpack_cxx_library(
     name = "operators",
     srcs = OPERATOR_SRCS,
     hdrs = [
