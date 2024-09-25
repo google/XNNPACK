@@ -207,10 +207,10 @@ static enum xnn_status create_fully_connected_nc(
       if (block_wise && bias != NULL) {
         void* weights_start = (void*) ((uintptr_t) weights_ptr +
           gemm_config->nr * (sizeof(float) + (block_size * sizeof(int8_t) / 2)));
-        weights_start = (void*) ((uintptr_t) weights_ptr + (weights_stride - gemm_config->nr * sizeof(float))) ;
+        weights_start = (void*) ((uintptr_t) weights_ptr + gemm_config->nr * (weights_stride - sizeof(float))) ;
         xnn_init_qs8_qc8w_scale_fp32_params(
               output_channels, gemm_config->nr, gemm_config->nr,
-              weights_stride, weights_stride, 0,
+              gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
               bias, weights_start);
       }
     } else {
