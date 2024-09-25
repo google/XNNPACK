@@ -41,7 +41,7 @@ xnn_subgraph_t FP32MobileNetV1() {
     subgraph, xnn_datatype_fp32,
     v0_dims.size(), v0_dims.data(),
     /*data=*/nullptr,
-    1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &v0);
+    0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &v0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v0" << std::endl;
     return nullptr;
@@ -389,7 +389,7 @@ xnn_subgraph_t FP32MobileNetV1() {
     subgraph, xnn_datatype_fp32,
     v29_dims.size(), v29_dims.data(),
     /*data=*/nullptr,
-    0, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &v29);
+    1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &v29);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v29" << std::endl;
     return nullptr;

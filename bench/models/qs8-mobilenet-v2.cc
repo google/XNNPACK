@@ -41,7 +41,7 @@ xnn_subgraph_t QS8MobileNetV2() {
     subgraph, xnn_datatype_fp32,
     v0_dims.size(), v0_dims.data(),
     /*data=*/nullptr,
-    0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &v0);
+    1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &v0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v0" << std::endl;
     return nullptr;
@@ -963,7 +963,7 @@ xnn_subgraph_t QS8MobileNetV2() {
     subgraph, xnn_datatype_fp32,
     v66_dims.size(), v66_dims.data(),
     /*data=*/nullptr,
-    1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &v66);
+    0, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &v66);
   if (status != xnn_status_success) {
     std::cerr << "failed to create tensor v66" << std::endl;
     return nullptr;
@@ -3273,10 +3273,11 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v11_params = { std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/std::numeric_limits<int8_t>::min(),
-    /*output_max=*/std::numeric_limits<int8_t>::max(),
+    xnn_binary_add,
+    &v11_params,
     v10,
     v7,
     v11,
@@ -3404,10 +3405,11 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v18_params = { std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/std::numeric_limits<int8_t>::min(),
-    /*output_max=*/std::numeric_limits<int8_t>::max(),
+    xnn_binary_add,
+    &v18_params,
     v17,
     v14,
     v18,
@@ -3476,10 +3478,11 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v22_params = { std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/std::numeric_limits<int8_t>::min(),
-    /*output_max=*/std::numeric_limits<int8_t>::max(),
+    xnn_binary_add,
+    &v22_params,
     v21,
     v18,
     v22,
@@ -3607,10 +3610,11 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v29_params = { std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/std::numeric_limits<int8_t>::min(),
-    /*output_max=*/std::numeric_limits<int8_t>::max(),
+    xnn_binary_add,
+    &v29_params,
     v28,
     v25,
     v29,
@@ -3679,10 +3683,11 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v33_params = { std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/std::numeric_limits<int8_t>::min(),
-    /*output_max=*/std::numeric_limits<int8_t>::max(),
+    xnn_binary_add,
+    &v33_params,
     v32,
     v29,
     v33,
@@ -3751,10 +3756,11 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v37_params = { std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/std::numeric_limits<int8_t>::min(),
-    /*output_max=*/std::numeric_limits<int8_t>::max(),
+    xnn_binary_add,
+    &v37_params,
     v36,
     v33,
     v37,
@@ -3882,10 +3888,11 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v44_params = { std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/std::numeric_limits<int8_t>::min(),
-    /*output_max=*/std::numeric_limits<int8_t>::max(),
+    xnn_binary_add,
+    &v44_params,
     v43,
     v40,
     v44,
@@ -3954,10 +3961,11 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v48_params = { std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/std::numeric_limits<int8_t>::min(),
-    /*output_max=*/std::numeric_limits<int8_t>::max(),
+    xnn_binary_add,
+    &v48_params,
     v47,
     v44,
     v48,
@@ -4085,10 +4093,11 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v55_params = { std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/std::numeric_limits<int8_t>::min(),
-    /*output_max=*/std::numeric_limits<int8_t>::max(),
+    xnn_binary_add,
+    &v55_params,
     v54,
     v51,
     v55,
@@ -4157,10 +4166,11 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v59_params = { std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/std::numeric_limits<int8_t>::min(),
-    /*output_max=*/std::numeric_limits<int8_t>::max(),
+    xnn_binary_add,
+    &v59_params,
     v58,
     v55,
     v59,

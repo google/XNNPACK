@@ -2502,10 +2502,11 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v10_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v10_params,
     v9,
     v6,
     v10,
@@ -2633,10 +2634,11 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v17_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v17_params,
     v16,
     v13,
     v17,
@@ -2705,10 +2707,11 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v21_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v21_params,
     v20,
     v17,
     v21,
@@ -2836,10 +2839,11 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v28_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v28_params,
     v27,
     v24,
     v28,
@@ -2908,10 +2912,11 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v32_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v32_params,
     v31,
     v28,
     v32,
@@ -2980,10 +2985,11 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v36_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v36_params,
     v35,
     v32,
     v36,
@@ -3111,10 +3117,11 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v43_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v43_params,
     v42,
     v39,
     v43,
@@ -3183,10 +3190,11 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v47_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v47_params,
     v46,
     v43,
     v47,
@@ -3314,10 +3322,11 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v54_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v54_params,
     v53,
     v50,
     v54,
@@ -3386,10 +3395,11 @@ xnn_subgraph_t FP32MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v58_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v58_params,
     v57,
     v54,
     v58,

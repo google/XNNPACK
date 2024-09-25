@@ -3498,10 +3498,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v5_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v5_params,
     v4,
     v2,
     v5,
@@ -3629,10 +3630,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v12_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v12_params,
     v11,
     v8,
     v12,
@@ -3735,10 +3737,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_multiply2(
+  xnn_binary_params v18_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_multiply,
+    &v18_params,
     v17,
     w150,
     v18,
@@ -3748,10 +3751,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_multiply2(
+  xnn_binary_params v19_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_multiply,
+    &v19_params,
     v14,
     v18,
     v19,
@@ -3874,10 +3878,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_multiply2(
+  xnn_binary_params v26_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_multiply,
+    &v26_params,
     v25,
     w161,
     v26,
@@ -3887,10 +3892,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_multiply2(
+  xnn_binary_params v27_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_multiply,
+    &v27_params,
     v22,
     v26,
     v27,
@@ -3920,10 +3926,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v29_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v29_params,
     v28,
     v20,
     v29,
@@ -4026,10 +4033,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_multiply2(
+  xnn_binary_params v35_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_multiply,
+    &v35_params,
     v34,
     w172,
     v35,
@@ -4039,10 +4047,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_multiply2(
+  xnn_binary_params v36_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_multiply,
+    &v36_params,
     v31,
     v35,
     v36,
@@ -4072,10 +4081,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v38_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v38_params,
     v37,
     v29,
     v38,
@@ -4243,10 +4253,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v49_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v49_params,
     v48,
     v43,
     v49,
@@ -4335,10 +4346,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v55_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v55_params,
     v54,
     v49,
     v55,
@@ -4427,10 +4439,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v61_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v61_params,
     v60,
     v55,
     v61,
@@ -4553,10 +4566,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_multiply2(
+  xnn_binary_params v69_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_multiply,
+    &v69_params,
     v68,
     w207,
     v69,
@@ -4566,10 +4580,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_multiply2(
+  xnn_binary_params v70_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_multiply,
+    &v70_params,
     v65,
     v69,
     v70,
@@ -4712,10 +4727,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_multiply2(
+  xnn_binary_params v79_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_multiply,
+    &v79_params,
     v78,
     w218,
     v79,
@@ -4725,10 +4741,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_multiply2(
+  xnn_binary_params v80_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_multiply,
+    &v80_params,
     v75,
     v79,
     v80,
@@ -4758,10 +4775,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v82_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v82_params,
     v81,
     v71,
     v82,
@@ -4884,10 +4902,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_multiply2(
+  xnn_binary_params v90_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_multiply,
+    &v90_params,
     v89,
     w229,
     v90,
@@ -4897,10 +4916,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_multiply2(
+  xnn_binary_params v91_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_multiply,
+    &v91_params,
     v86,
     v90,
     v91,
@@ -5043,10 +5063,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_multiply2(
+  xnn_binary_params v100_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_multiply,
+    &v100_params,
     v99,
     w240,
     v100,
@@ -5056,10 +5077,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_multiply2(
+  xnn_binary_params v101_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_multiply,
+    &v101_params,
     v96,
     v100,
     v101,
@@ -5089,10 +5111,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v103_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v103_params,
     v102,
     v92,
     v103,
@@ -5215,10 +5238,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_multiply2(
+  xnn_binary_params v111_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_multiply,
+    &v111_params,
     v110,
     w251,
     v111,
@@ -5228,10 +5252,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_multiply2(
+  xnn_binary_params v112_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_multiply,
+    &v112_params,
     v107,
     v111,
     v112,
@@ -5261,10 +5286,11 @@ xnn_subgraph_t FP32MobileNetV3Large() {
     return nullptr;
   }
 
-  status = xnn_define_add2(
+  xnn_binary_params v114_params = { -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() };
+  status = xnn_define_binary(
     subgraph,
-    /*output_min=*/-std::numeric_limits<float>::infinity(),
-    /*output_max=*/std::numeric_limits<float>::infinity(),
+    xnn_binary_add,
+    &v114_params,
     v113,
     v103,
     v114,

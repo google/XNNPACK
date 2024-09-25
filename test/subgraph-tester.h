@@ -327,9 +327,10 @@ class SubgraphTester {
   }
 
   SubgraphTester& AddAddition(uint32_t input_id1, uint32_t input_id2, uint32_t output_id) {
+    struct xnn_binary_params params = {-std::numeric_limits<float>::infinity(),
+                                       std::numeric_limits<float>::infinity()};
     const xnn_status status =
-        xnn_define_add2(subgraph_.get(), -std::numeric_limits<float>::infinity(),
-                        std::numeric_limits<float>::infinity(), input_id1,
+        xnn_define_binary(subgraph_.get(), xnn_binary_add, &params, input_id1,
                         input_id2, output_id, 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
 
@@ -403,9 +404,10 @@ class SubgraphTester {
   }
 
   SubgraphTester& AddDivide(uint32_t input_id1, uint32_t input_id2, uint32_t output_id) {
+    struct xnn_binary_params params = {-std::numeric_limits<float>::infinity(),
+                                       std::numeric_limits<float>::infinity()};
     const xnn_status status =
-        xnn_define_divide(subgraph_.get(), -std::numeric_limits<float>::infinity(),
-                        std::numeric_limits<float>::infinity(), input_id1,
+        xnn_define_binary(subgraph_.get(), xnn_binary_divide, &params, input_id1,
                         input_id2, output_id, 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
 
@@ -482,9 +484,10 @@ class SubgraphTester {
   }
 
   SubgraphTester& AddMultiply(uint32_t input_id1, uint32_t input_id2, uint32_t output_id) {
+    struct xnn_binary_params params = {-std::numeric_limits<float>::infinity(),
+                                       std::numeric_limits<float>::infinity()};
     const xnn_status status =
-        xnn_define_multiply2(subgraph_.get(), -std::numeric_limits<float>::infinity(),
-                        std::numeric_limits<float>::infinity(), input_id1,
+        xnn_define_binary(subgraph_.get(), xnn_binary_multiply, &params, input_id1,
                         input_id2, output_id, 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
 
@@ -499,9 +502,10 @@ class SubgraphTester {
   }
 
   SubgraphTester& AddSubtract(uint32_t input_id1, uint32_t input_id2, uint32_t output_id) {
+    struct xnn_binary_params params = {-std::numeric_limits<float>::infinity(),
+                                       std::numeric_limits<float>::infinity()};
     const xnn_status status =
-        xnn_define_subtract(subgraph_.get(), -std::numeric_limits<float>::infinity(),
-                        std::numeric_limits<float>::infinity(), input_id1,
+        xnn_define_binary(subgraph_.get(), xnn_binary_subtract, &params, input_id1,
                         input_id2, output_id, 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
 

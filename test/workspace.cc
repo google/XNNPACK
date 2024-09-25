@@ -89,10 +89,11 @@ void DefineGraphWithStaticData(xnn_subgraph_t* subgraph, std::array<size_t, 4> d
     XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
+  struct xnn_binary_params params = {-std::numeric_limits<float>::infinity(),
+                                     std::numeric_limits<float>::infinity()};
   ASSERT_EQ(xnn_status_success,
-            xnn_define_add2(*subgraph, -std::numeric_limits<float>::infinity(),
-                            std::numeric_limits<float>::infinity(), input_id,
-                            static_value_id, output_id, /*flags=*/0));
+            xnn_define_binary(*subgraph, xnn_binary_add, &params, input_id,
+                              static_value_id, output_id, /*flags=*/0));
 }
 
 void DefineGraphWithPersistentTensors(xnn_subgraph_t* subgraph, std::array<size_t, 4> dims)
