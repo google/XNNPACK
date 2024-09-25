@@ -37,8 +37,8 @@ void xnn_f16_ibilinear_ukernel__neonfp16arith_c16(
     const uint16_t* i3 = (const uint16_t*) ((uintptr_t) input[3] + input_offset);
     input += 4;
 
-    const float16x8_t valphah = vreinterpretq_f16_u16(vld1q_dup_u16(weights)); weights = (const xnn_float16*) weights + 1;
-    const float16x8_t valphav = vreinterpretq_f16_u16(vld1q_dup_u16(weights)); weights = (const xnn_float16*) weights + 1;
+    const float16x8_t valphah = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*)weights)); weights = weights + 1;
+    const float16x8_t valphav = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*)weights)); weights = weights + 1;
 
     size_t c = channels;
     for (; c >= 16 * sizeof(uint16_t); c -= 16 * sizeof(uint16_t)) {

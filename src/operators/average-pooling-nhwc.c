@@ -68,31 +68,10 @@ enum xnn_status create_average_pooling2d_nhwc(
     return xnn_status_invalid_parameter;
   }
 
-  if (pooling_size == 1) {
-    xnn_log_error(
-      "failed to create %s operator with 1 pooling element: 1x1 pooling is meaningless",
-      xnn_operator_type_to_string(operator_type));
-    return xnn_status_invalid_parameter;
-  }
-
   if (stride_height == 0 || stride_width == 0) {
     xnn_log_error(
       "failed to create %s operator with %" PRIu32 "x%" PRIu32 " stride: stride dimensions must be non-zero",
       xnn_operator_type_to_string(operator_type), stride_width, stride_height);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (stride_height > pooling_height) {
-    xnn_log_error(
-      "failed to create %s operator with %" PRIu32 " stride height: must be less than pooling height %" PRIu32,
-      xnn_operator_type_to_string(operator_type), stride_height, pooling_height);
-    return xnn_status_invalid_parameter;
-  }
-
-  if (stride_width > pooling_width) {
-    xnn_log_error(
-      "failed to create %s operator with %" PRIu32 " stride width: must be less than pooling width %" PRIu32,
-      xnn_operator_type_to_string(operator_type), stride_width, pooling_width);
     return xnn_status_invalid_parameter;
   }
 

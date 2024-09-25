@@ -212,6 +212,7 @@ xnnpack_benchmark(
     "f32_qs8_vcvt",
     "f32_qu8_vcvt",
     "s32_f32_vcvt",
+    "u32_f32_vcvt",
 ]]
 
 [xnnpack_benchmark(
@@ -240,18 +241,6 @@ xnnpack_benchmark(
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 ) for kernel in [
-    "qs8_vadd",
-    "qs8_vaddc",
-    "qs8_vhswish",
-    "qs8_vlrelu",
-    "qs8_vmul",
-    "qs8_vmulc",
-    "qu8_vadd",
-    "qu8_vaddc",
-    "qu8_vhswish",
-    "qu8_vlrelu",
-    "qu8_vmul",
-    "qu8_vmulc",
     "f16_gavgpool_cw",
     "f16_raddstoreexpminusmax",
     "f16_rmax",
@@ -268,16 +257,6 @@ xnnpack_benchmark(
     "f32_vscaleextexp",
     "f16_vcmul",
     "f32_vcmul",
-    "s16_rmaxabs",
-    "s16_window",
-    "u32_filterbank_accumulate",
-    "u32_filterbank_subtract",
-    "u32_vlog",
-    "u64_u32_vsqrtshift",
-    "i16_vlshift",
-    "cs16_vsquareabs",
-    "cs16_bfly4",
-    "cs16_fftr",
     "x8_lut",
 ]]
 
@@ -347,58 +326,17 @@ xnnpack_benchmark(
     ],
 )
 
-[xnnpack_benchmark(
-    name = "%s_bench" % kernel,
-    srcs = [
-        "%s.cc" % kernel.replace("_", "-"),
-        "f16-vunary-benchmark.h",
-    ],
+xnnpack_benchmark(
+    name = "vunary_bench",
+    srcs = ["vunary.cc"],
     deps = MICROKERNEL_BENCHMARK_DEPS,
-) for kernel in [
-    "f16_vsigmoid",
-    "f16_vtanh",
-    "f16_velu",
-    "f16_vabs",
-    "f16_vhswish",
-    "f16_vlrelu",
-    "f16_vneg",
-    "f16_vrndd",
-    "f16_vrndne",
-    "f16_vrndu",
-    "f16_vrndz",
-    "f16_vsqr",
-    "f16_vsqrt",
-    "f16_vrsqrt",
-    "f16_vclamp",
-]]
+)
 
-[xnnpack_benchmark(
-    name = "%s_bench" % kernel,
-    srcs = [
-        "%s.cc" % kernel.replace("_", "-"),
-        "f32-vunary-benchmark.h",
-    ],
+xnnpack_benchmark(
+    name = "vbinary_bench",
+    srcs = ["vbinary.cc"],
     deps = MICROKERNEL_BENCHMARK_DEPS,
-) for kernel in [
-    "f32_vabs",
-    "f32_velu",
-    "f32_vgelu",
-    "f32_vhswish",
-    "f32_vlog",
-    "f32_vlrelu",
-    "f32_vneg",
-    "f32_vrelu",
-    "f32_vrndd",
-    "f32_vrndne",
-    "f32_vrndu",
-    "f32_vrndz",
-    "f32_vsigmoid",
-    "f32_vsqr",
-    "f32_vsqrt",
-    "f32_vrsqrt",
-    "f32_vclamp",
-    "f32_vtanh",
-]]
+)
 
 xnnpack_benchmark(
     name = "f32_igemm_bench",
@@ -549,6 +487,7 @@ xnnpack_benchmark(
         "bgemm.h",
         "x8-packq.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":packq_benchmark",
         "//:allocator",
@@ -714,181 +653,4 @@ xnnpack_benchmark(
         "nowin32",
     ],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
-)
-
-############################### E2E benchmarks ###############################
-
-xnnpack_benchmark(
-    name = "f16_dwconv_e2e_bench",
-    srcs = [
-        "end2end.h",
-        "f16-dwconv-e2e.cc",
-    ],
-    tags = xnnpack_slow_benchmark_tags(),
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        "//:XNNPACK",
-        "//:microkernel_configs",
-        "//:models_h",
-        "//models:fp16_mobilenet_v1",
-        "//models:fp16_mobilenet_v2",
-        "//models:fp16_mobilenet_v3_large",
-        "//models:fp16_mobilenet_v3_small",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "f16_gemm_e2e_bench",
-    srcs = [
-        "end2end.h",
-        "f16-gemm-e2e.cc",
-    ],
-    tags = xnnpack_slow_benchmark_tags(),
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        "//:XNNPACK",
-        "//:microkernel_configs",
-        "//:models_h",
-        "//models:fp16_mobilenet_v1",
-        "//models:fp16_mobilenet_v2",
-        "//models:fp16_mobilenet_v3_large",
-        "//models:fp16_mobilenet_v3_small",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "f32_dwconv_e2e_bench",
-    srcs = [
-        "end2end.h",
-        "f32-dwconv-e2e.cc",
-    ],
-    tags = xnnpack_slow_benchmark_tags(),
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        "//:XNNPACK",
-        "//:microkernel_configs",
-        "//:models_h",
-        "//models:fp32_mobilenet_v1",
-        "//models:fp32_mobilenet_v2",
-        "//models:fp32_mobilenet_v3_large",
-        "//models:fp32_mobilenet_v3_small",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "f32_gemm_e2e_bench",
-    srcs = [
-        "end2end.h",
-        "f32-gemm-e2e.cc",
-    ],
-    tags = xnnpack_slow_benchmark_tags(),
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        "//:XNNPACK",
-        "//:microkernel_configs",
-        "//:models_h",
-        "//models:fp32_mobilenet_v1",
-        "//models:fp32_mobilenet_v2",
-        "//models:fp32_mobilenet_v3_large",
-        "//models:fp32_mobilenet_v3_small",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "qs8_dwconv_e2e_bench",
-    srcs = [
-        "end2end.h",
-        "qs8-dwconv-e2e.cc",
-    ],
-    tags = xnnpack_slow_benchmark_tags(),
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        "//:XNNPACK",
-        "//:microkernel_configs",
-        "//:models_h",
-        "//models:qs8_mobilenet_v1",
-        "//models:qs8_mobilenet_v2",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "qs8_gemm_e2e_bench",
-    srcs = [
-        "end2end.h",
-        "qs8-gemm-e2e.cc",
-    ],
-    tags = xnnpack_slow_benchmark_tags(),
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        "//:XNNPACK",
-        "//:microkernel_configs",
-        "//:models_h",
-        "//models:qs8_mobilenet_v1",
-        "//models:qs8_mobilenet_v2",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "qu8_gemm_e2e_bench",
-    srcs = [
-        "end2end.h",
-        "qu8-gemm-e2e.cc",
-    ],
-    tags = xnnpack_slow_benchmark_tags(),
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        "//:XNNPACK",
-        "//:microkernel_configs",
-        "//:models_h",
-        "//models:qu8_mobilenet_v1",
-        "//models:qu8_mobilenet_v2",
-        "//models:qu8_mobilenet_v3_large",
-        "//models:qu8_mobilenet_v3_small",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "qu8_dwconv_e2e_bench",
-    srcs = [
-        "end2end.h",
-        "qu8-dwconv-e2e.cc",
-    ],
-    tags = xnnpack_slow_benchmark_tags(),
-    deps = MICROKERNEL_BENCHMARK_DEPS + [
-        "//:XNNPACK",
-        "//:microkernel_configs",
-        "//:models_h",
-        "//models:qu8_mobilenet_v1",
-        "//models:qu8_mobilenet_v2",
-        "//models:qu8_mobilenet_v3_large",
-        "//models:qu8_mobilenet_v3_small",
-    ],
-)
-
-xnnpack_benchmark(
-    name = "end2end_bench",
-    srcs = ["end2end.cc"],
-    tags = xnnpack_slow_benchmark_tags(),
-    deps = [
-        ":bench_utils",
-        "//:XNNPACK",
-        "//:models_h",
-        "//models:fp16_mobilenet_v1",
-        "//models:fp16_mobilenet_v2",
-        "//models:fp16_mobilenet_v3_large",
-        "//models:fp16_mobilenet_v3_small",
-        "//models:fp16_sparse_mobilenet_v1",
-        "//models:fp16_sparse_mobilenet_v2",
-        "//models:fp16_sparse_mobilenet_v3_large",
-        "//models:fp16_sparse_mobilenet_v3_small",
-        "//models:fp32_mobilenet_v1",
-        "//models:fp32_mobilenet_v2",
-        "//models:fp32_mobilenet_v3_large",
-        "//models:fp32_mobilenet_v3_small",
-        "//models:fp32_sparse_mobilenet_v1",
-        "//models:fp32_sparse_mobilenet_v2",
-        "//models:fp32_sparse_mobilenet_v3_large",
-        "//models:fp32_sparse_mobilenet_v3_small",
-        "//models:qs8_mobilenet_v1",
-        "//models:qs8_mobilenet_v2",
-        "//models:qs8_qc8w_mobilenet_v1",
-        "//models:qs8_qc8w_mobilenet_v2",
-        "//models:qu8_mobilenet_v1",
-        "//models:qu8_mobilenet_v2",
-        "//models:qu8_mobilenet_v3_large",
-        "//models:qu8_mobilenet_v3_small",
-    ],
 )

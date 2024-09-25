@@ -27,7 +27,6 @@ void xnn_f32_vmax_ukernel__scalar_u8(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const float va0 = input_a[0];
     const float va1 = input_a[1];
@@ -57,7 +56,6 @@ void xnn_f32_vmax_ukernel__scalar_u8(
     float vacc5 = math_max_f32(va5, vb5);
     float vacc6 = math_max_f32(va6, vb6);
     float vacc7 = math_max_f32(va7, vb7);
-
 
 
     output[0] = vacc0;

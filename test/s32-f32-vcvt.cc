@@ -17,6 +17,7 @@
 XNN_TEST_CVT_BATCH_EQ(ukernel, arch_flags, batch_tile, datatype_in, datatype_out, ukernel, init_params); \
 XNN_TEST_CVT_BATCH_DIV(ukernel, arch_flags, batch_tile, datatype_in, datatype_out, ukernel, init_params);\
 XNN_TEST_CVT_BATCH_LT(ukernel, arch_flags, batch_tile, datatype_in, datatype_out, ukernel, init_params); \
-XNN_TEST_CVT_BATCH_GT(ukernel, arch_flags, batch_tile, datatype_in, datatype_out, ukernel, init_params);
+XNN_TEST_CVT_BATCH_GT(ukernel, arch_flags, batch_tile, datatype_in, datatype_out, ukernel, init_params); \
+XNN_TEST_CVT_INPUT_ZERO_POINT(ukernel, arch_flags, batch_tile, datatype_in, datatype_out, ukernel, init_params);
 #include "src/s32-f32-vcvt/s32-f32-vcvt.h"
 #undef XNN_CVT_UKERNEL_WITH_PARAMS

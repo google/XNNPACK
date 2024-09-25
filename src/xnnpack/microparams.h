@@ -365,6 +365,14 @@ union xnn_qu8_mul_minmax_params {
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 };
 
+union xnn_binary_uparams {
+  struct xnn_qs8_add_minmax_params qs8_add;
+  struct xnn_qu8_add_minmax_params qu8_add;
+  union xnn_qs8_mul_minmax_params qs8_mul;
+  union xnn_qu8_mul_minmax_params qu8_mul;
+  union xnn_f16_minmax_params f16_minmax;
+  union xnn_f32_minmax_params f32_minmax;
+};
 
 // RSum params used by RSUM & RDSUM microkernels.
 struct xnn_qs8_rsum_params {
@@ -377,6 +385,15 @@ struct xnn_qs8_mean_minmax_params {
     int32_t num_elements;
     int8_t input_zero_point;
     int8_t output_zero_point;
+  } scalar;
+};
+
+struct xnn_qu8_mean_minmax_params {
+  struct {
+    float scale;
+    int32_t num_elements;
+    uint8_t input_zero_point;
+    uint8_t output_zero_point;
   } scalar;
 };
 
@@ -598,8 +615,13 @@ struct xnn_f32_qu8_cvt_params {
 
 struct xnn_s32_f32_cvt_params {
   struct {
-    int32_t num_elements;
-    int8_t zero_point;
+    int32_t zero_point;
+  } scalar;
+};
+
+struct xnn_u32_f32_cvt_params {
+  struct {
+    int32_t zero_point;
   } scalar;
 };
 

@@ -17,36 +17,6 @@
 
 namespace xnnpack {
 
-TEST(ADD_THEN_CLAMP, fusion) {
-  RuntimeTester tester(4);
-  float output_min = -0.5f;
-  float output_max = 0.5f;
-  uint32_t input1_id = 0;
-  uint32_t input2_id = 1;
-  uint32_t intermediate_id = 2;
-  uint32_t output_id = 3;
-  tester
-    .AddInputTensorF32({1, 2, 2, 3}, input1_id)
-    .AddInputTensorF32({1, 2, 2, 3}, input2_id)
-    .AddDynamicTensorF32({1, 2, 2, 3}, intermediate_id)
-    .AddOutputTensorF32({1, 2, 2, 3}, output_id)
-    .AddAddition(input1_id, input2_id, intermediate_id)
-    .AddClamp(output_min, output_max, intermediate_id, output_id);
-
-  std::vector<float> unoptimized_output = tester.RunWithoutFusion<float>();
-  ASSERT_EQ(tester.NumOperators(), 2);
-
-  std::vector<float> optimized_output = tester.RunWithFusion<float>();
-
-  ASSERT_EQ(tester.NumOperators(), 1);
-  ASSERT_EQ(tester.Node(0)->activation.output_min, output_min);
-  ASSERT_EQ(tester.Node(0)->activation.output_max, output_max);
-  ASSERT_EQ(tester.Node(0)->outputs[0], output_id);
-  ASSERT_EQ(tester.Node(1)->compute_type, xnn_compute_type_invalid);
-
-  ASSERT_EQ(unoptimized_output, optimized_output);
-}
-
 TEST(AVERAGE_POOLING_2D_THEN_CLAMP, fusion) {
   RuntimeTester tester(3);
   float output_min = -0.5f;
@@ -132,36 +102,6 @@ TEST(CONVOLUTION_2D_THEN_CLAMP, fusion) {
           /*group_input_channels=*/ 3,
           /*group_output_channels=*/ 32,
         }, input_id, filter_id, bias_id, intermediate_id)
-    .AddClamp(output_min, output_max, intermediate_id, output_id);
-
-  std::vector<float> unoptimized_output = tester.RunWithoutFusion<float>();
-  ASSERT_EQ(tester.NumOperators(), 2);
-
-  std::vector<float> optimized_output = tester.RunWithFusion<float>();
-
-  ASSERT_EQ(tester.NumOperators(), 1);
-  ASSERT_EQ(tester.Node(0)->activation.output_min, output_min);
-  ASSERT_EQ(tester.Node(0)->activation.output_max, output_max);
-  ASSERT_EQ(tester.Node(0)->outputs[0], output_id);
-  ASSERT_EQ(tester.Node(1)->compute_type, xnn_compute_type_invalid);
-
-  ASSERT_EQ(unoptimized_output, optimized_output);
-}
-
-TEST(DIVIDE_THEN_CLAMP, fusion) {
-  RuntimeTester tester(4);
-  float output_min = -0.5f;
-  float output_max = 0.5f;
-  uint32_t input1_id = 0;
-  uint32_t input2_id = 1;
-  uint32_t intermediate_id = 2;
-  uint32_t output_id = 3;
-  tester
-    .AddInputTensorF32({1, 2, 2, 3}, input1_id)
-    .AddInputTensorF32({1, 2, 2, 3}, input2_id)
-    .AddDynamicTensorF32({1, 2, 2, 3}, intermediate_id)
-    .AddOutputTensorF32({1, 2, 2, 3}, output_id)
-    .AddDivide(input1_id, input2_id, intermediate_id)
     .AddClamp(output_min, output_max, intermediate_id, output_id);
 
   std::vector<float> unoptimized_output = tester.RunWithoutFusion<float>();
@@ -328,36 +268,6 @@ TEST(FULLY_CONNECTED_2D_THEN_COPY_THEN_FULLY_CONNECTED, fusion) {
   ASSERT_EQ(unoptimized_output, optimized_output);
 }
 
-TEST(MULTIPLY_THEN_CLAMP, fusion) {
-  RuntimeTester tester(4);
-  float output_min = -0.5f;
-  float output_max = 0.5f;
-  uint32_t input1_id = 0;
-  uint32_t input2_id = 1;
-  uint32_t intermediate_id = 2;
-  uint32_t output_id = 3;
-  tester
-    .AddInputTensorF32({1, 2, 2, 3}, input1_id)
-    .AddInputTensorF32({1, 2, 2, 3}, input2_id)
-    .AddDynamicTensorF32({1, 2, 2, 3}, intermediate_id)
-    .AddOutputTensorF32({1, 2, 2, 3}, output_id)
-    .AddMultiply(input1_id, input2_id, intermediate_id)
-    .AddClamp(output_min, output_max, intermediate_id, output_id);
-
-  std::vector<float> unoptimized_output = tester.RunWithoutFusion<float>();
-  ASSERT_EQ(tester.NumOperators(), 2);
-
-  std::vector<float> optimized_output = tester.RunWithFusion<float>();
-
-  ASSERT_EQ(tester.NumOperators(), 1);
-  ASSERT_EQ(tester.Node(0)->activation.output_min, output_min);
-  ASSERT_EQ(tester.Node(0)->activation.output_max, output_max);
-  ASSERT_EQ(tester.Node(0)->outputs[0], output_id);
-  ASSERT_EQ(tester.Node(1)->compute_type, xnn_compute_type_invalid);
-
-  ASSERT_EQ(unoptimized_output, optimized_output);
-}
-
 TEST(MAX_POOLING_THEN_CLAMP, fusion) {
   RuntimeTester tester(3);
   float output_min = -0.5f;
@@ -370,36 +280,6 @@ TEST(MAX_POOLING_THEN_CLAMP, fusion) {
     .AddDynamicTensorF32({1, 9, 9, 3}, intermediate_id)
     .AddOutputTensorF32({1, 9, 9, 3}, output_id)
     .AddMaxPooling2D(0, 0, 0, 0, 2, 2, 1, 1, 1, 1, input_id, intermediate_id)
-    .AddClamp(output_min, output_max, intermediate_id, output_id);
-
-  std::vector<float> unoptimized_output = tester.RunWithoutFusion<float>();
-  ASSERT_EQ(tester.NumOperators(), 2);
-
-  std::vector<float> optimized_output = tester.RunWithFusion<float>();
-
-  ASSERT_EQ(tester.NumOperators(), 1);
-  ASSERT_EQ(tester.Node(0)->activation.output_min, output_min);
-  ASSERT_EQ(tester.Node(0)->activation.output_max, output_max);
-  ASSERT_EQ(tester.Node(0)->outputs[0], output_id);
-  ASSERT_EQ(tester.Node(1)->compute_type, xnn_compute_type_invalid);
-
-  ASSERT_EQ(unoptimized_output, optimized_output);
-}
-
-TEST(SUBTRACT_THEN_CLAMP, fusion) {
-  RuntimeTester tester(4);
-  float output_min = -0.5f;
-  float output_max = 0.5f;
-  uint32_t input1_id = 0;
-  uint32_t input2_id = 1;
-  uint32_t intermediate_id = 2;
-  uint32_t output_id = 3;
-  tester
-    .AddInputTensorF32({1, 2, 2, 3}, input1_id)
-    .AddInputTensorF32({1, 2, 2, 3}, input2_id)
-    .AddDynamicTensorF32({1, 2, 2, 3}, intermediate_id)
-    .AddOutputTensorF32({1, 2, 2, 3}, output_id)
-    .AddSubtract(input1_id, input2_id, intermediate_id)
     .AddClamp(output_min, output_max, intermediate_id, output_id);
 
   std::vector<float> unoptimized_output = tester.RunWithoutFusion<float>();
