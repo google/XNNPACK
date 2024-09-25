@@ -64,6 +64,8 @@ enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min,
   if (status != xnn_status_success) {
     return status;
   }
+  struct xnn_value* new_value = &subgraph->values[new_id];
+  new_value->size = 0;
   node->outputs[0] = new_id;
   node->activation.output_min = -INFINITY;
   node->activation.output_max = INFINITY;
