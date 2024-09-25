@@ -4297,7 +4297,7 @@ TEST_F(FullyConnectedTestQP8F32QB4W, define)
   ASSERT_EQ(node->flags, 0);
 }
 
-TEST_F(FullyConnectedTestQP8F32QB4W, internally_allocated_dynamic_quantization_parameters)
+TEST_F(FullyConnectedTestQP8F32QB4W, matches_operator_api)
 {
   size_t block_size = 32;
   input_channels = round_up_po2(input_channels, block_size);
@@ -4311,7 +4311,8 @@ TEST_F(FullyConnectedTestQP8F32QB4W, internally_allocated_dynamic_quantization_p
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
   uint32_t input_id = XNN_INVALID_NODE_ID;
   std::vector<float> convert_input(batch_size * input_channels + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<int8_t> operator_dq_data(batch_size * input_channels + XNN_EXTRA_BYTES);
+  std::vector<int8_t> operator_dq_data(
+      xnn_x8_packq_f32qp8_gemm_packed_size(batch_size, input_channels) + XNN_EXTRA_BYTES);
   std::vector<float> subgraph_output(batch_size * output_channels);
   std::vector<float> operator_output(batch_size * output_channels);
   std::fill(operator_output.begin(), operator_output.end(), nanf(""));
@@ -4407,4 +4408,150 @@ TEST_F(FullyConnectedTestQP8F32QB4W, internally_allocated_dynamic_quantization_p
     xnn_external_value{input_id, convert_input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+  EXPECT_THAT(subgraph_output, operator_output);
+}
+
+TEST_F(FullyConnectedTestQP8F32QB4W, matches_qd8_f32_qb4w)
+{
+  const size_t block_size = 32;
+  input_channels = round_up_po2(input_channels, block_size);
+
+  input_dims[input_dims.size() - 1] = input_channels;
+  kernel_dims[kernel_dims.size() - 1] = input_channels;
+
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  std::vector<float> convert_input(batch_size * input_channels +
+                                   XNN_EXTRA_BYTES / sizeof(float));
+  std::vector<int8_t> operator_qp8_data(
+      xnn_x8_packq_f32qp8_gemm_packed_size(batch_size, input_channels) +
+      XNN_EXTRA_BYTES);
+  std::vector<int8_t> operator_qd8_data(batch_size * input_channels +
+                                        XNN_EXTRA_BYTES);
+  std::vector<float> qp8_operator_output(batch_size * output_channels);
+  std::vector<float> qd8_operator_output(batch_size * output_channels);
+  std::fill(qp8_operator_output.begin(), qp8_operator_output.end(), nanf(""));
+  std::fill(qd8_operator_output.begin(), qd8_operator_output.end(), nanf(""));
+  std::vector<xnn_dynamic_quantization_params> quantization_params(
+      batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
+
+  const size_t rounded_input_channels = round_up_po2(input_channels, 2);
+  const size_t num_blocks = rounded_input_channels / block_size;
+  std::vector<xnn_bfloat16> kernel_scale(output_channels * num_blocks);
+  std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return math_cvt_bf16_fp32(scale_dist(rng)); });
+  std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
+  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+  std::generate(convert_input.begin(), convert_input.end(),
+                [&]() { return f32dist(rng); });
+
+  kernel = std::vector<uint8_t>(output_channels * rounded_input_channels);
+
+
+  const float output_min = -std::numeric_limits<float>::infinity();
+  const float output_max = std::numeric_limits<float>::infinity();
+
+  const uint8_t kernel_zero_point = 8;
+
+  // Call operator API for `qp8`.
+  xnn_operator_t qp8_convert_op = nullptr;
+  xnn_operator_t qp8_fc_op = nullptr;
+  xnn_status status = xnn_create_convert_nc_f32_qp8(
+      /*flags=*/0, &qp8_convert_op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+      auto_qp8_convert_op(qp8_convert_op, xnn_delete_operator);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, qp8_convert_op);
+  ASSERT_EQ(xnn_status_success, xnn_reshape_convert_nc_f32_qp8(
+                                    qp8_convert_op, batch_size, input_channels,
+                                    input_channels, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_convert_nc_f32_qp8(qp8_convert_op, convert_input.data(),
+                                         operator_qp8_data.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_operator(qp8_convert_op, /*threadpool=*/nullptr));
+
+  status = xnn_create_fully_connected_nc_qp8_f32_qb4w(
+      input_channels, output_channels, input_channels, output_channels, block_size,
+      kernel_zero_point, reinterpret_cast<const uint16_t*>(kernel_scale.data()), kernel.data(), bias.data(),
+      output_min, output_max,
+      /*flags=*/0, nullptr, nullptr, &qp8_fc_op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_qp8_fc_op(
+      qp8_fc_op, xnn_delete_operator);
+
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, qp8_fc_op);
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_fully_connected_nc_qp8_f32_qb4w(
+                qp8_fc_op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_fully_connected_nc_qp8_f32_qb4w(
+                                    qp8_fc_op, operator_qp8_data.data(),
+                                    qp8_operator_output.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_operator(qp8_fc_op, /*threadpool=*/nullptr));
+
+  // Call operator API for `qd8`.
+  xnn_operator_t qd8_convert_op = nullptr;
+  xnn_operator_t qd8_fc_op = nullptr;
+  status = xnn_create_convert_nc_f32_qd8(
+      /*flags=*/0, &qd8_convert_op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+      auto_qd8_convert_op(qd8_convert_op, xnn_delete_operator);
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, qd8_convert_op);
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_convert_nc_f32_qd8(
+                qd8_convert_op, batch_size, input_channels, input_channels,
+                input_channels, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_convert_nc_f32_qd8(qd8_convert_op, convert_input.data(),
+                                         operator_qd8_data.data(),
+                                         quantization_params.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_operator(qd8_convert_op, /*threadpool=*/nullptr));
+
+  status = xnn_create_fully_connected_nc_qd8_f32_qb4w(
+      input_channels, output_channels, input_channels, output_channels, block_size,
+      kernel_zero_point, reinterpret_cast<const uint16_t*>(kernel_scale.data()), kernel.data(), bias.data(),
+      output_min, output_max,
+      /*flags=*/0, nullptr, nullptr, &qd8_fc_op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_qd8_fc_op(
+      qd8_fc_op, xnn_delete_operator);
+
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, qd8_fc_op);
+  ASSERT_EQ(xnn_status_success,
+            xnn_reshape_fully_connected_nc_qd8_f32_qb4w(
+                qd8_fc_op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_fully_connected_nc_qd8_f32_qb4w(
+                qd8_fc_op, operator_qd8_data.data(), qd8_operator_output.data(),
+                quantization_params.data()));
+  ASSERT_EQ(xnn_status_success,
+            xnn_run_operator(qd8_fc_op, /*threadpool=*/nullptr));
+
+  // Compare the outputs. Note that the values will not be exactly the same
+  // since the `qd8` quantization rounds to zero, whereas the `qp8` quantization
+  // does not.
+  float max_abs_val = 0.0f;
+  for (size_t i = 0; i < batch_size * output_channels; i++) {
+    max_abs_val = std::max(max_abs_val, std::abs(qd8_operator_output[i]));
+  }
+  for (size_t i = 0; i < batch_size * output_channels; i++) {
+    ASSERT_NEAR(qp8_operator_output[i], qd8_operator_output[i],
+                max_abs_val * 1e-2);
+  }
 }
