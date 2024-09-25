@@ -27,7 +27,6 @@ void xnn_f32_vprelu_ukernel__wasm_u4(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float va0 = input_a[0];
     const float va1 = input_a[1];
@@ -50,7 +49,6 @@ void xnn_f32_vprelu_ukernel__wasm_u4(
     vacc1 = XNN_UNPREDICTABLE(va1 < 0.0f) ? va1 * vb1 : va1;
     vacc2 = XNN_UNPREDICTABLE(va2 < 0.0f) ? va2 * vb2 : va2;
     vacc3 = XNN_UNPREDICTABLE(va3 < 0.0f) ? va3 * vb3 : va3;
-
 
     output[0] = vacc0;
     output[1] = vacc1;

@@ -29,7 +29,6 @@ void xnn_f32_vmin_ukernel__sse_u4(
   assert(input_b != NULL);
   assert(output != NULL);
 
-
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const __m128 va = _mm_loadu_ps(input_a);
     input_a += 4;

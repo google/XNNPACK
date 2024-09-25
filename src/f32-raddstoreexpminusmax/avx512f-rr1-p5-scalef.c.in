@@ -6,7 +6,6 @@
 $assert BATCH_TILE % 16 == 0
 $assert BATCH_TILE >= 16
 $SIMD_TILE = BATCH_TILE // 16
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 
 #include <immintrin.h>

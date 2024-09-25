@@ -43,7 +43,6 @@ void xnn_f32_vrpreluc_ukernel__sse2_u8(
     vacc0 = _mm_or_ps(_mm_and_ps(vacc0, vmask), _mm_andnot_ps(vmask, vb));
     vacc1 = _mm_or_ps(_mm_and_ps(vacc1, vmask), _mm_andnot_ps(vmask, vb));
 
-
     _mm_storeu_ps(output, vacc0);
     _mm_storeu_ps(output + 4, vacc1);
     output += 8;

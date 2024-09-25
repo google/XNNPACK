@@ -93,9 +93,6 @@ void BinaryElementwiseParameters(benchmark::internal::Benchmark* benchmark) {
   benchmark->Arg(characteristic_l2 / elementwise_size / 960 * 960);
 }
 
-// Set multi-threading parameters appropriate for the processor.
-void MultiThreadingParameters(benchmark::internal::Benchmark* benchmark);
-
 using IsaCheckFunction = std::function<bool(benchmark::State&)>;
 
 // Check if the architecture flags are supported.

@@ -2,8 +2,6 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
-
-$import math
 #include <assert.h>
 #include <math.h>
 
@@ -42,7 +40,7 @@ void xnn_qs8_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__avx512skx_c${CHANNE
     // 256 int8s may be summed into an int16 before overflowing
     // To prevent handling the tails of the inner 256 loop, we round 256 down to
     // the nearest integer multiple of ACCUMULATORS.
-    $OVERFLOW = math.floor(256 / ACCUMULATORS) * ACCUMULATORS
+    $OVERFLOW = (256 // ACCUMULATORS) * ACCUMULATORS
     int num_batches = floor((rows + ${OVERFLOW - 1}) / ${OVERFLOW});
     int r = rows;
     for (; num_batches > 0; --num_batches) {

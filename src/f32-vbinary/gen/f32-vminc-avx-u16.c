@@ -41,7 +41,6 @@ void xnn_f32_vminc_ukernel__avx_u16(
     __m256 vacc1 = _mm256_min_ps(va1, vb);
 
 
-
     _mm256_storeu_ps(output, vacc0);
     _mm256_storeu_ps(output + 8, vacc1);
     output += 16;
