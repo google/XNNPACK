@@ -11,9 +11,9 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
-#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/allocator.h"
 #include "xnnpack/cache.h"
@@ -1112,6 +1112,39 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qc8w(
     fully_connected_op_out);
 }
 
+enum xnn_status xnn_create_fully_connected_nc_f32_f16(
+    size_t input_channels,
+    size_t output_channels,
+    size_t input_stride,
+    size_t output_stride,
+    const void* kernel,
+    const void* bias,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
+    xnn_operator_t* fully_connected_op_out)
+{
+  float *fp32_kernel_buffer = (float*) malloc(input_channels * output_channels * sizeof(float));
+  float *fp32_bias_buffer = NULL;
+  const xnn_float16 *f16_kernel = (const xnn_float16*) kernel;
+  const xnn_float16 *f16_bias = (const xnn_float16*) bias;
+  for (size_t i = 0; i < input_channels * output_channels; ++i) {
+    fp32_kernel_buffer[i] = xnn_float16_to_float(f16_kernel[i]);
+  }
+  if (bias) {
+    fp32_bias_buffer = (float*) malloc(output_channels * sizeof(float));
+    for (size_t i = 0; i < output_channels; ++i) {
+      fp32_bias_buffer[i] = xnn_float16_to_float(f16_bias[i]);
+    }
+  }
+  enum xnn_status status = xnn_create_fully_connected_nc_f32(input_channels, output_channels, input_stride, output_stride, fp32_kernel_buffer, fp32_bias_buffer, output_min, output_max, flags, code_cache, weights_cache, fully_connected_op_out);
+  free(fp32_kernel_buffer);
+  free(fp32_bias_buffer);
+  return status;
+}
+
 enum xnn_status xnn_create_fully_connected_nc_f32(
     size_t input_channels,
     size_t output_channels,
@@ -1772,7 +1805,9 @@ static enum xnn_status reshape_fully_connected_nc(
     const size_t target_tiles_per_thread = 5;
     const size_t max_nc = divide_round_up(output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
     if (max_nc < nc) {
-      nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
+      nc = min(nc, divide_round_up(output_channels,
+                                   divide_round_up(nc, max_nc) * nr) *
+                       nr);
     }
   }
 
@@ -1834,6 +1869,14 @@ enum xnn_status xnn_reshape_fully_connected_nc_f16(
     &fully_connected_op->params.f16_minmax,
     sizeof(fully_connected_op->params.f16_minmax),
     threadpool);
+}
+
+enum xnn_status xnn_reshape_fully_connected_nc_f32_f16(
+    xnn_operator_t fully_connected_op,
+    size_t batch_size,
+    pthreadpool_t threadpool)
+{
+  return xnn_reshape_fully_connected_nc_f32(fully_connected_op, batch_size, threadpool);
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_f32(
@@ -2129,6 +2172,14 @@ enum xnn_status xnn_setup_fully_connected_nc_f16(
     input, output, /*quantization_params=*/NULL);
 }
 
+enum xnn_status xnn_setup_fully_connected_nc_f32_f16(
+    xnn_operator_t fully_connected_op,
+    const float* input,
+    float* output)
+{
+  return xnn_setup_fully_connected_nc_f32(fully_connected_op, input, output);
+}
+
 enum xnn_status xnn_setup_fully_connected_nc_f32(
     xnn_operator_t fully_connected_op,
     const float* input,
@@ -2163,7 +2214,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qc4w(
     xnn_operator_t fully_connected_op,
     const int8_t* input,
     void* output,
-    const struct xnn_dynamic_quantization_params* quantization_params)
+    const struct xnn_quantization_params* quantization_params)
 {
   return setup_fully_connected_nc(
     fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qc4w,
@@ -2174,7 +2225,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qb4w(
     xnn_operator_t fully_connected_op,
     const int8_t* input,
     void* output,
-    const struct xnn_dynamic_quantization_params* quantization_params)
+    const struct xnn_quantization_params* quantization_params)
 {
   return setup_fully_connected_nc(
     fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qb4w,
@@ -2185,7 +2236,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qc4w(
     xnn_operator_t fully_connected_op,
     const int8_t* input,
     float* output,
-    const struct xnn_dynamic_quantization_params* quantization_params)
+    const struct xnn_quantization_params* quantization_params)
 {
   return setup_fully_connected_nc(
     fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f32_qc4w,
@@ -2196,7 +2247,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qb4w(
     xnn_operator_t fully_connected_op,
     const int8_t* input,
     float* output,
-    const struct xnn_dynamic_quantization_params* quantization_params)
+    const struct xnn_quantization_params* quantization_params)
 {
   return setup_fully_connected_nc(
     fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f32_qb4w,
@@ -2207,7 +2258,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f16_qc8w(
     xnn_operator_t fully_connected_op,
     const int8_t* input,
     void* output,
-    const struct xnn_dynamic_quantization_params* quantization_params)
+    const struct xnn_quantization_params* quantization_params)
 {
   return setup_fully_connected_nc(
     fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f16_qc8w,
@@ -2225,7 +2276,7 @@ enum xnn_status xnn_setup_fully_connected_nc_qd8_f32_qc8w(
     xnn_operator_t fully_connected_op,
     const int8_t* input,
     float* output,
-    const struct xnn_dynamic_quantization_params* quantization_params)
+    const struct xnn_quantization_params* quantization_params)
 {
   return setup_fully_connected_nc(
     fully_connected_op, xnn_operator_type_fully_connected_nc_qd8_f32_qc8w,

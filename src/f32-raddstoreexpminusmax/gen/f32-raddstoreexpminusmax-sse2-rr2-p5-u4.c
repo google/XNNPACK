@@ -57,55 +57,55 @@ void xnn_f32_raddstoreexpminusmax_ukernel__sse2_rr2_p5_u4(
   __m128 vacc0 = _mm_setzero_ps();
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     // Load 4 (1x4) inputs at a time.
-    const __m128 vi0123 = _mm_loadu_ps(input);
+    const __m128 vi0 = _mm_loadu_ps(input);
     input += 4;
 
     // Subtract maximum input x := i - i_max. This implies x <= 0.
-    const __m128 vx0123 = _mm_sub_ps(vi0123, vi_max);
+    const __m128 vx0 = _mm_sub_ps(vi0, vi_max);
 
     // Compute reduced argument batch := round(x / log(2)).
-    __m128 vn0123 = _mm_add_ps(_mm_mul_ps(vx0123, vlog2e), vmagic_bias);
+    __m128 vn0 = _mm_add_ps(_mm_mul_ps(vx0, vlog2e), vmagic_bias);
 
     // Create a floating-point number s (scale) such that s == 2**batch for inputs which don't cause underflow, i.e.
     // -87.33642 <= x <= 0.0, and -126 <= batch <= 0 accordingly.
-    const __m128 vs0123 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn0123), 23));
+    const __m128 vs0 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(vn0), 23));
 
     // Subtract the large number back to get final batch := round(x / log(2)).
-    vn0123 = _mm_sub_ps(vn0123, vmagic_bias);
+    vn0 = _mm_sub_ps(vn0, vmagic_bias);
 
     // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    __m128 vt0123 = _mm_add_ps(_mm_mul_ps(vn0123, vminus_ln2_hi), vx0123);
+    __m128 vt0 = _mm_add_ps(_mm_mul_ps(vn0, vminus_ln2_hi), vx0);
 
-    vt0123 = _mm_add_ps(_mm_mul_ps(vn0123, vminus_ln2_lo), vt0123);
+    vt0 = _mm_add_ps(_mm_mul_ps(vn0, vminus_ln2_lo), vt0);
 
     // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
-    __m128 vp0123 = _mm_add_ps(_mm_mul_ps(vc5, vt0123), vc4);
+    __m128 vp0 = _mm_add_ps(_mm_mul_ps(vc5, vt0), vc4);
 
-    vp0123 = _mm_add_ps(_mm_mul_ps(vp0123, vt0123), vc3);
+    vp0 = _mm_add_ps(_mm_mul_ps(vp0, vt0), vc3);
 
-    vp0123 = _mm_add_ps(_mm_mul_ps(vp0123, vt0123), vc2);
+    vp0 = _mm_add_ps(_mm_mul_ps(vp0, vt0), vc2);
 
-    vp0123 = _mm_add_ps(_mm_mul_ps(vp0123, vt0123), vc1);
+    vp0 = _mm_add_ps(_mm_mul_ps(vp0, vt0), vc1);
 
     // Reconstruct the final f value:
     //   f = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
     //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
     //     = s + (t * s) * p
-    vt0123 = _mm_mul_ps(vt0123, vs0123);
+    vt0 = _mm_mul_ps(vt0, vs0);
 
-    __m128 vf0123 = _mm_add_ps(_mm_mul_ps(vt0123, vp0123), vs0123);
+    __m128 vf0 = _mm_add_ps(_mm_mul_ps(vt0, vp0), vs0);
 
     // For inputs below zero cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf0123 = _mm_andnot_ps(_mm_cmplt_ps(vx0123, vdenorm_cutoff), vf0123);
+    vf0 = _mm_andnot_ps(_mm_cmplt_ps(vx0, vdenorm_cutoff), vf0);
 
     // Store 4 (1x4) outputs at a time.
-    _mm_storeu_ps(output, vf0123);
+    _mm_storeu_ps(output, vf0);
     output += 4;
 
     // Accumulate computed exponents.
-    vacc0 = _mm_add_ps(vacc0, vf0123);
+    vacc0 = _mm_add_ps(vacc0, vf0);
   }
 
   __m128 vacc = vacc0;

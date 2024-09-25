@@ -55,9 +55,43 @@ static enum xnn_status create_batch_matrix_multiply_operator(
       break;
     case xnn_datatype_fp32:
       switch (inputb_datatype) {
-        case xnn_datatype_fp32:
-          status = xnn_create_batch_matrix_multiply_nc_f32(node->flags, &opdata->operator_objects[0]);
+        case xnn_datatype_fp32: {
+          // Get the shape and size of the second input.
+          const uint32_t input_b_id = opdata->inputs[1];
+          assert(input_b_id != XNN_INVALID_VALUE_ID);
+          assert(input_b_id < num_values);
+          const struct xnn_value* input_b = values + input_b_id;
+          if (xnn_value_is_static(input_b)) {
+            if (input_b->shape.num_dims < 2) {
+              xnn_log_error(
+                  "failed to create %s operator with input_b ID #%" PRIu32
+                  ": unsupported number of dimension %zu, must be at least 2",
+                  xnn_node_type_to_string(xnn_node_type_batch_matrix_multiply),
+                  input_b_id, input_b->shape.num_dims);
+              return xnn_status_invalid_parameter;
+            }
+            size_t batch_size_b = 1;
+            for (size_t i = 0; i < input_b->shape.num_dims - 2; i++) {
+              batch_size_b *= input_b->shape.dim[i];
+            }
+            const size_t k =
+                node->flags & XNN_FLAG_TRANSPOSE_B
+                    ? input_b->shape.dim[input_b->shape.num_dims - 1]
+                    : input_b->shape.dim[input_b->shape.num_dims - 2];
+            const size_t n =
+                node->flags & XNN_FLAG_TRANSPOSE_B
+                    ? input_b->shape.dim[input_b->shape.num_dims - 2]
+                    : input_b->shape.dim[input_b->shape.num_dims - 1];
+
+            status = xnn_create_batch_matrix_multiply_nc_f32_const_weights(
+                batch_size_b, k, n, input_b->data, node->flags,
+                &opdata->operator_objects[0]);
+          } else {
+            status = xnn_create_batch_matrix_multiply_nc_f32(
+                node->flags, &opdata->operator_objects[0]);
+          }
           break;
+        }
         default:
           XNN_UNREACHABLE;
       }

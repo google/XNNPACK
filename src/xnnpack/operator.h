@@ -11,9 +11,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/allocator.h"
-#include "xnnpack/cache.h"
+#include "xnnpack.h"
+#include "xnnpack/common.h"
 #include "xnnpack/compute.h"
+#include "xnnpack/microfnptr.h"
 #include "xnnpack/microkernel-type.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/operator-type.h"
@@ -208,7 +209,10 @@ struct xnn_operator {
   struct subconvolution_params* subconvolution_buffer;
   uint32_t flags;
 
+  uint32_t log2_elementwise_element_size;
+
   union {
+    union xnn_binary_uparams binary;
     struct xnn_f16_default_params f16_default;
     struct xnn_f16_hswish_params f16_hswish;
     struct xnn_f16_elu_params f16_elu;
@@ -259,10 +263,7 @@ struct xnn_operator {
       union xnn_qs8_avgpool_minmax_params qs8_gavgpool;
     };
     struct xnn_qs8_mean_minmax_params qs8_mean;
-    struct xnn_qs8_add_minmax_params qs8_add;
-    union xnn_qs8_mul_minmax_params qs8_mul;
-    struct xnn_qu8_add_minmax_params qu8_add;
-    union xnn_qu8_mul_minmax_params qu8_mul;
+    struct xnn_qu8_mean_minmax_params qu8_mean;
     union xnn_qu8_conv_minmax_params qu8_conv_minmax;
     // Average Pooling normally use qu8_avgpool_params, but also initialize qu8_gavgpool_params in case it needs to switch
     // to Global Average Pooling operation.
@@ -283,14 +284,11 @@ struct xnn_operator {
   // We also use this to store parameters to binary operators. For most such operators, this is a copy of params,
   // but params need to be swapped for commutative ops with per-operand params.
   union {
+    union xnn_binary_uparams binary;
     struct xnn_f16_expminus_params f16_expminus_params;
     union xnn_f32_minmax_params f32_minmax;
     struct xnn_f32_expminus_params f32_expminus_params;
     struct xnn_f32_default_params f32_default;
-    struct xnn_qs8_add_minmax_params qs8_add;
-    union xnn_qs8_mul_minmax_params qs8_mul;
-    struct xnn_qu8_add_minmax_params qu8_add;
-    union xnn_qu8_mul_minmax_params qu8_mul;
     struct xnn_s8_minmax_params s8_minmax;
     struct xnn_u8_minmax_params u8_minmax;
   } params2;
@@ -317,6 +315,7 @@ struct xnn_operator {
       const struct xnn_reduce_config* rsum_config;
       const struct xnn_unary_elementwise_config* cvt_config;
       const struct xnn_unary_elementwise_config* s32_f32_cvt_config;
+      const struct xnn_unary_elementwise_config* u32_f32_cvt_config;
     };
     const struct xnn_gavgpool_cw_config* gavgpool_cw_config;
     const struct xnn_ibilinear_chw_config* ibilinear_chw_config;
@@ -344,7 +343,7 @@ struct xnn_operator {
     const struct xnn_x8_lut_config* lut_config;
     const struct xnn_cmul_config* cmul_config;
     const struct xnn_transpose_config* transpose_config;
-    const struct xnn_binary_elementwise_subconfig* binary_elementwise_subconfig;
+    const struct xnn_binary_elementwise_config* binary_elementwise_config;
     struct {
       const struct xnn_unary_elementwise_config* unary_elementwise_config;
       const struct xnn_reduce_config* rminmax_config;  // For dynamic quantization convert operator.
@@ -380,6 +379,7 @@ struct xnn_operator {
       } gemm;
       struct packw_gemm_goi_context packw_gemm_goi;
       struct packw_gemm_gio_context packw_gemm_gio;
+      bool const_weights;
     } gemm;
     struct global_average_pooling_nwc_context global_average_pooling_nwc;
     struct global_average_pooling_ncw_context global_average_pooling_ncw;
@@ -426,3 +426,6 @@ XNN_INTERNAL enum xnn_status xnn_run_operator_with_index(
   size_t opdata_index,
   size_t operator_object_index,
   pthreadpool_t threadpool);
+
+XNN_INTERNAL enum xnn_operator_type xnn_binary_operator_to_operator_type(
+  enum xnn_binary_operator op);

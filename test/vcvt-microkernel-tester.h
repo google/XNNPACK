@@ -107,6 +107,9 @@ class VCvtMicrokernelTester {
   void Test(xnn_qu8_f32_vcvt_ukernel_fn vcvt,
             xnn_init_qu8_f32_cvt_params_fn init_params) const;
 
+  void Test(xnn_u32_f32_vcvt_ukernel_fn vcvt,
+            xnn_init_u32_f32_cvt_params_fn init_params) const;
+
  private:
   float scale_ = 1.75f;
   int16_t input_zero_point_ = 0;
@@ -123,10 +126,8 @@ VCvtMicrokernelTester make_vcvt_tester() {
     return VCvtMicrokernelTester()
         .qmin(std::numeric_limits<T>::min())
         .qmax(std::numeric_limits<T>::max())
-        .output_zero_point((static_cast<int>(std::numeric_limits<T>::min()) +
-                            static_cast<int>(std::numeric_limits<T>::max()) +
-                            1) /
-                           2);
+        .output_zero_point(std::numeric_limits<T>::min() / 2 +
+                           std::numeric_limits<T>::max() / 2 + 1);
   } else {
     return VCvtMicrokernelTester();
   }

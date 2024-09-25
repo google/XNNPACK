@@ -265,7 +265,7 @@ static void init_qu8_rsum_config(void) {
     };
   #endif
 
-  qu8_rsum_config.init.qs8_mean = xnn_init_qs8_mean_minmax_scalar_params;
+  qu8_rsum_config.init.qu8_mean = xnn_init_qu8_mean_minmax_scalar_params;
 }
 
 static void init_f16_f32acc_rsum_config(void) {

@@ -7,6 +7,7 @@
 #include <cfloat>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <random>
 #include <vector>
 
@@ -66,12 +67,13 @@ static void bf16_gemm(benchmark::State& state,
                           reinterpret_cast<uint16_t*>(w.data()),
                           /*extra_bytes=*/0, /*params=*/nullptr);
   std::vector<xnn_bfloat16> c(c_elements * num_buffers);
-  std::fill(c.begin(), c.end(), UINT16_C(0x7FC0) /* NaN */);
+  std::fill(c.begin(), c.end(), std::nanf(""));
 
   // Prepare minmax parameters.
   xnn_bf16_minmax_params params;
   init_params(&params,
-    UINT16_C(0xFF80)  /* -inf */, UINT16_C(0x7F80)  /* inf */);
+              -std::numeric_limits<float>::infinity(),
+              +std::numeric_limits<float>::infinity());
 
   size_t buffer_index = 0;
   for (auto _ : state) {

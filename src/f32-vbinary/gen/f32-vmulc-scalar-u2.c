@@ -38,7 +38,6 @@ void xnn_f32_vmulc_ukernel__scalar_u2(
     float vacc1 = va1 * vb;
 
 
-
     output[0] = vacc0;
     output[1] = vacc1;
     output += 2;

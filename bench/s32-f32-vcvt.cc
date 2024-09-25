@@ -20,7 +20,7 @@ static void s32_f32_vcvt(
   xnn_init_s32_f32_cvt_params_fn init_params)
 {
   xnn_s32_f32_cvt_params params;
-  init_params(&params, /*num_elements=*/1, /*zero_point=*/0);
+  init_params(&params, /*zero_point=*/0);
 
   cvt_benchmark<int32_t, float>(state, arch_flags, cvt, &params);
 }
