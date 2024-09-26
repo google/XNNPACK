@@ -436,10 +436,6 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "//build_config:aarch64": ["-march=armv8.2-a+dotprod"],
             "//conditions:default": [],
         }),
-        extra_deps = xnnpack_if_kleidiai_enabled([
-            "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp1x8_qsi4cxp4x8_1x4x32_neon_dotprod",
-            "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp1x8_qsi4cxp8x8_1x8x32_neon_dotprod",
-        ]),
     ),
     "neondot_aarch64": _create_params(
         cond = "//:arm_aarch64_dotprod_enabled",
@@ -447,6 +443,8 @@ XNNPACK_PARAMS_FOR_ARCH = {
         extra_deps = xnnpack_if_kleidiai_enabled([
             "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp1x8_qsi4cxp4x8_1x4x32_neon_dotprod",
             "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp1x8_qsi4cxp8x8_1x8x32_neon_dotprod",
+            "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp1x8_qsi4c32p4x8_1x4x32_neon_dotprod",
+            "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp1x8_qsi4c32p8x8_1x8x32_neon_dotprod",
         ]),
     ),
     "neoni8mm": _create_params(
@@ -457,6 +455,8 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp4x8_8x4x32_neon_i8mm",
             "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp8x8_4x8x32_neon_i8mm",
             "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp8x8_8x8x32_neon_i8mm",
+            "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4c32p8x8_4x8x32_neon_i8mm",
+            "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4c32p4x8_8x4x32_neon_i8mm",
         ]),
     ),
     "aarch32": _create_params(
