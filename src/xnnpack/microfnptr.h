@@ -1618,7 +1618,7 @@ typedef void (*xnn_f32_rw_ukernel_fn)(
     int window_dimensions, 
     int window_strides,
     float* output,
-    const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_rwd_ukernel_fn)(
     size_t row,
@@ -1631,7 +1631,7 @@ typedef void (*xnn_f32_rwd_ukernel_fn)(
     int window_dimensions, 
     int window_strides,
     float* output,
-    const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_u8_reduce_ukernel_fn)(
     size_t batch,

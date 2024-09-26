@@ -17,6 +17,7 @@
 #define MAX(X,Y) (X > Y ? X : Y)
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 
+// reduce window for vertical reduction 
 void xnn_f32_rwdsum_ukernel_1p1x__scalar_c1(
     size_t rows,
     size_t channels,
@@ -28,7 +29,7 @@ void xnn_f32_rwdsum_ukernel_1p1x__scalar_c1(
     int window_dimensions, 
     int window_strides,
     float* output,
-    const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -39,28 +40,29 @@ void xnn_f32_rwdsum_ukernel_1p1x__scalar_c1(
   int output_size = (padded_size < (window_dimensions - 1) * window_dilations + 1) ? 
                     0 : FLOOR((padded_size - (window_dimensions - 1) * window_dilations - 1) / (float)window_strides) + 1;
 
+  // replaced modulo and division by multiplicative scaled inverse
   int64_t inverse_base_dilation = (1LL << 32) / base_dilation;
   int64_t inverse_win_dilation = (1LL << 32) / window_dilations;
 
-    for (int i = 0; i < output_size; i++) {
+  for (int i = 0; i < output_size; i++) {
         float sum = init_value;
         int window_start = i * window_strides;
-        int loop_end1 = CEIL((((padding[0] - window_start) * inverse_win_dilation) >> 32));
-        int loop_end2 = CEIL((((padded_size - padding[1] - window_start) * inverse_win_dilation) >> 32));
+        int pad_high_boundary = CEIL((((padding[0] - window_start) * inverse_win_dilation) >> 32));
+        int pad_low_boundary = CEIL((((padded_size - padding[1] - window_start) * inverse_win_dilation) >> 32));
         int curr_win_size = 0;
 
-        int loop1 = MIN(loop_end1, window_dimensions);
-        loop1 = MAX(loop1 , 0);
-        sum += init_value * loop1;
-        curr_win_size += loop1;
+        int adjusted_pad_high_boundary = MIN(pad_high_boundary, window_dimensions);
+        adjusted_pad_high_boundary = MAX(adjusted_pad_high_boundary , 0);
+        sum += init_value * adjusted_pad_high_boundary;
+        curr_win_size += adjusted_pad_high_boundary;
 
         int offset = window_start - padding[0];
-        loop_end2 = MIN(loop_end2, window_dimensions);
+        int adjusted_pad_low_boundary = MIN(pad_low_boundary, window_dimensions);
 
         for (int j = 0; j < channels; j++) {
             float curr_sum = sum;
             int channel_win_size = curr_win_size;
-            for (; channel_win_size < loop_end2; channel_win_size++) {
+            for (; channel_win_size < adjusted_pad_low_boundary; channel_win_size++) {
                 int window_row = offset + channel_win_size * window_dilations;
                 if (((window_row * inverse_base_dilation) >> 32) * base_dilation != window_row) {
                     curr_sum += init_value;
@@ -73,5 +75,5 @@ void xnn_f32_rwdsum_ukernel_1p1x__scalar_c1(
             curr_sum += init_value * MAX((window_dimensions - channel_win_size), 0);
             output[i * channels + j] = curr_sum;
         }
-    }
+  }
 }

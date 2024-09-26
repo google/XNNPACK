@@ -90,7 +90,7 @@ void f32_rwdsum(
   int window_dimensions = rows;
   int window_stride = 1;
   float init_value = 0;
-  union xnn_f32_default_params params;
+  struct xnn_f32_default_params params;
   if (init_params != nullptr) {
     init_params(&params);
   }

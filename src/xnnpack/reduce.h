@@ -352,7 +352,7 @@ DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__wasmsimd_u16_acc4)
       int window_dimension,                          \
       int window_stride,                              \
       float* output,                                 \
-      const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F32_RW_UKERNEL_FUNCTION(xnn_f32_rwsum_ukernel__scalar_u1)
 
@@ -368,7 +368,7 @@ DECLARE_F32_RW_UKERNEL_FUNCTION(xnn_f32_rwsum_ukernel__scalar_u1)
       int window_dimension,                          \
       int window_stride,                              \
       float* output,                                 \
-      const union xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F32_RWD_UKERNEL_FUNCTION(xnn_f32_rwdsum_ukernel_1p1x__scalar_c1)
 
