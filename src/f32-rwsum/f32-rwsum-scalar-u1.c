@@ -8,15 +8,14 @@
 #include "xnnpack/common.h"
 #include "xnnpack/reduce.h"
 
-#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
-#define MAX(X,Y) (X > Y ? X : Y)
 #define CEILING_POS(X) ((X-(int)(X)) > 0 ? (int)(X+1) : (int)(X))
 #define CEILING_NEG(X) (int)(X)
 #define CEIL(X) ( ((X) > 0) ? CEILING_POS(X) : CEILING_NEG(X) )
-
 #define FLOORING_POS(X) (int)(X)
 #define FLOORING_NEG(X) ((X-(int)(X)) > 0 ? (int)(X-1) : (int)(X))
 #define FLOOR(X) ( ((X) > 0) ? FLOORING_POS(X) : FLOORING_NEG(X) )
+#define MAX(X,Y) (X > Y ? X : Y)
+#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 
 void xnn_f32_rwsum_ukernel__scalar_u1(
     size_t batch,
@@ -50,18 +49,18 @@ void xnn_f32_rwsum_ukernel__scalar_u1(
         int window_start = i * window_strides;
         int loop_end1 = CEIL((((padding[0] - window_start) * inverse_win_dilation) >> 32));
         int loop_end2 = CEIL((((padded_size - padding[1] - window_start) * inverse_win_dilation) >> 32));
-        int k = 0;
+        int curr_win_size = 0;
 
         int loop1 = MIN(loop_end1, window_dimensions);
         loop1 = MAX(loop1 , 0);
         sum += init_value * loop1;
-        k += loop1;
+        curr_win_size += loop1;
 
         int offset = window_start - padding[0];
         loop_end2 = MIN(loop_end2, window_dimensions);
 
-        for (; k < loop_end2; k++) {
-            int window_row = offset + k * window_dilations;
+        for (; curr_win_size < loop_end2; curr_win_size++) {
+            int window_row = offset + curr_win_size * window_dilations;
             if (((window_row * inverse_base_dilation) >> 32) * base_dilation != window_row) {
                 sum += init_value;
             } else {
@@ -70,7 +69,7 @@ void xnn_f32_rwsum_ukernel__scalar_u1(
             }
         }
 
-        sum += init_value * MAX((window_dimensions - k), 0);
+        sum += init_value * MAX((window_dimensions - curr_win_size), 0);
         output[i] = sum;
     }
 

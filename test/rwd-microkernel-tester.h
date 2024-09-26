@@ -153,7 +153,6 @@ class RWDMicrokernelTester {
       for (int j = 0; j < output_size; j++) {
         for (int i = 0; i < channels(); i++) {
             float sum = init_value();
-
             for (int k = 0; k < window_dimension(); k++) {
                 int window_row = j * window_stride() + k * window_dilation();
                 if (window_row < padding[0] || 
@@ -177,8 +176,8 @@ class RWDMicrokernelTester {
 
       // Call optimized micro-kernel.
       float output[output_size * channels()];
-      reduce_window(rows(), channels(), input.data(),init_value(),padding,base_dilation(),
-              window_dilation(),window_dimension(),window_stride(), output, init_params != nullptr ? &params : nullptr);
+      reduce_window(rows(), channels(), input.data(), init_value(), padding, base_dilation(),
+              window_dilation(), window_dimension(), window_stride(), output, init_params != nullptr ? &params : nullptr);
 
       // Verify results.
       switch (op_type) {

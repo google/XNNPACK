@@ -8,15 +8,14 @@
 #include "xnnpack/common.h"
 #include "xnnpack/reduce.h"
 
-#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
-#define MAX(X,Y) (X > Y ? X : Y)
 #define CEILING_POS(X) ((X-(int)(X)) > 0 ? (int)(X+1) : (int)(X))
 #define CEILING_NEG(X) (int)(X)
 #define CEIL(X) ( ((X) > 0) ? CEILING_POS(X) : CEILING_NEG(X) )
-
 #define FLOORING_POS(X) (int)(X)
 #define FLOORING_NEG(X) ((X-(int)(X)) > 0 ? (int)(X-1) : (int)(X))
 #define FLOOR(X) ( ((X) > 0) ? FLOORING_POS(X) : FLOORING_NEG(X) )
+#define MAX(X,Y) (X > Y ? X : Y)
+#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 
 void xnn_f32_rwdsum_ukernel_1p1x__scalar_c1(
     size_t rows,
@@ -48,31 +47,31 @@ void xnn_f32_rwdsum_ukernel_1p1x__scalar_c1(
         int window_start = i * window_strides;
         int loop_end1 = CEIL((((padding[0] - window_start) * inverse_win_dilation) >> 32));
         int loop_end2 = CEIL((((padded_size - padding[1] - window_start) * inverse_win_dilation) >> 32));
-        int k = 0;
+        int curr_win_size = 0;
 
         int loop1 = MIN(loop_end1, window_dimensions);
         loop1 = MAX(loop1 , 0);
         sum += init_value * loop1;
-        k += loop1;
+        curr_win_size += loop1;
 
         int offset = window_start - padding[0];
         loop_end2 = MIN(loop_end2, window_dimensions);
 
         for (int j = 0; j < channels; j++) {
-            float sum2 = sum;
-            int k2 = k;
-            for (; k2 < loop_end2; k2++) {
-                int window_row = offset + k2 * window_dilations;
+            float curr_sum = sum;
+            int channel_win_size = curr_win_size;
+            for (; channel_win_size < loop_end2; channel_win_size++) {
+                int window_row = offset + channel_win_size * window_dilations;
                 if (((window_row * inverse_base_dilation) >> 32) * base_dilation != window_row) {
-                    sum2 += init_value;
+                    curr_sum += init_value;
                 } else {
                     window_row = (window_row * inverse_base_dilation) >> 32;;
-                    sum2 += input[window_row * channels + j];
+                    curr_sum += input[window_row * channels + j];
                 }
             }
 
-            sum2 += init_value * MAX((window_dimensions - k2), 0);
-            output[i * channels + j] = sum2;
+            curr_sum += init_value * MAX((window_dimensions - channel_win_size), 0);
+            output[i * channels + j] = curr_sum;
         }
     }
 }

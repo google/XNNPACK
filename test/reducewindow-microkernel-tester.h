@@ -133,7 +133,6 @@ class ReduceWindowMicrokernelTester {
 
       for (int i = 0; i < output_size; i++) {
               float sum = init_value();
-
               for (int k = 0; k < window_dimension(); k++) {
                   int window_row = i * window_stride() + k * window_dilation();
                   if (window_row < padding[0] || 
@@ -156,8 +155,8 @@ class ReduceWindowMicrokernelTester {
 
       // Call optimized micro-kernel.
       float output[output_size];
-      reduce_window(batch_size() * sizeof(float), input.data(),init_value(),padding,base_dilation(),
-              window_dilation(),window_dimension(),window_stride(), output, init_params != nullptr ? &params : nullptr);
+      reduce_window(batch_size() * sizeof(float), input.data(), init_value(), padding, base_dilation(),
+              window_dilation(), window_dimension(), window_stride(), output, init_params != nullptr ? &params : nullptr);
 
       // Verify results.
       switch (op_type) {
