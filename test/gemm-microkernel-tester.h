@@ -398,6 +398,11 @@ class GemmMicrokernelTester {
             xnn_pack_weights_and_biases_fn pack,
             xnn_packed_stride_weights_and_biases_fn packed_stride);
 
+  void Test(xnn_qp8_f32_qb4w_gemm_minmax_ukernel_fn gemm,
+            xnn_init_f32_qb4w_minmax_params_fn init_minmax_params,
+            xnn_pack_weights_and_biases_fn pack,
+            xnn_packed_stride_weights_and_biases_fn packed_stride);
+
  private:
   size_t mr_{1};
   size_t nr_{1};
