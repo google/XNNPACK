@@ -20,6 +20,7 @@ extern "C" {
 
 /// If set, try to pack the quantized values for use by a GEMM.
 #define XNN_FLAG_MAYBE_PACK_FOR_GEMM 0x00000080
+#define XNN_FLAG_MAYBE_PACK_FOR_QB4W_GEMM 0x00000100
 
 enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qc4w(
     size_t input_channels,              //
@@ -59,6 +60,33 @@ enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,  //
 enum xnn_status xnn_setup_convert_nc_f32_qp8(xnn_operator_t convert_op,  //
                                              const float* input,         //
                                              int8_t* output);
+
+enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w(
+    size_t input_channels,              //
+    size_t output_channels,             //
+    size_t input_stride,                //
+    size_t output_stride,               //
+    size_t block_size,                  //
+    uint8_t kernel_zero_point,          //
+    const uint16_t* kernel_scale,       //
+    const void* kernel,                 //
+    const float* bias,                  //
+    float output_min,                   //
+    float output_max,                   //
+    uint32_t flags,                     //
+    xnn_code_cache_t code_cache,        //
+    xnn_weights_cache_t weights_cache,  //
+    xnn_operator_t* fully_connected_op_out);
+
+enum xnn_status xnn_setup_fully_connected_nc_qp8_f32_qb4w(
+    xnn_operator_t fully_connected_op,  //
+    const int8_t* input,                //
+    float* output);
+
+enum xnn_status xnn_reshape_fully_connected_nc_qp8_f32_qb4w(
+    xnn_operator_t fully_connected_op,  //
+    size_t batch_size,                  //
+    pthreadpool_t threadpool);
 
 #ifdef __cplusplus
 }  // extern "C"

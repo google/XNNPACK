@@ -22,8 +22,10 @@
 #include "xnnpack/unaligned.h"
 
 #if XNN_ENABLE_KLEIDIAI
-#include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4cxp_qsu4cxs1s0.h"
-#include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qsu4cxs1s0.h"
+  #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4cxp_qsu4cxs1s0.h"
+  #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qsu4cxs1s0.h"
+  #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0.h"
+  #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
 #include <fp16/fp16.h>
@@ -1676,6 +1678,77 @@ void xnn_pack_kai_qs4_weights_and_biases(
         /*rhs_packed=*/packed_weights_ptr,
         /*extra_bytes=*/0,
         &kai_params);
+  }
+}
+
+size_t xnn_packed_stride_kai_qb4_weights_and_biases(
+    const struct xnn_gemm_config* gemm_config, size_t k, size_t block_size,
+    size_t extra_bytes) {
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  const uint32_t nr = gemm_config->nr;
+
+  return kai_get_rhs_packed_stride_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0(
+      k, 
+      nr,
+      kr,
+      sr,
+      block_size,
+      kai_datatype::kai_dt_bf16);
+}
+
+void xnn_pack_kai_qb4_weights_and_biases(
+    uint32_t flags, const struct xnn_gemm_config* gemm_config,
+    size_t input_channels, size_t output_channels, size_t groups,
+    size_t block_size, const void* accumulator_init, const void* weights,
+    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
+    size_t extra_data0_element_size,
+    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
+    size_t extra_data1_element_size, void* packed_weights_ptr,
+    const void* params) {
+  const uint32_t nr = gemm_config->nr;
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  const struct xnn_qs8_qc4w_packing_params* xnn_params =
+      reinterpret_cast<const struct xnn_qs8_qc4w_packing_params*>(params);
+
+  if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    struct kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0_params kai_params;
+    kai_params.lhs_zero_point = xnn_params->input_zero_point;
+    kai_params.rhs_zero_point = xnn_params->kernel_zero_point;
+    kai_params.scale_dt = kai_datatype::kai_dt_bf16;
+    size_t rhs_stride = (output_channels + 1) / 2;
+    size_t blocks_per_row = (input_channels + block_size - 1) / block_size;
+    kai_run_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0(
+      groups, output_channels, input_channels, nr, kr, sr, 
+      /*bl=*/block_size, 
+      /*rhs=*/reinterpret_cast<const uint8_t*>(weights),
+      /*rhs_stride=*/rhs_stride,
+      /*bias=*/reinterpret_cast<const float*>(extra_data0),
+      /*scale=*/reinterpret_cast<const uint16_t*>(extra_data1),
+      /*scale_stride=*/blocks_per_row * sizeof(uint16_t),
+      /*rhs_packed*/packed_weights_ptr,
+      /*extra_bytes=*/0,
+      &kai_params);
+  } else {
+    // Repack the packing params.
+    struct kai_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0_params kai_params;
+    kai_params.lhs_zero_point = xnn_params->input_zero_point;
+    kai_params.rhs_zero_point = xnn_params->kernel_zero_point;
+    kai_params.scale_dt = kai_datatype::kai_dt_bf16;
+    size_t rhs_stride = (input_channels + 1) / 2;
+    size_t blocks_per_row = (input_channels + block_size - 1) / block_size;
+    kai_run_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0(
+      groups, output_channels, input_channels, nr, kr, sr, 
+      /*bl=*/block_size, 
+      /*rhs=*/reinterpret_cast<const uint8_t*>(weights),
+      /*rhs_stride=*/rhs_stride,
+      /*bias=*/reinterpret_cast<const float*>(extra_data0),
+      /*scale=*/reinterpret_cast<const uint16_t*>(extra_data1),
+      /*scale_stride=*/blocks_per_row * sizeof(uint16_t),
+      /*rhs_packed*/packed_weights_ptr,
+      /*extra_bytes=*/0,
+      &kai_params);
   }
 }
 #endif  // XNN_ENABLE_KLEIDIAI

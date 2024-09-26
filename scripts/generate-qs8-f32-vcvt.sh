@@ -15,6 +15,13 @@ tools/xngen src/qs8-f32-vcvt/neon.c.in -D BATCH_TILE=16 -D DATATYPE=QU8 -o src/q
 tools/xngen src/qs8-f32-vcvt/neon.c.in -D BATCH_TILE=24 -D DATATYPE=QU8 -o src/qu8-f32-vcvt/gen/qu8-f32-vcvt-neon-u24.c &
 tools/xngen src/qs8-f32-vcvt/neon.c.in -D BATCH_TILE=32 -D DATATYPE=QU8 -o src/qu8-f32-vcvt/gen/qu8-f32-vcvt-neon-u32.c &
 
+################################ RISC-V Vector ################################
+tools/xngen src/qs8-f32-vcvt/rvv.c.in -D LMUL=1  -D DATATYPE=QS8 -o src/qs8-f32-vcvt/gen/qs8-f32-vcvt-rvv-u1v.c &
+tools/xngen src/qs8-f32-vcvt/rvv.c.in -D LMUL=2  -D DATATYPE=QS8 -o src/qs8-f32-vcvt/gen/qs8-f32-vcvt-rvv-u2v.c &
+
+tools/xngen src/qs8-f32-vcvt/rvv.c.in -D LMUL=1  -D DATATYPE=QU8 -o src/qu8-f32-vcvt/gen/qu8-f32-vcvt-rvv-u1v.c &
+tools/xngen src/qs8-f32-vcvt/rvv.c.in -D LMUL=2  -D DATATYPE=QU8 -o src/qu8-f32-vcvt/gen/qu8-f32-vcvt-rvv-u2v.c &
+
 ################################# x86 128-bit #################################
 tools/xngen src/qs8-f32-vcvt/sse2.c.in -D BATCH_TILE=8  -D DATATYPE=QS8 -o src/qs8-f32-vcvt/gen/qs8-f32-vcvt-sse2-u8.c &
 tools/xngen src/qs8-f32-vcvt/sse2.c.in -D BATCH_TILE=16 -D DATATYPE=QS8 -o src/qs8-f32-vcvt/gen/qs8-f32-vcvt-sse2-u16.c &
