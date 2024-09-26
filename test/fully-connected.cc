@@ -4440,8 +4440,7 @@ TEST_F(FullyConnectedTestQP8F32QB4W, matches_qd8_f32_qb4w)
   std::vector<float> qd8_operator_output(batch_size * output_channels);
   std::fill(qp8_operator_output.begin(), qp8_operator_output.end(), nanf(""));
   std::fill(qd8_operator_output.begin(), qd8_operator_output.end(), nanf(""));
-  std::vector<xnn_dynamic_quantization_params> quantization_params(
-      batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
+  std::vector<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
 
   const size_t rounded_input_channels = round_up_po2(input_channels, 2);
   const size_t num_blocks = rounded_input_channels / block_size;
