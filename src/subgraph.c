@@ -33,25 +33,30 @@ enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min,
   struct xnn_value* output_value = &subgraph->values[output_id];
   uint32_t new_id = XNN_INVALID_VALUE_ID;
   enum xnn_status status;
+  size_t num_dims = output_value->shape.num_dims;
+  size_t dims[XNN_MAX_TENSOR_DIMS];
+  memcpy(dims, output_value->shape.dim, num_dims * sizeof(size_t));
   switch (output_value->datatype) {
     case xnn_datatype_fp16:
       status = xnn_define_tensor_value(
-          subgraph, xnn_datatype_fp16, 0, NULL, NULL,
+          subgraph, xnn_datatype_fp16, num_dims, dims, NULL,
           /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
       break;
     case xnn_datatype_fp32:
       status = xnn_define_tensor_value(
-          subgraph, xnn_datatype_fp32, 0, NULL, NULL,
+          subgraph, xnn_datatype_fp32, num_dims, dims, NULL,
           /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
       break;
     case xnn_datatype_quint8:
       status = xnn_define_quantized_tensor_value(
-          subgraph, xnn_datatype_quint8, output_value->quantization.zero_point, output_value->quantization.scale, /*num_dims=*/0, /*dims=*/NULL, NULL,
+          subgraph, xnn_datatype_quint8, output_value->quantization.zero_point,
+          output_value->quantization.scale, num_dims, dims, NULL,
           /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
       break;
     case xnn_datatype_qint8:
       status = xnn_define_quantized_tensor_value(
-          subgraph, xnn_datatype_qint8, output_value->quantization.zero_point, output_value->quantization.scale, /*num_dims=*/0, /*dims=*/NULL, NULL,
+          subgraph, xnn_datatype_qint8, output_value->quantization.zero_point,
+          output_value->quantization.scale, num_dims, dims, NULL,
           /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
       break;
     default:
@@ -60,6 +65,8 @@ enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min,
   if (status != xnn_status_success) {
     return status;
   }
+  struct xnn_value* new_value = &subgraph->values[new_id];
+  new_value->size = 0;
   node->outputs[0] = new_id;
   node->activation.output_min = -INFINITY;
   node->activation.output_max = INFINITY;
