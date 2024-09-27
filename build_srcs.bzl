@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2024 Google LLC
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
@@ -36,7 +36,6 @@ OPERATOR_SRCS = [
     "src/operators/unary-elementwise-nc.c",
     "src/operators/unpooling-nhwc.c",
 ]
-
 
 SUBGRAPH_SRCS = [
     "src/memory-planner.c",
