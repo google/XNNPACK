@@ -4429,6 +4429,10 @@ TEST_F(FullyConnectedTestQP8F32QB4W, matches_qd8_f32_qb4w)
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
+  if (xnn_init_qp8_f32_qb4w_gemm_config() == nullptr) {
+    GTEST_SKIP();
+  }
+
   std::vector<float> convert_input(batch_size * input_channels +
                                    XNN_EXTRA_BYTES / sizeof(float));
   std::vector<int8_t> operator_qp8_data(
