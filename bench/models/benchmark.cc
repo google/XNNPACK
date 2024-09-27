@@ -126,6 +126,10 @@ static void BenchmarkInvoke(benchmark::State& state,
   }
 }
 
+static void FP32Attention(benchmark::State& state) {
+  BenchmarkInvoke(state, models::FP32Attention);
+}
+
 static void FP32MobileNetV1(benchmark::State& state) {
   BenchmarkInvoke(state, models::FP32MobileNetV1);
 }
@@ -165,6 +169,8 @@ static void FP16MobileNetV3Small(benchmark::State& state) {
 static void QS8MobileNetV2(benchmark::State& state) {
   BenchmarkInvoke(state, models::QS8MobileNetV2);
 }
+
+BENCHMARK(FP32Attention)->Unit(benchmark::kMicrosecond)->UseRealTime();
 
 BENCHMARK(FP32MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
 BENCHMARK(FP32MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
