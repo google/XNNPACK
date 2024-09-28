@@ -1850,10 +1850,11 @@ static void init_qs8_cvt_config(void) {
       qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
       qs8_cvt_config.element_tile = 4;
     }
-  #elif XNN_ARCH_RISCV
-    qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__scalar_u4;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__rvv_u2v;
     qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
-    qs8_cvt_config.element_tile = 4;
+    qs8_cvt_config.element_tile = hardware_config->vlenb / sizeof(int8_t) * 2; // (VLENB/sizeof)*LMUL;
   #else
     qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__scalar_u4;
     qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
@@ -2142,10 +2143,11 @@ static void init_qu8_cvt_config(void) {
       qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
       qu8_cvt_config.element_tile = 4;
     }
-  #elif XNN_ARCH_RISCV
-    qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__scalar_u4;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__rvv_u2v;
     qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
-    qu8_cvt_config.element_tile = 4;
+    qu8_cvt_config.element_tile = hardware_config->vlenb / sizeof(int8_t) * 2; // (VLENB/sizeof)*LMUL;
   #else
     qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__scalar_u4;
     qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
