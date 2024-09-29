@@ -1604,22 +1604,25 @@ IF(XNNPACK_BUILD_TESTS)
       qu8-igemm-minmax-fp32
       qu8-igemm-minmax-rndnu)
   FOREACH(TEST ${MICROKERNEL_GEMM_UNIT_TESTS})
-    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
-    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        gemm-microkernel-tester
-        fp16
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
-        hardware-config
-        logging
-        microkernels-all
-        microparams-init
-        pthreadpool
-    )
-    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-    SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
+    FILE(GLOB TEST_SOURCES "test/${TEST}*.cc")
+    IF(TEST_SOURCES)
+        ADD_EXECUTABLE(${TEST}-test ${TEST_SOURCES})
+        TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
+        TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
+            gemm-microkernel-tester
+            fp16
+            GTest::gmock
+            GTest::gtest
+            GTest::gtest_main
+            hardware-config
+            logging
+            microkernels-all
+            microparams-init
+            pthreadpool
+        )
+        ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+        SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
+    ENDIF()
   ENDFOREACH()
 
   SET(MICROKERNEL_PACKQ_UNIT_TESTS
@@ -1847,6 +1850,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   get_all_test_targets(test_targets)
   LIST(FILTER test_targets INCLUDE REGEX "-(nc|nd|nd-eager|ncw|nhwc|nhtc|nchw|nwc)-test(-[0-9]+)?$")
+  # LIST(FILTER test_targets INCLUDE REGEX "-(nc|nd|nd-eager|ncw|nhwc|nhtc|nchw|nwc|\\d+)-test(-[0-9]+)?$")
   MESSAGE(STATUS "Inferred operator tests: ${test_targets}")
   SET_TESTS_PROPERTIES(${test_targets} PROPERTIES LABELS "operator")
 
