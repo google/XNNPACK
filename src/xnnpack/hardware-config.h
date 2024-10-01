@@ -32,6 +32,7 @@ enum xnn_arch_flags {
   xnn_arch_arm_sve = 1 << 12,
   xnn_arch_arm_sve2 = 1 << 13,
   xnn_arch_arm_sme = 1 << 14,
+  xnn_arch_arm_sme2 = 1 << 15,
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   xnn_arch_x86_ssse3 = 1 << 0,
@@ -98,6 +99,7 @@ struct xnn_hardware_config {
   bool use_arm_sve;
   bool use_arm_sve2;
   bool use_arm_sme;
+  bool use_arm_sme2;
 #endif  // XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   bool use_x86_ssse3;

@@ -105,6 +105,7 @@ static void init_hardware_config(void) {
     hardware_config.use_arm_sve = cpuinfo_has_arm_sve();
     hardware_config.use_arm_sve2 = cpuinfo_has_arm_sve2();
     hardware_config.use_arm_sme = cpuinfo_has_arm_sme();
+    hardware_config.use_arm_sme2 = cpuinfo_has_arm_sme2();
   #endif
 
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -305,6 +306,7 @@ static void init_hardware_config(void) {
     if (hardware_config.use_arm_sve) hardware_config.arch_flags |= xnn_arch_arm_sve;
     if (hardware_config.use_arm_sve2) hardware_config.arch_flags |= xnn_arch_arm_sve2;
     if (hardware_config.use_arm_sme) hardware_config.arch_flags |= xnn_arch_arm_sme;
+    if (hardware_config.use_arm_sme2) hardware_config.arch_flags |= xnn_arch_arm_sme2;
   #endif  // XNN_ARCH_ARM64
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     if (hardware_config.use_x86_ssse3) hardware_config.arch_flags |= xnn_arch_x86_ssse3;
