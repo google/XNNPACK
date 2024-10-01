@@ -1180,6 +1180,30 @@ config_setting(
     define_values = {"xnn_enable_arm_i8mm": "false"},
 )
 
+# Enables usage of ARM SME kernels.
+config_setting(
+    name = "xnn_enable_arm_sme_explicit_true",
+    define_values = {"xnn_enable_arm_sme": "true"},
+)
+
+# Disables usage of ARM SME kernels.
+config_setting(
+    name = "xnn_enable_arm_sme_explicit_false",
+    define_values = {"xnn_enable_arm_sme": "false"},
+)
+
+# Enables usage of ARM SME2 kernels.
+config_setting(
+    name = "xnn_enable_arm_sme2_explicit_true",
+    define_values = {"xnn_enable_arm_sme2": "true"},
+)
+
+# Disables usage of ARM SME2 kernels.
+config_setting(
+    name = "xnn_enable_arm_sme2_explicit_false",
+    define_values = {"xnn_enable_arm_sme2": "false"},
+)
+
 # Enables usage of Intel AVX512-VNNI-GFNI (integer dot product with gfni) kernels.
 config_setting(
     name = "xnn_enable_avx512vnnigfni_explicit_true",
@@ -1572,6 +1596,24 @@ alias(
         ":xnn_enable_arm_i8mm_explicit_true": ":xnn_enable_arm_i8mm_explicit_true",
         ":xnn_enable_arm_i8mm_explicit_false": ":xnn_enable_arm_i8mm_explicit_true",
         "//conditions:default": ":arm_i8mm_enabled_by_default",
+    }),
+)
+
+alias(
+    name = "arm_sme_enabled",
+    actual = select({
+        ":xnn_enable_arm_sme_explicit_true": ":xnn_enable_arm_sme_explicit_true",
+        ":xnn_enable_arm_sme_explicit_false": ":xnn_enable_arm_sme_explicit_true",
+        "//conditions:default": ":xnn_enable_arm_sme_explicit_true",
+    }),
+)
+
+alias(
+    name = "arm_sme2_enabled",
+    actual = select({
+        ":xnn_enable_arm_sme2_explicit_true": ":xnn_enable_arm_sme2_explicit_true",
+        ":xnn_enable_arm_sme2_explicit_false": ":xnn_enable_arm_sme2_explicit_true",
+        "//conditions:default": ":xnn_enable_arm_sme2_explicit_true",
     }),
 )
 
