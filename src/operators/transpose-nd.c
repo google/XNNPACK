@@ -297,14 +297,15 @@ static enum xnn_status reshape_transpose_nd(
       // Chose the tile size such that ~64k of data are processed per
       // microkernel call.
       const size_t target_size = (1 << 16);
-      const size_t element_size = context->output_stride[normalized_dims - 1];
-      const size_t num_tiles = max(1, target_size / element_size);
-      transpose_op->compute[0].tile[1] =
-          min((size_t)sqrtf(num_tiles),
-              transpose_op->compute[0].range[normalized_dims - 1]);
-      transpose_op->compute[0].tile[0] =
-          min(num_tiles / transpose_op->compute[0].tile[1],
-              transpose_op->compute[0].range[normalized_dims - 2]);
+      const size_t num_tiles = max(1, target_size / normalized_element_size);
+      if (1 < normalized_dims) {
+        transpose_op->compute[0].tile[1] =
+            min((size_t)sqrtf(num_tiles),
+                transpose_op->compute[0].range[normalized_dims - 1]);
+        transpose_op->compute[0].tile[0] =
+            min(num_tiles / transpose_op->compute[0].tile[1],
+                transpose_op->compute[0].range[normalized_dims - 2]);
+      }
       context->variable_size_ukernel = transpose_config->xx.variable_size_ukernel;
       variable_size_ukernel = true;
     }
