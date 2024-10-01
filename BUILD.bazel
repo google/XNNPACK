@@ -662,28 +662,13 @@ filegroup(
 # Generate the prod/all microkernel libraries for each architecture.
 [
     [
-        genrule(
-            name = arch + "_prod_microkernel_srcs",
-            srcs = prod_c_srcs_for_arch(arch),
-            outs = [arch + "_prod_microkernels.c"],
-            cmd = """
-              if [ -z \"$(SRCS)\" ]; then
-                echo \"\" > $@
-              else
-                cat $(SRCS) | grep -E '^#include ' | sort -u > $@
-                for f in $(SRCS); do
-                  echo '#line' $$((`grep -E '^#include ' $${f} | wc -l`+1)) '"'$${f}'"' >> $@
-                  grep -v -E '^#include ' $${f} >> $@
-                done
-              fi""",
-            compatible_with = [],
-        ),
         xnnpack_cc_library_for_arch(
             name = arch + "_prod_microkernels",
-            srcs = prod_asm_srcs_for_arch(arch) + [":" + arch + "_prod_microkernel_srcs"],
+            srcs = prod_asm_srcs_for_arch(arch) + prod_c_srcs_for_arch(arch),
             arch = arch,
             compatible_with = [],
             defines = xnnpack_configurable_defines(),
+            # Internal build flag.
             tags = ["nobuilder"],
             deps = MICROKERNEL_DEPS,
         ),
