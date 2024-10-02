@@ -67,7 +67,15 @@ static void init_f32_raddstoreexpminusmax_config(void) {
     if (hardware_config->use_x86_avx512f) {
       f32_raddstoreexpminusmax_config.ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u64_acc2;
       f32_raddstoreexpminusmax_config.element_tile = 64;
-    } else if (hardware_config->use_x86_avx2) {
+
+    } else
+    #if XNN_ENABLE_AVX256SKX
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx256skx) {
+      f32_raddstoreexpminusmax_config.ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__avx256skx_rr2_p5_u32_acc2;
+      f32_raddstoreexpminusmax_config.element_tile = 32;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx2) {
       f32_raddstoreexpminusmax_config.ukernel = (xnn_raddstoreexpminusmax_ukernel_fn) xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr2_p5_u32_acc2;
       f32_raddstoreexpminusmax_config.element_tile = 32;
     } else {

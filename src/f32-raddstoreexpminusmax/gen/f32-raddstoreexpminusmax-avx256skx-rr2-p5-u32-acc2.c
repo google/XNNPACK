@@ -1,11 +1,12 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f32-raddstoreexpminusmax/avx2-rr2-p5.c.in
+//   Generator: tools/xngen
+//
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert BATCH_TILE % 8 == 0
-$assert BATCH_TILE >= 8
-$SIMD_TILE = BATCH_TILE // 8
 #include <assert.h>
 
 #include <immintrin.h>
@@ -14,8 +15,7 @@ $SIMD_TILE = BATCH_TILE // 8
 #include "xnnpack/raddstoreexpminusmax.h"
 
 
-$ISA = "avx2" if AVX == 2 else "avx256skx"
-void xnn_f32_raddstoreexpminusmax_ukernel__${ISA}_rr2_p5_u${BATCH_TILE}${"" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS}(
+void xnn_f32_raddstoreexpminusmax_ukernel__avx256skx_rr2_p5_u32_acc2(
     size_t batch,
     const float* input,
     const float* max,
@@ -30,8 +30,6 @@ void xnn_f32_raddstoreexpminusmax_ukernel__${ISA}_rr2_p5_u${BATCH_TILE}${"" if A
   assert(output != NULL);
   assert(sum != NULL);
 
-  $if AVX != 10:
-    static const int32_t mask_table[16] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0};
 
   const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
   const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
@@ -56,92 +54,112 @@ void xnn_f32_raddstoreexpminusmax_ukernel__${ISA}_rr2_p5_u${BATCH_TILE}${"" if A
   XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   const __m256 vi_max = _mm256_broadcast_ss(max);
-  $if AVX == 10:
-    const __m256 vzero = _mm256_setzero_ps();
+  const __m256 vzero = _mm256_setzero_ps();
 
-  $for K in range(ACCUMULATORS):
-    __m256 vacc${K} = _mm256_setzero_ps();
-  for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
-    // Load ${BATCH_TILE} (${SIMD_TILE}x8) inputs at a time.
+  __m256 vacc0 = _mm256_setzero_ps();
+  __m256 vacc1 = _mm256_setzero_ps();
+  for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
+    // Load 32 (4x8) inputs at a time.
     const __m256 vi0 = _mm256_loadu_ps(input);
-    $for N in range(1, SIMD_TILE):
-      const __m256 vi${N} = _mm256_loadu_ps(input + ${N * 8});
-    input += ${BATCH_TILE};
+    const __m256 vi1 = _mm256_loadu_ps(input + 8);
+    const __m256 vi2 = _mm256_loadu_ps(input + 16);
+    const __m256 vi3 = _mm256_loadu_ps(input + 24);
+    input += 32;
 
     // Subtract maximum input x := i - i_max. This implies x <= 0.
-    $for N in range(SIMD_TILE):
-      const __m256 vx${N} = _mm256_sub_ps(vi${N}, vi_max);
+    const __m256 vx0 = _mm256_sub_ps(vi0, vi_max);
+    const __m256 vx1 = _mm256_sub_ps(vi1, vi_max);
+    const __m256 vx2 = _mm256_sub_ps(vi2, vi_max);
+    const __m256 vx3 = _mm256_sub_ps(vi3, vi_max);
 
     // Compute reduced argument batch := round(x / log(2)).
-    $for N in range(SIMD_TILE):
-      __m256 vn${N} = _mm256_add_ps(_mm256_mul_ps(vx${N}, vlog2e), vmagic_bias);
+    __m256 vn0 = _mm256_add_ps(_mm256_mul_ps(vx0, vlog2e), vmagic_bias);
+    __m256 vn1 = _mm256_add_ps(_mm256_mul_ps(vx1, vlog2e), vmagic_bias);
+    __m256 vn2 = _mm256_add_ps(_mm256_mul_ps(vx2, vlog2e), vmagic_bias);
+    __m256 vn3 = _mm256_add_ps(_mm256_mul_ps(vx3, vlog2e), vmagic_bias);
 
     // Create a floating-point number s (scale) such that s == 2**batch for inputs which don't cause underflow, i.e.
     // -87.33642 <= x <= 0.0, and -126 <= batch <= 0 accordingly.
-    $for N in range(SIMD_TILE):
-      const __m256 vs${N} = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn${N}), 23));
+    const __m256 vs0 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn0), 23));
+    const __m256 vs1 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn1), 23));
+    const __m256 vs2 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn2), 23));
+    const __m256 vs3 = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_castps_si256(vn3), 23));
 
     // Subtract the large number back to get final batch := round(x / log(2)).
-    $for N in range(SIMD_TILE):
-      vn${N} = _mm256_sub_ps(vn${N}, vmagic_bias);
+    vn0 = _mm256_sub_ps(vn0, vmagic_bias);
+    vn1 = _mm256_sub_ps(vn1, vmagic_bias);
+    vn2 = _mm256_sub_ps(vn2, vmagic_bias);
+    vn3 = _mm256_sub_ps(vn3, vmagic_bias);
 
     // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    $for N in range(SIMD_TILE):
-      __m256 vt${N} = _mm256_add_ps(_mm256_mul_ps(vn${N}, vminus_ln2_hi), vx${N});
+    __m256 vt0 = _mm256_add_ps(_mm256_mul_ps(vn0, vminus_ln2_hi), vx0);
+    __m256 vt1 = _mm256_add_ps(_mm256_mul_ps(vn1, vminus_ln2_hi), vx1);
+    __m256 vt2 = _mm256_add_ps(_mm256_mul_ps(vn2, vminus_ln2_hi), vx2);
+    __m256 vt3 = _mm256_add_ps(_mm256_mul_ps(vn3, vminus_ln2_hi), vx3);
 
-    $for N in range(SIMD_TILE):
-      vt${N} = _mm256_add_ps(_mm256_mul_ps(vn${N}, vminus_ln2_lo), vt${N});
+    vt0 = _mm256_add_ps(_mm256_mul_ps(vn0, vminus_ln2_lo), vt0);
+    vt1 = _mm256_add_ps(_mm256_mul_ps(vn1, vminus_ln2_lo), vt1);
+    vt2 = _mm256_add_ps(_mm256_mul_ps(vn2, vminus_ln2_lo), vt2);
+    vt3 = _mm256_add_ps(_mm256_mul_ps(vn3, vminus_ln2_lo), vt3);
 
     // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
-    $for N in range(SIMD_TILE):
-      __m256 vp${N} = _mm256_add_ps(_mm256_mul_ps(vc5, vt${N}), vc4);
+    __m256 vp0 = _mm256_add_ps(_mm256_mul_ps(vc5, vt0), vc4);
+    __m256 vp1 = _mm256_add_ps(_mm256_mul_ps(vc5, vt1), vc4);
+    __m256 vp2 = _mm256_add_ps(_mm256_mul_ps(vc5, vt2), vc4);
+    __m256 vp3 = _mm256_add_ps(_mm256_mul_ps(vc5, vt3), vc4);
 
-    $for N in range(SIMD_TILE):
-      vp${N} = _mm256_add_ps(_mm256_mul_ps(vp${N}, vt${N}), vc3);
+    vp0 = _mm256_add_ps(_mm256_mul_ps(vp0, vt0), vc3);
+    vp1 = _mm256_add_ps(_mm256_mul_ps(vp1, vt1), vc3);
+    vp2 = _mm256_add_ps(_mm256_mul_ps(vp2, vt2), vc3);
+    vp3 = _mm256_add_ps(_mm256_mul_ps(vp3, vt3), vc3);
 
-    $for N in range(SIMD_TILE):
-      vp${N} = _mm256_add_ps(_mm256_mul_ps(vp${N}, vt${N}), vc2);
+    vp0 = _mm256_add_ps(_mm256_mul_ps(vp0, vt0), vc2);
+    vp1 = _mm256_add_ps(_mm256_mul_ps(vp1, vt1), vc2);
+    vp2 = _mm256_add_ps(_mm256_mul_ps(vp2, vt2), vc2);
+    vp3 = _mm256_add_ps(_mm256_mul_ps(vp3, vt3), vc2);
 
-    $for N in range(SIMD_TILE):
-      vp${N} = _mm256_add_ps(_mm256_mul_ps(vp${N}, vt${N}), vc1);
+    vp0 = _mm256_add_ps(_mm256_mul_ps(vp0, vt0), vc1);
+    vp1 = _mm256_add_ps(_mm256_mul_ps(vp1, vt1), vc1);
+    vp2 = _mm256_add_ps(_mm256_mul_ps(vp2, vt2), vc1);
+    vp3 = _mm256_add_ps(_mm256_mul_ps(vp3, vt3), vc1);
 
     // Reconstruct the final f value:
     //   f = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
     //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
     //     = s + (t * s) * p
-    $for N in range(SIMD_TILE):
-      vt${N} = _mm256_mul_ps(vt${N}, vs${N});
+    vt0 = _mm256_mul_ps(vt0, vs0);
+    vt1 = _mm256_mul_ps(vt1, vs1);
+    vt2 = _mm256_mul_ps(vt2, vs2);
+    vt3 = _mm256_mul_ps(vt3, vs3);
 
-    $for N in range(SIMD_TILE):
-      __m256 vf${N} = _mm256_add_ps(_mm256_mul_ps(vt${N}, vp${N}), vs${N});
+    __m256 vf0 = _mm256_add_ps(_mm256_mul_ps(vt0, vp0), vs0);
+    __m256 vf1 = _mm256_add_ps(_mm256_mul_ps(vt1, vp1), vs1);
+    __m256 vf2 = _mm256_add_ps(_mm256_mul_ps(vt2, vp2), vs2);
+    __m256 vf3 = _mm256_add_ps(_mm256_mul_ps(vt3, vp3), vs3);
 
     // For inputs below zero cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    $for N in range(SIMD_TILE):
-      $if AVX == 10:
-        vf${N} = _mm256_mask_blend_ps(_mm256_cmp_ps_mask(vx${N}, vdenorm_cutoff, _CMP_LT_OS), vf${N}, vzero);
-      $else:
-        vf${N} = _mm256_andnot_ps(_mm256_cmp_ps(vx${N}, vdenorm_cutoff, _CMP_LT_OS), vf${N});
+    vf0 = _mm256_mask_blend_ps(_mm256_cmp_ps_mask(vx0, vdenorm_cutoff, _CMP_LT_OS), vf0, vzero);
+    vf1 = _mm256_mask_blend_ps(_mm256_cmp_ps_mask(vx1, vdenorm_cutoff, _CMP_LT_OS), vf1, vzero);
+    vf2 = _mm256_mask_blend_ps(_mm256_cmp_ps_mask(vx2, vdenorm_cutoff, _CMP_LT_OS), vf2, vzero);
+    vf3 = _mm256_mask_blend_ps(_mm256_cmp_ps_mask(vx3, vdenorm_cutoff, _CMP_LT_OS), vf3, vzero);
 
-    // Store ${BATCH_TILE} (${SIMD_TILE}x8) outputs at a time.
+    // Store 32 (4x8) outputs at a time.
     _mm256_storeu_ps(output, vf0);
-    $for N in range(1, SIMD_TILE):
-      _mm256_storeu_ps(output + ${N * 8}, vf${N});
-    output += ${BATCH_TILE};
+    _mm256_storeu_ps(output + 8, vf1);
+    _mm256_storeu_ps(output + 16, vf2);
+    _mm256_storeu_ps(output + 24, vf3);
+    output += 32;
 
     // Accumulate computed exponents.
-    $for N in range(SIMD_TILE):
-      vacc${N % ACCUMULATORS} = _mm256_add_ps(vacc${N % ACCUMULATORS}, vf${N});
+    vacc0 = _mm256_add_ps(vacc0, vf0);
+    vacc1 = _mm256_add_ps(vacc1, vf1);
+    vacc0 = _mm256_add_ps(vacc0, vf2);
+    vacc1 = _mm256_add_ps(vacc1, vf3);
   }
-  $if ACCUMULATORS > 1:
-    // Add up all accumulators to vacc0
-    $ACC_SLICE = 1
-    $while ACC_SLICE < ACCUMULATORS:
-      $for A in range(0, ACCUMULATORS, ACC_SLICE * 2):
-        $if A + ACC_SLICE < ACCUMULATORS:
-          vacc${A} = _mm256_add_ps(vacc${A}, vacc${A + ACC_SLICE});
-      $ACC_SLICE *= 2
+  // Add up all accumulators to vacc0
+  vacc0 = _mm256_add_ps(vacc0, vacc1);
 
   __m256 vacc = vacc0;
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
@@ -182,10 +200,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__${ISA}_rr2_p5_u${BATCH_TILE}${"" if A
 
     // For inputs below zero cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    $if AVX == 10:
-      vf = _mm256_mask_blend_ps(_mm256_cmp_ps_mask(vx, vdenorm_cutoff, _CMP_LT_OS), vf, vzero);
-    $else:
-      vf = _mm256_andnot_ps(_mm256_cmp_ps(vx, vdenorm_cutoff, _CMP_LT_OS), vf);
+    vf = _mm256_mask_blend_ps(_mm256_cmp_ps_mask(vx, vdenorm_cutoff, _CMP_LT_OS), vf, vzero);
 
     // Store 8 outputs at a time.
     _mm256_storeu_ps(output, vf);
@@ -197,17 +212,12 @@ void xnn_f32_raddstoreexpminusmax_ukernel__${ISA}_rr2_p5_u${BATCH_TILE}${"" if A
   if (batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    $if AVX == 10:
-      // Prepare mask for valid 32-bit batch (depends on batch).
-      batch >>= XNN_LOG2_SIZEOF_FLOAT;
-      const __mmask8 vmask = _cvtu32_mask8((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
+    // Prepare mask for valid 32-bit batch (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_FLOAT;
+    const __mmask8 vmask = _cvtu32_mask8((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
-      // Load 8 inputs at a time.
-      const __m256 vi = _mm256_maskz_loadu_ps(vmask, input);
-    $else:
-      const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[8] - batch));
-
-      const __m256 vi = _mm256_maskload_ps(input, vmask);
+    // Load 8 inputs at a time.
+    const __m256 vi = _mm256_maskz_loadu_ps(vmask, input);
 
     // Subtract maximum input x := i - i_max. This implies x <= 0.
     const __m256 vx = _mm256_sub_ps(vi, vi_max);
@@ -242,36 +252,15 @@ void xnn_f32_raddstoreexpminusmax_ukernel__${ISA}_rr2_p5_u${BATCH_TILE}${"" if A
 
     // For inputs below zero cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    $if AVX == 10:
-      vf = _mm256_mask_blend_ps(_mm256_cmp_ps_mask(vx, vdenorm_cutoff, _CMP_LT_OS), vf, vzero);
-    $else:
-      vf = _mm256_andnot_ps(_mm256_cmp_ps(vx, vdenorm_cutoff, _CMP_LT_OS), vf);
+    vf = _mm256_mask_blend_ps(_mm256_cmp_ps_mask(vx, vdenorm_cutoff, _CMP_LT_OS), vf, vzero);
 
-    $if AVX == 10:
-      // For inputs below zero cutoff, replace output with +0.0f.
-      // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-      vf = _mm256_mask_blend_ps(_mm256_cmp_ps_mask(vx, vdenorm_cutoff, _CMP_LT_OS), vf, vzero);
+    // For inputs below zero cutoff, replace output with +0.0f.
+    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
+    vf = _mm256_mask_blend_ps(_mm256_cmp_ps_mask(vx, vdenorm_cutoff, _CMP_LT_OS), vf, vzero);
 
-      _mm256_mask_storeu_ps(output, vmask, vf);
+    _mm256_mask_storeu_ps(output, vmask, vf);
 
-      vacc = _mm256_mask_add_ps(vacc, vmask, vacc, vf);
-    $else:
-      __m128 vf_lo = _mm256_castps256_ps128(vf);
-      if (batch & (4 * sizeof(float))) {
-        _mm_storeu_ps(output, vf_lo);
-        vf_lo = _mm256_extractf128_ps(vf, 1);
-        output += 4;
-      }
-      if (batch & (2 * sizeof(float))) {
-        _mm_storel_pi((__m64*) output, vf_lo);
-        vf_lo = _mm_movehl_ps(vf_lo, vf_lo);
-        output += 2;
-      }
-      if (batch & (1 * sizeof(float))) {
-        _mm_store_ss(output, vf_lo);
-      }
-
-      vacc = _mm256_add_ps(vacc, _mm256_and_ps(vf, _mm256_castsi256_ps(vmask)));
+    vacc = _mm256_mask_add_ps(vacc, vmask, vacc, vf);
   }
   __m128 vacc_lo = _mm_add_ps(_mm256_castps256_ps128(vacc), _mm256_extractf128_ps(vacc, 1));
   vacc_lo = _mm_add_ps(vacc_lo, _mm_movehl_ps(vacc_lo, vacc_lo));
