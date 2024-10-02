@@ -1986,10 +1986,11 @@ static void init_qs8_lrelu_config(void) {
       qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
       qs8_lrelu_config.element_tile = 4;
     }
-  #elif XNN_ARCH_RISCV
-    qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__scalar_andxor_u4;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__rvv_u2v;
     qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
-    qs8_lrelu_config.element_tile = 4;
+    qs8_lrelu_config.element_tile = hardware_config->vlenb / sizeof(int8_t) * 2;
   #else
     qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__scalar_andxor_u4;
     qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
@@ -2229,10 +2230,11 @@ static void init_qu8_lrelu_config(void) {
       qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
       qu8_lrelu_config.element_tile = 4;
     }
-  #elif XNN_ARCH_RISCV
-    qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__scalar_andxor_u4;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__rvv_u2v;
     qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
-    qu8_lrelu_config.element_tile = 4;
+    qu8_lrelu_config.element_tile = hardware_config->vlenb / sizeof(int8_t) * 2;
   #else
     qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__scalar_andxor_u4;
     qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
