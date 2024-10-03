@@ -13,6 +13,10 @@ PROD_AVXVNNIINT8_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_AVXVNNIINT8_MICROKERNEL_SRCS = [
+    "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8c8-minmax-avxvnniint8-prfm.c",
+    "src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-5x8c8-minmax-avxvnniint8-prfm.c",
+    "src/qs8-qc8w-igemm/gen/qd8-f32-qc8w-igemm-1x8c8-minmax-avxvnniint8-prfm.c",
+    "src/qs8-qc8w-igemm/gen/qd8-f32-qc8w-igemm-5x8c8-minmax-avxvnniint8-prfm.c",
 ]
 
 ALL_AVXVNNIINT8_MICROKERNEL_SRCS = PROD_AVXVNNIINT8_MICROKERNEL_SRCS + NON_PROD_AVXVNNIINT8_MICROKERNEL_SRCS
