@@ -158,7 +158,7 @@ std::vector<GemmTestParams> CreateTests1(
 #if XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
   #if XNN_ENABLE_KLEIDIAI
   INSTANTIATE_TEST_SUITE_P(
-      QP8_F32_QB4W_GEMM_MINMAX_4X8C16S2__AARCH64_NEONI8MM, GemmTest,
+      QP8_F32_QB4W_GEMM_MINMAX_4X8C16S2__NEONI8MM, GemmTest,
       testing::ValuesIn(CreateTests1(
           /*k_block=*/32,
           /*adj_k_block=*/32,
@@ -180,7 +180,7 @@ std::vector<GemmTestParams> CreateTests1(
 
 
   INSTANTIATE_TEST_SUITE_P(
-      QP8_F32_QB4W_GEMM_MINMAX_8X4C16S2__AARCH64_NEONI8MM_MSTEP2, GemmTest,
+      QP8_F32_QB4W_GEMM_MINMAX_8X4C16S2__NEONI8MM_MSTEP2, GemmTest,
       testing::ValuesIn(CreateTests1(
           /*k_block=*/32,
           /*adj_k_block=*/32,

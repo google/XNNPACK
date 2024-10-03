@@ -126,6 +126,24 @@ static void BenchmarkInvoke(benchmark::State& state,
   }
 }
 
+static void FP32Attention(benchmark::State& state) {
+  BenchmarkInvoke(state, [&state]() {
+    return models::FP32Attention(state.range(0), state.range(1), state.range(2),
+                                 state.range(3), state.range(4));
+  });
+}
+
+static void FP16Attention(benchmark::State& state) {
+  BenchmarkInvoke(
+      state,
+      [&state]() {
+        return models::FP32Attention(state.range(0), state.range(1),
+                                     state.range(2), state.range(3),
+                                     state.range(4));
+      },
+      XNN_FLAG_FORCE_FP16_INFERENCE);
+}
+
 static void FP32MobileNetV1(benchmark::State& state) {
   BenchmarkInvoke(state, models::FP32MobileNetV1);
 }
@@ -165,6 +183,29 @@ static void FP16MobileNetV3Small(benchmark::State& state) {
 static void QS8MobileNetV2(benchmark::State& state) {
   BenchmarkInvoke(state, models::QS8MobileNetV2);
 }
+
+static void AttentionArguments(benchmark::internal::Benchmark* b) {
+  b->ArgNames({"B", "T", "H", "N", "S"});
+  b->Args({1, 16, 25, 24, 4});
+  b->Args({1, 1536, 128, 12, 18});
+  b->Args({1, 1024, 256, 4, 46});
+  b->Args({1, 1792, 256, 8, 36});
+  b->Args({1, 1536, 256, 6, 22});
+  b->Args({1, 2048, 256, 8, 18});
+  b->Args({1, 3072, 256, 16, 28});
+  b->Args({1, 2304, 256, 8, 26});
+  b->Args({1, 2048, 64, 32, 24});
+}
+
+BENCHMARK(FP32Attention)
+    ->Unit(benchmark::kMicrosecond)
+    ->UseRealTime()
+    ->Apply(AttentionArguments);
+
+BENCHMARK(FP16Attention)
+    ->Unit(benchmark::kMicrosecond)
+    ->UseRealTime()
+    ->Apply(AttentionArguments);
 
 BENCHMARK(FP32MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
 BENCHMARK(FP32MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();

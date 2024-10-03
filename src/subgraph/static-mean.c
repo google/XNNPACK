@@ -60,7 +60,20 @@ static enum xnn_status create_mean_operator(
         const int8_t output_zero_point = (int8_t) values[output_id].quantization.zero_point;
 
         status = xnn_create_mean_nd_qs8(
-          input_scale * output_scale, input_zero_point, output_zero_point,
+          input_scale / output_scale, input_zero_point, output_zero_point,
+          node->flags,
+          &opdata->operator_objects[0]);
+        break;
+      }
+    case xnn_datatype_quint8:
+      {
+        const float input_scale = values[input_id].quantization.scale;
+        const float output_scale = values[output_id].quantization.scale;
+        const uint8_t input_zero_point = (uint8_t) values[input_id].quantization.zero_point;
+        const uint8_t output_zero_point = (uint8_t) values[output_id].quantization.zero_point;
+
+        status = xnn_create_mean_nd_qu8(
+          input_scale / output_scale, input_zero_point, output_zero_point,
           node->flags,
           &opdata->operator_objects[0]);
         break;
@@ -117,6 +130,17 @@ static enum xnn_status reshape_mean_operator(
       break;
     case xnn_operator_type_mean_nd_qs8:
       status = xnn_reshape_mean_nd_qs8(
+        opdata->operator_objects[0],
+        opdata->num_reduction_axes,
+        opdata->reduction_axes,
+        input_value->shape.num_dims,
+        input_value->shape.dim,
+        &opdata->workspace_size,
+        &opdata->workspace_alignment,
+        threadpool);
+      break;
+    case xnn_operator_type_mean_nd_qu8:
+      status = xnn_reshape_mean_nd_qu8(
         opdata->operator_objects[0],
         opdata->num_reduction_axes,
         opdata->reduction_axes,
@@ -212,6 +236,11 @@ static enum xnn_status setup_mean_operator(
         opdata->operator_objects[0],
         opdata->workspace,
         input_data, output_data);
+    case xnn_operator_type_mean_nd_qu8:
+      return xnn_setup_mean_nd_qu8(
+        opdata->operator_objects[0],
+        opdata->workspace,
+        input_data, output_data);
     default:
       XNN_UNREACHABLE;
   }
@@ -245,6 +274,7 @@ enum xnn_status xnn_define_static_mean(
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
     case xnn_datatype_qint8:
+    case xnn_datatype_quint8:
       break;
     default:
       xnn_log_error(
@@ -275,6 +305,9 @@ enum xnn_status xnn_define_static_mean(
       break;
     case xnn_datatype_qint8:
       compute_type = xnn_compute_type_qs8;
+      break;
+    case xnn_datatype_quint8:
+      compute_type = xnn_compute_type_qu8;
       break;
     default:
       xnn_log_error(

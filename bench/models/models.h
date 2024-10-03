@@ -9,6 +9,7 @@
 
 namespace models {
 
+xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s);
 xnn_subgraph_t FP32MobileNetV1();
 xnn_subgraph_t FP32MobileNetV2();
 xnn_subgraph_t FP32MobileNetV3Large();
