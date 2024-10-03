@@ -65,7 +65,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u16(
     const __m512 vx0 = _mm512_sub_ps(vi0, vi_max);
 
     // Compute reduced argument batch := round(x / log(2)).
-    __m512 vn0 = _mm512_add_ps(_mm512_mul_ps(vx0, vlog2e), vmagic_bias);
+    __m512 vn0 = _mm512_fmadd_ps(vx0, vlog2e, vmagic_bias);
 
     // Create a floating-point number s (scale) such that s == 2**batch for inputs which don't cause underflow, i.e.
     // -87.33642 <= x <= 0.0, and -126 <= batch <= 0 accordingly.
@@ -76,18 +76,18 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u16(
 
     // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    __m512 vt0 = _mm512_add_ps(_mm512_mul_ps(vn0, vminus_ln2_hi), vx0);
+    __m512 vt0 = _mm512_fmadd_ps(vn0, vminus_ln2_hi, vx0);
 
-    vt0 = _mm512_add_ps(_mm512_mul_ps(vn0, vminus_ln2_lo), vt0);
+    vt0 = _mm512_fmadd_ps(vn0, vminus_ln2_lo, vt0);
 
     // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
-    __m512 vp0 = _mm512_add_ps(_mm512_mul_ps(vc5, vt0), vc4);
+    __m512 vp0 = _mm512_fmadd_ps(vc5, vt0, vc4);
 
-    vp0 = _mm512_add_ps(_mm512_mul_ps(vp0, vt0), vc3);
+    vp0 = _mm512_fmadd_ps(vp0, vt0, vc3);
 
-    vp0 = _mm512_add_ps(_mm512_mul_ps(vp0, vt0), vc2);
+    vp0 = _mm512_fmadd_ps(vp0, vt0, vc2);
 
-    vp0 = _mm512_add_ps(_mm512_mul_ps(vp0, vt0), vc1);
+    vp0 = _mm512_fmadd_ps(vp0, vt0, vc1);
 
     // Reconstruct the final f value:
     //   f = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
@@ -95,7 +95,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u16(
     //     = s + (t * s) * p
     vt0 = _mm512_mul_ps(vt0, vs0);
 
-    __m512 vf0 = _mm512_add_ps(_mm512_mul_ps(vt0, vp0), vs0);
+    __m512 vf0 = _mm512_fmadd_ps(vt0, vp0, vs0);
 
     // For inputs below zero cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
@@ -120,7 +120,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u16(
     const __m512 vx = _mm512_sub_ps(vi, vi_max);
 
     // Compute reduced argument batch := round(x / log(2)).
-    __m512 vn = _mm512_add_ps(_mm512_mul_ps(vx, vlog2e), vmagic_bias);
+    __m512 vn = _mm512_fmadd_ps(vx, vlog2e, vmagic_bias);
 
     // Create a floating-point number s (scale) such that s == 2**batch for inputs which don't cause underflow, i.e.
     // -87.33642 <= x <= 0.0, and -126 <= batch <= 0 accordingly.
@@ -131,21 +131,21 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u16(
 
     // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    __m512 vt = _mm512_add_ps(_mm512_mul_ps(vn, vminus_ln2_hi), vx);
-    vt = _mm512_add_ps(_mm512_mul_ps(vn, vminus_ln2_lo), vt);
+    __m512 vt = _mm512_fmadd_ps(vn, vminus_ln2_hi, vx);
+    vt = _mm512_fmadd_ps(vn, vminus_ln2_lo, vt);
 
     // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
-    __m512 vp = _mm512_add_ps(_mm512_mul_ps(vc5, vt), vc4);
-    vp = _mm512_add_ps(_mm512_mul_ps(vp, vt), vc3);
-    vp = _mm512_add_ps(_mm512_mul_ps(vp, vt), vc2);
-    vp = _mm512_add_ps(_mm512_mul_ps(vp, vt), vc1);
+    __m512 vp = _mm512_fmadd_ps(vc5, vt, vc4);
+    vp = _mm512_fmadd_ps(vp, vt, vc3);
+    vp = _mm512_fmadd_ps(vp, vt, vc2);
+    vp = _mm512_fmadd_ps(vp, vt, vc1);
 
     // Reconstruct the final f value:
     //   f = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
     //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
     //     = s + (t * s) * p
     vt = _mm512_mul_ps(vt, vs);
-    __m512 vf = _mm512_add_ps(_mm512_mul_ps(vt, vp), vs);
+    __m512 vf = _mm512_fmadd_ps(vt, vp, vs);
 
     // For inputs below zero cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
@@ -173,7 +173,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u16(
     const __m512 vx = _mm512_sub_ps(vi, vi_max);
 
     // Compute reduced argument batch := round(x / log(2)).
-    __m512 vn = _mm512_add_ps(_mm512_mul_ps(vx, vlog2e), vmagic_bias);
+    __m512 vn = _mm512_fmadd_ps(vx, vlog2e, vmagic_bias);
 
     // Create a floating-point number s (scale) such that s == 2**batch for inputs which don't cause underflow, i.e.
     // -87.33642 <= x <= 0.0, and -126 <= batch <= 0 accordingly.
@@ -184,21 +184,21 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u16(
 
     // Compute reduced argument t := x - batch * log(2).
     // Use Cody-Waite range reduction method (note two constants to represent log(2)) to improve accuracy.
-    __m512 vt = _mm512_add_ps(_mm512_mul_ps(vn, vminus_ln2_hi), vx);
-    vt = _mm512_add_ps(_mm512_mul_ps(vn, vminus_ln2_lo), vt);
+    __m512 vt = _mm512_fmadd_ps(vn, vminus_ln2_hi, vx);
+    vt = _mm512_fmadd_ps(vn, vminus_ln2_lo, vt);
 
     // Compute degree-5 polynomial approximation for exp(t) on [-log(2)/2, log(2)/2].
-    __m512 vp = _mm512_add_ps(_mm512_mul_ps(vc5, vt), vc4);
-    vp = _mm512_add_ps(_mm512_mul_ps(vp, vt), vc3);
-    vp = _mm512_add_ps(_mm512_mul_ps(vp, vt), vc2);
-    vp = _mm512_add_ps(_mm512_mul_ps(vp, vt), vc1);
+    __m512 vp = _mm512_fmadd_ps(vc5, vt, vc4);
+    vp = _mm512_fmadd_ps(vp, vt, vc3);
+    vp = _mm512_fmadd_ps(vp, vt, vc2);
+    vp = _mm512_fmadd_ps(vp, vt, vc1);
 
     // Reconstruct the final f value:
     //   f = s * (1 + t * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5)))))
     //     = s + (t * s) * (c1 + t * (c2 + t * (c3 + t * (c4 + t * c5))))
     //     = s + (t * s) * p
     vt = _mm512_mul_ps(vt, vs);
-    __m512 vf = _mm512_add_ps(_mm512_mul_ps(vt, vp), vs);
+    __m512 vf = _mm512_fmadd_ps(vt, vp, vs);
 
     // For inputs below zero cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
