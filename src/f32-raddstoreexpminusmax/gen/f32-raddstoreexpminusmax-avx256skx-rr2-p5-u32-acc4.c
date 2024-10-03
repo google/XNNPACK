@@ -15,7 +15,7 @@
 #include "xnnpack/raddstoreexpminusmax.h"
 
 
-void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr2_p5_u32_acc4(
+void xnn_f32_raddstoreexpminusmax_ukernel__avx256skx_rr2_p5_u32_acc4(
     size_t batch,
     const float* input,
     const float* max,
@@ -30,7 +30,6 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr2_p5_u32_acc4(
   assert(output != NULL);
   assert(sum != NULL);
 
-  static const int32_t mask_table[16] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0};
 
   const __m256 vlog2e = _mm256_set1_ps(0x1.715476p+0f);
   const __m256 vmagic_bias = _mm256_set1_ps(0x1.8000FEp23f);
@@ -55,6 +54,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr2_p5_u32_acc4(
   XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   const __m256 vi_max = _mm256_broadcast_ss(max);
+  const __m256 vzero = _mm256_setzero_ps();
 
   __m256 vacc0 = _mm256_setzero_ps();
   __m256 vacc1 = _mm256_setzero_ps();
@@ -142,10 +142,10 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr2_p5_u32_acc4(
 
     // For inputs below zero cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf0 = _mm256_andnot_ps(_mm256_cmp_ps(vx0, vdenorm_cutoff, _CMP_LT_OS), vf0);
-    vf1 = _mm256_andnot_ps(_mm256_cmp_ps(vx1, vdenorm_cutoff, _CMP_LT_OS), vf1);
-    vf2 = _mm256_andnot_ps(_mm256_cmp_ps(vx2, vdenorm_cutoff, _CMP_LT_OS), vf2);
-    vf3 = _mm256_andnot_ps(_mm256_cmp_ps(vx3, vdenorm_cutoff, _CMP_LT_OS), vf3);
+    vf0 = _mm256_mask_blend_ps(_mm256_cmp_ps_mask(vx0, vdenorm_cutoff, _CMP_LT_OS), vf0, vzero);
+    vf1 = _mm256_mask_blend_ps(_mm256_cmp_ps_mask(vx1, vdenorm_cutoff, _CMP_LT_OS), vf1, vzero);
+    vf2 = _mm256_mask_blend_ps(_mm256_cmp_ps_mask(vx2, vdenorm_cutoff, _CMP_LT_OS), vf2, vzero);
+    vf3 = _mm256_mask_blend_ps(_mm256_cmp_ps_mask(vx3, vdenorm_cutoff, _CMP_LT_OS), vf3, vzero);
 
     // Store 32 (4x8) outputs at a time.
     _mm256_storeu_ps(output, vf0);
@@ -204,7 +204,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr2_p5_u32_acc4(
 
     // For inputs below zero cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf = _mm256_andnot_ps(_mm256_cmp_ps(vx, vdenorm_cutoff, _CMP_LT_OS), vf);
+    vf = _mm256_mask_blend_ps(_mm256_cmp_ps_mask(vx, vdenorm_cutoff, _CMP_LT_OS), vf, vzero);
 
     // Store 8 outputs at a time.
     _mm256_storeu_ps(output, vf);
@@ -216,9 +216,12 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr2_p5_u32_acc4(
   if (batch != 0) {
     assert(batch >= 1 * sizeof(float));
     assert(batch <= 7 * sizeof(float));
-    const __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[8] - batch));
+    // Prepare mask for valid 32-bit batch (depends on batch).
+    batch >>= XNN_LOG2_SIZEOF_FLOAT;
+    const __mmask8 vmask = _cvtu32_mask8((uint32_t) ((UINT32_C(1) << batch) - UINT32_C(1)));
 
-    const __m256 vi = _mm256_maskload_ps(input, vmask);
+    // Load 8 inputs at a time.
+    const __m256 vi = _mm256_maskz_loadu_ps(vmask, input);
 
     // Subtract maximum input x := i - i_max. This implies x <= 0.
     const __m256 vx = _mm256_sub_ps(vi, vi_max);
@@ -253,24 +256,15 @@ void xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr2_p5_u32_acc4(
 
     // For inputs below zero cutoff, replace output with +0.0f.
     // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
-    vf = _mm256_andnot_ps(_mm256_cmp_ps(vx, vdenorm_cutoff, _CMP_LT_OS), vf);
+    vf = _mm256_mask_blend_ps(_mm256_cmp_ps_mask(vx, vdenorm_cutoff, _CMP_LT_OS), vf, vzero);
 
-    __m128 vf_lo = _mm256_castps256_ps128(vf);
-    if (batch & (4 * sizeof(float))) {
-      _mm_storeu_ps(output, vf_lo);
-      vf_lo = _mm256_extractf128_ps(vf, 1);
-      output += 4;
-    }
-    if (batch & (2 * sizeof(float))) {
-      _mm_storel_pi((__m64*) output, vf_lo);
-      vf_lo = _mm_movehl_ps(vf_lo, vf_lo);
-      output += 2;
-    }
-    if (batch & (1 * sizeof(float))) {
-      _mm_store_ss(output, vf_lo);
-    }
+    // For inputs below zero cutoff, replace output with +0.0f.
+    // Note that for NaN inputs, comparison result is false, and outputs are left unchanged.
+    vf = _mm256_mask_blend_ps(_mm256_cmp_ps_mask(vx, vdenorm_cutoff, _CMP_LT_OS), vf, vzero);
 
-    vacc = _mm256_add_ps(vacc, _mm256_and_ps(vf, _mm256_castsi256_ps(vmask)));
+    _mm256_mask_storeu_ps(output, vmask, vf);
+
+    vacc = _mm256_mask_add_ps(vacc, vmask, vacc, vf);
   }
   __m128 vacc_lo = _mm_add_ps(_mm256_castps256_ps128(vacc), _mm256_extractf128_ps(vacc, 1));
   vacc_lo = _mm_add_ps(vacc_lo, _mm_movehl_ps(vacc_lo, vacc_lo));

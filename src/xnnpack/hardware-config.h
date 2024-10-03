@@ -32,6 +32,7 @@ enum xnn_arch_flags {
   xnn_arch_arm_sve = 1 << 12,
   xnn_arch_arm_sve2 = 1 << 13,
   xnn_arch_arm_sme = 1 << 14,
+  xnn_arch_arm_sme2 = 1 << 15,
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   xnn_arch_x86_ssse3 = 1 << 0,
@@ -40,17 +41,18 @@ enum xnn_arch_flags {
   xnn_arch_x86_f16c = 1 << 3,
   xnn_arch_x86_fma3 = 1 << 4,
   xnn_arch_x86_avx2 = 1 << 5,
-  xnn_arch_x86_avx512f = 1 << 6,
-  xnn_arch_x86_avx512vbmi = 1 << 7,
-  xnn_arch_x86_avx512skx = 1 << 8,
-  xnn_arch_x86_avx512vnni = 1 << 9,
-  xnn_arch_x86_avx512vnnigfni = 1 << 10,
-  xnn_arch_x86_avx512amx = 1 << 11,
-  xnn_arch_x86_avx512fp16 = 1 << 12,
-  xnn_arch_x86_avxvnni = 1 << 13,
-  xnn_arch_x86_avx256skx = 1 << 14,
-  xnn_arch_x86_avx256vnni = 1 << 15,
-  xnn_arch_x86_avx256vnnigfni = 1 << 16,
+  xnn_arch_x86_avxvnni = 1 << 6,
+  xnn_arch_x86_avxvnniint8 = 1 << 7,
+  xnn_arch_x86_avx256skx = 1 << 8,
+  xnn_arch_x86_avx256vnni = 1 << 9,
+  xnn_arch_x86_avx256vnnigfni = 1 << 10,
+  xnn_arch_x86_avx512f = 1 << 11,
+  xnn_arch_x86_avx512vbmi = 1 << 12,
+  xnn_arch_x86_avx512skx = 1 << 13,
+  xnn_arch_x86_avx512vnni = 1 << 14,
+  xnn_arch_x86_avx512vnnigfni = 1 << 15,
+  xnn_arch_x86_avx512amx = 1 << 16,
+  xnn_arch_x86_avx512fp16 = 1 << 17,
 #endif
 #if XNN_ARCH_RISCV
   xnn_arch_riscv_vector = 1 << 0,
@@ -98,6 +100,7 @@ struct xnn_hardware_config {
   bool use_arm_sve;
   bool use_arm_sve2;
   bool use_arm_sme;
+  bool use_arm_sme2;
 #endif  // XNN_ARCH_ARM64
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   bool use_x86_ssse3;

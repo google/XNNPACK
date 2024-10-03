@@ -29,6 +29,7 @@
 #define XNN_INVALID_NODE_ID UINT32_MAX
 
 #define XNN_MAX_OPERATOR_OBJECTS 5
+#define XNN_MAX_SUBGRAPH_INPUT_OR_OUTPUTS 16
 
 /// Disable fusion of nodes in subgraph. Fusion is enabled by default, set this flag to turn it off.
 #define XNN_FLAG_NO_OPERATOR_FUSION 0x80000000
@@ -481,8 +482,8 @@ struct xnn_runtime {
   slinky_pipeline_t slinky_pipeline;
   size_t num_inputs;
   size_t num_outputs;
-  struct xnn_value* input_values[XNN_MAX_OPERATOR_OBJECTS];
-  struct xnn_value* output_values[XNN_MAX_OPERATOR_OBJECTS];
+  struct xnn_value* input_values[XNN_MAX_SUBGRAPH_INPUT_OR_OUTPUTS];
+  struct xnn_value* output_values[XNN_MAX_SUBGRAPH_INPUT_OR_OUTPUTS];
 #endif
 };
 
