@@ -11,7 +11,6 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack/math.h"
 #include "xnnpack/microkernel-utils.h"
 #include "xnnpack/microparams-init.h"
