@@ -274,7 +274,6 @@ XNNPACK_PARAMS_FOR_ARCH = {
         ],
         extra_deps = [
             "//:config_hdrs",
-            "@FP16",
             "@FXdiv",
         ],
     ),
@@ -523,7 +522,6 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "-mno-sse4.2",
         ],
         extra_deps = [
-            "@FP16",
         ],
         msvc_x86_32_copts = ["/arch:SSE2"],
         msvc_x86_64_copts = ["/arch:SSE2"],

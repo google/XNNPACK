@@ -17,9 +17,9 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/simd/f16-scalar.h"
+#include "xnnpack/fp16.h"
 #include "replicable_random_device.h"
 
 namespace xnnpack {

@@ -1999,7 +1999,7 @@ static void init_qs8_lrelu_config(void) {
 }
 
 static void init_qs8_to_f16_cvt_config(void) {
-  #if XNN_ARCH_ARM || XNN_ARCH_ARM64
+  #if (XNN_ARCH_ARM || XNN_ARCH_ARM64) && XNN_ENABLE_ARM_FP16_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {

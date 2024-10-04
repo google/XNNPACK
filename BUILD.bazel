@@ -327,7 +327,6 @@ xnnpack_cc_library(
         ":microparams",
         ":mutex",
         ":xnnpack_h",
-        "@FP16",
     ],
 )
 
@@ -428,7 +427,6 @@ xnnpack_cc_library(
         ":packing",
         ":prod_microkernels",
         ":xnnpack_h",
-        "@FP16",
     ] + select({
         ":cpuinfo_enabled": ["@cpuinfo"],
         "//conditions:default": [],
@@ -450,12 +448,18 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "fp16",
+    hdrs = ["src/xnnpack/fp16.h"],
+    compatible_with = [],
+)
+
+xnnpack_cc_library(
     name = "math",
     hdrs = ["src/xnnpack/math.h"],
     deps = [
         ":common",
         ":config_hdrs",
-        "@FP16",
+        ":fp16",
     ],
 )
 
@@ -598,7 +602,6 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":microparams",
-        "@FP16",
     ],
 )
 
@@ -777,7 +780,6 @@ xnnpack_cc_library(
         ":microparams",
         ":operator_h",
         ":xnnpack_h",
-        "@FP16",
         "@FXdiv",
     ],
 )
@@ -796,7 +798,6 @@ xnnpack_cxx_library(
         ":params",
         ":unaligned",
         ":xnnpack_h",
-        "@FP16",
     ] + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
         "@KleidiAI//kai/ukernels/matmul:rhs_pack_kxn_qsi4cxp_qsu4cxs1s0",
@@ -931,6 +932,7 @@ xnnpack_cc_library(
         ":allocator",
         ":cache",
         ":common",
+        ":fp16",
         ":indirection",
         ":logging",
         ":math",
@@ -946,7 +948,6 @@ xnnpack_cc_library(
         ":params",
         ":quantization",
         ":xnnpack_h",
-        "@FP16",
         "@pthreadpool",
     ] + select({
         "//conditions:default": [],
@@ -969,6 +970,7 @@ xnnpack_cc_library(
         ":cache",
         ":common",
         ":config_hdrs",
+        ":fp16",
         ":hardware_config",
         ":internal",
         ":logging",
@@ -983,7 +985,6 @@ xnnpack_cc_library(
         ":params",
         ":requantization",
         ":xnnpack_h",
-        "@FP16",
         "@pthreadpool",
     ] + xnnpack_slinky_deps(),
 )

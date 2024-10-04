@@ -26,11 +26,11 @@ load(
 MICROKERNEL_TEST_DEPS = [
     ":next_prime",
     ":replicable_random_device",
-    "@FP16",
     "//:aligned_allocator",
     "//:all_microkernels",
     "//:allocator",
     "//:common",
+    "//:fp16",
     "//:isa_checks",
     "//:math",
     "//:memory",
@@ -46,12 +46,12 @@ MICROKERNEL_TEST_DEPS = [
 
 OPERATOR_TEST_DEPS = [
     ":replicable_random_device",
-    "@FP16",
     "@pthreadpool",
     "//:aligned_allocator",
     "//:allocator",
     "//:cache",
     "//:common",
+    "//:fp16",
     "//:internal",
     "//:math",
     "//:microkernel_configs",
@@ -189,8 +189,8 @@ sh_test(
     copts = xnnpack_simd_copts_for_arch(arch),
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:common",
+        "//:fp16",
         "//:isa_checks",
         "//:microkernels_h",
     ],
@@ -1769,7 +1769,6 @@ xnnpack_cxx_library(
     deps = [
         ":replicable_random_device",
         ":subgraph_unary_tester",
-        "@FP16",
         "//:XNNPACK",
         "//:math",
         "//:node_type",
@@ -1885,7 +1884,6 @@ xnnpack_unit_test(
     ],
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:aligned_allocator",
         "//:common",
@@ -1915,7 +1913,6 @@ xnnpack_unit_test(
     ],
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:aligned_allocator",
         "//:common",
@@ -1932,7 +1929,6 @@ xnnpack_unit_test(
     ],
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:node_type",
         "//:operators",
@@ -1953,7 +1949,6 @@ xnnpack_unit_test(
     deps = [
         ":convolution_test_helpers",
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:aligned_allocator",
         "//:common",
@@ -1974,7 +1969,6 @@ xnnpack_unit_test(
     shard_count = 5,
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:node_type",
         "//:operator_utils",
@@ -1991,7 +1985,6 @@ xnnpack_unit_test(
     ],
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:node_type",
         "//:operators",
@@ -2007,7 +2000,6 @@ xnnpack_unit_test(
     deps = [
         ":convolution_test_helpers",
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:aligned_allocator",
         "//:common",
@@ -2026,7 +2018,6 @@ xnnpack_unit_test(
     ],
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:node_type",
         "//:operators",
@@ -2046,7 +2037,6 @@ xnnpack_unit_test(
     ],
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:aligned_allocator",
         "//:common",
@@ -2068,7 +2058,6 @@ xnnpack_unit_test(
     ],
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:aligned_allocator",
         "//:common",
@@ -2086,7 +2075,6 @@ xnnpack_unit_test(
     ],
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:aligned_allocator",
         "//:common",
@@ -2104,7 +2092,6 @@ xnnpack_unit_test(
     ],
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:aligned_allocator",
         "//:common",
@@ -2121,7 +2108,6 @@ xnnpack_unit_test(
     ],
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:aligned_allocator",
         "//:common",
@@ -2138,7 +2124,6 @@ xnnpack_unit_test(
     ],
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:node_type",
         "//:operator_utils",
@@ -2155,7 +2140,6 @@ xnnpack_unit_test(
     ],
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:node_type",
         "//:operators",
@@ -2185,7 +2169,6 @@ xnnpack_unit_test(
     ],
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:aligned_allocator",
         "//:common",
@@ -2201,7 +2184,6 @@ xnnpack_unit_test(
     ],
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:aligned_allocator",
         "//:common",
@@ -2230,7 +2212,6 @@ xnnpack_unit_test(
     ],
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:node_type",
         "//:operators",
@@ -2348,7 +2329,6 @@ xnnpack_unit_test(
     ],
     deps = [
         ":replicable_random_device",
-        "@FP16",
         "//:XNNPACK",
         "//:allocation_type",
         "//:allocator",
