@@ -12,8 +12,6 @@ $assert IDATATYPE == "F16" and ODATATYPE == "QS8" or IDATATYPE == "F32"
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
 #include "xnnpack/vcvt.h"
-$if IDATATYPE == "F16":
-  #include <fp16/fp16.h>
 
 $INPUT_T = {"F16": "xnn_float16", "F32": "float"}[IDATATYPE]
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[ODATATYPE]

@@ -12,7 +12,6 @@
 #include "xnnpack/gemm.h"
 #include "xnnpack/math.h"
 #include "xnnpack/unaligned.h"
-#include <fp16/fp16.h>
 
 
 void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x2__scalar(
@@ -98,11 +97,11 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_1x2__scalar(
 
     w = (const float*) w + 2;
 
-    const float voutput_min = fp16_ieee_to_fp32_value(*(const uint16_t*) &params->scalar.min);
+    const float voutput_min = xnn_float16_to_float(params->scalar.min);
     vout0x0 = math_max_f32(vout0x0, voutput_min);
     vout0x1 = math_max_f32(vout0x1, voutput_min);
 
-    const float voutput_max = fp16_ieee_to_fp32_value(*(const uint16_t*) &params->scalar.max);
+    const float voutput_max = xnn_float16_to_float(params->scalar.max);
     vout0x0 = math_min_f32(vout0x0, voutput_max);
     vout0x1 = math_min_f32(vout0x1, voutput_max);
 
