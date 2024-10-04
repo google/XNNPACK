@@ -25,7 +25,6 @@
 #include <random>
 #include <vector>
 
-#include <fp16/fp16.h>
 #include "bench/utils.h"
 #include <benchmark/benchmark.h>
 

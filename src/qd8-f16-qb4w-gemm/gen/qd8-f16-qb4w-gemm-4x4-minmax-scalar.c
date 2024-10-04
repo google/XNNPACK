@@ -11,7 +11,6 @@
 
 #include "xnnpack/gemm.h"
 #include "xnnpack/math.h"
-#include <fp16/fp16.h>
 
 
 void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_4x4__scalar(
@@ -268,7 +267,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_4x4__scalar(
 
     w = (const float*) w + 4;
 
-    const float voutput_min = fp16_ieee_to_fp32_value(*(const uint16_t*) &params->scalar.min);
+    const float voutput_min = xnn_float16_to_float(params->scalar.min);
     vout0x0 = math_max_f32(vout0x0, voutput_min);
     vout1x0 = math_max_f32(vout1x0, voutput_min);
     vout2x0 = math_max_f32(vout2x0, voutput_min);
@@ -286,7 +285,7 @@ void xnn_qd8_f16_qb4w_gemm_minmax_ukernel_4x4__scalar(
     vout2x3 = math_max_f32(vout2x3, voutput_min);
     vout3x3 = math_max_f32(vout3x3, voutput_min);
 
-    const float voutput_max = fp16_ieee_to_fp32_value(*(const uint16_t*) &params->scalar.max);
+    const float voutput_max = xnn_float16_to_float(params->scalar.max);
     vout0x0 = math_min_f32(vout0x0, voutput_max);
     vout1x0 = math_min_f32(vout1x0, voutput_max);
     vout2x0 = math_min_f32(vout2x0, voutput_max);
