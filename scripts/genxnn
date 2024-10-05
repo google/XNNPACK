@@ -1,0 +1,71 @@
+#!/bin/bash
+
+function my_generate1() {
+  files_changed=$(scripts/check_files_changed.py $1)
+  if [[ $files_changed ]]
+  then
+    if ${VERBOSE}; then
+      echo $1
+    fi
+    if ${DEBUG}; then
+      echo $files_changed
+    fi
+    touch $files_changed
+    bash -c $1 &
+  fi
+}
+
+function my_generatef() {
+  if ${VERBOSE}; then
+    echo $1
+  fi
+  bash -c $1 &
+}
+
+export -f my_generate1
+export -f my_generatef
+
+export FORCE='false'
+export VERBOSE='false'
+export DEBUG='false'
+
+while getopts ':vfd' 'OPTKEY'; do
+    case ${OPTKEY} in
+        'v')
+            export VERBOSE='true'
+            ;;
+        'd')
+            export DEBUG='true'
+            ;;
+        'f')
+            export FORCE='true'
+            ;;
+        '?')
+            echo "INVALID OPTION -- ${OPTARG}" >&2
+            exit 1
+            ;;
+        ':')
+            echo "MISSING ARGUMENT for option -- ${OPTARG}" >&2
+            exit 1
+            ;;
+        *)
+            echo "UNIMPLEMENTED OPTION -- ${OPTKEY}" >&2
+            exit 1
+            ;;
+    esac
+done
+
+# [optional] Remove all options processed by getopts.
+shift $(( OPTIND - 1 ))
+[[ "${1}" == "--" ]] && shift
+
+if ${FORCE}; then
+  find scripts/ -name 'generate-*.sh' -exec bash -c 'my_generatef {}' \;
+else
+  find scripts/ -name 'generate-*.sh' -exec bash -c 'my_generate1 {}' \;
+fi
+wait
+if ${VERBOSE}; then
+  echo ./tools/update-microkernels.py
+fi
+./tools/update-microkernels.py

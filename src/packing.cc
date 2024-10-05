@@ -28,7 +28,6 @@
   #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
-#include <fp16/fp16.h>
 
 extern "C" {
 

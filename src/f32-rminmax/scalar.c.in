@@ -12,7 +12,7 @@ $if not WASM:
   #include "xnnpack/math.h"
 #include "xnnpack/reduce.h"
 $if DATATYPE == "F16":
-  #include <fp16/fp16.h>
+  #include "xnnpack/fp16.h"
 
 $ACC_SUFFIX = "" if ACCUMULATORS == 1 else "_acc%d" % ACCUMULATORS
 $MAX = "__builtin_wasm_max_f32" if WASM else "math_max_f32"
@@ -30,7 +30,7 @@ void xnn_${DATATYPE.lower()}_r${OP.lower()}_ukernel__${ISA}_u${BATCH_TILE}${ACC_
     $elif DATATYPE == "F16":
       const void* input,
       void* output,
-    const union xnn_${DATATYPE.lower()}_default_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_${DATATYPE.lower()}_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(${ITYPE}) == 0);

@@ -20,7 +20,6 @@
 #include <climits>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"

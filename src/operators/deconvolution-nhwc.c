@@ -13,7 +13,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/allocator.h"
 #include "xnnpack/cache.h"
