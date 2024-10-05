@@ -14,8 +14,6 @@ $if VARIANT == "LRINTF":
 #include "xnnpack/math.h"
 $if NR % 4 != 0:
   #include "xnnpack/unaligned.h"
-$if DATATYPE in ["QB4_F16"]:
-  #include <fp16/fp16.h>
 
 $#
 $INDENT = 0
@@ -279,7 +277,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
         w = (const float*) w + ${NR * 2};
 
       $if DATATYPE in ["QB4_F16"]:
-        const float voutput_min = fp16_ieee_to_fp32_value(*(const uint16_t*) &params->scalar.min);
+        const float voutput_min = xnn_float16_to_float(params->scalar.min);
       $else:
         const float voutput_min = params->scalar.min;
       $for N in range(NR):
@@ -287,7 +285,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
           vout${M}x${N} = ${MAX_F32}(vout${M}x${N}, voutput_min);
 
       $if DATATYPE in ["QB4_F16"]:
-        const float voutput_max = fp16_ieee_to_fp32_value(*(const uint16_t*) &params->scalar.max);
+        const float voutput_max = xnn_float16_to_float(params->scalar.max);
       $else:
         const float voutput_max = params->scalar.max;
       $for N in range(NR):

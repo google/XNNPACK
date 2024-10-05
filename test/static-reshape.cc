@@ -15,7 +15,6 @@
 #include <vector>      // For std::vector.
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator.h"
