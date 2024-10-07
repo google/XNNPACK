@@ -8,6 +8,7 @@
 #define __XNNPACK_SRC_XNNPACK_SIMD_U32_NEON_H_
 
 #include <assert.h>
+#include <stdbool.h>
 #include <stddef.h>
 
 #include <arm_neon.h>
@@ -41,6 +42,25 @@ static XNN_INLINE xnn_simd_u32_t xnn_min_u32(xnn_simd_u32_t a,
 static XNN_INLINE xnn_simd_u32_t xnn_sub_u32(xnn_simd_u32_t a,
                                              xnn_simd_u32_t b) {
   return vsubq_u32(a, b);
+}
+
+static XNN_INLINE float32x4_t xnn_subw_f32_u32(xnn_simd_u32_t a,
+                                               xnn_simd_u32_t b) {
+#if XNN_ARCH_ARM64
+  int64x2_t result_low = vreinterpretq_s64_u64(
+      vsubw_u32(vmovl_u32(vget_low_u32(a)), vget_low_u32(b)));
+  int64x2_t result_high = vreinterpretq_s64_u64(
+      vsubw_u32(vmovl_u32(vget_high_u32(a)), vget_high_u32(b)));
+    return vcombine_f32(
+      vcvt_f32_f64(vcvtq_f64_s64(result_low)),
+      vcvt_f32_f64(vcvtq_f64_s64(result_high)));
+#else
+  const uint32x4_t mask = vcgtq_u32(a, b);
+  const float32x4_t variant1 = vcvtq_f32_u32(vsubq_u32(a, b));
+  const float32x4_t variant2 = vcvtq_f32_u32(vsubq_u32(b, a));
+  const float32x4_t sign = vbslq_f32(mask, vdupq_n_f32(1), vdupq_n_f32(-1));
+  return vmulq_f32(vbslq_f32(mask, variant1, variant2), sign);
+#endif
 }
 
 // Load/store operations.
@@ -94,8 +114,7 @@ static XNN_INLINE void xnn_store_tail_u32(uint32_t* output, xnn_simd_u32_t v,
 
 // Conversion operations.
 
-static XNN_INLINE float32x4_t
-xnn_cvt_f32_u32(xnn_simd_u32_t a) {
+static XNN_INLINE float32x4_t xnn_cvt_f32_u32(xnn_simd_u32_t a) {
   return vcvtq_f32_u32(a);
 }
 

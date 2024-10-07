@@ -422,7 +422,7 @@ class MeanOperatorTester {
 
       for (size_t idx = 0; idx < output_ref.size(); ++idx) {
         output_ref[idx] = static_cast<float>(accumulator[idx] - static_cast<int32_t>(input_zero_point) * num_reduced_elements);
-        output_ref[idx] *= input_scale * mean_scale * output_scale;
+        output_ref[idx] *= input_scale * mean_scale / output_scale;
         output_ref[idx] = std::min(output_ref[idx], static_cast<float>(static_cast<int32_t>(quantized_output_max) - static_cast<int32_t>(output_zero_point)));
         output_ref[idx] = std::max(output_ref[idx], static_cast<float>(static_cast<int32_t>(quantized_output_min) - static_cast<int32_t>(output_zero_point)));
         output_ref_qs8[idx] = static_cast<int8_t>(std::lrintf(output_ref[idx]) + static_cast<int32_t>(output_zero_point));
@@ -433,7 +433,7 @@ class MeanOperatorTester {
       xnn_operator_t mean_op = nullptr;
 
       const xnn_status status = xnn_create_mean_nd_qs8(
-          input_scale * output_scale, input_zero_point, output_zero_point,
+          input_scale / output_scale, input_zero_point, output_zero_point,
           /*flags=*/0, &mean_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -518,7 +518,7 @@ class MeanOperatorTester {
       output_stride *= output_dims[i - 1];
     }
 
-    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + num_input_elements());
+    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + num_input_elements());
     std::vector<uint8_t> output(num_output_elements);
     std::vector<float> output_ref(num_output_elements);
     std::vector<uint8_t> output_ref_qu8(num_output_elements);
@@ -567,8 +567,8 @@ class MeanOperatorTester {
       }
 
       for (size_t idx = 0; idx < output_ref.size(); ++idx) {
-        output_ref[idx] = static_cast<float>(accumulator[idx] - static_cast<int32_t>(input_zero_point) * num_reduced_elements);
-        output_ref[idx] *= input_scale * mean_scale * output_scale;
+        output_ref[idx] = static_cast<float>(static_cast<int64_t>(accumulator[idx]) - static_cast<int32_t>(input_zero_point) * num_reduced_elements);
+        output_ref[idx] *= input_scale * mean_scale / output_scale;
         output_ref[idx] = std::min(output_ref[idx], static_cast<float>(static_cast<int32_t>(quantized_output_max) - static_cast<int32_t>(output_zero_point)));
         output_ref[idx] = std::max(output_ref[idx], static_cast<float>(static_cast<int32_t>(quantized_output_min) - static_cast<int32_t>(output_zero_point)));
         output_ref_qu8[idx] = static_cast<uint8_t>(std::lrintf(output_ref[idx]) + static_cast<int32_t>(output_zero_point));
@@ -579,7 +579,7 @@ class MeanOperatorTester {
       xnn_operator_t mean_op = nullptr;
 
       const xnn_status status = xnn_create_mean_nd_qu8(
-          input_scale * output_scale, input_zero_point, output_zero_point,
+          input_scale / output_scale, input_zero_point, output_zero_point,
           /*flags=*/0, &mean_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();

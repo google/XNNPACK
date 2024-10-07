@@ -277,7 +277,7 @@ void VCvtMicrokernelTester::Test(
       std::numeric_limits<uint32_t>::min(),
       std::numeric_limits<uint32_t>::max());
 
-  std::vector<uint32_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
+  std::vector<uint32_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(uint32_t));
   std::vector<float> output(batch_size());
   std::vector<float> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -285,15 +285,15 @@ void VCvtMicrokernelTester::Test(
     std::fill(output.begin(), output.end(), 0.0f);
 
     struct xnn_u32_f32_cvt_params params;
-    init_params(&params, static_cast<uint32_t>(input_zero_point()));
+    init_params(&params, static_cast<int32_t>(input_zero_point()));
 
     // Call optimized micro-kernel.
     vcvt(batch_size() * sizeof(uint32_t), input.data(), output.data(), &params);
 
     // Compute reference results
     for (size_t i = 0; i < batch_size(); i++) {
-      const uint32_t zero_point = static_cast<uint32_t>(input_zero_point());
-      output_ref[i] = static_cast<float>(input[i] - zero_point);
+      const int64_t zero_point = static_cast<int64_t>(input_zero_point());
+      output_ref[i] = static_cast<float>(static_cast<int64_t>(input[i]) - zero_point);
     }
 
     // Verify results.

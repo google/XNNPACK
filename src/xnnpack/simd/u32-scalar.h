@@ -44,6 +44,11 @@ static XNN_INLINE xnn_simd_u32_t xnn_sub_u32(xnn_simd_u32_t a,
   return a - b;
 }
 
+static XNN_INLINE float xnn_subw_f32_u32(xnn_simd_u32_t a,
+                                         xnn_simd_u32_t b) {
+  return (float) ((int64_t) a - (int64_t) b);
+}
+
 static XNN_INLINE xnn_simd_u32_t xnn_loadu_u32(const uint32_t *ptr) { return *ptr; }
 
 static XNN_INLINE xnn_simd_u32_t xnn_load_u32(const uint32_t *ptr) { return *ptr; }
@@ -68,8 +73,7 @@ static XNN_INLINE void xnn_store_tail_u32(uint32_t *output, xnn_simd_u32_t v,
 }
 
 // Conversion operations.
-static XNN_INLINE float
-xnn_cvt_f32_u32(xnn_simd_u32_t a) {
+static XNN_INLINE float xnn_cvt_f32_u32(xnn_simd_u32_t a) {
   return (float) a;
 }
 
