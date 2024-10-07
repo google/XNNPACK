@@ -64,19 +64,6 @@ http_archive(
 # LINT.ThenChange(cmake/DownloadGoogleBenchmark.cmake)
 
 # LINT.IfChange
-# FP16 library, used for half-precision conversions
-http_archive(
-    name = "FP16",
-    build_file = "@//third_party:FP16.BUILD",
-    sha256 = "e66e65515fa09927b348d3d584c68be4215cfe664100d01c9dbc7655a5716d70",
-    strip_prefix = "FP16-0a92994d729ff76a58f692d3028ca1b64b145d91",
-    urls = [
-        "https://github.com/Maratyszcza/FP16/archive/0a92994d729ff76a58f692d3028ca1b64b145d91.zip",
-    ],
-)
-# LINT.ThenChange(cmake/DownloadFP16.cmake)
-
-# LINT.IfChange
 # FXdiv library, used for repeated integer division by the same factor
 http_archive(
     name = "FXdiv",
@@ -100,10 +87,10 @@ http_archive(
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
     name = "cpuinfo",
-    sha256 = "2bf2b62eb86e2d2eaf862d0b9683a6c467a4d69fb2f7f1dc47c799809148608f",
-    strip_prefix = "cpuinfo-fa1c679da8d19e1d87f20175ae1ec10995cd3dd3",
+    sha256 = "ca31f17a86e4db01b5fc05efa1807ddc84c02ba4611464b67e185e8210bf096b",
+    strip_prefix = "cpuinfo-1e83a2fdd3102f65c6f1fb602c1b320486218a99",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/fa1c679da8d19e1d87f20175ae1ec10995cd3dd3.zip",
+        "https://github.com/pytorch/cpuinfo/archive/1e83a2fdd3102f65c6f1fb602c1b320486218a99.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadCpuinfo.cmake)

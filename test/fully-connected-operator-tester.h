@@ -20,7 +20,6 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/cache.h"
 #include "xnnpack/common.h"

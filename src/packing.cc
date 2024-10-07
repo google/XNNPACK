@@ -28,7 +28,6 @@
   #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
-#include <fp16/fp16.h>
 
 extern "C" {
 
@@ -1688,13 +1687,18 @@ size_t xnn_packed_stride_kai_qb4_weights_and_biases(
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
   const uint32_t nr = gemm_config->nr;
 
-  return kai_get_rhs_packed_stride_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0(
+  // We want the weight stride with nr = 1, but kleidi enforces a constraint
+  // where nr % 4 == 0. So instead we give nr to get the nr-scaled stride, and
+  // divide by nr to scaled down the stride.
+  const size_t nr_scaled_packed_stride = kai_get_rhs_packed_stride_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0(
       k, 
       nr,
       kr,
       sr,
       block_size,
       kai_datatype::kai_dt_bf16);
+
+  return nr_scaled_packed_stride / nr;
 }
 
 void xnn_pack_kai_qb4_weights_and_biases(

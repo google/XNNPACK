@@ -84,39 +84,44 @@ static void init_qs8_rsum_config(void) {
 
     if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512vnni) {
       qs8_rsum_config = (struct xnn_reduce_config) {
-        .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avx512vnni_u128,
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avx512vnni_u128_acc2,
         .element_tile = 128,
       };
     #if XNN_ENABLE_AVXVNNI
       } else if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avxvnni) {
         qs8_rsum_config = (struct xnn_reduce_config) {
-          .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avxvnni_u128,
+          .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avxvnni_u128_acc2,
           .element_tile = 128,
         };
     #endif
     } else if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
         qs8_rsum_config = (struct xnn_reduce_config) {
-          .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avx512skx_u128,
+          .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avx512skx_u128_acc2,
           .element_tile = 128,
         };
     #if XNN_ENABLE_AVX256SKX
       } else if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx256skx) {
           qs8_rsum_config = (struct xnn_reduce_config) {
-            .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avx256skx_u64,
+            .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avx256skx_u64_acc2,
             .element_tile = 64,
           };
     #endif
     } else if (hardware_config->use_x86_avx2) {
       qs8_rsum_config = (struct xnn_reduce_config) {
-        .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avx2_u64,
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avx2_u64_acc2,
         .element_tile = 64,
       };
     } else if (hardware_config->use_x86_ssse3) {
       qs8_rsum_config = (struct xnn_reduce_config) {
-        .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__ssse3_u32,
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__ssse3_u32_acc2,
         .element_tile = 32,
       };
     }
+  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+    qs8_rsum_config = (struct xnn_reduce_config) {
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__wasmsimd_u32_acc4,
+      .element_tile = 32,
+    };
   #else
     qs8_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__scalar_u4,

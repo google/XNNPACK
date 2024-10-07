@@ -13,11 +13,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/allocation-type.h"
 #include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
+#include "xnnpack/fp16.h"
 #include "xnnpack/hardware-config.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"

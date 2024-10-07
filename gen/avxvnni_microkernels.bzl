@@ -22,7 +22,7 @@ PROD_AVXVNNI_MICROKERNEL_SRCS = [
     "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-5x8c8-minmax-fp32-avxvnni-prfm.c",
     "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c8-minmax-fp32-avxvnni-prfm.c",
     "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-5x8c8-minmax-fp32-avxvnni-prfm.c",
-    "src/qs8-rsum/gen/qs8-rsum-avxvnni-u128.c",
+    "src/qs8-rsum/gen/qs8-rsum-avxvnni-u128-acc2.c",
 ]
 
 NON_PROD_AVXVNNI_MICROKERNEL_SRCS = [
@@ -156,8 +156,6 @@ NON_PROD_AVXVNNI_MICROKERNEL_SRCS = [
     "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x8c8-minmax-fp32-avxvnni.c",
     "src/qs8-rsum/gen/qs8-rsum-avxvnni-u32.c",
     "src/qs8-rsum/gen/qs8-rsum-avxvnni-u64-acc2.c",
-    "src/qs8-rsum/gen/qs8-rsum-avxvnni-u64.c",
-    "src/qs8-rsum/gen/qs8-rsum-avxvnni-u128-acc2.c",
     "src/qs8-rsum/gen/qs8-rsum-avxvnni-u128-acc4.c",
 ]
 

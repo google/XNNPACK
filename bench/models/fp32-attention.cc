@@ -2,8 +2,6 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
-//
-// Auto-generated file. Do not edit!
 
 #include "xnnpack.h"
 
@@ -23,7 +21,7 @@
 
 namespace models {
 
-xnn_subgraph_t FP32Attention() {
+xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
   xnn_status status;
   xnn_subgraph_t subgraph = nullptr;
   status = xnn_create_subgraph(/*num_external_values=*/4, 0, &subgraph);
@@ -36,7 +34,7 @@ xnn_subgraph_t FP32Attention() {
   auto rng = std::mt19937(random_device());
 
   uint32_t v0 = XNN_INVALID_VALUE_ID;
-  std::array<size_t, 4> v0_dims = {{1, 4, 24, 16}};
+  std::array<size_t, 4> v0_dims = {{b, s, n, t}};
   status = xnn_define_tensor_value(
     subgraph, xnn_datatype_fp32,
     v0_dims.size(), v0_dims.data(),
@@ -48,7 +46,7 @@ xnn_subgraph_t FP32Attention() {
   }
 
   uint32_t v1 = XNN_INVALID_VALUE_ID;
-  std::array<size_t, 4> v1_dims = {{1, 16, 24, 25}};
+  std::array<size_t, 4> v1_dims = {{b, t, n, h}};
   status = xnn_define_tensor_value(
     subgraph, xnn_datatype_fp32,
     v1_dims.size(), v1_dims.data(),
@@ -60,7 +58,7 @@ xnn_subgraph_t FP32Attention() {
   }
 
   uint32_t v2 = XNN_INVALID_VALUE_ID;
-  std::array<size_t, 4> v2_dims = {{1, 4, 24, 25}};
+  std::array<size_t, 4> v2_dims = {{b, s, n, h}};
   status = xnn_define_tensor_value(
     subgraph, xnn_datatype_fp32,
     v2_dims.size(), v2_dims.data(),
@@ -72,7 +70,7 @@ xnn_subgraph_t FP32Attention() {
   }
 
   uint32_t v3 = XNN_INVALID_VALUE_ID;
-  std::array<size_t, 4> v3_dims = {{1, 16, 24, 25}};
+  std::array<size_t, 4> v3_dims = {{b, t, n, h}};
   status = xnn_define_tensor_value(
     subgraph, xnn_datatype_fp32,
     v3_dims.size(), v3_dims.data(),
@@ -84,7 +82,7 @@ xnn_subgraph_t FP32Attention() {
   }
 
   uint32_t v4 = XNN_INVALID_VALUE_ID;
-  std::array<size_t, 4> v4_dims = {{1, 24, 16, 25}};
+  std::array<size_t, 4> v4_dims = {{b, n, t, h}};
   status = xnn_define_tensor_value(
     subgraph, xnn_datatype_fp32,
     v4_dims.size(), v4_dims.data(),
@@ -96,7 +94,7 @@ xnn_subgraph_t FP32Attention() {
   }
 
   uint32_t v5 = XNN_INVALID_VALUE_ID;
-  std::array<size_t, 4> v5_dims = {{1, 24, 4, 25}};
+  std::array<size_t, 4> v5_dims = {{b, n, s, h}};
   status = xnn_define_tensor_value(
     subgraph, xnn_datatype_fp32,
     v5_dims.size(), v5_dims.data(),
@@ -108,7 +106,7 @@ xnn_subgraph_t FP32Attention() {
   }
 
   uint32_t v6 = XNN_INVALID_VALUE_ID;
-  std::array<size_t, 4> v6_dims = {{1, 24, 16, 4}};
+  std::array<size_t, 4> v6_dims = {{b, n, t, s}};
   status = xnn_define_tensor_value(
     subgraph, xnn_datatype_fp32,
     v6_dims.size(), v6_dims.data(),
@@ -120,7 +118,7 @@ xnn_subgraph_t FP32Attention() {
   }
 
   uint32_t v7 = XNN_INVALID_VALUE_ID;
-  std::array<size_t, 4> v7_dims = {{1, 24, 16, 4}};
+  std::array<size_t, 4> v7_dims = {{b, n, t, s}};
   status = xnn_define_tensor_value(
     subgraph, xnn_datatype_fp32,
     v7_dims.size(), v7_dims.data(),
@@ -132,7 +130,7 @@ xnn_subgraph_t FP32Attention() {
   }
 
   uint32_t v8 = XNN_INVALID_VALUE_ID;
-  std::array<size_t, 4> v8_dims = {{1, 24, 16, 4}};
+  std::array<size_t, 4> v8_dims = {{b, n, t, s}};
   status = xnn_define_tensor_value(
     subgraph, xnn_datatype_fp32,
     v8_dims.size(), v8_dims.data(),
@@ -144,7 +142,7 @@ xnn_subgraph_t FP32Attention() {
   }
 
   uint32_t v9 = XNN_INVALID_VALUE_ID;
-  std::array<size_t, 4> v9_dims = {{1, 24, 16, 4}};
+  std::array<size_t, 4> v9_dims = {{b, n, t, s}};
   status = xnn_define_tensor_value(
     subgraph, xnn_datatype_fp32,
     v9_dims.size(), v9_dims.data(),
@@ -156,7 +154,7 @@ xnn_subgraph_t FP32Attention() {
   }
 
   uint32_t v10 = XNN_INVALID_VALUE_ID;
-  std::array<size_t, 4> v10_dims = {{1, 24, 16, 4}};
+  std::array<size_t, 4> v10_dims = {{b, n, t, s}};
   status = xnn_define_tensor_value(
     subgraph, xnn_datatype_fp32,
     v10_dims.size(), v10_dims.data(),
@@ -168,7 +166,7 @@ xnn_subgraph_t FP32Attention() {
   }
 
   uint32_t v11 = XNN_INVALID_VALUE_ID;
-  std::array<size_t, 4> v11_dims = {{1, 24, 16, 16}};
+  std::array<size_t, 4> v11_dims = {{b, n, t, t}};
   status = xnn_define_tensor_value(
     subgraph, xnn_datatype_fp32,
     v11_dims.size(), v11_dims.data(),
@@ -180,7 +178,7 @@ xnn_subgraph_t FP32Attention() {
   }
 
   uint32_t v12 = XNN_INVALID_VALUE_ID;
-  std::array<size_t, 4> v12_dims = {{1, 16, 24, 16}};
+  std::array<size_t, 4> v12_dims = {{b, t, n, t}};
   status = xnn_define_tensor_value(
     subgraph, xnn_datatype_fp32,
     v12_dims.size(), v12_dims.data(),

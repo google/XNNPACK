@@ -13,7 +13,7 @@ SET(PROD_SSSE3_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-ssse3-2x4-acc2.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x4c8-minmax-ssse3-madd.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x4c8-minmax-ssse3-madd.c
-  src/qs8-rsum/gen/qs8-rsum-ssse3-u32.c
+  src/qs8-rsum/gen/qs8-rsum-ssse3-u32-acc2.c
   src/qs8-vcvt/gen/qs8-vcvt-ssse3-u32.c
   src/qs8-vlrelu/gen/qs8-vlrelu-ssse3-u32.c
   src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-ssse3-u16.c
@@ -41,10 +41,8 @@ SET(NON_PROD_SSSE3_MICROKERNEL_SRCS
   src/qs8-requantization/qs8-requantization-gemmlowp-ssse3.c
   src/qs8-requantization/qs8-requantization-rndna-ssse3.c
   src/qs8-rsum/gen/qs8-rsum-ssse3-u16.c
-  src/qs8-rsum/gen/qs8-rsum-ssse3-u32-acc2.c
   src/qs8-rsum/gen/qs8-rsum-ssse3-u64-acc2.c
   src/qs8-rsum/gen/qs8-rsum-ssse3-u64-acc4.c
-  src/qs8-rsum/gen/qs8-rsum-ssse3-u64.c
   src/qs8-vcvt/gen/qs8-vcvt-ssse3-u16.c
   src/qs8-vhswish/gen/qs8-vhswish-ssse3-u16.c
   src/qs8-vhswish/gen/qs8-vhswish-ssse3-u32.c

@@ -90,6 +90,14 @@ tools/xngen src/qs8-vlrelu/armsimd32.c.in -D BATCH_TILE=8 -D DATATYPE=QS8 -o src
 tools/xngen src/qs8-vlrelu/armsimd32.c.in -D BATCH_TILE=4 -D DATATYPE=QU8 -o src/qu8-vlrelu/gen/qu8-vlrelu-armsimd32-u4.c &
 tools/xngen src/qs8-vlrelu/armsimd32.c.in -D BATCH_TILE=8 -D DATATYPE=QU8 -o src/qu8-vlrelu/gen/qu8-vlrelu-armsimd32-u8.c &
 
+################################ RISC-V Vector ################################
+tools/xngen src/qs8-vlrelu/rvv.c.in -D LMUL=1 -D DATATYPE=QS8 -o src/qs8-vlrelu/gen/qs8-vlrelu-rvv-u1v.c &
+tools/xngen src/qs8-vlrelu/rvv.c.in -D LMUL=2 -D DATATYPE=QS8 -o src/qs8-vlrelu/gen/qs8-vlrelu-rvv-u2v.c &
+
+tools/xngen src/qs8-vlrelu/rvv.c.in -D LMUL=1 -D DATATYPE=QU8 -o src/qu8-vlrelu/gen/qu8-vlrelu-rvv-u1v.c &
+tools/xngen src/qs8-vlrelu/rvv.c.in -D LMUL=2 -D DATATYPE=QU8 -o src/qu8-vlrelu/gen/qu8-vlrelu-rvv-u2v.c &
+
+
 #################################### Scalar ###################################
 tools/xngen src/qs8-vlrelu/scalar-select.c.in -D BATCH_TILE=1 -D DATATYPE=QS8 -o src/qs8-vlrelu/gen/qs8-vlrelu-scalar-select-u1.c &
 tools/xngen src/qs8-vlrelu/scalar-select.c.in -D BATCH_TILE=2 -D DATATYPE=QS8 -o src/qs8-vlrelu/gen/qs8-vlrelu-scalar-select-u2.c &
