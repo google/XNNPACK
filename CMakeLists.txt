@@ -1850,7 +1850,6 @@ IF(XNNPACK_BUILD_TESTS)
 
   get_all_test_targets(test_targets)
   LIST(FILTER test_targets INCLUDE REGEX "-(nc|nd|nd-eager|ncw|nhwc|nhtc|nchw|nwc)-test(-[0-9]+)?$")
-  # LIST(FILTER test_targets INCLUDE REGEX "-(nc|nd|nd-eager|ncw|nhwc|nhtc|nchw|nwc|\\d+)-test(-[0-9]+)?$")
   MESSAGE(STATUS "Inferred operator tests: ${test_targets}")
   SET_TESTS_PROPERTIES(${test_targets} PROPERTIES LABELS "operator")
 
