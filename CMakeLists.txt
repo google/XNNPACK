@@ -1581,7 +1581,6 @@ IF(XNNPACK_BUILD_TESTS)
         TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
         TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
             gemm-microkernel-tester
-            fp16
             GTest::gmock
             GTest::gtest
             GTest::gtest_main
