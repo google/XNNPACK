@@ -1,0 +1,69 @@
+// Copyright 2024 Imagination Technologies, inc.
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert LMUL in [1, 2, 4, 8]
+$assert DATATYPE in ["QS8", "QU8"]
+#include <assert.h>
+
+#include <riscv_vector.h>
+
+#include "xnnpack/vhswish.h"
+
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
+
+void xnn_${DATATYPE.lower()}_vhswish_ukernel__rvv_u${LMUL}v(
+    size_t batch,
+    const ${XINT8_T}* input,
+    ${XINT8_T}* output,
+    const union xnn_${DATATYPE.lower()}_hswish_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(${XINT8_T}) == 0);
+  assert(input != NULL);
+  assert(output != NULL);
+
+  const uint32_t input_zero_point = (uint32_t) params->scalar.input_zero_point;
+  const int32_t output_zero_point = params->scalar.output_zero_point;
+  const int32_t input_scale_div_mantissa = params->scalar.input_scale_div_mantissa;
+  const int32_t input_scale_div_exp = params->scalar.input_scale_div_exp;
+  const int32_t scale_ratio = params->scalar.scale_ratio;
+
+  $if DATATYPE == "QS8":
+    vint8m${LMUL}_t inzp_i8v = __riscv_vmv_v_x_i8m${LMUL}(input_zero_point, __riscv_vsetvl_e8m${LMUL}(batch));
+  $else:
+    vuint8m${LMUL}_t inzp_u8v = __riscv_vmv_v_x_u8m${LMUL}(input_zero_point, __riscv_vsetvl_e8m${LMUL}(batch));
+
+  do {
+    int32_t n = __riscv_vsetvl_e8m${LMUL}(batch); batch -= n;
+
+    $if DATATYPE == "QS8":
+      vint8m${LMUL}_t in_i8v = __riscv_vle8_v_i8m${LMUL}(input, n); input += n;
+      vint16m${LMUL*2}_t insub_i16v = __riscv_vwsub_vv_i16m${LMUL*2}(inzp_i8v, in_i8v, n);
+    $else:
+      vuint8m${LMUL}_t in_u8v = __riscv_vle8_v_u8m${LMUL}(input, n); input += n;
+      vuint16m${LMUL*2}_t sub_u16v = __riscv_vwsubu_vv_u16m${LMUL*2}(inzp_u8v, in_u8v, n);
+      vint16m${LMUL*2}_t insub_i16v = __riscv_vreinterpret_v_u16m${LMUL*2}_i16m${LMUL*2}(sub_u16v);
+
+    vint16m${LMUL*2}_t sl_i16v = __riscv_vsll_vx_i16m${LMUL*2}(insub_i16v, 7, n);
+    vint32m${LMUL*4}_t acc_i32v = __riscv_vwmul_vx_i32m${LMUL*4}(sl_i16v, input_scale_div_mantissa, n);
+    vint32m${LMUL*4}_t insl_i32v = __riscv_vsra_vx_i32m${LMUL*4}(acc_i32v, -input_scale_div_exp, n);
+    vint32m${LMUL*4}_t insub_i32v = __riscv_vsub_vx_i32m${LMUL*4}(insl_i32v, 16384, n);
+    vint16m${LMUL*2}_t in_i16v = __riscv_vnclip_wx_i16m${LMUL*2}(insub_i32v, 0, __RISCV_VXRM_RNU , n);
+    in_i16v = __riscv_vmin_vx_i16m${LMUL*2}(in_i16v, 0, n);
+    vint32m${LMUL*4}_t accm_i32v = __riscv_vwmul_vx_i32m${LMUL*4}(sl_i16v, scale_ratio, n);
+    vint16m${LMUL*2}_t sra_i16v = __riscv_vnclip_wx_i16m${LMUL*2}(accm_i32v, 15, __RISCV_VXRM_RNU, n);
+    vint32m${LMUL*4}_t mul_i32v = __riscv_vwmul_vv_i32m${LMUL*4}(in_i16v, sra_i16v, n);
+    vint16m${LMUL*2}_t mulsra_i16v = __riscv_vnclip_wx_i16m${LMUL*2}(mul_i32v, 15, __RISCV_VXRM_RNU, n);
+    vint16m${LMUL*2}_t add_i16v = __riscv_vadd_vx_i16m${LMUL*2}(mulsra_i16v, output_zero_point, n);
+
+    $if DATATYPE == "QS8":
+      vint8m${LMUL}_t out_i8v = __riscv_vnclip_wx_i8m${LMUL}(add_i16v, 0, 0, n);
+      __riscv_vse8_v_i8m${LMUL}(output, out_i8v, n); output += n;
+    $else:
+      vuint16m${LMUL*2}_t out_u16v = __riscv_vreinterpret_v_i16m${LMUL*2}_u16m${LMUL*2}(add_i16v);
+      vuint8m${LMUL}_t out_u8v = __riscv_vnclipu_wx_u8m${LMUL}(out_u16v, 0, 0, n);
+      __riscv_vse8_v_u8m${LMUL}(output, out_u8v, n); output += n;
+  } while (batch != 0);
+}

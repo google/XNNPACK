@@ -183,10 +183,14 @@ SET(NON_PROD_RVV_MICROKERNEL_SRCS
   src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x4v-minmax-rvv.c
   src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x4v-minmax-rvv.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-rvv-u1v.c
+  src/qs8-vhswish/gen/qs8-vhswish-rvv-u1v.c
+  src/qs8-vhswish/gen/qs8-vhswish-rvv-u2v.c
   src/qs8-vlrelu/gen/qs8-vlrelu-rvv-u1v.c
   src/qs8-vmul/gen/qs8-vmul-minmax-f32-rvv-u1v.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-f32-rvv-u1v.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-rvv-u1v.c
+  src/qu8-vhswish/gen/qu8-vhswish-rvv-u1v.c
+  src/qu8-vhswish/gen/qu8-vhswish-rvv-u2v.c
   src/qu8-vlrelu/gen/qu8-vlrelu-rvv-u1v.c
   src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u1v.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-f32-rvv-u1v.c

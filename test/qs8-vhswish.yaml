@@ -11,6 +11,12 @@
 - name: xnn_qs8_vhswish_ukernel__neon_u32
   init: xnn_init_qs8_hswish_scalar_params
 
+# RISC-V Vector
+- name: xnn_qs8_vhswish_ukernel__rvv_u1v
+  init: xnn_init_qs8_hswish_scalar_params
+- name: xnn_qs8_vhswish_ukernel__rvv_u2v
+  init: xnn_init_qs8_hswish_scalar_params
+
 # x86 SSE2
 - name: xnn_qs8_vhswish_ukernel__sse2_u16
   init: xnn_init_qs8_hswish_sse2_params

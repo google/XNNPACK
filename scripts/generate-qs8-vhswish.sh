@@ -54,6 +54,13 @@ tools/xngen src/qs8-vhswish/wasmsimd.c.in -D BATCH_TILE=8  -D RELAXED=0 -D DATAT
 tools/xngen src/qs8-vhswish/wasmsimd.c.in -D BATCH_TILE=16 -D RELAXED=0 -D DATATYPE=QU8 -o src/qu8-vhswish/gen/qu8-vhswish-wasmsimd-u16.c &
 tools/xngen src/qs8-vhswish/wasmsimd.c.in -D BATCH_TILE=32 -D RELAXED=0 -D DATATYPE=QU8 -o src/qu8-vhswish/gen/qu8-vhswish-wasmsimd-u32.c &
 
+################################ RISC-V Vector ################################
+tools/xngen src/qs8-vhswish/rvv.c.in -D LMUL=1 -D DATATYPE=QS8 -o src/qs8-vhswish/gen/qs8-vhswish-rvv-u1v.c &
+tools/xngen src/qs8-vhswish/rvv.c.in -D LMUL=2 -D DATATYPE=QS8 -o src/qs8-vhswish/gen/qs8-vhswish-rvv-u2v.c &
+
+tools/xngen src/qs8-vhswish/rvv.c.in -D LMUL=1 -D DATATYPE=QU8 -o src/qu8-vhswish/gen/qu8-vhswish-rvv-u1v.c &
+tools/xngen src/qs8-vhswish/rvv.c.in -D LMUL=2 -D DATATYPE=QU8 -o src/qu8-vhswish/gen/qu8-vhswish-rvv-u2v.c &
+
 #################################### Scalar ###################################
 tools/xngen src/qs8-vhswish/scalar.c.in -D BATCH_TILE=1 -D DATATYPE=QS8 -o src/qs8-vhswish/gen/qs8-vhswish-scalar-u1.c &
 tools/xngen src/qs8-vhswish/scalar.c.in -D BATCH_TILE=2 -D DATATYPE=QS8 -o src/qs8-vhswish/gen/qs8-vhswish-scalar-u2.c &
