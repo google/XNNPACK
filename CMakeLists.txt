@@ -1575,21 +1575,24 @@ IF(XNNPACK_BUILD_TESTS)
       qu8-igemm-minmax-fp32
       qu8-igemm-minmax-rndnu)
   FOREACH(TEST ${MICROKERNEL_GEMM_UNIT_TESTS})
-    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
-    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        gemm-microkernel-tester
-        GTest::gmock
-        GTest::gtest
-        GTest::gtest_main
-        hardware-config
-        logging
-        microkernels-all
-        microparams-init
-        pthreadpool
-    )
-    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-    SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
+    FILE(GLOB TEST_SOURCES "test/${TEST}*.cc")
+    IF(TEST_SOURCES)
+        ADD_EXECUTABLE(${TEST}-test ${TEST_SOURCES})
+        TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
+        TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
+            gemm-microkernel-tester
+            GTest::gmock
+            GTest::gtest
+            GTest::gtest_main
+            hardware-config
+            logging
+            microkernels-all
+            microparams-init
+            pthreadpool
+        )
+        ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+        SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
+    ENDIF()
   ENDFOREACH()
 
   SET(MICROKERNEL_PACKQ_UNIT_TESTS
