@@ -55,6 +55,11 @@ XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_arm_v6, xnn_qu8_vcvt_ukernel__armsimd32_u4,
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_arm_v6, xnn_qu8_vcvt_ukernel__armsimd32_u8, 8, false, uint8_t, uint8_t, struct xnn_qu8_cvt_params, xnn_init_qu8_cvt_scalar_params)
 #endif  // XNN_ARCH_ARM
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_qu8_vcvt_ukernel__rvv_u1v, 1, true, uint8_t, uint8_t, struct xnn_qu8_cvt_params, xnn_init_qu8_cvt_scalar_params)
+XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_qu8_vcvt_ukernel__rvv_u2v, 2, true, uint8_t, uint8_t, struct xnn_qu8_cvt_params, xnn_init_qu8_cvt_scalar_params)
+#endif  // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_qu8_vcvt_ukernel__scalar_u1, 1, false, uint8_t, uint8_t, struct xnn_qu8_cvt_params, xnn_init_qu8_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_qu8_vcvt_ukernel__scalar_u2, 2, false, uint8_t, uint8_t, struct xnn_qu8_cvt_params, xnn_init_qu8_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_qu8_vcvt_ukernel__scalar_u4, 4, false, uint8_t, uint8_t, struct xnn_qu8_cvt_params, xnn_init_qu8_cvt_scalar_params)
