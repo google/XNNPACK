@@ -19,6 +19,28 @@
 #include "xnnpack/subgraph.h"
 #include "pthreadpool.h"
 
+static const size_t NCHW_AXES_MAPPING[4] = {0, 2, 3, 1};
+static const size_t INVERSE_NCHW_AXES_MAPPING[4] = {0, 3, 2, 1};
+
+static void rewrite_reduction_axes_for_nchw(size_t num_reduction_axes, size_t* reduction_axes) {
+  bool mask[4] = {false};
+  size_t original_reduction_axes[4];
+  memcpy(original_reduction_axes, reduction_axes, num_reduction_axes * sizeof(size_t));
+
+  for (size_t idx = 0; idx < num_reduction_axes; ++idx) {
+    reduction_axes[idx] = NCHW_AXES_MAPPING[original_reduction_axes[idx]];
+    mask[reduction_axes[idx]] = true;
+  }
+
+  size_t counter = 0;
+  for (size_t idx = 0; idx < num_reduction_axes; ++idx) {
+    while (mask[counter]) {
+      reduction_axes[counter++] = idx;
+      mask[idx] = false;
+    }
+  }
+}
+
 static enum xnn_status create_mean_operator(
   const struct xnn_node* node,
   const struct xnn_value* values,
@@ -107,14 +129,30 @@ static enum xnn_status reshape_mean_operator(
   assert(output_id < num_values);
 
   enum xnn_status status = xnn_status_invalid_state;
+  size_t num_reduction_axes = opdata->num_reduction_axes;
+  size_t input_num_dims = input_value->shape.num_dims;
+
+  // This is the case when NHWC was rewritten to NCHW.
+  size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
+  size_t input_dims[XNN_MAX_TENSOR_DIMS];
+  memcpy(reduction_axes, opdata->reduction_axes, num_reduction_axes * sizeof(size_t));
+  memcpy(input_dims, input_value->shape.dim, input_num_dims * sizeof(size_t));
+  if (input_value->shape.num_dims == 4 && input_value->layout == xnn_layout_type_nchw) {
+    rewrite_reduction_axes_for_nchw(num_reduction_axes, reduction_axes);
+
+    for (size_t idx = 0; idx < input_num_dims; ++idx) {
+      input_dims[idx] = input_value->shape.dim[INVERSE_NCHW_AXES_MAPPING[idx]];
+    }
+  }
+
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_mean_nd_f16:
       status = xnn_reshape_mean_nd_f16(
         opdata->operator_objects[0],
-        opdata->num_reduction_axes,
-        opdata->reduction_axes,
-        input_value->shape.num_dims,
-        input_value->shape.dim,
+        num_reduction_axes,
+        reduction_axes,
+        input_num_dims,
+        input_dims,
         &opdata->workspace_size,
         &opdata->workspace_alignment,
         threadpool);
@@ -122,19 +160,19 @@ static enum xnn_status reshape_mean_operator(
     case xnn_operator_type_mean_nd_f32:
       status = xnn_reshape_mean_nd_f32(
         opdata->operator_objects[0],
-        opdata->num_reduction_axes,
-        opdata->reduction_axes,
-        input_value->shape.num_dims,
-        input_value->shape.dim,
+        num_reduction_axes,
+        reduction_axes,
+        input_num_dims,
+        input_dims,
         threadpool);
       break;
     case xnn_operator_type_mean_nd_qs8:
       status = xnn_reshape_mean_nd_qs8(
         opdata->operator_objects[0],
-        opdata->num_reduction_axes,
-        opdata->reduction_axes,
-        input_value->shape.num_dims,
-        input_value->shape.dim,
+        num_reduction_axes,
+        reduction_axes,
+        input_num_dims,
+        input_dims,
         &opdata->workspace_size,
         &opdata->workspace_alignment,
         threadpool);
@@ -142,10 +180,10 @@ static enum xnn_status reshape_mean_operator(
     case xnn_operator_type_mean_nd_qu8:
       status = xnn_reshape_mean_nd_qu8(
         opdata->operator_objects[0],
-        opdata->num_reduction_axes,
-        opdata->reduction_axes,
-        input_value->shape.num_dims,
-        input_value->shape.dim,
+        num_reduction_axes,
+        reduction_axes,
+        input_num_dims,
+        input_dims,
         &opdata->workspace_size,
         &opdata->workspace_alignment,
         threadpool);
@@ -154,40 +192,63 @@ static enum xnn_status reshape_mean_operator(
       XNN_UNREACHABLE;
   }
   struct xnn_value* output_value = values + output_id;
-  size_t input_num_dims = input_value->shape.num_dims;
-  size_t num_reduction_axes = opdata->num_reduction_axes;
   if (opdata->operator_objects[0]->flags & XNN_FLAG_KEEP_DIMS) {
-    output_value->shape.num_dims = input_value->shape.num_dims;
-    for (size_t idx = 0; idx < input_num_dims; ++idx) {
+    output_value->shape.num_dims = input_num_dims;
+    for (size_t input_idx = 0; input_idx < input_num_dims; ++input_idx) {
       bool is_axis = false;
+      size_t mapped_input_idx = input_idx;
+      size_t mapped_output_idx = input_idx;
+      if (input_value->layout == xnn_layout_type_nchw) {
+        mapped_input_idx = INVERSE_NCHW_AXES_MAPPING[input_idx];
+      }
+      if (output_value->layout == xnn_layout_type_nchw) {
+        mapped_output_idx = NCHW_AXES_MAPPING[mapped_input_idx];
+      }
+
       for (size_t axis_idx = 0; axis_idx < num_reduction_axes; ++axis_idx) {
-        if (opdata->reduction_axes[axis_idx] == idx) {
+        size_t reduction_axis = reduction_axes[axis_idx];
+        if (output_value->layout == xnn_layout_type_nchw) {
+          reduction_axis = NCHW_AXES_MAPPING[reduction_axis];
+        }
+
+        if (reduction_axis == mapped_output_idx) {
           is_axis = true;
           break;
         }
       }
+
       if (is_axis) {
-        output_value->shape.dim[idx] = 1;
+        output_value->shape.dim[input_idx] = 1;
       } else {
-        output_value->shape.dim[idx] = input_value->shape.dim[idx];
+        output_value->shape.dim[input_idx] = input_dims[input_idx];
       }
     }
   } else {
     size_t num_skip_axis = 0;
-    for (size_t idx = 0; idx < input_num_dims; ++idx) {
+    for (size_t input_idx = 0; input_idx < input_num_dims; ++input_idx) {
       bool is_axis = false;
+      size_t mapped_input_idx = input_idx;
+      size_t mapped_output_idx = input_idx;
+      if (input_value->layout == xnn_layout_type_nchw) {
+        mapped_input_idx = INVERSE_NCHW_AXES_MAPPING[input_idx];
+      }
+      if (output_value->layout == xnn_layout_type_nchw) {
+        mapped_output_idx = NCHW_AXES_MAPPING[mapped_input_idx];
+      }
+
       for (size_t axis_idx = 0; axis_idx < num_reduction_axes; ++axis_idx) {
-        if (opdata->reduction_axes[axis_idx] == idx) {
+        size_t reduction_axis = reduction_axes[axis_idx];
+        if (reduction_axis == mapped_output_idx) {
           ++num_skip_axis;
           is_axis = true;
           break;
         }
       }
       if (!is_axis) {
-        output_value->shape.dim[idx - num_skip_axis] = input_value->shape.dim[idx];
+        output_value->shape.dim[input_idx - num_skip_axis] = input_dims[input_idx];
       }
     }
-    output_value->shape.num_dims = input_value->shape.num_dims - num_skip_axis;
+    output_value->shape.num_dims = input_num_dims - num_skip_axis;
   }
   const size_t new_size = xnn_tensor_get_size(output_value);
   if (new_size > output_value->size) {
