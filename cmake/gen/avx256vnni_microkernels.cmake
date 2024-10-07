@@ -142,9 +142,7 @@ SET(NON_PROD_AVX256VNNI_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-14x8c8-minmax-fp32-avx256vnni.c
   src/qs8-rsum/gen/qs8-rsum-avx256vnni-u32.c
   src/qs8-rsum/gen/qs8-rsum-avx256vnni-u64-acc2.c
-  src/qs8-rsum/gen/qs8-rsum-avx256vnni-u64.c
   src/qs8-rsum/gen/qs8-rsum-avx256vnni-u128-acc2.c
-  src/qs8-rsum/gen/qs8-rsum-avx256vnni-u128-acc4.c
-  src/qs8-rsum/gen/qs8-rsum-avx256vnni-u128.c)
+  src/qs8-rsum/gen/qs8-rsum-avx256vnni-u128-acc4.c)
 
 SET(ALL_AVX256VNNI_MICROKERNEL_SRCS ${PROD_AVX256VNNI_MICROKERNEL_SRCS} + ${NON_PROD_AVX256VNNI_MICROKERNEL_SRCS})
