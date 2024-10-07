@@ -5397,6 +5397,8 @@ void xnn_pack_f32_prelu_w(
   size_t input_channels,
   size_t slope_channels,
   const float* s,
+  int16_t slope_zero_point,
+  const float* negative_scale,
   float* packed_weights)
 {
   assert(s != nullptr);
@@ -5416,6 +5418,8 @@ void xnn_pack_f16_prelu_w(
   size_t input_channels,
   size_t slope_channels,
   const uint16_t* s,
+  int16_t slope_zero_point,
+  const float* negative_scale,
   uint16_t* packed_weights)
 {
   assert(s != nullptr);
@@ -5435,6 +5439,8 @@ void xnn_pack_f32_to_f16_prelu_w(
   size_t input_channels,
   size_t slope_channels,
   const float* s,
+  int16_t slope_zero_point,
+  const float* negative_scale,
   xnn_float16* packed_weights)
 {
   assert(s != nullptr);
@@ -5450,6 +5456,90 @@ void xnn_pack_f32_to_f16_prelu_w(
     do {
       *packed_weights++ = xnn_float16_from_float(*s++);
     } while (--input_channels != 0);
+  }
+}
+
+void xnn_pack_qs8_prelu_w(
+  size_t input_channels,
+  size_t slope_channels,
+  const int8_t* s,
+  int16_t slope_zero_point,
+  const float* negative_scale,
+  int16_t* packed_weights)
+{
+  assert(s != NULL);
+  assert(packed_weights != NULL);
+  assert(slope_channels == input_channels || slope_channels == 1);
+
+  // Fill negative multiplier
+  size_t channel = 0;
+  if (slope_channels == 1) {
+    float negative_slope = (*s - slope_zero_point) * (*negative_scale);
+    assert(negative_slope <= 1.0 * 2^7);
+    assert(negative_slope >= 1.0 * 2^-8);
+    assert(fabsf(negative_slope) >= 1.0 * 2^-8);
+    const long negative_multiplier = lrintf(-256.0f * negative_slope);
+    assert(negative_multiplier >= -32768L);
+    assert(negative_multiplier <= 32767L);
+
+    channel = 0;
+    do {
+      *packed_weights++ = (int16_t)negative_multiplier;
+    } while (++channel < input_channels);
+  } else {
+    channel = 0;
+    do {
+      float negative_slope = (*s++ - slope_zero_point) * (*negative_scale);
+      assert(negative_slope <= 1.0 * 2^7);
+      assert(negative_slope >= 1.0 * 2^-8);
+      assert(fabsf(negative_slope) >= 1.0 * 2^-8);
+      const long negative_multiplier = lrintf(-256.0f * negative_slope);
+      assert(negative_multiplier >= -32768L);
+      assert(negative_multiplier <= 32767L);
+      *packed_weights++ = (int16_t)negative_multiplier;
+    } while (++channel < input_channels);
+  }
+}
+
+void xnn_pack_qu8_prelu_w(
+  size_t input_channels,
+  size_t slope_channels,
+  const uint8_t* s,
+  int16_t slope_zero_point,
+  const float* negative_scale,
+  int16_t* packed_weights)
+{
+  assert(s != NULL);
+  assert(packed_weights != NULL);
+  assert(slope_channels == input_channels || slope_channels == 1);
+
+  // Fill negative multiplier
+  size_t channel = 0;
+  if (slope_channels == 1) {
+    float negative_slope = (*s - slope_zero_point) * (*negative_scale);
+    assert(negative_slope <= 1.0 * 2^7);
+    assert(negative_slope >= 1.0 * 2^-8);
+    assert(fabsf(negative_slope) >= 1.0 * 2^-8);
+    const long negative_multiplier = lrintf(-256.0f * negative_slope);
+    assert(negative_multiplier >= -32768L);
+    assert(negative_multiplier <= 32767L);
+
+    channel = 0;
+    do {
+      *packed_weights++ = (int16_t)negative_multiplier;
+    } while (++channel < input_channels);
+  } else {
+    channel = 0;
+    do {
+      float negative_slope = (*s++ - slope_zero_point) * (*negative_scale);
+      assert(negative_slope <= 1.0 * 2^7);
+      assert(negative_slope >= 1.0 * 2^-8);
+      assert(fabsf(negative_slope) >= 1.0 * 2^-8);
+      const long negative_multiplier = lrintf(-256.0f * negative_slope);
+      assert(negative_multiplier >= -32768L);
+      assert(negative_multiplier <= 32767L);
+      *packed_weights++ = (int16_t)negative_multiplier;
+    } while (++channel < input_channels);
   }
 }
 

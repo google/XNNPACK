@@ -1363,25 +1363,49 @@ typedef void (*xnn_pack_prelu_w_fn)(
   size_t input_channels,
   size_t slope_channels,
   const void* slope_data,
+  int16_t slope_zero_point,
+  const float* negative_scale,
   void* packed_weights);
 
 XNN_INTERNAL void xnn_pack_f32_prelu_w(
   size_t input_channels,
   size_t slope_channels,
   const float* slope_data,
+  int16_t slope_zero_point,
+  const float* negative_scale,
   float* packed_weights);
 
 XNN_INTERNAL void xnn_pack_f16_prelu_w(
   size_t input_channels,
   size_t slope_channels,
   const uint16_t* slope_data,
+  int16_t slope_zero_point,
+  const float* negative_scale,
   uint16_t* packed_weights);
 
 XNN_INTERNAL void xnn_pack_f32_to_f16_prelu_w(
   size_t input_channels,
   size_t slope_channels,
   const float* slope_data,
+  int16_t slope_zero_point,
+  const float* negative_scale,
   xnn_float16* packed_weights);
+
+XNN_INTERNAL void xnn_pack_qs8_prelu_w(
+  size_t input_channels,
+  size_t slope_channels,
+  const int8_t* slope_data,
+  int16_t slope_zero_point,
+  const float* negative_scale,
+  int16_t* packed_weights);
+
+XNN_INTERNAL void xnn_pack_qu8_prelu_w(
+  size_t input_channels,
+  size_t slope_channels,
+  const uint8_t* slope_data,
+  int16_t slope_zero_point,
+  const float* negative_scale,
+  int16_t* packed_weights);
 
 // Sparse packing functions.
 

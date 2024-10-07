@@ -5166,6 +5166,62 @@ enum xnn_status xnn_setup_prelu_nc_f32(
   const float* input,
   float* output);
 
+enum xnn_status xnn_create_prelu_nc_qs8(
+  size_t input_channels,
+  size_t slope_channels,
+  size_t input_stride,
+  size_t output_stride,
+  const int8_t* negative_slope,
+  int8_t input_zero_point,
+  float input_scale,
+  int8_t slope_zero_point,
+  float slope_scale,
+  int8_t output_zero_point,
+  float output_scale,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* prelu_op_out
+);
+
+enum xnn_status xnn_reshape_prelu_nc_qs8(
+  xnn_operator_t prelu_op,
+  size_t batch_size,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_prelu_nc_qs8(
+  xnn_operator_t prelu_op,
+  const void* input,
+  void* output);
+
+enum xnn_status xnn_create_prelu_nc_qu8(
+  size_t input_channels,
+  size_t slope_channels,
+  size_t input_stride,
+  size_t output_stride,
+  const uint8_t* negative_slope,
+  uint8_t input_zero_point,
+  float input_scale,
+  uint8_t slope_zero_point,
+  float slope_scale,
+  uint8_t output_zero_point,
+  float output_scale,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* prelu_op_out
+);
+
+enum xnn_status xnn_reshape_prelu_nc_qu8(
+  xnn_operator_t prelu_op,
+  size_t batch_size,
+  pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_prelu_nc_qu8(
+  xnn_operator_t prelu_op,
+  const void* input,
+  void* output);
+
 enum xnn_status xnn_create_resize_bilinear2d_nchw_f32(
   size_t output_height,
   size_t output_width,

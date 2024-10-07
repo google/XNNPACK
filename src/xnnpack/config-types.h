@@ -262,6 +262,10 @@ struct xnn_prelu_config {
   // Number of channels in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
   uint16_t channel_tile;
+  union {
+    xnn_init_qs8_prelu_params_fn qs8_prelu;
+    xnn_init_qu8_prelu_params_fn qu8_prelu;
+  } init;
 };
 
 struct xnn_gemm_config {

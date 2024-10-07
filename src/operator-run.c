@@ -1572,7 +1572,7 @@ void xnn_compute_prelu(
   const void* x = (const void*) ((uintptr_t) context->x + x_stride * batch_start);
   void* y = (void*) ((uintptr_t) context->y + y_stride * batch_start);
 
-  context->ukernel(batch_range, context->n, x, x_stride, context->w, y, y_stride);
+  context->ukernel(batch_range, context->n, x, x_stride, context->w, y, y_stride, &context->params);
 }
 
 void xnn_compute_pad_5d(

@@ -35,6 +35,10 @@ static enum xnn_status create_prelu_nc(
     xnn_pack_prelu_w_fn pack_prelu_w,
     enum xnn_operator_type operator_type,
     const struct xnn_prelu_config* prelu_config,
+    const void* params,
+    size_t params_size,
+    int16_t slope_zero_point,
+    const float* negative_scale,
     xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* prelu_op_out)
@@ -102,7 +106,8 @@ static enum xnn_status create_prelu_nc(
   xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
     aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
 
-  pack_prelu_w(input_channels, slope_channels, negative_slope, weights_ptr);
+  pack_prelu_w(input_channels, slope_channels, negative_slope,
+               /* slope_zero_point */slope_zero_point, /*negative_scale*/negative_scale, weights_ptr);
 
   if (use_weights_cache(prelu_op)) {
     struct xnn_weights_cache_look_up_key cache_key;
@@ -118,6 +123,9 @@ static enum xnn_status create_prelu_nc(
   prelu_op->type = operator_type;
   prelu_op->flags = flags;
   prelu_op->prelu_config = prelu_config;
+  if (params_size != 0) {
+    memcpy(&prelu_op->params, params, params_size);
+  }
 
   prelu_op->state = xnn_run_state_invalid;
 
@@ -160,6 +168,10 @@ enum xnn_status xnn_create_prelu_nc_f16(
     pack_prelu_w,
     xnn_operator_type_prelu_nc_f16,
     prelu_config,
+    /*params*/NULL,
+    /*params_size*/NULL,
+    /* slope_zero_point */NULL,
+    /*negative_scale*/NULL,
     /*code_cache=*/code_cache,
     /*weights_cache=*/weights_cache,
     prelu_op_out);
@@ -190,6 +202,104 @@ enum xnn_status xnn_create_prelu_nc_f32(
     (xnn_pack_prelu_w_fn) xnn_pack_f32_prelu_w,
     xnn_operator_type_prelu_nc_f32,
     prelu_config,
+    /*parmas*/NULL,
+    /*params_size*/NULL,
+    /* slope_zero_point */ NULL,
+    /*negative_scale*/NULL,
+    /*code_cache=*/code_cache,
+    /*weights_cache=*/weights_cache,
+    prelu_op_out);
+}
+
+enum xnn_status xnn_create_prelu_nc_qs8(
+  size_t input_channels,
+  size_t slope_channels,
+  size_t input_stride,
+  size_t output_stride,
+  const int8_t* negative_slope,
+  int8_t input_zero_point,
+  float input_scale,
+  int8_t slope_zero_point,
+  float slope_scale,
+  int8_t output_zero_point,
+  float output_scale,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* prelu_op_out)
+{
+  const struct xnn_prelu_config* qs8_prelu_config = xnn_init_qs8_prelu_config();
+  if (qs8_prelu_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_prelu_nc_qs8));
+    return xnn_status_unsupported_hardware;
+  }
+
+  float positive_input_output_scale = input_scale / output_scale;
+  float negative_input_output_scale = positive_input_output_scale * slope_scale;
+
+  struct xnn_qs8_prelu_params params;
+  assert(qs8_prelu_config->init.qs8_prelu != NULL);
+  qs8_prelu_config->init.qs8_prelu(&params, positive_input_output_scale, input_zero_point, output_zero_point);
+
+  return create_prelu_nc(
+    input_channels, slope_channels, input_stride,
+    output_stride, negative_slope, flags,
+    /*log2_weights_element_size=*/XNN_LOG2_SIZEOF_INT16_T,
+    (xnn_pack_prelu_w_fn) xnn_pack_qs8_prelu_w,
+    xnn_operator_type_prelu_nc_qs8,
+    qs8_prelu_config,
+    &params,
+    sizeof(params),
+    /*slope_zero_point*/(int16_t)slope_zero_point,
+    /*negative_scale*/&negative_input_output_scale,
+    /*code_cache=*/code_cache,
+    /*weights_cache=*/weights_cache,
+    prelu_op_out);
+}
+
+enum xnn_status xnn_create_prelu_nc_qu8(
+  size_t input_channels,
+  size_t slope_channels,
+  size_t input_stride,
+  size_t output_stride,
+  const uint8_t* negative_slope,
+  uint8_t input_zero_point,
+  float input_scale,
+  uint8_t slope_zero_point,
+  float slope_scale,
+  uint8_t output_zero_point,
+  float output_scale,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* prelu_op_out)
+{
+  const struct xnn_prelu_config* qu8_prelu_config = xnn_init_qu8_prelu_config();
+  if (qu8_prelu_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_prelu_nc_qu8));
+    return xnn_status_unsupported_hardware;
+  }
+
+  float positive_input_output_scale = input_scale / output_scale;
+  float negative_input_output_scale =  positive_input_output_scale * slope_scale;
+
+  struct xnn_qu8_prelu_params params;
+  assert(qu8_prelu_config->init.qu8_prelu != NULL);
+  qu8_prelu_config->init.qu8_prelu(&params, positive_input_output_scale, input_zero_point, output_zero_point);
+
+  return create_prelu_nc(
+    input_channels, slope_channels, input_stride,
+    output_stride, negative_slope, flags,
+    /*log2_weights_element_size=*/XNN_LOG2_SIZEOF_UINT16_T,
+    (xnn_pack_prelu_w_fn) xnn_pack_qu8_prelu_w,
+    xnn_operator_type_prelu_nc_qu8,
+    qu8_prelu_config,
+    &params,
+    sizeof(params),
+    /*slope_zero_point*/(int16_t)slope_zero_point,
+    /*negative_scale*/&negative_input_output_scale,
     /*code_cache=*/code_cache,
     /*weights_cache=*/weights_cache,
     prelu_op_out);
@@ -200,6 +310,8 @@ static enum xnn_status reshape_prelu_nc(
     enum xnn_operator_type expected_operator_type,
     size_t batch_size,
     uint32_t log2_element_size,
+    const void* params,
+    size_t params_size,
     pthreadpool_t threadpool)
 {
   if (prelu_op->type != expected_operator_type) {
@@ -231,6 +343,10 @@ static enum xnn_status reshape_prelu_nc(
     .y_stride = prelu_op->output_pixel_stride << log2_element_size,
     .ukernel = prelu->ukernel,
   };
+  if (params_size != 0) {
+      memcpy(&prelu_op->context.prelu.params, params, params_size);
+  }
+  assert(prelu_op->context.prelu.ukernel != NULL); //rks debug
 
   size_t batch_tile = batch_size;
   const size_t num_threads = pthreadpool_get_threads_count(threadpool);
@@ -260,6 +376,7 @@ enum xnn_status xnn_reshape_prelu_nc_f16(
   return reshape_prelu_nc(
     prelu_op, xnn_operator_type_prelu_nc_f16,
     batch_size, /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /* params */NULL, /* params_size */NULL,
     threadpool);
 }
 
@@ -271,7 +388,30 @@ enum xnn_status xnn_reshape_prelu_nc_f32(
   return reshape_prelu_nc(
     prelu_op, xnn_operator_type_prelu_nc_f32,
     batch_size, /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    /* params */NULL, /* params_size */NULL,
     threadpool);
+}
+
+enum xnn_status xnn_reshape_prelu_nc_qs8(
+    xnn_operator_t prelu_op,
+    size_t batch_size,
+    pthreadpool_t threadpool)
+{
+  return reshape_prelu_nc(
+    prelu_op, xnn_operator_type_prelu_nc_qs8,
+    batch_size, /*log2_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
+    &prelu_op->params.qs8_prelu, sizeof(prelu_op->params.qs8_prelu) ,threadpool);
+}
+
+enum xnn_status xnn_reshape_prelu_nc_qu8(
+    xnn_operator_t prelu_op,
+    size_t batch_size,
+    pthreadpool_t threadpool)
+{
+  return reshape_prelu_nc(
+    prelu_op, xnn_operator_type_prelu_nc_qu8,
+    batch_size, /*log2_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
+    &prelu_op->params.qu8_prelu, sizeof(prelu_op->params.qu8_prelu), threadpool);
 }
 
 static enum xnn_status setup_prelu_nc(
@@ -332,5 +472,25 @@ enum xnn_status xnn_setup_prelu_nc_f32(
 {
   return setup_prelu_nc(
     prelu_op, xnn_operator_type_prelu_nc_f32,
+    input, output);
+}
+
+enum xnn_status xnn_setup_prelu_nc_qs8(
+    xnn_operator_t prelu_op,
+    const void* input,
+    void* output)
+{
+  return setup_prelu_nc(
+    prelu_op, xnn_operator_type_prelu_nc_qs8,
+    input, output);
+}
+
+enum xnn_status xnn_setup_prelu_nc_qu8(
+    xnn_operator_t prelu_op,
+    const void* input,
+    void* output)
+{
+  return setup_prelu_nc(
+    prelu_op, xnn_operator_type_prelu_nc_qu8,
     input, output);
 }

@@ -10,6 +10,7 @@
 
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -113,6 +114,34 @@ DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__wasm_2x4)
 
 DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__scalar_2x1)
 DECLARE_F32_PRELU_UKERNEL_FUNCTION(xnn_f32_prelu_ukernel__scalar_2x4)
+
+#define DECLARE_QS8_PRELU_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                        \
+      size_t rows,                                  \
+      size_t channels,                              \
+      const int8_t* input,                           \
+      size_t input_stride,                          \
+      const void* weights,                         \
+      int8_t* output,                                \
+      size_t output_stride,                           \
+      const struct xnn_qs8_prelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+DECLARE_QS8_PRELU_UKERNEL_FUNCTION(xnn_qs8_prelu_ukernel__avx2_2x16)
+DECLARE_QS8_PRELU_UKERNEL_FUNCTION(xnn_qs8_prelu_ukernel__scalar_2x4)
+
+#define DECLARE_QU8_PRELU_UKERNEL_FUNCTION(fn_name) \
+  XNN_INTERNAL void fn_name(                        \
+      size_t rows,                                  \
+      size_t channels,                              \
+      const uint8_t* input,                           \
+      size_t input_stride,                          \
+      const void* weights,                         \
+      uint8_t* output,                                \
+      size_t output_stride,                           \
+      const struct xnn_qu8_prelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+DECLARE_QU8_PRELU_UKERNEL_FUNCTION(xnn_qu8_prelu_ukernel__avx2_2x16)
+DECLARE_QU8_PRELU_UKERNEL_FUNCTION(xnn_qu8_prelu_ukernel__scalar_2x4)
 
 
 #ifdef __cplusplus

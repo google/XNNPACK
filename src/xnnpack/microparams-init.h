@@ -427,6 +427,18 @@ XNN_INTERNAL size_t xnn_init_qu8_lrelu_scalar_params(
   uint8_t input_zero_point,
   uint8_t output_zero_point);
 
+XNN_INTERNAL size_t xnn_init_qs8_prelu_scalar_params(
+  struct xnn_qs8_prelu_params params[XNN_MIN_ELEMENTS(1)],
+  float positive_scale,
+  int8_t input_zero_point,
+  int8_t output_zero_point);
+
+XNN_INTERNAL size_t xnn_init_qu8_prelu_scalar_params(
+  struct xnn_qu8_prelu_params params[XNN_MIN_ELEMENTS(1)],
+  float positive_scale,
+  uint8_t input_zero_point,
+  uint8_t output_zero_point);
+
 XNN_INTERNAL size_t xnn_init_f16_minmax_binary_params(
     union xnn_f16_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
     const struct xnn_quantization_params* a_quantization,

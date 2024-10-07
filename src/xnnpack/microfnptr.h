@@ -799,7 +799,8 @@ typedef void (*xnn_prelu_ukernel_fn)(
     size_t input_stride,
     const void* weights,
     void* output,
-    size_t output_stride);
+    size_t output_stride,
+    const void* params);
 
 typedef void (*xnn_f16_prelu_ukernel_fn)(
     size_t batch,
@@ -818,6 +819,25 @@ typedef void (*xnn_f32_prelu_ukernel_fn)(
     const float* weights,
     float* output,
     size_t output_stride);
+
+typedef void (*xnn_qs8_prelu_ukernel_fn)(
+    size_t batch,
+    size_t channels,
+    const int8_t* input,
+    size_t input_stride,
+    const void* weights,
+    int8_t* output,
+    size_t output_stride,
+    const struct xnn_qs8_prelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+typedef void (*xnn_qu8_prelu_ukernel_fn)(
+    size_t batch,
+    size_t channels,
+    const uint8_t* input,
+    size_t input_stride,
+    const void* weights,
+    uint8_t* output,
+    size_t output_stride,
+    const struct xnn_qu8_prelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // IBILINEAR: Indirect BILINEAR interpolation
 
@@ -2756,6 +2776,18 @@ typedef size_t (*xnn_init_qu8_lrelu_params_fn)(
   struct xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
   float positive_slope,
   float negative_slope,
+  uint8_t input_zero_point,
+  uint8_t output_zero_point);
+
+typedef size_t (*xnn_init_qs8_prelu_params_fn)(
+  struct xnn_qs8_prelu_params params[XNN_MIN_ELEMENTS(1)],
+  float positive_slope,
+  int8_t input_zero_point,
+  int8_t output_zero_point);
+
+typedef size_t (*xnn_init_qu8_prelu_params_fn)(
+  struct xnn_qu8_prelu_params params[XNN_MIN_ELEMENTS(1)],
+  float positive_slope,
   uint8_t input_zero_point,
   uint8_t output_zero_point);
 

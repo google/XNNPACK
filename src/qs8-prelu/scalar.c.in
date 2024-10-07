@@ -1,0 +1,167 @@
+// Copyright (C) 2024 Intel Corporation
+//  
+// Redistribution and use in source and binary forms, with or without modification,
+// are permitted provided that the following conditions are met:
+//  
+// 1. Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+// 3. Neither the name of the copyright holder nor the names of its contributors
+//    may be used to endorse or promote products derived from this software
+//    without specific prior written permission.
+//  
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
+// BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+// OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+// OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+// OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+// WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+// OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+// EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  
+//  
+// SPDX-License-Identifier: BSD-3-Clause
+
+$assert DATATYPE in ["QS8", "QU8"]
+$assert CHANNEL_TILE > 0
+$assert ROW_TILE >= 2
+
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include "xnnpack/math.h"
+#include "xnnpack/prelu.h"
+
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
+$OUTPUT_MIN = {"QS8": -128, "QU8": 0}[DATATYPE]
+$OUTPUT_MAX = {"QS8": 127, "QU8": 255}[DATATYPE]
+
+void xnn_${DATATYPE.lower()}_prelu_ukernel__scalar_${ROW_TILE}x${CHANNEL_TILE}(
+    size_t rows,
+    size_t channels,
+    const ${XINT8_T}* restrict input,
+    size_t input_stride,
+    const void* restrict weights,
+    ${XINT8_T}* restrict output,
+    size_t output_stride,
+    const struct xnn_${DATATYPE.lower()}_prelu_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+    assert(rows != 0);
+    assert(channels != 0);
+    assert(channels % sizeof(${XINT8_T}) == 0);
+    assert(input != NULL);
+    assert(output != NULL);
+
+    const ${XINT8_T}* i0 = (const ${XINT8_T}*) input;
+    ${XINT8_T}* o0 = (${XINT8_T}*) output;
+    const int32_t vinput_zero_point = params->scalar.input_zero_point;
+    const int32_t vpositive_multiplier = params->scalar.positive_multiplier;
+    const int32_t voutput_zero_point = params->scalar.output_zero_point;
+
+    const ${XINT8_T}* i1 = (const ${XINT8_T}*) ((uintptr_t) i0 + input_stride);
+    ${XINT8_T}* o1 = (${XINT8_T}*) ((uintptr_t) o0 + output_stride);
+
+    const size_t input_increment = input_stride * 2 - channels;
+    const size_t output_increment = output_stride * 2 - channels;
+
+    do {
+    $for M in range(1, ROW_TILE):
+      $if M % 2 == 0:
+        if XNN_UNPREDICTABLE(rows <= ${M}) {
+          i${M} = i${M-1};
+          o${M} = o${M-1};
+        }
+      $else:
+        if XNN_UNPREDICTABLE(rows < ${M+1}) {
+          i${M} = i${M-1};
+          o${M} = o${M-1};
+        }
+
+    const int16_t* w = weights;
+    size_t c = channels;
+
+    for (; c >= ${CHANNEL_TILE} * sizeof(${XINT8_T}); c -= ${CHANNEL_TILE} * sizeof(${XINT8_T})) {
+
+      $for M in range(ROW_TILE):
+        $for C in range(CHANNEL_TILE):
+          int32_t vi${M}x${ABC[C]} = (int32_t) i${M}[${C}];
+        i${M} += ${CHANNEL_TILE};
+
+      $for C in range(CHANNEL_TILE):
+        int32_t vnmulx${ABC[C]} = (int32_t) w[${C}];
+      w += ${CHANNEL_TILE};
+
+      $for M in range(ROW_TILE):
+        $for C in range(CHANNEL_TILE):
+          vi${M}x${ABC[C]} -= vinput_zero_point;
+
+      $for M in range(ROW_TILE):
+        $for C in range(CHANNEL_TILE):
+          int32_t vmul${M}x${ABC[C]} = XNN_UNPREDICTABLE(vi${M}x${ABC[C]} >= 0) ? vpositive_multiplier : vnmulx${ABC[C]};
+
+      $for M in range(ROW_TILE):
+        $for C in range(CHANNEL_TILE):
+          vi${M}x${ABC[C]} = vi${M}x${ABC[C]} * (-vmul${M}x${ABC[C]});
+
+      $for M in range(ROW_TILE):
+        $for C in range(CHANNEL_TILE):
+          int32_t vo${M}x${ABC[C]} = math_asr_s32(vi${M}x${ABC[C]}, 8);
+
+      $for M in range(ROW_TILE):
+        $for C in range(CHANNEL_TILE):
+          vo${M}x${ABC[C]} += voutput_zero_point;
+
+      $for M in range(ROW_TILE):
+        $for C in range(CHANNEL_TILE):
+          vo${M}x${ABC[C]} = math_max_s32(vo${M}x${ABC[C]},  ${OUTPUT_MIN});
+      
+      $for M in range(ROW_TILE):
+        $for C in range(CHANNEL_TILE):
+          vo${M}x${ABC[C]} = math_min_s32(vo${M}x${ABC[C]}, ${OUTPUT_MAX});
+
+      $for M in range(ROW_TILE):
+        $for C in range(CHANNEL_TILE):
+          o${M}[${C}] = (${XINT8_T}) vo${M}x${ABC[C]};
+        o${M} += ${CHANNEL_TILE};
+    }
+    for (; c != 0; c -= sizeof(${XINT8_T})) {
+      $for M in range(ROW_TILE):
+        int32_t vi${M} = (int32_t) *(${XINT8_T}*)i${M}++;
+
+      int32_t vnegative_multiplier = (int32_t) *w++;
+
+      $for M in range(ROW_TILE):
+        vi${M} -= vinput_zero_point;
+
+      $for M in range(ROW_TILE):
+       const int32_t vmul${M} = XNN_UNPREDICTABLE(vi${M} >= 0) ? vpositive_multiplier : vnegative_multiplier;
+
+      $for M in range(ROW_TILE):
+        vi${M} = vi${M} * (-vmul${M});
+
+      $for M in range(ROW_TILE):
+        int32_t vo${M} = math_asr_s32(vi${M}, 8);
+
+      $for M in range(ROW_TILE):
+        vo${M} += voutput_zero_point;
+
+      $for M in range(ROW_TILE):
+        vo${M} = math_max_s32(vo${M}, ${OUTPUT_MIN});
+      
+      $for M in range(ROW_TILE):
+        vo${M} = math_min_s32(vo${M}, ${OUTPUT_MAX});
+
+      $for M in range(ROW_TILE):
+        *(${XINT8_T}*)o${M}++ = (${XINT8_T}) vo${M};
+    }
+    $for M in range(ROW_TILE):
+      i${M} = (const ${XINT8_T}*) ((uintptr_t) i${M} + input_increment);
+      o${M} = (${XINT8_T}*) ((uintptr_t) o${M} + output_increment);
+    rows = doz(rows, ${ROW_TILE});
+    } while (rows != 0);
+}
