@@ -1064,6 +1064,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qs8_prelu_test",
+    srcs = [
+        "qs8-prelu.cc",
+        "prelu-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "qs8_requantization_test",
     srcs = [
         "qs8-requantization.cc",
@@ -1167,6 +1176,15 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
+)
+
+xnnpack_unit_test(
+    name = "qu8_prelu_test",
+    srcs = [
+        "qu8-prelu.cc",
+        "prelu-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(

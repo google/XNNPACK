@@ -10,13 +10,18 @@
 #include "xnnpack/config.h"
 #include "xnnpack/init-once.h"
 #include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
 #include "xnnpack/prelu.h"
 
 static struct xnn_prelu_config f16_prelu_config = {0};
 static struct xnn_prelu_config f32_prelu_config = {0};
+static struct xnn_prelu_config qs8_prelu_config = {0};
+static struct xnn_prelu_config qu8_prelu_config = {0};
 
 XNN_INIT_ONCE_GUARD(f16_prelu);
 XNN_INIT_ONCE_GUARD(f32_prelu);
+XNN_INIT_ONCE_GUARD(qs8_prelu);
+XNN_INIT_ONCE_GUARD(qu8_prelu);
 
 static void init_f16_prelu_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
@@ -126,6 +131,42 @@ static void init_f32_prelu_config(void) {
   #endif
 }
 
+static void init_qs8_prelu_config(void) {
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_x86_avx2) {
+      qs8_prelu_config.ukernel = (xnn_prelu_ukernel_fn) xnn_qs8_prelu_ukernel__avx2_2x16;
+      qs8_prelu_config.init.qs8_prelu = xnn_init_qs8_prelu_scalar_params;
+      qs8_prelu_config.row_tile = 2;
+      qs8_prelu_config.channel_tile = 16;
+    }
+  #else
+    qs8_prelu_config.ukernel = (xnn_prelu_ukernel_fn) xnn_qs8_prelu_ukernel__scalar_2x4;
+    qs8_prelu_config.init.qs8_prelu = xnn_init_qs8_prelu_scalar_params;
+    qs8_prelu_config.row_tile = 4;
+    qs8_prelu_config.channel_tile = 4;
+  #endif
+}
+
+static void init_qu8_prelu_config(void) {
+  #if XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_x86_avx2) {
+      qu8_prelu_config.ukernel = (xnn_prelu_ukernel_fn) xnn_qu8_prelu_ukernel__avx2_2x16;
+      qu8_prelu_config.init.qu8_prelu = xnn_init_qu8_prelu_scalar_params;
+      qu8_prelu_config.row_tile = 2;
+      qu8_prelu_config.channel_tile = 16;
+    }
+  #else
+    qu8_prelu_config.ukernel = (xnn_prelu_ukernel_fn) xnn_qu8_prelu_ukernel__scalar_2x4;
+    qu8_prelu_config.init.qu8_prelu = xnn_init_qu8_prelu_scalar_params;
+    qu8_prelu_config.row_tile = 4;
+    qu8_prelu_config.channel_tile = 4;
+  #endif
+}
+
 const struct xnn_prelu_config* xnn_init_f16_prelu_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
@@ -142,4 +183,22 @@ const struct xnn_prelu_config* xnn_init_f32_prelu_config() {
   }
   XNN_INIT_ONCE(f32_prelu);
   return &f32_prelu_config;
+}
+
+const struct xnn_prelu_config* xnn_init_qs8_prelu_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(qs8_prelu);
+  return &qs8_prelu_config;
+}
+
+const struct xnn_prelu_config* xnn_init_qu8_prelu_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(qu8_prelu);
+  return &qu8_prelu_config;
 }

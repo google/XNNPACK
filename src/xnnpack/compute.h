@@ -1472,6 +1472,12 @@ struct prelu_context {
   void* y;
   size_t y_stride;
   xnn_prelu_ukernel_fn ukernel;
+
+  union
+  {
+    struct xnn_qs8_prelu_params qs8_prelu;
+    struct xnn_qu8_prelu_params qu8_prelu;
+  } params;
 };
 
 #ifndef __cplusplus

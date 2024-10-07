@@ -1779,6 +1779,44 @@ size_t xnn_init_qu8_lrelu_scalar_params(
   return sizeof(params->scalar);
 }
 
+size_t xnn_init_qs8_prelu_scalar_params(
+  struct xnn_qs8_prelu_params params[XNN_MIN_ELEMENTS(1)],
+  float positive_scale,
+  int8_t input_zero_point,
+  int8_t output_zero_point)
+{
+  assert(positive_scale >= 0x1.0p-8f);
+  assert(positive_scale <= 0x1.0p+7f);
+
+  const long positive_multiplier = lrintf(-256.0f * positive_scale);
+  assert(positive_multiplier <= -1L);
+  assert(positive_multiplier >= -32768L);
+
+  params->scalar.input_zero_point = input_zero_point;
+  params->scalar.positive_multiplier = positive_multiplier;
+  params->scalar.output_zero_point = output_zero_point;
+  return sizeof(params->scalar);
+}
+
+size_t xnn_init_qu8_prelu_scalar_params(
+  struct xnn_qu8_prelu_params params[XNN_MIN_ELEMENTS(1)],
+  float positive_scale,
+  uint8_t input_zero_point,
+  uint8_t output_zero_point)
+{
+  assert(positive_scale >= 0x1.0p-8f);
+  assert(positive_scale <= 0x1.0p+7f);
+
+  const long positive_multiplier = lrintf(-256.0f * positive_scale);
+  assert(positive_multiplier <= -1L);
+  assert(positive_multiplier >= -32768L);
+
+  params->scalar.input_zero_point = input_zero_point;
+  params->scalar.positive_multiplier = positive_multiplier;
+  params->scalar.output_zero_point = output_zero_point;
+  return sizeof(params->scalar);
+}
+
 size_t xnn_init_s8_minmax_scalar_params(
   struct xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_min,
