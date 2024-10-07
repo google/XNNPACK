@@ -451,6 +451,7 @@ xnnpack_cc_library(
     name = "fp16",
     hdrs = ["src/xnnpack/fp16.h"],
     compatible_with = [],
+    visibility = xnnpack_visibility(),
 )
 
 xnnpack_cc_library(
