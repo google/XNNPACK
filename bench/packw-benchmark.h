@@ -358,6 +358,20 @@ BENCHMARK_BGEMM(qs8_packw_x8c4__reference)
 BENCHMARK_BGEMM(qs8_packw_x16c4__reference)
 BENCHMARK_BGEMM(qs8_packw_x64c4__reference)
 
+static void qs8_packw_x8c8__reference(benchmark::State& state, const char* net) {
+  qs8_packw(state,
+    qs8_packw__reference,
+    /*nr=*/8, /*kr=*/8, /*sr=*/1);
+}
+static void qs8_packw_x16c8__reference(benchmark::State& state, const char* net) {
+  qs8_packw(state,
+    qs8_packw__reference,
+    /*nr=*/16, /*kr=*/8, /*sr=*/1);
+}
+
+BENCHMARK_BGEMM(qs8_packw_x8c8__reference)
+BENCHMARK_BGEMM(qs8_packw_x16c8__reference)
+
 static void x16_packw__reference(
   size_t batch,
   size_t dim_n,

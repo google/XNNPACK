@@ -24,9 +24,8 @@ XNN_QS8_UKERNEL(0, xnn_qs8_packw_gemm_goi_ukernel_x64c4__scalar, 64, 4, 1, 4, 1)
 XNN_QS8_UKERNEL(0, xnn_qs8_packw_gemm_goi_ukernel_x8c8__scalar, 8, 8, 1, 8, 1)
 XNN_QS8_UKERNEL(0, xnn_qs8_packw_gemm_goi_ukernel_x16c8__scalar, 16, 8, 1, 8, 1)
 
-// TODO: immintrin.h only provide _mm256_insert_epi64 for __x86_64__
-#if XNN_ENABLE_AVXVNNIINT8 && XNN_ARCH_X86_64
-XNN_QS8_UKERNEL(xnn_arch_x86_avxvnniint8, xnn_qs8_packw_gemm_goi_ukernel_x8c8__avxvnniint8, 8, 8, 1, 8, 1)
+#if XNN_ENABLE_AVXVNNI && (XNN_ARCH_X86_64 || XNN_ARCH_X86)
+XNN_QS8_UKERNEL(xnn_arch_x86_avxvnni, xnn_qs8_packw_gemm_goi_ukernel_x8c8__avxvnni, 8, 8, 1, 8, 1)
 #endif
 
 #ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS

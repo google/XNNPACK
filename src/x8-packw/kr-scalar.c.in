@@ -6,6 +6,7 @@
 $assert NR > 1
 $assert KR > 1
 $assert TYPE in ["int8_t"]
+$assert IZP in [0, 128]
 
 #include <assert.h>
 #include <stddef.h>
@@ -16,7 +17,7 @@ $assert TYPE in ["int8_t"]
 $BITS = {"int8_t": 8, "uint16_t": 16, "uint32_t": 32, "float": 32}[TYPE]
 $BTYPE = {"int8_t": "int32_t", "uint16_t": "uint16_t", "uint32_t": "uint32_t", "float": "float"}[TYPE]
 $WTYPE = {"int8_t": "int8_t", "uint16_t": "uint16_t", "uint32_t": "uint32_t", "float": "uint32_t"}[TYPE]
-void xnn_qs${BITS}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
+void xnn_qs${BITS}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
   size_t g,
   size_t nc,
   size_t kc,
@@ -45,7 +46,7 @@ void xnn_qs${BITS}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
   ${TYPE}* out = (${TYPE}*) packed_weights;
   const ${BTYPE}* b = (const ${BTYPE}*) bias;
   $if BITS == 8:
-    const uint32_t izp = params ? (uint32_t) ((const struct xnn_qs8_packw_params*) params)->input_zero_point : 0;
+    const uint32_t izp = (uint32_t) (params ? (((const struct xnn_qs8_packw_params*) params)->input_zero_point + ${IZP}): ${IZP});
 
   do {
     // NC main loop multiple of ${NR}

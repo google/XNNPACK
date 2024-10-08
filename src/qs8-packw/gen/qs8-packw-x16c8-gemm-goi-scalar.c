@@ -39,7 +39,7 @@ void xnn_qs8_packw_gemm_goi_ukernel_x16c8__scalar(
 
   int8_t* out = (int8_t*) packed_weights;
   const int32_t* b = (const int32_t*) bias;
-  const uint32_t izp = params ? (uint32_t) ((const struct xnn_qs8_packw_params*) params)->input_zero_point : 0;
+  const uint32_t izp = (uint32_t) (params ? (((const struct xnn_qs8_packw_params*) params)->input_zero_point + 0): 0);
 
   do {
     // NC main loop multiple of 16
