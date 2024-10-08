@@ -6,6 +6,7 @@ Auto-generated file. Do not edit!
 """
 
 PROD_AVXVNNIINT8_MICROKERNEL_SRCS = [
+    "src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-avxvnniint8.c",
     "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x8c8-minmax-fp32-avxvnniint8-prfm.c",
     "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-5x8c8-minmax-fp32-avxvnniint8-prfm.c",
     "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c8-minmax-fp32-avxvnniint8-prfm.c",
@@ -13,7 +14,6 @@ PROD_AVXVNNIINT8_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_AVXVNNIINT8_MICROKERNEL_SRCS = [
-    "src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-avxvnniint8.c",
 ]
 
 ALL_AVXVNNIINT8_MICROKERNEL_SRCS = PROD_AVXVNNIINT8_MICROKERNEL_SRCS + NON_PROD_AVXVNNIINT8_MICROKERNEL_SRCS
