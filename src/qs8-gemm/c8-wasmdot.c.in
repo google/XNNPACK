@@ -6,7 +6,7 @@
 $assert DATATYPE in ["QC8", "QD8"]
 $assert DATATYPE == "QD8" or REQUANTIZATION == "FP32"
 $assert DATATYPE != "QD8" or not REQUANTIZATION
-$assert MR <= 4
+$assert MR <= 4 or NR == 8
 $assert NR == 4 or NR == 8
 #include <assert.h>
 
@@ -273,20 +273,14 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}c
         $else:
           v128_t vacc = wasm_i8x16_narrow_i16x8(vacc0${min(1, MR-1)}x0123, vacc0${min(1, MR-1)}x0123);
       $else:
-        $if MR > 2:
-          v128_t vacc0x01234567_1x01234567 = wasm_i8x16_narrow_i16x8(vacc0x01234567, vacc1x01234567);
-          v128_t vacc2x01234567_${min(3, MR-1)}x01234567 = wasm_i8x16_narrow_i16x8(vacc2x01234567, vacc${min(3, MR-1)}x01234567);
-        $else:
-          v128_t vacc0x01234567_${min(1, MR-1)}x01234567 = wasm_i8x16_narrow_i16x8(vacc0x01234567, vacc${min(1, MR-1)}x01234567);
+        $for M in range(0, MR, 2):
+          v128_t vacc${M}x01234567_${min(M+1, MR-1)}x01234567 = wasm_i8x16_narrow_i16x8(vacc${M}x01234567, vacc${min(M+1, MR-1)}x01234567);
 
       $if NR == 4:
         vacc = wasm_i8x16_min(vacc, voutput_max);
       $else:
-        $if MR > 2:
-          vacc0x01234567_1x01234567 = wasm_i8x16_min(vacc0x01234567_1x01234567, voutput_max);
-          vacc2x01234567_${min(3, MR-1)}x01234567 = wasm_i8x16_min(vacc2x01234567_${min(3, MR-1)}x01234567, voutput_max);
-        $else:
-          vacc0x01234567_${min(1, MR-1)}x01234567 = wasm_i8x16_min(vacc0x01234567_${min(1, MR-1)}x01234567, voutput_max);
+        $for M in range(0, MR, 2):
+          vacc${M}x01234567_${min(M+1, MR-1)}x01234567 = wasm_i8x16_min(vacc${M}x01234567_${min(M+1, MR-1)}x01234567, voutput_max);
 
       if XNN_LIKELY(nc >= ${NR}) {
         $if NR == 4:
