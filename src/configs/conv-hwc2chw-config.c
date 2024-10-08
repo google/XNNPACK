@@ -29,7 +29,6 @@ static void init_f16_conv_hwc2chw_3x3c3s2_config(void) {
       f16_conv_hwc2chw_3x3c3s2_config.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_conv_hwc2chw_3x3c3s2_config.output_channel_tile = 4;
       f16_conv_hwc2chw_3x3c3s2_config.output_height_tile = 2;
-      f16_conv_hwc2chw_3x3c3s2_config.output_width_tile = 2;
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -40,7 +39,6 @@ static void init_f16_conv_hwc2chw_3x3c3s2_config(void) {
       f16_conv_hwc2chw_3x3c3s2_config.init.f16 = xnn_init_f16_minmax_scalar_params;
       f16_conv_hwc2chw_3x3c3s2_config.output_channel_tile = 4;
       f16_conv_hwc2chw_3x3c3s2_config.output_height_tile = 2;
-      f16_conv_hwc2chw_3x3c3s2_config.output_width_tile = 2;
     }
   #endif
 }
@@ -55,14 +53,12 @@ static void init_f32_conv_hwc2chw_3x3c3s2_config(void) {
       f32_conv_hwc2chw_3x3c3s2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
       f32_conv_hwc2chw_3x3c3s2_config.output_channel_tile = 4;
       f32_conv_hwc2chw_3x3c3s2_config.output_height_tile = 2;
-      f32_conv_hwc2chw_3x3c3s2_config.output_width_tile = 2;
     } else if (!XNN_PLATFORM_MOBILE) {
       f32_conv_hwc2chw_3x3c3s2_config.ukernel_with_symm_padding =
         (xnn_conv_hwc2chw_ukernel_fn) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__scalar_1x1;
       f32_conv_hwc2chw_3x3c3s2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
       f32_conv_hwc2chw_3x3c3s2_config.output_channel_tile = 4;
       f32_conv_hwc2chw_3x3c3s2_config.output_height_tile = 1;
-      f32_conv_hwc2chw_3x3c3s2_config.output_width_tile = 1;
     }
   #elif XNN_ARCH_ARM64
     f32_conv_hwc2chw_3x3c3s2_config.ukernel_with_symm_padding =
@@ -70,28 +66,24 @@ static void init_f32_conv_hwc2chw_3x3c3s2_config(void) {
     f32_conv_hwc2chw_3x3c3s2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_conv_hwc2chw_3x3c3s2_config.output_channel_tile = 4;
     f32_conv_hwc2chw_3x3c3s2_config.output_height_tile = 2;
-    f32_conv_hwc2chw_3x3c3s2_config.output_width_tile = 2;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     f32_conv_hwc2chw_3x3c3s2_config.ukernel_with_symm_padding =
       (xnn_conv_hwc2chw_ukernel_fn) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__sse_2x2;
     f32_conv_hwc2chw_3x3c3s2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_conv_hwc2chw_3x3c3s2_config.output_channel_tile = 4;
     f32_conv_hwc2chw_3x3c3s2_config.output_height_tile = 2;
-    f32_conv_hwc2chw_3x3c3s2_config.output_width_tile = 2;
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_conv_hwc2chw_3x3c3s2_config.ukernel_with_symm_padding =
       (xnn_conv_hwc2chw_ukernel_fn) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__wasmsimd_2x2;
     f32_conv_hwc2chw_3x3c3s2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_conv_hwc2chw_3x3c3s2_config.output_channel_tile = 4;
     f32_conv_hwc2chw_3x3c3s2_config.output_height_tile = 2;
-    f32_conv_hwc2chw_3x3c3s2_config.output_width_tile = 2;
   #else
     f32_conv_hwc2chw_3x3c3s2_config.ukernel_with_symm_padding =
       (xnn_conv_hwc2chw_ukernel_fn) xnn_f32_conv_hwc2chw_ukernel_3x3s2p1c3x4__scalar_1x1;
     f32_conv_hwc2chw_3x3c3s2_config.init.f32 = xnn_init_f32_minmax_scalar_params;
     f32_conv_hwc2chw_3x3c3s2_config.output_channel_tile = 4;
     f32_conv_hwc2chw_3x3c3s2_config.output_height_tile = 1;
-    f32_conv_hwc2chw_3x3c3s2_config.output_width_tile = 1;
   #endif
 }
 

@@ -19,9 +19,6 @@ extern "C" {
 
 struct xnn_x8_lut_config {
   xnn_x8_lut_ukernel_fn microkernel;
-  // Number of elements in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
-  size_t tile_size;
 };
 
 struct xnn_transpose_subconfig {
@@ -48,9 +45,6 @@ struct xnn_cmul_config {
   union {
     xnn_init_f32_default_params_fn f32_default;
   } init;
-  // Number of elements in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
-  size_t element_tile;
 };
 
 struct xnn_binary_elementwise_config {
@@ -105,10 +99,6 @@ struct xnn_unary_elementwise_config {
     xnn_init_s8_minmax_params_fn s8_minmax;
     xnn_init_u8_minmax_params_fn u8_minmax;
   } init;
-  // Number of elements in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of
-  // elements in each call.
-  uint8_t element_tile;
 };
 
 struct xnn_reduce_config {
@@ -124,24 +114,14 @@ struct xnn_reduce_config {
     xnn_init_f32_scale_params_fn f32_scale;
     xnn_init_f32_scaleminmax_params_fn f32_scaleminmax;
   } init;
-  // Number of elements in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of
-  // elements in each call.
-  size_t element_tile;
 };
 
 struct xnn_xx_fill_config {
   xnn_fill_ukernel_fn ukernel;
-  // Number of rows of inputs processed in one tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of rows in each call.
-  uint8_t row_tile;
 };
 
 struct xnn_xx_pad_config {
   xnn_pad_ukernel_fn ukernel;
-  // Number of rows of inputs processed in one tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of rows in each call.
-  uint8_t row_tile;
 };
 
 struct xnn_avgpool_config {
@@ -261,18 +241,12 @@ struct xnn_ibilinear_config {
   // Number of output pixels in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of pixels in each call.
   uint8_t pixel_tile;
-  // Number of channels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
-  uint8_t channel_tile;
 };
 
 // Bilinear interpolation (2D).
 
 struct xnn_ibilinear_chw_config {
   xnn_ibilinear_chw_ukernel_fn ukernel;
-  // Number of output pixels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of pixels in each call.
-  uint8_t pixel_tile;
   // Number of channels in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
   uint8_t channel_tile;
@@ -378,9 +352,6 @@ struct xnn_dwconv2d_chw_parameters {
   } init;
   // Number of output width pixels in a tile.
   uint8_t output_width_tile;
-  // Number of output height pixels in a tile.
-  // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
-  uint8_t output_height_tile;
 };
 
 struct xnn_dwconv2d_chw_config {
@@ -406,8 +377,6 @@ struct xnn_conv_hwc2chw_config {
   // Number of output height pixels in a tile.
   // For best efficiency, micro-kernel must produce a multiple of this number of rows in each call.
   uint8_t output_height_tile;
-  // Number of output width pixels in a tile.
-  uint8_t output_width_tile;
 };
 
 struct xnn_vmulcaddc_config {
@@ -430,9 +399,6 @@ struct xnn_raddstoreexpminusmax_config {
     xnn_init_f16_expminus_params_fn f16;
     xnn_init_f32_expminus_params_fn f32;
   } init;
-  // Number of elements in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of elements in each call.
-  uint8_t element_tile;
 };
 
 struct xnn_argmaxpool_config {
