@@ -354,3 +354,289 @@ TEST(PRELU_NC_F32, weights_cache_unit_batch) {
       .TestF32();
   }
 }
+
+/* Unit tests for QS8 */
+TEST(PRELU_NC_QS8, unit_batch) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qs8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(1)
+      .input_channels(input_channels)
+      .iterations(3)
+      .TestQS8();
+  }
+}
+
+TEST(PRELU_NC_QS8, small_batch_with_broadcasted_slope) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qs8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(prelu_config->row_tile)
+      .input_channels(input_channels)
+      .slope_channels(1)
+      .iterations(3)
+      .TestQS8();
+  }
+}
+
+TEST(PRELU_NC_QS8, small_batch) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qs8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(prelu_config->row_tile)
+      .input_channels(input_channels)
+      .iterations(3)
+      .TestQS8();
+  }
+}
+
+TEST(PRELU_NC_QS8, small_batch_with_x_stride) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qs8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(prelu_config->row_tile)
+      .input_channels(input_channels)
+      .x_stride(337)
+      .iterations(3)
+      .TestQS8();
+  }
+}
+
+TEST(PRELU_NC_QS8, small_batch_with_y_stride) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qs8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(prelu_config->row_tile)
+      .input_channels(input_channels)
+      .y_stride(347)
+      .iterations(3)
+      .TestQS8();
+  }
+}
+
+TEST(PRELU_NC_QS8, small_batch_with_x_stride_and_y_stride) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qs8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(prelu_config->row_tile)
+      .input_channels(input_channels)
+      .x_stride(337)
+      .y_stride(347)
+      .iterations(3)
+      .TestQS8();
+  }
+}
+
+TEST(PRELU_NC_QS8, large_batch) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qs8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(3 * prelu_config->row_tile + 1)
+      .input_channels(input_channels)
+      .iterations(1)
+      .TestQS8();
+  }
+}
+
+TEST(PRELU_NC_QS8, large_batch_with_x_stride) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qs8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(3 * prelu_config->row_tile + 1)
+      .input_channels(input_channels)
+      .x_stride(337)
+      .iterations(1)
+      .TestQS8();
+  }
+}
+
+TEST(PRELU_NC_QS8, large_batch_with_y_stride) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qs8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(3 * prelu_config->row_tile + 1)
+      .input_channels(input_channels)
+      .y_stride(347)
+      .iterations(1)
+      .TestQS8();
+  }
+}
+
+TEST(PRELU_NC_QS8, large_batch_with_x_stride_and_y_stride) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qs8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(3 * prelu_config->row_tile + 1)
+      .input_channels(input_channels)
+      .x_stride(337)
+      .y_stride(347)
+      .iterations(1)
+      .TestQS8();
+  }
+}
+
+TEST(PRELU_NC_QS8, weights_cache_unit_batch) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qs8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(1)
+      .input_channels(input_channels)
+      .use_weights_cache(true)
+      .iterations(3)
+      .TestQS8();
+  }
+}
+
+/* Unit tests for QU8 */
+TEST(PRELU_NC_QU8, unit_batch) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qu8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(1)
+      .input_channels(input_channels)
+      .iterations(1)
+      .TestQU8();
+  }
+}
+
+TEST(PRELU_NC_QU8, small_batch_with_broadcasted_slope) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qu8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(prelu_config->row_tile)
+      .input_channels(input_channels)
+      .slope_channels(1)
+      .iterations(3)
+      .TestQU8();
+  }
+}
+
+TEST(PRELU_NC_QU8, small_batch) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qu8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(prelu_config->row_tile)
+      .input_channels(input_channels)
+      .iterations(3)
+      .TestQU8();
+  }
+}
+
+TEST(PRELU_NC_QU8, small_batch_with_x_stride) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qu8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(prelu_config->row_tile)
+      .input_channels(input_channels)
+      .x_stride(337)
+      .iterations(3)
+      .TestQU8();
+  }
+}
+
+TEST(PRELU_NC_QU8, small_batch_with_y_stride) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qu8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(prelu_config->row_tile)
+      .input_channels(input_channels)
+      .y_stride(347)
+      .iterations(3)
+      .TestQU8();
+  }
+}
+
+TEST(PRELU_NC_QU8, small_batch_with_x_stride_and_y_stride) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qu8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(prelu_config->row_tile)
+      .input_channels(input_channels)
+      .x_stride(337)
+      .y_stride(347)
+      .iterations(3)
+      .TestQU8();
+  }
+}
+
+TEST(PRELU_NC_QU8, large_batch) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qu8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(3 * prelu_config->row_tile + 1)
+      .input_channels(input_channels)
+      .iterations(1)
+      .TestQU8();
+  }
+}
+
+TEST(PRELU_NC_QU8, large_batch_with_x_stride) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qu8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(3 * prelu_config->row_tile + 1)
+      .input_channels(input_channels)
+      .x_stride(337)
+      .iterations(1)
+      .TestQU8();
+  }
+}
+
+TEST(PRELU_NC_QU8, large_batch_with_y_stride) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qu8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(3 * prelu_config->row_tile + 1)
+      .input_channels(input_channels)
+      .y_stride(347)
+      .iterations(1)
+      .TestQU8();
+  }
+}
+
+TEST(PRELU_NC_QU8, large_batch_with_x_stride_and_y_stride) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qu8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(3 * prelu_config->row_tile + 1)
+      .input_channels(input_channels)
+      .x_stride(337)
+      .y_stride(347)
+      .iterations(1)
+      .TestQU8();
+  }
+}
+
+TEST(PRELU_NC_QU8, weights_cache_unit_batch) {
+  const struct xnn_prelu_config* prelu_config = xnn_init_qu8_prelu_config();
+  assert(prelu_config != nullptr);
+  for (size_t input_channels = 1; input_channels < prelu_config->channel_tile * 10; input_channels += std::max<size_t>(1, prelu_config->channel_tile - 1)) {
+    PReLUOperatorTester()
+      .batch_size(1)
+      .input_channels(input_channels)
+      .use_weights_cache(true)
+      .iterations(3)
+      .TestQU8();
+  }
+} 

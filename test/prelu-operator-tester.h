@@ -119,6 +119,58 @@ class PReLUOperatorTester {
     return this->use_weights_cache_;
   }
 
+  float input_scale() const { return input_scale_; }
+
+  int16_t input_zero_point() const { return input_zero_point_; }
+
+  float slope_scale() const { return slope_scale_; }
+
+  int16_t slope_zero_point() const { return slope_zero_point_; }
+
+  float output_scale() const { return output_scale_; }
+
+  int16_t output_zero_point() const { return output_zero_point_; }
+
+  int16_t qmin() const { return qmin_; }
+
+  int16_t qmax() const { return qmax_; }
+
+  // Converters between float and quantized types.
+  float FloatFromInputQS8(int8_t x) const {
+    return input_scale() * (static_cast<int32_t>(x) -
+                            static_cast<int32_t>(input_zero_point() - 0x80));
+  }
+
+  float FloatFromInputQU8(uint8_t x) const {
+    return input_scale() *
+           (static_cast<int32_t>(x) - static_cast<int32_t>(input_zero_point()));
+  }
+
+  float FloatFromSlopeQS8(int8_t x) const {
+    return slope_scale() *
+           (static_cast<int32_t>(x) - static_cast<int32_t>(slope_zero_point()));
+  }
+
+  float FloatFromSlopeQU8(uint8_t x) const {
+    return slope_scale() *
+           (static_cast<int32_t>(x) - static_cast<int32_t>(slope_zero_point()));
+  }
+
+  float QuantizeAsFloatQS8(float x) const {
+    float y = x / output_scale() + static_cast<int32_t>(output_zero_point() - 0x80);
+    y = std::min<float>(y, qmax() - 0x80);
+    y = std::max<float>(y, qmin() - 0x80);
+    return y;
+  }
+
+  float QuantizeAsFloatQU8(float x) const {
+    float y = x / output_scale() + static_cast<int32_t>(output_zero_point());
+    y = std::min<float>(y, qmax());
+    y = std::max<float>(y, qmin());
+    return y;
+  }
+
+
   void TestF16() const {
     switch (weights_type()) {
       case WeightsType::Default:
@@ -377,6 +429,255 @@ class PReLUOperatorTester {
     }
   }
 
+  void TestQS8() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
+    xnnpack::ReplicableRandomDevice rng;
+    auto i8dist = std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(),
+                    std::numeric_limits<int8_t>::max())(rng);
+
+    std::vector<int8_t> x((batch_size() - 1) * x_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
+    std::vector<int8_t> w(input_channels());
+    std::vector<int8_t> y((batch_size() - 1) * y_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
+    std::vector<float> y_ref(batch_size() * input_channels());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(x.begin(), x.end(), [&] { return i8dist;});
+      if (slope_channels() == 1) {
+        std::fill(w.begin(), w.end(), i8dist);
+      } else {
+        std::generate(w.begin(), w.end(), [&] { return i8dist;});
+      }
+      std::fill(y.begin(), y.end(), 0xAA);
+
+      // Compute reference results, without clamping.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < input_channels(); c++) {
+          if((x[i * x_stride() + c] - (input_zero_point() - 0x80)) < 0) {
+            y_ref[i * input_channels() + c] = QuantizeAsFloatQS8(FloatFromInputQS8(x[i * x_stride() + c]) * FloatFromSlopeQS8(w[c]));
+          } else {
+            y_ref[i * input_channels() + c] = QuantizeAsFloatQS8(FloatFromInputQS8(x[i * x_stride() + c]));
+          }
+        }
+      }
+
+      // Create, setup, run, and destroy PReLU operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t prelu_op = nullptr;
+
+      struct xnn_internal_weights_cache* internal_weights_cache = nullptr;
+      std::unique_ptr<xnn_weights_cache_provider, decltype(&xnn_delete_weights_cache)> auto_weights_cache(
+        nullptr, xnn_delete_weights_cache);
+      if (use_weights_cache()) {
+        xnn_weights_cache_t weights_cache = nullptr;
+        xnn_create_weights_cache(&weights_cache);
+        auto_weights_cache.reset(weights_cache);
+        if (weights_cache) {
+          internal_weights_cache = (struct xnn_internal_weights_cache*) weights_cache->context;
+        }
+      }
+
+      ASSERT_EQ(xnn_status_success,
+          xnn_create_prelu_nc_qs8(
+            input_channels(), slope_channels(), x_stride(), y_stride(),
+            w.data(), input_zero_point() - 0x80, input_scale(), slope_zero_point(), slope_scale(), output_zero_point() - 0x80, output_scale(),
+            0, /*code_cache=*/nullptr, auto_weights_cache.get(), &prelu_op));
+        ASSERT_NE(nullptr, prelu_op);
+        if (use_weights_cache()) {
+          ASSERT_EQ(xnn_status_success,
+                    xnn_finalize_weights_cache(auto_weights_cache.get(), xnn_weights_cache_finalization_kind_soft));
+        }
+
+        // Smart pointer to automatically delete prelu_op.
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_prelu_op(prelu_op, xnn_delete_operator);
+
+        ASSERT_EQ(xnn_status_success,
+          xnn_reshape_prelu_nc_qs8(
+            prelu_op,
+            batch_size(),
+            /*threadpool=*/nullptr));
+
+        ASSERT_EQ(xnn_status_success,
+          xnn_setup_prelu_nc_qs8(
+            prelu_op,
+            x.data(), y.data()));
+
+        ASSERT_EQ(xnn_status_success,
+          xnn_run_operator(prelu_op, /*threadpool=*/nullptr));
+
+        VerifyQS8(y, y_ref);
+
+        if (use_weights_cache()) {
+          xnn_operator_t prelu_op2 = nullptr;
+          const size_t old_weights_cache_size = internal_weights_cache->cache.weights.size;
+
+          ASSERT_EQ(xnn_status_success,
+                    xnn_create_prelu_nc_qs8(
+                        input_channels(), slope_channels(), x_stride(), y_stride(),
+                        w.data(), input_zero_point() - 0x80, input_scale(), slope_zero_point(), slope_scale(), output_zero_point() - 0x80, output_scale(),
+                        0, /*code_cache=*/nullptr, auto_weights_cache.get(), &prelu_op2));
+          ASSERT_NE(nullptr, prelu_op2);
+
+          // Smart pointer to automatically delete prelu_op2.
+          std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_prelu_op(prelu_op2, xnn_delete_operator);
+          std::vector<int8_t> y2(y.size(), 0xAA);
+
+          ASSERT_EQ(xnn_status_success,
+                    xnn_reshape_prelu_nc_qs8(
+                        prelu_op2,
+                        batch_size(),
+                        /*threadpool=*/nullptr));
+
+          ASSERT_EQ(xnn_status_success,
+                    xnn_setup_prelu_nc_qs8(
+                        prelu_op2,
+                        x.data(), y2.data()));
+
+          ASSERT_EQ(xnn_status_success,
+                    xnn_run_operator(prelu_op2, /*threadpool=*/nullptr));
+
+          VerifyQS8(y, y_ref);
+          VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
+        }
+    }
+  }
+
+  void TestQU8() const {
+    ASSERT_EQ(weights_type(), WeightsType::Default);
+
+    xnnpack::ReplicableRandomDevice rng;
+    auto u8dist = std::uniform_int_distribution<int32_t>(std::numeric_limits<uint8_t>::min(),
+                    std::numeric_limits<uint8_t>::max())(rng);
+
+    std::vector<uint8_t> x((batch_size() - 1) * x_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    std::vector<uint8_t> w(input_channels());
+    std::vector<uint8_t> y((batch_size() - 1) * y_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    std::vector<float> y_ref(batch_size() * input_channels());
+
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(x.begin(), x.end(), [&] { return u8dist;});
+      if (slope_channels() == 1) {
+        std::fill(w.begin(), w.end(), u8dist);
+      } else {
+        std::generate(w.begin(), w.end(), [&] { return u8dist;});
+      }
+      std::fill(y.begin(), y.end(), 0xAA);
+      
+
+      // Compute reference results, without clamping.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t c = 0; c < input_channels(); c++) {
+          if((x[i * x_stride() + c] - input_zero_point()) < 0) {
+            y_ref[i * input_channels() + c] = QuantizeAsFloatQU8(FloatFromInputQU8(x[i * x_stride() + c]) * FloatFromSlopeQU8(w[c]));
+          } else {
+            y_ref[i * input_channels() + c] = QuantizeAsFloatQU8(FloatFromInputQU8(x[i * x_stride() + c]));
+          }
+        }
+      }
+
+      // Create, setup, run, and destroy PReLU operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t prelu_op = nullptr;
+
+      struct xnn_internal_weights_cache* internal_weights_cache = nullptr;
+      std::unique_ptr<xnn_weights_cache_provider, decltype(&xnn_delete_weights_cache)> auto_weights_cache(
+        nullptr, xnn_delete_weights_cache);
+      if (use_weights_cache()) {
+        xnn_weights_cache_t weights_cache = nullptr;
+        xnn_create_weights_cache(&weights_cache);
+        auto_weights_cache.reset(weights_cache);
+        if (weights_cache) {
+          internal_weights_cache = (struct xnn_internal_weights_cache*) weights_cache->context;
+        }
+      }
+
+      ASSERT_EQ(xnn_status_success,
+          xnn_create_prelu_nc_qu8(
+            input_channels(), slope_channels(), x_stride(), y_stride(),
+            w.data(), input_zero_point(), input_scale(), slope_zero_point(), slope_scale(), output_zero_point(), output_scale(),
+            0, /*code_cache=*/nullptr, auto_weights_cache.get(), &prelu_op));
+        ASSERT_NE(nullptr, prelu_op);
+        if (use_weights_cache()) {
+          ASSERT_EQ(xnn_status_success,
+                    xnn_finalize_weights_cache(auto_weights_cache.get(), xnn_weights_cache_finalization_kind_soft));
+        }
+
+        // Smart pointer to automatically delete prelu_op.
+        std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_prelu_op(prelu_op, xnn_delete_operator);
+
+        ASSERT_EQ(xnn_status_success,
+          xnn_reshape_prelu_nc_qu8(
+            prelu_op,
+            batch_size(),
+            /*threadpool=*/nullptr));
+
+        ASSERT_EQ(xnn_status_success,
+          xnn_setup_prelu_nc_qu8(
+            prelu_op,
+            x.data(), y.data()));
+
+        ASSERT_EQ(xnn_status_success,
+          xnn_run_operator(prelu_op, /*threadpool=*/nullptr));
+
+        VerifyQU8(y, y_ref);
+
+        if (use_weights_cache()) {
+          xnn_operator_t prelu_op2 = nullptr;
+          const size_t old_weights_cache_size = internal_weights_cache->cache.weights.size;
+
+          ASSERT_EQ(xnn_status_success,
+                    xnn_create_prelu_nc_qu8(
+                        input_channels(), slope_channels(), x_stride(), y_stride(), 
+                        w.data(), input_zero_point(), input_scale(), slope_zero_point(), slope_scale(), output_zero_point(), output_scale(),
+                        0, /*code_cache=*/nullptr, auto_weights_cache.get(), &prelu_op2));
+          ASSERT_NE(nullptr, prelu_op2);
+
+          // Smart pointer to automatically delete prelu_op2.
+          std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_prelu_op(prelu_op2, xnn_delete_operator);
+          std::vector<uint8_t> y2(y.size(), 0xAA);
+
+          ASSERT_EQ(xnn_status_success,
+                    xnn_reshape_prelu_nc_qu8(
+                        prelu_op2,
+                        batch_size(),
+                        /*threadpool=*/nullptr));
+
+          ASSERT_EQ(xnn_status_success,
+                    xnn_setup_prelu_nc_qu8(
+                        prelu_op2,
+                        x.data(), y2.data()));
+
+          ASSERT_EQ(xnn_status_success,
+                    xnn_run_operator(prelu_op2, /*threadpool=*/nullptr));
+
+          VerifyQU8(y, y_ref);
+          VerifyWeightsCache(*internal_weights_cache, old_weights_cache_size);
+        }
+    }
+  }
+
+  void VerifyQS8(const std::vector<int8_t>& y, const std::vector<float>& y_ref) const {
+    for (size_t i = 0; i < batch_size(); i++) {
+      for(size_t c = 0; c < input_channels(); c++) {
+        ASSERT_NEAR(
+              static_cast<float>(y[i * y_stride() + c]),
+              y_ref[i * input_channels() + c], 1.5f)
+            << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << input_channels();
+      }
+    }
+  }
+
+  void VerifyQU8(const std::vector<uint8_t>& y, const std::vector<float>& y_ref) const {
+    for (size_t i = 0; i < batch_size(); i++) {
+      for(size_t c = 0; c < input_channels(); c++) {
+        ASSERT_NEAR(
+              static_cast<float>(y[i * y_stride() + c]),
+              y_ref[i * input_channels() + c], 1.5f)
+            << "at position " << i << " / " << batch_size() << ", channel " << c << " / " << input_channels();
+      }
+    }
+  }
+
   void VerifyWeightsCache(const xnn_internal_weights_cache& weights_cache, size_t old_size) const {
     ASSERT_EQ(weights_cache.cache.hits, 1);
     // Ensure that we did not write more weights to the cache because it was a cache hit.
@@ -391,5 +692,13 @@ class PReLUOperatorTester {
   size_t y_stride_{0};
   WeightsType weights_type_{WeightsType::Default};
   bool use_weights_cache_{false};
+  float input_scale_{0.1f};
+  int16_t input_zero_point_{121};
+  float slope_scale_{0.05f};
+  int16_t slope_zero_point_{1};
+  float output_scale_{0.1f};
+  int16_t output_zero_point_{128};
+  int16_t qmin_{0};
+  int16_t qmax_{255};
   size_t iterations_{15};
 };

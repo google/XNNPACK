@@ -36,6 +36,10 @@ static enum xnn_status create_prelu_operator(
   assert(slope_id != XNN_INVALID_VALUE_ID);
   assert(slope_id < num_values);
 
+  const uint32_t output_id = node->outputs[0];
+  assert(output_id != XNN_INVALID_VALUE_ID);
+  assert(output_id < num_values);
+
   const void* slope_data = values[slope_id].fp32_data != NULL ? values[slope_id].fp32_data : values[slope_id].data;
   assert(slope_data != NULL);
 
@@ -76,6 +80,36 @@ static enum xnn_status create_prelu_operator(
         weights_cache,
         &opdata->operator_objects[0]);
       break;
+    case xnn_datatype_qint8:
+      status = xnn_create_prelu_nc_qs8(
+        input_channels,
+        slope_channels,
+        /*input_stride=*/input_channels,
+        /*output_stride=*/input_channels,
+        /*negative_slope=*/slope_data,
+        (int8_t) values[input_id].quantization.zero_point, values[input_id].quantization.scale,
+        (int8_t) values[slope_id].quantization.zero_point, values[slope_id].quantization.scale,
+        (int8_t) values[output_id].quantization.zero_point, values[output_id].quantization.scale,
+        node->flags,
+        code_cache,
+        weights_cache,
+        &opdata->operator_objects[0]);
+      break;
+    case xnn_datatype_quint8:
+      status = xnn_create_prelu_nc_qu8(
+        input_channels,
+        slope_channels,
+        /*input_stride=*/input_channels,
+        /*output_stride=*/input_channels,
+        /*negative_slope=*/slope_data,
+        (uint8_t) values[input_id].quantization.zero_point, values[input_id].quantization.scale,
+        (uint8_t) values[slope_id].quantization.zero_point, values[slope_id].quantization.scale,
+        (uint8_t) values[output_id].quantization.zero_point, values[output_id].quantization.scale,
+        node->flags,
+        code_cache,
+        weights_cache,
+        &opdata->operator_objects[0]);
+      break;
     default:
       XNN_UNREACHABLE;
   }
@@ -104,6 +138,18 @@ static enum xnn_status reshape_prelu_operator(
         break;
     case xnn_operator_type_prelu_nc_f32:
       status = xnn_reshape_prelu_nc_f32(
+        opdata->operator_objects[0],
+        batch_size,
+        threadpool);
+        break;
+    case xnn_operator_type_prelu_nc_qs8:
+      status = xnn_reshape_prelu_nc_qs8(
+        opdata->operator_objects[0],
+        batch_size,
+        threadpool);
+        break;
+    case xnn_operator_type_prelu_nc_qu8:
+      status = xnn_reshape_prelu_nc_qu8(
         opdata->operator_objects[0],
         batch_size,
         threadpool);
@@ -163,6 +209,16 @@ static enum xnn_status setup_prelu_operator(
         opdata->operator_objects[0],
         input_data,
         output_data);
+    case xnn_operator_type_prelu_nc_qs8:
+      return xnn_setup_prelu_nc_qs8(
+        opdata->operator_objects[0],
+        input_data,
+        output_data);
+    case xnn_operator_type_prelu_nc_qu8:
+      return xnn_setup_prelu_nc_qu8(
+        opdata->operator_objects[0],
+        input_data,
+        output_data);
     default:
       XNN_UNREACHABLE;
   }
@@ -194,6 +250,8 @@ enum xnn_status xnn_define_prelu(
   switch (input_value->datatype) {
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
+    case xnn_datatype_qint8:
+    case xnn_datatype_quint8:
       break;
     default:
       xnn_log_error(
@@ -227,6 +285,8 @@ enum xnn_status xnn_define_prelu(
 
   switch (slope_value->datatype) {
     case xnn_datatype_fp32:
+    case xnn_datatype_qint8:
+    case xnn_datatype_quint8:
       break;
     default:
       xnn_log_error(
@@ -254,6 +314,12 @@ enum xnn_status xnn_define_prelu(
       break;
     case xnn_datatype_fp32:
       compute_type = xnn_compute_type_fp32;
+      break;
+    case xnn_datatype_qint8:
+      compute_type = xnn_compute_type_qs8;
+      break;
+    case xnn_datatype_quint8:
+      compute_type = xnn_compute_type_qu8;
       break;
     default:
       xnn_log_error(

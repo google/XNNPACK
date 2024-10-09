@@ -778,6 +778,24 @@ struct xnn_qu8_lrelu_params {
   } scalar;
 };
 
+// PReLU (Parametric ReLU): used by PRELU microkernels.
+
+struct xnn_qs8_prelu_params {
+  struct {
+    int32_t input_zero_point;
+    int32_t positive_multiplier;
+    int32_t output_zero_point;
+  } scalar;
+};
+
+struct xnn_qu8_prelu_params {
+  struct {
+    int32_t input_zero_point;
+    int32_t positive_multiplier;
+    int32_t output_zero_point;
+  } scalar;
+};
+
 // Rnd (Round): used by VRNDNE/VRNDU/VRNDD/VRNDZ microkernels.
 
 struct xnn_f16_rnd_params {

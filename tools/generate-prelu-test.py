@@ -27,7 +27,7 @@ parser.set_defaults(defines=list())
 
 
 def split_ukernel_name(name):
-  match = re.fullmatch(r"xnn_(f16|f32)_prelu_ukernel__(.+)_(\d+)x(\d+)", name)
+  match = re.fullmatch(r"xnn_(f16|f32|qs8|qu8)_prelu_ukernel__(.+)_(\d+)x(\d+)", name)
   assert match is not None
   row_tile = int(match.group(3))
   channel_tile = int(match.group(4))
@@ -167,7 +167,7 @@ TEST(${TEST_NAME}, inplace) {
 """
 
 
-def generate_test_cases(ukernel, row_tile, channel_tile, isa):
+def generate_test_cases(ukernel, init_fn, row_tile, channel_tile, isa):
   """Generates all tests cases for a PRELU micro-kernel.
 
   Args:
@@ -183,10 +183,13 @@ def generate_test_cases(ukernel, row_tile, channel_tile, isa):
     Code for the test case.
   """
   _, test_name = ukernel.split("_", 1)
+  test_args = [ukernel]
+  if init_fn:
+    test_args.append(init_fn)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
   return xngen.preprocess(PRELU_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
-      "TEST_ARGS": [ukernel],
+      "TEST_ARGS": test_args,
       "DATATYPE": datatype,
       "ROW_TILE": row_tile,
       "CHANNEL_TILE": channel_tile,
@@ -217,15 +220,17 @@ def main(args):
 #include <gtest/gtest.h>
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
+#include "xnnpack/microparams-init.h"
 #include "xnnpack/prelu.h"
 #include "prelu-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
 
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
+      init_fn = ukernel_spec.get("init")
       row_tile, channel_tile, arch, isa = split_ukernel_name(name)
 
-      test_case = generate_test_cases(name, row_tile, channel_tile, isa)
+      test_case = generate_test_cases(name, init_fn, row_tile, channel_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     xnncommon.overwrite_if_changed(options.output, tests)

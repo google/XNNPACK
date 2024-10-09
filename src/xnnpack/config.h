@@ -157,6 +157,8 @@ XNN_INTERNAL const struct xnn_ibilinear_chw_config* xnn_init_f32_ibilinear_chw_c
 
 XNN_INTERNAL const struct xnn_prelu_config* xnn_init_f16_prelu_config();
 XNN_INTERNAL const struct xnn_prelu_config* xnn_init_f32_prelu_config();
+XNN_INTERNAL const struct xnn_prelu_config* xnn_init_qs8_prelu_config();
+XNN_INTERNAL const struct xnn_prelu_config* xnn_init_qu8_prelu_config();
 
 static inline struct xnn_hmp_dqgemm_ukernel xnn_init_hmp_dqgemm_ukernel(
     xnn_dqgemm_ukernel_fn function) {

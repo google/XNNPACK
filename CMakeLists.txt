@@ -1293,6 +1293,11 @@ IF(XNNPACK_BUILD_TESTS)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     ENDFOREACH()
 
+    ADD_EXECUTABLE(prelu-nc-test test/prelu-nc.cc)
+    TARGET_INCLUDE_DIRECTORIES(prelu-nc-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(prelu-nc-test PRIVATE XNNPACK fp16 GTest::gtest GTest::gtest_main)
+    ADD_TEST(NAME prelu-nc-test COMMAND prelu-nc-test)
+  
     ADD_EXECUTABLE(binary-elementwise-nd-test test/binary-elementwise-nd.cc)
     TARGET_INCLUDE_DIRECTORIES(binary-elementwise-nd-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(binary-elementwise-nd-test PRIVATE
@@ -1454,6 +1459,7 @@ IF(XNNPACK_BUILD_TESTS)
       packing
       qs8-gavgpool-minmax-fp32
       qs8-gavgpool-minmax-rndnu
+      qs8-prelu
       qs8-requantization
       qs8-rdsum-minmax-fp32
       qu8-rdsum
@@ -1463,6 +1469,7 @@ IF(XNNPACK_BUILD_TESTS)
       qs8-vlrelu
       qu8-gavgpool-minmax-fp32
       qu8-gavgpool-minmax-rndnu
+      qu8-prelu
       qu8-requantization
       qu8-vhswish
       qu8-vlrelu
