@@ -156,6 +156,10 @@ static void init_qs8_rdsum_config(void) {
         .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_qs8_rdsum_ukernel_7p7x__scalar_c4,
       };
     }
+  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+    qs8_rdsum_config = (struct xnn_reduce_config) {
+      .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_qs8_rdsum_ukernel_7p7x__wasmsimd_c32,
+    };
   #else
     qs8_rdsum_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_qs8_rdsum_ukernel_7p7x__scalar_c4,
@@ -193,6 +197,10 @@ static void init_qu8_rdsum_config(void) {
         .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_qu8_rdsum_ukernel_7p7x__scalar_c4,
       };
     }
+  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+    qu8_rdsum_config = (struct xnn_reduce_config) {
+      .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c32,
+    };
   #else
     qu8_rdsum_config = (struct xnn_reduce_config) {
       .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_qu8_rdsum_ukernel_7p7x__scalar_c4,

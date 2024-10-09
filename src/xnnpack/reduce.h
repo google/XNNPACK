@@ -493,6 +493,9 @@ DECLARE_QS8_RDSUM_UKERNEL_FUNCTION(xnn_qs8_rdsum_ukernel_7p7x__scalar_c4)
 DECLARE_QS8_RDSUM_UKERNEL_FUNCTION(xnn_qs8_rdsum_ukernel_7p7x__sse41_c16)
 DECLARE_QS8_RDSUM_UKERNEL_FUNCTION(xnn_qs8_rdsum_ukernel_7p7x__sse41_c32)
 DECLARE_QS8_RDSUM_UKERNEL_FUNCTION(xnn_qs8_rdsum_ukernel_7p7x__sse41_c64)
+DECLARE_QS8_RDSUM_UKERNEL_FUNCTION(xnn_qs8_rdsum_ukernel_7p7x__wasmsimd_c16)
+DECLARE_QS8_RDSUM_UKERNEL_FUNCTION(xnn_qs8_rdsum_ukernel_7p7x__wasmsimd_c32)
+DECLARE_QS8_RDSUM_UKERNEL_FUNCTION(xnn_qs8_rdsum_ukernel_7p7x__wasmsimd_c64)
 
 #define DECLARE_QU8_RDSUM_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                        \
@@ -511,6 +514,9 @@ DECLARE_QU8_RDSUM_UKERNEL_FUNCTION(xnn_qu8_rdsum_ukernel_7p7x__scalar_c4)
 DECLARE_QU8_RDSUM_UKERNEL_FUNCTION(xnn_qu8_rdsum_ukernel_7p7x__ssse3_c16)
 DECLARE_QU8_RDSUM_UKERNEL_FUNCTION(xnn_qu8_rdsum_ukernel_7p7x__ssse3_c32)
 DECLARE_QU8_RDSUM_UKERNEL_FUNCTION(xnn_qu8_rdsum_ukernel_7p7x__ssse3_c64)
+DECLARE_QU8_RDSUM_UKERNEL_FUNCTION(xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c16)
+DECLARE_QU8_RDSUM_UKERNEL_FUNCTION(xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c32)
+DECLARE_QU8_RDSUM_UKERNEL_FUNCTION(xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c64)
 
 #ifdef __cplusplus
 }  // extern "C"

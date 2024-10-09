@@ -185,6 +185,7 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x4c2s4-minmax-fp32-wasmsimd-dot16x2-ld128.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x4c2s4-minmax-fp32-wasmsimd-dot16x2-ld128.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4c2s4-minmax-fp32-wasmsimd-dot16x2-ld128.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-wasmsimd-c32.c
   src/qs8-rsum/gen/qs8-rsum-wasmsimd-u32-acc4.c
   src/qs8-vadd/gen/qs8-vadd-minmax-wasmsimd-u32.c
   src/qs8-vaddc/gen/qs8-vaddc-minmax-wasmsimd-u32.c
@@ -203,6 +204,7 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/qu8-gemm/gen/qu8-gemm-4x4c2s4-minmax-fp32-wasmsimd-dot16x2-ld128.c
   src/qu8-igemm/gen/qu8-igemm-1x4c2s4-minmax-fp32-wasmsimd-dot16x2-ld128.c
   src/qu8-igemm/gen/qu8-igemm-4x4c2s4-minmax-fp32-wasmsimd-dot16x2-ld128.c
+  src/qu8-rdsum/gen/qu8-rdsum-7p7x-wasmsimd-c32.c
   src/qu8-rsum/gen/qu8-rsum-wasmsimd-u32-acc4.c
   src/qu8-vadd/gen/qu8-vadd-minmax-wasmsimd-u32.c
   src/qu8-vaddc/gen/qu8-vaddc-minmax-wasmsimd-u32.c
@@ -961,6 +963,8 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4c2s4-minmax-fp32-wasmsimd-dot16x2-ld64.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4c8-minmax-fp32-wasmsimd-dot16x2-ld64.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4c8-minmax-fp32-wasmsimd-dot16x2-ld128.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-wasmsimd-c16.c
+  src/qs8-rdsum/gen/qs8-rdsum-7p7x-wasmsimd-c64.c
   src/qs8-requantization/qs8-requantization-fp32-wasmsimd.c
   src/qs8-requantization/qs8-requantization-gemmlowp-wasmsimd.c
   src/qs8-rsum/gen/qs8-rsum-wasmsimd-u8.c
@@ -1045,6 +1049,8 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/qu8-igemm/gen/qu8-igemm-4x4c2s4-minmax-fp32-wasmsimd-dot16x2-ld64.c
   src/qu8-igemm/gen/qu8-igemm-4x4c8-minmax-fp32-wasmsimd-dot16x2-ld64.c
   src/qu8-igemm/gen/qu8-igemm-4x4c8-minmax-fp32-wasmsimd-dot16x2-ld128.c
+  src/qu8-rdsum/gen/qu8-rdsum-7p7x-wasmsimd-c16.c
+  src/qu8-rdsum/gen/qu8-rdsum-7p7x-wasmsimd-c64.c
   src/qu8-requantization/qu8-requantization-fp32-wasmsimd.c
   src/qu8-requantization/qu8-requantization-gemmlowp-wasmsimd.c
   src/qu8-rsum/gen/qu8-rsum-wasmsimd-u8.c

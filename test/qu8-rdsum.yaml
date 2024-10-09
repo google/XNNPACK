@@ -15,3 +15,8 @@
 - name: xnn_qu8_rdsum_ukernel_7p7x__ssse3_c16
 - name: xnn_qu8_rdsum_ukernel_7p7x__ssse3_c32
 - name: xnn_qu8_rdsum_ukernel_7p7x__ssse3_c64
+
+# WASMSIMD
+- name: xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c16
+- name: xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c32
+- name: xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c64

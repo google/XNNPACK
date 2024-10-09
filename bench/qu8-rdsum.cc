@@ -85,6 +85,33 @@ BENCHMARK_CAPTURE(qu8_rdsum, scalar_c4,
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(qu8_rdsum, wasmsimd_c16,
+                    xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c16,
+                    /*init_params=*/nullptr)
+    ->Apply(BenchmarkRDSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(qu8_rdsum, wasmsimd_c32,
+                    xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c32,
+                    /*init_params=*/nullptr)
+    ->Apply(BenchmarkRDSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(qu8_rdsum, wasmsimd_c64,
+                    xnn_qu8_rdsum_ukernel_7p7x__wasmsimd_c64,
+                    /*init_params=*/nullptr)
+    ->Apply(BenchmarkRDSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif

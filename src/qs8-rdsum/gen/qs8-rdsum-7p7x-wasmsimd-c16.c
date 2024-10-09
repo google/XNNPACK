@@ -1,22 +1,22 @@
 // Auto-generated file. Do not edit!
-//   Template: src/qs8-rdsum/neon.c.in
+//   Template: src/qs8-rdsum/wasmsimd.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
+
+
 #include <assert.h>
 #include <math.h>
 
-#include <arm_neon.h>
+#include <wasm_simd128.h>
 
 #include "xnnpack/common.h"
 #include "xnnpack/reduce.h"
-#include "xnnpack/math.h"
 
-
-void xnn_qs8_rdsum_ukernel_7p7x__neon_c16(
+void xnn_qs8_rdsum_ukernel_7p7x__wasmsimd_c16(
     size_t rows,
     size_t channels,
     const int8_t* input,
@@ -40,18 +40,18 @@ void xnn_qs8_rdsum_ukernel_7p7x__neon_c16(
     const int8_t* i5 = (const int8_t*) ((uintptr_t) input + 5 * input_stride);
     const int8_t* i6 = (const int8_t*) ((uintptr_t) input + 6 * input_stride);
 
-    int32x4_t vacc0 = vdupq_n_s32(0);
-    int32x4_t vacc4 = vdupq_n_s32(0);
-    int32x4_t vacc8 = vdupq_n_s32(0);
-    int32x4_t vacc12 = vdupq_n_s32(0);
+    v128_t vacc0 = wasm_i32x4_const_splat(0);
+    v128_t vacc4 = wasm_i32x4_const_splat(0);
+    v128_t vacc8 = wasm_i32x4_const_splat(0);
+    v128_t vacc12 = wasm_i32x4_const_splat(0);
 
     // 256 int8s may be summed into an int16 before overflowing
     // To prevent handling the tails of the inner 256 loop, we round 256 down to
     // the nearest integer multiple of ACCUMULATORS.
     int r = rows;
     while (r > 0) {
-      int16x8_t vacc16_0 = vmovq_n_s16(0);
-      int16x8_t vacc16_8 = vmovq_n_s16(0);
+      v128_t vacc16_0 = wasm_i16x8_const_splat(0);
+      v128_t vacc16_8 = wasm_i16x8_const_splat(0);
       for (int current_batch = min(r, 252); current_batch > 0; current_batch -= 7) {
         if XNN_UNPREDICTABLE(current_batch < 2) {
           i1 = zero;
@@ -71,36 +71,36 @@ void xnn_qs8_rdsum_ukernel_7p7x__neon_c16(
         if XNN_UNPREDICTABLE(current_batch <= 6) {
           i6 = zero;
         }
-        int8x8_t vin0;
-        int8x8_t vin8;
-        vin0 = vld1_s8(&i0[0]);
-        vin8 = vld1_s8(&i0[8]);
-        vacc16_0 = vaddw_s8(vacc16_0, vin0);
-        vacc16_8 = vaddw_s8(vacc16_8, vin8);
-        vin0 = vld1_s8(&i1[0]);
-        vin8 = vld1_s8(&i1[8]);
-        vacc16_0 = vaddw_s8(vacc16_0, vin0);
-        vacc16_8 = vaddw_s8(vacc16_8, vin8);
-        vin0 = vld1_s8(&i2[0]);
-        vin8 = vld1_s8(&i2[8]);
-        vacc16_0 = vaddw_s8(vacc16_0, vin0);
-        vacc16_8 = vaddw_s8(vacc16_8, vin8);
-        vin0 = vld1_s8(&i3[0]);
-        vin8 = vld1_s8(&i3[8]);
-        vacc16_0 = vaddw_s8(vacc16_0, vin0);
-        vacc16_8 = vaddw_s8(vacc16_8, vin8);
-        vin0 = vld1_s8(&i4[0]);
-        vin8 = vld1_s8(&i4[8]);
-        vacc16_0 = vaddw_s8(vacc16_0, vin0);
-        vacc16_8 = vaddw_s8(vacc16_8, vin8);
-        vin0 = vld1_s8(&i5[0]);
-        vin8 = vld1_s8(&i5[8]);
-        vacc16_0 = vaddw_s8(vacc16_0, vin0);
-        vacc16_8 = vaddw_s8(vacc16_8, vin8);
-        vin0 = vld1_s8(&i6[0]);
-        vin8 = vld1_s8(&i6[8]);
-        vacc16_0 = vaddw_s8(vacc16_0, vin0);
-        vacc16_8 = vaddw_s8(vacc16_8, vin8);
+        v128_t vin0;
+        v128_t vin8;
+        vin0 = wasm_i16x8_load8x8(&i0[0]);
+        vin8 = wasm_i16x8_load8x8(&i0[8]);
+        vacc16_0 = wasm_i16x8_add(vacc16_0, vin0);
+        vacc16_8 = wasm_i16x8_add(vacc16_8, vin8);
+        vin0 = wasm_i16x8_load8x8(&i1[0]);
+        vin8 = wasm_i16x8_load8x8(&i1[8]);
+        vacc16_0 = wasm_i16x8_add(vacc16_0, vin0);
+        vacc16_8 = wasm_i16x8_add(vacc16_8, vin8);
+        vin0 = wasm_i16x8_load8x8(&i2[0]);
+        vin8 = wasm_i16x8_load8x8(&i2[8]);
+        vacc16_0 = wasm_i16x8_add(vacc16_0, vin0);
+        vacc16_8 = wasm_i16x8_add(vacc16_8, vin8);
+        vin0 = wasm_i16x8_load8x8(&i3[0]);
+        vin8 = wasm_i16x8_load8x8(&i3[8]);
+        vacc16_0 = wasm_i16x8_add(vacc16_0, vin0);
+        vacc16_8 = wasm_i16x8_add(vacc16_8, vin8);
+        vin0 = wasm_i16x8_load8x8(&i4[0]);
+        vin8 = wasm_i16x8_load8x8(&i4[8]);
+        vacc16_0 = wasm_i16x8_add(vacc16_0, vin0);
+        vacc16_8 = wasm_i16x8_add(vacc16_8, vin8);
+        vin0 = wasm_i16x8_load8x8(&i5[0]);
+        vin8 = wasm_i16x8_load8x8(&i5[8]);
+        vacc16_0 = wasm_i16x8_add(vacc16_0, vin0);
+        vacc16_8 = wasm_i16x8_add(vacc16_8, vin8);
+        vin0 = wasm_i16x8_load8x8(&i6[0]);
+        vin8 = wasm_i16x8_load8x8(&i6[8]);
+        vacc16_0 = wasm_i16x8_add(vacc16_0, vin0);
+        vacc16_8 = wasm_i16x8_add(vacc16_8, vin8);
         i0 = (const int8_t*) ((uintptr_t) i0 + input_increment);
         i1 = (const int8_t*) ((uintptr_t) i1 + input_increment);
         i2 = (const int8_t*) ((uintptr_t) i2 + input_increment);
@@ -109,26 +109,26 @@ void xnn_qs8_rdsum_ukernel_7p7x__neon_c16(
         i5 = (const int8_t*) ((uintptr_t) i5 + input_increment);
         i6 = (const int8_t*) ((uintptr_t) i6 + input_increment);
       }
-      vacc0 = vaddw_s16(vacc0, vget_low_s16(vacc16_0));
-      vacc4 = vaddw_s16(vacc4, vget_high_s16(vacc16_0));
-      vacc8 = vaddw_s16(vacc8, vget_low_s16(vacc16_8));
-      vacc12 = vaddw_s16(vacc12, vget_high_s16(vacc16_8));
+      vacc0 = wasm_i32x4_add(vacc0, wasm_i32x4_extend_low_i16x8(vacc16_0));
+      vacc4 = wasm_i32x4_add(vacc4, wasm_i32x4_extend_high_i16x8(vacc16_0));
+      vacc8 = wasm_i32x4_add(vacc8, wasm_i32x4_extend_low_i16x8(vacc16_8));
+      vacc12 = wasm_i32x4_add(vacc12, wasm_i32x4_extend_high_i16x8(vacc16_8));
       r = doz(r, 252);
     }
 
     const int32_t* o = output;
-    int32x4_t vo0 = vld1q_s32(o); o += 4;
-    int32x4_t vo4 = vld1q_s32(o); o += 4;
-    int32x4_t vo8 = vld1q_s32(o); o += 4;
-    int32x4_t vo12 = vld1q_s32(o); o += 4;
-    vacc0 = vaddq_s32(vo0, vacc0);
-    vacc4 = vaddq_s32(vo4, vacc4);
-    vacc8 = vaddq_s32(vo8, vacc8);
-    vacc12 = vaddq_s32(vo12, vacc12);
-    vst1q_s32(output, vacc0); output += 4;
-    vst1q_s32(output, vacc4); output += 4;
-    vst1q_s32(output, vacc8); output += 4;
-    vst1q_s32(output, vacc12); output += 4;
+    v128_t vo0 = wasm_v128_load(o); o += 4;
+    v128_t vo4 = wasm_v128_load(o); o += 4;
+    v128_t vo8 = wasm_v128_load(o); o += 4;
+    v128_t vo12 = wasm_v128_load(o); o += 4;
+    vo0 = wasm_i32x4_add(vo0, vacc0);
+    vo4 = wasm_i32x4_add(vo4, vacc4);
+    vo8 = wasm_i32x4_add(vo8, vacc8);
+    vo12 = wasm_i32x4_add(vo12, vacc12);
+    wasm_v128_store(output, vo0); output += 4;
+    wasm_v128_store(output, vo4); output += 4;
+    wasm_v128_store(output, vo8); output += 4;
+    wasm_v128_store(output, vo12); output += 4;
 
     input = (const int8_t*) ((uintptr_t) input + 16 * sizeof(int8_t));
   }
@@ -146,11 +146,11 @@ void xnn_qs8_rdsum_ukernel_7p7x__neon_c16(
       const int8_t* i5 = (const int8_t*) ((uintptr_t) input + 5 * input_stride);
       const int8_t* i6 = (const int8_t*) ((uintptr_t) input + 6 * input_stride);
 
-      int32x4_t vacc0 = vdupq_n_s32(0);
-      int32x4_t vacc1 = vdupq_n_s32(0);
+      v128_t vacc0 = wasm_i32x4_const_splat(0);
+      v128_t vacc1 = wasm_i32x4_const_splat(0);
 
       for (; num_batches > 0; --num_batches) {
-        int16x8_t vacc16 = vmovq_n_s16(0);
+        v128_t vacc16 = wasm_i16x8_const_splat(0);
         for (int current_batch = min(r, 252); current_batch > 0; current_batch -= 7) {
           if XNN_UNPREDICTABLE(current_batch < 2) {
             i1 = zero;
@@ -171,20 +171,20 @@ void xnn_qs8_rdsum_ukernel_7p7x__neon_c16(
             i6 = zero;
           }
 
-          int8x8_t vin0 = vld1_s8(&i0[0]);
-          int8x8_t vin1 = vld1_s8(&i1[0]);
-          int8x8_t vin2 = vld1_s8(&i2[0]);
-          int8x8_t vin3 = vld1_s8(&i3[0]);
-          int8x8_t vin4 = vld1_s8(&i4[0]);
-          int8x8_t vin5 = vld1_s8(&i5[0]);
-          int8x8_t vin6 = vld1_s8(&i6[0]);
-          vacc16 = vaddw_s8(vacc16, vin0);
-          vacc16 = vaddw_s8(vacc16, vin1);
-          vacc16 = vaddw_s8(vacc16, vin2);
-          vacc16 = vaddw_s8(vacc16, vin3);
-          vacc16 = vaddw_s8(vacc16, vin4);
-          vacc16 = vaddw_s8(vacc16, vin5);
-          vacc16 = vaddw_s8(vacc16, vin6);
+          v128_t vin0 = wasm_i16x8_load8x8(&i0[0]);
+          v128_t vin1 = wasm_i16x8_load8x8(&i1[0]);
+          v128_t vin2 = wasm_i16x8_load8x8(&i2[0]);
+          v128_t vin3 = wasm_i16x8_load8x8(&i3[0]);
+          v128_t vin4 = wasm_i16x8_load8x8(&i4[0]);
+          v128_t vin5 = wasm_i16x8_load8x8(&i5[0]);
+          v128_t vin6 = wasm_i16x8_load8x8(&i6[0]);
+          vacc16 = wasm_i16x8_add(vacc16, vin0);
+          vacc16 = wasm_i16x8_add(vacc16, vin1);
+          vacc16 = wasm_i16x8_add(vacc16, vin2);
+          vacc16 = wasm_i16x8_add(vacc16, vin3);
+          vacc16 = wasm_i16x8_add(vacc16, vin4);
+          vacc16 = wasm_i16x8_add(vacc16, vin5);
+          vacc16 = wasm_i16x8_add(vacc16, vin6);
           i0 = (const int8_t*) ((uintptr_t) i0 + input_increment);
           i1 = (const int8_t*) ((uintptr_t) i1 + input_increment);
           i2 = (const int8_t*) ((uintptr_t) i2 + input_increment);
@@ -193,35 +193,35 @@ void xnn_qs8_rdsum_ukernel_7p7x__neon_c16(
           i5 = (const int8_t*) ((uintptr_t) i5 + input_increment);
           i6 = (const int8_t*) ((uintptr_t) i6 + input_increment);
         }
-        vacc0 = vaddw_s16(vacc0, vget_low_s16(vacc16));
-        vacc1 = vaddw_s16(vacc1, vget_high_s16(vacc16));
+        vacc0 = wasm_i32x4_add(vacc0, wasm_i32x4_extend_low_i16x8(vacc16));
+        vacc1 = wasm_i32x4_add(vacc1, wasm_i32x4_extend_high_i16x8(vacc16));
         r = doz(r, 252);
       }
 
       if XNN_LIKELY(channels >= 8) {
-        int32x4_t vo0 = vld1q_s32(output);
-        int32x4_t vo1 = vld1q_s32(output + 4);
-        vo0 = vaddq_s32(vo0, vacc0);
-        vo1 = vaddq_s32(vo1, vacc1);
-        vst1q_s32(output, vo0); output += 4;
-        vst1q_s32(output, vo1); output += 4;
+        v128_t vo0 = wasm_v128_load(output);
+        v128_t vo1 = wasm_v128_load(output + 4);
+        vo0 = wasm_i32x4_add(vo0, vacc0);
+        vo1 = wasm_i32x4_add(vo1, vacc1);
+        wasm_v128_store(output, vo0); output += 4;
+        wasm_v128_store(output, vo1); output += 4;
         channels -= 8;
         input = (const int8_t*) ((uintptr_t) input + 8 * sizeof(int8_t));
       } else {
         if (channels & 4) {
-          int32x4_t vo = vld1q_s32(output);
-          vo = vaddq_s32(vo, vacc0);
-          vst1q_s32(output, vo); output += 4;
+          v128_t vo = wasm_v128_load(output);
+          vo = wasm_i32x4_add(vo, vacc0);
+          wasm_v128_store(output, vo); output += 4;
           vacc0 = vacc1;
         }
         if (channels & 2) {
-          int32x2_t vo = vld1_s32(output);
-          vo = vadd_s32(vo, vget_low_s32(vacc0));
-          vst1_s32(output, vo); output += 2;
-          vacc0 = vextq_s32(vacc0, vacc0, 2);
+          v128_t vo = wasm_i32x4_make(output[0], output[1], 0, 0);
+          vo = wasm_i32x4_add(vo, vacc0);
+          wasm_v128_store64_lane(output, vo, 0); output += 2;
+          vacc0 = wasm_v64x2_shuffle(vacc0, vacc0, 1, 1);
         }
         if (channels & 1) {
-          *output += vgetq_lane_s32(vacc0, 0);
+          *output += wasm_i32x4_extract_lane(vacc0, 0);
         }
         channels = 0;
       }
