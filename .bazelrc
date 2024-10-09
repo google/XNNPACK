@@ -59,6 +59,10 @@ build:macos_arm64 --cpu=darwin_arm64
 # Disable Bzlmod for every Bazel command
 common --enable_bzlmod=false
 
+# wasm configs.
+build:wasm --enable_bzlmod=true
+build:wasm --features=wasm_relaxed_simd
+
 # Disable some warnings to allow a warning-free build
 build --cxxopt='-Wno-sign-compare'
 build --cxxopt='-Wno-comment'
