@@ -839,10 +839,8 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/qu8-requantization/qu8-requantization-gemmlowp-neon.c
   src/qu8-requantization/qu8-requantization-rndna-neon.c
   src/qu8-rsum/gen/qu8-rsum-neon-u16.c
-  src/qu8-rsum/gen/qu8-rsum-neon-u32.c
   src/qu8-rsum/gen/qu8-rsum-neon-u64-acc2.c
   src/qu8-rsum/gen/qu8-rsum-neon-u64-acc4.c
-  src/qu8-rsum/gen/qu8-rsum-neon-u64.c
   src/qu8-vadd/gen/qu8-vadd-minmax-neon-ld64-u8.c
   src/qu8-vadd/gen/qu8-vadd-minmax-neon-ld128-u16.c
   src/qu8-vaddc/gen/qu8-vaddc-minmax-neon-ld64-u8.c

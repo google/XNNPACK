@@ -224,13 +224,17 @@ static void init_qu8_rsum_config(void) {
 
     if (hardware_config->use_x86_avx2) {
       qu8_rsum_config = (struct xnn_reduce_config) {
-        .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__avx2_u64,
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__avx2_u64_acc2,
       };
     } else {
       qu8_rsum_config = (struct xnn_reduce_config) {
-        .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__sse2_u32,
+        .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__sse2_u32_acc2,
       };
     }
+  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+    qu8_rsum_config = (struct xnn_reduce_config) {
+      .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__wasmsimd_u32_acc4,
+    };
   #else
     qu8_rsum_config = (struct xnn_reduce_config) {
       .ukernel = (xnn_reduce_ukernel_fn) xnn_qu8_rsum_ukernel__scalar_u4,
