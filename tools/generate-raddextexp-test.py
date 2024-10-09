@@ -19,8 +19,11 @@ import xnncommon
 
 parser = argparse.ArgumentParser(
   description='RAddExtExp microkernel test generator')
-parser.add_argument("-s", "--spec", metavar="FILE", required=True,
-                    help="Specification (YAML) file")
+parser.add_argument("-t", "--tester", metavar="TESTER", required=True,
+                    choices=["RAddExtExpMicrokernelTester"],
+                    help="Tester class to be used in the generated test")
+parser.add_argument("-k", "--ukernel", metavar="FILE", required=True,
+                    help="Microkernel type")
 parser.add_argument("-o", "--output", metavar="FILE", required=True,
                     help='Output (C++ source) file')
 parser.set_defaults(defines=list())
@@ -37,78 +40,21 @@ def split_ukernel_name(name):
 
 
 RADDEXTEXP_TEST_TEMPLATE = """\
-TEST(${TEST_NAME}, elements_eq_${ELEMENTS_TILE}) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  RAddExtExpMicrokernelTester()
-    .elements(${ELEMENTS_TILE})
-    .Test(${TEST_FUNCTION});
-}
-
-$if ELEMENTS_TILE > 1:
-  TEST(${TEST_NAME}, elements_div_${ELEMENTS_TILE}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t elements = ${ELEMENTS_TILE*2}; elements < ${ELEMENTS_TILE*10}; elements += ${ELEMENTS_TILE}) {
-      RAddExtExpMicrokernelTester()
-        .elements(elements)
-        .Test(${TEST_FUNCTION});
-    }
-  }
-
-  TEST(${TEST_NAME}, elements_lt_${ELEMENTS_TILE}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t elements = 1; elements < ${ELEMENTS_TILE}; elements++) {
-      RAddExtExpMicrokernelTester()
-        .elements(elements)
-        .Test(${TEST_FUNCTION});
-    }
-  }
-
-TEST(${TEST_NAME}, elements_gt_${ELEMENTS_TILE}) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t elements = ${ELEMENTS_TILE+1}; elements < ${10 if ELEMENTS_TILE == 1 else ELEMENTS_TILE*2}; elements++) {
-    RAddExtExpMicrokernelTester()
-      .elements(elements)
-      .Test(${TEST_FUNCTION});
-  }
-}
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, element_tile, datatype, params_type, init_params) \
+XNN_TEST_RADDEXTEXP_ELEMENT_EQ(ukernel,arch_flags, ${", ".join(TEST_ARGS)});  
+XNN_TEST_RADDEXTEXP_ELEMENT_DIV(ukernel,arch_flags, ${", ".join(TEST_ARGS)});
+XNN_TEST_RADDEXTEXP_ELEMENT_LT(ukernel,arch_flags, ${", ".join(TEST_ARGS)});
+XNN_TEST_RADDEXTEXP_ELEMENT_GT(ukernel,arch_flags, ${", ".join(TEST_ARGS)});
 """
 
-
-def generate_test_cases(ukernel, elements_tile, isa):
-  """Generates all tests cases for a RAddExtExp micro-kernel.
-
-  Args:
-    ukernel: C name of the micro-kernel function.
-    elements_tile: Number of batch elements processed per one iteration of the
-                   inner loop of the micro-kernel.
-    isa: instruction set required to run the micro-kernel. Generated unit test
-         will skip execution if the host processor doesn't support this ISA.
-
-  Returns:
-    Code for the test case.
-  """
-  _, test_name = ukernel.split("_", 1)
-  _, datatype, _ = ukernel.split("_", 2)
-  return xngen.preprocess(RADDEXTEXP_TEST_TEMPLATE, {
-      "TEST_FUNCTION": ukernel,
-      "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
-      "DATATYPE": datatype,
-      "ELEMENTS_TILE": elements_tile,
-      "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
-    })
-
-
 def main(args):
-  options = parser.parse_args(args)
 
-  with codecs.open(options.spec, "r", encoding="utf-8") as spec_file:
-    spec_yaml = yaml.safe_load(spec_file)
-    if not isinstance(spec_yaml, list):
-      raise ValueError("expected a list of micro-kernels in the spec")
+    options = parser.parse_args(args)
+    tester = options.tester
+    tester_header = {
+    "RAddExtExpMicrokernelTester": "raddextexp-microkernel-tester.h",
+    }[tester]
+    ukernel = options.ukernel
 
     tests = """\
 // Copyright 2019 Google LLC
@@ -126,14 +72,24 @@ def main(args):
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/raddextexp.h"
 #include "raddextexp-microkernel-tester.h"
-""".format(specification=options.spec, generator=sys.argv[0])
-
-    for ukernel_spec in spec_yaml:
-      name = ukernel_spec["name"]
-      elements_tile, arch, isa = split_ukernel_name(name)
-
-      test_case = generate_test_cases(name, elements_tile, isa)
-      tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
+""".format(specification=options.ukernel, generator=sys.argv[0])
+    ukernel_parts = options.ukernel.split("-")
+    datatype = ukernel_parts[0]
+    op = ukernel_parts[1]
+    test_args = ["element_tile"]
+    test_args.append("init_params")
+    tests += xnncommon.make_multiline_macro(xngen.preprocess(
+      RADDEXTEXP_TEST_TEMPLATE,
+      {
+          "TEST_ARGS": test_args,
+          "TESTER": tester,
+          "DATATYPE": datatype,
+      },
+  ))
+    folder = datatype + "-" + ("raddextexp" if datatype.startswith("f") else op)
+    print("options",options.ukernel)
+    tests += f'#include "{xnncommon._XNNPACK_SRC}{folder}/{options.ukernel}.h"\n'
+    tests += "#undef XNN_UKERNEL_WITH_PARAMS\n"
 
     xnncommon.overwrite_if_changed(options.output, tests)
 
