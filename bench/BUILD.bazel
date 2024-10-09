@@ -118,6 +118,11 @@ xnnpack_cxx_library(
     srcs = [
         "%s.cc" % kernel.replace("_", "-"),
     ],
+    copts = select({
+        "//build_config:emscripten": ["-mfp16"],
+        "//conditions:default": [],
+    }),
+    wasm = True,
     tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":gemm_benchmark",
@@ -148,6 +153,7 @@ xnnpack_cxx_library(
     ],
     copts = xnnpack_optional_ruy_copts() + xnnpack_optional_gemmlowp_copts(),
     tags = xnnpack_slow_benchmark_tags(),
+    wasm = True,
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":gemm_benchmark",
         "//:allocator",
