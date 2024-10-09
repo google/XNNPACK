@@ -22,8 +22,8 @@
 #include "xnnpack/unaligned.h"
 
 #if XNN_ENABLE_KLEIDIAI
-  #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4cxp_qsu4cxs1s0.h"
-  #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qsu4cxs1s0.h"
+  #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4cxp_qs4cxs1s0.h"
+  #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qs4cxs1s0.h"
   #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0.h"
   #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0.h"
 #endif  // XNN_ENABLE_KLEIDIAI
@@ -1630,7 +1630,7 @@ size_t xnn_packed_stride_kai_qs4_weights_and_biases(
     size_t extra_bytes) {
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
-  return kai_get_rhs_packed_stride_rhs_pack_kxn_qsi4cxp_qsu4cxs1s0(k, /*nr=*/1,
+  return kai_get_rhs_packed_stride_rhs_pack_kxn_qsi4cxp_qs4cxs1s0(k, /*nr=*/1,
                                                                    kr, sr);
 }
 
@@ -1651,11 +1651,11 @@ void xnn_pack_kai_qs4_weights_and_biases(
 
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
     // Repack the packing params.
-    struct kai_rhs_pack_kxn_qsi4cxp_qsu4cxs1s0_params kai_params;
+    struct kai_rhs_pack_kxn_qsi4cxp_qs4cxs1s0_params kai_params;
     kai_params.lhs_zero_point = xnn_params->input_zero_point;
     kai_params.rhs_zero_point = xnn_params->kernel_zero_point;
 
-    kai_run_rhs_pack_kxn_qsi4cxp_qsu4cxs1s0(
+    kai_run_rhs_pack_kxn_qsi4cxp_qs4cxs1s0(
         groups, output_channels, input_channels, nr, kr, sr,
         /*rhs=*/reinterpret_cast<const uint8_t*>(weights),
         /*bias=*/reinterpret_cast<const float*>(extra_data0),
@@ -1665,11 +1665,11 @@ void xnn_pack_kai_qs4_weights_and_biases(
         &kai_params);
   } else {
     // Repack the packing params.
-    struct kai_rhs_pack_nxk_qsi4cxp_qsu4cxs1s0_params kai_params;
+    struct kai_rhs_pack_nxk_qsi4cxp_qs4cxs1s0_params kai_params;
     kai_params.lhs_zero_point = xnn_params->input_zero_point;
     kai_params.rhs_zero_point = xnn_params->kernel_zero_point;
 
-    kai_run_rhs_pack_nxk_qsi4cxp_qsu4cxs1s0(
+    kai_run_rhs_pack_nxk_qsi4cxp_qs4cxs1s0(
         groups, output_channels, input_channels, nr, kr, sr,
         /*rhs=*/reinterpret_cast<const uint8_t*>(weights),
         /*bias=*/reinterpret_cast<const float*>(extra_data0),
@@ -2706,7 +2706,7 @@ void pack_qs8_deconv_goki_w(
         for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
           const size_t nr_block_size = min(nc - nr_block_start, nr);
           int32_t* packed_b = (int32_t*) packed_weights;
-          if XNN_LIKELY(b != 0) {
+          if XNN_LIKELY(b != nullptr) {
             for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
               unaligned_store_s32(packed_weights, b[nr_block_start + nr_block_offset]);
               packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));
@@ -2833,7 +2833,7 @@ void xnn_pack_qu8_deconv_goki_w(
         for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
           const size_t nr_block_size = min(nc - nr_block_start, nr);
           int32_t* packed_b = (int32_t*) packed_weights;
-          if XNN_LIKELY(b != 0) {
+          if XNN_LIKELY(b != nullptr) {
             for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
               unaligned_store_s32(packed_weights, bzp + b[nr_block_start + nr_block_offset]);
               packed_weights = (void*) ((uintptr_t) packed_weights + sizeof(int32_t));

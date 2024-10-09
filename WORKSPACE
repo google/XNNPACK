@@ -99,10 +99,10 @@ http_archive(
 # KleidiAI library, used for ARM microkernels.
 http_archive(
     name = "KleidiAI",
-    sha256 = "d8f2b5bf6eba7ab8fe3cedd97c4adc967c1befa69a6f4c4f6cbb3c102a7dd3c9",
-    strip_prefix = "kleidiai-32384cde728f444afdb92eecbb65e293fc6a6315",
+    sha256 = "6682b7a2795c711c1dd23ada552675b6514523e991043753648f2cad826f588f",
+    strip_prefix = "kleidiai-382b07835c43fcb0401cb4dab3c8fb85eaf187b6",
     urls = [
-        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/32384cde728f444afdb92eecbb65e293fc6a6315/kleidiai-32384cde728f444afdb92eecbb65e293fc6a6315.zip",
+        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/382b07835c43fcb0401cb4dab3c8fb85eaf187b6/kleidiai-382b07835c43fcb0401cb4dab3c8fb85eaf187b6.zip"
     ],
 )
 # LINT.ThenChange(cmake/DownloadKleidiAI.cmake)
