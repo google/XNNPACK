@@ -18,7 +18,7 @@
 #include "xnnpack/unaligned.h"
 
 
-void xnn_qs8_packw_gemm_goi_ukernel_x8c8__avxvnni(
+void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avxvnni(
   size_t g,
   size_t nc,
   size_t kc,
@@ -44,7 +44,7 @@ void xnn_qs8_packw_gemm_goi_ukernel_x8c8__avxvnni(
   const __m256i vone = _mm256_set1_epi8(1);
   int8_t* out = (int8_t*) packed_weights;
   const uint32_t* b = (const uint32_t*) bias;
-  const uint32_t izp = (uint32_t) (params ? (((const struct xnn_qs8_packw_params*) params)->input_zero_point + 0): 0);
+  const uint32_t izp = (uint32_t) (params ? (((const struct xnn_qs8_packw_params*) params)->input_zero_point + 128): 128);
   __m256i vzeropoint = _mm256_set1_epi32((int32_t) izp);
 
   do {

@@ -58,6 +58,15 @@ class PackWMicrokernelTester {
     return this->sr_;
   }
 
+  PackWMicrokernelTester& izp(size_t izp) {
+    this->izp_ = izp;
+    return *this;
+  }
+
+  size_t izp() const {
+    return this->izp_;
+  }
+
   PackWMicrokernelTester& n(size_t n) {
     assert(n != 0);
     this->n_ = n;
@@ -102,19 +111,28 @@ class PackWMicrokernelTester {
 
     std::iota(weights.begin(), weights.end(), 0);
     std::iota(bias.begin(), bias.end(), UINT32_C(0));
-    std::fill(packed_w.begin(), packed_w.end(), INT8_C(0x12));
+    std::fill(packed_w.begin(), packed_w.end(), INT8_C(0));
     std::fill(packed_w_ref.begin(), packed_w_ref.end(), INT8_C(0x7B));
 
     const int32_t* bias_data = nullbias() ? nullptr : bias.data();
     const xnn_qs8_packing_params packing_params = { 0 };
 
     // Compute reference results.
-    xnn_pack_qs8_gemm_goi_w(/*g=*/1, n(), k(), nr(), kr(), sr(),
-      reinterpret_cast<const int8_t *>(weights.data()),
-      bias_data,
-      /*scale=*/nullptr,
-      reinterpret_cast<void *>(packed_w_ref.data()),
-      /*extra_bytes=*/0, &packing_params);
+    if (izp() == 128) {
+      xnn_pack_qs8_to_qu8_gemm_goi_w(/*g=*/1, n(), k(), nr(), kr(), sr(),
+        reinterpret_cast<const int8_t *>(weights.data()),
+        bias_data,
+        /*scale=*/nullptr,
+        reinterpret_cast<void *>(packed_w_ref.data()),
+        /*extra_bytes=*/0, &packing_params);
+    } else {
+      xnn_pack_qs8_gemm_goi_w(/*g=*/1, n(), k(), nr(), kr(), sr(),
+        reinterpret_cast<const int8_t *>(weights.data()),
+        bias_data,
+        /*scale=*/nullptr,
+        reinterpret_cast<void *>(packed_w_ref.data()),
+        /*extra_bytes=*/0, &packing_params);
+    }
 
     // Call optimized micro-kernel.
     packw(/*g=*/1, n(), k(), nr(), kr(), sr(),
@@ -283,4 +301,5 @@ class PackWMicrokernelTester {
   size_t sr_{1};
   size_t k_{1};
   bool nullbias_{false};
+  size_t izp_{0};
 };

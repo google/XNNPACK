@@ -14,7 +14,7 @@
 
 #include "xnnpack/packw.h"
 
-void xnn_qs8_packw_gemm_goi_ukernel_x8c8__scalar(
+void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__scalar(
   size_t g,
   size_t nc,
   size_t kc,
@@ -39,7 +39,7 @@ void xnn_qs8_packw_gemm_goi_ukernel_x8c8__scalar(
 
   int8_t* out = (int8_t*) packed_weights;
   const int32_t* b = (const int32_t*) bias;
-  const uint32_t izp = (uint32_t) (params ? (((const struct xnn_qs8_packw_params*) params)->input_zero_point + 0): 0);
+  const uint32_t izp = (uint32_t) (params ? (((const struct xnn_qs8_packw_params*) params)->input_zero_point + 128): 128);
 
   do {
     // NC main loop multiple of 8

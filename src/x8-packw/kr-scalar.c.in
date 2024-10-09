@@ -95,16 +95,17 @@ void xnn_qs${BITS}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${N
         out += ${NR*KR};
       }
 
-      // KC remainder 1..KR-1
+      // KC remainder of 1..${KR-1}
       if (k != 0) {
+        assert(k >= 1 && k <= ${KR-1});
         $for N in range(NR):
-          $for K in range(KR):
-            const ${TYPE} v${N}x${K} = ${K} < k ? w${N}[${K}] : izp;
-          $for K in range(KR):
-            $if BITS == 8:
-              ksum${N} += (uint32_t) v${N}x${K};
-          $for K in range(KR):
+          const ${TYPE} v${N}x0 = w${N}[0];
+          ksum${N} += (uint32_t) v${N}x0;
+          out[${N*KR}] = v${N}x0;
+          $for K in range(1, KR):
             if (${K} < k) {
+              const ${TYPE} v${N}x${K} = w${N}[${K}];
+              ksum${N} += (uint32_t) v${N}x${K};
               out[${N*KR+K}] = v${N}x${K};
             }
           w${N} += ${KR};
@@ -180,14 +181,15 @@ void xnn_qs${BITS}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${N
 
       // KC remainder of 1..${KR-1}
       if (k != 0) {
+        assert(k >= 1 && k <= ${KR-1});
         $for N in range(NR-1):
-          $for K in range(KR):
-            const ${TYPE} v${N}x${K} = ${K} < k ? w${N}[${K}] : izp;
-          $for K in range(KR):
-            $if BITS == 8:
-              ksum${N} += (uint32_t) v${N}x${K};
-          $for K in range(KR):
+          const ${TYPE} v${N}x0 = w${N}[0];
+          ksum${N} += (uint32_t) v${N}x0;
+          out[${N*KR}] = v${N}x0;
+          $for K in range(1, KR):
             if (${K} < k) {
+              const ${TYPE} v${N}x${K} = w${N}[${K}];
+              ksum${N} += (uint32_t) v${N}x${K};
               out[${N*KR+K}] = v${N}x${K};
             }
           w${N} += ${KR};

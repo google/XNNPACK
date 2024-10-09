@@ -35,19 +35,19 @@ extern "C" {
 
 #undef XNN_UKERNEL
 
-#define XNN_QS8_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale) \
-  XNN_INTERNAL void ukernel(                                                  \
-      size_t g,                                                               \
-      size_t nc,                                                              \
-      size_t kc,                                                              \
-      size_t nr,                                                              \
-      size_t kr,                                                              \
-      size_t sr,                                                              \
-      const int8_t* weights,                                                  \
-      const int32_t* bias,                                                    \
-      const void* scale,                                                      \
-      int8_t* packed_weights,                                                 \
-      size_t extra_bytes,                                                     \
+#define XNN_QS8_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale, izp) \
+  XNN_INTERNAL void ukernel(                                                       \
+      size_t g,                                                                    \
+      size_t nc,                                                                   \
+      size_t kc,                                                                   \
+      size_t nr,                                                                   \
+      size_t kr,                                                                   \
+      size_t sr,                                                                   \
+      const int8_t* weights,                                                       \
+      const int32_t* bias,                                                         \
+      const void* scale,                                                           \
+      int8_t* packed_weights,                                                      \
+      size_t extra_bytes,                                                          \
       const void* params);
 
 #include "src/qs8-packw/qs8-packw.h"

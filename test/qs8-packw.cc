@@ -18,7 +18,7 @@ struct XnnTestQS8Param {
   const char *name;
   xnn_qs8_packw_gemm_goi_ukernel_fn ukernel;
   uint64_t arch_flags;
-  size_t nr, kr, sr, kblock, nr_scale;
+  size_t nr, kr, sr, kblock, nr_scale, izp;
 };
 
 class XnnTestQS8 : public testing::TestWithParam<XnnTestQS8Param> {
@@ -28,13 +28,12 @@ std::string GetTestQS8Name(const testing::TestParamInfo<XnnTestQS8::ParamType>& 
   return info.param.name;
 }
 
-#define XNN_QS8_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale) \
-  { #ukernel, ukernel, arch_flags, nr, kr, sr, kblock, nr_scale },
+#define XNN_QS8_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale, izp) \
+  { #ukernel, ukernel, arch_flags, nr, kr, sr, kblock, nr_scale, izp },
 
 const XnnTestQS8Param xnn_test_qs8_params[] = {
 #include "src/qs8-packw/qs8-packw.h"
 };
-
 #undef XNN_QS8_UKERNEL
 
 }  // namespace
@@ -47,6 +46,7 @@ TEST_P(XnnTestQS8, k_eq_kblock) {
     .nr(GetParam().nr * GetParam().nr_scale)
     .kr(GetParam().kr)
     .sr(GetParam().sr)
+    .izp(GetParam().izp)
     .Test(GetParam().ukernel);
 }
 
@@ -61,6 +61,7 @@ TEST_P(XnnTestQS8, k_div_kblock) {
     .nr(GetParam().nr * GetParam().nr_scale)
     .kr(GetParam().kr)
     .sr(GetParam().sr)
+    .izp(GetParam().izp)
     .Test(GetParam().ukernel);
 }
 
@@ -76,6 +77,7 @@ TEST_P(XnnTestQS8, k_lt_kblock) {
       .nr(GetParam().nr * GetParam().nr_scale)
       .kr(GetParam().kr)
       .sr(GetParam().sr)
+      .izp(GetParam().izp)
       .Test(GetParam().ukernel);
   }
 }
@@ -89,6 +91,7 @@ TEST_P(XnnTestQS8, k_gt_kblock) {
       .nr(GetParam().nr * GetParam().nr_scale)
       .kr(GetParam().kr)
       .sr(GetParam().sr)
+      .izp(GetParam().izp)
       .Test(GetParam().ukernel);
   }
 }
@@ -102,6 +105,7 @@ TEST_P(XnnTestQS8, n_eq_nr) {
       .nr(GetParam().nr * GetParam().nr_scale)
       .kr(GetParam().kr)
       .sr(GetParam().sr)
+      .izp(GetParam().izp)
       .Test(GetParam().ukernel);
   }
 }
