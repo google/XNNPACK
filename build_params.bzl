@@ -464,6 +464,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
             "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4cxp8x8_8x8x32_neon_i8mm",
             "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4c32p8x8_4x8x32_neon_i8mm",
             "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4c32p4x8_8x4x32_neon_i8mm",
+            "@KleidiAI//kai/ukernels/matmul:clamp_f32_qai8dxp4x8_qsi4c32p4x8_16x4x32_neon_i8mm",
         ]),
     ),
     "neonsme": _create_params(

@@ -46,6 +46,19 @@
   }
 
   BENCHMARK_GEMM_BL(qp8_f32_qb4w_gemm_minmax_ukernel_8x4c16s2__neoni8mm_mstep2)
+
+  static void qp8_f32_qb4w_gemm_minmax_ukernel_16x4c16s2__neoni8mm_mstep4(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x4c16s2__neoni8mm_mstep4,
+      xnn_init_f32_qb4w_minmax_scalar_params,
+      xnn_pack_kai_qb4_weights_and_biases,
+      xnn_packed_stride_kai_qb4_weights_and_biases,
+      /*mr=*/16, /*nr=*/4, /*kr=*/16, /*sr=*/2,
+      /*mr_packed=*/4,
+      benchmark::utils::CheckNEONI8MM);
+  }
+
+  BENCHMARK_GEMM_BL(qp8_f32_qb4w_gemm_minmax_ukernel_16x4c16s2__neoni8mm_mstep4)
   #endif  // XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
 
