@@ -36,7 +36,7 @@ void xnn_f16_igemm_minmax_ukernel_1x64__avx512fp16_broadcast(
   assert(kc % sizeof(uint16_t) == 0);
   assert(ks != 0);
   assert(ks % (1 * sizeof(void*)) == 0);
-  assert(a_offset % sizeof(float) == 0);
+  assert(a_offset % sizeof(xnn_float16) == 0);
   assert(a != NULL);
   assert(w != NULL);
   assert(c != NULL);
