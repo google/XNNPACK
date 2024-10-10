@@ -7,8 +7,6 @@ $assert NR == 8
 $assert KR == 8
 $assert TYPE in ["int8_t"]
 $assert IZP in [0, 128]
-$AVX = 2
-$PREFETCH = 0
 
 #include <assert.h>
 #include <stddef.h>
