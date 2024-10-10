@@ -3265,7 +3265,7 @@ static void init_qs8_qc8w_gemm_config(void) {
       qs8_qc8w_gemm_config.pack_weights_and_biases = NULL;  // Override the default packing function.
       qs8_qc8w_gemm_config.packed_stride_weights_and_biases = NULL;  // Override the default packing function.
       qs8_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_to_qu8_gemm_gio_w;
-      qs8_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_to_qu8_gemm_goi_w;
+      qs8_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar;
       qs8_qc8w_gemm_config.pack_igemm_goki = (xnn_pack_conv_goki_w_fn) xnn_pack_qs8_to_qu8_conv_goki_w;
       qs8_qc8w_gemm_config.pack_igemm_kgo = (xnn_pack_conv_kgo_w_fn) xnn_pack_qs8_to_qu8_conv_kgo_w;
       qs8_qc8w_gemm_config.pack_deconv_goki = (xnn_pack_deconv_goki_w_fn) xnn_pack_qs8_to_qu8_deconv_goki_w;

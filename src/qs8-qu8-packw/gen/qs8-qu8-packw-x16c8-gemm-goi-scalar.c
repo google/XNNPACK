@@ -564,7 +564,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum0 += (uint32_t) v0x7;
           out[7] = v0x7;
         }
-        w0 += 8;
+        w0 += k;
         const int8_t v1x0 = w1[0];
         ksum1 += (uint32_t) v1x0;
         out[8] = v1x0;
@@ -603,7 +603,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum1 += (uint32_t) v1x7;
           out[15] = v1x7;
         }
-        w1 += 8;
+        w1 += k;
         const int8_t v2x0 = w2[0];
         ksum2 += (uint32_t) v2x0;
         out[16] = v2x0;
@@ -642,7 +642,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum2 += (uint32_t) v2x7;
           out[23] = v2x7;
         }
-        w2 += 8;
+        w2 += k;
         const int8_t v3x0 = w3[0];
         ksum3 += (uint32_t) v3x0;
         out[24] = v3x0;
@@ -681,7 +681,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum3 += (uint32_t) v3x7;
           out[31] = v3x7;
         }
-        w3 += 8;
+        w3 += k;
         const int8_t v4x0 = w4[0];
         ksum4 += (uint32_t) v4x0;
         out[32] = v4x0;
@@ -720,7 +720,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum4 += (uint32_t) v4x7;
           out[39] = v4x7;
         }
-        w4 += 8;
+        w4 += k;
         const int8_t v5x0 = w5[0];
         ksum5 += (uint32_t) v5x0;
         out[40] = v5x0;
@@ -759,7 +759,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum5 += (uint32_t) v5x7;
           out[47] = v5x7;
         }
-        w5 += 8;
+        w5 += k;
         const int8_t v6x0 = w6[0];
         ksum6 += (uint32_t) v6x0;
         out[48] = v6x0;
@@ -798,7 +798,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum6 += (uint32_t) v6x7;
           out[55] = v6x7;
         }
-        w6 += 8;
+        w6 += k;
         const int8_t v7x0 = w7[0];
         ksum7 += (uint32_t) v7x0;
         out[56] = v7x0;
@@ -837,7 +837,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum7 += (uint32_t) v7x7;
           out[63] = v7x7;
         }
-        w7 += 8;
+        w7 += k;
         const int8_t v8x0 = w8[0];
         ksum8 += (uint32_t) v8x0;
         out[64] = v8x0;
@@ -876,7 +876,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum8 += (uint32_t) v8x7;
           out[71] = v8x7;
         }
-        w8 += 8;
+        w8 += k;
         const int8_t v9x0 = w9[0];
         ksum9 += (uint32_t) v9x0;
         out[72] = v9x0;
@@ -915,7 +915,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum9 += (uint32_t) v9x7;
           out[79] = v9x7;
         }
-        w9 += 8;
+        w9 += k;
         const int8_t v10x0 = w10[0];
         ksum10 += (uint32_t) v10x0;
         out[80] = v10x0;
@@ -954,7 +954,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum10 += (uint32_t) v10x7;
           out[87] = v10x7;
         }
-        w10 += 8;
+        w10 += k;
         const int8_t v11x0 = w11[0];
         ksum11 += (uint32_t) v11x0;
         out[88] = v11x0;
@@ -993,7 +993,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum11 += (uint32_t) v11x7;
           out[95] = v11x7;
         }
-        w11 += 8;
+        w11 += k;
         const int8_t v12x0 = w12[0];
         ksum12 += (uint32_t) v12x0;
         out[96] = v12x0;
@@ -1032,7 +1032,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum12 += (uint32_t) v12x7;
           out[103] = v12x7;
         }
-        w12 += 8;
+        w12 += k;
         const int8_t v13x0 = w13[0];
         ksum13 += (uint32_t) v13x0;
         out[104] = v13x0;
@@ -1071,7 +1071,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum13 += (uint32_t) v13x7;
           out[111] = v13x7;
         }
-        w13 += 8;
+        w13 += k;
         const int8_t v14x0 = w14[0];
         ksum14 += (uint32_t) v14x0;
         out[112] = v14x0;
@@ -1110,7 +1110,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum14 += (uint32_t) v14x7;
           out[119] = v14x7;
         }
-        w14 += 8;
+        w14 += k;
         const int8_t v15x0 = w15[0];
         ksum15 += (uint32_t) v15x0;
         out[120] = v15x0;
@@ -1149,7 +1149,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum15 += (uint32_t) v15x7;
           out[127] = v15x7;
         }
-        w15 += 8;
+        w15 += k;
         out += 128;
       }
 
@@ -1687,7 +1687,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum0 += (uint32_t) v0x7;
           out[7] = v0x7;
         }
-        w0 += 8;
+        w0 += k;
         const int8_t v1x0 = w1[0];
         ksum1 += (uint32_t) v1x0;
         out[8] = v1x0;
@@ -1726,7 +1726,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum1 += (uint32_t) v1x7;
           out[15] = v1x7;
         }
-        w1 += 8;
+        w1 += k;
         const int8_t v2x0 = w2[0];
         ksum2 += (uint32_t) v2x0;
         out[16] = v2x0;
@@ -1765,7 +1765,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum2 += (uint32_t) v2x7;
           out[23] = v2x7;
         }
-        w2 += 8;
+        w2 += k;
         const int8_t v3x0 = w3[0];
         ksum3 += (uint32_t) v3x0;
         out[24] = v3x0;
@@ -1804,7 +1804,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum3 += (uint32_t) v3x7;
           out[31] = v3x7;
         }
-        w3 += 8;
+        w3 += k;
         const int8_t v4x0 = w4[0];
         ksum4 += (uint32_t) v4x0;
         out[32] = v4x0;
@@ -1843,7 +1843,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum4 += (uint32_t) v4x7;
           out[39] = v4x7;
         }
-        w4 += 8;
+        w4 += k;
         const int8_t v5x0 = w5[0];
         ksum5 += (uint32_t) v5x0;
         out[40] = v5x0;
@@ -1882,7 +1882,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum5 += (uint32_t) v5x7;
           out[47] = v5x7;
         }
-        w5 += 8;
+        w5 += k;
         const int8_t v6x0 = w6[0];
         ksum6 += (uint32_t) v6x0;
         out[48] = v6x0;
@@ -1921,7 +1921,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum6 += (uint32_t) v6x7;
           out[55] = v6x7;
         }
-        w6 += 8;
+        w6 += k;
         const int8_t v7x0 = w7[0];
         ksum7 += (uint32_t) v7x0;
         out[56] = v7x0;
@@ -1960,7 +1960,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum7 += (uint32_t) v7x7;
           out[63] = v7x7;
         }
-        w7 += 8;
+        w7 += k;
         const int8_t v8x0 = w8[0];
         ksum8 += (uint32_t) v8x0;
         out[64] = v8x0;
@@ -1999,7 +1999,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum8 += (uint32_t) v8x7;
           out[71] = v8x7;
         }
-        w8 += 8;
+        w8 += k;
         const int8_t v9x0 = w9[0];
         ksum9 += (uint32_t) v9x0;
         out[72] = v9x0;
@@ -2038,7 +2038,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum9 += (uint32_t) v9x7;
           out[79] = v9x7;
         }
-        w9 += 8;
+        w9 += k;
         const int8_t v10x0 = w10[0];
         ksum10 += (uint32_t) v10x0;
         out[80] = v10x0;
@@ -2077,7 +2077,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum10 += (uint32_t) v10x7;
           out[87] = v10x7;
         }
-        w10 += 8;
+        w10 += k;
         const int8_t v11x0 = w11[0];
         ksum11 += (uint32_t) v11x0;
         out[88] = v11x0;
@@ -2116,7 +2116,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum11 += (uint32_t) v11x7;
           out[95] = v11x7;
         }
-        w11 += 8;
+        w11 += k;
         const int8_t v12x0 = w12[0];
         ksum12 += (uint32_t) v12x0;
         out[96] = v12x0;
@@ -2155,7 +2155,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum12 += (uint32_t) v12x7;
           out[103] = v12x7;
         }
-        w12 += 8;
+        w12 += k;
         const int8_t v13x0 = w13[0];
         ksum13 += (uint32_t) v13x0;
         out[104] = v13x0;
@@ -2194,7 +2194,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum13 += (uint32_t) v13x7;
           out[111] = v13x7;
         }
-        w13 += 8;
+        w13 += k;
         const int8_t v14x0 = w14[0];
         ksum14 += (uint32_t) v14x0;
         out[112] = v14x0;
@@ -2233,7 +2233,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__scalar(
           ksum14 += (uint32_t) v14x7;
           out[119] = v14x7;
         }
-        w14 += 8;
+        w14 += k;
         out += 128;
       }
 

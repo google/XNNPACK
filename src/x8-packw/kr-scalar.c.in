@@ -108,7 +108,7 @@ void xnn_qs${BITS}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${N
               ksum${N} += (uint32_t) v${N}x${K};
               out[${N*KR+K}] = v${N}x${K};
             }
-          w${N} += ${KR};
+          w${N} += k;
         out += ${NR*KR};
       }
 
@@ -192,7 +192,7 @@ void xnn_qs${BITS}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${N
               ksum${N} += (uint32_t) v${N}x${K};
               out[${N*KR+K}] = v${N}x${K};
             }
-          w${N} += ${KR};
+          w${N} += k;
         out += ${NR*KR};
       }
 
