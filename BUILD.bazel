@@ -17,6 +17,7 @@ load(
     "xnnpack_min_size_copts",
     "xnnpack_slinky_deps",
     "xnnpack_slinky_srcs",
+    "xnnpack_source_list_file",
     "xnnpack_transitive_source_list",
     "xnnpack_visibility",
 )
@@ -818,19 +819,46 @@ py_binary(
     }),
 )
 
+# This target gathers the transitive sources from its deps and adds them to the
+# srcs attribute.
 xnnpack_transitive_source_list(
     name = "build_identifier_ukernel_srcs",
+    srcs = ["src/packing.cc"],
     deps = [":prod_microkernels"],
 )
 
+# Windows builds fail on the generate_build_identifier genrule because the
+# command line is too long when expanding the source file paths to feed to the
+# Python generation script. To work around this, we write those files to a
+# single file that we.
+#
+# This is what the below command does. It ONLY exposes the list file as an output.
+#
+# See the next genrule comment for the rest of the explanation.
+xnnpack_source_list_file(
+    name = "build_identifier_ukernel_srcs_list",
+    srcs = [":build_identifier_ukernel_srcs"],
+    compatible_with = [],
+)
+
+# When the python script gets executed, the files it has access to are limited
+# to what is explicitely requested in the `srcs` attribute. We add the "list"
+# and the source paths to the sources to make them available to the Python
+# script and only expand the list file path to keep the command line short
+# enough to avoid having Windows break down.
+#
+# I have not found a way to transitively pull the source files from the "list"
+# target and make them available from the Python script without adding them to
+# the `srcs` attribute (making them expanded in the "$(SRCS)" variable), thus
+# the repetition.
 genrule(
     name = "generate_build_identifier",
     srcs = [
-        "src/packing.cc",
+        ":build_identifier_ukernel_srcs_list",
         ":build_identifier_ukernel_srcs",
     ],
     outs = ["src/build_identifier.c"],
-    cmd = "$(location generate_build_identifier_py) --output $@ $(SRCS)",
+    cmd = "$(location generate_build_identifier_py) --output $@ --input_file_list $(location :build_identifier_ukernel_srcs_list)",
     tools = [":generate_build_identifier_py"],
 )
 

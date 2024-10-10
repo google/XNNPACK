@@ -79,15 +79,19 @@ bool xnn_experimental_check_build_identifier(const void* data, const size_t size
 
 def main(args) -> None:
   m = hashlib.sha256()
+  inputs = args.inputs
   if args.input_file_list:
     with open(args.input_file_list, "r") as f:
-      args.inputs = f.read().splitlines()
-  for path in args.inputs:
+      inputs += f.read().splitlines()
+
+  inputs = sorted(inputs)
+
+  for path in inputs:
     with open(path, "rb") as f:
       m.update(f.read())
   byte_list = ", ".join(str(b).rjust(3, "x") for b in m.digest())
   byte_list = textwrap.indent(textwrap.fill(byte_list, width=40), "  ").replace("x", " ")
-  formatted_input_list = "\n".join("// - " + p for p in args.inputs)
+  formatted_input_list = "\n".join("// - " + p for p in inputs)
   with open(args.output, "w") as out:
     out.write(
         FILE_TEMPLATE.format(id_data=byte_list, genlist=formatted_input_list)
