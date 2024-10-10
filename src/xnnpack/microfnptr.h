@@ -1612,11 +1612,11 @@ typedef void (*xnn_f32_rw_ukernel_fn)(
     size_t batch,
     const float* input,
     float init_value,
-    int* padding, 
-    int base_dilation, 
-    int window_dilations,
-    int window_dimensions, 
-    int window_strides,
+    int64_t* padding, 
+    int64_t base_dilation, 
+    int64_t window_dilations,
+    int64_t window_dimensions, 
+    int64_t window_strides,
     float* output,
     const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
@@ -1625,11 +1625,11 @@ typedef void (*xnn_f32_rwd_ukernel_fn)(
     size_t channels,
     const float* input,
     float init_value,
-    int* padding, 
-    int base_dilation, 
-    int window_dilations,
-    int window_dimensions, 
-    int window_strides,
+    int64_t* padding, 
+    int64_t base_dilation, 
+    int64_t window_dilations,
+    int64_t window_dimensions, 
+    int64_t window_strides,
     float* output,
     const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 

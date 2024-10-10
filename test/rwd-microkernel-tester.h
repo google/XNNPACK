@@ -68,58 +68,58 @@ class RWDMicrokernelTester {
     return this->init_value_;
   }
 
- RWDMicrokernelTester& padding(int* padding) {
+ RWDMicrokernelTester& padding(int64_t* padding) {
     assert(padding != 0);
     this->padding_[0] = padding[0];
     this->padding_[1] = padding[1];
     return *this;
   }
 
-  int padding_high() const {
+  int64_t padding_high() const {
     return this->padding_[0];
   }
 
-  int padding_low() const {
+  int64_t padding_low() const {
     return this->padding_[1];
   }
 
- RWDMicrokernelTester& base_dilation(int base_dilation) {
+ RWDMicrokernelTester& base_dilation(int64_t base_dilation) {
     assert(base_dilation != 0);
     this->base_dilation_ = base_dilation;
     return *this;
   }
 
-  int base_dilation() const {
+  int64_t base_dilation() const {
     return this->base_dilation_;
   }
 
- RWDMicrokernelTester& window_dilation(int window_dilation) {
+ RWDMicrokernelTester& window_dilation(int64_t window_dilation) {
     assert(window_dilation != 0);
     this->window_dilation_ = window_dilation;
     return *this;
   }
 
-  int window_dilation() const {
+  int64_t window_dilation() const {
     return this->window_dilation_;
   }
 
- RWDMicrokernelTester& window_dimension(int window_dimension) {
+ RWDMicrokernelTester& window_dimension(int64_t window_dimension) {
     assert(window_dimension != 0);
     this->window_dimension_ = window_dimension;
     return *this;
   }
 
-  int window_dimension() const {
+  int64_t window_dimension() const {
     return this->window_dimension_;
   }
 
- RWDMicrokernelTester& window_stride(int window_stride) {
+ RWDMicrokernelTester& window_stride(int64_t window_stride) {
     assert(window_stride != 0);
     this->window_stride_ = window_stride;
     return *this;
   }
 
-  int window_stride() const {
+  int64_t window_stride() const {
     return this->window_stride_;
   }
 
@@ -140,21 +140,21 @@ class RWDMicrokernelTester {
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
-      int padding[2] = {padding_high(),padding_low()};
+      int64_t padding[2] = {padding_high(),padding_low()};
 
       // Compute reference results.
-      int size = rows();
+      int64_t size = rows();
 
-      int padded_size = size + (size - 1) * (base_dilation() - 1) + padding[0] + padding[1];
-      int output_size = (padded_size - (window_dimension() - 1) * window_dilation() - 1) / window_stride() + 1;
+      int64_t padded_size = size + (size - 1) * (base_dilation() - 1) + padding[0] + padding[1];
+      int64_t output_size = (padded_size - (window_dimension() - 1) * window_dilation() - 1) / window_stride() + 1;
 
       float output_ref[output_size * channels()];
 
-      for (int j = 0; j < output_size; j++) {
-        for (int i = 0; i < channels(); i++) {
+      for (int64_t j = 0; j < output_size; j++) {
+        for (int64_t i = 0; i < channels(); i++) {
             float sum = init_value();
-            for (int k = 0; k < window_dimension(); k++) {
-                int window_row = j * window_stride() + k * window_dilation();
+            for (int64_t k = 0; k < window_dimension(); k++) {
+                int64_t window_row = j * window_stride() + k * window_dilation();
                 if (window_row < padding[0] || 
                     window_row >= padded_size - padding[1] || 
                     (window_row - padding[0]) % base_dilation() != 0) {
@@ -196,9 +196,9 @@ class RWDMicrokernelTester {
   size_t channel_tile_{1};
   size_t iterations_{15};
   float init_value_{0.0};
-  int padding_[2] = {1,1};
-  int base_dilation_{1};
-  int window_dimension_{1};
-  int window_dilation_{1};
-  int window_stride_{1};
+  int64_t padding_[2] = {1,1};
+  int64_t base_dilation_{1};
+  int64_t window_dimension_{1};
+  int64_t window_dilation_{1};
+  int64_t window_stride_{1};
 };

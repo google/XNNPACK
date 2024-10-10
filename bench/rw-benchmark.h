@@ -34,18 +34,18 @@ void f32_rwsum(
     return;
   }
   const size_t rows = state.range(0);
-  const size_t batch = state.range(0);
+  const size_t batch = state.range(1);
 
   std::vector<float, AlignedAllocator<float, 64>> input(rows * batch + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<float> output(rows);
   std::iota(input.begin(), input.end(), 1);
 
   // Prepare parameters.
-  int padding[2] = {0,0};
-  int base_dilation = 1;
-  int window_dilation = 1;
-  int window_dimensions = batch;
-  int window_stride = 1;
+  int64_t padding[2] = {0,0};
+  int64_t base_dilation = 1;
+  int64_t window_dilation = 1;
+  int64_t window_dimensions = batch;
+  int64_t window_stride = 1;
   float init_value = 0;
   xnn_f32_default_params params;
   if (init_params != nullptr) {
@@ -53,7 +53,7 @@ void f32_rwsum(
   }
 
   for (auto _ : state) {
-    for (int i = 0; i < rows; ++i) {
+    for (int64_t i = 0; i < rows; ++i) {
       rwsum(batch * sizeof(float), &input[i * batch], init_value, padding, base_dilation, window_dilation,
             window_dimensions, window_stride, &output[i], init_params != nullptr ? &params : nullptr);
     }
@@ -84,11 +84,11 @@ void f32_rwdsum(
   std::iota(input.begin(), input.end(), 0.0f);
 
   // Prepare parameters.
-  int padding[2] = {0,0};
-  int base_dilation = 1;
-  int window_dilation = 1;
-  int window_dimensions = rows;
-  int window_stride = 1;
+  int64_t padding[2] = {0,0};
+  int64_t base_dilation = 1;
+  int64_t window_dilation = 1;
+  int64_t window_dimensions = rows;
+  int64_t window_stride = 1;
   float init_value = 0;
   struct xnn_f32_default_params params;
   if (init_params != nullptr) {
@@ -117,6 +117,9 @@ static void BenchmarkRWSUM(benchmark::internal::Benchmark* b)
   b->Args({512, 8000});
   b->Args({1024, 64});
   b->Args({32768, 1});
+  b->Args({10240, 1024});
+  /*b->Args({32768, 32768});
+  b->Args({65536, 65536});*/
 }
 
 static void BenchmarkRWDSUM(benchmark::internal::Benchmark* b)
@@ -125,6 +128,8 @@ static void BenchmarkRWDSUM(benchmark::internal::Benchmark* b)
   b->Args({8, 1024});
   b->Args({16, 1024});
   b->Args({10240, 1024});
+  //b->Args({32768, 32768});
+  //b->Args({65536, 65536});
 }
 
 }  // namespace
