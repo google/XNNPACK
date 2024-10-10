@@ -119,10 +119,7 @@ TEST_F(GlobalAveragePooling2DTestQS8, define)
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_global_average_pooling_2d);
   ASSERT_EQ(node->compute_type, xnn_compute_type_qs8);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);
@@ -158,10 +155,7 @@ TEST_F(GlobalAveragePooling2DTestQU8, define)
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_global_average_pooling_2d);
   ASSERT_EQ(node->compute_type, xnn_compute_type_qu8);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);
@@ -197,10 +191,7 @@ TEST_F(GlobalAveragePooling2DTestF16, define)
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_global_average_pooling_2d);
   ASSERT_EQ(node->compute_type, xnn_compute_type_fp16);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);
@@ -236,10 +227,7 @@ TEST_F(GlobalAveragePooling2DTestF32, define)
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_global_average_pooling_2d);
   ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);
@@ -466,7 +454,9 @@ TEST_F(GlobalAveragePooling2DTestF16, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
-  ASSERT_EQ(subgraph_output, operator_output);
+  for (size_t i = 0; i < subgraph_output.size(); ++i) {
+    ASSERT_NEAR(subgraph_output[i], operator_output[i], 1e-3);
+  }
 }
 
 TEST_F(GlobalAveragePooling2DTestF32, matches_operator_api)
@@ -536,7 +526,9 @@ TEST_F(GlobalAveragePooling2DTestF32, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
-  ASSERT_EQ(subgraph_output, operator_output);
+  for (size_t i = 0; i < subgraph_output.size(); ++i) {
+    ASSERT_NEAR(subgraph_output[i], operator_output[i], 1e-6);
+  }
 }
 
 TEST_F(GlobalAveragePooling2DTestF32, reshape_output_no_keep_dims)

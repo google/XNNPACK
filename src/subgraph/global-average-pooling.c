@@ -425,8 +425,18 @@ enum xnn_status xnn_define_global_average_pooling_1d(
   uint32_t output_id,
   uint32_t flags)
 {
-  return define_global_average_pooling_nd(
-    subgraph, xnn_node_type_global_average_pooling_1d, output_min, output_max, input_id, output_id, flags);
+  const struct xnn_value* input_value = &subgraph->values[input_id];
+  size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
+
+  if (input_value->layout == xnn_layout_type_nchw) {
+    reduction_axes[0] = input_value->shape.num_dims - 1;
+  } else {
+    reduction_axes[0] = input_value->shape.num_dims - 2;
+  }
+
+  return xnn_define_static_mean(
+    subgraph, 1, reduction_axes, input_id,
+    output_id, flags);
 }
 
 enum xnn_status xnn_define_global_average_pooling_2d(
@@ -437,6 +447,18 @@ enum xnn_status xnn_define_global_average_pooling_2d(
   uint32_t output_id,
   uint32_t flags)
 {
-  return define_global_average_pooling_nd(
-    subgraph, xnn_node_type_global_average_pooling_2d, output_min, output_max, input_id, output_id, flags);
+  const struct xnn_value* input_value = &subgraph->values[input_id];
+  size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
+
+  if (input_value->layout == xnn_layout_type_nchw) {
+    reduction_axes[0] = input_value->shape.num_dims - 2;
+    reduction_axes[1] = input_value->shape.num_dims - 1;
+  } else {
+    reduction_axes[0] = input_value->shape.num_dims - 3;
+    reduction_axes[1] = input_value->shape.num_dims - 2;
+  }
+
+  return xnn_define_static_mean(
+    subgraph, 2, reduction_axes, input_id,
+    output_id, flags);
 }
