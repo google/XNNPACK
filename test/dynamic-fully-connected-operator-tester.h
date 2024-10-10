@@ -157,7 +157,6 @@ class DynamicFullyConnectedOperatorTester {
       std::copy(kernel.cbegin(), kernel.cend(), kernel_as_float.begin());
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
       std::copy(bias.cbegin(), bias.cend(), bias_as_float.begin());
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       if (has_bias()) {

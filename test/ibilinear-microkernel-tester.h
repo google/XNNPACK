@@ -104,7 +104,6 @@ class IBilinearMicrokernelTester {
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(packed_weights.begin(), packed_weights.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < indirection.size(); i++) {
         indirection[i] = input.data() + i * channels() - input_offset();
@@ -157,7 +156,6 @@ class IBilinearMicrokernelTester {
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(packed_weights.begin(), packed_weights.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       for (size_t i = 0; i < indirection.size(); i++) {
         indirection[i] = input.data() + i * channels() - input_offset();
@@ -212,7 +210,6 @@ class IBilinearMicrokernelTester {
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(packed_weights.begin(), packed_weights.end(), [&]() { return w11dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xFA));
 
       for (size_t i = 0; i < indirection.size(); i++) {
         indirection[i] = input.data() + i * channels() - input_offset();
@@ -268,7 +265,6 @@ class IBilinearMicrokernelTester {
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       std::generate(packed_weights.begin(), packed_weights.end(), [&]() { return w11dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xFA));
 
       for (size_t i = 0; i < indirection.size(); i++) {
         indirection[i] = input.data() + i * channels() - input_offset();
@@ -320,7 +316,6 @@ class IBilinearMicrokernelTester {
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(packed_weights.begin(), packed_weights.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Indirection will point to the even ("left") pixels of the input.
       // The kernels will expect "right" pixels to be placed right next to them.
@@ -377,7 +372,6 @@ class IBilinearMicrokernelTester {
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(packed_weights.begin(), packed_weights.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Indirection will point to the even ("left") pixels of the input.
       // The kernels will expect "right" pixels to be placed right next to them.

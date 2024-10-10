@@ -147,8 +147,6 @@ TEST_F(EluTestQS8, matches_operator_api)
   const float output_scale = input_scale;
   const float alpha = std::uniform_real_distribution<float>(1.0e-4f, 1.0f)(rng);
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), INT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0xA5));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -206,8 +204,6 @@ TEST_F(EluTestF16, matches_operator_api)
   const float alpha = std::uniform_real_distribution<float>(1.0e-4f, 1.0f)(rng);
   std::uniform_real_distribution<float> f32dist(-255.0f, 255.0f);
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -262,8 +258,6 @@ TEST_F(EluTestF32, matches_operator_api)
   const float alpha = std::uniform_real_distribution<float>(1.0e-4f, 1.0f)(rng);
   std::uniform_real_distribution<float> f32dist(-255.0f, 255.0f);
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

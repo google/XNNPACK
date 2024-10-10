@@ -145,7 +145,6 @@ class ConvertOperatorTester {
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -191,7 +190,6 @@ class ConvertOperatorTester {
     std::vector<xnn_float16> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -252,7 +250,6 @@ class ConvertOperatorTester {
       std::copy(input_float.begin(), input_float.end(), input.begin());
       std::copy(input.begin(), input.begin() + channels(),
                      input_float.begin());
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Create, setup, run, and destroy Convert operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -319,7 +316,6 @@ class ConvertOperatorTester {
       const float second_val = range_dist(rng);
       std::uniform_real_distribution<float> f32dist(std::min(first_val, second_val), std::max(first_val, second_val));
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Create, setup, run, and destroy Convert operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -374,7 +370,6 @@ class ConvertOperatorTester {
       std::uniform_real_distribution<float> f32dist(
           std::min(first_val, second_val), std::max(first_val, second_val));
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Create, setup, run, and destroy Convert operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -432,7 +427,6 @@ class ConvertOperatorTester {
     std::vector<int8_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results.
       const float inv_scale = 1.0f / output_scale();
@@ -490,7 +484,6 @@ class ConvertOperatorTester {
     std::vector<uint8_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Compute reference results.
       const float inv_scale = 1.0f / output_scale();
@@ -545,7 +538,6 @@ class ConvertOperatorTester {
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       const float fp16_scale = xnn_float16(input_scale());
       // Compute reference results.
@@ -601,7 +593,6 @@ class ConvertOperatorTester {
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -655,7 +646,6 @@ class ConvertOperatorTester {
     std::vector<int8_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return qs16dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results.
       const int64_t multiplier = static_cast<int64_t> (std::llrintf(32768.0f * input_scale()));
@@ -711,7 +701,6 @@ class ConvertOperatorTester {
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -758,7 +747,6 @@ class ConvertOperatorTester {
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -799,7 +787,6 @@ class ConvertOperatorTester {
     std::vector<xnn_float16> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -847,7 +834,6 @@ class ConvertOperatorTester {
     std::vector<int8_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results.
       const float inv_scale = 1.0f / output_scale();
@@ -894,7 +880,6 @@ class ConvertOperatorTester {
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -940,7 +925,6 @@ class ConvertOperatorTester {
     std::vector<int8_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return qs16dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results.
       const int64_t multiplier = static_cast<int64_t> (std::llrintf(32768.0f * input_scale()));
@@ -991,7 +975,6 @@ class ConvertOperatorTester {
     std::vector<uint8_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Compute reference results.
       const float inv_scale = 1.0f / output_scale();
@@ -1038,7 +1021,6 @@ class ConvertOperatorTester {
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {

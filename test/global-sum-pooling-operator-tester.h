@@ -124,7 +124,6 @@ class GlobalSumPoolingOperatorTester {
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -211,7 +210,6 @@ class GlobalSumPoolingOperatorTester {
     std::vector<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {

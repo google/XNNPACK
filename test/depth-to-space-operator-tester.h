@@ -131,7 +131,6 @@ class DepthToSpaceOperatorTester {
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(i8rng));
-      std::fill(output.begin(), output.end(), INT8_C(0xAF));
 
       // Create, setup, run, and destroy Depth To Space operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -201,7 +200,6 @@ class DepthToSpaceOperatorTester {
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(i16rng));
-      std::fill(output.begin(), output.end(), INT16_C(0xDEAD));
 
       // Create, setup, run, and destroy Depth To Space operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -271,7 +269,6 @@ class DepthToSpaceOperatorTester {
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(i32rng));
-      std::fill(output.begin(), output.end(), INT32_C(0xDEADBEAF));
 
       // Create, setup, run, and destroy Depth To Space operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -341,7 +338,6 @@ class DepthToSpaceOperatorTester {
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(i16rng));
-      std::fill(output.begin(), output.end(), INT16_C(0xDEAD));
 
       // Create, setup, run, and destroy Depth To Space operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -411,7 +407,6 @@ class DepthToSpaceOperatorTester {
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(i32rng));
-      std::fill(output.begin(), output.end(), INT32_C(0xDEADBEAF));
 
       // Create, setup, run, and destroy Depth To Space operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));

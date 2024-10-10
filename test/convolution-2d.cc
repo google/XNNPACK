@@ -291,8 +291,6 @@ TEST_F(ConvolutionTestQD8F16QC8W, internally_allocated_dynamic_quantization_para
   uint32_t input_id = XNN_INVALID_NODE_ID;
   std::vector<xnn_float16> convert_input(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::vector<int8_t> operator_dq_data(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES);
-  std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0xDEAD));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0xDEAD));
   std::vector<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
   std::vector<float> kernel_scale(group_output_channels * groups);
   std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return scale_dist(rng); });
@@ -464,8 +462,6 @@ TEST_F(ConvolutionTestQD8F32QC8W, internally_allocated_dynamic_quantization_para
   uint32_t input_id = XNN_INVALID_NODE_ID;
   std::vector<float> convert_input(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES / sizeof(float));
   std::vector<int8_t> operator_dq_data(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES);
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
   std::vector<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
   std::vector<float> kernel_scale(group_output_channels * groups);
   std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return scale_dist(rng); });
@@ -861,8 +857,6 @@ TEST_F(ConvolutionTestQC8, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
   std::generate(filter.begin(), filter.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), INT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0xA5));
   std::vector<float> requantization_scales(groups * group_output_channels);
   const int8_t input_zero_point = i8dist(rng);
   const int8_t output_zero_point = i8dist(rng);
@@ -1013,8 +1007,6 @@ TEST_F(ConvolutionTestQS8, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
   std::generate(filter.begin(), filter.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), INT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0xA5));
   const int8_t input_zero_point = -1;
   const float input_scale = scale_dist(rng);
   const float kernel_scale = scale_dist(rng);
@@ -1149,8 +1141,6 @@ TEST_F(ConvolutionTestQU8, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
   std::generate(filter.begin(), filter.end(), [&]() { return u8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), UINT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT8_C(0xA5));
   const uint8_t input_zero_point = u8dist(rng);
   const uint8_t kernel_zero_point = 0;
   const float input_scale = scale_dist(rng);
@@ -1288,8 +1278,6 @@ TEST_F(ConvolutionTestF16, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(filter.begin(), filter.end(), [&]() { return f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_convolution2d_nhwc_f16(
@@ -1382,8 +1370,6 @@ TEST_F(ConvolutionTestF32, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(filter.begin(), filter.end(), [&]() { return f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_convolution2d_nhwc_f32(
@@ -1476,8 +1462,6 @@ TEST_F(ConvolutionTestF32, transient_indirection_buffer)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(filter.begin(), filter.end(), [&]() { return f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_convolution2d_nhwc_f32(

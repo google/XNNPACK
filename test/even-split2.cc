@@ -299,10 +299,6 @@ TEST_F(EvenSplit2TestF32, define)
 TEST_F(EvenSplit2TestQS8, matches_operator_api)
 {
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-  std::fill(operator_output1.begin(), operator_output1.end(), INT8_C(0xA5));
-  std::fill(operator_output2.begin(), operator_output2.end(), INT8_C(0xA5));
-  std::fill(subgraph_output1.begin(), subgraph_output1.end(), INT8_C(0xA5));
-  std::fill(subgraph_output2.begin(), subgraph_output2.end(), INT8_C(0xA5));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -378,10 +374,6 @@ TEST_F(EvenSplit2TestQS8, matches_operator_api)
 TEST_F(EvenSplit2TestQU8, matches_operator_api)
 {
   std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-  std::fill(operator_output1.begin(), operator_output1.end(), UINT8_C(0xA5));
-  std::fill(operator_output2.begin(), operator_output2.end(), UINT8_C(0xA5));
-  std::fill(subgraph_output1.begin(), subgraph_output1.end(), UINT8_C(0xA5));
-  std::fill(subgraph_output2.begin(), subgraph_output2.end(), UINT8_C(0xA5));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -457,10 +449,6 @@ TEST_F(EvenSplit2TestQU8, matches_operator_api)
 TEST_F(EvenSplit2TestF16, matches_operator_api)
 {
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output1.begin(), operator_output1.end(), std::nanf(""));
-  std::fill(operator_output2.begin(), operator_output2.end(), std::nanf(""));
-  std::fill(subgraph_output1.begin(), subgraph_output1.end(), std::nanf(""));
-  std::fill(subgraph_output2.begin(), subgraph_output2.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -533,10 +521,6 @@ TEST_F(EvenSplit2TestF16, matches_operator_api)
 TEST_F(EvenSplit2TestF32, matches_operator_api)
 {
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output1.begin(), operator_output1.end(), std::nanf(""));
-  std::fill(operator_output2.begin(), operator_output2.end(), std::nanf(""));
-  std::fill(subgraph_output1.begin(), subgraph_output1.end(), std::nanf(""));
-  std::fill(subgraph_output2.begin(), subgraph_output2.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

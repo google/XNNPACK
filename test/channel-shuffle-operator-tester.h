@@ -106,7 +106,6 @@ class ChannelShuffleOperatorTester {
     std::vector<uint8_t> output((batch_size() - 1) * output_stride() + channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Create, setup, run, and destroy Channel Shuffle operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -157,7 +156,6 @@ class ChannelShuffleOperatorTester {
     std::vector<uint32_t> output((batch_size() - 1) * output_stride() + channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u32dist(rng); });
-      std::fill(output.begin(), output.end(), UINT32_C(0xDEADBEAF));
 
       // Create, setup, run, and destroy Channel Shuffle operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));

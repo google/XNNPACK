@@ -43,7 +43,6 @@ static void benchmark_unary_operator(Create create, Reshape reshape,
   std::vector<In> input(batch_size + XNN_EXTRA_BYTES / sizeof(In));
   std::vector<Out> output(batch_size);
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(output.begin(), output.end(), 0);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {

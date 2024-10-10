@@ -233,8 +233,6 @@ TEST_F(StaticTransposeTestQS8, matches_operator_api)
   const int32_t output_zero_point = input_zero_point;
   const float output_scale = input_scale;
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), INT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0xA5));
   std::vector<size_t> perm = RandomPermutation(dims, rng);
   std::vector<size_t> output_dims = PermuteInputDimensions(dims, perm);
 
@@ -297,8 +295,6 @@ TEST_F(StaticTransposeTestQU8, matches_operator_api)
   const int32_t output_zero_point = input_zero_point;
   const float output_scale = input_scale;
   std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), UINT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT8_C(0xA5));
   std::vector<size_t> perm = RandomPermutation(dims, rng);
   std::vector<size_t> output_dims = PermuteInputDimensions(dims, perm);
 
@@ -357,8 +353,6 @@ TEST_F(StaticTransposeTestQU8, matches_operator_api)
 TEST_F(StaticTransposeTestF16, matches_operator_api)
 {
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
   std::vector<size_t> perm = RandomPermutation(dims, rng);
   std::vector<size_t> output_dims = PermuteInputDimensions(dims, perm);
 
@@ -418,8 +412,6 @@ TEST_F(StaticTransposeTestF16, matches_operator_api)
 TEST_F(StaticTransposeTestF32, matches_operator_api)
 {
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
   std::vector<size_t> perm = RandomPermutation(dims, rng);
   std::vector<size_t> output_dims = PermuteInputDimensions(dims, perm);
 

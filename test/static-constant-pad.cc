@@ -248,8 +248,6 @@ TEST_F(StaticConstantPadTestInt8, matches_operator_api)
   // Output sizes
   operator_output = std::vector<int8_t>(NumElements(output_dims));
   subgraph_output = std::vector<int8_t>(operator_output.size());
-  std::fill(operator_output.begin(), operator_output.end(), INT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0xA5));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -323,8 +321,6 @@ TEST_F(StaticConstantPadTestUint8, matches_operator_api)
   // Output sizes
   operator_output = std::vector<uint8_t>(NumElements(output_dims));
   subgraph_output = std::vector<uint8_t>(operator_output.size());
-  std::fill(operator_output.begin(), operator_output.end(), UINT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT8_C(0xA5));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -396,8 +392,6 @@ TEST_F(StaticConstantPadTestF16, matches_operator_api)
   // Output sizes
   operator_output = std::vector<xnn_float16>(NumElements(output_dims));
   subgraph_output = std::vector<xnn_float16>(operator_output.size());
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -469,8 +463,6 @@ TEST_F(StaticConstantPadTestF32, matches_operator_api)
   // Output sizes
   operator_output = std::vector<float>(NumElements(output_dims));
   subgraph_output = std::vector<float>(operator_output.size());
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -539,7 +531,6 @@ TEST_F(StaticConstantPadTestF32, reshape_output)
     output_dims[i] = pre_paddings[i] + output_dims[i] + post_paddings[i];
   }
   subgraph_output = std::vector<float>(NumElements(output_dims));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

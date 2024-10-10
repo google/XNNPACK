@@ -142,7 +142,6 @@ class MeanOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       std::fill(output_ref.begin(), output_ref.end(), 0.0f);
@@ -268,7 +267,6 @@ class MeanOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results.
       std::fill(output_ref.begin(), output_ref.end(), 0.0);
@@ -391,7 +389,6 @@ class MeanOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       const int32_t num_reduced_elements = num_input_elements() / num_output_elements;
       const float mean_scale = static_cast<double>(1.0f) / num_reduced_elements;
@@ -537,7 +534,6 @@ class MeanOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       const int32_t num_reduced_elements = num_input_elements() / num_output_elements;
       const float mean_scale = static_cast<double>(1.0f) / num_reduced_elements;

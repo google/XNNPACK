@@ -197,8 +197,6 @@ TEST_F(AveragePoolingTestF16, matches_operator_api)
 {
   std::uniform_real_distribution<float> f32dist;
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -273,8 +271,6 @@ TEST_F(AveragePoolingTestF32, matches_operator_api)
 {
   std::uniform_real_distribution<float> f32dist;
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

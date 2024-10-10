@@ -256,8 +256,6 @@ TEST_F(BatchMatrixMultiplyTestF16, matches_operator_api)
 
   std::generate(input1.begin(), input1.end(), [&]() { return f32dist(rng); });
   std::generate(input2.begin(), input2.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_batch_matrix_multiply_nc_f16(/*flags=*/0, &op);
@@ -345,8 +343,6 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api)
 
   std::generate(input1.begin(), input1.end(), [&]() { return f32dist(rng); });
   std::generate(input2.begin(), input2.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_batch_matrix_multiply_nc_f32(/*flags=*/0, &op);
@@ -434,8 +430,6 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api_transposed)
 
   std::generate(input1.begin(), input1.end(), [&]() { return f32dist(rng); });
   std::generate(input2.begin(), input2.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_batch_matrix_multiply_nc_f32(/*flags=*/XNN_FLAG_TRANSPOSE_B, &op);
@@ -573,8 +567,6 @@ TEST_F(BatchMatrixMultiplyTestQD8ToF32, matches_operator_api) {
       NumElements(input2_dims) / input2_dims[input2_dims.size() - 2],
       1.0f / std::numeric_limits<int8_t>::max());
   std::generate(input2.begin(), input2.end(), [&]() { return i8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Create the dynamically quantized input data with the corresponding
   // `quantization_params`.

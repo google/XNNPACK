@@ -252,7 +252,6 @@ class FullyConnectedOperatorTester {
         quantization_params[i].zero_point = quantization_params[batch_size() - 1].zero_point;
         quantization_params[i].inv_scale = quantization_params[batch_size() - 1].inv_scale;
       }
-      std::fill(output.begin(), output.end(), UINT16_C(0xDEAD));
 
       // Compute reference results, without renormalization.
       std::fill(output_ref.begin(), output_ref.end(), 0.0f);
@@ -452,7 +451,6 @@ class FullyConnectedOperatorTester {
         quantization_params[i].zero_point = quantization_params[batch_size() - 1].zero_point;
         quantization_params[i].inv_scale = quantization_params[batch_size() - 1].inv_scale;
       }
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without renormalization.
       std::fill(output_ref.begin(), output_ref.end(), 0);
@@ -639,7 +637,6 @@ class FullyConnectedOperatorTester {
         quantization_params[i].zero_point = quantization_params[batch_size() - 1].zero_point;
         quantization_params[i].inv_scale = quantization_params[batch_size() - 1].inv_scale;
       }
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without renormalization.
       std::fill(output_ref.begin(), output_ref.end(), 0);
@@ -837,7 +834,6 @@ class FullyConnectedOperatorTester {
         quantization_params[i].zero_point = quantization_params[batch_size() - 1].zero_point;
         quantization_params[i].inv_scale = quantization_params[batch_size() - 1].inv_scale;
       }
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without renormalization.
       std::fill(output_ref.begin(), output_ref.end(), 0);
@@ -1034,7 +1030,6 @@ class FullyConnectedOperatorTester {
                     [&]() { return w8dist(rng); });
       std::generate(kernel_scale.begin(), kernel_scale.end(),
                     [&]() { return f32idist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
 
       // Quantize the left-hand operand.
@@ -1259,7 +1254,6 @@ class FullyConnectedOperatorTester {
       std::generate(kernel.begin(), kernel.end(),
                     [&]() { return w8dist(rng); });
       std::generate(kernel_scale2d.begin(), kernel_scale2d.end(), [&]() { return math_cvt_bf16_fp32(f32idist(rng)); });
-      std::fill(output.begin(), output.end(), nanf(""));
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
 
       // Quantize the left-hand operand.
@@ -1462,7 +1456,6 @@ class FullyConnectedOperatorTester {
         quantization_params[i].zero_point = quantization_params[batch_size() - 1].zero_point;
         quantization_params[i].inv_scale = quantization_params[batch_size() - 1].inv_scale;
       }
-      std::fill(output.begin(), output.end(), UINT16_C(0xDEAD));
 
       // Compute reference results, without renormalization.
       std::fill(output_ref.begin(), output_ref.end(), 0);
@@ -1639,7 +1632,6 @@ class FullyConnectedOperatorTester {
         quantization_params[i].zero_point = quantization_params[batch_size() - 1].zero_point;
         quantization_params[i].inv_scale = quantization_params[batch_size() - 1].inv_scale;
       }
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without renormalization.
       std::fill(output_ref.begin(), output_ref.end(), 0);
@@ -1810,7 +1802,6 @@ class FullyConnectedOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results, without renormalization.
       if (has_bias()) {
@@ -2001,7 +1992,6 @@ class FullyConnectedOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       for (size_t oc = 0; oc < output_channels(); oc++) {
         // Make filter weights within the same output channel to use the same sign as the bias.
@@ -2219,7 +2209,6 @@ class FullyConnectedOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return u8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Compute reference results, without renormalization.
       if (has_bias()) {
@@ -2415,7 +2404,6 @@ class FullyConnectedOperatorTester {
       std::copy(kernel.cbegin(), kernel.cend(), kernel_as_float.begin());
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
       std::copy(bias.cbegin(), bias.cend(), bias_as_float.begin());
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without renormalization.
       if (has_bias()) {
@@ -2684,7 +2672,6 @@ class FullyConnectedOperatorTester {
       std::generate(kernel.begin(), kernel.end(), [&]() { return i8wdist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32wdist(rng); });
       std::generate(scale.begin(), scale.end(), [&]() { return f32idist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       if (input_channels() % 2 == 1) {
         // For odd number of input channels, ensure that last nibble is padded with 0.
@@ -2855,7 +2842,6 @@ class FullyConnectedOperatorTester {
       std::generate(kernel.begin(), kernel.end(), [&]() { return i8wdist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32wdist(rng); });
       std::generate(scale.begin(), scale.end(), [&]() { return f32idist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t oc = 0; oc < output_channels(); oc++) {
         // Make filter weights within the same output channel to use the same sign as the bias.
@@ -3046,7 +3032,6 @@ class FullyConnectedOperatorTester {
       std::copy(kernel.cbegin(), kernel.cend(), kernel_as_float.begin());
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
       std::copy(bias.cbegin(), bias.cend(), bias_as_float.begin());
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without renormalization.
       if (has_bias()) {

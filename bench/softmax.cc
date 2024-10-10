@@ -41,7 +41,6 @@ static void xnnpack_softmax_qu8(benchmark::State& state) {
   std::vector<uint8_t> input(batch_size * channels);
   std::vector<uint8_t> output(batch_size * channels);
   std::generate(input.begin(), input.end(), std::ref(u8rng));
-  std::fill(output.begin(), output.end(), 0xA5);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
@@ -120,7 +119,6 @@ static void xnnpack_softmax_f32(benchmark::State& state) {
   std::vector<float> output(batch_size * channels +
                             XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input.begin(), input.end(), std::ref(f32rng));
-  std::fill(output.begin(), output.end(), std::nanf(""));
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
@@ -196,7 +194,6 @@ static void xnnpack_softmax_f16(benchmark::State& state) {
   std::vector<xnn_float16> output(batch_size * channels +
                                   XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::generate(input.begin(), input.end(), f32rng);
-  std::fill(output.begin(), output.end(), std::nanf(""));
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {

@@ -174,7 +174,6 @@ class DWConv2DMicrokernelTester {
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(packed_weights.begin(), packed_weights.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       for (size_t oy = 0; oy < output_height(); oy++) {
         for (size_t ox = 0; ox < output_width(); ox++) {
@@ -243,7 +242,6 @@ class DWConv2DMicrokernelTester {
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(packed_weights.begin(), packed_weights.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t oy = 0; oy < output_height(); oy++) {
         for (size_t ox = 0; ox < output_width(); ox++) {

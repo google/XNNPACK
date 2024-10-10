@@ -55,7 +55,6 @@ static void f16_spmm(benchmark::State& state,
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(output.begin(), output.end(), std::nanf(""));
   std::fill(nmap.begin(), nmap.end(), 0);
   std::fill(dmap.begin(), dmap.end(), 0);
   std::fill(w.begin(), w.end(), 0);

@@ -156,7 +156,6 @@ class ArgMaxPoolMicrokernelTester {
     std::vector<uint32_t> index_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels() - input_offset();
@@ -226,7 +225,6 @@ class ArgMaxPoolMicrokernelTester {
     std::vector<uint32_t> index_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels() - input_offset();

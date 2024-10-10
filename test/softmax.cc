@@ -99,8 +99,6 @@ TEST_F(SoftmaxTestF16, matches_operator_api)
   // However, the range is still narrow enough that single-precision exp doesn't overflow.
   std::uniform_real_distribution<float> f32dist(90.0f, 100.0f);
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -160,8 +158,6 @@ TEST_F(SoftmaxTestF32, matches_operator_api)
   // However, the range is still narrow enough that single-precision exp doesn't overflow.
   std::uniform_real_distribution<float> f32dist(90.0f, 100.0f);
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

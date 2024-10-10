@@ -506,7 +506,6 @@ class AveragePoolingOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -636,7 +635,6 @@ class AveragePoolingOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -755,7 +753,6 @@ class AveragePoolingOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Compute reference results.
       const double scale = double(input_scale()) / (double(output_scale()) * double(pooling_height() * pooling_width()));
@@ -866,7 +863,6 @@ class AveragePoolingOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -974,7 +970,6 @@ class AveragePoolingOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results for the second run.
       for (size_t i = 0; i < next_batch_size(); i++) {
@@ -1072,7 +1067,6 @@ class AveragePoolingOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -1168,7 +1162,6 @@ class AveragePoolingOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results for the second run.
       for (size_t i = 0; i < next_batch_size(); i++) {
@@ -1264,7 +1257,6 @@ class AveragePoolingOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results.
       const double scale = double(input_scale()) / (double(output_scale()) * double(pooling_height() * pooling_width()));
@@ -1348,7 +1340,6 @@ class AveragePoolingOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Compute reference results for the second run.
       for (size_t i = 0; i < next_batch_size(); i++) {

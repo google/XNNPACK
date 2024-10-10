@@ -115,6 +115,8 @@ class BatchMatMulOperatorTester {
   static void ComputeRefF32(size_t m, size_t k, size_t n, bool transpose_b,
                             const float* input_a, const float* input_b,
                             float* output_ref) {
+    std::fill(output_ref, output_ref + m * n, 0.0f);
+
     if (transpose_b) {
       // lhs is B*M*K, rhs is B*N*K.
       for (size_t mi = 0; mi < m; mi++) {
@@ -141,6 +143,8 @@ class BatchMatMulOperatorTester {
   static void ComputeRefF16(size_t m, size_t k, size_t n, bool transpose_b,
                             const xnn_float16* input_a, const xnn_float16* input_b,
                             float* output_ref) {
+    std::fill(output_ref, output_ref + m * n, 0.0f);
+
     if (transpose_b) {
       // lhs is B*M*K, rhs is B*N*K.
       for (size_t mi = 0; mi < m; mi++) {
@@ -280,8 +284,6 @@ class BatchMatMulOperatorTester {
                     [&]() { return f32dist(rng); });
       std::generate(input_b.begin(), input_b.end(),
                     [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
-      std::fill(output_ref.begin(), output_ref.end(), 0.0f);
 
       // Compute reference results.
       ComputeReference(batch_dims_output, input_a.data(), input_b.data(),
@@ -364,8 +366,6 @@ class BatchMatMulOperatorTester {
                       [&]() { return f32dist(rng); });
         std::generate(input_b.begin(), input_b.end(),
                       [&]() { return f32dist(rng); });
-        std::fill(output.begin(), output.end(), nanf(""));
-        std::fill(output_ref.begin(), output_ref.end(), 0.0f);
 
         // Compute reference results.
         ComputeReference(batch_dims_output, input_a.data(), input_b.data(),
@@ -461,8 +461,6 @@ class BatchMatMulOperatorTester {
                     [&]() { return f32dist(rng); });
       std::generate(input_b.begin(), input_b.end(),
                     [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
-      std::fill(output_ref.begin(), output_ref.end(), 0.0f);
 
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
 

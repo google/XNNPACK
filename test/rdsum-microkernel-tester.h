@@ -139,7 +139,6 @@ class RDSumMicrokernelTester {
     {//for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(output.begin(), output.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), 0);
       output_ref = output;
 
       // Compute reference results, without clamping.
@@ -178,7 +177,6 @@ class RDSumMicrokernelTester {
     {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       std::generate(output.begin(), output.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), 0);
       output_ref = output;
 
       // Compute reference results, without clamping.

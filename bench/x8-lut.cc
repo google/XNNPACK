@@ -40,7 +40,6 @@ static void x8_lut(
     std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
   std::generate(input.begin(), input.end(), std::ref(u8rng));
   std::generate(table.begin(), table.end(), std::ref(u8rng));
-  std::fill(output.begin(), output.end(), UINT8_C(0xAA));
 
   for (auto _ : state) {
     lut(num_elements * sizeof(uint8_t), input.data(), output.data(), table.data());

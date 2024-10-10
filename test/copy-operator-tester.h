@@ -92,7 +92,6 @@ class CopyOperatorTester {
     std::vector<uint8_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xFA));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -138,7 +137,6 @@ class CopyOperatorTester {
     std::vector<uint16_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u16dist(rng); });
-      std::fill(output.begin(), output.end(), UINT16_C(0xDEAD));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -184,7 +182,6 @@ class CopyOperatorTester {
     std::vector<uint32_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u32dist(rng); });
-      std::fill(output.begin(), output.end(), UINT32_C(0xDEADBEEF));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -230,7 +227,6 @@ class CopyOperatorTester {
     std::vector<uint32_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u32dist(rng); });
-      std::fill(output.begin(), output.end(), UINT32_C(0xDEADBEEF));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {

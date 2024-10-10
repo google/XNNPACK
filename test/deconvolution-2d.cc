@@ -527,8 +527,6 @@ TEST_F(DeconvolutionTestQS8, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), INT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0xA5));
   const int8_t input_zero_point = 1;
   const float input_scale = scale_dist(rng);
   std::vector<float> kernel_scale(groups * group_output_channels);
@@ -668,8 +666,6 @@ TEST_F(DeconvolutionTestQU8, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return u8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), UINT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT8_C(0xA5));
   const uint8_t input_zero_point = u8dist(rng);
   const uint8_t kernel_zero_point = 0;
   const float input_scale = scale_dist(rng);
@@ -812,8 +808,6 @@ TEST_F(DeconvolutionTestF16, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_deconvolution2d_nhwc_f16(
@@ -911,8 +905,6 @@ TEST_F(DeconvolutionTestQD8F32QC8W, internally_allocated_dynamic_quantization_pa
   std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
 
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   xnn_operator_t convert_op = nullptr;
@@ -1027,8 +1019,6 @@ TEST_F(DeconvolutionTestF32, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_deconvolution2d_nhwc_f32(

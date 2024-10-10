@@ -482,7 +482,6 @@ class DeconvolutionOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results, without renormalization.
       if (has_bias()) {
@@ -714,7 +713,6 @@ class DeconvolutionOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return u8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Compute reference results, without renormalization.
       if (has_bias()) {
@@ -928,7 +926,6 @@ class DeconvolutionOperatorTester {
       std::copy(kernel.cbegin(), kernel.cend(), kernel_as_float.begin());
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
       std::copy(bias.cbegin(), bias.cend(), bias_as_float.begin());
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       if (has_bias()) {
@@ -1178,7 +1175,6 @@ class DeconvolutionOperatorTester {
           quantization_params.begin(), quantization_params.end(), [&]() {
             return xnn_qd8_quantization_params{w8dist(rng), f32idist(rng)};
           });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without clamping.
       std::fill(output_ref.begin(), output_ref.end(), 0.0f);
@@ -1388,7 +1384,6 @@ class DeconvolutionOperatorTester {
         }
       }
 
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without clamping.
       if (has_bias()) {
@@ -1607,7 +1602,6 @@ class DeconvolutionOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without clamping.
       if (has_bias()) {
@@ -1783,7 +1777,6 @@ class DeconvolutionOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results, without renormalization.
       if (has_bias()) {
@@ -1905,7 +1898,6 @@ class DeconvolutionOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results for the second run, including renormalization.
       if (has_bias()) {
@@ -2024,7 +2016,6 @@ class DeconvolutionOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return u8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Compute reference results, without renormalization.
       if (has_bias()) {
@@ -2146,7 +2137,6 @@ class DeconvolutionOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), 0xA5);
 
       // Compute reference results for the second run, including renormalization.
       if (has_bias()) {
@@ -2258,7 +2248,6 @@ class DeconvolutionOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       if (has_bias()) {
@@ -2391,7 +2380,6 @@ class DeconvolutionOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results for the second run, including clamping.
       if (has_bias()) {
@@ -2502,7 +2490,6 @@ class DeconvolutionOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without clamping.
       if (has_bias()) {
@@ -2619,7 +2606,6 @@ class DeconvolutionOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results for the second run, including clamping.
       if (has_bias()) {

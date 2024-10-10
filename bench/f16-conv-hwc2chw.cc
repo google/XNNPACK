@@ -79,7 +79,6 @@ static void f16_conv_hwc2chw(benchmark::State& state,
   }
 
   std::vector<xnn_float16> output(output_elements * num_buffers);
-  std::fill(output.begin(), output.end(), std::nanf(""));
 
   xnn_f16_minmax_params params;
   init_params(&params, 0x7C00 /* inf */, 0xFC00 /* -inf */);

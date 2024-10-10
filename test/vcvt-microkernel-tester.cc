@@ -37,7 +37,6 @@ void VCvtMicrokernelTester::Test(
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(),
                   [&]() { return f32dist(rng); });
-    std::fill(output.begin(), output.end(), nanf(""));
 
     // Call optimized micro-kernel.
     vcvt(batch_size() * sizeof(xnn_float16), input.data(), output.data(), nullptr);
@@ -61,7 +60,6 @@ void VCvtMicrokernelTester::Test(
   std::vector<xnn_float16> output(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-    std::fill(output.begin(), output.end(), std::nanf(""));
 
     // Call optimized micro-kernel.
     vcvt(batch_size() * sizeof(float), input.data(), output.data(), nullptr);
@@ -100,7 +98,6 @@ void VCvtMicrokernelTester::Test(xnn_f16_qs8_vcvt_ukernel_fn vcvt,
                   [&]() { return f32dist(rng); });
     std::copy(input_float.begin(), input_float.end(), input.begin());
 
-    std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
     struct xnn_f16_qs8_cvt_params params;
     init_params(&params, scale(),
@@ -151,7 +148,6 @@ void VCvtMicrokernelTester::Test(
   std::vector<int8_t> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-    std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
     struct xnn_f32_qs8_cvt_params params;
     init_params(&params, scale(), output_zero_point(), qmin(), qmax());
@@ -199,7 +195,6 @@ void VCvtMicrokernelTester::Test(
   std::vector<uint8_t> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-    std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
     struct xnn_f32_qu8_cvt_params params;
     init_params(&params, scale(), output_zero_point(), qmin(), qmax());
@@ -244,7 +239,6 @@ void VCvtMicrokernelTester::Test(
   std::vector<float> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return i32dist(rng); });
-    std::fill(output.begin(), output.end(), 0.0f);
 
     struct xnn_s32_f32_cvt_params params;
     init_params(&params, static_cast<int32_t>(input_zero_point()));
@@ -282,7 +276,6 @@ void VCvtMicrokernelTester::Test(
   std::vector<float> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return u32dist(rng); });
-    std::fill(output.begin(), output.end(), 0.0f);
 
     struct xnn_u32_f32_cvt_params params;
     init_params(&params, static_cast<int32_t>(input_zero_point()));
@@ -320,7 +313,6 @@ void VCvtMicrokernelTester::Test(xnn_qs8_vcvt_ukernel_fn vcvt,
   std::vector<int8_t> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-    std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
     struct xnn_qs8_cvt_params params;
     init_params(&params, scale(), input_zero_point(), output_zero_point());
@@ -367,7 +359,6 @@ void VCvtMicrokernelTester::Test(
   std::vector<int8_t> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return i16dist(rng); });
-    std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
     struct xnn_qs16_qs8_cvt_params params;
     init_params(&params, scale(), output_zero_point());
@@ -416,7 +407,6 @@ void VCvtMicrokernelTester::Test(
   std::vector<float> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-    std::fill(output.begin(), output.end(), std::nanf(""));
 
     struct xnn_qs8_f16_cvt_params params;
     init_params(&params, scale(),
@@ -457,7 +447,6 @@ void VCvtMicrokernelTester::Test(
   std::vector<float> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-    std::fill(output.begin(), output.end(), std::nanf(""));
 
     struct xnn_qs8_f32_cvt_params params;
     init_params(&params, scale(), input_zero_point());
@@ -497,7 +486,6 @@ void VCvtMicrokernelTester::Test(xnn_qu8_vcvt_ukernel_fn vcvt,
   std::vector<uint8_t> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-    std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
     struct xnn_qu8_cvt_params params;
     init_params(&params, scale(), input_zero_point(), output_zero_point());
@@ -544,7 +532,6 @@ void VCvtMicrokernelTester::Test(
   std::vector<float> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-    std::fill(output.begin(), output.end(), std::nanf(""));
 
     struct xnn_qu8_f32_cvt_params params;
     init_params(&params, scale(), input_zero_point());

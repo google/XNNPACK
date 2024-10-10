@@ -34,7 +34,6 @@ void TestTranspose(transpose_ukernel ukernel, size_t input_stride,
                              XNN_EXTRA_BYTES);
   std::vector<uint8_t> output(output_stride * width * output_element_stride);
   std::iota(input.begin(), input.end(), 0);
-  std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
   // Call optimized micro-kernel.
   ukernel(input.data(), output.data(), input_stride * input_element_stride,

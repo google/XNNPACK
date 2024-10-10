@@ -39,7 +39,6 @@ static void qu8_requantization(
   std::vector<int32_t, AlignedAllocator<int32_t, 64>> input(num_elements);
   std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> output(num_elements);
   std::generate(input.begin(), input.end(), std::ref(i32rng));
-  std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
   for (auto _ : state) {
     requantize(

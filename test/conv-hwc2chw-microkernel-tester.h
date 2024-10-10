@@ -304,7 +304,6 @@ class ConvHWC2CHWMicrokernelTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
       std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
 
       xnn_pack_f32_dconv_oki_w(
@@ -411,7 +410,6 @@ class ConvHWC2CHWMicrokernelTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
       std::fill(packed_weights.begin(), packed_weights.end(), 0);
 
       xnn_pack_f16_dconv_oki_w(

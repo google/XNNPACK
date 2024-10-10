@@ -366,7 +366,6 @@ class ArgmaxPoolingOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -485,7 +484,6 @@ class ArgmaxPoolingOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -570,7 +568,6 @@ class ArgmaxPoolingOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results for the second run, including clamping.
       for (size_t i = 0; i < next_batch_size(); i++) {

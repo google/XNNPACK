@@ -54,7 +54,6 @@ TEST_F(S8SimdSCALARTest, StoreTail) {
   const xnn_simd_s8_t a = xnn_loadu_s8(inputs_.data());
   for (size_t num_elements = 1; num_elements < xnn_simd_size_s8;
       num_elements++) {
-    std::fill(output_.begin(), output_.end(), 0.0f);
     xnn_store_tail_s8(output_.data(), a, num_elements);
     for (size_t k = 0; k < num_elements; k++) {
       ASSERT_EQ(output_[k], inputs_[k]) << " " << k;

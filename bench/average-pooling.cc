@@ -49,7 +49,6 @@ static void xnnpack_average_pooling_qu8(benchmark::State& state, const char* net
   std::vector<uint8_t> input(batch_size * input_height * input_width * channels + XNN_EXTRA_BYTES / sizeof(uint8_t));
   std::generate(input.begin(), input.end(), std::ref(u8rng));
   std::vector<uint8_t> output(batch_size * output_height * output_width * channels);
-  std::fill(output.begin(), output.end(), 0xA5);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
@@ -141,7 +140,6 @@ static void xnnpack_average_pooling_f32(benchmark::State& state, const char* net
   std::vector<float> input(batch_size * input_height * input_width * channels + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input.begin(), input.end(), std::ref(f32rng));
   std::vector<float> output(batch_size * output_height * output_width * channels);
-  std::fill(output.begin(), output.end(), std::nanf(""));
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
@@ -242,7 +240,6 @@ void tflite_average_pooling_f32(benchmark::State& state, const char* net) {
   std::vector<float> input(batch_size * input_height * input_width * channels + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input.begin(), input.end(), std::ref(f32rng));
   std::vector<float> output(batch_size * output_height * output_width * channels);
-  std::fill(output.begin(), output.end(), std::nanf(""));
 
   flatbuffers::FlatBufferBuilder builder;
   flatbuffers::Offset<tflite::OperatorCode> operator_code =

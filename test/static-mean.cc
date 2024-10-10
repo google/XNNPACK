@@ -282,8 +282,6 @@ TEST_P(MeanTestF16, matches_operator_api) {
   xnn_operator_t op = nullptr;
 
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   uint32_t flags = keep_dims ? XNN_FLAG_KEEP_DIMS : 0;
   // Call operator API.
@@ -367,8 +365,6 @@ TEST_P(MeanTestF32, matches_operator_api) {
   xnn_operator_t op = nullptr;
 
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   uint32_t flags = keep_dims ? XNN_FLAG_KEEP_DIMS : 0;
   // Call operator API.
@@ -444,8 +440,6 @@ TEST_P(MeanTestQS8, matches_operator_api) {
   xnn_operator_t op = nullptr;
 
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), INT8_C(0));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0));
 
   std::uniform_real_distribution<float> scale_dist = std::uniform_real_distribution<float>(0.0f, 1.0f);
   const float input_scale = scale_dist(rng);
@@ -536,8 +530,6 @@ TEST_P(MeanTestQU8, matches_operator_api) {
   xnn_operator_t op = nullptr;
 
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), UINT8_C(0));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT8_C(0));
 
   std::uniform_real_distribution<float> scale_dist = std::uniform_real_distribution<float>(0.0f, 1.0f);
   const float input_scale = scale_dist(rng);

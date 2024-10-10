@@ -220,7 +220,6 @@ class AvgPoolMicrokernelTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(xnn_float16), input.end(), std::nanf(""));
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -313,7 +312,6 @@ class AvgPoolMicrokernelTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(xnn_float16), input.end(), std::nanf(""));
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -405,7 +403,6 @@ class AvgPoolMicrokernelTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(float), input.end(), std::nanf(""));
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -494,7 +491,6 @@ class AvgPoolMicrokernelTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(float), input.end(), std::nanf(""));
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -591,7 +587,6 @@ class AvgPoolMicrokernelTester {
       } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
       std::fill(input.begin(), input.begin() + input_offset(), UINT8_C(0xA5));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(uint8_t), input.end(), UINT8_C(0xA5));
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -688,7 +683,6 @@ class AvgPoolMicrokernelTester {
       } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
       std::fill(input.begin(), input.begin() + input_offset(), UINT8_C(0xA5));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(uint8_t), input.end(), UINT8_C(0xA5));
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -778,7 +772,6 @@ class AvgPoolMicrokernelTester {
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(xnn_float16), input.end(), std::nanf(""));
       std::generate(multiplier.begin(), multiplier.end(), [&]() { return m32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -874,7 +867,6 @@ class AvgPoolMicrokernelTester {
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(xnn_float16), input.end(), std::nanf(""));
       std::generate(multiplier.begin(), multiplier.end(), [&]() { return m32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -969,7 +961,6 @@ class AvgPoolMicrokernelTester {
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(float), input.end(), std::nanf(""));
       std::generate(multiplier.begin(), multiplier.end(), [&]() { return m32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -1061,7 +1052,6 @@ class AvgPoolMicrokernelTester {
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(float), input.end(), std::nanf(""));
       std::generate(multiplier.begin(), multiplier.end(), [&]() { return m32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();

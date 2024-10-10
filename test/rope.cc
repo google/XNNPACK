@@ -159,8 +159,6 @@ TEST_F(RoPETestF16, matches_operator_api)
 
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(weights.begin(), weights.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   const xnn_status status = xnn_create_rope_nthc_f16(max_tokens, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
@@ -239,8 +237,6 @@ TEST_F(RoPETestF32, matches_operator_api)
 
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(weights.begin(), weights.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   const xnn_status status = xnn_create_rope_nthc_f32(max_tokens, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {

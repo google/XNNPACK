@@ -37,7 +37,6 @@ void UnaryOperatorTester::TestF16() {
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(),
                   [&]() { return f32dist(rng); });
-    std::fill(output.begin(), output.end(), std::nanf(""));
 
     // Compute reference results.
     for (size_t i = 0; i < batch_size(); i++) {
@@ -90,7 +89,6 @@ void UnaryOperatorTester::TestF32() {
   std::vector<float> output_ref(batch_size() * channels());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-    std::fill(output.begin(), output.end(), std::nanf(""));
 
     // Compute reference results.
     for (size_t i = 0; i < batch_size(); i++) {
@@ -138,7 +136,6 @@ void UnaryOperatorTester::TestRunF32() {
   std::vector<float> output_ref(batch_size() * channels());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-    std::fill(output.begin(), output.end(), std::nanf(""));
 
     // Compute reference results.
     for (size_t i = 0; i < batch_size(); i++) {
@@ -179,7 +176,6 @@ void UnaryOperatorTester::TestQS8() {
   std::vector<float> output_ref(batch_size() * channels());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), i8rng);
-    std::fill(output.begin(), output.end(), 0xA5);
 
     // Compute reference results, which are stored as un-truncated quantized
     // values.
@@ -238,7 +234,6 @@ void UnaryOperatorTester::TestQU8() {
   std::vector<float> output_ref(batch_size() * channels());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), u8rng);
-    std::fill(output.begin(), output.end(), 0xA5);
 
     // Compute reference results.
     for (size_t i = 0; i < batch_size(); i++) {

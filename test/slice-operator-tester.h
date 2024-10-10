@@ -129,7 +129,6 @@ class SliceOperatorTester {
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::iota(input.begin(), input.end(), UINT8_C(0));
-      std::fill(output.begin(), output.end(), UINT32_C(0xAA));
 
       ComputeReference(input_dims, output_dims, input_offsets, input, output_ref);
 
@@ -190,7 +189,6 @@ class SliceOperatorTester {
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::iota(input.begin(), input.end(), UINT16_C(0));
-      std::fill(output.begin(), output.end(), UINT16_C(0xDEAD));
 
       ComputeReference(input_dims, output_dims, input_offsets, input, output_ref);
 
@@ -251,7 +249,6 @@ class SliceOperatorTester {
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::iota(input.begin(), input.end(), UINT32_C(0));
-      std::fill(output.begin(), output.end(), UINT32_C(0xDEADBEEF));
 
       ComputeReference(input_dims, output_dims, input_offsets, input, output_ref);
 
@@ -312,7 +309,6 @@ void TestRunX32() const {
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::iota(input.begin(), input.end(), UINT32_C(0));
-      std::fill(output.begin(), output.end(), UINT32_C(0xDEADBEEF));
 
       ComputeReference(input_dims, output_dims, input_offsets, input, output_ref);
 

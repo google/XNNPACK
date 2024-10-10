@@ -113,7 +113,6 @@ void DWConvMicrokernelTester::Test(
                  *std::min_element(kernel.cbegin(), kernel.cend()));
     std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
     std::fill(zero.begin(), zero.end(), input_zero_point());
-    std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
     std::fill(packed_weights.begin(), packed_weights.end(),
               kernel_zero_point());
@@ -254,7 +253,6 @@ void DWConvMicrokernelTester::Test(
                  *std::min_element(kernel.cbegin(), kernel.cend()));
     std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
     std::fill(zero.begin(), zero.end(), input_zero_point());
-    std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
     std::fill(packed_weights.begin(), packed_weights.end(),
               kernel_zero_point());
@@ -401,7 +399,6 @@ void DWConvMicrokernelTester::Test(
     std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
     std::fill(zero.begin(), zero.end(),
               static_cast<int8_t>(input_zero_point() - 0x80));
-    std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
     std::fill(packed_weights.begin(), packed_weights.end(), 0);
     const xnn_qs8_packing_params packing_params = {
@@ -556,7 +553,6 @@ void DWConvMicrokernelTester::Test(
     std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
     std::fill(zero.begin(), zero.end(),
               static_cast<int8_t>(input_zero_point() - 0x80));
-    std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
     std::fill(packed_weights.begin(), packed_weights.end(), 0);
     const xnn_qs8_packing_params packing_params = {
@@ -721,7 +717,6 @@ void DWConvMicrokernelTester::Test(
     std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
     std::fill(zero.begin(), zero.end(),
               static_cast<int8_t>(input_zero_point() - 0x80));
-    std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
     std::fill(packed_weights.begin(), packed_weights.end(), 0);
     const xnn_qs8_packing_params packing_params = {
@@ -865,7 +860,6 @@ void DWConvMicrokernelTester::Test(
     std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
     std::fill(zero.begin(), zero.end(),
               static_cast<int8_t>(input_zero_point() - 0x80));
-    std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
     std::fill(packed_weights.begin(), packed_weights.end(), 0);
     const xnn_qs8_packing_params packing_params = {
@@ -997,8 +991,6 @@ void DWConvMicrokernelTester::Test(
     std::generate(bias.begin(), bias.end(),
                   [&]() { return f32dist(rng); });
     std::fill(zero.begin(), zero.end(), 0);
-    std::fill(output_ref.begin(), output_ref.end(), 0.0f);
-    std::fill(output.begin(), output.end(), std::nanf(""));
 
     std::fill(packed_weights.begin(), packed_weights.end(), 0);
     xnn_pack_f16_dwconv_ghw_w(
@@ -1117,8 +1109,6 @@ void DWConvMicrokernelTester::Test(
     std::generate(bias.begin(), bias.end(),
                   [&]() { return f32dist(rng); });
     std::fill(zero.begin(), zero.end(), 0);
-    std::fill(output_ref.begin(), output_ref.end(), 0.0f);
-    std::fill(output.begin(), output.end(), std::nanf(""));
 
     std::fill(packed_weights.begin(), packed_weights.end(), 0);
     xnn_pack_f16_dwconv_ghw_w(
@@ -1237,8 +1227,6 @@ void DWConvMicrokernelTester::Test(
     std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
     std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
     std::fill(zero.begin(), zero.end(), 0.0f);
-    std::fill(output_ref.begin(), output_ref.end(), nanf(""));
-    std::fill(output.begin(), output.end(), nanf(""));
 
     std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
     xnn_pack_f32_dwconv_ghw_w(
@@ -1311,8 +1299,6 @@ void DWConvMicrokernelTester::Test(
     std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
     std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
     std::fill(zero.begin(), zero.end(), 0.0f);
-    std::fill(output_ref.begin(), output_ref.end(), nanf(""));
-    std::fill(output.begin(), output.end(), nanf(""));
 
     std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
     xnn_pack_f32_dwconv_ghw_w(
@@ -1418,8 +1404,6 @@ void DWConvMicrokernelTester::Test(
     std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
     std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
     std::fill(zero.begin(), zero.end(), 0.0f);
-    std::fill(output_ref.begin(), output_ref.end(), nanf(""));
-    std::fill(output.begin(), output.end(), nanf(""));
 
     std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
     xnn_pack_f32_dwconv_ghw_w(
@@ -1514,8 +1498,6 @@ void DWConvMicrokernelTester::Test(
     std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
     std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
     std::fill(zero.begin(), zero.end(), 0.0f);
-    std::fill(output_ref.begin(), output_ref.end(), nanf(""));
-    std::fill(output.begin(), output.end(), nanf(""));
 
     std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
     xnn_pack_f32_dwconv_ghw_w(

@@ -219,8 +219,6 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_qd8_f32_qc4w) {
                                         XNN_EXTRA_BYTES);
   std::vector<float> qp8_operator_output(batch_size * output_channels);
   std::vector<float> qd8_operator_output(batch_size * output_channels);
-  std::fill(qp8_operator_output.begin(), qp8_operator_output.end(), nanf(""));
-  std::fill(qd8_operator_output.begin(), qd8_operator_output.end(), nanf(""));
 
   // Adjust number of kernel elements for QC4W. input_channels should be padded
   // to byte boundary, hence even.
@@ -365,8 +363,6 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api) {
       xnn_x8_packq_f32qp8_gemm_packed_size(batch_size, input_channels));
   std::vector<float> subgraph_output(batch_size * output_channels);
   std::vector<float> operator_output(batch_size * output_channels);
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Adjust number of kernel elements for QC4W. input_channels should be padded
   // to byte boundary, hence even.
@@ -523,8 +519,6 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_with_reshape) {
       xnn_x8_packq_f32qp8_gemm_packed_size(batch_size, input_channels) +
       XNN_EXTRA_BYTES);
   std::vector<float> operator_output(batch_size * output_channels);
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Adjust number of kernel elements for QC4W. input_channels should be padded
   // to byte boundary, hence even.
@@ -725,8 +719,6 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_transposed_weights) {
       XNN_EXTRA_BYTES);
   std::vector<float> subgraph_output(batch_size * output_channels);
   std::vector<float> operator_output(batch_size * output_channels);
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Adjust number of kernel elements for QC4W. input_channels should be padded
   // to byte boundary, hence even.
@@ -1429,8 +1421,6 @@ TEST_F(FullyConnectedTestQC8, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), INT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0xA5));
   const int8_t input_zero_point = -1;
   const float input_scale = scale_dist(rng);
   std::vector<float> requantization_scales(output_channels, 1.0f);
@@ -1537,8 +1527,6 @@ TEST_F(FullyConnectedTestQS8, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), INT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0xA5));
   const int8_t input_zero_point = -1;
   const float input_scale = scale_dist(rng);
   const float kernel_scale = scale_dist(rng);
@@ -1642,8 +1630,6 @@ TEST_F(FullyConnectedTestQU8, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return u8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), UINT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT8_C(0xA5));
   const uint8_t input_zero_point = u8dist(rng);
   const uint8_t kernel_zero_point = 0;
   const float input_scale = scale_dist(rng);
@@ -1751,8 +1737,6 @@ TEST_P(FullyConnectedTestF16, matches_operator_api)
   if (use_bias) {
     std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
   }
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_fully_connected_nc_f16(
@@ -1837,8 +1821,6 @@ TEST_P(FullyConnectedTestF16, matches_operator_api_f16_weights)
   if (use_bias) {
     std::generate(bias_fp16.begin(), bias_fp16.end(), [&]() { return xnn_float16_from_float(f32dist(rng)); });
   }
-  std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0x7E00) /* NaN */);
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0x7E00) /* NaN */);
 
   // Call operator API.
   const xnn_status status = xnn_create_fully_connected_nc_f16(
@@ -1915,8 +1897,6 @@ TEST_F(FullyConnectedTestF32, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_fully_connected_nc_f32(
@@ -1995,8 +1975,6 @@ TEST_F(FullyConnectedTestF32QC4W, matches_operator_api)
   kernel = std::vector<uint8_t>(output_channels * rounded_input_channels);
   std::generate(kernel.begin(), kernel.end(), [&]() { return i8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
   std::vector<float> requantization_scales(output_channels);
   std::generate(requantization_scales.begin(), requantization_scales.end(), [&]() { return scale_dist(rng); });
   uint8_t kernel_zero_point = 8;
@@ -2079,8 +2057,6 @@ TEST_F(FullyConnectedTestF32QC4W, matches_operator_api_without_bias)
   const size_t rounded_input_channels = round_up_po2(input_channels, 2);
   kernel = std::vector<uint8_t>(output_channels * rounded_input_channels);
   std::generate(kernel.begin(), kernel.end(), [&]() { return i8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
   std::vector<float> requantization_scales(output_channels);
   std::generate(requantization_scales.begin(), requantization_scales.end(), [&]() { return scale_dist(rng); });
   uint8_t kernel_zero_point = 8;
@@ -2155,8 +2131,6 @@ TEST_F(FullyConnectedTestF32QC8W, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return i8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
   std::vector<float> requantization_scales(output_channels);
   std::generate(requantization_scales.begin(), requantization_scales.end(), [&]() { return scale_dist(rng); });
 
@@ -2234,8 +2208,6 @@ TEST_F(FullyConnectedTestF32QC8W, matches_operator_api_without_bias)
 
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return i8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
   std::vector<float> requantization_scales(output_channels);
   std::generate(requantization_scales.begin(), requantization_scales.end(), [&]() { return scale_dist(rng); });
 
@@ -2317,8 +2289,6 @@ TEST_P(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel)
   if (use_bias) {
     std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
   }
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_dynamic_fully_connected_nc_f32(output_min, output_max, /*flags=*/0, &op);
@@ -2408,8 +2378,6 @@ TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_bias)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_dynamic_fully_connected_nc_f32(output_min, output_max, /*flags=*/0, &op);
@@ -2497,8 +2465,6 @@ TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel_and_bia
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_dynamic_fully_connected_nc_f32(output_min, output_max, /*flags=*/0, &op);
@@ -2587,8 +2553,6 @@ TEST_F(FullyConnectedTestF32QC8W, matches_operator_api_transposed_weights)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return i8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
   std::vector<float> requantization_scales(output_channels);
   std::generate(requantization_scales.begin(), requantization_scales.end(), [&]() { return scale_dist(rng); });
 
@@ -2893,8 +2857,6 @@ TEST_F(FullyConnectedTestQD8F16QC4W, internally_allocated_dynamic_quantization_p
   std::vector<int8_t> operator_dq_data(batch_size * input_channels + XNN_EXTRA_BYTES);
   std::vector<xnn_float16> subgraph_output(batch_size * output_channels);
   std::vector<xnn_float16> operator_output(batch_size * output_channels);
-  std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0xDEAD));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0xDEAD));
   std::vector<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
 
   std::vector<float> kernel_scale(output_channels);
@@ -3072,8 +3034,6 @@ TEST_F(FullyConnectedTestQD8F16QB4W, internally_allocated_dynamic_quantization_p
   std::vector<int8_t> operator_dq_data(batch_size * input_channels + XNN_EXTRA_BYTES);
   std::vector<float> subgraph_output(batch_size * output_channels);
   std::vector<float> operator_output(batch_size * output_channels);
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
   std::vector<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
 
   std::vector<xnn_bfloat16> kernel_scale(output_channels * block_size);
@@ -3238,8 +3198,6 @@ TEST_F(FullyConnectedTestQD8F16QC8W, internally_allocated_dynamic_quantization_p
   std::vector<int8_t> operator_dq_data(batch_size * input_channels + XNN_EXTRA_BYTES);
   std::vector<xnn_float16> subgraph_output(batch_size * output_channels);
   std::vector<xnn_float16> operator_output(batch_size * output_channels);
-  std::fill(operator_output.begin(), operator_output.end(), UINT16_C(0xDEAD));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT16_C(0xDEAD));
   std::vector<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
 
   std::vector<float> kernel_scale(output_channels);
@@ -3401,8 +3359,6 @@ TEST_F(FullyConnectedTestQD8F32QC8W, internally_allocated_dynamic_quantization_p
   std::vector<int8_t> operator_dq_data(batch_size * input_channels + XNN_EXTRA_BYTES);
   std::vector<float> subgraph_output(batch_size * output_channels);
   std::vector<float> operator_output(batch_size * output_channels);
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
   std::vector<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
 
   std::vector<float> kernel_scale(output_channels);
@@ -3569,8 +3525,6 @@ TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_p
   std::vector<int8_t> operator_dq_data(batch_size * input_channels + XNN_EXTRA_BYTES);
   std::vector<float> subgraph_output(batch_size * output_channels);
   std::vector<float> operator_output(batch_size * output_channels);
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
   std::vector<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
 
   // Adjust number of kernel elements for QC4W. input_channels should be padded to byte boundary, hence even.
@@ -3683,8 +3637,6 @@ TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_p
   subgraph_output.resize(batch_size * output_channels);
   std::vector<int8_t> operator_dq_data(batch_size * input_channels + XNN_EXTRA_BYTES);
   std::vector<float> operator_output(batch_size * output_channels);
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
   std::vector<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
 
   // Adjust number of kernel elements for QC4W. input_channels should be padded to byte boundary, hence even.
@@ -3840,8 +3792,6 @@ TEST_F(FullyConnectedTestQD8F32QC4W, internally_allocated_dynamic_quantization_p
   std::vector<int8_t> operator_dq_data(batch_size * input_channels + XNN_EXTRA_BYTES);
   std::vector<float> subgraph_output(batch_size * output_channels);
   std::vector<float> operator_output(batch_size * output_channels);
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
   std::vector<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
 
   // Adjust number of kernel elements for QC4W. input_channels should be padded to byte boundary, hence even.
@@ -4024,8 +3974,6 @@ TEST_F(FullyConnectedTestQD8F32QB4W, internally_allocated_dynamic_quantization_p
   std::vector<int8_t> operator_dq_data(batch_size * input_channels + XNN_EXTRA_BYTES);
   std::vector<float> subgraph_output(batch_size * output_channels);
   std::vector<float> operator_output(batch_size * output_channels);
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
   std::vector<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
 
   std::vector<xnn_bfloat16> kernel_scale(output_channels * block_size);
@@ -4128,7 +4076,6 @@ TEST_F(FullyConnectedTestF32, reshape)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
@@ -4322,8 +4269,6 @@ TEST_F(FullyConnectedTestQP8F32QB4W, matches_operator_api)
       xnn_x8_packq_f32qp8_gemm_packed_size(batch_size, input_channels));
   std::vector<float> subgraph_output(batch_size * output_channels);
   std::vector<float> operator_output(batch_size * output_channels);
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
   std::vector<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
 
   std::vector<uint16_t> kernel_scale(output_channels * block_size);
@@ -4441,8 +4386,6 @@ TEST_F(FullyConnectedTestQP8F32QB4W, matches_qd8_f32_qb4w)
                                         XNN_EXTRA_BYTES);
   std::vector<float> qp8_operator_output(batch_size * output_channels);
   std::vector<float> qd8_operator_output(batch_size * output_channels);
-  std::fill(qp8_operator_output.begin(), qp8_operator_output.end(), nanf(""));
-  std::fill(qd8_operator_output.begin(), qd8_operator_output.end(), nanf(""));
   std::vector<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
 
   const size_t rounded_input_channels = round_up_po2(input_channels, 2);

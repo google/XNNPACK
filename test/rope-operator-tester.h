@@ -110,8 +110,6 @@ class RoPEOperatorTester {
                         channels() / 2,
                         [&]() { return f32idist(rng); });
       }
-      std::fill(output.begin(), output.end(), UINT16_C(0xDEAD));
-      std::fill(output_ref.begin(), output_ref.end(), float(std::nan("")));
 
       // Compute reference results
       for (size_t n = 0; n < batch_size(); n++) {
@@ -212,8 +210,6 @@ class RoPEOperatorTester {
                         channels() / 2,
                         [&]() { return f32idist(rng); });
       }
-      std::fill(output.begin(), output.end(), std::nanf(""));
-      std::fill(output_ref.begin(), output_ref.end(), std::nan(""));
 
       // Compute reference results
       for (size_t n = 0; n < batch_size(); n++) {

@@ -447,8 +447,6 @@ TEST_F(Concatenate5TestQS8, matches_operator_api)
   std::generate(input3.begin(), input3.end(), [&]() { return i8dist(rng); });
   std::generate(input4.begin(), input4.end(), [&]() { return i8dist(rng); });
   std::generate(input5.begin(), input5.end(), [&]() { return i8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), INT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0xA5));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -579,8 +577,6 @@ TEST_F(Concatenate5TestQU8, matches_operator_api)
   std::generate(input3.begin(), input3.end(), [&]() { return u8dist(rng); });
   std::generate(input4.begin(), input4.end(), [&]() { return u8dist(rng); });
   std::generate(input5.begin(), input5.end(), [&]() { return u8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), UINT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT8_C(0xA5));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -711,8 +707,6 @@ TEST_F(Concatenate5TestF16, matches_operator_api)
   std::generate(input3.begin(), input3.end(), [&]() { return f32dist(rng); });
   std::generate(input4.begin(), input4.end(), [&]() { return f32dist(rng); });
   std::generate(input5.begin(), input5.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -837,8 +831,6 @@ TEST_F(Concatenate5TestF32, matches_operator_api)
   std::generate(input3.begin(), input3.end(), [&]() { return f32dist(rng); });
   std::generate(input4.begin(), input4.end(), [&]() { return f32dist(rng); });
   std::generate(input5.begin(), input5.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

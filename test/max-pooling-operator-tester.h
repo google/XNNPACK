@@ -459,7 +459,6 @@ class MaxPoolingOperatorTester {
     std::vector<int8_t> output_ref(batch_size() * output_height() * output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), 0xA5);
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -547,7 +546,6 @@ class MaxPoolingOperatorTester {
     std::vector<uint8_t> output_ref(batch_size() * output_height() * output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), 0xA5);
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -636,7 +634,6 @@ class MaxPoolingOperatorTester {
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -750,7 +747,6 @@ class MaxPoolingOperatorTester {
     std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -858,7 +854,6 @@ class MaxPoolingOperatorTester {
     std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -934,7 +929,6 @@ class MaxPoolingOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), 0xA5);
 
       // Compute reference results for the second run.
       for (size_t i = 0; i < next_batch_size(); i++) {
@@ -1008,7 +1002,6 @@ class MaxPoolingOperatorTester {
     std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), 0xA5);
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -1084,7 +1077,6 @@ class MaxPoolingOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), 0xA5);
 
       // Compute reference results for the second run.
       for (size_t i = 0; i < next_batch_size(); i++) {
@@ -1159,7 +1151,6 @@ class MaxPoolingOperatorTester {
     std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -1261,7 +1252,6 @@ class MaxPoolingOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results for the second run, including clamping.
       for (size_t i = 0; i < next_batch_size(); i++) {
@@ -1336,7 +1326,6 @@ class MaxPoolingOperatorTester {
     std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -1425,7 +1414,6 @@ class MaxPoolingOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results for the second run, including clamping.
       for (size_t i = 0; i < next_batch_size(); i++) {

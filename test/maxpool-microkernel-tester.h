@@ -176,7 +176,6 @@ class MaxPoolMicrokernelTester {
       do {
         std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels() - input_offset();
@@ -247,7 +246,6 @@ class MaxPoolMicrokernelTester {
       do {
         std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels() - input_offset();
@@ -313,7 +311,6 @@ class MaxPoolMicrokernelTester {
     std::vector<float> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels() - input_offset();
@@ -401,7 +398,6 @@ class MaxPoolMicrokernelTester {
     std::vector<float> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels() - input_offset();

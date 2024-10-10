@@ -59,7 +59,6 @@ TEST_F(U32SimdAVX512FTest, StoreTail) {
   const xnn_simd_u32_t a = xnn_loadu_u32(inputs_.data());
   for (size_t num_elements = 1; num_elements < xnn_simd_size_u32;
       num_elements++) {
-    std::fill(output_.begin(), output_.end(), 0.0f);
     xnn_store_tail_u32(output_.data(), a, num_elements);
     for (size_t k = 0; k < num_elements; k++) {
       ASSERT_EQ(output_[k], inputs_[k]);

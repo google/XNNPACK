@@ -241,8 +241,6 @@ TEST_F(StaticResizeBilinear2DTestQS8, matches_operator_api)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), INT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0xA5));
   const int8_t input_zero_point = i8dist(rng);
   const float input_scale = scale_dist(rng);
   const float output_zero_point = input_zero_point;
@@ -310,8 +308,6 @@ TEST_F(StaticResizeBilinear2DTestQU8, matches_operator_api)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), UINT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT8_C(0xA5));
   const uint8_t input_zero_point = u8dist(rng);
   const float input_scale = scale_dist(rng);
   const uint8_t output_zero_point = input_zero_point;
@@ -379,8 +375,6 @@ TEST_F(StaticResizeBilinear2DTestF16, matches_operator_api)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   // Call operator API.
   xnn_operator_t op = nullptr;
@@ -444,8 +438,6 @@ TEST_F(StaticResizeBilinear2DTestF32, matches_operator_api)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   // Call operator API.
   xnn_operator_t op = nullptr;

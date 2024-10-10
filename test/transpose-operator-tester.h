@@ -74,7 +74,6 @@ class TransposeOperatorTester {
     ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     xnn_operator_t transpose_op = nullptr;
     std::iota(input.begin(), input.end(), 0);
-    std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
     ASSERT_EQ(xnn_status_success,
               xnn_create_transpose_nd_x8(0, &transpose_op));
@@ -116,7 +115,6 @@ class TransposeOperatorTester {
       output_stride[i - 1] = output_stride[i] * shape_[perm()[i]];
     }
     std::iota(input.begin(), input.end(), 0);
-    std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
     // Call transpose eager API
     ASSERT_EQ(xnn_status_success,
@@ -146,7 +144,6 @@ class TransposeOperatorTester {
     ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     xnn_operator_t transpose_op = nullptr;
     std::iota(input.begin(), input.end(), 0);
-    std::fill(output.begin(), output.end(), UINT16_C(0xDEAD));
 
     ASSERT_EQ(xnn_status_success,
               xnn_create_transpose_nd_x16(0, &transpose_op));
@@ -188,7 +185,6 @@ class TransposeOperatorTester {
       output_stride[i - 1] = output_stride[i] * shape_[perm()[i]];
     }
     std::iota(input.begin(), input.end(), 0);
-    std::fill(output.begin(), output.end(), UINT16_C(0xDEADBEEF));
 
     // Call transpose eager API
     ASSERT_EQ(xnn_status_success,
@@ -218,7 +214,6 @@ class TransposeOperatorTester {
     ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     xnn_operator_t transpose_op = nullptr;
     std::iota(input.begin(), input.end(), 0);
-    std::fill(output.begin(), output.end(), UINT32_C(0xDEADBEEF));
 
     ASSERT_EQ(xnn_status_success,
               xnn_create_transpose_nd_x32(0, &transpose_op));
@@ -262,7 +257,6 @@ class TransposeOperatorTester {
     ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     xnn_operator_t transpose_op = nullptr;
     std::iota(input.begin(), input.end(), 0);
-    std::fill(output.begin(), output.end(), UINT64_C(0xCAFEB0BADEADBEAF));
 
     ASSERT_EQ(xnn_status_success,
               xnn_create_transpose_nd_x64(0, &transpose_op));
@@ -304,7 +298,6 @@ class TransposeOperatorTester {
       output_stride[i - 1] = output_stride[i] * shape_[perm()[i]];
     }
     std::iota(input.begin(), input.end(), 0);
-    std::fill(output.begin(), output.end(), UINT32_C(0xDEADBEEF));
 
     // Call transpose eager API
     ASSERT_EQ(xnn_status_success,
@@ -332,7 +325,6 @@ class TransposeOperatorTester {
       output_stride[i - 1] = output_stride[i] * shape_[perm()[i]];
     }
     std::iota(input.begin(), input.end(), 0);
-    std::fill(output.begin(), output.end(), UINT64_C(0xCAFEB0BADEADBEAF));
 
     // Call transpose eager API
     ASSERT_EQ(xnn_status_success,

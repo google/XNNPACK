@@ -145,7 +145,6 @@ class ConstantPadOperatorTester {
     std::vector<uint8_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), UINT32_C(0xAA));
       const uint8_t padding_value = u8dist(rng);
 
       // Compute reference results.
@@ -264,7 +263,6 @@ class ConstantPadOperatorTester {
     std::vector<uint8_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), UINT32_C(0xAA));
       const uint8_t padding_value = u8dist(rng);
 
       // Compute reference results.
@@ -364,7 +362,6 @@ class ConstantPadOperatorTester {
     std::vector<uint16_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u16dist(rng); });
-      std::fill(output.begin(), output.end(), UINT16_C(0xDEAD));
       const uint16_t padding_value = u16dist(rng);
 
       // Compute reference results.
@@ -482,7 +479,6 @@ class ConstantPadOperatorTester {
     std::vector<uint16_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u16dist(rng); });
-      std::fill(output.begin(), output.end(), UINT16_C(0xDEAD));
       const uint16_t padding_value = u16dist(rng);
 
       // Compute reference results.
@@ -582,7 +578,6 @@ class ConstantPadOperatorTester {
     std::vector<uint32_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u32dist(rng); });
-      std::fill(output.begin(), output.end(), UINT32_C(0xDEADBEEF));
       const uint32_t padding_value = u32dist(rng);
 
       // Compute reference results.
@@ -700,7 +695,6 @@ class ConstantPadOperatorTester {
     std::vector<uint32_t> output_ref(num_output_elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u32dist(rng); });
-      std::fill(output.begin(), output.end(), UINT32_C(0xDEADBEEF));
       const uint32_t padding_value = u32dist(rng);
 
       // Compute reference results.

@@ -79,7 +79,6 @@ static void f32_conv_hwc2chw(benchmark::State& state,
   }
 
   std::vector<float> output(output_elements * num_buffers);
-  std::fill(output.begin(), output.end(), std::nanf(""));
 
   xnn_f32_minmax_params params;
   init_params(&params,

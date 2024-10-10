@@ -593,7 +593,6 @@ class ConvolutionOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results, without renormalization.
       if (depthwise_layout()) {
@@ -894,7 +893,6 @@ class ConvolutionOperatorTester {
           quantization_params.begin(), quantization_params.end(), [&]() {
             return xnn_qd8_quantization_params{w8dist(rng), f32idist(rng)};
           });
-      std::fill(output.begin(), output.end(), UINT16_C(0xDEAD));
 
       // Compute reference results.
       xnnpack::compute_convolution_qd8_f32_qc8w_reference_results(
@@ -1121,7 +1119,6 @@ class ConvolutionOperatorTester {
           quantization_params.begin(), quantization_params.end(), [&]() {
             return xnn_qd8_quantization_params{w8dist(rng), f32idist(rng)};
           });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results.
       xnnpack::compute_convolution_qd8_f32_qc8w_reference_results(
@@ -1326,7 +1323,6 @@ class ConvolutionOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results, without renormalization.
       if (depthwise_layout()) {
@@ -1592,7 +1588,6 @@ class ConvolutionOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return u8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Compute reference results, without renormalization.
       if (has_bias()) {
@@ -1873,7 +1868,6 @@ class ConvolutionOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without clamping.
       if (has_bias()) {
@@ -2154,7 +2148,6 @@ class ConvolutionOperatorTester {
       std::copy(kernel.cbegin(), kernel.cend(), kernel_as_float.begin());
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
       std::copy(bias.cbegin(), bias.cend(), bias_as_float.begin());
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
 
       // Compute reference results, without clamping.
@@ -2448,7 +2441,6 @@ class ConvolutionOperatorTester {
         }
       }
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without clamping.
       if (has_bias()) {
@@ -2721,7 +2713,6 @@ class ConvolutionOperatorTester {
       std::copy(kernel.cbegin(), kernel.cend(), kernel_as_float.begin());
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
       std::copy(bias.cbegin(), bias.cend(), bias_as_float.begin());
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       if (has_bias()) {
@@ -3007,7 +2998,6 @@ class ConvolutionOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results, without renormalization.
       if (has_bias()) {
@@ -3149,7 +3139,6 @@ class ConvolutionOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results for the second run, including renormalization.
       if (has_bias()) {
@@ -3282,7 +3271,6 @@ class ConvolutionOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results, without renormalization.
       if (has_bias()) {
@@ -3404,7 +3392,6 @@ class ConvolutionOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results for the second run, including renormalization.
       if (has_bias()) {
@@ -3530,7 +3517,6 @@ class ConvolutionOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return u8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Compute reference results, without renormalization.
       if (has_bias()) {
@@ -3653,7 +3639,6 @@ class ConvolutionOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), 0xA5);
 
       // Compute reference results for the second run, including renormalization.
       if (has_bias()) {
@@ -3772,7 +3757,6 @@ class ConvolutionOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       if (has_bias()) {
@@ -3873,7 +3857,6 @@ class ConvolutionOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results for the second run, including clamping.
       if (has_bias()) {
@@ -3973,7 +3956,6 @@ class ConvolutionOperatorTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without clamping.
       if (has_bias()) {
@@ -4091,7 +4073,6 @@ class ConvolutionOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results for the second run, including clamping.
       if (has_bias()) {

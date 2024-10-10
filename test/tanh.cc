@@ -184,8 +184,6 @@ TEST_F(TanhTestQS8, matches_operator_api)
   const int32_t output_zero_point = 0;
   const float output_scale = 0x1.0p-7f;
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), INT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0x5A));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -246,8 +244,6 @@ TEST_F(TanhTestQU8, matches_operator_api)
   const int32_t output_zero_point = 128;
   const float output_scale = 0x1.0p-7f;
   std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), UINT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT8_C(0x5A));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

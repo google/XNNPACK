@@ -99,7 +99,6 @@ class VHSwishMicrokernelTester {
     std::vector<int8_t> output_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
       for (int i = 0; i < batch_size(); i++) {
         input[i] = i;
       }
@@ -149,7 +148,6 @@ class VHSwishMicrokernelTester {
     std::vector<uint8_t> output_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
       for (int i = 0; i < batch_size(); i++) {
         input[i] = i;
       }

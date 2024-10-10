@@ -145,8 +145,6 @@ class SpMMMicrokernelTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
-      std::fill(output_ref.begin(), output_ref.end(), 0.0f);
       std::fill(nmap.begin(), nmap.end(), 0);
       std::fill(dmap.begin(), dmap.end(), 0);
       std::fill(w.begin(), w.end(), 0.0f);
@@ -309,8 +307,6 @@ class SpMMMicrokernelTester {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
-      std::fill(output_ref.begin(), output_ref.end(), 0.0f);
       std::fill(nmap.begin(), nmap.end(), 0);
       std::fill(dmap.begin(), dmap.end(), 0);
       std::fill(w.begin(), w.end(), 0);

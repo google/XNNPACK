@@ -110,7 +110,6 @@ static void f32_dwconv2d_chw(benchmark::State& state,
   }
 
   std::vector<float> output(o_elements * num_buffers);
-  std::fill(output.begin(), output.end(), std::nanf(""));
 
   xnn_f32_minmax_params chw_params;
   init_params(&chw_params,

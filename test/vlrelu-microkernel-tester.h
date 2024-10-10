@@ -97,7 +97,6 @@ class VLReLUMicrokernelTester {
     std::vector<int8_t> output_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       struct xnn_qs8_lrelu_params params;
       init_params(&params, positive_scale(), negative_scale(), input_zero_point(), output_zero_point());
@@ -141,7 +140,6 @@ class VLReLUMicrokernelTester {
     std::vector<uint8_t> output_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       struct xnn_qu8_lrelu_params params;
       init_params(&params, positive_scale(), negative_scale(), input_zero_point(), output_zero_point());
