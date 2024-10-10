@@ -19,7 +19,7 @@ static void qs8_packw(benchmark::State& state, const char* net,
   qs8_packw(state, ukernel, nr, kr, sr);
 }
 
-#define XNN_QS8_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale)       \
+#define XNN_QS8_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale, izp)       \
 BENCHMARK_CAPTURE_BGEMM(qs8_packw, ukernel##_, ukernel, arch_flags, nr, kr, sr);
 
 #include "src/qs8-packw/qs8-packw.h"
