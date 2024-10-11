@@ -283,14 +283,14 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
         $else:
           v128_t vout = wasm_i8x16_narrow_i16x8(vacc0${min(1, MR-1)}x0123, vacc0${min(1, MR-1)}x0123);
       $else:
-        $for M in range(0, MR, 2):
-          v128_t vout${M}x01234567_${min(M+1, MR-1)}x01234567 = wasm_i8x16_narrow_i16x8(vacc${M}x01234567, vacc${min(M+1, MR-1)}x01234567);
+        $for M in range(MR):
+          v128_t vout${M}x01234567 = wasm_i8x16_narrow_i16x8(vacc${M}x01234567, vacc${M}x01234567);
 
       $if NR == 4:
         vout = wasm_i8x16_min(vout, voutput_max);
       $else:
-        $for M in range(0, MR, 2):
-          vout${M}x01234567_${min(M+1, MR-1)}x01234567 = wasm_i8x16_min(vout${M}x01234567_${min(M+1, MR-1)}x01234567, voutput_max);
+        $for M in range(MR):
+          vout${M}x01234567 = wasm_i8x16_min(vout${M}x01234567, voutput_max);
 
       if (nc >= ${NR}) {
         $if NR == 4:
@@ -298,7 +298,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
             wasm_v128_store32_lane(c${M}, vout, ${M});
         $else:
           $for M in reversed(range(MR)):
-            wasm_v128_store64_lane(c${M}, vout${(M>>1)*2}x01234567_${min(MR-1, (M>>1)*2+1)}x01234567, ${M%2});
+            wasm_v128_store64_lane(c${M}, vout${M}x01234567, 0);
 
         $for M in reversed(range(MR)):
           c${M} = (int8_t*) ((uintptr_t) c${M} + cn_stride);
@@ -310,11 +310,11 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
         $if NR == 8:
           if (nc & 4) {
             $for M in reversed(range(MR)):
-              wasm_v128_store32_lane(c${M}, vout${(M>>1)*2}x01234567_${min(MR-1, (M>>1)*2+1)}x01234567, ${M%2*2});
+              wasm_v128_store32_lane(c${M}, vout${M}x01234567, 0);
               c${M} += 4;
 
-            $for M in range(0, MR, 2):
-              vout${(M>>1)*2}x01234567_${min(MR-1, (M>>1)*2+1)}x01234567 = wasm_u64x2_shr(vout${(M>>1)*2}x01234567_${min(MR-1, (M>>1)*2+1)}x01234567, 32);
+            $for M in range(MR):
+              vout${M}x01234567 = wasm_u64x2_shr(vout${M}x01234567, 32);
           }
         if (nc & 2) {
           $if NR == 4:
@@ -325,18 +325,18 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
             vout = wasm_u32x4_shr(vout, 16);
           $else:
             $for M in reversed(range(MR)):
-              wasm_v128_store16_lane(c${M}, vout${(M>>1)*2}x01234567_${min(MR-1, (M>>1)*2+1)}x01234567, ${M%2*4});
+              wasm_v128_store16_lane(c${M}, vout${M}x01234567, 0);
               c${M} += 2;
 
-            $for M in range(0, MR, 2):
-                vout${(M>>1)*2}x01234567_${min(MR-1, (M>>1)*2+1)}x01234567 = wasm_u32x4_shr(vout${(M>>1)*2}x01234567_${min(MR-1, (M>>1)*2+1)}x01234567, 16);
+            $for M in range(MR):
+                vout${M}x01234567 = wasm_u32x4_shr(vout${M}x01234567, 16);
         }
         if (nc & 1) {
           $for M in reversed(range(MR)):
             $if NR == 4:
               wasm_v128_store8_lane(c${M}, vout, ${4 * M});
             $else:
-              wasm_v128_store8_lane(c${M}, vout${(M>>1)*2}x01234567_${min(MR-1, (M>>1)*2+1)}x01234567, ${M%2*8});
+              wasm_v128_store8_lane(c${M}, vout${M}x01234567, 0);
         }
 
         nc = 0;
