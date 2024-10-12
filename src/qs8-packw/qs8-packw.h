@@ -38,3 +38,8 @@ XNN_QS8_UKERNEL(xnn_arch_x86_avx256vnni, xnn_qs8_packw_gemm_goi_ukernel_x16c8__a
 XNN_QS8_UKERNEL(xnn_arch_x86_avx256vnni, xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__avx256vnni, 16, 8, 1, 8, 1, 128)
 XNN_QS8_UKERNEL(xnn_arch_x86_avx256vnni, xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__avx256vnni_prfm, 16, 8, 1, 8, 1, 128)
 #endif
+
+#if XNN_ARCH_WASMRELAXEDSIMD
+XNN_QS8_UKERNEL(0, xnn_qs8_packw_gemm_goi_ukernel_x8c8__wasmrelaxedsimd, 8, 8, 1, 8, 1, 0)
+XNN_QS8_UKERNEL(0, xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__wasmrelaxedsimd, 8, 8, 1, 8, 1, 128)
+#endif // XNN_ARCH_WASMRELAXEDSIMD
