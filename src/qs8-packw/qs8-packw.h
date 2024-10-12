@@ -20,6 +20,11 @@ XNN_QS8_UKERNEL(xnn_arch_x86_avxvnni, xnn_qs8_packw_gemm_goi_ukernel_x8c8__avxvn
 XNN_QS8_UKERNEL(xnn_arch_x86_avxvnni, xnn_qs8_packw_gemm_goi_ukernel_x8c8__avxvnni_prfm, 8, 8, 1, 8, 1, 0)
 XNN_QS8_UKERNEL(xnn_arch_x86_avxvnni, xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avxvnni, 8, 8, 1, 8, 1, 128)
 XNN_QS8_UKERNEL(xnn_arch_x86_avxvnni, xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avxvnni_prfm, 8, 8, 1, 8, 1, 128)
+
+XNN_QS8_UKERNEL(xnn_arch_x86_avxvnni, xnn_qs8_packw_gemm_goi_ukernel_x16c8__avxvnni, 16, 8, 1, 8, 1, 0)
+XNN_QS8_UKERNEL(xnn_arch_x86_avxvnni, xnn_qs8_packw_gemm_goi_ukernel_x16c8__avxvnni_prfm, 16, 8, 1, 8, 1, 0)
+XNN_QS8_UKERNEL(xnn_arch_x86_avxvnni, xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__avxvnni, 16, 8, 1, 8, 1, 128)
+XNN_QS8_UKERNEL(xnn_arch_x86_avxvnni, xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__avxvnni_prfm, 16, 8, 1, 8, 1, 128)
 #endif
 
 #if XNN_ENABLE_AVX256VNNI && (XNN_ARCH_X86_64 || XNN_ARCH_X86)
@@ -27,4 +32,9 @@ XNN_QS8_UKERNEL(xnn_arch_x86_avx256vnni, xnn_qs8_packw_gemm_goi_ukernel_x8c8__av
 XNN_QS8_UKERNEL(xnn_arch_x86_avx256vnni, xnn_qs8_packw_gemm_goi_ukernel_x8c8__avx256vnni_prfm, 8, 8, 1, 8, 1, 0)
 XNN_QS8_UKERNEL(xnn_arch_x86_avx256vnni, xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avx256vnni, 8, 8, 1, 8, 1, 128)
 XNN_QS8_UKERNEL(xnn_arch_x86_avx256vnni, xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avx256vnni_prfm, 8, 8, 1, 8, 1, 128)
+
+XNN_QS8_UKERNEL(xnn_arch_x86_avx256vnni, xnn_qs8_packw_gemm_goi_ukernel_x16c8__avx256vnni, 16, 8, 1, 8, 1, 0)
+XNN_QS8_UKERNEL(xnn_arch_x86_avx256vnni, xnn_qs8_packw_gemm_goi_ukernel_x16c8__avx256vnni_prfm, 16, 8, 1, 8, 1, 0)
+XNN_QS8_UKERNEL(xnn_arch_x86_avx256vnni, xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__avx256vnni, 16, 8, 1, 8, 1, 128)
+XNN_QS8_UKERNEL(xnn_arch_x86_avx256vnni, xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__avx256vnni_prfm, 16, 8, 1, 8, 1, 128)
 #endif

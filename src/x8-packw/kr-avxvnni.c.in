@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert NR == 8
+$assert NR in [8, 16]
 $assert KR == 8
 $assert TYPE in ["int8_t"]
 $assert IZP in [0, 128]
@@ -20,12 +20,11 @@ $if PREFETCH:
   #include "xnnpack/prefetch.h"
 
 
-$BITS = {"int8_t": 8}[TYPE]
 $BTYPE = {"int8_t": "uint32_t"}[TYPE]
 $WTYPE = {"int8_t": "int8_t"}[TYPE]
 $_MM256_DPBUSD_EPI32 = "_mm256_dpbusd_avx_epi32" if AVX == 2 else "_mm256_dpbusd_epi32"
 $ISA = "avxvnni" if AVX == 2 else "avx256vnni"
-void xnn_qs${BITS}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_prfm" if PREFETCH else ""}(
+void xnn_qs8${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_prfm" if PREFETCH else ""}(
   size_t g,
   size_t nc,
   size_t kc,
@@ -33,10 +32,7 @@ void xnn_qs${BITS}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${N
   size_t kr,
   size_t sr,
   const ${WTYPE}* weights,
-  $if BITS == 8:
-    const int32_t* bias,
-  $else:
-    const ${WTYPE}* bias,
+  const int32_t* bias,
   const void* scale,
   ${WTYPE}* packed_weights,
   size_t extra_bytes,
@@ -54,31 +50,26 @@ void xnn_qs${BITS}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${N
   const __m256i vone = _mm256_set1_epi8(1);
   ${TYPE}* out = (${TYPE}*) packed_weights;
   const ${BTYPE}* b = (const ${BTYPE}*) bias;
-  $if BITS == 8:
-    const uint32_t izp = (uint32_t) (params ? (((const struct xnn_qs8_packw_params*) params)->input_zero_point + ${IZP}): ${IZP});
-    __m256i vzeropoint = _mm256_set1_epi32((int32_t) izp);
+  const uint32_t izp = (uint32_t) (params ? (((const struct xnn_qs8_packw_params*) params)->input_zero_point + ${IZP}): ${IZP});
+  __m256i vzeropoint = _mm256_set1_epi32((int32_t) izp);
 
   do {
     // NC main loop multiple of ${NR}
     const ${TYPE}* w0 = (const ${TYPE}*) weights;
     size_t n = nc;
     for (;n >= ${NR}; n -= ${NR}) {
-      __m256i vacc0124x8 = _mm256_setzero_si256();
-      __m256i vacc4567x8 = _mm256_setzero_si256();
-
-      $if BITS == 8:
-        int32_t* packed_b = (int32_t*) out;
+      int32_t* packed_b = (int32_t*) out;
       if XNN_LIKELY(b != NULL) {
-        const __m256i vb = _mm256_loadu_si256((const __m256i*) b);
-        _mm256_storeu_si256((__m256i*) out, vb);
+        $for N in range(0, NR, 8):
+          const __m256i vb${N} = _mm256_loadu_si256((const __m256i*) (b + ${N}));
+        $for N in range(0, NR, 8):
+          _mm256_storeu_si256((__m256i*) (out + ${N*4}), vb${N});
         b += ${NR};
       } else {
-        _mm256_storeu_si256((__m256i*) out, _mm256_setzero_si256());
+        $for N in range(0, NR, 8):
+          _mm256_storeu_si256((__m256i*) (out + ${N*4}), _mm256_setzero_si256());
       }
-      $if BTYPE == TYPE:
-        out += ${NR};
-      $else:
-        out += ${NR} * sizeof(${BTYPE});
+      out += ${NR} * sizeof(${BTYPE});
 
       $for N in range(1, NR):
         const ${TYPE}* w${N} = w${N-1} + kc;
@@ -87,74 +78,60 @@ void xnn_qs${BITS}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${N
           xnn_prefetch_to_l1((const int8_t*) w${N});
           xnn_prefetch_to_l1((const int8_t*) w${N} + 64);
 
+      $for N in range(0, NR, 4):
+        __m256i vacc${N} = _mm256_setzero_si256();
+
       // KC main loop multiple of ${NR}x${KR}
       size_t k = kc;
       for (; k >= ${KR}; k -= ${KR}) {
-        __m256i v0123x8 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w0));
-        v0123x8 = _mm256_blend_epi32(v0123x8, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w1)), 0x0C);
-        v0123x8 = _mm256_blend_epi32(v0123x8, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w2)), 0x30);
-        v0123x8 = _mm256_blend_epi32(v0123x8, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w3)), 0xC0);
-
-        __m256i v4567x8 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w4));
-        v4567x8 = _mm256_blend_epi32(v4567x8, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w5)), 0x0C);
-        v4567x8 = _mm256_blend_epi32(v4567x8, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w6)), 0x30);
-        v4567x8 = _mm256_blend_epi32(v4567x8, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w7)), 0xC0);
+        $for N in range(0, NR, 4):
+          __m256i v${N} = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N}));
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+1})), 0x0C);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+2})), 0x30);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+3})), 0xC0);
         $if PREFETCH:
           $for N in range(0, NR):
             xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
 
-        $if BITS == 8:
-          vacc0124x8 = ${_MM256_DPBUSD_EPI32}(vacc0124x8, vone, v0123x8);
-          vacc4567x8 = ${_MM256_DPBUSD_EPI32}(vacc4567x8, vone, v4567x8);
+        $for N in range(0, NR, 4):
+          vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, v${N});
 
-        _mm256_storeu_si256((__m256i *)&out[0],  v0123x8);
-        _mm256_storeu_si256((__m256i *)&out[${4 * KR}],  v4567x8);
+        $for N in range(0, NR, 4):
+          _mm256_storeu_si256((__m256i *)&out[${N * KR}],  v${N});
 
         $for N in range(NR):
           w${N} += ${KR};
         out += ${NR*KR};
       }
 
-      // KC remainder 1..KR-1
+      // KC remainder of 1..${KR-1}
       if (k != 0) {
         assert(k >= 1 && k <= ${KR-1});
-        __m256i v0123x8 = _mm256_setzero_si256();
-        __m256i v4567x8 = _mm256_setzero_si256();
+        $for N in range(0, NR, 4):
+          __m256i v${N} = _mm256_setzero_si256();
 
         if (k & 4) {
-          v0123x8 = _mm256_insert_epi32(v0123x8, *(const int32_t *)w0, 0);
-          v0123x8 = _mm256_insert_epi32(v0123x8, *(const int32_t *)w1, 2);
-          v0123x8 = _mm256_insert_epi32(v0123x8, *(const int32_t *)w2, 4);
-          v0123x8 = _mm256_insert_epi32(v0123x8, *(const int32_t *)w3, 6);
-
-          v4567x8 = _mm256_insert_epi32(v4567x8, *(const int32_t *)w4, 0);
-          v4567x8 = _mm256_insert_epi32(v4567x8, *(const int32_t *)w5, 2);
-          v4567x8 = _mm256_insert_epi32(v4567x8, *(const int32_t *)w6, 4);
-          v4567x8 = _mm256_insert_epi32(v4567x8, *(const int32_t *)w7, 6);
+          $for N in range(0, NR, 4):
+            v${N} = _mm256_insert_epi32(v${N}, *(const int32_t *)w${N}, 0);
+            v${N} = _mm256_insert_epi32(v${N}, *(const int32_t *)w${N+1}, 2);
+            v${N} = _mm256_insert_epi32(v${N}, *(const int32_t *)w${N+2}, 4);
+            v${N} = _mm256_insert_epi32(v${N}, *(const int32_t *)w${N+3}, 6);
           $for N in range(NR):
             w${N} += 4;
         }
         if (k & 2) {
           if (k & 4) {
-            v0123x8 = _mm256_insert_epi16(v0123x8, *(const int16_t *)w0, 2);
-            v0123x8 = _mm256_insert_epi16(v0123x8, *(const int16_t *)w1, 6);
-            v0123x8 = _mm256_insert_epi16(v0123x8, *(const int16_t *)w2, 10);
-            v0123x8 = _mm256_insert_epi16(v0123x8, *(const int16_t *)w3, 14);
-
-            v4567x8 = _mm256_insert_epi16(v4567x8, *(const int16_t *)w4, 2);
-            v4567x8 = _mm256_insert_epi16(v4567x8, *(const int16_t *)w5, 6);
-            v4567x8 = _mm256_insert_epi16(v4567x8, *(const int16_t *)w6, 10);
-            v4567x8 = _mm256_insert_epi16(v4567x8, *(const int16_t *)w7, 14);
+            $for N in range(0, NR, 4):
+              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N}, 2);
+              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+1}, 6);
+              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+2}, 10);
+              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+3}, 14);
           } else {
-            v0123x8 = _mm256_insert_epi16(v0123x8, *(const int16_t *)w0, 0);
-            v0123x8 = _mm256_insert_epi16(v0123x8, *(const int16_t *)w1, 4);
-            v0123x8 = _mm256_insert_epi16(v0123x8, *(const int16_t *)w2, 8);
-            v0123x8 = _mm256_insert_epi16(v0123x8, *(const int16_t *)w3, 12);
-
-            v4567x8 = _mm256_insert_epi16(v4567x8, *(const int16_t *)w4, 0);
-            v4567x8 = _mm256_insert_epi16(v4567x8, *(const int16_t *)w5, 4);
-            v4567x8 = _mm256_insert_epi16(v4567x8, *(const int16_t *)w6, 8);
-            v4567x8 = _mm256_insert_epi16(v4567x8, *(const int16_t *)w7, 12);
+            $for N in range(0, NR, 4):
+              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N}, 0);
+              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+1}, 4);
+              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+2}, 8);
+              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+3}, 12);
           }
 
           $for N in range(NR):
@@ -162,103 +139,82 @@ void xnn_qs${BITS}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${N
         }
         if (k & 1) {
           if ((k & 4) && (k & 2)) {
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w0, 6);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w1, 14);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w2, 22);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w3, 30);
-
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w4, 6);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w5, 14);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w6, 22);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w7, 30);
+            $for N in range(0, NR, 4):
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N}, 6);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+1}, 14);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+2}, 22);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+3}, 30);
           }
           else if (k & 4) {
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w0, 4);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w1, 12);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w2, 20);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w3, 28);
-
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w4, 4);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w5, 12);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w6, 20);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w7, 28);
+            $for N in range(0, NR, 4):
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N}, 4);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+1}, 12);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+2}, 20);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+3}, 28);
           }
           else if (k & 2) {
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w0, 2);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w1, 10);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w2, 18);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w3, 26);
-
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w4, 2);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w5, 10);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w6, 18);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w7, 26);
+            $for N in range(0, NR, 4):
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N}, 2);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+1}, 10);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+2}, 18);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+3}, 26);
           }
           else {
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w0, 0);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w1, 8);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w2, 16);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w3, 24);
-
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w4, 0);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w5, 8);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w6, 16);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w7, 24);
+            $for N in range(0, NR, 4):
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N}, 0);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+1}, 8);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+2}, 16);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+3}, 24);
           }
 
           $for N in range(NR):
             w${N} += 1;
         }
 
-        $if BITS == 8:
-          vacc0124x8 = ${_MM256_DPBUSD_EPI32}(vacc0124x8, vone, v0123x8);
-          vacc4567x8 = ${_MM256_DPBUSD_EPI32}(vacc4567x8, vone, v4567x8);
+        $for N in range(0, NR, 4):
+          vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, v${N});
 
-        _mm256_storeu_si256((__m256i *)&out[0],  v0123x8);
-        _mm256_storeu_si256((__m256i *)&out[${4 * KR}],  v4567x8);
+        $for N in range(0, NR, 4):
+          _mm256_storeu_si256((__m256i *)&out[${N * KR}],  v${N});
 
         out += ${NR*KR};
       }
 
-      $if BITS == 8:
-        __m256i vksum = _mm256_hadd_epi32(vacc0124x8, vacc4567x8);
-        vksum = _mm256_permute4x64_epi64(vksum, _MM_SHUFFLE(3, 1, 2, 0));
-        vksum = _mm256_mullo_epi32(vksum, vzeropoint);
-        __m256i vpack =  _mm256_loadu_si256((const __m256i*) packed_b);
-        _mm256_storeu_si256((__m256i *)packed_b, _mm256_sub_epi32(vpack, vksum));
+      $for N in range(0, NR, 8):
+        __m256i vksum${N} = _mm256_hadd_epi32(vacc${N}, vacc${N+4});
+        vksum${N} = _mm256_permute4x64_epi64(vksum${N}, _MM_SHUFFLE(3, 1, 2, 0));
+      $for N in range(0, NR, 8):
+        vksum${N} = _mm256_mullo_epi32(vksum${N}, vzeropoint);
+      $for N in range(0, NR, 8):
+        __m256i vpack${N} =  _mm256_loadu_si256((const __m256i*) (packed_b + ${N}));
+      $for N in range(0, NR, 8):
+        vpack${N} = _mm256_sub_epi32(vpack${N}, vksum${N});
+      $for N in range(0, NR, 8):
+        _mm256_storeu_si256((__m256i *) (packed_b + ${N}), vpack${N});
       out = (${TYPE}*) ((uintptr_t) out + extra_bytes);
       w0 = w${NR-1};
     }
 
     // NC remainder (1..${NR-1})
     if XNN_UNLIKELY(n != 0) {
-      $if BITS == 8:
-        int32_t* packed_b = (int32_t*) out;
+      assert(n >= 1 && n <= ${NR-1});
+
+      int32_t* packed_b = (int32_t*) out;
       if XNN_LIKELY(b != NULL) {
         size_t nb = n;
         do {
-          $if BTYPE == TYPE:
-            *out++ = *b++;
-          $else:
-            *((${BTYPE}*) out) = *b++;
-            out += sizeof(${BTYPE});
+          *((${BTYPE}*) out) = *b++;
+          out += sizeof(${BTYPE});
         } while (--nb != 0);
       } else {
         size_t nb = n;
         do {
-          $if BTYPE == TYPE:
-            *out++ = 0;
-          $else:
-            *((${BTYPE}*) out) = 0;
-            out += sizeof(${BTYPE});
+          *((${BTYPE}*) out) = 0;
+          out += sizeof(${BTYPE});
         } while (--nb != 0);
       }
-      $if BTYPE == TYPE:
-        out += (${NR} - n);
-      $else:
-        out += (${NR} - n) * sizeof(${BTYPE});
+      out += (${NR} - n) * sizeof(${BTYPE});
 
-     $if NR > 2:
       $for N in range(1, NR):
         const ${TYPE}* w${N} = w${N-1} + kc;
         $if N % 2 == 0:
@@ -269,30 +225,31 @@ void xnn_qs${BITS}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${N
           if XNN_UNPREDICTABLE(n < ${N+1}) {
             w${N} = w${N-1};
           }
+      $if PREFETCH:
+        $for N in range(0, NR):
+          xnn_prefetch_to_l1((const int8_t*) w${N});
+          xnn_prefetch_to_l1((const int8_t*) w${N} + 64);
 
-      $if BITS == 8:
-        __m256i vacc0124x8 = _mm256_setzero_si256();
-        __m256i vacc4567x8 = _mm256_setzero_si256();
+      $for N in range(0, NR, 4):
+        __m256i vacc${N} = _mm256_setzero_si256();
 
       // KC main loop multiple of ${NR}x${KR}
       size_t k = kc;
       for (; k >= ${KR}; k -= ${KR}) {
-        __m256i v0123x8 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w0));
-        v0123x8 = _mm256_blend_epi32(v0123x8, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w1)), 0x0C);
-        v0123x8 = _mm256_blend_epi32(v0123x8, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w2)), 0x30);
-        v0123x8 = _mm256_blend_epi32(v0123x8, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w3)), 0xC0);
+        $for N in range(0, NR, 4):
+          __m256i v${N} = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N}));
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+1})), 0x0C);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+2})), 0x30);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+3})), 0xC0);
+        $if PREFETCH:
+          $for N in range(0, NR):
+            xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
 
-        __m256i v4567x8 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w4));
-        v4567x8 = _mm256_blend_epi32(v4567x8, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w5)), 0x0C);
-        v4567x8 = _mm256_blend_epi32(v4567x8, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w6)), 0x30);
-        v4567x8 = _mm256_blend_epi32(v4567x8, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w7)), 0xC0);
+        $for N in range(0, NR, 4):
+          vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, v${N});
 
-        $if BITS == 8:
-          vacc0124x8 = ${_MM256_DPBUSD_EPI32}(vacc0124x8, vone, v0123x8);
-          vacc4567x8 = ${_MM256_DPBUSD_EPI32}(vacc4567x8, vone, v4567x8);
-
-        _mm256_storeu_si256((__m256i *)&out[0],  v0123x8);
-        _mm256_storeu_si256((__m256i *)&out[${4 * KR}],  v4567x8);
+        $for N in range(0, NR, 4):
+          _mm256_storeu_si256((__m256i *)&out[${N * KR}],  v${N});
 
         $for N in range(NR):
           w${N} += ${KR};
@@ -301,43 +258,32 @@ void xnn_qs${BITS}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${N
 
       // KC remainder of 1..${KR-1}
       if (k != 0) {
-        __m256i v0123x8 = _mm256_setzero_si256();
-        __m256i v4567x8 = _mm256_setzero_si256();
+        assert(k >= 1 && k <= ${KR-1});
+        $for N in range(0, NR, 4):
+          __m256i v${N} = _mm256_setzero_si256();
 
         if (k & 4) {
-          v0123x8 = _mm256_insert_epi32(v0123x8, *(const int32_t *)w0, 0);
-          v0123x8 = _mm256_insert_epi32(v0123x8, *(const int32_t *)w1, 2);
-          v0123x8 = _mm256_insert_epi32(v0123x8, *(const int32_t *)w2, 4);
-          v0123x8 = _mm256_insert_epi32(v0123x8, *(const int32_t *)w3, 6);
-
-          v4567x8 = _mm256_insert_epi32(v4567x8, *(const int32_t *)w4, 0);
-          v4567x8 = _mm256_insert_epi32(v4567x8, *(const int32_t *)w5, 2);
-          v4567x8 = _mm256_insert_epi32(v4567x8, *(const int32_t *)w6, 4);
-          v4567x8 = _mm256_insert_epi32(v4567x8, *(const int32_t *)w7, 6);
+          $for N in range(0, NR, 4):
+            v${N} = _mm256_insert_epi32(v${N}, *(const int32_t *)w${N}, 0);
+            v${N} = _mm256_insert_epi32(v${N}, *(const int32_t *)w${N+1}, 2);
+            v${N} = _mm256_insert_epi32(v${N}, *(const int32_t *)w${N+2}, 4);
+            v${N} = _mm256_insert_epi32(v${N}, *(const int32_t *)w${N+3}, 6);
           $for N in range(NR):
             w${N} += 4;
         }
         if (k & 2) {
           if (k & 4) {
-            v0123x8 = _mm256_insert_epi16(v0123x8, *(const int16_t *)w0, 2);
-            v0123x8 = _mm256_insert_epi16(v0123x8, *(const int16_t *)w1, 6);
-            v0123x8 = _mm256_insert_epi16(v0123x8, *(const int16_t *)w2, 10);
-            v0123x8 = _mm256_insert_epi16(v0123x8, *(const int16_t *)w3, 14);
-
-            v4567x8 = _mm256_insert_epi16(v4567x8, *(const int16_t *)w4, 2);
-            v4567x8 = _mm256_insert_epi16(v4567x8, *(const int16_t *)w5, 6);
-            v4567x8 = _mm256_insert_epi16(v4567x8, *(const int16_t *)w6, 10);
-            v4567x8 = _mm256_insert_epi16(v4567x8, *(const int16_t *)w7, 14);
+            $for N in range(0, NR, 4):
+              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N}, 2);
+              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+1}, 6);
+              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+2}, 10);
+              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+3}, 14);
           } else {
-            v0123x8 = _mm256_insert_epi16(v0123x8, *(const int16_t *)w0, 0);
-            v0123x8 = _mm256_insert_epi16(v0123x8, *(const int16_t *)w1, 4);
-            v0123x8 = _mm256_insert_epi16(v0123x8, *(const int16_t *)w2, 8);
-            v0123x8 = _mm256_insert_epi16(v0123x8, *(const int16_t *)w3, 12);
-
-            v4567x8 = _mm256_insert_epi16(v4567x8, *(const int16_t *)w4, 0);
-            v4567x8 = _mm256_insert_epi16(v4567x8, *(const int16_t *)w5, 4);
-            v4567x8 = _mm256_insert_epi16(v4567x8, *(const int16_t *)w6, 8);
-            v4567x8 = _mm256_insert_epi16(v4567x8, *(const int16_t *)w7, 12);
+            $for N in range(0, NR, 4):
+              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N}, 0);
+              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+1}, 4);
+              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+2}, 8);
+              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+3}, 12);
           }
 
           $for N in range(NR):
@@ -345,72 +291,61 @@ void xnn_qs${BITS}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${N
         }
         if (k & 1) {
           if ((k & 4) && (k & 2)) {
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w0, 6);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w1, 14);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w2, 22);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w3, 30);
-
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w4, 6);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w5, 14);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w6, 22);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w7, 30);
+            $for N in range(0, NR, 4):
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N}, 6);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+1}, 14);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+2}, 22);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+3}, 30);
           }
           else if (k & 4) {
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w0, 4);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w1, 12);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w2, 20);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w3, 28);
-
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w4, 4);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w5, 12);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w6, 20);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w7, 28);
+            $for N in range(0, NR, 4):
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N}, 4);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+1}, 12);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+2}, 20);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+3}, 28);
           }
           else if (k & 2) {
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w0, 2);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w1, 10);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w2, 18);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w3, 26);
-
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w4, 2);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w5, 10);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w6, 18);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w7, 26);
+            $for N in range(0, NR, 4):
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N}, 2);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+1}, 10);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+2}, 18);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+3}, 26);
           }
           else {
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w0, 0);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w1, 8);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w2, 16);
-            v0123x8 = _mm256_insert_epi8(v0123x8, *(const int8_t *)w3, 24);
-
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w4, 0);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w5, 8);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w6, 16);
-            v4567x8 = _mm256_insert_epi8(v4567x8, *(const int8_t *)w7, 24);
+            $for N in range(0, NR, 4):
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N}, 0);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+1}, 8);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+2}, 16);
+              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+3}, 24);
           }
 
           $for N in range(NR):
             w${N} += 1;
         }
 
-        $if BITS == 8:
-          vacc0124x8 = ${_MM256_DPBUSD_EPI32}(vacc0124x8, vone, v0123x8);
-          vacc4567x8 = ${_MM256_DPBUSD_EPI32}(vacc4567x8, vone, v4567x8);
+        $for N in range(0, NR, 4):
+          vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, v${N});
 
-        _mm256_storeu_si256((__m256i *)&out[0],  v0123x8);
-        _mm256_storeu_si256((__m256i *)&out[${4 * KR}],  v4567x8);
+        $for N in range(0, NR, 4):
+          _mm256_storeu_si256((__m256i *)&out[${N * KR}],  v${N});
 
         out += ${NR*KR};
       }
 
-      $if BITS == 8:
-        __m256i vksum = _mm256_hadd_epi32(vacc0124x8, vacc4567x8);
-        vksum = _mm256_permute4x64_epi64(vksum, _MM_SHUFFLE(3, 1, 2, 0));
-        vksum = _mm256_mullo_epi32(vksum, vzeropoint);
-        __m256i vpack =  _mm256_loadu_si256((const __m256i*) packed_b);
-        _mm256_storeu_si256((__m256i *)packed_b, _mm256_sub_epi32(vpack, vksum));
+      $for N in range(0, NR, 8):
+        __m256i vksum${N} = _mm256_hadd_epi32(vacc${N}, vacc${N+4});
+        vksum${N} = _mm256_permute4x64_epi64(vksum${N}, _MM_SHUFFLE(3, 1, 2, 0));
+      $for N in range(0, NR, 8):
+        vksum${N} = _mm256_mullo_epi32(vksum${N}, vzeropoint);
+      $for N in range(0, NR, 8):
+        __m256i vpack${N} =  _mm256_loadu_si256((const __m256i*) (packed_b + ${N}));
+      $for N in range(0, NR, 8):
+        vpack${N} = _mm256_sub_epi32(vpack${N}, vksum${N});
+      $for N in range(0, NR, 8):
+        _mm256_storeu_si256((__m256i *) (packed_b + ${N}), vpack${N});
       out = (${TYPE}*) ((uintptr_t) out + extra_bytes);
     }
+
     weights += nc * kc;
   } while (--g != 0);
 }
