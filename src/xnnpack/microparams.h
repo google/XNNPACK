@@ -874,8 +874,6 @@ struct xnn_qs8_packw_params {
 // Forward declare for use in microkernel headers for JIT generator functions.
 struct xnn_code_buffer;
 
-typedef int xnn_status_t;
-
 struct xnn_x32_packb_params {
   char _;  // Dummy member variable to comply with the C standard
 };

@@ -2006,12 +2006,6 @@ typedef void (*xnn_f32_vrelu_ukernel_fn)(
     float* output,
     const struct xnn_f32_relu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-// VRELU generator
-typedef xnn_status_t (*xnn_vrelu_generator_fn)(
-    struct xnn_code_buffer*,
-    size_t,
-    int);
-
 // VROUND: Vector ROUNDing elementwise
 
 typedef void (*xnn_f16_vround_ukernel_fn)(
@@ -2370,81 +2364,6 @@ typedef void (*xnn_f32_gavgpool_cw_ukernel_fn)(
     const float* input,
     float* output,
     const union xnn_f32_gavgpool_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-
-/********************* JIT microkernel generator pointers ********************/
-
-typedef xnn_status_t (*xnn_jit_gemm_code_generator_fn)(
-    struct xnn_code_buffer *code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void *params);
-typedef xnn_status_t (*xnn_jit_igemm_code_generator_fn)(
-    struct xnn_code_buffer *code, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const void *params);
-
-
-/***************** Audio pre-processing microkernel pointers *****************/
-
-typedef void (*xnn_s16_rmaxabs_ukernel_fn)(
-    size_t batch_size,
-    const int16_t* x,
-    uint16_t* y);
-
-typedef void (*xnn_s16_window_ukernel_fn)(
-    size_t rows,
-    size_t batch_size,
-    const int16_t* input,
-    const int16_t* weights,
-    int16_t* output,
-    uint32_t shift);
-
-typedef void (*xnn_u32_filterbank_accumulate_ukernel_fn)(
-    size_t rows,
-    const uint32_t* input,
-    const uint8_t* weight_widths,
-    const uint16_t* weights,
-    uint64_t* output);
-
-typedef void (*xnn_u32_filterbank_subtract_ukernel_fn)(
-    size_t batch_size,
-    const uint32_t* input,
-    uint32_t smoothing,
-    uint32_t alternate_smoothing,
-    uint32_t one_minus_smoothing,
-    uint32_t alternate_one_minus_smoothing,
-    uint32_t min_signal_remaining,
-    uint32_t smoothing_bits,
-    uint32_t spectral_subtraction_bits,
-    uint32_t* noise_estimate,
-    uint32_t* output);
-
-typedef void (*xnn_i16_vlshift_ukernel_fn)(
-    size_t batch,
-    const uint16_t* input,
-    uint16_t* output,
-    uint32_t shift);
-
-typedef void (*xnn_cs16_vsquareabs_ukernel_fn)(
-    size_t batch_size,
-    const int16_t* input,
-    uint32_t* output);
-
-typedef void (*xnn_u32_vlog_ukernel_fn)(
-    size_t batch_size,
-    const uint32_t* input,
-    uint32_t input_lshift,
-    uint32_t output_scale,
-    uint16_t* output);
-
-typedef void (*xnn_cs16_bfly4_ukernel_fn)(
-    size_t batch,
-    size_t samples,
-    int16_t* data,
-    const int16_t* twiddle,
-    size_t stride);
-
-typedef void (*xnn_cs16_fftr_ukernel_fn)(
-    size_t samples,
-    int16_t* data,
-    const int16_t* twiddle);
-
 
 /********************* Experimental microkernel pointers *********************/
 
