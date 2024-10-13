@@ -18,7 +18,9 @@
 #include "xnnpack/unaligned.h"
 #include "xnnpack/prefetch.h"
 
-
+#
+#
+#
 void xnn_qs8_packw_gemm_goi_ukernel_x16c8__avx256vnni_prfm(
   size_t g,
   size_t nc,
