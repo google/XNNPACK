@@ -73,20 +73,11 @@ int32_t copy_n_and_sum(const Src* src, size_t n, Dst* dst) {
 
 extern "C" {
 
-void xnn_pack_f32_gemm_goi_w(
-  size_t g,
-  size_t nc,
-  size_t kc,
-  size_t nr,
-  size_t kr,
-  size_t sr,
-  const float* k,
-  const float* b,
-  const void* scale,
-  float* packed_weights,
-  size_t extra_bytes,
-  const void* params)
-{
+void xnn_pack_f32_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
+                             size_t kr, size_t sr, const float* k,
+                             const float* b, const void* scale,
+                             float* packed_weights, size_t extra_bytes,
+                             const void* params) {
   assert(g != 0);
   assert(nr >= sr);
   assert(k != nullptr);
@@ -99,12 +90,17 @@ void xnn_pack_f32_gemm_goi_w(
       copy_bias(b, nr_block_start, nr_block_size, packed_weights);
       packed_weights += nr;
 
-      for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
-        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
-          const size_t kc_end = std::min(kc, kc_begin + kr);
+      for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr);
+           kr_block_start += kr) {
+        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size;
+             nr_block_offset++) {
+          const size_t kc_begin =
+              round_down_po2(kr_block_start, skr) +
+              ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+          const size_t kc_end = min(kc, kc_begin + kr);
           if (kc_begin < kc_end) {
-            std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, packed_weights);
+            std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin],
+                        kc_end - kc_begin, packed_weights);
           }
           packed_weights += kr;
         }
@@ -119,20 +115,11 @@ void xnn_pack_f32_gemm_goi_w(
   } while (--g != 0);
 }
 
-void xnn_pack_f16_gemm_goi_w(
-  size_t g,
-  size_t nc,
-  size_t kc,
-  size_t nr,
-  size_t kr,
-  size_t sr,
-  const uint16_t* k,
-  const uint16_t* b,
-  const void* scale,
-  uint16_t* packed_weights,
-  size_t extra_bytes,
-  const void* params)
-{
+void xnn_pack_f16_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
+                             size_t kr, size_t sr, const uint16_t* k,
+                             const uint16_t* b, const void* scale,
+                             uint16_t* packed_weights, size_t extra_bytes,
+                             const void* params) {
   assert(g != 0);
   assert(nr >= sr);
   assert(k != nullptr);
@@ -145,12 +132,17 @@ void xnn_pack_f16_gemm_goi_w(
       copy_bias(b, nr_block_start, nr_block_size, packed_weights);
       packed_weights += nr;
 
-      for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
-        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+      for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr);
+           kr_block_start += kr) {
+        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size;
+             nr_block_offset++) {
+          const size_t kc_begin =
+              round_down_po2(kr_block_start, skr) +
+              ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           const size_t kc_end = std::min(kc, kc_begin + kr);
           if (kc_begin < kc_end) {
-            std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, packed_weights);
+            std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin],
+                        kc_end - kc_begin, packed_weights);
           }
           packed_weights += kr;
         }
@@ -999,21 +991,11 @@ void xnn_pack_f32_qc4w_gemm_goi_w(
   } while (--g != 0);
 }
 
-void xnn_pack_f32_gemm_gio_w(
-  size_t g,
-  size_t nc,
-  size_t kc,
-  size_t nr,
-  size_t kr,
-  size_t sr,
-  size_t k_stride,
-  const float* k,
-  const float* b,
-  const void* scale,
-  float* packed_weights,
-  size_t extra_bytes,
-  const void* params)
-{
+void xnn_pack_f32_gemm_gio_w(size_t g, size_t nc, size_t kc, size_t nr,
+                             size_t kr, size_t sr, size_t k_stride,
+                             const float* k, const float* b, const void* scale,
+                             float* packed_weights, size_t extra_bytes,
+                             const void* params) {
   assert(g != 0);
   assert(nr >= sr);
   assert(k != nullptr);
@@ -1026,20 +1008,39 @@ void xnn_pack_f32_gemm_gio_w(
       copy_bias(b, nr_block_start, nr_block_size, packed_weights);
       packed_weights += nr;
 
-      for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
-        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
-          for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = kc_begin + kr_block_offset;
-            if (kc_idx < kc) {
-              packed_weights[kr_block_offset] = k[kc_idx * k_stride + nr_block_start + nr_block_offset];
-            }
+      // Special case for trivial packings.
+      if (skr == 1) {
+        for (size_t kr_block_start = 0; kr_block_start < kc; kr_block_start++) {
+          const size_t kc_idx = round_down_po2(kr_block_start, skr);
+          if (kc_idx < kc) {
+            memcpy(packed_weights, &k[kc_idx * k_stride + nr_block_start],
+                   nr_block_size * sizeof(float));
           }
-          packed_weights += kr;
+          packed_weights += nr;
         }
-        packed_weights += (nr - nr_block_size) * kr;
+
+      } else {
+        for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr);
+             kr_block_start += kr) {
+          for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size;
+               nr_block_offset++) {
+            const size_t kc_begin =
+                round_down_po2(kr_block_start, skr) +
+                ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+            for (size_t kr_block_offset = 0; kr_block_offset < kr;
+                 kr_block_offset++) {
+              const size_t kc_idx = kc_begin + kr_block_offset;
+              if (kc_idx < kc) {
+                packed_weights[kr_block_offset] =
+                    k[kc_idx * k_stride + nr_block_start + nr_block_offset];
+              }
+            }
+            packed_weights += kr;
+          }
+          packed_weights += (nr - nr_block_size) * kr;
+        }
       }
-      packed_weights = (float*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (float*)((uintptr_t)packed_weights + extra_bytes);
     }
     k += nc * kc;
     if XNN_UNPREDICTABLE(b != nullptr) {
@@ -1048,21 +1049,11 @@ void xnn_pack_f32_gemm_gio_w(
   } while (--g != 0);
 }
 
-void xnn_pack_f16_gemm_gio_w(
-  size_t g,
-  size_t nc,
-  size_t kc,
-  size_t nr,
-  size_t kr,
-  size_t sr,
-  size_t k_stride,
-  const uint16_t* k,
-  const uint16_t* b,
-  const void* scale,
-  uint16_t* packed_weights,
-  size_t extra_bytes,
-  const void* params)
-{
+void xnn_pack_f16_gemm_gio_w(size_t g, size_t nc, size_t kc, size_t nr,
+                             size_t kr, size_t sr, size_t k_stride,
+                             const uint16_t* k, const uint16_t* b,
+                             const void* scale, uint16_t* packed_weights,
+                             size_t extra_bytes, const void* params) {
   assert(g != 0);
   assert(nr >= sr);
   assert(k != nullptr);
@@ -1075,20 +1066,39 @@ void xnn_pack_f16_gemm_gio_w(
       copy_bias(b, nr_block_start, nr_block_size, packed_weights);
       packed_weights += nr;
 
-      for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
-        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
-          for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = kc_begin + kr_block_offset;
-            if (kc_idx < kc) {
-              packed_weights[kr_block_offset] = k[kc_idx * k_stride + nr_block_start + nr_block_offset];
-            }
+      // Special case for trivial packings.
+      if (skr == 1) {
+        for (size_t kr_block_start = 0; kr_block_start < kc; kr_block_start++) {
+          const size_t kc_idx = round_down_po2(kr_block_start, skr);
+          if (kc_idx < kc) {
+            memcpy(packed_weights, &k[kc_idx * k_stride + nr_block_start],
+                   nr_block_size * sizeof(uint16_t));
           }
-          packed_weights += kr;
+          packed_weights += nr;
         }
-        packed_weights += (nr - nr_block_size) * kr;
+
+      } else {
+        for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr);
+             kr_block_start += kr) {
+          for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size;
+               nr_block_offset++) {
+            const size_t kc_begin =
+                round_down_po2(kr_block_start, skr) +
+                ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+            for (size_t kr_block_offset = 0; kr_block_offset < kr;
+                 kr_block_offset++) {
+              const size_t kc_idx = kc_begin + kr_block_offset;
+              if (kc_idx < kc) {
+                packed_weights[kr_block_offset] =
+                    k[kc_idx * k_stride + nr_block_start + nr_block_offset];
+              }
+            }
+            packed_weights += kr;
+          }
+          packed_weights += (nr - nr_block_size) * kr;
+        }
       }
-      packed_weights = (uint16_t*) ((uintptr_t) packed_weights + extra_bytes);
+      packed_weights = (uint16_t*)((uintptr_t)packed_weights + extra_bytes);
     }
     k += nc * kc;
     if XNN_UNPREDICTABLE(b != nullptr) {
