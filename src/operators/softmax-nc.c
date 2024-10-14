@@ -20,7 +20,9 @@
 #include "xnnpack/compute.h"
 #include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
+#include "xnnpack/hardware-config.h"
 #include "xnnpack/log.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/operator-type.h"
@@ -424,6 +426,7 @@ static enum xnn_status reshape_softmax_nc_floating_point(
     .raddstoreexpminusmax_ukernel = raddstoreexpminusmax->ukernel,
     .compute_reciprocal = compute_reciprocal,
     .vmulc_ukernel = vmul->opc_ukernel,
+    .target_chunk_size = xnn_init_hardware_config()->l1_data_bytes / 2,
   };
   if (vmul->opc_ukernel != NULL) {
     softmax_op->context.floating_point_softmax.vmulc_ukernel = vmul->opc_ukernel;

@@ -961,6 +961,7 @@ xnnpack_cc_library(
         ":cache",
         ":common",
         ":fp16",
+        ":hardware_config",
         ":indirection",
         ":logging",
         ":math",
@@ -977,9 +978,7 @@ xnnpack_cc_library(
         ":quantization",
         ":xnnpack_h",
         "@pthreadpool",
-    ] + select({
-        "//conditions:default": [],
-    }),
+    ],
 )
 
 xnnpack_cc_library(

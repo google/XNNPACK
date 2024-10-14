@@ -1657,6 +1657,7 @@ struct floating_point_softmax_context {
     struct xnn_f16_default_params f16;
     struct xnn_f32_default_params f32;
   } rmax_params;
+  size_t target_chunk_size;
 };
 
 #ifndef __cplusplus

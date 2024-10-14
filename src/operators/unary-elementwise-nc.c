@@ -18,6 +18,7 @@
 #include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
 #include "xnnpack/log.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/operator-type.h"
@@ -164,7 +165,6 @@ static enum xnn_status reshape_unary_elementwise_nc(
   const xnn_vunary_ukernel_fn ukernel = unary_elementwise_op->unary_elementwise_config->ukernel;
   const size_t num_threads = pthreadpool_get_threads_count(threadpool);
   if ((((input_stride ^ channels) | (output_stride ^ channels)) == 0) || batch_size == 1) {
-    const size_t block_size = 4096;
 
     unary_elementwise_op->context.univector_contiguous = (struct univector_contiguous_context) {
       .log2_xsize = log2_input_size,
@@ -176,10 +176,11 @@ static enum xnn_status reshape_unary_elementwise_nc(
     }
 
     const size_t range = (batch_size * channels) << log2_input_size;
+    const size_t block_size = min(range, 1 << 14);
     unary_elementwise_op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
     unary_elementwise_op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_contiguous;
     unary_elementwise_op->compute[0].range[0] = range;
-    unary_elementwise_op->compute[0].tile[0] = (num_threads == 1) ? range : block_size;;
+    unary_elementwise_op->compute[0].tile[0] = block_size;
   } else {
     unary_elementwise_op->context.univector_strided = (struct univector_strided_context) {
       .n = channels << log2_input_size,

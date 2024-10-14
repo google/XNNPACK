@@ -5,6 +5,7 @@
 
 #include <stddef.h>
 
+#include "cpuinfo.h"
 #include "xnnpack/common.h"
 
 #if _WIN32
@@ -351,6 +352,8 @@ static void init_hardware_config(void) {
     if (hardware_config.use_hvx) hardware_config.arch_flags |= xnn_arch_hvx;
   #endif  // XNN_ARCH_HEXAGON
 
+  // Set the size of the L1 data cache in bytes.
+  hardware_config.l1_data_bytes = cpuinfo_get_processor(0)->cache.l1d->size;
 }
 
 const struct xnn_hardware_config* xnn_init_hardware_config() {

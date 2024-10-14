@@ -10,6 +10,7 @@
 #include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "xnnpack.h"
@@ -21,8 +22,8 @@
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microkernel-type.h"
-#include "xnnpack/microparams.h"
 #include "xnnpack/microparams-init.h"
+#include "xnnpack/microparams.h"
 #include "xnnpack/operator-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/packq.h"
@@ -2380,31 +2381,44 @@ void xnn_compute_floating_point_softmax(
     const struct floating_point_softmax_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index)
 {
-  const void* x = (const void*) ((uintptr_t) context->x + context->x_stride * batch_index);
-  void* y = (void*) ((uintptr_t) context->y + context->y_stride * batch_index);
-  const size_t n = context->n;
+  // Process the data in chunks of ~half of the L1 data cache size to keep as
+  // much of the input/output data as possible in cache across the kernel calls.
+  const size_t num_chunks = (context->n + context->target_chunk_size - 1) /
+                            context->target_chunk_size;
+  const size_t chunk_size =
+      ((context->n / num_chunks) + (XNN_MAX_SIMD_SIZE - 1)) &
+      ~(size_t)(XNN_MAX_SIMD_SIZE - 1);
 
-  // First pass: reduce-max
-  union {
-    float as_float;
-    uint16_t as_half;
-  } x_max;
-  context->rmax_ukernel(n, x, &x_max, &context->rmax_params);
+  for (size_t offset = 0; offset < context->n; offset += chunk_size) {
+    const void* x = (const void*)((uintptr_t)context->x +
+                                  context->x_stride * batch_index + offset);
+    void* y = (void*)((uintptr_t)context->y + context->y_stride * batch_index +
+                      offset);
+    const size_t n = min(chunk_size, context->n - offset);
 
-  // Second pass: reduce-add & store exp(x-x_max)
-  union {
-    float as_float;
-    uint16_t as_half;
-  } y_sum;
-  context->raddstoreexpminusmax_ukernel(n, x, &x_max, y, &y_sum, &context->expminus_params);
+    // First pass: reduce-max
+    union {
+      float as_float;
+      uint16_t as_half;
+    } x_max;
+    context->rmax_ukernel(n, x, &x_max, &context->rmax_params);
 
-  // Third pass: scale y
-  union {
-    float as_float;
-    uint16_t as_half;
-  } y_scale;
-  context->compute_reciprocal(&y_sum, &y_scale);
-  context->vmulc_ukernel(n, y, &y_scale, y, &context->minmax_params);
+    // Second pass: reduce-add & store exp(x-x_max)
+    union {
+      float as_float;
+      uint16_t as_half;
+    } y_sum;
+    context->raddstoreexpminusmax_ukernel(n, x, &x_max, y, &y_sum,
+                                          &context->expminus_params);
+
+    // Third pass: scale y
+    union {
+      float as_float;
+      uint16_t as_half;
+    } y_scale;
+    context->compute_reciprocal(&y_sum, &y_scale);
+    context->vmulc_ukernel(n, y, &y_scale, y, &context->minmax_params);
+  }
 }
 
 void xnn_compute_vmulcaddc(
