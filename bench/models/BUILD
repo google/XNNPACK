@@ -18,6 +18,7 @@ xnnpack_cxx_library(
         "fp32-mobilenet-v2.cc",
         "fp32-mobilenet-v3-large.cc",
         "fp32-mobilenet-v3-small.cc",
+        "qs8-attention.cc",
         "qs8-mobilenet-v2.cc",
     ],
     hdrs = [
