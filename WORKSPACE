@@ -47,9 +47,9 @@ http_archive(
 # Google Test framework, used by most unit-tests.
 http_archive(
     name = "com_google_googletest",
-    sha256 = "5cb522f1427558c6df572d6d0e1bf0fd076428633d080e88ad5312be0b6a8859",
-    strip_prefix = "googletest-e23cdb78e9fef1f69a9ef917f447add5638daf2a",
-    urls = ["https://github.com/google/googletest/archive/e23cdb78e9fef1f69a9ef917f447add5638daf2a.zip"],
+    sha256 = "5a5f23d3d788a0b6e10c45f30128e126a7f3db01c5c8026f0f68e64d6d7a26f0",
+    strip_prefix = "googletest-62df7bdbc10887e094661e07ec2595b7920376fd",
+    urls = ["https://github.com/google/googletest/archive/62df7bdbc10887e094661e07ec2595b7920376fd.zip"],
 )
 # LINT.ThenChange(cmake/DownloadGoogleTest.cmake)
 
