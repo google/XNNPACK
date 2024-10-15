@@ -44,9 +44,12 @@ static void init_f32_cmul_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_cmul_config.ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcmul_ukernel__avx512f_u32;
-    } else if (hardware_config->use_x86_fma3) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_cmul_config.ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcmul_ukernel__avx512f_u32;
+      } else
+    #endif
+    if (hardware_config->use_x86_fma3) {
       f32_cmul_config.ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcmul_ukernel__fma3_u16;
     } else {
       f32_cmul_config.ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcmul_ukernel__sse_u8;

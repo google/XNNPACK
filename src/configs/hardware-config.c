@@ -115,8 +115,11 @@ static void init_hardware_config(void) {
     hardware_config.use_x86_f16c = cpuinfo_has_x86_f16c();
     hardware_config.use_x86_fma3 = cpuinfo_has_x86_fma3();
     hardware_config.use_x86_avx2 = cpuinfo_has_x86_avx2();
+#if XNN_ENABLE_AVX512F
     hardware_config.use_x86_avx512f = cpuinfo_has_x86_avx512f();
-
+#else
+    hardware_config.use_x86_avx512f = 0;
+#endif
 #if XNN_ENABLE_AVX512SKX
     hardware_config.use_x86_avx512skx = hardware_config.use_x86_avx512f &&
       cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl();

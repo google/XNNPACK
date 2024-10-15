@@ -100,6 +100,10 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_AVXVNNIINT8=1"],
         ["XNN_ENABLE_AVXVNNIINT8=0"],
     ) + xnnpack_select_if(
+        ":avx512f_enabled",
+        ["XNN_ENABLE_AVX512F=1"],
+        ["XNN_ENABLE_AVX512F=0"],
+    ) + xnnpack_select_if(
         ":avx256skx_enabled",
         ["XNN_ENABLE_AVX256SKX=1"],
         ["XNN_ENABLE_AVX256SKX=0"],
@@ -599,7 +603,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         msvc_x86_64_copts = ["/arch:AVX2"],
     ),
     "avx512f": _create_params(
-        cond = "//build_config:x86",
+        cond = "//:avx512f_enabled",
         gcc_x86_copts = [
             "-mavx512f",
         ],

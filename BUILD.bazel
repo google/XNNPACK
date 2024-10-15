@@ -1223,6 +1223,18 @@ config_setting(
     define_values = {"xnn_enable_arm_sme2": "false"},
 )
 
+# Enables usage of Intel AVX512F (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512f_explicit_true",
+    define_values = {"xnn_enable_avx512f": "true"},
+)
+
+# Disables usage of Intel AVX512F (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512f_explicit_false",
+    define_values = {"xnn_enable_avx512f": "false"},
+)
+
 # Enables usage of Intel AVX512SKX (evex512) kernels.
 config_setting(
     name = "xnn_enable_avx512skx_explicit_true",
@@ -1657,6 +1669,22 @@ alias(
         ":xnn_enable_arm_sme2_explicit_true": ":xnn_enable_arm_sme2_explicit_true",
         ":xnn_enable_arm_sme2_explicit_false": ":xnn_enable_arm_sme2_explicit_true",
         "//conditions:default": ":xnn_enable_arm_sme2_explicit_true",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx512f_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx512f_enabled",
+    actual = select({
+        ":xnn_enable_avx512f_explicit_true": ":xnn_enable_avx512f_explicit_true",
+        ":xnn_enable_avx512f_explicit_false": ":xnn_enable_avx512f_explicit_true",
+        "//conditions:default": ":avx512f_enabled_by_default",
     }),
 )
 

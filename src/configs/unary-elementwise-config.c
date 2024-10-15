@@ -537,9 +537,12 @@ static void init_f32_abs_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__avx512f_u16;
-    } else if (hardware_config->use_x86_avx) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__avx512f_u16;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx) {
       f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__avx_u16;
     } else {
       f32_abs_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vabs_ukernel__sse2_u8;
@@ -572,10 +575,13 @@ static void init_f32_clamp_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
         f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__avx512f_u16;
         f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
-    } else if (hardware_config->use_x86_avx) {
+      } else
+    #endif
+    if (hardware_config->use_x86_avx) {
       f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__avx_u16;
       f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
     } else {
@@ -626,10 +632,13 @@ static void init_f32_elu_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__avx512f_rr1_p6_u128;
-      f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_params;
-    } else if (hardware_config->use_x86_avx2) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__avx512f_rr1_p6_u128;
+        f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_params;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx2) {
       f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_u56;
       f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_params;
     } else if (hardware_config->use_x86_avx) {
@@ -691,9 +700,12 @@ static void init_f32_gelu_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u32;
-    } else if (hardware_config->use_x86_fma3) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__avx512f_rational_12_10_nr_u32;
+      } else
+    #endif
+    if (hardware_config->use_x86_fma3) {
       f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__fma3_rational_12_10_div_u16;
     } else if (hardware_config->use_x86_avx) {
       f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__avx_rational_12_10_div_u16;
@@ -725,9 +737,12 @@ static void init_f32_hswish_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__avx512f_u16;
-    } else if (hardware_config->use_x86_fma3) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__avx512f_u16;
+      } else
+    #endif
+    if (hardware_config->use_x86_fma3) {
       f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__fma3_u16;
     } else if (hardware_config->use_x86_avx) {
       f32_hswish_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vhswish_ukernel__avx_u16;
@@ -769,9 +784,12 @@ static void init_f32_log_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_log_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u16;
-    } else if (hardware_config->use_x86_fma3) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_log_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlog_ukernel__avx512f_rational_3_3_div_u16;
+      } else
+    #endif
+    if (hardware_config->use_x86_fma3) {
       f32_log_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlog_ukernel__fma3_rational_3_3_div_u16;
     } else if (hardware_config->use_x86_avx2) {
       f32_log_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlog_ukernel__avx2_rational_3_3_div_u16;
@@ -802,10 +820,13 @@ static void init_f32_lrelu_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__avx512f_u16;
-      f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
-    } else if (hardware_config->use_x86_avx) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__avx512f_u16;
+        f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx) {
       f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__avx_u16;
       f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
     } else if (hardware_config->use_x86_sse4_1) {
@@ -862,9 +883,12 @@ static void init_f32_neg_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__avx512f_u16;
-    } else if (hardware_config->use_x86_avx) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__avx512f_u16;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx) {
       f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__avx_u16;
     } else {
       f32_neg_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vneg_ukernel__sse2_u8;
@@ -915,9 +939,12 @@ static void init_f32_rndd_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_rndd_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndd_ukernel__avx512f_u16;
-    } else if (hardware_config->use_x86_avx) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_rndd_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndd_ukernel__avx512f_u16;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx) {
       f32_rndd_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndd_ukernel__avx_u16;
     } else if (hardware_config->use_x86_sse4_1) {
       f32_rndd_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndd_ukernel__sse41_u8;
@@ -954,9 +981,12 @@ static void init_f32_rndne_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_rndne_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndne_ukernel__avx512f_u16;
-    } else if (hardware_config->use_x86_avx) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_rndne_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndne_ukernel__avx512f_u16;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx) {
       f32_rndne_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndne_ukernel__avx_u16;
     } else if (hardware_config->use_x86_sse4_1) {
       f32_rndne_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndne_ukernel__sse41_u8;
@@ -993,9 +1023,12 @@ static void init_f32_rndu_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_rndu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndu_ukernel__avx512f_u16;
-    } else if (hardware_config->use_x86_avx) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_rndu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndu_ukernel__avx512f_u16;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx) {
       f32_rndu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndu_ukernel__avx_u16;
     } else if (hardware_config->use_x86_sse4_1) {
       f32_rndu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndu_ukernel__sse41_u8;
@@ -1032,9 +1065,12 @@ static void init_f32_rndz_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_rndz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndz_ukernel__avx512f_u16;
-    } else if (hardware_config->use_x86_avx) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_rndz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndz_ukernel__avx512f_u16;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx) {
       f32_rndz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndz_ukernel__avx_u16;
     } else if (hardware_config->use_x86_sse4_1) {
       f32_rndz_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrndz_ukernel__sse41_u8;
@@ -1067,9 +1103,12 @@ static void init_f32_sigmoid_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_u64;
-    } else if (hardware_config->use_x86_avx2) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__avx512f_rr2_lut32_p2_perm2_scalef_div_u64;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx2) {
       f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__avx2_rr1_p5_div_u40;
     } else if (hardware_config->use_x86_avx) {
       f32_sigmoid_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsigmoid_ukernel__avx_rr2_p5_nr2_u40;
@@ -1107,9 +1146,12 @@ static void init_f32_sqr_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_sqr_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqr_ukernel__avx512f_u16;
-    } else if (hardware_config->use_x86_avx) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_sqr_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqr_ukernel__avx512f_u16;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx) {
       f32_sqr_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqr_ukernel__avx_u16;
     } else {
       f32_sqr_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqr_ukernel__sse2_u8;
@@ -1139,9 +1181,12 @@ static void init_f32_sqrt_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_x86_avx512f) {
-      f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u16;
-    } else if (hardware_config->use_x86_fma3) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u16;
+      } else
+    #endif
+    if (hardware_config->use_x86_fma3) {
       f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__fma3_rsqrt_u16;
     } else if (hardware_config->use_x86_avx) {
       f32_sqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vsqrt_ukernel__avx_rsqrt_u16;
@@ -1171,9 +1216,12 @@ static void init_f32_rsqrt_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_rsqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32;
-    } else if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_fma3) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_rsqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__avx512f_rsqrt_u32;
+      } else
+    #endif
+    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_fma3) {
       f32_rsqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__fma3_rsqrt_u16;
     } else if (hardware_config->use_x86_avx) {
       f32_rsqrt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vrsqrt_ukernel__avx_rsqrt_u16;
@@ -1203,9 +1251,12 @@ static void init_f32_tanh_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__avx512f_rational_9_8_nr_u16;
-    } else if (hardware_config->use_x86_fma3) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__avx512f_rational_9_8_nr_u16;
+      } else
+    #endif
+    if (hardware_config->use_x86_fma3) {
       f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__fma3_rational_9_8_div_u16;
     } else if (hardware_config->use_x86_avx) {
       f32_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vtanh_ukernel__avx_rational_9_8_div_u16;
@@ -1430,10 +1481,13 @@ static void init_s32_to_f32_cvt_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_x86_avx512f) {
-      s32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_f32_vcvt_ukernel__avx512f_u64;
-      s32_to_f32_cvt_config.init.s32_f32_cvt = xnn_init_s32_f32_cvt_scalar_params;
-    } else if (hardware_config->use_x86_avx2) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        s32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_f32_vcvt_ukernel__avx512f_u64;
+        s32_to_f32_cvt_config.init.s32_f32_cvt = xnn_init_s32_f32_cvt_scalar_params;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx2) {
       s32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_f32_vcvt_ukernel__avx2_u32;
       s32_to_f32_cvt_config.init.s32_f32_cvt = xnn_init_s32_f32_cvt_scalar_params;
     } else {
@@ -1463,10 +1517,13 @@ static void init_u32_to_f32_cvt_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_x86_avx512f) {
-      u32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u32_f32_vcvt_ukernel__avx512f_u64;
-      u32_to_f32_cvt_config.init.u32_f32_cvt = xnn_init_u32_f32_cvt_scalar_params;
-    } else if (hardware_config->use_x86_avx2) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        u32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u32_f32_vcvt_ukernel__avx512f_u64;
+        u32_to_f32_cvt_config.init.u32_f32_cvt = xnn_init_u32_f32_cvt_scalar_params;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx2) {
       u32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u32_f32_vcvt_ukernel__avx2_u32;
       u32_to_f32_cvt_config.init.u32_f32_cvt = xnn_init_u32_f32_cvt_scalar_params;
     } else {

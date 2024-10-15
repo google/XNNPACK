@@ -349,11 +349,14 @@ static void init_f32_rminmax_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_rminmax_config = (struct xnn_reduce_config) {
-        .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rminmax_ukernel__avx512f_u64_acc4,
-      };
-    } else if (hardware_config->use_x86_avx) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_rminmax_config = (struct xnn_reduce_config) {
+          .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rminmax_ukernel__avx512f_u64_acc4,
+        };
+      } else
+    #endif
+    if (hardware_config->use_x86_avx) {
       f32_rminmax_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rminmax_ukernel__avx_u32_acc4,
       };
@@ -405,12 +408,15 @@ static void init_f32_rsum_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_rsum_config = (struct xnn_reduce_config) {
-        .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__avx512f_u64_acc4,
-        .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
-      };
-    } else if (hardware_config->use_x86_avx) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_rsum_config = (struct xnn_reduce_config) {
+          .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__avx512f_u64_acc4,
+          .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
+        };
+      } else
+    #endif
+    if (hardware_config->use_x86_avx) {
       f32_rsum_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f32_rsum_ukernel__avx_u32_acc4,
         .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
@@ -487,12 +493,15 @@ static void init_f32_rdsum_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_rdsum_config = (struct xnn_reduce_config) {
-        .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_f32_rdsum_ukernel_7p7x__avx512f_c64,
-        .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
-      };
-    } else if (hardware_config->use_x86_avx) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_rdsum_config = (struct xnn_reduce_config) {
+          .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_f32_rdsum_ukernel_7p7x__avx512f_c64,
+          .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,
+        };
+      } else
+    #endif
+    if (hardware_config->use_x86_avx) {
       f32_rdsum_config = (struct xnn_reduce_config) {
         .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_f32_rdsum_ukernel_7p7x__avx_c32,
         .init.f32_scaleminmax = xnn_init_f32_scaleminmax_scalar_params,

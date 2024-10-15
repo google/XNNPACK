@@ -1286,7 +1286,7 @@
 #endif  // XNN_ENABLE_AVX256SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDSTOREEXPMINUSMAX__AVX512F_RR1_P5_SCALEF_U16, elements_eq_16) {
     TEST_REQUIRES_X86_AVX512F;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -1320,10 +1320,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_u16, nullptr);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDSTOREEXPMINUSMAX__AVX512F_RR1_P5_SCALEF_U32_ACC2, elements_eq_32) {
     TEST_REQUIRES_X86_AVX512F;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -1357,10 +1357,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_u32_acc2, nullptr);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDSTOREEXPMINUSMAX__AVX512F_RR1_P5_SCALEF_U64_ACC2, elements_eq_64) {
     TEST_REQUIRES_X86_AVX512F;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -1394,10 +1394,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_u64_acc2, nullptr);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDSTOREEXPMINUSMAX__AVX512F_RR1_P5_SCALEF_U64_ACC4, elements_eq_64) {
     TEST_REQUIRES_X86_AVX512F;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -1431,10 +1431,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_u64_acc4, nullptr);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDSTOREEXPMINUSMAX__AVX512F_RR2_P5_U16, elements_eq_16) {
     TEST_REQUIRES_X86_AVX512F;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -1468,10 +1468,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u16, nullptr);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDSTOREEXPMINUSMAX__AVX512F_RR2_P5_U32_ACC2, elements_eq_32) {
     TEST_REQUIRES_X86_AVX512F;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -1505,10 +1505,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u32_acc2, nullptr);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDSTOREEXPMINUSMAX__AVX512F_RR2_P5_U64_ACC2, elements_eq_64) {
     TEST_REQUIRES_X86_AVX512F;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -1542,10 +1542,10 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u64_acc2, nullptr);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_RADDSTOREEXPMINUSMAX__AVX512F_RR2_P5_U64_ACC4, elements_eq_64) {
     TEST_REQUIRES_X86_AVX512F;
     RAddStoreExpMinusMaxMicrokernelTester()
@@ -1579,7 +1579,7 @@
         .Test(xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr2_p5_u64_acc4, nullptr);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
