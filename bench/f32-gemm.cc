@@ -22,8 +22,6 @@
 #endif  // BENCHMARK_RUY
 #include "bench/gemm.h"
 #include "bench/utils.h"
-
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
@@ -33,7 +31,7 @@
 #include "xnnpack/pack.h"
 #include "xnnpack/packx.h"
 #include "xnnpack/ppmm.h"
-
+#include "xnnpack/buffer.h"
 
 static void GEMMBenchmark(benchmark::State& state,
   xnn_f32_gemm_minmax_ukernel_fn gemm,
@@ -56,11 +54,11 @@ static void GEMMBenchmark(benchmark::State& state,
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  std::vector<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
-  std::vector<float> k(nc * kc);
+  xnnpack::Buffer<float> k(nc * kc);
   std::generate(k.begin(), k.end(), std::ref(f32rng));
-  std::vector<float> b(nc);
+  xnnpack::Buffer<float> b(nc);
   std::generate(b.begin(), b.end(), std::ref(f32rng));
 
   const size_t w_elements = nc_stride * kc_stride + nc_stride;
@@ -69,12 +67,10 @@ static void GEMMBenchmark(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + c_elements));
 
-  std::vector<float, AlignedAllocator<float, 64>> w(w_elements * num_buffers);
-  std::fill(w.begin(), w.end(), 0.0f);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
   xnn_pack_f32_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr,
     k.data(), b.data(), /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, /*params=*/nullptr);
-  std::vector<float> c(c_elements * num_buffers);
-  std::fill(c.begin(), c.end(), std::nanf(""));
+  xnnpack::Buffer<float> c(c_elements * num_buffers);
 
   xnn_f32_minmax_params params;
   init_params(&params,
@@ -129,7 +125,7 @@ static void GEMMGoiBenchmark(benchmark::State& state,
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  std::vector<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
 
   const size_t k_elements = nc * kc;
@@ -138,10 +134,9 @@ static void GEMMGoiBenchmark(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (k_elements + c_elements));
 
-  std::vector<float> k(k_elements * num_buffers);
-  std::vector<float> c(c_elements * num_buffers);
+  xnnpack::Buffer<float> k(k_elements * num_buffers);
+  xnnpack::Buffer<float> c(c_elements * num_buffers);
   std::generate(k.begin(), k.end(), std::ref(f32rng));
-  std::fill(c.begin(), c.end(), std::nanf(""));
 
   xnn_f32_minmax_params params;
   init_params(&params,
@@ -199,14 +194,14 @@ static void PPMM1PBenchmark(benchmark::State& state,
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  std::vector<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
-  std::vector<float> k(nc * kc);
+  xnnpack::Buffer<float> k(nc * kc);
   std::generate(k.begin(), k.end(), std::ref(f32rng));
-  std::vector<float> b(nc);
+  xnnpack::Buffer<float> b(nc);
   std::generate(b.begin(), b.end(), std::ref(f32rng));
 
-  std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> t(mr * kc);
+  xnnpack::Buffer<uint32_t, XNN_ALLOCATION_ALIGNMENT> t(mr * kc);
 
   const size_t w_elements = nc_stride * kc + nc_stride;
   const size_t c_elements = mc * nc;
@@ -214,12 +209,10 @@ static void PPMM1PBenchmark(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + c_elements));
 
-  std::vector<float, AlignedAllocator<float, 64>> w(w_elements * num_buffers);
-  std::fill(w.begin(), w.end(), 0.0f);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
   xnn_pack_f32_gemm_goi_w(/*groups=*/1, nc, kc, nr, /*kr=*/1, /*sr=*/1,
     k.data(), b.data(), /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, /*params=*/nullptr);
-  std::vector<float> c(c_elements * num_buffers);
-  std::fill(c.begin(), c.end(), std::nanf(""));
+  xnnpack::Buffer<float> c(c_elements * num_buffers);
 
   xnn_f32_minmax_params params;
   init_params(&params,
@@ -279,14 +272,14 @@ static void PPMM2PBenchmark(benchmark::State& state,
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  std::vector<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
-  std::vector<float> k(nc * kc);
+  xnnpack::Buffer<float> k(nc * kc);
   std::generate(k.begin(), k.end(), std::ref(f32rng));
-  std::vector<float> b(nc);
+  xnnpack::Buffer<float> b(nc);
   std::generate(b.begin(), b.end(), std::ref(f32rng));
 
-  std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> t(mc_stride * kc);
+  xnnpack::Buffer<uint32_t, XNN_ALLOCATION_ALIGNMENT> t(mc_stride * kc);
 
   const size_t w_elements = nc_stride * kc + nc_stride;
   const size_t c_elements = mc * nc;
@@ -294,12 +287,10 @@ static void PPMM2PBenchmark(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + c_elements));
 
-  std::vector<float, AlignedAllocator<float, 64>> w(w_elements * num_buffers);
-  std::fill(w.begin(), w.end(), 0.0f);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
   xnn_pack_f32_gemm_goi_w(/*groups=*/1, nc, kc, nr, /*kr=*/1, /*sr=*/1,
     k.data(), b.data(), /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, /*params=*/nullptr);
-  std::vector<float> c(c_elements * num_buffers);
-  std::fill(c.begin(), c.end(), std::nanf(""));
+  xnnpack::Buffer<float> c(c_elements * num_buffers);
 
   xnn_f32_minmax_params params;
   init_params(&params,
@@ -355,14 +346,13 @@ static void RuyBenchmark(benchmark::State& state, uint32_t threads)
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (nc * (mc + kc + 1)));
 
-  std::vector<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(mc * kc + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
-  std::vector<float> k(num_buffers * nc * kc);
+  xnnpack::Buffer<float> k(num_buffers * nc * kc);
   std::generate(k.begin(), k.end(), std::ref(f32rng));
-  std::vector<float> b(num_buffers * nc);
+  xnnpack::Buffer<float> b(num_buffers * nc);
   std::generate(b.begin(), b.end(), std::ref(f32rng));
-  std::vector<float> c(num_buffers * nc * mc);
-  std::fill(c.begin(), c.end(), std::nanf(""));
+  xnnpack::Buffer<float> c(num_buffers * nc * mc);
 
   // Note: context must be static to avoid the cost of re-creating it for each benchmark.
   static ruy::Context context;

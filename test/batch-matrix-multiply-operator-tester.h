@@ -19,9 +19,9 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class BatchMatMulOperatorTester {
@@ -272,12 +272,12 @@ class BatchMatMulOperatorTester {
       batch_size_output *= batch_dims_output[k];
     }
 
-    std::vector<xnn_float16> input_a(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
+    xnnpack::Buffer<xnn_float16> input_a(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
                                   batch_size_a * m() * k());
-    std::vector<xnn_float16> input_b(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
+    xnnpack::Buffer<xnn_float16> input_b(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
                                   batch_size_b * k() * n());
-    std::vector<xnn_float16> output(batch_size_output * m() * n());
-    std::vector<float> output_ref(batch_size_output * m() * n());
+    xnnpack::Buffer<xnn_float16> output(batch_size_output * m() * n());
+    xnnpack::Buffer<float> output_ref(batch_size_output * m() * n());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input_a.begin(), input_a.end(),
@@ -317,7 +317,9 @@ class BatchMatMulOperatorTester {
       }
       ASSERT_NE(workspace_size, 0);
       ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
+      // TODO(b/372731180): This should probably be initialized by the operator.
+      std::fill(workspace.begin(), workspace.end(), 0);
 
       ASSERT_EQ(xnn_status_success,
                 xnn_setup_batch_matrix_multiply_nc_f16(
@@ -353,12 +355,12 @@ class BatchMatMulOperatorTester {
       batch_size_output *= batch_dims_output[k];
     }
 
-    std::vector<float> input_a(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<float> input_a(XNN_EXTRA_BYTES / sizeof(float) +
                                batch_size_a * m() * k());
-    std::vector<float> input_b(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<float> input_b(XNN_EXTRA_BYTES / sizeof(float) +
                                batch_size_b * k() * n());
-    std::vector<float> output(batch_size_output * m() * n());
-    std::vector<float> output_ref(batch_size_output * m() * n());
+    xnnpack::Buffer<float> output(batch_size_output * m() * n());
+    xnnpack::Buffer<float> output_ref(batch_size_output * m() * n());
 
     for (bool const_weights : {true, false}) {
       for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -410,8 +412,10 @@ class BatchMatMulOperatorTester {
           ASSERT_NE(workspace_size, 0);
           ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
         }
-        std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>>
-            workspace(workspace_size);
+        xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
+        // TODO(b/372731180): This should probably be initialized by the
+        // operator.
+        std::fill(workspace.begin(), workspace.end(), 0);
 
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_batch_matrix_multiply_nc_f32(
@@ -449,12 +453,12 @@ class BatchMatMulOperatorTester {
       batch_size_output *= batch_dims_output[k];
     }
 
-    std::vector<float> input_a(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<float> input_a(XNN_EXTRA_BYTES / sizeof(float) +
                                batch_size_a * m() * k());
-    std::vector<float> input_b(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<float> input_b(XNN_EXTRA_BYTES / sizeof(float) +
                                batch_size_b * k() * n());
-    std::vector<float> output(batch_size_output * m() * n());
-    std::vector<float> output_ref(batch_size_output * m() * n());
+    xnnpack::Buffer<float> output(batch_size_output * m() * n());
+    xnnpack::Buffer<float> output_ref(batch_size_output * m() * n());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input_a.begin(), input_a.end(),
@@ -466,9 +470,9 @@ class BatchMatMulOperatorTester {
 
       // Create the dynamically quantized input data with the corresponding
       // `quantization_params`.
-      std::vector<xnn_quantization_params> quantization_params(
+      xnnpack::Buffer<xnn_quantization_params> quantization_params(
           batch_size_a * m() + XNN_EXTRA_QUANTIZATION_PARAMS);
-      std::vector<int8_t> input_a_qd8(batch_size_a * m() * k() +
+      xnnpack::Buffer<int8_t> input_a_qd8(batch_size_a * m() * k() +
                                       XNN_EXTRA_BYTES / sizeof(int8_t));
       xnn_operator_t convert_op = nullptr;
       xnn_status status = xnn_create_convert_nc_f32_qd8(
@@ -491,9 +495,9 @@ class BatchMatMulOperatorTester {
                 xnn_run_operator(convert_op, /*threadpool=*/nullptr));
 
       // Compute the channelwise quantized input_b.
-      std::vector<int8_t> input_b_qc8(XNN_EXTRA_BYTES / sizeof(int8_t) +
+      xnnpack::Buffer<int8_t> input_b_qc8(XNN_EXTRA_BYTES / sizeof(int8_t) +
                                       batch_size_b * k() * n());
-      std::vector<float> channelwise_scale_b(XNN_EXTRA_BYTES / sizeof(float) +
+      xnnpack::Buffer<float> channelwise_scale_b(XNN_EXTRA_BYTES / sizeof(float) +
                                              batch_size_b * n());
       if (transpose_b_) {
         for (size_t b = 0; b < batch_size_b; b++) {
@@ -579,8 +583,8 @@ class BatchMatMulOperatorTester {
     }
   }
 
-  void VerifyF16(const std::vector<xnn_float16>& output,
-                 const std::vector<float>& output_ref) const {
+  void VerifyF16(const xnnpack::Buffer<xnn_float16>& output,
+                 const xnnpack::Buffer<float>& output_ref) const {
     const size_t batch_size_output = output.size() / (m() * n());
     for (size_t bi = 0; bi < batch_size_output; bi++) {
       for (size_t mi = 0; mi < m(); mi++) {
@@ -597,8 +601,8 @@ class BatchMatMulOperatorTester {
     }
   }
 
-  void VerifyF32(const std::vector<float>& output,
-                 const std::vector<float>& output_ref) const {
+  void VerifyF32(const xnnpack::Buffer<float>& output,
+                 const xnnpack::Buffer<float>& output_ref) const {
     // Verify results.
     const size_t batch_size_output = output.size() / (m() * n());
     for (size_t bi = 0; bi < batch_size_output; bi++) {
@@ -616,8 +620,8 @@ class BatchMatMulOperatorTester {
     }
   }
 
-  void VerifyQD8F32QC8W(const std::vector<float>& output,
-                        const std::vector<float>& output_ref) const {
+  void VerifyQD8F32QC8W(const xnnpack::Buffer<float>& output,
+                        const xnnpack::Buffer<float>& output_ref) const {
     // Compute the expected error bound, which is the error bound of the
     // quantized dot product between the rows of $A$ and the columns of $B$.
     //

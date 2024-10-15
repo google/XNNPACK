@@ -3,23 +3,20 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-
 #include <algorithm>
 #include <cmath>
 #include <functional>
 #include <random>
 #include <vector>
 
-#include <benchmark/benchmark.h>
 #include "bench/utils.h"
-
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/requantization-stubs.h"
-
+#include "xnnpack/buffer.h"
+#include <benchmark/benchmark.h>
 
 static void qu8_requantization(
   benchmark::State& state,
@@ -36,8 +33,8 @@ static void qu8_requantization(
   auto rng = std::mt19937(random_device());
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(), std::ref(rng));
 
-  std::vector<int32_t, AlignedAllocator<int32_t, 64>> input(num_elements);
-  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> output(num_elements);
+  xnnpack::Buffer<int32_t, XNN_ALLOCATION_ALIGNMENT> input(num_elements);
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> output(num_elements);
   std::generate(input.begin(), input.end(), std::ref(i32rng));
 
   for (auto _ : state) {

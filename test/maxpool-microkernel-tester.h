@@ -24,6 +24,7 @@
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
 #include "next_prime.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class MaxPoolMicrokernelTester {
@@ -166,12 +167,12 @@ class MaxPoolMicrokernelTester {
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
-    std::vector<const int8_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
-    std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
+    xnnpack::Buffer<const int8_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
+    xnnpack::Buffer<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
       indirect_input.size() * channels());
-    std::vector<int8_t> output(XNN_EXTRA_BYTES / sizeof(int8_t) +
+    xnnpack::Buffer<int8_t> output(XNN_EXTRA_BYTES / sizeof(int8_t) +
       (output_pixels() - 1) * output_stride() + channels());
-    std::vector<int8_t> output_ref(output_pixels() * channels());
+    xnnpack::Buffer<int8_t> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       do {
         std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
@@ -236,12 +237,12 @@ class MaxPoolMicrokernelTester {
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
-    std::vector<const uint8_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
-    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
+    xnnpack::Buffer<const uint8_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
+    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
       indirect_input.size() * channels());
-    std::vector<uint8_t> output(XNN_EXTRA_BYTES / sizeof(uint8_t) +
+    xnnpack::Buffer<uint8_t> output(XNN_EXTRA_BYTES / sizeof(uint8_t) +
       (output_pixels() - 1) * output_stride() + channels());
-    std::vector<uint8_t> output_ref(output_pixels() * channels());
+    xnnpack::Buffer<uint8_t> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       do {
         std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
@@ -303,12 +304,12 @@ class MaxPoolMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
-    std::vector<const xnn_float16*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
-    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
+    xnnpack::Buffer<const xnn_float16*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
+    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       ((output_pixels() - 1) * step() + pooling_elements()) * channels());
-    std::vector<xnn_float16> output(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
+    xnnpack::Buffer<xnn_float16> output(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       (output_pixels() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(output_pixels() * channels());
+    xnnpack::Buffer<float> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
@@ -390,12 +391,12 @@ class MaxPoolMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
-    std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       ((output_pixels() - 1) * step() + pooling_elements()) * channels());
-    std::vector<float> output(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<float> output(XNN_EXTRA_BYTES / sizeof(float) +
       (output_pixels() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(output_pixels() * channels());
+    xnnpack::Buffer<float> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 

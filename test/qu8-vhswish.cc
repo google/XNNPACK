@@ -64,7 +64,7 @@
   TEST(QU8_VHSWISH__NEON_U8, input_scale) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float input_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .input_scale(input_scale)
@@ -78,7 +78,7 @@
   TEST(QU8_VHSWISH__NEON_U8, output_scale) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float output_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .output_scale(output_scale)
@@ -163,7 +163,7 @@
   TEST(QU8_VHSWISH__NEON_U16, input_scale) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
-      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float input_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .input_scale(input_scale)
@@ -177,7 +177,7 @@
   TEST(QU8_VHSWISH__NEON_U16, output_scale) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
-      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float output_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .output_scale(output_scale)
@@ -262,7 +262,7 @@
   TEST(QU8_VHSWISH__NEON_U32, input_scale) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
-      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float input_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .input_scale(input_scale)
@@ -276,7 +276,7 @@
   TEST(QU8_VHSWISH__NEON_U32, output_scale) {
     TEST_REQUIRES_ARM_NEON;
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
-      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float output_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .output_scale(output_scale)
@@ -361,7 +361,7 @@
   TEST(QU8_VHSWISH__SSE2_U16, input_scale) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
-      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float input_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .input_scale(input_scale)
@@ -375,7 +375,7 @@
   TEST(QU8_VHSWISH__SSE2_U16, output_scale) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
-      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float output_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .output_scale(output_scale)
@@ -460,7 +460,7 @@
   TEST(QU8_VHSWISH__SSE2_U32, input_scale) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
-      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float input_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .input_scale(input_scale)
@@ -474,7 +474,7 @@
   TEST(QU8_VHSWISH__SSE2_U32, output_scale) {
     TEST_REQUIRES_X86_SSE2;
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
-      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float output_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .output_scale(output_scale)
@@ -559,7 +559,7 @@
   TEST(QU8_VHSWISH__SSSE3_U16, input_scale) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
-      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float input_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .input_scale(input_scale)
@@ -573,7 +573,7 @@
   TEST(QU8_VHSWISH__SSSE3_U16, output_scale) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
-      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float output_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .output_scale(output_scale)
@@ -658,7 +658,7 @@
   TEST(QU8_VHSWISH__SSSE3_U32, input_scale) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
-      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float input_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .input_scale(input_scale)
@@ -672,7 +672,7 @@
   TEST(QU8_VHSWISH__SSSE3_U32, output_scale) {
     TEST_REQUIRES_X86_SSSE3;
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
-      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float output_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .output_scale(output_scale)
@@ -757,7 +757,7 @@
   TEST(QU8_VHSWISH__SSE41_U8, input_scale) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float input_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .input_scale(input_scale)
@@ -771,7 +771,7 @@
   TEST(QU8_VHSWISH__SSE41_U8, output_scale) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float output_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .output_scale(output_scale)
@@ -856,7 +856,7 @@
   TEST(QU8_VHSWISH__SSE41_U16, input_scale) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
-      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float input_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .input_scale(input_scale)
@@ -870,7 +870,7 @@
   TEST(QU8_VHSWISH__SSE41_U16, output_scale) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
-      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float output_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .output_scale(output_scale)
@@ -955,7 +955,7 @@
   TEST(QU8_VHSWISH__SSE41_U32, input_scale) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
-      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float input_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .input_scale(input_scale)
@@ -969,7 +969,7 @@
   TEST(QU8_VHSWISH__SSE41_U32, output_scale) {
     TEST_REQUIRES_X86_SSE41;
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
-      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float output_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .output_scale(output_scale)
@@ -1054,7 +1054,7 @@
   TEST(QU8_VHSWISH__AVX_U8, input_scale) {
     TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float input_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .input_scale(input_scale)
@@ -1068,7 +1068,7 @@
   TEST(QU8_VHSWISH__AVX_U8, output_scale) {
     TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float output_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .output_scale(output_scale)
@@ -1153,7 +1153,7 @@
   TEST(QU8_VHSWISH__AVX_U16, input_scale) {
     TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
-      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float input_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .input_scale(input_scale)
@@ -1167,7 +1167,7 @@
   TEST(QU8_VHSWISH__AVX_U16, output_scale) {
     TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
-      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float output_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .output_scale(output_scale)
@@ -1252,7 +1252,7 @@
   TEST(QU8_VHSWISH__AVX_U32, input_scale) {
     TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
-      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float input_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .input_scale(input_scale)
@@ -1266,7 +1266,7 @@
   TEST(QU8_VHSWISH__AVX_U32, output_scale) {
     TEST_REQUIRES_X86_AVX;
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
-      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float output_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .output_scale(output_scale)
@@ -1346,7 +1346,7 @@
 
   TEST(QU8_VHSWISH__WASMSIMD_U8, input_scale) {
     for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float input_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .input_scale(input_scale)
@@ -1359,7 +1359,7 @@
 
   TEST(QU8_VHSWISH__WASMSIMD_U8, output_scale) {
     for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
-      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float output_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .output_scale(output_scale)
@@ -1437,7 +1437,7 @@
 
   TEST(QU8_VHSWISH__WASMSIMD_U16, input_scale) {
     for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
-      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float input_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .input_scale(input_scale)
@@ -1450,7 +1450,7 @@
 
   TEST(QU8_VHSWISH__WASMSIMD_U16, output_scale) {
     for (size_t batch_size = 1; batch_size <= 80; batch_size += 15) {
-      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float output_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .output_scale(output_scale)
@@ -1528,7 +1528,7 @@
 
   TEST(QU8_VHSWISH__WASMSIMD_U32, input_scale) {
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
-      for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float input_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .input_scale(input_scale)
@@ -1541,7 +1541,7 @@
 
   TEST(QU8_VHSWISH__WASMSIMD_U32, output_scale) {
     for (size_t batch_size = 1; batch_size <= 160; batch_size += 31) {
-      for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+      for (float output_scale : {4.0f, 16.0f, 64.0f}) {
         VHSwishMicrokernelTester()
           .batch_size(batch_size)
           .output_scale(output_scale)
@@ -1598,7 +1598,7 @@ TEST(QU8_VHSWISH__SCALAR_U1, batch_gt_1) {
 
 TEST(QU8_VHSWISH__SCALAR_U1, input_scale) {
   for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
-    for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+    for (float input_scale : {4.0f, 16.0f, 64.0f}) {
       VHSwishMicrokernelTester()
         .batch_size(batch_size)
         .input_scale(input_scale)
@@ -1611,7 +1611,7 @@ TEST(QU8_VHSWISH__SCALAR_U1, input_scale) {
 
 TEST(QU8_VHSWISH__SCALAR_U1, output_scale) {
   for (size_t batch_size = 1; batch_size <= 5; batch_size += 1) {
-    for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+    for (float output_scale : {4.0f, 16.0f, 64.0f}) {
       VHSwishMicrokernelTester()
         .batch_size(batch_size)
         .output_scale(output_scale)
@@ -1686,7 +1686,7 @@ TEST(QU8_VHSWISH__SCALAR_U2, batch_gt_2) {
 
 TEST(QU8_VHSWISH__SCALAR_U2, input_scale) {
   for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
-    for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+    for (float input_scale : {4.0f, 16.0f, 64.0f}) {
       VHSwishMicrokernelTester()
         .batch_size(batch_size)
         .input_scale(input_scale)
@@ -1699,7 +1699,7 @@ TEST(QU8_VHSWISH__SCALAR_U2, input_scale) {
 
 TEST(QU8_VHSWISH__SCALAR_U2, output_scale) {
   for (size_t batch_size = 1; batch_size <= 10; batch_size += 1) {
-    for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+    for (float output_scale : {4.0f, 16.0f, 64.0f}) {
       VHSwishMicrokernelTester()
         .batch_size(batch_size)
         .output_scale(output_scale)
@@ -1774,7 +1774,7 @@ TEST(QU8_VHSWISH__SCALAR_U4, batch_gt_4) {
 
 TEST(QU8_VHSWISH__SCALAR_U4, input_scale) {
   for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
-    for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+    for (float input_scale : {4.0f, 16.0f, 64.0f}) {
       VHSwishMicrokernelTester()
         .batch_size(batch_size)
         .input_scale(input_scale)
@@ -1787,7 +1787,7 @@ TEST(QU8_VHSWISH__SCALAR_U4, input_scale) {
 
 TEST(QU8_VHSWISH__SCALAR_U4, output_scale) {
   for (size_t batch_size = 1; batch_size <= 20; batch_size += 3) {
-    for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+    for (float output_scale : {4.0f, 16.0f, 64.0f}) {
       VHSwishMicrokernelTester()
         .batch_size(batch_size)
         .output_scale(output_scale)

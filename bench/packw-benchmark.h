@@ -8,15 +8,13 @@
 #include <random>
 #include <vector>
 
-#include <benchmark/benchmark.h>
 #include "bench/bgemm.h"
 #include "bench/utils.h"
-
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/pack.h"
 #include "xnnpack/packw.h"
-
+#include "xnnpack/buffer.h"
+#include <benchmark/benchmark.h>
 
 static void x8_packw(benchmark::State& state,
   xnn_x8_packw_gemm_goi_ukernel_fn packw,
@@ -45,10 +43,12 @@ static void x8_packw(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(int8_t) * batch * (dim_n * dim_k + rounded_n * rounded_k + rounded_n));
 
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> weights(num_buffers * batch * dim_n * dim_k);
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> weights(num_buffers * batch *
+                                                    dim_n * dim_k);
   std::generate(weights.begin(), weights.end(), std::ref(i8rng));
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_weights(num_buffers * batch * (rounded_n * rounded_k + rounded_n * sizeof(uint32_t)));
-  std::fill(packed_weights.begin(), packed_weights.end(), 0);
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
+      num_buffers * batch *
+      (rounded_n * rounded_k + rounded_n * sizeof(uint32_t)));
 
   const xnn_qs8_packw_params params = {127};
 
@@ -106,10 +106,12 @@ static void qs8_packw(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(int8_t) * batch * (dim_n * dim_k + rounded_n * rounded_k + rounded_n));
 
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> weights(num_buffers * batch * dim_n * dim_k);
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> weights(num_buffers * batch *
+                                                    dim_n * dim_k);
   std::generate(weights.begin(), weights.end(), std::ref(i8rng));
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_weights(num_buffers * batch * (rounded_n * rounded_k + rounded_n * sizeof(uint32_t)));
-  std::fill(packed_weights.begin(), packed_weights.end(), 0);
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
+      num_buffers * batch *
+      (rounded_n * rounded_k + rounded_n * sizeof(uint32_t)));
 
   const xnn_qs8_packw_params params = {127};
 
@@ -165,10 +167,11 @@ static void x16_packw(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(uint16_t) * batch * (dim_n * dim_k + rounded_n * rounded_k + rounded_n));
 
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> weights(num_buffers * batch * dim_n * dim_k);
+  xnnpack::Buffer<uint16_t, XNN_ALLOCATION_ALIGNMENT> weights(num_buffers * batch *
+                                                      dim_n * dim_k);
   std::generate(weights.begin(), weights.end(), std::ref(u16rng));
-  std::vector<uint16_t, AlignedAllocator<uint16_t, 64>> packed_weights(num_buffers * batch * (rounded_n * rounded_k + rounded_n));
-  std::fill(packed_weights.begin(), packed_weights.end(), 0);
+  xnnpack::Buffer<uint16_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
+      num_buffers * batch * (rounded_n * rounded_k + rounded_n));
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -222,10 +225,11 @@ static void x32_packw(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * batch * (dim_n * dim_k + rounded_n * rounded_k + rounded_n));
 
-  std::vector<float, AlignedAllocator<float, 64>> weights(num_buffers * batch * dim_n * dim_k);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> weights(num_buffers * batch * dim_n *
+                                                   dim_k);
   std::generate(weights.begin(), weights.end(), std::ref(f32rng));
-  std::vector<float, AlignedAllocator<float, 64>> packed_weights(num_buffers * batch * (rounded_n * rounded_k + rounded_n));
-  std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_weights(
+      num_buffers * batch * (rounded_n * rounded_k + rounded_n));
 
   size_t buffer_index = 0;
   for (auto _ : state) {

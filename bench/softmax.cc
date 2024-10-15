@@ -17,6 +17,7 @@
 #include "bench/utils.h"
 #include "xnnpack.h"
 #include "xnnpack/math.h"
+#include "xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
@@ -38,8 +39,8 @@ static void xnnpack_softmax_qu8(benchmark::State& state) {
   auto rng = std::mt19937(random_device());
   auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
-  std::vector<uint8_t> input(batch_size * channels);
-  std::vector<uint8_t> output(batch_size * channels);
+  xnnpack::Buffer<uint8_t> input(batch_size * channels);
+  xnnpack::Buffer<uint8_t> output(batch_size * channels);
   std::generate(input.begin(), input.end(), std::ref(u8rng));
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
@@ -112,11 +113,11 @@ static void xnnpack_softmax_f32(benchmark::State& state) {
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-100.0f, 100.0f), std::ref(rng));
 
-  std::vector<float> input(batch_size * channels + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(batch_size * channels + XNN_EXTRA_BYTES / sizeof(float));
   // Pad the outputs as well since the softmax computation is a multi-phase
   // operation in which the output is re-read, potentially going OOB with
   // vectorized kernels.
-  std::vector<float> output(batch_size * channels +
+  xnnpack::Buffer<float> output(batch_size * channels +
                             XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input.begin(), input.end(), std::ref(f32rng));
 
@@ -187,11 +188,11 @@ static void xnnpack_softmax_f16(benchmark::State& state) {
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(
       std::uniform_real_distribution<float>(-100.0f, 100.0f), std::ref(rng));
-  std::vector<xnn_float16> input(batch_size * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16> input(batch_size * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   // Pad the outputs as well since the softmax computation is a multi-phase
   // operation in which the output is re-read, potentially going OOB with
   // vectorized kernels.
-  std::vector<xnn_float16> output(batch_size * channels +
+  xnnpack::Buffer<xnn_float16> output(batch_size * channels +
                                   XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::generate(input.begin(), input.end(), f32rng);
 

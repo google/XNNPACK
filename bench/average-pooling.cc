@@ -16,9 +16,8 @@
 #include <vector>
 
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
-
+#include "xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/flatbuffers.h"
@@ -46,9 +45,9 @@ static void xnnpack_average_pooling_qu8(benchmark::State& state, const char* net
   const size_t output_height = (2 * padding_size + input_height - pooling_size) / stride + 1;
   const size_t output_width = (2 * padding_size + input_width - pooling_size) / stride + 1;
 
-  std::vector<uint8_t> input(batch_size * input_height * input_width * channels + XNN_EXTRA_BYTES / sizeof(uint8_t));
+  xnnpack::Buffer<uint8_t> input(batch_size * input_height * input_width * channels + XNN_EXTRA_BYTES / sizeof(uint8_t));
   std::generate(input.begin(), input.end(), std::ref(u8rng));
-  std::vector<uint8_t> output(batch_size * output_height * output_width * channels);
+  xnnpack::Buffer<uint8_t> output(batch_size * output_height * output_width * channels);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
@@ -84,7 +83,7 @@ static void xnnpack_average_pooling_qu8(benchmark::State& state, const char* net
     return;
   }
 
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
   status = xnn_setup_average_pooling2d_nhwc_qu8(
     pooling_op,
@@ -137,9 +136,9 @@ static void xnnpack_average_pooling_f32(benchmark::State& state, const char* net
   const size_t output_height = (2 * padding_size + input_height - pooling_size) / stride + 1;
   const size_t output_width = (2 * padding_size + input_width - pooling_size) / stride + 1;
 
-  std::vector<float> input(batch_size * input_height * input_width * channels + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(batch_size * input_height * input_width * channels + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input.begin(), input.end(), std::ref(f32rng));
-  std::vector<float> output(batch_size * output_height * output_width * channels);
+  xnnpack::Buffer<float> output(batch_size * output_height * output_width * channels);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
@@ -173,7 +172,7 @@ static void xnnpack_average_pooling_f32(benchmark::State& state, const char* net
     return;
   }
 
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
   status = xnn_setup_average_pooling2d_nhwc_f32(
     pooling_op,
@@ -237,9 +236,9 @@ void tflite_average_pooling_f32(benchmark::State& state, const char* net) {
   const size_t output_height = (2 * padding_size + input_height - pooling_size) / stride + 1;
   const size_t output_width = (2 * padding_size + input_width - pooling_size) / stride + 1;
 
-  std::vector<float> input(batch_size * input_height * input_width * channels + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(batch_size * input_height * input_width * channels + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input.begin(), input.end(), std::ref(f32rng));
-  std::vector<float> output(batch_size * output_height * output_width * channels);
+  xnnpack::Buffer<float> output(batch_size * output_height * output_width * channels);
 
   flatbuffers::FlatBufferBuilder builder;
   flatbuffers::Offset<tflite::OperatorCode> operator_code =

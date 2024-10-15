@@ -9,15 +9,13 @@
 
 #include "bench/rsum-benchmark.h"
 #include "bench/utils.h"
-#include <benchmark/benchmark.h>
-
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
-
+#include "xnnpack/reduce.h"
+#include "xnnpack/buffer.h"
+#include <benchmark/benchmark.h>
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
   BENCHMARK_CAPTURE(f16_f32acc_rdsum, neonfp16arith_c16,

@@ -18,6 +18,7 @@
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 template <class T> class StaticResizeBilinear2DTestBase : public ::testing::Test {
@@ -45,9 +46,9 @@ template <class T> class StaticResizeBilinear2DTestBase : public ::testing::Test
     input_dims = {{batch_size, input_height, input_width, channels}};
     output_dims = {{batch_size, output_height, output_width, channels}};
 
-    input = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + batch_size * input_height * input_width * channels);
-    operator_output = std::vector<T>(batch_size * output_height * output_width * channels);
-    subgraph_output = std::vector<T>(batch_size * output_height * output_width * channels);
+    input = xnnpack::Buffer<T>(XNN_EXTRA_BYTES / sizeof(T) + batch_size * input_height * input_width * channels);
+    operator_output = xnnpack::Buffer<T>(batch_size * output_height * output_width * channels);
+    subgraph_output = xnnpack::Buffer<T>(batch_size * output_height * output_width * channels);
   }
 
   xnnpack::ReplicableRandomDevice rng;
@@ -71,9 +72,9 @@ template <class T> class StaticResizeBilinear2DTestBase : public ::testing::Test
   std::array<size_t, 4> input_dims;
   std::array<size_t, 4> output_dims;
 
-  std::vector<T> input;
-  std::vector<T> operator_output;
-  std::vector<T> subgraph_output;
+  xnnpack::Buffer<T> input;
+  xnnpack::Buffer<T> operator_output;
+  xnnpack::Buffer<T> subgraph_output;
 };
 
 using StaticResizeBilinear2DTestQS8 = StaticResizeBilinear2DTestBase<int8_t>;

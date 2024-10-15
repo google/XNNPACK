@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/microfnptr.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 // These help disambiguate Test overloads below.
@@ -293,16 +294,14 @@ class VUnaryMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(range_min, range_max);
 
-    std::vector<T> x(batch_size() + XNN_EXTRA_BYTES / sizeof(T));
-    std::vector<T> y(batch_size() +
+    xnnpack::Buffer<T> x(batch_size() + XNN_EXTRA_BYTES / sizeof(T));
+    xnnpack::Buffer<T> y(batch_size() +
                          (inplace() ? XNN_EXTRA_BYTES / sizeof(T) : 0));
-    std::vector<T> y_ref(batch_size());
+    xnnpack::Buffer<T> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
       if (inplace()) {
-        memcpy(y.data(), x.data(), y.size() * sizeof(T));
-      } else {
-        std::fill(y.begin(), y.end(), nanf(""));
+        std::copy(x.begin(), x.end(), y.begin());
       }
       const T* x_data = inplace() ? y.data() : x.data();
 

@@ -22,6 +22,7 @@
 #include "xnnpack/fill.h"
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microfnptr.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class FillMicrokernelTester {
@@ -72,8 +73,8 @@ class FillMicrokernelTester {
           0, std::numeric_limits<uint8_t>::max())(rng);
     };
 
-    std::vector<uint8_t> output((rows() - 1) * output_stride() + channels());
-    std::vector<uint8_t> output_copy(output.size());
+    xnnpack::Buffer<uint8_t> output((rows() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint8_t> output_copy(output.size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(output.begin(), output.end(), std::ref(u8rng));
       std::copy(output.cbegin(), output.cend(), output_copy.begin());

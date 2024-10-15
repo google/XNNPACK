@@ -19,6 +19,7 @@
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 template <
@@ -39,10 +40,10 @@ class PreluTest : public ::testing::Test {
       slope_channels = 1;
     }
     slope_dims = {slope_channels};
-    input = std::vector<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) + NumElements(input_dims));
-    slope = std::vector<WeightType>(slope_channels);
-    operator_output = std::vector<OutputType>(NumElements(output_dims));
-    subgraph_output = std::vector<OutputType>(operator_output.size());
+    input = xnnpack::Buffer<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) + NumElements(input_dims));
+    slope = xnnpack::Buffer<WeightType>(slope_channels);
+    operator_output = xnnpack::Buffer<OutputType>(NumElements(output_dims));
+    subgraph_output = xnnpack::Buffer<OutputType>(operator_output.size());
   }
 
   std::vector<size_t> RandomShape(size_t num_dims)
@@ -63,10 +64,10 @@ class PreluTest : public ::testing::Test {
   std::vector<size_t> output_dims;
   std::vector<size_t> input_dims;
   std::vector<size_t> slope_dims;
-  std::vector<InputType> input;
-  std::vector<WeightType> slope;
-  std::vector<OutputType> operator_output;
-  std::vector<OutputType> subgraph_output;
+  xnnpack::Buffer<InputType> input;
+  xnnpack::Buffer<WeightType> slope;
+  xnnpack::Buffer<OutputType> operator_output;
+  xnnpack::Buffer<OutputType> subgraph_output;
   size_t input_channels;
   size_t slope_channels;
   size_t batch_size;

@@ -22,6 +22,7 @@
 #include <gtest/gtest.h>
 #include "xnnpack/requantization-stubs.h"
 #include "xnnpack/requantization.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class RequantizationTester {
@@ -95,8 +96,8 @@ class RequantizationTester {
     ASSERT_GE(s(), 1);
     ASSERT_LT(s(), 32);
 
-    std::vector<int32_t> inputs(256);
-    std::vector<uint8_t> outputs(inputs.size());
+    xnnpack::Buffer<int32_t> inputs(256);
+    xnnpack::Buffer<uint8_t> outputs(inputs.size());
     const int32_t max_i = (uint32_t(std::numeric_limits<int32_t>::max()) >> s()) + zero_point();
     const int32_t min_i = -(-uint32_t(std::numeric_limits<int32_t>::min()) >> s()) + zero_point();
     for (int32_t i = 0; i <= std::numeric_limits<uint8_t>::max(); i++) {
@@ -135,8 +136,8 @@ class RequantizationTester {
     ASSERT_GE(s(), 1);
     ASSERT_LT(s(), 32);
 
-    std::vector<int32_t> inputs(256);
-    std::vector<int8_t> outputs(inputs.size());
+    xnnpack::Buffer<int32_t> inputs(256);
+    xnnpack::Buffer<int8_t> outputs(inputs.size());
     const int32_t max_i = (uint32_t(std::numeric_limits<int32_t>::max()) >> s()) + zero_point();
     const int32_t min_i = -(-uint32_t(std::numeric_limits<int32_t>::min()) >> s()) + zero_point();
     for (int32_t i = std::numeric_limits<int8_t>::min(); i <= std::numeric_limits<int8_t>::max(); i++) {
@@ -176,8 +177,8 @@ class RequantizationTester {
     ASSERT_GE(s(), 1);
     ASSERT_LT(s(), 32);
 
-    std::vector<int32_t> inputs(256);
-    std::vector<uint8_t> outputs(inputs.size());
+    xnnpack::Buffer<int32_t> inputs(256);
+    xnnpack::Buffer<uint8_t> outputs(inputs.size());
     for (int32_t i = 0; i <= std::numeric_limits<uint8_t>::max(); i++) {
       const int64_t input = RequantizationTester::ShiftLeft(i - zero_point(), s()) -
         (INT64_C(1) << (s() - 1)) + 1;
@@ -217,8 +218,8 @@ class RequantizationTester {
     ASSERT_GE(s(), 1);
     ASSERT_LT(s(), 32);
 
-    std::vector<int32_t> inputs(256);
-    std::vector<int8_t> outputs(inputs.size());
+    xnnpack::Buffer<int32_t> inputs(256);
+    xnnpack::Buffer<int8_t> outputs(inputs.size());
     for (int32_t i = std::numeric_limits<int8_t>::min(); i <= std::numeric_limits<int8_t>::max(); i++) {
       const int64_t input = RequantizationTester::ShiftLeft(i - zero_point(), s()) -
         (INT64_C(1) << (s() - 1)) + 1;
@@ -258,8 +259,8 @@ class RequantizationTester {
     ASSERT_GE(s(), 1);
     ASSERT_LT(s(), 32);
 
-    std::vector<int32_t> inputs(256);
-    std::vector<uint8_t> outputs(inputs.size());
+    xnnpack::Buffer<int32_t> inputs(256);
+    xnnpack::Buffer<uint8_t> outputs(inputs.size());
     for (int32_t i = 0; i <= std::numeric_limits<uint8_t>::max(); i++) {
       const int64_t input = RequantizationTester::ShiftLeft(i - zero_point(), s()) +
         (INT64_C(1) << (s() - 1)) - 1;
@@ -299,8 +300,8 @@ class RequantizationTester {
     ASSERT_GE(s(), 1);
     ASSERT_LT(s(), 32);
 
-    std::vector<int32_t> inputs(256);
-    std::vector<int8_t> outputs(inputs.size());
+    xnnpack::Buffer<int32_t> inputs(256);
+    xnnpack::Buffer<int8_t> outputs(inputs.size());
     for (int32_t i = std::numeric_limits<int8_t>::min(); i <= std::numeric_limits<int8_t>::max(); i++) {
       const int64_t input = RequantizationTester::ShiftLeft(i - zero_point(), s()) +
         (INT64_C(1) << (s() - 1)) - 1;
@@ -333,8 +334,8 @@ class RequantizationTester {
     ASSERT_GE(s(), 1);
     ASSERT_LT(s(), 32);
 
-    std::vector<int32_t> inputs(256);
-    std::vector<uint8_t> outputs(inputs.size());
+    xnnpack::Buffer<int32_t> inputs(256);
+    xnnpack::Buffer<uint8_t> outputs(inputs.size());
     for (int32_t i = 0; i <= std::numeric_limits<uint8_t>::max(); i++) {
       int64_t input = RequantizationTester::ShiftLeft(i - zero_point(), s());
       if (input > 0) {
@@ -375,8 +376,8 @@ class RequantizationTester {
     ASSERT_GE(s(), 1);
     ASSERT_LT(s(), 32);
 
-    std::vector<int32_t> inputs(256);
-    std::vector<int8_t> outputs(inputs.size());
+    xnnpack::Buffer<int32_t> inputs(256);
+    xnnpack::Buffer<int8_t> outputs(inputs.size());
     for (int32_t i = std::numeric_limits<int8_t>::min(); i <= std::numeric_limits<int8_t>::max(); i++) {
       int64_t input = RequantizationTester::ShiftLeft(i - zero_point(), s());
       if (input > 0) {
@@ -417,8 +418,8 @@ class RequantizationTester {
     ASSERT_GE(s(), 1);
     ASSERT_LT(s(), 32);
 
-    std::vector<int32_t> inputs(256);
-    std::vector<int8_t> outputs(inputs.size());
+    xnnpack::Buffer<int32_t> inputs(256);
+    xnnpack::Buffer<int8_t> outputs(inputs.size());
     for (int32_t i = std::numeric_limits<int8_t>::min(); i <= std::numeric_limits<int8_t>::max(); i++) {
       int64_t input = RequantizationTester::ShiftLeft(i - zero_point(), s());
       input -= INT64_C(1) << (s() - 1);
@@ -445,8 +446,8 @@ class RequantizationTester {
     ASSERT_LE(qmax(), std::numeric_limits<uint8_t>::max());
     ASSERT_LT(qmin(), qmax());
 
-    std::vector<int32_t> inputs(256);
-    std::vector<uint8_t> outputs(inputs.size());
+    xnnpack::Buffer<int32_t> inputs(256);
+    xnnpack::Buffer<uint8_t> outputs(inputs.size());
 
     std::fill(inputs.begin(), inputs.end(), std::numeric_limits<int32_t>::min());
     for (int32_t zero_point = 0; zero_point <= std::numeric_limits<uint8_t>::max(); zero_point++) {
@@ -484,8 +485,8 @@ class RequantizationTester {
     ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
     ASSERT_LT(qmin(), qmax());
 
-    std::vector<int32_t> inputs(256);
-    std::vector<int8_t> outputs(inputs.size());
+    xnnpack::Buffer<int32_t> inputs(256);
+    xnnpack::Buffer<int8_t> outputs(inputs.size());
 
     std::fill(inputs.begin(), inputs.end(), std::numeric_limits<int32_t>::min());
     for (int32_t zero_point = std::numeric_limits<int8_t>::min();
@@ -533,8 +534,8 @@ class RequantizationTester {
       auto u8rng =
         std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
-      std::vector<int32_t> inputs(4096);
-      std::vector<uint8_t> outputs(inputs.size());
+      xnnpack::Buffer<int32_t> inputs(4096);
+      xnnpack::Buffer<uint8_t> outputs(inputs.size());
 
       std::uniform_real_distribution<float> scale_distribution(0x1.000000p-23f, 0x1.FFFFFEp-1f);
       const float scale = scale_distribution(rng);
@@ -575,8 +576,8 @@ class RequantizationTester {
       auto i8rng = std::bind(
         std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), std::ref(rng));
 
-      std::vector<int32_t> inputs(4096);
-      std::vector<int8_t> outputs(inputs.size());
+      xnnpack::Buffer<int32_t> inputs(4096);
+      xnnpack::Buffer<int8_t> outputs(inputs.size());
 
       std::uniform_real_distribution<float> scale_distribution(0x1.000000p-23f, 0x1.FFFFFEp-1f);
       const float scale = scale_distribution(rng);
@@ -617,8 +618,8 @@ class RequantizationTester {
       auto i8rng = std::bind(
         std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), std::ref(rng));
 
-      std::vector<int32_t> inputs(4096);
-      std::vector<int8_t> outputs(inputs.size());
+      xnnpack::Buffer<int32_t> inputs(4096);
+      xnnpack::Buffer<int8_t> outputs(inputs.size());
 
       std::uniform_real_distribution<float> scale_distribution(0x1.000000p-23f, 0x1.FFFFFEp-1f);
       const float scale = scale_distribution(rng);
@@ -659,8 +660,8 @@ class RequantizationTester {
       auto u8rng =
         std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
-      std::vector<int32_t> inputs(4096);
-      std::vector<uint8_t> outputs(inputs.size());
+      xnnpack::Buffer<int32_t> inputs(4096);
+      xnnpack::Buffer<uint8_t> outputs(inputs.size());
 
       std::uniform_real_distribution<float> scale_distribution(0x1.000000p-23f, 0x1.FFFFFEp-1f);
       const float scale = scale_distribution(rng);
@@ -703,8 +704,8 @@ class RequantizationTester {
       auto i8rng = std::bind(
         std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), std::ref(rng));
 
-      std::vector<int32_t> inputs(4096);
-      std::vector<int8_t> outputs(inputs.size());
+      xnnpack::Buffer<int32_t> inputs(4096);
+      xnnpack::Buffer<int8_t> outputs(inputs.size());
 
       std::uniform_real_distribution<float> scale_distribution(0x1.000000p-23f, 0x1.FFFFFEp-1f);
       const float scale = scale_distribution(rng);

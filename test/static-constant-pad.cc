@@ -246,8 +246,10 @@ TEST_F(StaticConstantPadTestInt8, matches_operator_api)
     output_dims[i] = pre_paddings[i] + output_dims[i] + post_paddings[i];
   }
   // Output sizes
-  operator_output = std::vector<int8_t>(NumElements(output_dims));
-  subgraph_output = std::vector<int8_t>(operator_output.size());
+  operator_output = xnnpack::Buffer<int8_t>(NumElements(output_dims));
+  subgraph_output = xnnpack::Buffer<int8_t>(operator_output.size());
+
+  std::iota(input.begin(), input.end(), 0);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -319,8 +321,10 @@ TEST_F(StaticConstantPadTestUint8, matches_operator_api)
     output_dims[i] = pre_paddings[i] + output_dims[i] + post_paddings[i];
   }
   // Output sizes
-  operator_output = std::vector<uint8_t>(NumElements(output_dims));
-  subgraph_output = std::vector<uint8_t>(operator_output.size());
+  operator_output = xnnpack::Buffer<uint8_t>(NumElements(output_dims));
+  subgraph_output = xnnpack::Buffer<uint8_t>(operator_output.size());
+
+  std::iota(input.begin(), input.end(), 0);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -390,8 +394,10 @@ TEST_F(StaticConstantPadTestF16, matches_operator_api)
     output_dims[i] = pre_paddings[i] + output_dims[i] + post_paddings[i];
   }
   // Output sizes
-  operator_output = std::vector<xnn_float16>(NumElements(output_dims));
-  subgraph_output = std::vector<xnn_float16>(operator_output.size());
+  operator_output = xnnpack::Buffer<xnn_float16>(NumElements(output_dims));
+  subgraph_output = xnnpack::Buffer<xnn_float16>(operator_output.size());
+
+  std::iota(input.begin(), input.end(), 0);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -461,8 +467,10 @@ TEST_F(StaticConstantPadTestF32, matches_operator_api)
     output_dims[i] = pre_paddings[i] + output_dims[i] + post_paddings[i];
   }
   // Output sizes
-  operator_output = std::vector<float>(NumElements(output_dims));
-  subgraph_output = std::vector<float>(operator_output.size());
+  operator_output = xnnpack::Buffer<float>(NumElements(output_dims));
+  subgraph_output = xnnpack::Buffer<float>(operator_output.size());
+
+  std::iota(input.begin(), input.end(), 0);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -530,7 +538,9 @@ TEST_F(StaticConstantPadTestF32, reshape_output)
   for (size_t i = 0; i < dims.size(); i++) {
     output_dims[i] = pre_paddings[i] + output_dims[i] + post_paddings[i];
   }
-  subgraph_output = std::vector<float>(NumElements(output_dims));
+  subgraph_output = xnnpack::Buffer<float>(NumElements(output_dims));
+
+  std::iota(input.begin(), input.end(), 0);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

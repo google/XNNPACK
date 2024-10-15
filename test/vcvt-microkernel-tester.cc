@@ -24,6 +24,7 @@
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 void VCvtMicrokernelTester::Test(
@@ -31,9 +32,9 @@ void VCvtMicrokernelTester::Test(
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(-100.0f, 100.0f);
 
-  std::vector<xnn_float16> input(batch_size() +
+  xnnpack::Buffer<xnn_float16> input(batch_size() +
                               XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  std::vector<float> output(batch_size());
+  xnnpack::Buffer<float> output(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(),
                   [&]() { return f32dist(rng); });
@@ -56,8 +57,8 @@ void VCvtMicrokernelTester::Test(
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(-100.0f, 100.0f);
 
-  std::vector<float> input(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<xnn_float16> output(batch_size());
+  xnnpack::Buffer<float> input(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<xnn_float16> output(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
@@ -86,11 +87,11 @@ void VCvtMicrokernelTester::Test(xnn_f16_qs8_vcvt_ukernel_fn vcvt,
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
-  std::vector<float> input_float(batch_size());
-  std::vector<xnn_float16> input(batch_size() +
+  xnnpack::Buffer<float> input_float(batch_size());
+  xnnpack::Buffer<xnn_float16> input(batch_size() +
                               XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  std::vector<int8_t> output(batch_size());
-  std::vector<int8_t> output_ref(batch_size());
+  xnnpack::Buffer<int8_t> output(batch_size());
+  xnnpack::Buffer<int8_t> output_ref(batch_size());
   const float scale_fp16 =
       xnn_float16(scale());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -143,9 +144,9 @@ void VCvtMicrokernelTester::Test(
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
-  std::vector<float> input(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<int8_t> output(batch_size());
-  std::vector<int8_t> output_ref(batch_size());
+  xnnpack::Buffer<float> input(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<int8_t> output(batch_size());
+  xnnpack::Buffer<int8_t> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
@@ -190,9 +191,9 @@ void VCvtMicrokernelTester::Test(
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
-  std::vector<float> input(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<uint8_t> output(batch_size());
-  std::vector<uint8_t> output_ref(batch_size());
+  xnnpack::Buffer<float> input(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<uint8_t> output(batch_size());
+  xnnpack::Buffer<uint8_t> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
@@ -234,9 +235,9 @@ void VCvtMicrokernelTester::Test(
   std::uniform_int_distribution<int32_t> i32dist(
       std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max());
 
-  std::vector<int32_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
-  std::vector<float> output(batch_size());
-  std::vector<float> output_ref(batch_size());
+  xnnpack::Buffer<int32_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
+  xnnpack::Buffer<float> output(batch_size());
+  xnnpack::Buffer<float> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return i32dist(rng); });
 
@@ -271,9 +272,9 @@ void VCvtMicrokernelTester::Test(
       std::numeric_limits<uint32_t>::min(),
       std::numeric_limits<uint32_t>::max());
 
-  std::vector<uint32_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(uint32_t));
-  std::vector<float> output(batch_size());
-  std::vector<float> output_ref(batch_size());
+  xnnpack::Buffer<uint32_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(uint32_t));
+  xnnpack::Buffer<float> output(batch_size());
+  xnnpack::Buffer<float> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return u32dist(rng); });
 
@@ -308,9 +309,9 @@ void VCvtMicrokernelTester::Test(xnn_qs8_vcvt_ukernel_fn vcvt,
   std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
-  std::vector<int8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::vector<int8_t> output(batch_size());
-  std::vector<int8_t> output_ref(batch_size());
+  xnnpack::Buffer<int8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<int8_t> output(batch_size());
+  xnnpack::Buffer<int8_t> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
 
@@ -354,9 +355,9 @@ void VCvtMicrokernelTester::Test(
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<int16_t> i16dist;
 
-  std::vector<int16_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int16_t));
-  std::vector<int8_t> output(batch_size());
-  std::vector<int8_t> output_ref(batch_size());
+  xnnpack::Buffer<int16_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int16_t));
+  xnnpack::Buffer<int8_t> output(batch_size());
+  xnnpack::Buffer<int8_t> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return i16dist(rng); });
 
@@ -402,9 +403,9 @@ void VCvtMicrokernelTester::Test(
   std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
-  std::vector<int8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::vector<xnn_float16> output(batch_size());
-  std::vector<float> output_ref(batch_size());
+  xnnpack::Buffer<int8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<xnn_float16> output(batch_size());
+  xnnpack::Buffer<float> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
 
@@ -442,9 +443,9 @@ void VCvtMicrokernelTester::Test(
   std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
-  std::vector<int8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::vector<float> output(batch_size());
-  std::vector<float> output_ref(batch_size());
+  xnnpack::Buffer<int8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<float> output(batch_size());
+  xnnpack::Buffer<float> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
 
@@ -481,9 +482,9 @@ void VCvtMicrokernelTester::Test(xnn_qu8_vcvt_ukernel_fn vcvt,
   std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
-  std::vector<uint8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-  std::vector<uint8_t> output(batch_size());
-  std::vector<uint8_t> output_ref(batch_size());
+  xnnpack::Buffer<uint8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+  xnnpack::Buffer<uint8_t> output(batch_size());
+  xnnpack::Buffer<uint8_t> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
 
@@ -527,9 +528,9 @@ void VCvtMicrokernelTester::Test(
   std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
-  std::vector<uint8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-  std::vector<float> output(batch_size());
-  std::vector<float> output_ref(batch_size());
+  xnnpack::Buffer<uint8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+  xnnpack::Buffer<float> output(batch_size());
+  xnnpack::Buffer<float> output_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
 

@@ -16,7 +16,6 @@
 
 #include "bench/utils.h"
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/hardware-config.h"
 #include "xnnpack/microfnptr.h"
@@ -24,6 +23,7 @@
 #include "xnnpack/microparams.h"
 #include "xnnpack/vhswish.h"
 #include "xnnpack/vlrelu.h"
+#include "xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 
 template <typename T>
@@ -166,10 +166,9 @@ void vunary(benchmark::State& state, uint64_t arch_flags,
   auto rng = std::mt19937(random_device());
   UniformDistribution<TIn> dist;
 
-  std::vector<TIn, AlignedAllocator<TIn, 64>> x(num_elements);
-  std::vector<TOut, AlignedAllocator<TOut, 64>> y(num_elements);
+  xnnpack::Buffer<TIn, XNN_ALLOCATION_ALIGNMENT> x(num_elements);
+  xnnpack::Buffer<TOut, XNN_ALLOCATION_ALIGNMENT> y(num_elements);
   std::generate(x.begin(), x.end(), [&]() { return dist(rng); });
-  std::fill(y.begin(), y.end(), 0);
 
   for (auto _ : state) {
     ukernel(num_elements * sizeof(TOut), x.data(), y.data(), &config.params);

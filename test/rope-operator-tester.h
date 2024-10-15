@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/math.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class RoPEOperatorTester {
@@ -83,11 +84,11 @@ class RoPEOperatorTester {
     std::uniform_real_distribution<float> f32rdist(1.0f, 10.0f);
     std::uniform_real_distribution<float> f32idist(0.01f, 0.1f);
 
-    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
+    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       batch_size() * tokens() * heads() * channels());
-    std::vector<xnn_float16> weights(XNN_EXTRA_BYTES / sizeof(xnn_float16) + tokens() * channels());
-    std::vector<xnn_float16> output(batch_size() * tokens() * heads() * channels());
-    std::vector<float> output_ref(batch_size() * tokens() * heads() * channels());
+    xnnpack::Buffer<xnn_float16> weights(XNN_EXTRA_BYTES / sizeof(xnn_float16) + tokens() * channels());
+    xnnpack::Buffer<xnn_float16> output(batch_size() * tokens() * heads() * channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * tokens() * heads() * channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       for (size_t n = 0; n < batch_size(); n++) {
@@ -183,11 +184,11 @@ class RoPEOperatorTester {
     std::uniform_real_distribution<float> f32rdist(1.0f, 10.0f);
     std::uniform_real_distribution<float> f32idist(0.01f, 0.1f);
 
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       batch_size() * tokens() * heads() * channels());
-    std::vector<float> weights(XNN_EXTRA_BYTES / sizeof(float) + tokens() * channels());
-    std::vector<float> output(batch_size() * tokens() * heads() * channels());
-    std::vector<double> output_ref(batch_size() * tokens() * heads() * channels());
+    xnnpack::Buffer<float> weights(XNN_EXTRA_BYTES / sizeof(float) + tokens() * channels());
+    xnnpack::Buffer<float> output(batch_size() * tokens() * heads() * channels());
+    xnnpack::Buffer<double> output_ref(batch_size() * tokens() * heads() * channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       for (size_t n = 0; n < batch_size(); n++) {

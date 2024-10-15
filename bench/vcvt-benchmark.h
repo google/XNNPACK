@@ -8,12 +8,10 @@
 #include <random>
 #include <vector>
 
-#include <benchmark/benchmark.h>
 #include "bench/utils.h"
-
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
-
+#include "xnnpack/buffer.h"
+#include <benchmark/benchmark.h>
 
 namespace {
 
@@ -34,8 +32,9 @@ void cvt_benchmark(
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 10.0f), std::ref(rng));
 
-  std::vector<In, AlignedAllocator<In, 64>> x(num_elements + XNN_EXTRA_BYTES / sizeof(In));
-  std::vector<Out, AlignedAllocator<Out, 64>> y(num_elements);
+  xnnpack::Buffer<In, XNN_ALLOCATION_ALIGNMENT> x(num_elements +
+                                          XNN_EXTRA_BYTES / sizeof(In));
+  xnnpack::Buffer<Out, XNN_ALLOCATION_ALIGNMENT> y(num_elements);
   std::generate(x.begin(), x.end(), f32rng);
 
   for (auto _ : state) {

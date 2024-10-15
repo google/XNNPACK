@@ -94,7 +94,7 @@ TEST(${TEST_NAME}, input_scale) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-    for (float input_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+    for (float input_scale : {4.0f, 16.0f, 64.0f}) {
       VHSwishMicrokernelTester()
         .batch_size(batch_size)
         .input_scale(input_scale)
@@ -110,7 +110,7 @@ TEST(${TEST_NAME}, output_scale) {
   $if ISA_CHECK:
     ${ISA_CHECK};
   for (size_t batch_size = 1; batch_size <= ${BATCH_TILE*5}; batch_size += ${max(1, BATCH_TILE-1)}) {
-    for (float output_scale : std::vector<float>({4.0f, 16.0f, 64.0f})) {
+    for (float output_scale : {4.0f, 16.0f, 64.0f}) {
       VHSwishMicrokernelTester()
         .batch_size(batch_size)
         .output_scale(output_scale)

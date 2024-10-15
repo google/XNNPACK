@@ -20,6 +20,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 namespace xnnpack {
@@ -29,11 +30,11 @@ void UnaryOperatorTester::TestF16() {
   std::uniform_real_distribution<float> f32dist(range_f16_.first,
                                                 range_f16_.second);
 
-  std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
+  xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
                               (batch_size() - 1) * input_stride() + channels());
-  std::vector<xnn_float16> output((batch_size() - 1) * output_stride() +
+  xnnpack::Buffer<xnn_float16> output((batch_size() - 1) * output_stride() +
                                channels());
-  std::vector<float> output_ref(batch_size() * channels());
+  xnnpack::Buffer<float> output_ref(batch_size() * channels());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(),
                   [&]() { return f32dist(rng); });
@@ -83,10 +84,10 @@ void UnaryOperatorTester::TestF32() {
   std::uniform_real_distribution<float> f32dist(range_f32_.first,
                                                 range_f32_.second);
 
-  std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+  xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
                            (batch_size() - 1) * input_stride() + channels());
-  std::vector<float> output((batch_size() - 1) * output_stride() + channels());
-  std::vector<float> output_ref(batch_size() * channels());
+  xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() + channels());
+  xnnpack::Buffer<float> output_ref(batch_size() * channels());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
@@ -130,10 +131,10 @@ void UnaryOperatorTester::TestRunF32() {
   std::uniform_real_distribution<float> f32dist(range_f32_.first,
                                                 range_f32_.second);
 
-  std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+  xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
                            (batch_size() - 1) * input_stride() + channels());
-  std::vector<float> output((batch_size() - 1) * output_stride() + channels());
-  std::vector<float> output_ref(batch_size() * channels());
+  xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() + channels());
+  xnnpack::Buffer<float> output_ref(batch_size() * channels());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
@@ -170,10 +171,10 @@ void UnaryOperatorTester::TestQS8() {
                                                   range_qs8_.second)(rng);
   };
 
-  std::vector<int8_t> input((batch_size() - 1) * input_stride() + channels() +
+  xnnpack::Buffer<int8_t> input((batch_size() - 1) * input_stride() + channels() +
                             XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::vector<int8_t> output((batch_size() - 1) * output_stride() + channels());
-  std::vector<float> output_ref(batch_size() * channels());
+  xnnpack::Buffer<int8_t> output((batch_size() - 1) * output_stride() + channels());
+  xnnpack::Buffer<float> output_ref(batch_size() * channels());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), i8rng);
 
@@ -227,11 +228,11 @@ void UnaryOperatorTester::TestQU8() {
                                                    range_qu8_.second)(rng);
   };
 
-  std::vector<uint8_t> input((batch_size() - 1) * input_stride() + channels() +
+  xnnpack::Buffer<uint8_t> input((batch_size() - 1) * input_stride() + channels() +
                              XNN_EXTRA_BYTES / sizeof(uint8_t));
-  std::vector<uint8_t> output((batch_size() - 1) * output_stride() +
+  xnnpack::Buffer<uint8_t> output((batch_size() - 1) * output_stride() +
                               channels());
-  std::vector<float> output_ref(batch_size() * channels());
+  xnnpack::Buffer<float> output_ref(batch_size() * channels());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), u8rng);
 

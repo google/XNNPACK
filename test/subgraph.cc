@@ -80,7 +80,7 @@ TEST(SUBGRAPH, even_split3_first_two_outputs_optimized_away) {
   // Regression test for a crash where we could not deal with a split where the
   // 0th output is not used (and optimized away).
   auto output = tester.RunWithFusion<float>();
-  std::vector<float> expected = {6, 7, 8};
+  xnnpack::Buffer<float> expected = {6, 7, 8};
   ASSERT_EQ(expected, output);
 }
 

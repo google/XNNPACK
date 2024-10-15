@@ -20,6 +20,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack/microfnptr.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class LUTNormMicrokernelTester {
@@ -63,17 +64,15 @@ class LUTNormMicrokernelTester {
           1, std::numeric_limits<uint32_t>::max() / (257 * n()))(rng);
     };
 
-    std::vector<uint8_t> x(n());
-    std::vector<uint32_t> t(256);
-    std::vector<uint8_t> y(n());
-    std::vector<float> y_ref(n());
+    xnnpack::Buffer<uint8_t> x(n());
+    xnnpack::Buffer<uint32_t> t(256);
+    xnnpack::Buffer<uint8_t> y(n());
+    xnnpack::Buffer<float> y_ref(n());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), std::ref(u8rng));
       std::generate(t.begin(), t.end(), std::ref(u32rng));
       if (inplace()) {
         std::generate(y.begin(), y.end(), std::ref(u8rng));
-      } else {
-        std::fill(y.begin(), y.end(), 0xA5);
       }
       const uint8_t* x_data = inplace() ? y.data() : x.data();
 

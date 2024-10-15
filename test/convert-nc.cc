@@ -345,7 +345,7 @@ TEST(CONVERT_NC_F32_QS8, small_batch_with_input_and_output_stride) {
 }
 
 TEST(CONVERT_NC_F32_QS8, output_scale) {
-  for (float output_scale : std::vector<float>{{0.1f, 1.0f, 10.0f}}) {
+  for (float output_scale : {0.1f, 1.0f, 10.0f}) {
     for (size_t channels = 1; channels < 100; channels++) {
       ConvertOperatorTester()
           .batch_size(3)
@@ -476,7 +476,7 @@ TEST(CONVERT_NC_F32_QU8, small_batch_with_input_and_output_stride) {
 }
 
 TEST(CONVERT_NC_F32_QU8, output_scale) {
-  for (float output_scale : std::vector<float>{{0.1f, 1.0f, 10.0f}}) {
+  for (float output_scale : {0.1f, 1.0f, 10.0f}) {
     for (size_t channels = 1; channels < 100; channels++) {
       ConvertOperatorTester()
           .batch_size(3)
@@ -597,7 +597,7 @@ TEST(CONVERT_NC_QS8_F16, small_batch_with_input_and_output_stride) {
 }
 
 TEST(CONVERT_NC_QS8_F16, input_scale) {
-  for (float input_scale : std::vector<float>{{0.1f, 1.0f, 10.0f}}) {
+  for (float input_scale : {0.1f, 1.0f, 10.0f}) {
     for (size_t channels = 1; channels < 100; channels++) {
       ConvertOperatorTester()
           .batch_size(3)
@@ -680,7 +680,7 @@ TEST(CONVERT_NC_QS8_F32, small_batch_with_input_and_output_stride) {
 }
 
 TEST(CONVERT_NC_QS8_F32, input_scale) {
-  for (float input_scale : std::vector<float>{{0.1f, 1.0f, 10.0f}}) {
+  for (float input_scale : {0.1f, 1.0f, 10.0f}) {
     for (size_t channels = 1; channels < 100; channels++) {
       ConvertOperatorTester()
           .batch_size(3)
@@ -773,7 +773,7 @@ TEST(CONVERT_NC_QS16_QS8, small_batch_with_input_and_output_stride) {
 }
 
 TEST(CONVERT_NC_QS16_QS8, input_scale) {
-  for (float input_scale : std::vector<float>{{0.1f, 1.0f, 10.0f}}) {
+  for (float input_scale : {0.1f, 1.0f, 10.0f}) {
     for (size_t channels = 1; channels < 100; channels++) {
       ConvertOperatorTester()
           .batch_size(3)
@@ -860,7 +860,7 @@ TEST(CONVERT_NC_QU8_F32, small_batch_with_input_and_output_stride) {
 }
 
 TEST(CONVERT_NC_QU8_F32, input_scale) {
-  for (float input_scale : std::vector<float>{{0.1f, 1.0f, 10.0f}}) {
+  for (float input_scale : {0.1f, 1.0f, 10.0f}) {
     for (size_t channels = 1; channels < 100; channels++) {
       ConvertOperatorTester()
           .batch_size(3)

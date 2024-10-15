@@ -16,6 +16,7 @@
 
 #include <benchmark/benchmark.h>
 #include "bench/utils.h"
+#include "xnnpack/buffer.h"
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "tensorflow/lite/interpreter.h"
@@ -34,9 +35,9 @@ void xnnpack_batch_matrix_multiply_f32(benchmark::State& state, const char* net)
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
 
-  std::vector<float> input1(batch_size * m * k);
+  xnnpack::Buffer<float> input1(batch_size * m * k);
   std::generate(input1.begin(), input1.end(), std::ref(f32rng));
-  std::vector<float> input2(batch_size * k * n);
+  xnnpack::Buffer<float> input2(batch_size * k * n);
   std::generate(input2.begin(), input2.end(), std::ref(f32rng));
   const size_t output_elements = batch_size * m * n;
 
@@ -48,9 +49,9 @@ void xnnpack_batch_matrix_multiply_f32(benchmark::State& state, const char* net)
 
   const size_t num_buffers =
     1 + benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), sizeof(float) * (output_elements));
-  std::vector<float> output(output_elements * num_buffers);
+  xnnpack::Buffer<float> output(output_elements * num_buffers);
 
-  std::vector<xnn_operator_t> ops(num_buffers);
+  xnnpack::Buffer<xnn_operator_t> ops(num_buffers);
 
   for (xnn_operator_t& op : ops) {
     status = xnn_create_batch_matrix_multiply_nc_f32(/*flags=*/0, &op);
@@ -60,7 +61,7 @@ void xnnpack_batch_matrix_multiply_f32(benchmark::State& state, const char* net)
     }
   }
 
-  std::vector<std::unique_ptr<std::vector<char>>> workspaces;
+  std::vector<std::unique_ptr<xnnpack::Buffer<char>>> workspaces;
 
   for (xnn_operator_t& op : ops) {
     size_t workspace_size = 0;
@@ -70,7 +71,7 @@ void xnnpack_batch_matrix_multiply_f32(benchmark::State& state, const char* net)
         /*batch_dims_b=*/&batch_size, m, k, n, &workspace_size,
         &workspace_alignment, nullptr);
 
-    auto workspace = std::make_unique<std::vector<char>>(workspace_size);
+    auto workspace = std::make_unique<xnnpack::Buffer<char>>(workspace_size);
     char* workspace_ptr = workspace->data();
 
     workspaces.push_back(std::move(workspace));
@@ -126,9 +127,9 @@ void tflite_batch_matrix_multiply_f32(benchmark::State& state, const char* net) 
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
 
-  std::vector<float> input1(batch_size * m * k);
+  xnnpack::Buffer<float> input1(batch_size * m * k);
   std::generate(input1.begin(), input1.end(), std::ref(f32rng));
-  std::vector<float> input2(batch_size * k * n);
+  xnnpack::Buffer<float> input2(batch_size * k * n);
   std::generate(input2.begin(), input2.end(), std::ref(f32rng));
 
   flatbuffers::FlatBufferBuilder builder;

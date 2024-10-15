@@ -114,7 +114,7 @@ def main(args):
 #include <benchmark/benchmark.h>
 
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
 #include "xnnpack/reduce.h"
 #include "xnnpack/microfnptr.h"

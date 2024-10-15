@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <climits>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -17,7 +18,6 @@
 #include <limits>
 #include <random>
 #include <vector>
-#include <climits>
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
@@ -25,6 +25,7 @@
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/requantization.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 void VBinaryMicrokernelTester::Test(xnn_f16_vbinary_ukernel_fn vbinary,
@@ -33,22 +34,24 @@ void VBinaryMicrokernelTester::Test(xnn_f16_vbinary_ukernel_fn vbinary,
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
-  std::vector<xnn_float16> a(batch_size() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  std::vector<xnn_float16> b(broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  std::vector<xnn_float16> y(
+  xnnpack::Buffer<xnn_float16> a(batch_size() +
+                                 XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16> b(
+      broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16> y(
       batch_size() +
       (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(xnn_float16) : 0));
-  std::vector<float> y_ref(batch_size());
+  xnnpack::Buffer<float> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
-    std::generate(a.begin(), a.end(),
-                  [&]() { return f32dist(rng); });
-    std::generate(b.begin(), b.end(),
-                  [&]() { return f32dist(rng); });
+    if (!inplace_a()) {
+      std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
+    }
+    if (!inplace_b()) {
+      std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
+    }
     if (inplace_a() || inplace_b()) {
       std::generate(y.begin(), y.end(),
                     [&]() { return f32dist(rng); });
-    } else {
-      std::fill(y.begin(), y.end(), std::nanf(""));
     }
     const xnn_float16* a_data = inplace_a() ? y.data() : a.data();
     const xnn_float16* b_data = inplace_b() ? y.data() : b.data();
@@ -72,22 +75,24 @@ void VBinaryMicrokernelTester::Test(
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
-  std::vector<xnn_float16> a(batch_size() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  std::vector<xnn_float16> b(broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  std::vector<xnn_float16> y(
+  xnnpack::Buffer<xnn_float16> a(batch_size() +
+                                 XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16> b(
+      broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16> y(
       batch_size() +
       (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(xnn_float16) : 0));
-  std::vector<float> y_ref(batch_size());
+  xnnpack::Buffer<float> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
-    std::generate(a.begin(), a.end(),
-                  [&]() { return f32dist(rng); });
-    std::generate(b.begin(), b.end(),
-                  [&]() { return f32dist(rng); });
+    if (!inplace_a()) {
+      std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
+    }
+    if (!inplace_b()) {
+      std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
+    }
     if (inplace_a() || inplace_b()) {
       std::generate(y.begin(), y.end(),
                     [&]() { return f32dist(rng); });
-    } else {
-      std::fill(y.begin(), y.end(), std::nanf(""));
     }
     const xnn_float16* a_data = inplace_a() ? y.data() : a.data();
     const xnn_float16* b_data = inplace_b() ? y.data() : b.data();
@@ -136,19 +141,22 @@ void VBinaryMicrokernelTester::Test(xnn_f32_vbinary_ukernel_fn vbinary,
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
-  std::vector<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<float> b(broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<float> y(batch_size() + (inplace_a() || inplace_b()
-                                           ? XNN_EXTRA_BYTES / sizeof(float)
-                                           : 0));
-  std::vector<float> y_ref(batch_size());
+  xnnpack::Buffer<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> b(
+      broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> y(batch_size() + (inplace_a() || inplace_b()
+                                               ? XNN_EXTRA_BYTES / sizeof(float)
+                                               : 0));
+  xnnpack::Buffer<float> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
-    std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
-    std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
+    if (!inplace_a()) {
+      std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
+    }
+    if (!inplace_b()) {
+      std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
+    }
     if (inplace_a() || inplace_b()) {
       std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
-    } else {
-      std::fill(y.begin(), y.end(), nanf(""));
     }
     const float* a_data = inplace_a() ? y.data() : a.data();
     const float* b_data = inplace_b() ? y.data() : b.data();
@@ -171,19 +179,22 @@ void VBinaryMicrokernelTester::Test(xnn_s32_vbinary_ukernel_fn vbinary,
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_int_distribution<int32_t> s32dist(-100000, 100000);
 
-  std::vector<int32_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
-  std::vector<int32_t> b(broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
-  std::vector<int32_t> y(batch_size() + (inplace_a() || inplace_b()
-                                           ? XNN_EXTRA_BYTES / sizeof(int32_t)
-                                           : 0));
-  std::vector<int32_t> y_ref(batch_size());
+  xnnpack::Buffer<int32_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
+  xnnpack::Buffer<int32_t> b(
+      broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
+  xnnpack::Buffer<int32_t> y(
+      batch_size() +
+      (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(int32_t) : 0));
+  xnnpack::Buffer<int32_t> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
-    std::generate(a.begin(), a.end(), [&]() { return s32dist(rng); });
-    std::generate(b.begin(), b.end(), [&]() { return s32dist(rng); });
+    if (!inplace_a()) {
+      std::generate(a.begin(), a.end(), [&]() { return s32dist(rng); });
+    }
+    if (!inplace_b()) {
+      std::generate(b.begin(), b.end(), [&]() { return s32dist(rng); });
+    }
     if (inplace_a() || inplace_b()) {
       std::generate(y.begin(), y.end(), [&]() { return s32dist(rng); });
-    } else {
-      std::fill(y.begin(), y.end(), INT_MAX);
     }
     const int32_t* a_data = inplace_a() ? y.data() : a.data();
     const int32_t* b_data = inplace_b() ? y.data() : b.data();
@@ -206,19 +217,22 @@ void VBinaryMicrokernelTester::Test(
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(0.01f, 1.0f);
 
-  std::vector<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<float> b(broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<float> y(batch_size() + (inplace_a() || inplace_b()
-                                           ? XNN_EXTRA_BYTES / sizeof(float)
-                                           : 0));
-  std::vector<float> y_ref(batch_size());
+  xnnpack::Buffer<float> a(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> b(
+      broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> y(batch_size() + (inplace_a() || inplace_b()
+                                               ? XNN_EXTRA_BYTES / sizeof(float)
+                                               : 0));
+  xnnpack::Buffer<float> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
-    std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
-    std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
+    if (!inplace_a()) {
+      std::generate(a.begin(), a.end(), [&]() { return f32dist(rng); });
+    }
+    if (!inplace_b()) {
+      std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
+    }
     if (inplace_a() || inplace_b()) {
       std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
-    } else {
-      std::fill(y.begin(), y.end(), nanf(""));
     }
     const float* a_data = inplace_a() ? y.data() : a.data();
     const float* b_data = inplace_b() ? y.data() : b.data();
@@ -267,20 +281,23 @@ void VBinaryMicrokernelTester::Test(
         0, std::numeric_limits<uint8_t>::max())(rng);
   };
 
-  std::vector<uint8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-  std::vector<uint8_t> b(broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-  std::vector<uint8_t> y(batch_size() + (inplace_a() || inplace_b()
-                                             ? XNN_EXTRA_BYTES / sizeof(uint8_t)
-                                             : 0));
-  std::vector<float> y_fp(batch_size());
-  std::vector<uint8_t> y_ref(batch_size());
+  xnnpack::Buffer<uint8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+  xnnpack::Buffer<uint8_t> b(
+      broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+  xnnpack::Buffer<uint8_t> y(
+      batch_size() +
+      (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(uint8_t) : 0));
+  xnnpack::Buffer<float> y_fp(batch_size());
+  xnnpack::Buffer<uint8_t> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
-    std::generate(a.begin(), a.end(), std::ref(u8rng));
-    std::generate(b.begin(), b.end(), std::ref(u8rng));
+    if (!inplace_a()) {
+      std::generate(a.begin(), a.end(), [&]() { return u8rng(); });
+    }
+    if (!inplace_b()) {
+      std::generate(b.begin(), b.end(), [&]() { return u8rng(); });
+    }
     if (inplace_a() || inplace_b()) {
-      std::generate(y.begin(), y.end(), std::ref(u8rng));
-    } else {
-      std::fill(y.begin(), y.end(), 0xA5);
+      std::generate(y.begin(), y.end(), [&]() { return u8rng(); });
     }
     const uint8_t* a_data = inplace_a() ? y.data() : a.data();
     const uint8_t* b_data = inplace_b() ? y.data() : b.data();
@@ -329,20 +346,23 @@ void VBinaryMicrokernelTester::Test(
         0, std::numeric_limits<uint8_t>::max())(rng);
   };
 
-  std::vector<uint8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-  std::vector<uint8_t> b(broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-  std::vector<uint8_t> y(batch_size() + (inplace_a() || inplace_b()
-                                             ? XNN_EXTRA_BYTES / sizeof(uint8_t)
-                                             : 0));
-  std::vector<float> y_fp(batch_size());
-  std::vector<uint8_t> y_ref(batch_size());
+  xnnpack::Buffer<uint8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+  xnnpack::Buffer<uint8_t> b(
+      broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+  xnnpack::Buffer<uint8_t> y(
+      batch_size() +
+      (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(uint8_t) : 0));
+  xnnpack::Buffer<float> y_fp(batch_size());
+  xnnpack::Buffer<uint8_t> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
-    std::generate(a.begin(), a.end(), std::ref(u8rng));
-    std::generate(b.begin(), b.end(), std::ref(u8rng));
+    if (!inplace_a()) {
+      std::generate(a.begin(), a.end(), [&]() { return u8rng(); });
+    }
+    if (!inplace_b()) {
+      std::generate(b.begin(), b.end(), [&]() { return u8rng(); });
+    }
     if (inplace_a() || inplace_b()) {
-      std::generate(y.begin(), y.end(), std::ref(u8rng));
-    } else {
-      std::fill(y.begin(), y.end(), 0xA5);
+      std::generate(y.begin(), y.end(), [&]() { return u8rng(); });
     }
     const uint8_t* a_data = inplace_a() ? y.data() : a.data();
     const uint8_t* b_data = inplace_b() ? y.data() : b.data();
@@ -393,20 +413,22 @@ void VBinaryMicrokernelTester::Test(
         std::numeric_limits<int8_t>::max())(rng);
   };
 
-  std::vector<int8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::vector<int8_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::vector<int8_t> y(batch_size() + (inplace_a() || inplace_b()
-                                            ? XNN_EXTRA_BYTES / sizeof(int8_t)
-                                            : 0));
-  std::vector<float> y_fp(batch_size());
-  std::vector<int8_t> y_ref(batch_size());
+  xnnpack::Buffer<int8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<int8_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<int8_t> y(
+      batch_size() +
+      (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(int8_t) : 0));
+  xnnpack::Buffer<float> y_fp(batch_size());
+  xnnpack::Buffer<int8_t> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
-    std::generate(a.begin(), a.end(), std::ref(i8rng));
-    std::generate(b.begin(), b.end(), std::ref(i8rng));
+    if (!inplace_a()) {
+      std::generate(a.begin(), a.end(), [&]() { return i8rng(); });
+    }
+    if (!inplace_b()) {
+      std::generate(b.begin(), b.end(), [&]() { return i8rng(); });
+    }
     if (inplace_a() || inplace_b()) {
-      std::generate(y.begin(), y.end(), std::ref(i8rng));
-    } else {
-      std::fill(y.begin(), y.end(), 0xA5);
+      std::generate(y.begin(), y.end(), [&]() { return i8rng(); });
     }
     const int8_t* a_data = inplace_a() ? y.data() : a.data();
     const int8_t* b_data = inplace_b() ? y.data() : b.data();
@@ -460,20 +482,22 @@ void VBinaryMicrokernelTester::Test(
         std::numeric_limits<int8_t>::max())(rng);
   };
 
-  std::vector<int8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::vector<int8_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::vector<int8_t> y(batch_size() + (inplace_a() || inplace_b()
-                                            ? XNN_EXTRA_BYTES / sizeof(int8_t)
-                                            : 0));
-  std::vector<float> y_fp(batch_size());
-  std::vector<int8_t> y_ref(batch_size());
+  xnnpack::Buffer<int8_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<int8_t> b(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<int8_t> y(
+      batch_size() +
+      (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(int8_t) : 0));
+  xnnpack::Buffer<float> y_fp(batch_size());
+  xnnpack::Buffer<int8_t> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
-    std::generate(a.begin(), a.end(), std::ref(i8rng));
-    std::generate(b.begin(), b.end(), std::ref(i8rng));
+    if (!inplace_a()) {
+      std::generate(a.begin(), a.end(), [&]() { return i8rng(); });
+    }
+    if (!inplace_b()) {
+      std::generate(b.begin(), b.end(), [&]() { return i8rng(); });
+    }
     if (inplace_a() || inplace_b()) {
-      std::generate(y.begin(), y.end(), std::ref(i8rng));
-    } else {
-      std::fill(y.begin(), y.end(), 0xA5);
+      std::generate(y.begin(), y.end(), [&]() { return i8rng(); });
     }
     const int8_t* a_data = inplace_a() ? y.data() : a.data();
     const int8_t* b_data = inplace_b() ? y.data() : b.data();

@@ -42,14 +42,13 @@ static void RuyBenchmark(benchmark::State& state, size_t threads)
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       nc * (sizeof(int8_t) * (mc + kc) + sizeof(int32_t)));
 
-  std::vector<int8_t> a(mc * kc);
+  xnnpack::Buffer<int8_t> a(mc * kc);
   std::generate(a.begin(), a.end(), std::ref(u8rng));
-  std::vector<int8_t> k(num_buffers * nc * kc);
+  xnnpack::Buffer<int8_t> k(num_buffers * nc * kc);
   std::generate(k.begin(), k.end(), std::ref(u8rng));
-  std::vector<int32_t> b(num_buffers * nc);
+  xnnpack::Buffer<int32_t> b(num_buffers * nc);
   std::generate(b.begin(), b.end(), std::ref(i32rng));
-  std::vector<int8_t> c(num_buffers * nc * mc);
-  std::fill(c.begin(), c.end(), 0);
+  xnnpack::Buffer<int8_t> c(num_buffers * nc * mc);
 
   // Note: context must be static to avoid the cost of re-creating it for each benchmark.
   static ruy::Context context;

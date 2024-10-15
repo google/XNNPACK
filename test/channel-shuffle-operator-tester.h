@@ -20,6 +20,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class ChannelShuffleOperatorTester {
@@ -102,8 +103,8 @@ class ChannelShuffleOperatorTester {
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
-    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + (batch_size() - 1) * input_stride() + channels());
-    std::vector<uint8_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + (batch_size() - 1) * input_stride() + channels());
+    xnnpack::Buffer<uint8_t> output((batch_size() - 1) * output_stride() + channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
 
@@ -152,8 +153,8 @@ class ChannelShuffleOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint32_t> u32dist;
 
-    std::vector<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) + (batch_size() - 1) * input_stride() + channels());
-    std::vector<uint32_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) + (batch_size() - 1) * input_stride() + channels());
+    xnnpack::Buffer<uint32_t> output((batch_size() - 1) * output_stride() + channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u32dist(rng); });
 

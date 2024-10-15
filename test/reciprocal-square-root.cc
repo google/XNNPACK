@@ -103,10 +103,6 @@ TEST_F(ReciprocalSquareRootTestF16, matches_operator_api) {
   std::uniform_real_distribution<float> f32dist(0.1f, 5.0f);
   std::generate(input.begin(), input.end(),
                 [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(),
-            std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(),
-            std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -176,10 +172,6 @@ TEST_F(ReciprocalSquareRootTestF32, matches_operator_api) {
   std::uniform_real_distribution<float> f32dist(0.1f, 5.0f);
   std::generate(input.begin(), input.end(),
                 [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(),
-            std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(),
-            std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

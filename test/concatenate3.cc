@@ -20,6 +20,7 @@
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 template <typename T> class Concatenate3Test : public ::testing::Test {
@@ -42,11 +43,11 @@ template <typename T> class Concatenate3Test : public ::testing::Test {
     output_dims = input1_dims;
     output_dims[axis] = input1_dims[axis] + input2_dims[axis] + input3_dims[axis];
 
-    input1 = std::vector<T>(NumElements(input1_dims));
-    input2 = std::vector<T>(NumElements(input2_dims));
-    input3 = std::vector<T>(NumElements(input3_dims));
-    operator_output = std::vector<T>(NumElements(output_dims));
-    subgraph_output = std::vector<T>(NumElements(output_dims));
+    input1 = xnnpack::Buffer<T>(NumElements(input1_dims));
+    input2 = xnnpack::Buffer<T>(NumElements(input2_dims));
+    input3 = xnnpack::Buffer<T>(NumElements(input3_dims));
+    operator_output = xnnpack::Buffer<T>(NumElements(output_dims));
+    subgraph_output = xnnpack::Buffer<T>(NumElements(output_dims));
 
     signed_zero_point = i8dist(rng);
     unsigned_zero_point = u8dist(rng);
@@ -121,11 +122,11 @@ template <typename T> class Concatenate3Test : public ::testing::Test {
   int32_t unsigned_zero_point;
   float scale;
 
-  std::vector<T> input1;
-  std::vector<T> input2;
-  std::vector<T> input3;
-  std::vector<T> operator_output;
-  std::vector<T> subgraph_output;
+  xnnpack::Buffer<T> input1;
+  xnnpack::Buffer<T> input2;
+  xnnpack::Buffer<T> input3;
+  xnnpack::Buffer<T> operator_output;
+  xnnpack::Buffer<T> subgraph_output;
 };
 
 using Concatenate3TestQS8 = Concatenate3Test<int8_t>;

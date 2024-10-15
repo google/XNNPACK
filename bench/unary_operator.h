@@ -19,6 +19,7 @@
 
 #include "bench/utils.h"
 #include "xnnpack/math.h"
+#include "xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/flatbuffers.h"
@@ -40,8 +41,8 @@ static void benchmark_unary_operator(Create create, Reshape reshape,
   auto rng = std::mt19937(random_device());
   std::uniform_real_distribution<float> f32dist(0.0f, 10.0f);
 
-  std::vector<In> input(batch_size + XNN_EXTRA_BYTES / sizeof(In));
-  std::vector<Out> output(batch_size);
+  xnnpack::Buffer<In> input(batch_size + XNN_EXTRA_BYTES / sizeof(In));
+  xnnpack::Buffer<Out> output(batch_size);
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);

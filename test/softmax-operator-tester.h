@@ -22,6 +22,7 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/math.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class SoftMaxOperatorTester {
@@ -119,9 +120,9 @@ class SoftMaxOperatorTester {
     // However, the range is still narrow enough that single-precision exp doesn't overflow.
     std::uniform_real_distribution<float> f32dist(15.0f, 20.0f);
 
-    std::vector<xnn_float16> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<xnn_float16> output((batch_size() - 1) * output_stride() + channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<float> output_ref(batch_size() * channels());
+    xnnpack::Buffer<xnn_float16> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> output((batch_size() - 1) * output_stride() + channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
@@ -179,9 +180,9 @@ class SoftMaxOperatorTester {
     // However, the range is still narrow enough that single-precision exp doesn't overflow.
     std::uniform_real_distribution<float> f32dist(90.0f, 100.0f);
 
-    std::vector<float> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> output((batch_size() - 1) * output_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<double> output_ref(batch_size() * channels());
+    xnnpack::Buffer<float> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<double> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
@@ -234,9 +235,9 @@ class SoftMaxOperatorTester {
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
-    std::vector<uint8_t> input((batch_size() - 1) * input_stride() + channels());
-    std::vector<uint8_t> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(batch_size() * channels());
+    xnnpack::Buffer<uint8_t> input((batch_size() - 1) * input_stride() + channels());
+    xnnpack::Buffer<uint8_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
 

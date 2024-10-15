@@ -22,6 +22,7 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/subgraph.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 namespace xnnpack {
@@ -168,7 +169,8 @@ class SubgraphTester {
         // 1. Generate non-zero elements in the beginning of the vector
         // 2. Randomize positions of non-zero elements
         const size_t num_nonzero_elements = num_elements / 10;
-        std::generate(data, data + num_nonzero_elements, [&]() { return w8dist(rng_); });
+        std::fill_n(data, num_elements, 0);
+        std::generate_n(data, num_nonzero_elements, [&]() { return w8dist(rng_); });
         std::shuffle(data, data + num_elements, rng_);
       }
     }
@@ -200,7 +202,8 @@ class SubgraphTester {
         // 1. Generate non-zero elements in the beginning of the vector
         // 2. Randomize positions of non-zero elements
         const size_t num_nonzero_elements = num_elements / 10;
-        std::generate(data, data + num_nonzero_elements, [&]() { return f32dist(rng_); });
+        std::fill_n(data, num_elements, 0.0f);
+        std::generate_n(data, num_nonzero_elements, [&]() { return f32dist(rng_); });
         std::shuffle(data, data + num_elements, rng_);
       }
     }
@@ -217,10 +220,10 @@ class SubgraphTester {
   SubgraphTester& AddInputTensorF32(const std::vector<size_t>& dims, uint32_t external_id) {
     AddDynamicTensorF32(dims, external_id, XNN_VALUE_FLAG_EXTERNAL_INPUT);
     size_t num_elements = NumElements(dims);
-    auto input = std::vector<char>(num_elements * sizeof(float) + XNN_EXTRA_BYTES * sizeof(char));
+    xnnpack::Buffer<char> input(num_elements * sizeof(float) + XNN_EXTRA_BYTES * sizeof(char));
     float* data = reinterpret_cast<float*>(input.data());
     std::generate(data, data + num_elements, [&]() { return f32dist(rng_); });
-    auto it = external_tensors_.insert({external_id, input});
+    auto it = external_tensors_.insert({external_id, std::move(input)});
     EXPECT_TRUE(it.second);
     return *this;
   }
@@ -228,10 +231,10 @@ class SubgraphTester {
   SubgraphTester& AddInputTensorQS8(int32_t zero_point, float scale, const std::vector<size_t>& dims, uint32_t external_id) {
     AddDynamicTensorQS8(zero_point, scale, dims, external_id, XNN_VALUE_FLAG_EXTERNAL_INPUT);
     size_t num_elements = NumElements(dims);
-    auto input = std::vector<char>(num_elements * sizeof(float) + XNN_EXTRA_BYTES * sizeof(char));
+    xnnpack::Buffer<char> input(num_elements * sizeof(float) + XNN_EXTRA_BYTES * sizeof(char));
     float* data = reinterpret_cast<float*>(input.data());
     std::generate(data, data + num_elements, [&]() { return f32dist(rng_); });
-    auto it = external_tensors_.insert({external_id, input});
+    auto it = external_tensors_.insert({external_id, std::move(input)});
     EXPECT_TRUE(it.second);
     return *this;
   }
@@ -240,10 +243,10 @@ class SubgraphTester {
     output_id_ = external_id;
     AddDynamicTensorF32(dims, external_id, XNN_VALUE_FLAG_EXTERNAL_OUTPUT);
     size_t num_elements = NumElements(dims);
-    auto output = std::vector<char>(num_elements * sizeof(float));
+    xnnpack::Buffer<char> output(num_elements * sizeof(float));
     float* data = reinterpret_cast<float*>(output.data());
     std::fill(data, data + num_elements, std::nanf(""));
-    auto it = external_tensors_.insert({external_id, output});
+    auto it = external_tensors_.insert({external_id, std::move(output)});
     EXPECT_TRUE(it.second);
     return *this;
   }
@@ -571,14 +574,14 @@ class SubgraphTester {
 
  protected:
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> subgraph_{nullptr, xnn_delete_subgraph};
-  std::unordered_map<uint32_t, std::vector<char>> external_tensors_;
+  std::unordered_map<uint32_t, xnnpack::Buffer<char>> external_tensors_;
   uint32_t output_id_;
   xnnpack::ReplicableRandomDevice rng_;
   std::uniform_real_distribution<float> f32dist = std::uniform_real_distribution<float>(-1.0f, +1.0f);
   std::uniform_int_distribution<int32_t> w8dist = std::uniform_int_distribution<int32_t>(-std::numeric_limits<int8_t>::max(), std::numeric_limits<int8_t>::max());
 
  private:
-  std::vector<std::vector<char>> static_data_;
+  std::vector<xnnpack::Buffer<char>> static_data_;
 };
 
 }  // namespace xnnpack

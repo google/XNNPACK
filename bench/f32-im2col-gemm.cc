@@ -11,12 +11,9 @@
 #include <random>
 #include <vector>
 
-#include <benchmark/benchmark.h>
 #include "bench/conv.h"
 #include "bench/utils.h"
-
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/im2col.h"
@@ -24,7 +21,8 @@
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pack.h"
-
+#include "xnnpack/buffer.h"
+#include <benchmark/benchmark.h>
 
 static void Im2ColGEMMBenchmark(benchmark::State& state,
   xnn_f32_gemm_minmax_ukernel_fn f32_gemm,
@@ -63,11 +61,11 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
   const size_t nc_stride = benchmark::utils::RoundUp<size_t>(group_output_channels, nr);
   const size_t kc_stride = benchmark::utils::RoundUp<size_t>(group_input_channels, kr);
 
-  std::vector<float> a(input_height * input_width * group_input_channels + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(input_height * input_width * group_input_channels + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
-  std::vector<float> k(group_output_channels * kernel_height * kernel_width * group_input_channels);
+  xnnpack::Buffer<float> k(group_output_channels * kernel_height * kernel_width * group_input_channels);
   std::generate(k.begin(), k.end(), std::ref(f32rng));
-  std::vector<float> b(group_output_channels);
+  xnnpack::Buffer<float> b(group_output_channels);
   std::generate(b.begin(), b.end(), std::ref(f32rng));
 
   const size_t w_elements = (kernel_size * kc_stride + 1) * nc_stride;
@@ -76,18 +74,16 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (w_elements + c_elements));
 
-  std::vector<float, AlignedAllocator<float, 64>> w(w_elements * num_buffers);
-  std::fill(w.begin(), w.end(), 0.0f);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
   xnn_pack_f32_gemm_goi_w(/*groups=*/1, group_output_channels, group_input_channels * kernel_size,
     nr, kr, sr, k.data(), b.data(), /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, /*params=*/nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
   }
 
-  std::vector<float> im2col_buffer(output_size * group_input_channels * kernel_size * group_output_channels);
+  xnnpack::Buffer<float> im2col_buffer(output_size * group_input_channels * kernel_size * group_output_channels);
 
-  std::vector<float> c(c_elements * num_buffers);
-  std::fill(c.begin(), c.end(), std::nanf(""));
+  xnnpack::Buffer<float> c(c_elements * num_buffers);
 
   xnn_f32_minmax_params params;
   init_params(&params,

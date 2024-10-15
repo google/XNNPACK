@@ -10,20 +10,18 @@
 #include <random>
 #include <vector>
 
-#include <benchmark/benchmark.h>
 #include "bench/dwconv.h"
 #include "bench/utils.h"
-
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
-#include "xnnpack/math.h"
 #include "xnnpack/dwconv.h"
 #include "xnnpack/indirection.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pack.h"
-
+#include "xnnpack/buffer.h"
+#include <benchmark/benchmark.h>
 
 static void f16_dwconv2d_chw(benchmark::State& state,
   xnn_f16_dwconv2d_chw_ukernel_fn dwconv,
@@ -83,13 +81,13 @@ static void f16_dwconv2d_chw(benchmark::State& state,
   const size_t kernel_size = kernel_height * kernel_width;
   const size_t output_size = output_height * output_width;
 
-  std::vector<xnn_float16> input(inputSize * channels + 2 * XNN_EXTRA_BYTES);
+  xnnpack::Buffer<xnn_float16> input(inputSize * channels + 2 * XNN_EXTRA_BYTES);
   std::generate(input.begin(), input.end(), f32rng);
-  std::vector<xnn_float16> bias(channels);
+  xnnpack::Buffer<xnn_float16> bias(channels);
   std::generate(bias.begin(), bias.end(), f32rng);
-  std::vector<xnn_float16> kernel(channels * kernel_size);
+  xnnpack::Buffer<xnn_float16> kernel(channels * kernel_size);
   std::generate(kernel.begin(), kernel.end(), f32rng);
-  std::vector<xnn_float16> zero(input_width + padding_width);
+  xnnpack::Buffer<xnn_float16> zero(input_width + padding_width);
 
   const size_t w_elements = (kernel_size + 1) * channels;
   const size_t o_elements = output_size * channels;
@@ -97,8 +95,8 @@ static void f16_dwconv2d_chw(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(xnn_float16) * (w_elements + o_elements));
 
-  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> packed_weights(w_elements * num_buffers);
-  std::fill(packed_weights.begin(), packed_weights.end(), 0);
+  xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> packed_weights(w_elements *
+                                                                num_buffers);
   for (size_t c = 0; c < channels; c++) {
     packed_weights[c * kernel_size + c] = bias[c];
     for (size_t i = 0; i < kernel_size; i++) {
@@ -109,7 +107,7 @@ static void f16_dwconv2d_chw(benchmark::State& state,
     std::copy(packed_weights.cbegin(), packed_weights.cbegin() + w_elements, packed_weights.begin() + n * w_elements);
   }
 
-  std::vector<xnn_float16> output(o_elements * num_buffers);
+  xnnpack::Buffer<xnn_float16> output(o_elements * num_buffers);
 
   xnn_f16_minmax_params chw_params;
   init_params(&chw_params, 0xFC00 /* -inf */, 0x7C00 /* inf */);

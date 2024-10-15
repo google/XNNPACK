@@ -19,6 +19,7 @@
 #include "xnnpack.h"
 #include "xnnpack/cache.h"
 #include "xnnpack/math.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class PReLUOperatorTester {
@@ -133,11 +134,11 @@ class PReLUOperatorTester {
     auto f32irng = std::uniform_real_distribution<float>(-1.0f, 1.0f);
     auto f32wrng = std::uniform_real_distribution<float>(0.25f, 0.75f);
 
-    std::vector<xnn_float16> x((batch_size() - 1) * x_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<xnn_float16> w(input_channels());
-    std::vector<float> w_as_float(input_channels());
-    std::vector<xnn_float16> y((batch_size() - 1) * y_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<float> y_ref(batch_size() * input_channels());
+    xnnpack::Buffer<xnn_float16> x((batch_size() - 1) * x_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> w(input_channels());
+    xnnpack::Buffer<float> w_as_float(input_channels());
+    xnnpack::Buffer<xnn_float16> y((batch_size() - 1) * y_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<float> y_ref(batch_size() * input_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), [&] { return f32irng(rng); });
       if (slope_channels() == 1) {
@@ -146,7 +147,6 @@ class PReLUOperatorTester {
         std::generate(w.begin(), w.end(), [&] { return f32wrng(rng); });
       }
       std::copy(w.cbegin(), w.cend(), w_as_float.begin());
-      std::fill(y.begin(), y.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -225,7 +225,7 @@ class PReLUOperatorTester {
         // Smart pointer to automatically delete prelu_op2.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_prelu_op(prelu_op2, xnn_delete_operator);
 
-        std::vector<xnn_float16> y2(y.size(), std::nanf(""));
+        xnnpack::Buffer<xnn_float16> y2(y.size(), std::nanf(""));
         ASSERT_EQ(xnn_status_success,
                   xnn_reshape_prelu_nc_f16(
                       prelu_op2,
@@ -245,7 +245,7 @@ class PReLUOperatorTester {
     }
   }
 
-  void VerifyF16(const std::vector<xnn_float16>& y, const std::vector<float>& y_ref) const {
+  void VerifyF16(const xnnpack::Buffer<xnn_float16>& y, const xnnpack::Buffer<float>& y_ref) const {
     for (size_t i = 0; i < batch_size(); i++) {
       for (size_t c = 0; c < input_channels(); c++) {
         ASSERT_NEAR(
@@ -264,10 +264,10 @@ class PReLUOperatorTester {
     auto f32irng = std::uniform_real_distribution<float>(-1.0f, 1.0f);
     auto f32wrng = std::uniform_real_distribution<float>(0.25f, 0.75f);
 
-    std::vector<float> x((batch_size() - 1) * x_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> w(input_channels());
-    std::vector<float> y((batch_size() - 1) * y_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y_ref(batch_size() * input_channels());
+    xnnpack::Buffer<float> x((batch_size() - 1) * x_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> w(input_channels());
+    xnnpack::Buffer<float> y((batch_size() - 1) * y_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> y_ref(batch_size() * input_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), [&] { return f32irng(rng);} );
       if (slope_channels() == 1) {
@@ -275,7 +275,6 @@ class PReLUOperatorTester {
       } else {
         std::generate(w.begin(), w.end(), [&] { return f32wrng(rng);} );
       }
-      std::fill(y.begin(), y.end(), nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -343,7 +342,7 @@ class PReLUOperatorTester {
 
         // Smart pointer to automatically delete prelu_op2.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_prelu_op(prelu_op2, xnn_delete_operator);
-        std::vector<float> y2(y.size(), nanf(""));
+        xnnpack::Buffer<float> y2(y.size(), nanf(""));
 
         ASSERT_EQ(xnn_status_success,
                   xnn_reshape_prelu_nc_f32(
@@ -365,7 +364,7 @@ class PReLUOperatorTester {
     }
   }
 
-  void VerifyF32(const std::vector<float>& y, const std::vector<float>& y_ref) const {
+  void VerifyF32(const xnnpack::Buffer<float>& y, const xnnpack::Buffer<float>& y_ref) const {
     for (size_t i = 0; i < batch_size(); i++) {
       for (size_t c = 0; c < input_channels(); c++) {
         ASSERT_NEAR(

@@ -23,6 +23,7 @@
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class LUTMicrokernelTester {
@@ -60,17 +61,15 @@ class LUTMicrokernelTester {
     auto u8rng = std::bind(
       std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
-    std::vector<uint8_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    xnnpack::Buffer<uint8_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
     XNN_ALIGN(64) std::array<uint8_t, 256> t;
-    std::vector<uint8_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint8_t) : 0));
-    std::vector<uint8_t> y_ref(batch_size());
+    xnnpack::Buffer<uint8_t> y(batch_size() + (inplace() ? XNN_EXTRA_BYTES / sizeof(uint8_t) : 0));
+    xnnpack::Buffer<uint8_t> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), std::ref(u8rng));
       std::generate(t.begin(), t.end(), std::ref(u8rng));
       if (inplace()) {
         std::generate(y.begin(), y.end(), std::ref(u8rng));
-      } else {
-        std::fill(y.begin(), y.end(), 0xA5);
       }
       const uint8_t* x_data = x.data();
       if (inplace()) {

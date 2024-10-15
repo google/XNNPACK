@@ -21,6 +21,7 @@
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 template <typename T> class DepthToSpaceTest : public ::testing::Test {
@@ -41,9 +42,9 @@ template <typename T> class DepthToSpaceTest : public ::testing::Test {
     input_dims[3] = block_size * block_size * output_channels;
 
     size_t num_output_elements = NumElements(output_dims);
-    input = std::vector<T>(NumElements(input_dims) + XNN_EXTRA_BYTES / sizeof(T));
-    operator_output = std::vector<T>(num_output_elements);
-    subgraph_output = std::vector<T>(num_output_elements);
+    input = xnnpack::Buffer<T>(NumElements(input_dims) + XNN_EXTRA_BYTES / sizeof(T));
+    operator_output = xnnpack::Buffer<T>(num_output_elements);
+    subgraph_output = xnnpack::Buffer<T>(num_output_elements);
   }
 
   size_t NumElements(std::vector<size_t>& dims)
@@ -79,9 +80,9 @@ template <typename T> class DepthToSpaceTest : public ::testing::Test {
   std::vector<size_t> input_dims;
   std::vector<size_t> output_dims;
 
-  std::vector<T> input;
-  std::vector<T> operator_output;
-  std::vector<T> subgraph_output;
+  xnnpack::Buffer<T> input;
+  xnnpack::Buffer<T> operator_output;
+  xnnpack::Buffer<T> subgraph_output;
 
   uint32_t block_size;
 

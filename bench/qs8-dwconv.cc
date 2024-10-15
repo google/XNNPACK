@@ -13,10 +13,7 @@
 
 #include "bench/dwconv.h"
 #include "bench/utils.h"
-#include <benchmark/benchmark.h>
-
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/dwconv.h"
 #include "xnnpack/indirection.h"
@@ -24,7 +21,8 @@
 #include "xnnpack/microkernel-utils.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pack.h"
-
+#include "xnnpack/buffer.h"
+#include <benchmark/benchmark.h>
 
 static void DWConvBenchmark(benchmark::State& state,
   xnn_qs8_dwconv_minmax_unipass_ukernel_fn dwconv,
@@ -70,14 +68,14 @@ static void DWConvBenchmark(benchmark::State& state,
 
   const size_t c_stride = benchmark::utils::RoundUp<size_t>(channels, channel_tile);
 
-  std::vector<int8_t> a(channels * input_height * input_width + XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<int8_t> a(channels * input_height * input_width + XNN_EXTRA_BYTES / sizeof(int8_t));
   std::generate(a.begin(), a.end(), std::ref(i8rng));
-  std::vector<int8_t> k(channels * kernel_height * kernel_width);
+  xnnpack::Buffer<int8_t> k(channels * kernel_height * kernel_width);
   std::generate(k.begin(), k.end(), std::ref(i8rng));
-  std::vector<int32_t> b(channels);
+  xnnpack::Buffer<int32_t> b(channels);
   std::generate(b.begin(), b.end(), std::ref(i32rng));
 
-  std::vector<int8_t> z(channels + XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<int8_t> z(channels + XNN_EXTRA_BYTES / sizeof(int8_t));
 
   const size_t k_elements = kernel_size * c_stride;
   const size_t b_elements = c_stride;
@@ -89,8 +87,7 @@ static void DWConvBenchmark(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       (c_elements * sizeof(int8_t) + w_size) + sizeof(void*) * i_elements);
 
-  std::vector<char, AlignedAllocator<char, 64>> w(w_size * num_buffers);
-  std::fill(w.begin(), w.end(), 0);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> w(w_size * num_buffers);
   struct xnn_qs8_packing_params packing_params;
   packing_params.input_zero_point = 0;
   xnn_pack_qs8_dwconv_ghw_w(primary_tile, 0, 0, kernel_height, kernel_width, channels,
@@ -101,7 +98,7 @@ static void DWConvBenchmark(benchmark::State& state,
     std::copy(w.cbegin(), w.cbegin() + w_size, w.begin() + n * w_size);
   }
 
-  std::vector<const int8_t*> i(i_elements * num_buffers);
+  xnnpack::Buffer<const int8_t*> i(i_elements * num_buffers);
   xnn_indirection_init_dwconv2d(
     /*output_y_start=*/0, /*output_y_end=*/output_height,
     reinterpret_cast<const void**>(i.data()),
@@ -119,8 +116,7 @@ static void DWConvBenchmark(benchmark::State& state,
     std::copy(i.cbegin(), i.cbegin() + i_elements, i.begin() + n * i_elements);
   }
 
-  std::vector<int8_t> c(c_elements * num_buffers);
-  std::fill(c.begin(), c.end(), INT8_C(0));
+  xnnpack::Buffer<int8_t> c(c_elements * num_buffers);
 
   xnn_qs8_conv_minmax_params params;
   init_params(&params,
@@ -207,16 +203,16 @@ static void DWConvBenchmark(benchmark::State& state,
 
   const size_t c_stride = benchmark::utils::RoundUp<size_t>(channels, channel_tile);
 
-  std::vector<int8_t> a(channels * input_height * input_width + XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<int8_t> a(channels * input_height * input_width + XNN_EXTRA_BYTES / sizeof(int8_t));
   std::generate(a.begin(), a.end(), std::ref(i8rng));
-  std::vector<int8_t> k(channels * kernel_size);
+  xnnpack::Buffer<int8_t> k(channels * kernel_size);
   std::generate(k.begin(), k.end(), std::ref(i8rng));
-  std::vector<int32_t> b(channels);
+  xnnpack::Buffer<int32_t> b(channels);
   std::generate(b.begin(), b.end(), std::ref(i32rng));
 
-  std::vector<int8_t> z(channels + XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::vector<int32_t, AlignedAllocator<int32_t, 64>> buffer(
-    channels + XNN_MULTIPASS_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<int8_t> z(channels + XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<int32_t, XNN_ALLOCATION_ALIGNMENT> buffer(
+      channels + XNN_MULTIPASS_EXTRA_BYTES / sizeof(int8_t));
 
   const size_t tile_size = xnn_dwconv_multipass_tile_size(
     kernel_size, first_pass_tile, middle_pass_tile, last_pass_tile);
@@ -233,8 +229,7 @@ static void DWConvBenchmark(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       (c_elements * sizeof(int8_t) + w_size) + sizeof(void*) * i_elements);
 
-  std::vector<char, AlignedAllocator<char, 64>> w(w_size * num_buffers);
-  std::fill(w.begin(), w.end(), 0);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> w(w_size * num_buffers);
   struct xnn_qs8_packing_params packing_params;
   packing_params.input_zero_point = 0;
   xnn_pack_qs8_dwconv_ghw_w(first_pass_tile, middle_pass_tile, last_pass_tile,
@@ -246,7 +241,7 @@ static void DWConvBenchmark(benchmark::State& state,
     std::copy(w.cbegin(), w.cbegin() + w_size, w.begin() + n * w_size);
   }
 
-  std::vector<const int8_t*> i(i_elements * num_buffers);
+  xnnpack::Buffer<const int8_t*> i(i_elements * num_buffers);
   xnn_indirection_init_dwconv2d(
     /*output_y_start=*/0, /*output_y_end=*/output_height,
     reinterpret_cast<const void**>(i.data()),
@@ -264,8 +259,7 @@ static void DWConvBenchmark(benchmark::State& state,
     std::copy(i.cbegin(), i.cbegin() + i_elements, i.begin() + n * i_elements);
   }
 
-  std::vector<int8_t> c(c_elements * num_buffers);
-  std::fill(c.begin(), c.end(), INT8_C(0));
+  xnnpack::Buffer<int8_t> c(c_elements * num_buffers);
 
   xnn_qs8_conv_minmax_params params;
   init_params(&params,

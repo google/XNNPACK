@@ -131,9 +131,9 @@ class TanhOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-5.0f, 5.0f);
 
-    std::vector<xnn_float16> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<xnn_float16> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(batch_size() * channels());
+    xnnpack::Buffer<xnn_float16> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
@@ -181,9 +181,9 @@ class TanhOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
 
-    std::vector<float> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<double> output_ref(batch_size() * channels());
+    xnnpack::Buffer<float> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<double> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
@@ -228,9 +228,9 @@ class TanhOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
 
-    std::vector<float> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<double> output_ref(batch_size() * channels());
+    xnnpack::Buffer<float> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<double> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
@@ -269,9 +269,9 @@ class TanhOperatorTester {
       std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
       std::ref(rng));
 
-    std::vector<int8_t> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
-    std::vector<int8_t> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(batch_size() * channels());
+    xnnpack::Buffer<int8_t> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
+    xnnpack::Buffer<int8_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(i8rng));
 
@@ -322,9 +322,9 @@ class TanhOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), rng);
 
-    std::vector<uint8_t> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-    std::vector<uint8_t> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(batch_size() * channels());
+    xnnpack::Buffer<uint8_t> input((batch_size() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    xnnpack::Buffer<uint8_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(u8rng));
 

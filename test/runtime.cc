@@ -31,7 +31,7 @@ TEST(RUNTIME, reshape_runtime) {
       .AddAddition(input0_id, input2_id, add2_out)
       .AddMultiply(add1_out, add2_out, output_id);
 
-  std::vector<float> expected(dim0);
+  xnnpack::Buffer<float> expected(dim0);
   const float* input0_data = tester.GetExternalTensorDataF32(input0_id);
   const float* input1_data = tester.GetExternalTensorDataF32(input1_id);
   const float* input2_data = tester.GetExternalTensorDataF32(input2_id);
@@ -50,7 +50,7 @@ TEST(RUNTIME, reshape_runtime) {
   tester.SetupRuntimeV2();
 
   output = tester.RepeatRun<float>();
-  expected.resize(new_dim0);
+  expected = xnnpack::Buffer<float>(new_dim0);
   input0_data = tester.GetExternalTensorDataF32(input0_id);
   input1_data = tester.GetExternalTensorDataF32(input1_id);
   input2_data = tester.GetExternalTensorDataF32(input2_id);

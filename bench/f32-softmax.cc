@@ -23,6 +23,7 @@
 #include "xnnpack/reduce.h"
 #include "xnnpack/vscaleexpminusmax.h"
 #include "xnnpack/vscaleextexp.h"
+#include "xnnpack/buffer.h"
 
 
 #ifdef BENCHMARK_INTEL_DNNL
@@ -51,8 +52,8 @@ static void DNNLSoftArgMax(
 
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_elements * sizeof(float));
-  std::vector<float> x(elements);
-  std::vector<float> y(packed_elements * num_buffers);
+  xnnpack::Buffer<float> x(elements);
+  xnnpack::Buffer<float> y(packed_elements * num_buffers);
 
   std::generate(x.begin(), x.end(), std::ref(f32rng));
 
@@ -223,8 +224,8 @@ static void ThreePassSoftMaxWithRecomputing(
 
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_elements * sizeof(float));
-  std::vector<float> x(elements);
-  std::vector<float> y(packed_elements * num_buffers);
+  xnnpack::Buffer<float> x(elements);
+  xnnpack::Buffer<float> y(packed_elements * num_buffers);
 
   std::generate(x.begin(), x.end(), std::ref(f32rng));
 
@@ -292,8 +293,8 @@ static void ThreePassSoftMaxWithReloading(
 
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_elements * sizeof(float));
-  std::vector<float> x(elements);
-  std::vector<float> y(packed_elements * num_buffers);
+  xnnpack::Buffer<float> x(elements);
+  xnnpack::Buffer<float> y(packed_elements * num_buffers);
 
   std::generate(x.begin(), x.end(), std::ref(f32rng));
 
@@ -363,8 +364,8 @@ static void TwoPassSoftMax(
 
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_elements * sizeof(float));
-  std::vector<float> x(elements);
-  std::vector<float> y(packed_elements * num_buffers);
+  xnnpack::Buffer<float> x(elements);
+  xnnpack::Buffer<float> y(packed_elements * num_buffers);
 
   std::generate(x.begin(), x.end(), std::ref(f32rng));
 

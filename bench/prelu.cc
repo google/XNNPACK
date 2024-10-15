@@ -14,6 +14,7 @@
 #include "xnnpack.h"
 
 #include "bench/utils.h"
+#include "xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/flatbuffers.h"
@@ -36,11 +37,11 @@ void xnnpack_prelu_f32(benchmark::State& state, const char* net) {
   auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), std::ref(rng));
   auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f), std::ref(rng));
 
-  std::vector<float> input(batch_size * height * width * channels + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(batch_size * height * width * channels + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input.begin(), input.end(), std::ref(f32irng));
-  std::vector<float> slope(channels);
+  xnnpack::Buffer<float> slope(channels);
   std::generate(slope.begin(), slope.end(), std::ref(f32wrng));
-  std::vector<float> output(batch_size * height * width * channels);
+  xnnpack::Buffer<float> output(batch_size * height * width * channels);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
@@ -116,7 +117,7 @@ void tflite_prelu_f32(benchmark::State& state, const char* net) {
   auto f32irng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), std::ref(rng));
   auto f32wrng = std::bind(std::uniform_real_distribution<float>(0.25f, 0.75f), std::ref(rng));
 
-  std::vector<float> slope(channels);
+  xnnpack::Buffer<float> slope(channels);
   std::generate(slope.begin(), slope.end(), std::ref(f32wrng));
 
   flatbuffers::FlatBufferBuilder builder;

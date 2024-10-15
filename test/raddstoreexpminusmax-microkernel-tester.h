@@ -19,6 +19,7 @@
 #include "xnnpack.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class RAddStoreExpMinusMaxMicrokernelTester {
@@ -48,12 +49,11 @@ class RAddStoreExpMinusMaxMicrokernelTester {
     // However, the range is still narrow enough that double-precision exp doesn't overflow.
     std::uniform_real_distribution<float> f32dist(15.0f, 20.0f);
 
-    std::vector<xnn_float16> x(elements() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<xnn_float16> y(elements());
-    std::vector<float> y_ref(elements());
+    xnnpack::Buffer<xnn_float16> x(elements() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> y(elements());
+    xnnpack::Buffer<float> y_ref(elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
-      std::fill(y.begin(), y.end(), std::nanf(""));
 
       // Compute reference results.
       float sum_ref = 0.0f;
@@ -92,12 +92,11 @@ class RAddStoreExpMinusMaxMicrokernelTester {
     // However, the range is still narrow enough that double-precision exp doesn't overflow.
     std::uniform_real_distribution<float> f32dist(90.0f, 100.0f);
 
-    std::vector<float> x(elements() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(elements());
-    std::vector<double> y_ref(elements());
+    xnnpack::Buffer<float> x(elements() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> y(elements());
+    xnnpack::Buffer<double> y_ref(elements());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
-      std::fill(y.begin(), y.end(), std::nanf(""));
 
       // Compute reference results.
       double sum_ref = 0.0f;

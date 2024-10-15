@@ -176,7 +176,7 @@ $if OP_TYPE == "LeakyReLU":
     TEST(ukernel, positive_scale) {
       TEST_REQUIRES_ARCH_FLAGS(arch_flags);
       for (size_t batch_size = 1; batch_size <= batch_tile * 5; batch_size += std::max(1, batch_tile - 1)) {
-        for (float positive_scale : std::vector<float>({1.0f / 256.0f, 0.3f, 1.3f, 128.0f})) {
+        for (float positive_scale : {1.0f / 256.0f, 0.3f, 1.3f, 128.0f}) {
           ${TESTER}()
             .batch_size(batch_size)
             .positive_scale(positive_scale)
@@ -191,7 +191,7 @@ $if OP_TYPE == "LeakyReLU":
     TEST(ukernel, negative_scale) {
       TEST_REQUIRES_ARCH_FLAGS(arch_flags);
       for (size_t batch_size = 1; batch_size <= batch_tile * 5; batch_size += std::max(1, batch_tile - 1)) {
-        for (float negative_scale : std::vector<float>({-127.99609375f, -1.3f, -0.3f, -1.0f / 256.0f, 1 / 256.0f, 0.3f, 1.3f, 128.0f})) {
+        for (float negative_scale : {-127.99609375f, -1.3f, -0.3f, -1.0f / 256.0f, 1 / 256.0f, 0.3f, 1.3f, 128.0f}) {
           ${TESTER}()
             .batch_size(batch_size)
             .negative_scale(negative_scale)

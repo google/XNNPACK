@@ -21,6 +21,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 #ifndef M_SQRT1_2
@@ -359,16 +360,14 @@ void VUnaryMicrokernelTester::Test(xnn_s8_vclamp_ukernel_fn vclamp,
                              std::numeric_limits<int8_t>::max()),
                          std::ref(rng));
 
-  std::vector<int8_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::vector<int8_t> y(batch_size() +
+  xnnpack::Buffer<int8_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<int8_t> y(batch_size() +
                         (inplace() ? XNN_EXTRA_BYTES / sizeof(int8_t) : 0));
-  std::vector<int8_t> y_ref(batch_size());
+  xnnpack::Buffer<int8_t> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(x.begin(), x.end(), std::ref(i8rng));
     if (inplace()) {
       std::copy(x.cbegin(), x.cend(), y.begin());
-    } else {
-      std::fill(y.begin(), y.end(), INT8_C(0xA5));
     }
     const int8_t* x_data = inplace() ? y.data() : x.data();
 
@@ -404,16 +403,14 @@ void VUnaryMicrokernelTester::Test(xnn_u8_vclamp_ukernel_fn vclamp,
                              0, std::numeric_limits<uint8_t>::max()),
                          std::ref(rng));
 
-  std::vector<uint8_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-  std::vector<uint8_t> y(batch_size() +
+  xnnpack::Buffer<uint8_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+  xnnpack::Buffer<uint8_t> y(batch_size() +
                          (inplace() ? XNN_EXTRA_BYTES / sizeof(uint8_t) : 0));
-  std::vector<uint8_t> y_ref(batch_size());
+  xnnpack::Buffer<uint8_t> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(x.begin(), x.end(), std::ref(u8rng));
     if (inplace()) {
       std::copy(x.cbegin(), x.cend(), y.begin());
-    } else {
-      std::fill(y.begin(), y.end(), UINT8_C(0xA5));
     }
     const uint8_t* x_data = inplace() ? y.data() : x.data();
 

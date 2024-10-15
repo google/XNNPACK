@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/math.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class CopyOperatorTester {
@@ -86,10 +87,10 @@ class CopyOperatorTester {
     std::uniform_int_distribution<uint32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
-    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
+    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<uint8_t> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<uint8_t> output_ref(batch_size() * channels());
+    xnnpack::Buffer<uint8_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint8_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
 
@@ -131,10 +132,10 @@ class CopyOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint16_t> u16dist;
 
-    std::vector<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
+    xnnpack::Buffer<uint16_t> input(XNN_EXTRA_BYTES / sizeof(uint16_t) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<uint16_t> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<uint16_t> output_ref(batch_size() * channels());
+    xnnpack::Buffer<uint16_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint16_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u16dist(rng); });
 
@@ -176,10 +177,10 @@ class CopyOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint32_t> u32dist;
 
-    std::vector<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) +
+    xnnpack::Buffer<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<uint32_t> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<uint32_t> output_ref(batch_size() * channels());
+    xnnpack::Buffer<uint32_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint32_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u32dist(rng); });
 
@@ -221,10 +222,10 @@ class CopyOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<uint32_t> u32dist;
 
-    std::vector<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) +
+    xnnpack::Buffer<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<uint32_t> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<uint32_t> output_ref(batch_size() * channels());
+    xnnpack::Buffer<uint32_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint32_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u32dist(rng); });
 

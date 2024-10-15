@@ -11,12 +11,9 @@
 #include <random>
 #include <vector>
 
-#include <benchmark/benchmark.h>
 #include "bench/conv.h"
 #include "bench/utils.h"
-
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/igemm.h"
 #include "xnnpack/indirection.h"
@@ -24,7 +21,8 @@
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pack.h"
-
+#include "xnnpack/buffer.h"
+#include <benchmark/benchmark.h>
 
 static void f16_igemm(benchmark::State& state,
   xnn_f16_igemm_minmax_ukernel_fn igemm,
@@ -66,14 +64,14 @@ static void f16_igemm(benchmark::State& state,
   const size_t nc_stride = benchmark::utils::RoundUp<size_t>(group_output_channels, nr);
   const size_t kc_stride = benchmark::utils::RoundUp<size_t>(group_input_channels, kr * sr);
 
-  std::vector<xnn_float16> a(input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16> a(input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::generate(a.begin(), a.end(), f32rng);
-  std::vector<xnn_float16> k(group_output_channels * kernel_height * kernel_width * group_input_channels);
+  xnnpack::Buffer<xnn_float16> k(group_output_channels * kernel_height * kernel_width * group_input_channels);
   std::generate(k.begin(), k.end(), f32rng);
-  std::vector<xnn_float16> b(group_output_channels);
+  xnnpack::Buffer<xnn_float16> b(group_output_channels);
   std::generate(b.begin(), b.end(), f32rng);
 
-  std::vector<xnn_float16> z(group_input_channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16> z(group_input_channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
 
   const size_t w_elements = (kernel_size * kc_stride + 1) * nc_stride;
   const size_t i_elements = mc_stride * kernel_size;
@@ -82,8 +80,7 @@ static void f16_igemm(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(xnn_float16) * (w_elements + c_elements) + sizeof(void*) * i_elements);
 
-  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> w(w_elements * num_buffers);
-  std::fill(w.begin(), w.end(), 0);
+  xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
   xnn_pack_f16_conv_goki_w(/*groups=*/1, group_output_channels, kernel_size, group_input_channels, nr, kr, sr,
                            reinterpret_cast<const uint16_t*>(k.data()), 
                            reinterpret_cast<const uint16_t*>(b.data()), 
@@ -94,7 +91,7 @@ static void f16_igemm(benchmark::State& state,
     std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
   }
 
-  std::vector<const xnn_float16*> i(i_elements * num_buffers);
+  xnnpack::Buffer<const xnn_float16*> i(i_elements * num_buffers);
   const size_t tiled_output_size = round_up(output_size, mr);
   xnn_indirection_init_conv2d(
       /*output_tile_size=*/mr,
@@ -114,8 +111,7 @@ static void f16_igemm(benchmark::State& state,
     std::copy(i.cbegin(), i.cbegin() + i_elements, i.begin() + n * i_elements);
   }
 
-  std::vector<xnn_float16> c(c_elements * num_buffers);
-  std::fill(c.begin(), c.end(), std::nanf(""));
+  xnnpack::Buffer<xnn_float16> c(c_elements * num_buffers);
 
   // Prepare minmax parameters.
   xnn_f16_minmax_params params;

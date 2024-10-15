@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class UnpoolingOperatorTester {
@@ -282,10 +283,10 @@ class UnpoolingOperatorTester {
     auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));
     auto idx_rng = std::bind(std::uniform_int_distribution<uint32_t>(0, pooling_height() * pooling_width() - 1), std::ref(rng));
 
-    std::vector<uint32_t> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels());
-    std::vector<uint32_t> index(batch_size() * input_height() * input_width() * channels());
-    std::vector<uint32_t> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
-    std::vector<uint32_t> output_ref(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<uint32_t> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels());
+    xnnpack::Buffer<uint32_t> index(batch_size() * input_height() * input_width() * channels());
+    xnnpack::Buffer<uint32_t> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
+    xnnpack::Buffer<uint32_t> output_ref(batch_size() * output_height() * output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(u32rng));
       std::generate(index.begin(), index.end(), std::ref(idx_rng));
@@ -359,17 +360,17 @@ class UnpoolingOperatorTester {
     auto u32rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));
     auto idx_rng = std::bind(std::uniform_int_distribution<uint32_t>(0, pooling_height() * pooling_width() - 1), std::ref(rng));
 
-    std::vector<uint32_t> input(std::max<size_t>(
+    xnnpack::Buffer<uint32_t> input(std::max<size_t>(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
       (next_batch_size() * next_input_height() * next_input_width() - 1) * input_pixel_stride() + channels()));
-    std::vector<uint32_t> index(std::max<size_t>(
+    xnnpack::Buffer<uint32_t> index(std::max<size_t>(
       batch_size() * input_height() * input_width() * channels(),
       next_batch_size() * next_input_height() * next_input_width() * channels()));
-    std::vector<uint32_t> output(std::max<size_t>(
+    xnnpack::Buffer<uint32_t> output(std::max<size_t>(
       (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
       (next_batch_size() * next_output_height() * next_output_width() - 1) * output_pixel_stride() * channels()));
-    std::vector<uint32_t> output_ref(batch_size() * output_height() * output_width() * channels());
-    std::vector<uint32_t> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
+    xnnpack::Buffer<uint32_t> output_ref(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<uint32_t> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(u32rng));

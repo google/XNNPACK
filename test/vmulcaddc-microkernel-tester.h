@@ -16,10 +16,10 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/pack.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class VMulCAddCMicrokernelTester {
@@ -119,12 +119,13 @@ class VMulCAddCMicrokernelTester {
       ASSERT_EQ(input_stride(), output_stride());
     }
 
-    std::vector<xnn_float16> x((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<xnn_float16> scale(channels());
-    std::vector<xnn_float16> bias(channels());
-    std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> packed_w(packed_channels() * 2);
-    std::vector<xnn_float16> y((rows() - 1) * output_stride() + channels() + (inplace() ? XNN_EXTRA_BYTES / sizeof(xnn_float16) : 0));
-    std::vector<float> y_ref(rows() * channels());
+    xnnpack::Buffer<xnn_float16> x((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> scale(channels());
+    xnnpack::Buffer<xnn_float16> bias(channels());
+    xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> packed_w(packed_channels() *
+                                                            2);
+    xnnpack::Buffer<xnn_float16> y((rows() - 1) * output_stride() + channels() + (inplace() ? XNN_EXTRA_BYTES / sizeof(xnn_float16) : 0));
+    xnnpack::Buffer<float> y_ref(rows() * channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(scale.begin(), scale.end(), [&]() { return f32dist(rng); });
@@ -132,12 +133,9 @@ class VMulCAddCMicrokernelTester {
       std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
       if (inplace()) {
         std::copy(x.cbegin(), x.cend(), y.begin());
-      } else {
-        std::fill(y.begin(), y.end(), std::nanf(""));
       }
       const xnn_float16* x_data = inplace() ? y.data() : x.data();
 
-      std::fill(packed_w.begin(), packed_w.end(), std::nanf(""));
       xnn_pack_f16_vmulcaddc_w(channels(), channel_tile(),
                                reinterpret_cast<const uint16_t*>(scale.data()), 
                                reinterpret_cast<const uint16_t*>(bias.data()), 
@@ -190,24 +188,21 @@ class VMulCAddCMicrokernelTester {
       ASSERT_EQ(input_stride(), output_stride());
     }
 
-    std::vector<float> x((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> scale(channels());
-    std::vector<float> bias(channels());
-    std::vector<float, AlignedAllocator<float, 64>> packed_w(packed_channels() * 2);
-    std::vector<float> y((rows() - 1) * output_stride() + channels() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
-    std::vector<float> y_ref(rows() * channels());
+    xnnpack::Buffer<float> x((rows() - 1) * input_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> scale(channels());
+    xnnpack::Buffer<float> bias(channels());
+    xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_w(packed_channels() * 2);
+    xnnpack::Buffer<float> y((rows() - 1) * output_stride() + channels() + (inplace() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    xnnpack::Buffer<float> y_ref(rows() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(scale.begin(), scale.end(), [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
       std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
       if (inplace()) {
         std::copy(x.cbegin(), x.cend(), y.begin());
-      } else {
-        std::fill(y.begin(), y.end(), nanf(""));
       }
       const float* x_data = inplace() ? y.data() : x.data();
 
-      std::fill(packed_w.begin(), packed_w.end(), nanf(""));
       xnn_pack_f32_vmulcaddc_w(channels(), channel_tile(),
         scale.data(), bias.data(), packed_w.data(), nullptr);
 

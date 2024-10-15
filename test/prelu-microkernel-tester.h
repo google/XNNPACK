@@ -16,8 +16,8 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/microfnptr.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class PReLUMicrokernelTester {
@@ -95,17 +95,16 @@ class PReLUMicrokernelTester {
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
     std::uniform_real_distribution<float> w32dist(0.25f, 0.75f);
 
-    std::vector<xnn_float16> x(channels() + (rows() - 1) * input_stride() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> w(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<xnn_float16> y(channels() + (rows() - 1) * output_stride() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<float> y_ref(channels() * rows());
+    xnnpack::Buffer<xnn_float16> x(channels() + (rows() - 1) * input_stride() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> w(
+        channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> y(channels() + (rows() - 1) * output_stride() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<float> y_ref(channels() * rows());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
       std::generate(w.begin(), w.end(), [&]() { return w32dist(rng); });
       if (inplace()) {
         std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
-      } else {
-        std::fill(y.begin(), y.end(), std::nanf(""));
       }
       const xnn_float16* x_data = inplace() ? y.data() : x.data();
 
@@ -140,17 +139,16 @@ class PReLUMicrokernelTester {
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
     std::uniform_real_distribution<float> w32dist(0.25f, 0.75f);
 
-    std::vector<float> x(channels() + (rows() - 1) * input_stride() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float, AlignedAllocator<float, 64>> w(channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(channels() + (rows() - 1) * output_stride() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y_ref(channels() * rows());
+    xnnpack::Buffer<float> x(channels() + (rows() - 1) * input_stride() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> w(channels() +
+                                               XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> y(channels() + (rows() - 1) * output_stride() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> y_ref(channels() * rows());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), [&]() { return f32dist(rng); });
       std::generate(w.begin(), w.end(), [&]() { return w32dist(rng); });
       if (inplace()) {
         std::generate(y.begin(), y.end(), [&]() { return f32dist(rng); });
-      } else {
-        std::fill(y.begin(), y.end(), nanf(""));
       }
       const float* x_data = inplace() ? y.data() : x.data();
 

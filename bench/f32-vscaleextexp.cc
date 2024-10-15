@@ -6,16 +6,14 @@
 #include <random>
 #include <vector>
 
-#include <benchmark/benchmark.h>
 #include "bench/utils.h"
-
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/raddextexp.h"
 #include "xnnpack/vscaleextexp.h"
-
+#include "xnnpack/buffer.h"
+#include <benchmark/benchmark.h>
 
 static void f32_vscaleextexp(
   benchmark::State& state,
@@ -37,8 +35,8 @@ static void f32_vscaleextexp(
 
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_n * sizeof(float));
-  std::vector<float, AlignedAllocator<float, 64>> x(elements);
-  std::vector<float, AlignedAllocator<float, 64>> y(packed_n * num_buffers);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> x(elements);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> y(packed_n * num_buffers);
 
   std::generate(x.begin(), x.end(), std::ref(f32rng));
 

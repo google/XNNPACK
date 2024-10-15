@@ -20,6 +20,7 @@
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 template <typename T> class EvenSplit3Test : public ::testing::Test {
@@ -41,13 +42,13 @@ template <typename T> class EvenSplit3Test : public ::testing::Test {
     axis = RandomAxis(output1_dims);
     input_dims[axis] = output1_dims[axis] + output2_dims[axis] + output3_dims[axis];
 
-    input = std::vector<T>(NumElements(input_dims));
-    operator_output1 = std::vector<T>(NumElements(output1_dims));
-    operator_output2 = std::vector<T>(NumElements(output2_dims));
-    operator_output3 = std::vector<T>(NumElements(output3_dims));
-    subgraph_output1 = std::vector<T>(NumElements(output1_dims));
-    subgraph_output2 = std::vector<T>(NumElements(output2_dims));
-    subgraph_output3 = std::vector<T>(NumElements(output3_dims));
+    input = xnnpack::Buffer<T>(NumElements(input_dims));
+    operator_output1 = xnnpack::Buffer<T>(NumElements(output1_dims));
+    operator_output2 = xnnpack::Buffer<T>(NumElements(output2_dims));
+    operator_output3 = xnnpack::Buffer<T>(NumElements(output3_dims));
+    subgraph_output1 = xnnpack::Buffer<T>(NumElements(output1_dims));
+    subgraph_output2 = xnnpack::Buffer<T>(NumElements(output2_dims));
+    subgraph_output3 = xnnpack::Buffer<T>(NumElements(output3_dims));
 
     signed_zero_point = i8dist(rng);
     unsigned_zero_point = u8dist(rng);
@@ -109,13 +110,13 @@ template <typename T> class EvenSplit3Test : public ::testing::Test {
   int32_t unsigned_zero_point;
   float scale;
 
-  std::vector<T> operator_output1;
-  std::vector<T> operator_output2;
-  std::vector<T> operator_output3;
-  std::vector<T> subgraph_output1;
-  std::vector<T> subgraph_output2;
-  std::vector<T> subgraph_output3;
-  std::vector<T> input;
+  xnnpack::Buffer<T> operator_output1;
+  xnnpack::Buffer<T> operator_output2;
+  xnnpack::Buffer<T> operator_output3;
+  xnnpack::Buffer<T> subgraph_output1;
+  xnnpack::Buffer<T> subgraph_output2;
+  xnnpack::Buffer<T> subgraph_output3;
+  xnnpack::Buffer<T> input;
 };
 
 using EvenSplit3TestQS8 = EvenSplit3Test<int8_t>;

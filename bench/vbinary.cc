@@ -15,13 +15,13 @@
 
 #include "bench/utils.h"
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/hardware-config.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
+#include "xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 
 template <typename T>
@@ -124,9 +124,9 @@ static void vbinary(benchmark::State& state, uint64_t arch_flags,
   auto rng = std::mt19937(random_device());
   UniformDistribution<T> dist;
 
-  std::vector<T, AlignedAllocator<T, 64>> a(num_elements);
-  std::vector<T, AlignedAllocator<T, 64>> b(num_elements);
-  std::vector<T, AlignedAllocator<T, 64>> output(num_elements);
+  xnnpack::Buffer<T, XNN_ALLOCATION_ALIGNMENT> a(num_elements);
+  xnnpack::Buffer<T, XNN_ALLOCATION_ALIGNMENT> b(num_elements);
+  xnnpack::Buffer<T, XNN_ALLOCATION_ALIGNMENT> output(num_elements);
   std::generate(a.begin(), a.end(), [&]() { return dist(rng); });
   std::generate(b.begin(), b.end(), [&]() { return dist(rng); });
 

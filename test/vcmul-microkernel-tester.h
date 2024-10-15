@@ -18,6 +18,7 @@
 #include "xnnpack.h"
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microfnptr.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class VCMulMicrokernelTester {
@@ -64,12 +65,10 @@ class VCMulMicrokernelTester {
     std::uniform_real_distribution<float> f32rdist(1.0f, 10.0f);
     std::uniform_real_distribution<float> f32idist(0.01f, 0.1f);
 
-    std::vector<xnn_float16> a(2 * batch_size() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<xnn_float16> b(2 * batch_size() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<xnn_float16> y(2 * batch_size() + (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(xnn_float16) : 0));
-    std::vector<float> y_ref(2 * batch_size());
-    std::fill(a.begin(), a.end(), std::nanf(""));
-    std::fill(b.begin(), b.end(), std::nanf(""));
+    xnnpack::Buffer<xnn_float16> a(2 * batch_size() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> b(2 * batch_size() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> y(2 * batch_size() + (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(xnn_float16) : 0));
+    xnnpack::Buffer<float> y_ref(2 * batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate_n(a.begin(), batch_size(), [&]() { return f32rdist(rng); });
       std::generate_n(a.begin() + batch_size(), batch_size(), [&]() { return f32idist(rng); });
@@ -79,8 +78,6 @@ class VCMulMicrokernelTester {
         std::copy(a.cbegin(), a.cend(), y.begin());
       } else if (inplace_b()) {
         std::copy(b.cbegin(), b.cend(), y.begin());
-      } else {
-        std::fill(y.begin(), y.end(), std::nanf(""));
       }
       const xnn_float16* a_data = inplace_a() ? y.data() : a.data();
       const xnn_float16* b_data = inplace_b() ? y.data() : b.data();
@@ -118,12 +115,10 @@ class VCMulMicrokernelTester {
     std::uniform_real_distribution<float> f32rdist(1.0f, 10.0f);
     std::uniform_real_distribution<float> f32idist(0.01f, 0.1f);
 
-    std::vector<float> a(2 * batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> b(2 * batch_size() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> y(2 * batch_size() + (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
-    std::vector<double> y_ref(2 * batch_size());
-    std::fill(a.begin(), a.end(), std::nanf(""));
-    std::fill(b.begin(), b.end(), std::nanf(""));
+    xnnpack::Buffer<float> a(2 * batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> b(2 * batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> y(2 * batch_size() + (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(float) : 0));
+    xnnpack::Buffer<double> y_ref(2 * batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate_n(a.begin(), batch_size(), [&]() { return f32rdist(rng); });
       std::generate_n(a.begin() + batch_size(), batch_size(), [&]() { return f32idist(rng); });
@@ -133,8 +128,6 @@ class VCMulMicrokernelTester {
         std::copy(a.cbegin(), a.cend(), y.begin());
       } else if (inplace_b()) {
         std::copy(b.cbegin(), b.cend(), y.begin());
-      } else {
-        std::fill(y.begin(), y.end(), nanf(""));
       }
       const float* a_data = inplace_a() ? y.data() : a.data();
       const float* b_data = inplace_b() ? y.data() : b.data();

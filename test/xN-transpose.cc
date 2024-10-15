@@ -19,6 +19,7 @@
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/transpose.h"
+#include "xnnpack/buffer.h"
 
 using transpose_ukernel =
     std::function<void(const void* input, void* output, size_t input_row_stride,
@@ -30,9 +31,9 @@ void TestTranspose(transpose_ukernel ukernel, size_t input_stride,
                    size_t output_stride, size_t input_element_stride,
                    size_t output_element_stride, size_t element_size,
                    size_t width, size_t height) {
-  std::vector<uint8_t> input(input_stride * height * input_element_stride +
+  xnnpack::Buffer<uint8_t> input(input_stride * height * input_element_stride +
                              XNN_EXTRA_BYTES);
-  std::vector<uint8_t> output(output_stride * width * output_element_stride);
+  xnnpack::Buffer<uint8_t> output(output_stride * width * output_element_stride);
   std::iota(input.begin(), input.end(), 0);
 
   // Call optimized micro-kernel.

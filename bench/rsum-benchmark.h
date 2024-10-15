@@ -14,13 +14,12 @@
 
 #include "bench/rsum-benchmark.h"
 #include "bench/utils.h"
-#include <benchmark/benchmark.h>
-
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
 #include "xnnpack/microfnptr.h"
+#include "xnnpack/reduce.h"
+#include "xnnpack/buffer.h"
+#include <benchmark/benchmark.h>
 
 namespace {
 void f16_rsum(
@@ -35,8 +34,9 @@ void f16_rsum(
   const size_t channels = state.range(0);
   const size_t rows = state.range(1);
 
-  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> input(rows * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  std::vector<xnn_float16> output(rows);
+  xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> input(
+      rows * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16> output(rows);
   std::iota(input.begin(), input.end(), 1);
 
   // Prepare parameters.
@@ -67,8 +67,9 @@ void f16_f32acc_rsum(
   const size_t channels = state.range(0);
   const size_t rows = state.range(1);
 
-  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> input(rows * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  std::vector<float> output(rows);
+  xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> input(
+      rows * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<float> output(rows);
   std::iota(input.begin(), input.end(), 1);
 
   // Prepare parameters.
@@ -99,8 +100,9 @@ void f32_rsum(
   const size_t channels = state.range(0);
   const size_t rows = state.range(1);
 
-  std::vector<float, AlignedAllocator<float, 64>> input(rows * channels + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<float> output(rows);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> input(
+      rows * channels + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> output(rows);
   std::iota(input.begin(), input.end(), 1);
 
   // Prepare parameters.
@@ -131,8 +133,9 @@ void qs8_rsum(
   const size_t channels = state.range(0);
   const size_t rows = state.range(1);
 
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> input(rows * channels + XNN_EXTRA_BYTES);
-  std::vector<int32_t> output(rows);
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> input(rows * channels +
+                                                  XNN_EXTRA_BYTES);
+  xnnpack::Buffer<int32_t> output(rows);
   std::iota(input.begin(), input.end(), 1);
 
   // Prepare parameters.
@@ -165,8 +168,9 @@ void qu8_rsum(
   const size_t channels = state.range(0);
   const size_t rows = state.range(1);
 
-  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> input(rows * channels + XNN_EXTRA_BYTES);
-  std::vector<uint32_t> output(rows);
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> input(rows * channels +
+                                                   XNN_EXTRA_BYTES);
+  xnnpack::Buffer<uint32_t> output(rows);
   std::iota(input.begin(), input.end(), 1);
 
   // Prepare parameters.
@@ -199,9 +203,10 @@ void f32_rdsum(
   const size_t rows = state.range(0);
   const size_t channels = state.range(1);
 
-  std::vector<float, AlignedAllocator<float, 64>> input(rows * channels + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<float> output(channels);
-  std::vector<float> zero(channels + XNN_EXTRA_BYTES / sizeof(float), 0.f);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> input(
+      rows * channels + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> output(channels);
+  xnnpack::Buffer<float> zero(channels + XNN_EXTRA_BYTES / sizeof(float), 0.f);
   std::iota(input.begin(), input.end(), 0.0f);
 
   // Prepare parameters.
@@ -230,9 +235,10 @@ void qs8_rdsum(
   const size_t rows = state.range(0);
   const size_t channels = state.range(1);
 
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> input(rows * channels + XNN_EXTRA_BYTES);
-  std::vector<int32_t> output(channels);
-  std::vector<int8_t> zero(channels + XNN_EXTRA_BYTES, 0);
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> input(rows * channels +
+                                                  XNN_EXTRA_BYTES);
+  xnnpack::Buffer<int32_t> output(channels);
+  xnnpack::Buffer<int8_t> zero(channels + XNN_EXTRA_BYTES, 0);
   std::fill(input.begin(), input.end(), 0);
 
   // Prepare parameters.
@@ -263,9 +269,10 @@ void qu8_rdsum(
   const size_t rows = state.range(0);
   const size_t channels = state.range(1);
 
-  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> input(rows * channels + XNN_EXTRA_BYTES);
-  std::vector<uint32_t> output(channels);
-  std::vector<uint8_t> zero(channels + XNN_EXTRA_BYTES, 0);
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> input(rows * channels +
+                                                   XNN_EXTRA_BYTES);
+  xnnpack::Buffer<uint32_t> output(channels);
+  xnnpack::Buffer<uint8_t> zero(channels + XNN_EXTRA_BYTES, 0);
   std::fill(input.begin(), input.end(), 0);
 
   // Prepare parameters.
@@ -296,9 +303,10 @@ void f16_f32acc_rdsum(
   const size_t rows = state.range(0);
   const size_t channels = state.range(1);
 
-  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> input(rows * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  std::vector<float> output(channels);
-  std::vector<xnn_float16> zero(channels + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
+  xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> input(
+      rows * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<float> output(channels);
+  xnnpack::Buffer<xnn_float16> zero(channels + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
   std::iota(input.begin(), input.end(), 0.0f);
 
   // Prepare parameters.

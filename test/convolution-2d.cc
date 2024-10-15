@@ -15,13 +15,13 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/requantization.h"
 #include "xnnpack/subgraph.h"
+#include "xnnpack/buffer.h"
 #include "convolution-test-helpers.h"
 #include "replicable_random_device.h"
 
@@ -66,18 +66,18 @@ template <class InputType, class KernelType = InputType, class BiasType = InputT
     output_dims = {{batch_size, output_height, output_width,
                     groups * group_output_channels}};
 
-    input = std::vector<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) +
+    input = xnnpack::Buffer<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) +
                                    batch_size * input_height * input_width *
                                        groups * group_input_channels);
     filter =
-        std::vector<KernelType>(groups * group_output_channels * kernel_height *
+        xnnpack::Buffer<KernelType>(groups * group_output_channels * kernel_height *
                                 kernel_width * group_input_channels);
-    bias = std::vector<BiasType>(groups * group_output_channels);
+    bias = xnnpack::Buffer<BiasType>(groups * group_output_channels);
     operator_output =
-        std::vector<OutputType>(batch_size * output_height * output_width *
+        xnnpack::Buffer<OutputType>(batch_size * output_height * output_width *
                                 groups * group_output_channels);
     subgraph_output =
-        std::vector<OutputType>(batch_size * output_height * output_width *
+        xnnpack::Buffer<OutputType>(batch_size * output_height * output_width *
                                 groups * group_output_channels);
   }
 
@@ -116,11 +116,11 @@ template <class InputType, class KernelType = InputType, class BiasType = InputT
   std::array<size_t, 1> bias_dims;
   std::array<size_t, 4> output_dims;
 
-  std::vector<InputType> input;
-  std::vector<KernelType> filter;
-  std::vector<BiasType> bias;
-  std::vector<OutputType> operator_output;
-  std::vector<OutputType> subgraph_output;
+  xnnpack::Buffer<InputType> input;
+  xnnpack::Buffer<KernelType> filter;
+  xnnpack::Buffer<BiasType> bias;
+  xnnpack::Buffer<OutputType> operator_output;
+  xnnpack::Buffer<OutputType> subgraph_output;
 };
 
 template <class InputType, class KernelType = InputType, class BiasType = InputType, class OutputType = InputType> class QuantizedConvolutionTestBase : public ConvolutionTestBase<InputType, KernelType, BiasType, OutputType> {
@@ -132,14 +132,14 @@ protected:
     w8dist = std::uniform_int_distribution<int32_t>(-std::numeric_limits<KernelType>::max(), std::numeric_limits<KernelType>::max());
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
-    accumulators = std::vector<int32_t>(
+    accumulators = xnnpack::Buffer<int32_t>(
       this->batch_size * this->output_height * this->output_width * this->groups * this->group_output_channels);
   }
 
   std::uniform_int_distribution<int32_t> i8dist;
   std::uniform_int_distribution<int32_t> u8dist;
   std::uniform_int_distribution<int32_t> w8dist;
-  std::vector<int32_t> accumulators;
+  xnnpack::Buffer<int32_t> accumulators;
 };
 
 using ConvolutionTestQC8 = QuantizedConvolutionTestBase<int8_t, int8_t, int32_t,int8_t>;
@@ -165,7 +165,7 @@ TEST_F(ConvolutionTestQC8, define)
                           /*external_id=*/0, /*flags=*/0, &input_id));
   ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
 
-  std::vector<float> scale(groups * group_output_channels, 1.0f);
+  xnnpack::Buffer<float> scale(groups * group_output_channels, 1.0f);
   uint32_t filter_id = XNN_INVALID_NODE_ID;
   ASSERT_EQ(
     xnn_status_success,
@@ -226,7 +226,7 @@ TEST_F(ConvolutionTestQC8, define)
 
 TEST_F(ConvolutionTestQD8F16QC8W, define)
 {
-  std::vector<float> requantization_scales(group_output_channels * groups, 1.0f);
+  xnnpack::Buffer<float> requantization_scales(group_output_channels * groups, 1.0f);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -289,10 +289,10 @@ TEST_F(ConvolutionTestQD8F16QC8W, internally_allocated_dynamic_quantization_para
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/4, /*flags=*/0, &subgraph));
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
   uint32_t input_id = XNN_INVALID_NODE_ID;
-  std::vector<xnn_float16> convert_input(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  std::vector<int8_t> operator_dq_data(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES);
-  std::vector<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
-  std::vector<float> kernel_scale(group_output_channels * groups);
+  xnnpack::Buffer<xnn_float16> convert_input(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<int8_t> operator_dq_data(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES);
+  xnnpack::Buffer<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
+  xnnpack::Buffer<float> kernel_scale(group_output_channels * groups);
   std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return scale_dist(rng); });
   std::generate(filter.begin(), filter.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
@@ -396,7 +396,7 @@ TEST_F(ConvolutionTestQD8F16QC8W, internally_allocated_dynamic_quantization_para
 
 TEST_F(ConvolutionTestQD8F32QC8W, define)
 {
-  std::vector<float> requantization_scales(group_output_channels * groups, 1.0f);
+  xnnpack::Buffer<float> requantization_scales(group_output_channels * groups, 1.0f);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -460,10 +460,10 @@ TEST_F(ConvolutionTestQD8F32QC8W, internally_allocated_dynamic_quantization_para
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/4, /*flags=*/0, &subgraph));
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
   uint32_t input_id = XNN_INVALID_NODE_ID;
-  std::vector<float> convert_input(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES / sizeof(float));
-  std::vector<int8_t> operator_dq_data(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES);
-  std::vector<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
-  std::vector<float> kernel_scale(group_output_channels * groups);
+  xnnpack::Buffer<float> convert_input(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<int8_t> operator_dq_data(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES);
+  xnnpack::Buffer<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
+  xnnpack::Buffer<float> kernel_scale(group_output_channels * groups);
   std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return scale_dist(rng); });
   std::generate(filter.begin(), filter.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
@@ -857,7 +857,7 @@ TEST_F(ConvolutionTestQC8, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
   std::generate(filter.begin(), filter.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-  std::vector<float> requantization_scales(groups * group_output_channels);
+  xnnpack::Buffer<float> requantization_scales(groups * group_output_channels);
   const int8_t input_zero_point = i8dist(rng);
   const int8_t output_zero_point = i8dist(rng);
   const float input_scale = scale_dist(rng);
@@ -1489,7 +1489,7 @@ TEST_F(ConvolutionTestF32, transient_indirection_buffer)
   // workspace_size might be 0 if we hit the vmulcaddc path which does not require any indirection buffers.
   ASSERT_NE(workspace_size, SIZE_MAX);
   ASSERT_NE(workspace_alignment, SIZE_MAX);
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
   ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(op, workspace.data(), input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));

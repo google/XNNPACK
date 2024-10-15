@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <vector>
 
+#include "xnnpack/buffer.h"
 #include "xnnpack/quantization.h"
 
 namespace xnnpack {
@@ -20,10 +21,10 @@ void compute_convolution_qd8_f32_qc8w_reference_results(
     size_t subsampling_height, size_t subsampling_width, size_t dilation_height,
     size_t dilation_width, size_t groups, size_t group_input_channels,
     size_t group_output_channels, size_t input_channel_stride,
-    const std::vector<int8_t>& input, const std::vector<int8_t>& filter,
-    const std::vector<float>& filter_scale,
-    const std::vector<xnn_qd8_quantization_params>& quantization_params,
-    std::vector<float>& output, bool has_bias, const std::vector<float>& bias);
+    const xnnpack::Buffer<int8_t>& input, const xnnpack::Buffer<int8_t>& filter,
+    const xnnpack::Buffer<float>& filter_scale,
+    const xnnpack::Buffer<xnn_qd8_quantization_params>& quantization_params,
+    xnnpack::Buffer<float>& output, bool has_bias, const xnnpack::Buffer<float>& bias);
 
 void compute_convolution_qs8_reference_results(
     size_t batch_size,
@@ -46,11 +47,11 @@ void compute_convolution_qs8_reference_results(
     size_t group_output_channels,
     size_t input_channel_stride,
     int8_t input_zero_point,
-    const std::vector<int8_t>& input,
-    const std::vector<int8_t>& filter,
-    std::vector<int32_t>& accumulators,
+    const xnnpack::Buffer<int8_t>& input,
+    const xnnpack::Buffer<int8_t>& filter,
+    xnnpack::Buffer<int32_t>& accumulators,
     bool has_bias,
-    const std::vector<int32_t>& bias);
+    const xnnpack::Buffer<int32_t>& bias);
 
 void compute_convolution_qs8_reference_results(
     size_t batch_size,
@@ -72,11 +73,11 @@ void compute_convolution_qs8_reference_results(
     size_t group_input_channels,
     size_t group_output_channels,
     int8_t input_zero_point,
-    const std::vector<int8_t>& input,
-    const std::vector<int8_t>& filter,
-    std::vector<int32_t>& accumulators,
+    const xnnpack::Buffer<int8_t>& input,
+    const xnnpack::Buffer<int8_t>& filter,
+    xnnpack::Buffer<int32_t>& accumulators,
     bool has_bias,
-    const std::vector<int32_t>& bias);
+    const xnnpack::Buffer<int32_t>& bias);
 
 void compute_convolution_qu8_reference_results(
     size_t batch_size,
@@ -99,11 +100,11 @@ void compute_convolution_qu8_reference_results(
     size_t group_output_channels,
     uint8_t input_zero_point,
     uint8_t kernel_zero_point,
-    const std::vector<uint8_t>& input,
-    const std::vector<uint8_t>& filter,
-    std::vector<int32_t>& accumulators,
+    const xnnpack::Buffer<uint8_t>& input,
+    const xnnpack::Buffer<uint8_t>& filter,
+    xnnpack::Buffer<int32_t>& accumulators,
     bool has_bias,
-    const std::vector<int32_t>& bias);
+    const xnnpack::Buffer<int32_t>& bias);
 
 void compute_convolution_qu8_reference_results(
     size_t batch_size,
@@ -127,11 +128,11 @@ void compute_convolution_qu8_reference_results(
     size_t input_channel_stride,
     uint8_t input_zero_point,
     uint8_t kernel_zero_point,
-    const std::vector<uint8_t>& input,
-    const std::vector<uint8_t>& filter,
-    std::vector<int32_t>& accumulators,
+    const xnnpack::Buffer<uint8_t>& input,
+    const xnnpack::Buffer<uint8_t>& filter,
+    xnnpack::Buffer<int32_t>& accumulators,
     bool has_bias,
-    const std::vector<int32_t>& bias);
+    const xnnpack::Buffer<int32_t>& bias);
 
 void compute_depthwise_convolution_qs8_reference_results(
     size_t batch_size,
@@ -153,11 +154,11 @@ void compute_depthwise_convolution_qs8_reference_results(
     size_t depth_multiplier,
     size_t input_channel_stride,
     int8_t input_zero_point,
-    const std::vector<int8_t>& input,
-    const std::vector<int8_t>& filter,
-    std::vector<int32_t>& accumulators,
+    const xnnpack::Buffer<int8_t>& input,
+    const xnnpack::Buffer<int8_t>& filter,
+    xnnpack::Buffer<int32_t>& accumulators,
     bool has_bias,
-    const std::vector<int32_t>& bias);
+    const xnnpack::Buffer<int32_t>& bias);
 
 void compute_depthwise_convolution_qs8_reference_results(
     size_t batch_size,
@@ -178,11 +179,11 @@ void compute_depthwise_convolution_qs8_reference_results(
     size_t input_channels,
     size_t depth_multiplier,
     int8_t input_zero_point,
-    const std::vector<int8_t>& input,
-    const std::vector<int8_t>& filter,
-    std::vector<int32_t>& accumulators,
+    const xnnpack::Buffer<int8_t>& input,
+    const xnnpack::Buffer<int8_t>& filter,
+    xnnpack::Buffer<int32_t>& accumulators,
     bool has_bias,
-    const std::vector<int32_t>& bias);
+    const xnnpack::Buffer<int32_t>& bias);
 
 void compute_depthwise_convolution_qu8_reference_results(
     size_t batch_size,
@@ -205,11 +206,11 @@ void compute_depthwise_convolution_qu8_reference_results(
     size_t input_channel_stride,
     uint8_t input_zero_point,
     uint8_t kernel_zero_point,
-    const std::vector<uint8_t>& input,
-    const std::vector<uint8_t>& filter,
-    std::vector<int32_t>& accumulators,
+    const xnnpack::Buffer<uint8_t>& input,
+    const xnnpack::Buffer<uint8_t>& filter,
+    xnnpack::Buffer<int32_t>& accumulators,
     bool has_bias,
-    const std::vector<int32_t>& bias);
+    const xnnpack::Buffer<int32_t>& bias);
 
 void compute_depthwise_convolution_qu8_reference_results(
     size_t batch_size,
@@ -231,9 +232,9 @@ void compute_depthwise_convolution_qu8_reference_results(
     size_t depth_multiplier,
     uint8_t input_zero_point,
     uint8_t kernel_zero_point,
-    const std::vector<uint8_t>& input,
-    const std::vector<uint8_t>& filter,
-    std::vector<int32_t>& accumulators,
+    const xnnpack::Buffer<uint8_t>& input,
+    const xnnpack::Buffer<uint8_t>& filter,
+    xnnpack::Buffer<int32_t>& accumulators,
     bool has_bias,
-    const std::vector<int32_t>& bias);
+    const xnnpack::Buffer<int32_t>& bias);
 }  // namespace xnnpack

@@ -23,6 +23,7 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/math.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 enum class RunMode {
@@ -271,9 +272,9 @@ class BinaryElementwiseOperatorTester {
                                                    input2_scale()};
     xnn_quantization_params output_quantization = {output_zero_point(),
                                                    output_scale()};
-    std::vector<T> input1(XNN_EXTRA_BYTES / sizeof(T) + num_input1_elements());
-    std::vector<T> input2(XNN_EXTRA_BYTES / sizeof(T) + num_input2_elements());
-    std::vector<T> output(num_output_elements);
+    xnnpack::Buffer<T> input1(XNN_EXTRA_BYTES / sizeof(T) + num_input1_elements());
+    xnnpack::Buffer<T> input2(XNN_EXTRA_BYTES / sizeof(T) + num_input2_elements());
+    xnnpack::Buffer<T> output(num_output_elements);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input1.begin(), input1.end(), [&]() { return dist(rng); });
       std::generate(input2.begin(), input2.end(), [&]() { return dist(rng); });

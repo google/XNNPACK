@@ -23,6 +23,7 @@
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/pad.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class PadMicrokernelTester {
@@ -106,10 +107,10 @@ class PadMicrokernelTester {
           0, std::numeric_limits<uint8_t>::max())(rng);
     };
 
-    std::vector<uint8_t> input(input_channels() +
+    xnnpack::Buffer<uint8_t> input(input_channels() +
                                (rows() - 1) * input_stride() +
                                XNN_EXTRA_BYTES / sizeof(uint8_t));
-    std::vector<uint8_t> output(
+    xnnpack::Buffer<uint8_t> output(
         (pre_padding() + input_channels() + post_padding()) +
         (rows() - 1) * output_stride());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {

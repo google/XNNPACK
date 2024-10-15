@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/math.h"
+#include "xnnpack/buffer.h"
 
 class SliceOperatorTester {
  public:
@@ -123,9 +124,9 @@ class SliceOperatorTester {
       output_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = output_dim(i);
     }
 
-    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + num_input_elements());
-    std::vector<uint8_t> output(num_output_elements());
-    std::vector<uint8_t> output_ref(num_output_elements());
+    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + num_input_elements());
+    xnnpack::Buffer<uint8_t> output(num_output_elements());
+    xnnpack::Buffer<uint8_t> output_ref(num_output_elements());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::iota(input.begin(), input.end(), UINT8_C(0));
@@ -183,9 +184,9 @@ class SliceOperatorTester {
       output_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = output_dim(i);
     }
 
-    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) + num_input_elements());
-    std::vector<xnn_float16> output(num_output_elements());
-    std::vector<xnn_float16> output_ref(num_output_elements());
+    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) + num_input_elements());
+    xnnpack::Buffer<xnn_float16> output(num_output_elements());
+    xnnpack::Buffer<xnn_float16> output_ref(num_output_elements());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::iota(input.begin(), input.end(), UINT16_C(0));
@@ -243,9 +244,9 @@ class SliceOperatorTester {
       output_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = output_dim(i);
     }
 
-    std::vector<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) + num_input_elements());
-    std::vector<uint32_t> output(num_output_elements());
-    std::vector<uint32_t> output_ref(num_output_elements());
+    xnnpack::Buffer<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) + num_input_elements());
+    xnnpack::Buffer<uint32_t> output(num_output_elements());
+    xnnpack::Buffer<uint32_t> output_ref(num_output_elements());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::iota(input.begin(), input.end(), UINT32_C(0));
@@ -303,9 +304,9 @@ void TestRunX32() const {
       output_dims[XNN_MAX_TENSOR_DIMS - num_dims() + i] = output_dim(i);
     }
 
-    std::vector<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) + num_input_elements());
-    std::vector<uint32_t> output(num_output_elements());
-    std::vector<uint32_t> output_ref(num_output_elements());
+    xnnpack::Buffer<uint32_t> input(XNN_EXTRA_BYTES / sizeof(uint32_t) + num_input_elements());
+    xnnpack::Buffer<uint32_t> output(num_output_elements());
+    xnnpack::Buffer<uint32_t> output_ref(num_output_elements());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::iota(input.begin(), input.end(), UINT32_C(0));
@@ -331,8 +332,8 @@ void TestRunX32() const {
       const std::array<size_t, XNN_MAX_TENSOR_DIMS> input_dims,
       const std::array<size_t, XNN_MAX_TENSOR_DIMS> output_dims,
       const std::array<size_t, XNN_MAX_TENSOR_DIMS> input_offsets,
-      const std::vector<T>& input,
-      std::vector<T>& output) const {
+      const xnnpack::Buffer<T>& input,
+      xnnpack::Buffer<T>& output) const {
     for (size_t i = 0; i < output_dims[0]; i++) {
       for (size_t j = 0; j < output_dims[1]; j++) {
         for (size_t k = 0; k < output_dims[2]; k++) {
