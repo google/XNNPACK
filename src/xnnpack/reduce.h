@@ -343,14 +343,14 @@ DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__wasmsimd_u16_acc4)
 
 #define DECLARE_F32_RW_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                         \
-      size_t batch,                                   \
+      const size_t batch,                                   \
       const float* input,                            \
-      float init_value,                                 \
-      int64_t* padding,                                    \
-      int64_t base_dilation,                             \
-      int64_t window_dilation,                           \
-      int64_t window_dimension,                          \
-      int64_t window_stride,                              \
+      const float init_value,                                 \
+      const int64_t* padding,                                    \
+      const int64_t base_dilation,                             \
+      const int64_t window_dilation,                           \
+      const int64_t window_dimension,                          \
+      const int64_t window_stride,                              \
       float* output,                                 \
       const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
@@ -358,15 +358,15 @@ DECLARE_F32_RW_UKERNEL_FUNCTION(xnn_f32_rwsum_ukernel__scalar_u1)
 
 #define DECLARE_F32_RWD_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                         \
-      size_t row,                                      \
-      size_t channels,                                   \
+      const size_t row,                                      \
+      const size_t channels,                                   \
       const float* input,                            \
-      float init_value,                                 \
-      int64_t* padding,                                    \
-      int64_t base_dilation,                             \
-      int64_t window_dilation,                           \
-      int64_t window_dimension,                          \
-      int64_t window_stride,                              \
+      const float init_value,                                 \
+      const int64_t* padding,                                    \
+      const int64_t base_dilation,                             \
+      const int64_t window_dilation,                           \
+      const int64_t window_dimension,                          \
+      const int64_t window_stride,                              \
       float* output,                                 \
       const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 

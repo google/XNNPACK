@@ -1609,27 +1609,27 @@ typedef void (*xnn_f32_reduce_ukernel_fn)(
     const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_rw_ukernel_fn)(
-    size_t batch,
+    const size_t batch,
     const float* input,
-    float init_value,
-    int64_t* padding, 
-    int64_t base_dilation, 
-    int64_t window_dilations,
-    int64_t window_dimensions, 
-    int64_t window_strides,
+    const float init_value,
+    const int64_t* padding, 
+    const int64_t base_dilation, 
+    const int64_t window_dilations,
+    const int64_t window_dimensions, 
+    const int64_t window_strides,
     float* output,
     const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_f32_rwd_ukernel_fn)(
-    size_t row,
-    size_t channels,
+    const size_t row,
+    const size_t channels,
     const float* input,
-    float init_value,
-    int64_t* padding, 
-    int64_t base_dilation, 
-    int64_t window_dilations,
-    int64_t window_dimensions, 
-    int64_t window_strides,
+    const float init_value,
+    const int64_t* padding, 
+    const int64_t base_dilation, 
+    const int64_t window_dilations,
+    const int64_t window_dimensions, 
+    const int64_t window_strides,
     float* output,
     const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 

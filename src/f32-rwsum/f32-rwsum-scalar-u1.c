@@ -10,14 +10,14 @@
 #include "xnnpack/reduce.h"
 
 void xnn_f32_rwsum_ukernel__scalar_u1(
-    size_t batch,
+    const size_t batch,
     const float* input,
-    float init_value,
-    int64_t* padding, 
-    int64_t base_dilation, 
-    int64_t window_dilations,
-    int64_t window_dimensions, 
-    int64_t window_strides,
+    const float init_value,
+    const int64_t* padding, 
+    const int64_t base_dilation, 
+    const int64_t window_dilations,
+    const int64_t window_dimensions, 
+    const int64_t window_strides,
     float* output,
     const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)])
 {
@@ -26,10 +26,10 @@ void xnn_f32_rwsum_ukernel__scalar_u1(
   assert(input != NULL);
   assert(output != NULL);
 
-  int64_t size = batch / sizeof(float);
+  const int64_t size = batch / sizeof(float);
 
-  int64_t padded_size = size + (size - 1) * (base_dilation - 1) + padding[0] + padding[1];
-  int64_t output_size = (padded_size < (window_dimensions - 1) * window_dilations + 1) ? 
+  const int64_t padded_size = size + (size - 1) * (base_dilation - 1) + padding[0] + padding[1];
+  const int64_t output_size = (padded_size < (window_dimensions - 1) * window_dilations + 1) ? 
                     0 : (padded_size - (window_dimensions - 1) * window_dilations - 1) / window_strides + 1;
     
 
@@ -38,18 +38,18 @@ void xnn_f32_rwsum_ukernel__scalar_u1(
 
   for (int64_t i = 0; i < output_size; i++) {
         float sum = init_value * (window_dimensions + 1);
-        int64_t window_start = i * window_strides;
-        int64_t pad_high_boundary = math_divide_round_up_s64((padding[0] - window_start) , window_dilations);
-        int64_t pad_low_boundary = math_divide_round_up_s64((padded_size - padding[1] - window_start), window_dilations);
+        const int64_t window_start = i * window_strides;
+        const int64_t pad_high_boundary = math_divide_round_up_s64((padding[0] - window_start) , window_dilations);
+        const int64_t pad_low_boundary = math_divide_round_up_s64((padded_size - padding[1] - window_start), window_dilations);
         int64_t curr_win_idx = 0;
 
         int64_t adjusted_pad_high_boundary = math_min_s64(pad_high_boundary, window_dimensions);
         adjusted_pad_high_boundary = math_max_s64(adjusted_pad_high_boundary , 0);
         curr_win_idx += adjusted_pad_high_boundary;
 
-        int64_t offset = window_start - padding[0];
-        int64_t adjusted_pad_low_boundary = math_min_s64(pad_low_boundary, window_dimensions);
-        int64_t win_boundary = math_divide_round_up_s64((offset + (adjusted_pad_low_boundary) * window_dilations), base_dilation);
+        const int64_t offset = window_start - padding[0];
+        const int64_t adjusted_pad_low_boundary = math_min_s64(pad_low_boundary, window_dimensions);
+        const int64_t win_boundary = math_divide_round_up_s64((offset + (adjusted_pad_low_boundary) * window_dilations), base_dilation);
         int64_t counter = 0;
 
         for (; curr_win_idx < adjusted_pad_low_boundary; curr_win_idx++) {
