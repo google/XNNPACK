@@ -610,7 +610,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F16_F32ACC_RSUM__AVX512SKX_U16, batch_eq_16) {
     TEST_REQUIRES_X86_AVX512SKX;
     RSumMicrokernelTester()
@@ -661,10 +661,10 @@
       .batch_size(2048)
       .Test(xnn_f16_f32acc_rsum_ukernel__avx512skx_u16, xnn_init_f16_f32acc_scale_scalar_params);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F16_F32ACC_RSUM__AVX512SKX_U32_ACC2, batch_eq_32) {
     TEST_REQUIRES_X86_AVX512SKX;
     RSumMicrokernelTester()
@@ -715,10 +715,10 @@
       .batch_size(4096)
       .Test(xnn_f16_f32acc_rsum_ukernel__avx512skx_u32_acc2, xnn_init_f16_f32acc_scale_scalar_params);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F16_F32ACC_RSUM__AVX512SKX_U48_ACC3, batch_eq_48) {
     TEST_REQUIRES_X86_AVX512SKX;
     RSumMicrokernelTester()
@@ -769,10 +769,10 @@
       .batch_size(6144)
       .Test(xnn_f16_f32acc_rsum_ukernel__avx512skx_u48_acc3, xnn_init_f16_f32acc_scale_scalar_params);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F16_F32ACC_RSUM__AVX512SKX_U64_ACC2, batch_eq_64) {
     TEST_REQUIRES_X86_AVX512SKX;
     RSumMicrokernelTester()
@@ -823,10 +823,10 @@
       .batch_size(8192)
       .Test(xnn_f16_f32acc_rsum_ukernel__avx512skx_u64_acc2, xnn_init_f16_f32acc_scale_scalar_params);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F16_F32ACC_RSUM__AVX512SKX_U64_ACC4, batch_eq_64) {
     TEST_REQUIRES_X86_AVX512SKX;
     RSumMicrokernelTester()
@@ -877,10 +877,10 @@
       .batch_size(8192)
       .Test(xnn_f16_f32acc_rsum_ukernel__avx512skx_u64_acc4, xnn_init_f16_f32acc_scale_scalar_params);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F16_F32ACC_RSUM__AVX512SKX_U128_ACC4, batch_eq_128) {
     TEST_REQUIRES_X86_AVX512SKX;
     RSumMicrokernelTester()
@@ -931,4 +931,4 @@
       .batch_size(16384)
       .Test(xnn_f16_f32acc_rsum_ukernel__avx512skx_u128_acc4, xnn_init_f16_f32acc_scale_scalar_params);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

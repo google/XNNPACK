@@ -386,7 +386,7 @@
 #endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F16_RMAX__AVX512SKX_U16, batch_eq_16) {
     TEST_REQUIRES_X86_AVX512SKX;
     ReduceMicrokernelTester()
@@ -420,10 +420,10 @@
         .Test(xnn_f16_rmax_ukernel__avx512skx_u16, ReduceMicrokernelTester::OpType::Max);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F16_RMAX__AVX512SKX_U32_ACC2, batch_eq_32) {
     TEST_REQUIRES_X86_AVX512SKX;
     ReduceMicrokernelTester()
@@ -457,10 +457,10 @@
         .Test(xnn_f16_rmax_ukernel__avx512skx_u32_acc2, ReduceMicrokernelTester::OpType::Max);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F16_RMAX__AVX512SKX_U48_ACC3, batch_eq_48) {
     TEST_REQUIRES_X86_AVX512SKX;
     ReduceMicrokernelTester()
@@ -494,10 +494,10 @@
         .Test(xnn_f16_rmax_ukernel__avx512skx_u48_acc3, ReduceMicrokernelTester::OpType::Max);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F16_RMAX__AVX512SKX_U64_ACC2, batch_eq_64) {
     TEST_REQUIRES_X86_AVX512SKX;
     ReduceMicrokernelTester()
@@ -531,10 +531,10 @@
         .Test(xnn_f16_rmax_ukernel__avx512skx_u64_acc2, ReduceMicrokernelTester::OpType::Max);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F16_RMAX__AVX512SKX_U64_ACC4, batch_eq_64) {
     TEST_REQUIRES_X86_AVX512SKX;
     ReduceMicrokernelTester()
@@ -568,7 +568,7 @@
         .Test(xnn_f16_rmax_ukernel__avx512skx_u64_acc4, ReduceMicrokernelTester::OpType::Max);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

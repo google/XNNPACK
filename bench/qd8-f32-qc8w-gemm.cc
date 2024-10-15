@@ -1348,7 +1348,7 @@
 #endif  // XNN_ENABLE_AVX512AMX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   static void qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__avx512vnni(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__avx512vnni,
@@ -1722,7 +1722,98 @@
   }
 
   BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_14x16c8__avx512vnni_prfm)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  static void qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__avx512skx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__avx512skx,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/1, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX512SKX);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__avx512skx)
+
+  static void qd8_f32_qc8w_gemm_minmax_ukernel_5x16c8__avx512skx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x16c8__avx512skx,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/5, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX512SKX);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_5x16c8__avx512skx)
+
+  static void qd8_f32_qc8w_gemm_minmax_ukernel_7x16c8__avx512skx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x16c8__avx512skx,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/7, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX512SKX);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_7x16c8__avx512skx)
+
+  static void qd8_f32_qc8w_gemm_minmax_ukernel_8x16c8__avx512skx(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_8x16c8__avx512skx,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/8, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX512SKX);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_8x16c8__avx512skx)
+
+  static void qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__avx512skx_prfm(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__avx512skx_prfm,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/1, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX512SKX);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__avx512skx_prfm)
+
+  static void qd8_f32_qc8w_gemm_minmax_ukernel_5x16c8__avx512skx_prfm(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x16c8__avx512skx_prfm,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/5, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX512SKX);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_5x16c8__avx512skx_prfm)
+
+  static void qd8_f32_qc8w_gemm_minmax_ukernel_7x16c8__avx512skx_prfm(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x16c8__avx512skx_prfm,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/7, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX512SKX);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_7x16c8__avx512skx_prfm)
+
+  static void qd8_f32_qc8w_gemm_minmax_ukernel_8x16c8__avx512skx_prfm(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_8x16c8__avx512skx_prfm,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/8, /*nr=*/16, /*kr=*/8, /*sr=*/1,
+      benchmark::utils::CheckAVX512SKX);
+  }
+
+  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_8x16c8__avx512skx_prfm)
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #if XNN_ENABLE_AVX256VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
@@ -2307,94 +2398,6 @@
 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  static void qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__avx512skx(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__avx512skx,
-      xnn_init_f32_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
-      /*mr=*/1, /*nr=*/16, /*kr=*/8, /*sr=*/1,
-      benchmark::utils::CheckAVX512SKX);
-  }
-
-  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__avx512skx)
-
-  static void qd8_f32_qc8w_gemm_minmax_ukernel_5x16c8__avx512skx(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x16c8__avx512skx,
-      xnn_init_f32_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
-      /*mr=*/5, /*nr=*/16, /*kr=*/8, /*sr=*/1,
-      benchmark::utils::CheckAVX512SKX);
-  }
-
-  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_5x16c8__avx512skx)
-
-  static void qd8_f32_qc8w_gemm_minmax_ukernel_7x16c8__avx512skx(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x16c8__avx512skx,
-      xnn_init_f32_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
-      /*mr=*/7, /*nr=*/16, /*kr=*/8, /*sr=*/1,
-      benchmark::utils::CheckAVX512SKX);
-  }
-
-  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_7x16c8__avx512skx)
-
-  static void qd8_f32_qc8w_gemm_minmax_ukernel_8x16c8__avx512skx(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_8x16c8__avx512skx,
-      xnn_init_f32_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
-      /*mr=*/8, /*nr=*/16, /*kr=*/8, /*sr=*/1,
-      benchmark::utils::CheckAVX512SKX);
-  }
-
-  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_8x16c8__avx512skx)
-
-  static void qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__avx512skx_prfm(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__avx512skx_prfm,
-      xnn_init_f32_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
-      /*mr=*/1, /*nr=*/16, /*kr=*/8, /*sr=*/1,
-      benchmark::utils::CheckAVX512SKX);
-  }
-
-  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_1x16c8__avx512skx_prfm)
-
-  static void qd8_f32_qc8w_gemm_minmax_ukernel_5x16c8__avx512skx_prfm(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x16c8__avx512skx_prfm,
-      xnn_init_f32_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
-      /*mr=*/5, /*nr=*/16, /*kr=*/8, /*sr=*/1,
-      benchmark::utils::CheckAVX512SKX);
-  }
-
-  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_5x16c8__avx512skx_prfm)
-
-  static void qd8_f32_qc8w_gemm_minmax_ukernel_7x16c8__avx512skx_prfm(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_7x16c8__avx512skx_prfm,
-      xnn_init_f32_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
-      /*mr=*/7, /*nr=*/16, /*kr=*/8, /*sr=*/1,
-      benchmark::utils::CheckAVX512SKX);
-  }
-
-  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_7x16c8__avx512skx_prfm)
-
-  static void qd8_f32_qc8w_gemm_minmax_ukernel_8x16c8__avx512skx_prfm(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_qd8_f32_qc8w_gemm_minmax_ukernel_8x16c8__avx512skx_prfm,
-      xnn_init_f32_minmax_scalar_params,
-      xnn_pack_qs8_gemm_goi_w,
-      /*mr=*/8, /*nr=*/16, /*kr=*/8, /*sr=*/1,
-      benchmark::utils::CheckAVX512SKX);
-  }
-
-  BENCHMARK_GEMM(qd8_f32_qc8w_gemm_minmax_ukernel_8x16c8__avx512skx_prfm)
-
   static void qd8_f32_qc8w_gemm_minmax_ukernel_1x8c8__avx2(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x8c8__avx2,

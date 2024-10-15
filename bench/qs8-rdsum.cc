@@ -9,13 +9,15 @@
 
 #include "bench/rsum-benchmark.h"
 #include "bench/utils.h"
+#include <benchmark/benchmark.h>
+
 #include "xnnpack.h"
+#include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
+#include "xnnpack/reduce.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
-#include "xnnpack/reduce.h"
-#include "xnnpack/buffer.h"
-#include <benchmark/benchmark.h>
+
 
 BENCHMARK_CAPTURE(qs8_rdsum, scalar_c4,
                   xnn_qs8_rdsum_ukernel_7p7x__scalar_c4,
@@ -103,24 +105,24 @@ BENCHMARK_CAPTURE(qs8_rdsum, scalar_c4,
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   BENCHMARK_CAPTURE(qs8_rdsum, avx512skx_c64,
                     xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c64,
                     /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(BenchmarkRDSUM)
     ->UseRealTime();
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   BENCHMARK_CAPTURE(qs8_rdsum, avx512skx_c128,
                     xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c128,
                     /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(BenchmarkRDSUM)
     ->UseRealTime();
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

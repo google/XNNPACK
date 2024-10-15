@@ -1647,7 +1647,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
 #endif  // XNN_ENABLE_AVX256SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(QS8_RSUM__AVX512SKX_U64, batch_eq_64) {
     TEST_REQUIRES_X86_AVX512SKX;
     RSumMicrokernelTester()
@@ -1698,10 +1698,10 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
       .batch_size(8192)
       .Test(xnn_qs8_rsum_ukernel__avx512skx_u64);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(QS8_RSUM__AVX512SKX_U128_ACC2, batch_eq_128) {
     TEST_REQUIRES_X86_AVX512SKX;
     RSumMicrokernelTester()
@@ -1752,10 +1752,10 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
       .batch_size(16384)
       .Test(xnn_qs8_rsum_ukernel__avx512skx_u128_acc2);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(QS8_RSUM__AVX512SKX_U256_ACC2, batch_eq_256) {
     TEST_REQUIRES_X86_AVX512SKX;
     RSumMicrokernelTester()
@@ -1806,10 +1806,10 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
       .batch_size(32768)
       .Test(xnn_qs8_rsum_ukernel__avx512skx_u256_acc2);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(QS8_RSUM__AVX512SKX_U256_ACC4, batch_eq_256) {
     TEST_REQUIRES_X86_AVX512SKX;
     RSumMicrokernelTester()
@@ -1860,10 +1860,10 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
       .batch_size(32768)
       .Test(xnn_qs8_rsum_ukernel__avx512skx_u256_acc4);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(QS8_RSUM__AVX512VNNI_U64, batch_eq_64) {
     TEST_REQUIRES_X86_AVX512VNNI;
     RSumMicrokernelTester()
@@ -1914,10 +1914,10 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
       .batch_size(8192)
       .Test(xnn_qs8_rsum_ukernel__avx512vnni_u64);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(QS8_RSUM__AVX512VNNI_U128_ACC2, batch_eq_128) {
     TEST_REQUIRES_X86_AVX512VNNI;
     RSumMicrokernelTester()
@@ -1968,10 +1968,10 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
       .batch_size(16384)
       .Test(xnn_qs8_rsum_ukernel__avx512vnni_u128_acc2);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(QS8_RSUM__AVX512VNNI_U256_ACC2, batch_eq_256) {
     TEST_REQUIRES_X86_AVX512VNNI;
     RSumMicrokernelTester()
@@ -2022,10 +2022,10 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
       .batch_size(32768)
       .Test(xnn_qs8_rsum_ukernel__avx512vnni_u256_acc2);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(QS8_RSUM__AVX512VNNI_U256_ACC4, batch_eq_256) {
     TEST_REQUIRES_X86_AVX512VNNI;
     RSumMicrokernelTester()
@@ -2076,7 +2076,7 @@ TEST(QS8_RSUM__SCALAR_U4, overflow_accumulator) {
       .batch_size(32768)
       .Test(xnn_qs8_rsum_ukernel__avx512vnni_u256_acc4);
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #if XNN_ARCH_WASMRELAXEDSIMD

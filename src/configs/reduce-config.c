@@ -77,27 +77,35 @@ static void init_qs8_rsum_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
 
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512vnni) {
-      qs8_rsum_config = (struct xnn_reduce_config) {
-        .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avx512vnni_u128_acc2,
-      };
+    #if XNN_ENABLE_AVX512VNNI
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512vnni) {
+        qs8_rsum_config = (struct xnn_reduce_config) {
+          .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avx512vnni_u128_acc2,
+        };
+      } else
+    #endif
     #if XNN_ENABLE_AVXVNNI
-      } else if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avxvnni) {
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avxvnni) {
         qs8_rsum_config = (struct xnn_reduce_config) {
           .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avxvnni_u128_acc2,
         };
+      } else
     #endif
-    } else if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+    #if XNN_ENABLE_AVX512SKX
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
         qs8_rsum_config = (struct xnn_reduce_config) {
           .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avx512skx_u128_acc2,
         };
+      } else
+    #endif
     #if XNN_ENABLE_AVX256SKX
-      } else if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx256skx) {
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx256skx) {
           qs8_rsum_config = (struct xnn_reduce_config) {
             .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avx256skx_u64_acc2,
-          };
+        };
+      } else
     #endif
-    } else if (hardware_config->use_x86_avx2) {
+    if (hardware_config->use_x86_avx2) {
       qs8_rsum_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_qs8_rsum_ukernel__avx2_u64_acc2,
       };
@@ -143,11 +151,14 @@ static void init_qs8_rdsum_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_x86_avx512skx) {
-      qs8_rdsum_config = (struct xnn_reduce_config) {
-        .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c64,
-      };
-    } else if (hardware_config->use_x86_avx2) {
+    #if XNN_ENABLE_AVX512SKX
+      if (hardware_config->use_x86_avx512skx) {
+        qs8_rdsum_config = (struct xnn_reduce_config) {
+          .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c64,
+        };
+      } else
+    #endif
+    if (hardware_config->use_x86_avx2) {
       qs8_rdsum_config = (struct xnn_reduce_config) {
         .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_qs8_rdsum_ukernel_7p7x__avx2_c64,
       };
@@ -269,12 +280,15 @@ static void init_f16_f32acc_rsum_config(void) {
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64)
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
-      f16_f32acc_rsum_config = (struct xnn_reduce_config) {
-        .ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__avx512skx_u64_acc4,
-        .init.f16_f32acc_scale = xnn_init_f16_f32acc_scale_scalar_params,
-      };
-    } else if (hardware_config->use_x86_f16c) {
+    #if XNN_ENABLE_AVX512SKX
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+        f16_f32acc_rsum_config = (struct xnn_reduce_config) {
+          .ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__avx512skx_u64_acc4,
+          .init.f16_f32acc_scale = xnn_init_f16_f32acc_scale_scalar_params,
+        };
+      } else
+    #endif
+    if (hardware_config->use_x86_f16c) {
       f16_f32acc_rsum_config = (struct xnn_reduce_config) {
         .ukernel = (xnn_reduce_ukernel_fn) xnn_f16_f32acc_rsum_ukernel__f16c_u32_acc4,
         .init.f16_f32acc_scale = xnn_init_f16_f32acc_scale_scalar_params,
@@ -293,17 +307,21 @@ static void init_f16_rminmax_config(void) {
       f16_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rminmax_ukernel__scalar_u2_acc2;
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-
+    #if XNN_ENABLE_AVX512FP16 || XNN_ENABLE_AVX512SKX
+      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      assert(hardware_config != NULL);
+    #endif
     #if XNN_ENABLE_AVX512FP16
       if (hardware_config->use_x86_avx512fp16) {
         f16_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rminmax_ukernel__avx512fp16_u128_acc4;
       } else
     #endif
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
-      f16_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rminmax_ukernel__avx512skx_u64_acc4;
-    } else {
+    #if XNN_ENABLE_AVX512SKX
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+        f16_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rminmax_ukernel__avx512skx_u64_acc4;
+      } else
+    #endif
+    {
       f16_rminmax_config.ukernel = (xnn_reduce_ukernel_fn) xnn_f16_rminmax_ukernel__scalar_u2_acc2;
     }
   #else
@@ -429,12 +447,15 @@ static void init_f16_f32acc_rdsum_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
-      f16_f32acc_rdsum_config = (struct xnn_reduce_config) {
-        .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c64,
-        .init.f16_f32acc_scale = xnn_init_f16_f32acc_scale_scalar_params,
-      };
-    } else if (hardware_config->use_x86_f16c) {
+    #if XNN_ENABLE_AVX512SKX
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+        f16_f32acc_rdsum_config = (struct xnn_reduce_config) {
+          .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c64,
+          .init.f16_f32acc_scale = xnn_init_f16_f32acc_scale_scalar_params,
+        };
+      } else
+    #endif
+    if (hardware_config->use_x86_f16c) {
       f16_f32acc_rdsum_config = (struct xnn_reduce_config) {
         .rd_ukernel = (xnn_rdsum_ukernel_fn) xnn_f16_f32acc_rdsum_ukernel_7p7x__f16c_c32,
         .init.f16_f32acc_scale = xnn_init_f16_f32acc_scale_scalar_params,

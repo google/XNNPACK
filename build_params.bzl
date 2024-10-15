@@ -84,10 +84,6 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_RISCV_FP16_VECTOR=1"],
         ["XNN_ENABLE_RISCV_FP16_VECTOR=0"],
     ) + xnnpack_select_if(
-        ":avx512vnnigfni_enabled",
-        ["XNN_ENABLE_AVX512VNNIGFNI=1"],
-        ["XNN_ENABLE_AVX512VNNIGFNI=0"],
-    ) + xnnpack_select_if(
         ":avx512amx_enabled",
         ["XNN_ENABLE_AVX512AMX=1"],
         ["XNN_ENABLE_AVX512AMX=0"],
@@ -115,6 +111,18 @@ def xnnpack_configurable_defines():
         ":avx256vnnigfni_enabled",
         ["XNN_ENABLE_AVX256VNNIGFNI=1"],
         ["XNN_ENABLE_AVX256VNNIGFNI=0"],
+    ) + xnnpack_select_if(
+        ":avx512skx_enabled",
+        ["XNN_ENABLE_AVX512SKX=1"],
+        ["XNN_ENABLE_AVX512SKX=0"],
+    ) + xnnpack_select_if(
+        ":avx512vnni_enabled",
+        ["XNN_ENABLE_AVX512VNNI=1"],
+        ["XNN_ENABLE_AVX512VNNI=0"],
+    ) + xnnpack_select_if(
+        ":avx512vnnigfni_enabled",
+        ["XNN_ENABLE_AVX512VNNIGFNI=1"],
+        ["XNN_ENABLE_AVX512VNNIGFNI=0"],
     ) + xnnpack_select_if(
         ":hvx_enabled",
         ["XNN_ENABLE_HVX=1"],
@@ -601,7 +609,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         msys_copts = ["-fno-asynchronous-unwind-tables"],
     ),
     "avx512skx": _create_params(
-        cond = "//build_config:x86",
+        cond = "//:avx512skx_enabled",
         gcc_x86_copts = [
             "-mf16c",
             "-mfma",
@@ -650,7 +658,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         msys_copts = ["-fno-asynchronous-unwind-tables"],
     ),
     "avx512vnni": _create_params(
-        cond = "//build_config:x86",
+        cond = "//:avx512vnni_enabled",
         gcc_x86_copts = [
             "-mf16c",
             "-mfma",
@@ -684,7 +692,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         msys_copts = ["-fno-asynchronous-unwind-tables"],
     ),
     "avx512vnnigfni": _create_params(
-        cond = "//build_config:x86",
+        cond = "//:avx512vnnigfni_enabled",
         gcc_x86_copts = [
             "-mf16c",
             "-mfma",

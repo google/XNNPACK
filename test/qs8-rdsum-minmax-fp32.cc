@@ -2010,7 +2010,7 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C64, channels_eq_64_2pass_fulltile) {
     TEST_REQUIRES_X86_AVX512SKX;
     const size_t channel_tile = 64;
@@ -2231,10 +2231,10 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
          .Test(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c64);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(QS8_RDSUM_7P7X__AVX512SKX_C128, channels_eq_128_2pass_fulltile) {
     TEST_REQUIRES_X86_AVX512SKX;
     const size_t channel_tile = 128;
@@ -2455,7 +2455,7 @@ TEST(QS8_RDSUM_7P7X__SCALAR_C4, overflow_accumulator) {
          .Test(xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c128);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

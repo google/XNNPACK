@@ -1223,13 +1223,37 @@ config_setting(
     define_values = {"xnn_enable_arm_sme2": "false"},
 )
 
-# Enables usage of Intel AVX512-VNNI-GFNI (integer dot product with gfni) kernels.
+# Enables usage of Intel AVX512SKX (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512skx_explicit_true",
+    define_values = {"xnn_enable_avx512skx": "true"},
+)
+
+# Disables usage of Intel AVX512SKX (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512skx_explicit_false",
+    define_values = {"xnn_enable_avx512skx": "false"},
+)
+
+# Enables usage of Intel AVX512VNNI (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512vnni_explicit_true",
+    define_values = {"xnn_enable_avx512vnni": "true"},
+)
+
+# Disables usage of Intel AVX512VNNI (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512vnni_explicit_false",
+    define_values = {"xnn_enable_avx512vnni": "false"},
+)
+
+# Enables usage of Intel AVX512VNNIGFNI (evex512) kernels.
 config_setting(
     name = "xnn_enable_avx512vnnigfni_explicit_true",
     define_values = {"xnn_enable_avx512vnnigfni": "true"},
 )
 
-# Disables usage of Intel AVX512-VNNI-GFNI (integer dot product with gfni) kernels.
+# Disables usage of Intel AVX512VNNIGFNI (evex512) kernels.
 config_setting(
     name = "xnn_enable_avx512vnnigfni_explicit_false",
     define_values = {"xnn_enable_avx512vnnigfni": "false"},
@@ -1633,6 +1657,38 @@ alias(
         ":xnn_enable_arm_sme2_explicit_true": ":xnn_enable_arm_sme2_explicit_true",
         ":xnn_enable_arm_sme2_explicit_false": ":xnn_enable_arm_sme2_explicit_true",
         "//conditions:default": ":xnn_enable_arm_sme2_explicit_true",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx512skx_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx512skx_enabled",
+    actual = select({
+        ":xnn_enable_avx512skx_explicit_true": ":xnn_enable_avx512skx_explicit_true",
+        ":xnn_enable_avx512skx_explicit_false": ":xnn_enable_avx512skx_explicit_true",
+        "//conditions:default": ":avx512skx_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx512vnni_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx512vnni_enabled",
+    actual = select({
+        ":xnn_enable_avx512vnni_explicit_true": ":xnn_enable_avx512vnni_explicit_true",
+        ":xnn_enable_avx512vnni_explicit_false": ":xnn_enable_avx512vnni_explicit_true",
+        "//conditions:default": ":avx512vnni_enabled_by_default",
     }),
 )
 
