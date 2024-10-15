@@ -238,25 +238,23 @@ XNN_INTERNAL size_t xnn_init_f32_scale_scalar_params(
   struct xnn_f32_scale_params params[XNN_MIN_ELEMENTS(1)],
   float scale);
 
-#define DECLARE_INIT_QS8_MEAN_MINMAX_PARAMS_FUNCTION(fn_name)      \
-  XNN_INTERNAL size_t fn_name(                                     \
-    struct xnn_qs8_mean_minmax_params params[XNN_MIN_ELEMENTS(1)], \
-    float scale,                                                   \
-    int32_t num_elements,                                          \
-    int8_t input_zero_point,                                       \
-    int8_t output_zero_point);
+#define DECLARE_INIT_QS8_REDUCE_MINMAX_PARAMS_FUNCTION(fn_name)        \
+  XNN_INTERNAL size_t fn_name(                                         \
+      struct xnn_qs8_reduce_minmax_params params[XNN_MIN_ELEMENTS(1)], \
+      float scale, int32_t num_elements, int8_t input_zero_point,      \
+      int8_t output_zero_point);
 
-DECLARE_INIT_QS8_MEAN_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mean_minmax_scalar_params)
+DECLARE_INIT_QS8_REDUCE_MINMAX_PARAMS_FUNCTION(
+    xnn_init_qs8_reduce_minmax_scalar_params)
 
-#define DECLARE_INIT_QU8_MEAN_MINMAX_PARAMS_FUNCTION(fn_name)      \
-  XNN_INTERNAL size_t fn_name(                                     \
-    struct xnn_qu8_mean_minmax_params params[XNN_MIN_ELEMENTS(1)], \
-    float scale,                                                   \
-    int32_t num_elements,                                          \
-    uint8_t input_zero_point,                                      \
-    uint8_t output_zero_point);
+#define DECLARE_INIT_QU8_REDUCE_MINMAX_PARAMS_FUNCTION(fn_name)        \
+  XNN_INTERNAL size_t fn_name(                                         \
+      struct xnn_qu8_reduce_minmax_params params[XNN_MIN_ELEMENTS(1)], \
+      float scale, int32_t num_elements, uint8_t input_zero_point,     \
+      uint8_t output_zero_point);
 
-DECLARE_INIT_QU8_MEAN_MINMAX_PARAMS_FUNCTION(xnn_init_qu8_mean_minmax_scalar_params)
+DECLARE_INIT_QU8_REDUCE_MINMAX_PARAMS_FUNCTION(
+    xnn_init_qu8_reduce_minmax_scalar_params)
 
 XNN_INTERNAL size_t xnn_init_f16_scaleminmax_scalar_params(
   struct xnn_f16_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],

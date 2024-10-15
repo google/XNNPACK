@@ -1431,8 +1431,8 @@ struct reduce_context {
   xnn_vunary_ukernel_fn s32_f32_cvt_ukernel;
   xnn_vunary_ukernel_fn u32_f32_cvt_ukernel;
   union {
-    struct xnn_qs8_mean_minmax_params qs8_mean;
-    struct xnn_qu8_mean_minmax_params qu8_mean;
+    struct xnn_qs8_reduce_minmax_params qs8_mean;
+    struct xnn_qu8_reduce_minmax_params qu8_mean;
     struct xnn_f32_default_params f32_default;
     struct xnn_f16_f32acc_scale_params scale_params;
     struct xnn_f32_scale_params f32_scale;

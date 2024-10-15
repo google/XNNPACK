@@ -1578,13 +1578,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "mean_nd_test",
+    name = "reduce_nd_test",
     timeout = "moderate",
     srcs = [
-        "mean-nd.cc",
-        "mean-operator-tester.h",
+        "reduce-nd.cc",
     ],
-    deps = OPERATOR_TEST_DEPS + ["//:requantization"],
+    deps = OPERATOR_TEST_DEPS + [
+        "//:logging",
+        "//:requantization",
+    ],
 )
 
 xnnpack_unit_test(
@@ -2178,15 +2180,17 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "static_mean_test",
+    name = "static_reduce_test",
     srcs = [
-        "static-mean.cc",
+        "static-reduce.cc",
     ],
     deps = [
         ":replicable_random_device",
         "//:XNNPACK",
         "//:aligned_allocator",
         "//:common",
+        "//:logging",
+        "//:math",
         "//:node_type",
         "//:operators",
         "//:subgraph",

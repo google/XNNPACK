@@ -171,3 +171,15 @@ enum xnn_operator_type xnn_binary_operator_to_operator_type(enum xnn_binary_oper
       return xnn_operator_type_invalid;
   }
 }
+
+enum xnn_operator_type xnn_reduce_operator_to_operator_type(enum xnn_reduce_operator type)
+{
+  switch (type) {
+    case xnn_reduce_mean:
+      return xnn_operator_type_mean_nd;
+    case xnn_reduce_sum:
+      return xnn_operator_type_sum_nd;
+    default:
+      return xnn_operator_type_invalid;
+  }
+}

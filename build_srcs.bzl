@@ -82,7 +82,7 @@ SUBGRAPH_SRCS = [
     "src/subgraph/square-root.c",
     "src/subgraph/square.c",
     "src/subgraph/static-constant-pad.c",
-    "src/subgraph/static-mean.c",
+    "src/subgraph/static-reduce.c",
     "src/subgraph/static-resize-bilinear-2d.c",
     "src/subgraph/static-slice.c",
     "src/subgraph/static-transpose.c",

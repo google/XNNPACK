@@ -441,7 +441,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/square-root.c
   src/subgraph/square.c
   src/subgraph/static-constant-pad.c
-  src/subgraph/static-mean.c
+  src/subgraph/static-reduce.c
   src/subgraph/static-resize-bilinear-2d.c
   src/subgraph/static-slice.c
   src/subgraph/static-transpose.c
@@ -1364,7 +1364,7 @@ IF(XNNPACK_BUILD_TESTS)
         square
         square-root
         static-constant-pad
-        static-mean
+        static-reduce
         static-reshape
         static-resize-bilinear-2d
         static-transpose
@@ -1379,6 +1379,7 @@ IF(XNNPACK_BUILD_TESTS)
         GTest::gtest
         GTest::gtest_main
         subgraph
+        logging
         XNNPACK)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
       SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)

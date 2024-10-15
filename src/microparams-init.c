@@ -2089,8 +2089,8 @@ size_t xnn_init_f32_qs8_cvt_scalar_params(
   return sizeof(params->scalar);
 }
 
-size_t xnn_init_qs8_mean_minmax_scalar_params(
-  struct xnn_qs8_mean_minmax_params params[XNN_MIN_ELEMENTS(1)],
+size_t xnn_init_qs8_reduce_minmax_scalar_params(
+  struct xnn_qs8_reduce_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int32_t num_elements,
   int8_t input_zero_point,
@@ -2103,8 +2103,8 @@ size_t xnn_init_qs8_mean_minmax_scalar_params(
   return sizeof(params->scalar);
 }
 
-size_t xnn_init_qu8_mean_minmax_scalar_params(
-  struct xnn_qu8_mean_minmax_params params[XNN_MIN_ELEMENTS(1)],
+size_t xnn_init_qu8_reduce_minmax_scalar_params(
+  struct xnn_qu8_reduce_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int32_t num_elements,
   uint8_t input_zero_point,

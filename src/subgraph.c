@@ -516,6 +516,7 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
     case xnn_node_type_hardswish:
     case xnn_node_type_leaky_relu:
     case xnn_node_type_static_mean:
+    case xnn_node_type_static_sum:
       if (subgraph->values[node->inputs[0]].shape.num_dims == 4) {
         return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW | XNN_LAYOUT_FLAG_COMPATIBLE_NHWC2NCHW;
       } else {
@@ -836,6 +837,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_static_constant_pad:
       case xnn_node_type_static_mean:
       case xnn_node_type_static_slice:
+      case xnn_node_type_static_sum:
       case xnn_node_type_static_reshape:
       case xnn_node_type_static_resize_bilinear_2d:
       case xnn_node_type_static_transpose:
@@ -1416,9 +1418,9 @@ enum xnn_status xnn_delete_subgraph(
   return xnn_status_success;
 }
 
-enum xnn_node_type xnn_binary_operator_to_node_type(enum xnn_binary_operator op)
+enum xnn_node_type xnn_binary_operator_to_node_type(enum xnn_binary_operator type)
 {
-  switch (op) {
+  switch (type) {
     case xnn_binary_add:
       return xnn_node_type_add2;
     case xnn_binary_divide:
@@ -1440,9 +1442,9 @@ enum xnn_node_type xnn_binary_operator_to_node_type(enum xnn_binary_operator op)
   }
 }
 
-enum xnn_binary_operator xnn_node_type_to_binary_operator(enum xnn_node_type op)
+enum xnn_binary_operator xnn_node_type_to_binary_operator(enum xnn_node_type type)
 {
-  switch (op) {
+  switch (type) {
     case xnn_node_type_add2:
       return xnn_binary_add;
     case xnn_node_type_divide:
@@ -1461,5 +1463,29 @@ enum xnn_binary_operator xnn_node_type_to_binary_operator(enum xnn_node_type op)
       return xnn_binary_maximum;
     default:
       return xnn_binary_invalid;
+  }
+}
+
+enum xnn_node_type xnn_reduce_operator_to_node_type(enum xnn_reduce_operator type)
+{
+  switch (type) {
+    case xnn_reduce_mean:
+      return xnn_node_type_static_mean;
+    case xnn_reduce_sum:
+      return xnn_node_type_static_sum;
+    default:
+      return xnn_node_type_invalid;
+  }
+}
+
+enum xnn_reduce_operator xnn_node_type_to_reduce_operator(enum xnn_node_type type)
+{
+  switch (type) {
+    case xnn_node_type_static_mean:
+      return xnn_reduce_mean;
+    case xnn_node_type_static_sum:
+      return xnn_reduce_sum;
+    default:
+      return xnn_reduce_invalid;
   }
 }

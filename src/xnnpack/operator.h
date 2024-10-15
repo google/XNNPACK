@@ -129,7 +129,7 @@ enum xnn_run_state {
   xnn_run_state_needs_setup,
 };
 
-struct f16_f32acc_mean_params {
+struct f16_f32acc_reduce_params {
   struct xnn_f16_f32acc_scale_params f16_f32acc_scale;
 };
 
@@ -233,7 +233,7 @@ struct xnn_operator {
     struct xnn_f32_hswish_params f32_hswish;
     union xnn_f16_minmax_params f16_minmax;
     struct xnn_f16_scaleminmax_params f16_scaleminmax;
-    struct f16_f32acc_mean_params mean_params;
+    struct f16_f32acc_reduce_params reduce_params;
     // Pixelwise Average Pooling normally use f32_minmax_params, but also initialize
     // f32_scaleminmax_params in case it needs to switch to Global Average Pooling operation.
     struct {
@@ -262,8 +262,8 @@ struct xnn_operator {
       union xnn_qs8_avgpool_minmax_params qs8_avgpool;
       union xnn_qs8_avgpool_minmax_params qs8_gavgpool;
     };
-    struct xnn_qs8_mean_minmax_params qs8_mean;
-    struct xnn_qu8_mean_minmax_params qu8_mean;
+    struct xnn_qs8_reduce_minmax_params qs8_reduce;
+    struct xnn_qu8_reduce_minmax_params qu8_reduce;
     union xnn_qu8_conv_minmax_params qu8_conv_minmax;
     // Average Pooling normally use qu8_avgpool_params, but also initialize qu8_gavgpool_params in case it needs to switch
     // to Global Average Pooling operation.
@@ -429,3 +429,5 @@ XNN_INTERNAL enum xnn_status xnn_run_operator_with_index(
 
 XNN_INTERNAL enum xnn_operator_type xnn_binary_operator_to_operator_type(
   enum xnn_binary_operator op);
+
+XNN_INTERNAL enum xnn_operator_type xnn_reduce_operator_to_operator_type(enum xnn_reduce_operator op);
