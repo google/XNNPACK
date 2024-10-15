@@ -69,4 +69,10 @@ tools/xngen src/qs8-rsum/wasmsimd.c.in -D CHANNEL_TILE=16 -D ACCUMULATORS=2 -D D
 tools/xngen src/qs8-rsum/wasmsimd.c.in -D CHANNEL_TILE=32 -D ACCUMULATORS=2 -D DATATYPE=QS8 -o src/qs8-rsum/gen/qs8-rsum-wasmsimd-u32-acc2.c &
 tools/xngen src/qs8-rsum/wasmsimd.c.in -D CHANNEL_TILE=32 -D ACCUMULATORS=4 -D DATATYPE=QS8 -o src/qs8-rsum/gen/qs8-rsum-wasmsimd-u32-acc4.c &
 
+################################### Wasm Relaxed SIMD #########################
+tools/xngen src/qs8-rsum/wasmrelaxedsimd.c.in -D CHANNEL_TILE=16 -D ACCUMULATORS=1 -D DATATYPE=QS8 -o src/qs8-rsum/gen/qs8-rsum-wasmrelaxedsimd-u16.c &
+tools/xngen src/qs8-rsum/wasmrelaxedsimd.c.in -D CHANNEL_TILE=32 -D ACCUMULATORS=2 -D DATATYPE=QS8 -o src/qs8-rsum/gen/qs8-rsum-wasmrelaxedsimd-u32-acc2.c &
+tools/xngen src/qs8-rsum/wasmrelaxedsimd.c.in -D CHANNEL_TILE=64 -D ACCUMULATORS=2 -D DATATYPE=QS8 -o src/qs8-rsum/gen/qs8-rsum-wasmrelaxedsimd-u64-acc2.c &
+tools/xngen src/qs8-rsum/wasmrelaxedsimd.c.in -D CHANNEL_TILE=64 -D ACCUMULATORS=4 -D DATATYPE=QS8 -o src/qs8-rsum/gen/qs8-rsum-wasmrelaxedsimd-u64-acc4.c &
+
 wait
