@@ -12,15 +12,15 @@
 #include <numeric>
 #include <vector>
 
-#include "bench/rw-benchmark.h"
-#include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
+#include "bench/rw-benchmark.h"
+#include "bench/utils.h"
 #include "xnnpack.h"
 #include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
 #include "xnnpack/microfnptr.h"
+#include "xnnpack/reduce.h"
 
 namespace {
 
@@ -64,7 +64,6 @@ void f32_rwsum(
     state.counters["cpufreq"] = cpu_frequency;
   }
 }
-
 
 void f32_rwdsum(
     benchmark::State& state,
@@ -118,8 +117,6 @@ static void BenchmarkRWSUM(benchmark::internal::Benchmark* b)
   b->Args({1024, 64});
   b->Args({32768, 1});
   b->Args({10240, 1024});
-  /*b->Args({32768, 32768});
-  b->Args({65536, 65536});*/
 }
 
 static void BenchmarkRWDSUM(benchmark::internal::Benchmark* b)
@@ -128,8 +125,6 @@ static void BenchmarkRWDSUM(benchmark::internal::Benchmark* b)
   b->Args({8, 1024});
   b->Args({16, 1024});
   b->Args({10240, 1024});
-  //b->Args({32768, 32768});
-  //b->Args({65536, 65536});
 }
 
 }  // namespace

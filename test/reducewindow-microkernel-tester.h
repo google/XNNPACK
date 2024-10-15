@@ -18,10 +18,11 @@
 
 #include <gtest/gtest.h>
 #include <fp16/fp16.h>
+
+#include "replicable_random_device.h"
 #include "xnnpack.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
-#include "replicable_random_device.h"
 
 class ReduceWindowMicrokernelTester {
  public:
@@ -118,33 +119,33 @@ class ReduceWindowMicrokernelTester {
     std::uniform_real_distribution<float> f32dist;
 
     std::vector<float> input(batch_size() + XNN_EXTRA_BYTES / sizeof(float));
+
+    int64_t padding[2] = {padding_high(), padding_low()};
+    int64_t size = batch_size();
+    int64_t padded_size = size + (size - 1) * (base_dilation() - 1) + padding[0] + padding[1];
+    int64_t output_size = (padded_size - (window_dimension() - 1) * window_dilation() - 1) / window_stride() + 1;
+
+    std::vector<float> output_ref(output_size);
+    std::vector<float> output(output_size);   
+    
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
-      int64_t padding[2] = {padding_high(), padding_low()};
-
       // Compute reference results.
-      int64_t size = batch_size();
-
-      int64_t padded_size = size + (size - 1) * (base_dilation() - 1) + padding[0] + padding[1];
-      int64_t output_size = (padded_size - (window_dimension() - 1) * window_dilation() - 1) / window_stride() + 1;
-
-      float output_ref[output_size];
-
       for (int64_t i = 0; i < output_size; i++) {
-              float sum = init_value();
-              for (int64_t k = 0; k < window_dimension(); k++) {
-                  int64_t window_row = i * window_stride() + k * window_dilation();
-                  if (window_row < padding[0] || 
-                      window_row >= padded_size - padding[1] || 
-                      (window_row - padding[0]) % base_dilation() != 0) {
-                      sum += init_value();
-                      continue;
-                  }
-                  window_row = (window_row - padding[0]) / base_dilation();
-                  sum += input[window_row]; 
-              }
-              output_ref[i] = sum;   
+        float sum = init_value();
+        for (int64_t k = 0; k < window_dimension(); k++) {
+          int64_t window_row = i * window_stride() + k * window_dilation();
+          if (window_row < padding[0] || 
+              window_row >= padded_size - padding[1] || 
+              (window_row - padding[0]) % base_dilation() != 0) {
+              sum += init_value();
+              continue;
+          }
+          window_row = (window_row - padding[0]) / base_dilation();
+          sum += input[window_row]; 
+        }
+        output_ref[i] = sum;   
       }
 
       // Prepare parameters.
@@ -154,9 +155,8 @@ class ReduceWindowMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      float output[output_size];
       reduce_window(batch_size() * sizeof(float), input.data(), init_value(), padding, base_dilation(),
-              window_dilation(), window_dimension(), window_stride(), output, init_params != nullptr ? &params : nullptr);
+              window_dilation(), window_dimension(), window_stride(), output.data(), init_params != nullptr ? &params : nullptr);
 
       // Verify results.
       switch (op_type) {

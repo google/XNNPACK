@@ -65,7 +65,7 @@ void xnn_f32_rwdsum_ukernel_1p1x__scalar_c1(
                         curr_sum += input[base_index];
                         counter++;
                         window_row += lcm_value;
-                        base_index+= scaled_lcm;
+                        base_index += scaled_lcm;
                     }
                     break;
                 }

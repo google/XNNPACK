@@ -2,22 +2,18 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
-//
-// Auto-generated file. Do not edit!
-//   Specification: test/f32-rsum.yaml
-//   Generator: tools/generate-rdsum-benchmark.py
 
-#include "bench/rw-benchmark.h"
-#include "bench/rsum-benchmark.h"
-#include "bench/utils.h"
 #include <benchmark/benchmark.h>
 
+#include "bench/rsum-benchmark.h"
+#include "bench/rw-benchmark.h"
+#include "bench/utils.h"
 #include "xnnpack.h"
 #include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
+#include "xnnpack/reduce.h"
 
 //Scalar rdsum
 BENCHMARK_CAPTURE(f32_rdsum, scalar_c4,
