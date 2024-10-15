@@ -60,6 +60,17 @@ void copy_bias(const Src* b, size_t b_offset, size_t n, Dst* packed_b, Src zero_
   }
 }
 
+template <typename Src, typename Dst>
+int32_t copy_n_and_sum(const Src* src, size_t n, Dst* dst) {
+  int32_t sum = 0;
+  for (size_t i = 0; i < n; ++i) {
+    const auto v = *src++;
+    sum += (int32_t) v;
+    *dst++ = v;
+  }
+  return sum;
+}
+
 extern "C" {
 
 void xnn_pack_f32_gemm_goi_w(
@@ -90,11 +101,10 @@ void xnn_pack_f32_gemm_goi_w(
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-            if (kc_idx < kc) {
-              packed_weights[kr_block_offset] = k[(nr_block_start + nr_block_offset) * kc + kc_idx];
-            }
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+          const size_t kc_end = std::min(kc, kc_begin + kr);
+          if (kc_begin < kc_end) {
+            std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, packed_weights);
           }
           packed_weights += kr;
         }
@@ -137,11 +147,10 @@ void xnn_pack_f16_gemm_goi_w(
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-            if (kc_idx < kc) {
-              packed_weights[kr_block_offset] = k[(nr_block_start + nr_block_offset) * kc + kc_idx];
-            }
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+          const size_t kc_end = std::min(kc, kc_begin + kr);
+          if (kc_begin < kc_end) {
+            std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, packed_weights);
           }
           packed_weights += kr;
         }
@@ -184,11 +193,10 @@ void xnn_pack_f32_to_f16_gemm_goi_w(
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-            if (kc_idx < kc) {
-              packed_weights[kr_block_offset] = xnn_float16_from_float(k[(nr_block_start + nr_block_offset) * kc + kc_idx]);
-            }
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+          const size_t kc_end = std::min(kc, kc_begin + kr);
+          if (kc_begin < kc_end) {
+            std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, packed_weights);
           }
           packed_weights += kr;
         }
@@ -234,16 +242,12 @@ void xnn_pack_qu8_gemm_goi_w(
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          int32_t ksum = 0;
-          for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-            if (kc_idx < kc) {
-              const uint8_t kv = k[(nr_block_start + nr_block_offset) * kc + kc_idx];
-              ksum += (int32_t) kv;
-              ((uint8_t*) packed_weights)[kr_block_offset] = kv;
-            }
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+          const size_t kc_end = std::min(kc, kc_begin + kr);
+          if (kc_begin < kc_end) {
+            int32_t ksum = copy_n_and_sum(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, (uint8_t*) packed_weights);
+            packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
           }
-          packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
           packed_weights = (uint8_t*) packed_weights + kr;
         }
         packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;
@@ -287,16 +291,12 @@ void xnn_pack_qs8_gemm_goi_w(
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          uint32_t ksum = 0;
-          for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-            if (kc_idx < kc) {
-              const int8_t kv = k[(nr_block_start + nr_block_offset) * kc + kc_idx];
-              ksum += (uint32_t) kv;
-              ((int8_t*) packed_weights)[kr_block_offset] = kv;
-            }
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+          const size_t kc_end = std::min(kc, kc_begin + kr);
+          if (kc_begin < kc_end) {
+            uint32_t ksum = copy_n_and_sum(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, (int8_t*) packed_weights);
+            packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
           }
-          packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
           packed_weights = (int8_t*) packed_weights + kr;
         }
         packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
@@ -340,16 +340,12 @@ void xnn_pack_qs8_to_qu8_gemm_goi_w(
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          uint32_t ksum = 0;
-          for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-            if (kc_idx < kc) {
-              const int8_t kv = k[(nr_block_start + nr_block_offset) * kc + kc_idx];
-              ksum += (uint32_t) kv;
-              ((int8_t*) packed_weights)[kr_block_offset] = kv;
-            }
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+          const size_t kc_end = std::min(kc, kc_begin + kr);
+          if (kc_begin < kc_end) {
+            uint32_t ksum = copy_n_and_sum(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, (int8_t*) packed_weights);
+            packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
           }
-          packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
           packed_weights = (int8_t*) packed_weights + kr;
         }
         packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
@@ -406,8 +402,9 @@ void xnn_pack_qs8_qc4w_gemm_goi_w(
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr * 2); kr_block_start += kr * 2) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           int32_t ksum = 0;
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_idx = kc_begin + kr_block_offset;
             const size_t k_offset = (nr_block_start + nr_block_offset) * kc + kc_idx;
             const size_t kh_offset = k_offset + kr;
             if (kernel_zero_point == 0) {
@@ -495,8 +492,9 @@ void xnn_pack_qs8_qc4uw_gemm_goi_w(
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr * 2); kr_block_start += kr * 2) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           int32_t ksum = 0;
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_idx = kc_begin + kr_block_offset;
             const size_t k_offset = (nr_block_start + nr_block_offset) * kc + kc_idx;
             const size_t kh_offset = k_offset + kr;
             if (kernel_zero_point == 0) {
@@ -594,8 +592,9 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr * 2); kr_block_start += kr * 2) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           int32_t ksum = 0;
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_idx = kc_begin + kr_block_offset;
             const size_t k_offset = (nr_block_start + nr_block_offset) * kc + kc_idx;
             const size_t kh_offset = k_offset + kr;
             uint8_t kv_lo = 8;
@@ -684,8 +683,9 @@ void xnn_pack_qs8_qb4w_gemm_gio_w(
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr * 2); kr_block_start += kr * 2) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           int32_t ksum = 0;
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_idx = kc_begin + kr_block_offset;
             const size_t k_offset = (nr_block_start + nr_block_offset + kc_idx * k_stride);
             const size_t kh_offset = k_offset + (kr * k_stride);
             uint8_t kv_lo = 8;
@@ -761,8 +761,9 @@ void xnn_pack_qs8_qc4w_gemm_gio_w(
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr * 2); kr_block_start += kr * 2) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           int32_t ksum = 0;
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_idx = kc_begin + kr_block_offset;
             const size_t k_offset = kc_idx * k_stride + (nr_block_start + nr_block_offset);
             const size_t kh_offset = (kc_idx + kr) * k_stride + (nr_block_start + nr_block_offset);
             if (kernel_zero_point == 0) {
@@ -851,8 +852,9 @@ void xnn_pack_qs8_qc4uw_gemm_gio_w(
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr * 2); kr_block_start += kr * 2) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           int32_t ksum = 0;
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_idx = kc_begin + kr_block_offset;
             const size_t k_offset = kc_idx * k_stride + (nr_block_start + nr_block_offset);
             const size_t kh_offset = (kc_idx + kr) * k_stride + (nr_block_start + nr_block_offset);
             if (kernel_zero_point == 0) {
@@ -928,12 +930,10 @@ void xnn_pack_f32_qs8w_gemm_goi_w(
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-            if (kc_idx < kc) {
-              const int8_t kv = k[(nr_block_start + nr_block_offset) * kc + kc_idx];
-              ((int8_t*) packed_weights)[kr_block_offset] = kv;
-            }
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+          const size_t kc_end = std::min(kc, kc_begin + kr);
+          if (kc_begin < kc_end) {
+            std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, (int8_t*) packed_weights);
           }
           packed_weights = (int8_t*) packed_weights + kr;
         }
@@ -981,12 +981,10 @@ void xnn_pack_f32_qc4w_gemm_goi_w(
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-          for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-            if (kc_idx < kc) {
-              const uint8_t kv = ((const uint8_t*) k)[(nr_block_start + nr_block_offset) * kc + kc_idx];
-              ((uint8_t*) packed_weights)[kr_block_offset] = kv;
-            }
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+          const size_t kc_end = std::min(kc, kc_begin + kr);
+          if (kc_begin < kc_end) {
+            std::copy_n(&((const uint8_t*) k)[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, (uint8_t*) packed_weights);
           }
           packed_weights = (uint8_t*) packed_weights + kr;
         }
@@ -1030,8 +1028,9 @@ void xnn_pack_f32_gemm_gio_w(
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_idx = kc_begin + kr_block_offset;
             if (kc_idx < kc) {
               packed_weights[kr_block_offset] = k[kc_idx * k_stride + nr_block_start + nr_block_offset];
             }
@@ -1078,8 +1077,9 @@ void xnn_pack_f16_gemm_gio_w(
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_idx = kc_begin + kr_block_offset;
             if (kc_idx < kc) {
               packed_weights[kr_block_offset] = k[kc_idx * k_stride + nr_block_start + nr_block_offset];
             }
@@ -1126,8 +1126,9 @@ void xnn_pack_f32_to_f16_gemm_gio_w(
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_idx = kc_begin + kr_block_offset;
             if (kc_idx < kc) {
               packed_weights[kr_block_offset] = xnn_float16_from_float(k[kc_idx * k_stride + nr_block_start + nr_block_offset]);
             }
@@ -1178,8 +1179,9 @@ void xnn_pack_qu8_gemm_gio_w(
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           int32_t ksum = 0;
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_idx = kc_begin + kr_block_offset;
             if (kc_idx < kc) {
               const uint8_t kv = k[kc_idx * k_stride + (nr_block_start + nr_block_offset)];
               ksum += (int32_t) kv;
@@ -1232,8 +1234,9 @@ void xnn_pack_qs8_to_qu8_gemm_gio_w(
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           uint32_t ksum = 0;
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_idx = kc_begin + kr_block_offset;
             if (kc_idx < kc) {
               const int8_t kv = k[kc_idx * k_stride + (nr_block_start + nr_block_offset)];
               ksum += (uint32_t) kv;
@@ -1286,8 +1289,9 @@ void xnn_pack_qs8_gemm_gio_w(
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           uint32_t ksum = 0;
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_idx = kc_begin + kr_block_offset;
             if (kc_idx < kc) {
               const int8_t kv = k[kc_idx * k_stride + (nr_block_start + nr_block_offset)];
               ksum += (uint32_t) kv;
@@ -1641,8 +1645,9 @@ void xnn_pack_f32_qs8w_gemm_gio_w(
 
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
+          const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_idx = kc_begin + kr_block_offset;
             if (kc_idx < kc) {
               const int8_t kv = k[kc_idx * k_stride + (nr_block_start + nr_block_offset)];
               ((int8_t*) packed_weights)[kr_block_offset] = kv;
@@ -1693,11 +1698,10 @@ void xnn_pack_f32_conv_goki_w(
       for (size_t ki = 0; ki < ks; ki++) {
         for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
           for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-            for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-              const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-              if (kc_idx < kc) {
-                packed_weights[kr_block_offset] = k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_idx];
-              }
+            const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_end = std::min(kc, kc_begin + kr);
+            if (kc_begin < kc_end) {
+              std::copy_n(&k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_begin], kc_end - kc_begin, packed_weights);
             }
             packed_weights += kr;
           }
@@ -1745,11 +1749,10 @@ void xnn_pack_f16_conv_goki_w(
       for (size_t ki = 0; ki < ks; ki++) {
         for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
           for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-            for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-              const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-              if (kc_idx < kc) {
-                packed_weights[kr_block_offset] = k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_idx];
-              }
+            const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_end = std::min(kc, kc_begin + kr);
+            if (kc_begin < kc_end) {
+              std::copy_n(&k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_begin], kc_end - kc_begin, packed_weights);
             }
             packed_weights += kr;
           }
@@ -1797,11 +1800,10 @@ void xnn_pack_f32_to_f16_conv_goki_w(
       for (size_t ki = 0; ki < ks; ki++) {
         for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
           for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-            for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-              const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-              if (kc_idx < kc) {
-                packed_weights[kr_block_offset] = xnn_float16_from_float(k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_idx]);
-              }
+            const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_end = std::min(kc, kc_begin + kr);
+            if (kc_begin < kc_end) {
+              std::copy_n(&k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_begin], kc_end - kc_begin, packed_weights);
             }
             packed_weights += kr;
           }
@@ -1850,16 +1852,12 @@ void xnn_pack_qu8_conv_goki_w(
       for (size_t ki = 0; ki < ks; ki++) {
         for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
           for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-            int32_t ksum = 0;
-            for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-              const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-              if (kc_idx < kc) {
-                const uint8_t kv = k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_idx];
-                ksum += (int32_t) kv;
-                ((uint8_t*) packed_weights)[kr_block_offset] = kv;
-              }
+            const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_end = std::min(kc, kc_begin + kr);
+            if (kc_begin < kc_end) {
+              int32_t ksum = copy_n_and_sum(&k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_begin], kc_end - kc_begin, (uint8_t*) packed_weights);
+              packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
             }
-            packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
             packed_weights = (uint8_t*) packed_weights + kr;
           }
           packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;
@@ -1906,16 +1904,12 @@ void xnn_pack_qs8_to_qu8_conv_goki_w(
       for (size_t ki = 0; ki < ks; ki++) {
         for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
           for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-            uint32_t ksum = 0;
-            for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-              const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-              if (kc_idx < kc) {
-                const int8_t kv = k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_idx];
-                ksum += (uint32_t) kv;
-                ((int8_t*) packed_weights)[kr_block_offset] = kv;
-              }
+            const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_end = std::min(kc, kc_begin + kr);
+            if (kc_begin < kc_end) {
+              uint32_t ksum = copy_n_and_sum(&k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_begin], kc_end - kc_begin, (int8_t*) packed_weights);
+              packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
             }
-            packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
             packed_weights = (int8_t*) packed_weights + kr;
           }
           packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
@@ -1962,16 +1956,12 @@ void xnn_pack_qs8_conv_goki_w(
       for (size_t ki = 0; ki < ks; ki++) {
         for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
           for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-            uint32_t ksum = 0;
-            for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-              const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-              if (kc_idx < kc) {
-                const int8_t kv = k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_idx];
-                ksum += (uint32_t) kv;
-                ((int8_t*) packed_weights)[kr_block_offset] = kv;
-              }
+            const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_end = std::min(kc, kc_begin + kr);
+            if (kc_begin < kc_end) {
+              uint32_t ksum = copy_n_and_sum(&k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_begin], kc_end - kc_begin, (int8_t*) packed_weights);
+              packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
             }
-            packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
             packed_weights = (int8_t*) packed_weights + kr;
           }
           packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
@@ -2289,11 +2279,10 @@ void xnn_pack_f32_deconv_goki_w(
             for (size_t kx = ox; kx < kw; kx += sw) {
               for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
                 for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-                  for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-                    const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-                    if (kc_idx < kc) {
-                      packed_weights[kr_block_offset] = k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_idx];
-                    }
+                  const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+                  const size_t kc_end = std::min(kc, kc_begin + kr);
+                  if (kc_begin < kc_end) {
+                    std::copy_n(&k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_begin], kc_end - kc_begin, packed_weights);
                   }
                   packed_weights += kr;
                 }
@@ -2353,11 +2342,10 @@ void xnn_pack_f16_deconv_goki_w(
             for (size_t kx = ox; kx < kw; kx += sw) {
               for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
                 for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-                  for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-                    const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-                    if (kc_idx < kc) {
-                      packed_weights[kr_block_offset] = k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_idx];
-                    }
+                  const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+                  const size_t kc_end = std::min(kc, kc_begin + kr);
+                  if (kc_begin < kc_end) {
+                    std::copy_n(&k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_begin], kc_end - kc_begin, packed_weights);
                   }
                   packed_weights += kr;
                 }
@@ -2417,11 +2405,10 @@ void xnn_pack_f32_to_f16_deconv_goki_w(
             for (size_t kx = ox; kx < kw; kx += sw) {
               for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
                 for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-                  for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-                    const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-                    if (kc_idx < kc) {
-                      packed_weights[kr_block_offset] = xnn_float16_from_float(k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_idx]);
-                    }
+                  const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+                  const size_t kc_end = std::min(kc, kc_begin + kr);
+                  if (kc_begin < kc_end) {
+                    std::copy_n(&k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_begin], kc_end - kc_begin, packed_weights);
                   }
                   packed_weights += kr;
                 }
@@ -2482,16 +2469,12 @@ void pack_qs8_deconv_goki_w(
             for (size_t kx = ox; kx < kw; kx += sw) {
               for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
                 for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-                  uint32_t ksum = 0;
-                  for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-                    const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-                    if (kc_idx < kc) {
-                      const int8_t kv = k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_idx];
-                      ksum += (uint32_t) kv;
-                      ((int8_t*) packed_weights)[kr_block_offset] = kv;
-                    }
+                  const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+                  const size_t kc_end = std::min(kc, kc_begin + kr);
+                  if (kc_begin < kc_end) {
+                    uint32_t ksum = copy_n_and_sum(&k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_begin], kc_end - kc_begin, (int8_t*) packed_weights);
+                    packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
                   }
-                  packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
                   packed_weights = (int8_t*) packed_weights + kr;
                 }
                 packed_weights = (int8_t*) packed_weights + (nr - nr_block_size) * kr;
@@ -2598,16 +2581,12 @@ void xnn_pack_qu8_deconv_goki_w(
             for (size_t kx = ox; kx < kw; kx += sw) {
               for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
                 for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
-                  int32_t ksum = 0;
-                  for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-                    const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-                    if (kc_idx < kc) {
-                      const uint8_t kv = k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_idx];
-                      ksum += (int32_t) kv;
-                      ((uint8_t*) packed_weights)[kr_block_offset] = kv;
-                    }
+                  const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+                  const size_t kc_end = std::min(kc, kc_begin + kr);
+                  if (kc_begin < kc_end) {
+                    int32_t ksum = copy_n_and_sum(&k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_begin], kc_end - kc_begin, (uint8_t*) packed_weights);
+                    packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
                   }
-                  packed_b[nr_block_offset] = packed_b[nr_block_offset] - ksum * izp;
                   packed_weights = (uint8_t*) packed_weights + kr;
                 }
                 packed_weights = (uint8_t*) packed_weights + (nr - nr_block_size) * kr;
@@ -4521,9 +4500,10 @@ void xnn_pack_f32_gemminc_goi_w(
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-            if (kc_idx < kc) {
-              packed_weights[kr_block_offset] = k[(nr_block_start + nr_block_offset) * kc + kc_idx];
+            const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_end = std::min(kc, kc_begin + kr);
+            if (kc_begin < kc_end) {
+              std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, packed_weights);
             }
           }
           packed_weights += kr;
@@ -4559,9 +4539,10 @@ void xnn_pack_f16_gemminc_goi_w(
       for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr); kr_block_start += kr) {
         for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size; nr_block_offset++) {
           for (size_t kr_block_offset = 0; kr_block_offset < kr; kr_block_offset++) {
-            const size_t kc_idx = round_down_po2(kr_block_start, skr) + ((kr_block_start + kr_block_offset + nr_block_offset * kr) & (skr - 1));
-            if (kc_idx < kc) {
-              packed_weights[kr_block_offset] = k[(nr_block_start + nr_block_offset) * kc + kc_idx];
+            const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+            const size_t kc_end = std::min(kc, kc_begin + kr);
+            if (kc_begin < kc_end) {
+              std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, packed_weights);
             }
           }
           packed_weights += kr;
