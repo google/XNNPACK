@@ -35,8 +35,10 @@ OP_TYPES = {
 
 BINOP_TEST_TEMPLATE = """
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, void, init_params) 
-XNN_TEST_RW_BATCH_EQ(ukernel, ${", ".join(TEST_ARGS)});
-XNN_TEST_RW_BATCH_GT(ukernel, ${", ".join(TEST_ARGS)});
+XNN_TEST_RW_BATCH_EQ(ukernel, batch_tile,  ${", ".join(TEST_ARGS)});
+XNN_TEST_RW_BATCH_GT(ukernel, batch_tile, ${", ".join(TEST_ARGS)});
+XNN_TEST_RW_BATCH_LT(ukernel, batch_tile, ${", ".join(TEST_ARGS)});
+XNN_TEST_RW_BATCH_DIV(ukernel, batch_tile, ${", ".join(TEST_ARGS)});
 """
 
 def main(args):

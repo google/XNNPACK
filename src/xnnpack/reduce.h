@@ -355,6 +355,10 @@ DECLARE_F32_RSUM_UKERNEL_FUNCTION(xnn_f32_rsum_ukernel__wasmsimd_u16_acc4)
       const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F32_RW_UKERNEL_FUNCTION(xnn_f32_rwsum_ukernel__scalar_u1)
+DECLARE_F32_RW_UKERNEL_FUNCTION(xnn_f32_rwsum_ukernel__scalar_u2_acc2)
+DECLARE_F32_RW_UKERNEL_FUNCTION(xnn_f32_rwsum_ukernel__scalar_u3_acc3)
+DECLARE_F32_RW_UKERNEL_FUNCTION(xnn_f32_rwsum_ukernel__scalar_u4_acc4)
+
 
 #define DECLARE_F32_RWD_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                         \

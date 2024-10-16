@@ -66,6 +66,21 @@ BENCHMARK_CAPTURE(f32_rwsum, scalar_u1,
   ->Apply(BenchmarkRWSUM)
   ->UseRealTime();
 
+BENCHMARK_CAPTURE(f32_rwsum, scalar_u2_acc2,
+                  xnn_f32_rwsum_ukernel__scalar_u2_acc2)
+  ->Apply(BenchmarkRWSUM)
+  ->UseRealTime();
+
+BENCHMARK_CAPTURE(f32_rwsum, scalar_u3_acc3,
+                  xnn_f32_rwsum_ukernel__scalar_u3_acc3)
+  ->Apply(BenchmarkRWSUM)
+  ->UseRealTime();
+
+BENCHMARK_CAPTURE(f32_rwsum, scalar_u4_acc4,
+                  xnn_f32_rwsum_ukernel__scalar_u4_acc4)
+  ->Apply(BenchmarkRWSUM)
+  ->UseRealTime();
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif

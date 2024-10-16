@@ -11,8 +11,10 @@
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/reduce.h"
 #include "reducewindow-microkernel-tester.h"
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, void, init_params) \
-XNN_TEST_RW_BATCH_EQ(ukernel, ukernel, ReduceWindowMicrokernelTester::OpType::Sum, init_params);           \
-XNN_TEST_RW_BATCH_GT(ukernel, ukernel, ReduceWindowMicrokernelTester::OpType::Sum, init_params);
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, void, init_params)   \
+XNN_TEST_RW_BATCH_EQ(ukernel, batch_tile,  ukernel, ReduceWindowMicrokernelTester::OpType::Sum, init_params);\
+XNN_TEST_RW_BATCH_GT(ukernel, batch_tile, ukernel, ReduceWindowMicrokernelTester::OpType::Sum, init_params); \
+XNN_TEST_RW_BATCH_LT(ukernel, batch_tile, ukernel, ReduceWindowMicrokernelTester::OpType::Sum, init_params); \
+XNN_TEST_RW_BATCH_DIV(ukernel, batch_tile, ukernel, ReduceWindowMicrokernelTester::OpType::Sum, init_params);
 #include "src/f32-rwsum/f32-rwsum.h"
 #undef XNN_UKERNEL_WITH_PARAMS

@@ -9,7 +9,7 @@
 #include "xnnpack/math.h"
 #include "xnnpack/reduce.h"
 
-void xnn_f32_rwsum_ukernel__scalar_u1(
+void xnn_f32_rwsum_ukernel__scalar_u2_acc2(
     const size_t batch,
     const float* input,
     const float init_value,
@@ -33,11 +33,12 @@ void xnn_f32_rwsum_ukernel__scalar_u1(
                     0 : (padded_size - (window_dimensions - 1) * window_dilations - 1) / window_strides + 1;
     
 
-  const int64_t lcm_value = math_lcm_s64(window_dilations, base_dilation);
-  const int64_t scaled_lcm = lcm_value / base_dilation;
+  const int64_t lcm_value = math_lcm_s64(window_dilations, base_dilation) / base_dilation;
+  const int64_t scaled_lcm_u2 = 2* lcm_value;
 
   for (int64_t i = 0; i < output_size; i++) {
         float sum = init_value * (window_dimensions + 1);
+        float sum2 = 0;
         const int64_t window_start = i * window_strides;
         const int64_t pad_high_boundary = math_divide_round_up_s64((padding[0] - window_start) , window_dilations);
         const int64_t pad_low_boundary = math_divide_round_up_s64((padded_size - padding[1] - window_start), window_dilations);
@@ -54,12 +55,23 @@ void xnn_f32_rwsum_ukernel__scalar_u1(
 
         for (; curr_win_idx < adjusted_pad_low_boundary; curr_win_idx++) {
             int64_t window_row = offset + curr_win_idx * window_dilations;
+
             if (window_row % base_dilation == 0) {
                 window_row /= base_dilation;
-                while(window_row < win_boundary) { 
+                int64_t window_row2 = window_row + lcm_value;
+                while(window_row2 < win_boundary) { 
                     sum += input[window_row];
+                    sum2 += input[window_row2];
                     counter++;
-                    window_row += scaled_lcm;
+                    window_row += scaled_lcm_u2;
+                    window_row2+= scaled_lcm_u2;
+                }
+                counter*= 2;
+                sum += sum2;
+                
+                if(window_row < win_boundary){
+                  sum +=  input[window_row]; 
+                  counter += 1;
                 }
                 break;
             }
