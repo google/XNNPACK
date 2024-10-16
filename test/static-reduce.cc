@@ -467,6 +467,8 @@ TEST_P(ReduceTest, reshape) {
   const Param p = GetParam();
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
+  GenerateRandomInput(p.datatype);
+
   // Call subgraph API.
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
