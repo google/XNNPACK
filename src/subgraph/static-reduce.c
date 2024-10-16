@@ -326,15 +326,6 @@ enum xnn_status xnn_define_static_reduce(
     return xnn_status_invalid_parameter;
   }
 
-  for (size_t i = 0; i < num_reduction_axes; i++) {
-    if (reduction_axes[i] > input_value->shape.num_dims) {
-      xnn_log_error(
-        "failed to define %s operator with #%zu reduction axis of %zu: the index is out of bounds for a %zuD input shape",
-        xnn_node_type_to_string(node_type), i, reduction_axes[i], input_value->shape.num_dims);
-      return xnn_status_invalid_parameter;
-    }
-  }
-
   for (size_t i = 1; i < num_reduction_axes; i++) {
     if (reduction_axes[i] <= reduction_axes[i - 1]) {
       xnn_log_error(
