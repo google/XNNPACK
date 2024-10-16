@@ -23,6 +23,7 @@ out/
 *.pyc
 *.pyo
 *.log
+MODULE.bazel.lock
 
 # System files
 .DS_Store
