@@ -16,12 +16,25 @@
 
 #include "xnnpack/packw.h"
 #include "xnnpack/unaligned.h"
-#include "xnnpack/prefetch.h"
 
 #
+// AVX ksum of int4 values
+// s4 is int8 containing 2 int4 values
+static XNN_INTRINSIC
+__m256i _mm256_dpbusd_epi32_qs4(__m256i acc, const __m256i vone, const __m256i s4) {
+  const __m256i vmask = _mm256_set1_epi8(0xF0);
+  const __m256i vone16 = _mm256_set1_epi16(1);
+
+  const __m256i hi4 = _mm256_and_si256(s4, vmask);  // isolate upper int4
+  const __m256i lo4 = _mm256_srli_epi32(s4, 4);     // isolate lower int4
+  const __m256i li4 = _mm256_and_si256(lo4, vmask);
+
+  acc = _mm256_dpbusd_avx_epi32(acc, vone, hi4);
+  acc = _mm256_dpbusd_avx_epi32(acc, vone, li4);
+}
 #
 #
-void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avx256vnni_prfm(
+void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
   size_t g,
   size_t nc,
   size_t kc,
@@ -47,7 +60,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avx256vnni_prfm(
   const __m256i vone = _mm256_set1_epi8(1);
   int8_t* out = (int8_t*) packed_weights;
   const uint32_t* b = (const uint32_t*) bias;
-  const uint32_t izp = (uint32_t) (params ? (((const struct xnn_qs8_packw_params*) params)->input_zero_point + 128): 128);
+  const uint32_t izp = (uint32_t) (params ? (((const struct xnn_qs8_packw_params*) params)->input_zero_point + 0): 0);
   __m256i vzeropoint = _mm256_set1_epi32((int32_t) izp);
 
   do {
@@ -72,22 +85,6 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avx256vnni_prfm(
       const int8_t* w5 = w4 + kc;
       const int8_t* w6 = w5 + kc;
       const int8_t* w7 = w6 + kc;
-      xnn_prefetch_to_l1((const int8_t*) w0);
-      xnn_prefetch_to_l1((const int8_t*) w0 + 64);
-      xnn_prefetch_to_l1((const int8_t*) w1);
-      xnn_prefetch_to_l1((const int8_t*) w1 + 64);
-      xnn_prefetch_to_l1((const int8_t*) w2);
-      xnn_prefetch_to_l1((const int8_t*) w2 + 64);
-      xnn_prefetch_to_l1((const int8_t*) w3);
-      xnn_prefetch_to_l1((const int8_t*) w3 + 64);
-      xnn_prefetch_to_l1((const int8_t*) w4);
-      xnn_prefetch_to_l1((const int8_t*) w4 + 64);
-      xnn_prefetch_to_l1((const int8_t*) w5);
-      xnn_prefetch_to_l1((const int8_t*) w5 + 64);
-      xnn_prefetch_to_l1((const int8_t*) w6);
-      xnn_prefetch_to_l1((const int8_t*) w6 + 64);
-      xnn_prefetch_to_l1((const int8_t*) w7);
-      xnn_prefetch_to_l1((const int8_t*) w7 + 64);
 
       __m256i vacc0 = _mm256_setzero_si256();
       __m256i vacc4 = _mm256_setzero_si256();
@@ -103,17 +100,9 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avx256vnni_prfm(
         v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w5)), 0x0C);
         v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w6)), 0x30);
         v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w7)), 0xC0);
-        xnn_prefetch_to_l1((const int8_t*) w0 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w1 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w2 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w3 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w4 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w5 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w6 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w7 + 128);
 
-        vacc0 = _mm256_dpbusd_epi32(vacc0, vone, v0);
-        vacc4 = _mm256_dpbusd_epi32(vacc4, vone, v4);
+        vacc0 = _mm256_dpbusd_epi32_qs4(vacc0, vone, v0);
+        vacc4 = _mm256_dpbusd_epi32_qs4(vacc4, vone, v4);
 
         _mm256_storeu_si256((__m256i *)&out[0],  v0);
         _mm256_storeu_si256((__m256i *)&out[32],  v4);
@@ -235,8 +224,8 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avx256vnni_prfm(
           w7 += 1;
         }
 
-        vacc0 = _mm256_dpbusd_epi32(vacc0, vone, v0);
-        vacc4 = _mm256_dpbusd_epi32(vacc4, vone, v4);
+        vacc0 = _mm256_dpbusd_epi32_qs4(vacc0, vone, v0);
+        vacc4 = _mm256_dpbusd_epi32_qs4(vacc4, vone, v4);
 
         _mm256_storeu_si256((__m256i *)&out[0],  v0);
         _mm256_storeu_si256((__m256i *)&out[32],  v4);
@@ -302,22 +291,6 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avx256vnni_prfm(
       if XNN_UNPREDICTABLE(n < 8) {
         w7 = w6;
       }
-      xnn_prefetch_to_l1((const int8_t*) w0);
-      xnn_prefetch_to_l1((const int8_t*) w0 + 64);
-      xnn_prefetch_to_l1((const int8_t*) w1);
-      xnn_prefetch_to_l1((const int8_t*) w1 + 64);
-      xnn_prefetch_to_l1((const int8_t*) w2);
-      xnn_prefetch_to_l1((const int8_t*) w2 + 64);
-      xnn_prefetch_to_l1((const int8_t*) w3);
-      xnn_prefetch_to_l1((const int8_t*) w3 + 64);
-      xnn_prefetch_to_l1((const int8_t*) w4);
-      xnn_prefetch_to_l1((const int8_t*) w4 + 64);
-      xnn_prefetch_to_l1((const int8_t*) w5);
-      xnn_prefetch_to_l1((const int8_t*) w5 + 64);
-      xnn_prefetch_to_l1((const int8_t*) w6);
-      xnn_prefetch_to_l1((const int8_t*) w6 + 64);
-      xnn_prefetch_to_l1((const int8_t*) w7);
-      xnn_prefetch_to_l1((const int8_t*) w7 + 64);
 
       __m256i vacc0 = _mm256_setzero_si256();
       __m256i vacc4 = _mm256_setzero_si256();
@@ -333,17 +306,9 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avx256vnni_prfm(
         v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w5)), 0x0C);
         v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w6)), 0x30);
         v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w7)), 0xC0);
-        xnn_prefetch_to_l1((const int8_t*) w0 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w1 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w2 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w3 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w4 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w5 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w6 + 128);
-        xnn_prefetch_to_l1((const int8_t*) w7 + 128);
 
-        vacc0 = _mm256_dpbusd_epi32(vacc0, vone, v0);
-        vacc4 = _mm256_dpbusd_epi32(vacc4, vone, v4);
+        vacc0 = _mm256_dpbusd_epi32_qs4(vacc0, vone, v0);
+        vacc4 = _mm256_dpbusd_epi32_qs4(vacc4, vone, v4);
 
         _mm256_storeu_si256((__m256i *)&out[0],  v0);
         _mm256_storeu_si256((__m256i *)&out[32],  v4);
@@ -465,8 +430,8 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avx256vnni_prfm(
           w7 += 1;
         }
 
-        vacc0 = _mm256_dpbusd_epi32(vacc0, vone, v0);
-        vacc4 = _mm256_dpbusd_epi32(vacc4, vone, v4);
+        vacc0 = _mm256_dpbusd_epi32_qs4(vacc0, vone, v0);
+        vacc4 = _mm256_dpbusd_epi32_qs4(vacc4, vone, v4);
 
         _mm256_storeu_si256((__m256i *)&out[0],  v0);
         _mm256_storeu_si256((__m256i *)&out[32],  v4);

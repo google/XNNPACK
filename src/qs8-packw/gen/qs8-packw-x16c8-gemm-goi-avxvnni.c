@@ -17,7 +17,9 @@
 #include "xnnpack/packw.h"
 #include "xnnpack/unaligned.h"
 
-
+#
+#
+#
 void xnn_qs8_packw_gemm_goi_ukernel_x16c8__avxvnni(
   size_t g,
   size_t nc,
