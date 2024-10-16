@@ -311,7 +311,7 @@ INSTANTIATE_TEST_SUITE_P(ReduceTest, ReduceTest,
                              Values(xnn_reduce_sum, xnn_reduce_mean), Bool())),
                          [](auto p) { return p.param.Name(); });
 
-TEST_P(ReduceTest, SubgraphDefineWorks) {
+TEST_P(ReduceTest, define) {
   const Param p = GetParam();
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -347,7 +347,7 @@ TEST_P(ReduceTest, SubgraphDefineWorks) {
   ASSERT_EQ(node->flags, p.keep_dims ? XNN_FLAG_KEEP_DIMS : 0);
 }
 
-TEST_P(ReduceTest, SubgraphAPIResultsMatchesOperatorAPI) {
+TEST_P(ReduceTest, matches_operator_api) {
   const Param p = GetParam();
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -463,7 +463,7 @@ TEST_P(ReduceTest, SubgraphAPIResultsMatchesOperatorAPI) {
   CompareOutputs(p.datatype);
 }
 
-TEST_P(ReduceTest, ReshapingWorks) {
+TEST_P(ReduceTest, reshape) {
   const Param p = GetParam();
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
