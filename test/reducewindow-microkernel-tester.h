@@ -179,3 +179,19 @@ class ReduceWindowMicrokernelTester {
   int64_t window_dilation_{1};
   int64_t window_stride_{1};
 };
+
+#define XNN_TEST_RW_BATCH_EQ(ukernel, ...)                        \
+  TEST(ukernel, batch_eq_1) {                                     \
+    ReduceWindowMicrokernelTester()                               \
+      .batch_size(1)                                              \
+      .Test(__VA_ARGS__);                                         \
+  }
+
+#define XNN_TEST_RW_BATCH_GT(ukernel, ...)                        \
+  TEST(ukernel, batch_gt_1) {                                     \
+    for (size_t batch_size = 2; batch_size < 10; batch_size++) {  \
+      ReduceWindowMicrokernelTester()                             \
+        .batch_size(batch_size)                                   \
+        .Test(__VA_ARGS__);                                       \
+    }                                                             \
+  }

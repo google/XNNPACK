@@ -201,3 +201,53 @@ class RWDMicrokernelTester {
   int64_t window_dilation_{1};
   int64_t window_stride_{1};
 };
+
+#define XNN_TEST_RWD_CHANNEL_EQ_ROW_EQ(ukernel, ...)               \
+  TEST(ukernel, channels_eq_1_2pass_fulltile) {                    \
+    RWDMicrokernelTester()                                         \
+      .rows(1)                                                     \
+      .channels(1)                                                 \
+      .Test(__VA_ARGS__);                                          \
+  }
+
+#define XNN_TEST_RWD_CHANNEL_EQ_ROW_GT(ukernel, ...)               \
+  TEST(ukernel, channels_eq_1_multipass_fulltile) {                \
+    for (size_t rows = 1; rows <= 5; rows += 1) {                  \
+      RWDMicrokernelTester()                                       \
+        .rows(rows)                                                \
+        .channels(1)                                               \
+        .Test(__VA_ARGS__);                                        \
+    }                                                              \
+  }
+
+#define XNN_TEST_RWD_CHANNEL_GT_ROW_EQ(ukernel, ...)               \
+  TEST(ukernel, channels_div_1_2pass_fulltile) {                   \
+    for (size_t channels = 2; channels < 8; channels += 1) {       \
+      RWDMicrokernelTester()                                       \
+        .rows(1)                                                   \
+        .channels(channels)                                        \
+        .Test(__VA_ARGS__);                                        \
+    }                                                              \
+  }
+
+#define XNN_TEST_RWD_CHANNEL_GT_ROW_GT(ukernel, ...)               \
+  TEST(ukernel, channels_div_1_multipass_fulltile) {               \
+    for (size_t channels = 2; channels <= 10; channels += 1) {     \
+      for (size_t rows = 1; rows <= 5; rows += 1) {                \
+        RWDMicrokernelTester()                                     \
+          .rows(rows)                                              \
+          .channels(channels)                                      \
+          .Test(__VA_ARGS__);                                      \
+      }                                                            \
+    }                                                              \
+  }
+
+#define XNN_TEST_RWD_CHANNEL_EQ_ROW_258(ukernel, ...)               \
+  TEST(ukernel, overflow_accumulator) {                             \
+    for (size_t channels = 1; channels < 2; ++channels) {           \
+      RWDMicrokernelTester()                                        \
+        .rows(258)                                                  \
+        .channels(channels)                                         \
+        .Test(__VA_ARGS__);                                         \
+    }                                                               \
+  }
