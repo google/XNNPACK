@@ -76,7 +76,7 @@ class FillMicrokernelTester {
     xnnpack::Buffer<uint8_t> output((rows() - 1) * output_stride() + channels());
     xnnpack::Buffer<uint8_t> output_copy(output.size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(output.begin(), output.end(), std::ref(u8rng));
+      xnnpack::fill_uniform_random_bits(output.data(), output.size(), rng);
       std::copy(output.cbegin(), output.cend(), output_copy.begin());
       std::array<uint8_t, 4> fill_pattern;
       std::generate(fill_pattern.begin(), fill_pattern.end(), std::ref(u8rng));

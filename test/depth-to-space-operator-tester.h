@@ -122,16 +122,13 @@ class DepthToSpaceOperatorTester {
 
   void TestNHWCxX8() const {
     xnnpack::ReplicableRandomDevice rng;
-    auto i8rng = std::bind(
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
-      std::ref(rng));
 
     xnnpack::Buffer<int8_t> input(
       (batch_size() * input_height() * input_width() - 1) * input_channels_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
     xnnpack::Buffer<int8_t> output(
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(i8rng));
+      xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
 
       // Create, setup, run, and destroy Depth To Space operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));

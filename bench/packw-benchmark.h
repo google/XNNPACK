@@ -34,9 +34,6 @@ static void x8_packw(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto i8rng = std::bind(
-    std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
-    std::ref(rng));
 
   // Computer num_buffers that fit cache with source weights + packed_weights.
   const size_t num_buffers = 1 +
@@ -45,7 +42,7 @@ static void x8_packw(benchmark::State& state,
 
   xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> weights(num_buffers * batch *
                                                     dim_n * dim_k);
-  std::generate(weights.begin(), weights.end(), std::ref(i8rng));
+  xnnpack::fill_uniform_random_bits(weights.data(), weights.size(), rng);
   xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
       num_buffers * batch *
       (rounded_n * rounded_k + rounded_n * sizeof(uint32_t)));
@@ -97,9 +94,6 @@ static void qs8_packw(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto i8rng = std::bind(
-    std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
-    std::ref(rng));
 
   // Computer num_buffers that fit cache with source weights + packed_weights.
   const size_t num_buffers = 1 +
@@ -108,7 +102,7 @@ static void qs8_packw(benchmark::State& state,
 
   xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> weights(num_buffers * batch *
                                                     dim_n * dim_k);
-  std::generate(weights.begin(), weights.end(), std::ref(i8rng));
+  xnnpack::fill_uniform_random_bits(weights.data(), weights.size(), rng);
   xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
       num_buffers * batch *
       (rounded_n * rounded_k + rounded_n * sizeof(uint32_t)));
@@ -160,7 +154,6 @@ static void x16_packw(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto u16rng = std::bind(std::uniform_int_distribution<uint16_t>(), std::ref(rng));
 
   // Computer num_buffers that fit cache with source weights + packed_weights.
   const size_t num_buffers = 1 +
@@ -169,7 +162,7 @@ static void x16_packw(benchmark::State& state,
 
   xnnpack::Buffer<uint16_t, XNN_ALLOCATION_ALIGNMENT> weights(num_buffers * batch *
                                                       dim_n * dim_k);
-  std::generate(weights.begin(), weights.end(), std::ref(u16rng));
+  xnnpack::fill_uniform_random_bits(weights.data(), weights.size(), rng);
   xnnpack::Buffer<uint16_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(
       num_buffers * batch * (rounded_n * rounded_k + rounded_n));
 

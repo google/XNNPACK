@@ -46,9 +46,6 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
-  auto u8rng = std::bind(
-    std::uniform_int_distribution<int32_t>(std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max()),
-    std::ref(rng));
 
   const size_t effective_kernel_height = (kernel_height - 1) * dilation + 1;
   const size_t effective_kernel_width = (kernel_width - 1) * dilation + 1;
@@ -60,9 +57,9 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
   const size_t output_width = std::max(stride_width * (input_width - 1) + adjustment + effective_kernel_width, padding_width) - padding_width;
 
   xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES + batch_size * input_height * input_width * input_channels);
-  std::generate(input.begin(), input.end(), std::ref(u8rng));
+  xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
   xnnpack::Buffer<uint8_t> kernel(output_channels * kernel_height * kernel_width * input_channels);
-  std::generate(kernel.begin(), kernel.end(), std::ref(u8rng));
+  xnnpack::fill_uniform_random_bits(kernel.data(), kernel.size(), rng);
   xnnpack::Buffer<int32_t> bias(output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(i32rng));
   const size_t output_elements = batch_size * output_height * output_width * output_channels;

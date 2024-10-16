@@ -111,6 +111,26 @@ class Buffer {
   }
 };
 
+// This is a faster way of generating random numbers, by generating as many
+// random values as possible for each call to rng(). Assumes that rng() returns
+// entirely random bits.
+template <typename T, typename Rng>
+void fill_uniform_random_bits(T* data, size_t size, Rng& rng) {
+  using RngT = decltype(rng());
+  RngT* data_rng_t = reinterpret_cast<RngT*>(data);
+  size_t size_bytes = size * sizeof(T);
+  size_t i = 0;
+  // Fill with as many RngT as we can.
+  for (; i + sizeof(RngT) <= size_bytes; i += sizeof(RngT)) {
+    *data_rng_t++ = rng();
+  }
+  // Fill the remaining bytes.
+  char* data_char = reinterpret_cast<char*>(data_rng_t);
+  for (; i < size_bytes; ++i) {
+    *data_char++ = rng() & 0xff;
+  }
+}
+
 };  // namespace xnnpack
 
 #endif  // __XNNPACK_TEST_BUFFER_H_

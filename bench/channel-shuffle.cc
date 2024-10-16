@@ -27,11 +27,10 @@ static void channel_shuffle_x8(benchmark::State& state, const char* net) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
   xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + batch_size * groups * group_channels);
   xnnpack::Buffer<uint8_t> output(batch_size * groups * group_channels);
-  std::generate(input.begin(), input.end(), std::ref(u8rng));
+  xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {

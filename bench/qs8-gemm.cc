@@ -20,6 +20,7 @@
 #include "ruy/ruy.h"
 #endif  // BENCHMARK_RUY
 
+#include "xnnpack/buffer.h"
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/microfnptr.h"
@@ -36,16 +37,15 @@ static void RuyBenchmark(benchmark::State& state, size_t threads)
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
-  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       nc * (sizeof(int8_t) * (mc + kc) + sizeof(int32_t)));
 
   xnnpack::Buffer<int8_t> a(mc * kc);
-  std::generate(a.begin(), a.end(), std::ref(u8rng));
+  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
   xnnpack::Buffer<int8_t> k(num_buffers * nc * kc);
-  std::generate(k.begin(), k.end(), std::ref(u8rng));
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
   xnnpack::Buffer<int32_t> b(num_buffers * nc);
   std::generate(b.begin(), b.end(), std::ref(i32rng));
   xnnpack::Buffer<int8_t> c(num_buffers * nc * mc);

@@ -114,8 +114,8 @@ class PadMicrokernelTester {
         (pre_padding() + input_channels() + post_padding()) +
         (rows() - 1) * output_stride());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(u8rng));
-      std::generate(output.begin(), output.end(), std::ref(u8rng));
+      xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
+      xnnpack::fill_uniform_random_bits(output.data(), output.size(), rng);
       std::array<uint8_t, 4> fill_pattern;
       std::generate(fill_pattern.begin(), fill_pattern.end(), std::ref(u8rng));
       uint32_t fill_value = 0;

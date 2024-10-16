@@ -34,10 +34,8 @@ static void x8_lut(
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto u8rng = std::bind(
-    std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
-  std::generate(input.begin(), input.end(), std::ref(u8rng));
-  std::generate(table.begin(), table.end(), std::ref(u8rng));
+  xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
+  xnnpack::fill_uniform_random_bits(table.data(), table.size(), rng);
 
   for (auto _ : state) {
     lut(num_elements * sizeof(uint8_t), input.data(), output.data(), table.data());

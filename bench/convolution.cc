@@ -48,7 +48,6 @@ void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
-  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
   const size_t output_pixel_stride = groups * group_output_channels;
   const size_t input_pixel_stride = groups * group_input_channels;
@@ -62,9 +61,9 @@ void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
   const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
 
   xnnpack::Buffer<uint8_t> input(batch_size * input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(uint8_t));
-  std::generate(input.begin(), input.end(), std::ref(u8rng));
+  xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
   xnnpack::Buffer<uint8_t> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
-  std::generate(kernel.begin(), kernel.end(), std::ref(u8rng));
+  xnnpack::fill_uniform_random_bits(kernel.data(), kernel.size(), rng);
   xnnpack::Buffer<int32_t> bias(groups * group_output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(i32rng));
   const size_t output_elements = batch_size * output_height * output_width * output_pixel_stride;
@@ -187,8 +186,6 @@ void xnnpack_convolution_qs8(benchmark::State& state, const char* net) {
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
-  auto i8rng = std::bind(
-    std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), std::ref(rng));
 
   const size_t output_pixel_stride = groups * group_output_channels;
   const size_t input_pixel_stride = groups * group_input_channels;
@@ -202,9 +199,9 @@ void xnnpack_convolution_qs8(benchmark::State& state, const char* net) {
   const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
 
   xnnpack::Buffer<int8_t> input(batch_size * input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::generate(input.begin(), input.end(), std::ref(i8rng));
+  xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
   xnnpack::Buffer<int8_t> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
-  std::generate(kernel.begin(), kernel.end(), std::ref(i8rng));
+  xnnpack::fill_uniform_random_bits(kernel.data(), kernel.size(), rng);
   xnnpack::Buffer<int32_t> bias(groups * group_output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(i32rng));
   const size_t output_elements = batch_size * output_height * output_width * output_pixel_stride;

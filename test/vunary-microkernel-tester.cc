@@ -355,17 +355,13 @@ void VUnaryMicrokernelTester::Test(xnn_s8_vclamp_ukernel_fn vclamp,
                                    xnn_init_s8_minmax_params_fn init_params,
                                    Default) const {
   xnnpack::ReplicableRandomDevice rng;
-  auto i8rng = std::bind(std::uniform_int_distribution<int32_t>(
-                             std::numeric_limits<int8_t>::min(),
-                             std::numeric_limits<int8_t>::max()),
-                         std::ref(rng));
 
   xnnpack::Buffer<int8_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
   xnnpack::Buffer<int8_t> y(batch_size() +
                         (inplace() ? XNN_EXTRA_BYTES / sizeof(int8_t) : 0));
   xnnpack::Buffer<int8_t> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
-    std::generate(x.begin(), x.end(), std::ref(i8rng));
+    xnnpack::fill_uniform_random_bits(x.data(), x.size(), rng);
     if (inplace()) {
       std::copy(x.cbegin(), x.cend(), y.begin());
     }
@@ -399,16 +395,13 @@ void VUnaryMicrokernelTester::Test(xnn_u8_vclamp_ukernel_fn vclamp,
                                    xnn_init_u8_minmax_params_fn init_params,
                                    Default) const {
   xnnpack::ReplicableRandomDevice rng;
-  auto u8rng = std::bind(std::uniform_int_distribution<int32_t>(
-                             0, std::numeric_limits<uint8_t>::max()),
-                         std::ref(rng));
 
   xnnpack::Buffer<uint8_t> x(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
   xnnpack::Buffer<uint8_t> y(batch_size() +
                          (inplace() ? XNN_EXTRA_BYTES / sizeof(uint8_t) : 0));
   xnnpack::Buffer<uint8_t> y_ref(batch_size());
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
-    std::generate(x.begin(), x.end(), std::ref(u8rng));
+    xnnpack::fill_uniform_random_bits(x.data(), x.size(), rng);
     if (inplace()) {
       std::copy(x.cbegin(), x.cend(), y.begin());
     }

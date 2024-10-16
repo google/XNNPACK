@@ -46,15 +46,11 @@ void GEMMBenchmark(benchmark::State& state, xnn_qs8_gemm_minmax_ukernel_fn gemm,
   auto rng = std::mt19937(random_device());
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
                           std::ref(rng));
-  auto i8rng = std::bind(std::uniform_int_distribution<int32_t>(
-                             -std::numeric_limits<int8_t>::max(),
-                             std::numeric_limits<int8_t>::max()),
-                         std::ref(rng));
 
   xnnpack::Buffer<int8_t> a(mc * kc + XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::generate(a.begin(), a.end(), std::ref(i8rng));
+  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
   xnnpack::Buffer<int8_t> k(nc * kc);
-  std::generate(k.begin(), k.end(), std::ref(i8rng));
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
   xnnpack::Buffer<int32_t> b(nc);
   std::generate(b.begin(), b.end(), std::ref(i32rng));
 
@@ -136,15 +132,11 @@ void GEMMBenchmark(benchmark::State& state,
   auto rng = std::mt19937(random_device());
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
                           std::ref(rng));
-  auto i8rng = std::bind(std::uniform_int_distribution<int32_t>(
-                             -std::numeric_limits<int8_t>::max(),
-                             std::numeric_limits<int8_t>::max()),
-                         std::ref(rng));
 
   xnnpack::Buffer<int8_t> a(mc * kc + XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::generate(a.begin(), a.end(), std::ref(i8rng));
+  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
   xnnpack::Buffer<int8_t> k(nc * kc);
-  std::generate(k.begin(), k.end(), std::ref(i8rng));
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
   xnnpack::Buffer<int32_t> b(nc);
   std::generate(b.begin(), b.end(), std::ref(i32rng));
 
@@ -222,15 +214,11 @@ void GEMMBenchmark(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto i8rng = std::bind(std::uniform_int_distribution<int32_t>(
-                             -std::numeric_limits<int8_t>::max(),
-                             std::numeric_limits<int8_t>::max()),
-                         std::ref(rng));
 
   xnnpack::Buffer<int8_t> a(mc * kc + XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::generate(a.begin(), a.end(), std::ref(i8rng));
+  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
   xnnpack::Buffer<int8_t> k(nc * kc);
-  std::generate(k.begin(), k.end(), std::ref(i8rng));
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
 
   xnnpack::Buffer<xnn_qd8_quantization_params> quantization_params(
       mc + XNN_EXTRA_QUANTIZATION_PARAMS);
@@ -304,15 +292,11 @@ void GEMMBenchmark(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto i8rng = std::bind(std::uniform_int_distribution<int32_t>(
-                             -std::numeric_limits<int8_t>::max(),
-                             std::numeric_limits<int8_t>::max()),
-                         std::ref(rng));
 
   xnnpack::Buffer<int8_t> a(mc * kc + XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::generate(a.begin(), a.end(), std::ref(i8rng));
+  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
   xnnpack::Buffer<int8_t> k(nc * kc);
-  std::generate(k.begin(), k.end(), std::ref(i8rng));
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
 
   xnnpack::Buffer<xnn_qd8_quantization_params> quantization_params(
       mc + XNN_EXTRA_QUANTIZATION_PARAMS);
@@ -384,13 +368,6 @@ void GEMMBenchmark(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto i8rng = std::bind(std::uniform_int_distribution<int32_t>(
-                             -std::numeric_limits<int8_t>::max(),
-                             std::numeric_limits<int8_t>::max()),
-                         std::ref(rng));
-  auto u8rng = std::bind(std::uniform_int_distribution<int32_t>(
-                             0, std::numeric_limits<uint8_t>::max()),
-                         std::ref(rng));
   auto scalerng = std::bind(std::uniform_real_distribution<float>(0.5f, 2.f),
                             std::ref(rng));
 
@@ -404,11 +381,11 @@ void GEMMBenchmark(benchmark::State& state,
   const size_t packed_n = round_up_po2(nc, nr);
 
   xnnpack::Buffer<int8_t> a(mc * kc + XNN_EXTRA_BYTES);
-  std::generate(a.begin(), a.end(), std::ref(i8rng));
+  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
   xnnpack::Buffer<uint8_t> k(nc * kc / 2);
-  std::generate(k.begin(), k.end(), std::ref(u8rng));
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
   xnnpack::Buffer<xnn_bfloat16> kernel_scale2d(nc * k2 / bl);
-  std::generate(k.begin(), k.end(), std::ref(u8rng));
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
   std::generate(kernel_scale2d.begin(), kernel_scale2d.end(),
                 [&]() { return scalerng(); });
 
@@ -489,18 +466,11 @@ void GEMMBenchmark(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto i8rng = std::bind(std::uniform_int_distribution<int32_t>(
-                             -std::numeric_limits<int8_t>::max(),
-                             std::numeric_limits<int8_t>::max()),
-                         std::ref(rng));
-  auto u8rng = std::bind(std::uniform_int_distribution<int32_t>(
-                             0, std::numeric_limits<uint8_t>::max()),
-                         std::ref(rng));
 
   xnnpack::Buffer<int8_t> a(mc * kc + XNN_EXTRA_BYTES);
-  std::generate(a.begin(), a.end(), std::ref(i8rng));
+  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
   xnnpack::Buffer<uint8_t> k(nc * kc / 2);
-  std::generate(k.begin(), k.end(), std::ref(u8rng));
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
 
   xnnpack::Buffer<xnn_qd8_quantization_params> quantization_params(
       mc + XNN_EXTRA_QUANTIZATION_PARAMS);
@@ -574,13 +544,6 @@ void GEMMBenchmark(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto i8rng = std::bind(std::uniform_int_distribution<int32_t>(
-                             -std::numeric_limits<int8_t>::max(),
-                             std::numeric_limits<int8_t>::max()),
-                         std::ref(rng));
-  auto u8rng = std::bind(std::uniform_int_distribution<int32_t>(
-                             0, std::numeric_limits<uint8_t>::max()),
-                         std::ref(rng));
   auto scalerng = std::bind(std::uniform_real_distribution<float>(0.5f, 2.f),
                             std::ref(rng));
 
@@ -594,11 +557,11 @@ void GEMMBenchmark(benchmark::State& state,
   const size_t packed_n = round_up_po2(nc, nr);
 
   xnnpack::Buffer<int8_t> a(mc * kc + XNN_EXTRA_BYTES);
-  std::generate(a.begin(), a.end(), std::ref(i8rng));
+  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
   xnnpack::Buffer<uint8_t> k(nc * kc / 2);
-  std::generate(k.begin(), k.end(), std::ref(u8rng));
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
   xnnpack::Buffer<xnn_bfloat16> kernel_scale2d(nc * k2 / bl);
-  std::generate(k.begin(), k.end(), std::ref(u8rng));
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
   std::generate(kernel_scale2d.begin(), kernel_scale2d.end(),
                 [&]() { return scalerng(); });
 
@@ -678,18 +641,11 @@ void GEMMBenchmark(benchmark::State& state,
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto i8rng = std::bind(std::uniform_int_distribution<int32_t>(
-                             -std::numeric_limits<int8_t>::max(),
-                             std::numeric_limits<int8_t>::max()),
-                         std::ref(rng));
-  auto u8rng = std::bind(std::uniform_int_distribution<int32_t>(
-                             0, std::numeric_limits<uint8_t>::max()),
-                         std::ref(rng));
 
   xnnpack::Buffer<int8_t> a(mc * kc + XNN_EXTRA_BYTES);
-  std::generate(a.begin(), a.end(), std::ref(i8rng));
+  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
   xnnpack::Buffer<uint8_t> k(nc * kc / 2);
-  std::generate(k.begin(), k.end(), std::ref(u8rng));
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
 
   xnnpack::Buffer<xnn_qd8_quantization_params> quantization_params(
       mc + XNN_EXTRA_QUANTIZATION_PARAMS);
@@ -764,14 +720,11 @@ void GEMMBenchmark(benchmark::State& state,
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f),
                           std::ref(rng));
-  auto u8rng = std::bind(std::uniform_int_distribution<int32_t>(
-                             0, std::numeric_limits<uint8_t>::max()),
-                         std::ref(rng));
 
   xnnpack::Buffer<float> a(mc * kc + XNN_EXTRA_BYTES);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   xnnpack::Buffer<uint8_t> k(nc * kc / 2);
-  std::generate(k.begin(), k.end(), std::ref(u8rng));
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
 
   // Create a fake `gemm_config` for the packing functions.
   struct xnn_gemm_config gemm_config;
@@ -880,9 +833,6 @@ void GEMMBenchmark(benchmark::State& state,
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-10.0f, 10.0f),
                           std::ref(rng));
-  auto u8rng = std::bind(std::uniform_int_distribution<int32_t>(
-                             0, std::numeric_limits<uint8_t>::max()),
-                         std::ref(rng));
   auto scalerng = std::bind(std::uniform_real_distribution<float>(0.5f, 2.f),
                             std::ref(rng));
 
@@ -891,7 +841,7 @@ void GEMMBenchmark(benchmark::State& state,
   xnnpack::Buffer<float> a(mc * k2);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
   xnnpack::Buffer<uint8_t> k(nc * k2 / 2);
-  std::generate(k.begin(), k.end(), std::ref(u8rng));
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
 
   // Create a fake `gemm_config` for the packing functions.
   struct xnn_gemm_config gemm_config;
@@ -1001,14 +951,11 @@ void GEMMBenchmark(benchmark::State& state, xnn_qu8_gemm_minmax_ukernel_fn gemm,
   auto rng = std::mt19937(random_device());
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
                           std::ref(rng));
-  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(
-                             0, std::numeric_limits<uint8_t>::max()),
-                         std::ref(rng));
 
   xnnpack::Buffer<uint8_t> a(mc * kc + XNN_EXTRA_BYTES / sizeof(uint8_t));
-  std::generate(a.begin(), a.end(), std::ref(u8rng));
+  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
   xnnpack::Buffer<uint8_t> k(nc * kc);
-  std::generate(k.begin(), k.end(), std::ref(u8rng));
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
   xnnpack::Buffer<int32_t> b(nc);
   std::generate(b.begin(), b.end(), std::ref(i32rng));
 
