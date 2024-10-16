@@ -20,7 +20,7 @@
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/pack.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include "replicable_random_device.h"
 
 class ConvHWCMicrokernelTester {

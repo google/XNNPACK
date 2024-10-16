@@ -18,7 +18,7 @@
 #include "xnnpack.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include "replicable_random_device.h"
 
 class IBilinearMicrokernelTester {

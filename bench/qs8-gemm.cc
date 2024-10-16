@@ -20,12 +20,11 @@
 #include "ruy/ruy.h"
 #endif  // BENCHMARK_RUY
 
-#include "xnnpack/buffer.h"
-#include "xnnpack/isa-checks.h"
 #include "xnnpack/gemm.h"
+#include "xnnpack/isa-checks.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
-
+#include "buffer.h"
 
 #ifdef BENCHMARK_RUY
 static void RuyBenchmark(benchmark::State& state, size_t threads)

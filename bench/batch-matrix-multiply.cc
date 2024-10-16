@@ -12,11 +12,10 @@
 #include <utility>
 #include <vector>
 
-#include "xnnpack.h"
-
-#include <benchmark/benchmark.h>
 #include "bench/utils.h"
-#include "xnnpack/buffer.h"
+#include "xnnpack.h"
+#include "buffer.h"
+#include <benchmark/benchmark.h>
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/flatbuffers.h"
 #include "tensorflow/lite/interpreter.h"

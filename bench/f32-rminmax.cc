@@ -15,7 +15,7 @@
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/reduce.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include <benchmark/benchmark.h>
 
 static void f32_rminmax(

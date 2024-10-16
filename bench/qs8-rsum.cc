@@ -9,15 +9,13 @@
 
 #include "bench/rsum-benchmark.h"
 #include "bench/utils.h"
-#include <benchmark/benchmark.h>
-
 #include "xnnpack.h"
-#include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
-#include "xnnpack/reduce.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
-
+#include "xnnpack/reduce.h"
+#include "buffer.h"
+#include <benchmark/benchmark.h>
 
 BENCHMARK_CAPTURE(qs8_rsum, scalar_u1,
                   xnn_qs8_rsum_ukernel__scalar_u1,

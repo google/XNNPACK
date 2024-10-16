@@ -23,8 +23,8 @@
 #include "xnnpack.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
+#include "buffer.h"
 #include "next_prime.h"
-#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class MaxPoolMicrokernelTester {

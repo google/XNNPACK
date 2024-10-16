@@ -14,7 +14,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/transpose.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include <benchmark/benchmark.h>
 
 void transpose(

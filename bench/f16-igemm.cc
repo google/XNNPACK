@@ -21,7 +21,7 @@
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pack.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include <benchmark/benchmark.h>
 
 static void f16_igemm(benchmark::State& state,

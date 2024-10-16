@@ -22,7 +22,7 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/math.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include "replicable_random_device.h"
 
 class MaxPoolingOperatorTester {

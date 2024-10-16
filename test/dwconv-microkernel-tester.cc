@@ -30,7 +30,7 @@
 #include "xnnpack/microparams.h"
 #include "xnnpack/pack.h"
 #include "xnnpack/requantization.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include "replicable_random_device.h"
 
 TEST_P(DWConvTest, Test) {

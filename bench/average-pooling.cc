@@ -17,7 +17,7 @@
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include <benchmark/benchmark.h>
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/flatbuffers.h"

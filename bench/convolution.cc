@@ -29,7 +29,7 @@
 #include "tensorflow/lite/version.h"
 #endif  // BENCHMARK_TENSORFLOW_LITE
 #include "bench/utils.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 
 void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);

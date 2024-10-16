@@ -28,7 +28,7 @@
 #include "xnnpack/packq.h"
 #include "xnnpack/requantization.h"
 #include "xnnpack/subgraph.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include "replicable_random_device.h"
 
 using testing::ElementsAreArray;

@@ -22,7 +22,7 @@
 #include "xnnpack/microkernel-utils.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pack.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include <benchmark/benchmark.h>
 
 static void f16_dwconv(benchmark::State& state,

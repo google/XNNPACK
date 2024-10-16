@@ -11,10 +11,9 @@
 #include <random>
 #include <vector>
 
-#include "xnnpack.h"
-
 #include "bench/utils.h"
-#include "xnnpack/buffer.h"
+#include "xnnpack.h"
+#include "buffer.h"
 #include <benchmark/benchmark.h>
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/flatbuffers.h"

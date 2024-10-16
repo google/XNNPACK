@@ -27,7 +27,7 @@
 #include "xnnpack/pack.h"
 #include "xnnpack/packx.h"
 #include "xnnpack/ppmm.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include <benchmark/benchmark.h>
 
 static void GEMMBenchmark(benchmark::State& state,

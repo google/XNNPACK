@@ -25,7 +25,7 @@
 #include "xnnpack/cache.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microparams.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include "convolution-test-helpers.h"
 #include "replicable_random_device.h"
 #include "pthreadpool.h"

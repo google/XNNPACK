@@ -13,7 +13,7 @@
 #include "xnnpack/raddexpminusmax.h"
 #include "xnnpack/reduce.h"
 #include "xnnpack/vscaleexpminusmax.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include <benchmark/benchmark.h>
 
 static void f32_vscaleexpminusmax(

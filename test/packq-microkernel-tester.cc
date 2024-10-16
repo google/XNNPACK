@@ -18,7 +18,7 @@
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/packq.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 
 namespace xnnpack {
 

@@ -10,7 +10,7 @@
 
 #include "bench/utils.h"
 #include "xnnpack.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include <benchmark/benchmark.h>
 
 namespace {

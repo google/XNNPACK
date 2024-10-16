@@ -13,7 +13,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/pack.h"
 #include "xnnpack/packw.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include <benchmark/benchmark.h>
 
 static void x8_packw(benchmark::State& state,

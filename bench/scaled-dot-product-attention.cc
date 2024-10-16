@@ -6,17 +6,16 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <random>
 #include <vector>
 
-#include "xnnpack.h"
-
-#include <benchmark/benchmark.h>
 #include "bench/utils.h"
-#include "xnnpack/buffer.h"
+#include "xnnpack.h"
+#include "buffer.h"
+#include <benchmark/benchmark.h>
 
 void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);

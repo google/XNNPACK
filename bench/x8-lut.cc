@@ -15,7 +15,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/lut.h"
 #include "xnnpack/microfnptr.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include <benchmark/benchmark.h>
 
 static void x8_lut(

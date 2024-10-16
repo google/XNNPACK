@@ -23,7 +23,7 @@
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pack.h"
 #include "xnnpack/requantization.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 
 class DWConvMicrokernelTester {
  public:

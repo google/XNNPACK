@@ -29,7 +29,7 @@
 #include "xnnpack/packw.h"
 #include "xnnpack/packx.h"
 #include "xnnpack/ppmm.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 
 static void f32_gemm(benchmark::State& state,
   xnn_x32_packw_gemm_goi_ukernel_fn packw,

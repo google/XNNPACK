@@ -17,7 +17,7 @@
 
 #include "bench/utils.h"
 #include "xnnpack.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include <benchmark/benchmark.h>
 
 void max_pooling_u8(benchmark::State& state, const char* net) {

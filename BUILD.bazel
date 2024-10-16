@@ -568,11 +568,6 @@ xnnpack_cc_library(
     ],
 )
 
-xnnpack_cxx_library(
-    name = "buffer",
-    hdrs = ["src/xnnpack/buffer.h"],
-)
-
 xnnpack_cc_library(
     name = "isa_checks",
     hdrs = [

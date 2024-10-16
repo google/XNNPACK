@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/math.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 
 inline size_t reference_index(
     const size_t* input_stride,

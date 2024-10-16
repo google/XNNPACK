@@ -20,7 +20,7 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/requantization.h"
 #include "xnnpack/subgraph.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include "replicable_random_device.h"
 
 template <class T, class KernelType = T, class BiasType = T> class DeconvolutionTestBase : public ::testing::Test {

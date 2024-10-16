@@ -20,7 +20,7 @@
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include "replicable_random_device.h"
 
 class DynamicFullyConnectedOperatorTester {

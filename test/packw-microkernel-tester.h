@@ -17,7 +17,7 @@
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/pack.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 
 class PackWMicrokernelTester {
  public:

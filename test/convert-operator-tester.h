@@ -23,7 +23,7 @@
 #include "xnnpack/internal.h"
 #include "xnnpack/math.h"
 #include "xnnpack/packq.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include "replicable_random_device.h"
 
 class ConvertOperatorTester {

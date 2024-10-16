@@ -31,7 +31,7 @@
 #include "xnnpack/pack.h"
 #include "xnnpack/packx.h"
 #include "xnnpack/ppmm.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 
 static void GEMMBenchmark(benchmark::State& state,
   xnn_f32_gemm_minmax_ukernel_fn gemm,

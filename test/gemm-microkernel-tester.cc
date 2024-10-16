@@ -28,7 +28,7 @@
 #include "xnnpack/packq.h"
 #include "xnnpack/quantization.h"
 #include "xnnpack/requantization.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include "replicable_random_device.h"
 
 TEST_P(GemmTest, Test) {

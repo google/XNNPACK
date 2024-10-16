@@ -24,7 +24,7 @@
 #include "xnnpack/pack.h"
 #include "xnnpack/packq.h"
 #include "xnnpack/packw.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include <benchmark/benchmark.h>
 
 void GEMMBenchmark(benchmark::State& state, xnn_qs8_gemm_minmax_ukernel_fn gemm,

@@ -25,11 +25,11 @@
 #include "xnnpack/common.h"
 #include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
+#include "xnnpack/internal.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/packq.h"
-#include "xnnpack/internal.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include "replicable_random_device.h"
 
 static int8_t sign_extend_int4(int8_t value) {

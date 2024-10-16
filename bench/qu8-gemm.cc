@@ -33,7 +33,7 @@
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pack.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 
 static void GEMMBenchmark(benchmark::State& state,
   xnn_qu8_gemm_minmax_ukernel_fn gemm,

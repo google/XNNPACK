@@ -17,7 +17,7 @@
 #include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include "replicable_random_device.h"
 
 template <class T, class BiasType = T> class Unpooling2DTestBase : public ::testing::Test {

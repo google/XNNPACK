@@ -19,7 +19,7 @@
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/transpose.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 
 using transpose_ukernel =
     std::function<void(const void* input, void* output, size_t input_row_stride,

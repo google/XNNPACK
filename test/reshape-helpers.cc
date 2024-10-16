@@ -3,6 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include "xnnpack/reshape-helpers.h"
+
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -17,9 +19,8 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
-#include "xnnpack/reshape-helpers.h"
 #include "xnnpack/subgraph.h"
-#include "xnnpack/buffer.h"
+#include "buffer.h"
 #include "replicable_random_device.h"
 
 xnn_runtime_t SetupUnary(const std::vector<size_t> &dims) {
