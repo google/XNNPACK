@@ -1,0 +1,91 @@
+// Copyright 2024 Imagination Technologies, inc.
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert DATATYPE in ["QS8", "QU8"]
+$assert ROW_TILE >= 3
+$assert LMUL in [1, 2, 4, 8]
+#include <assert.h>
+
+#include <riscv_vector.h>
+
+#include "xnnpack/gavgpool.h"
+
+
+$XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
+void xnn_${DATATYPE.lower()}_gavgpool_minmax_fp32_ukernel_${ROW_TILE}x__rvv_u${LMUL}v(
+    size_t rows,
+    size_t channels,
+    const ${XINT8_T}* input,
+    size_t input_stride,
+    const ${XINT8_T}* zero,
+    ${XINT8_T}* output,
+    const union xnn_${DATATYPE.lower()}_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(rows != 0);
+  assert(rows <= ${ROW_TILE});
+  assert(channels != 0);
+
+  const ${XINT8_T}* i0 = input;
+  $for M in range(1, ROW_TILE):
+    const ${XINT8_T}* i${M} = (const ${XINT8_T}*) ((uintptr_t) i${M-1} + input_stride);
+    $if M % 2 == 1:
+      if XNN_UNPREDICTABLE(rows < ${M+1}) {
+        i${M} = zero;
+      }
+    $else:
+      if XNN_UNPREDICTABLE(rows <= ${M}) {
+        i${M} = zero;
+      }
+
+  const int32_t init_bias = params->fp32_scalar_fmagic.init_bias;
+  const float scale = params->fp32_scalar_fmagic.scale;
+  const float output_min_less_zero_point = params->fp32_scalar_fmagic.output_min_less_zero_point;
+  const float output_max_less_zero_point = params->fp32_scalar_fmagic.output_max_less_zero_point;
+  const float magic_bias = params->fp32_scalar_fmagic.magic_bias;
+  const int32_t magic_bias_less_output_zero_point = params->fp32_scalar_fmagic.magic_bias_less_output_zero_point;
+  vint32m${LMUL*4}_t init_bias_i32v = __riscv_vmv_v_x_i32m${LMUL*4}(init_bias, __riscv_vsetvl_e8m${LMUL}(channels));
+
+  do {
+    int32_t n = __riscv_vsetvl_e8m${LMUL}(channels); channels -= n;
+
+    $if DATATYPE == "QS8":
+      vint8m${LMUL}_t i0_i8v = __riscv_vle8_v_i8m${LMUL}(i0, n); i0 += n;
+      vint8m${LMUL}_t i1_i8v = __riscv_vle8_v_i8m${LMUL}(i1, n); i1 += n;
+      vint16m${LMUL*2}_t acc_i16v = __riscv_vwadd_vv_i16m${LMUL*2}(i0_i8v, i1_i8v, n);
+    $else:
+      vuint8m${LMUL}_t i0_u8v = __riscv_vle8_v_u8m${LMUL}(i0, n); i0 += n;
+      vuint8m${LMUL}_t i1_u8v = __riscv_vle8_v_u8m${LMUL}(i1, n); i1 += n;
+      vuint16m${LMUL*2}_t acc_u16v = __riscv_vwaddu_vv_u16m${LMUL*2}(i0_u8v, i1_u8v, n);
+    $for M in range(2, ROW_TILE):
+      $if DATATYPE == "QS8":
+        i0_i8v = __riscv_vle8_v_i8m${LMUL}(i${M}, n); i${M} += n;
+        acc_i16v = __riscv_vwadd_wv_i16m${LMUL*2}(acc_i16v, i0_i8v, n);
+      $else:
+        i0_u8v = __riscv_vle8_v_u8m${LMUL}(i${M}, n); i${M} += n;
+        acc_u16v = __riscv_vwaddu_wv_u16m${LMUL*2}(acc_u16v, i0_u8v, n);
+        $if M + 1 == ROW_TILE and DATATYPE == "QU8":
+          vint16m${LMUL*2}_t acc_i16v = __riscv_vreinterpret_v_u16m${LMUL*2}_i16m${LMUL*2}(acc_u16v);
+
+    vint32m${LMUL*4}_t acc_i32v = __riscv_vwcvt_x_x_v_i32m${LMUL*4}(acc_i16v, n);
+    acc_i32v = __riscv_vadd_vv_i32m${LMUL*4}(acc_i32v, init_bias_i32v, n);
+    vfloat32m${LMUL*4}_t acc_f32v = __riscv_vfcvt_f_x_v_f32m${LMUL*4}(acc_i32v, n);
+    acc_f32v = __riscv_vfmul_vf_f32m${LMUL*4}(acc_f32v, scale, n);
+    acc_f32v = __riscv_vfmin_vf_f32m${LMUL*4}(__riscv_vfmax_vf_f32m${LMUL*4}(acc_f32v, output_min_less_zero_point, n), output_max_less_zero_point, n);
+    acc_f32v = __riscv_vfadd_vf_f32m${LMUL*4}(acc_f32v, magic_bias, n);
+
+    $if DATATYPE == "QS8":
+      vint32m${LMUL*4}_t out_i32v = __riscv_vfcvt_x_f_v_i32m${LMUL*4}(acc_f32v, n);
+      vint16m${LMUL*2}_t out_i16v = __riscv_vncvt_x_x_w_i16m${LMUL*2}(out_i32v, n);
+      out_i16v = __riscv_vsub_vx_i16m${LMUL*2}(out_i16v, magic_bias_less_output_zero_point, n);
+      vint8m${LMUL}_t out_i8v = __riscv_vncvt_x_x_w_i8m${LMUL}(out_i16v, n);
+      __riscv_vse8_v_i8m${LMUL}(output, out_i8v, n); output += n;
+    $else:
+      vuint32m${LMUL*4}_t out_u32v = __riscv_vfcvt_xu_f_v_u32m${LMUL*4}(acc_f32v, n);
+      vuint16m${LMUL*2}_t out_u16v = __riscv_vncvt_x_x_w_u16m${LMUL*2}(out_u32v, n);
+      out_u16v = __riscv_vsub_vx_u16m${LMUL*2}(out_u16v, magic_bias_less_output_zero_point, n);
+      vuint8m${LMUL}_t out_u8v = __riscv_vncvt_x_x_w_u8m${LMUL}(out_u16v, n);
+      __riscv_vse8_v_u8m${LMUL}(output, out_u8v, n); output += n;
+  } while (channels != 0);
+}
