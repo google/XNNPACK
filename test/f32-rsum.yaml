@@ -78,6 +78,12 @@
 # RISC-V Vector
 - name: xnn_f32_rsum_ukernel__rvv_u1v
   init: xnn_init_f32_scaleminmax_scalar_params
+- name: xnn_f32_rsum_ukernel__rvv_u2v
+  init: xnn_init_f32_scaleminmax_scalar_params
+- name: xnn_f32_rsum_ukernel__rvv_u4v
+  init: xnn_init_f32_scaleminmax_scalar_params
+- name: xnn_f32_rsum_ukernel__rvv_u8v
+  init: xnn_init_f32_scaleminmax_scalar_params
 
 # Scalar
 - name: xnn_f32_rsum_ukernel__scalar_u1

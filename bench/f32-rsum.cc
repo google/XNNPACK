@@ -319,6 +319,36 @@
 #endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(f32_rsum, rvv_u2v,
+                    xnn_f32_rsum_ukernel__rvv_u2v,
+                    xnn_init_f32_scaleminmax_scalar_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(f32_rsum, rvv_u4v,
+                    xnn_f32_rsum_ukernel__rvv_u4v,
+                    xnn_init_f32_scaleminmax_scalar_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(f32_rsum, rvv_u8v,
+                    xnn_f32_rsum_ukernel__rvv_u8v,
+                    xnn_init_f32_scaleminmax_scalar_params,
+                    benchmark::utils::CheckRVV)
+    ->Apply(BenchmarkRSUM)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
+
 BENCHMARK_CAPTURE(f32_rsum, scalar_u1,
                   xnn_f32_rsum_ukernel__scalar_u1,
                   xnn_init_f32_scaleminmax_scalar_params)
