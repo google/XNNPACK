@@ -94,6 +94,14 @@ static void BenchmarkBatch(benchmark::internal::Benchmark* b)
     ->UseRealTime();
 #endif  // XNN_ARCH_WASMSIMD
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+  BENCHMARK_CAPTURE(f32_gavgpool_cw, f32_rvv_u1v,
+                    xnn_f32_gavgpool_cw_ukernel__rvv_u1v,
+                    xnn_init_f32_gavgpool_scalar_params)
+    ->Apply(BenchmarkBatch)
+    ->UseRealTime();
+#endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+
 BENCHMARK_CAPTURE(f32_gavgpool_cw, f32_scalar_u1,
                   xnn_f32_gavgpool_cw_ukernel__scalar_u1,
                   xnn_init_f32_gavgpool_scalar_params)

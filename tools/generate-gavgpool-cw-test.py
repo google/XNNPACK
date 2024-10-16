@@ -32,25 +32,28 @@ def split_ukernel_name(name):
     raise ValueError("Unexpected microkernel name: " + name)
 
   element_tile = int(match.group(3))
+  vector_tile = bool(match.group(4))
 
   arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(2))
-  return element_tile, arch, isa
+  return element_tile, vector_tile, arch, isa
 
 
 AVGPOOL_TEST_TEMPLATE = """\
-TEST(${TEST_NAME}, elements_eq_${ELEMENT_TILE}) {
+TEST(${TEST_NAME}, elements_eq_${ELEMENT_TILE}${ELEMENT_SUFFIX}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t element_tile = ${ELEMENT_SCALED_TILE};
   GAvgPoolCWMicrokernelTester()
-    .elements(${ELEMENT_TILE})
+    .elements(element_tile)
     .channels(${CHANNEL_TILE})
     .Test(${", ".join(TEST_ARGS)});
 }
 
-TEST(${TEST_NAME}, elements_gt_${ELEMENT_TILE}) {
+TEST(${TEST_NAME}, elements_gt_${ELEMENT_TILE}${ELEMENT_SUFFIX}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t elements = ${ELEMENT_TILE + 1}; elements < ${ELEMENT_TILE * 2}; elements++) {
+  const size_t element_tile = ${ELEMENT_SCALED_TILE};
+  for (size_t elements = element_tile+1; elements < element_tile*2; elements++) {
     GAvgPoolCWMicrokernelTester()
       .elements(elements)
       .channels(${CHANNEL_TILE})
@@ -58,11 +61,12 @@ TEST(${TEST_NAME}, elements_gt_${ELEMENT_TILE}) {
   }
 }
 
-$if ELEMENT_TILE > 1:
-  TEST(${TEST_NAME}, elements_lt_${ELEMENT_TILE}) {
+$if ELEMENT_TILE > 1 or ELEMENT_SCALED_TILE != ELEMENT_TILE:
+  TEST(${TEST_NAME}, elements_lt_${ELEMENT_TILE}${ELEMENT_SUFFIX}) {
     $if ISA_CHECK:
       ${ISA_CHECK};
-    for (size_t elements = 1; elements < ${ELEMENT_TILE}; elements++) {
+    const size_t element_tile = ${ELEMENT_SCALED_TILE};
+    for (size_t elements = 1; elements < element_tile; elements++) {
       GAvgPoolCWMicrokernelTester()
         .elements(elements)
         .channels(${CHANNEL_TILE})
@@ -70,10 +74,11 @@ $if ELEMENT_TILE > 1:
     }
   }
 
-TEST(${TEST_NAME}, elements_div_${ELEMENT_TILE}) {
+TEST(${TEST_NAME}, elements_div_${ELEMENT_TILE}${ELEMENT_SUFFIX}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t elements = ${ELEMENT_TILE * 2}; elements < ${ELEMENT_TILE * 5}; elements += ${ELEMENT_TILE}) {
+  const size_t element_tile = ${ELEMENT_SCALED_TILE};
+  for (size_t elements = element_tile*2; elements < element_tile*5; elements += element_tile) {
     GAvgPoolCWMicrokernelTester()
       .elements(elements)
       .channels(${CHANNEL_TILE})
@@ -84,9 +89,10 @@ TEST(${TEST_NAME}, elements_div_${ELEMENT_TILE}) {
 TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}) {
   $if ISA_CHECK:
     ${ISA_CHECK};
+  const size_t element_tile = ${ELEMENT_SCALED_TILE};
   for (size_t channels = ${CHANNEL_TILE + 1}; channels < ${CHANNEL_TILE * 4}; channels++) {
     GAvgPoolCWMicrokernelTester()
-      .elements(${ELEMENT_TILE})
+      .elements(element_tile)
       .channels(channels)
       .Test(${", ".join(TEST_ARGS)});
   }
@@ -95,7 +101,8 @@ TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}) {
 TEST(${TEST_NAME}, qmin) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t elements = 1; elements < ${ELEMENT_TILE * 2}; elements += ${1 if ELEMENT_TILE < 4 else 3}) {
+  const size_t element_tile = ${ELEMENT_SCALED_TILE};
+  for (size_t elements = 1; elements < element_tile*2; elements += 3) {
     GAvgPoolCWMicrokernelTester()
       .elements(elements)
       .channels(${CHANNEL_TILE * 4})
@@ -107,7 +114,8 @@ TEST(${TEST_NAME}, qmin) {
 TEST(${TEST_NAME}, qmax) {
   $if ISA_CHECK:
     ${ISA_CHECK};
-  for (size_t elements = 1; elements < ${ELEMENT_TILE * 2}; elements += ${1 if ELEMENT_TILE < 4 else 3}) {
+  const size_t element_tile = ${ELEMENT_SCALED_TILE};
+  for (size_t elements = 1; elements < element_tile*2; elements += 3) {
     GAvgPoolCWMicrokernelTester()
       .elements(elements)
       .channels(${CHANNEL_TILE * 4})
@@ -118,7 +126,7 @@ TEST(${TEST_NAME}, qmax) {
 """
 
 
-def generate_test_cases(ukernel, init_fn, element_tile, isa):
+def generate_test_cases(ukernel, init_fn, element_tile, vector_tile, isa):
   """Generates all tests cases for a GAVGPOOL micro-kernel.
 
   Args:
@@ -126,6 +134,8 @@ def generate_test_cases(ukernel, init_fn, element_tile, isa):
     init_fn: C name of the function to initialize microkernel parameters.
     element_tile: Number of elements/pixels processed per one iteration of the inner
                   loops of the micro-kernel.
+    vector_tile: Indicates if elements are specified in vectors rather than
+                 elements.
     isa: instruction set required to run the micro-kernel. Generated unit test
          will skip execution if the host processor doesn't support this ISA.
 
@@ -135,12 +145,18 @@ def generate_test_cases(ukernel, init_fn, element_tile, isa):
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
   test_args = [ukernel, init_fn]
+  element_scaled_tile = element_tile
+  if vector_tile:
+    ctype = {"f16": "uint16_t", "f32": "float"}[datatype]
+    element_scaled_tile = {"rvv": "(%s*xnn_init_hardware_config()->vlenb/sizeof(%s))" % (str(element_tile), ctype)}[isa]
   return xngen.preprocess(AVGPOOL_TEST_TEMPLATE, {
       "TEST_NAME": test_name.upper().replace("UKERNEL_", ""),
       "TEST_ARGS": test_args,
       "DATATYPE": datatype,
       "CHANNEL_TILE": 1,  # All microkernels process one channel at a time.
       "ELEMENT_TILE": element_tile,
+      "ELEMENT_SCALED_TILE": element_scaled_tile,
+      "ELEMENT_SUFFIX": "v" if vector_tile else "",
       "ISA_CHECK": xnncommon.generate_isa_check_macro(isa),
       "next_prime": next_prime,
     })
@@ -176,9 +192,9 @@ def main(args):
     for ukernel_spec in spec_yaml:
       name = ukernel_spec["name"]
       init_fn = ukernel_spec.get("init")
-      element_tile, arch, isa = split_ukernel_name(name)
+      element_tile, vector_tile, arch, isa = split_ukernel_name(name)
 
-      test_case = generate_test_cases(name, init_fn, element_tile, isa)
+      test_case = generate_test_cases(name, init_fn, element_tile, vector_tile, isa)
       tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
 
     xnncommon.overwrite_if_changed(options.output, tests)

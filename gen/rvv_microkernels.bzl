@@ -11,6 +11,7 @@ PROD_RVV_MICROKERNEL_SRCS = [
     "src/f32-argmaxpool/f32-argmaxpool-9x-rvv-u1v.c",
     "src/f32-avgpool/gen/f32-avgpool-9p8x-minmax-rvv-c2v.c",
     "src/f32-avgpool/gen/f32-avgpool-9x-minmax-rvv-c2v.c",
+    "src/f32-gavgpool-cw/gen/f32-gavgpool-cw-rvv-u4v.c",
     "src/f32-gavgpool/gen/f32-gavgpool-7p7x-minmax-rvv-c2v.c",
     "src/f32-gavgpool/gen/f32-gavgpool-7x-minmax-rvv-c2v.c",
     "src/f32-gemm/gen/f32-gemm-1x4v-minmax-rvv.c",
@@ -68,6 +69,9 @@ PROD_RVV_MICROKERNEL_SRCS = [
 NON_PROD_RVV_MICROKERNEL_SRCS = [
     "src/f32-avgpool/gen/f32-avgpool-9p8x-minmax-rvv-c1v.c",
     "src/f32-avgpool/gen/f32-avgpool-9x-minmax-rvv-c1v.c",
+    "src/f32-gavgpool-cw/gen/f32-gavgpool-cw-rvv-u1v.c",
+    "src/f32-gavgpool-cw/gen/f32-gavgpool-cw-rvv-u2v.c",
+    "src/f32-gavgpool-cw/gen/f32-gavgpool-cw-rvv-u8v.c",
     "src/f32-gavgpool/gen/f32-gavgpool-7p7x-minmax-rvv-c1v.c",
     "src/f32-gavgpool/gen/f32-gavgpool-7p7x-minmax-rvv-c4v.c",
     "src/f32-gavgpool/gen/f32-gavgpool-7x-minmax-rvv-c1v.c",
