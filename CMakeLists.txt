@@ -836,8 +836,8 @@ IF(XNNPACK_BUILD_LIBRARY)
   TARGET_LINK_LIBRARIES(operator-run PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(operator-utils PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(subgraph PRIVATE xnnpack-base allocator logging memory mutex operators operator-run)
-  TARGET_LINK_LIBRARIES(XNNPACK PRIVATE xnnpack-base allocator cache hardware-config indirection logging memory microkernel-utils microparams-init mutex normalization operators operator-run operator-utils packing microkernels-prod subgraph)
-  TARGET_LINK_LIBRARIES(XNNPACK PUBLIC pthreadpool)
+  TARGET_LINK_LIBRARIES(XNNPACK PRIVATE xnnpack-base allocator cache hardware-config indirection memory microkernel-utils microparams-init mutex normalization operators operator-run operator-utils packing microkernels-prod subgraph)
+  TARGET_LINK_LIBRARIES(XNNPACK PUBLIC pthreadpool logging)
   SET_TARGET_PROPERTIES(XNNPACK PROPERTIES C_EXTENSIONS YES)
 ENDIF()
 IF(NOT MSVC)
@@ -984,7 +984,7 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^x86(_64)?$")
 ENDIF()
 
 # Set `XNN_LOG_LEVEL` transitively for all targets that depend on `logging`.
-TARGET_COMPILE_DEFINITIONS(logging PUBLIC "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:4>$<$<NOT:$<CONFIG:Debug>>:0>")
+TARGET_COMPILE_DEFINITIONS(logging PUBLIC "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
 
 IF(MSVC)
   # Even though MSVC has __restrict, it can't be used in all the same contexts as the C99 restrict keyword
