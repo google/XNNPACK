@@ -281,6 +281,8 @@ enum xnn_datatype {
   /// Quantized 4-bit signed integer with shared per-channel-block quantization
   /// parameters.
   xnn_datatype_qbint4 = 12,
+  /// IEEE754 single-precision packed floating-point.
+  xnn_datatype_pfp32 = 13,
 };
 
 /// Define a tensor-type Value and add it to a Subgraph.

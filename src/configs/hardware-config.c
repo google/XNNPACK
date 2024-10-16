@@ -104,8 +104,8 @@ static void init_hardware_config(void) {
     hardware_config.use_arm_neon_i8mm = cpuinfo_has_arm_i8mm();
     hardware_config.use_arm_sve = cpuinfo_has_arm_sve();
     hardware_config.use_arm_sve2 = cpuinfo_has_arm_sve2();
-    hardware_config.use_arm_sme = cpuinfo_has_arm_sme();
-    hardware_config.use_arm_sme2 = cpuinfo_has_arm_sme2();
+    hardware_config.use_arm_sme = true;//cpuinfo_has_arm_sme();
+    hardware_config.use_arm_sme2 = true;//cpuinfo_has_arm_sme2();
   #endif
 
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64

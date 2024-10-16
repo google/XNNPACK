@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "xnnpack.h"
 #include "xnnpack/allocator.h"
@@ -157,9 +158,11 @@ static enum xnn_status create_fully_connected_nc(
                 gemm_config, input_channels, block_wise ? block_size : k_stride, extra_weights_bytes)
           : (k_stride << log2_filter_element_size) + bias_element_size +
                 extra_weights_bytes + block_scale_bytes;
+  //printf("weights_stride %zu n_stride %zu\n", weights_stride, n_stride);
   const size_t packed_weights_size = n_stride * weights_stride;
   fully_connected_op->weights_stride = weights_stride;
   size_t aligned_total_weights_size = round_up_po2(packed_weights_size, XNN_ALLOCATION_ALIGNMENT);
+  printf("aligned_total_weights_size %zu input_channels %zu output_channels %zu\n", aligned_total_weights_size, input_channels, output_channels);
 
   uint32_t cache_seed = output_channels ^ input_channels ^ nr ^ kr ^ sr ^ extra_weights_bytes ^ operator_type;
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
@@ -176,8 +179,11 @@ static enum xnn_status create_fully_connected_nc(
   }
 
   if (cache_offset == XNN_CACHE_NOT_FOUND) {
+    printf("aligned_total_weights_size %zu\n", aligned_total_weights_size);
     void* weights_ptr = xnn_get_pointer_to_write_weights(
         fully_connected_op, aligned_total_weights_size, packed_weights_padding_byte);
+memset(weights_ptr, 0, aligned_total_weights_size);
+printf("WEIGHTS PTR %p\n", weights_ptr);
     if (weights_ptr == NULL) {
       xnn_log_error(
         "failed to allocate %zu bytes for %s operator packed weights",
@@ -187,6 +193,7 @@ static enum xnn_status create_fully_connected_nc(
     xnn_log_debug("allocated %zu bytes for packed weights in %s operator",
       aligned_total_weights_size, xnn_operator_type_to_string(operator_type));
 
+    memset(weights_ptr, 0, aligned_total_weights_size);
     if (gemm_config->pack_weights_and_biases) {
       gemm_config->pack_weights_and_biases(
           flags, gemm_config, input_channels, output_channels,
@@ -195,8 +202,8 @@ static enum xnn_status create_fully_connected_nc(
           /*accumulator_init=*/bias,
           /*weights=*/kernel,
           /*int_extra_data0_fn=*/(xnn_init_scale_params_fn)init_scale_params,
-          /*extra_data0=*/scale_params,
-          /*extra_data0_size=*/init_scale_params != NULL ? sizeof(float) : 0,
+          /*extra_data0=*/bias,//scale_params,
+          /*extra_data0_size=*/sizeof(float),//init_scale_params != NULL ? sizeof(float) : 0,
           /*init_extra_data1_fn=*/
           (xnn_init_scale_params_fn)init_kernel_scale_params,
           /*extra_data1=*/block_wise ? (const void *) blockwise_kernel_scale_params : (const void *) kernel_scale_params,
@@ -204,6 +211,7 @@ static enum xnn_status create_fully_connected_nc(
                                                                 : 0,
           /*packed_weights_ptr=*/weights_ptr, packing_params);
 
+      printf("PACKWED WEIGHTS & basias\n");fflush(stdout);
       if (block_wise && bias != NULL) {
         void* weights_start = (void*) ((uintptr_t) weights_ptr +
           gemm_config->nr * (sizeof(float) + (block_size * sizeof(int8_t) / 2)));
@@ -254,6 +262,7 @@ static enum xnn_status create_fully_connected_nc(
             kernel_scale_params, weights);
       }
 
+      printf("PACKWED kernel scale \n");fflush(stdout);
       if (scale_params != NULL) {
         assert(init_scale_params != NULL);
         void* weights = (void*) ((uintptr_t) weights_ptr +
@@ -267,6 +276,7 @@ static enum xnn_status create_fully_connected_nc(
             scale_params, weights);
       }
 
+      printf("PACKWED scale \n");fflush(stdout);
       if (block_wise) {
         // Fill in kernel scale.
         void* weights_start = (void*) ((uintptr_t) weights_ptr +
@@ -1280,7 +1290,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32_f16(
   return status;
 }
 
-enum xnn_status xnn_create_fully_connected_nc_f32(
+enum xnn_status create_fully_connected_nc_f32(
     size_t input_channels,
     size_t output_channels,
     size_t input_stride,
@@ -1292,6 +1302,7 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
     uint32_t flags,
     xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
+    const struct xnn_gemm_config* gemm_config,
     xnn_operator_t* fully_connected_op_out)
 {
   if (isnan(output_min)) {
@@ -1313,21 +1324,6 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
       "failed to create %s operator with [%.7g, %.7g] output range: lower bound must be less than or equal to upper bound",
       xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32), output_min, output_max);
     return xnn_status_invalid_parameter;
-  }
-
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
-  if (gemm_config == NULL) {
-    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
-                  xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32));
-    return xnn_status_unsupported_hardware;
-  }
-
-  const struct xnn_gemm_config* gemm_nr2_config = xnn_init_f32_gemm_nr2_config();
-  if (gemm_config->nr > output_channels) {
-    // Default microkernel is suboptimal, use a microkernel that better supports less output channels.
-    if (gemm_nr2_config != NULL && gemm_nr2_config->minmax.gemm[gemm_nr2_config->mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
-      gemm_config = gemm_nr2_config;
-    }
   }
 
   const struct gemm_fused_ukernels* gemm_ukernels = &gemm_config->minmax;
@@ -1365,6 +1361,61 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
     xnn_operator_type_fully_connected_nc_f32,
     /*weights_cache=*/weights_cache,
     fully_connected_op_out);
+}
+
+enum xnn_status xnn_create_fully_connected_nc_f32(
+    size_t input_channels,
+    size_t output_channels,
+    size_t input_stride,
+    size_t output_stride,
+    const float* kernel,
+    const float* bias,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
+    xnn_operator_t* fully_connected_op_out) {
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
+  const struct xnn_gemm_config* gemm_nr2_config = xnn_init_f32_gemm_nr2_config();
+  if (gemm_config->nr > output_channels) {
+    // Default microkernel is suboptimal, use a microkernel that better supports less output channels.
+    if (gemm_nr2_config != NULL && gemm_nr2_config->minmax.gemm[gemm_nr2_config->mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
+      gemm_config = gemm_nr2_config;
+    }
+  }
+
+  return create_fully_connected_nc_f32(input_channels, output_channels, input_stride, output_stride, kernel, bias, output_min, output_max, flags, code_cache, weights_cache, gemm_config, fully_connected_op_out);
+}
+
+enum xnn_status xnn_create_fully_connected_nc_pf32(
+    size_t input_channels,
+    size_t output_channels,
+    size_t input_stride,
+    size_t output_stride,
+    const float* kernel,
+    const float* bias,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
+    xnn_operator_t* fully_connected_op_out) {
+  const struct xnn_gemm_config* gemm_config = xnn_init_pf32_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_pf32));
+    return xnn_status_unsupported_hardware;
+  }
+
+  printf("INPUT CHANNELS %zu OUTPUT_STRIDE %zu\n", input_channels, output_stride);
+  return create_fully_connected_nc_f32(input_channels, output_channels, input_stride, output_stride, kernel, bias, output_min, output_max, flags, code_cache, weights_cache, gemm_config, fully_connected_op_out);
 }
 
 enum xnn_status xnn_create_fully_connected_nc_f32_qc4w(
@@ -1898,7 +1949,8 @@ static enum xnn_status reshape_fully_connected_nc(
   struct xnn_hmp_gemm_ukernel *gemm_cases = fully_connected_op->ukernel.gemm.gemm_cases;
 
   if (batch_size == 1 && fully_connected_op->ukernel.gemm.gemm_cases[0].function[XNN_UARCH_DEFAULT] != NULL) {
-    mr = 1;
+	  printf("BATCH SIZE 1\n"); fflush(stdout);
+	  mr = 1;
   }
 
   assert(mr != 0 && mr <= XNN_MAX_MR);
@@ -1931,6 +1983,9 @@ static enum xnn_status reshape_fully_connected_nc(
       .mr = mr,
       .kr = fully_connected_op->ukernel.gemm.kr,
       .sr = fully_connected_op->ukernel.gemm.sr,
+      .M = batch_size,
+      .N = output_channels,
+      .K = input_channels,
   };
   memcpy(&fully_connected_op->context.gemm.gemm.gemm.params, params, params_size);
   fully_connected_op->context.gemm.gemm.gemm.fused_params = &fully_connected_op->context.gemm.gemm.gemm.params;
@@ -1984,7 +2039,7 @@ static enum xnn_status reshape_fully_connected_nc(
     fully_connected_op->compute[0].range[0] = batch_size;
     fully_connected_op->compute[0].range[1] = output_channels;
     fully_connected_op->compute[0].tile[0] = mr;
-    fully_connected_op->compute[0].tile[1] = nc;
+    fully_connected_op->compute[0].tile[1] = nr;
     fully_connected_op->state = xnn_run_state_needs_setup;
 
     return xnn_status_success;

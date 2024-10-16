@@ -20,6 +20,8 @@ const char* xnn_datatype_to_string(enum xnn_datatype type) {
       return "FP32";
     case xnn_datatype_fp16:
       return "FP16";
+    case xnn_datatype_pfp32:
+      return "PFP32";
     case xnn_datatype_qint8:
       return "QINT8";
     case xnn_datatype_quint8:

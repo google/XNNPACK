@@ -9,6 +9,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <stdio.h>
 #include <cstring>
 #include <algorithm>
 
@@ -23,10 +24,11 @@
 #include "xnnpack/unaligned.h"
 
 #if XNN_ENABLE_KLEIDIAI
-  #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4cxp_qs4cxs1s0.h"
-  #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qs4cxs1s0.h"
-  #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0.h"
-  #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4cxp_qs4cxs1s0.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qs4cxs1s0.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
 
@@ -1537,6 +1539,72 @@ void xnn_pack_kai_qs4_weights_and_biases(
   }
 }
 
+size_t xnn_packed_stride_kai_f32_weights_and_biases(
+    const struct xnn_gemm_config* gemm_config, size_t k, size_t unused_k_stride,
+    size_t extra_bytes) {
+  size_t ret_val =
+      kai_get_rhs_packed_stride_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme(k) /
+      kai_get_n_step_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme();
+  printf("xnn_packed_stride_kai_f32_weights_and_biases %zu\n", ret_val);
+  return ret_val;
+}
+
+void xnn_pack_kai_f32_weights_and_biases(
+    uint32_t flags, const struct xnn_gemm_config* gemm_config,
+    size_t input_channels, size_t output_channels, size_t groups,
+    size_t k_stride, const void* accumulator_init, const void* weights,
+    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
+    size_t extra_data0_element_size,
+    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
+    size_t extra_data1_element_size, void* packed_weights_ptr,
+    const void* params) {
+  printf("xnn_pack_kai_f32_weights_and_biases %zu %zu\n", input_channels,
+         output_channels);
+  fflush(stdout);
+  const uint32_t nr = gemm_config->nr;
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  const size_t rhs_stride = output_channels * sizeof(float);
+
+  bool must_free = false;
+  if (extra_data0 == NULL) {
+    extra_data0 = calloc(output_channels, sizeof(float));
+    must_free = true;
+  }
+  // if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+  //  Repack the packing params.
+  kai_run_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme(
+      groups, output_channels, input_channels, nr, kr, sr, rhs_stride,
+      /*rhs=*/reinterpret_cast<const uint8_t*>(weights),
+      /*bias=*/reinterpret_cast<const float*>(extra_data0),
+      /*scale=*/reinterpret_cast<const float*>(extra_data1),
+      /*rhs_packed=*/packed_weights_ptr,
+      /*extra_bytes=*/0, NULL);
+  //} else {
+  //  // Transpose the weights until the transpose packing function is ready.
+  //  float* tmp_data = (float*) malloc(input_channels * output_channels *
+  //  sizeof(float)); size_t shape[] = {output_channels, input_channels}; size_t
+  //  perm[] = {1, 0}; printf("bias %p scale %p\n", extra_data0,
+  //  extra_data1);fflush(stdout); xnn_run_transpose_nd_x32(weights, tmp_data,
+  //  /*num_dims=*/2, shape, perm, /*flags=*/0, /*threadpool=*/NULL);
+  //  // Repack the packing params.
+  //  kai_run_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme(
+  //      groups, output_channels, input_channels, nr, kr, sr, rhs_stride,
+  //      /*rhs=*/reinterpret_cast<const uint8_t*>(tmp_data),
+  //      /*bias=*/reinterpret_cast<const float*>(extra_data0),
+  //      /*scale=*/reinterpret_cast<const float*>(extra_data1),
+  //      /*rhs_packed=*/packed_weights_ptr,
+  //      /*extra_bytes=*/0,
+  //      NULL);
+  //  free(tmp_data);
+  //}
+  if (must_free) {
+    free((void*)extra_data0);
+  }
+  printf("DONE HERE\n");
+  fflush(stdout);
+}
+
 size_t xnn_packed_stride_kai_qb4_weights_and_biases(
     const struct xnn_gemm_config* gemm_config, size_t k, size_t block_size,
     size_t extra_bytes) {
@@ -1547,13 +1615,9 @@ size_t xnn_packed_stride_kai_qb4_weights_and_biases(
   // We want the weight stride with nr = 1, but kleidi enforces a constraint
   // where nr % 4 == 0. So instead we give nr to get the nr-scaled stride, and
   // divide by nr to scaled down the stride.
-  const size_t nr_scaled_packed_stride = kai_get_rhs_packed_stride_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0(
-      k, 
-      nr,
-      kr,
-      sr,
-      block_size,
-      kai_datatype::kai_dt_bf16);
+  const size_t nr_scaled_packed_stride =
+      kai_get_rhs_packed_stride_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0(
+          k, nr, kr, sr, block_size, kai_datatype::kai_dt_bf16);
 
   return nr_scaled_packed_stride / nr;
 }

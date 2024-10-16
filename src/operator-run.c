@@ -11,6 +11,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
@@ -465,6 +466,10 @@ void xnn_compute_gemm(
   const size_t a_stride  = context->a_stride;
   const size_t cm_stride = context->cm_stride;
 
+size_t w_offset = nr_block_start * context->w_stride;
+  printf("RUNNING GEMM nr_block_start %zu nr_block_size %zu cm_stride %zu cn_stride %zu M %zu N %zu K %zu w_offset %zu\n", nr_block_start, nr_block_size, cm_stride, context->cn_stride, context->M, context->N, context->K, w_offset);
+printf("mr_block-struct %zu mr_block_size %zu nr_block_size %zu k_scaled %zu a_stride %zu \n", mr_block_start, mr_block_size, nr_block_size, context->k_scaled, a_stride);
+  float *out_ptr = (float*) context->c;
   context->ukernel.function[XNN_UARCH_DEFAULT](
       mr_block_size,
       nr_block_size,
@@ -476,6 +481,7 @@ void xnn_compute_gemm(
       cm_stride,
       context->cn_stride,
       context->fused_params);
+  printf("OUT ELE %f\n", out_ptr[0]);
 }
 
 void xnn_compute_dqgemm(
@@ -2344,6 +2350,23 @@ void xnn_compute_f32_qd8_convert(
   struct xnn_f32_qs8_cvt_params params;
   context->init_params(&params, 1.0f / context->quantization_params[batch_index].inv_scale, context->quantization_params[batch_index].zero_point, INT8_MIN, INT8_MAX);
   context->convert_ukernel(n, input, output, &params);
+}
+
+void xnn_compute_x32_pack_lh(
+    const struct x32_pack_lh_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t m_idx_start, size_t tile) {
+  const float* lhs = (const float*)((const char*)context->lhs +
+                                    m_idx_start * context->lhs_stride);
+      const size_t offset = context->k*m_idx_start;//*sizeof(float);//xnn_x8_packq_f32qp8_packed_offset(m_idx_start, context->k, context->mr,
+                                        //context->kr, context->sr) * sizeof(float);
+      float* lhs_packed =
+          context->lhs_packed + offset;
+      //xnn_x8_packq_f32qp8_packed_offset(m_idx_start, context->k, context->mr,
+      //                                  context->kr, context->sr) * sizeof(float);
+
+  context->pack_lh_ukernel(/*m=*/tile, context->k, context->mr, context->kr,
+                         context->sr, 0, (const uint32_t*) lhs, context->lhs_stride,
+                         (uint32_t*) lhs_packed);
 }
 
 void xnn_compute_f32_qp8_convert(
