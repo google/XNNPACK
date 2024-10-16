@@ -60,6 +60,11 @@ BENCHMARK_CAPTURE(f32_rwdsum, scalar_c1,
   ->Apply(BenchmarkRWDSUM)
   ->UseRealTime();
 
+BENCHMARK_CAPTURE(f32_rwdsum, scalar_c4,
+                  xnn_f32_rwdsum_ukernel_1p1x__scalar_c4)
+  ->Apply(BenchmarkRWDSUM)
+  ->UseRealTime();
+
 //Scalar rwsum 
 BENCHMARK_CAPTURE(f32_rwsum, scalar_u1,
                   xnn_f32_rwsum_ukernel__scalar_u1)

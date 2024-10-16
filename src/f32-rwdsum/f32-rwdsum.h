@@ -18,6 +18,7 @@
 
 //XNN_UKERNEL(0, xnn_f32_rwsum_ukernel__scalar_u1, 1, false, float)
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rwdsum_ukernel_1p1x__scalar_c1, 1, false, float,const struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_rwdsum_ukernel_1p1x__scalar_c4, 4, false, float,const struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 
 
 #ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS

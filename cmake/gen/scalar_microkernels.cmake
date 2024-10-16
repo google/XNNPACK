@@ -445,6 +445,7 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-rsum/gen/f32-rsum-scalar-u3-acc3.c
   src/f32-rsum/gen/f32-rsum-scalar-u4-acc2.c
   src/f32-rwdsum/f32-rwdsum-1p1x-scalar-c1.c
+  src/f32-rwdsum/f32-rwdsum-1p1x-scalar-c4.c
   src/f32-rwsum/f32-rwsum-scalar-u1.c
   src/f32-rwsum/f32-rwsum-scalar-u2-acc2.c
   src/f32-rwsum/f32-rwsum-scalar-u3-acc3.c
