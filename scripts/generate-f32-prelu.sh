@@ -23,6 +23,18 @@ tools/xngen src/f32-prelu/neon.c.in -D CHANNEL_TILE=4  -D ROW_TILE=4 -o src/f32-
 tools/xngen src/f32-prelu/neon.c.in -D CHANNEL_TILE=8  -D ROW_TILE=4 -o src/f32-prelu/gen/f32-prelu-neon-4x8.c &
 tools/xngen src/f32-prelu/neon.c.in -D CHANNEL_TILE=16 -D ROW_TILE=4 -o src/f32-prelu/gen/f32-prelu-neon-4x16.c &
 
+################################### RISC-V Vector ##################################
+tools/xngen src/f32-prelu/rvv.c.in -D ROW_TILE=1 -D LMUL=1 -o src/f32-prelu/gen/f32-prelu-rvv-1x1v.c &
+tools/xngen src/f32-prelu/rvv.c.in -D ROW_TILE=1 -D LMUL=2 -o src/f32-prelu/gen/f32-prelu-rvv-1x2v.c &
+tools/xngen src/f32-prelu/rvv.c.in -D ROW_TILE=1 -D LMUL=4 -o src/f32-prelu/gen/f32-prelu-rvv-1x4v.c &
+tools/xngen src/f32-prelu/rvv.c.in -D ROW_TILE=1 -D LMUL=8 -o src/f32-prelu/gen/f32-prelu-rvv-1x8v.c &
+tools/xngen src/f32-prelu/rvv.c.in -D ROW_TILE=2 -D LMUL=1 -o src/f32-prelu/gen/f32-prelu-rvv-2x1v.c &
+tools/xngen src/f32-prelu/rvv.c.in -D ROW_TILE=2 -D LMUL=2 -o src/f32-prelu/gen/f32-prelu-rvv-2x2v.c &
+tools/xngen src/f32-prelu/rvv.c.in -D ROW_TILE=2 -D LMUL=4 -o src/f32-prelu/gen/f32-prelu-rvv-2x4v.c &
+tools/xngen src/f32-prelu/rvv.c.in -D ROW_TILE=4 -D LMUL=1 -o src/f32-prelu/gen/f32-prelu-rvv-4x1v.c &
+tools/xngen src/f32-prelu/rvv.c.in -D ROW_TILE=4 -D LMUL=2 -o src/f32-prelu/gen/f32-prelu-rvv-4x2v.c &
+tools/xngen src/f32-prelu/rvv.c.in -D ROW_TILE=4 -D LMUL=4 -o src/f32-prelu/gen/f32-prelu-rvv-4x4v.c &
+
 ################################## WAsm SIMD ##################################
 tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=4  -D ROW_TILE=1 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-1x4.c &
 tools/xngen src/f32-prelu/wasmsimd-laneselect.c.in -D CHANNEL_TILE=8  -D ROW_TILE=1 -D RELAXED=0 -o src/f32-prelu/gen/f32-prelu-wasmsimd-laneselect-1x8.c &
