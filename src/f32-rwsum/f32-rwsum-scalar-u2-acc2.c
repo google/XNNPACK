@@ -34,11 +34,11 @@ void xnn_f32_rwsum_ukernel__scalar_u2_acc2(
     
 
   const int64_t lcm_value = math_lcm_s64(window_dilations, base_dilation) / base_dilation;
-  const int64_t scaled_lcm_u2 = 2* lcm_value;
+  const int64_t scaled_lcm_u2 = 2 * lcm_value;
 
   for (int64_t i = 0; i < output_size; i++) {
-        float sum = init_value * (window_dimensions + 1);
-        float sum2 = 0;
+        float sum0 = init_value * (window_dimensions + 1);
+        float sum1 = 0;
         const int64_t window_start = i * window_strides;
         const int64_t pad_high_boundary = math_divide_round_up_s64((padding[0] - window_start) , window_dilations);
         const int64_t pad_low_boundary = math_divide_round_up_s64((padded_size - padding[1] - window_start), window_dilations);
@@ -54,30 +54,30 @@ void xnn_f32_rwsum_ukernel__scalar_u2_acc2(
         int64_t counter = 0;
 
         for (; curr_win_idx < adjusted_pad_low_boundary; curr_win_idx++) {
-            int64_t window_row = offset + curr_win_idx * window_dilations;
+            int64_t window_row0 = offset + curr_win_idx * window_dilations;
 
-            if (window_row % base_dilation == 0) {
-                window_row /= base_dilation;
-                int64_t window_row2 = window_row + lcm_value;
-                while(window_row2 < win_boundary) { 
-                    sum += input[window_row];
-                    sum2 += input[window_row2];
+            if (window_row0 % base_dilation == 0) {
+                window_row0 /= base_dilation;
+                int64_t window_row1 = window_row0 + lcm_value;
+                while(window_row1 < win_boundary) { 
+                    sum0 += input[window_row0];
+                    sum1 += input[window_row1];
                     counter++;
-                    window_row += scaled_lcm_u2;
-                    window_row2+= scaled_lcm_u2;
+                    window_row0 += scaled_lcm_u2;
+                    window_row1 += scaled_lcm_u2;
                 }
-                counter*= 2;
-                sum += sum2;
+                counter *= 2;
+                sum0 += sum1;
                 
-                if(window_row < win_boundary){
-                  sum +=  input[window_row]; 
+                if(window_row0 < win_boundary){
+                  sum0 +=  input[window_row0]; 
                   counter += 1;
                 }
                 break;
             }
         }
-        sum -= counter * init_value;
-        output[i] = sum;
+        sum0 -= counter * init_value;
+        output[i] = sum0;
     }
 
 }

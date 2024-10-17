@@ -57,40 +57,40 @@ void xnn_f32_rwsum_ukernel__scalar_u4_acc4(
     int64_t counter = 0;
 
     for (; curr_win_idx < adjusted_pad_low_boundary; curr_win_idx++) {
-      int64_t window_row = offset + curr_win_idx * window_dilations;
+      int64_t window_row0 = offset + curr_win_idx * window_dilations;
 
-      if (window_row % base_dilation == 0) {
-        window_row /= base_dilation;
+      if (window_row0 % base_dilation == 0) {
+        window_row0 /= base_dilation;
 
-        int64_t window_row1 = window_row + lcm_value;
-        int64_t window_row2 = window_row + 2 * lcm_value;
-        int64_t window_row3 = window_row + 3 * lcm_value;
+        int64_t window_row1 = window_row0 + lcm_value;
+        int64_t window_row2 = window_row0 + 2 * lcm_value;
+        int64_t window_row3 = window_row0 + 3 * lcm_value;
         
         while (window_row3 < win_boundary) {
-          sum0 += input[window_row];
+          sum0 += input[window_row0];
           sum1 += input[window_row1];
           sum2 += input[window_row2];
           sum3 += input[window_row3];
 
           counter += 4;
 
-          window_row += scaled_lcm_u4;
+          window_row0 += scaled_lcm_u4;
           window_row1 += scaled_lcm_u4;
           window_row2 += scaled_lcm_u4;
           window_row3 += scaled_lcm_u4;
         }
 
         if (window_row2 < win_boundary) {
-          sum0 += input[window_row];
+          sum0 += input[window_row0];
           sum1 += input[window_row1];
           sum2 += input[window_row2];
           counter += 3;
         } else if (window_row1 < win_boundary) {
-          sum0 += input[window_row];
+          sum0 += input[window_row0];
           sum1 += input[window_row1];
           counter += 2;
-        } else if (window_row < win_boundary) {
-          sum0 += input[window_row];
+        } else if (window_row0 < win_boundary) {
+          sum0 += input[window_row0];
           counter += 1;
         }
 
