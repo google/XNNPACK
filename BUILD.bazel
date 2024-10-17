@@ -489,6 +489,7 @@ xnnpack_cc_library(
         ":logging",
         ":math",
         ":microparams",
+        ":requantization",
         ":unaligned",
         ":xnnpack_h",
     ],
@@ -679,7 +680,7 @@ filegroup(
             defines = xnnpack_configurable_defines(),
             # Internal build flag.
             tags = ["nobuilder"],
-            deps = MICROKERNEL_DEPS,
+            deps = MICROKERNEL_DEPS + [":requantization"],
         ),
         xnnpack_cc_library_for_arch(
             name = arch + "_all_microkernels",
@@ -688,7 +689,7 @@ filegroup(
             compatible_with = [],
             defines = xnnpack_configurable_defines(),
             tags = ["nobuilder"],
-            deps = MICROKERNEL_DEPS + [":" + arch + "_prod_microkernels"],
+            deps = MICROKERNEL_DEPS + [":" + arch + "_prod_microkernels"] + [":requantization"],
         ),
     ]
     for arch in xnnpack_archs()

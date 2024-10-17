@@ -27,6 +27,11 @@
 
 class RequantizationTester {
  public:
+  RequantizationTester& max_abs_error(uint64_t max_abs_error) {
+    this->max_abs_error_ = max_abs_error;
+    return *this;
+  }
+
   RequantizationTester& s(uint32_t s) {
     this->s_ = s;
     return *this;
@@ -109,10 +114,12 @@ class RequantizationTester {
         outputs.data());
     for (int32_t i = 0; i <= std::numeric_limits<uint8_t>::max(); i++) {
       const int32_t clamped_i = std::max(min_i, std::min(max_i, i));
-      ASSERT_EQ(uint32_t(clamped_i), uint32_t(outputs[i]))
-        << "i = " << i << ", clamped i = " << clamped_i << ", input = " << inputs[i]
-        << ", min i = " << min_i << ", max i = " << max_i
-        << ", s = " << s() << ", zero point = " << zero_point();
+      ASSERT_LE(std::abs(int64_t(clamped_i) - int64_t(outputs[i])),
+                this->max_abs_error_)
+          << "i = " << i << ", clamped i = " << clamped_i
+          << ", input = " << inputs[i] << ", min i = " << min_i
+          << ", max i = " << max_i << ", s = " << s()
+          << ", zero point = " << zero_point();
     }
   }
 
@@ -191,9 +198,9 @@ class RequantizationTester {
       const int64_t input = RequantizationTester::ShiftLeft(i - zero_point(), s()) -
         (INT64_C(1) << (s() - 1)) + 1;
       if (int32_t(input) == input) {
-        ASSERT_EQ(i, int32_t(outputs[i]))
-          << "i = " << i << ", input = " << input
-          << ", s = " << s() << ", zero point = " << zero_point();
+        ASSERT_LE(std::abs(i - int32_t(outputs[i])), this->max_abs_error_)
+            << "i = " << i << ", input = " << input << ", s = " << s()
+            << ", zero point = " << zero_point();
       }
     }
   }
@@ -273,9 +280,10 @@ class RequantizationTester {
       const int64_t input = RequantizationTester::ShiftLeft(i - zero_point(), s()) +
         (INT64_C(1) << (s() - 1)) - 1;
       if (int32_t(input) == input) {
-        ASSERT_EQ(i, int32_t(outputs[i]))
-          << "i = " << i << ", input = " << input
-          << ", s = " << s() << ", zero point = " << zero_point();
+        ASSERT_LE(std::abs((int64_t)i - int64_t(outputs[i])),
+                  this->max_abs_error_)
+            << "i = " << i << ", input = " << input << ", s = " << s()
+            << ", zero point = " << zero_point();
       }
     }
   }
@@ -356,9 +364,9 @@ class RequantizationTester {
         input += INT64_C(1) << (s() - 1);
       }
       if (int32_t(input) == input) {
-        ASSERT_EQ(i, int32_t(outputs[i]))
-          << "i = " << i << ", input = " << input
-          << ", s = " << s() << ", zero point = " << zero_point();
+        ASSERT_LE(std::abs(i - int32_t(outputs[i])), this->max_abs_error_)
+            << "i = " << i << ", input = " << input << ", s = " << s()
+            << ", zero point = " << zero_point();
       }
     }
   }
@@ -460,7 +468,11 @@ class RequantizationTester {
           std::numeric_limits<uint8_t>::max(),
           outputs.data());
       for (size_t i = 0; i < outputs.size(); i++) {
-        ASSERT_EQ(std::max(int32_t(int32_t(std::numeric_limits<uint8_t>::min())), zero_point - 1), int32_t(outputs[i]));
+        int32_t expected =
+            std::max(int32_t(int32_t(std::numeric_limits<uint8_t>::min())),
+                     zero_point - 1);
+        int32_t output = int32_t(outputs[i]);
+        ASSERT_LE(std::abs((int64_t)expected - output), this->max_abs_error_);
       }
     }
 
@@ -557,7 +569,8 @@ class RequantizationTester {
       for (size_t i = 0; i < inputs.size(); i++) {
         const uint8_t reference_output = xnn_qu8_requantize_rndna(
           inputs[i], scale, zero_point(), qmin(), qmax());
-        ASSERT_EQ(uint32_t(reference_output), uint32_t(outputs[i]));
+        ASSERT_LE(std::abs(int64_t(reference_output) - int64_t(outputs[i])),
+                  this->max_abs_error_);
       }
     }
   }
@@ -770,4 +783,5 @@ class RequantizationTester {
   int16_t qmin_{std::numeric_limits<int16_t>::min()};
   int16_t qmax_{std::numeric_limits<int16_t>::max()};
   size_t iterations_{1};
+  uint64_t max_abs_error_{0};
 };

@@ -167,6 +167,13 @@ union xnn_qs8_conv_minmax_params {
     int32_t output_zero_point;
     int64_t rounding;
   } rndnu_scalar;
+  struct {
+    int16_t multiplier;
+    int32_t right_preshift;
+    int16_t output_min;
+    int16_t output_max;
+    int16_t output_zero_point;
+  } rndnu16_scalar;
 #if XNN_ARCH_ARM
   struct {
     float scale;
@@ -247,6 +254,14 @@ union xnn_qu8_conv_minmax_params {
     int32_t kernel_zero_point;
     int64_t rounding;
   } rndnu_scalar;
+  struct {
+    int16_t multiplier;
+    int32_t right_preshift;
+    int16_t output_min;
+    int16_t output_max;
+    int16_t output_zero_point;
+    int16_t kernel_zero_point;
+  } rndnu16_scalar;
 #if XNN_ARCH_ARM
   struct {
     float scale;

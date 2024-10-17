@@ -155,6 +155,18 @@ BENCHMARK_CAPTURE(qu8_requantization, rndna__scalar_unsigned64,
   ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
   ->UseRealTime();
 
+BENCHMARK_CAPTURE(qu8_requantization, rndnu16__scalar,
+                  xnn_qu8_requantize_rndnu16__scalar)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
+    ->UseRealTime();
+
+#if XNN_ARCH_X86_64
+BENCHMARK_CAPTURE(qu8_requantization, rndnu16__sse41,
+                  xnn_qu8_requantize_rndnu16__sse41)
+    ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
+    ->UseRealTime();
+#endif
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif
