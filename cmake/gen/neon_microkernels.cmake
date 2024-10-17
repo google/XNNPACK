@@ -721,7 +721,6 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-neon-c64.c
   src/qs8-requantization/qs8-requantization-fp32-neon.c
   src/qs8-requantization/qs8-requantization-gemmlowp-neon.c
-  src/qs8-requantization/qs8-requantization-rndna-neon.c
   src/qs8-requantization/qs8-requantization-rndnu-neon-mull.c
   src/qs8-requantization/qs8-requantization-rndnu-neon-qdmulh.c
   src/qs8-rsum/gen/qs8-rsum-neon-u16.c
@@ -837,7 +836,6 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/qu8-rdsum/gen/qu8-rdsum-7p7x-neon-u64.c
   src/qu8-requantization/qu8-requantization-fp32-neon.c
   src/qu8-requantization/qu8-requantization-gemmlowp-neon.c
-  src/qu8-requantization/qu8-requantization-rndna-neon.c
   src/qu8-rsum/gen/qu8-rsum-neon-u16.c
   src/qu8-rsum/gen/qu8-rsum-neon-u64-acc2.c
   src/qu8-rsum/gen/qu8-rsum-neon-u64-acc4.c

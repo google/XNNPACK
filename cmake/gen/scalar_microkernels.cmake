@@ -724,9 +724,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-requantization/qs8-requantization-fp32-scalar-fmagic.c
   src/qs8-requantization/qs8-requantization-fp32-scalar-lrintf.c
   src/qs8-requantization/qs8-requantization-gemmlowp-scalar.c
-  src/qs8-requantization/qs8-requantization-rndna-scalar-signed64.c
-  src/qs8-requantization/qs8-requantization-rndna-scalar-unsigned32.c
-  src/qs8-requantization/qs8-requantization-rndna-scalar-unsigned64.c
   src/qs8-requantization/qs8-requantization-rndnu-scalar.c
   src/qs8-rsum/gen/qs8-rsum-scalar-u1.c
   src/qs8-rsum/gen/qs8-rsum-scalar-u2.c
@@ -863,9 +860,6 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/qu8-requantization/qu8-requantization-fp32-scalar-fmagic.c
   src/qu8-requantization/qu8-requantization-fp32-scalar-lrintf.c
   src/qu8-requantization/qu8-requantization-gemmlowp-scalar.c
-  src/qu8-requantization/qu8-requantization-rndna-scalar-signed64.c
-  src/qu8-requantization/qu8-requantization-rndna-scalar-unsigned32.c
-  src/qu8-requantization/qu8-requantization-rndna-scalar-unsigned64.c
   src/qu8-rsum/gen/qu8-rsum-scalar-u1.c
   src/qu8-rsum/gen/qu8-rsum-scalar-u2.c
   src/qu8-vadd/gen/qu8-vadd-minmax-scalar-u2.c

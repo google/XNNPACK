@@ -272,7 +272,6 @@ SET(NON_PROD_SSE2_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4c2s4-minmax-fp32-sse2-ld128.c
   src/qs8-requantization/qs8-requantization-fp32-sse2.c
   src/qs8-requantization/qs8-requantization-gemmlowp-sse2.c
-  src/qs8-requantization/qs8-requantization-rndna-sse2.c
   src/qs8-vadd/gen/qs8-vadd-minmax-sse2-mul16-ld64-u16.c
   src/qs8-vadd/gen/qs8-vadd-minmax-sse2-mul16-ld64-u24.c
   src/qs8-vadd/gen/qs8-vadd-minmax-sse2-mul16-ld64-u32.c
@@ -344,7 +343,6 @@ SET(NON_PROD_SSE2_MICROKERNEL_SRCS
   src/qu8-igemm/gen/qu8-igemm-4x4c2s4-minmax-fp32-sse2-ld128.c
   src/qu8-requantization/qu8-requantization-fp32-sse2.c
   src/qu8-requantization/qu8-requantization-gemmlowp-sse2.c
-  src/qu8-requantization/qu8-requantization-rndna-sse2.c
   src/qu8-rsum/gen/qu8-rsum-sse2-u16.c
   src/qu8-rsum/gen/qu8-rsum-sse2-u64-acc2.c
   src/qu8-rsum/gen/qu8-rsum-sse2-u64-acc4.c
