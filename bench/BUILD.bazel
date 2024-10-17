@@ -235,14 +235,15 @@ xnnpack_benchmark(
 ]]
 
 [xnnpack_benchmark(
-    name = "f32_rwsum_bench",
+    name = "%s_bench" % kernel,
     srcs = [
-        "f32-rwsum.cc",
-        "rsum-benchmark.h",
-        "rw-benchmark.h",
+        "%s.cc" % kernel.replace("_", "-"),
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
-)]
+) for kernel in [
+    "f32_rwdsum",
+    "f32_rwsum",
+]]
 
 [xnnpack_benchmark(
     name = "%s_bench" % kernel,
