@@ -515,15 +515,6 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
     case xnn_node_type_floor:
     case xnn_node_type_hardswish:
     case xnn_node_type_leaky_relu:
-    case xnn_node_type_static_mean:
-    case xnn_node_type_static_sum:
-      if (subgraph->values[node->inputs[0]].shape.num_dims == 4) {
-        return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW | XNN_LAYOUT_FLAG_COMPATIBLE_NHWC2NCHW;
-      } else {
-        xnn_log_info("Node %s inputs shape is incompatible with sparse inference",
-                     xnn_node_type_to_string(node->type));
-        return 0;
-      }
     case xnn_node_type_negate:
     case xnn_node_type_sigmoid:
     case xnn_node_type_square:
@@ -531,6 +522,15 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
       assert(node->num_outputs == 1);
       if (subgraph->values[node->inputs[0]].shape.num_dims == 4) {
         return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW;
+      } else {
+        xnn_log_info("Node %s inputs shape is incompatible with sparse inference",
+                     xnn_node_type_to_string(node->type));
+        return 0;
+      }
+    case xnn_node_type_static_mean:
+    case xnn_node_type_static_sum:
+      if (subgraph->values[node->inputs[0]].shape.num_dims == 4) {
+        return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW | XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC;
       } else {
         xnn_log_info("Node %s inputs shape is incompatible with sparse inference",
                      xnn_node_type_to_string(node->type));
