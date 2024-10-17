@@ -108,25 +108,16 @@ int main(int argc, char** argv) {
         op, NULL, NULL);
       break;
     case 17:
-      xnn_create_global_average_pooling_nwc_f32(
-        0.0f, 0.0f,
-        0, &op);
-      break;
-    case 18:
-      xnn_setup_global_average_pooling_nwc_f32(
-        op, NULL, NULL, NULL);
-      break;
-    case 19:
       xnn_create_hardswish_nc_f32(
         0, &op);
       xnn_reshape_hardswish_nc_f32(
         op, 0, 0, 0, 0, NULL);
       break;
-    case 20:
+    case 18:
       xnn_setup_hardswish_nc_f32(
         op, NULL, NULL);
       break;
-    case 21:
+    case 19:
       xnn_create_max_pooling2d_nhwc_f32(
         0, 0, 0, 0,
         0, 0, 0,
@@ -134,63 +125,63 @@ int main(int argc, char** argv) {
         0.0f, 0.0f,
         0, &op);
       break;
-    case 22:
+    case 20:
       xnn_setup_max_pooling2d_nhwc_f32(
         op, NULL, NULL);
       break;
-    case 29:
+    case 27:
       xnn_create_prelu_nc_f32(
         0, 0, 0, 0,
         NULL, 0, NULL, NULL, &op);
       break;
-    case 30:
+    case 28:
       xnn_setup_prelu_nc_f32(
         op,
         NULL, NULL);
       break;
-    case 31:
+    case 29:
       xnn_create_resize_bilinear2d_nhwc_f32(
         0, 0, 0, &op);
       break;
-    case 32:
+    case 30:
       xnn_setup_resize_bilinear2d_nhwc_f32(
         op, NULL, NULL, NULL);
       break;
-    case 33:
+    case 31:
       xnn_create_sigmoid_nc_f32(
         0, &op);
       xnn_reshape_sigmoid_nc_f32(
         op, 0, 0, 0, 0, NULL);
       break;
-    case 34:
+    case 32:
       xnn_setup_sigmoid_nc_f32(
         op, NULL, NULL);
       break;
-    case 35:
+    case 33:
       xnn_create_softmax_nc_f32(
         0, &op);
       break;
-    case 36:
+    case 34:
       xnn_setup_softmax_nc_f32(
         op, NULL, NULL);
       break;
-    case 39:
+    case 37:
       xnn_create_channel_shuffle_nc_x32(
         0, 0, 0, 0,
         0, &op);
       break;
-    case 40:
+    case 38:
       xnn_setup_channel_shuffle_nc_x32(
         op, NULL, NULL);
       break;
-    case 41:
+    case 39:
       xnn_create_unpooling2d_nhwc_x32(
         0, 0, 0, 0,
         0, 0,
         0, 0, 0,
         0, &op);
       break;
-    case 42:
+    case 40:
       xnn_setup_unpooling2d_nhwc_x32(
         op, NULL, NULL, NULL);
       break;

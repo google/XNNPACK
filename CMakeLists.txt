@@ -414,8 +414,6 @@ SET(OPERATOR_SRCS
   src/operators/deconvolution-nhwc.c
   src/operators/dynamic-fully-connected-nc.c
   src/operators/fully-connected-nc.c
-  src/operators/global-average-pooling-ncw.c
-  src/operators/global-average-pooling-nwc.c
   src/operators/lut-elementwise-nc.c
   src/operators/max-pooling-nhwc.c
   src/operators/prelu-nc.c
@@ -501,7 +499,6 @@ SET(XNNPACK_SRCS
   src/configs/dwconv2d-chw-config.c
   src/configs/experiments-config.c
   src/configs/gavgpool-config.c
-  src/configs/gavgpool-cw-config.c
   src/configs/gemm-config.c
   src/configs/ibilinear-chw-config.c
   src/configs/ibilinear-config.c
@@ -1469,7 +1466,6 @@ IF(XNNPACK_BUILD_TESTS)
       f16-conv-hwc2chw
       f16-f32acc-rdsum
       f16-f32acc-rsum
-      f16-gavgpool-cw
       f16-gavgpool-minmax
       f16-ibilinear-chw
       f16-ibilinear
@@ -1482,7 +1478,6 @@ IF(XNNPACK_BUILD_TESTS)
       f16-vmulcaddc-minmax
       f32-conv-hwc
       f32-conv-hwc2chw
-      f32-gavgpool-cw
       f32-gavgpool-minmax
       f32-ibilinear-chw
       f32-ibilinear
@@ -1944,7 +1939,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
         deconvolution
         elu
         floor
-        global-average-pooling
         hardswish
         leaky-relu
         max-pooling
@@ -1979,7 +1973,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       f16-f32acc-igemm
       f16-f32acc-rdsum
       f16-f32acc-rsum
-      f16-gavgpool-cw
       f16-gemm
       f16-gemm-minmax
       f16-igemm
@@ -1995,7 +1988,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       f32-dwconv
       f32-dwconv2d-chw
       f32-f16-vcvt
-      f32-gavgpool-cw
       f32-gemm
       f32-gemm-goi-minmax
       f32-gemm-minmax

@@ -395,8 +395,7 @@ class GlobalAveragePoolingOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t global_average_pooling_op = nullptr;
 
-      xnn_status status = xnn_create_global_average_pooling_nwc_f16(
-          output_min, output_max,
+      xnn_status status = xnn_create_mean_nd_f16(
           0, &global_average_pooling_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -407,13 +406,20 @@ class GlobalAveragePoolingOperatorTester {
       // Smart pointer to automatically delete global_average_pooling_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_global_average_pooling_op(global_average_pooling_op, xnn_delete_operator);
 
+      size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
+      size_t input_shape[XNN_MAX_TENSOR_DIMS];
+      reduction_axes[0] = 1;
+      input_shape[0] = batch_size();
+      input_shape[1] = width();
+      input_shape[2] = channels();
+
       size_t workspace_size = 0;
       size_t workspace_alignment = 0;
       ASSERT_EQ(xnn_status_success,
-        xnn_reshape_global_average_pooling_nwc_f16(
+        xnn_reshape_mean_nd_f16(
           global_average_pooling_op,
-          batch_size(), width(),
-          channels(), input_stride(), output_stride(),
+          1, reduction_axes,
+          3, input_shape,
           &workspace_size, &workspace_alignment,
           auto_threadpool.get()));
 
@@ -421,7 +427,7 @@ class GlobalAveragePoolingOperatorTester {
       std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_global_average_pooling_nwc_f16(
+        xnn_setup_mean_nd_f16(
           global_average_pooling_op,
           workspace.data(),
           input.data(), output.data()));
@@ -493,8 +499,7 @@ class GlobalAveragePoolingOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t global_average_pooling_op = nullptr;
 
-      xnn_status status = xnn_create_global_average_pooling_nwc_f32(
-          output_min, output_max,
+      xnn_status status = xnn_create_mean_nd_f32(
           0, &global_average_pooling_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -505,23 +510,23 @@ class GlobalAveragePoolingOperatorTester {
       // Smart pointer to automatically delete global_average_pooling_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_global_average_pooling_op(global_average_pooling_op, xnn_delete_operator);
 
-      size_t workspace_size = 0;
-      size_t workspace_alignment = 0;
+      size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
+      size_t input_shape[XNN_MAX_TENSOR_DIMS];
+      reduction_axes[0] = 1;
+      input_shape[0] = batch_size();
+      input_shape[1] = width();
+      input_shape[2] = channels();
+
       ASSERT_EQ(xnn_status_success,
-        xnn_reshape_global_average_pooling_nwc_f32(
+        xnn_reshape_mean_nd_f32(
           global_average_pooling_op,
-          batch_size(), width(),
-          channels(), input_stride(), output_stride(),
-          &workspace_size, &workspace_alignment,
+          1, reduction_axes,
+          3, input_shape,
           auto_threadpool.get()));
 
-      ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
-
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_global_average_pooling_nwc_f32(
+        xnn_setup_mean_nd_f32(
           global_average_pooling_op,
-          workspace.data(),
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
@@ -530,8 +535,6 @@ class GlobalAveragePoolingOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          EXPECT_LE(output[i * output_stride() + c], output_max);
-          EXPECT_GE(output[i * output_stride() + c], output_min);
           EXPECT_NEAR(output[i * output_stride() + c], output_ref[i * channels() + c], std::abs(output_ref[i * channels() + c]) * 1.0e-6f)
             << "at batch index " << i << " / " << batch_size()
             << ", channel " << c << " / " << channels();
@@ -589,8 +592,7 @@ class GlobalAveragePoolingOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t global_average_pooling_op = nullptr;
 
-      xnn_status status = xnn_create_global_average_pooling_ncw_f16(
-        output_min, output_max, 0, &global_average_pooling_op);
+      xnn_status status = xnn_create_mean_nd_f16(0, &global_average_pooling_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -599,15 +601,30 @@ class GlobalAveragePoolingOperatorTester {
       // Smart pointer to automatically delete global_average_pooling_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_global_average_pooling_op(global_average_pooling_op, xnn_delete_operator);
 
+      size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
+      size_t input_shape[XNN_MAX_TENSOR_DIMS];
+      reduction_axes[0] = 2;
+      input_shape[0] = batch_size();
+      input_shape[1] = channels();
+      input_shape[2] = width();
+
+      size_t workspace_size = 0;
+      size_t workspace_alignment = 0;
       ASSERT_EQ(xnn_status_success,
-        xnn_reshape_global_average_pooling_ncw_f16(
+        xnn_reshape_mean_nd_f16(
           global_average_pooling_op,
-          batch_size(), width(), channels(),
+          1, reduction_axes,
+          3, input_shape,
+          &workspace_size, &workspace_alignment,
           auto_threadpool.get()));
 
+      ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
+      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_global_average_pooling_ncw_f16(
+        xnn_setup_mean_nd_f16(
           global_average_pooling_op,
+          workspace.data(),
           input.data(), output.data()));
 
       ASSERT_EQ(xnn_status_success,
@@ -677,8 +694,7 @@ class GlobalAveragePoolingOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t global_average_pooling_op = nullptr;
 
-      xnn_status status = xnn_create_global_average_pooling_ncw_f32(
-        output_min, output_max, 0, &global_average_pooling_op);
+      xnn_status status = xnn_create_mean_nd_f32(0, &global_average_pooling_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -687,14 +703,22 @@ class GlobalAveragePoolingOperatorTester {
       // Smart pointer to automatically delete global_average_pooling_op.
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_global_average_pooling_op(global_average_pooling_op, xnn_delete_operator);
 
+      size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
+      size_t input_shape[XNN_MAX_TENSOR_DIMS];
+      reduction_axes[0] = 2;
+      input_shape[0] = batch_size();
+      input_shape[1] = channels();
+      input_shape[2] = width();
+
       ASSERT_EQ(xnn_status_success,
-        xnn_reshape_global_average_pooling_ncw_f32(
+        xnn_reshape_mean_nd_f32(
           global_average_pooling_op,
-          batch_size(), width(), channels(),
+          1, reduction_axes,
+          3, input_shape,
           auto_threadpool.get()));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_global_average_pooling_ncw_f32(
+        xnn_setup_mean_nd_f32(
           global_average_pooling_op,
           input.data(), output.data()));
 
@@ -704,8 +728,6 @@ class GlobalAveragePoolingOperatorTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          EXPECT_LE(output[i * channels() + c], output_max);
-          EXPECT_GE(output[i * channels() + c], output_min);
           EXPECT_NEAR(output[i * channels() + c], output_ref[i * channels() + c], std::abs(output_ref[i * channels() + c]) * 1.0e-5f)
             << "at batch index " << i << " / " << batch_size()
             << ", channel " << c << " / " << channels();
