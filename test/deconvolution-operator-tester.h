@@ -24,10 +24,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/buffer.h"
 #include "xnnpack/cache.h"
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microparams.h"
-#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class DeconvolutionOperatorTester {

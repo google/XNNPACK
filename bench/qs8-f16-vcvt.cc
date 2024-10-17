@@ -3,16 +3,17 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <benchmark/benchmark.h>
 #include "bench/utils.h"
 #include "bench/vcvt-benchmark.h"
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/hardware-config.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams.h"
 #include "xnnpack/microparams-init.h"
+#include "xnnpack/microparams.h"
 #include "xnnpack/vcvt.h"
+#include <benchmark/benchmark.h>
 
 static void qs8_f16_vcvt(
   benchmark::State& state,

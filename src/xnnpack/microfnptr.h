@@ -11,8 +11,8 @@
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microparams.h"
-
 
 /****************** Microkernel pointers for dense inference *****************/
 

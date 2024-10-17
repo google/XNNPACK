@@ -3,10 +3,10 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack.h"
-
 #include "unary_operator.h"
 #include "bench/utils.h"
+#include "xnnpack.h"
+#include "xnnpack/math.h"
 #include <benchmark/benchmark.h>
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "tensorflow/lite/schema/schema_generated.h"

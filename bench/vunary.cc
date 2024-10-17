@@ -16,14 +16,15 @@
 
 #include "bench/utils.h"
 #include "xnnpack.h"
+#include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
 #include "xnnpack/hardware-config.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/vhswish.h"
 #include "xnnpack/vlrelu.h"
-#include "xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 
 template <typename T>

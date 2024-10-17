@@ -17,10 +17,11 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/buffer.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/pack.h"
-#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class ConvHWC2CHWMicrokernelTester {

@@ -10,8 +10,8 @@
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microparams.h"
-
 
 #ifdef __cplusplus
 extern "C" {
