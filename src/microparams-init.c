@@ -15,6 +15,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microparams.h"
+#include "xnnpack/requantization.h"
 #include "xnnpack/unaligned.h"
 
 size_t xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params(
@@ -268,6 +269,31 @@ size_t xnn_init_qu8_conv_minmax_rndnu_scalar_params(
   return sizeof(params->rndnu_scalar);
 }
 
+size_t xnn_init_qu8_conv_minmax_rndnu16_scalar_params(
+  union xnn_qu8_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  uint8_t kernel_zero_point,
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max)
+{
+  assert(scale >= 0x1.0p-32f);
+  assert(scale < 1.0f);
+  struct F32 f32 = parse_f32(scale);
+
+  int exp = f32.exp;
+  // m16 is in the range [2^14, 2^15 - 1]
+  int16_t m16 = f32.multiplier >> 9;
+  int right_preshift = -exp - 1;
+
+  params->rndnu16_scalar.kernel_zero_point = (int16_t) kernel_zero_point;
+  params->rndnu16_scalar.multiplier = m16;
+  params->rndnu16_scalar.right_preshift = right_preshift;
+  params->rndnu16_scalar.output_min = output_min;
+  params->rndnu16_scalar.output_max = output_max;
+  params->rndnu16_scalar.output_zero_point = (int16_t) output_zero_point;
+  return sizeof(params->rndnu16_scalar);
+}
 
 #if XNN_ARCH_ARM
 size_t xnn_init_qu8_conv_minmax_fp32_armsimd32_params(

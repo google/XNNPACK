@@ -104,6 +104,8 @@ DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_rndnu__scalar)
 DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_rndnu__sse41_sra)
 DECLARE_QS8_REQUANTIZATION_FUNCTION(xnn_qs8_requantize_rndnu__sse41_srl)
 
+DECLARE_QU8_REQUANTIZATION_FUNCTION(xnn_qu8_requantize_rndnu16__scalar)
+DECLARE_QU8_REQUANTIZATION_FUNCTION(xnn_qu8_requantize_rndnu16__sse41)
 
 #ifdef __cplusplus
 }  // extern "C"

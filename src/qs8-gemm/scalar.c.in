@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert DATATYPE in ["QD8", "QC4", "QB4_F16", "QB4_F32"] or REQUANTIZATION in ["FP32", "RNDNU"]
+$assert DATATYPE in ["QD8", "QC4", "QB4_F16", "QB4_F32"] or REQUANTIZATION in ["FP32", "RNDNU", "RNDNU16"]
 $assert REQUANTIZATION != "FP32" or VARIANT in ["FMAGIC", "IMAGIC", "LRINTF"]
 $assert DATATYPE in ["QC8", "QS8", "QU8", "QD8", "QC4", "QB4_F16", "QB4_F32"]
 #include <assert.h>
@@ -12,6 +12,7 @@ $if VARIANT == "LRINTF":
 
 #include "xnnpack/gemm.h"
 #include "xnnpack/math.h"
+#include "xnnpack/requantization.h"
 $if NR % 4 != 0:
   #include "xnnpack/unaligned.h"
 
@@ -119,6 +120,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
       const int32_t voutput_min_less_zero_point = (int32_t) params->${PARAMS_STRUCT}.output_min - (int32_t) params->${PARAMS_STRUCT}.output_zero_point;
       const int32_t voutput_max_less_zero_point = (int32_t) params->${PARAMS_STRUCT}.output_max - (int32_t) params->${PARAMS_STRUCT}.output_zero_point;
       const int32_t voutput_zero_point = params->${PARAMS_STRUCT}.output_zero_point;
+    $elif REQUANTIZATION == "RNDNU16":
+      const int16_t vmultiplier = params->${PARAMS_STRUCT}.multiplier;
+      const int32_t vright_preshift = params->${PARAMS_STRUCT}.right_preshift;
+      const int16_t voutput_min_less_zero_point = params->${PARAMS_STRUCT}.output_min - params->${PARAMS_STRUCT}.output_zero_point;
+      const int16_t voutput_max_less_zero_point = params->${PARAMS_STRUCT}.output_max - params->${PARAMS_STRUCT}.output_zero_point;
+      const int16_t voutput_zero_point = params->${PARAMS_STRUCT}.output_zero_point;
 
   $if DATATYPE == "QU8":
     const int32_t vb_zero_point = params->${PARAMS_STRUCT}.kernel_zero_point;
@@ -422,6 +429,23 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
         $for M in range(MR):
           $for N in range(NR):
             vout${M}x${N} += voutput_zero_point;
+      $elif REQUANTIZATION == "RNDNU16":
+        $for M in range(MR):
+          $for N in range(NR):
+            int16_t vout${M}x${N} = upper_half_product(saturating_cast(math_asr_s32(vacc${M}x${N}, vright_preshift)), vmultiplier);
+
+        $for M in range(MR):
+          $for N in range(NR):
+            vout${M}x${N} = math_max_s16(vout${M}x${N}, voutput_min_less_zero_point);
+
+        $for M in range(MR):
+          $for N in range(NR):
+            vout${M}x${N} = math_min_s16(vout${M}x${N}, voutput_max_less_zero_point);
+
+        $for M in range(MR):
+          $for N in range(NR):
+            vout${M}x${N} += voutput_zero_point;
+
 
       if XNN_LIKELY(nc >= ${NR}) {
         $for M in range(MR):

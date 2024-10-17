@@ -29,6 +29,16 @@ TEST(QU8_RNDNA__SCALAR_UNSIGNED32, exact_divide_by_po2) {
   }
 }
 
+TEST(QU8_RNDNU16_SCALAR, exact_divide_by_po2) {
+  for (uint32_t s = 1; s < 32; s++) {
+    RequantizationTester()
+        .qmin(std::numeric_limits<uint8_t>::min())
+        .qmax(std::numeric_limits<uint8_t>::max())
+        .s(s)
+        .TestExactDivideByPO2(xnn_qu8_requantize_rndnu16__scalar);
+  }
+}
+
 TEST(QU8_RNDNA__SCALAR_UNSIGNED32, exact_divide_by_po2_with_zero_point) {
   for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
@@ -38,6 +48,19 @@ TEST(QU8_RNDNA__SCALAR_UNSIGNED32, exact_divide_by_po2_with_zero_point) {
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
         .TestExactDivideByPO2(xnn_qu8_requantize_rndna__scalar_unsigned32);
+    }
+  }
+}
+
+TEST(QU8_RNDNU16__SCALAR, exact_divide_by_po2_with_zero_point) {
+  for (int32_t zero_point = 1; zero_point < 256; zero_point++) {
+    for (uint32_t s = 1; s < 32; s++) {
+      RequantizationTester()
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .s(s)
+          .TestExactDivideByPO2(xnn_qu8_requantize_rndnu16__scalar);
     }
   }
 }
@@ -55,6 +78,19 @@ TEST(QU8_RNDNA__SCALAR_UNSIGNED32, divide_by_po2_with_rounding_up) {
   }
 }
 
+TEST(QU8_RNDNU16__SCALAR, divide_by_po2_with_rounding_up) {
+  for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
+    for (uint32_t s = 1; s < 32; s++) {
+      RequantizationTester()
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .s(s)
+          .TestDivideByPO2WithRoundingUp(xnn_qu8_requantize_rndnu16__scalar);
+    }
+  }
+}
+
 TEST(QU8_RNDNA__SCALAR_UNSIGNED32, divide_by_po2_with_rounding_down) {
   for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
     for (uint32_t s = 1; s < 32; s++) {
@@ -64,6 +100,19 @@ TEST(QU8_RNDNA__SCALAR_UNSIGNED32, divide_by_po2_with_rounding_down) {
         .qmax(std::numeric_limits<uint8_t>::max())
         .s(s)
         .TestDivideByPO2WithRoundingDown(xnn_qu8_requantize_rndna__scalar_unsigned32);
+    }
+  }
+}
+
+TEST(QU8_RNDNU16__SCALAR, divide_by_po2_with_rounding_down) {
+  for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
+    for (uint32_t s = 1; s < 32; s++) {
+      RequantizationTester()
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .s(s)
+          .TestDivideByPO2WithRoundingDown(xnn_qu8_requantize_rndnu16__scalar);
     }
   }
 }
@@ -81,11 +130,34 @@ TEST(QU8_RNDNA__SCALAR_UNSIGNED32, divide_by_po2_with_rounding_away) {
   }
 }
 
+TEST(QU8_RNDNU16__SCALAR, divide_by_po2_with_rounding_away) {
+  for (int32_t zero_point = 0; zero_point < 256; zero_point++) {
+    for (uint32_t s = 1; s < 32; s++) {
+      RequantizationTester()
+          .max_abs_error(1)
+          .zero_point(zero_point)
+          .qmin(std::numeric_limits<uint8_t>::min())
+          .qmax(std::numeric_limits<uint8_t>::max())
+          .s(s)
+          .TestDivideByPO2WithRoundingTiesAway(
+              xnn_qu8_requantize_rndnu16__scalar);
+    }
+  }
+}
+
 TEST(QU8_RNDNA__SCALAR_UNSIGNED32, special_cases) {
   RequantizationTester()
     .qmin(std::numeric_limits<uint8_t>::min())
     .qmax(std::numeric_limits<uint8_t>::max())
     .TestSpecialCases(xnn_qu8_requantize_rndna__scalar_unsigned32);
+}
+
+TEST(QU8_RNDNU16__SCALAR, special_cases) {
+  RequantizationTester()
+      .max_abs_error(1)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .TestSpecialCases(xnn_qu8_requantize_rndnu16__scalar);
 }
 
 TEST(QU8_RNDNA__SCALAR_UNSIGNED32, random_cases) {
@@ -97,6 +169,16 @@ TEST(QU8_RNDNA__SCALAR_UNSIGNED32, random_cases) {
     .TestRandomCasesRoundToNearestTiesAway(xnn_qu8_requantize_rndna__scalar_unsigned32);
 }
 
+TEST(QU8_RNDNU16__SCALAR, random_cases) {
+  RequantizationTester()
+      .max_abs_error(1)
+      .qmin(std::numeric_limits<uint8_t>::min())
+      .qmax(std::numeric_limits<uint8_t>::max())
+      .zero_point(128)
+      .iterations(100)
+      .TestRandomCasesRoundToNearestTiesAway(
+          xnn_qu8_requantize_rndna__scalar_unsigned32);
+}
 
 /*
  * Round-to-nearest, ties away from zero, scalar implementation using unsigned 64-bit arithmetics.

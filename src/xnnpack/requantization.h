@@ -150,6 +150,84 @@ static inline uint8_t xnn_qu8_requantize_rndna(
   return (uint8_t) (output + (int32_t) zero_point);
 }
 
+// f32 = 2^exp * multiplier, multiplier is in [1, 2)
+struct F32 {
+  int32_t exp;
+  // 24 bits
+  uint32_t multiplier;
+};
+
+static inline struct F32 parse_f32(float scale) {
+  assert(scale >= 0);
+  uint32_t scale_bits = float_as_uint32(scale);
+  const uint32_t multiplier =
+      (scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000);
+  int32_t exp = (scale_bits >> 23) - 127;
+  struct F32 ret = {.exp = exp, .multiplier = multiplier};
+  return ret;
+}
+
+static inline int16_t saturating_cast(int32_t input) {
+  if (input > INT16_MAX) return INT16_MAX;
+  if (input < INT16_MIN) return INT16_MIN;
+  return input;
+}
+
+// upper_half_product emulates X86_64 pmulhrsw.
+// int16_t range is [-2^15, 2^15 - 1]
+// int16_t * int16_t range is strictly included into [-2^30, 2^30 - 1],
+// so the result can modeled by signed int31.
+// To extract the most significant 16 bits one can shift int31 by 15.
+static int16_t upper_half_product(int16_t x, int16_t m16) {
+  int32_t product = (int32_t)x * (int32_t)m16;
+  int32_t rounding = 1 << 14;
+  int16_t result = (product + rounding) >> 15;
+  return result;
+}
+
+static inline uint8_t clamp_u8(int16_t result, uint8_t zero_point, uint8_t min,
+                               uint8_t max) {
+  int16_t min_less_zero_point = (int16_t)min - (int16_t)zero_point;
+  int16_t max_less_zero_point = (int16_t)max - (int16_t)zero_point;
+  int16_t output = math_max_s16(result, min_less_zero_point);
+  output = math_min_s16(output, max_less_zero_point);
+  return output + (int16_t)zero_point;
+}
+
+static inline uint8_t xnn_qu8_requantize_rndnu16(int32_t input, float scale,
+                                                 uint8_t zero_point,
+                                                 uint8_t min, uint8_t max) {
+  assert(scale < 1.0f);
+  assert(scale >= 1.0f / 4294967296.0f /* 0x1.0p-32f */);
+
+  // multiplier represents the 24 bit mantissa.
+  // i.e. scale = 2^{-exp} * (multiplier * 2^{-23})
+  struct F32 f32 = parse_f32(scale);
+
+  // scale is modelled as 2^{exp} * m16 * 2^{-14}
+  int exp = f32.exp;
+  assert(exp <= -1);
+  assert(exp >= -32);
+
+  // m16 is in the range [2^14, 2^15 - 1]
+  int16_t m16 = f32.multiplier >> 9;
+
+  // Desired product: P = input * 2^exp * m16 * 2^-14
+  // We care about the lower 8 bits of P with saturation,
+  // i.e. if P >= 2^8 the answer should be 2^8 - 1.
+
+  // To compute these 8 bits we would like to use the upper half
+  // of a 16 bit x 16 bit product.
+  // This is achived by a preshift of the input, depending on
+  // the value of exp.
+  int right_preshift = -exp - 1;
+  int32_t preshifted_input = math_asr_s32(input, right_preshift);
+  int16_t input16 = saturating_cast(preshifted_input);
+  int16_t upper_half16 = upper_half_product(input16, m16);
+
+  return clamp_u8(upper_half16, zero_point, min, max);
+}
+
 static inline int8_t xnn_qs8_requantize_rndnu(
   int32_t input,
   float scale,

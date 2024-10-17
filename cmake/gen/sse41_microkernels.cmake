@@ -375,6 +375,7 @@ SET(NON_PROD_SSE41_MICROKERNEL_SRCS
   src/qu8-igemm/gen/qu8-igemm-4x4c2s4-minmax-fp32-sse41-ld128.c
   src/qu8-requantization/qu8-requantization-gemmlowp-sse41.c
   src/qu8-requantization/qu8-requantization-rndna-sse41.c
+  src/qu8-requantization/qu8-requantization-rndnu16-sse41.c
   src/qu8-vadd/gen/qu8-vadd-minmax-sse41-mul16-ld64-u16.c
   src/qu8-vadd/gen/qu8-vadd-minmax-sse41-mul32-ld32-u8.c
   src/qu8-vadd/gen/qu8-vadd-minmax-sse41-mul32-ld32-u16.c
