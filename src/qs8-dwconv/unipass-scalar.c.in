@@ -10,9 +10,13 @@ $assert DATATYPE in ["QC8", "QS8", "QU8"]
 #include <assert.h>
 $if VARIANT == "LRINTF":
   #include <math.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/dwconv.h"
 #include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
 $if CHANNEL_TILE % 4 != 0:
   #include "xnnpack/unaligned.h"
 
