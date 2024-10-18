@@ -1326,12 +1326,6 @@ xnnpack_unit_test(
 ########################## Size tests for the library #########################
 
 xnnpack_binary(
-    name = "operator_size_test",
-    srcs = ["operator-size.c"],
-    deps = ["//:XNNPACK"],
-)
-
-xnnpack_binary(
     name = "subgraph_size_test",
     srcs = ["subgraph-size.c"],
     deps = ["//:XNNPACK"],

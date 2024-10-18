@@ -1305,9 +1305,6 @@ IF(XNNPACK_BUILD_TESTS)
     ENDFOREACH()
 
     # ---[ Build size tests
-    ADD_EXECUTABLE(operator-size-test test/operator-size.c)
-    TARGET_LINK_LIBRARIES(operator-size-test PRIVATE XNNPACK)
-
     ADD_EXECUTABLE(subgraph-size-test test/subgraph-size.c)
     TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE XNNPACK)
 
