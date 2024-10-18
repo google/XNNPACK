@@ -22,7 +22,6 @@ SET(PROD_SSE_MICROKERNEL_SRCS
   src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-sse-1x4-acc3.c
   src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-sse-4x4.c
   src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-sse-2x4.c
-  src/f32-gavgpool-cw/f32-gavgpool-cw-sse-u4.c
   src/f32-gavgpool/f32-gavgpool-7p7x-minmax-sse-c4.c
   src/f32-gavgpool/f32-gavgpool-7x-minmax-sse-c4.c
   src/f32-gemm/gen/f32-gemm-1x8-minmax-sse-load1.c

@@ -4,8 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
-#include <array>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -17,11 +15,8 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
-#include "xnnpack/common.h"
 #include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
-#include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
 #include "replicable_random_device.h"
 
@@ -43,7 +38,8 @@ template <typename T> class GlobalSumPooling1DTest : public ::testing::Test {
     input_width = input_dims[input_dims.size() - 2];
     channels = input_dims[input_dims.size() - 1];
 
-    input = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + NumElements(input_dims));
+    input =
+        std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + NumElements(input_dims));
     operator_output = std::vector<T>(NumElements(output_dims));
     subgraph_output = std::vector<T>(operator_output.size());
   }
@@ -58,7 +54,8 @@ template <typename T> class GlobalSumPooling1DTest : public ::testing::Test {
 
   size_t NumElements(std::vector<size_t>& dims)
   {
-    return std::accumulate(dims.begin(), dims.end(), size_t(1), std::multiplies<size_t>());
+    return std::accumulate(
+        dims.begin(), dims.end(), size_t(1), std::multiplies<size_t>());
   }
 
   xnnpack::ReplicableRandomDevice rng;
@@ -111,14 +108,14 @@ TEST_F(GlobalSumPooling1DTestF16, define)
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_global_sum_pooling_1d);
+  ASSERT_EQ(node->type, xnn_node_type_static_sum);
   ASSERT_EQ(node->compute_type, xnn_compute_type_fp16);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);
   ASSERT_EQ(node->outputs[0], output_id);
+  ASSERT_EQ(node->params.reduce.num_reduction_axes, 1);
+  ASSERT_EQ(node->params.reduce.reduction_axes[0], input_dims.size() - 2);
   ASSERT_EQ(node->flags, 0);
 }
 
@@ -150,284 +147,13 @@ TEST_F(GlobalSumPooling1DTestF32, define)
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_global_sum_pooling_1d);
+  ASSERT_EQ(node->type, xnn_node_type_static_sum);
   ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);
   ASSERT_EQ(node->outputs[0], output_id);
+  ASSERT_EQ(node->params.reduce.num_reduction_axes, 1);
+  ASSERT_EQ(node->params.reduce.reduction_axes[0], input_dims.size() - 2);
   ASSERT_EQ(node->flags, 0);
-}
-
-TEST_F(GlobalSumPooling1DTestF16, matches_operator_api)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_operator_t op = nullptr;
-
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-
-  // Call operator API.
-  const xnn_status status = xnn_create_global_sum_pooling_nwc_f16(
-    output_min, output_max, /*flags=*/0, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  size_t workspace_size = 0;
-  size_t workspace_alignment = 0;
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_global_sum_pooling_nwc_f16(
-                          op, batch_size, input_width, channels, channels, channels,
-                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
-  ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_global_sum_pooling_nwc_f16(op, workspace.data(), input.data(), operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_global_sum_pooling_1d(subgraph, output_min, output_max, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  ASSERT_EQ(subgraph_output, operator_output);
-}
-
-TEST_F(GlobalSumPooling1DTestF32, matches_operator_api)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_operator_t op = nullptr;
-
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-
-  // Call operator API.
-  const xnn_status status = xnn_create_global_sum_pooling_nwc_f32(
-    output_min, output_max, /*flags=*/0, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  size_t workspace_size = 0;
-  size_t workspace_alignment = 0;
-  ASSERT_EQ(
-    xnn_status_success, xnn_reshape_global_sum_pooling_nwc_f32(
-                          op, batch_size, input_width, channels, channels, channels,
-                          &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
-  ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_setup_global_sum_pooling_nwc_f32(op, workspace.data(), input.data(), operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_global_sum_pooling_1d(subgraph, output_min, output_max, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  ASSERT_EQ(subgraph_output, operator_output);
-}
-
-TEST_F(GlobalSumPooling1DTestF32, reshape_output_no_keep_dims)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_global_sum_pooling_1d(subgraph, output_min, output_max, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  const size_t num_input_dims = input_dims.size();
-  const size_t num_batch_dims = num_input_dims - 2;
-  const struct xnn_node* node = &subgraph->nodes[0];
-  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
-  for (size_t i = 0; i < num_batch_dims; ++i) {
-    ASSERT_EQ(output_shape->dim[i], input_dims[i]);
-  }
-  ASSERT_EQ(output_shape->dim[num_input_dims - 2], input_dims[num_input_dims - 1]);
-
-  input_dims[0] += 2;
-  input_dims[num_input_dims - 1] += 3;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
-  for (size_t i = 0; i < num_batch_dims; ++i) {
-    ASSERT_EQ(output_shape->dim[i], input_dims[i]);
-  }
-  ASSERT_EQ(output_shape->dim[num_input_dims - 2], input_dims[num_input_dims - 1]);
-
-  input_dims[0] -= 2;
-  input_dims[num_input_dims - 1] -= 3;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
-  for (size_t i = 0; i < num_batch_dims; ++i) {
-    ASSERT_EQ(output_shape->dim[i], input_dims[i]);
-  }
-  ASSERT_EQ(output_shape->dim[num_input_dims - 2], input_dims[num_input_dims - 1]);
-}
-
-TEST_F(GlobalSumPooling1DTestF32, reshape_output_keep_dims)
-{
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, input_dims.size(), input_dims.data(), nullptr,
-                          /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  uint32_t output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
-                          /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_global_sum_pooling_1d(subgraph, output_min, output_max, input_id, output_id, XNN_FLAG_KEEP_DIMS));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  const size_t num_input_dims = input_dims.size();
-  const size_t num_batch_dims = num_input_dims - 2;
-  const struct xnn_node* node = &subgraph->nodes[0];
-  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
-  for (size_t i = 0; i < num_batch_dims; ++i) {
-    ASSERT_EQ(output_shape->dim[i], input_dims[i]);
-  }
-  for (size_t i = num_batch_dims; i < num_input_dims - 1; ++i) {
-    ASSERT_EQ(output_shape->dim[i], 1);
-  }
-  ASSERT_EQ(output_shape->dim[num_input_dims - 1], input_dims[num_input_dims - 1]);
-  input_dims[0] += 2;
-  input_dims[num_input_dims - 1] += 3;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_reallocation_required);
-
-  for (size_t i = 0; i < num_batch_dims; ++i) {
-    ASSERT_EQ(output_shape->dim[i], input_dims[i]);
-  }
-  for (size_t i = num_batch_dims; i < num_input_dims - 1; ++i) {
-    ASSERT_EQ(output_shape->dim[i], 1);
-  }
-  ASSERT_EQ(output_shape->dim[num_input_dims - 1], input_dims[num_input_dims - 1]);
-  input_dims[0] -= 2;
-  input_dims[num_input_dims - 1] -= 3;
-  ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, input_dims.size(), input_dims.data()));
-  ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
-
-  for (size_t i = 0; i < num_batch_dims; ++i) {
-    ASSERT_EQ(output_shape->dim[i], input_dims[i]);
-  }
-  for (size_t i = num_batch_dims; i < num_input_dims - 1; ++i) {
-    ASSERT_EQ(output_shape->dim[i], 1);
-  }
-  ASSERT_EQ(output_shape->dim[num_input_dims - 1], input_dims[num_input_dims - 1]);
 }
