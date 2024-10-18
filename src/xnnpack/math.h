@@ -117,9 +117,27 @@ XNN_INLINE static uint32_t math_abs_s32(int32_t n) {
   #endif
 }
 
+XNN_INLINE static int64_t math_divide_round_up_s64(int64_t n, int64_t q) {
+  return XNN_UNPREDICTABLE(n % q == 0) ? n / q : n / q + 1;
+}
+
 // Flip low 15 bits based on high bit.  Reversible.
 XNN_INLINE static int16_t math_signcomplement_f16(uint16_t a) {
   return (a & 0x7FFF) ^ -((int16_t) a < 0);
+}
+
+XNN_INLINE static int64_t math_gcd_s64(int64_t n, int64_t q) {
+  while (q != 0) {
+        int temp = q;
+        q = n % q;
+        n = temp;
+    }
+    return n;
+}
+
+XNN_INLINE static int64_t math_lcm_s64(int64_t n, int64_t q) {
+
+  return (n * q) / math_gcd_s64(n, q);
 }
 
 XNN_INLINE static int16_t math_min_s16(int16_t a, int16_t b) {
@@ -136,6 +154,14 @@ XNN_INLINE static int32_t math_min_s32(int32_t a, int32_t b) {
 
 XNN_INLINE static int32_t math_max_s32(int32_t a, int32_t b) {
   return XNN_UNPREDICTABLE(a > b) ? a : b;
+}
+
+XNN_INLINE static int64_t math_max_s64(int64_t a, int64_t b) {
+  return XNN_UNPREDICTABLE(a > b) ? a : b;
+}
+
+XNN_INLINE static int64_t math_min_s64(int64_t a, int64_t b) {
+  return XNN_UNPREDICTABLE(a < b) ? a : b;
 }
 
 XNN_INLINE static uint32_t math_min_u32(uint32_t a, uint32_t b) {

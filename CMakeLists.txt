@@ -1491,6 +1491,8 @@ IF(XNNPACK_BUILD_TESTS)
       f32-rmin
       f32-rminmax
       f32-rsum
+      f32-rwdsum
+      f32-rwsum
       f32-spmm-minmax
       f32-vcmul
       f32-vmulcaddc-minmax
@@ -2010,6 +2012,8 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       f32-rmin
       f32-rminmax
       f32-rsum
+      f32-rwdsum
+      f32-rwsum
       f32-softmax
       f32-spmm
       f16-vcmul
