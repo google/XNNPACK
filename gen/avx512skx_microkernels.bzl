@@ -217,6 +217,8 @@ NON_PROD_AVX512SKX_MICROKERNEL_SRCS = [
     "src/qu8-igemm/gen/qu8-igemm-8x16c8-minmax-fp32-avx512skx.c",
     "src/qu8-vadd/gen/qu8-vadd-minmax-avx512skx-mul32-ld128-u32.c",
     "src/qu8-vaddc/gen/qu8-vaddc-minmax-avx512skx-mul32-ld128-u32.c",
+    "src/s8-vclamp/s8-vclamp-avx512skx-u256.c",
+    "src/u8-vclamp/u8-vclamp-avx512skx-u256.c",
     "src/x8-lut/gen/x8-lut-avx512skx-vpshufb-u128.c",
     "src/x8-lut/gen/x8-lut-avx512skx-vpshufb-u192.c",
     "src/x8-lut/gen/x8-lut-avx512skx-vpshufb-u256.c",
