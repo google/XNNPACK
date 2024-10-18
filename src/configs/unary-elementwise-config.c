@@ -1983,7 +1983,10 @@ static void init_s8_clamp_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_x86_sse4_1) {
+    if (hardware_config->use_x86_avx2) {
+      s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__avx2_u128;
+      s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
+    } else if (hardware_config->use_x86_sse4_1) {
       s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__sse41_u64;
       s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
     } else {
@@ -1992,12 +1995,6 @@ static void init_s8_clamp_config(void) {
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__wasmsimd_u64;
-    s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
-  #elif XNN_ARCH_WASM
-    s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__scalar_u4;
-    s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
-  #elif XNN_ARCH_RISCV
-    s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__scalar_u4;
     s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
   #else
     s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__scalar_u4;
@@ -2020,8 +2017,15 @@ static void init_u8_clamp_config(void) {
     u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__neon_u64;
     u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__sse2_u64;
-    u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_x86_avx2) {
+      u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__avx2_u128;
+      u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
+    } else {
+      u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__sse2_u64;
+      u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
+    }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__wasmsimd_u64;
     u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;

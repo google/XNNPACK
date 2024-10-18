@@ -22,6 +22,8 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_u8_vclamp_ukernel__neon_u64, 64, 
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
 XNN_UKERNEL_WITH_PARAMS(0, xnn_u8_vclamp_ukernel__sse2_u64, 64, false, uint8_t, struct xnn_u8_minmax_params, xnn_init_u8_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_u8_vclamp_ukernel__avx2_u128, 128, false, uint8_t, struct xnn_u8_minmax_params, xnn_init_u8_minmax_scalar_params)
+
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
