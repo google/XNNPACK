@@ -96,7 +96,7 @@ extern "C" {
       uint8_t* output,                                                 \
       size_t input_increment,                                          \
       size_t output_increment,                                         \
-      const union xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 #define XNN_UKERNEL_UNIPASS(arch_flags, ukernel, requantize, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, init_params) \
   XNN_INTERNAL void ukernel(                                         \
@@ -109,7 +109,7 @@ extern "C" {
       uint8_t* output,                                               \
       size_t input_increment,                                        \
       size_t output_increment,                                       \
-      const union xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 #include "qu8-avgpool/qu8-avgpool-minmax.h"
 

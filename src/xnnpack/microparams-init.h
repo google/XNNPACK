@@ -125,106 +125,18 @@ XNN_INTERNAL void xnn_init_qs8_to_qs8_qc8w_scale_fp32_params(
   const float scale[XNN_MIN_ELEMENTS(1)],
   void* packed_w);
 
-#define DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(fn_name)            \
-  XNN_INTERNAL size_t fn_name(                                       \
-    union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)], \
-    int32_t bias,                                                    \
-    float scale,                                                     \
-    int8_t output_zero_point,                                        \
-    int8_t output_min,                                               \
-    int8_t output_max);
+XNN_INTERNAL size_t xnn_init_qu8_avgpool_minmax_fp32_scalar_params(
+  struct xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int32_t bias,
+  float scale,
+  uint8_t output_zero_point,
+  uint8_t output_min,
+  uint8_t output_max);
 
-DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_scalar_fmagic_params)
-DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_scalar_imagic_params)
-DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_scalar_lrintf_params)
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_neon_params)
-  DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_neonv8_params)
-  DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_rndnu_neon_params)
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_sse2_params)
-  DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_ssse3_params)
-  DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_sse4_params)
-  DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_avx2_params)
-  DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_avx512_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_INIT_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qs8_avgpool_minmax_fp32_wasmsimd_params)
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-
-#define DECLARE_UPDATE_QS8_AVGPOOL_PARAMS_FUNCTION(fn_name)          \
-  XNN_INTERNAL void fn_name(                                         \
-    union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)], \
-    int32_t bias,                                                    \
-    float scale);
-
-DECLARE_UPDATE_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qs8_avgpool_minmax_fp32_scalar_fmagic_params)
-DECLARE_UPDATE_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qs8_avgpool_minmax_fp32_scalar_imagic_params)
-DECLARE_UPDATE_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qs8_avgpool_minmax_fp32_scalar_lrintf_params)
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_UPDATE_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qs8_avgpool_minmax_fp32_neon_params)
-  DECLARE_UPDATE_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qs8_avgpool_minmax_fp32_neonv8_params)
-  DECLARE_UPDATE_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qs8_avgpool_minmax_rndnu_neon_params)
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_UPDATE_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qs8_avgpool_minmax_fp32_sse2_params)
-  DECLARE_UPDATE_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qs8_avgpool_minmax_fp32_sse4_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_UPDATE_QS8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qs8_avgpool_minmax_fp32_wasmsimd_params)
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-
-#define DECLARE_INIT_QU8_AVGPOOL_PARAMS_FUNCTION(fn_name)            \
-  XNN_INTERNAL size_t fn_name(                                       \
-    union xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)], \
-    int32_t bias,                                                    \
-    float scale,                                                     \
-    uint8_t output_zero_point,                                       \
-    uint8_t output_min,                                              \
-    uint8_t output_max);
-
-DECLARE_INIT_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qu8_avgpool_minmax_fp32_scalar_fmagic_params)
-DECLARE_INIT_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qu8_avgpool_minmax_fp32_scalar_imagic_params)
-DECLARE_INIT_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qu8_avgpool_minmax_fp32_scalar_lrintf_params)
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qu8_avgpool_minmax_fp32_neon_params)
-  DECLARE_INIT_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qu8_avgpool_minmax_fp32_neonv8_params)
-  DECLARE_INIT_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qu8_avgpool_minmax_rndnu_neon_params)
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qu8_avgpool_minmax_fp32_sse2_params)
-  DECLARE_INIT_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qu8_avgpool_minmax_fp32_sse4_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_INIT_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_init_qu8_avgpool_minmax_fp32_wasmsimd_params)
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
-
-#define DECLARE_UPDATE_QU8_AVGPOOL_PARAMS_FUNCTION(fn_name)          \
-  XNN_INTERNAL void fn_name(                                         \
-    union xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)], \
-    int32_t bias,                                                    \
-    float scale);
-
-DECLARE_UPDATE_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qu8_avgpool_minmax_fp32_scalar_fmagic_params)
-DECLARE_UPDATE_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qu8_avgpool_minmax_fp32_scalar_imagic_params)
-DECLARE_UPDATE_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qu8_avgpool_minmax_fp32_scalar_lrintf_params)
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_UPDATE_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qu8_avgpool_minmax_fp32_neon_params)
-  DECLARE_UPDATE_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qu8_avgpool_minmax_fp32_neonv8_params)
-  DECLARE_UPDATE_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qu8_avgpool_minmax_rndnu_neon_params)
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_UPDATE_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qu8_avgpool_minmax_fp32_sse2_params)
-  DECLARE_UPDATE_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qu8_avgpool_minmax_fp32_sse4_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-  DECLARE_UPDATE_QU8_AVGPOOL_PARAMS_FUNCTION(xnn_update_qu8_avgpool_minmax_fp32_wasmsimd_params)
-#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-
+XNN_INTERNAL void xnn_update_qu8_avgpool_minmax_fp32_scalar_params(
+  struct xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  int32_t bias,
+  float scale);
 
 XNN_INTERNAL size_t xnn_init_f16_scale_scalar_params(
   struct xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)],
