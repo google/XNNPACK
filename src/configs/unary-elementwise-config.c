@@ -1983,6 +1983,12 @@ static void init_s8_clamp_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    #if XNN_ENABLE_AVX512SKX
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+        s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__avx512skx_u256;
+        s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
+      } else
+    #endif
     if (hardware_config->use_x86_avx2) {
       s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__avx2_u128;
       s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
@@ -2019,6 +2025,12 @@ static void init_u8_clamp_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
+    #if XNN_ENABLE_AVX512SKX
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+        u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__avx512skx_u256;
+        u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
+      } else
+    #endif
     if (hardware_config->use_x86_avx2) {
       u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__avx2_u128;
       u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
