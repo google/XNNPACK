@@ -5,9 +5,9 @@
 
 
 #include <benchmark/benchmark.h>
-#include "bench/bgemm.h"
-#include "bench/packw-benchmark.h"
-#include "bench/utils.h"
+#include "bgemm.h"
+#include "packw-benchmark.h"
+#include "utils.h"
 #include "xnnpack/common.h"
 #include "xnnpack/hardware-config.h"
 #include "xnnpack/packw.h"
@@ -22,7 +22,7 @@ static void x16_packw(benchmark::State& state, const char* net,
 #define XNN_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale)       \
 BENCHMARK_CAPTURE_BGEMM(x16_packw, ukernel##_, ukernel, arch_flags, nr, kr, sr);
 
-#include "src/x16-packw/x16-packw.h"
+#include "x16-packw/x16-packw.h"
 
 #undef XNN_UKERNEL
 

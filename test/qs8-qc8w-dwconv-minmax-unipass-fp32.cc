@@ -204,5 +204,5 @@ INSTANTIATE_TEST_SUITE_P(                                                       
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {                                                             \
       return info.param.test_name;                                                                                              \
     });
-#include "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-unipass-fp32.h"
+#include "qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-unipass-fp32.h"
 #undef XNN_UKERNEL_WITH_PARAMS

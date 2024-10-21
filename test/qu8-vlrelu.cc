@@ -55,5 +55,5 @@ TEST(ukernel, negative_scale) {                                                 
       }                                                                                                          \
   }                                                                                                              \
 }
-#include "src/qu8-vlrelu/qu8-vlrelu.h"
+#include "qu8-vlrelu/qu8-vlrelu.h"
 #undef XNN_UKERNEL_WITH_PARAMS

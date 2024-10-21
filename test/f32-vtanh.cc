@@ -63,5 +63,5 @@ TEST(ukernel, special_values) {                                                 
     }                                                                                                            \
   }                                                                                                              \
 }
-#include "src/f32-vtanh/f32-vtanh.h"
+#include "f32-vtanh/f32-vtanh.h"
 #undef XNN_UKERNEL_WITH_PARAMS

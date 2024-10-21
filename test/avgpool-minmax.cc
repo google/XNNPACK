@@ -43,10 +43,10 @@ const XnnTestParam xnn_test_params[] = {
 #define XNN_UKERNEL_UNIPASS(arch_flags, ukernel, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, init_params) \
   { #ukernel, AvgPoolMicrokernelTester::Kernel{ukernel, init_params}, arch_flags, channel_tile, channel_scaled_tile, primary_tile, incremental_tile },
 
-#include "src/f16-avgpool/f16-avgpool-minmax.h"
-#include "src/f16-pavgpool/f16-pavgpool-minmax.h"
-#include "src/f32-avgpool/f32-avgpool-minmax.h"
-#include "src/f32-pavgpool/f32-pavgpool-minmax.h"
+#include "f16-avgpool/f16-avgpool-minmax.h"
+#include "f16-pavgpool/f16-pavgpool-minmax.h"
+#include "f32-avgpool/f32-avgpool-minmax.h"
+#include "f32-pavgpool/f32-pavgpool-minmax.h"
 
 #undef XNN_UKERNEL_MULTIPASS
 #undef XNN_UKERNEL_UNIPASS
@@ -57,7 +57,7 @@ const XnnTestParam xnn_test_params[] = {
 #define XNN_UKERNEL_UNIPASS(arch_flags, ukernel, requantize, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, init_params) \
   { #ukernel, AvgPoolMicrokernelTester::Kernel{ukernel, init_params, requantize}, arch_flags, channel_tile, channel_scaled_tile, primary_tile, incremental_tile },
 
-#include "src/qu8-avgpool/qu8-avgpool-minmax.h"
+#include "qu8-avgpool/qu8-avgpool-minmax.h"
 
 #undef XNN_UKERNEL_MULTIPASS
 #undef XNN_UKERNEL_UNIPASS

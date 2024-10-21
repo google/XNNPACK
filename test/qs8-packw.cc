@@ -33,7 +33,7 @@ std::string GetTestQS8Name(const testing::TestParamInfo<XnnTestQS8::ParamType>& 
   { #ukernel, ukernel, arch_flags, nr, kr, sr, kblock, nr_scale, izp },
 
 const XnnTestQS8Param xnn_test_qs8_params[] = {
-#include "src/qs8-packw/qs8-packw.h"
+#include "qs8-packw/qs8-packw.h"
 };
 
 #undef XNN_QS8_UKERNEL

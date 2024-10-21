@@ -23,7 +23,7 @@ extern "C" {
       const int8_t* input,                            \
       int8_t* output,                                 \
       const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-#include "src/qs8-vhswish/qs8-vhswish.h"
+#include "qs8-vhswish/qs8-vhswish.h"
 #undef XNN_UKERNEL
 #undef XNN_UKERNEL_WITH_PARAMS
 
@@ -34,7 +34,7 @@ extern "C" {
       const uint8_t* input,                            \
       uint8_t* output,                                 \
       const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-#include "src/qu8-vhswish/qu8-vhswish.h"
+#include "qu8-vhswish/qu8-vhswish.h"
 #undef XNN_UKERNEL
 #undef XNN_UKERNEL_WITH_PARAMS
 

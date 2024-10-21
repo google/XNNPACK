@@ -26,7 +26,7 @@ extern "C" {
     void* output,                             \
     size_t output_stride,                     \
     const uint32_t fill_pattern);
-#include "src/xx-pad/xx-pad.h"
+#include "xx-pad/xx-pad.h"
 #undef XNN_PAD_UKERNEL
 
 

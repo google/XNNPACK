@@ -11,8 +11,8 @@
 #include <random>
 #include <vector>
 
-#include "bench/spmm.h"
-#include "bench/utils.h"
+#include "spmm.h"
+#include "utils.h"
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"

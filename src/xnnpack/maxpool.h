@@ -31,7 +31,7 @@ extern "C" {
       size_t output_increment,                                                                                          \
       const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-#include "src/f16-maxpool/f16-maxpool-minmax.h"
+#include "f16-maxpool/f16-maxpool-minmax.h"
 
 #undef XNN_UKERNEL
 
@@ -47,7 +47,7 @@ extern "C" {
       size_t output_increment,                                                                                          \
       const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-#include "src/f32-maxpool/f32-maxpool-minmax.h"
+#include "f32-maxpool/f32-maxpool-minmax.h"
 
 #undef XNN_UKERNEL
 
@@ -64,7 +64,7 @@ extern "C" {
       const struct xnn_u8_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 
-#include "src/u8-maxpool/u8-maxpool-minmax.h"
+#include "u8-maxpool/u8-maxpool-minmax.h"
 
 #undef XNN_UKERNEL
 
@@ -81,7 +81,7 @@ extern "C" {
       const struct xnn_s8_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 
-#include "src/s8-maxpool/s8-maxpool-minmax.h"
+#include "s8-maxpool/s8-maxpool-minmax.h"
 
 #undef XNN_UKERNEL
 

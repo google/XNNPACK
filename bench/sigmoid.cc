@@ -7,7 +7,7 @@
 #include <limits>
 
 #include "unary_operator.h"
-#include "bench/utils.h"
+#include "utils.h"
 #include "xnnpack.h"
 #include "xnnpack/math.h"
 #include <benchmark/benchmark.h>

@@ -32,5 +32,5 @@ XNN_TEST_UNARY_BATCH_LT(ukernel, arch_flags, batch_tile, datatype, ukernel, init
 XNN_TEST_UNARY_BATCH_GT(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params, Abs());                 \
                                                                                                                  \
 XNN_TEST_UNARY_INPLACE(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params, Abs());
-#include "src/f32-vabs/f32-vabs.h"
+#include "f32-vabs/f32-vabs.h"
 #undef XNN_UKERNEL_WITH_PARAMS

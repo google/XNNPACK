@@ -10,8 +10,8 @@
 #include <random>
 #include <vector>
 
-#include "bench/dwconv.h"
-#include "bench/utils.h"
+#include "dwconv.h"
+#include "utils.h"
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/dwconv.h"

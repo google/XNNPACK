@@ -10,7 +10,7 @@
 #include <random>
 #include <vector>
 
-#include "bench/utils.h"
+#include "utils.h"
 #include "xnnpack.h"
 #include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
@@ -73,7 +73,7 @@ static void f16_vcmul(benchmark::State& state, uint64_t arch_flags,
           benchmark::utils::BinaryElementwiseParameters<std::complex<xnn_float16>,  \
                                                         std::complex<xnn_float16>>) \
       ->UseRealTime();
-#include "src/f16-vbinary/f16-vcmul.h"
+#include "f16-vbinary/f16-vcmul.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

@@ -109,8 +109,8 @@ def main(args):
 //   Specification: {specification}
 //   Generator: {generator}
 
-#include "bench/rsum-benchmark.h"
-#include "bench/utils.h"
+#include "rsum-benchmark.h"
+#include "utils.h"
 #include <benchmark/benchmark.h>
 
 #include "xnnpack.h"

@@ -1030,9 +1030,9 @@ ELSE()
 ENDIF()
 
 IF(XNNPACK_BUILD_ALL_MICROKERNELS)
-  TARGET_INCLUDE_DIRECTORIES(microkernels-all PRIVATE . include src)
+  TARGET_INCLUDE_DIRECTORIES(microkernels-all PRIVATE include src)
 ENDIF()
-TARGET_INCLUDE_DIRECTORIES(microkernels-prod PRIVATE . include src)
+TARGET_INCLUDE_DIRECTORIES(microkernels-prod PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(hardware-config PRIVATE include src ${CPUINFO_SOURCE_DIR}/include)
 TARGET_INCLUDE_DIRECTORIES(indirection PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(microparams-init PRIVATE include src)
@@ -1041,13 +1041,13 @@ TARGET_INCLUDE_DIRECTORIES(packing PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(logging PRIVATE include src)
 IF(XNNPACK_BUILD_LIBRARY)
   TARGET_INCLUDE_DIRECTORIES(XNNPACK PUBLIC include)
-  TARGET_INCLUDE_DIRECTORIES(XNNPACK PRIVATE . src)
+  TARGET_INCLUDE_DIRECTORIES(XNNPACK PRIVATE src)
   TARGET_INCLUDE_DIRECTORIES(allocator PRIVATE include src)
   TARGET_INCLUDE_DIRECTORIES(cache PRIVATE include src)
   TARGET_INCLUDE_DIRECTORIES(microkernel-utils PRIVATE include src)
-  TARGET_INCLUDE_DIRECTORIES(subgraph PRIVATE . include src)
-  TARGET_INCLUDE_DIRECTORIES(operators PRIVATE . include src)
-  TARGET_INCLUDE_DIRECTORIES(operator-run PRIVATE . include src)
+  TARGET_INCLUDE_DIRECTORIES(subgraph PRIVATE include src)
+  TARGET_INCLUDE_DIRECTORIES(operators PRIVATE include src)
+  TARGET_INCLUDE_DIRECTORIES(operator-run PRIVATE include src)
   TARGET_INCLUDE_DIRECTORIES(operator-utils PRIVATE include src)
   TARGET_INCLUDE_DIRECTORIES(memory PRIVATE include src)
   TARGET_INCLUDE_DIRECTORIES(mutex PRIVATE include src)
@@ -1211,7 +1211,7 @@ IF(XNNPACK_BUILD_TESTS)
   ADD_LIBRARY(next-prime STATIC test/next_prime.cc)
 
   ADD_LIBRARY(gemm-microkernel-tester STATIC test/gemm-microkernel-tester.cc)
-  TARGET_INCLUDE_DIRECTORIES(gemm-microkernel-tester PRIVATE . include src test)
+  TARGET_INCLUDE_DIRECTORIES(gemm-microkernel-tester PRIVATE include src test)
   TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE xnnpack-base pthreadpool GTest::gtest)
   TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE packing)
   IF(XNNPACK_ENABLE_KLEIDIAI)
@@ -1220,25 +1220,25 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(gemm-microkernel-tester PUBLIC next-prime)
 
   ADD_LIBRARY(unary-operator-tester STATIC test/unary-operator-tester.cc)
-  TARGET_INCLUDE_DIRECTORIES(unary-operator-tester PRIVATE . include src test)
+  TARGET_INCLUDE_DIRECTORIES(unary-operator-tester PRIVATE include src test)
   TARGET_LINK_LIBRARIES(unary-operator-tester PRIVATE XNNPACK pthreadpool GTest::gtest)
 
   ADD_LIBRARY(dwconv-microkernel-tester STATIC test/dwconv-microkernel-tester.cc)
-  TARGET_INCLUDE_DIRECTORIES(dwconv-microkernel-tester PRIVATE . include src test)
+  TARGET_INCLUDE_DIRECTORIES(dwconv-microkernel-tester PRIVATE include src test)
   TARGET_LINK_LIBRARIES(dwconv-microkernel-tester PRIVATE XNNPACK pthreadpool GTest::gtest)
   TARGET_LINK_LIBRARIES(dwconv-microkernel-tester PUBLIC next-prime)
 
   ADD_LIBRARY(vbinary-microkernel-tester STATIC test/vbinary-microkernel-tester.cc)
   SET_TARGET_PROPERTIES(vbinary-microkernel-tester PROPERTIES CXX_EXTENSIONS YES)
-  TARGET_INCLUDE_DIRECTORIES(vbinary-microkernel-tester PRIVATE . include src test)
+  TARGET_INCLUDE_DIRECTORIES(vbinary-microkernel-tester PRIVATE include src test)
   TARGET_LINK_LIBRARIES(vbinary-microkernel-tester PRIVATE XNNPACK pthreadpool GTest::gtest)
 
   ADD_LIBRARY(vcvt-microkernel-tester STATIC test/vcvt-microkernel-tester.cc)
-  TARGET_INCLUDE_DIRECTORIES(vcvt-microkernel-tester PRIVATE . include src test)
+  TARGET_INCLUDE_DIRECTORIES(vcvt-microkernel-tester PRIVATE include src test)
   TARGET_LINK_LIBRARIES(vcvt-microkernel-tester PRIVATE XNNPACK pthreadpool GTest::gtest)
 
   ADD_LIBRARY(vunary-microkernel-tester STATIC test/vunary-microkernel-tester.cc)
-  TARGET_INCLUDE_DIRECTORIES(vunary-microkernel-tester PRIVATE . include src test)
+  TARGET_INCLUDE_DIRECTORIES(vunary-microkernel-tester PRIVATE include src test)
   TARGET_LINK_LIBRARIES(vunary-microkernel-tester PRIVATE XNNPACK pthreadpool GTest::gtest)
   TARGET_LINK_LIBRARIES(vunary-microkernel-tester PUBLIC next-prime)
 
@@ -1247,7 +1247,7 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_LINK_LIBRARIES(convolution-test-helpers PRIVATE xnnpack-base)
 
   ADD_LIBRARY(packq-microkernel-tester STATIC test/packq-microkernel-tester.cc)
-  TARGET_INCLUDE_DIRECTORIES(packq-microkernel-tester PRIVATE . include src test)
+  TARGET_INCLUDE_DIRECTORIES(packq-microkernel-tester PRIVATE include src test)
   TARGET_LINK_LIBRARIES(packq-microkernel-tester PRIVATE XNNPACK pthreadpool  GTest::gtest)
   IF(XNNPACK_ENABLE_KLEIDIAI)
     TARGET_LINK_LIBRARIES(packq-microkernel-tester PRIVATE kleidiai)
@@ -1266,7 +1266,7 @@ IF(XNNPACK_BUILD_TESTS)
   )
   FOREACH(TEST ${SHARDED_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
       GTest::gtest
       GTest::gtest_main
@@ -1292,7 +1292,7 @@ IF(XNNPACK_BUILD_TESTS)
     )
     FOREACH(TEST ${LIBRARY_SHARDED_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-      TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . src test)
+      TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
       TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         GTest::gmock
         GTest::gtest
@@ -1525,7 +1525,7 @@ IF(XNNPACK_BUILD_TESTS)
       xx-pad)
   FOREACH(TEST ${MICROKERNEL_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         GTest::gmock
         GTest::gtest
@@ -1564,7 +1564,7 @@ IF(XNNPACK_BUILD_TESTS)
       qu8-dwconv-minmax-unipass-rndnu)
   FOREACH(TEST ${MICROKERNEL_DWCONV_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         dwconv-microkernel-tester
         GTest::gmock
@@ -1618,7 +1618,7 @@ IF(XNNPACK_BUILD_TESTS)
     FILE(GLOB TEST_SOURCES "test/${TEST}*.cc")
     IF(TEST_SOURCES)
         ADD_EXECUTABLE(${TEST}-test ${TEST_SOURCES})
-        TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
+        TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
         TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
             gemm-microkernel-tester
             GTest::gmock
@@ -1639,7 +1639,7 @@ IF(XNNPACK_BUILD_TESTS)
       x8-packq)
   FOREACH(TEST ${MICROKERNEL_PACKQ_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         packq-microkernel-tester
         GTest::gmock
@@ -1711,7 +1711,7 @@ IF(XNNPACK_BUILD_TESTS)
       s32-vmulc)
   FOREACH(TEST ${MICROKERNEL_VBINARY_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         vbinary-microkernel-tester
         GTest::gmock
@@ -1743,7 +1743,7 @@ IF(XNNPACK_BUILD_TESTS)
       u32-f32-vcvt)
   FOREACH(TEST ${MICROKERNEL_VCVT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         vcvt-microkernel-tester
         GTest::gmock
@@ -1796,7 +1796,7 @@ IF(XNNPACK_BUILD_TESTS)
       u8-vclamp)
   FOREACH(TEST ${MICROKERNEL_VUNARY_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE . include src test)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         vunary-microkernel-tester
         GTest::gmock
@@ -1876,7 +1876,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
   ENDIF()
 
   ADD_LIBRARY(bench-utils STATIC bench/utils.cc)
-  TARGET_INCLUDE_DIRECTORIES(bench-utils PRIVATE .)
   TARGET_INCLUDE_DIRECTORIES(bench-utils PUBLIC include src)
   TARGET_LINK_LIBRARIES(bench-utils PRIVATE benchmark::benchmark cpuinfo pthreadpool)
   TARGET_LINK_LIBRARIES(bench-utils PRIVATE xnnpack-base hardware-config)
@@ -1886,14 +1885,14 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
   # Helper libraries
   ADD_LIBRARY(packq-benchmark STATIC bench/packq-benchmark.cc)
-  TARGET_INCLUDE_DIRECTORIES(packq-benchmark PRIVATE . include src bench)
+  TARGET_INCLUDE_DIRECTORIES(packq-benchmark PRIVATE include src bench)
   TARGET_LINK_LIBRARIES(packq-benchmark PRIVATE XNNPACK benchmark::benchmark bench-utils)
   IF(XNNPACK_ENABLE_KLEIDIAI)
     TARGET_LINK_LIBRARIES(packq-benchmark PRIVATE kleidiai)
   ENDIF()
 
   ADD_LIBRARY(gemm-benchmark STATIC bench/gemm-benchmark.cc)
-  TARGET_INCLUDE_DIRECTORIES(gemm-benchmark PRIVATE . include src bench)
+  TARGET_INCLUDE_DIRECTORIES(gemm-benchmark PRIVATE include src bench)
   TARGET_LINK_LIBRARIES(gemm-benchmark PRIVATE XNNPACK benchmark::benchmark bench-utils)
   IF(XNNPACK_ENABLE_KLEIDIAI)
     TARGET_LINK_LIBRARIES(gemm-benchmark PUBLIC kleidiai)
@@ -1912,11 +1911,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       bench/models/fp32-mobilenet-v3-small.cc
       bench/models/qs8-mobilenet-v2.cc)
     SET_TARGET_PROPERTIES(models PROPERTIES CXX_EXTENSIONS YES)
-    TARGET_INCLUDE_DIRECTORIES(models PRIVATE .)
     TARGET_LINK_LIBRARIES(models PRIVATE XNNPACK)
 
     ADD_EXECUTABLE(bench-models bench/models/benchmark.cc)
-    TARGET_INCLUDE_DIRECTORIES(bench-models PRIVATE .)
+    TARGET_INCLUDE_DIRECTORIES(bench-models PRIVATE bench)
     TARGET_LINK_LIBRARIES(bench-models PRIVATE
       bench-utils
       benchmark::benchmark
@@ -1949,7 +1947,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
         tanh)
     FOREACH(BENCH ${LIBRARY_OPERATOR_BENCHMARKS})
       ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)
-      TARGET_INCLUDE_DIRECTORIES(${BENCH}-bench PRIVATE .)
       TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
         bench-utils
         benchmark::benchmark
@@ -2045,7 +2042,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       xx-transposev)
   FOREACH(BENCH ${MICROKERNEL_BENCHMARKS})
     ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${BENCH}-bench PRIVATE . include src)
+    TARGET_INCLUDE_DIRECTORIES(${BENCH}-bench PRIVATE include src)
     TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
       bench-utils
       benchmark::benchmark

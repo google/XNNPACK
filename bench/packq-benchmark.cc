@@ -9,14 +9,12 @@
 #include <cstddef>
 #include <cstdint>
 #include <random>
-#include <vector>
 
-#include "bench/utils.h"
+#include "utils.h"
+#include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
-#include "xnnpack/pack.h"
 #include "xnnpack/packq.h"
-#include "xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 
 void x8_packq(benchmark::State& state, xnn_x8_packq_f32qp8_ukernel_fn packq,

@@ -7,8 +7,8 @@
 //   Specification: test/qs8-rdsum-minmax-fp32.yaml
 //   Generator: tools/generate-rdsum-benchmark.py
 
-#include "bench/rsum-benchmark.h"
-#include "bench/utils.h"
+#include "rsum-benchmark.h"
+#include "utils.h"
 #include <benchmark/benchmark.h>
 
 #include "xnnpack.h"

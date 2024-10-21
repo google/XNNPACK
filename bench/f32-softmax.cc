@@ -10,7 +10,7 @@
 #ifdef BENCHMARK_INTEL_DNNL
 #include <dnnl.h>
 #endif  // BENCHMARK_INTEL_DNNL
-#include "bench/utils.h"
+#include "utils.h"
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"

@@ -31,7 +31,7 @@ extern "C" {
       size_t extra_bytes,                                                 \
       const void* params);
 
-#include "src/x8-packw/x8-packw.h"
+#include "x8-packw/x8-packw.h"
 
 #undef XNN_UKERNEL
 
@@ -50,7 +50,7 @@ extern "C" {
       size_t extra_bytes,                                                          \
       const void* params);
 
-#include "src/qs8-packw/qs8-packw.h"
+#include "qs8-packw/qs8-packw.h"
 
 #undef XNN_QS8_UKERNEL
 
@@ -69,7 +69,7 @@ extern "C" {
       size_t extra_bytes,                                                 \
       const void* params);                                                \
 
-#include "src/x16-packw/x16-packw.h"
+#include "x16-packw/x16-packw.h"
 
 #undef XNN_UKERNEL
 
@@ -88,7 +88,7 @@ extern "C" {
       size_t extra_bytes,                                                 \
       const void* params);                                                \
 
-#include "src/x32-packw/x32-packw.h"
+#include "x32-packw/x32-packw.h"
 
 #undef XNN_UKERNEL
 

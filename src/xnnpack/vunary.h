@@ -41,14 +41,14 @@ extern "C" {
   XNN_INTERNAL void fn_name(size_t n, const int8_t* x, int8_t* y,           \
                             const struct xnn_s8_minmax_params                \
                                 params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-#include "src/s8-vclamp/s8-vclamp.h"
+#include "s8-vclamp/s8-vclamp.h"
 #undef XNN_UKERNEL
 
 #define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype) \
   XNN_INTERNAL void fn_name(size_t n, const uint8_t* x, uint8_t* y,         \
                             const struct xnn_u8_minmax_params                \
                                 params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-#include "src/u8-vclamp/u8-vclamp.h"
+#include "u8-vclamp/u8-vclamp.h"
 #undef XNN_UKERNEL
 
 #define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype) \
@@ -56,7 +56,7 @@ extern "C" {
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, fn_name, batch_tile, vector_tile, \
                                 datatype, params_type, init_params)           \
   DECLARE_BF16_UKERNEL_FUNCTION(fn_name, params_type);
-#include "src/bf16-vabs/bf16-vabs.h"
+#include "bf16-vabs/bf16-vabs.h"
 #undef XNN_UKERNEL
 #undef XNN_UKERNEL_WITH_PARAMS
 
@@ -65,21 +65,21 @@ extern "C" {
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, fn_name, batch_tile, vector_tile, \
                                 datatype, params_type, init_params)           \
   DECLARE_F16_UKERNEL_FUNCTION(fn_name, params_type);
-#include "src/f16-vabs/f16-vabs.h"
-#include "src/f16-vclamp/f16-vclamp.h"
-#include "src/f16-velu/f16-velu.h"
-#include "src/f16-vhswish/f16-vhswish.h"
-#include "src/f16-vlrelu/f16-vlrelu.h"
-#include "src/f16-vneg/f16-vneg.h"
-#include "src/f16-vrnd/f16-vrndd.h"
-#include "src/f16-vrnd/f16-vrndne.h"
-#include "src/f16-vrnd/f16-vrndu.h"
-#include "src/f16-vrnd/f16-vrndz.h"
-#include "src/f16-vrsqrt/f16-vrsqrt.h"
-#include "src/f16-vsigmoid/f16-vsigmoid.h"
-#include "src/f16-vsqr/f16-vsqr.h"
-#include "src/f16-vsqrt/f16-vsqrt.h"
-#include "src/f16-vtanh/f16-vtanh.h"
+#include "f16-vabs/f16-vabs.h"
+#include "f16-vclamp/f16-vclamp.h"
+#include "f16-velu/f16-velu.h"
+#include "f16-vhswish/f16-vhswish.h"
+#include "f16-vlrelu/f16-vlrelu.h"
+#include "f16-vneg/f16-vneg.h"
+#include "f16-vrnd/f16-vrndd.h"
+#include "f16-vrnd/f16-vrndne.h"
+#include "f16-vrnd/f16-vrndu.h"
+#include "f16-vrnd/f16-vrndz.h"
+#include "f16-vrsqrt/f16-vrsqrt.h"
+#include "f16-vsigmoid/f16-vsigmoid.h"
+#include "f16-vsqr/f16-vsqr.h"
+#include "f16-vsqrt/f16-vsqrt.h"
+#include "f16-vtanh/f16-vtanh.h"
 #undef XNN_UKERNEL
 #undef XNN_UKERNEL_WITH_PARAMS
 
@@ -88,25 +88,25 @@ extern "C" {
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, fn_name, batch_tile, vector_tile, \
                                 datatype, params_type, init_params)           \
   DECLARE_F32_UKERNEL_FUNCTION(fn_name, params_type);
-#include "src/f32-vabs/f32-vabs.h"
-#include "src/f32-vclamp/f32-vclamp.h"
-#include "src/f32-velu/f32-velu.h"
-#include "src/f32-vexp/f32-vexp.h"
-#include "src/f32-vgelu/f32-vgelu.h"
-#include "src/f32-vhswish/f32-vhswish.h"
-#include "src/f32-vlog/f32-vlog.h"
-#include "src/f32-vlrelu/f32-vlrelu.h"
-#include "src/f32-vneg/f32-vneg.h"
-#include "src/f32-vrelu/f32-vrelu.h"
-#include "src/f32-vrnd/f32-vrndd.h"
-#include "src/f32-vrnd/f32-vrndne.h"
-#include "src/f32-vrnd/f32-vrndu.h"
-#include "src/f32-vrnd/f32-vrndz.h"
-#include "src/f32-vrsqrt/f32-vrsqrt.h"
-#include "src/f32-vsigmoid/f32-vsigmoid.h"
-#include "src/f32-vsqr/f32-vsqr.h"
-#include "src/f32-vsqrt/f32-vsqrt.h"
-#include "src/f32-vtanh/f32-vtanh.h"
+#include "f32-vabs/f32-vabs.h"
+#include "f32-vclamp/f32-vclamp.h"
+#include "f32-velu/f32-velu.h"
+#include "f32-vexp/f32-vexp.h"
+#include "f32-vgelu/f32-vgelu.h"
+#include "f32-vhswish/f32-vhswish.h"
+#include "f32-vlog/f32-vlog.h"
+#include "f32-vlrelu/f32-vlrelu.h"
+#include "f32-vneg/f32-vneg.h"
+#include "f32-vrelu/f32-vrelu.h"
+#include "f32-vrnd/f32-vrndd.h"
+#include "f32-vrnd/f32-vrndne.h"
+#include "f32-vrnd/f32-vrndu.h"
+#include "f32-vrnd/f32-vrndz.h"
+#include "f32-vrsqrt/f32-vrsqrt.h"
+#include "f32-vsigmoid/f32-vsigmoid.h"
+#include "f32-vsqr/f32-vsqr.h"
+#include "f32-vsqrt/f32-vsqrt.h"
+#include "f32-vtanh/f32-vtanh.h"
 #undef XNN_UKERNEL
 #undef XNN_UKERNEL_WITH_PARAMS
 

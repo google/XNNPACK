@@ -151,5 +151,5 @@ INSTANTIATE_TEST_SUITE_P(                                                       
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {                                                             \
       return info.param.test_name;                                                                                              \
     });
-#include "src/f32-dwconv/f32-dwconv-unipass.h"
+#include "f32-dwconv/f32-dwconv-unipass.h"
 #undef XNN_UKERNEL_WITH_PARAMS
