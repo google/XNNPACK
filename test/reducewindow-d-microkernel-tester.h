@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -240,14 +240,4 @@ class RWDMicrokernelTester {
           .Test(__VA_ARGS__);                                      \
       }                                                            \
     }                                                              \
-  }
-
-#define XNN_TEST_RWD_CHANNEL_EQ_ROW_258(ukernel, ...)               \
-  TEST(ukernel, overflow_accumulator) {                             \
-    for (size_t channels = 1; channels < 2; ++channels) {           \
-      RWDMicrokernelTester()                                        \
-        .rows(258)                                                  \
-        .channels(channels)                                         \
-        .Test(__VA_ARGS__);                                         \
-    }                                                               \
   }

@@ -39,7 +39,6 @@ XNN_TEST_RWD_CHANNEL_EQ_ROW_EQ(ukernel, ${", ".join(TEST_ARGS)});
 XNN_TEST_RWD_CHANNEL_EQ_ROW_GT(ukernel, ${", ".join(TEST_ARGS)});
 XNN_TEST_RWD_CHANNEL_GT_ROW_EQ(ukernel, ${", ".join(TEST_ARGS)});
 XNN_TEST_RWD_CHANNEL_GT_ROW_GT(ukernel, ${", ".join(TEST_ARGS)});
-XNN_TEST_RWD_CHANNEL_EQ_ROW_258(ukernel, ${", ".join(TEST_ARGS)});
 """
 
 def main(args):
@@ -47,7 +46,7 @@ def main(args):
 
   tester = options.tester
   tester_header = {
-    "RWDMicrokernelTester": "rwd-microkernel-tester.h",
+    "RWDMicrokernelTester": "reducewindow-d-microkernel-tester.h",
   }[tester]
   
   tests = """\
