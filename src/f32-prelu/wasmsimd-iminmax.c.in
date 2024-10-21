@@ -1,0 +1,151 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert CHANNEL_TILE % 4 == 0
+$assert CHANNEL_TILE >= 4
+$assert ROW_TILE >= 1
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <wasm_simd128.h>
+
+#include "xnnpack/math.h"
+#include "xnnpack/prelu.h"
+
+
+$ISA = "wasmrelaxedsimd" if RELAXED else "wasmsimd"
+void xnn_f32_prelu_ukernel__${ISA}_iminmax_${ROW_TILE}x${CHANNEL_TILE}(
+    size_t rows,
+    size_t channels,
+    const float* restrict input,
+    size_t input_stride,
+    const float* restrict weights,
+    float* restrict output,
+    size_t output_stride) XNN_OOB_READS
+{
+  assert(rows != 0);
+  assert(channels != 0);
+  assert(channels % sizeof(float) == 0);
+
+  const float* i0 = input;
+  float* o0 = output;
+  $for M in range(1, ROW_TILE):
+    const float* i${M} = (const float*) ((uintptr_t) i${M-1} + input_stride);
+    float* o${M} = (float*) ((uintptr_t) o${M-1} + output_stride);
+
+  const size_t input_increment = input_stride * ${ROW_TILE} - channels;
+  const size_t output_increment = output_stride * ${ROW_TILE} - channels;
+
+  const v128_t vzero = wasm_i32x4_const_splat(0);
+  do {
+    $for M in range(1, ROW_TILE):
+      $if M % 2 == 0:
+        if XNN_UNPREDICTABLE(rows <= ${M}) {
+          i${M} = i${M-1};
+          o${M} = o${M-1};
+        }
+      $else:
+        if XNN_UNPREDICTABLE(rows < ${M+1}) {
+          i${M} = i${M-1};
+          o${M} = o${M-1};
+        }
+
+    const float* w = weights;
+    size_t c = channels;
+    for (; c >= ${CHANNEL_TILE} * sizeof(float); c -= ${CHANNEL_TILE} * sizeof(float)) {
+      const v128_t vw${ABC[0:4]} = wasm_v128_load(w);
+      $for C in range(4, CHANNEL_TILE, 4):
+        const v128_t vw${ABC[C:C+4]} = wasm_v128_load(w + ${C});
+      w += ${CHANNEL_TILE};
+
+      $for M in range(ROW_TILE):
+        v128_t vi${M}x${ABC[0:4]} = wasm_v128_load(i${M});
+        $for C in range(4, CHANNEL_TILE, 4):
+          v128_t vi${M}x${ABC[C:C+4]} = wasm_v128_load(i${M} + ${C});
+        i${M} += ${CHANNEL_TILE};
+
+      $for M in range(ROW_TILE):
+        $for C in range(0, CHANNEL_TILE, 4):
+          v128_t vacc${M}x${ABC[C:C+4]} = wasm_i32x4_max(vi${M}x${ABC[C:C+4]}, vzero);
+          vi${M}x${ABC[C:C+4]} = wasm_i32x4_min(vi${M}x${ABC[C:C+4]}, vzero);
+
+      $for M in range(ROW_TILE):
+        $for C in range(0, CHANNEL_TILE, 4):
+          $if RELAXED:
+            vacc${M}x${ABC[C:C+4]} = wasm_f32x4_relaxed_madd(vi${M}x${ABC[C:C+4]}, vw${ABC[C:C+4]}, vacc${M}x${ABC[C:C+4]});
+          $else:
+            vacc${M}x${ABC[C:C+4]} = wasm_f32x4_add(wasm_f32x4_mul(vi${M}x${ABC[C:C+4]}, vw${ABC[C:C+4]}), vacc${M}x${ABC[C:C+4]});
+
+      $for M in range(ROW_TILE):
+        wasm_v128_store(o${M}, vacc${M}x${ABC[0:4]});
+        $for C in range(4, CHANNEL_TILE, 4):
+          wasm_v128_store(o${M} + ${C}, vacc${M}x${ABC[C:C+4]});
+        o${M} += ${CHANNEL_TILE};
+    }
+    $if CHANNEL_TILE > 4:
+      for (; c >= 4 * sizeof(float); c -= 4 * sizeof(float)) {
+        const v128_t vw0123 = wasm_v128_load(w);
+        w += 4;
+
+        $for M in range(ROW_TILE):
+          v128_t vi${M}x0123 = wasm_v128_load(i${M});
+          i${M} += 4;
+
+        $for M in range(ROW_TILE):
+          v128_t vacc${M}x0123 = wasm_i32x4_max(vi${M}x0123, vzero);
+          vi${M}x0123 = wasm_i32x4_min(vi${M}x0123, vzero);
+
+        $for M in range(ROW_TILE):
+          $if RELAXED:
+            vacc${M}x0123 = wasm_f32x4_relaxed_madd(vi${M}x0123, vw0123, vacc${M}x0123);
+          $else:
+            vacc${M}x0123 = wasm_f32x4_add(wasm_f32x4_mul(vi${M}x0123, vw0123), vacc${M}x0123);
+
+        $for M in range(ROW_TILE):
+          wasm_v128_store(o${M}, vacc${M}x0123);
+          o${M} += 4;
+      }
+    if XNN_UNLIKELY(c != 0) {
+      const v128_t vw0123 = wasm_v128_load(w);
+      w = (const float*) ((uintptr_t) w + c);
+
+      $for M in range(ROW_TILE):
+        v128_t vi${M}x0123 = wasm_v128_load(i${M});
+        i${M} = (const float*) ((uintptr_t) i${M} + c);
+
+      $for M in range(ROW_TILE):
+        v128_t vacc${M}x0123 = wasm_i32x4_max(vi${M}x0123, vzero);
+        vi${M}x0123 = wasm_i32x4_min(vi${M}x0123, vzero);
+
+      $for M in range(ROW_TILE):
+        $if RELAXED:
+          vacc${M}x0123 = wasm_f32x4_relaxed_madd(vi${M}x0123, vw0123, vacc${M}x0123);
+        $else:
+          vacc${M}x0123 = wasm_f32x4_add(wasm_f32x4_mul(vi${M}x0123, vw0123), vacc${M}x0123);
+
+      if (c & (2 * sizeof(float))) {
+        $for M in range(ROW_TILE):
+          wasm_v128_store64_lane(o${M}, vacc${M}x0123, 0);
+
+        $for M in range(ROW_TILE):
+          vacc${M}x0123 = wasm_v64x2_shuffle(vacc${M}x0123, vacc${M}x0123, 1, 1);
+
+        $for M in range(ROW_TILE):
+          o${M} += 2;
+      }
+      if (c & (1 * sizeof(float))) {
+        $for M in range(ROW_TILE):
+          wasm_v128_store32_lane(o${M}, vacc${M}x0123, 0);
+
+        $for M in range(ROW_TILE):
+          o${M} += 1;
+      }
+    }
+    $for M in range(ROW_TILE):
+      i${M} = (const float*) ((uintptr_t) i${M} + input_increment);
+      o${M} = (float*) ((uintptr_t) o${M} + output_increment);
+    rows = doz(rows, ${ROW_TILE});
+  } while (rows != 0);
+}

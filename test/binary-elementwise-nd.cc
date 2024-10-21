@@ -77,8 +77,6 @@ class BinaryElementwiseOperatorTester {
         return "Minimum";
       case xnn_binary_multiply:
         return "Multiply";
-      case xnn_binary_prelu:
-        return "Prelu";
       case xnn_binary_subtract:
         return "Subtract";
       case xnn_binary_squared_difference:

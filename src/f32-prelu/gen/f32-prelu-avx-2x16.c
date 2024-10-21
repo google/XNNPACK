@@ -12,7 +12,7 @@
 #include <immintrin.h>
 
 #include "xnnpack/math.h"
-#include "xnnpack/vbinary.h"
+#include "xnnpack/prelu.h"
 
 
 void xnn_f32_prelu_ukernel__avx_2x16(

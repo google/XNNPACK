@@ -1433,8 +1433,6 @@ enum xnn_node_type xnn_binary_operator_to_node_type(enum xnn_binary_operator typ
       return xnn_node_type_copysign;
     case xnn_binary_squared_difference:
       return xnn_node_type_squared_difference;
-    case xnn_binary_prelu:
-      return xnn_node_type_prelu;
     case xnn_binary_minimum:
       return xnn_node_type_minimum2;
     case xnn_binary_maximum:
@@ -1459,8 +1457,6 @@ enum xnn_binary_operator xnn_node_type_to_binary_operator(enum xnn_node_type typ
       return xnn_binary_copysign;
     case xnn_node_type_squared_difference:
       return xnn_binary_squared_difference;
-    case xnn_node_type_prelu:
-      return xnn_binary_prelu;
     case xnn_node_type_minimum2:
       return xnn_binary_minimum;
     case xnn_node_type_maximum2:

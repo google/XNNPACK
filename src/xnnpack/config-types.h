@@ -236,8 +236,6 @@ struct xnn_dwconv_config {
   uint8_t last_tile;
 };
 
-// Bilinear interpolation (2D).
-
 struct xnn_ibilinear_config {
   xnn_ibilinear_ukernel_fn ukernel;
   // Number of output pixels in a tile.
@@ -245,13 +243,25 @@ struct xnn_ibilinear_config {
   uint8_t pixel_tile;
 };
 
-// Bilinear interpolation (2D) in CHW layout.
+// Bilinear interpolation (2D).
 
 struct xnn_ibilinear_chw_config {
   xnn_ibilinear_chw_ukernel_fn ukernel;
   // Number of channels in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
   uint8_t channel_tile;
+};
+
+// Bilinear interpolation (2D) in CHW layout.
+
+struct xnn_prelu_config {
+  xnn_prelu_ukernel_fn ukernel;
+  // Number of rows in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of rows in each call.
+  uint16_t row_tile;
+  // Number of channels in a tile.
+  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
+  uint16_t channel_tile;
 };
 
 struct xnn_gemm_config {

@@ -562,6 +562,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "f16_prelu_test",
+    srcs = [
+        "f16-prelu.cc",
+        "prelu-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "f16_spmm_minmax_test",
     srcs = [
         "f16-spmm-minmax.cc",
@@ -795,6 +804,15 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
+)
+
+xnnpack_unit_test(
+    name = "f32_prelu_test",
+    srcs = [
+        "f32-prelu.cc",
+        "prelu-microkernel-tester.h",
+    ],
+    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -1605,6 +1623,15 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "prelu_nc_test",
+    srcs = [
+        "prelu-nc.cc",
+        "prelu-operator-tester.h",
+    ],
+    deps = OPERATOR_TEST_DEPS,
+)
+
+xnnpack_unit_test(
     name = "resize_bilinear_nhwc_test",
     srcs = [
         "resize-bilinear-nhwc.cc",
@@ -2132,6 +2159,22 @@ xnnpack_unit_test(
         "//:operator_utils",
         "//:operators",
         "//:requantization",
+        "//:subgraph",
+    ],
+)
+
+xnnpack_unit_test(
+    name = "prelu_test",
+    srcs = [
+        "prelu.cc",
+    ],
+    deps = [
+        ":replicable_random_device",
+        "//:XNNPACK",
+        "//:buffer",
+        "//:math",
+        "//:node_type",
+        "//:operators",
         "//:subgraph",
     ],
 )

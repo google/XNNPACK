@@ -262,6 +262,10 @@ tools/generate-ibilinear-test.py --spec test/u8-ibilinear.yaml --output test/u8-
 tools/generate-ibilinear-chw-test.py --spec test/f16-ibilinear-chw.yaml --output test/f16-ibilinear-chw.cc &
 tools/generate-ibilinear-chw-test.py --spec test/f32-ibilinear-chw.yaml --output test/f32-ibilinear-chw.cc &
 
+### Tests for PRelu micro-kernels
+tools/generate-prelu-test.py --spec test/f16-prelu.yaml --output test/f16-prelu.cc &
+tools/generate-prelu-test.py --spec test/f32-prelu.yaml --output test/f32-prelu.cc &
+
 ### Tests for RAddExpMinusMax micro-kernels
 tools/generate-raddexpminusmax-test.py --spec test/f32-raddexpminusmax.yaml --output test/f32-raddexpminusmax.cc &
 

@@ -233,6 +233,7 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/pad.h",
     "src/xnnpack/pavgpool.h",
     "src/xnnpack/ppmm.h",
+    "src/xnnpack/prelu.h",
     "src/xnnpack/quantization.h",
     "src/xnnpack/raddexpminusmax.h",
     "src/xnnpack/raddextexp.h",

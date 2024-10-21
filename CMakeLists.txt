@@ -418,6 +418,7 @@ SET(OPERATOR_SRCS
   src/operators/global-average-pooling-nwc.c
   src/operators/lut-elementwise-nc.c
   src/operators/max-pooling-nhwc.c
+  src/operators/prelu-nc.c
   src/operators/reduce-nd.c
   src/operators/resize-bilinear-nchw.c
   src/operators/resize-bilinear-nhwc.c
@@ -463,6 +464,7 @@ SET(SUBGRAPH_SRCS
   src/subgraph/log.c
   src/subgraph/max-pooling-2d.c
   src/subgraph/negate.c
+  src/subgraph/prelu.c
   src/subgraph/reciprocal-square-root.c
   src/subgraph/reshape-helpers.c
   src/subgraph/scaled-dot-product-attention.c
@@ -506,6 +508,7 @@ SET(XNNPACK_SRCS
   src/configs/lut32norm-config.c
   src/configs/maxpool-config.c
   src/configs/pavgpool-config.c
+  src/configs/prelu-config.c
   src/configs/raddstoreexpminusmax-config.c
   src/configs/reduce-config.c
   src/configs/rmax-config.c
@@ -1396,6 +1399,7 @@ IF(XNNPACK_BUILD_TESTS)
         log
         max-pooling-2d
         negate
+        prelu
         reciprocal-square-root
         reshape-helpers
         sigmoid
@@ -1466,6 +1470,7 @@ IF(XNNPACK_BUILD_TESTS)
       f16-gavgpool-minmax
       f16-ibilinear-chw
       f16-ibilinear
+      f16-prelu
       f16-raddstoreexpminusmax
       f16-rmax
       f16-rsum
@@ -1478,6 +1483,7 @@ IF(XNNPACK_BUILD_TESTS)
       f32-gavgpool-minmax
       f32-ibilinear-chw
       f32-ibilinear
+      f32-prelu
       f32-raddexpminusmax
       f32-raddextexp
       f32-raddstoreexpminusmax
@@ -1940,6 +1946,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
         leaky-relu
         max-pooling
         negate
+        prelu
         reciprocal-square-root
         sigmoid
         softmax

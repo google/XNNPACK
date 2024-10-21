@@ -141,15 +141,6 @@ static const struct xnn_binary_elementwise_config* init_config(
         default:
           return NULL;
       }
-    case xnn_binary_prelu:
-      switch (datatype) {
-        case xnn_datatype_fp32:
-          return xnn_init_f32_vprelu_config();
-        case xnn_datatype_fp16:
-          return xnn_init_f16_vprelu_config();
-        default:
-          return NULL;
-      }
     default:
       return NULL;
   }

@@ -1,0 +1,154 @@
+// Copyright 2020 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert CHANNEL_TILE % 8 == 0
+$assert CHANNEL_TILE >= 8
+$assert ROW_TILE >= 1
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#include <assert.h>
+
+#include <immintrin.h>
+
+#include "xnnpack/math.h"
+#include "xnnpack/prelu.h"
+
+
+void xnn_f32_prelu_ukernel__avx_${ROW_TILE}x${CHANNEL_TILE}(
+    size_t rows,
+    size_t channels,
+    const float* restrict input,
+    size_t input_stride,
+    const float* restrict weights,
+    float* restrict output,
+    size_t output_stride)
+{
+  assert(rows != 0);
+  assert(channels != 0);
+  assert(channels % sizeof(float) == 0);
+
+  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+
+  const float* i0 = input;
+  float* o0 = output;
+  $for M in range(1, ROW_TILE):
+    const float* i${M} = (const float*) ((uintptr_t) i${M-1} + input_stride);
+    float* o${M} = (float*) ((uintptr_t) o${M-1} + output_stride);
+
+  const size_t input_increment = input_stride * ${ROW_TILE} - channels;
+  const size_t output_increment = output_stride * ${ROW_TILE} - channels;
+
+  do {
+    $for M in range(1, ROW_TILE):
+      $if M % 2 == 0:
+        if XNN_UNPREDICTABLE(rows <= ${M}) {
+          i${M} = i${M-1};
+          o${M} = o${M-1};
+        }
+      $else:
+        if XNN_UNPREDICTABLE(rows < ${M+1}) {
+          i${M} = i${M-1};
+          o${M} = o${M-1};
+        }
+
+    const float* w = weights;
+    size_t c = channels;
+    for (; c >= ${CHANNEL_TILE} * sizeof(float); c -= ${CHANNEL_TILE} * sizeof(float)) {
+      const __m256 vw${ABC[0:8]} = _mm256_load_ps(w);
+      $for C in range(8, CHANNEL_TILE, 8):
+        const __m256 vw${ABC[C:C+8]} = _mm256_load_ps(w + ${C});
+      w += ${CHANNEL_TILE};
+
+      $for M in range(ROW_TILE):
+        const __m256 vi${M}x${ABC[0:8]} = _mm256_loadu_ps(i${M});
+        $for C in range(8, CHANNEL_TILE, 8):
+          const __m256 vi${M}x${ABC[C:C+8]} = _mm256_loadu_ps(i${M} + ${C});
+        i${M} += ${CHANNEL_TILE};
+
+      $for M in range(ROW_TILE):
+        $for C in range(0, CHANNEL_TILE, 8):
+          const __m256 vprod${M}x${ABC[C:C+8]} = _mm256_mul_ps(vi${M}x${ABC[C:C+8]}, vw${ABC[C:C+8]});
+
+      $for M in range(ROW_TILE):
+        $for C in range(0, CHANNEL_TILE, 8):
+          const __m256 vacc${M}x${ABC[C:C+8]} = _mm256_blendv_ps(vi${M}x${ABC[C:C+8]}, vprod${M}x${ABC[C:C+8]}, vi${M}x${ABC[C:C+8]});
+
+      $for M in range(ROW_TILE):
+        _mm256_storeu_ps(o${M}, vacc${M}x${ABC[0:8]});
+        $for C in range(8, CHANNEL_TILE, 8):
+          _mm256_storeu_ps(o${M} + ${C}, vacc${M}x${ABC[C:C+8]});
+        o${M} += ${CHANNEL_TILE};
+    }
+    $if CHANNEL_TILE > 8:
+      for (; c >= 8 * sizeof(float); c -= 8 * sizeof(float)) {
+        const __m256 vw = _mm256_load_ps(w);
+        w += 8;
+
+        $for M in range(ROW_TILE):
+          const __m256 vi${M} = _mm256_loadu_ps(i${M});
+          i${M} += 8;
+
+        $for M in range(ROW_TILE):
+          const __m256 vprod${M} = _mm256_mul_ps(vi${M}, vw);
+
+        $for M in range(ROW_TILE):
+          const __m256 vacc${M} = _mm256_blendv_ps(vi${M}, vprod${M}, vi${M});
+
+        $for M in range(ROW_TILE):
+          _mm256_storeu_ps(o${M}, vacc${M});
+          o${M} += 8;
+      }
+    if XNN_UNLIKELY(c != 0) {
+      assert(c >= 1 * sizeof(float));
+      assert(c <= 7 * sizeof(float));
+      __m256i vmask = _mm256_loadu_si256((const __m256i*) ((uintptr_t) &mask_table[7] - c));
+
+      const __m256 vw = _mm256_maskload_ps(w, vmask);
+
+      $for M in range(ROW_TILE):
+        const __m256 vi${M} = _mm256_maskload_ps(i${M}, vmask);
+        i${M} = (const float*) ((uintptr_t) i${M} + c);
+
+      $for M in range(ROW_TILE):
+        const __m256 vprod${M} = _mm256_mul_ps(vi${M}, vw);
+
+      $for M in range(ROW_TILE):
+        __m256 vacc${M} = _mm256_blendv_ps(vi${M}, vprod${M}, vi${M});
+
+      $for M in range(ROW_TILE):
+        __m128 vacc${M}_lo = _mm256_castps256_ps128(vacc${M});
+      if (c & (4 * sizeof(float))) {
+        $for M in range(ROW_TILE):
+          _mm_storeu_ps(o${M}, vacc${M}_lo);
+
+        $for M in range(ROW_TILE):
+          vacc${M}_lo = _mm256_extractf128_ps(vacc${M}, 1);
+
+        $for M in range(ROW_TILE):
+          o${M} += 4;
+      }
+      if (c & (2 * sizeof(float))) {
+        $for M in range(ROW_TILE):
+          _mm_storel_pi((__m64*) o${M}, vacc${M}_lo);
+
+        $for M in range(ROW_TILE):
+          vacc${M}_lo = _mm_movehl_ps(vacc${M}_lo, vacc${M}_lo);
+
+        $for M in range(ROW_TILE):
+          o${M} += 2;
+      }
+      if (c & (1 * sizeof(float))) {
+        $for M in range(ROW_TILE):
+          _mm_store_ss(o${M}, vacc${M}_lo);
+
+        $for M in range(ROW_TILE):
+          o${M} += 1;
+      }
+    }
+    $for M in range(ROW_TILE):
+      i${M} = (const float*) ((uintptr_t) i${M} + input_increment);
+      o${M} = (float*) ((uintptr_t) o${M} + output_increment);
+    rows = doz(rows, ${ROW_TILE});
+  } while (rows != 0);
+}

@@ -26,10 +26,7 @@ SET(PROD_AVX512FP16_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vminc-avx512fp16-u64.c
   src/f16-vbinary/gen/f16-vmul-avx512fp16-u64.c
   src/f16-vbinary/gen/f16-vmulc-avx512fp16-u64.c
-  src/f16-vbinary/gen/f16-vprelu-avx512fp16-u64.c
-  src/f16-vbinary/gen/f16-vpreluc-avx512fp16-u64.c
   src/f16-vbinary/gen/f16-vrdivc-avx512fp16-u64.c
-  src/f16-vbinary/gen/f16-vrpreluc-avx512fp16-u64.c
   src/f16-vbinary/gen/f16-vrsubc-avx512fp16-u64.c
   src/f16-vbinary/gen/f16-vsqrdiff-avx512fp16-u64.c
   src/f16-vbinary/gen/f16-vsqrdiffc-avx512fp16-u64.c
@@ -86,9 +83,12 @@ SET(NON_PROD_AVX512FP16_MICROKERNEL_SRCS
   src/f16-vbinary/gen/f16-vmul-avx512fp16-u32.c
   src/f16-vbinary/gen/f16-vmulc-avx512fp16-u32.c
   src/f16-vbinary/gen/f16-vprelu-avx512fp16-u32.c
+  src/f16-vbinary/gen/f16-vprelu-avx512fp16-u64.c
   src/f16-vbinary/gen/f16-vpreluc-avx512fp16-u32.c
+  src/f16-vbinary/gen/f16-vpreluc-avx512fp16-u64.c
   src/f16-vbinary/gen/f16-vrdivc-avx512fp16-u32.c
   src/f16-vbinary/gen/f16-vrpreluc-avx512fp16-u32.c
+  src/f16-vbinary/gen/f16-vrpreluc-avx512fp16-u64.c
   src/f16-vbinary/gen/f16-vrsubc-avx512fp16-u32.c
   src/f16-vbinary/gen/f16-vsqrdiff-avx512fp16-u32.c
   src/f16-vbinary/gen/f16-vsqrdiffc-avx512fp16-u32.c

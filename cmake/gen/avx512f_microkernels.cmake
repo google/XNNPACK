@@ -19,6 +19,7 @@ SET(PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-gemm/gen/f32-gemm-7x16-minmax-avx512f-broadcast.c
   src/f32-igemm/gen/f32-igemm-1x16-minmax-avx512f-broadcast.c
   src/f32-igemm/gen/f32-igemm-7x16-minmax-avx512f-broadcast.c
+  src/f32-prelu/gen/f32-prelu-avx512f-2x16.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u64-acc2.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c64.c
   src/f32-rminmax/gen/f32-rmax-avx512f-u64-acc4.c
@@ -34,10 +35,7 @@ SET(PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vminc-avx512f-u32.c
   src/f32-vbinary/gen/f32-vmul-avx512f-u32.c
   src/f32-vbinary/gen/f32-vmulc-avx512f-u32.c
-  src/f32-vbinary/gen/f32-vprelu-avx512f-u32.c
-  src/f32-vbinary/gen/f32-vpreluc-avx512f-u32.c
   src/f32-vbinary/gen/f32-vrdivc-avx512f-u32.c
-  src/f32-vbinary/gen/f32-vrpreluc-avx512f-u32.c
   src/f32-vbinary/gen/f32-vrsubc-avx512f-u32.c
   src/f32-vbinary/gen/f32-vsqrdiff-avx512f-u32.c
   src/f32-vbinary/gen/f32-vsqrdiffc-avx512f-u32.c
@@ -100,6 +98,7 @@ SET(NON_PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-5x16-minmax-avx512f-broadcast.c
   src/f32-igemm/gen/f32-igemm-6x16-minmax-avx512f-broadcast.c
   src/f32-igemm/gen/f32-igemm-8x16-minmax-avx512f-broadcast.c
+  src/f32-prelu/gen/f32-prelu-avx512f-2x32.c
   src/f32-raddexpminusmax/gen/f32-raddexpminusmax-avx512f-p5-scalef-u64-acc2.c
   src/f32-raddexpminusmax/gen/f32-raddexpminusmax-avx512f-p5-scalef-u64-acc4.c
   src/f32-raddexpminusmax/gen/f32-raddexpminusmax-avx512f-p5-scalef-u64.c
@@ -168,9 +167,12 @@ SET(NON_PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-vbinary/gen/f32-vmul-avx512f-u16.c
   src/f32-vbinary/gen/f32-vmulc-avx512f-u16.c
   src/f32-vbinary/gen/f32-vprelu-avx512f-u16.c
+  src/f32-vbinary/gen/f32-vprelu-avx512f-u32.c
   src/f32-vbinary/gen/f32-vpreluc-avx512f-u16.c
+  src/f32-vbinary/gen/f32-vpreluc-avx512f-u32.c
   src/f32-vbinary/gen/f32-vrdivc-avx512f-u16.c
   src/f32-vbinary/gen/f32-vrpreluc-avx512f-u16.c
+  src/f32-vbinary/gen/f32-vrpreluc-avx512f-u32.c
   src/f32-vbinary/gen/f32-vrsubc-avx512f-u16.c
   src/f32-vbinary/gen/f32-vsqrdiff-avx512f-u16.c
   src/f32-vbinary/gen/f32-vsqrdiffc-avx512f-u16.c
