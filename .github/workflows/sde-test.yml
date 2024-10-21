@@ -1,8 +1,0 @@
-name: Execute Windows (x86, x64) Tests with Intel SDE
-
-on:
-  workflow_dispatch: # Allows manual trigger of the workflow
-
-jobs:
-  build-and-test:
-    uses: ./.github/workflows/build-windows.yml
