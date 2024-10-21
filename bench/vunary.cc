@@ -23,8 +23,7 @@
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
-#include "xnnpack/vhswish.h"
-#include "xnnpack/vlrelu.h"
+#include "xnnpack/vunary.h"
 #include <benchmark/benchmark.h>
 
 template <typename T>

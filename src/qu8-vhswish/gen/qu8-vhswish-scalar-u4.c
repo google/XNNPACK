@@ -10,7 +10,7 @@
 #include <assert.h>
 
 #include "xnnpack/math.h"
-#include "xnnpack/vhswish.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_qu8_vhswish_ukernel__scalar_u4(

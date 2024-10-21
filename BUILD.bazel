@@ -243,9 +243,6 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/unpool.h",
     "src/xnnpack/vbinary.h",
     "src/xnnpack/vcvt.h",
-    "src/xnnpack/vhswish.h",
-    "src/xnnpack/vlog.h",
-    "src/xnnpack/vlrelu.h",
     "src/xnnpack/vmulcaddc.h",
     "src/xnnpack/vscaleexpminusmax.h",
     "src/xnnpack/vscaleextexp.h",
@@ -322,6 +319,7 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":config_hdrs",
+        ":fp16",
         ":math",
         ":memory",
         ":microparams",

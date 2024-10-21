@@ -12,7 +12,7 @@
 #include <arm_neon.h>
 
 #include "xnnpack/common.h"
-#include "xnnpack/vlrelu.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_qu8_vlrelu_ukernel__neon_u16(

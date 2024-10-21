@@ -12,7 +12,7 @@
 #include <arm_neon.h>
 
 #include "xnnpack/common.h"
-#include "xnnpack/vhswish.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_qu8_vhswish_ukernel__neon_u32(

@@ -15,7 +15,6 @@
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/packq.h"
 #include "xnnpack/vcvt.h"
-#include "xnnpack/vlrelu.h"
 #include "xnnpack/vunary.h"
 
 static struct xnn_unary_elementwise_config f16_abs_config = {0};
