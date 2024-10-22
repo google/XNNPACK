@@ -47,12 +47,6 @@ static uint32_t xnn_datatype_get_log2_element_size(enum xnn_datatype datatype) {
   }
 }
 
-static const char* xnn_binary_operator_to_string(
-    enum xnn_binary_operator type) {
-  return xnn_operator_type_to_string(
-      xnn_binary_operator_to_operator_type(type));
-}
-
 static const struct xnn_binary_elementwise_config* init_config(
     enum xnn_binary_operator type, enum xnn_datatype datatype, int* sign_b) {
   switch (type) {

@@ -183,3 +183,9 @@ enum xnn_operator_type xnn_reduce_operator_to_operator_type(enum xnn_reduce_oper
       return xnn_operator_type_invalid;
   }
 }
+
+
+const char* xnn_binary_operator_to_string(enum xnn_binary_operator type) {
+  return xnn_operator_type_to_string(
+      xnn_binary_operator_to_operator_type(type));
+}
