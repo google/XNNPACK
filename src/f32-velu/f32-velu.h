@@ -126,6 +126,9 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_velu_ukernel__avx2_rr1_p6_u56
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_velu_ukernel__avx2_rr1_p6_u64, 64, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_velu_ukernel__avx2_rr1_p6_u72, 72, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_velu_ukernel__avx2_rr1_p6_u80, 80, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_u16, 16, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_u32, 32, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_velu_ukernel__avx512f_rr1_lut16_p3_perm_u48, 48, false, float, struct xnn_f32_elu_params, xnn_init_f32_elu_scalar_params)

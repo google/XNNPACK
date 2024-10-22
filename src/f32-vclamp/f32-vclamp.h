@@ -34,6 +34,9 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vclamp_ukernel__sse_u4, 4, false, float, unio
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vclamp_ukernel__sse_u8, 8, false, float, union xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_vclamp_ukernel__avx_u8, 8, false, float, union xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_vclamp_ukernel__avx_u16, 16, false, float, union xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vclamp_ukernel__avx512f_u16, 16, false, float, union xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vclamp_ukernel__avx512f_u32, 32, false, float, union xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

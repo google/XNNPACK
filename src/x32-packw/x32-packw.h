@@ -65,6 +65,9 @@ XNN_UKERNEL(xnn_arch_x86_avx, xnn_x32_packw_gemm_goi_ukernel_x16__avx_u4, 16, 1,
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_x32_packw_gemm_goi_ukernel_x16__avx_u4_prfm, 16, 1, 1, 4, 1)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_x32_packw_gemm_goi_ukernel_x16s4__avx_u4, 16, 1, 4, 4, 1)
 XNN_UKERNEL(xnn_arch_x86_avx, xnn_x32_packw_gemm_goi_ukernel_x16s4__avx_u4_prfm, 16, 1, 4, 4, 1)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_u4, 16, 1, 1, 4, 1)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_u4_prfm, 16, 1, 1, 4, 1)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

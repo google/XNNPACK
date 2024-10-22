@@ -187,6 +187,9 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_vsigmoid_ukernel__avx2_rr1_p5
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_vsigmoid_ukernel__avx2_rr1_p5_nr2fma_u64, 64, false, float, struct xnn_f32_sigmoid_params, ((xnn_init_f32_sigmoid_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_vsigmoid_ukernel__avx2_rr1_p5_nr2fma_u72, 72, false, float, struct xnn_f32_sigmoid_params, ((xnn_init_f32_sigmoid_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_vsigmoid_ukernel__avx2_rr1_p5_nr2fma_u80, 80, false, float, struct xnn_f32_sigmoid_params, ((xnn_init_f32_sigmoid_params_fn) NULL))
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vsigmoid_ukernel__avx512f_rr1_lut16_p3_perm_scalef_div_u16, 16, false, float, struct xnn_f32_sigmoid_params, ((xnn_init_f32_sigmoid_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vsigmoid_ukernel__avx512f_rr1_lut16_p3_perm_scalef_div_u32, 32, false, float, struct xnn_f32_sigmoid_params, ((xnn_init_f32_sigmoid_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vsigmoid_ukernel__avx512f_rr1_lut16_p3_perm_scalef_div_u48, 48, false, float, struct xnn_f32_sigmoid_params, ((xnn_init_f32_sigmoid_params_fn) NULL))

@@ -111,6 +111,9 @@ XNN_DWCONV_UNIPASS(xnn_arch_x86_fma3, xnn_f32_dwconv_minmax_ukernel_25p8c__fma3,
 XNN_DWCONV_UNIPASS(xnn_arch_x86_fma3, xnn_f32_dwconv_minmax_ukernel_25p8c__fma3_acc2, 8, false, 8, 25, float, float, union xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_DWCONV_UNIPASS(xnn_arch_x86_fma3, xnn_f32_dwconv_minmax_ukernel_25p16c__fma3, 16, false, 16, 25, float, float, union xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_DWCONV_UNIPASS(xnn_arch_x86_fma3, xnn_f32_dwconv_minmax_ukernel_25p16c__fma3_acc2, 16, false, 16, 25, float, float, union xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_DWCONV_UNIPASS(xnn_arch_x86_avx512f, xnn_f32_dwconv_minmax_ukernel_3p16c__avx512f, 16, false, 16, 3, float, float, union xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_DWCONV_UNIPASS(xnn_arch_x86_avx512f, xnn_f32_dwconv_minmax_ukernel_3p16c__avx512f_acc2, 16, false, 16, 3, float, float, union xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_DWCONV_UNIPASS(xnn_arch_x86_avx512f, xnn_f32_dwconv_minmax_ukernel_3p32c__avx512f, 32, false, 32, 3, float, float, union xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)

@@ -61,13 +61,16 @@ XNN_DWCONV_MULTIPASS(xnn_arch_x86_avx2, xnn_qu8_dwconv_minmax_fp32_ukernel_8f8m9
 XNN_DWCONV_MULTIPASS(xnn_arch_x86_avx, xnn_qu8_dwconv_minmax_fp32_ukernel_8f8m9l16c4s4r__avx_mul32, 8, 8, 9, 16, 4, 4, uint8_t, void, int32_t, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
 XNN_DWCONV_MULTIPASS(xnn_arch_x86_avx2, xnn_qu8_dwconv_minmax_fp32_ukernel_8f8m9l16c8s8r__avx2_mul32, 8, 8, 9, 16, 8, 8, uint8_t, void, int32_t, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
 XNN_DWCONV_MULTIPASS(xnn_arch_x86_avx2, xnn_qu8_dwconv_minmax_fp32_ukernel_8f8m9l32c8s8r__avx2_mul32, 8, 8, 9, 32, 8, 8, uint8_t, void, int32_t, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_DWCONV_MULTIPASS(xnn_arch_x86_avx512skx, xnn_qu8_dwconv_minmax_fp32_ukernel_5f5m5l16c16s1r__avx512skx_mul32, 5, 5, 5, 16, 16, 1, uint8_t, void, int32_t, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
 XNN_DWCONV_MULTIPASS(xnn_arch_x86_avx512skx, xnn_qu8_dwconv_minmax_fp32_ukernel_5f5m5l32c16s1r__avx512skx_mul32, 5, 5, 5, 32, 16, 1, uint8_t, void, int32_t, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
 XNN_DWCONV_MULTIPASS(xnn_arch_x86_avx512skx, xnn_qu8_dwconv_minmax_fp32_ukernel_6f6m7l16c16s1r__avx512skx_mul32, 6, 6, 7, 16, 16, 1, uint8_t, void, int32_t, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
 XNN_DWCONV_MULTIPASS(xnn_arch_x86_avx512skx, xnn_qu8_dwconv_minmax_fp32_ukernel_6f6m7l32c16s1r__avx512skx_mul32, 6, 6, 7, 32, 16, 1, uint8_t, void, int32_t, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
 XNN_DWCONV_MULTIPASS(xnn_arch_x86_avx512skx, xnn_qu8_dwconv_minmax_fp32_ukernel_8f8m9l16c16s1r__avx512skx_mul32, 8, 8, 9, 16, 16, 1, uint8_t, void, int32_t, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
 XNN_DWCONV_MULTIPASS(xnn_arch_x86_avx512skx, xnn_qu8_dwconv_minmax_fp32_ukernel_8f8m9l32c16s1r__avx512skx_mul32, 8, 8, 9, 32, 16, 1, uint8_t, void, int32_t, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_DWCONV_MULTIPASS(0, xnn_qu8_dwconv_minmax_fp32_ukernel_5f5m5l8c8s8r__wasmsimd_mul16, 5, 5, 5, 8, 8, 8, uint8_t, void, int32_t, union xnn_qu8_conv_minmax_params, xnn_init_qu8_conv_minmax_fp32_scalar_params)

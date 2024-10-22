@@ -24,8 +24,11 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_s8_vclamp_ukernel__neon_u64, 64, 
 XNN_UKERNEL_WITH_PARAMS(0, xnn_s8_vclamp_ukernel__sse2_u64, 64, false, int8_t, struct xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_sse4_1, xnn_s8_vclamp_ukernel__sse41_u64, 64, false, int8_t, struct xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_s8_vclamp_ukernel__avx2_u128, 128, false, int8_t, struct xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512skx, xnn_s8_vclamp_ukernel__avx512skx_u256, 256, false, int8_t, struct xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512skx, xnn_s8_vclamp_ukernel__avx512skx_u256, 256, false, int8_t, struct xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_s8_vclamp_ukernel__rvv_u1v, 1, true, int8_t, struct xnn_s8_minmax_params, xnn_init_s8_minmax_scalar_params)

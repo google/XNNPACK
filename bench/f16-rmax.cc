@@ -128,7 +128,7 @@ static void f16_rmax(
     ->UseRealTime();
 #endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   BENCHMARK_CAPTURE(f16_rmax, avx512skx_u16,
                     xnn_f16_rmax_ukernel__avx512skx_u16,
                     /*init_params=*/nullptr,
@@ -159,7 +159,9 @@ static void f16_rmax(
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(benchmark::utils::ReductionParameters<xnn_float16>)
     ->UseRealTime();
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f16_rmax, f16c_u32,
                     xnn_f16_rmax_ukernel__f16c_u32,
                     /*init_params=*/nullptr,
