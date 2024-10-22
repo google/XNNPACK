@@ -1979,6 +1979,10 @@ static void init_s8_clamp_config(void) {
   #elif XNN_ARCH_ARM64
     s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__neon_u64;
     s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
+
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__rvv_u4v;
+    s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
@@ -2020,6 +2024,9 @@ static void init_u8_clamp_config(void) {
     }
   #elif XNN_ARCH_ARM64
     u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__neon_u64;
+    u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
+  #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+    u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__rvv_u4v;
     u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
