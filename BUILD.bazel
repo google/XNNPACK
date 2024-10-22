@@ -1244,6 +1244,18 @@ config_setting(
     define_values = {"xnn_enable_avx512skx": "false"},
 )
 
+# Enables usage of Intel AVX512VBMI (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512vbmi_explicit_true",
+    define_values = {"xnn_enable_avx512vbmi": "true"},
+)
+
+# Disables usage of Intel AVX512VBMI (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512vbmi_explicit_false",
+    define_values = {"xnn_enable_avx512vbmi": "false"},
+)
+
 # Enables usage of Intel AVX512VNNI (evex512) kernels.
 config_setting(
     name = "xnn_enable_avx512vnni_explicit_true",
@@ -1698,6 +1710,22 @@ alias(
         ":xnn_enable_avx512skx_explicit_true": ":xnn_enable_avx512skx_explicit_true",
         ":xnn_enable_avx512skx_explicit_false": ":xnn_enable_avx512skx_explicit_true",
         "//conditions:default": ":avx512skx_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx512vbmi_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx512vbmi_enabled",
+    actual = select({
+        ":xnn_enable_avx512vbmi_explicit_true": ":xnn_enable_avx512vbmi_explicit_true",
+        ":xnn_enable_avx512vbmi_explicit_false": ":xnn_enable_avx512vbmi_explicit_true",
+        "//conditions:default": ":avx512vbmi_enabled_by_default",
     }),
 )
 
