@@ -71,9 +71,6 @@ int main(int argc, char** argv) {
     case 7:
       xnn_define_binary(NULL, xnn_binary_add, NULL, 0, 0, 0, 0);
       break;
-    case 9:
-      xnn_define_prelu(NULL, 0, 0, 0, 0);
-      break;
     case 10:
       xnn_define_clamp(NULL, 0.0f, 0.0f, 0, 0, 0);
       break;
