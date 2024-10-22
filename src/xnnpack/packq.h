@@ -86,6 +86,37 @@ XNN_INLINE static int8_t xnn_x8_packq_f32qp8_get_quantized(
   return *dst_ptr;
 }
 
+XNN_INLINE static float xnn_x8_packq_f32qp8_get_recip_scale(
+    size_t m_idx, const int8_t* lhs_packed, size_t k,
+    size_t mr_packed, size_t kr, size_t sr) {
+  const size_t k_internal = k_roundedup(k, kr, sr);
+  const size_t dst_x = (m_idx % mr_packed);
+  const size_t packed_offset =
+      xnn_x8_packq_f32qp8_packed_offset(m_idx, k, mr_packed, kr, sr);
+
+  // Get the quantization parameters.
+  const int8_t* dst_ptr = lhs_packed + packed_offset + mr_packed * k_internal;
+  dst_ptr += dst_x * sizeof(int32_t);
+  dst_ptr += mr_packed * sizeof(float);
+  const float recip_scale = *(const float*)dst_ptr;
+  return recip_scale;
+}
+
+XNN_INLINE static float xnn_x8_packq_f32qp8_get_neg_nudged_zp(
+    size_t m_idx, const int8_t* lhs_packed, size_t k,
+    size_t mr_packed, size_t kr, size_t sr) {
+  const size_t k_internal = k_roundedup(k, kr, sr);
+  const size_t dst_x = (m_idx % mr_packed);
+  const size_t packed_offset =
+      xnn_x8_packq_f32qp8_packed_offset(m_idx, k, mr_packed, kr, sr);
+
+  // Get the quantization parameters.
+  const int8_t* dst_ptr = lhs_packed + packed_offset + mr_packed * k_internal;
+  dst_ptr += dst_x * sizeof(int32_t);
+  const int32_t neg_nudged_zero_point = *(const int32_t*)dst_ptr;
+  return neg_nudged_zero_point;
+}
+
 XNN_INLINE static float xnn_x8_packq_f32qp8_get_dequantized(
     size_t m_idx, size_t k_idx, const int8_t* lhs_packed, size_t k,
     size_t mr_packed, size_t kr, size_t sr) {
@@ -117,7 +148,7 @@ XNN_INLINE static float xnn_x8_packq_f32qp8_get_dequantized(
                             const float* XNN_RESTRICT lhs, size_t lhs_stride, \
                             void* XNN_RESTRICT lhs_packed);
 
-#include "src/x8-packq/x8-packq.h"
+#include "x8-packq/x8-packq.h"
 
 #undef XNN_UKERNEL
 

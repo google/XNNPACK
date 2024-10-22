@@ -18,9 +18,9 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class DynamicFullyConnectedOperatorTester {
@@ -142,14 +142,14 @@ class DynamicFullyConnectedOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
-    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
+    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       (batch_size() - 1) * input_stride() + input_channels());
-    std::vector<xnn_float16> kernel(output_channels() * input_channels());
-    std::vector<float> kernel_as_float(kernel.size());
-    std::vector<xnn_float16> bias(output_channels());
-    std::vector<float> bias_as_float(bias.size());
-    std::vector<xnn_float16> output((batch_size() - 1) * output_stride() + output_channels());
-    std::vector<float> output_ref(batch_size() * output_channels());
+    xnnpack::Buffer<xnn_float16> kernel(output_channels() * input_channels());
+    xnnpack::Buffer<float> kernel_as_float(kernel.size());
+    xnnpack::Buffer<xnn_float16> bias(output_channels());
+    xnnpack::Buffer<float> bias_as_float(bias.size());
+    xnnpack::Buffer<xnn_float16> output((batch_size() - 1) * output_stride() + output_channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
@@ -157,7 +157,6 @@ class DynamicFullyConnectedOperatorTester {
       std::copy(kernel.cbegin(), kernel.cend(), kernel_as_float.begin());
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
       std::copy(bias.cbegin(), bias.cend(), bias_as_float.begin());
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       if (has_bias()) {
@@ -231,7 +230,9 @@ class DynamicFullyConnectedOperatorTester {
           output_stride(), &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
       ASSERT_NE(workspace_size, 0);
       ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
+      // TODO(b/372731180): This should probably be initialized by the operator.
+      std::fill(workspace.begin(), workspace.end(), 0);
 
       ASSERT_EQ(
         xnn_status_success, xnn_setup_dynamic_fully_connected_nc_f16(
@@ -244,8 +245,8 @@ class DynamicFullyConnectedOperatorTester {
     }
   }
 
-  void VerifyF16(const std::vector<xnn_float16>& output,
-                 const std::vector<float>& output_ref,
+  void VerifyF16(const xnnpack::Buffer<xnn_float16>& output,
+                 const xnnpack::Buffer<float>& output_ref,
                  const float output_max,
                  const float output_min) const {
     for (size_t i = 0; i < batch_size(); i++) {
@@ -267,12 +268,12 @@ class DynamicFullyConnectedOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       (batch_size() - 1) * input_stride() + input_channels());
-    std::vector<float> kernel(output_channels() * input_channels());
-    std::vector<float> bias(output_channels());
-    std::vector<float> output((batch_size() - 1) * output_stride() + output_channels());
-    std::vector<float> output_ref(batch_size() * output_channels());
+    xnnpack::Buffer<float> kernel(output_channels() * input_channels());
+    xnnpack::Buffer<float> bias(output_channels());
+    xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() + output_channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
@@ -348,7 +349,9 @@ class DynamicFullyConnectedOperatorTester {
           output_stride(), &workspace_size, &workspace_alignment, /*threadpool=*/nullptr));
       ASSERT_NE(workspace_size, 0);
       ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
+      // TODO(b/372731180): This should probably be initialized by the operator.
+      std::fill(workspace.begin(), workspace.end(), 0);
 
       ASSERT_EQ(
         xnn_status_success, xnn_setup_dynamic_fully_connected_nc_f32(
@@ -361,8 +364,8 @@ class DynamicFullyConnectedOperatorTester {
     }
   }
 
-  void VerifyF32(const std::vector<float>& output,
-                 const std::vector<float>& output_ref,
+  void VerifyF32(const xnnpack::Buffer<float>& output,
+                 const xnnpack::Buffer<float>& output_ref,
                  float output_max,
                  float output_min) const
   {

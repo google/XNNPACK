@@ -1584,7 +1584,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F16_F32ACC_RDSUM_7P7X__AVX512SKX_C16, channels_eq_16_2pass_fulltile) {
     TEST_REQUIRES_X86_AVX512SKX;
     const size_t channel_tile = 16;
@@ -1805,10 +1805,10 @@
          .Test(xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c16, xnn_init_f16_f32acc_scale_scalar_params);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F16_F32ACC_RDSUM_7P7X__AVX512SKX_C32, channels_eq_32_2pass_fulltile) {
     TEST_REQUIRES_X86_AVX512SKX;
     const size_t channel_tile = 32;
@@ -2029,10 +2029,10 @@
          .Test(xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c32, xnn_init_f16_f32acc_scale_scalar_params);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F16_F32ACC_RDSUM_7P7X__AVX512SKX_C64, channels_eq_64_2pass_fulltile) {
     TEST_REQUIRES_X86_AVX512SKX;
     const size_t channel_tile = 64;
@@ -2253,10 +2253,10 @@
          .Test(xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c64, xnn_init_f16_f32acc_scale_scalar_params);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F16_F32ACC_RDSUM_7P7X__AVX512SKX_C128, channels_eq_128_2pass_fulltile) {
     TEST_REQUIRES_X86_AVX512SKX;
     const size_t channel_tile = 128;
@@ -2477,4 +2477,4 @@
          .Test(xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c128, xnn_init_f16_f32acc_scale_scalar_params);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

@@ -63,5 +63,5 @@ TEST(ukernel, special_values) {                                                 
     }                                                                                                            \
   }                                                                                                              \
 }
-#include "src/f32-vgelu/f32-vgelu.h"
+#include "f32-vgelu/f32-vgelu.h"
 #undef XNN_UKERNEL_WITH_PARAMS

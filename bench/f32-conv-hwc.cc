@@ -11,18 +11,16 @@
 #include <random>
 #include <vector>
 
-#include <benchmark/benchmark.h>
-#include "bench/dconv.h"
-#include "bench/utils.h"
-
+#include "dconv.h"
+#include "utils.h"
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/conv.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pack.h"
-
+#include "xnnpack/buffer.h"
+#include <benchmark/benchmark.h>
 
 static void f32_conv_hwc(benchmark::State& state,
   xnn_f32_conv_hwc_ukernel_fn conv,
@@ -50,14 +48,15 @@ static void f32_conv_hwc(benchmark::State& state,
   const size_t output_height = (input_height + 2 * padding - kernel_size) / subsampling + 1;
   const size_t output_width = (input_width + 2 * padding - kernel_size) / subsampling + 1;
 
-  std::vector<float> input(input_height * input_width * input_channels + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(input_height * input_width * input_channels + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input.begin(), input.end(), std::ref(f32rng));
-  std::vector<float> kernel(output_channels * kernel_size * kernel_size * input_channels);
+  xnnpack::Buffer<float> kernel(output_channels * kernel_size * kernel_size * input_channels);
   std::generate(kernel.begin(), kernel.end(), std::ref(f32rng));
-  std::vector<float> bias(output_channels);
+  xnnpack::Buffer<float> bias(output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
 
-  std::vector<float, AlignedAllocator<float, 64>> zero(input_channels * input_width + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> zero(
+      input_channels * input_width + XNN_EXTRA_BYTES / sizeof(float));
 
   const size_t weights_elements = (kernel_size * kernel_size * input_channels + 1) *
     benchmark::utils::RoundUp<size_t>(output_channels, output_channels_tile);
@@ -66,8 +65,8 @@ static void f32_conv_hwc(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (weights_elements + output_elements));
 
-  std::vector<float, AlignedAllocator<float, 64>> packed_weights(weights_elements * num_buffers);
-  std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_weights(weights_elements *
+                                                          num_buffers);
   xnn_pack_f32_dconv_oki_w(
     output_channels, input_channels, output_channels_tile,
     kernel_size /* kernel height */, kernel_size /* kernel width */,
@@ -78,8 +77,7 @@ static void f32_conv_hwc(benchmark::State& state,
       packed_weights.begin() + n * weights_elements);
   }
 
-  std::vector<float> output(output_elements * num_buffers);
-  std::fill(output.begin(), output.end(), std::nanf(""));
+  xnnpack::Buffer<float> output(output_elements * num_buffers);
 
   xnn_f32_minmax_params params;
   init_params(&params,

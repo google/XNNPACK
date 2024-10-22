@@ -35,11 +35,11 @@ void xnn_qs8_rsum_ukernel__ssse3_u32_acc2(
   __m128i vacc1 = _mm_setzero_si128();
 
   // 256 int8s may be summed into an int16 before overflowing.
-  // Each register has 8 lanes and there are 2 accumulators so batch size is 4096
-  for (; batch >= 4096; batch -= 4096) {
+  // Each register has 16 lanes and there are 2 accumulators so batch size is 8192
+  for (; batch >= 8192; batch -= 8192) {
     __m128i vacc16_0 = _mm_setzero_si128();
     __m128i vacc16_1 = _mm_setzero_si128();
-    for (size_t current_batch = 4096; current_batch > 0; current_batch -= 32) {
+    for (size_t current_batch = 8192; current_batch > 0; current_batch -= 32) {
       const __m128i vt0 = _mm_maddubs_epi16(vone, _mm_loadu_si128((const __m128i*) input)); input += 16;
       const __m128i vt1 = _mm_maddubs_epi16(vone, _mm_loadu_si128((const __m128i*) input)); input += 16;
       vacc16_0 = _mm_add_epi16(vacc16_0, vt0);
@@ -50,7 +50,7 @@ void xnn_qs8_rsum_ukernel__ssse3_u32_acc2(
   }
 
   if (XNN_UNLIKELY(batch != 0)) {
-    assert(batch >= 1 && batch < 4096);
+    assert(batch >= 1 && batch < 8192);
     __m128i vacc16_0 = _mm_setzero_si128();
     __m128i vacc16_1 = _mm_setzero_si128();
     for (; batch >= 32; batch -= 32) {
@@ -63,7 +63,7 @@ void xnn_qs8_rsum_ukernel__ssse3_u32_acc2(
     vacc1 = _mm_add_epi32(vacc1, _mm_madd_epi16(vone_16, vacc16_1));
   }
   if (XNN_UNLIKELY(batch != 0)) {
-    assert(batch >= 1 && batch < 2048);
+    assert(batch >= 1 && batch < 4096);
     __m128i vacc16 = _mm_setzero_si128();
     for (; batch >= 16; batch -= 16) {
       const __m128i vt = _mm_maddubs_epi16(vone, _mm_loadu_si128((const __m128i*) input)); input += 16;

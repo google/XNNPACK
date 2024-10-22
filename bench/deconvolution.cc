@@ -25,7 +25,8 @@
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 #endif  // BENCHMARK_TENSORFLOW_LITE */
-#include "bench/utils.h"
+#include "utils.h"
+#include "xnnpack/buffer.h"
 
 void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
@@ -45,9 +46,6 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
-  auto u8rng = std::bind(
-    std::uniform_int_distribution<int32_t>(std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max()),
-    std::ref(rng));
 
   const size_t effective_kernel_height = (kernel_height - 1) * dilation + 1;
   const size_t effective_kernel_width = (kernel_width - 1) * dilation + 1;
@@ -58,11 +56,11 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
   const size_t output_height = std::max(stride_height * (input_height - 1) + adjustment + effective_kernel_height, padding_height) - padding_height;
   const size_t output_width = std::max(stride_width * (input_width - 1) + adjustment + effective_kernel_width, padding_width) - padding_width;
 
-  std::vector<uint8_t> input(XNN_EXTRA_BYTES + batch_size * input_height * input_width * input_channels);
-  std::generate(input.begin(), input.end(), std::ref(u8rng));
-  std::vector<uint8_t> kernel(output_channels * kernel_height * kernel_width * input_channels);
-  std::generate(kernel.begin(), kernel.end(), std::ref(u8rng));
-  std::vector<int32_t> bias(output_channels);
+  xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES + batch_size * input_height * input_width * input_channels);
+  xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
+  xnnpack::Buffer<uint8_t> kernel(output_channels * kernel_height * kernel_width * input_channels);
+  xnnpack::fill_uniform_random_bits(kernel.data(), kernel.size(), rng);
+  xnnpack::Buffer<int32_t> bias(output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(i32rng));
   const size_t output_elements = batch_size * output_height * output_width * output_channels;
 
@@ -75,9 +73,9 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (kernel.size() + bias.size() + output_elements));
-  std::vector<uint8_t> output(output_elements * num_buffers);
+  xnnpack::Buffer<uint8_t> output(output_elements * num_buffers);
 
-  std::vector<xnn_operator_t> deconvolution_operators(num_buffers);
+  xnnpack::Buffer<xnn_operator_t> deconvolution_operators(num_buffers);
   for (xnn_operator_t& deconvolution_op : deconvolution_operators) {
     status = xnn_create_deconvolution2d_nhwc_qu8(
         padding_top, padding_right, padding_bottom, padding_left,
@@ -185,12 +183,12 @@ void xnnpack_deconvolution_f32(benchmark::State& state, const char* net) {
   const size_t output_height = std::max(stride_height * (input_height - 1) + adjustment + effective_kernel_height, padding_height) - padding_height;
   const size_t output_width = std::max(stride_width * (input_width - 1) + adjustment + effective_kernel_width, padding_width) - padding_width;
 
-  std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+  xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
     batch_size * input_height * input_width * input_channels);
   std::generate(input.begin(), input.end(), std::ref(f32rng));
-  std::vector<float> kernel(output_channels * kernel_height * kernel_width * input_channels);
+  xnnpack::Buffer<float> kernel(output_channels * kernel_height * kernel_width * input_channels);
   std::generate(kernel.begin(), kernel.end(), std::ref(f32rng));
-  std::vector<float> bias(output_channels);
+  xnnpack::Buffer<float> bias(output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
   const size_t output_elements = batch_size * output_height * output_width * output_channels;
 
@@ -203,9 +201,9 @@ void xnnpack_deconvolution_f32(benchmark::State& state, const char* net) {
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (kernel.size() + bias.size() + output_elements));
-  std::vector<float> output(output_elements * num_buffers);
+  xnnpack::Buffer<float> output(output_elements * num_buffers);
 
-  std::vector<xnn_operator_t> deconvolution_operators(num_buffers);
+  xnnpack::Buffer<xnn_operator_t> deconvolution_operators(num_buffers);
   for (xnn_operator_t& deconvolution_op : deconvolution_operators) {
     status = xnn_create_deconvolution2d_nhwc_f32(
         padding_top, padding_right, padding_bottom, padding_left,
@@ -323,7 +321,7 @@ void tflite_deconvolution_f32(benchmark::State& state, const char* net) {
   const size_t output_height = std::max(stride_height * (input_height - 1) + adjustment + kernel_height, padding_height) - padding_height;
   const size_t output_width = std::max(stride_width * (input_width - 1) + adjustment + kernel_width, padding_width) - padding_width;
 
-  std::vector<float> kernel(output_channels * kernel_height * kernel_width * input_channels);
+  xnnpack::Buffer<float> kernel(output_channels * kernel_height * kernel_width * input_channels);
   std::generate(kernel.begin(), kernel.end(), std::ref(f32rng));
 
   flatbuffers::FlatBufferBuilder builder;

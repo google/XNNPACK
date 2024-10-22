@@ -17,8 +17,8 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 #include "pthreadpool.h"
 
@@ -349,11 +349,11 @@ class ArgmaxPoolingOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<float> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
-    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
-    std::vector<uint32_t> index(batch_size() * output_height() * output_width() * channels());
-    std::vector<uint32_t> index_ref(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<float> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<uint32_t> index(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<uint32_t> index_ref(batch_size() * output_height() * output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
@@ -366,7 +366,6 @@ class ArgmaxPoolingOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -427,7 +426,7 @@ class ArgmaxPoolingOperatorTester {
 
       ASSERT_NE(workspace_size, SIZE_MAX);
       ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_argmax_pooling2d_nhwc_f32(
@@ -460,19 +459,19 @@ class ArgmaxPoolingOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max<size_t>(
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max<size_t>(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
       (next_batch_size() * next_input_height() * next_input_width() - 1) * input_pixel_stride() + channels()));
-    std::vector<float> output(std::max<size_t>(
+    xnnpack::Buffer<float> output(std::max<size_t>(
       (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
       (next_batch_size() * next_output_height() * next_output_width() - 1) * output_pixel_stride() + channels()));
-    std::vector<uint32_t> index(std::max<size_t>(
+    xnnpack::Buffer<uint32_t> index(std::max<size_t>(
       batch_size() * output_height() * output_width() * channels(),
       next_batch_size() * next_output_height() * next_output_width() * channels()));
-    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
-    std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
-    std::vector<uint32_t> index_ref(batch_size() * output_height() * output_width() * channels());
-    std::vector<uint32_t> next_index_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
+    xnnpack::Buffer<uint32_t> index_ref(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<uint32_t> next_index_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
@@ -485,7 +484,6 @@ class ArgmaxPoolingOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -541,7 +539,7 @@ class ArgmaxPoolingOperatorTester {
 
       ASSERT_NE(workspace_size, SIZE_MAX);
       ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_argmax_pooling2d_nhwc_f32(
@@ -570,7 +568,6 @@ class ArgmaxPoolingOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results for the second run, including clamping.
       for (size_t i = 0; i < next_batch_size(); i++) {
@@ -615,7 +612,8 @@ class ArgmaxPoolingOperatorTester {
 
       ASSERT_NE(workspace_size, SIZE_MAX);
       ASSERT_LE(next_workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> next_workspace(next_workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> next_workspace(
+          next_workspace_size);
 
       // Setup and run Argmax Pooling operator the second time, and destroy the operator.
       ASSERT_EQ(xnn_status_success,

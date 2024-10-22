@@ -31,5 +31,5 @@ XNN_TEST_BINARY_Y_SCALE(ukernel, arch_flags, batch_tile, false, datatype, ukerne
                                                                                                                  \
 XNN_TEST_BINARY_QMIN(ukernel, arch_flags, batch_tile, false, datatype, ukernel, init_params);                    \
 XNN_TEST_BINARY_QMAX(ukernel, arch_flags, batch_tile, false, datatype, ukernel, init_params);
-#include "src/qs8-vmul/qs8-vmul-minmax-rndnu.h"
+#include "qs8-vmul/qs8-vmul-minmax-rndnu.h"
 #undef XNN_UKERNEL_WITH_PARAMS

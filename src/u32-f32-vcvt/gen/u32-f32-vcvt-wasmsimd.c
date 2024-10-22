@@ -38,7 +38,7 @@ void xnn_u32_f32_vcvt_ukernel__wasmsimd_u4(
     const xnn_simd_u32_t vx = xnn_loadu_u32(input);
     input += xnn_simd_size_f32;
 
-    const xnn_simd_f32_t vy = xnn_cvt_f32_u32(xnn_sub_u32(vx, zero_point));
+    const xnn_simd_f32_t vy = xnn_subw_f32_u32(vx, zero_point);
 
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
@@ -48,7 +48,7 @@ void xnn_u32_f32_vcvt_ukernel__wasmsimd_u4(
     const xnn_simd_u32_t vx =
         xnn_load_tail_u32(input, batch >> XNN_LOG2_SIZEOF_UINT32_T);
 
-    const xnn_simd_f32_t vy = xnn_cvt_f32_u32(xnn_sub_u32(vx, zero_point));
+    const xnn_simd_f32_t vy = xnn_subw_f32_u32(vx, zero_point);
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
@@ -74,8 +74,8 @@ void xnn_u32_f32_vcvt_ukernel__wasmsimd_u8(
     const xnn_simd_u32_t vx1 = xnn_loadu_u32(input + 1 * xnn_simd_size_u32);
     input += 2 * xnn_simd_size_u32;
 
-    const xnn_simd_f32_t vy0 = xnn_cvt_f32_u32(xnn_sub_u32(vx0, zero_point));
-    const xnn_simd_f32_t vy1 = xnn_cvt_f32_u32(xnn_sub_u32(vx1, zero_point));
+    const xnn_simd_f32_t vy0 = xnn_subw_f32_u32(vx0, zero_point);
+    const xnn_simd_f32_t vy1 = xnn_subw_f32_u32(vx1, zero_point);
 
     xnn_storeu_f32(output, vy0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy1);
@@ -86,7 +86,7 @@ void xnn_u32_f32_vcvt_ukernel__wasmsimd_u8(
     const xnn_simd_u32_t vx = xnn_loadu_u32(input);
     input += xnn_simd_size_f32;
 
-    const xnn_simd_f32_t vy = xnn_cvt_f32_u32(xnn_sub_u32(vx, zero_point));
+    const xnn_simd_f32_t vy = xnn_subw_f32_u32(vx, zero_point);
 
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
@@ -96,7 +96,7 @@ void xnn_u32_f32_vcvt_ukernel__wasmsimd_u8(
     const xnn_simd_u32_t vx =
         xnn_load_tail_u32(input, batch >> XNN_LOG2_SIZEOF_UINT32_T);
 
-    const xnn_simd_f32_t vy = xnn_cvt_f32_u32(xnn_sub_u32(vx, zero_point));
+    const xnn_simd_f32_t vy = xnn_subw_f32_u32(vx, zero_point);
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
@@ -123,9 +123,9 @@ void xnn_u32_f32_vcvt_ukernel__wasmsimd_u12(
     const xnn_simd_u32_t vx2 = xnn_loadu_u32(input + 2 * xnn_simd_size_u32);
     input += 3 * xnn_simd_size_u32;
 
-    const xnn_simd_f32_t vy0 = xnn_cvt_f32_u32(xnn_sub_u32(vx0, zero_point));
-    const xnn_simd_f32_t vy1 = xnn_cvt_f32_u32(xnn_sub_u32(vx1, zero_point));
-    const xnn_simd_f32_t vy2 = xnn_cvt_f32_u32(xnn_sub_u32(vx2, zero_point));
+    const xnn_simd_f32_t vy0 = xnn_subw_f32_u32(vx0, zero_point);
+    const xnn_simd_f32_t vy1 = xnn_subw_f32_u32(vx1, zero_point);
+    const xnn_simd_f32_t vy2 = xnn_subw_f32_u32(vx2, zero_point);
 
     xnn_storeu_f32(output, vy0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy1);
@@ -137,7 +137,7 @@ void xnn_u32_f32_vcvt_ukernel__wasmsimd_u12(
     const xnn_simd_u32_t vx = xnn_loadu_u32(input);
     input += xnn_simd_size_f32;
 
-    const xnn_simd_f32_t vy = xnn_cvt_f32_u32(xnn_sub_u32(vx, zero_point));
+    const xnn_simd_f32_t vy = xnn_subw_f32_u32(vx, zero_point);
 
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
@@ -147,7 +147,7 @@ void xnn_u32_f32_vcvt_ukernel__wasmsimd_u12(
     const xnn_simd_u32_t vx =
         xnn_load_tail_u32(input, batch >> XNN_LOG2_SIZEOF_UINT32_T);
 
-    const xnn_simd_f32_t vy = xnn_cvt_f32_u32(xnn_sub_u32(vx, zero_point));
+    const xnn_simd_f32_t vy = xnn_subw_f32_u32(vx, zero_point);
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }
@@ -175,10 +175,10 @@ void xnn_u32_f32_vcvt_ukernel__wasmsimd_u16(
     const xnn_simd_u32_t vx3 = xnn_loadu_u32(input + 3 * xnn_simd_size_u32);
     input += 4 * xnn_simd_size_u32;
 
-    const xnn_simd_f32_t vy0 = xnn_cvt_f32_u32(xnn_sub_u32(vx0, zero_point));
-    const xnn_simd_f32_t vy1 = xnn_cvt_f32_u32(xnn_sub_u32(vx1, zero_point));
-    const xnn_simd_f32_t vy2 = xnn_cvt_f32_u32(xnn_sub_u32(vx2, zero_point));
-    const xnn_simd_f32_t vy3 = xnn_cvt_f32_u32(xnn_sub_u32(vx3, zero_point));
+    const xnn_simd_f32_t vy0 = xnn_subw_f32_u32(vx0, zero_point);
+    const xnn_simd_f32_t vy1 = xnn_subw_f32_u32(vx1, zero_point);
+    const xnn_simd_f32_t vy2 = xnn_subw_f32_u32(vx2, zero_point);
+    const xnn_simd_f32_t vy3 = xnn_subw_f32_u32(vx3, zero_point);
 
     xnn_storeu_f32(output, vy0);
     xnn_storeu_f32(output + 1 * xnn_simd_size_f32, vy1);
@@ -191,7 +191,7 @@ void xnn_u32_f32_vcvt_ukernel__wasmsimd_u16(
     const xnn_simd_u32_t vx = xnn_loadu_u32(input);
     input += xnn_simd_size_f32;
 
-    const xnn_simd_f32_t vy = xnn_cvt_f32_u32(xnn_sub_u32(vx, zero_point));
+    const xnn_simd_f32_t vy = xnn_subw_f32_u32(vx, zero_point);
 
     xnn_storeu_f32(output, vy);
     output += xnn_simd_size_f32;
@@ -201,7 +201,7 @@ void xnn_u32_f32_vcvt_ukernel__wasmsimd_u16(
     const xnn_simd_u32_t vx =
         xnn_load_tail_u32(input, batch >> XNN_LOG2_SIZEOF_UINT32_T);
 
-    const xnn_simd_f32_t vy = xnn_cvt_f32_u32(xnn_sub_u32(vx, zero_point));
+    const xnn_simd_f32_t vy = xnn_subw_f32_u32(vx, zero_point);
 
     xnn_store_tail_f32(output, vy, batch >> XNN_LOG2_SIZEOF_FLOAT);
   }

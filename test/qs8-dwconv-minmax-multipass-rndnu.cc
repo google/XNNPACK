@@ -300,5 +300,5 @@ INSTANTIATE_TEST_SUITE_P(                                                       
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {                                                                                                                                              \
       return info.param.test_name;                                                                                                                                                                               \
     });
-#include "src/qs8-dwconv/qs8-dwconv-minmax-multipass-rndnu.h"
+#include "qs8-dwconv/qs8-dwconv-minmax-multipass-rndnu.h"
 #undef XNN_UKERNEL_WITH_PARAMS

@@ -48,6 +48,7 @@ tools/generate-gemm-test.py --spec test/qd8-f32-qc4w-gemm-minmax.yaml --output-t
 tools/generate-gemm-test.py --spec test/qd8-f32-qb4w-gemm-minmax.yaml --output-test test/qd8-f32-qb4w-gemm-minmax.cc --output-bench bench/qd8-f32-qb4w-gemm.cc &
 
 tools/generate-gemm-test.py --spec test/qp8-f32-qc4w-gemm-minmax.yaml --output-test test/qp8-f32-qc4w-gemm-minmax.cc --output-bench bench/qp8-f32-qc4w-gemm.cc &
+tools/generate-gemm-test.py --spec test/qp8-f32-qb4w-gemm-minmax.yaml --output-test test/qp8-f32-qb4w-gemm-minmax.cc --output-bench bench/qp8-f32-qb4w-gemm.cc &
 
 tools/generate-gemm-test.py --spec test/qs8-qc8w-gemm-minmax-fp32.yaml --output-test test/qs8-qc8w-gemm-minmax-fp32.cc --output-test test/qs8-qc8w-gemm-minmax-fp32-2.cc --output-test test/qs8-qc8w-gemm-minmax-fp32-3.cc --output-bench bench/qs8-qc8w-gemm-fp32.cc &
 
@@ -251,8 +252,8 @@ tools/generate-dwconv2d-chw-test.py --spec test/f32-dwconv2d-chw.yaml --output t
 ### Tests for VHSwish micro-kernels
 tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-vhswish --output test/f16-vhswish.cc &
 tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vhswish --output test/f32-vhswish.cc &
-tools/generate-vhswish-test.py --spec test/qs8-vhswish.yaml --output test/qs8-vhswish.cc &
-tools/generate-vhswish-test.py --spec test/qu8-vhswish.yaml --output test/qu8-vhswish.cc &
+tools/generate-vunary-test.py --tester VHSwishMicrokernelTester --ukernel qs8-vhswish --output test/qs8-vhswish.cc &
+tools/generate-vunary-test.py --tester VHSwishMicrokernelTester --ukernel qu8-vhswish --output test/qu8-vhswish.cc &
 
 ### Tests for IBilinear micro-kernels
 tools/generate-ibilinear-test.py --spec test/f16-ibilinear.yaml --output test/f16-ibilinear.cc &
@@ -263,10 +264,6 @@ tools/generate-ibilinear-test.py --spec test/u8-ibilinear.yaml --output test/u8-
 ### Tests for IBilinear CHW layout micro-kernels
 tools/generate-ibilinear-chw-test.py --spec test/f16-ibilinear-chw.yaml --output test/f16-ibilinear-chw.cc &
 tools/generate-ibilinear-chw-test.py --spec test/f32-ibilinear-chw.yaml --output test/f32-ibilinear-chw.cc &
-
-### Tests for PRelu micro-kernels
-tools/generate-prelu-test.py --spec test/f16-prelu.yaml --output test/f16-prelu.cc &
-tools/generate-prelu-test.py --spec test/f32-prelu.yaml --output test/f32-prelu.cc &
 
 ### Tests for RAddExpMinusMax micro-kernels
 tools/generate-raddexpminusmax-test.py --spec test/f32-raddexpminusmax.yaml --output test/f32-raddexpminusmax.cc &

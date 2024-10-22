@@ -57,7 +57,7 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x8c8-minmax-fp32-avx2.c
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-3x8c8-minmax-fp32-avx2.c
   src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-avx2-c64.c
-  src/qs8-rsum/gen/qs8-rsum-avx2-u64.c
+  src/qs8-rsum/gen/qs8-rsum-avx2-u64-acc2.c
   src/qs8-vadd/gen/qs8-vadd-minmax-avx2-mul32-ld64-u16.c
   src/qs8-vaddc/gen/qs8-vaddc-minmax-avx2-mul32-ld64-u16.c
   src/qs8-vcvt/gen/qs8-vcvt-avx2-u32.c
@@ -69,14 +69,16 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/qu8-gemm/gen/qu8-gemm-3x8c8-minmax-fp32-avx2.c
   src/qu8-igemm/gen/qu8-igemm-1x8c8-minmax-fp32-avx2.c
   src/qu8-igemm/gen/qu8-igemm-3x8c8-minmax-fp32-avx2.c
-  src/qu8-rsum/gen/qu8-rsum-avx2-u64.c
+  src/qu8-rsum/gen/qu8-rsum-avx2-u64-acc2.c
   src/qu8-vadd/gen/qu8-vadd-minmax-avx2-mul32-ld64-u16.c
   src/qu8-vaddc/gen/qu8-vaddc-minmax-avx2-mul32-ld64-u16.c
   src/qu8-vcvt/gen/qu8-vcvt-avx2-u32.c
   src/qu8-vlrelu/gen/qu8-vlrelu-avx2-u32.c
+  src/s8-vclamp/s8-vclamp-avx2-u128.c
   src/s32-f32-vcvt/gen/s32-f32-vcvt-avx2.c
   src/s32-vmul/gen/s32-vmul-avx2.c
   src/s32-vmul/gen/s32-vmulc-avx2.c
+  src/u8-vclamp/u8-vclamp-avx2-u128.c
   src/u32-f32-vcvt/gen/u32-f32-vcvt-avx2.c
   src/x8-lut/gen/x8-lut-avx2-u128.c
   src/x8-transposec/gen/x8-transposec-32x32-reuse-switch-avx2.c
@@ -487,10 +489,8 @@ SET(NON_PROD_AVX2_MICROKERNEL_SRCS
   src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x8c8-minmax-fp32-avx2.c
   src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-avx2-c32.c
   src/qs8-rsum/gen/qs8-rsum-avx2-u32.c
-  src/qs8-rsum/gen/qs8-rsum-avx2-u64-acc2.c
   src/qs8-rsum/gen/qs8-rsum-avx2-u128-acc2.c
   src/qs8-rsum/gen/qs8-rsum-avx2-u128-acc4.c
-  src/qs8-rsum/gen/qs8-rsum-avx2-u128.c
   src/qs8-vadd/gen/qs8-vadd-minmax-avx2-mul32-ld64-u8.c
   src/qs8-vadd/gen/qs8-vadd-minmax-avx2-mul32-ld64-u24.c
   src/qs8-vadd/gen/qs8-vadd-minmax-avx2-mul32-ld64-u32.c
@@ -522,10 +522,8 @@ SET(NON_PROD_AVX2_MICROKERNEL_SRCS
   src/qu8-igemm/gen/qu8-igemm-2x8c8-minmax-fp32-avx2.c
   src/qu8-igemm/gen/qu8-igemm-4x8c8-minmax-fp32-avx2.c
   src/qu8-rsum/gen/qu8-rsum-avx2-u32.c
-  src/qu8-rsum/gen/qu8-rsum-avx2-u64-acc2.c
   src/qu8-rsum/gen/qu8-rsum-avx2-u128-acc2.c
   src/qu8-rsum/gen/qu8-rsum-avx2-u128-acc4.c
-  src/qu8-rsum/gen/qu8-rsum-avx2-u128.c
   src/qu8-vadd/gen/qu8-vadd-minmax-avx2-mul32-ld64-u8.c
   src/qu8-vaddc/gen/qu8-vaddc-minmax-avx2-mul32-ld64-u8.c
   src/qu8-vcvt/gen/qu8-vcvt-avx2-u16.c

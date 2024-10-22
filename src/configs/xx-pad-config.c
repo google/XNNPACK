@@ -22,23 +22,17 @@ static void init_xx_pad_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       xx_pad_config.ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel_p16__neon_u16;
-      xx_pad_config.row_tile = 1;
     } else if (!XNN_PLATFORM_MOBILE) {
       xx_pad_config.ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel_p4__scalar_u16;
-      xx_pad_config.row_tile = 1;
     }
   #elif XNN_ARCH_ARM64
     xx_pad_config.ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel_p16__neon_u16;
-    xx_pad_config.row_tile = 1;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     xx_pad_config.ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel_p16__sse2_u16;
-    xx_pad_config.row_tile = 1;
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     xx_pad_config.ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel_p16__wasmsimd_u16;
-    xx_pad_config.row_tile = 1;
   #else
     xx_pad_config.ukernel = (xnn_pad_ukernel_fn) xnn_xx_pad_ukernel_p4__scalar_u16;
-    xx_pad_config.row_tile = 1;
   #endif
 }
 

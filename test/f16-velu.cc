@@ -76,5 +76,5 @@ TEST(ukernel, beta) {                                                           
     }                                                                                                            \
   }                                                                                                              \
 }
-#include "src/f16-velu/f16-velu.h"
+#include "f16-velu/f16-velu.h"
 #undef XNN_UKERNEL_WITH_PARAMS

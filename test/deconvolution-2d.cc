@@ -14,8 +14,9 @@
 #include <vector>     // For std::vector.
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
+#include "xnnpack/buffer.h"
+#include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
@@ -59,12 +60,12 @@ template <class T, class KernelType = T, class BiasType = T> class Deconvolution
     bias_dims = {{groups * group_output_channels}};
     output_dims = {{batch_size, output_height, output_width, groups * group_output_channels}};
 
-    input = std::vector<T>(
+    input = xnnpack::Buffer<T>(
       XNN_EXTRA_BYTES / sizeof(T) + batch_size * input_height * input_width * groups * group_input_channels);
-    kernel = std::vector<KernelType>(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
-    bias = std::vector<BiasType>(groups * group_output_channels);
-    operator_output = std::vector<T>(batch_size * output_height * output_width * groups * group_output_channels);
-    subgraph_output = std::vector<T>(batch_size * output_height * output_width * groups * group_output_channels);
+    kernel = xnnpack::Buffer<KernelType>(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
+    bias = xnnpack::Buffer<BiasType>(groups * group_output_channels);
+    operator_output = xnnpack::Buffer<T>(batch_size * output_height * output_width * groups * group_output_channels);
+    subgraph_output = xnnpack::Buffer<T>(batch_size * output_height * output_width * groups * group_output_channels);
   }
 
   xnnpack::ReplicableRandomDevice rng;
@@ -103,11 +104,11 @@ template <class T, class KernelType = T, class BiasType = T> class Deconvolution
   std::array<size_t, 1> bias_dims;
   std::array<size_t, 4> output_dims;
 
-  std::vector<T> input;
-  std::vector<KernelType> kernel;
-  std::vector<BiasType> bias;
-  std::vector<T> operator_output;
-  std::vector<T> subgraph_output;
+  xnnpack::Buffer<T> input;
+  xnnpack::Buffer<KernelType> kernel;
+  xnnpack::Buffer<BiasType> bias;
+  xnnpack::Buffer<T> operator_output;
+  xnnpack::Buffer<T> subgraph_output;
 };
 
 template <class T> class QuantizedDeconvolutionTestBase : public DeconvolutionTestBase<T, T, int32_t> {
@@ -118,7 +119,7 @@ protected:
     w8dist = std::uniform_int_distribution<int32_t>(-std::numeric_limits<T>::max(), std::numeric_limits<T>::max());
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
-    accumulators = std::vector<int32_t>(
+    accumulators = xnnpack::Buffer<int32_t>(
       this->batch_size * this->output_height * this->output_width * this->groups * this->group_output_channels);
   }
 
@@ -143,7 +144,7 @@ protected:
   std::uniform_int_distribution<int32_t> i8dist;
   std::uniform_int_distribution<int32_t> u8dist;
   std::uniform_int_distribution<int32_t> w8dist;
-  std::vector<int32_t> accumulators;
+  xnnpack::Buffer<int32_t> accumulators;
 };
 
 using DeconvolutionTestQS8 = QuantizedDeconvolutionTestBase<int8_t>;
@@ -160,7 +161,7 @@ TEST_F(DeconvolutionTestQS8, define)
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
 
-  std::vector<float> kernel_scale(groups * group_output_channels, 1.0f);
+  xnnpack::Buffer<float> kernel_scale(groups * group_output_channels, 1.0f);
   uint32_t input_id = XNN_INVALID_NODE_ID;
   ASSERT_EQ(
     xnn_status_success, xnn_define_quantized_tensor_value(
@@ -372,7 +373,7 @@ TEST_F(DeconvolutionTestF16, define)
 
 TEST_F(DeconvolutionTestQD8F32QC8W, define)
 {
-  std::vector<float> requantization_scales(group_output_channels * groups, 1.0f);
+  xnnpack::Buffer<float> requantization_scales(group_output_channels * groups, 1.0f);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -528,13 +529,12 @@ TEST_F(DeconvolutionTestQS8, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), INT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0xA5));
   const int8_t input_zero_point = 1;
   const float input_scale = scale_dist(rng);
-  std::vector<float> kernel_scale(groups * group_output_channels);
+  xnnpack::Buffer<float> kernel_scale(groups * group_output_channels);
   std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return scale_dist(rng); });
 
+  std::fill(accumulators.begin(), accumulators.end(), 0);
   for (size_t i = 0; i < batch_size; i++) {
     for (size_t oy = 0; oy < output_height; oy++) {
       for (size_t ox = 0; ox < output_width; ox++) {
@@ -669,8 +669,6 @@ TEST_F(DeconvolutionTestQU8, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return u8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), UINT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT8_C(0xA5));
   const uint8_t input_zero_point = u8dist(rng);
   const uint8_t kernel_zero_point = 0;
   const float input_scale = scale_dist(rng);
@@ -813,8 +811,6 @@ TEST_F(DeconvolutionTestF16, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_deconvolution2d_nhwc_f16(
@@ -900,20 +896,18 @@ TEST_F(DeconvolutionTestQD8F32QC8W, internally_allocated_dynamic_quantization_pa
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
-  std::vector<float> convert_input(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> convert_input(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(convert_input.begin(), convert_input.end(), [&]() { return f32dist(rng); });
 
-  std::vector<int8_t> operator_dq_data(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES);
-  std::vector<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
+  xnnpack::Buffer<int8_t> operator_dq_data(batch_size * input_height * input_width * groups * group_input_channels + XNN_EXTRA_BYTES);
+  xnnpack::Buffer<xnn_quantization_params> quantization_params(batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
 
-  std::vector<float> kernel_scale(group_output_channels * groups);
+  xnnpack::Buffer<float> kernel_scale(group_output_channels * groups);
   std::generate(kernel_scale.begin(), kernel_scale.end(), [&]() { return scale_dist(rng); });
 
   std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
 
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   xnn_operator_t convert_op = nullptr;
@@ -1028,8 +1022,6 @@ TEST_F(DeconvolutionTestF32, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_deconvolution2d_nhwc_f32(

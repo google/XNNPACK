@@ -21,9 +21,9 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 #include "pthreadpool.h"
 
@@ -491,9 +491,9 @@ class AveragePoolingOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<xnn_float16> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<xnn_float16> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
-    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<xnn_float16> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
@@ -506,7 +506,6 @@ class AveragePoolingOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -587,7 +586,7 @@ class AveragePoolingOperatorTester {
 
       ASSERT_NE(workspace_size, SIZE_MAX);
       ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_average_pooling2d_nhwc_f16(
@@ -621,9 +620,9 @@ class AveragePoolingOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<float> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
-    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<float> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
@@ -636,7 +635,6 @@ class AveragePoolingOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -706,7 +704,7 @@ class AveragePoolingOperatorTester {
 
       ASSERT_NE(workspace_size, SIZE_MAX);
       ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_average_pooling2d_nhwc_f32(
@@ -740,9 +738,9 @@ class AveragePoolingOperatorTester {
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
-    std::vector<uint8_t> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-    std::vector<uint8_t> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
-    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<uint8_t> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    xnnpack::Buffer<uint8_t> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
@@ -755,7 +753,6 @@ class AveragePoolingOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Compute reference results.
       const double scale = double(input_scale()) / (double(output_scale()) * double(pooling_height() * pooling_width()));
@@ -814,7 +811,7 @@ class AveragePoolingOperatorTester {
 
       ASSERT_NE(workspace_size, SIZE_MAX);
       ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_average_pooling2d_nhwc_qu8(
@@ -846,14 +843,14 @@ class AveragePoolingOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) + std::max<size_t>(
+    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) + std::max<size_t>(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
       (next_batch_size() * next_input_height() * next_input_width() - 1) * next_input_pixel_stride() + next_channels()));
-    std::vector<xnn_float16> output(std::max<size_t>(
+    xnnpack::Buffer<xnn_float16> output(std::max<size_t>(
       (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
       (next_batch_size() * next_output_height() * next_output_width() - 1) * next_output_pixel_stride() + next_channels()));
-    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
-    std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * next_channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * next_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
@@ -866,7 +863,6 @@ class AveragePoolingOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -944,7 +940,7 @@ class AveragePoolingOperatorTester {
 
       ASSERT_NE(workspace_size, SIZE_MAX);
       ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_average_pooling2d_nhwc_f16(
@@ -974,7 +970,6 @@ class AveragePoolingOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results for the second run.
       for (size_t i = 0; i < next_batch_size(); i++) {
@@ -1014,7 +1009,8 @@ class AveragePoolingOperatorTester {
 
       ASSERT_NE(next_workspace_size, SIZE_MAX);
       ASSERT_LE(next_workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> next_workspace(next_workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> next_workspace(
+          next_workspace_size);
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_average_pooling2d_nhwc_f16(
@@ -1052,14 +1048,14 @@ class AveragePoolingOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max<size_t>(
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max<size_t>(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
       (next_batch_size() * next_input_height() * next_input_width() - 1) * next_input_pixel_stride() + next_channels()));
-    std::vector<float> output(std::max<size_t>(
+    xnnpack::Buffer<float> output(std::max<size_t>(
       (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
       (next_batch_size() * next_output_height() * next_output_width() - 1) * next_output_pixel_stride() + next_channels()));
-    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
-    std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * next_channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * next_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
@@ -1072,7 +1068,6 @@ class AveragePoolingOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -1139,7 +1134,7 @@ class AveragePoolingOperatorTester {
 
       ASSERT_NE(workspace_size, SIZE_MAX);
       ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_average_pooling2d_nhwc_f32(
@@ -1168,7 +1163,6 @@ class AveragePoolingOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results for the second run.
       for (size_t i = 0; i < next_batch_size(); i++) {
@@ -1206,7 +1200,8 @@ class AveragePoolingOperatorTester {
           /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
           auto_threadpool.get()));
       ASSERT_LE(next_workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> next_workspace(next_workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> next_workspace(
+          next_workspace_size);
       ASSERT_EQ(xnn_status_success,
         xnn_setup_average_pooling2d_nhwc_f32(
           average_pooling_op,
@@ -1244,14 +1239,14 @@ class AveragePoolingOperatorTester {
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
-    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + std::max<size_t>(
+    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + std::max<size_t>(
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels(),
       (next_batch_size() * next_input_height() * next_input_width() - 1) * next_input_pixel_stride() + next_channels()));
-    std::vector<uint8_t> output(std::max<size_t>(
+    xnnpack::Buffer<uint8_t> output(std::max<size_t>(
       (batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels(),
       (next_batch_size() * next_output_height() * next_output_width() - 1) * next_output_pixel_stride() + channels()));
-    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
-    std::vector<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
@@ -1264,7 +1259,6 @@ class AveragePoolingOperatorTester {
       }
 
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results.
       const double scale = double(input_scale()) / (double(output_scale()) * double(pooling_height() * pooling_width()));
@@ -1320,7 +1314,7 @@ class AveragePoolingOperatorTester {
 
       ASSERT_NE(workspace_size, SIZE_MAX);
       ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_average_pooling2d_nhwc_qu8(
@@ -1348,7 +1342,6 @@ class AveragePoolingOperatorTester {
 
       // Re-generate data for the second run.
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Compute reference results for the second run.
       for (size_t i = 0; i < next_batch_size(); i++) {
@@ -1389,7 +1382,8 @@ class AveragePoolingOperatorTester {
 
       ASSERT_NE(next_workspace_size, SIZE_MAX);
       ASSERT_LE(next_workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> next_workspace(next_workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> next_workspace(
+          next_workspace_size);
 
       ASSERT_EQ(xnn_status_success,
         xnn_setup_average_pooling2d_nhwc_qu8(

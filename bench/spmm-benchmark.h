@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "bench/spmm.h"
-#include "bench/utils.h"
+#include "spmm.h"
+#include "utils.h"
 
 #include "xnnpack.h"
 #include "xnnpack/aligned-allocator.h"

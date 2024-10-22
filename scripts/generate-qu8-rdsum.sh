@@ -17,4 +17,9 @@ tools/xngen src/qu8-rdsum/ssse3.c.in -D CHANNELS=16 -D ACCUMULATORS=7 -o src/qu8
 tools/xngen src/qu8-rdsum/ssse3.c.in -D CHANNELS=32 -D ACCUMULATORS=7 -o src/qu8-rdsum/gen/qu8-rdsum-7p7x-ssse3-c32.c &
 tools/xngen src/qu8-rdsum/ssse3.c.in -D CHANNELS=64 -D ACCUMULATORS=7 -o src/qu8-rdsum/gen/qu8-rdsum-7p7x-ssse3-c64.c &
 
+################################### Wasm SIMD #################################
+tools/xngen src/qs8-rdsum/wasmsimd.c.in -D CHANNELS=16 -D ACCUMULATORS=7 -D DATATYPE=QU8 -o src/qu8-rdsum/gen/qu8-rdsum-7p7x-wasmsimd-c16.c &
+tools/xngen src/qs8-rdsum/wasmsimd.c.in -D CHANNELS=32 -D ACCUMULATORS=7 -D DATATYPE=QU8 -o src/qu8-rdsum/gen/qu8-rdsum-7p7x-wasmsimd-c32.c &
+tools/xngen src/qs8-rdsum/wasmsimd.c.in -D CHANNELS=64 -D ACCUMULATORS=7 -D DATATYPE=QU8 -o src/qu8-rdsum/gen/qu8-rdsum-7p7x-wasmsimd-c64.c &
+
 wait

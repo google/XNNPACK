@@ -6,7 +6,7 @@
 #include "xnnpack.h"
 
 #include "unary_operator.h"
-#include "bench/utils.h"
+#include "utils.h"
 #include <benchmark/benchmark.h>
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "tensorflow/lite/schema/schema_generated.h"

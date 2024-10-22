@@ -12,7 +12,7 @@
 #include <emmintrin.h>
 
 #include "xnnpack/common.h"
-#include "xnnpack/vlrelu.h"
+#include "xnnpack/vunary.h"
 #include "xnnpack/unaligned.h"
 
 

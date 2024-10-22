@@ -300,5 +300,5 @@ INSTANTIATE_TEST_SUITE_P(                                                       
     [](const testing::TestParamInfo<DWConvTest::ParamType>& info) {                                                                                                                                              \
       return info.param.test_name;                                                                                                                                                                               \
     });
-#include "src/f16-dwconv/f16-dwconv-minmax-multipass.h"
+#include "f16-dwconv/f16-dwconv-minmax-multipass.h"
 #undef XNN_UKERNEL_WITH_PARAMS

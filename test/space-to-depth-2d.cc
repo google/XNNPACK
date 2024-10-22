@@ -13,8 +13,8 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
+#include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
@@ -228,8 +228,6 @@ TEST_F(SpaceToDepth2DTestQS8, matches_operator_api)
   size_t batch_size = dims[0];
 
   std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), INT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0xA6));
 
   // Call operator API.
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
@@ -307,8 +305,6 @@ TEST_F(SpaceToDepth2DTestQU8, matches_operator_api)
   size_t batch_size = dims[0];
 
   std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), UINT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT8_C(0xA5));
 
   // Call operator API.
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
@@ -381,8 +377,6 @@ TEST_F(SpaceToDepth2DTestF16, matches_operator_api)
   size_t batch_size = dims[0];
 
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   // Call operator API.
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
@@ -454,8 +448,6 @@ TEST_F(SpaceToDepth2DTestF32, matches_operator_api)
   size_t batch_size = dims[0];
 
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));

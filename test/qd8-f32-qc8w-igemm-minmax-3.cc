@@ -845,7 +845,7 @@ INSTANTIATE_TEST_SUITE_P(
 #endif  // XNN_ENABLE_ARM_DOTPROD && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F32_QC8W_IGEMM_MINMAX_5X16C8__AVX512SKX, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -883,7 +883,10 @@ INSTANTIATE_TEST_SUITE_P(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+
+#if XNN_ENABLE_AVX512VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   INSTANTIATE_TEST_SUITE_P(
       QD8_F32_QC8W_IGEMM_MINMAX_1X16C4__AVX512VNNI, GemmTest,
       testing::ValuesIn(CreateTests1(
@@ -1168,7 +1171,7 @@ INSTANTIATE_TEST_SUITE_P(
       [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
         return info.param.test_name;
       });
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #if XNN_ENABLE_AVX256VNNI && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

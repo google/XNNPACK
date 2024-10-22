@@ -12,7 +12,7 @@
 #include <wasm_simd128.h>
 
 #include "xnnpack/common.h"
-#include "xnnpack/vhswish.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_qu8_vhswish_ukernel__wasmsimd_u32(

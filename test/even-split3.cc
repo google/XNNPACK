@@ -16,8 +16,9 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
+#include "xnnpack/buffer.h"
+#include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
@@ -42,13 +43,13 @@ template <typename T> class EvenSplit3Test : public ::testing::Test {
     axis = RandomAxis(output1_dims);
     input_dims[axis] = output1_dims[axis] + output2_dims[axis] + output3_dims[axis];
 
-    input = std::vector<T>(NumElements(input_dims));
-    operator_output1 = std::vector<T>(NumElements(output1_dims));
-    operator_output2 = std::vector<T>(NumElements(output2_dims));
-    operator_output3 = std::vector<T>(NumElements(output3_dims));
-    subgraph_output1 = std::vector<T>(NumElements(output1_dims));
-    subgraph_output2 = std::vector<T>(NumElements(output2_dims));
-    subgraph_output3 = std::vector<T>(NumElements(output3_dims));
+    input = xnnpack::Buffer<T>(NumElements(input_dims));
+    operator_output1 = xnnpack::Buffer<T>(NumElements(output1_dims));
+    operator_output2 = xnnpack::Buffer<T>(NumElements(output2_dims));
+    operator_output3 = xnnpack::Buffer<T>(NumElements(output3_dims));
+    subgraph_output1 = xnnpack::Buffer<T>(NumElements(output1_dims));
+    subgraph_output2 = xnnpack::Buffer<T>(NumElements(output2_dims));
+    subgraph_output3 = xnnpack::Buffer<T>(NumElements(output3_dims));
 
     signed_zero_point = i8dist(rng);
     unsigned_zero_point = u8dist(rng);
@@ -110,13 +111,13 @@ template <typename T> class EvenSplit3Test : public ::testing::Test {
   int32_t unsigned_zero_point;
   float scale;
 
-  std::vector<T> operator_output1;
-  std::vector<T> operator_output2;
-  std::vector<T> operator_output3;
-  std::vector<T> subgraph_output1;
-  std::vector<T> subgraph_output2;
-  std::vector<T> subgraph_output3;
-  std::vector<T> input;
+  xnnpack::Buffer<T> operator_output1;
+  xnnpack::Buffer<T> operator_output2;
+  xnnpack::Buffer<T> operator_output3;
+  xnnpack::Buffer<T> subgraph_output1;
+  xnnpack::Buffer<T> subgraph_output2;
+  xnnpack::Buffer<T> subgraph_output3;
+  xnnpack::Buffer<T> input;
 };
 
 using EvenSplit3TestQS8 = EvenSplit3Test<int8_t>;
@@ -351,12 +352,6 @@ TEST_F(EvenSplit3TestF32, define)
 TEST_F(EvenSplit3TestQS8, matches_operator_api)
 {
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-  std::fill(operator_output1.begin(), operator_output1.end(), INT8_C(0xA5));
-  std::fill(operator_output2.begin(), operator_output2.end(), INT8_C(0xA5));
-  std::fill(operator_output3.begin(), operator_output3.end(), INT8_C(0xA5));
-  std::fill(subgraph_output1.begin(), subgraph_output1.end(), INT8_C(0xA5));
-  std::fill(subgraph_output2.begin(), subgraph_output2.end(), INT8_C(0xA5));
-  std::fill(subgraph_output3.begin(), subgraph_output3.end(), INT8_C(0xA5));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -452,12 +447,6 @@ TEST_F(EvenSplit3TestQS8, matches_operator_api)
 TEST_F(EvenSplit3TestQU8, matches_operator_api)
 {
   std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-  std::fill(operator_output1.begin(), operator_output1.end(), UINT8_C(0xA5));
-  std::fill(operator_output2.begin(), operator_output2.end(), UINT8_C(0xA5));
-  std::fill(operator_output3.begin(), operator_output3.end(), UINT8_C(0xA5));
-  std::fill(subgraph_output1.begin(), subgraph_output1.end(), UINT8_C(0xA5));
-  std::fill(subgraph_output2.begin(), subgraph_output2.end(), UINT8_C(0xA5));
-  std::fill(subgraph_output3.begin(), subgraph_output3.end(), UINT8_C(0xA5));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -553,12 +542,6 @@ TEST_F(EvenSplit3TestQU8, matches_operator_api)
 TEST_F(EvenSplit3TestF16, matches_operator_api)
 {
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output1.begin(), operator_output1.end(), std::nanf(""));
-  std::fill(operator_output2.begin(), operator_output2.end(), std::nanf(""));
-  std::fill(operator_output3.begin(), operator_output3.end(), std::nanf(""));
-  std::fill(subgraph_output1.begin(), subgraph_output1.end(), std::nanf(""));
-  std::fill(subgraph_output2.begin(), subgraph_output2.end(), std::nanf(""));
-  std::fill(subgraph_output3.begin(), subgraph_output3.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -650,12 +633,6 @@ TEST_F(EvenSplit3TestF16, matches_operator_api)
 TEST_F(EvenSplit3TestF32, matches_operator_api)
 {
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output1.begin(), operator_output1.end(), std::nanf(""));
-  std::fill(operator_output2.begin(), operator_output2.end(), std::nanf(""));
-  std::fill(operator_output3.begin(), operator_output3.end(), std::nanf(""));
-  std::fill(subgraph_output1.begin(), subgraph_output1.end(), std::nanf(""));
-  std::fill(subgraph_output2.begin(), subgraph_output2.end(), std::nanf(""));
-  std::fill(subgraph_output3.begin(), subgraph_output3.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

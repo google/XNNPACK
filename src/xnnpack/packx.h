@@ -23,7 +23,7 @@ extern "C" {
       size_t x_stride,                               \
       uint32_t* y);
 
-#include "src/x32-packx/x32-packx.h"
+#include "x32-packx/x32-packx.h"
 
 #undef XNN_UKERNEL
 

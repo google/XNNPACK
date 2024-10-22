@@ -20,9 +20,9 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/buffer.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/requantization.h"
@@ -211,17 +211,16 @@ class AvgPoolMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<const xnn_float16*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
-    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
+    xnnpack::Buffer<const xnn_float16*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
+    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       input_offset() + indirect_input.size() * channels());
-    std::vector<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<xnn_float16> output((output_pixels() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(output_pixels() * channels());
+    xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0.0f);
+    xnnpack::Buffer<xnn_float16> output((output_pixels() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(xnn_float16), input.end(), std::nanf(""));
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -303,18 +302,18 @@ class AvgPoolMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<const xnn_float16*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
-    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
+    xnnpack::Buffer<const xnn_float16*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
+    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       input_offset() + indirect_input.size() * channels());
-    std::vector<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<xnn_float16> output((output_pixels() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(output_pixels() * channels());
-    std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> buffer(XNN_EXTRA_BYTES / sizeof(xnn_float16) + channels());
+    xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0.0f);
+    xnnpack::Buffer<xnn_float16> output((output_pixels() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(output_pixels() * channels());
+    xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> buffer(
+        XNN_EXTRA_BYTES / sizeof(xnn_float16) + channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(xnn_float16), input.end(), std::nanf(""));
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -396,17 +395,16 @@ class AvgPoolMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       input_offset() + indirect_input.size() * channels());
-    std::vector<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> output((output_pixels() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(output_pixels() * channels());
+    xnnpack::Buffer<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float), 0.0f);
+    xnnpack::Buffer<float> output((output_pixels() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(float), input.end(), std::nanf(""));
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -484,18 +482,18 @@ class AvgPoolMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       input_offset() + indirect_input.size() * channels());
-    std::vector<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> output((output_pixels() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(output_pixels() * channels());
-    std::vector<float, AlignedAllocator<float, 64>> buffer(XNN_EXTRA_BYTES / sizeof(float) + channels());
+    xnnpack::Buffer<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float), 0.0f);
+    xnnpack::Buffer<float> output((output_pixels() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(output_pixels() * channels());
+    xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> buffer(
+        XNN_EXTRA_BYTES / sizeof(float) + channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(float), input.end(), std::nanf(""));
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -578,21 +576,20 @@ class AvgPoolMicrokernelTester {
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
-    std::vector<const uint8_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
-    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
+    xnnpack::Buffer<const uint8_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
+    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
       input_offset() + indirect_input.size() * channels());
-    std::vector<uint8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-    std::vector<uint8_t> output((output_pixels() - 1) * output_stride() + channels());
-    std::vector<uint8_t> output_ref(output_pixels() * channels());
-    std::vector<float> output_real(output_pixels() * channels());
-    std::vector<int32_t> accumulator(output_pixels() * channels());
+    xnnpack::Buffer<uint8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(uint8_t), 0);
+    xnnpack::Buffer<uint8_t> output((output_pixels() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint8_t> output_ref(output_pixels() * channels());
+    xnnpack::Buffer<float> output_real(output_pixels() * channels());
+    xnnpack::Buffer<int32_t> accumulator(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       do {
         std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
       std::fill(input.begin(), input.begin() + input_offset(), UINT8_C(0xA5));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(uint8_t), input.end(), UINT8_C(0xA5));
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -674,22 +671,22 @@ class AvgPoolMicrokernelTester {
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
-    std::vector<const uint8_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
-    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
+    xnnpack::Buffer<const uint8_t*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
+    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
       input_offset() + indirect_input.size() * channels());
-    std::vector<uint8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-    std::vector<uint8_t> output((output_pixels() - 1) * output_stride() + channels());
-    std::vector<uint8_t> output_ref(output_pixels() * channels());
-    std::vector<float> output_real(output_pixels() * channels());
-    std::vector<int32_t> accumulator(output_pixels() * channels());
-    std::vector<int32_t, AlignedAllocator<int32_t, 64>> buffer(XNN_EXTRA_BYTES / sizeof(uint8_t) + channels());
+    xnnpack::Buffer<uint8_t> zero(channels() + XNN_EXTRA_BYTES / sizeof(uint8_t), 0);
+    xnnpack::Buffer<uint8_t> output((output_pixels() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint8_t> output_ref(output_pixels() * channels());
+    xnnpack::Buffer<float> output_real(output_pixels() * channels());
+    xnnpack::Buffer<int32_t> accumulator(output_pixels() * channels());
+    xnnpack::Buffer<int32_t, XNN_ALLOCATION_ALIGNMENT> buffer(
+        XNN_EXTRA_BYTES / sizeof(uint8_t) + channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       do {
         std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       } while (input.size() > 1 && *std::max_element(input.cbegin(), input.cend()) == *std::min_element(input.cbegin(), input.cend()));
       std::fill(input.begin(), input.begin() + input_offset(), UINT8_C(0xA5));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(uint8_t), input.end(), UINT8_C(0xA5));
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -767,19 +764,18 @@ class AvgPoolMicrokernelTester {
     std::uniform_real_distribution<float> f32dist;
     std::uniform_real_distribution<float> m32dist(0.1f, 0.5f);
 
-    std::vector<const xnn_float16*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
-    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
+    xnnpack::Buffer<const xnn_float16*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
+    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       input_offset() + indirect_input.size() * channels());
-    std::vector<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<xnn_float16> multiplier(output_pixels());
-    std::vector<xnn_float16> output((output_pixels() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(output_pixels() * channels());
+    xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0.0f);
+    xnnpack::Buffer<xnn_float16> multiplier(output_pixels());
+    xnnpack::Buffer<xnn_float16> output((output_pixels() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(xnn_float16), input.end(), std::nanf(""));
       std::generate(multiplier.begin(), multiplier.end(), [&]() { return m32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -862,20 +858,20 @@ class AvgPoolMicrokernelTester {
     std::uniform_real_distribution<float> f32dist;
     std::uniform_real_distribution<float> m32dist(0.1f, 0.5f);
 
-    std::vector<const xnn_float16*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
-    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
+    xnnpack::Buffer<const xnn_float16*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
+    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       input_offset() + indirect_input.size() * channels());
-    std::vector<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<xnn_float16> multiplier(output_pixels());
-    std::vector<xnn_float16> output((output_pixels() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(output_pixels() * channels());
-    std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> buffer(XNN_EXTRA_BYTES / sizeof(xnn_float16) + channels());
+    xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0.0f);
+    xnnpack::Buffer<xnn_float16> multiplier(output_pixels());
+    xnnpack::Buffer<xnn_float16> output((output_pixels() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(output_pixels() * channels());
+    xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> buffer(
+        XNN_EXTRA_BYTES / sizeof(xnn_float16) + channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(xnn_float16), input.end(), std::nanf(""));
       std::generate(multiplier.begin(), multiplier.end(), [&]() { return m32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -958,19 +954,18 @@ class AvgPoolMicrokernelTester {
     std::uniform_real_distribution<float> f32dist;
     std::uniform_real_distribution<float> m32dist(0.1f, 0.5f);
 
-    std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       input_offset() + indirect_input.size() * channels());
-    std::vector<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> multiplier(output_pixels());
-    std::vector<float> output((output_pixels() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(output_pixels() * channels());
+    xnnpack::Buffer<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float), 0.0f);
+    xnnpack::Buffer<float> multiplier(output_pixels());
+    xnnpack::Buffer<float> output((output_pixels() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(float), input.end(), std::nanf(""));
       std::generate(multiplier.begin(), multiplier.end(), [&]() { return m32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();
@@ -1049,20 +1044,20 @@ class AvgPoolMicrokernelTester {
     std::uniform_real_distribution<float> f32dist;
     std::uniform_real_distribution<float> m32dist(0.1f, 0.5f);
 
-    std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       input_offset() + indirect_input.size() * channels());
-    std::vector<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> multiplier(output_pixels());
-    std::vector<float> output((output_pixels() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(output_pixels() * channels());
-    std::vector<float, AlignedAllocator<float, 64>> buffer(XNN_EXTRA_BYTES / sizeof(float) + channels());
+    xnnpack::Buffer<float> zero(channels() + XNN_EXTRA_BYTES / sizeof(float), 0.0f);
+    xnnpack::Buffer<float> multiplier(output_pixels());
+    xnnpack::Buffer<float> output((output_pixels() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(output_pixels() * channels());
+    xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> buffer(
+        XNN_EXTRA_BYTES / sizeof(float) + channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::fill(input.begin(), input.begin() + input_offset(), std::nanf(""));
       std::fill(input.end() - XNN_EXTRA_BYTES / sizeof(float), input.end(), std::nanf(""));
       std::generate(multiplier.begin(), multiplier.end(), [&]() { return m32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels();

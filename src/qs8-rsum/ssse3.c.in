@@ -36,11 +36,11 @@ void xnn_qs8_rsum_ukernel__ssse3_u${CHANNEL_TILE}${ACC_SUFFIX}(
     __m128i vacc${ACC} = _mm_setzero_si128();
 
   // 256 int8s may be summed into an int16 before overflowing.
-  // Each register has 8 lanes and there are ${ACCUMULATORS} accumulators so batch size is ${ACCUMULATORS*256*8}
-  for (; batch >= ${ACCUMULATORS*256*8}; batch -= ${ACCUMULATORS*256*8}) {
+  // Each register has 16 lanes and there are ${ACCUMULATORS} accumulators so batch size is ${ACCUMULATORS*256*16}
+  for (; batch >= ${ACCUMULATORS*256*16}; batch -= ${ACCUMULATORS*256*16}) {
     $for ACC in range(ACCUMULATORS):
       __m128i vacc16_${ACC} = _mm_setzero_si128();
-    for (size_t current_batch = ${ACCUMULATORS*256*8}; current_batch > 0; current_batch -= ${CHANNEL_TILE}) {
+    for (size_t current_batch = ${ACCUMULATORS*256*16}; current_batch > 0; current_batch -= ${CHANNEL_TILE}) {
       $for N in range(SIMD_TILE):
         const __m128i vt${N} = _mm_maddubs_epi16(vone, _mm_loadu_si128((const __m128i*) input)); input += 16;
       $for N in range(SIMD_TILE):
@@ -52,7 +52,7 @@ void xnn_qs8_rsum_ukernel__ssse3_u${CHANNEL_TILE}${ACC_SUFFIX}(
 
   $if CHANNEL_TILE > 16:
     if (XNN_UNLIKELY(batch != 0)) {
-      assert(batch >= 1 && batch < ${ACCUMULATORS*256*8});
+      assert(batch >= 1 && batch < ${ACCUMULATORS*256*16});
       $for ACC in range(ACCUMULATORS):
         __m128i vacc16_${ACC} = _mm_setzero_si128();
       for (; batch >= ${CHANNEL_TILE}; batch -= ${CHANNEL_TILE}) {
@@ -65,7 +65,7 @@ void xnn_qs8_rsum_ukernel__ssse3_u${CHANNEL_TILE}${ACC_SUFFIX}(
         vacc${ACC} = _mm_add_epi32(vacc${ACC}, _mm_madd_epi16(vone_16, vacc16_${ACC}));
     }
   if (XNN_UNLIKELY(batch != 0)) {
-    assert(batch >= 1 && batch < ${256*8});
+    assert(batch >= 1 && batch < ${256*16});
     __m128i vacc16 = _mm_setzero_si128();
     for (; batch >= 16; batch -= 16) {
       const __m128i vt = _mm_maddubs_epi16(vone, _mm_loadu_si128((const __m128i*) input)); input += 16;

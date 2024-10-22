@@ -19,9 +19,9 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/aligned-allocator.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/requantization.h"
@@ -159,7 +159,6 @@ class GAvgPoolMicrokernelTester {
     std::vector<int32_t> accumulators(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Prepare parameters.
       union xnn_qu8_avgpool_minmax_params params;
@@ -225,7 +224,6 @@ class GAvgPoolMicrokernelTester {
     std::vector<int32_t> accumulators(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Prepare parameters.
       union xnn_qu8_avgpool_minmax_params params;
@@ -292,7 +290,6 @@ class GAvgPoolMicrokernelTester {
     std::vector<int32_t> accumulators(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Prepare parameters.
       union xnn_qs8_avgpool_minmax_params params;
@@ -358,7 +355,6 @@ class GAvgPoolMicrokernelTester {
     std::vector<int32_t> accumulators(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Prepare parameters.
       union xnn_qs8_avgpool_minmax_params params;
@@ -418,7 +414,6 @@ class GAvgPoolMicrokernelTester {
     std::fill(zero.begin(), zero.end(), 0);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t c = 0; c < channels(); c++) {
@@ -478,7 +473,6 @@ class GAvgPoolMicrokernelTester {
     std::vector<float> output_ref(channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t c = 0; c < channels(); c++) {
@@ -540,7 +534,6 @@ class GAvgPoolMicrokernelTester {
     std::fill(zero.begin(), zero.end(), 0.0f);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results, without clamping.
       for (size_t c = 0; c < channels(); c++) {

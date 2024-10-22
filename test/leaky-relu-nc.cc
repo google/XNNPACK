@@ -118,8 +118,7 @@ CREATE_UNARY_QUANTIZED_TESTS_NO_QMIN(QU8, LeakyReLUOperatorTester);
 TEST(LEAKY_RELU_NC_F16, small_batch_with_negative_slope) {
   for (size_t batch_size = 1; batch_size <= 3; batch_size += 2) {
     for (size_t channels = 1; channels < 100; channels += 15) {
-      for (float negative_slope :
-           std::vector<float>({-10.0f, -1.0f, -0.1f, 0.1f, 10.0f})) {
+      for (float negative_slope : {-10.0f, -1.0f, -0.1f, 0.1f, 10.0f}) {
         LeakyReLUOperatorTester()
             .negative_slope(negative_slope)
             .batch_size(3)
@@ -135,8 +134,7 @@ TEST(LEAKY_RELU_NC_F16, small_batch_with_negative_slope) {
 TEST(LEAKY_RELU_NC_F32, small_batch_with_negative_slope) {
   for (size_t batch_size = 1; batch_size <= 3; batch_size += 2) {
     for (size_t channels = 1; channels < 100; channels += 15) {
-      for (float negative_slope :
-           std::vector<float>({-10.0f, -1.0f, -0.1f, 0.1f, 10.0f})) {
+      for (float negative_slope : {-10.0f, -1.0f, -0.1f, 0.1f, 10.0f}) {
         LeakyReLUOperatorTester()
             .negative_slope(negative_slope)
             .batch_size(3)
@@ -150,8 +148,7 @@ TEST(LEAKY_RELU_NC_F32, small_batch_with_negative_slope) {
 
 TEST(LEAKY_RELU_NC_QS8, unit_batch_with_negative_slope) {
   for (size_t channels = 1; channels < 100; channels += 15) {
-    for (float negative_slope :
-         std::vector<float>({-10.0f, -1.0f, -0.1f, 0.1f, 10.0f})) {
+    for (float negative_slope : {-10.0f, -1.0f, -0.1f, 0.1f, 10.0f}) {
       LeakyReLUOperatorTester()
           .negative_slope(negative_slope)
           .batch_size(1)
@@ -192,8 +189,7 @@ TEST(LEAKY_RELU_NC_QS8, unit_batch_with_output_zero_point) {
 
 TEST(LEAKY_RELU_NC_QU8, unit_batch_with_negative_slope) {
   for (size_t channels = 1; channels < 100; channels += 15) {
-    for (float negative_slope :
-         std::vector<float>({-10.0f, -1.0f, -0.1f, 0.1f, 10.0f})) {
+    for (float negative_slope : {-10.0f, -1.0f, -0.1f, 0.1f, 10.0f}) {
       LeakyReLUOperatorTester()
           .negative_slope(negative_slope)
           .batch_size(1)

@@ -20,10 +20,10 @@
 #include <vector>  // For std::vector.
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
@@ -41,6 +41,8 @@ class BatchMatrixMultiplyTestBase : public ::testing::Test {
         std::numeric_limits<uint8_t>::max());
     auto shape_dist =
         std::uniform_int_distribution<size_t>(4, XNN_MAX_TENSOR_DIMS);
+    auto broadcast_dist =
+        std::uniform_int_distribution<size_t>(0, 4);
     dim_dist = std::uniform_int_distribution<size_t>(5, 15);
 
     // input1: B x G x M x K
@@ -55,21 +57,31 @@ class BatchMatrixMultiplyTestBase : public ::testing::Test {
     k = input1_dims.back();
     n = dim_dist(rng);
     input2_dims = input1_dims;
+    output_dims = input1_dims;
+
     input2_dims[num_input_dims - 2] = k;
     input2_dims[num_input_dims - 1] = n;
-    input2_t_dims = input1_dims;
-    input2_t_dims[num_input_dims - 2] = n;
 
-    output_dims = input1_dims;
+    for (size_t i = 0; i + 2 < num_input_dims; ++i) {
+      if (broadcast_dist(rng) == 0) {
+        input1_dims[i] = 1;
+      } else if (broadcast_dist(rng) == 0) {
+        input2_dims[i] = 1;
+      }
+    }
+
+    input2_t_dims = input2_dims;
+    std::swap(input2_t_dims[num_input_dims - 2], input2_t_dims[num_input_dims - 1]);
+
     output_dims[num_input_dims - 2] = m;
     output_dims[num_input_dims - 1] = n;
 
-    input1 = std::vector<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) +
+    input1 = xnnpack::Buffer<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) +
                                     NumElements(input1_dims));
-    input2 = std::vector<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) +
+    input2 = xnnpack::Buffer<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) +
                                     NumElements(input2_dims));
-    operator_output = std::vector<OutputType>(NumElements(output_dims));
-    subgraph_output = std::vector<OutputType>(operator_output.size());
+    operator_output = xnnpack::Buffer<OutputType>(NumElements(output_dims));
+    subgraph_output = xnnpack::Buffer<OutputType>(operator_output.size());
   }
 
   std::vector<size_t> RandomShape(size_t num_dims)
@@ -99,10 +111,10 @@ class BatchMatrixMultiplyTestBase : public ::testing::Test {
   std::vector<size_t> input2_t_dims;  // input2 transposed.
   std::vector<size_t> output_dims;
 
-  std::vector<InputType> input1;
-  std::vector<InputType> input2;
-  std::vector<OutputType> operator_output;
-  std::vector<OutputType> subgraph_output;
+  xnnpack::Buffer<InputType> input1;
+  xnnpack::Buffer<InputType> input2;
+  xnnpack::Buffer<OutputType> operator_output;
+  xnnpack::Buffer<OutputType> subgraph_output;
 };
 
 using BatchMatrixMultiplyTestF16 =
@@ -257,8 +269,6 @@ TEST_F(BatchMatrixMultiplyTestF16, matches_operator_api)
 
   std::generate(input1.begin(), input1.end(), [&]() { return f32dist(rng); });
   std::generate(input2.begin(), input2.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_batch_matrix_multiply_nc_f16(/*flags=*/0, &op);
@@ -283,8 +293,10 @@ TEST_F(BatchMatrixMultiplyTestF16, matches_operator_api)
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(
-      workspace_size + XNN_EXTRA_BYTES);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size +
+                                                    XNN_EXTRA_BYTES);
+  // TODO(b/372731180): This should probably be initialized by the operator.
+  std::fill(workspace.begin(), workspace.end(), 0);
   ASSERT_EQ(
     xnn_status_success,
     xnn_setup_batch_matrix_multiply_nc_f16(op, workspace.data(), input1.data(), input2.data(), operator_output.data()));
@@ -346,8 +358,6 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api)
 
   std::generate(input1.begin(), input1.end(), [&]() { return f32dist(rng); });
   std::generate(input2.begin(), input2.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_batch_matrix_multiply_nc_f32(/*flags=*/0, &op);
@@ -372,8 +382,10 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api)
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(
-      workspace_size + XNN_EXTRA_BYTES);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size +
+                                                    XNN_EXTRA_BYTES);
+  // TODO(b/372731180): This should probably be initialized by the operator.
+  std::fill(workspace.begin(), workspace.end(), 0);
   ASSERT_EQ(
     xnn_status_success,
     xnn_setup_batch_matrix_multiply_nc_f32(op, workspace.data(), input1.data(), input2.data(), operator_output.data()));
@@ -435,8 +447,6 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api_transposed)
 
   std::generate(input1.begin(), input1.end(), [&]() { return f32dist(rng); });
   std::generate(input2.begin(), input2.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_batch_matrix_multiply_nc_f32(/*flags=*/XNN_FLAG_TRANSPOSE_B, &op);
@@ -461,8 +471,10 @@ TEST_F(BatchMatrixMultiplyTestF32, matches_operator_api_transposed)
   ASSERT_NE(workspace_size, 0);
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(
-      workspace_size + XNN_EXTRA_BYTES);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size +
+                                                    XNN_EXTRA_BYTES);
+  // TODO(b/372731180): This should probably be initialized by the operator.
+  std::fill(workspace.begin(), workspace.end(), 0);
   ASSERT_EQ(
     xnn_status_success,
     xnn_setup_batch_matrix_multiply_nc_f32(op, workspace.data(), input1.data(), input2.data(), operator_output.data()));
@@ -533,7 +545,7 @@ TEST_F(BatchMatrixMultiplyTestQD8ToF32, define) {
   ASSERT_NE(input1_id, XNN_INVALID_VALUE_ID);
 
   uint32_t input2_id = XNN_INVALID_VALUE_ID;
-  std::vector<float> channelwise_scale(
+  xnnpack::Buffer<float> channelwise_scale(
       NumElements(input2_dims) / input2_dims.back(),
       1.0f / std::numeric_limits<int8_t>::max());
   ASSERT_EQ(xnn_status_success,
@@ -570,19 +582,17 @@ TEST_F(BatchMatrixMultiplyTestQD8ToF32, define) {
 TEST_F(BatchMatrixMultiplyTestQD8ToF32, matches_operator_api) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
-  std::vector<float> channelwise_scale(
+  xnnpack::Buffer<float> channelwise_scale(
       NumElements(input2_dims) / input2_dims[input2_dims.size() - 2],
       1.0f / std::numeric_limits<int8_t>::max());
   std::generate(input2.begin(), input2.end(), [&]() { return i8dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Create the dynamically quantized input data with the corresponding
   // `quantization_params`.
   const size_t input_batch_size = NumElements(input1_dims) / m / k;
-  std::vector<xnn_quantization_params> quantization_params(
+  xnnpack::Buffer<xnn_quantization_params> quantization_params(
       input_batch_size * m + XNN_EXTRA_QUANTIZATION_PARAMS);
-  std::vector<float> input1_f32(NumElements(input1_dims) +
+  xnnpack::Buffer<float> input1_f32(NumElements(input1_dims) +
                                 XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input1_f32.begin(), input1_f32.end(),
                 [&]() { return f32dist(rng); });

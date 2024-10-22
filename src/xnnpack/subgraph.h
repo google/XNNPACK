@@ -29,6 +29,7 @@
 #define XNN_INVALID_NODE_ID UINT32_MAX
 
 #define XNN_MAX_OPERATOR_OBJECTS 5
+#define XNN_MAX_SUBGRAPH_INPUT_OR_OUTPUTS 16
 
 /// Disable fusion of nodes in subgraph. Fusion is enabled by default, set this flag to turn it off.
 #define XNN_FLAG_NO_OPERATOR_FUSION 0x80000000
@@ -401,7 +402,7 @@ struct xnn_operator_data {
   struct xnn_shape shape1;
   struct xnn_shape shape2;
   union {
-    // Used for reduction/mean.
+    // Used for reduction.
     struct {
       size_t num_reduction_axes;
       size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
@@ -481,8 +482,8 @@ struct xnn_runtime {
   slinky_pipeline_t slinky_pipeline;
   size_t num_inputs;
   size_t num_outputs;
-  struct xnn_value* input_values[XNN_MAX_OPERATOR_OBJECTS];
-  struct xnn_value* output_values[XNN_MAX_OPERATOR_OBJECTS];
+  struct xnn_value* input_values[XNN_MAX_SUBGRAPH_INPUT_OR_OUTPUTS];
+  struct xnn_value* output_values[XNN_MAX_SUBGRAPH_INPUT_OR_OUTPUTS];
 #endif
 };
 
@@ -587,6 +588,9 @@ enum xnn_status resize_fully_connected_output_tensor(
 
 XNN_INTERNAL enum xnn_node_type xnn_binary_operator_to_node_type(enum xnn_binary_operator type);
 XNN_INTERNAL enum xnn_binary_operator xnn_node_type_to_binary_operator(enum xnn_node_type type);
+
+XNN_INTERNAL enum xnn_node_type xnn_reduce_operator_to_node_type(enum xnn_reduce_operator type);
+XNN_INTERNAL enum xnn_reduce_operator xnn_node_type_to_reduce_operator(enum xnn_node_type type);
 
 #ifdef __cplusplus
 }  // extern "C"

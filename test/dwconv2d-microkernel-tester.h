@@ -18,9 +18,9 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/buffer.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
 #include "replicable_random_device.h"
@@ -166,16 +166,17 @@ class DWConv2DMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<float, AlignedAllocator<float, 64>> input(input_height() * input_width() + 2 * XNN_EXTRA_BYTES);
-    std::vector<float> zero(input_width() + 2 * XNN_EXTRA_BYTES);
-    std::vector<float> packed_weights(kernel_size() + 1);
-    std::vector<float, AlignedAllocator<float, 64>> output(output_height() * output_width());
-    std::vector<float> output_ref(output_height() * output_width());
+    xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> input(
+        input_height() * input_width() + 2 * XNN_EXTRA_BYTES);
+    xnnpack::Buffer<float> zero(input_width() + 2 * XNN_EXTRA_BYTES, 0.0f);
+    xnnpack::Buffer<float> packed_weights(kernel_size() + 1);
+    xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> output(output_height() *
+                                                    output_width());
+    xnnpack::Buffer<float> output_ref(output_height() * output_width());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(packed_weights.begin(), packed_weights.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       for (size_t oy = 0; oy < output_height(); oy++) {
         for (size_t ox = 0; ox < output_width(); ox++) {
@@ -235,16 +236,17 @@ class DWConv2DMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> input(input_height() * input_width() + 2 * XNN_EXTRA_BYTES);
-    std::vector<xnn_float16> zero(input_width() + 2 * XNN_EXTRA_BYTES);
-    std::vector<xnn_float16> packed_weights(kernel_size() + 1);
-    std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> output(output_height() * output_width());
-    std::vector<float> output_ref(output_height() * output_width());
+    xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> input(
+        input_height() * input_width() + 2 * XNN_EXTRA_BYTES);
+    xnnpack::Buffer<xnn_float16> zero(input_width() + 2 * XNN_EXTRA_BYTES, 0.0f);
+    xnnpack::Buffer<xnn_float16> packed_weights(kernel_size() + 1);
+    xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> output(output_height() *
+                                                          output_width());
+    xnnpack::Buffer<float> output_ref(output_height() * output_width());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(packed_weights.begin(), packed_weights.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t oy = 0; oy < output_height(); oy++) {
         for (size_t ox = 0; ox < output_width(); ox++) {

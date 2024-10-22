@@ -16,9 +16,9 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/buffer.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/pack.h"
@@ -292,21 +292,21 @@ class ConvHWC2CHWMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       batch_size() * ((input_height() * input_width() - 1) * input_pixel_stride() + input_channels()));
-    std::vector<float> zero(XNN_EXTRA_BYTES / sizeof(float) + input_width() * input_channels());
-    std::vector<float> kernel(output_channels() * kernel_height() * kernel_width() * input_channels());
-    std::vector<float> bias(output_channels());
-    std::vector<float> output(batch_size() * output_channels() * output_height() * output_width());
-    std::vector<float> output_ref(batch_size() * output_channels() * output_height() * output_width());
-    std::vector<float, AlignedAllocator<float, 64>> packed_weights((input_channels() * kernel_height() * kernel_width() + 1) * packed_output_channels());
+    xnnpack::Buffer<float> zero(XNN_EXTRA_BYTES / sizeof(float) + input_width() * input_channels(), 0.0f);
+    xnnpack::Buffer<float> kernel(output_channels() * kernel_height() * kernel_width() * input_channels());
+    xnnpack::Buffer<float> bias(output_channels());
+    xnnpack::Buffer<float> output(batch_size() * output_channels() * output_height() * output_width());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_channels() * output_height() * output_width());
+    xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_weights(
+        (input_channels() * kernel_height() * kernel_width() + 1) *
+        packed_output_channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
-      std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
 
       xnn_pack_f32_dconv_oki_w(
         output_channels(),
@@ -399,21 +399,21 @@ class ConvHWC2CHWMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
-    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
+    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       batch_size() * ((input_height() * input_width() - 1) * input_pixel_stride() + input_channels()));
-    std::vector<xnn_float16> zero(XNN_EXTRA_BYTES / sizeof(xnn_float16) + input_width() * input_channels());
-    std::vector<xnn_float16> kernel(output_channels() * kernel_height() * kernel_width() * input_channels());
-    std::vector<xnn_float16> bias(output_channels());
-    std::vector<xnn_float16> output(batch_size() * output_channels() * output_height() * output_width());
-    std::vector<float> output_ref(batch_size() * output_channels() * output_height() * output_width());
-    std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> packed_weights((input_channels() * kernel_height() * kernel_width() + 1) * packed_output_channels());
+    xnnpack::Buffer<xnn_float16> zero(XNN_EXTRA_BYTES / sizeof(xnn_float16) + input_width() * input_channels(), 0.0f);
+    xnnpack::Buffer<xnn_float16> kernel(output_channels() * kernel_height() * kernel_width() * input_channels());
+    xnnpack::Buffer<xnn_float16> bias(output_channels());
+    xnnpack::Buffer<xnn_float16> output(batch_size() * output_channels() * output_height() * output_width());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_channels() * output_height() * output_width());
+    xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> packed_weights(
+        (input_channels() * kernel_height() * kernel_width() + 1) *
+        packed_output_channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
-      std::fill(packed_weights.begin(), packed_weights.end(), 0);
 
       xnn_pack_f16_dconv_oki_w(
         output_channels(),

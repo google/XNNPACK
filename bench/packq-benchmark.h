@@ -6,15 +6,14 @@
 #ifndef __XNNPACK_BENCH_PACKQ_BENCHMARK_H
 #define __XNNPACK_BENCH_PACKQ_BENCHMARK_H
 
-#include "xnnpack/aligned-allocator.h"
+#include <cstddef>
+
+#include "utils.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/pack.h"
 #include "xnnpack/packq.h"
-
-#include <cstddef>
-
-#include "bench/utils.h"
+#include "xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 
 void x8_packq(benchmark::State& state, xnn_x8_packq_f32qp8_ukernel_fn packq,

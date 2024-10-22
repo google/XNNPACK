@@ -19,6 +19,7 @@
 #include "xnnpack.h"
 #include "xnnpack/reshape-helpers.h"
 #include "xnnpack/subgraph.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 xnn_runtime_t SetupUnary(const std::vector<size_t> &dims) {
@@ -164,9 +165,9 @@ TEST(ReshapeHelpersTest, UnaryScalar) {
   ASSERT_EQ(xnn_status_success,
             xnn_get_external_value_shape(runtime, /*external_id=*/1,
                                          &num_output_dims, &output_dims[0]));
-  std::vector<float> input(1 + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(1 + XNN_EXTRA_BYTES / sizeof(float));
   input[0] = -7;
-  std::vector<float> output(1);
+  xnnpack::Buffer<float> output(1);
   ASSERT_EQ(num_output_dims, 0);
   std::array<xnn_external_value, 2> external = {
       xnn_external_value{0, input.data()},
@@ -191,11 +192,11 @@ TEST(ReshapeHelpersTest, BinaryScalarLHSRHS) {
   ASSERT_EQ(xnn_status_success,
             xnn_get_external_value_shape(runtime, /*external_id=*/1,
                                          &num_output_dims, &output_dims[0]));
-  std::vector<float> input0(1 + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input0(1 + XNN_EXTRA_BYTES / sizeof(float));
   input0[0] = 2;
-  std::vector<float> input1(1 + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input1(1 + XNN_EXTRA_BYTES / sizeof(float));
   input1[0] = 3;
-  std::vector<float> output(1);
+  xnnpack::Buffer<float> output(1);
   ASSERT_EQ(num_output_dims, 0);
   std::array<xnn_external_value, 3> external = {
       xnn_external_value{0, input0.data()},
@@ -233,9 +234,9 @@ TEST(ReshapeHelpersTest, BinaryScalarLHS3DRHS) {
                       std::multiplies<size_t>());
   const size_t num_output_elements =
       std::max(num_input0_elements, num_input1_elements);
-  std::vector<float> input0(num_input0_elements);
-  std::vector<float> input1(num_input1_elements);
-  std::vector<float> output(num_output_elements);
+  xnnpack::Buffer<float> input0(num_input0_elements);
+  xnnpack::Buffer<float> input1(num_input1_elements);
+  xnnpack::Buffer<float> output(num_output_elements);
 
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(-1.f, 1.f);
@@ -282,9 +283,9 @@ TEST(ReshapeHelpersTest, Binary3DLHSScalarRHS) {
                       std::multiplies<size_t>());
   const size_t num_output_elements =
       std::max(num_input0_elements, num_input1_elements);
-  std::vector<float> input0(num_input0_elements);
-  std::vector<float> input1(num_input1_elements);
-  std::vector<float> output(num_output_elements);
+  xnnpack::Buffer<float> input0(num_input0_elements);
+  xnnpack::Buffer<float> input1(num_input1_elements);
+  xnnpack::Buffer<float> output(num_output_elements);
 
   xnnpack::ReplicableRandomDevice rng;
   std::uniform_real_distribution<float> f32dist(-1.f, 1.f);

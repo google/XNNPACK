@@ -9,18 +9,16 @@
 #include <random>
 #include <vector>
 
-#include <benchmark/benchmark.h>
-#include "bench/utils.h"
-
+#include "utils.h"
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/raddstoreexpminusmax.h"
 #include "xnnpack/reduce.h"
-
+#include "xnnpack/buffer.h"
+#include <benchmark/benchmark.h>
 
 static void f16_raddstoreexpminusmax(
   benchmark::State& state,
@@ -43,8 +41,9 @@ static void f16_raddstoreexpminusmax(
   
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_elements * sizeof(xnn_float16));
-  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> x(elements);
-  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> y(packed_elements * num_buffers);
+  xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> x(elements);
+  xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> y(packed_elements *
+                                                   num_buffers);
 
   std::generate(x.begin(), x.end(), f32rng);
 

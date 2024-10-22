@@ -162,7 +162,6 @@ class ScaledDotProductAttentionOperatorTester {
       std::generate(key.begin(), key.end(), [&]() { return f32dist(rng); });
       std::generate(value.begin(), value.end(), [&]() { return f32dist(rng); });
       std::generate(mask.begin(), mask.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       const size_t query_batch_stride = query_heads() *  query_tokens() * query_key_channels();
       const size_t query_head_stride = query_tokens() * query_key_channels();
@@ -324,7 +323,6 @@ class ScaledDotProductAttentionOperatorTester {
       std::generate(key.begin(), key.end(), [&]() { return f32dist(rng); });
       std::generate(value.begin(), value.end(), [&]() { return f32dist(rng); });
       std::generate(mask.begin(), mask.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       const size_t query_batch_stride = query_heads() *  query_tokens() * query_key_channels();
       const size_t query_head_stride = query_tokens() * query_key_channels();

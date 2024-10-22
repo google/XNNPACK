@@ -14,10 +14,10 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/pack.h"
+#include "xnnpack/buffer.h"
 
 class PackWMicrokernelTester {
  public:
@@ -58,6 +58,15 @@ class PackWMicrokernelTester {
     return this->sr_;
   }
 
+  PackWMicrokernelTester& izp(size_t izp) {
+    this->izp_ = izp;
+    return *this;
+  }
+
+  size_t izp() const {
+    return this->izp_;
+  }
+
   PackWMicrokernelTester& n(size_t n) {
     assert(n != 0);
     this->n_ = n;
@@ -95,21 +104,24 @@ class PackWMicrokernelTester {
   }
 
   void Test(xnn_qs8_packw_gemm_goi_ukernel_fn packw) const {
-    std::vector<int8_t> weights(n() * k());
-    std::vector<int32_t> bias(n());
-    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * packed_k() + packed_n() * sizeof(uint32_t));
-    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w_ref(packed_n() * packed_k() + packed_n() * sizeof(uint32_t));
+    xnnpack::Buffer<int8_t> weights(n() * k());
+    xnnpack::Buffer<int32_t> bias(n());
+    xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
+        packed_n() * packed_k() + packed_n() * sizeof(uint32_t));
+    xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w_ref(
+        packed_n() * packed_k() + packed_n() * sizeof(uint32_t));
 
     std::iota(weights.begin(), weights.end(), 0);
     std::iota(bias.begin(), bias.end(), UINT32_C(0));
-    std::fill(packed_w.begin(), packed_w.end(), INT8_C(0x12));
+    std::fill(packed_w.begin(), packed_w.end(), INT8_C(0));
     std::fill(packed_w_ref.begin(), packed_w_ref.end(), INT8_C(0x7B));
 
     const int32_t* bias_data = nullbias() ? nullptr : bias.data();
     const xnn_qs8_packing_params packing_params = { 0 };
 
     // Compute reference results.
-    xnn_pack_qs8_gemm_goi_w(/*g=*/1, n(), k(), nr(), kr(), sr(),
+    auto* pack_function = izp() == 128 ? xnn_pack_qs8_to_qu8_gemm_goi_w : xnn_pack_qs8_gemm_goi_w;
+    pack_function(/*g=*/1, n(), k(), nr(), kr(), sr(),
       reinterpret_cast<const int8_t *>(weights.data()),
       bias_data,
       /*scale=*/nullptr,
@@ -122,7 +134,9 @@ class PackWMicrokernelTester {
 
     // Verify bias results.
     for (size_t i = 0; i < packed_n() * sizeof(int32_t); i++) {
-      EXPECT_EQ((int32_t) packed_w[i], (int32_t) packed_w_ref[i]);
+      if (packed_w_ref[i] != INT8_C(0x7B)) {  // Allow pad to differ
+        EXPECT_EQ((int32_t) packed_w[i], (int32_t) packed_w_ref[i]);
+      }
     }
 
     // Verify weights results.
@@ -141,10 +155,11 @@ class PackWMicrokernelTester {
   }
 
   void Test(xnn_x8_packw_gemm_goi_ukernel_fn packw) const {
-    std::vector<int8_t> weights(n() * k());
-    std::vector<uint32_t> bias(n());
-    std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_w(packed_n() * k() + packed_n() * sizeof(uint32_t));
-    std::vector<int8_t> packed_w_ref(packed_n() * k() + packed_n() * sizeof(uint32_t));
+    xnnpack::Buffer<int8_t> weights(n() * k());
+    xnnpack::Buffer<uint32_t> bias(n());
+    xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
+        packed_n() * k() + packed_n() * sizeof(uint32_t));
+    xnnpack::Buffer<int8_t> packed_w_ref(packed_n() * k() + packed_n() * sizeof(uint32_t));
 
     std::iota(weights.begin(), weights.end(), 0);
     std::iota(bias.begin(), bias.end(), UINT32_C(0));
@@ -176,11 +191,12 @@ class PackWMicrokernelTester {
   }
 
   void Test(xnn_x16_packw_gemm_goi_ukernel_fn packw) const {
-    std::vector<xnn_float16> weights(g() * n() * k());
-    std::vector<xnn_float16> padded_weights(g() * n() * packed_k());
-    std::vector<xnn_float16> bias(g() * n());
-    std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> packed_w(g() * (packed_n() * packed_k() + packed_n()));
-    std::vector<xnn_float16> packed_w_ref(g() * (packed_n() * packed_k() + packed_n()));
+    xnnpack::Buffer<xnn_float16> weights(g() * n() * k());
+    xnnpack::Buffer<xnn_float16> padded_weights(g() * n() * packed_k());
+    xnnpack::Buffer<xnn_float16> bias(g() * n());
+    xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> packed_w(
+        g() * (packed_n() * packed_k() + packed_n()));
+    xnnpack::Buffer<xnn_float16> packed_w_ref(g() * (packed_n() * packed_k() + packed_n()));
 
     const xnn_float16 pad_value = std::max(sr(), kr()) == 1 ? UINT16_C(0xDEAD) : 0;
     std::iota(weights.begin(), weights.end(), UINT16_C(0x0001));
@@ -227,11 +243,12 @@ class PackWMicrokernelTester {
   }
 
   void Test(xnn_x32_packw_gemm_goi_ukernel_fn packw) const {
-    std::vector<uint32_t> weights(g() * n() * k());
-    std::vector<uint32_t> padded_weights(g() * n() * packed_k());
-    std::vector<uint32_t> bias(g() * n());
-    std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> packed_w(g() * (packed_n() * packed_k() + packed_n()));
-    std::vector<uint32_t> packed_w_ref(g() * (packed_n() * packed_k() + packed_n()));
+    xnnpack::Buffer<uint32_t> weights(g() * n() * k());
+    xnnpack::Buffer<uint32_t> padded_weights(g() * n() * packed_k());
+    xnnpack::Buffer<uint32_t> bias(g() * n());
+    xnnpack::Buffer<uint32_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
+        g() * (packed_n() * packed_k() + packed_n()));
+    xnnpack::Buffer<uint32_t> packed_w_ref(g() * (packed_n() * packed_k() + packed_n()));
 
     const uint32_t pad_value = UINT32_C(0xDEADBEEF);
     std::iota(weights.begin(), weights.end(), UINT32_C(0x00000001));
@@ -283,4 +300,5 @@ class PackWMicrokernelTester {
   size_t sr_{1};
   size_t k_{1};
   bool nullbias_{false};
+  size_t izp_{0};
 };

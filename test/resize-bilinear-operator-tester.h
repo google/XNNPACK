@@ -19,9 +19,9 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class ResizeBilinearOperatorTester {
@@ -242,13 +242,12 @@ class ResizeBilinearOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
+    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels());
-    std::vector<xnn_float16> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
-    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<xnn_float16> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       const float offset = (tf_legacy_mode() || align_corners()) ? 0.0f : 0.5f;
@@ -309,7 +308,7 @@ class ResizeBilinearOperatorTester {
           channels(), input_pixel_stride(), output_pixel_stride(),
           &workspace_size, &workspace_alignment,
           /*threadpool=*/nullptr));
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
       std::iota(workspace.begin(), workspace.end(), 0);
       if (transient_indirection_buffer()) {
         ASSERT_NE(workspace_size, 0);
@@ -355,12 +354,11 @@ class ResizeBilinearOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<float> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
-    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<float> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       const float offset = (tf_legacy_mode() || align_corners()) ? 0.0f : 0.5f;
@@ -419,7 +417,7 @@ class ResizeBilinearOperatorTester {
           &workspace_size, &workspace_alignment,
           /*threadpool=*/nullptr));
 
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
       std::iota(workspace.begin(), workspace.end(), 0);
       if (transient_indirection_buffer()) {
         ASSERT_NE(workspace_size, 0);
@@ -465,12 +463,11 @@ class ResizeBilinearOperatorTester {
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
-    std::vector<int8_t> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
-    std::vector<int8_t> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
-    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<int8_t> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
+    xnnpack::Buffer<int8_t> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results.
       const float offset = (tf_legacy_mode() || align_corners()) ? 0.0f : 0.5f;
@@ -529,7 +526,7 @@ class ResizeBilinearOperatorTester {
           &workspace_size, &workspace_alignment,
           /*threadpool=*/nullptr));
 
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
       std::iota(workspace.begin(), workspace.end(), 0);
       if (transient_indirection_buffer()) {
         ASSERT_NE(workspace_size, 0);
@@ -576,12 +573,11 @@ class ResizeBilinearOperatorTester {
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
-    std::vector<uint8_t> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-    std::vector<uint8_t> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
-    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<uint8_t> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    xnnpack::Buffer<uint8_t> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Compute reference results.
       const float offset = (tf_legacy_mode() || align_corners()) ? 0.0f : 0.5f;
@@ -640,7 +636,7 @@ class ResizeBilinearOperatorTester {
           &workspace_size, &workspace_alignment,
           /*threadpool=*/nullptr));
 
-      std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+      xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
       std::iota(workspace.begin(), workspace.end(), 0);
       if (transient_indirection_buffer()) {
         ASSERT_NE(workspace_size, 0);
@@ -686,12 +682,11 @@ class ResizeBilinearOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<xnn_float16> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<xnn_float16> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
-    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<xnn_float16> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       const float offset = (tf_legacy_mode() || align_corners()) ? 0.0f : 0.5f;
@@ -777,12 +772,11 @@ class ResizeBilinearOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<float> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
-    std::vector<float> output_ref(batch_size() * output_height() * output_width() * channels());
+    xnnpack::Buffer<float> input((batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + channels() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       const float offset = (tf_legacy_mode() || align_corners()) ? 0.0f : 0.5f;

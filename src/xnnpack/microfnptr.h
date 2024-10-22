@@ -11,8 +11,8 @@
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microparams.h"
-
 
 /****************** Microkernel pointers for dense inference *****************/
 
@@ -338,6 +338,18 @@ typedef void (*xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn)(
     size_t dst_stride_row,
     size_t dst_stride_col,
     union xnn_f32_minmax_params
+        minmax_params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+typedef void (*xnn_qp8_f32_qb4w_gemm_minmax_ukernel_fn)(
+    size_t m,
+    size_t n,
+    size_t k,
+    const void* lhs_packed,
+    const void* rhs_packed,
+    float* dst,
+    size_t dst_stride_row,
+    size_t dst_stride_col,
+    const struct xnn_f32_qb4w_minmax_params 
         minmax_params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // GEMMINC: GEMM INCremental with Min+Max activation
@@ -777,35 +789,6 @@ typedef void (*xnn_f32_vmulcaddc_ukernel_fn)(
     float* output,
     size_t output_stride,
     const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// PRELU: Parametric RELU
-
-typedef void (*xnn_prelu_ukernel_fn)(
-    size_t batch,
-    size_t channels,
-    const void* input,
-    size_t input_stride,
-    const void* weights,
-    void* output,
-    size_t output_stride);
-
-typedef void (*xnn_f16_prelu_ukernel_fn)(
-    size_t batch,
-    size_t channels,
-    const xnn_float16* input,
-    size_t input_stride,
-    const xnn_float16* weights,
-    xnn_float16* output,
-    size_t output_stride);
-
-typedef void (*xnn_f32_prelu_ukernel_fn)(
-    size_t batch,
-    size_t channels,
-    const float* input,
-    size_t input_stride,
-    const float* weights,
-    float* output,
-    size_t output_stride);
 
 // IBILINEAR: Indirect BILINEAR interpolation
 
@@ -2552,15 +2535,15 @@ typedef size_t (*xnn_init_f32_qs8_cvt_params_fn)(
   int8_t output_min,
   int8_t output_max);
 
-typedef size_t (*xnn_init_qs8_mean_minmax_params_fn)(
-  struct xnn_qs8_mean_minmax_params params[XNN_MIN_ELEMENTS(1)],
+typedef size_t (*xnn_init_qs8_reduce_minmax_params_fn)(
+  struct xnn_qs8_reduce_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int32_t num_elements,
   int8_t input_zero_point,
   int8_t output_zero_point);
 
-typedef size_t (*xnn_init_qu8_mean_minmax_params_fn)(
-  struct xnn_qu8_mean_minmax_params params[XNN_MIN_ELEMENTS(1)],
+typedef size_t (*xnn_init_qu8_reduce_minmax_params_fn)(
+  struct xnn_qu8_reduce_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
   int32_t num_elements,
   uint8_t input_zero_point,
@@ -3009,6 +2992,10 @@ struct xnn_hmp_qp8gemm_ukernel {
   xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn function[XNN_MAX_UARCH_TYPES];
 };
 
+struct xnn_hmp_qp8gemm_bl_ukernel {
+  xnn_qp8_f32_qb4w_gemm_minmax_ukernel_fn function[XNN_MAX_UARCH_TYPES];
+};
+
 // Largest GEMM/IGEMM MR used in init.c is 16 (x86 AVX512AMX).
 // Largest GEMM/IGEMM MR is 8 in e2e benchmarks.
 #define XNN_MAX_MR 16
@@ -3019,10 +3006,10 @@ struct gemm_fused_ukernels {
     struct xnn_hmp_dqgemm_ukernel dqgemm[XNN_MAX_MR];
     struct xnn_hmp_qp8gemm_ukernel qp8gemm[XNN_MAX_MR];
     struct xnn_hmp_dqgemm_bl_ukernel dqgemm_bl[XNN_MAX_MR];
+    struct xnn_hmp_qp8gemm_bl_ukernel qp8gemm_bl[XNN_MAX_MR];
   };
   union {
     struct xnn_hmp_igemm_ukernel igemm[XNN_MAX_MR];
     struct xnn_hmp_dqigemm_ukernel dqigemm[XNN_MAX_MR];
   };
 };
-

@@ -16,10 +16,10 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/requantization.h"
@@ -409,8 +409,6 @@ TEST_F(GlobalAveragePooling1DTestF16, matches_operator_api)
   xnn_operator_t op = nullptr;
 
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_global_average_pooling_nwc_f16(
@@ -481,8 +479,6 @@ TEST_F(GlobalAveragePooling1DTestF32, matches_operator_api)
   xnn_operator_t op = nullptr;
 
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_global_average_pooling_nwc_f32(

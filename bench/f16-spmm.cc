@@ -11,17 +11,16 @@
 #include <random>
 #include <vector>
 
-#include <benchmark/benchmark.h>
-#include "bench/spmm.h"
-#include "bench/utils.h"
-
+#include "spmm.h"
+#include "utils.h"
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/spmm.h"
+#include "xnnpack/buffer.h"
+#include <benchmark/benchmark.h>
 
 static void f16_spmm(benchmark::State& state,
   xnn_f16_spmm_minmax_ukernel_fn spmm, uint32_t mr, uint32_t nr, float sparsity,
@@ -40,22 +39,22 @@ static void f16_spmm(benchmark::State& state,
   std::uniform_real_distribution<float> f32dist;
   std::uniform_real_distribution<float> pdist;
 
-  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> input(kc * mc);
+  xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> input(kc * mc);
   // Think of b as (n/nr + n % nr) x k, expansion happens later.
   const size_t ncols = nc / nr + nc % nr;
-  std::vector<xnn_float16> b(ncols * kc);
-  std::vector<xnn_float16> bias(nc);
+  xnnpack::Buffer<xnn_float16> b(ncols * kc);
+  xnnpack::Buffer<xnn_float16> bias(nc);
   // Number of non-zero weights per N (output channel).
-  std::vector<uint32_t> nmap(nc);
+  xnnpack::Buffer<uint32_t> nmap(nc);
   // Mapping from index of non-zero weight to increment of K (input channel) following this index.
-  std::vector<int32_t> dmap(nc * kc);
-  std::vector<xnn_float16> w(nc * kc + nc);
-  std::vector<xnn_float16> output(nc * mc);
+  // Micro-kernel can access one element beyond w and dmap for software pipelining.
+  xnnpack::Buffer<int32_t> dmap(nc * kc + 1);
+  xnnpack::Buffer<xnn_float16> w(nc * kc + nc + 1);
+  xnnpack::Buffer<xnn_float16> output(nc * mc);
 
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(output.begin(), output.end(), std::nanf(""));
   std::fill(nmap.begin(), nmap.end(), 0);
   std::fill(dmap.begin(), dmap.end(), 0);
   std::fill(w.begin(), w.end(), 0);
@@ -121,11 +120,10 @@ static void f16_spmm(benchmark::State& state,
   // Generate expanded b which will be used in reference calculation.
   // Everywhere there is input non-zero in the original we copy it and add an
   // adjacent non-zero with incremented weight value.
-  std::vector<xnn_float16> b_full(nc * kc);
+  xnnpack::Buffer<xnn_float16> b_full(nc * kc);
   if (nr == 1) {
-     b_full = b;
-  }
-  else {
+    std::copy(b.begin(), b.end(), b_full.begin());
+  } else {
     for (size_t nn = 0; nn < nc / nr; nn++) {
       for (size_t kk = 0; kk < kc; kk++) {
         if (b[nn * kc + kk] != 0.0f) {
@@ -143,10 +141,6 @@ static void f16_spmm(benchmark::State& state,
       }
     }
   }
-
-  // Micro-kernel can access one element beyond w and dmap for software pipelining.
-  w.resize(wcnt + 1);
-  dmap.resize(nnz + 1);
 
   // Prepare parameters.
   xnn_f16_minmax_params params;

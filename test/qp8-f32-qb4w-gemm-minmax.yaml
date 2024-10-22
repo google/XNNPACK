@@ -1,0 +1,40 @@
+# Copyright 2023 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+# Arm KleidiAI kernels
+- name: xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x4c16s2__aarch64_neondot
+  init: xnn_init_f32_qb4w_minmax_scalar_params
+  pack: xnn_pack_kai_qb4_weights_and_biases
+  packed-stride: xnn_packed_stride_kai_qb4_weights_and_biases
+  k-block: 32
+  cpp-check: XNN_ENABLE_KLEIDIAI
+
+- name: xnn_qp8_f32_qb4w_gemm_minmax_ukernel_1x8c16s2__aarch64_neondot
+  init: xnn_init_f32_qb4w_minmax_scalar_params
+  pack: xnn_pack_kai_qb4_weights_and_biases
+  packed-stride: xnn_packed_stride_kai_qb4_weights_and_biases
+  k-block: 32
+  cpp-check: XNN_ENABLE_KLEIDIAI
+
+- name: xnn_qp8_f32_qb4w_gemm_minmax_ukernel_4x8c16s2__neoni8mm
+  init: xnn_init_f32_qb4w_minmax_scalar_params
+  pack: xnn_pack_kai_qb4_weights_and_biases
+  packed-stride: xnn_packed_stride_kai_qb4_weights_and_biases
+  k-block: 32
+  cpp-check: XNN_ENABLE_KLEIDIAI
+
+- name: xnn_qp8_f32_qb4w_gemm_minmax_ukernel_8x4c16s2__neoni8mm_mstep2
+  init: xnn_init_f32_qb4w_minmax_scalar_params
+  pack: xnn_pack_kai_qb4_weights_and_biases
+  packed-stride: xnn_packed_stride_kai_qb4_weights_and_biases
+  k-block: 32
+  cpp-check: XNN_ENABLE_KLEIDIAI
+
+- name: xnn_qp8_f32_qb4w_gemm_minmax_ukernel_16x4c16s2__neoni8mm_mstep4
+  init: xnn_init_f32_qb4w_minmax_scalar_params
+  pack: xnn_pack_kai_qb4_weights_and_biases
+  packed-stride: xnn_packed_stride_kai_qb4_weights_and_biases
+  k-block: 32
+  cpp-check: XNN_ENABLE_KLEIDIAI

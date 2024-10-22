@@ -17,13 +17,13 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
 #include "xnnpack/internal.h"
 #include "xnnpack/math.h"
 #include "xnnpack/packq.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class ConvertOperatorTester {
@@ -140,13 +140,12 @@ class ConvertOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
-    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
+    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(batch_size() * channels());
+    xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -186,13 +185,12 @@ class ConvertOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<xnn_float16> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<xnn_float16> output_ref(batch_size() * channels());
+    xnnpack::Buffer<xnn_float16> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<xnn_float16> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -231,14 +229,14 @@ class ConvertOperatorTester {
   void TestF16toQD8() const {
     xnnpack::ReplicableRandomDevice rng;
 
-    std::vector<float> input_float((batch_size() - 1) * input_stride() +
+    xnnpack::Buffer<float> input_float((batch_size() - 1) * input_stride() +
                                    channels());
-    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
+    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
                                 (batch_size() - 1) * input_stride() +
                                 channels());
-    std::vector<int8_t> output((batch_size() - 1) * output_stride() +
+    xnnpack::Buffer<int8_t> output((batch_size() - 1) * output_stride() +
                                channels());
-    std::vector<xnn_quantization_params> quantization_params(
+    xnnpack::Buffer<xnn_quantization_params> quantization_params(
         batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
     std::uniform_real_distribution<float> range_dist(-10, 10);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -253,7 +251,6 @@ class ConvertOperatorTester {
       std::copy(input_float.begin(), input_float.end(), input.begin());
       std::copy(input.begin(), input.begin() + channels(),
                      input_float.begin());
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Create, setup, run, and destroy Convert operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -310,17 +307,16 @@ class ConvertOperatorTester {
   void TestF32toQD8() const {
     xnnpack::ReplicableRandomDevice rng;
 
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<int8_t> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<xnn_quantization_params> quantization_params(batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
+    xnnpack::Buffer<int8_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<xnn_quantization_params> quantization_params(batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
     std::uniform_real_distribution<float> range_dist(-100000, 100000);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       const float first_val = range_dist(rng);
       const float second_val = range_dist(rng);
       std::uniform_real_distribution<float> f32dist(std::min(first_val, second_val), std::max(first_val, second_val));
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Create, setup, run, and destroy Convert operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -363,9 +359,9 @@ class ConvertOperatorTester {
     // The parameters of the GEMM config are used as packing parameters.
     const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_nr2_config();
 
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
                              (batch_size() - 1) * input_stride() + channels());
-    std::vector<int8_t> output(xnn_x8_packq_f32qp8_packed_size(
+    xnnpack::Buffer<int8_t> output(xnn_x8_packq_f32qp8_packed_size(
         batch_size(), channels(), gemm_config->mr, 1 << gemm_config->log2_kr,
         1 << gemm_config->log2_sr));
     std::uniform_real_distribution<float> range_dist(-100000, 100000);
@@ -375,7 +371,6 @@ class ConvertOperatorTester {
       std::uniform_real_distribution<float> f32dist(
           std::min(first_val, second_val), std::max(first_val, second_val));
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Create, setup, run, and destroy Convert operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -427,13 +422,12 @@ class ConvertOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<int8_t> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<int8_t> output_ref(batch_size() * channels());
+    xnnpack::Buffer<int8_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<int8_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results.
       const float inv_scale = 1.0f / output_scale();
@@ -485,13 +479,12 @@ class ConvertOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<uint8_t> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<uint8_t> output_ref(batch_size() * channels());
+    xnnpack::Buffer<uint8_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint8_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Compute reference results.
       const float inv_scale = 1.0f / output_scale();
@@ -540,13 +533,12 @@ class ConvertOperatorTester {
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
-    std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
+    xnnpack::Buffer<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<xnn_float16> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(batch_size() * channels());
+    xnnpack::Buffer<xnn_float16> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       const float fp16_scale = xnn_float16(input_scale());
       // Compute reference results.
@@ -596,13 +588,12 @@ class ConvertOperatorTester {
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
-    std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
+    xnnpack::Buffer<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(batch_size() * channels());
+    xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -650,13 +641,12 @@ class ConvertOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int16_t> qs16dist;
 
-    std::vector<int16_t> input(XNN_EXTRA_BYTES / sizeof(int16_t) +
+    xnnpack::Buffer<int16_t> input(XNN_EXTRA_BYTES / sizeof(int16_t) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<int8_t> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<int8_t> output_ref(batch_size() * channels());
+    xnnpack::Buffer<int8_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<int8_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return qs16dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results.
       const int64_t multiplier = static_cast<int64_t> (std::llrintf(32768.0f * input_scale()));
@@ -706,13 +696,12 @@ class ConvertOperatorTester {
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
-    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
+    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(batch_size() * channels());
+    xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -753,13 +742,12 @@ class ConvertOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
-    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
+    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(batch_size() * channels());
+    xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -794,13 +782,12 @@ class ConvertOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<xnn_float16> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<xnn_float16> output_ref(batch_size() * channels());
+    xnnpack::Buffer<xnn_float16> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<xnn_float16> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -842,13 +829,12 @@ class ConvertOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<int8_t> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<int8_t> output_ref(batch_size() * channels());
+    xnnpack::Buffer<int8_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<int8_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results.
       const float inv_scale = 1.0f / output_scale();
@@ -889,13 +875,12 @@ class ConvertOperatorTester {
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
-    std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
+    xnnpack::Buffer<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(batch_size() * channels());
+    xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {
@@ -935,13 +920,12 @@ class ConvertOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_int_distribution<int16_t> qs16dist;
 
-    std::vector<int16_t> input(XNN_EXTRA_BYTES / sizeof(int16_t) +
+    xnnpack::Buffer<int16_t> input(XNN_EXTRA_BYTES / sizeof(int16_t) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<int8_t> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<int8_t> output_ref(batch_size() * channels());
+    xnnpack::Buffer<int8_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<int8_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return qs16dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       // Compute reference results.
       const int64_t multiplier = static_cast<int64_t> (std::llrintf(32768.0f * input_scale()));
@@ -986,13 +970,12 @@ class ConvertOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
 
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<uint8_t> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<uint8_t> output_ref(batch_size() * channels());
+    xnnpack::Buffer<uint8_t> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint8_t> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       // Compute reference results.
       const float inv_scale = 1.0f / output_scale();
@@ -1033,13 +1016,12 @@ class ConvertOperatorTester {
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
-    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
+    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
       (batch_size() - 1) * input_stride() + channels());
-    std::vector<float> output((batch_size() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(batch_size() * channels());
+    xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(batch_size() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Compute reference results.
       for (size_t i = 0; i < batch_size(); i++) {

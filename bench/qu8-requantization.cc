@@ -3,23 +3,20 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-
 #include <algorithm>
 #include <cmath>
 #include <functional>
 #include <random>
 #include <vector>
 
-#include <benchmark/benchmark.h>
-#include "bench/utils.h"
-
+#include "utils.h"
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/requantization-stubs.h"
-
+#include "xnnpack/buffer.h"
+#include <benchmark/benchmark.h>
 
 static void qu8_requantization(
   benchmark::State& state,
@@ -36,10 +33,9 @@ static void qu8_requantization(
   auto rng = std::mt19937(random_device());
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(), std::ref(rng));
 
-  std::vector<int32_t, AlignedAllocator<int32_t, 64>> input(num_elements);
-  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> output(num_elements);
+  xnnpack::Buffer<int32_t, XNN_ALLOCATION_ALIGNMENT> input(num_elements);
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> output(num_elements);
   std::generate(input.begin(), input.end(), std::ref(i32rng));
-  std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
   for (auto _ : state) {
     requantize(
@@ -75,12 +71,6 @@ static void qu8_requantization(
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
     ->UseRealTime();
-
-  BENCHMARK_CAPTURE(qu8_requantization, rndna__neon,
-                    xnn_qu8_requantize_rndna__neon,
-                    benchmark::utils::CheckNEON)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
-    ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -100,21 +90,6 @@ static void qu8_requantization(
     ->UseRealTime();
   BENCHMARK_CAPTURE(qu8_requantization, gemmlowp__sse41,
                     xnn_qu8_requantize_gemmlowp__sse41,
-                    benchmark::utils::CheckSSE41)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
-    ->UseRealTime();
-
-  BENCHMARK_CAPTURE(qu8_requantization, rndna__sse2,
-                    xnn_qu8_requantize_rndna__sse2)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(qu8_requantization, rndna__ssse3,
-                    xnn_qu8_requantize_rndna__ssse3,
-                    benchmark::utils::CheckSSSE3)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(qu8_requantization, rndna__sse41,
-                    xnn_qu8_requantize_rndna__sse41,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
     ->UseRealTime();
@@ -143,19 +118,6 @@ BENCHMARK_CAPTURE(qu8_requantization, fp32__scalar_fmagic,
 
 BENCHMARK_CAPTURE(qu8_requantization, gemmlowp__scalar,
                   xnn_qu8_requantize_gemmlowp__scalar)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
-  ->UseRealTime();
-
-BENCHMARK_CAPTURE(qu8_requantization, rndna__scalar_signed64,
-                  xnn_qu8_requantize_rndna__scalar_signed64)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(qu8_requantization, rndna__scalar_unsigned32,
-                  xnn_qu8_requantize_rndna__scalar_unsigned32)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(qu8_requantization, rndna__scalar_unsigned64,
-                  xnn_qu8_requantize_rndna__scalar_unsigned64)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
   ->UseRealTime();
 

@@ -32,5 +32,5 @@ XNN_TEST_UNARY_BATCH_LT(ukernel, arch_flags, batch_tile, datatype, ukernel, init
 XNN_TEST_UNARY_BATCH_GT(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                        \
                                                                                                                  \
 XNN_TEST_UNARY_INPLACE(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);
-#include "src/f32-vhswish/f32-vhswish.h"
+#include "f32-vhswish/f32-vhswish.h"
 #undef XNN_UKERNEL_WITH_PARAMS

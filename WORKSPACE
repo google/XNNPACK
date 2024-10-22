@@ -47,9 +47,9 @@ http_archive(
 # Google Test framework, used by most unit-tests.
 http_archive(
     name = "com_google_googletest",
-    sha256 = "5cb522f1427558c6df572d6d0e1bf0fd076428633d080e88ad5312be0b6a8859",
-    strip_prefix = "googletest-e23cdb78e9fef1f69a9ef917f447add5638daf2a",
-    urls = ["https://github.com/google/googletest/archive/e23cdb78e9fef1f69a9ef917f447add5638daf2a.zip"],
+    sha256 = "5a5f23d3d788a0b6e10c45f30128e126a7f3db01c5c8026f0f68e64d6d7a26f0",
+    strip_prefix = "googletest-62df7bdbc10887e094661e07ec2595b7920376fd",
+    urls = ["https://github.com/google/googletest/archive/62df7bdbc10887e094661e07ec2595b7920376fd.zip"],
 )
 # LINT.ThenChange(cmake/DownloadGoogleTest.cmake)
 
@@ -62,19 +62,6 @@ http_archive(
     urls = ["https://github.com/google/benchmark/archive/d2a8a4ee41b923876c034afb939c4fc03598e622.zip"],
 )
 # LINT.ThenChange(cmake/DownloadGoogleBenchmark.cmake)
-
-# LINT.IfChange
-# FP16 library, used for half-precision conversions
-http_archive(
-    name = "FP16",
-    build_file = "@//third_party:FP16.BUILD",
-    sha256 = "e66e65515fa09927b348d3d584c68be4215cfe664100d01c9dbc7655a5716d70",
-    strip_prefix = "FP16-0a92994d729ff76a58f692d3028ca1b64b145d91",
-    urls = [
-        "https://github.com/Maratyszcza/FP16/archive/0a92994d729ff76a58f692d3028ca1b64b145d91.zip",
-    ],
-)
-# LINT.ThenChange(cmake/DownloadFP16.cmake)
 
 # LINT.IfChange
 # FXdiv library, used for repeated integer division by the same factor
@@ -100,10 +87,10 @@ http_archive(
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
     name = "cpuinfo",
-    sha256 = "2bf2b62eb86e2d2eaf862d0b9683a6c467a4d69fb2f7f1dc47c799809148608f",
-    strip_prefix = "cpuinfo-fa1c679da8d19e1d87f20175ae1ec10995cd3dd3",
+    sha256 = "ca31f17a86e4db01b5fc05efa1807ddc84c02ba4611464b67e185e8210bf096b",
+    strip_prefix = "cpuinfo-1e83a2fdd3102f65c6f1fb602c1b320486218a99",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/fa1c679da8d19e1d87f20175ae1ec10995cd3dd3.zip",
+        "https://github.com/pytorch/cpuinfo/archive/1e83a2fdd3102f65c6f1fb602c1b320486218a99.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadCpuinfo.cmake)
@@ -112,10 +99,10 @@ http_archive(
 # KleidiAI library, used for ARM microkernels.
 http_archive(
     name = "KleidiAI",
-    sha256 = "d8f2b5bf6eba7ab8fe3cedd97c4adc967c1befa69a6f4c4f6cbb3c102a7dd3c9",
-    strip_prefix = "kleidiai-32384cde728f444afdb92eecbb65e293fc6a6315",
+    sha256 = "6682b7a2795c711c1dd23ada552675b6514523e991043753648f2cad826f588f",
+    strip_prefix = "kleidiai-382b07835c43fcb0401cb4dab3c8fb85eaf187b6",
     urls = [
-        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/32384cde728f444afdb92eecbb65e293fc6a6315/kleidiai-32384cde728f444afdb92eecbb65e293fc6a6315.zip",
+        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/382b07835c43fcb0401cb4dab3c8fb85eaf187b6/kleidiai-382b07835c43fcb0401cb4dab3c8fb85eaf187b6.zip"
     ],
 )
 # LINT.ThenChange(cmake/DownloadKleidiAI.cmake)

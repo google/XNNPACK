@@ -9,17 +9,15 @@
 #include <random>
 #include <vector>
 
-#include <benchmark/benchmark.h>
-#include "bench/utils.h"
-
+#include "utils.h"
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/reduce.h"
-
+#include "xnnpack/buffer.h"
+#include <benchmark/benchmark.h>
 
 static void f16_rmin(
   benchmark::State& state,
@@ -36,8 +34,8 @@ static void f16_rmin(
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), std::ref(rng));
-  
-  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> input(elements);
+
+  xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> input(elements);
   std::generate(input.begin(), input.end(), f32rng);
 
   xnn_f16_default_params params;

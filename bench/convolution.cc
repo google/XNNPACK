@@ -28,7 +28,8 @@
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 #endif  // BENCHMARK_TENSORFLOW_LITE
-#include "bench/utils.h"
+#include "utils.h"
+#include "xnnpack/buffer.h"
 
 void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
@@ -47,7 +48,6 @@ void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
-  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
   const size_t output_pixel_stride = groups * group_output_channels;
   const size_t input_pixel_stride = groups * group_input_channels;
@@ -60,11 +60,11 @@ void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
   const size_t output_height = (input_height + padding_height - effective_kernel_height) / subsampling + 1;
   const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
 
-  std::vector<uint8_t> input(batch_size * input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(uint8_t));
-  std::generate(input.begin(), input.end(), std::ref(u8rng));
-  std::vector<uint8_t> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
-  std::generate(kernel.begin(), kernel.end(), std::ref(u8rng));
-  std::vector<int32_t> bias(groups * group_output_channels);
+  xnnpack::Buffer<uint8_t> input(batch_size * input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(uint8_t));
+  xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
+  xnnpack::Buffer<uint8_t> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
+  xnnpack::fill_uniform_random_bits(kernel.data(), kernel.size(), rng);
+  xnnpack::Buffer<int32_t> bias(groups * group_output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(i32rng));
   const size_t output_elements = batch_size * output_height * output_width * output_pixel_stride;
 
@@ -77,9 +77,9 @@ void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(uint8_t) * kernel.size() + sizeof(int32_t) * bias.size() + sizeof(uint8_t) * output_elements);
-  std::vector<uint8_t> output(output_elements * num_buffers);
+  xnnpack::Buffer<uint8_t> output(output_elements * num_buffers);
 
-  std::vector<xnn_operator_t> convolution_operators(num_buffers);
+  xnnpack::Buffer<xnn_operator_t> convolution_operators(num_buffers);
   for (xnn_operator_t& convolution_op : convolution_operators) {
     status = xnn_create_convolution2d_nhwc_qu8(
       padding_top, padding_right, padding_bottom, padding_left,
@@ -119,7 +119,7 @@ void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
     max_workspace_size = std::max(max_workspace_size, workspace_size);
   }
 
-  std::vector<char> workspace(max_workspace_size);
+  xnnpack::Buffer<char> workspace(max_workspace_size);
 
   for (size_t i = 0; i < convolution_operators.size(); i++) {
     status = xnn_setup_convolution2d_nhwc_qu8(
@@ -186,8 +186,6 @@ void xnnpack_convolution_qs8(benchmark::State& state, const char* net) {
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
-  auto i8rng = std::bind(
-    std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), std::ref(rng));
 
   const size_t output_pixel_stride = groups * group_output_channels;
   const size_t input_pixel_stride = groups * group_input_channels;
@@ -200,11 +198,11 @@ void xnnpack_convolution_qs8(benchmark::State& state, const char* net) {
   const size_t output_height = (input_height + padding_height - effective_kernel_height) / subsampling + 1;
   const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
 
-  std::vector<int8_t> input(batch_size * input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(int8_t));
-  std::generate(input.begin(), input.end(), std::ref(i8rng));
-  std::vector<int8_t> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
-  std::generate(kernel.begin(), kernel.end(), std::ref(i8rng));
-  std::vector<int32_t> bias(groups * group_output_channels);
+  xnnpack::Buffer<int8_t> input(batch_size * input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
+  xnnpack::Buffer<int8_t> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
+  xnnpack::fill_uniform_random_bits(kernel.data(), kernel.size(), rng);
+  xnnpack::Buffer<int32_t> bias(groups * group_output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(i32rng));
   const size_t output_elements = batch_size * output_height * output_width * output_pixel_stride;
 
@@ -217,9 +215,9 @@ void xnnpack_convolution_qs8(benchmark::State& state, const char* net) {
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(int8_t) * kernel.size() + sizeof(int32_t) * bias.size() + sizeof(int8_t) * output_elements);
-  std::vector<int8_t> output(output_elements * num_buffers);
+  xnnpack::Buffer<int8_t> output(output_elements * num_buffers);
 
-  std::vector<xnn_operator_t> convolution_operators(num_buffers);
+  xnnpack::Buffer<xnn_operator_t> convolution_operators(num_buffers);
   for (xnn_operator_t& convolution_op : convolution_operators) {
     status = xnn_create_convolution2d_nhwc_qs8(
       padding_top, padding_right, padding_bottom, padding_left,
@@ -258,7 +256,7 @@ void xnnpack_convolution_qs8(benchmark::State& state, const char* net) {
     max_workspace_size = std::max(max_workspace_size, workspace_size);
   }
 
-  std::vector<char> workspace(max_workspace_size);
+  xnnpack::Buffer<char> workspace(max_workspace_size);
 
   for (size_t i = 0; i < convolution_operators.size(); i++) {
     status = xnn_setup_convolution2d_nhwc_qs8(
@@ -337,11 +335,11 @@ void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
   const size_t output_height = (input_height + padding_height - effective_kernel_height) / subsampling + 1;
   const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
 
-  std::vector<xnn_float16> input(batch_size * input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16> input(batch_size * input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::generate(input.begin(), input.end(), f32rng);
-  std::vector<xnn_float16> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
+  xnnpack::Buffer<xnn_float16> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
   std::generate(kernel.begin(), kernel.end(), f32rng);
-  std::vector<xnn_float16> bias(groups * group_output_channels);
+  xnnpack::Buffer<xnn_float16> bias(groups * group_output_channels);
   std::generate(bias.begin(), bias.end(), f32rng);
   const size_t output_elements = batch_size * output_height * output_width * output_pixel_stride;
 
@@ -354,9 +352,9 @@ void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(xnn_float16) * (kernel.size() + bias.size() + output_elements));
-  std::vector<xnn_float16> output(output_elements * num_buffers);
+  xnnpack::Buffer<xnn_float16> output(output_elements * num_buffers);
 
-  std::vector<xnn_operator_t> convolution_operators(num_buffers);
+  xnnpack::Buffer<xnn_operator_t> convolution_operators(num_buffers);
   for (xnn_operator_t& convolution_op : convolution_operators) {
     status = xnn_create_convolution2d_nhwc_f16(
       padding_top, padding_right, padding_bottom, padding_left,
@@ -394,7 +392,7 @@ void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
     max_workspace_size = std::max(max_workspace_size, workspace_size);
   }
 
-  std::vector<char> workspace(max_workspace_size);
+  xnnpack::Buffer<char> workspace(max_workspace_size);
 
   for (size_t i = 0; i < convolution_operators.size(); i++) {
     status = xnn_setup_convolution2d_nhwc_f16(
@@ -472,11 +470,11 @@ void xnnpack_convolution_f32(benchmark::State& state, const char* net) {
   const size_t output_height = (input_height + padding_height - effective_kernel_height) / subsampling + 1;
   const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
 
-  std::vector<float> input(batch_size * input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(batch_size * input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input.begin(), input.end(), std::ref(f32rng));
-  std::vector<float> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
+  xnnpack::Buffer<float> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
   std::generate(kernel.begin(), kernel.end(), std::ref(f32rng));
-  std::vector<float> bias(groups * group_output_channels);
+  xnnpack::Buffer<float> bias(groups * group_output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
   const size_t output_elements = batch_size * output_height * output_width * output_pixel_stride;
 
@@ -489,9 +487,9 @@ void xnnpack_convolution_f32(benchmark::State& state, const char* net) {
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (kernel.size() + bias.size() + output_elements));
-  std::vector<float> output(output_elements * num_buffers);
+  xnnpack::Buffer<float> output(output_elements * num_buffers);
 
-  std::vector<xnn_operator_t> convolution_operators(num_buffers);
+  xnnpack::Buffer<xnn_operator_t> convolution_operators(num_buffers);
   for (xnn_operator_t& convolution_op : convolution_operators) {
     status = xnn_create_convolution2d_nhwc_f32(
       padding_top, padding_right, padding_bottom, padding_left,
@@ -529,7 +527,7 @@ void xnnpack_convolution_f32(benchmark::State& state, const char* net) {
     max_workspace_size = std::max(max_workspace_size, workspace_size);
   }
 
-  std::vector<char> workspace(max_workspace_size);
+  xnnpack::Buffer<char> workspace(max_workspace_size);
 
   for (size_t i = 0; i < convolution_operators.size(); i++) {
     status = xnn_setup_convolution2d_nhwc_f32(
@@ -623,9 +621,9 @@ void tflite_convolution_f32(benchmark::State& state, const char* net) {
   const size_t output_height = (input_height + padding_height - effective_kernel_height) / subsampling + 1;
   const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
 
-  std::vector<float> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
+  xnnpack::Buffer<float> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
   std::generate(kernel.begin(), kernel.end(), std::ref(f32rng));
-  std::vector<float> bias(groups * group_output_channels);
+  xnnpack::Buffer<float> bias(groups * group_output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
 
   flatbuffers::FlatBufferBuilder builder;

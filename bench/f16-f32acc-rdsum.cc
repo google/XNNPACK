@@ -7,12 +7,12 @@
 //   Specification: test/f16-f32acc-rdsum.yaml
 //   Generator: tools/generate-rdsum-benchmark.py
 
-#include "bench/rsum-benchmark.h"
-#include "bench/utils.h"
+#include "rsum-benchmark.h"
+#include "utils.h"
 #include <benchmark/benchmark.h>
 
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
 #include "xnnpack/reduce.h"
 #include "xnnpack/microfnptr.h"
@@ -89,44 +89,44 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   BENCHMARK_CAPTURE(f16_f32acc_rdsum, avx512skx_c16,
                     xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c16,
                     xnn_init_f16_f32acc_scale_scalar_params,
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(BenchmarkRDSUM)
     ->UseRealTime();
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   BENCHMARK_CAPTURE(f16_f32acc_rdsum, avx512skx_c32,
                     xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c32,
                     xnn_init_f16_f32acc_scale_scalar_params,
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(BenchmarkRDSUM)
     ->UseRealTime();
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   BENCHMARK_CAPTURE(f16_f32acc_rdsum, avx512skx_c64,
                     xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c64,
                     xnn_init_f16_f32acc_scale_scalar_params,
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(BenchmarkRDSUM)
     ->UseRealTime();
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   BENCHMARK_CAPTURE(f16_f32acc_rdsum, avx512skx_c128,
                     xnn_f16_f32acc_rdsum_ukernel_7p7x__avx512skx_c128,
                     xnn_init_f16_f32acc_scale_scalar_params,
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(BenchmarkRDSUM)
     ->UseRealTime();
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

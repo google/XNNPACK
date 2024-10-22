@@ -42,9 +42,12 @@ static void init_f16_rmax_config(void) {
         f16_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f16_rmax_ukernel__avx512fp16_u128_acc4;
       } else
     #endif
-    if (hardware_config->use_x86_avx512skx) {
-      f16_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f16_rmax_ukernel__avx512skx_u64_acc4;
-    } else if (hardware_config->use_x86_f16c) {
+    #if XNN_ENABLE_AVX512SKX
+      if (hardware_config->use_x86_avx512skx) {
+        f16_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f16_rmax_ukernel__avx512skx_u64_acc4;
+      } else
+    #endif
+    if (hardware_config->use_x86_f16c) {
       f16_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f16_rmax_ukernel__f16c_u32;
     }
   #else
@@ -66,9 +69,12 @@ static void init_f32_rmax_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (hardware_config->use_x86_avx512f) {
-      f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__avx512f_u64_acc4;
-    } else if (hardware_config->use_x86_avx) {
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__avx512f_u64_acc4;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx) {
       f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__avx_u32_acc4;
     } else {
       f32_rmax_config.ukernel = (xnn_rmax_ukernel_fn) xnn_f32_rmax_ukernel__sse_u16_acc4;

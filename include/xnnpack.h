@@ -997,6 +997,7 @@ enum xnn_binary_operator {
   xnn_binary_minimum,
   xnn_binary_copysign,
   xnn_binary_squared_difference,
+  xnn_binary_prelu,
 };
 
 struct xnn_binary_params {
@@ -1326,8 +1327,35 @@ enum xnn_status xnn_define_static_expand_dims(
 ///                    XNN_FLAG_KEEP_DIMS is not specified), or has same dimension rank but the dimension at
 ///                    @a reduction_axes reduced to 1 (if XNN_FLAG_KEEP_DIMS is specified).
 /// @param flags - binary features of the Mean Node. The only currently supported value is XNN_FLAG_KEEP_DIMS
-enum xnn_status xnn_define_static_mean(
+XNN_DEPRECATED enum xnn_status xnn_define_static_mean(
   xnn_subgraph_t subgraph,
+  size_t num_reduction_axes,
+  const size_t* reduction_axes,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
+enum xnn_reduce_operator {
+  xnn_reduce_invalid = -1,
+  xnn_reduce_sum,
+  xnn_reduce_mean,
+};
+
+/// Define a Reduce Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param num_reduction_axes - number of axes along which reduce is computed.
+/// @param reduction_axes - axes along which reduce is computed.
+/// @param input_id - Value ID for the input tensor. The input tensor must be a dense tensor with at least
+///                   @a num_reduction_axes dimensions defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be a dense tensor defined in the
+///                    @a subgraph with @a num_reduction_axes fewer dimensions than the input tensor (if
+///                    XNN_FLAG_KEEP_DIMS is not specified), or has same dimension rank but the dimension at
+///                    @a reduction_axes reduced to 1 (if XNN_FLAG_KEEP_DIMS is specified).
+/// @param flags - binary features of the Reduce Node. The only currently supported value is XNN_FLAG_KEEP_DIMS
+enum xnn_status xnn_define_static_reduce(
+  xnn_subgraph_t subgraph,
+  enum xnn_reduce_operator reduce_operator_type,
   size_t num_reduction_axes,
   const size_t* reduction_axes,
   uint32_t input_id,
@@ -1623,7 +1651,7 @@ enum xnn_status xnn_define_static_resize_bilinear_2d(
 /// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
 ///                    with [N, H, W, channels] dimensions.
 /// @param flags - binary features of the PReLU Node. No supported flags are currently defined.
-enum xnn_status xnn_define_prelu(
+XNN_DEPRECATED enum xnn_status xnn_define_prelu(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t slope_id,
@@ -4997,54 +5025,18 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_u8(
   const uint8_t* input,
   uint8_t* output);
 
-enum xnn_status xnn_create_mean_nd_f16(
-  uint32_t flags,
-  xnn_operator_t* mean_op_out);
-
-enum xnn_status xnn_reshape_mean_nd_f16(
-  xnn_operator_t mean_op,
-  size_t num_reduction_axes,
-  const size_t* reduction_axes,
-  size_t num_input_dims,
-  const size_t* input_shape,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_mean_nd_f16(
-  xnn_operator_t mean_op,
-  void* workspace,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_mean_nd_f32(
-  uint32_t flags,
-  xnn_operator_t* mean_op_out);
-
-enum xnn_status xnn_create_mean_nd_qs8(
+enum xnn_status xnn_create_reduce_nd(
+  enum xnn_reduce_operator reduce_operator_type,
+  enum xnn_datatype datatype,
   float scale,
-  int8_t input_zero_point,
-  int8_t output_zero_point,
+  int32_t input_zero_point,
+  int32_t output_zero_point,
   uint32_t flags,
-  xnn_operator_t* mean_op_out);
+  xnn_operator_t* reduce_op_out);
 
-enum xnn_status xnn_create_mean_nd_qu8(
-  float scale,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point,
-  uint32_t flags,
-  xnn_operator_t* mean_op_out);
-
-enum xnn_status xnn_reshape_mean_nd_f32(
-  xnn_operator_t mean_op,
-  size_t num_reduction_axes,
-  const size_t* reduction_axes,
-  size_t num_input_dims,
-  const size_t* input_shape,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_reshape_mean_nd_qs8(
-  xnn_operator_t mean_op,
+enum xnn_status xnn_reshape_reduce_nd(
+  xnn_operator_t reduce_op,
+  enum xnn_datatype type,
   size_t num_reduction_axes,
   const size_t* reduction_axes,
   size_t num_input_dims,
@@ -5053,32 +5045,11 @@ enum xnn_status xnn_reshape_mean_nd_qs8(
   size_t* workspace_alignment,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_reshape_mean_nd_qu8(
-  xnn_operator_t mean_op,
-  size_t num_reduction_axes,
-  const size_t* reduction_axes,
-  size_t num_input_dims,
-  const size_t* input_shape,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_mean_nd_f32(
-  xnn_operator_t mean_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_setup_mean_nd_qs8(
-  xnn_operator_t mean_op,
-  void* workspace,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_setup_mean_nd_qu8(
-  xnn_operator_t mean_op,
-  void* workspace,
-  const void* input,
-  void* output);
+enum xnn_status xnn_setup_reduce_nd(
+    xnn_operator_t reduce_op,
+    void* workspace,
+    const void* input,
+    void* output);
 
 enum xnn_status xnn_create_negate_nc_f16(
   uint32_t flags,
@@ -5123,48 +5094,6 @@ enum xnn_status xnn_run_negate_nc_f32(
   float* output,
   uint32_t flags,
   pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_prelu_nc_f16(
-  size_t input_channels,
-  size_t slope_channels,
-  size_t input_stride,
-  size_t output_stride,
-  const void* negative_slope,
-  uint32_t flags,
-  xnn_code_cache_t code_cache,
-  xnn_weights_cache_t weights_cache,
-  xnn_operator_t* prelu_op_out);
-
-enum xnn_status xnn_reshape_prelu_nc_f16(
-  xnn_operator_t prelu_op,
-  size_t batch_size,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_prelu_nc_f16(
-  xnn_operator_t prelu_op,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_prelu_nc_f32(
-  size_t input_channels,
-  size_t slope_channels,
-  size_t input_stride,
-  size_t output_stride,
-  const float* negative_slope,
-  uint32_t flags,
-  xnn_code_cache_t code_cache,
-  xnn_weights_cache_t weights_cache,
-  xnn_operator_t* prelu_op_out);
-
-enum xnn_status xnn_reshape_prelu_nc_f32(
-  xnn_operator_t prelu_op,
-  size_t batch_size,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_prelu_nc_f32(
-  xnn_operator_t prelu_op,
-  const float* input,
-  float* output);
 
 enum xnn_status xnn_create_resize_bilinear2d_nchw_f32(
   size_t output_height,

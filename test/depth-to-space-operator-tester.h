@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class DepthToSpaceOperatorTester {
@@ -121,17 +122,13 @@ class DepthToSpaceOperatorTester {
 
   void TestNHWCxX8() const {
     xnnpack::ReplicableRandomDevice rng;
-    auto i8rng = std::bind(
-      std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()),
-      std::ref(rng));
 
-    std::vector<int8_t> input(
+    xnnpack::Buffer<int8_t> input(
       (batch_size() * input_height() * input_width() - 1) * input_channels_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(int8_t));
-    std::vector<int8_t> output(
+    xnnpack::Buffer<int8_t> output(
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(i8rng));
-      std::fill(output.begin(), output.end(), INT8_C(0xAF));
+      xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
 
       // Create, setup, run, and destroy Depth To Space operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -195,13 +192,12 @@ class DepthToSpaceOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
 
-    std::vector<int16_t> input(
+    xnnpack::Buffer<int16_t> input(
       (batch_size() * input_height() * input_width() - 1) * input_channels_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(int16_t));
-    std::vector<int16_t> output(
+    xnnpack::Buffer<int16_t> output(
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(i16rng));
-      std::fill(output.begin(), output.end(), INT16_C(0xDEAD));
 
       // Create, setup, run, and destroy Depth To Space operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -265,13 +261,12 @@ class DepthToSpaceOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(), std::ref(rng));
 
-    std::vector<int32_t> input(
+    xnnpack::Buffer<int32_t> input(
       (batch_size() * input_height() * input_width() - 1) * input_channels_stride() + input_channels() + XNN_EXTRA_BYTES / sizeof(int32_t));
-    std::vector<int32_t> output(
+    xnnpack::Buffer<int32_t> output(
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(i32rng));
-      std::fill(output.begin(), output.end(), INT32_C(0xDEADBEAF));
 
       // Create, setup, run, and destroy Depth To Space operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -335,13 +330,12 @@ class DepthToSpaceOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     auto i16rng = std::bind(std::uniform_int_distribution<int16_t>(), std::ref(rng));
 
-    std::vector<int16_t> input(XNN_EXTRA_BYTES / sizeof(int16_t) +
+    xnnpack::Buffer<int16_t> input(XNN_EXTRA_BYTES / sizeof(int16_t) +
       ((batch_size() - 1) * input_channels_stride() + input_channels()) * input_height() * input_width());
-    std::vector<int16_t> output(
+    xnnpack::Buffer<int16_t> output(
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(i16rng));
-      std::fill(output.begin(), output.end(), INT16_C(0xDEAD));
 
       // Create, setup, run, and destroy Depth To Space operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -405,13 +399,12 @@ class DepthToSpaceOperatorTester {
     xnnpack::ReplicableRandomDevice rng;
     auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(), std::ref(rng));
 
-    std::vector<int32_t> input(XNN_EXTRA_BYTES / sizeof(int32_t) +
+    xnnpack::Buffer<int32_t> input(XNN_EXTRA_BYTES / sizeof(int32_t) +
       ((batch_size() - 1) * input_channels_stride() + input_channels()) * input_height() * input_width());
-    std::vector<int32_t> output(
+    xnnpack::Buffer<int32_t> output(
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), std::ref(i32rng));
-      std::fill(output.begin(), output.end(), INT32_C(0xDEADBEAF));
 
       // Create, setup, run, and destroy Depth To Space operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));

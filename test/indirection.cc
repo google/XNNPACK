@@ -14,6 +14,7 @@
 #include "xnnpack/math.h"
 #include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
+#include "xnnpack/buffer.h"
 
 namespace xnnpack {
 namespace {
@@ -118,12 +119,12 @@ class IndirectionTester {
     const size_t step_height =
         kernel_size + (output_width - 1) * step_width * kernel_height_;
 
-    input_ = std::vector<float>(channels_ * input_height_ * input_width_);
+    input_ = xnnpack::Buffer<float>(channels_ * input_height_ * input_width_);
     std::iota(input_.begin(), input_.end(), 0.0f);
-    zero_buffer_ = std::vector<float>(channels_);
+    zero_buffer_ = xnnpack::Buffer<float>(channels_, 0.0f);
 
     const size_t num_indirection_elements = (primary_tile_ - kernel_size) + output_height * step_height;
-    indirection_buffer_ = std::vector<const float*>(num_indirection_elements);
+    indirection_buffer_ = xnnpack::Buffer<const float*>(num_indirection_elements);
     xnn_operator op = {};
     op.indirection_buffer = reinterpret_cast<const void**>(indirection_buffer_.data());
     op.input = input_.data();
@@ -166,16 +167,16 @@ class IndirectionTester {
     const size_t step_height =
         kernel_size + (output_width - 1) * step_width * kernel_height_;
 
-    input_ = std::vector<float>(channels_ * input_height_ * input_width_);
+    input_ = xnnpack::Buffer<float>(channels_ * input_height_ * input_width_);
     std::iota(input_.begin(), input_.end(), 0);
-    zero_buffer_ = std::vector<float>(channels_);
+    zero_buffer_ = xnnpack::Buffer<float>(channels_, 0.0f);
 
     const size_t indirect_top_height = divide_round_up(padding_height_ / 2, subsampling_);
     const size_t indirect_bot_height = divide_round_up(padding_height_ / 2, subsampling_);
     const size_t indirection_buffer_output_height = (indirect_top_height + indirect_bot_height + 1);
 
     const size_t num_indirection_elements = (primary_tile_ - kernel_size) + indirection_buffer_output_height * step_height;
-    indirection_buffer_ = std::vector<const float*>(num_indirection_elements);
+    indirection_buffer_ = xnnpack::Buffer<const float*>(num_indirection_elements);
     xnn_operator op = {};
     op.indirection_buffer = reinterpret_cast<const void**>(indirection_buffer_.data());
     op.input = input_.data();
@@ -226,9 +227,9 @@ class IndirectionTester {
   std::vector<size_t> expected_indices_;
 
   // Initialized by IndirectionInit.
-  std::vector<const float*> indirection_buffer_;
-  std::vector<float> input_;
-  std::vector<float> zero_buffer_;
+  xnnpack::Buffer<const float*> indirection_buffer_;
+  xnnpack::Buffer<float> input_;
+  xnnpack::Buffer<float> zero_buffer_;
 };
 
 TEST(INDIRECTION, input3x3_kernel1x1) {

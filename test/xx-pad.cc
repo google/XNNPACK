@@ -23,6 +23,7 @@
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/pad.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class PadMicrokernelTester {
@@ -106,15 +107,15 @@ class PadMicrokernelTester {
           0, std::numeric_limits<uint8_t>::max())(rng);
     };
 
-    std::vector<uint8_t> input(input_channels() +
+    xnnpack::Buffer<uint8_t> input(input_channels() +
                                (rows() - 1) * input_stride() +
                                XNN_EXTRA_BYTES / sizeof(uint8_t));
-    std::vector<uint8_t> output(
+    xnnpack::Buffer<uint8_t> output(
         (pre_padding() + input_channels() + post_padding()) +
         (rows() - 1) * output_stride());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input.begin(), input.end(), std::ref(u8rng));
-      std::generate(output.begin(), output.end(), std::ref(u8rng));
+      xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
+      xnnpack::fill_uniform_random_bits(output.data(), output.size(), rng);
       std::array<uint8_t, 4> fill_pattern;
       std::generate(fill_pattern.begin(), fill_pattern.end(), std::ref(u8rng));
       uint32_t fill_value = 0;
@@ -187,7 +188,7 @@ struct TestParams {
 #define XNN_PAD_UKERNEL(arch_flags, ukernel, tile_size) \
   {#ukernel, arch_flags, ukernel, tile_size},
 TestParams test_params[] = {
-#include "src/xx-pad/xx-pad.h"
+#include "xx-pad/xx-pad.h"
 };
 #undef XNN_PAD_UKERNEL
 

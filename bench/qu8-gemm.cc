@@ -24,18 +24,16 @@
 #ifdef BENCHMARK_RUY
 #include "ruy/ruy.h"
 #endif  // BENCHMARK_RUY
-#include "bench/gemm.h"
-#include "bench/utils.h"
-
+#include "gemm.h"
+#include "utils.h"
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pack.h"
-
+#include "xnnpack/buffer.h"
 
 static void GEMMBenchmark(benchmark::State& state,
   xnn_qu8_gemm_minmax_ukernel_fn gemm,
@@ -57,13 +55,12 @@ static void GEMMBenchmark(benchmark::State& state,
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
-  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
-  std::vector<uint8_t> a(mc * kc + XNN_EXTRA_BYTES / sizeof(uint8_t));
-  std::generate(a.begin(), a.end(), std::ref(u8rng));
-  std::vector<uint8_t> k(nc * kc);
-  std::generate(k.begin(), k.end(), std::ref(u8rng));
-  std::vector<int32_t> b(nc);
+  xnnpack::Buffer<uint8_t> a(mc * kc + XNN_EXTRA_BYTES / sizeof(uint8_t));
+  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
+  xnnpack::Buffer<uint8_t> k(nc * kc);
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
+  xnnpack::Buffer<int32_t> b(nc);
   std::generate(b.begin(), b.end(), std::ref(i32rng));
 
   const size_t w_elements = kc_stride * nc_stride + nc_stride * sizeof(int32_t) / sizeof(uint8_t);
@@ -72,13 +69,11 @@ static void GEMMBenchmark(benchmark::State& state,
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(uint8_t) * (w_elements + c_elements));
 
-  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> w(w_elements * num_buffers);
-  std::fill(w.begin(), w.end(), 0);
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
   const xnn_qu8_packing_params packing_params = { 127, 127 };
   xnn_pack_qu8_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr,
     k.data(), b.data(), /*scale=*/nullptr, w.data(), /*extra_bytes=*/0, &packing_params);
-  std::vector<uint8_t> c(c_elements * num_buffers);
-  std::fill(c.begin(), c.end(), 0xA5);
+  xnnpack::Buffer<uint8_t> c(c_elements * num_buffers);
 
   union xnn_qu8_conv_minmax_params quantization_params;
   init_params(&quantization_params, 127, 0.75f, 127, 1, 254);
@@ -160,10 +155,9 @@ static void GemmlowpBenchmark(benchmark::State& state, uint32_t threads)
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
-  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
-  std::vector<uint8_t> a(mc * kc);
-  std::generate(a.begin(), a.end(), std::ref(u8rng));
+  xnnpack::Buffer<uint8_t> a(mc * kc);
+  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
 
   const size_t kElements = nc * kc;
   const size_t bElements = nc;
@@ -172,12 +166,11 @@ static void GemmlowpBenchmark(benchmark::State& state, uint32_t threads)
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       kElements * sizeof(uint8_t) + bElements * sizeof(int32_t) + c_elements * sizeof(uint8_t));
 
-  std::vector<uint8_t> k(kElements * num_buffers);
-  std::generate(k.begin(), k.end(), std::ref(u8rng));
-  std::vector<int32_t> b(bElements * num_buffers);
+  xnnpack::Buffer<uint8_t> k(kElements * num_buffers);
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
+  xnnpack::Buffer<int32_t> b(bElements * num_buffers);
   std::generate(b.begin(), b.end(), std::ref(i32rng));
-  std::vector<uint8_t> c(c_elements * num_buffers);
-  std::fill(c.begin(), c.end(), 0xA5);
+  xnnpack::Buffer<uint8_t> c(c_elements * num_buffers);
 
   gemmlowp::MultiThreadGemmContext threadingContext;
   threadingContext.set_max_num_threads(threads);
@@ -225,20 +218,18 @@ static void RuyBenchmark(benchmark::State& state, size_t threads)
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
-  auto u8rng = std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
 
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       nc * (sizeof(uint8_t) * (mc + kc) + sizeof(int32_t)));
 
-  std::vector<uint8_t> a(mc * kc);
-  std::generate(a.begin(), a.end(), std::ref(u8rng));
-  std::vector<uint8_t> k(num_buffers * nc * kc);
-  std::generate(k.begin(), k.end(), std::ref(u8rng));
-  std::vector<int32_t> b(num_buffers * nc);
+  xnnpack::Buffer<uint8_t> a(mc * kc);
+  xnnpack::fill_uniform_random_bits(a.data(), a.size(), rng);
+  xnnpack::Buffer<uint8_t> k(num_buffers * nc * kc);
+  xnnpack::fill_uniform_random_bits(k.data(), k.size(), rng);
+  xnnpack::Buffer<int32_t> b(num_buffers * nc);
   std::generate(b.begin(), b.end(), std::ref(i32rng));
-  std::vector<uint8_t> c(num_buffers * nc * mc);
-  std::fill(c.begin(), c.end(), UINT8_C(0xDE));
+  xnnpack::Buffer<uint8_t> c(num_buffers * nc * mc);
 
   // Note: context must be static to avoid the cost of re-creating it for each benchmark.
   static ruy::Context context;

@@ -43,7 +43,20 @@ static XNN_INLINE xnn_simd_u32_t xnn_min_u32(xnn_simd_u32_t a,
 
 static XNN_INLINE xnn_simd_u32_t xnn_sub_u32(xnn_simd_u32_t a,
                                              xnn_simd_u32_t b) {
-  return _mm_min_epi32(a, b);
+  return _mm_sub_epi32(a, b);
+}
+
+static XNN_INLINE __m128 xnn_cvt_f32_u32(xnn_simd_u32_t a);
+static XNN_INLINE __m128 xnn_subw_f32_u32(xnn_simd_u32_t a,
+                                          xnn_simd_u32_t b) {
+  __m128i mask = _mm_cmpeq_epi32(a, _mm_max_epu32(a, b));
+  __m128i result_32_variant1 = _mm_sub_epi32(a, b);
+  __m128i result_32_variant2 = _mm_sub_epi32(b, a);
+  __m128i result_32 = _mm_blendv_epi8(result_32_variant2, result_32_variant1,
+                                      mask);
+  __m128i sign = _mm_blendv_epi8(_mm_set1_epi32(INT32_C(-1)),
+                                 _mm_set1_epi32(INT32_C(1)), mask);
+  return _mm_mul_ps(xnn_cvt_f32_u32(result_32), _mm_cvtepi32_ps(sign));
 }
 
 // Load/store operations.
@@ -102,8 +115,7 @@ static XNN_INLINE void xnn_store_tail_u32(uint32_t* output, xnn_simd_u32_t v,
 
 // Conversion operations.
 
-static XNN_INLINE __m128
-xnn_cvt_f32_u32(xnn_simd_u32_t a) {
+static XNN_INLINE __m128 xnn_cvt_f32_u32(xnn_simd_u32_t a) {
   const __m128 two16 = _mm_set1_ps(0x1.0p16f);  // Equivalent to 65536.0f
   __m128i hi = _mm_srli_epi32(a, 16);
   __m128i lo = _mm_srli_epi32(_mm_slli_epi32(a, 16), 16);

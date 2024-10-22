@@ -105,6 +105,7 @@ static void init_hardware_config(void) {
     hardware_config.use_arm_sve = cpuinfo_has_arm_sve();
     hardware_config.use_arm_sve2 = cpuinfo_has_arm_sve2();
     hardware_config.use_arm_sme = cpuinfo_has_arm_sme();
+    hardware_config.use_arm_sme2 = cpuinfo_has_arm_sme2();
   #endif
 
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -114,12 +115,32 @@ static void init_hardware_config(void) {
     hardware_config.use_x86_f16c = cpuinfo_has_x86_f16c();
     hardware_config.use_x86_fma3 = cpuinfo_has_x86_fma3();
     hardware_config.use_x86_avx2 = cpuinfo_has_x86_avx2();
+#if XNN_ENABLE_AVX512F
     hardware_config.use_x86_avx512f = cpuinfo_has_x86_avx512f();
+#else
+    hardware_config.use_x86_avx512f = 0;
+#endif
+#if XNN_ENABLE_AVX512SKX
     hardware_config.use_x86_avx512skx = hardware_config.use_x86_avx512f &&
       cpuinfo_has_x86_avx512bw() && cpuinfo_has_x86_avx512dq() && cpuinfo_has_x86_avx512vl();
+#else
+    hardware_config.use_x86_avx512skx = 0;
+#endif
+#if XNN_ENABLE_AVX512VBMI
     hardware_config.use_x86_avx512vbmi = hardware_config.use_x86_avx512skx && cpuinfo_has_x86_avx512vbmi();
+#else
+    hardware_config.use_x86_avx512vbmi = 0;
+#endif
+#if XNN_ENABLE_AVX512VNNI
     hardware_config.use_x86_avx512vnni = hardware_config.use_x86_avx512skx && cpuinfo_has_x86_avx512vnni();
+#else
+    hardware_config.use_x86_avx512vnni = 0;
+#endif
+#if XNN_ENABLE_AVX512VNNIGFNI
     hardware_config.use_x86_avx512vnnigfni = hardware_config.use_x86_avx512vnni && cpuinfo_has_x86_gfni();
+#else
+    hardware_config.use_x86_avx512vnnigfni = 0;
+#endif
 #if XNN_ENABLE_AVX512FP16
     hardware_config.use_x86_avx512fp16 = cpuinfo_has_x86_avx512fp16();
 #else
@@ -149,19 +170,19 @@ static void init_hardware_config(void) {
 #else
     hardware_config.use_x86_avxvnniint8 = 0;
 #endif
-#if XNN_ENABLE_AVX256SKX && XNN_ENABLE_AVX512AMX
+#if XNN_ENABLE_AVX256SKX
     // Using cpuinfo_has_x86_amx_int8 as placeholder for cpuinfo_has_x86_avx10
     hardware_config.use_x86_avx256skx = hardware_config.use_x86_avx512skx || cpuinfo_has_x86_amx_int8();
 #else
     hardware_config.use_x86_avx256skx = 0;
 #endif
-#if XNN_ENABLE_AVX256VNNI && XNN_ENABLE_AVX512AMX
+#if XNN_ENABLE_AVX256VNNI
     // Using cpuinfo_has_x86_amx_int8 as placeholder for cpuinfo_has_x86_avx10
     hardware_config.use_x86_avx256vnni = (hardware_config.use_x86_avx512skx && cpuinfo_has_x86_avxvnni()) || cpuinfo_has_x86_amx_int8();
 #else
     hardware_config.use_x86_avx256vnni = 0;
 #endif
-#if XNN_ENABLE_AVX256VNNIGFNI && XNN_ENABLE_AVX512AMX
+#if XNN_ENABLE_AVX256VNNIGFNI
     // Using cpuinfo_has_x86_amx_int8 as placeholder for cpuinfo_has_x86_avx10
     hardware_config.use_x86_avx256vnnigfni = hardware_config.use_x86_avx256vnni && cpuinfo_has_x86_gfni();
 #else
@@ -305,6 +326,7 @@ static void init_hardware_config(void) {
     if (hardware_config.use_arm_sve) hardware_config.arch_flags |= xnn_arch_arm_sve;
     if (hardware_config.use_arm_sve2) hardware_config.arch_flags |= xnn_arch_arm_sve2;
     if (hardware_config.use_arm_sme) hardware_config.arch_flags |= xnn_arch_arm_sme;
+    if (hardware_config.use_arm_sme2) hardware_config.arch_flags |= xnn_arch_arm_sme2;
   #endif  // XNN_ARCH_ARM64
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     if (hardware_config.use_x86_ssse3) hardware_config.arch_flags |= xnn_arch_x86_ssse3;
@@ -313,6 +335,11 @@ static void init_hardware_config(void) {
     if (hardware_config.use_x86_f16c) hardware_config.arch_flags |= xnn_arch_x86_f16c;
     if (hardware_config.use_x86_fma3) hardware_config.arch_flags |= xnn_arch_x86_fma3;
     if (hardware_config.use_x86_avx2) hardware_config.arch_flags |= xnn_arch_x86_avx2;
+    if (hardware_config.use_x86_avxvnni) hardware_config.arch_flags |= xnn_arch_x86_avxvnni;
+    if (hardware_config.use_x86_avxvnniint8) hardware_config.arch_flags |= xnn_arch_x86_avxvnniint8;
+    if (hardware_config.use_x86_avx256skx) hardware_config.arch_flags |= xnn_arch_x86_avx256skx;
+    if (hardware_config.use_x86_avx256vnni) hardware_config.arch_flags |= xnn_arch_x86_avx256vnni;
+    if (hardware_config.use_x86_avx256vnnigfni) hardware_config.arch_flags |= xnn_arch_x86_avx256vnnigfni;
     if (hardware_config.use_x86_avx512f) hardware_config.arch_flags |= xnn_arch_x86_avx512f;
     if (hardware_config.use_x86_avx512vbmi) hardware_config.arch_flags |= xnn_arch_x86_avx512vbmi;
     if (hardware_config.use_x86_avx512skx) hardware_config.arch_flags |= xnn_arch_x86_avx512skx;
@@ -320,10 +347,6 @@ static void init_hardware_config(void) {
     if (hardware_config.use_x86_avx512vnnigfni) hardware_config.arch_flags |= xnn_arch_x86_avx512vnnigfni;
     if (hardware_config.use_x86_avx512amx) hardware_config.arch_flags |= xnn_arch_x86_avx512amx;
     if (hardware_config.use_x86_avx512fp16) hardware_config.arch_flags |= xnn_arch_x86_avx512fp16;
-    if (hardware_config.use_x86_avxvnni) hardware_config.arch_flags |= xnn_arch_x86_avxvnni;
-    if (hardware_config.use_x86_avx256skx) hardware_config.arch_flags |= xnn_arch_x86_avx256skx;
-    if (hardware_config.use_x86_avx256vnni) hardware_config.arch_flags |= xnn_arch_x86_avx256vnni;
-    if (hardware_config.use_x86_avx256vnnigfni) hardware_config.arch_flags |= xnn_arch_x86_avx256vnnigfni;
   #endif
   #if XNN_ARCH_RISCV
     if (hardware_config.use_riscv_vector) hardware_config.arch_flags |= xnn_arch_riscv_vector;

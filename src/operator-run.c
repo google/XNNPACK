@@ -529,41 +529,6 @@ void xnn_compute_qp8gemm(
                           nr_block_start, mr_block_size, nr_block_size);
 }
 
-void xnn_compute_hmp_dqgemm_bl(
-    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    uint32_t uarch_index,
-    size_t mr_block_start,
-    size_t nr_block_start,
-    size_t mr_block_size,
-    size_t nr_block_size)
-{
-  const size_t a_stride  = context->a_stride;
-  const size_t cm_stride = context->cm_stride;
-
-  context->dq_bl_ukernel.function[uarch_index](
-      mr_block_size,
-      nr_block_size,
-      context->k_scaled,
-      (const void*) ((uintptr_t) context->a + mr_block_start * a_stride),
-      a_stride,
-      (const void*) ((uintptr_t) context->packed_w + nr_block_start * context->w_stride),
-      (void*) ((uintptr_t) context->c + mr_block_start * cm_stride + (nr_block_start << context->log2_csize)),
-      cm_stride,
-      context->cn_stride,
-      context->fused_params,
-     (const void*) ((uintptr_t) &context->quantization_params[mr_block_start]));
-}
-
-void xnn_compute_dqgemm_bl(
-    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t mr_block_start,
-    size_t nr_block_start,
-    size_t mr_block_size,
-    size_t nr_block_size)
-{
-  return xnn_compute_hmp_dqgemm_bl(context, /*uarch_index=*/0, mr_block_start, nr_block_start, mr_block_size, nr_block_size);
-}
-
 void xnn_compute_spmm(
     const struct spmm_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,
@@ -1595,19 +1560,6 @@ void xnn_compute_resize_bilinear_chw(
     context->packed_weights,
     output,
     context->input_channel_stride);
-}
-
-void xnn_compute_prelu(
-    const struct prelu_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_start,
-    size_t batch_range)
-{
-  const size_t x_stride = context->x_stride;
-  const size_t y_stride = context->y_stride;
-  const void* x = (const void*) ((uintptr_t) context->x + x_stride * batch_start);
-  void* y = (void*) ((uintptr_t) context->y + y_stride * batch_start);
-
-  context->ukernel(batch_range, context->n, x, x_stride, context->w, y, y_stride);
 }
 
 void xnn_compute_pad_5d(

@@ -46,6 +46,16 @@ static XNN_INLINE xnn_simd_u32_t xnn_sub_u32(xnn_simd_u32_t a,
   return wasm_i32x4_sub(a, b);
 }
 
+static XNN_INLINE v128_t xnn_subw_f32_u32(xnn_simd_u32_t a,
+                                          xnn_simd_u32_t b) {
+  const v128_t mask = wasm_u32x4_gt(a, b);
+  const v128_t variant1 = wasm_f32x4_convert_u32x4(wasm_i32x4_sub(a, b));
+  const v128_t variant2 = wasm_f32x4_convert_u32x4(wasm_i32x4_sub(b, a));
+  const v128_t sign = wasm_v128_bitselect(wasm_f32x4_splat(1),
+                                          wasm_f32x4_splat(-1), mask);
+  return wasm_f32x4_mul(wasm_v128_bitselect(variant1, variant2, mask), sign);
+}
+
 // Load/store operations.
 
 static XNN_INLINE xnn_simd_u32_t xnn_loadu_u32(const uint32_t* ptr) {
@@ -98,8 +108,7 @@ static XNN_INLINE void xnn_store_tail_u32(uint32_t* output, xnn_simd_u32_t v,
 
 // Conversion operations.
 
-static XNN_INLINE v128_t
-xnn_cvt_f32_u32(xnn_simd_u32_t a) {
+static XNN_INLINE v128_t xnn_cvt_f32_u32(xnn_simd_u32_t a) {
   return wasm_f32x4_convert_u32x4(a);
 }
 

@@ -15,10 +15,10 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
@@ -68,15 +68,15 @@ template <class T, class BiasType = T> class DepthwiseConvolutionTestBase : publ
     bias_dims = {{output_channels}};
     output_dims = {{batch_size, output_height, output_width, output_channels}};
 
-    input = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) +
+    input = xnnpack::Buffer<T>(XNN_EXTRA_BYTES / sizeof(T) +
                            batch_size * input_height * input_width *
                                input_channels);
-    filter = std::vector<T>(batch_size * kernel_height * kernel_width *
+    filter = xnnpack::Buffer<T>(batch_size * kernel_height * kernel_width *
                             output_channels);
-    bias = std::vector<BiasType>(output_channels);
-    operator_output = std::vector<T>(batch_size * output_height * output_width *
+    bias = xnnpack::Buffer<BiasType>(output_channels);
+    operator_output = xnnpack::Buffer<T>(batch_size * output_height * output_width *
                                      output_channels);
-    subgraph_output = std::vector<T>(batch_size * output_height * output_width *
+    subgraph_output = xnnpack::Buffer<T>(batch_size * output_height * output_width *
                                      output_channels);
   }
 
@@ -113,11 +113,11 @@ template <class T, class BiasType = T> class DepthwiseConvolutionTestBase : publ
   std::array<size_t, 1> bias_dims;
   std::array<size_t, 4> output_dims;
 
-  std::vector<T> input;
-  std::vector<T> filter;
-  std::vector<BiasType> bias;
-  std::vector<T> operator_output;
-  std::vector<T> subgraph_output;
+  xnnpack::Buffer<T> input;
+  xnnpack::Buffer<T> filter;
+  xnnpack::Buffer<BiasType> bias;
+  xnnpack::Buffer<T> operator_output;
+  xnnpack::Buffer<T> subgraph_output;
 };
 
 template <class T> class QuantizedDepthwiseConvolutionTestBase : public DepthwiseConvolutionTestBase<T, int32_t> {
@@ -127,7 +127,7 @@ protected:
     i8dist = std::uniform_int_distribution<int32_t>(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
     w8dist = std::uniform_int_distribution<int32_t>(-std::numeric_limits<T>::max(), std::numeric_limits<T>::max());
     u8dist = std::uniform_int_distribution<int32_t>(std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
-    accumulators = std::vector<int32_t>(
+    accumulators = xnnpack::Buffer<int32_t>(
       this->batch_size * this->output_height * this->output_width * this->input_channels * this->depth_multiplier);
     scale_dist = std::uniform_real_distribution<float>(1.0f, 5.0f);
 
@@ -146,7 +146,7 @@ protected:
   std::uniform_int_distribution<int32_t> u8dist;
   std::uniform_int_distribution<int32_t> w8dist;
   std::uniform_real_distribution<float> scale_dist;
-  std::vector<int32_t> accumulators;
+  xnnpack::Buffer<int32_t> accumulators;
 
   float input_scale;
   float kernel_scale;
@@ -167,7 +167,7 @@ using DepthwiseConvolutionTestF32 = DepthwiseConvolutionTestBase<float>;
 TEST_F(DepthwiseConvolutionTestQC8, define)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-  std::vector<float> requantization_scales(input_channels * depth_multiplier, 1.0f);
+  xnnpack::Buffer<float> requantization_scales(input_channels * depth_multiplier, 1.0f);
 
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
@@ -529,9 +529,7 @@ TEST_F(DepthwiseConvolutionTestQC8, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
   std::generate(filter.begin(), filter.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), INT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0xA5));
-  std::vector<float> requantization_scales(input_channels * depth_multiplier);
+  xnnpack::Buffer<float> requantization_scales(input_channels * depth_multiplier);
   const int8_t quantized_output_min = xnn_qs8_quantize(output_min, output_scale, output_zero_point);
   const int8_t quantized_output_max = xnn_qs8_quantize(output_max, output_scale, output_zero_point);
 
@@ -616,7 +614,7 @@ TEST_F(DepthwiseConvolutionTestQC8, matches_operator_api)
                           /*threadpool=*/nullptr));
   ASSERT_EQ(workspace_size, 0);
   ASSERT_EQ(workspace_alignment, 1);
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
   ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8_qc8w(op, workspace.data(), input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
@@ -685,8 +683,6 @@ TEST_F(DepthwiseConvolutionTestQS8, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
   std::generate(filter.begin(), filter.end(), [&]() { return w8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), INT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), INT8_C(0xA5));
 
   compute_convolution_qs8_reference_results(
       batch_size,
@@ -754,7 +750,7 @@ TEST_F(DepthwiseConvolutionTestQS8, matches_operator_api)
                           /*threadpool=*/nullptr));
   ASSERT_EQ(workspace_size, 0);
   ASSERT_EQ(workspace_alignment, 1);
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
   ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qs8(op, workspace.data(), input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
@@ -823,8 +819,6 @@ TEST_F(DepthwiseConvolutionTestQU8, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
   std::generate(filter.begin(), filter.end(), [&]() { return u8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), UINT8_C(0xA5));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), UINT8_C(0xA5));
 
   // Compute reference results, without renormalization.
   compute_convolution_qu8_reference_results(
@@ -894,7 +888,7 @@ TEST_F(DepthwiseConvolutionTestQU8, matches_operator_api)
                           /*threadpool=*/nullptr));
   ASSERT_EQ(workspace_size, 0);
   ASSERT_EQ(workspace_alignment, 1);
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
   ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_qu8(op, workspace.data(), input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
@@ -963,8 +957,6 @@ TEST_F(DepthwiseConvolutionTestF16, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(filter.begin(), filter.end(), [&]() { return  f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return  f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_convolution2d_nhwc_f16(
@@ -992,7 +984,7 @@ TEST_F(DepthwiseConvolutionTestF16, matches_operator_api)
                 /*threadpool=*/nullptr));
   ASSERT_NE(workspace_size, SIZE_MAX);
   ASSERT_NE(workspace_alignment, SIZE_MAX);
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
   ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f16(op, workspace.data(), input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
@@ -1056,8 +1048,6 @@ TEST_F(DepthwiseConvolutionTestF32, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(filter.begin(), filter.end(), [&]() { return f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_convolution2d_nhwc_f32(
@@ -1085,7 +1075,7 @@ TEST_F(DepthwiseConvolutionTestF32, matches_operator_api)
                 /*threadpool=*/nullptr));
   ASSERT_NE(workspace_size, SIZE_MAX);
   ASSERT_NE(workspace_alignment, SIZE_MAX);
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
   ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(op, workspace.data(), input.data(), operator_output.data()));
 
@@ -1222,8 +1212,6 @@ TEST_F(DepthwiseConvolutionTestF32, transient_indirection_buffer)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(filter.begin(), filter.end(), [&]() { return f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_convolution2d_nhwc_f32(
@@ -1251,7 +1239,7 @@ TEST_F(DepthwiseConvolutionTestF32, transient_indirection_buffer)
                           /*threadpool=*/nullptr));
   ASSERT_NE(workspace_size, 0);
   ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
   ASSERT_EQ(xnn_status_success, xnn_setup_convolution2d_nhwc_f32(op, workspace.data(), input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));

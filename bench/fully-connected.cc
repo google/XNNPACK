@@ -18,7 +18,8 @@
 #include "xnnpack.h"
 
 #include <benchmark/benchmark.h>
-#include "bench/utils.h"
+#include "utils.h"
+#include "xnnpack/buffer.h"
 
 void xnnpack_fully_connected_f32(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
@@ -29,11 +30,11 @@ void xnnpack_fully_connected_f32(benchmark::State& state, const char* net) {
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
 
-  std::vector<float> input(batch_size * input_channels + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(batch_size * input_channels + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input.begin(), input.end(), std::ref(f32rng));
-  std::vector<float> kernel(input_channels * output_channels);
+  xnnpack::Buffer<float> kernel(input_channels * output_channels);
   std::generate(kernel.begin(), kernel.end(), std::ref(f32rng));
-  std::vector<float> bias(output_channels);
+  xnnpack::Buffer<float> bias(output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
   const size_t output_elements = batch_size * output_channels;
 
@@ -46,9 +47,9 @@ void xnnpack_fully_connected_f32(benchmark::State& state, const char* net) {
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (kernel.size() + bias.size() + output_elements));
-  std::vector<float> output(output_elements * num_buffers);
+  xnnpack::Buffer<float> output(output_elements * num_buffers);
 
-  std::vector<xnn_operator_t> ops(num_buffers);
+  xnnpack::Buffer<xnn_operator_t> ops(num_buffers);
   for (xnn_operator_t& op : ops) {
     status = xnn_create_fully_connected_nc_f32(
       input_channels, output_channels,
@@ -125,11 +126,11 @@ void xnnpack_dynamic_fully_connected_f32(benchmark::State& state, const char* ne
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, 1.0f), std::ref(rng));
 
-  std::vector<float> input(batch_size * input_channels + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(batch_size * input_channels + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input.begin(), input.end(), std::ref(f32rng));
-  std::vector<float> kernel(input_channels * output_channels);
+  xnnpack::Buffer<float> kernel(input_channels * output_channels);
   std::generate(kernel.begin(), kernel.end(), std::ref(f32rng));
-  std::vector<float> bias(output_channels);
+  xnnpack::Buffer<float> bias(output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
   const size_t output_elements = batch_size * output_channels;
 
@@ -142,9 +143,9 @@ void xnnpack_dynamic_fully_connected_f32(benchmark::State& state, const char* ne
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
       sizeof(float) * (kernel.size() + bias.size() + output_elements));
-  std::vector<float> output(output_elements * num_buffers);
+  xnnpack::Buffer<float> output(output_elements * num_buffers);
 
-  std::vector<xnn_operator_t> ops(num_buffers);
+  xnnpack::Buffer<xnn_operator_t> ops(num_buffers);
   for (xnn_operator_t& op : ops) {
     status = xnn_create_dynamic_fully_connected_nc_f32(
       -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity(),
@@ -155,7 +156,7 @@ void xnnpack_dynamic_fully_connected_f32(benchmark::State& state, const char* ne
     }
   }
 
-  std::vector<std::unique_ptr<std::vector<char>>> workspaces;
+  std::vector<std::unique_ptr<xnnpack::Buffer<char>>> workspaces;
 
   for (size_t i = 0; i < ops.size(); i++) {
     size_t workspace_size = 0;
@@ -173,7 +174,7 @@ void xnnpack_dynamic_fully_connected_f32(benchmark::State& state, const char* ne
       return;
     }
 
-    auto workspace = std::make_unique<std::vector<char>>(workspace_size);
+    auto workspace = std::make_unique<xnnpack::Buffer<char>>(workspace_size);
     char* workspace_ptr = workspace->data();
 
     workspaces.push_back(std::move(workspace));

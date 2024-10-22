@@ -17,9 +17,9 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/simd/f16-scalar.h"
+#include "xnnpack/fp16.h"
 #include "replicable_random_device.h"
 
 namespace xnnpack {
@@ -605,7 +605,6 @@ TEST_F(F16SimdSCALARTest, StoreTail) {
   std::vector<float> inputs_f32 = ToFloat32(inputs_);
   for (size_t num_elements = 1; num_elements < xnn_simd_size_f16;
       num_elements++) {
-    std::fill(output_.begin(), output_.end(), fp16_ieee_from_fp32_value(0.0f));
     xnn_store_tail_f16(output_.data(), a, num_elements);
     std::vector<float> output_f32 = ToFloat32(output_);
     for (size_t k = 0; k < num_elements; k++) {

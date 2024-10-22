@@ -40,18 +40,18 @@ void xnn_qs8_rdsum_ukernel_7p7x__neon_c16(
     const int8_t* i5 = (const int8_t*) ((uintptr_t) input + 5 * input_stride);
     const int8_t* i6 = (const int8_t*) ((uintptr_t) input + 6 * input_stride);
 
-    int32x4_t vacc0123 = vdupq_n_s32(0);
-    int32x4_t vacc4567 = vdupq_n_s32(0);
-    int32x4_t vacc89AB = vdupq_n_s32(0);
-    int32x4_t vaccCDEF = vdupq_n_s32(0);
+    int32x4_t vacc0 = vdupq_n_s32(0);
+    int32x4_t vacc4 = vdupq_n_s32(0);
+    int32x4_t vacc8 = vdupq_n_s32(0);
+    int32x4_t vacc12 = vdupq_n_s32(0);
 
     // 256 int8s may be summed into an int16 before overflowing
     // To prevent handling the tails of the inner 256 loop, we round 256 down to
     // the nearest integer multiple of ACCUMULATORS.
     int r = rows;
     while (r > 0) {
-      int16x8_t vacc16_01234567 = vmovq_n_s16(0);
-      int16x8_t vacc16_89ABCDEF = vmovq_n_s16(0);
+      int16x8_t vacc16_0 = vmovq_n_s16(0);
+      int16x8_t vacc16_8 = vmovq_n_s16(0);
       for (int current_batch = min(r, 252); current_batch > 0; current_batch -= 7) {
         if XNN_UNPREDICTABLE(current_batch < 2) {
           i1 = zero;
@@ -71,36 +71,36 @@ void xnn_qs8_rdsum_ukernel_7p7x__neon_c16(
         if XNN_UNPREDICTABLE(current_batch <= 6) {
           i6 = zero;
         }
-        int8x8_t vin01234567;
-        int8x8_t vin89ABCDEF;
-        vin01234567 = vld1_s8(&i0[0]);
-        vin89ABCDEF = vld1_s8(&i0[8]);
-        vacc16_01234567 = vaddw_s8(vacc16_01234567, vin01234567);
-        vacc16_89ABCDEF = vaddw_s8(vacc16_89ABCDEF, vin89ABCDEF);
-        vin01234567 = vld1_s8(&i1[0]);
-        vin89ABCDEF = vld1_s8(&i1[8]);
-        vacc16_01234567 = vaddw_s8(vacc16_01234567, vin01234567);
-        vacc16_89ABCDEF = vaddw_s8(vacc16_89ABCDEF, vin89ABCDEF);
-        vin01234567 = vld1_s8(&i2[0]);
-        vin89ABCDEF = vld1_s8(&i2[8]);
-        vacc16_01234567 = vaddw_s8(vacc16_01234567, vin01234567);
-        vacc16_89ABCDEF = vaddw_s8(vacc16_89ABCDEF, vin89ABCDEF);
-        vin01234567 = vld1_s8(&i3[0]);
-        vin89ABCDEF = vld1_s8(&i3[8]);
-        vacc16_01234567 = vaddw_s8(vacc16_01234567, vin01234567);
-        vacc16_89ABCDEF = vaddw_s8(vacc16_89ABCDEF, vin89ABCDEF);
-        vin01234567 = vld1_s8(&i4[0]);
-        vin89ABCDEF = vld1_s8(&i4[8]);
-        vacc16_01234567 = vaddw_s8(vacc16_01234567, vin01234567);
-        vacc16_89ABCDEF = vaddw_s8(vacc16_89ABCDEF, vin89ABCDEF);
-        vin01234567 = vld1_s8(&i5[0]);
-        vin89ABCDEF = vld1_s8(&i5[8]);
-        vacc16_01234567 = vaddw_s8(vacc16_01234567, vin01234567);
-        vacc16_89ABCDEF = vaddw_s8(vacc16_89ABCDEF, vin89ABCDEF);
-        vin01234567 = vld1_s8(&i6[0]);
-        vin89ABCDEF = vld1_s8(&i6[8]);
-        vacc16_01234567 = vaddw_s8(vacc16_01234567, vin01234567);
-        vacc16_89ABCDEF = vaddw_s8(vacc16_89ABCDEF, vin89ABCDEF);
+        int8x8_t vin0;
+        int8x8_t vin8;
+        vin0 = vld1_s8(&i0[0]);
+        vin8 = vld1_s8(&i0[8]);
+        vacc16_0 = vaddw_s8(vacc16_0, vin0);
+        vacc16_8 = vaddw_s8(vacc16_8, vin8);
+        vin0 = vld1_s8(&i1[0]);
+        vin8 = vld1_s8(&i1[8]);
+        vacc16_0 = vaddw_s8(vacc16_0, vin0);
+        vacc16_8 = vaddw_s8(vacc16_8, vin8);
+        vin0 = vld1_s8(&i2[0]);
+        vin8 = vld1_s8(&i2[8]);
+        vacc16_0 = vaddw_s8(vacc16_0, vin0);
+        vacc16_8 = vaddw_s8(vacc16_8, vin8);
+        vin0 = vld1_s8(&i3[0]);
+        vin8 = vld1_s8(&i3[8]);
+        vacc16_0 = vaddw_s8(vacc16_0, vin0);
+        vacc16_8 = vaddw_s8(vacc16_8, vin8);
+        vin0 = vld1_s8(&i4[0]);
+        vin8 = vld1_s8(&i4[8]);
+        vacc16_0 = vaddw_s8(vacc16_0, vin0);
+        vacc16_8 = vaddw_s8(vacc16_8, vin8);
+        vin0 = vld1_s8(&i5[0]);
+        vin8 = vld1_s8(&i5[8]);
+        vacc16_0 = vaddw_s8(vacc16_0, vin0);
+        vacc16_8 = vaddw_s8(vacc16_8, vin8);
+        vin0 = vld1_s8(&i6[0]);
+        vin8 = vld1_s8(&i6[8]);
+        vacc16_0 = vaddw_s8(vacc16_0, vin0);
+        vacc16_8 = vaddw_s8(vacc16_8, vin8);
         i0 = (const int8_t*) ((uintptr_t) i0 + input_increment);
         i1 = (const int8_t*) ((uintptr_t) i1 + input_increment);
         i2 = (const int8_t*) ((uintptr_t) i2 + input_increment);
@@ -109,26 +109,26 @@ void xnn_qs8_rdsum_ukernel_7p7x__neon_c16(
         i5 = (const int8_t*) ((uintptr_t) i5 + input_increment);
         i6 = (const int8_t*) ((uintptr_t) i6 + input_increment);
       }
-      vacc0123 = vaddw_s16(vacc0123, vget_low_s16(vacc16_01234567));
-      vacc4567 = vaddw_s16(vacc4567, vget_high_s16(vacc16_01234567));
-      vacc89AB = vaddw_s16(vacc89AB, vget_low_s16(vacc16_89ABCDEF));
-      vaccCDEF = vaddw_s16(vaccCDEF, vget_high_s16(vacc16_89ABCDEF));
+      vacc0 = vaddw_s16(vacc0, vget_low_s16(vacc16_0));
+      vacc4 = vaddw_s16(vacc4, vget_high_s16(vacc16_0));
+      vacc8 = vaddw_s16(vacc8, vget_low_s16(vacc16_8));
+      vacc12 = vaddw_s16(vacc12, vget_high_s16(vacc16_8));
       r = doz(r, 252);
     }
 
     const int32_t* o = output;
-    int32x4_t vo0123 = vld1q_s32(o); o += 4;
-    int32x4_t vo4567 = vld1q_s32(o); o += 4;
-    int32x4_t vo89AB = vld1q_s32(o); o += 4;
-    int32x4_t voCDEF = vld1q_s32(o); o += 4;
-    vacc0123 = vaddq_s32(vo0123, vacc0123);
-    vacc4567 = vaddq_s32(vo4567, vacc4567);
-    vacc89AB = vaddq_s32(vo89AB, vacc89AB);
-    vaccCDEF = vaddq_s32(voCDEF, vaccCDEF);
-    vst1q_s32(output, vacc0123); output += 4;
-    vst1q_s32(output, vacc4567); output += 4;
-    vst1q_s32(output, vacc89AB); output += 4;
-    vst1q_s32(output, vaccCDEF); output += 4;
+    int32x4_t vo0 = vld1q_s32(o); o += 4;
+    int32x4_t vo4 = vld1q_s32(o); o += 4;
+    int32x4_t vo8 = vld1q_s32(o); o += 4;
+    int32x4_t vo12 = vld1q_s32(o); o += 4;
+    vacc0 = vaddq_s32(vo0, vacc0);
+    vacc4 = vaddq_s32(vo4, vacc4);
+    vacc8 = vaddq_s32(vo8, vacc8);
+    vacc12 = vaddq_s32(vo12, vacc12);
+    vst1q_s32(output, vacc0); output += 4;
+    vst1q_s32(output, vacc4); output += 4;
+    vst1q_s32(output, vacc8); output += 4;
+    vst1q_s32(output, vacc12); output += 4;
 
     input = (const int8_t*) ((uintptr_t) input + 16 * sizeof(int8_t));
   }

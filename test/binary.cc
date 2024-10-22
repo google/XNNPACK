@@ -19,10 +19,10 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/math.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 template <typename T>
@@ -165,6 +165,8 @@ static const char* binary_operator_to_string(
       return "Minimum";
     case xnn_binary_multiply:
       return "Multiply";
+    case xnn_binary_prelu:
+      return "Prelu";
     case xnn_binary_subtract:
       return "Subtract";
     case xnn_binary_squared_difference:
@@ -283,13 +285,13 @@ void MatchesOperatorApi(xnn_binary_operator binary_op) {
     output_dims.erase(output_dims.begin());
   }
 
-  std::vector<T, AlignedAllocator<T, 64>> input0(NumElements(input0_dims) +
-                                                 XNN_EXTRA_BYTES / sizeof(T));
-  std::vector<T, AlignedAllocator<T, 64>> input1(NumElements(input1_dims) +
-                                                 XNN_EXTRA_BYTES / sizeof(T));
-  std::vector<T, AlignedAllocator<T, 64>> operator_output(
+  xnnpack::Buffer<T, XNN_ALLOCATION_ALIGNMENT> input0(NumElements(input0_dims) +
+                                              XNN_EXTRA_BYTES / sizeof(T));
+  xnnpack::Buffer<T, XNN_ALLOCATION_ALIGNMENT> input1(NumElements(input1_dims) +
+                                              XNN_EXTRA_BYTES / sizeof(T));
+  xnnpack::Buffer<T, XNN_ALLOCATION_ALIGNMENT> operator_output(
       NumElements(output_dims));
-  std::vector<T, AlignedAllocator<T, 64>> subgraph_output(
+  xnnpack::Buffer<T, XNN_ALLOCATION_ALIGNMENT> subgraph_output(
       NumElements(output_dims));
   UniformDistribution<T> dist;
   std::generate(input0.begin(), input0.end(), [&]() { return dist(rng); });
@@ -913,7 +915,8 @@ INSTANTIATE_TEST_SUITE_P(test, BinaryTestF16,
                          testing::Values(xnn_binary_add, xnn_binary_subtract,
                                          xnn_binary_multiply, xnn_binary_divide,
                                          xnn_binary_maximum, xnn_binary_minimum,
-                                         xnn_binary_squared_difference),
+                                         xnn_binary_squared_difference,
+                                         xnn_binary_prelu),
                          [](const auto& info) { return ToString(info.param); });
 #endif
 INSTANTIATE_TEST_SUITE_P(test, BinaryTestF32,
@@ -921,7 +924,8 @@ INSTANTIATE_TEST_SUITE_P(test, BinaryTestF32,
                                          xnn_binary_multiply, xnn_binary_divide,
                                          xnn_binary_maximum, xnn_binary_minimum,
                                          xnn_binary_copysign,
-                                         xnn_binary_squared_difference),
+                                         xnn_binary_squared_difference,
+                                         xnn_binary_prelu),
                          [](const auto& info) { return ToString(info.param); });
 INSTANTIATE_TEST_SUITE_P(test, BinaryTestS32,
                          testing::Values(xnn_binary_multiply),

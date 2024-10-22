@@ -15,11 +15,10 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class IBilinearMicrokernelTester {
@@ -96,16 +95,15 @@ class IBilinearMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
-    std::vector<const xnn_float16*> indirection(pixels() * 4);
-    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) + indirection.size() * channels());
-    std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> packed_weights(pixels() * 2);
-    std::vector<xnn_float16> output((pixels() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(pixels() * channels());
+    xnnpack::Buffer<const xnn_float16*> indirection(pixels() * 4);
+    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) + indirection.size() * channels());
+    xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> packed_weights(pixels() * 2);
+    xnnpack::Buffer<xnn_float16> output((pixels() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(pixels() * channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(packed_weights.begin(), packed_weights.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       for (size_t i = 0; i < indirection.size(); i++) {
         indirection[i] = input.data() + i * channels() - input_offset();
@@ -149,16 +147,15 @@ class IBilinearMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<const float*> indirection(pixels() * 4);
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + indirection.size() * channels());
-    std::vector<float, AlignedAllocator<float, 64>> packed_weights(pixels() * 2);
-    std::vector<float> output((pixels() - 1) * output_stride() + channels());
-    std::vector<float> output_ref(pixels() * channels());
+    xnnpack::Buffer<const float*> indirection(pixels() * 4);
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) + indirection.size() * channels());
+    xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_weights(pixels() * 2);
+    xnnpack::Buffer<float> output((pixels() - 1) * output_stride() + channels());
+    xnnpack::Buffer<float> output_ref(pixels() * channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(packed_weights.begin(), packed_weights.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       for (size_t i = 0; i < indirection.size(); i++) {
         indirection[i] = input.data() + i * channels() - input_offset();
@@ -204,16 +201,15 @@ class IBilinearMicrokernelTester {
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
     std::uniform_int_distribution<int16_t> w11dist(0, 2047);
 
-    std::vector<const int8_t*> indirection(pixels() * 4);
-    std::vector<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + indirection.size() * channels());
-    std::vector<int16_t, AlignedAllocator<int16_t, 64>> packed_weights(pixels() * 2);
-    std::vector<int8_t> output((pixels() - 1) * output_stride() + channels());
-    std::vector<int8_t> output_ref(pixels() * channels());
+    xnnpack::Buffer<const int8_t*> indirection(pixels() * 4);
+    xnnpack::Buffer<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + indirection.size() * channels());
+    xnnpack::Buffer<int16_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(pixels() * 2);
+    xnnpack::Buffer<int8_t> output((pixels() - 1) * output_stride() + channels());
+    xnnpack::Buffer<int8_t> output_ref(pixels() * channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(packed_weights.begin(), packed_weights.end(), [&]() { return w11dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xFA));
 
       for (size_t i = 0; i < indirection.size(); i++) {
         indirection[i] = input.data() + i * channels() - input_offset();
@@ -260,16 +256,15 @@ class IBilinearMicrokernelTester {
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
     std::uniform_int_distribution<int16_t> w11dist(0, 2047);
 
-    std::vector<const uint8_t*> indirection(pixels() * 4);
-    std::vector<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + indirection.size() * channels());
-    std::vector<int16_t, AlignedAllocator<int16_t, 64>> packed_weights(pixels() * 2);
-    std::vector<uint8_t> output((pixels() - 1) * output_stride() + channels());
-    std::vector<uint8_t> output_ref(pixels() * channels());
+    xnnpack::Buffer<const uint8_t*> indirection(pixels() * 4);
+    xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + indirection.size() * channels());
+    xnnpack::Buffer<int16_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(pixels() * 2);
+    xnnpack::Buffer<uint8_t> output((pixels() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint8_t> output_ref(pixels() * channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       std::generate(packed_weights.begin(), packed_weights.end(), [&]() { return w11dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xFA));
 
       for (size_t i = 0; i < indirection.size(); i++) {
         indirection[i] = input.data() + i * channels() - input_offset();
@@ -312,16 +307,15 @@ class IBilinearMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
-    std::vector<const xnn_float16*> indirection(pixels() * 2);
-    std::vector<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) + (channels() - 1) * input_stride() + 4 * pixels());
-    std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> packed_weights(pixels() * 2);
-    std::vector<xnn_float16> output(pixels() * channels());
-    std::vector<float> output_ref(pixels() * channels());
+    xnnpack::Buffer<const xnn_float16*> indirection(pixels() * 2);
+    xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) + (channels() - 1) * input_stride() + 4 * pixels());
+    xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> packed_weights(pixels() * 2);
+    xnnpack::Buffer<xnn_float16> output(pixels() * channels());
+    xnnpack::Buffer<float> output_ref(pixels() * channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(packed_weights.begin(), packed_weights.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
 
       // Indirection will point to the even ("left") pixels of the input.
       // The kernels will expect "right" pixels to be placed right next to them.
@@ -369,16 +363,15 @@ class IBilinearMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<const float*> indirection(pixels() * 2);
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) + (channels() - 1) * input_stride() + 4 * pixels());
-    std::vector<float, AlignedAllocator<float, 64>> packed_weights(pixels() * 2);
-    std::vector<float> output(pixels() * channels());
-    std::vector<float> output_ref(pixels() * channels());
+    xnnpack::Buffer<const float*> indirection(pixels() * 2);
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) + (channels() - 1) * input_stride() + 4 * pixels());
+    xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_weights(pixels() * 2);
+    xnnpack::Buffer<float> output(pixels() * channels());
+    xnnpack::Buffer<float> output_ref(pixels() * channels());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(packed_weights.begin(), packed_weights.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       // Indirection will point to the even ("left") pixels of the input.
       // The kernels will expect "right" pixels to be placed right next to them.

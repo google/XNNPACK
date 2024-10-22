@@ -25,7 +25,6 @@ static void init_f16_ibilinear_chw_config(void) {
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_ibilinear_chw_config.ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p8;
       f16_ibilinear_chw_config.channel_tile = 1;
-      f16_ibilinear_chw_config.pixel_tile = 8;
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -33,7 +32,6 @@ static void init_f16_ibilinear_chw_config(void) {
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_ibilinear_chw_config.ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f16_ibilinear_chw_ukernel__neonfp16arith_p8;
       f16_ibilinear_chw_config.channel_tile = 1;
-      f16_ibilinear_chw_config.pixel_tile = 8;
     }
   #endif
 }
@@ -45,28 +43,22 @@ static void init_f32_ibilinear_chw_config(void) {
     if (hardware_config->use_arm_neon) {
       f32_ibilinear_chw_config.ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__neon_p8;
       f32_ibilinear_chw_config.channel_tile = 1;
-      f32_ibilinear_chw_config.pixel_tile = 8;
     } else if (!XNN_PLATFORM_MOBILE) {
       f32_ibilinear_chw_config.ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__scalar_p4;
       f32_ibilinear_chw_config.channel_tile = 1;
-      f32_ibilinear_chw_config.pixel_tile = 4;
     }
   #elif XNN_ARCH_ARM64
     f32_ibilinear_chw_config.ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__neonfma_p8;
     f32_ibilinear_chw_config.channel_tile = 1;
-    f32_ibilinear_chw_config.pixel_tile = 8;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     f32_ibilinear_chw_config.ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__sse_p8;
     f32_ibilinear_chw_config.channel_tile = 1;
-    f32_ibilinear_chw_config.pixel_tile = 8;
   #elif XNN_ARCH_WASMRELAXEDSIMD || XNN_ARCH_WASMSIMD
     f32_ibilinear_chw_config.ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__wasmsimd_p8;
     f32_ibilinear_chw_config.channel_tile = 1;
-    f32_ibilinear_chw_config.pixel_tile = 8;
   #else
     f32_ibilinear_chw_config.ukernel = (xnn_ibilinear_chw_ukernel_fn) xnn_f32_ibilinear_chw_ukernel__scalar_p4;
     f32_ibilinear_chw_config.channel_tile = 1;
-    f32_ibilinear_chw_config.pixel_tile = 4;
   #endif
 }
 

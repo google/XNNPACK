@@ -18,6 +18,7 @@
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 template <class T> class RoPETestBase : public ::testing::Test {
@@ -34,12 +35,12 @@ template <class T> class RoPETestBase : public ::testing::Test {
     heads = dim_dist(rng);
     channels = dim_dist(rng) * 2;  // ensure the number of channels is even
 
-    input = std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) +
+    input = xnnpack::Buffer<T>(XNN_EXTRA_BYTES / sizeof(T) +
                            batch_size * tokens * heads * channels);
     weights =
-        std::vector<T>(XNN_EXTRA_BYTES / sizeof(T) + max_tokens * channels);
-    operator_output = std::vector<T>(batch_size * tokens * heads * channels);
-    subgraph_output = std::vector<T>(operator_output.size());
+        xnnpack::Buffer<T>(XNN_EXTRA_BYTES / sizeof(T) + max_tokens * channels);
+    operator_output = xnnpack::Buffer<T>(batch_size * tokens * heads * channels);
+    subgraph_output = xnnpack::Buffer<T>(operator_output.size());
   }
 
   xnnpack::ReplicableRandomDevice rng;
@@ -52,10 +53,10 @@ template <class T> class RoPETestBase : public ::testing::Test {
   size_t heads;
   size_t channels;
 
-  std::vector<T> input;
-  std::vector<T> weights;
-  std::vector<T> operator_output;
-  std::vector<T> subgraph_output;
+  xnnpack::Buffer<T> input;
+  xnnpack::Buffer<T> weights;
+  xnnpack::Buffer<T> operator_output;
+  xnnpack::Buffer<T> subgraph_output;
 };
 
 using RoPETestF16 = RoPETestBase<xnn_float16>;
@@ -159,8 +160,6 @@ TEST_F(RoPETestF16, matches_operator_api)
 
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(weights.begin(), weights.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   const xnn_status status = xnn_create_rope_nthc_f16(max_tokens, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
@@ -239,8 +238,6 @@ TEST_F(RoPETestF32, matches_operator_api)
 
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(weights.begin(), weights.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   const xnn_status status = xnn_create_rope_nthc_f32(max_tokens, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {

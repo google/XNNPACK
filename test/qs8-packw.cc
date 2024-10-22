@@ -10,6 +10,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/packw.h"
+#include "next_prime.h"
 #include "packw-microkernel-tester.h"
 
 namespace {
@@ -18,7 +19,7 @@ struct XnnTestQS8Param {
   const char *name;
   xnn_qs8_packw_gemm_goi_ukernel_fn ukernel;
   uint64_t arch_flags;
-  size_t nr, kr, sr, kblock, nr_scale;
+  size_t nr, kr, sr, kblock, nr_scale, izp;
 };
 
 class XnnTestQS8 : public testing::TestWithParam<XnnTestQS8Param> {
@@ -28,16 +29,29 @@ std::string GetTestQS8Name(const testing::TestParamInfo<XnnTestQS8::ParamType>& 
   return info.param.name;
 }
 
-#define XNN_QS8_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale) \
-  { #ukernel, ukernel, arch_flags, nr, kr, sr, kblock, nr_scale },
+#define XNN_QS8_UKERNEL(arch_flags, ukernel, nr, kr, sr, kblock, nr_scale, izp) \
+  { #ukernel, ukernel, arch_flags, nr, kr, sr, kblock, nr_scale, izp },
 
 const XnnTestQS8Param xnn_test_qs8_params[] = {
-#include "src/qs8-packw/qs8-packw.h"
+#include "qs8-packw/qs8-packw.h"
 };
 
 #undef XNN_QS8_UKERNEL
 
 }  // namespace
+
+TEST_P(XnnTestQS8, null_bias) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  PackWMicrokernelTester()
+    .nullbias(true)
+    .n(GetParam().nr * GetParam().nr_scale)
+    .k(GetParam().kblock)
+    .nr(GetParam().nr * GetParam().nr_scale)
+    .kr(GetParam().kr)
+    .sr(GetParam().sr)
+    .izp(GetParam().izp)
+    .Test(GetParam().ukernel);
+}
 
 TEST_P(XnnTestQS8, k_eq_kblock) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
@@ -47,21 +61,22 @@ TEST_P(XnnTestQS8, k_eq_kblock) {
     .nr(GetParam().nr * GetParam().nr_scale)
     .kr(GetParam().kr)
     .sr(GetParam().sr)
+    .izp(GetParam().izp)
     .Test(GetParam().ukernel);
 }
 
 TEST_P(XnnTestQS8, k_div_kblock) {
-  if (GetParam().kblock <= 1) {
-    GTEST_SKIP();
-  }
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
-  PackWMicrokernelTester()
-    .n(GetParam().nr * GetParam().nr_scale)
-    .k(GetParam().kblock * 5)
-    .nr(GetParam().nr * GetParam().nr_scale)
-    .kr(GetParam().kr)
-    .sr(GetParam().sr)
-    .Test(GetParam().ukernel);
+  for (size_t k = GetParam().kblock; k < GetParam().kblock * 5; k += GetParam().kblock) {
+    PackWMicrokernelTester()
+      .n(GetParam().nr * GetParam().nr_scale)
+      .k(k)
+      .nr(GetParam().nr * GetParam().nr_scale)
+      .kr(GetParam().kr)
+      .sr(GetParam().sr)
+      .izp(GetParam().izp)
+      .Test(GetParam().ukernel);
+  }
 }
 
 TEST_P(XnnTestQS8, k_lt_kblock) {
@@ -76,32 +91,97 @@ TEST_P(XnnTestQS8, k_lt_kblock) {
       .nr(GetParam().nr * GetParam().nr_scale)
       .kr(GetParam().kr)
       .sr(GetParam().sr)
+      .izp(GetParam().izp)
       .Test(GetParam().ukernel);
   }
 }
 
 TEST_P(XnnTestQS8, k_gt_kblock) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
-  for (size_t k = GetParam().kblock + 1; k < (GetParam().kblock == 1 ? 4 : GetParam().kblock * 2); k++) {
+  for (size_t k = GetParam().kblock + 1; k < GetParam().kblock * 5; k = xnnpack::NextPrime(k + 1)) {
     PackWMicrokernelTester()
       .n(GetParam().nr * GetParam().nr_scale)
       .k(k)
       .nr(GetParam().nr * GetParam().nr_scale)
       .kr(GetParam().kr)
       .sr(GetParam().sr)
+      .izp(GetParam().izp)
       .Test(GetParam().ukernel);
   }
 }
 
-TEST_P(XnnTestQS8, n_eq_nr) {
+TEST_P(XnnTestQS8, n_eq_1) {
+  if (GetParam().nr <= 1 || GetParam().nr_scale != 1) {
+    GTEST_SKIP();
+  }
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
-  for (size_t k = 1; k < (GetParam().kblock == 1 ? 4 : GetParam().kblock * 2); k++) {
+  PackWMicrokernelTester()
+    .n(1 * GetParam().nr_scale)
+    .k(GetParam().kblock)
+    .nr(GetParam().nr * GetParam().nr_scale)
+    .kr(GetParam().kr)
+    .sr(GetParam().sr)
+    .izp(GetParam().izp)
+    .Test(GetParam().ukernel);
+}
+
+
+TEST_P(XnnTestQS8, n_div_nr_null_bias) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  for (size_t n = GetParam().nr; n < GetParam().nr * 5; n += GetParam().nr) {
     PackWMicrokernelTester()
-      .n(GetParam().nr * GetParam().nr_scale)
-      .k(k)
+      .nullbias(true)
+      .n(n * GetParam().nr_scale)
+      .k(GetParam().kblock)
       .nr(GetParam().nr * GetParam().nr_scale)
       .kr(GetParam().kr)
       .sr(GetParam().sr)
+      .izp(GetParam().izp)
+      .Test(GetParam().ukernel);
+  }
+}
+
+TEST_P(XnnTestQS8, n_div_nr) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  for (size_t n = GetParam().nr; n < GetParam().nr * 5; n += GetParam().nr) {
+    PackWMicrokernelTester()
+      .n(n * GetParam().nr_scale)
+      .k(GetParam().kblock)
+      .nr(GetParam().nr * GetParam().nr_scale)
+      .kr(GetParam().kr)
+      .sr(GetParam().sr)
+      .izp(GetParam().izp)
+      .Test(GetParam().ukernel);
+  }
+}
+
+TEST_P(XnnTestQS8, n_lt_nr) {
+  if (GetParam().nr <= 1 || GetParam().nr_scale != 1) {
+    GTEST_SKIP();
+  }
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  for (size_t n = 1; n < GetParam().nr * GetParam().nr_scale; n++) {
+    PackWMicrokernelTester()
+      .n(n)
+      .k(GetParam().kblock)
+      .nr(GetParam().nr * GetParam().nr_scale)
+      .kr(GetParam().kr)
+      .sr(GetParam().sr)
+      .izp(GetParam().izp)
+      .Test(GetParam().ukernel);
+  }
+}
+
+TEST_P(XnnTestQS8, n_gt_nr) {
+  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
+  for (size_t n = GetParam().nr * GetParam().nr_scale; n < GetParam().nr * GetParam().nr_scale * 5; n = xnnpack::NextPrime(n + 1)) {
+    PackWMicrokernelTester()
+      .n(n)
+      .k(xnnpack::NextPrime(GetParam().kblock + 1))
+      .nr(GetParam().nr * GetParam().nr_scale)
+      .kr(GetParam().kr)
+      .sr(GetParam().sr)
+      .izp(GetParam().izp)
       .Test(GetParam().ukernel);
   }
 }
@@ -110,4 +190,3 @@ INSTANTIATE_TEST_SUITE_P(qs8_packw,
                          XnnTestQS8,
                          testing::ValuesIn(xnn_test_qs8_params),
                          GetTestQS8Name);
-

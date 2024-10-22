@@ -379,7 +379,7 @@ struct xnn_qs8_rsum_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
-struct xnn_qs8_mean_minmax_params {
+struct xnn_qs8_reduce_minmax_params {
   struct {
     float scale;
     int32_t num_elements;
@@ -388,7 +388,7 @@ struct xnn_qs8_mean_minmax_params {
   } scalar;
 };
 
-struct xnn_qu8_mean_minmax_params {
+struct xnn_qu8_reduce_minmax_params {
   struct {
     float scale;
     int32_t num_elements;

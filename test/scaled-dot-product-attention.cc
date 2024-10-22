@@ -17,10 +17,10 @@
 #include <vector>   // For std::vector.
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/subgraph.h"
 #include "replicable_random_device.h"
@@ -350,8 +350,6 @@ TEST_F(ScaledDotProductAttentionTestF16, matches_operator_api) {
   std::generate(value.begin(), value.end(), [&]() { return f32dist(rng); });
   std::generate(scale.begin(), scale.end(), [&]() { return f32dist(rng); });
   std::generate(mask.begin(), mask.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_scaled_dot_product_attention_nhtc_f16(cap_type, &cap_params, /*flags=*/0, &op);
@@ -469,8 +467,6 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api) {
   std::generate(value.begin(), value.end(), [&]() { return f32dist(rng); });
   std::generate(scale.begin(), scale.end(), [&]() { return f32dist(rng); });
   std::generate(mask.begin(), mask.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   const xnn_status status = xnn_create_scaled_dot_product_attention_nhtc_f32(cap_type, &cap_params, /*flags=*/0, &op);
@@ -621,8 +617,6 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_no_r
   std::generate(value.begin(), value.end(), [&]() { return f32dist(rng); });
   std::generate(scale.begin(), scale.end(), [&]() { return f32dist(rng); });
   std::generate(mask.begin(), mask.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   xnn_operator_t op = nullptr;
@@ -830,8 +824,6 @@ TEST_F(ScaledDotProductAttentionTestF32, matches_operator_api_dynamic_shape_requ
   std::generate(value.begin(), value.end(), [&]() { return f32dist(rng); });
   std::generate(scale.begin(), scale.end(), [&]() { return f32dist(rng); });
   std::generate(mask.begin(), mask.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   // Call operator API.
   xnn_operator_t op = nullptr;

@@ -9,16 +9,14 @@
 #include <random>
 #include <vector>
 
-#include <benchmark/benchmark.h>
-#include "bench/utils.h"
-
+#include "utils.h"
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/raddexpminusmax.h"
 #include "xnnpack/reduce.h"
-
+#include "xnnpack/buffer.h"
+#include <benchmark/benchmark.h>
 
 static void f32_raddexpminusmax(
   benchmark::State& state,
@@ -40,7 +38,7 @@ static void f32_raddexpminusmax(
 
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_elements * sizeof(float));
-  std::vector<float, AlignedAllocator<float, 64>> x(elements);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> x(elements);
 
   std::generate(x.begin(), x.end(), std::ref(f32rng));
 

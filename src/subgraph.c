@@ -13,11 +13,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <fp16/fp16.h>
 #include "xnnpack.h"
 #include "xnnpack/allocation-type.h"
 #include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
+#include "xnnpack/fp16.h"
 #include "xnnpack/hardware-config.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
@@ -33,25 +33,30 @@ enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min,
   struct xnn_value* output_value = &subgraph->values[output_id];
   uint32_t new_id = XNN_INVALID_VALUE_ID;
   enum xnn_status status;
+  size_t num_dims = output_value->shape.num_dims;
+  size_t dims[XNN_MAX_TENSOR_DIMS];
+  memcpy(dims, output_value->shape.dim, num_dims * sizeof(size_t));
   switch (output_value->datatype) {
     case xnn_datatype_fp16:
       status = xnn_define_tensor_value(
-          subgraph, xnn_datatype_fp16, 0, NULL, NULL,
+          subgraph, xnn_datatype_fp16, num_dims, dims, NULL,
           /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
       break;
     case xnn_datatype_fp32:
       status = xnn_define_tensor_value(
-          subgraph, xnn_datatype_fp32, 0, NULL, NULL,
+          subgraph, xnn_datatype_fp32, num_dims, dims, NULL,
           /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
       break;
     case xnn_datatype_quint8:
       status = xnn_define_quantized_tensor_value(
-          subgraph, xnn_datatype_quint8, output_value->quantization.zero_point, output_value->quantization.scale, /*num_dims=*/0, /*dims=*/NULL, NULL,
+          subgraph, xnn_datatype_quint8, output_value->quantization.zero_point,
+          output_value->quantization.scale, num_dims, dims, NULL,
           /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
       break;
     case xnn_datatype_qint8:
       status = xnn_define_quantized_tensor_value(
-          subgraph, xnn_datatype_qint8, output_value->quantization.zero_point, output_value->quantization.scale, /*num_dims=*/0, /*dims=*/NULL, NULL,
+          subgraph, xnn_datatype_qint8, output_value->quantization.zero_point,
+          output_value->quantization.scale, num_dims, dims, NULL,
           /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, &new_id);
       break;
     default:
@@ -60,6 +65,8 @@ enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min,
   if (status != xnn_status_success) {
     return status;
   }
+  struct xnn_value* new_value = &subgraph->values[new_id];
+  new_value->size = 0;
   node->outputs[0] = new_id;
   node->activation.output_min = -INFINITY;
   node->activation.output_max = INFINITY;
@@ -520,6 +527,15 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
                      xnn_node_type_to_string(node->type));
         return 0;
       }
+    case xnn_node_type_static_mean:
+    case xnn_node_type_static_sum:
+      if (subgraph->values[node->inputs[0]].shape.num_dims == 4) {
+        return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW | XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC;
+      } else {
+        xnn_log_info("Node %s inputs shape is incompatible with sparse inference",
+                     xnn_node_type_to_string(node->type));
+        return 0;
+      }
     default:
       return false;
   }
@@ -821,6 +837,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_static_constant_pad:
       case xnn_node_type_static_mean:
       case xnn_node_type_static_slice:
+      case xnn_node_type_static_sum:
       case xnn_node_type_static_reshape:
       case xnn_node_type_static_resize_bilinear_2d:
       case xnn_node_type_static_transpose:
@@ -1401,9 +1418,9 @@ enum xnn_status xnn_delete_subgraph(
   return xnn_status_success;
 }
 
-enum xnn_node_type xnn_binary_operator_to_node_type(enum xnn_binary_operator op)
+enum xnn_node_type xnn_binary_operator_to_node_type(enum xnn_binary_operator type)
 {
-  switch (op) {
+  switch (type) {
     case xnn_binary_add:
       return xnn_node_type_add2;
     case xnn_binary_divide:
@@ -1416,6 +1433,8 @@ enum xnn_node_type xnn_binary_operator_to_node_type(enum xnn_binary_operator op)
       return xnn_node_type_copysign;
     case xnn_binary_squared_difference:
       return xnn_node_type_squared_difference;
+    case xnn_binary_prelu:
+      return xnn_node_type_prelu;
     case xnn_binary_minimum:
       return xnn_node_type_minimum2;
     case xnn_binary_maximum:
@@ -1425,9 +1444,9 @@ enum xnn_node_type xnn_binary_operator_to_node_type(enum xnn_binary_operator op)
   }
 }
 
-enum xnn_binary_operator xnn_node_type_to_binary_operator(enum xnn_node_type op)
+enum xnn_binary_operator xnn_node_type_to_binary_operator(enum xnn_node_type type)
 {
-  switch (op) {
+  switch (type) {
     case xnn_node_type_add2:
       return xnn_binary_add;
     case xnn_node_type_divide:
@@ -1440,11 +1459,37 @@ enum xnn_binary_operator xnn_node_type_to_binary_operator(enum xnn_node_type op)
       return xnn_binary_copysign;
     case xnn_node_type_squared_difference:
       return xnn_binary_squared_difference;
+    case xnn_node_type_prelu:
+      return xnn_binary_prelu;
     case xnn_node_type_minimum2:
       return xnn_binary_minimum;
     case xnn_node_type_maximum2:
       return xnn_binary_maximum;
     default:
       return xnn_binary_invalid;
+  }
+}
+
+enum xnn_node_type xnn_reduce_operator_to_node_type(enum xnn_reduce_operator type)
+{
+  switch (type) {
+    case xnn_reduce_mean:
+      return xnn_node_type_static_mean;
+    case xnn_reduce_sum:
+      return xnn_node_type_static_sum;
+    default:
+      return xnn_node_type_invalid;
+  }
+}
+
+enum xnn_reduce_operator xnn_node_type_to_reduce_operator(enum xnn_node_type type)
+{
+  switch (type) {
+    case xnn_node_type_static_mean:
+      return xnn_reduce_mean;
+    case xnn_node_type_static_sum:
+      return xnn_reduce_sum;
+    default:
+      return xnn_reduce_invalid;
   }
 }

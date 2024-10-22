@@ -51,13 +51,7 @@ extern "C" {
   void xnn_vlog_fatal(const char* format, va_list args);
 #endif
 
-#if XNN_LOG_LEVEL == XNN_LOG_NONE
-  inline static const char* xnn_datatype_to_string(enum xnn_datatype type) {
-    return "Unknown";
-  }
-#else
-  const char* xnn_datatype_to_string(enum xnn_datatype type);
-#endif
+const char* xnn_datatype_to_string(enum xnn_datatype type);
 
 #ifdef __cplusplus
 }  // extern "C"

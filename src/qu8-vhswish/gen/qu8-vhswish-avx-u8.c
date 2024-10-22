@@ -13,7 +13,7 @@
 
 #include "xnnpack/common.h"
 #include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/vhswish.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_qu8_vhswish_ukernel__avx_u8(

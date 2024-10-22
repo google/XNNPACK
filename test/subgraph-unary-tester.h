@@ -19,6 +19,7 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/requantization.h"
 #include "xnnpack/subgraph.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 template <
@@ -55,10 +56,10 @@ class UnaryTest : public ::testing::Test {
     signed_zero_point = i8dist(rng);
     unsigned_zero_point = u8dist(rng);
 
-    input = std::vector<InputType>(num_output_elements + XNN_EXTRA_BYTES / sizeof(InputType));
+    input = xnnpack::Buffer<InputType>(num_output_elements + XNN_EXTRA_BYTES / sizeof(InputType));
     const size_t output_padding = pad_output ? (XNN_EXTRA_BYTES / sizeof(InputType)) : 0;
-    operator_output = std::vector<OutputType>(num_output_elements + output_padding);
-    subgraph_output = std::vector<OutputType>(num_output_elements + output_padding);
+    operator_output = xnnpack::Buffer<OutputType>(num_output_elements + output_padding);
+    subgraph_output = xnnpack::Buffer<OutputType>(num_output_elements + output_padding);
   }
 
   std::vector<size_t> RandomShape() {
@@ -93,7 +94,7 @@ class UnaryTest : public ::testing::Test {
   int32_t signed_zero_point;
   int32_t unsigned_zero_point;
 
-  std::vector<InputType> input;
-  std::vector<OutputType> operator_output;
-  std::vector<OutputType> subgraph_output;
+  xnnpack::Buffer<InputType> input;
+  xnnpack::Buffer<OutputType> operator_output;
+  xnnpack::Buffer<OutputType> subgraph_output;
 };

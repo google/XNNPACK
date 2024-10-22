@@ -7,12 +7,12 @@
 //   Specification: test/qs8-rdsum-minmax-fp32.yaml
 //   Generator: tools/generate-rdsum-benchmark.py
 
-#include "bench/rsum-benchmark.h"
-#include "bench/utils.h"
+#include "rsum-benchmark.h"
+#include "utils.h"
 #include <benchmark/benchmark.h>
 
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
 #include "xnnpack/reduce.h"
 #include "xnnpack/microfnptr.h"
@@ -105,24 +105,51 @@ BENCHMARK_CAPTURE(qs8_rdsum, scalar_c4,
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   BENCHMARK_CAPTURE(qs8_rdsum, avx512skx_c64,
                     xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c64,
                     /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(BenchmarkRDSUM)
     ->UseRealTime();
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   BENCHMARK_CAPTURE(qs8_rdsum, avx512skx_c128,
                     xnn_qs8_rdsum_ukernel_7p7x__avx512skx_c128,
                     /*init_params=*/nullptr,
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(BenchmarkRDSUM)
     ->UseRealTime();
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(qs8_rdsum, wasmsimd_c16,
+                    xnn_qs8_rdsum_ukernel_7p7x__wasmsimd_c16,
+                    /*init_params=*/nullptr)
+    ->Apply(BenchmarkRDSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(qs8_rdsum, wasmsimd_c32,
+                    xnn_qs8_rdsum_ukernel_7p7x__wasmsimd_c32,
+                    /*init_params=*/nullptr)
+    ->Apply(BenchmarkRDSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+
+
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+  BENCHMARK_CAPTURE(qs8_rdsum, wasmsimd_c64,
+                    xnn_qs8_rdsum_ukernel_7p7x__wasmsimd_c64,
+                    /*init_params=*/nullptr)
+    ->Apply(BenchmarkRDSUM)
+    ->UseRealTime();
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

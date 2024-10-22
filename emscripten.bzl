@@ -18,6 +18,7 @@ def xnnpack_emscripten_test_linkopts():
         "-s ERROR_ON_UNDEFINED_SYMBOLS=1",
         "-s EXIT_RUNTIME=1",
         "-s STACK_SIZE=5MB",
+        "-s TEXTDECODER=1",
         "--pre-js $(location //:preamble.js.lds)",
     ]
 

@@ -20,6 +20,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack/microfnptr.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class LUTNormMicrokernelTester {
@@ -54,26 +55,20 @@ class LUTNormMicrokernelTester {
 
   void Test(xnn_u8_lut32norm_ukernel_fn lutnorm) const {
     xnnpack::ReplicableRandomDevice rng;
-    auto u8rng = [&rng]() {
-      return std::uniform_int_distribution<uint32_t>(
-          0, std::numeric_limits<uint8_t>::max())(rng);
-    };
     auto u32rng = [&]() {
       return std::uniform_int_distribution<uint32_t>(
           1, std::numeric_limits<uint32_t>::max() / (257 * n()))(rng);
     };
 
-    std::vector<uint8_t> x(n());
-    std::vector<uint32_t> t(256);
-    std::vector<uint8_t> y(n());
-    std::vector<float> y_ref(n());
+    xnnpack::Buffer<uint8_t> x(n());
+    xnnpack::Buffer<uint32_t> t(256);
+    xnnpack::Buffer<uint8_t> y(n());
+    xnnpack::Buffer<float> y_ref(n());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), std::ref(u8rng));
+      xnnpack::fill_uniform_random_bits(x.data(), x.size(), rng);
       std::generate(t.begin(), t.end(), std::ref(u32rng));
       if (inplace()) {
-        std::generate(y.begin(), y.end(), std::ref(u8rng));
-      } else {
-        std::fill(y.begin(), y.end(), 0xA5);
+        xnnpack::fill_uniform_random_bits(y.data(), y.size(), rng);
       }
       const uint8_t* x_data = inplace() ? y.data() : x.data();
 

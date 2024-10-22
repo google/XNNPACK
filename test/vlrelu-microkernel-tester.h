@@ -20,6 +20,7 @@
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class VLReLUMicrokernelTester {
@@ -92,12 +93,11 @@ class VLReLUMicrokernelTester {
     std::uniform_int_distribution<int32_t> i8dist(
       std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
-    std::vector<int8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
-    std::vector<int8_t> output(batch_size());
-    std::vector<int8_t> output_ref(batch_size());
+    xnnpack::Buffer<int8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(int8_t));
+    xnnpack::Buffer<int8_t> output(batch_size());
+    xnnpack::Buffer<int8_t> output_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
-      std::fill(output.begin(), output.end(), INT8_C(0xA5));
 
       struct xnn_qs8_lrelu_params params;
       init_params(&params, positive_scale(), negative_scale(), input_zero_point(), output_zero_point());
@@ -136,12 +136,11 @@ class VLReLUMicrokernelTester {
     std::uniform_int_distribution<int32_t> u8dist(
       std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max());
 
-    std::vector<uint8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
-    std::vector<uint8_t> output(batch_size());
-    std::vector<uint8_t> output_ref(batch_size());
+    xnnpack::Buffer<uint8_t> input(batch_size() + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    xnnpack::Buffer<uint8_t> output(batch_size());
+    xnnpack::Buffer<uint8_t> output_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
-      std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
       struct xnn_qu8_lrelu_params params;
       init_params(&params, positive_scale(), negative_scale(), input_zero_point(), output_zero_point());

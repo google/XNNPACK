@@ -12,7 +12,6 @@
 
 
 // This function is defined inline when logging is disabled
-#if XNN_LOG_LEVEL > 0
 const char* xnn_datatype_to_string(enum xnn_datatype type) {
   switch (type) {
     case xnn_datatype_invalid:
@@ -45,4 +44,3 @@ const char* xnn_datatype_to_string(enum xnn_datatype type) {
   XNN_UNREACHABLE;
   return NULL;
 }
-#endif  // XNN_LOG_LEVEL > 0

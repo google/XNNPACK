@@ -11,7 +11,6 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack/math.h"
 #include "xnnpack/microkernel-utils.h"
 #include "xnnpack/microparams-init.h"
@@ -191,8 +190,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_eq_kc) {
   size_t extra_bytes_n = sizeof(float);
   std::vector<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2)
     + k_num_blocks * round_up(nc, nr) * extra_bytes_bl + round_up(nc, nr) * extra_bytes_n);
-  std::vector<xnn_bfloat16> scale(nc * k_num_blocks, 0);
-  std::fill(scale.begin(), scale.end(), 853.6010);
+  std::vector<xnn_bfloat16> scale(nc * k_num_blocks, 853.6010);
   auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };
 
   xnn_pack_qs8_qb4w_gemm_goi_w(g, nc, kc, nr, kr, sr, bl,
@@ -267,8 +265,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, nc_gt_1) {
   size_t extra_bytes_bl = sizeof(uint16_t);
   std::vector<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2)
     + k_num_blocks * round_up(nc, nr) * extra_bytes_bl + round_up(nc, nr) * extra_bytes_n);
-  std::vector<xnn_bfloat16> scale(nc * k_num_blocks, 0);
-  std::fill(scale.begin(), scale.end(), 853.6010);
+  std::vector<xnn_bfloat16> scale(nc * k_num_blocks, 853.6010);
 
   auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };
   xnn_pack_qs8_qb4w_gemm_goi_w(g, nc, kc, nr, kr, sr, bl,
@@ -343,8 +340,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GOI_W, bl_lt_kc) {
   size_t extra_bytes_bl = sizeof(uint16_t);
   std::vector<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2)
     + k_num_blocks * round_up(nc, nr) * extra_bytes_bl + round_up(nc, nr) * extra_bytes_n);
-  std::vector<xnn_bfloat16> scale(nc * k_num_blocks, 0);
-  std::fill(scale.begin(), scale.end(), 853.6010);
+  std::vector<xnn_bfloat16> scale(nc * k_num_blocks, 853.6010);
 
 
   auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };
@@ -430,8 +426,7 @@ TEST(PACK_QD8_F32_QB4W_GEMM_GIO_W, bl_eq_kc) {
   size_t extra_bytes_bl = sizeof(uint16_t);
   std::vector<uint8_t> packed_weights(g * round_up(nc, nr) * (sizeof(float) + round_up_po2(kc, kr * sr) / 2)
     + k_num_blocks * round_up(nc, nr) * extra_bytes_bl + round_up(nc, nr) * extra_bytes_n);
-  std::vector<xnn_bfloat16> scale(nc * k_num_blocks, 0);
-  std::fill(scale.begin(), scale.end(), 853.6010);
+  std::vector<xnn_bfloat16> scale(nc * k_num_blocks, 853.6010);
 
 
   auto a = xnn_qs8_qc4w_packing_params{ -1, 0x8 };

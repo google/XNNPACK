@@ -13,10 +13,10 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
@@ -53,9 +53,9 @@ class AveragePoolingTest : public ::testing::Test {
     output_max = std::uniform_real_distribution<float>(0.1f, 255.0f)(rng);
     input_dims = {batch_size, input_height, input_width, channels};
     output_dims = {batch_size, output_height, output_width, channels};
-    input = std::vector<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) + batch_size * input_height * input_width * channels);
-    operator_output = std::vector<OutputType>(batch_size * output_height * output_width * channels);
-    subgraph_output = std::vector<OutputType>(batch_size * output_height * output_width * channels);
+    input = xnnpack::Buffer<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) + batch_size * input_height * input_width * channels);
+    operator_output = xnnpack::Buffer<OutputType>(batch_size * output_height * output_width * channels);
+    subgraph_output = xnnpack::Buffer<OutputType>(batch_size * output_height * output_width * channels);
   }
 
   xnnpack::ReplicableRandomDevice rng;
@@ -84,9 +84,9 @@ class AveragePoolingTest : public ::testing::Test {
   uint32_t input_id;
   uint32_t output_id;
 
-  std::vector<InputType> input;
-  std::vector<OutputType> operator_output;
-  std::vector<OutputType> subgraph_output;
+  xnnpack::Buffer<InputType> input;
+  xnnpack::Buffer<OutputType> operator_output;
+  xnnpack::Buffer<OutputType> subgraph_output;
 };
 
 using AveragePoolingTestF16 = AveragePoolingTest<xnn_float16>;
@@ -198,8 +198,6 @@ TEST_F(AveragePoolingTestF16, matches_operator_api)
 {
   std::uniform_real_distribution<float> f32dist;
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), std::nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), std::nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -228,7 +226,7 @@ TEST_F(AveragePoolingTestF16, matches_operator_api)
       /*threadpool=*/nullptr));
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
   ASSERT_EQ(xnn_status_success, xnn_setup_average_pooling2d_nhwc_f16(op, workspace.data(), input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
@@ -274,8 +272,6 @@ TEST_F(AveragePoolingTestF32, matches_operator_api)
 {
   std::uniform_real_distribution<float> f32dist;
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::fill(operator_output.begin(), operator_output.end(), nanf(""));
-  std::fill(subgraph_output.begin(), subgraph_output.end(), nanf(""));
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -304,7 +300,7 @@ TEST_F(AveragePoolingTestF32, matches_operator_api)
       /*threadpool=*/nullptr));
   ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
 
-  std::vector<char, AlignedAllocator<char, XNN_ALLOCATION_ALIGNMENT>> workspace(workspace_size);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
   ASSERT_EQ(xnn_status_success, xnn_setup_average_pooling2d_nhwc_f32(op, workspace.data(), input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));

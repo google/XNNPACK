@@ -5,19 +5,16 @@
 
 #include "packq-benchmark.h"
 
-#include "xnnpack/aligned-allocator.h"
-#include "xnnpack/common.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/pack.h"
-#include "xnnpack/packq.h"
-
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <random>
-#include <vector>
 
-#include "bench/utils.h"
+#include "utils.h"
+#include "xnnpack/buffer.h"
+#include "xnnpack/common.h"
+#include "xnnpack/microfnptr.h"
+#include "xnnpack/packq.h"
 #include <benchmark/benchmark.h>
 
 void x8_packq(benchmark::State& state, xnn_x8_packq_f32qp8_ukernel_fn packq,
@@ -47,13 +44,13 @@ void x8_packq(benchmark::State& state, xnn_x8_packq_f32qp8_ukernel_fn packq,
               sizeof(int8_t) * batch *
                   (dim_m * dim_k + rounded_n * rounded_k + rounded_n));
 
-  std::vector<float, AlignedAllocator<float, 64>> input(num_buffers * batch *
-                                                        dim_m * dim_k);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> input(num_buffers * batch * dim_m *
+                                                 dim_k);
   std::generate(input.begin(), input.end(), f32rng);
   const size_t packed_size =
       xnn_x8_packq_f32qp8_packed_size(batch * dim_m, dim_k, mr, kr, sr);
-  std::vector<int8_t, AlignedAllocator<int8_t, 64>> packed_weights(num_buffers *
-                                                                   packed_size);
+  xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_weights(num_buffers *
+                                                           packed_size);
 
   size_t buffer_index = 0;
   for (auto _ : state) {

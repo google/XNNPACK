@@ -16,6 +16,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack/microfnptr.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class UnpoolMicrokernelTester {
@@ -78,11 +79,11 @@ class UnpoolMicrokernelTester {
     auto x_rng = std::bind(std::uniform_int_distribution<uint32_t>(), std::ref(rng));
     auto i_rng = std::bind(std::uniform_int_distribution<uint32_t>(0, uint32_t(p() - 1)), std::ref(rng));
 
-    std::vector<uint32_t> x(c());
-    std::vector<uint32_t> i(c());
-    std::vector<uint32_t> y((p() - 1) * y_stride() + c());
-    std::vector<uint32_t*> indirect_y(p());
-    std::vector<uint32_t> y_ref((p() - 1) * y_stride() + c());
+    xnnpack::Buffer<uint32_t> x(c());
+    xnnpack::Buffer<uint32_t> i(c());
+    xnnpack::Buffer<uint32_t> y((p() - 1) * y_stride() + c());
+    xnnpack::Buffer<uint32_t*> indirect_y(p());
+    xnnpack::Buffer<uint32_t> y_ref((p() - 1) * y_stride() + c());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), std::ref(x_rng));
       std::generate(i.begin(), i.end(), std::ref(i_rng));

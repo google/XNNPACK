@@ -16,8 +16,8 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/microfnptr.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class ArgMaxPoolMicrokernelTester {
@@ -147,16 +147,15 @@ class ArgMaxPoolMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       ((output_pixels() - 1) * step() + pooling_elements()) * channels());
-    std::vector<float> output((output_pixels() - 1) * output_stride() + channels());
-    std::vector<uint32_t> index(output_pixels() * channels());
-    std::vector<float> output_ref(output_pixels() * channels());
-    std::vector<uint32_t> index_ref(output_pixels() * channels());
+    xnnpack::Buffer<float> output((output_pixels() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint32_t> index(output_pixels() * channels());
+    xnnpack::Buffer<float> output_ref(output_pixels() * channels());
+    xnnpack::Buffer<uint32_t> index_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels() - input_offset();
@@ -213,20 +212,19 @@ class ArgMaxPoolMicrokernelTester {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
-    std::vector<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
-    std::vector<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+    xnnpack::Buffer<const float*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       ((output_pixels() - 1) * step() + pooling_elements()) * channels());
-    std::vector<float> output((output_pixels() - 1) * output_stride() + channels());
-    std::vector<uint32_t> index(output_pixels() * channels());
-    std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> index_buffer(
-      channels() + XNN_EXTRA_BYTES / sizeof(uint32_t));
-    std::vector<float, AlignedAllocator<float, 64>> output_buffer(
-      channels() + XNN_EXTRA_BYTES / sizeof(float));
-    std::vector<float> output_ref(output_pixels() * channels());
-    std::vector<uint32_t> index_ref(output_pixels() * channels());
+    xnnpack::Buffer<float> output((output_pixels() - 1) * output_stride() + channels());
+    xnnpack::Buffer<uint32_t> index(output_pixels() * channels());
+    xnnpack::Buffer<uint32_t, XNN_ALLOCATION_ALIGNMENT> index_buffer(
+        channels() + XNN_EXTRA_BYTES / sizeof(uint32_t));
+    xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> output_buffer(
+        channels() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> output_ref(output_pixels() * channels());
+    xnnpack::Buffer<uint32_t> index_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
 
       for (size_t i = 0; i < (output_pixels() - 1) * step() + pooling_elements(); i++) {
         indirect_input[i] = input.data() + i * channels() - input_offset();

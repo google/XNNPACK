@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/math.h"
+#include "xnnpack/buffer.h"
 
 inline size_t reference_index(
     const size_t* input_stride,
@@ -63,8 +64,8 @@ class TransposeOperatorTester {
 
   void TestX8() const {
     size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
-    std::vector<uint8_t> input(count + XNN_EXTRA_BYTES / sizeof(uint8_t));
-    std::vector<uint8_t> output(count);
+    xnnpack::Buffer<uint8_t> input(count + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    xnnpack::Buffer<uint8_t> output(count);
     std::vector<size_t> input_stride(num_dims(), 1);
     std::vector<size_t> output_stride(num_dims(), 1);
     for (size_t i = num_dims() - 1; i > 0; --i) {
@@ -74,7 +75,6 @@ class TransposeOperatorTester {
     ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     xnn_operator_t transpose_op = nullptr;
     std::iota(input.begin(), input.end(), 0);
-    std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
     ASSERT_EQ(xnn_status_success,
               xnn_create_transpose_nd_x8(0, &transpose_op));
@@ -107,8 +107,8 @@ class TransposeOperatorTester {
 
     void TestRunX8() const {
     const size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
-    std::vector<uint8_t> input(count + XNN_EXTRA_BYTES / sizeof(uint8_t));
-    std::vector<uint8_t> output(count);
+    xnnpack::Buffer<uint8_t> input(count + XNN_EXTRA_BYTES / sizeof(uint8_t));
+    xnnpack::Buffer<uint8_t> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
     std::vector<size_t> output_stride(input.size(), 1);
     for (size_t i = num_dims() - 1; i > 0; --i) {
@@ -116,7 +116,6 @@ class TransposeOperatorTester {
       output_stride[i - 1] = output_stride[i] * shape_[perm()[i]];
     }
     std::iota(input.begin(), input.end(), 0);
-    std::fill(output.begin(), output.end(), UINT8_C(0xA5));
 
     // Call transpose eager API
     ASSERT_EQ(xnn_status_success,
@@ -135,8 +134,8 @@ class TransposeOperatorTester {
 
   void TestX16() const {
     size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
-    std::vector<xnn_float16> input(count + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<xnn_float16> output(count);
+    xnnpack::Buffer<xnn_float16> input(count + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> output(count);
     std::vector<size_t> input_stride(num_dims(), 1);
     std::vector<size_t> output_stride(num_dims(), 1);
     for (size_t i = num_dims() - 1; i > 0; --i) {
@@ -146,7 +145,6 @@ class TransposeOperatorTester {
     ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     xnn_operator_t transpose_op = nullptr;
     std::iota(input.begin(), input.end(), 0);
-    std::fill(output.begin(), output.end(), UINT16_C(0xDEAD));
 
     ASSERT_EQ(xnn_status_success,
               xnn_create_transpose_nd_x16(0, &transpose_op));
@@ -179,8 +177,8 @@ class TransposeOperatorTester {
 
   void TestRunX16() const {
     const size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
-    std::vector<xnn_float16> input(count + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-    std::vector<xnn_float16> output(count);
+    xnnpack::Buffer<xnn_float16> input(count + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+    xnnpack::Buffer<xnn_float16> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
     std::vector<size_t> output_stride(input.size(), 1);
     for (size_t i = num_dims() - 1; i > 0; --i) {
@@ -188,7 +186,6 @@ class TransposeOperatorTester {
       output_stride[i - 1] = output_stride[i] * shape_[perm()[i]];
     }
     std::iota(input.begin(), input.end(), 0);
-    std::fill(output.begin(), output.end(), UINT16_C(0xDEADBEEF));
 
     // Call transpose eager API
     ASSERT_EQ(xnn_status_success,
@@ -207,8 +204,8 @@ class TransposeOperatorTester {
 
   void TestX32() const {
     size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
-    std::vector<uint32_t> input(count + XNN_EXTRA_BYTES / sizeof(uint32_t));
-    std::vector<uint32_t> output(count);
+    xnnpack::Buffer<uint32_t> input(count + XNN_EXTRA_BYTES / sizeof(uint32_t));
+    xnnpack::Buffer<uint32_t> output(count);
     std::vector<size_t> input_stride(num_dims(), 1);
     std::vector<size_t> output_stride(num_dims(), 1);
     for (size_t i = num_dims() - 1; i > 0; --i) {
@@ -218,7 +215,6 @@ class TransposeOperatorTester {
     ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     xnn_operator_t transpose_op = nullptr;
     std::iota(input.begin(), input.end(), 0);
-    std::fill(output.begin(), output.end(), UINT32_C(0xDEADBEEF));
 
     ASSERT_EQ(xnn_status_success,
               xnn_create_transpose_nd_x32(0, &transpose_op));
@@ -251,8 +247,8 @@ class TransposeOperatorTester {
 
   void TestX64() const {
     size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
-    std::vector<uint64_t> input(count + XNN_EXTRA_BYTES / sizeof(uint64_t));
-    std::vector<uint64_t> output(count);
+    xnnpack::Buffer<uint64_t> input(count + XNN_EXTRA_BYTES / sizeof(uint64_t));
+    xnnpack::Buffer<uint64_t> output(count);
     std::vector<size_t> input_stride(num_dims(), 1);
     std::vector<size_t> output_stride(num_dims(), 1);
     for (size_t i = num_dims() - 1; i > 0; --i) {
@@ -262,7 +258,6 @@ class TransposeOperatorTester {
     ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     xnn_operator_t transpose_op = nullptr;
     std::iota(input.begin(), input.end(), 0);
-    std::fill(output.begin(), output.end(), UINT64_C(0xCAFEB0BADEADBEAF));
 
     ASSERT_EQ(xnn_status_success,
               xnn_create_transpose_nd_x64(0, &transpose_op));
@@ -295,8 +290,8 @@ class TransposeOperatorTester {
 
   void TestRunX32() const {
     const size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
-    std::vector<uint32_t> input(count + XNN_EXTRA_BYTES / sizeof(uint32_t));
-    std::vector<uint32_t> output(count);
+    xnnpack::Buffer<uint32_t> input(count + XNN_EXTRA_BYTES / sizeof(uint32_t));
+    xnnpack::Buffer<uint32_t> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
     std::vector<size_t> output_stride(input.size(), 1);
     for (size_t i = num_dims() - 1; i > 0; --i) {
@@ -304,7 +299,6 @@ class TransposeOperatorTester {
       output_stride[i - 1] = output_stride[i] * shape_[perm()[i]];
     }
     std::iota(input.begin(), input.end(), 0);
-    std::fill(output.begin(), output.end(), UINT32_C(0xDEADBEEF));
 
     // Call transpose eager API
     ASSERT_EQ(xnn_status_success,
@@ -323,8 +317,8 @@ class TransposeOperatorTester {
 
   void TestRunX64() const {
     const size_t count = std::accumulate(dims().cbegin(), dims().cend(), size_t{1}, std::multiplies<size_t>());
-    std::vector<uint64_t> input(count + XNN_EXTRA_BYTES / sizeof(uint64_t));
-    std::vector<uint64_t> output(count);
+    xnnpack::Buffer<uint64_t> input(count + XNN_EXTRA_BYTES / sizeof(uint64_t));
+    xnnpack::Buffer<uint64_t> output(count);
     std::vector<size_t> input_stride(input.size(), 1);
     std::vector<size_t> output_stride(input.size(), 1);
     for (size_t i = num_dims() - 1; i > 0; --i) {
@@ -332,7 +326,6 @@ class TransposeOperatorTester {
       output_stride[i - 1] = output_stride[i] * shape_[perm()[i]];
     }
     std::iota(input.begin(), input.end(), 0);
-    std::fill(output.begin(), output.end(), UINT64_C(0xCAFEB0BADEADBEAF));
 
     // Call transpose eager API
     ASSERT_EQ(xnn_status_success,

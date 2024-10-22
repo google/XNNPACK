@@ -22,5 +22,5 @@ XNN_TEST_CVT_BATCH_GT(ukernel, arch_flags, batch_tile, datatype_in, datatype_out
 XNN_TEST_CVT_SCALE(ukernel, arch_flags, batch_tile, datatype_in, datatype_out, ukernel, init_params);           \
                                                                                                                 \
 XNN_TEST_CVT_INPUT_ZERO_POINT(ukernel, arch_flags, batch_tile, datatype_in, datatype_out, ukernel, init_params);
-#include "src/qs8-f32-vcvt/qs8-f32-vcvt.h"
+#include "qs8-f32-vcvt/qs8-f32-vcvt.h"
 #undef XNN_CVT_UKERNEL_WITH_PARAMS

@@ -20,6 +20,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack/microfnptr.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class ZipMicrokernelTester {
@@ -55,17 +56,12 @@ class ZipMicrokernelTester {
 
   void Test(xnn_x8_zipc_ukernel_fn zip) const {
     xnnpack::ReplicableRandomDevice rng;
-    auto u8rng = [&rng]() {
-      return std::uniform_int_distribution<uint32_t>(
-          0, std::numeric_limits<uint8_t>::max())(rng);
-    };
 
-    std::vector<uint8_t> x(n() * g());
-    std::vector<uint8_t> x_ref(g() * n());
+    xnnpack::Buffer<uint8_t> x(n() * g());
+    xnnpack::Buffer<uint8_t> x_ref(g() * n());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), std::ref(u8rng));
-      std::fill(x_ref.begin(), x_ref.end(), 0xA5);
+      xnnpack::fill_uniform_random_bits(x.data(), x.size(), rng);
 
       // Call optimized micro-kernel.
       zip(n() * sizeof(uint8_t), x.data(), x_ref.data());
@@ -82,17 +78,12 @@ class ZipMicrokernelTester {
 
   void Test(xnn_x8_zipv_ukernel_fn zip) const {
     xnnpack::ReplicableRandomDevice rng;
-    auto u8rng = [&rng]() {
-      return std::uniform_int_distribution<uint32_t>(
-          0, std::numeric_limits<uint8_t>::max())(rng);
-    };
 
-    std::vector<uint8_t> x(n() * g());
-    std::vector<uint8_t> x_ref(g() * n());
+    xnnpack::Buffer<uint8_t> x(n() * g());
+    xnnpack::Buffer<uint8_t> x_ref(g() * n());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(x.begin(), x.end(), std::ref(u8rng));
-      std::fill(x_ref.begin(), x_ref.end(), 0xA5);
+      xnnpack::fill_uniform_random_bits(x.data(), x.size(), rng);
 
       // Call optimized micro-kernel.
       zip(n() * sizeof(uint8_t), g(), x.data(), x_ref.data());
@@ -113,12 +104,11 @@ class ZipMicrokernelTester {
       return std::uniform_int_distribution<uint32_t>()(rng);
     };
 
-    std::vector<uint32_t> x(n() * g());
-    std::vector<uint32_t> x_ref(g() * n());
+    xnnpack::Buffer<uint32_t> x(n() * g());
+    xnnpack::Buffer<uint32_t> x_ref(g() * n());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), std::ref(u32rng));
-      std::fill(x_ref.begin(), x_ref.end(), 0xA55A5AA5);
 
       // Call optimized micro-kernel.
       zip(n() * sizeof(uint32_t), x.data(), x_ref.data());
@@ -139,12 +129,11 @@ class ZipMicrokernelTester {
       return std::uniform_int_distribution<uint32_t>()(rng);
     };
 
-    std::vector<uint32_t> x(n() * g());
-    std::vector<uint32_t> x_ref(g() * n());
+    xnnpack::Buffer<uint32_t> x(n() * g());
+    xnnpack::Buffer<uint32_t> x_ref(g() * n());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), std::ref(u32rng));
-      std::fill(x_ref.begin(), x_ref.end(), 0xA55A5AA5);
 
       // Call optimized micro-kernel.
       zip(n() * sizeof(uint32_t), g(), x.data(), x_ref.data());

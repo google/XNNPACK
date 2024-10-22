@@ -13,9 +13,9 @@
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -482,6 +482,30 @@ XNN_INTERNAL size_t xnn_packed_stride_kai_qs4_weights_and_biases(
     const struct xnn_gemm_config* gemm_config,  //
     size_t k,                                   //
     size_t k_stride,                            //
+    size_t extra_bytes);
+
+XNN_INTERNAL void xnn_pack_kai_qb4_weights_and_biases(
+    uint32_t flags,                                //
+    const struct xnn_gemm_config* gemm_config,     //
+    size_t input_channels,                         //
+    size_t output_channels,                        //
+    size_t groups,                                 //
+    size_t block_size,                             //
+    const void* accumulator_init,                  //
+    const void* weights,                           //
+    xnn_init_scale_params_fn init_extra_data0_fn,  //
+    const void* extra_data0,                       //
+    size_t extra_data0_element_size,               //
+    xnn_init_scale_params_fn init_extra_data1_fn,  //
+    const void* extra_data1,                       //
+    size_t extra_data1_element_size,               //
+    void* packed_weights_ptr,                      //
+    const void* params);
+
+XNN_INTERNAL size_t xnn_packed_stride_kai_qb4_weights_and_biases(
+    const struct xnn_gemm_config* gemm_config,  //
+    size_t k,                                   //
+    size_t block_size,                          //
     size_t extra_bytes);
 #endif  // XNN_ENABLE_KLEIDIAI
 
@@ -1333,31 +1357,6 @@ XNN_INTERNAL void xnn_pack_f32_to_f16_vmulcaddc_w(
   xnn_float16* packed_weights,
   const void* params);
 
-
-// Pack functions for prelu weights.
-typedef void (*xnn_pack_prelu_w_fn)(
-  size_t input_channels,
-  size_t slope_channels,
-  const void* slope_data,
-  void* packed_weights);
-
-XNN_INTERNAL void xnn_pack_f32_prelu_w(
-  size_t input_channels,
-  size_t slope_channels,
-  const float* slope_data,
-  float* packed_weights);
-
-XNN_INTERNAL void xnn_pack_f16_prelu_w(
-  size_t input_channels,
-  size_t slope_channels,
-  const uint16_t* slope_data,
-  uint16_t* packed_weights);
-
-XNN_INTERNAL void xnn_pack_f32_to_f16_prelu_w(
-  size_t input_channels,
-  size_t slope_channels,
-  const float* slope_data,
-  xnn_float16* packed_weights);
 
 // Sparse packing functions.
 

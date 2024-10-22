@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/microfnptr.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
 class RAddExtExpMicrokernelTester {
@@ -47,7 +48,7 @@ class RAddExtExpMicrokernelTester {
       return std::uniform_real_distribution<float>(90.0f, 100.0f)(rng);
     };
 
-    std::vector<float> x(elements() + XNN_EXTRA_BYTES / sizeof(float));
+    xnnpack::Buffer<float> x(elements() + XNN_EXTRA_BYTES / sizeof(float));
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), std::ref(f32rng));
 

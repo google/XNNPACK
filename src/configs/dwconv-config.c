@@ -289,48 +289,51 @@ static void init_f32_dwconv_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-      f32_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_3p16c__avx512f;
-      f32_dwconv_config[0].init.f32 = xnn_init_f32_minmax_scalar_params;
-      f32_dwconv_config[0].channel_tile = 16;
-      f32_dwconv_config[0].channel_subtile = 16;
-      f32_dwconv_config[0].channel_round = 1;
-      f32_dwconv_config[0].primary_tile = 3;
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_3p16c__avx512f;
+        f32_dwconv_config[0].init.f32 = xnn_init_f32_minmax_scalar_params;
+        f32_dwconv_config[0].channel_tile = 16;
+        f32_dwconv_config[0].channel_subtile = 16;
+        f32_dwconv_config[0].channel_round = 1;
+        f32_dwconv_config[0].primary_tile = 3;
 
-      f32_dwconv_config[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_4p16c__avx512f;
-      f32_dwconv_config[1].init.f32 = xnn_init_f32_minmax_scalar_params;
-      f32_dwconv_config[1].channel_tile = 16;
-      f32_dwconv_config[1].channel_subtile = 16;
-      f32_dwconv_config[1].channel_round = 1;
-      f32_dwconv_config[1].primary_tile = 4;
+        f32_dwconv_config[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_4p16c__avx512f;
+        f32_dwconv_config[1].init.f32 = xnn_init_f32_minmax_scalar_params;
+        f32_dwconv_config[1].channel_tile = 16;
+        f32_dwconv_config[1].channel_subtile = 16;
+        f32_dwconv_config[1].channel_round = 1;
+        f32_dwconv_config[1].primary_tile = 4;
 
-      f32_dwconv_config[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_9p16c__avx512f;
-      f32_dwconv_config[2].init.f32 = xnn_init_f32_minmax_scalar_params;
-      f32_dwconv_config[2].channel_tile = 16;
-      f32_dwconv_config[2].channel_subtile = 16;
-      f32_dwconv_config[2].channel_round = 1;
-      f32_dwconv_config[2].primary_tile = 9;
+        f32_dwconv_config[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_9p16c__avx512f;
+        f32_dwconv_config[2].init.f32 = xnn_init_f32_minmax_scalar_params;
+        f32_dwconv_config[2].channel_tile = 16;
+        f32_dwconv_config[2].channel_subtile = 16;
+        f32_dwconv_config[2].channel_round = 1;
+        f32_dwconv_config[2].primary_tile = 9;
 
-      // Multipass microkernel "acc" value should match unipass and also match across different hardware config.
-      // Accumulation (FMA) can produce different results, which results in tests only failing on certain platforms.
-      #if XNN_ENABLE_DWCONV_MULTIPASS
-        f32_dwconv_config[3].minmax.multipass = (xnn_dwconv_multipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_5f5m5l32c16s1r__avx512f;
-        f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_scalar_params;
-        f32_dwconv_config[3].channel_tile = 32;
-        f32_dwconv_config[3].channel_subtile = 16;
-        f32_dwconv_config[3].channel_round = 1;
-        f32_dwconv_config[3].primary_tile = 5;
-        f32_dwconv_config[3].middle_tile = 5;
-        f32_dwconv_config[3].last_tile = 5;
-      #else
-        f32_dwconv_config[3].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_25p16c__avx512f;
-        f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_scalar_params;
-        f32_dwconv_config[3].channel_tile = 16;
-        f32_dwconv_config[3].channel_subtile = 16;
-        f32_dwconv_config[3].channel_round = 1;
-        f32_dwconv_config[3].primary_tile = 25;
-      #endif  // XNN_ENABLE_DWCONV_MULTIPASS
-    } else if (hardware_config->use_x86_fma3) {
+        // Multipass microkernel "acc" value should match unipass and also match across different hardware config.
+        // Accumulation (FMA) can produce different results, which results in tests only failing on certain platforms.
+        #if XNN_ENABLE_DWCONV_MULTIPASS
+          f32_dwconv_config[3].minmax.multipass = (xnn_dwconv_multipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_5f5m5l32c16s1r__avx512f;
+          f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_scalar_params;
+          f32_dwconv_config[3].channel_tile = 32;
+          f32_dwconv_config[3].channel_subtile = 16;
+          f32_dwconv_config[3].channel_round = 1;
+          f32_dwconv_config[3].primary_tile = 5;
+          f32_dwconv_config[3].middle_tile = 5;
+          f32_dwconv_config[3].last_tile = 5;
+        #else
+          f32_dwconv_config[3].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_25p16c__avx512f;
+          f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_scalar_params;
+          f32_dwconv_config[3].channel_tile = 16;
+          f32_dwconv_config[3].channel_subtile = 16;
+          f32_dwconv_config[3].channel_round = 1;
+          f32_dwconv_config[3].primary_tile = 25;
+        #endif  // XNN_ENABLE_DWCONV_MULTIPASS
+      } else
+    #endif
+    if (hardware_config->use_x86_fma3) {
       f32_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_3p16c__fma3;
       f32_dwconv_config[0].init.f32 = xnn_init_f32_minmax_scalar_params;
       f32_dwconv_config[0].channel_tile = 16;
@@ -756,23 +759,26 @@ static void init_qs8_qc8w_dwconv_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
-      qs8_qc8w_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p32c__avx512skx_mul32;
-      qs8_qc8w_dwconv_config[0].init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
-      qs8_qc8w_dwconv_config[0].channel_tile = 32;
-      qs8_qc8w_dwconv_config[0].channel_subtile = 32;
-      qs8_qc8w_dwconv_config[0].channel_round = 1;
-      qs8_qc8w_dwconv_config[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_9p32c__avx512skx_mul32;
-      qs8_qc8w_dwconv_config[1].init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
-      qs8_qc8w_dwconv_config[1].channel_tile = 32;
-      qs8_qc8w_dwconv_config[1].channel_subtile = 32;
-      qs8_qc8w_dwconv_config[1].channel_round = 1;
-      qs8_qc8w_dwconv_config[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_25p32c__avx512skx_mul32;
-      qs8_qc8w_dwconv_config[2].init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
-      qs8_qc8w_dwconv_config[2].channel_tile = 32;
-      qs8_qc8w_dwconv_config[2].channel_subtile = 32;
-      qs8_qc8w_dwconv_config[2].channel_round = 1;
-    } else if (hardware_config->use_x86_avx2) {
+    #if XNN_ENABLE_AVX512SKX
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+        qs8_qc8w_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p32c__avx512skx_mul32;
+        qs8_qc8w_dwconv_config[0].init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
+        qs8_qc8w_dwconv_config[0].channel_tile = 32;
+        qs8_qc8w_dwconv_config[0].channel_subtile = 32;
+        qs8_qc8w_dwconv_config[0].channel_round = 1;
+        qs8_qc8w_dwconv_config[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_9p32c__avx512skx_mul32;
+        qs8_qc8w_dwconv_config[1].init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
+        qs8_qc8w_dwconv_config[1].channel_tile = 32;
+        qs8_qc8w_dwconv_config[1].channel_subtile = 32;
+        qs8_qc8w_dwconv_config[1].channel_round = 1;
+        qs8_qc8w_dwconv_config[2].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_25p32c__avx512skx_mul32;
+        qs8_qc8w_dwconv_config[2].init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
+        qs8_qc8w_dwconv_config[2].channel_tile = 32;
+        qs8_qc8w_dwconv_config[2].channel_subtile = 32;
+        qs8_qc8w_dwconv_config[2].channel_round = 1;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx2) {
       qs8_qc8w_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p16c__avx2_mul32;
       qs8_qc8w_dwconv_config[0].init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
       qs8_qc8w_dwconv_config[0].channel_tile = 16;
@@ -970,18 +976,21 @@ static void init_qs8_dwconv_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
-      qs8_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_9p32c__avx512skx_mul32;
-      qs8_dwconv_config[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_params;
-      qs8_dwconv_config[0].channel_tile = 32;
-      qs8_dwconv_config[0].channel_subtile = 32;
-      qs8_dwconv_config[0].channel_round = 1;
-      qs8_dwconv_config[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_25p32c__avx512skx_mul32;
-      qs8_dwconv_config[1].init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_params;
-      qs8_dwconv_config[1].channel_tile = 32;
-      qs8_dwconv_config[1].channel_subtile = 32;
-      qs8_dwconv_config[1].channel_round = 1;
-    } else if (hardware_config->use_x86_avx2) {
+    #if XNN_ENABLE_AVX512SKX
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+        qs8_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_9p32c__avx512skx_mul32;
+        qs8_dwconv_config[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_params;
+        qs8_dwconv_config[0].channel_tile = 32;
+        qs8_dwconv_config[0].channel_subtile = 32;
+        qs8_dwconv_config[0].channel_round = 1;
+        qs8_dwconv_config[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_25p32c__avx512skx_mul32;
+        qs8_dwconv_config[1].init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_params;
+        qs8_dwconv_config[1].channel_tile = 32;
+        qs8_dwconv_config[1].channel_subtile = 32;
+        qs8_dwconv_config[1].channel_round = 1;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx2) {
       qs8_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32;
       qs8_dwconv_config[0].init.qs8 = xnn_init_qs8_conv_minmax_fp32_scalar_params;
       qs8_dwconv_config[0].channel_tile = 16;
@@ -1134,18 +1143,21 @@ static void init_qu8_dwconv_config(void) {
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
-    if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
-      qu8_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_9p32c__avx512skx_mul32;
-      qu8_dwconv_config[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_params;
-      qu8_dwconv_config[0].channel_tile = 32;
-      qu8_dwconv_config[0].channel_subtile = 32;
-      qu8_dwconv_config[0].channel_round = 1;
-      qu8_dwconv_config[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_25p32c__avx512skx_mul32;
-      qu8_dwconv_config[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_params;
-      qu8_dwconv_config[1].channel_tile = 32;
-      qu8_dwconv_config[1].channel_subtile = 32;
-      qu8_dwconv_config[1].channel_round = 1;
-    } else if (hardware_config->use_x86_avx2) {
+    #if XNN_ENABLE_AVX512SKX
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
+        qu8_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_9p32c__avx512skx_mul32;
+        qu8_dwconv_config[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_params;
+        qu8_dwconv_config[0].channel_tile = 32;
+        qu8_dwconv_config[0].channel_subtile = 32;
+        qu8_dwconv_config[0].channel_round = 1;
+        qu8_dwconv_config[1].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_25p32c__avx512skx_mul32;
+        qu8_dwconv_config[1].init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_params;
+        qu8_dwconv_config[1].channel_tile = 32;
+        qu8_dwconv_config[1].channel_subtile = 32;
+        qu8_dwconv_config[1].channel_round = 1;
+      } else
+    #endif
+    if (hardware_config->use_x86_avx2) {
       qu8_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qu8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul32;
       qu8_dwconv_config[0].init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_params;
       qu8_dwconv_config[0].channel_tile = 16;

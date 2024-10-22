@@ -21,5 +21,5 @@ XNN_TEST_BINARY_BATCH_GT(ukernel, arch_flags, batch_tile, true, datatype, ukerne
 XNN_TEST_BINARY_INPLACE_A(ukernel, arch_flags, batch_tile, true, datatype, ukernel, VBinaryMicrokernelTester::OpType::Div, init_params);      \
 XNN_TEST_BINARY_INPLACE_B(ukernel, arch_flags, batch_tile, true, datatype, ukernel, VBinaryMicrokernelTester::OpType::Div, init_params);      \
 XNN_TEST_BINARY_INPLACE_A_AND_B(ukernel, arch_flags, batch_tile, true, datatype, ukernel, VBinaryMicrokernelTester::OpType::Div, init_params);
-#include "src/f16-vbinary/f16-vdivc.h"
+#include "f16-vbinary/f16-vdivc.h"
 #undef XNN_UKERNEL_WITH_PARAMS

@@ -12,7 +12,6 @@
 SET(PROD_SSE41_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-sse41-int16-u16.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-sse41-u8.c
-  src/f32-prelu/gen/f32-prelu-sse41-2x8.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x8-minmax-sse41-dup.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x8-minmax-sse41-dup.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-sse41-dup.c
@@ -83,7 +82,6 @@ SET(NON_PROD_SSE41_MICROKERNEL_SRCS
   src/f32-f16-vcvt/gen/f32-f16-vcvt-sse41-u16.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-sse41-u24.c
   src/f32-f16-vcvt/gen/f32-f16-vcvt-sse41-u32.c
-  src/f32-prelu/gen/f32-prelu-sse41-2x4.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x8-minmax-sse41-dup.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x8-minmax-sse41-dup.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-6x8-minmax-sse41-dup.c
@@ -280,7 +278,6 @@ SET(NON_PROD_SSE41_MICROKERNEL_SRCS
   src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-sse41-c32.c
   src/qs8-requantization/qs8-requantization-fp32-sse41.c
   src/qs8-requantization/qs8-requantization-gemmlowp-sse41.c
-  src/qs8-requantization/qs8-requantization-rndna-sse41.c
   src/qs8-requantization/qs8-requantization-rndnu-sse41-sra.c
   src/qs8-requantization/qs8-requantization-rndnu-sse41-srl.c
   src/qs8-vadd/gen/qs8-vadd-minmax-sse41-mul16-ld64-u16.c
@@ -374,7 +371,6 @@ SET(NON_PROD_SSE41_MICROKERNEL_SRCS
   src/qu8-igemm/gen/qu8-igemm-4x4c2s4-minmax-fp32-sse41-ld64.c
   src/qu8-igemm/gen/qu8-igemm-4x4c2s4-minmax-fp32-sse41-ld128.c
   src/qu8-requantization/qu8-requantization-gemmlowp-sse41.c
-  src/qu8-requantization/qu8-requantization-rndna-sse41.c
   src/qu8-vadd/gen/qu8-vadd-minmax-sse41-mul16-ld64-u16.c
   src/qu8-vadd/gen/qu8-vadd-minmax-sse41-mul32-ld32-u8.c
   src/qu8-vadd/gen/qu8-vadd-minmax-sse41-mul32-ld32-u16.c

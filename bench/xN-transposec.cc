@@ -9,16 +9,15 @@
 #include <numeric>
 #include <vector>
 
-#include <benchmark/benchmark.h>
-#include "bench/utils.h"
-
+#include "utils.h"
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/hardware-config.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/transpose.h"
+#include "xnnpack/buffer.h"
+#include <benchmark/benchmark.h>
 
 void transpose(benchmark::State& state, uint64_t arch_flags,
                xnn_transposec_ukernel_fn ukernel,
@@ -32,12 +31,11 @@ void transpose(benchmark::State& state, uint64_t arch_flags,
   const size_t tile_hbytes = height * element_size * sizeof(uint8_t);
   const size_t tile_wbytes = width * element_size * sizeof(uint8_t);
 
-  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> x(
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> x(
       height * width * element_size + XNN_EXTRA_BYTES / sizeof(uint8_t));
-  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> y(
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> y(
       height * width * element_size + XNN_EXTRA_BYTES / sizeof(uint8_t));
   std::iota(x.begin(), x.end(), 0);
-  std::fill(y.begin(), y.end(), 0);
 
   for (auto _ : state) {
     ukernel(x.data(), y.data(), tile_wbytes, tile_hbytes, width, height);
@@ -67,11 +65,11 @@ static void BenchmarkKernelSize(benchmark::internal::Benchmark* b)
                     element_size)                                             \
       ->Apply(BenchmarkKernelSize)                                            \
       ->UseRealTime();
-#include "src/x8-transposec/x8-transposec.h"
-#include "src/x16-transposec/x16-transposec.h"
-#include "src/x24-transposec/x24-transposec.h"
-#include "src/x32-transposec/x32-transposec.h"
-#include "src/x64-transposec/x64-transposec.h"
+#include "x8-transposec/x8-transposec.h"
+#include "x16-transposec/x16-transposec.h"
+#include "x24-transposec/x24-transposec.h"
+#include "x32-transposec/x32-transposec.h"
+#include "x64-transposec/x64-transposec.h"
 #undef XNN_TRANSPOSE_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

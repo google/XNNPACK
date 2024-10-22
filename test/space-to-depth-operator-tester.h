@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "xnnpack/buffer.h"
 #include "xnnpack.h"
 
 class SpaceToDepthOperatorTester {
@@ -119,14 +120,13 @@ class SpaceToDepthOperatorTester {
   }
 
   void TestNHWCxX8() const {
-    std::vector<int8_t> input(
+    xnnpack::Buffer<int8_t> input(
       (batch_size() * input_height() * input_width() - 1) * input_channels_stride()
       + input_channels() + XNN_EXTRA_BYTES / (sizeof(int8_t)));
-    std::vector<int8_t> output(
+    xnnpack::Buffer<int8_t> output(
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::iota(input.begin(), input.end(), 0);
-      std::fill(output.begin(), output.end(), INT8_C(0xAF));
 
       // Create, setup, run, and destroy Depth To Space operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -194,14 +194,13 @@ class SpaceToDepthOperatorTester {
   }
 
   void TestNHWCxX16() const {
-    std::vector<int16_t> input(
+    xnnpack::Buffer<int16_t> input(
       (batch_size() * input_height() * input_width() - 1) * input_channels_stride()
       + input_channels() + XNN_EXTRA_BYTES / (sizeof(int16_t)));
-    std::vector<int16_t> output(
+    xnnpack::Buffer<int16_t> output(
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::iota(input.begin(), input.end(), 0);
-      std::fill(output.begin(), output.end(), INT16_C(0xDEAD));
 
       // Create, setup, run, and destroy Depth To Space operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
@@ -269,14 +268,13 @@ class SpaceToDepthOperatorTester {
   }
 
   void TestNHWCxX32() const {
-    std::vector<int32_t> input(
+    xnnpack::Buffer<int32_t> input(
       (batch_size() * input_height() * input_width() - 1) * input_channels_stride()
       + input_channels() + XNN_EXTRA_BYTES / (sizeof(int32_t)));
-    std::vector<int32_t> output(
+    xnnpack::Buffer<int32_t> output(
       (batch_size() * output_height() * output_width() - 1) * output_channels_stride() + output_channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::iota(input.begin(), input.end(), 0);
-      std::fill(output.begin(), output.end(), INT32_C(0xDEADBEEF));
 
       // Create, setup, run, and destroy Depth To Space operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));

@@ -63,5 +63,5 @@ TEST(ukernel, special_values) {                                                 
     }                                                                                                            \
   }                                                                                                              \
 }
-#include "src/f32-vexp/f32-vexp.h"
+#include "f32-vexp/f32-vexp.h"
 #undef XNN_UKERNEL_WITH_PARAMS

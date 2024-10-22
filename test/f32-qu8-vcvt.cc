@@ -30,5 +30,5 @@ XNN_TEST_CVT_OVERFLOW(ukernel, arch_flags, batch_tile, datatype_in, datatype_out
                                                                                                                  \
 XNN_TEST_CVT_QMIN(ukernel, arch_flags, batch_tile, datatype_in, datatype_out, ukernel, init_params);             \
 XNN_TEST_CVT_QMAX(ukernel, arch_flags, batch_tile, datatype_in, datatype_out, ukernel, init_params);
-#include "src/f32-qu8-vcvt/f32-qu8-vcvt.h"
+#include "f32-qu8-vcvt/f32-qu8-vcvt.h"
 #undef XNN_CVT_UKERNEL_WITH_PARAMS

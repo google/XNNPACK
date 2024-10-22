@@ -83,10 +83,8 @@ NON_PROD_NEONDOT_MICROKERNEL_SRCS = [
     "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x8c4-minmax-fp32-neondot.c",
     "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x16c4-minmax-fp32-neondot.c",
     "src/qs8-rsum/gen/qs8-rsum-neondot-u16.c",
-    "src/qs8-rsum/gen/qs8-rsum-neondot-u32.c",
     "src/qs8-rsum/gen/qs8-rsum-neondot-u64-acc2.c",
     "src/qs8-rsum/gen/qs8-rsum-neondot-u64-acc4.c",
-    "src/qs8-rsum/gen/qs8-rsum-neondot-u64.c",
 ]
 
 ALL_NEONDOT_MICROKERNEL_SRCS = PROD_NEONDOT_MICROKERNEL_SRCS + NON_PROD_NEONDOT_MICROKERNEL_SRCS

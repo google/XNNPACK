@@ -459,7 +459,7 @@
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_VSCALEEXTEXP__AVX512F_P5_SCALEF_U16, elements_eq_16) {
     TEST_REQUIRES_X86_AVX512F;
     VScaleExtExpMicrokernelTester()
@@ -493,10 +493,10 @@
         .Test(xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u16);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_VSCALEEXTEXP__AVX512F_P5_SCALEF_U32, elements_eq_32) {
     TEST_REQUIRES_X86_AVX512F;
     VScaleExtExpMicrokernelTester()
@@ -530,10 +530,10 @@
         .Test(xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u32);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_VSCALEEXTEXP__AVX512F_P5_SCALEF_U48, elements_eq_48) {
     TEST_REQUIRES_X86_AVX512F;
     VScaleExtExpMicrokernelTester()
@@ -567,10 +567,10 @@
         .Test(xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u48);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_VSCALEEXTEXP__AVX512F_P5_SCALEF_U64, elements_eq_64) {
     TEST_REQUIRES_X86_AVX512F;
     VScaleExtExpMicrokernelTester()
@@ -604,10 +604,10 @@
         .Test(xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u64);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_VSCALEEXTEXP__AVX512F_P5_SCALEF_U80, elements_eq_80) {
     TEST_REQUIRES_X86_AVX512F;
     VScaleExtExpMicrokernelTester()
@@ -641,10 +641,10 @@
         .Test(xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u80);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_VSCALEEXTEXP__AVX512F_P5_SCALEF_U96, elements_eq_96) {
     TEST_REQUIRES_X86_AVX512F;
     VScaleExtExpMicrokernelTester()
@@ -678,10 +678,10 @@
         .Test(xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u96);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_VSCALEEXTEXP__AVX512F_P5_SCALEF_U112, elements_eq_112) {
     TEST_REQUIRES_X86_AVX512F;
     VScaleExtExpMicrokernelTester()
@@ -715,10 +715,10 @@
         .Test(xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u112);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_VSCALEEXTEXP__AVX512F_P5_SCALEF_U128, elements_eq_128) {
     TEST_REQUIRES_X86_AVX512F;
     VScaleExtExpMicrokernelTester()
@@ -752,10 +752,10 @@
         .Test(xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u128);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_VSCALEEXTEXP__AVX512F_P5_SCALEF_U144, elements_eq_144) {
     TEST_REQUIRES_X86_AVX512F;
     VScaleExtExpMicrokernelTester()
@@ -789,10 +789,10 @@
         .Test(xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u144);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_VSCALEEXTEXP__AVX512F_P5_SCALEF_U160, elements_eq_160) {
     TEST_REQUIRES_X86_AVX512F;
     VScaleExtExpMicrokernelTester()
@@ -826,10 +826,10 @@
         .Test(xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u160);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_VSCALEEXTEXP__AVX512F_P5_SCALEF_U176, elements_eq_176) {
     TEST_REQUIRES_X86_AVX512F;
     VScaleExtExpMicrokernelTester()
@@ -863,10 +863,10 @@
         .Test(xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u176);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   TEST(F32_VSCALEEXTEXP__AVX512F_P5_SCALEF_U192, elements_eq_192) {
     TEST_REQUIRES_X86_AVX512F;
     VScaleExtExpMicrokernelTester()
@@ -900,4 +900,4 @@
         .Test(xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u192);
     }
   }
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)

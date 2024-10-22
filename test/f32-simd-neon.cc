@@ -932,7 +932,6 @@ TEST_F(F32SimdNEONTest, StoreTail) {
   const xnn_simd_f32_t a = xnn_loadu_f32(inputs_.data());
   for (size_t num_elements = 1; num_elements < xnn_simd_size_f32;
       num_elements++) {
-    std::fill(output_.begin(), output_.end(), 0.0f);
     xnn_store_tail_f32(output_.data(), a, num_elements);
     for (size_t k = 0; k < num_elements; k++) {
       ASSERT_EQ(output_[k], inputs_[k]);

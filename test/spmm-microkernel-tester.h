@@ -15,12 +15,10 @@
 #include <vector>
 
 #include <gtest/gtest.h>
-#include <fp16/fp16.h>
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
+#include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
-
 
 class SpMMMicrokernelTester {
  public:
@@ -129,25 +127,24 @@ class SpMMMicrokernelTester {
     std::uniform_real_distribution<float> f32dist;
     std::uniform_real_distribution<float> pdist;
 
-    std::vector<float, AlignedAllocator<float, 64>> input(k() * m());
+    xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> input(k() * m());
     // Think of b as (n/nr + n % nr) x k, expansion happens later.
     const size_t ncols = n() / nr() + n() % nr();
-    std::vector<float> b(ncols * k());
-    std::vector<float> bias(n());
+    xnnpack::Buffer<float> b(ncols * k());
+    xnnpack::Buffer<float> bias(n());
     // Number of non-zero weights per N (output channel).
-    std::vector<uint32_t> nmap(n());
+    xnnpack::Buffer<uint32_t> nmap(n());
     // Mapping from index of non-zero weight to increment of K (input channel) following this index.
-    std::vector<int32_t> dmap(n() * k());
-    std::vector<float> w(n() * k() + n());
-    std::vector<float> output((n() - 1) * output_stride() + m());
-    std::vector<float> output_ref(n() * m());
+      // Micro-kernel can access one element beyond w and dmap for software pipelining.
+    xnnpack::Buffer<int32_t> dmap(n() * k() + 1);
+    xnnpack::Buffer<float> w(n() * k() + n() + 1);
+    xnnpack::Buffer<float> output((n() - 1) * output_stride() + m());
+    xnnpack::Buffer<float> output_ref(n() * m());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), nanf(""));
-      std::fill(output_ref.begin(), output_ref.end(), 0.0f);
       std::fill(nmap.begin(), nmap.end(), 0);
       std::fill(dmap.begin(), dmap.end(), 0);
       std::fill(w.begin(), w.end(), 0.0f);
@@ -213,11 +210,11 @@ class SpMMMicrokernelTester {
       // Generate expanded b which will be used in reference calculation.
       // Everywhere there is input non-zero in the original we copy it and add an
       // adjacent non-zero with incremented weight value.
-      std::vector<float> b_full(n() * k());
+      xnnpack::Buffer<float> b_full(n() * k());
       if (nr() == 1) {
-         b_full = b;
-      }
-      else {
+        std::copy(b.begin(), b.end(), b_full.begin());
+      } else {
+        std::fill(b_full.begin(), b_full.end(), 0.0f);
         for (size_t nn = 0; nn < n() / nr(); nn++) {
           for (size_t kk = 0; kk < k(); kk++) {
             if (b[nn * k() + kk] != 0.0f) {
@@ -243,10 +240,6 @@ class SpMMMicrokernelTester {
           }
         }
       }
-
-      // Micro-kernel can access one element beyond w and dmap for software pipelining.
-      w.resize(wcnt + 1);
-      dmap.resize(nnz + 1);
 
       // Compute clamping parameters.
       const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
@@ -293,25 +286,24 @@ class SpMMMicrokernelTester {
     std::uniform_real_distribution<float> f32dist;
     std::uniform_real_distribution<float> pdist;
 
-    std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> input(k() * m());
+    xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> input(k() * m());
     // Think of b as (n/nr + n % nr) x k, expansion happens later.
     const size_t ncols = n() / nr() + n() % nr();
-    std::vector<xnn_float16> b(ncols * k());
-    std::vector<xnn_float16> bias(n());
+    xnnpack::Buffer<xnn_float16> b(ncols * k());
+    xnnpack::Buffer<xnn_float16> bias(n());
     // Number of non-zero weights per N (output channel).
-    std::vector<uint32_t> nmap(n());
+    xnnpack::Buffer<uint32_t> nmap(n());
     // Mapping from index of non-zero weight to increment of K (input channel) following this index.
-    std::vector<int32_t> dmap(n() * k());
-    std::vector<xnn_float16> w(n() * k() + n());
-    std::vector<xnn_float16> output((n() - 1) * output_stride() + m());
-    std::vector<float> output_ref(n() * m());
+      // Micro-kernel can access one element beyond w and dmap for software pipelining.
+    xnnpack::Buffer<int32_t> dmap(n() * k() + 1);
+    xnnpack::Buffer<xnn_float16> w(n() * k() + n() + 1);
+    xnnpack::Buffer<xnn_float16> output((n() - 1) * output_stride() + m());
+    xnnpack::Buffer<float> output_ref(n() * m());
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(b.begin(), b.end(), [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-      std::fill(output.begin(), output.end(), std::nanf(""));
-      std::fill(output_ref.begin(), output_ref.end(), 0.0f);
       std::fill(nmap.begin(), nmap.end(), 0);
       std::fill(dmap.begin(), dmap.end(), 0);
       std::fill(w.begin(), w.end(), 0);
@@ -377,11 +369,10 @@ class SpMMMicrokernelTester {
       // Generate expanded b which will be used in reference calculation.
       // Everywhere there is input non-zero in the original we copy it and add an
       // adjacent non-zero with incremented weight value.
-      std::vector<xnn_float16> b_full(n() * k());
+      xnnpack::Buffer<xnn_float16> b_full(n() * k());
       if (nr() == 1) {
-         b_full = b;
-      }
-      else {
+        std::copy(b.begin(), b.end(), b_full.begin());
+      } else {
         for (size_t nn = 0; nn < n() / nr(); nn++) {
           for (size_t kk = 0; kk < k(); kk++) {
             if (b[nn * k() + kk] != 0.0f) {
@@ -408,10 +399,6 @@ class SpMMMicrokernelTester {
           }
         }
       }
-
-      // Micro-kernel can access one element beyond w and dmap for software pipelining.
-      w.resize(wcnt + 1);
-      dmap.resize(nnz + 1);
 
       // Compute clamping parameters.
       const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());

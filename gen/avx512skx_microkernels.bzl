@@ -35,7 +35,7 @@ PROD_AVX512SKX_MICROKERNEL_SRCS = [
     "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x16c8-minmax-fp32-avx512skx-prfm.c",
     "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-7x16c8-minmax-fp32-avx512skx-prfm.c",
     "src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-avx512skx-c64.c",
-    "src/qs8-rsum/gen/qs8-rsum-avx512skx-u128.c",
+    "src/qs8-rsum/gen/qs8-rsum-avx512skx-u128-acc2.c",
     "src/qs8-vadd/gen/qs8-vadd-minmax-avx512skx-mul32-ld128-u16.c",
     "src/qs8-vaddc/gen/qs8-vaddc-minmax-avx512skx-mul32-ld128-u16.c",
     "src/qu8-dwconv/gen/qu8-dwconv-9p32c-minmax-fp32-avx512skx-mul32.c",
@@ -47,6 +47,8 @@ PROD_AVX512SKX_MICROKERNEL_SRCS = [
     "src/qu8-igemm/gen/qu8-igemm-7x16c8-minmax-fp32-avx512skx-prfm.c",
     "src/qu8-vadd/gen/qu8-vadd-minmax-avx512skx-mul32-ld128-u16.c",
     "src/qu8-vaddc/gen/qu8-vaddc-minmax-avx512skx-mul32-ld128-u16.c",
+    "src/s8-vclamp/s8-vclamp-avx512skx-u256.c",
+    "src/u8-vclamp/u8-vclamp-avx512skx-u256.c",
     "src/x8-lut/gen/x8-lut-avx512skx-vpshufb-u64.c",
 ]
 
@@ -188,10 +190,8 @@ NON_PROD_AVX512SKX_MICROKERNEL_SRCS = [
     "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-8x16c8-minmax-fp32-avx512skx.c",
     "src/qs8-rdsum/gen/qs8-rdsum-7p7x-minmax-fp32-avx512skx-c128.c",
     "src/qs8-rsum/gen/qs8-rsum-avx512skx-u64.c",
-    "src/qs8-rsum/gen/qs8-rsum-avx512skx-u128-acc2.c",
     "src/qs8-rsum/gen/qs8-rsum-avx512skx-u256-acc2.c",
     "src/qs8-rsum/gen/qs8-rsum-avx512skx-u256-acc4.c",
-    "src/qs8-rsum/gen/qs8-rsum-avx512skx-u256.c",
     "src/qs8-vadd/gen/qs8-vadd-minmax-avx512skx-mul32-ld128-u32.c",
     "src/qs8-vaddc/gen/qs8-vaddc-minmax-avx512skx-mul32-ld128-u32.c",
     "src/qu8-dwconv/gen/qu8-dwconv-5f5m5l16c16s1r-minmax-fp32-avx512skx-mul32.c",

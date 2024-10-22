@@ -17,6 +17,7 @@ load(
     "xnnpack_min_size_copts",
     "xnnpack_slinky_deps",
     "xnnpack_slinky_srcs",
+    "xnnpack_source_list_file",
     "xnnpack_transitive_source_list",
     "xnnpack_visibility",
 )
@@ -43,6 +44,14 @@ load(
     "prod_asm_srcs_for_arch",
     "prod_c_srcs_for_arch",
 )
+load(
+    ":build_srcs.bzl",
+    "LOGGING_SRCS",
+    "OPERATOR_SRCS",
+    "SUBGRAPH_SRCS",
+    "TABLE_SRCS",
+    "XNNPACK_SRCS",
+)
 
 licenses(["notice"])
 
@@ -50,109 +59,15 @@ exports_files(["LICENSE"])
 
 exports_files(["preamble.js.lds"])
 
-OPERATOR_SRCS = [
-    "src/operator-delete.c",
-    "src/operator-run.c",
-    "src/operators/argmax-pooling-nhwc.c",
-    "src/operators/average-pooling-nhwc.c",
-    "src/operators/batch-matrix-multiply-nc.c",
-    "src/operators/binary-elementwise-nd.c",
-    "src/operators/channel-shuffle-nc.c",
-    "src/operators/constant-pad-nd.c",
-    "src/operators/convolution-nchw.c",
-    "src/operators/convolution-nhwc.c",
-    "src/operators/deconvolution-nhwc.c",
-    "src/operators/dynamic-fully-connected-nc.c",
-    "src/operators/fully-connected-nc.c",
-    "src/operators/global-average-pooling-ncw.c",
-    "src/operators/global-average-pooling-nwc.c",
-    "src/operators/lut-elementwise-nc.c",
-    "src/operators/max-pooling-nhwc.c",
-    "src/operators/prelu-nc.c",
-    "src/operators/reduce-nd.c",
-    "src/operators/resize-bilinear-nchw.c",
-    "src/operators/resize-bilinear-nhwc.c",
-    "src/operators/rope-nthc.c",
-    "src/operators/scaled-dot-product-attention-nhtc.c",
-    "src/operators/slice-nd.c",
-    "src/operators/softmax-nc.c",
-    "src/operators/transpose-nd.c",
-    "src/operators/unary-elementwise-nc.c",
-    "src/operators/unpooling-nhwc.c",
-]
-
-SUBGRAPH_SRCS = [
-    "src/memory-planner.c",
-    "src/runtime.c",
-    "src/subgraph.c",
-    "src/subgraph/abs.c",
-    "src/subgraph/argmax-pooling-2d.c",
-    "src/subgraph/average-pooling-2d.c",
-    "src/subgraph/bankers-rounding.c",
-    "src/subgraph/batch-matrix-multiply.c",
-    "src/subgraph/binary.c",
-    "src/subgraph/ceiling.c",
-    "src/subgraph/clamp.c",
-    "src/subgraph/concatenate.c",
-    "src/subgraph/convert.c",
-    "src/subgraph/convolution-2d.c",
-    "src/subgraph/copy.c",
-    "src/subgraph/deconvolution-2d.c",
-    "src/subgraph/deprecated.c",
-    "src/subgraph/depth-to-space-2d.c",
-    "src/subgraph/depthwise-convolution-2d.c",
-    "src/subgraph/elu.c",
-    "src/subgraph/even-split.c",
-    "src/subgraph/exp.c",
-    "src/subgraph/floor.c",
-    "src/subgraph/fully-connected-sparse.c",
-    "src/subgraph/fully-connected.c",
-    "src/subgraph/gelu.c",
-    "src/subgraph/global-average-pooling.c",
-    "src/subgraph/global-sum-pooling.c",
-    "src/subgraph/hardswish.c",
-    "src/subgraph/leaky-relu.c",
-    "src/subgraph/log.c",
-    "src/subgraph/max-pooling-2d.c",
-    "src/subgraph/negate.c",
-    "src/subgraph/prelu.c",
-    "src/subgraph/reciprocal-square-root.c",
-    "src/subgraph/reshape-helpers.c",
-    "src/subgraph/rope.c",
-    "src/subgraph/scaled-dot-product-attention.c",
-    "src/subgraph/sigmoid.c",
-    "src/subgraph/softmax.c",
-    "src/subgraph/space-to-depth-2d.c",
-    "src/subgraph/square-root.c",
-    "src/subgraph/square.c",
-    "src/subgraph/static-constant-pad.c",
-    "src/subgraph/static-mean.c",
-    "src/subgraph/static-resize-bilinear-2d.c",
-    "src/subgraph/static-slice.c",
-    "src/subgraph/static-transpose.c",
-    "src/subgraph/tanh.c",
-    "src/subgraph/unpooling-2d.c",
-    "src/subgraph/validation.c",
-    "src/tensor.c",
-]
-
-TABLE_SRCS = [
-    "src/tables/exp2-k-over-64.c",
-    "src/tables/exp2-k-over-2048.c",
-    "src/tables/exp2minus-k-over-4.c",
-    "src/tables/exp2minus-k-over-8.c",
-    "src/tables/exp2minus-k-over-16.c",
-    "src/tables/exp2minus-k-over-32.c",
-    "src/tables/exp2minus-k-over-64.c",
-    "src/tables/exp2minus-k-over-2048.c",
-    "src/tables/vlog.c",
-]
-
 MICROKERNEL_DEFS = [
     "src/bf16-vabs/bf16-vabs.h",
     "src/f16-avgpool/f16-avgpool-minmax.h",
+    "src/f16-dwconv/f16-dwconv-minmax-multipass.h",
+    "src/f16-dwconv/f16-dwconv-minmax-unipass.h",
+    "src/f16-f32-vcvt/f16-f32-vcvt.h",
     "src/f16-maxpool/f16-maxpool-minmax.h",
     "src/f16-pavgpool/f16-pavgpool-minmax.h",
+    "src/f16-qs8-vcvt/f16-qs8-vcvt.h",
     "src/f16-vabs/f16-vabs.h",
     "src/f16-vbinary/f16-vadd.h",
     "src/f16-vbinary/f16-vaddc.h",
@@ -189,8 +104,15 @@ MICROKERNEL_DEFS = [
     "src/f16-vsqrt/f16-vsqrt.h",
     "src/f16-vtanh/f16-vtanh.h",
     "src/f32-avgpool/f32-avgpool-minmax.h",
+    "src/f32-dwconv/f32-dwconv-minmax-multipass.h",
+    "src/f32-dwconv/f32-dwconv-minmax-unipass.h",
+    "src/f32-dwconv/f32-dwconv-multipass.h",
+    "src/f32-dwconv/f32-dwconv-unipass.h",
+    "src/f32-f16-vcvt/f32-f16-vcvt.h",
     "src/f32-maxpool/f32-maxpool-minmax.h",
     "src/f32-pavgpool/f32-pavgpool-minmax.h",
+    "src/f32-qs8-vcvt/f32-qs8-vcvt.h",
+    "src/f32-qu8-vcvt/f32-qu8-vcvt.h",
     "src/f32-vabs/f32-vabs.h",
     "src/f32-vbinary/f32-vadd.h",
     "src/f32-vbinary/f32-vaddc.h",
@@ -233,18 +155,34 @@ MICROKERNEL_DEFS = [
     "src/f32-vsqr/f32-vsqr.h",
     "src/f32-vsqrt/f32-vsqrt.h",
     "src/f32-vtanh/f32-vtanh.h",
+    "src/qs8-dwconv/qs8-dwconv-minmax-multipass-fp32.h",
+    "src/qs8-dwconv/qs8-dwconv-minmax-multipass-rndnu.h",
+    "src/qs8-dwconv/qs8-dwconv-minmax-unipass-fp32.h",
+    "src/qs8-dwconv/qs8-dwconv-minmax-unipass-rndnu.h",
+    "src/qs8-f16-vcvt/qs8-f16-vcvt.h",
+    "src/qs8-f32-vcvt/qs8-f32-vcvt.h",
     "src/qs8-packw/qs8-packw.h",
+    "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-multipass-fp32.h",
+    "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-unipass-fp32.h",
     "src/qs8-vadd/qs8-vadd-minmax.h",
     "src/qs8-vaddc/qs8-vaddc-minmax.h",
+    "src/qs8-vcvt/qs8-vcvt.h",
     "src/qs8-vhswish/qs8-vhswish.h",
     "src/qs8-vlrelu/qs8-vlrelu.h",
     "src/qs8-vmul/qs8-vmul-minmax-fp32.h",
     "src/qs8-vmul/qs8-vmul-minmax-rndnu.h",
     "src/qs8-vmulc/qs8-vmulc-minmax-fp32.h",
     "src/qs8-vmulc/qs8-vmulc-minmax-rndnu.h",
+    "src/qs16-qs8-vcvt/qs16-qs8-vcvt.h",
     "src/qu8-avgpool/qu8-avgpool-minmax.h",
+    "src/qu8-dwconv/qu8-dwconv-minmax-multipass-fp32.h",
+    "src/qu8-dwconv/qu8-dwconv-minmax-multipass-rndnu.h",
+    "src/qu8-dwconv/qu8-dwconv-minmax-unipass-fp32.h",
+    "src/qu8-dwconv/qu8-dwconv-minmax-unipass-rndnu.h",
+    "src/qu8-f32-vcvt/qu8-f32-vcvt.h",
     "src/qu8-vadd/qu8-vadd-minmax.h",
     "src/qu8-vaddc/qu8-vaddc-minmax.h",
+    "src/qu8-vcvt/qu8-vcvt.h",
     "src/qu8-vhswish/qu8-vhswish.h",
     "src/qu8-vlrelu/qu8-vlrelu.h",
     "src/qu8-vmul/qu8-vmul-minmax-fp32.h",
@@ -253,54 +191,27 @@ MICROKERNEL_DEFS = [
     "src/qu8-vmulc/qu8-vmulc-minmax-rndnu.h",
     "src/s8-maxpool/s8-maxpool-minmax.h",
     "src/s8-vclamp/s8-vclamp.h",
+    "src/s32-f32-vcvt/s32-f32-vcvt.h",
     "src/s32-vmul/s32-vmul.h",
     "src/s32-vmul/s32-vmulc.h",
     "src/u8-maxpool/u8-maxpool-minmax.h",
     "src/u8-vclamp/u8-vclamp.h",
+    "src/u32-f32-vcvt/u32-f32-vcvt.h",
+    "src/xx-fill/xx-fill.h",
+    "src/xx-pad/xx-pad.h",
+    "src/xx-transposev/xx-transposev.h",
     "src/x8-packq/x8-packq.h",
     "src/x8-packw/x8-packw.h",
+    "src/x8-transposec/x8-transposec.h",
     "src/x16-packw/x16-packw.h",
+    "src/x16-transposec/x16-transposec.h",
+    "src/x24-transposec/x24-transposec.h",
     "src/x32-packb/x32-packb.h",
     "src/x32-packw/x32-packw.h",
     "src/x32-packx/x32-packx.h",
-    "src/x32-zerob/x32-zerob.h",
-    "src/f16-f32-vcvt/f16-f32-vcvt.h",
-    "src/f32-qs8-vcvt/f32-qs8-vcvt.h",
-    "src/qs8-f16-vcvt/qs8-f16-vcvt.h",
-    "src/qu8-f32-vcvt/qu8-f32-vcvt.h",
-    "src/f16-qs8-vcvt/f16-qs8-vcvt.h",
-    "src/f32-qu8-vcvt/f32-qu8-vcvt.h",
-    "src/qs8-f32-vcvt/qs8-f32-vcvt.h",
-    "src/qu8-vcvt/qu8-vcvt.h",
-    "src/f32-f16-vcvt/f32-f16-vcvt.h",
-    "src/qs16-qs8-vcvt/qs16-qs8-vcvt.h",
-    "src/qs8-vcvt/qs8-vcvt.h",
-    "src/s32-f32-vcvt/s32-f32-vcvt.h",
-    "src/u32-f32-vcvt/u32-f32-vcvt.h",
-    "src/x8-transposec/x8-transposec.h",
-    "src/x16-transposec/x16-transposec.h",
-    "src/x24-transposec/x24-transposec.h",
     "src/x32-transposec/x32-transposec.h",
+    "src/x32-zerob/x32-zerob.h",
     "src/x64-transposec/x64-transposec.h",
-    "src/xx-transposev/xx-transposev.h",
-    "src/xx-fill/xx-fill.h",
-    "src/xx-pad/xx-pad.h",
-    "src/f16-dwconv/f16-dwconv-minmax-unipass.h",
-    "src/f32-dwconv/f32-dwconv-minmax-unipass.h",
-    "src/f32-dwconv/f32-dwconv-unipass.h",
-    "src/qs8-dwconv/qs8-dwconv-minmax-unipass-fp32.h",
-    "src/qs8-dwconv/qs8-dwconv-minmax-unipass-rndnu.h",
-    "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-unipass-fp32.h",
-    "src/qu8-dwconv/qu8-dwconv-minmax-unipass-fp32.h",
-    "src/qu8-dwconv/qu8-dwconv-minmax-unipass-rndnu.h",
-    "src/f16-dwconv/f16-dwconv-minmax-multipass.h",
-    "src/f32-dwconv/f32-dwconv-minmax-multipass.h",
-    "src/f32-dwconv/f32-dwconv-multipass.h",
-    "src/qs8-dwconv/qs8-dwconv-minmax-multipass-fp32.h",
-    "src/qs8-dwconv/qs8-dwconv-minmax-multipass-rndnu.h",
-    "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-multipass-fp32.h",
-    "src/qu8-dwconv/qu8-dwconv-minmax-multipass-fp32.h",
-    "src/qu8-dwconv/qu8-dwconv-minmax-multipass-rndnu.h",
 ]
 
 MICROKERNEL_HDRS = [
@@ -322,7 +233,6 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/pad.h",
     "src/xnnpack/pavgpool.h",
     "src/xnnpack/ppmm.h",
-    "src/xnnpack/prelu.h",
     "src/xnnpack/quantization.h",
     "src/xnnpack/raddexpminusmax.h",
     "src/xnnpack/raddextexp.h",
@@ -333,9 +243,6 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/unpool.h",
     "src/xnnpack/vbinary.h",
     "src/xnnpack/vcvt.h",
-    "src/xnnpack/vhswish.h",
-    "src/xnnpack/vlog.h",
-    "src/xnnpack/vlrelu.h",
     "src/xnnpack/vmulcaddc.h",
     "src/xnnpack/vscaleexpminusmax.h",
     "src/xnnpack/vscaleextexp.h",
@@ -412,12 +319,12 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":config_hdrs",
+        ":fp16",
         ":math",
         ":memory",
         ":microparams",
         ":mutex",
         ":xnnpack_h",
-        "@FP16",
     ],
 )
 
@@ -493,36 +400,7 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "microkernel_configs",
-    srcs = [
-        "src/configs/argmaxpool-config.c",
-        "src/configs/avgpool-config.c",
-        "src/configs/binary-elementwise-config.c",
-        "src/configs/cmul-config.c",
-        "src/configs/conv-hwc2chw-config.c",
-        "src/configs/dwconv-config.c",
-        "src/configs/dwconv2d-chw-config.c",
-        "src/configs/gavgpool-config.c",
-        "src/configs/gavgpool-cw-config.c",
-        "src/configs/gemm-config.c",
-        "src/configs/ibilinear-chw-config.c",
-        "src/configs/ibilinear-config.c",
-        "src/configs/lut32norm-config.c",
-        "src/configs/maxpool-config.c",
-        "src/configs/pavgpool-config.c",
-        "src/configs/prelu-config.c",
-        "src/configs/raddstoreexpminusmax-config.c",
-        "src/configs/reduce-config.c",
-        "src/configs/rmax-config.c",
-        "src/configs/spmm-config.c",
-        "src/configs/transpose-config.c",
-        "src/configs/unary-elementwise-config.c",
-        "src/configs/unpool-config.c",
-        "src/configs/vmulcaddc-config.c",
-        "src/configs/x8-lut-config.c",
-        "src/configs/xx-fill-config.c",
-        "src/configs/xx-pad-config.c",
-        "src/configs/zip-config.c",
-    ],
+    srcs = XNNPACK_SRCS,
     hdrs = [
         "src/xnnpack/config.h",
         "src/xnnpack/config-types.h",
@@ -547,7 +425,6 @@ xnnpack_cc_library(
         ":packing",
         ":prod_microkernels",
         ":xnnpack_h",
-        "@FP16",
     ] + select({
         ":cpuinfo_enabled": ["@cpuinfo"],
         "//conditions:default": [],
@@ -569,12 +446,18 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "fp16",
+    hdrs = ["src/xnnpack/fp16.h"],
+    compatible_with = [],
+)
+
+xnnpack_cc_library(
     name = "math",
     hdrs = ["src/xnnpack/math.h"],
     deps = [
         ":common",
         ":config_hdrs",
-        "@FP16",
+        ":fp16",
     ],
 )
 
@@ -682,6 +565,11 @@ xnnpack_cc_library(
     ],
 )
 
+xnnpack_cxx_library(
+    name = "buffer",
+    hdrs = ["src/xnnpack/buffer.h"],
+)
+
 xnnpack_cc_library(
     name = "isa_checks",
     hdrs = [
@@ -717,7 +605,6 @@ xnnpack_cc_library(
         ":common",
         ":math",
         ":microparams",
-        "@FP16",
     ],
 )
 
@@ -781,24 +668,13 @@ filegroup(
 # Generate the prod/all microkernel libraries for each architecture.
 [
     [
-        genrule(
-            name = arch + "_prod_microkernel_srcs",
-            srcs = prod_c_srcs_for_arch(arch),
-            outs = [arch + "_prod_microkernels.c"],
-            cmd = "if [ -z \"$(SRCS)\" ]; then " +
-                  "  echo \"\" > $@; " +
-                  "else " +
-                  "  cat $(SRCS) | grep -E '^#include ' | sort -u > $@; " +
-                  "  cat $(SRCS) | grep -v -E '^#include ' >> $@; " +
-                  "fi",
-            compatible_with = [],
-        ),
         xnnpack_cc_library_for_arch(
             name = arch + "_prod_microkernels",
-            srcs = prod_asm_srcs_for_arch(arch) + [":" + arch + "_prod_microkernel_srcs"],
+            srcs = prod_asm_srcs_for_arch(arch) + prod_c_srcs_for_arch(arch),
             arch = arch,
             compatible_with = [],
             defines = xnnpack_configurable_defines(),
+            # Internal build flag.
             tags = ["nobuilder"],
             deps = MICROKERNEL_DEPS,
         ),
@@ -829,14 +705,7 @@ xnnpack_cc_library(
 
 xnnpack_cc_library(
     name = "logging",
-    srcs = [
-        "src/enums/allocation-type.c",
-        "src/enums/datatype-strings.c",
-        "src/enums/microkernel-type.c",
-        "src/enums/node-type.c",
-        "src/enums/operator-type.c",
-        "src/log.c",
-    ],
+    srcs = LOGGING_SRCS,
     hdrs = ["src/xnnpack/log.h"],
     copts = select({
         ":debug_build": [],
@@ -914,7 +783,6 @@ xnnpack_cc_library(
         ":microparams",
         ":operator_h",
         ":xnnpack_h",
-        "@FP16",
         "@FXdiv",
     ],
 )
@@ -933,11 +801,12 @@ xnnpack_cxx_library(
         ":params",
         ":unaligned",
         ":xnnpack_h",
-        "@FP16",
     ] + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
-        "@KleidiAI//kai/ukernels/matmul:rhs_pack_kxn_qsi4cxp_qsu4cxs1s0",
-        "@KleidiAI//kai/ukernels/matmul:rhs_pack_nxk_qsi4cxp_qsu4cxs1s0",
+        "@KleidiAI//kai/ukernels/matmul:rhs_pack_kxn_qsi4cxp_qs4cxs1s0",
+        "@KleidiAI//kai/ukernels/matmul:rhs_pack_nxk_qsi4cxp_qs4cxs1s0",
+        "@KleidiAI//kai/ukernels/matmul:rhs_pack_nxk_qsi4c32p_qsu4c32s1s0",
+        "@KleidiAI//kai/ukernels/matmul:rhs_pack_kxn_qsi4c32p_qsu4c32s1s0",
     ]),
 )
 
@@ -952,19 +821,46 @@ py_binary(
     }),
 )
 
+# This target gathers the transitive sources from its deps and adds them to the
+# srcs attribute.
 xnnpack_transitive_source_list(
     name = "build_identifier_ukernel_srcs",
+    srcs = ["src/packing.cc"],
     deps = [":prod_microkernels"],
 )
 
+# Windows builds fail on the generate_build_identifier genrule because the
+# command line is too long when expanding the source file paths to feed to the
+# Python generation script. To work around this, we write those files to a
+# single file that we.
+#
+# This is what the below command does. It ONLY exposes the list file as an output.
+#
+# See the next genrule comment for the rest of the explanation.
+xnnpack_source_list_file(
+    name = "build_identifier_ukernel_srcs_list",
+    srcs = [":build_identifier_ukernel_srcs"],
+    compatible_with = [],
+)
+
+# When the python script gets executed, the files it has access to are limited
+# to what is explicitely requested in the `srcs` attribute. We add the "list"
+# and the source paths to the sources to make them available to the Python
+# script and only expand the list file path to keep the command line short
+# enough to avoid having Windows break down.
+#
+# I have not found a way to transitively pull the source files from the "list"
+# target and make them available from the Python script without adding them to
+# the `srcs` attribute (making them expanded in the "$(SRCS)" variable), thus
+# the repetition.
 genrule(
     name = "generate_build_identifier",
     srcs = [
-        "src/packing.cc",
+        ":build_identifier_ukernel_srcs_list",
         ":build_identifier_ukernel_srcs",
     ],
     outs = ["src/build_identifier.c"],
-    cmd = "$(location generate_build_identifier_py) --output $@ $(SRCS)",
+    cmd = "$(location generate_build_identifier_py) --output $@ --input_file_list $(location :build_identifier_ukernel_srcs_list)",
     tools = [":generate_build_identifier_py"],
 )
 
@@ -1066,6 +962,7 @@ xnnpack_cc_library(
         ":allocator",
         ":cache",
         ":common",
+        ":fp16",
         ":indirection",
         ":logging",
         ":math",
@@ -1081,7 +978,6 @@ xnnpack_cc_library(
         ":params",
         ":quantization",
         ":xnnpack_h",
-        "@FP16",
         "@pthreadpool",
     ] + select({
         "//conditions:default": [],
@@ -1104,6 +1000,7 @@ xnnpack_cc_library(
         ":cache",
         ":common",
         ":config_hdrs",
+        ":fp16",
         ":hardware_config",
         ":internal",
         ":logging",
@@ -1118,7 +1015,6 @@ xnnpack_cc_library(
         ":params",
         ":requantization",
         ":xnnpack_h",
-        "@FP16",
         "@pthreadpool",
     ] + xnnpack_slinky_deps(),
 )
@@ -1300,13 +1196,85 @@ config_setting(
     define_values = {"xnn_enable_arm_i8mm": "false"},
 )
 
-# Enables usage of Intel AVX512-VNNI-GFNI (integer dot product with gfni) kernels.
+# Enables usage of ARM SME kernels.
+config_setting(
+    name = "xnn_enable_arm_sme_explicit_true",
+    define_values = {"xnn_enable_arm_sme": "true"},
+)
+
+# Disables usage of ARM SME kernels.
+config_setting(
+    name = "xnn_enable_arm_sme_explicit_false",
+    define_values = {"xnn_enable_arm_sme": "false"},
+)
+
+# Enables usage of ARM SME2 kernels.
+config_setting(
+    name = "xnn_enable_arm_sme2_explicit_true",
+    define_values = {"xnn_enable_arm_sme2": "true"},
+)
+
+# Disables usage of ARM SME2 kernels.
+config_setting(
+    name = "xnn_enable_arm_sme2_explicit_false",
+    define_values = {"xnn_enable_arm_sme2": "false"},
+)
+
+# Enables usage of Intel AVX512F (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512f_explicit_true",
+    define_values = {"xnn_enable_avx512f": "true"},
+)
+
+# Disables usage of Intel AVX512F (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512f_explicit_false",
+    define_values = {"xnn_enable_avx512f": "false"},
+)
+
+# Enables usage of Intel AVX512SKX (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512skx_explicit_true",
+    define_values = {"xnn_enable_avx512skx": "true"},
+)
+
+# Disables usage of Intel AVX512SKX (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512skx_explicit_false",
+    define_values = {"xnn_enable_avx512skx": "false"},
+)
+
+# Enables usage of Intel AVX512VBMI (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512vbmi_explicit_true",
+    define_values = {"xnn_enable_avx512vbmi": "true"},
+)
+
+# Disables usage of Intel AVX512VBMI (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512vbmi_explicit_false",
+    define_values = {"xnn_enable_avx512vbmi": "false"},
+)
+
+# Enables usage of Intel AVX512VNNI (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512vnni_explicit_true",
+    define_values = {"xnn_enable_avx512vnni": "true"},
+)
+
+# Disables usage of Intel AVX512VNNI (evex512) kernels.
+config_setting(
+    name = "xnn_enable_avx512vnni_explicit_false",
+    define_values = {"xnn_enable_avx512vnni": "false"},
+)
+
+# Enables usage of Intel AVX512VNNIGFNI (evex512) kernels.
 config_setting(
     name = "xnn_enable_avx512vnnigfni_explicit_true",
     define_values = {"xnn_enable_avx512vnnigfni": "true"},
 )
 
-# Disables usage of Intel AVX512-VNNI-GFNI (integer dot product with gfni) kernels.
+# Disables usage of Intel AVX512VNNIGFNI (evex512) kernels.
 config_setting(
     name = "xnn_enable_avx512vnnigfni_explicit_false",
     define_values = {"xnn_enable_avx512vnnigfni": "false"},
@@ -1692,6 +1660,88 @@ alias(
         ":xnn_enable_arm_i8mm_explicit_true": ":xnn_enable_arm_i8mm_explicit_true",
         ":xnn_enable_arm_i8mm_explicit_false": ":xnn_enable_arm_i8mm_explicit_true",
         "//conditions:default": ":arm_i8mm_enabled_by_default",
+    }),
+)
+
+alias(
+    name = "arm_sme_enabled",
+    actual = select({
+        ":xnn_enable_arm_sme_explicit_true": ":xnn_enable_arm_sme_explicit_true",
+        ":xnn_enable_arm_sme_explicit_false": ":xnn_enable_arm_sme_explicit_true",
+        "//conditions:default": ":xnn_enable_arm_sme_explicit_true",
+    }),
+)
+
+alias(
+    name = "arm_sme2_enabled",
+    actual = select({
+        ":xnn_enable_arm_sme2_explicit_true": ":xnn_enable_arm_sme2_explicit_true",
+        ":xnn_enable_arm_sme2_explicit_false": ":xnn_enable_arm_sme2_explicit_true",
+        "//conditions:default": ":xnn_enable_arm_sme2_explicit_true",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx512f_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx512f_enabled",
+    actual = select({
+        ":xnn_enable_avx512f_explicit_true": ":xnn_enable_avx512f_explicit_true",
+        ":xnn_enable_avx512f_explicit_false": ":xnn_enable_avx512f_explicit_true",
+        "//conditions:default": ":avx512f_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx512skx_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx512skx_enabled",
+    actual = select({
+        ":xnn_enable_avx512skx_explicit_true": ":xnn_enable_avx512skx_explicit_true",
+        ":xnn_enable_avx512skx_explicit_false": ":xnn_enable_avx512skx_explicit_true",
+        "//conditions:default": ":avx512skx_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx512vbmi_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx512vbmi_enabled",
+    actual = select({
+        ":xnn_enable_avx512vbmi_explicit_true": ":xnn_enable_avx512vbmi_explicit_true",
+        ":xnn_enable_avx512vbmi_explicit_false": ":xnn_enable_avx512vbmi_explicit_true",
+        "//conditions:default": ":avx512vbmi_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "avx512vnni_enabled_by_default",
+    match_any = [
+        "//build_config:x86",
+    ],
+)
+
+alias(
+    name = "avx512vnni_enabled",
+    actual = select({
+        ":xnn_enable_avx512vnni_explicit_true": ":xnn_enable_avx512vnni_explicit_true",
+        ":xnn_enable_avx512vnni_explicit_false": ":xnn_enable_avx512vnni_explicit_true",
+        "//conditions:default": ":avx512vnni_enabled_by_default",
     }),
 )
 

@@ -15,7 +15,8 @@
 #include "xnnpack.h"
 
 #include <benchmark/benchmark.h>
-#include "bench/utils.h"
+#include "utils.h"
+#include "xnnpack/buffer.h"
 
 void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
@@ -30,15 +31,15 @@ void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::Stat
   std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
   std::uniform_real_distribution<float> scaledist(0.2f, 2.0f);
 
-  std::vector<float> query(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * query_tokens * channels);
-  std::vector<float> key(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * key_value_tokens * channels);
-  std::vector<float> value(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * key_value_tokens * channels);
-  std::vector<float> scale(XNN_EXTRA_BYTES / sizeof(float) + channels);
-  std::vector<float> mask(XNN_EXTRA_BYTES / sizeof(float) + query_tokens * key_value_tokens);
-  std::vector<float> output(batch_size * heads * query_tokens * channels);
+  xnnpack::Buffer<float> query(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * query_tokens * channels);
+  xnnpack::Buffer<float> key(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * key_value_tokens * channels);
+  xnnpack::Buffer<float> value(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * key_value_tokens * channels);
+  xnnpack::Buffer<float> scale(XNN_EXTRA_BYTES / sizeof(float) + channels);
+  xnnpack::Buffer<float> mask(XNN_EXTRA_BYTES / sizeof(float) + query_tokens * key_value_tokens);
+  xnnpack::Buffer<float> output(batch_size * heads * query_tokens * channels);
 
-  std::vector<float> query_scaled(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * query_tokens * channels);
-  std::vector<float> logits(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * query_tokens * key_value_tokens);
+  xnnpack::Buffer<float> query_scaled(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * query_tokens * channels);
+  xnnpack::Buffer<float> logits(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * query_tokens * key_value_tokens);
 
   std::generate(query.begin(), query.end(), [&]() { return f32dist(rng); });
   // Use a different distribution to avoid divide by 0.
@@ -53,8 +54,7 @@ void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::Stat
   }
 
   xnn_operator_t q_scale_mul_op = nullptr;
-  status = xnn_create_multiply_nd_f32(
-    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), /*flags=*/0, &q_scale_mul_op);
+  status = xnn_create_binary_elementwise_nd(xnn_binary_multiply, xnn_datatype_fp32, nullptr, nullptr, nullptr, /*flags=*/0, &q_scale_mul_op);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to create Multiply operator");
   }
@@ -66,8 +66,7 @@ void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::Stat
   }
 
   xnn_operator_t divide_op = nullptr;
-  status = xnn_create_divide_nd_f32(
-    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), /*flags=*/0, &divide_op);
+  status = xnn_create_binary_elementwise_nd(xnn_binary_divide, xnn_datatype_fp32, nullptr, nullptr, nullptr, /*flags=*/0, &divide_op);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to create Divide operator");
   }
@@ -79,15 +78,13 @@ void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::Stat
   }
 
   xnn_operator_t mul_cap_op = nullptr;
-  status = xnn_create_multiply_nd_f32(
-    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), /*flags=*/0, &mul_cap_op);
+  status = xnn_create_binary_elementwise_nd(xnn_binary_multiply, xnn_datatype_fp32, nullptr, nullptr, nullptr, /*flags=*/0, &mul_cap_op);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to create Divide operator");
   }
 
   xnn_operator_t add_op = nullptr;
-  status = xnn_create_add_nd_f32(
-    -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), /*flags=*/0, &add_op);
+  status = xnn_create_binary_elementwise_nd(xnn_binary_add, xnn_datatype_fp32, nullptr, nullptr, nullptr, /*flags=*/0, &add_op);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to create Add operator");
   }
@@ -106,7 +103,7 @@ void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::Stat
 
   std::array<size_t, 4> query_dims = {batch_size, heads, query_tokens, channels};
   std::array<size_t, 1> scale_dims = {channels};
-  status = xnn_reshape_multiply_nd_f32(
+  status = xnn_reshape_binary_elementwise_nd(
     q_scale_mul_op, query_dims.size(), query_dims.data(), scale_dims.size(), scale_dims.data(), /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Multiply operator");
@@ -126,19 +123,19 @@ void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::Stat
   std::array<size_t, 4> logits_dims = {batch_size, heads, query_tokens, key_value_tokens};
   std::array<size_t, 1> cap_tanh_dims = {1};
 
-  status = xnn_reshape_divide_nd_f32(
+  status = xnn_reshape_binary_elementwise_nd(
     divide_op, logits_dims.size(), logits_dims.data(),
       cap_tanh_dims.size(), cap_tanh_dims.data(), /*threadpool=*/nullptr);
 
   status = xnn_reshape_tanh_nc_f32(
       tanh_op, batch_size * heads * query_tokens, key_value_tokens, key_value_tokens, key_value_tokens, /*threadpool=*/nullptr);
 
-  status = xnn_reshape_multiply_nd_f32(
+  status = xnn_reshape_binary_elementwise_nd(
       mul_cap_op, logits_dims.size(), logits_dims.data(), cap_tanh_dims.size(), cap_tanh_dims.data(), /*threadpool=*/nullptr);
 
   std::array<size_t, 2> mask_dims = {query_tokens, key_value_tokens};
 
-  status = xnn_reshape_add_nd_f32(
+  status = xnn_reshape_binary_elementwise_nd(
     add_op, logits_dims.size(), logits_dims.data(), mask_dims.size(), mask_dims.data(), /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Add operator");
@@ -160,21 +157,21 @@ void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::Stat
     state.SkipWithError("failed to reshape Batch Matrix Multiply operator");
   }
 
-  std::vector<char> workspace2(workspace_size2, 0);
+  xnnpack::Buffer<char> workspace2(workspace_size2, 0);
 
-  status = xnn_setup_multiply_nd_f32(q_scale_mul_op, query.data(), scale.data(), query_scaled.data());
+  status = xnn_setup_binary_elementwise_nd(q_scale_mul_op, query.data(), scale.data(), query_scaled.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup Multiply operator");
   }
 
-  std::vector<char> workspace(workspace_size, 0);
+  xnnpack::Buffer<char> workspace(workspace_size, 0);
   status = xnn_setup_batch_matrix_multiply_nc_f32(
     qk_bmm_op, workspace.data(), query_scaled.data(), key.data(), logits.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup Batch Matrix Multiply operator");
   }
 
-  status = xnn_setup_divide_nd_f32(divide_op, logits.data(), &cap_value, logits.data());
+  status = xnn_setup_binary_elementwise_nd(divide_op, logits.data(), &cap_value, logits.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup Divide operator");
   }
@@ -184,12 +181,12 @@ void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::Stat
     state.SkipWithError("failed to setup Tanh operator");
   }
 
-  status = xnn_setup_multiply_nd_f32(mul_cap_op, logits.data(), &cap_value, logits.data());
+  status = xnn_setup_binary_elementwise_nd(mul_cap_op, logits.data(), &cap_value, logits.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup Multiply operator");
   }
 
-  status = xnn_setup_add_nd_f32(add_op, logits.data(), mask.data(), logits.data());
+  status = xnn_setup_binary_elementwise_nd(add_op, logits.data(), mask.data(), logits.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup Add operator");
   }
@@ -299,12 +296,12 @@ void xnnpack_multihead_scaled_dot_product_attention_cap_tanh_f32(benchmark::Stat
   std::uniform_real_distribution<float> f32dist(-1.0f, 1.0f);
   std::uniform_real_distribution<float> scaledist(0.2f, 2.0f);
 
-  std::vector<float> query(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * query_tokens * channels);
-  std::vector<float> key(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * key_value_tokens * channels);
-  std::vector<float> value(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * key_value_tokens * channels);
-  std::vector<float> scale(XNN_EXTRA_BYTES / sizeof(float) + channels);
-  std::vector<float> mask(XNN_EXTRA_BYTES / sizeof(float) + query_tokens * key_value_tokens);
-  std::vector<float> output(batch_size * heads * query_tokens * channels);
+  xnnpack::Buffer<float> query(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * query_tokens * channels);
+  xnnpack::Buffer<float> key(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * key_value_tokens * channels);
+  xnnpack::Buffer<float> value(XNN_EXTRA_BYTES / sizeof(float) + batch_size * heads * key_value_tokens * channels);
+  xnnpack::Buffer<float> scale(XNN_EXTRA_BYTES / sizeof(float) + channels);
+  xnnpack::Buffer<float> mask(XNN_EXTRA_BYTES / sizeof(float) + query_tokens * key_value_tokens);
+  xnnpack::Buffer<float> output(batch_size * heads * query_tokens * channels);
 
   std::generate(query.begin(), query.end(), [&]() { return f32dist(rng); });
   // Use a different distribution to avoid divide by 0.
@@ -344,7 +341,7 @@ void xnnpack_multihead_scaled_dot_product_attention_cap_tanh_f32(benchmark::Stat
     state.SkipWithError("failed to reshape Scaled Dot Attention operator");
   }
 
-  std::vector<char> workspace(workspace_size, 0);
+  xnnpack::Buffer<char> workspace(workspace_size, 0);
 
   status = xnn_setup_scaled_dot_product_attention_nhtc_f32(
             attention_op,

@@ -13,11 +13,11 @@
 #include "xnnpack/pack.h"
 
 #if XNN_ENABLE_KLEIDIAI
-#include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qsu4cxs1s0.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qs4cxs1s0.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
-#include "bench/gemm.h"
-#include "bench/utils.h"
+#include "gemm.h"
+#include "utils.h"
 #include <benchmark/benchmark.h>
 
 void GEMMBenchmark(benchmark::State& state, xnn_qs8_gemm_minmax_ukernel_fn gemm,
@@ -74,6 +74,15 @@ void GEMMBenchmark(benchmark::State& state,
 void GEMMBenchmark(benchmark::State& state,
                    xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn gemm,
                    xnn_init_f32_minmax_params_fn init_minmax_params,
+                   xnn_pack_weights_and_biases_fn pack_weights,
+                   xnn_packed_stride_weights_and_biases_fn packed_stride,
+                   size_t mr,
+                   size_t nr, size_t kr, size_t sr, size_t mr_packed,
+                   benchmark::utils::IsaCheckFunction isa_check);
+
+void GEMMBenchmark(benchmark::State& state,
+                   xnn_qp8_f32_qb4w_gemm_minmax_ukernel_fn gemm,
+                   xnn_init_f32_qb4w_minmax_params_fn init_params,
                    xnn_pack_weights_and_biases_fn pack_weights,
                    xnn_packed_stride_weights_and_biases_fn packed_stride,
                    size_t mr,

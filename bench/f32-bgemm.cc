@@ -17,10 +17,8 @@
 #ifdef BENCHMARK_RUY
 #include "ruy/ruy.h"
 #endif  // BENCHMARK_RUY
-#include "bench/bgemm.h"
-#include "bench/utils.h"
-
-#include "xnnpack/aligned-allocator.h"
+#include "bgemm.h"
+#include "utils.h"
 #include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
@@ -31,7 +29,7 @@
 #include "xnnpack/packw.h"
 #include "xnnpack/packx.h"
 #include "xnnpack/ppmm.h"
-
+#include "xnnpack/buffer.h"
 
 static void f32_gemm(benchmark::State& state,
   xnn_x32_packw_gemm_goi_ukernel_fn packw,
@@ -56,16 +54,14 @@ static void f32_gemm(benchmark::State& state,
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  std::vector<float> a(batch * dim_m * dim_k + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(batch * dim_m * dim_k + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
-  std::vector<float> b(batch * dim_n * dim_k);
+  xnnpack::Buffer<float> b(batch * dim_n * dim_k);
   std::generate(b.begin(), b.end(), std::ref(f32rng));
-  std::vector<float> c(batch * dim_m * dim_n);
-  std::fill(c.begin(), c.end(), std::nanf(""));
+  xnnpack::Buffer<float> c(batch * dim_m * dim_n);
 
   const size_t w_elements = stride_n * stride_k + stride_n;
-  std::vector<float, AlignedAllocator<float, 64>> w(batch * w_elements);
-  std::fill(w.begin(), w.end(), 0.0f);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> w(batch * w_elements);
 
   xnn_f32_minmax_params params;
   init_params(&params,
@@ -124,18 +120,16 @@ static void f32_ppmm1p(benchmark::State& state,
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  std::vector<float> a(batch * dim_m * dim_k + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(batch * dim_m * dim_k + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
-  std::vector<float> b(batch * dim_n * dim_k);
+  xnnpack::Buffer<float> b(batch * dim_n * dim_k);
   std::generate(b.begin(), b.end(), std::ref(f32rng));
-  std::vector<float> c(batch * dim_m * dim_n);
-  std::fill(c.begin(), c.end(), std::nanf(""));
+  xnnpack::Buffer<float> c(batch * dim_m * dim_n);
 
-  std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> t(mr * dim_k);
+  xnnpack::Buffer<uint32_t, XNN_ALLOCATION_ALIGNMENT> t(mr * dim_k);
 
   const size_t w_elements = stride_n * stride_k + stride_n;
-  std::vector<float, AlignedAllocator<float, 64>> w(batch * w_elements);
-  std::fill(w.begin(), w.end(), 0.0f);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> w(batch * w_elements);
 
   xnn_f32_minmax_params params;
   init_params(&params,
@@ -196,18 +190,16 @@ static void f32_ppmm2p(benchmark::State& state,
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
 
-  std::vector<float> a(batch * dim_m * dim_k + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> a(batch * dim_m * dim_k + XNN_EXTRA_BYTES / sizeof(float));
   std::generate(a.begin(), a.end(), std::ref(f32rng));
-  std::vector<float> b(batch * dim_n * dim_k);
+  xnnpack::Buffer<float> b(batch * dim_n * dim_k);
   std::generate(b.begin(), b.end(), std::ref(f32rng));
-  std::vector<float> c(batch * dim_m * dim_n);
-  std::fill(c.begin(), c.end(), std::nanf(""));
+  xnnpack::Buffer<float> c(batch * dim_m * dim_n);
 
-  std::vector<uint32_t, AlignedAllocator<uint32_t, 64>> t(batch * stride_m * dim_k);
+  xnnpack::Buffer<uint32_t, XNN_ALLOCATION_ALIGNMENT> t(batch * stride_m * dim_k);
 
   const size_t w_elements = stride_n * stride_k + stride_n;
-  std::vector<float, AlignedAllocator<float, 64>> w(batch * w_elements);
-  std::fill(w.begin(), w.end(), 0.0f);
+  xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> w(batch * w_elements);
 
   xnn_f32_minmax_params params;
   init_params(&params,
@@ -261,12 +253,11 @@ static void RuyBenchmark(benchmark::State& state, uint32_t threads)
   const size_t dim_n = state.range(2);
   const size_t dim_k = state.range(3);
 
-  std::vector<float> a(batch * dim_m * dim_k);
+  xnnpack::Buffer<float> a(batch * dim_m * dim_k);
   std::generate(a.begin(), a.end(), std::ref(f32rng));
-  std::vector<float> b(batch * dim_n * dim_k);
+  xnnpack::Buffer<float> b(batch * dim_n * dim_k);
   std::generate(b.begin(), b.end(), std::ref(f32rng));
-  std::vector<float> c(batch * dim_m * dim_n);
-  std::fill(c.begin(), c.end(), std::nanf(""));
+  xnnpack::Buffer<float> c(batch * dim_m * dim_n);
 
   // Note: context must be static to avoid the cost of re-creating it for each benchmark.
   static ruy::Context context;

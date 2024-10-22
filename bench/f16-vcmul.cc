@@ -10,11 +10,12 @@
 #include <random>
 #include <vector>
 
-#include "bench/utils.h"
+#include "utils.h"
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
+#include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
 #include "xnnpack/hardware-config.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/vbinary.h"
@@ -35,9 +36,11 @@ static void f16_vcmul(benchmark::State& state, uint64_t arch_flags,
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-1.0f, 1.0f), std::ref(rng));
   auto f16rng = std::bind(xnn_float16_from_float, f32rng);
 
-  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> a(num_elements * 2 + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> b(num_elements * 2 + XNN_EXTRA_BYTES / sizeof(xnn_float16));
-  std::vector<xnn_float16, AlignedAllocator<xnn_float16, 64>> product(num_elements * 2);
+  xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> a(
+      num_elements * 2 + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> b(
+      num_elements * 2 + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> product(num_elements * 2);
   std::generate(a.begin(), a.end(), std::ref(f16rng));
   std::generate(b.begin(), b.end(), std::ref(f16rng));
 
@@ -70,7 +73,7 @@ static void f16_vcmul(benchmark::State& state, uint64_t arch_flags,
           benchmark::utils::BinaryElementwiseParameters<std::complex<xnn_float16>,  \
                                                         std::complex<xnn_float16>>) \
       ->UseRealTime();
-#include "src/f16-vbinary/f16-vcmul.h"
+#include "f16-vbinary/f16-vcmul.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

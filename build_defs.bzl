@@ -439,12 +439,27 @@ source_list_aspect = aspect(
 def _transitive_source_list_rule_impl(ctx):
     get_repo_name = lambda x: getattr(x, "repo_name", getattr(x, "workspace_name"))
     files = [p for dep in ctx.attr.deps for p in dep[SrcListInfo].srcs.to_list() if get_repo_name(p.owner) == get_repo_name(ctx.label) and p.owner.package.startswith(ctx.label.package)]
-    return [DefaultInfo(files = depset(files))]
+    return [DefaultInfo(files = depset(files + ctx.files.srcs))]
 
 xnnpack_transitive_source_list = rule(
     implementation = _transitive_source_list_rule_impl,
     attrs = {
         "deps": attr.label_list(aspects = [source_list_aspect]),
+        "srcs": attr.label_list(allow_files = True),
     },
 )
 
+def _source_list_file_rule_impl(ctx):
+    output_file = ctx.actions.declare_file(ctx.label.name + ".list")
+    ctx.actions.write(
+        output = output_file,
+        content = "\n".join([s.path for s in ctx.files.srcs]),
+    )
+    return [DefaultInfo(files = depset([output_file]))]
+
+xnnpack_source_list_file = rule(
+    implementation = _source_list_file_rule_impl,
+    attrs = {
+        "srcs": attr.label_list(allow_files = True),
+    },
+)

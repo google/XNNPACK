@@ -8,8 +8,8 @@
 //   Generator: tools/generate-gemm-test.py
 
 #include <benchmark/benchmark.h>
-#include "bench/gemm-benchmark.h"
-#include "bench/utils.h"
+#include "gemm-benchmark.h"
+#include "utils.h"
 #include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/isa-checks.h"
@@ -1286,7 +1286,7 @@
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   static void f32_gemm_minmax_ukernel_1x16__avx512f_broadcast(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_gemm_minmax_ukernel_1x16__avx512f_broadcast,
@@ -1352,7 +1352,10 @@
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_8x16__avx512f_broadcast)
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   static void f32_gemm_minmax_ukernel_1x8__avx_broadcast(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_gemm_minmax_ukernel_1x8__avx_broadcast,

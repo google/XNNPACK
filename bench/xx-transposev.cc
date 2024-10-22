@@ -9,15 +9,13 @@
 #include <numeric>
 #include <vector>
 
-#include <benchmark/benchmark.h>
-#include "bench/utils.h"
-
+#include "utils.h"
 #include "xnnpack.h"
-#include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/transpose.h"
-
+#include "xnnpack/buffer.h"
+#include <benchmark/benchmark.h>
 
 void transpose(
     benchmark::State& state,
@@ -33,12 +31,11 @@ void transpose(
   const size_t tile_hbytes = height * 3;
   const size_t tile_wbytes = width * 3;
 
-  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> x(
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> x(
       height * width * element_size + XNN_EXTRA_BYTES / sizeof(uint8_t));
-  std::vector<uint8_t, AlignedAllocator<uint8_t, 64>> y(
+  xnnpack::Buffer<uint8_t, XNN_ALLOCATION_ALIGNMENT> y(
       height * width * element_size + XNN_EXTRA_BYTES / sizeof(uint8_t));
   std::iota(x.begin(), x.end(), 0);
-  std::fill(y.begin(), y.end(), 0);
 
   for (auto _ : state) {
     transpose(x.data(), y.data(), tile_wbytes, tile_hbytes, element_size,
