@@ -49,11 +49,15 @@ xnn_datatype datatype_of() {
 }
 
 template <typename T>
-double compute_tolerance(double output_ref) {
+double compute_tolerance(xnn_binary_operator op, double output_ref) {
   if (std::is_integral<T>::value) {
     return 0.6;
   } else if (std::is_same<T, xnn_float16>::value) {
-    return 1.0e-3 * std::abs(output_ref);
+    if (op == xnn_binary_squared_difference) {
+      return 1.0 * std::abs(output_ref);
+    } else {
+      return 1.0e-3 * std::abs(output_ref);
+    }
   } else {
     return 1.0e-6 * std::abs(output_ref);
   }
@@ -354,11 +358,23 @@ class BinaryElementwiseOperatorTester {
                       i * output_strides[0] + j * output_strides[1] +
                       k * output_strides[2] + l * output_strides[3] +
                       m * output_strides[4] + n * output_strides[5];
-                  if (output_ref < std::numeric_limits<T>::lowest() ||
-                      output_ref > std::numeric_limits<T>::max()) {
+                  // std::numeric_limits<xnn_float16> returns 0 for all values,
+                  // so all float16 tests were incorrectly "expected to
+                  // overflow" here.
+                  const double min_ref =
+                      std::is_same<T, xnn_float16>::value
+                          ? 0.0
+                          : static_cast<double>(
+                                std::numeric_limits<T>::lowest());
+                  const double max_ref =
+                      std::is_same<T, xnn_float16>::value
+                          ? 1.0
+                          : static_cast<double>(std::numeric_limits<T>::max());
+                  if (output_ref < min_ref || output_ref > max_ref) {
                     // This is expected to overflow.
                   } else {
-                    const double tolerance = compute_tolerance<T>(output_ref);
+                    const double tolerance =
+                        compute_tolerance<T>(operation_type(), output_ref);
                     ASSERT_NEAR(output[index], output_ref, tolerance)
                         << "input1_value = " << input1_value << ", "
                         << "input2_value = " << input2_value << ", "
