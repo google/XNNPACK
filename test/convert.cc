@@ -485,7 +485,7 @@ TEST_F(ConvertTestF32ToQS8, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status = xnn_create_convert_nc_f32_qs8(
-    scale, signed_zero_point, INT8_MIN, INT8_MAX, /*flags=*/0, &op);
+    scale, signed_zero_point, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -594,7 +594,7 @@ TEST_F(ConvertTestF32ToQU8, matches_operator_api)
   // Call operator API.
   xnn_operator_t op = nullptr;
   const xnn_status status = xnn_create_convert_nc_f32_qu8(
-    scale, unsigned_zero_point, 0, UINT8_MAX, /*flags=*/0, &op);
+    scale, unsigned_zero_point, /*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }

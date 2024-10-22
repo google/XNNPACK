@@ -29,10 +29,6 @@ $VCOMBINE_X8 = {"QS8": "vcombine_s8", "QU8": "vcombine_u8"}[DATATYPE]
 $VGET_LOW_X8 = {"QS8": "vget_low_s8", "QU8": "vget_low_u8"}[DATATYPE]
 $VREINTERPRET_U16_X8 = {"QS8": "vreinterpret_u16_s8", "QU8": "vreinterpret_u16_u8"}[DATATYPE]
 $VREINTERPRET_U32_X8 = {"QS8": "vreinterpret_u32_s8", "QU8": "vreinterpret_u32_u8"}[DATATYPE]
-$VMAXQ_X8 = {"QS8": "vmaxq_s8", "QU8": "vmaxq_u8"}[DATATYPE]
-$VMAX_X8 = {"QS8": "vmax_s8", "QU8": "vmax_u8"}[DATATYPE]
-$VMINQ_X8 = {"QS8": "vminq_s8", "QU8": "vminq_u8"}[DATATYPE]
-$VMIN_X8 = {"QS8": "vmin_s8", "QU8": "vmin_u8"}[DATATYPE]
 void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neonv8_u${BATCH_TILE}(
     size_t batch,
     const float* input,
@@ -46,12 +42,6 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neonv8_u${BATCH_TILE}(
 
   const float32x4_t vscale = vld1q_dup_f32(&params->scalar.scale);
   const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
-  $if BATCH_TILE > 8:
-    const ${XINT8X16_T} voutput_min = ${VLD1Q_DUP_X8}(&params->scalar.output_min);
-    const ${XINT8X16_T} voutput_max = ${VLD1Q_DUP_X8}(&params->scalar.output_max);
-  $else:
-    const ${XINT8X8_T} voutput_min = ${VLD1_DUP_X8}(&params->scalar.output_min);
-    const ${XINT8X8_T} voutput_max = ${VLD1_DUP_X8}(&params->scalar.output_max);
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       $for N in range(0, BATCH_TILE, 4):
@@ -77,18 +67,6 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neonv8_u${BATCH_TILE}(
 
       $for N in range(0, BATCH_TILE, 16):
         $if N + 8 < BATCH_TILE:
-          vy${ABC[N:N+16]} = ${VMAXQ_X8}(vy${ABC[N:N+16]}, voutput_min);
-        $else:
-          vy${ABC[N:N+8]} = ${VMAX_X8}(vy${ABC[N:N+8]}, ${VGET_LOW_X8}(voutput_min));
-
-      $for N in range(0, BATCH_TILE, 16):
-        $if N + 8 < BATCH_TILE:
-          vy${ABC[N:N+16]} = ${VMINQ_X8}(vy${ABC[N:N+16]}, voutput_max);
-        $else:
-          vy${ABC[N:N+8]} = ${VMIN_X8}(vy${ABC[N:N+8]}, ${VGET_LOW_X8}(voutput_max));
-
-      $for N in range(0, BATCH_TILE, 16):
-        $if N + 8 < BATCH_TILE:
           ${VST1Q_X8}(output, vy${ABC[N:N+16]}); output += 16;
         $else:
           ${VST1_X8}(output, vy${ABC[N:N+8]}); output += 8;
@@ -107,12 +85,6 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neonv8_u${BATCH_TILE}(
     vacc = vqaddq_s16(vacc, voutput_zero_point);
 
     ${XINT8X8_T} vy = ${VQMOVXN_S16}(vacc);
-    $if BATCH_TILE > 8:
-      vy = ${VMAX_X8}(vy, ${VGET_LOW_X8}(voutput_min));
-      vy = ${VMIN_X8}(vy, ${VGET_LOW_X8}(voutput_max));
-    $else:
-      vy = ${VMAX_X8}(vy, voutput_min);
-      vy = ${VMIN_X8}(vy, voutput_max);
     ${VST1_X8}(output, vy); output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -132,12 +104,6 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neonv8_u${BATCH_TILE}(
     vacc = vqaddq_s16(vacc, voutput_zero_point);
 
     ${XINT8X8_T} vy = ${VQMOVXN_S16}(vacc);
-    $if BATCH_TILE > 8:
-      vy = ${VMAX_X8}(vy, ${VGET_LOW_X8}(voutput_min));
-      vy = ${VMIN_X8}(vy, ${VGET_LOW_X8}(voutput_max));
-    $else:
-      vy = ${VMAX_X8}(vy, voutput_min);
-      vy = ${VMIN_X8}(vy, voutput_max);
 
     if (batch & (4 * sizeof(float))) {
       vst1_lane_u32((void*) output, ${VREINTERPRET_U32_X8}(vy), 0); output += 4;

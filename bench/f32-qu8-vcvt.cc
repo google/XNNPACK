@@ -22,9 +22,7 @@ static void f32_qu8_vcvt(
   xnn_f32_qu8_cvt_params params;
   init_params(&params,
     25.0f /* scale */,
-    127 /* output zero point */,
-    std::numeric_limits<uint8_t>::min() + 1 /* output min */,
-    std::numeric_limits<uint8_t>::max() - 1 /* output max */);
+    127 /* output zero point */);
 
   cvt_benchmark<float, uint8_t>(state, arch_flags, cvt, &params);
 }

@@ -2949,8 +2949,6 @@ enum xnn_status xnn_run_convert_nc_f32_f16(
 enum xnn_status xnn_create_convert_nc_f32_qs8(
   float output_scale,
   int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max,
   uint32_t flags,
   xnn_operator_t* convert_op_out);
 
@@ -2982,8 +2980,6 @@ enum xnn_status xnn_run_convert_nc_f32_qs8(
 enum xnn_status xnn_create_convert_nc_f32_qu8(
   float output_scale,
   uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max,
   uint32_t flags,
   xnn_operator_t* convert_op_out);
 

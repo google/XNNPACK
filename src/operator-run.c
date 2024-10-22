@@ -2184,7 +2184,7 @@ void xnn_compute_contiguous_reduce(
       context->s32_f32_cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
                                    workspace_ptr, /*params=*/&s32_f32_cvt_params);
       struct xnn_f32_qs8_cvt_params cvt_params;
-      xnn_init_f32_qs8_cvt_scalar_params(&cvt_params, context->params.qs8_mean.scalar.scale, context->params.qs8_mean.scalar.output_zero_point, INT8_MIN, INT8_MAX);
+      xnn_init_f32_qs8_cvt_scalar_params(&cvt_params, context->params.qs8_mean.scalar.scale, context->params.qs8_mean.scalar.output_zero_point);
       context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
                            output_ptr, /*params=*/&cvt_params);
     } else if (context->u32_f32_cvt_ukernel) {
@@ -2193,7 +2193,7 @@ void xnn_compute_contiguous_reduce(
       context->u32_f32_cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
                                    workspace_ptr, /*params=*/&u32_f32_cvt_params);
       struct xnn_f32_qu8_cvt_params cvt_params;
-      xnn_init_f32_qu8_cvt_scalar_params(&cvt_params, context->params.qu8_mean.scalar.scale, context->params.qu8_mean.scalar.output_zero_point, 0, UINT8_MAX);
+      xnn_init_f32_qu8_cvt_scalar_params(&cvt_params, context->params.qu8_mean.scalar.scale, context->params.qu8_mean.scalar.output_zero_point);
       context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
                            output_ptr, /*params=*/&cvt_params);
     } else {
@@ -2265,7 +2265,7 @@ void xnn_compute_discontiguous_reduce(
       context->s32_f32_cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
                                    workspace_ptr, /*params=*/&s32_f32_cvt_params);
       struct xnn_f32_qs8_cvt_params cvt_params;
-      xnn_init_f32_qs8_cvt_scalar_params(&cvt_params, context->params.qs8_mean.scalar.scale, context->params.qs8_mean.scalar.output_zero_point, INT8_MIN, INT8_MAX);
+      xnn_init_f32_qs8_cvt_scalar_params(&cvt_params, context->params.qs8_mean.scalar.scale, context->params.qs8_mean.scalar.output_zero_point);
       context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
                            output_ptr, /*params=*/&cvt_params);
     } else if (context->u32_f32_cvt_ukernel) {
@@ -2274,7 +2274,7 @@ void xnn_compute_discontiguous_reduce(
       context->u32_f32_cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
                                    workspace_ptr, /*params=*/&u32_f32_cvt_params);
       struct xnn_f32_qu8_cvt_params cvt_params;
-      xnn_init_f32_qu8_cvt_scalar_params(&cvt_params, context->params.qu8_mean.scalar.scale, context->params.qu8_mean.scalar.output_zero_point, 0, UINT8_MAX);
+      xnn_init_f32_qu8_cvt_scalar_params(&cvt_params, context->params.qu8_mean.scalar.scale, context->params.qu8_mean.scalar.output_zero_point);
       context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
                            output_ptr, /*params=*/&cvt_params);
     } else {
@@ -2310,7 +2310,7 @@ void xnn_compute_f16_qd8_convert(
   context->quantization_params[batch_index] = xnn_f16_qd8_asymmetric_quantization_params(minmax[0], minmax[1], &f16_scale);
 
   struct xnn_f16_qs8_cvt_params params;
-  context->init_params(&params, f16_scale, context->quantization_params[batch_index].zero_point, INT8_MIN, INT8_MAX);
+  context->init_params(&params, f16_scale, context->quantization_params[batch_index].zero_point);
   context->convert_ukernel(n, input, output, &params);
 }
 
@@ -2329,7 +2329,7 @@ void xnn_compute_f32_qd8_convert(
   context->quantization_params[batch_index] = xnn_f32_qd8_asymmetric_quantization_params(minmax[0], minmax[1]);
 
   struct xnn_f32_qs8_cvt_params params;
-  context->init_params(&params, 1.0f / context->quantization_params[batch_index].inv_scale, context->quantization_params[batch_index].zero_point, INT8_MIN, INT8_MAX);
+  context->init_params(&params, 1.0f / context->quantization_params[batch_index].inv_scale, context->quantization_params[batch_index].zero_point);
   context->convert_ukernel(n, input, output, &params);
 }
 

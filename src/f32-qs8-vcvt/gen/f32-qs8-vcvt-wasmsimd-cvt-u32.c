@@ -29,12 +29,8 @@ void xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_u32(
 
   const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
   const v128_t voutput_zero_point = wasm_v128_load16_splat(&params->scalar.output_zero_point);
-  const v128_t voutput_min = wasm_v128_load8_splat(&params->scalar.output_min);
-  const v128_t voutput_max = wasm_v128_load8_splat(&params->scalar.output_max);
   XNN_FORCE_REALIZATION(vscale);
   XNN_FORCE_REALIZATION(voutput_zero_point);
-  XNN_FORCE_REALIZATION(voutput_min);
-  XNN_FORCE_REALIZATION(voutput_max);
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     v128_t vx0123 = wasm_v128_load(input);
     v128_t vx4567 = wasm_v128_load(input + 4);
@@ -86,12 +82,6 @@ void xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_u32(
     v128_t vy0123456789ABCDEF = wasm_i8x16_narrow_i16x8(vacc01234567, vacc89ABCDEF);
     v128_t vyGHIJKLMNOPQRSTUV = wasm_i8x16_narrow_i16x8(vaccGHIJKLMN, vaccOPQRSTUV);
 
-    vy0123456789ABCDEF = wasm_i8x16_max(vy0123456789ABCDEF, voutput_min);
-    vyGHIJKLMNOPQRSTUV = wasm_i8x16_max(vyGHIJKLMNOPQRSTUV, voutput_min);
-
-    vy0123456789ABCDEF = wasm_i8x16_min(vy0123456789ABCDEF, voutput_max);
-    vyGHIJKLMNOPQRSTUV = wasm_i8x16_min(vyGHIJKLMNOPQRSTUV, voutput_max);
-
     wasm_v128_store(output, vy0123456789ABCDEF);
     wasm_v128_store(output + 16, vyGHIJKLMNOPQRSTUV);
     output += 32;
@@ -114,8 +104,6 @@ void xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_u32(
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
 
     v128_t vy = wasm_i8x16_narrow_i16x8(vacc, vacc);
-    vy = wasm_i8x16_max(vy, voutput_min);
-    vy = wasm_i8x16_min(vy, voutput_max);
 
     wasm_v128_store64_lane(output, vy, 0);
     output += 8;
@@ -140,8 +128,6 @@ void xnn_f32_qs8_vcvt_ukernel__wasmsimd_cvt_u32(
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
 
     v128_t vy = wasm_i8x16_narrow_i16x8(vacc, vacc);
-    vy = wasm_i8x16_max(vy, voutput_min);
-    vy = wasm_i8x16_min(vy, voutput_max);
 
     if (batch & (4 * sizeof(float))) {
       wasm_v128_store32_lane(output, vy, 0);

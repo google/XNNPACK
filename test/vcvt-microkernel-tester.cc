@@ -77,10 +77,6 @@ void VCvtMicrokernelTester::Test(
 
 void VCvtMicrokernelTester::Test(xnn_f16_qs8_vcvt_ukernel_fn vcvt,
                                  xnn_init_f16_qs8_cvt_params_fn init_params) {
-  ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
-  ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
-  ASSERT_LT(qmin(), qmax());
-
   ASSERT_GE(output_zero_point(), std::numeric_limits<int8_t>::min());
   ASSERT_LE(output_zero_point(), std::numeric_limits<int8_t>::max());
 
@@ -101,8 +97,7 @@ void VCvtMicrokernelTester::Test(xnn_f16_qs8_vcvt_ukernel_fn vcvt,
 
 
     struct xnn_f16_qs8_cvt_params params;
-    init_params(&params, scale(),
-                output_zero_point(), qmin(), qmax());
+    init_params(&params, scale(), output_zero_point());
 
     // Call optimized micro-kernel.
     vcvt(batch_size() * sizeof(xnn_float16), input.data(), output.data(), &params);
@@ -111,9 +106,11 @@ void VCvtMicrokernelTester::Test(xnn_f16_qs8_vcvt_ukernel_fn vcvt,
     for (size_t i = 0; i < batch_size(); i++) {
       float scaled_input = input[i] * scale_fp16;
       scaled_input = std::min<float>(
-          scaled_input, static_cast<float>(qmax() - output_zero_point()));
+          scaled_input, static_cast<float>(std::numeric_limits<int8_t>::max() -
+                                           output_zero_point()));
       scaled_input = std::max<float>(
-          scaled_input, static_cast<float>(qmin() - output_zero_point()));
+          scaled_input, static_cast<float>(std::numeric_limits<int8_t>::min() -
+                                           output_zero_point()));
       output_ref[i] = static_cast<int8_t>(
           std::lrintf(scaled_input) + static_cast<long>(output_zero_point()));
     }
@@ -134,10 +131,6 @@ void VCvtMicrokernelTester::Test(xnn_f16_qs8_vcvt_ukernel_fn vcvt,
 void VCvtMicrokernelTester::Test(
     xnn_f32_qs8_vcvt_ukernel_fn vcvt,
     xnn_init_f32_qs8_cvt_params_fn init_params) const {
-  ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
-  ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
-  ASSERT_LT(qmin(), qmax());
-
   ASSERT_GE(output_zero_point(), std::numeric_limits<int8_t>::min());
   ASSERT_LE(output_zero_point(), std::numeric_limits<int8_t>::max());
 
@@ -151,7 +144,7 @@ void VCvtMicrokernelTester::Test(
     std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
     struct xnn_f32_qs8_cvt_params params;
-    init_params(&params, scale(), output_zero_point(), qmin(), qmax());
+    init_params(&params, scale(), output_zero_point());
 
     // Call optimized micro-kernel.
     vcvt(batch_size() * sizeof(float), input.data(), output.data(), &params);
@@ -160,9 +153,11 @@ void VCvtMicrokernelTester::Test(
     for (size_t i = 0; i < batch_size(); i++) {
       float scaled_input = input[i] * scale();
       scaled_input = std::min<float>(
-          scaled_input, static_cast<float>(qmax() - output_zero_point()));
+          scaled_input, static_cast<float>(std::numeric_limits<int8_t>::max() -
+                                           output_zero_point()));
       scaled_input = std::max<float>(
-          scaled_input, static_cast<float>(qmin() - output_zero_point()));
+          scaled_input, static_cast<float>(std::numeric_limits<int8_t>::min() -
+                                           output_zero_point()));
       output_ref[i] = static_cast<int8_t>(
           std::lrintf(scaled_input) + static_cast<long>(output_zero_point()));
     }
@@ -181,10 +176,6 @@ void VCvtMicrokernelTester::Test(
 void VCvtMicrokernelTester::Test(
     xnn_f32_qu8_vcvt_ukernel_fn vcvt,
     xnn_init_f32_qu8_cvt_params_fn init_params) const {
-  ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
-  ASSERT_LE(qmax(), std::numeric_limits<uint8_t>::max());
-  ASSERT_LT(qmin(), qmax());
-
   ASSERT_GE(output_zero_point(), std::numeric_limits<uint8_t>::min());
   ASSERT_LE(output_zero_point(), std::numeric_limits<uint8_t>::max());
 
@@ -198,7 +189,7 @@ void VCvtMicrokernelTester::Test(
     std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
 
     struct xnn_f32_qu8_cvt_params params;
-    init_params(&params, scale(), output_zero_point(), qmin(), qmax());
+    init_params(&params, scale(), output_zero_point());
 
     // Call optimized micro-kernel.
     vcvt(batch_size() * sizeof(float), input.data(), output.data(), &params);
@@ -207,9 +198,11 @@ void VCvtMicrokernelTester::Test(
     for (size_t i = 0; i < batch_size(); i++) {
       float scaled_input = input[i] * scale();
       scaled_input = std::min<float>(
-          scaled_input, static_cast<float>(qmax() - output_zero_point()));
+          scaled_input, static_cast<float>(std::numeric_limits<uint8_t>::max() -
+                                           output_zero_point()));
       scaled_input = std::max<float>(
-          scaled_input, static_cast<float>(qmin() - output_zero_point()));
+          scaled_input, static_cast<float>(std::numeric_limits<uint8_t>::min() -
+                                           output_zero_point()));
       output_ref[i] = static_cast<uint8_t>(
           std::lrintf(scaled_input) + static_cast<long>(output_zero_point()));
     }

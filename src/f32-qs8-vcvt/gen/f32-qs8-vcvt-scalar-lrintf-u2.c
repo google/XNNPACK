@@ -27,8 +27,8 @@ void xnn_f32_qs8_vcvt_ukernel__scalar_lrintf_u2(
   assert(output != NULL);
 
   const float vscale = params->scalar.scale;
-  const float voutput_min_less_zero_point = (float) ((int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point);
-  const float voutput_max_less_zero_point = (float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point);
+  const float voutput_min_less_zero_point = (float) ((int32_t) -128 - (int32_t) params->scalar.output_zero_point);
+  const float voutput_max_less_zero_point = (float) ((int32_t) 127 - (int32_t) params->scalar.output_zero_point);
   const int32_t voutput_zero_point = params->scalar.output_zero_point;
 
   for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {

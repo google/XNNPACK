@@ -27,9 +27,7 @@ static void f16_qs8_vcvt(
   xnn_f16_qs8_cvt_params params;
   init_params(&params,
     1.0f /* scale */,
-    1 /* output zero point */,
-    std::numeric_limits<int8_t>::min() + 1 /* output min */,
-    std::numeric_limits<int8_t>::max() - 1 /* output max */);
+    1 /* output zero point */);
 
   cvt_benchmark<xnn_float16, int8_t>(state, arch_flags, cvt, &params);
 }

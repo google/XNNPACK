@@ -28,12 +28,12 @@ void xnn_f32_qu8_vcvt_ukernel__wasmsimd_magic_u32(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float output_min_less_zero_point = (float) ((int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point);
+  const float output_min_less_zero_point = (float) ((int32_t) 0 - (int32_t) params->scalar.output_zero_point);
   const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
   const v128_t vmagic_bias = wasm_f32x4_const_splat(12582912.0f);
   const v128_t vmagic_min = wasm_u32x4_splat(float_as_uint32(12582912.0f + output_min_less_zero_point));
   const v128_t vmagic_bias_less_zero_point = wasm_i32x4_splat(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
-  const v128_t voutput_max = wasm_v128_load8_splat(&params->scalar.output_max);
+  const v128_t voutput_max = wasm_u8x16_const_splat(255);
   XNN_FORCE_REALIZATION(vscale);
   XNN_FORCE_REALIZATION(vmagic_bias);
   XNN_FORCE_REALIZATION(vmagic_min);

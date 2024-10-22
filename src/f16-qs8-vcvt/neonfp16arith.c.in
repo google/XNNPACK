@@ -30,12 +30,6 @@ void xnn_f16_qs8_vcvt_ukernel__neonfp16arith_u${BATCH_TILE}(
   const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.scale));
   const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
   $if BATCH_TILE > 8:
-    const int8x16_t voutput_min = vld1q_dup_s8(&params->scalar.output_min);
-    const int8x16_t voutput_max = vld1q_dup_s8(&params->scalar.output_max);
-  $else:
-    const int8x8_t voutput_min = vld1_dup_s8(&params->scalar.output_min);
-    const int8x8_t voutput_max = vld1_dup_s8(&params->scalar.output_max);
-  $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(uint16_t); batch -= ${BATCH_TILE} * sizeof(uint16_t)) {
       $for N in range(0, BATCH_TILE, 8):
         float16x8_t vx${N} = vreinterpretq_f16_u16(vld1q_u16(i)); i += 8;
@@ -57,18 +51,6 @@ void xnn_f16_qs8_vcvt_ukernel__neonfp16arith_u${BATCH_TILE}(
 
       $for N in range(0, BATCH_TILE, 16):
         $if N + 8 < BATCH_TILE:
-          vy${N} = vmaxq_s8(vy${N}, voutput_min);
-        $else:
-          vy${N} = vmax_s8(vy${N}, vget_low_s8(voutput_min));
-
-      $for N in range(0, BATCH_TILE, 16):
-        $if N + 8 < BATCH_TILE:
-          vy${N} = vminq_s8(vy${N}, voutput_max);
-        $else:
-          vy${N} = vmin_s8(vy${N}, vget_low_s8(voutput_max));
-
-      $for N in range(0, BATCH_TILE, 16):
-        $if N + 8 < BATCH_TILE:
           vst1q_s8(output, vy${N}); output += 16;
         $else:
           vst1_s8(output, vy${N}); output += 8;
@@ -83,12 +65,6 @@ void xnn_f16_qs8_vcvt_ukernel__neonfp16arith_u${BATCH_TILE}(
     vacc = vqaddq_s16(vacc, voutput_zero_point);
 
     int8x8_t vy = vqmovn_s16(vacc);
-    $if BATCH_TILE > 8:
-      vy = vmax_s8(vy, vget_low_s8(voutput_min));
-      vy = vmin_s8(vy, vget_low_s8(voutput_max));
-    $else:
-      vy = vmax_s8(vy, voutput_min);
-      vy = vmin_s8(vy, voutput_max);
     vst1_s8(output, vy); output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -102,12 +78,6 @@ void xnn_f16_qs8_vcvt_ukernel__neonfp16arith_u${BATCH_TILE}(
     vacc = vqaddq_s16(vacc, voutput_zero_point);
 
     int8x8_t vy = vqmovn_s16(vacc);
-    $if BATCH_TILE > 8:
-      vy = vmax_s8(vy, vget_low_s8(voutput_min));
-      vy = vmin_s8(vy, vget_low_s8(voutput_max));
-    $else:
-      vy = vmax_s8(vy, voutput_min);
-      vy = vmin_s8(vy, voutput_max);
 
     if (batch & (4 * sizeof(uint16_t))) {
       vst1_lane_u32((void*) output, vreinterpret_u32_s8(vy), 0); output += 4;

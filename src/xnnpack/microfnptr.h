@@ -2499,16 +2499,12 @@ typedef size_t (*xnn_init_binary_params_fn)(
 typedef size_t (*xnn_init_f16_qs8_cvt_params_fn)(
   struct xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   xnn_float16 scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max);
+  int8_t output_zero_point);
 
 typedef size_t (*xnn_init_f32_qs8_cvt_params_fn)(
   struct xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max);
+  int8_t output_zero_point);
 
 typedef size_t (*xnn_init_qs8_reduce_minmax_params_fn)(
   struct xnn_qs8_reduce_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2527,9 +2523,7 @@ typedef size_t (*xnn_init_qu8_reduce_minmax_params_fn)(
 typedef size_t (*xnn_init_f32_qu8_cvt_params_fn)(
   struct xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
-  uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max);
+  uint8_t output_zero_point);
 
 typedef size_t (*xnn_init_s32_f32_cvt_params_fn)(
   struct xnn_s32_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],

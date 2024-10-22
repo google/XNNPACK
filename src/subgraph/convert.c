@@ -64,7 +64,6 @@ static enum xnn_status create_convert_operator(
           status = xnn_create_convert_nc_f32_qs8(
               output_value->quantization.scale,
               (int8_t) output_value->quantization.zero_point,
-              INT8_MIN, INT8_MAX,
               node->flags,
               &opdata->operator_objects[0]);
            break;
@@ -72,7 +71,6 @@ static enum xnn_status create_convert_operator(
           status = xnn_create_convert_nc_f32_qu8(
             output_value->quantization.scale,
             (uint8_t) output_value->quantization.zero_point,
-            0, UINT8_MAX,
             node->flags,
             &opdata->operator_objects[0]);
           break;

@@ -33,9 +33,7 @@ void xnnpack_convert_f32_qs8(benchmark::State& state) {
   benchmark_unary_operator<float, int8_t>(
       [](uint32_t flags, xnn_operator_t* op) {
         return xnn_create_convert_nc_f32_qs8(
-            1.0f / 128.0f /* scale */, 1 /* zero point */,
-            std::numeric_limits<int8_t>::min(),
-            std::numeric_limits<int8_t>::max(), flags, op);
+            1.0f / 128.0f /* scale */, 1 /* zero point */, flags, op);
       },
       xnn_reshape_convert_nc_f32_qs8, xnn_setup_convert_nc_f32_qs8, state);
 }
@@ -44,9 +42,7 @@ void xnnpack_convert_f32_qu8(benchmark::State& state) {
   benchmark_unary_operator<float, uint8_t>(
       [](uint32_t flags, xnn_operator_t* op) {
         return xnn_create_convert_nc_f32_qu8(
-            1.0f / 128.0f /* scale */, 127 /* zero point */,
-            std::numeric_limits<uint8_t>::min(),
-            std::numeric_limits<uint8_t>::max(), flags, op);
+            1.0f / 128.0f /* scale */, 127 /* zero point */, flags, op);
       },
       xnn_reshape_convert_nc_f32_qu8, xnn_setup_convert_nc_f32_qu8, state);
 }

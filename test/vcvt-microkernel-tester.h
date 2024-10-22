@@ -52,20 +52,6 @@ class VCvtMicrokernelTester {
 
   int16_t output_zero_point() const { return this->output_zero_point_; }
 
-  VCvtMicrokernelTester& qmin(int16_t qmin) {
-    this->qmin_ = qmin;
-    return *this;
-  }
-
-  int16_t qmin() const { return this->qmin_; }
-
-  VCvtMicrokernelTester& qmax(int16_t qmax) {
-    this->qmax_ = qmax;
-    return *this;
-  }
-
-  int16_t qmax() const { return this->qmax_; }
-
   VCvtMicrokernelTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -114,8 +100,6 @@ class VCvtMicrokernelTester {
   float scale_ = 1.75f;
   int16_t input_zero_point_ = 0;
   int16_t output_zero_point_ = 5;
-  int16_t qmin_ = std::numeric_limits<int16_t>::min();
-  int16_t qmax_ = std::numeric_limits<int16_t>::max();
   size_t batch_size_ = 1;
   size_t iterations_ = 15;
 };
@@ -124,8 +108,6 @@ template <typename T>
 VCvtMicrokernelTester make_vcvt_tester() {
   if (std::is_integral<T>::value) {
     return VCvtMicrokernelTester()
-        .qmin(std::numeric_limits<T>::min())
-        .qmax(std::numeric_limits<T>::max())
         .output_zero_point(std::numeric_limits<T>::min() / 2 +
                            std::numeric_limits<T>::max() / 2 + 1);
   } else {
@@ -271,44 +253,4 @@ VCvtMicrokernelTester make_vcvt_tester() {
           .scale(4294967296.0f)                                             \
           .Test(__VA_ARGS__);                                               \
     }                                                                       \
-  }
-
-#define XNN_TEST_CVT_QMIN(ukernel, arch_flags, batch_tile, datatype_in, \
-                          datatype_out, ...)                            \
-  TEST(ukernel, qmin) {                                                 \
-    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                               \
-    const size_t batch_scale = get_batch_scale<datatype_in>();          \
-    const size_t batch_end = batch_tile * batch_scale * 5;              \
-    const size_t batch_step = std::max<size_t>(2, batch_end / 8) - 1;   \
-    for (int32_t qmin = std::numeric_limits<datatype_out>::min();       \
-         qmin < std::numeric_limits<datatype_out>::max(); qmin += 51) { \
-      for (size_t batch_size = 1; batch_size <= batch_end;              \
-           batch_size += batch_step) {                                  \
-        make_vcvt_tester<datatype_out>()                                \
-            .batch_size(batch_size)                                     \
-            .scale(500)                                                 \
-            .qmin(qmin)                                                 \
-            .Test(__VA_ARGS__);                                         \
-      }                                                                 \
-    }                                                                   \
-  }
-
-#define XNN_TEST_CVT_QMAX(ukernel, arch_flags, batch_tile, datatype_in,  \
-                          datatype_out, ...)                             \
-  TEST(ukernel, qmax) {                                                  \
-    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                \
-    const size_t batch_scale = get_batch_scale<datatype_in>();           \
-    const size_t batch_end = batch_tile * batch_scale * 5;               \
-    const size_t batch_step = std::max<size_t>(2, batch_end / 8) - 1;    \
-    for (int32_t qmax = std::numeric_limits<datatype_out>::min() + 1;    \
-         qmax <= std::numeric_limits<datatype_out>::max(); qmax += 51) { \
-      for (size_t batch_size = 1; batch_size <= batch_end;               \
-           batch_size += batch_step) {                                   \
-        make_vcvt_tester<datatype_out>()                                 \
-            .batch_size(batch_size)                                      \
-            .scale(500)                                                  \
-            .qmax(qmax)                                                  \
-            .Test(__VA_ARGS__);                                          \
-      }                                                                  \
-    }                                                                    \
   }
