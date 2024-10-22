@@ -997,6 +997,7 @@ enum xnn_binary_operator {
   xnn_binary_minimum,
   xnn_binary_copysign,
   xnn_binary_squared_difference,
+  xnn_binary_prelu,
 };
 
 struct xnn_binary_params {
@@ -1650,7 +1651,7 @@ enum xnn_status xnn_define_static_resize_bilinear_2d(
 /// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
 ///                    with [N, H, W, channels] dimensions.
 /// @param flags - binary features of the PReLU Node. No supported flags are currently defined.
-enum xnn_status xnn_define_prelu(
+XNN_DEPRECATED enum xnn_status xnn_define_prelu(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t slope_id,
@@ -5093,48 +5094,6 @@ enum xnn_status xnn_run_negate_nc_f32(
   float* output,
   uint32_t flags,
   pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_prelu_nc_f16(
-  size_t input_channels,
-  size_t slope_channels,
-  size_t input_stride,
-  size_t output_stride,
-  const void* negative_slope,
-  uint32_t flags,
-  xnn_code_cache_t code_cache,
-  xnn_weights_cache_t weights_cache,
-  xnn_operator_t* prelu_op_out);
-
-enum xnn_status xnn_reshape_prelu_nc_f16(
-  xnn_operator_t prelu_op,
-  size_t batch_size,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_prelu_nc_f16(
-  xnn_operator_t prelu_op,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_prelu_nc_f32(
-  size_t input_channels,
-  size_t slope_channels,
-  size_t input_stride,
-  size_t output_stride,
-  const float* negative_slope,
-  uint32_t flags,
-  xnn_code_cache_t code_cache,
-  xnn_weights_cache_t weights_cache,
-  xnn_operator_t* prelu_op_out);
-
-enum xnn_status xnn_reshape_prelu_nc_f32(
-  xnn_operator_t prelu_op,
-  size_t batch_size,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_prelu_nc_f32(
-  xnn_operator_t prelu_op,
-  const float* input,
-  float* output);
 
 enum xnn_status xnn_create_resize_bilinear2d_nchw_f32(
   size_t output_height,

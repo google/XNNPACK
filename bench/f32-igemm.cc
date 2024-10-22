@@ -11,8 +11,8 @@
 #include <random>
 #include <vector>
 
-#include "bench/conv.h"
-#include "bench/utils.h"
+#include "conv.h"
+#include "utils.h"
 #include "xnnpack/common.h"
 #include "xnnpack/igemm.h"
 #include "xnnpack/indirection.h"

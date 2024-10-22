@@ -34,5 +34,5 @@ XNN_TEST_UNARY_BATCH_GT(ukernel, arch_flags, batch_tile, datatype, ukernel, init
 XNN_TEST_UNARY_INPLACE(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                         \
 XNN_TEST_UNARY_QMIN(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                            \
 XNN_TEST_UNARY_QMAX(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);
-#include "src/s8-vclamp/s8-vclamp.h"
+#include "s8-vclamp/s8-vclamp.h"
 #undef XNN_UKERNEL_WITH_PARAMS

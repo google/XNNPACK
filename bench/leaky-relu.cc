@@ -9,7 +9,7 @@
 #include <limits>
 
 #include "unary_operator.h"
-#include "bench/utils.h"
+#include "utils.h"
 #include "xnnpack/math.h"
 #include <benchmark/benchmark.h>
 #ifdef BENCHMARK_TENSORFLOW_LITE

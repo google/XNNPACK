@@ -16,7 +16,7 @@
 #include "xnnpack.h"
 
 #include <benchmark/benchmark.h>
-#include "bench/utils.h"
+#include "utils.h"
 #include "xnnpack/buffer.h"
 
 

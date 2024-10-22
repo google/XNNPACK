@@ -18,7 +18,7 @@
 #include "xnnpack.h"
 
 #include <benchmark/benchmark.h>
-#include "bench/utils.h"
+#include "utils.h"
 #include "xnnpack/buffer.h"
 
 void xnnpack_fully_connected_f32(benchmark::State& state, const char* net) {

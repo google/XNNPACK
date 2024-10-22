@@ -63,5 +63,5 @@ TEST(ukernel, special_values) {                                                 
     }                                                                                                            \
   }                                                                                                              \
 }
-#include "src/f32-vsqrt/f32-vsqrt.h"
+#include "f32-vsqrt/f32-vsqrt.h"
 #undef XNN_UKERNEL_WITH_PARAMS

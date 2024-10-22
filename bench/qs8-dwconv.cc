@@ -10,8 +10,8 @@
 #include <limits>
 #include <random>
 
-#include "bench/dwconv.h"
-#include "bench/utils.h"
+#include "dwconv.h"
+#include "utils.h"
 #include "xnnpack.h"
 #include "xnnpack/buffer.h"
 #include "xnnpack/common.h"

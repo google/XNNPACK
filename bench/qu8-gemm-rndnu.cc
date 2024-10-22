@@ -8,8 +8,8 @@
 //   Generator: tools/generate-gemm-test.py
 
 #include <benchmark/benchmark.h>
-#include "bench/gemm-benchmark.h"
-#include "bench/utils.h"
+#include "gemm-benchmark.h"
+#include "utils.h"
 #include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/isa-checks.h"

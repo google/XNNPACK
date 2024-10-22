@@ -32,5 +32,5 @@ XNN_TEST_UNARY_BATCH_LT(ukernel, arch_flags, batch_tile, datatype, ukernel, VUna
 XNN_TEST_UNARY_BATCH_GT(ukernel, arch_flags, batch_tile, datatype, ukernel, VUnaryMicrokernelTester::OpType::RoundTowardsZero, init_params); \
                                                                                                                                              \
 XNN_TEST_UNARY_INPLACE(ukernel, arch_flags, batch_tile, datatype, ukernel, VUnaryMicrokernelTester::OpType::RoundTowardsZero, init_params);
-#include "src/f16-vrnd/f16-vrndz.h"
+#include "f16-vrnd/f16-vrndz.h"
 #undef XNN_UKERNEL_WITH_PARAMS

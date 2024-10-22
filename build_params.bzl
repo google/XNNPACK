@@ -120,6 +120,10 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_AVX512SKX=1"],
         ["XNN_ENABLE_AVX512SKX=0"],
     ) + xnnpack_select_if(
+        ":avx512vbmi_enabled",
+        ["XNN_ENABLE_AVX512VBMI=1"],
+        ["XNN_ENABLE_AVX512VBMI=0"],
+    ) + xnnpack_select_if(
         ":avx512vnni_enabled",
         ["XNN_ENABLE_AVX512VNNI=1"],
         ["XNN_ENABLE_AVX512VNNI=0"],
@@ -645,7 +649,7 @@ XNNPACK_PARAMS_FOR_ARCH = {
         msys_copts = ["-fno-asynchronous-unwind-tables"],
     ),
     "avx512vbmi": _create_params(
-        cond = "//build_config:x86",
+        cond = "//:avx512vbmi_enabled",
         gcc_x86_copts = [
             "-mf16c",
             "-mfma",

@@ -9,7 +9,7 @@
 #include <numeric>
 #include <vector>
 
-#include "bench/utils.h"
+#include "utils.h"
 #include "xnnpack.h"
 #include "xnnpack/aligned-allocator.h"
 #include "xnnpack/common.h"

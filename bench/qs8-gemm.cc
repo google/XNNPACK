@@ -14,8 +14,8 @@
 #include <vector>
 
 #include <benchmark/benchmark.h>
-#include "bench/gemm-benchmark.h"
-#include "bench/utils.h"
+#include "gemm-benchmark.h"
+#include "utils.h"
 #ifdef BENCHMARK_RUY
 #include "ruy/ruy.h"
 #endif  // BENCHMARK_RUY

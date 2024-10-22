@@ -16,8 +16,8 @@
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qs4cxs1s0.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
-#include "bench/gemm.h"
-#include "bench/utils.h"
+#include "gemm.h"
+#include "utils.h"
 #include <benchmark/benchmark.h>
 
 void GEMMBenchmark(benchmark::State& state, xnn_qs8_gemm_minmax_ukernel_fn gemm,

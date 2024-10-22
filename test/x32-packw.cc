@@ -32,7 +32,7 @@ std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) 
   { #ukernel, ukernel, arch_flags, nr, kr, sr, kblock, nr_scale },
 
 const XnnTestParam xnn_test_params[] = {
-#include "src/x32-packw/x32-packw.h"
+#include "x32-packw/x32-packw.h"
 };
 
 #undef XNN_UKERNEL

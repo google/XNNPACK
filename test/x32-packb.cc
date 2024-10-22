@@ -32,8 +32,8 @@ std::string GetTestName(const testing::TestParamInfo<XnnTest::ParamType>& info) 
   { #ukernel, PackBMicrokernelTester::Kernel{ukernel}, arch_flags, channel_tile, channel_subtile, channel_round },
 
 const XnnTestParam xnn_test_params[] = {
-#include "src/x32-packb/x32-packb.h"
-#include "src/x32-zerob/x32-zerob.h"
+#include "x32-packb/x32-packb.h"
+#include "x32-zerob/x32-zerob.h"
 };
 
 #undef XNN_UKERNEL

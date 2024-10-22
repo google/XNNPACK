@@ -32,5 +32,5 @@ XNN_TEST_UNARY_BATCH_LT(ukernel, arch_flags, batch_tile, datatype, ukernel, init
 XNN_TEST_UNARY_BATCH_GT(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                        \
                                                                                                                  \
 XNN_TEST_UNARY_INPLACE(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);
-#include "src/f16-vtanh/f16-vtanh.h"
+#include "f16-vtanh/f16-vtanh.h"
 #undef XNN_UKERNEL_WITH_PARAMS

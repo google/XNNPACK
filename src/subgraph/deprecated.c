@@ -77,6 +77,13 @@ enum xnn_status xnn_define_copysign(xnn_subgraph_t subgraph, uint32_t input1_id,
                            input2_id, output_id, flags);
 }
 
+enum xnn_status xnn_define_prelu(xnn_subgraph_t subgraph, uint32_t input1_id,
+                                 uint32_t input2_id, uint32_t output_id,
+                                 uint32_t flags) {
+  return xnn_define_binary(subgraph, xnn_binary_prelu, NULL,
+                           input1_id, input2_id, output_id, flags);
+}
+
 enum xnn_status xnn_define_static_mean(xnn_subgraph_t subgraph,
                                        size_t num_reduction_axes,
                                        const size_t* reduction_axes,

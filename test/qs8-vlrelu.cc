@@ -20,7 +20,7 @@
 #include "xnnpack/isa-checks.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
-#include "xnnpack/vlrelu.h"
+#include "xnnpack/vunary.h"
 #include "next_prime.h"
 #include "vlrelu-microkernel-tester.h"
 
@@ -55,5 +55,5 @@ TEST(ukernel, negative_scale) {                                                 
       }                                                                                                          \
   }                                                                                                              \
 }
-#include "src/qs8-vlrelu/qs8-vlrelu.h"
+#include "qs8-vlrelu/qs8-vlrelu.h"
 #undef XNN_UKERNEL_WITH_PARAMS

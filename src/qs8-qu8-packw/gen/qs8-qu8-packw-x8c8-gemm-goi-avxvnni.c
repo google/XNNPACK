@@ -30,7 +30,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avxvnni(
   const void* scale,
   int8_t* packed_weights,
   size_t extra_bytes,
-  const void* params)
+  const void* params) XNN_OOB_READS
 {
   assert(g != 0);
   assert(nc != 0);

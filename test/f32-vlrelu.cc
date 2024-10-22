@@ -46,5 +46,5 @@ TEST(ukernel, slope) {                                                          
     }                                                                                                            \
   }                                                                                                              \
 }
-#include "src/f32-vlrelu/f32-vlrelu.h"
+#include "f32-vlrelu/f32-vlrelu.h"
 #undef XNN_UKERNEL_WITH_PARAMS
