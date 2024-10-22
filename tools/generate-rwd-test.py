@@ -93,7 +93,7 @@ def main(args):
       },
   ))
   folder = datatype + "-" + ("vbinary" if datatype.startswith("f") else op)
-  tests += f'#include "{xnncommon._XNNPACK_SRC}/{options.ukernel}/{options.ukernel}.h"\n'
+  tests += f'#include "{options.ukernel}/{options.ukernel}.h"\n'
   tests += "#undef XNN_UKERNEL_WITH_PARAMS\n"
   xnncommon.overwrite_if_changed(options.output, tests)
   

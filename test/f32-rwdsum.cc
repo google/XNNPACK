@@ -15,6 +15,6 @@
 XNN_TEST_RWD_CHANNEL_EQ_ROW_EQ(ukernel, ukernel, RWDMicrokernelTester::OpType::Sum, init_params);          \
 XNN_TEST_RWD_CHANNEL_EQ_ROW_GT(ukernel, ukernel, RWDMicrokernelTester::OpType::Sum, init_params);          \
 XNN_TEST_RWD_CHANNEL_GT_ROW_EQ(ukernel, ukernel, RWDMicrokernelTester::OpType::Sum, init_params);          \
-XNN_TEST_RWD_CHANNEL_GT_ROW_GT(ukernel, ukernel, RWDMicrokernelTester::OpType::Sum, init_params);          
-#include "src/f32-rwdsum/f32-rwdsum.h"
+XNN_TEST_RWD_CHANNEL_GT_ROW_GT(ukernel, ukernel, RWDMicrokernelTester::OpType::Sum, init_params);
+#include "f32-rwdsum/f32-rwdsum.h"
 #undef XNN_UKERNEL_WITH_PARAMS

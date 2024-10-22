@@ -112,7 +112,7 @@ def main(args):
 #include <numeric>
 #include <benchmark/benchmark.h>
 
-#include "bench/utils.h"
+#include "utils.h"
 #include "xnnpack/aligned-allocator.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/reduce.h"
@@ -143,7 +143,7 @@ def main(args):
   ))
 
   folder = options.ukernel
-  benchmarks += f'#include "{xnncommon._XNNPACK_SRC}/{folder}/{options.ukernel}.h"\n'
+  benchmarks += f'#include "{folder}/{options.ukernel}.h"\n'
   benchmarks += "#undef XNN_UKERNEL_WITH_PARAMS\n"
 
 

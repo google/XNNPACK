@@ -36,9 +36,9 @@ void xnn_f32_rwsum_ukernel__scalar_u4_acc4(
 
     for (int64_t i = 0; i < output_size; i++) {
         float sum0 = init_value * (window_dimensions + 1);
-        float sum1 = 0;
-        float sum2 = 0;
-        float sum3 = 0;
+        float sum1 = 0.0f;
+        float sum2 = 0.0f;
+        float sum3 = 0.0f;
         
         const int64_t window_start = i * window_strides;
         const int64_t pad_high_boundary = math_divide_round_up_s64((padding[0] - window_start), window_dilations);
@@ -59,8 +59,8 @@ void xnn_f32_rwsum_ukernel__scalar_u4_acc4(
                 window_row0 /= base_dilation;
 
                 int64_t window_row1 = window_row0 + lcm_value;
-                int64_t window_row2 = window_row0 + 2 * lcm_value;
-                int64_t window_row3 = window_row0 + 3 * lcm_value;
+                int64_t window_row2 = window_row1 + lcm_value;
+                int64_t window_row3 = window_row2 + lcm_value;
                 
                 while (window_row3 < win_boundary) {
                     sum0 += input[window_row0];

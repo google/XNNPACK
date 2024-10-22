@@ -16,5 +16,5 @@ XNN_TEST_RW_BATCH_EQ(ukernel, batch_tile,  ukernel, ReduceWindowMicrokernelTeste
 XNN_TEST_RW_BATCH_GT(ukernel, batch_tile, ukernel, ReduceWindowMicrokernelTester::OpType::Sum, init_params); \
 XNN_TEST_RW_BATCH_LT(ukernel, batch_tile, ukernel, ReduceWindowMicrokernelTester::OpType::Sum, init_params); \
 XNN_TEST_RW_BATCH_DIV(ukernel, batch_tile, ukernel, ReduceWindowMicrokernelTester::OpType::Sum, init_params);
-#include "src/f32-rwsum/f32-rwsum.h"
+#include "f32-rwsum/f32-rwsum.h"
 #undef XNN_UKERNEL_WITH_PARAMS

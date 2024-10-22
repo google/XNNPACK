@@ -37,7 +37,7 @@ void xnn_f32_rwsum_ukernel__scalar_u2_acc2(
 
     for (int64_t i = 0; i < output_size; i++) {
         float sum0 = init_value * (window_dimensions + 1);
-        float sum1 = 0;
+        float sum1 = 0.0f;
         const int64_t window_start = i * window_strides;
         const int64_t pad_high_boundary = math_divide_round_up_s64((padding[0] - window_start), window_dilations);
         const int64_t pad_low_boundary = math_divide_round_up_s64((padded_size - padding[1] - window_start), window_dilations);

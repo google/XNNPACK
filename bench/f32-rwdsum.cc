@@ -10,7 +10,7 @@
 #include <numeric>
 #include <benchmark/benchmark.h>
 
-#include "bench/utils.h"
+#include "utils.h"
 #include "xnnpack/aligned-allocator.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/reduce.h"
@@ -68,7 +68,7 @@ static void BenchmarkRWDSUM(benchmark::internal::Benchmark* b)
 BENCHMARK_CAPTURE(f32_rwdsum, arch_flags, ukernel)                           \
   ->Apply(BenchmarkRWDSUM)                                                   \
   ->UseRealTime();
-#include "src/f32-rwdsum/f32-rwdsum.h"
+#include "f32-rwdsum/f32-rwdsum.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 
 
