@@ -47,9 +47,9 @@ http_archive(
 # Google Test framework, used by most unit-tests.
 http_archive(
     name = "com_google_googletest",
-    sha256 = "5a5f23d3d788a0b6e10c45f30128e126a7f3db01c5c8026f0f68e64d6d7a26f0",
-    strip_prefix = "googletest-62df7bdbc10887e094661e07ec2595b7920376fd",
-    urls = ["https://github.com/google/googletest/archive/62df7bdbc10887e094661e07ec2595b7920376fd.zip"],
+    sha256 = "4f45c2213c1ad4de211b15721db4b05c31dc54e244ab26f397345631da327624",
+    strip_prefix = "googletest-df1544bcee0c7ce35cd5ea0b3eb8cc81855a4140",
+    urls = ["https://github.com/google/googletest/archive/df1544bcee0c7ce35cd5ea0b3eb8cc81855a4140.zip"],
 )
 # LINT.ThenChange(cmake/DownloadGoogleTest.cmake)
 
@@ -87,10 +87,10 @@ http_archive(
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
     name = "cpuinfo",
-    sha256 = "ca31f17a86e4db01b5fc05efa1807ddc84c02ba4611464b67e185e8210bf096b",
-    strip_prefix = "cpuinfo-1e83a2fdd3102f65c6f1fb602c1b320486218a99",
+    sha256 = "a57f2b93704fe49ad37fa3ef5ce8208443d6b589b89653341332bcf51aa6dde3",
+    strip_prefix = "cpuinfo-dff2616ddd49122b63abcf44d2c097483b77f861",
     urls = [
-        "https://github.com/pytorch/cpuinfo/archive/1e83a2fdd3102f65c6f1fb602c1b320486218a99.zip",
+        "https://github.com/pytorch/cpuinfo/archive/dff2616ddd49122b63abcf44d2c097483b77f861.zip",
     ],
 )
 # LINT.ThenChange(cmake/DownloadCpuinfo.cmake)
