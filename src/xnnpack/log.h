@@ -52,6 +52,7 @@ extern "C" {
 #endif
 
 const char* xnn_datatype_to_string(enum xnn_datatype type);
+const char* xnn_binary_operator_to_string(enum xnn_binary_operator type);
 
 #ifdef __cplusplus
 }  // extern "C"
