@@ -1927,6 +1927,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       bench/models/fp32-mobilenet-v2.cc
       bench/models/fp32-mobilenet-v3-large.cc
       bench/models/fp32-mobilenet-v3-small.cc
+      bench/models/qd8-attention.cc
       bench/models/qs8-mobilenet-v2.cc)
     SET_TARGET_PROPERTIES(models PROPERTIES CXX_EXTENSIONS YES)
     TARGET_LINK_LIBRARIES(models PRIVATE XNNPACK)
