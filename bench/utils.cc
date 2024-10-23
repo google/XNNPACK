@@ -28,7 +28,7 @@
 #include "xnnpack/allocator.h"
 #include "xnnpack/hardware-config.h"
 
-#include "bench/utils.h"
+#include "utils.h"
 
 static void* wipe_buffer = nullptr;
 static size_t wipe_buffer_size = 0;

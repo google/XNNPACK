@@ -18,7 +18,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $_MM_PACKXS_EPI16 = {"QS8": "_mm_packs_epi16", "QU8": "_mm_packus_epi16"}[DATATYPE]
-$_MM_MAX_EPX8 = {"QS8": "_mm_max_epi8", "QU8": "_mm_max_epu8"}[DATATYPE]
+$OUTPUT_MAX = {"QS8": 127, "QU8": 255}[DATATYPE]
 void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__avx_u${BATCH_TILE}(
     size_t batch,
     const float* input,
@@ -33,13 +33,11 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__avx_u${BATCH_TILE}(
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
   const __m256 vscale = _mm256_set1_ps(params->scalar.scale);
-  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point));
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((float) ((int32_t) ${OUTPUT_MAX} - (int32_t) params->scalar.output_zero_point));
   const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
-  const __m128i voutput_min = _mm_set1_epi8(params->scalar.output_min);
   XNN_FORCE_REALIZATION(vscale);
   XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
   XNN_FORCE_REALIZATION(voutput_zero_point);
-  XNN_FORCE_REALIZATION(voutput_min);
 
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
@@ -69,12 +67,6 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__avx_u${BATCH_TILE}(
         $else:
           vy${ABC[N:N+8]} = ${_MM_PACKXS_EPI16}(vy${ABC[N:N+8]}, vy${ABC[N:N+8]});
 
-      $for N in range(0, BATCH_TILE, 16):
-        $if N + 8 < BATCH_TILE:
-          vy${ABC[N:N+16]} = ${_MM_MAX_EPX8}(vy${ABC[N:N+16]}, voutput_min);
-        $else:
-          vy${ABC[N:N+8]} = ${_MM_MAX_EPX8}(vy${ABC[N:N+8]}, voutput_min);
-
       _mm_storeu_si128((__m128i*) output, vy${ABC[0:16]});
       $for N in range(16, BATCH_TILE, 16):
         $if N + 8 < BATCH_TILE:
@@ -94,7 +86,6 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__avx_u${BATCH_TILE}(
     __m128i vy = _mm_packs_epi32(_mm256_castsi256_si128(vacc), _mm256_extractf128_si256(vacc, 1));
     vy = _mm_adds_epi16(vy, voutput_zero_point);
     vy = ${_MM_PACKXS_EPI16}(vy, vy);
-    vy = ${_MM_MAX_EPX8}(vy, voutput_min);
 
     _mm_storel_epi64((__m128i*) output, vy);
     output += 8;
@@ -113,7 +104,6 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__avx_u${BATCH_TILE}(
     __m128i vy = _mm_packs_epi32(_mm256_castsi256_si128(vacc), _mm256_extractf128_si256(vacc, 1));
     vy = _mm_adds_epi16(vy, voutput_zero_point);
     vy = ${_MM_PACKXS_EPI16}(vy, vy);
-    vy = ${_MM_MAX_EPX8}(vy, voutput_min);
 
     if (batch & (4 * sizeof(float))) {
       _mm_storeu_si32(output, vy);

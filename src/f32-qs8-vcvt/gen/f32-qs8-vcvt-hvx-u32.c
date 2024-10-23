@@ -26,8 +26,6 @@ void xnn_f32_qs8_vcvt_ukernel__hvx_u32(
   const HVX_Vector vscale = xnn_set1_f32(params->scalar.scale);
   const HVX_Vector vmagic_bias = xnn_set1_f32(12582912.0f);
   const HVX_Vector vmagic_bias_less_zero_point = Q6_V_vsplat_R(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
-  const HVX_Vector voutput_min = Q6_Vb_vsplat_R(params->scalar.output_min);
-  const HVX_Vector voutput_max = Q6_Vb_vsplat_R(params->scalar.output_max);
   XNN_FORCE_REALIZATION(vmagic_bias);
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     HVX_Vector vx = xnn_loadu_f32(input);
@@ -40,9 +38,6 @@ void xnn_f32_qs8_vcvt_ukernel__hvx_u32(
     const HVX_Vector vacc_h = Q6_Vh_vpack_VwVw_sat(vacc, vacc);
 
     HVX_Vector vy = Q6_Vb_vpack_VhVh_sat(vacc_h, vacc_h);
-
-    vy = Q6_Vb_vmax_VbVb(voutput_min, vy);
-    vy = Q6_Vb_vmin_VbVb(voutput_max, vy);
 
     Q6_V_vstu_variable(output, 32, vy);
     output += 32;
@@ -59,9 +54,6 @@ void xnn_f32_qs8_vcvt_ukernel__hvx_u32(
     const HVX_Vector vacc_h = Q6_Vh_vpack_VwVw_sat(vacc, vacc);
 
     HVX_Vector vy = Q6_Vb_vpack_VhVh_sat(vacc_h, vacc_h);
-
-    vy = Q6_Vb_vmax_VbVb(voutput_min, vy);
-    vy = Q6_Vb_vmin_VbVb(voutput_max, vy);
 
     // Since the output data type is int8_t,
     // we simply determine the number of elements using batch >> 2

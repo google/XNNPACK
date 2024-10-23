@@ -7,8 +7,8 @@
 #include <cstdint>
 
 #include <benchmark/benchmark.h>
-#include "bench/utils.h"
-#include "bench/vcvt-benchmark.h"
+#include "utils.h"
+#include "vcvt-benchmark.h"
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/hardware-config.h"
@@ -27,9 +27,7 @@ static void f16_qs8_vcvt(
   xnn_f16_qs8_cvt_params params;
   init_params(&params,
     1.0f /* scale */,
-    1 /* output zero point */,
-    std::numeric_limits<int8_t>::min() + 1 /* output min */,
-    std::numeric_limits<int8_t>::max() - 1 /* output max */);
+    1 /* output zero point */);
 
   cvt_benchmark<xnn_float16, int8_t>(state, arch_flags, cvt, &params);
 }
@@ -39,7 +37,7 @@ static void f16_qs8_vcvt(
 BENCHMARK_CAPTURE(f16_qs8_vcvt, ukernel, arch_flags, ukernel, init_params)          \
   ->Apply(benchmark::utils::UnaryElementwiseParameters<datatype_in, datatype_out>)  \
   ->UseRealTime();
-#include "src/f16-qs8-vcvt/f16-qs8-vcvt.h"
+#include "f16-qs8-vcvt/f16-qs8-vcvt.h"
 #undef XNN_CVT_UKERNEL_WITH_PARAMS
 
 

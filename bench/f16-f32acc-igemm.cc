@@ -10,8 +10,8 @@
 #include <random>
 #include <vector>
 
-#include "bench/conv.h"
-#include "bench/utils.h"
+#include "conv.h"
+#include "utils.h"
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/igemm.h"

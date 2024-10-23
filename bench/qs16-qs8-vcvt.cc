@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <benchmark/benchmark.h>
-#include "bench/utils.h"
-#include "bench/vcvt-benchmark.h"
+#include "utils.h"
+#include "vcvt-benchmark.h"
 #include "xnnpack.h"
 #include "xnnpack/hardware-config.h"
 #include "xnnpack/microfnptr.h"
@@ -30,7 +30,7 @@ static void qs16_qs8_vcvt(
 BENCHMARK_CAPTURE(qs16_qs8_vcvt, ukernel, arch_flags, ukernel, init_params)         \
   ->Apply(benchmark::utils::UnaryElementwiseParameters<datatype_in, datatype_out>)  \
   ->UseRealTime();
-#include "src/qs16-qs8-vcvt/qs16-qs8-vcvt.h"
+#include "qs16-qs8-vcvt/qs16-qs8-vcvt.h"
 #undef XNN_CVT_UKERNEL_WITH_PARAMS
 
 

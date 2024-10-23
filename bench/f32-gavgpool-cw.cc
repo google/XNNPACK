@@ -10,7 +10,7 @@
 #include <numeric>
 #include <vector>
 
-#include "bench/utils.h"
+#include "utils.h"
 #include <benchmark/benchmark.h>
 
 #include "xnnpack.h"

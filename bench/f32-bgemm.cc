@@ -17,8 +17,8 @@
 #ifdef BENCHMARK_RUY
 #include "ruy/ruy.h"
 #endif  // BENCHMARK_RUY
-#include "bench/bgemm.h"
-#include "bench/utils.h"
+#include "bgemm.h"
+#include "utils.h"
 #include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
 #include "xnnpack/gemm.h"

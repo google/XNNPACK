@@ -515,15 +515,6 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
     case xnn_node_type_floor:
     case xnn_node_type_hardswish:
     case xnn_node_type_leaky_relu:
-    case xnn_node_type_static_mean:
-    case xnn_node_type_static_sum:
-      if (subgraph->values[node->inputs[0]].shape.num_dims == 4) {
-        return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW | XNN_LAYOUT_FLAG_COMPATIBLE_NHWC2NCHW;
-      } else {
-        xnn_log_info("Node %s inputs shape is incompatible with sparse inference",
-                     xnn_node_type_to_string(node->type));
-        return 0;
-      }
     case xnn_node_type_negate:
     case xnn_node_type_sigmoid:
     case xnn_node_type_square:
@@ -531,6 +522,15 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
       assert(node->num_outputs == 1);
       if (subgraph->values[node->inputs[0]].shape.num_dims == 4) {
         return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW;
+      } else {
+        xnn_log_info("Node %s inputs shape is incompatible with sparse inference",
+                     xnn_node_type_to_string(node->type));
+        return 0;
+      }
+    case xnn_node_type_static_mean:
+    case xnn_node_type_static_sum:
+      if (subgraph->values[node->inputs[0]].shape.num_dims == 4) {
+        return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW | XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC;
       } else {
         xnn_log_info("Node %s inputs shape is incompatible with sparse inference",
                      xnn_node_type_to_string(node->type));
@@ -1433,6 +1433,8 @@ enum xnn_node_type xnn_binary_operator_to_node_type(enum xnn_binary_operator typ
       return xnn_node_type_copysign;
     case xnn_binary_squared_difference:
       return xnn_node_type_squared_difference;
+    case xnn_binary_prelu:
+      return xnn_node_type_prelu;
     case xnn_binary_minimum:
       return xnn_node_type_minimum2;
     case xnn_binary_maximum:
@@ -1457,6 +1459,8 @@ enum xnn_binary_operator xnn_node_type_to_binary_operator(enum xnn_node_type typ
       return xnn_binary_copysign;
     case xnn_node_type_squared_difference:
       return xnn_binary_squared_difference;
+    case xnn_node_type_prelu:
+      return xnn_binary_prelu;
     case xnn_node_type_minimum2:
       return xnn_binary_minimum;
     case xnn_node_type_maximum2:

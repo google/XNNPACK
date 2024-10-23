@@ -126,7 +126,11 @@ static void init_hardware_config(void) {
 #else
     hardware_config.use_x86_avx512skx = 0;
 #endif
+#if XNN_ENABLE_AVX512VBMI
     hardware_config.use_x86_avx512vbmi = hardware_config.use_x86_avx512skx && cpuinfo_has_x86_avx512vbmi();
+#else
+    hardware_config.use_x86_avx512vbmi = 0;
+#endif
 #if XNN_ENABLE_AVX512VNNI
     hardware_config.use_x86_avx512vnni = hardware_config.use_x86_avx512skx && cpuinfo_has_x86_avx512vnni();
 #else

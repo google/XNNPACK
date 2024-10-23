@@ -13,7 +13,7 @@
 
 #include "xnnpack/common.h"
 #include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/vlrelu.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_qu8_vlrelu_ukernel__sse41_u16(

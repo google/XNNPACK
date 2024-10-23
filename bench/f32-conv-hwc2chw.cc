@@ -11,8 +11,8 @@
 #include <random>
 #include <vector>
 
-#include "bench/dconv.h"
-#include "bench/utils.h"
+#include "dconv.h"
+#include "utils.h"
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/conv.h"

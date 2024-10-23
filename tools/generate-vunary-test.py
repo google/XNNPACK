@@ -18,6 +18,7 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument("-t", "--tester", metavar="TESTER", required=True,
                     choices=[
+                    "VHSwishMicrokernelTester",
                     "VLReLUMicrokernelTester",
                     "VUnaryMicrokernelTester"],
                     help="Tester class to be used in the generated test")
@@ -106,8 +107,7 @@ XNN_TEST_UNARY_BATCH_DIV(ukernel, arch_flags, batch_tile, datatype, ${", ".join(
 XNN_TEST_UNARY_BATCH_LT(ukernel, arch_flags, batch_tile, datatype, ${", ".join(TEST_ARGS)});
 XNN_TEST_UNARY_BATCH_GT(ukernel, arch_flags, batch_tile, datatype, ${", ".join(TEST_ARGS)});
 
-$if OP_TYPE != "SquareRootShift":
-  XNN_TEST_UNARY_INPLACE(ukernel, arch_flags, batch_tile, datatype, ${", ".join(TEST_ARGS)});
+XNN_TEST_UNARY_INPLACE(ukernel, arch_flags, batch_tile, datatype, ${", ".join(TEST_ARGS)});
 $if OP_TYPE == "Clamp":
   XNN_TEST_UNARY_QMIN(ukernel, arch_flags, batch_tile, datatype, ${", ".join(TEST_ARGS)});
   XNN_TEST_UNARY_QMAX(ukernel, arch_flags, batch_tile, datatype, ${", ".join(TEST_ARGS)});
@@ -202,21 +202,65 @@ $if OP_TYPE == "LeakyReLU":
           }
       }
     }
-$if OP_TYPE == "SquareRootShift":
-  TEST(ukernel, shift) {
-    TEST_REQUIRES_ARCH_FLAGS(arch_flags);
-    const size_t batch_scale = get_batch_scale<datatype>();
-    const size_t batch_end = batch_tile * batch_scale;
-    const size_t batch_step = std::max(1, batch_tile - 1);
-    for (uint32_t shift = 0; shift < 32; shift++) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_end; batch_size += batch_step) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          .shift(shift)
-          .Test(${", ".join(TEST_ARGS)});
+$if OP_TYPE == "HardSwish":
+  $if "f" not in DATATYPE:
+    TEST(ukernel, input_scale) {
+      TEST_REQUIRES_ARCH_FLAGS(arch_flags);
+      for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+        for (float input_scale : {4.0f, 16.0f, 64.0f}) {
+          VHSwishMicrokernelTester()
+            .batch_size(batch_size)
+            .input_scale(input_scale)
+            $if "qu8" in DATATYPE:
+              .input_zero_point(150)
+              .output_zero_point(100)
+            .Test(${", ".join(TEST_ARGS)});
+          }
       }
     }
-  }
+
+    TEST(ukernel, output_scale) {
+      TEST_REQUIRES_ARCH_FLAGS(arch_flags);
+      for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+        for (float output_scale : {4.0f, 16.0f, 64.0f}) {
+          VHSwishMicrokernelTester()
+            .batch_size(batch_size)
+            .output_scale(output_scale)
+            $if "qu8" in DATATYPE:
+              .input_zero_point(150)
+              .output_zero_point(100)
+            .Test(${", ".join(TEST_ARGS)});
+          }
+      }
+    }
+
+    TEST(ukernel, input_zero_point) {
+      TEST_REQUIRES_ARCH_FLAGS(arch_flags);
+      for (int16_t input_zero_point = 2; input_zero_point < 10; input_zero_point += 3) {
+        for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+          VHSwishMicrokernelTester()
+            .batch_size(batch_size)
+            .input_zero_point(input_zero_point)
+            $if "qu8" in DATATYPE:
+              .output_zero_point(100)
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      }
+    }
+
+    TEST(ukernel, output_zero_point) {
+      TEST_REQUIRES_ARCH_FLAGS(arch_flags);
+      for (int16_t output_zero_point = 2; output_zero_point < 10; output_zero_point += 3) {
+        for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
+          VHSwishMicrokernelTester()
+            .batch_size(batch_size)
+            $if "qu8" in DATATYPE:
+              .input_zero_point(150)
+            .output_zero_point(output_zero_point)
+            .Test(${", ".join(TEST_ARGS)});
+        }
+      }
+    }
 $if DATATYPE == "f32" and OP_TYPE in SPECIAL_VALUES_F32:
   TEST(ukernel, special_values) {
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);
@@ -261,14 +305,12 @@ def main(args):
 
   tester = options.tester
   tester_header = {
+      "VHSwishMicrokernelTester": "vhswish-microkernel-tester.h",
       "VLReLUMicrokernelTester": "vlrelu-microkernel-tester.h",
       "VUnaryMicrokernelTester": "vunary-microkernel-tester.h",
   }[tester]
 
-  op_header = {
-      "VLReLUMicrokernelTester": "vlrelu.h",
-      "VUnaryMicrokernelTester": "vunary.h",
-  }[tester]
+  op_header = "vunary.h"
   tests = """\
 // Copyright 2019 Google LLC
 //

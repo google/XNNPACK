@@ -63,5 +63,5 @@ TEST(ukernel, special_values) {                                                 
     }                                                                                                            \
   }                                                                                                              \
 }
-#include "src/f32-vlog/f32-vlog.h"
+#include "f32-vlog/f32-vlog.h"
 #undef XNN_UKERNEL_WITH_PARAMS

@@ -72,11 +72,14 @@ XNN_DWCONV_UNIPASS(xnn_arch_x86_avx2, xnn_qs8_dwconv_minmax_fp32_ukernel_25p32c_
 XNN_DWCONV_UNIPASS(xnn_arch_x86_avx2, xnn_qs8_dwconv_minmax_fp32_ukernel_25p32c__avx2_mul16_vpmovsx, 32, false, 32, 25, int8_t, void, union xnn_qs8_conv_minmax_params, xnn_init_qs8_conv_minmax_fp32_scalar_params)
 XNN_DWCONV_UNIPASS(xnn_arch_x86_avx2, xnn_qs8_dwconv_minmax_fp32_ukernel_25p32c__avx2_mul16_vpunpck, 32, false, 32, 25, int8_t, void, union xnn_qs8_conv_minmax_params, xnn_init_qs8_conv_minmax_fp32_scalar_params)
 XNN_DWCONV_UNIPASS(xnn_arch_x86_avx2, xnn_qs8_dwconv_minmax_fp32_ukernel_25p32c__avx2_mul32, 32, false, 32, 25, int8_t, void, union xnn_qs8_conv_minmax_params, xnn_init_qs8_conv_minmax_fp32_scalar_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_DWCONV_UNIPASS(xnn_arch_x86_avx512skx, xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx512skx_mul32, 16, false, 16, 9, int8_t, void, union xnn_qs8_conv_minmax_params, xnn_init_qs8_conv_minmax_fp32_scalar_params)
 XNN_DWCONV_UNIPASS(xnn_arch_x86_avx512skx, xnn_qs8_dwconv_minmax_fp32_ukernel_9p32c__avx512skx_mul32, 32, false, 32, 9, int8_t, void, union xnn_qs8_conv_minmax_params, xnn_init_qs8_conv_minmax_fp32_scalar_params)
 XNN_DWCONV_UNIPASS(xnn_arch_x86_avx512skx, xnn_qs8_dwconv_minmax_fp32_ukernel_25p16c__avx512skx_mul32, 16, false, 16, 25, int8_t, void, union xnn_qs8_conv_minmax_params, xnn_init_qs8_conv_minmax_fp32_scalar_params)
 XNN_DWCONV_UNIPASS(xnn_arch_x86_avx512skx, xnn_qs8_dwconv_minmax_fp32_ukernel_25p32c__avx512skx_mul32, 32, false, 32, 25, int8_t, void, union xnn_qs8_conv_minmax_params, xnn_init_qs8_conv_minmax_fp32_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_DWCONV_UNIPASS(0, xnn_qs8_dwconv_minmax_fp32_ukernel_9p8c__wasmsimd_mul16, 8, false, 8, 9, int8_t, void, union xnn_qs8_conv_minmax_params, xnn_init_qs8_conv_minmax_fp32_scalar_params)

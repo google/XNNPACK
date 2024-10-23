@@ -45,7 +45,7 @@ extern "C" {
       size_t output_increment,                                        \
       const struct xnn_f16_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-#include "src/f16-pavgpool/f16-pavgpool-minmax.h"
+#include "f16-pavgpool/f16-pavgpool-minmax.h"
 
 #undef XNN_UKERNEL_MULTIPASS
 #undef XNN_UKERNEL_UNIPASS
@@ -80,7 +80,7 @@ extern "C" {
       size_t output_increment,                                        \
       const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-#include "src/f32-pavgpool/f32-pavgpool-minmax.h"
+#include "f32-pavgpool/f32-pavgpool-minmax.h"
 
 #undef XNN_UKERNEL_MULTIPASS
 #undef XNN_UKERNEL_UNIPASS

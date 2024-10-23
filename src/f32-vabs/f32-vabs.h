@@ -36,10 +36,13 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vabs_ukernel__sse2_u12, 12, false, float, str
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_vabs_ukernel__avx_u8, 8, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_vabs_ukernel__avx_u16, 16, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_vabs_ukernel__avx_u24, 24, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vabs_ukernel__avx512f_u16, 16, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vabs_ukernel__avx512f_u32, 32, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vabs_ukernel__avx512f_u48, 48, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ENABLE_HVX && (XNN_ARCH_HEXAGON)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_hvx, xnn_f32_vabs_ukernel__hvx_u32, 32, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))

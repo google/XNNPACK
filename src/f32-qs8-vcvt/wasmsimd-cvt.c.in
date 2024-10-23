@@ -17,8 +17,6 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $WASM_X8X16_NARROW_I16X8 = {"QS8": "wasm_i8x16_narrow_i16x8", "QU8": "wasm_u8x16_narrow_i16x8"}[DATATYPE]
-$WASM_X8X16_MIN = {"QS8": "wasm_i8x16_min", "QU8": "wasm_u8x16_min"}[DATATYPE]
-$WASM_X8X16_MAX = {"QS8": "wasm_i8x16_max", "QU8": "wasm_u8x16_max"}[DATATYPE]
 void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__wasmsimd_cvt_u${BATCH_TILE}(
     size_t batch,
     const float* input,
@@ -32,12 +30,8 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__wasmsimd_cvt_u${BATCH_TILE}(
 
   const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
   const v128_t voutput_zero_point = wasm_v128_load16_splat(&params->scalar.output_zero_point);
-  const v128_t voutput_min = wasm_v128_load8_splat(&params->scalar.output_min);
-  const v128_t voutput_max = wasm_v128_load8_splat(&params->scalar.output_max);
   XNN_FORCE_REALIZATION(vscale);
   XNN_FORCE_REALIZATION(voutput_zero_point);
-  XNN_FORCE_REALIZATION(voutput_min);
-  XNN_FORCE_REALIZATION(voutput_max);
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       v128_t vx${ABC[0:4]} = wasm_v128_load(input);
@@ -66,18 +60,6 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__wasmsimd_cvt_u${BATCH_TILE}(
         $else:
           v128_t vy${ABC[N:N+8]} = ${WASM_X8X16_NARROW_I16X8}(vacc${ABC[N:N+8]}, vacc${ABC[N:N+8]});
 
-      $for N in range(0, BATCH_TILE, 16):
-        $if N + 8 < BATCH_TILE:
-          vy${ABC[N:N+16]} = ${WASM_X8X16_MAX}(vy${ABC[N:N+16]}, voutput_min);
-        $else:
-          vy${ABC[N:N+8]} = ${WASM_X8X16_MAX}(vy${ABC[N:N+8]}, voutput_min);
-
-      $for N in range(0, BATCH_TILE, 16):
-        $if N + 8 < BATCH_TILE:
-          vy${ABC[N:N+16]} = ${WASM_X8X16_MIN}(vy${ABC[N:N+16]}, voutput_max);
-        $else:
-          vy${ABC[N:N+8]} = ${WASM_X8X16_MIN}(vy${ABC[N:N+8]}, voutput_max);
-
       wasm_v128_store(output, vy${ABC[0:16]});
       $for N in range(16, BATCH_TILE, 16):
         $if N + 8 < BATCH_TILE:
@@ -104,8 +86,6 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__wasmsimd_cvt_u${BATCH_TILE}(
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
 
     v128_t vy = ${WASM_X8X16_NARROW_I16X8}(vacc, vacc);
-    vy = ${WASM_X8X16_MAX}(vy, voutput_min);
-    vy = ${WASM_X8X16_MIN}(vy, voutput_max);
 
     wasm_v128_store64_lane(output, vy, 0);
     output += 8;
@@ -130,8 +110,6 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__wasmsimd_cvt_u${BATCH_TILE}(
     vacc = wasm_i16x8_add_sat(vacc, voutput_zero_point);
 
     v128_t vy = ${WASM_X8X16_NARROW_I16X8}(vacc, vacc);
-    vy = ${WASM_X8X16_MAX}(vy, voutput_min);
-    vy = ${WASM_X8X16_MIN}(vy, voutput_max);
 
     if (batch & (4 * sizeof(float))) {
       wasm_v128_store32_lane(output, vy, 0);

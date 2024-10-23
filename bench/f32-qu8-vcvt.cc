@@ -4,8 +4,8 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <benchmark/benchmark.h>
-#include "bench/utils.h"
-#include "bench/vcvt-benchmark.h"
+#include "utils.h"
+#include "vcvt-benchmark.h"
 #include "xnnpack.h"
 #include "xnnpack/hardware-config.h"
 #include "xnnpack/microfnptr.h"
@@ -22,9 +22,7 @@ static void f32_qu8_vcvt(
   xnn_f32_qu8_cvt_params params;
   init_params(&params,
     25.0f /* scale */,
-    127 /* output zero point */,
-    std::numeric_limits<uint8_t>::min() + 1 /* output min */,
-    std::numeric_limits<uint8_t>::max() - 1 /* output max */);
+    127 /* output zero point */);
 
   cvt_benchmark<float, uint8_t>(state, arch_flags, cvt, &params);
 }
@@ -34,7 +32,7 @@ static void f32_qu8_vcvt(
 BENCHMARK_CAPTURE(f32_qu8_vcvt, ukernel, arch_flags, ukernel, init_params)          \
   ->Apply(benchmark::utils::UnaryElementwiseParameters<datatype_in, datatype_out>)  \
   ->UseRealTime();
-#include "src/f32-qu8-vcvt/f32-qu8-vcvt.h"
+#include "f32-qu8-vcvt/f32-qu8-vcvt.h"
 #undef XNN_CVT_UKERNEL_WITH_PARAMS
 
 

@@ -320,9 +320,6 @@ struct xnn_node {
       size_t new_width;
     } static_resize;
     struct {
-      size_t max_tokens;
-    } rope;
-    struct {
       size_t num_dims;
       size_t offsets[XNN_MAX_TENSOR_DIMS];
       size_t sizes[XNN_MAX_TENSOR_DIMS];

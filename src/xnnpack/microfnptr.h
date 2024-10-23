@@ -11,8 +11,8 @@
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microparams.h"
-
 
 /****************** Microkernel pointers for dense inference *****************/
 
@@ -789,35 +789,6 @@ typedef void (*xnn_f32_vmulcaddc_ukernel_fn)(
     float* output,
     size_t output_stride,
     const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// PRELU: Parametric RELU
-
-typedef void (*xnn_prelu_ukernel_fn)(
-    size_t batch,
-    size_t channels,
-    const void* input,
-    size_t input_stride,
-    const void* weights,
-    void* output,
-    size_t output_stride);
-
-typedef void (*xnn_f16_prelu_ukernel_fn)(
-    size_t batch,
-    size_t channels,
-    const xnn_float16* input,
-    size_t input_stride,
-    const xnn_float16* weights,
-    xnn_float16* output,
-    size_t output_stride);
-
-typedef void (*xnn_f32_prelu_ukernel_fn)(
-    size_t batch,
-    size_t channels,
-    const float* input,
-    size_t input_stride,
-    const float* weights,
-    float* output,
-    size_t output_stride);
 
 // IBILINEAR: Indirect BILINEAR interpolation
 
@@ -2528,16 +2499,12 @@ typedef size_t (*xnn_init_binary_params_fn)(
 typedef size_t (*xnn_init_f16_qs8_cvt_params_fn)(
   struct xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   xnn_float16 scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max);
+  int8_t output_zero_point);
 
 typedef size_t (*xnn_init_f32_qs8_cvt_params_fn)(
   struct xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max);
+  int8_t output_zero_point);
 
 typedef size_t (*xnn_init_qs8_reduce_minmax_params_fn)(
   struct xnn_qs8_reduce_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2556,9 +2523,7 @@ typedef size_t (*xnn_init_qu8_reduce_minmax_params_fn)(
 typedef size_t (*xnn_init_f32_qu8_cvt_params_fn)(
   struct xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
-  uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max);
+  uint8_t output_zero_point);
 
 typedef size_t (*xnn_init_s32_f32_cvt_params_fn)(
   struct xnn_s32_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],

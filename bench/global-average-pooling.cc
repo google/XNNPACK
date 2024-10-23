@@ -20,7 +20,7 @@
 #include "xnnpack/math.h"
 
 #include <benchmark/benchmark.h>
-#include "bench/utils.h"
+#include "utils.h"
 
 static void global_average_pooling_qu8(benchmark::State& state) {
   const size_t batch_size = state.range(0);

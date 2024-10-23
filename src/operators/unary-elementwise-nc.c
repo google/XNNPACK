@@ -18,6 +18,7 @@
 #include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
 #include "xnnpack/log.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/operator-type.h"
@@ -516,8 +517,6 @@ enum xnn_status xnn_create_convert_nc_f32_f16(
 enum xnn_status xnn_create_convert_nc_f32_qs8(
   float output_scale,
   int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max,
   uint32_t flags,
   xnn_operator_t* convert_op_out)
 {
@@ -528,19 +527,12 @@ enum xnn_status xnn_create_convert_nc_f32_qs8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min > output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%" PRId8 ", %" PRId8 "] output range: lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qs8), output_min, output_max);
-    return xnn_status_invalid_parameter;
-  }
-
   const struct xnn_unary_elementwise_config* f32_to_qs8_cvt_config = xnn_init_f32_to_qs8_cvt_config();
 
   struct xnn_f32_qs8_cvt_params params;
   if XNN_LIKELY(f32_to_qs8_cvt_config != NULL) {
     assert(f32_to_qs8_cvt_config->init.f32_qs8_cvt != NULL);
-    f32_to_qs8_cvt_config->init.f32_qs8_cvt(&params, 1.0f / output_scale, output_zero_point, output_min, output_max);
+    f32_to_qs8_cvt_config->init.f32_qs8_cvt(&params, 1.0f / output_scale, output_zero_point);
   }
 
   return create_unary_elementwise_nc(
@@ -619,8 +611,6 @@ enum xnn_status xnn_create_convert_nc_f32_qp8(uint32_t flags,
 enum xnn_status xnn_create_convert_nc_f32_qu8(
   float output_scale,
   uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max,
   uint32_t flags,
   xnn_operator_t* convert_op_out)
 {
@@ -631,19 +621,12 @@ enum xnn_status xnn_create_convert_nc_f32_qu8(
     return xnn_status_invalid_parameter;
   }
 
-  if (output_min > output_max) {
-    xnn_log_error(
-      "failed to create %s operator with [%" PRIu8 ", %" PRIu8 "] output range: lower bound must be less than or equal to upper bound",
-      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qu8), output_min, output_max);
-    return xnn_status_invalid_parameter;
-  }
-
   const struct xnn_unary_elementwise_config* f32_to_qu8_cvt_config = xnn_init_f32_to_qu8_cvt_config();
 
   struct xnn_f32_qu8_cvt_params params;
   if XNN_LIKELY(f32_to_qu8_cvt_config != NULL) {
     assert(f32_to_qu8_cvt_config->init.f32_qu8_cvt != NULL);
-    f32_to_qu8_cvt_config->init.f32_qu8_cvt(&params, 1.0f / output_scale, output_zero_point, output_min, output_max);
+    f32_to_qu8_cvt_config->init.f32_qu8_cvt(&params, 1.0f / output_scale, output_zero_point);
   }
 
   return create_unary_elementwise_nc(
@@ -3420,7 +3403,7 @@ enum xnn_status xnn_run_convert_nc_f32_qs8(
   struct xnn_f32_qs8_cvt_params params;
   if XNN_LIKELY(f32_to_qs8_cvt_config != NULL) {
     assert(f32_to_qs8_cvt_config->init.f32_qs8_cvt != NULL);
-    f32_to_qs8_cvt_config->init.f32_qs8_cvt(&params, 1.0f / output_scale, output_zero_point, INT8_MIN, INT8_MAX);
+    f32_to_qs8_cvt_config->init.f32_qs8_cvt(&params, 1.0f / output_scale, output_zero_point);
   }
 
   return run_unary_elementwise_nc(
@@ -3458,7 +3441,7 @@ enum xnn_status xnn_run_convert_nc_f32_qu8(
   struct xnn_f32_qu8_cvt_params params;
   if XNN_LIKELY(f32_to_qu8_cvt_config != NULL) {
     assert(f32_to_qu8_cvt_config->init.f32_qu8_cvt != NULL);
-    f32_to_qu8_cvt_config->init.f32_qu8_cvt(&params, 1.0f / output_scale, output_zero_point, 0, UINT8_MAX);
+    f32_to_qu8_cvt_config->init.f32_qu8_cvt(&params, 1.0f / output_scale, output_zero_point);
   }
 
   return run_unary_elementwise_nc(

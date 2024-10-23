@@ -519,6 +519,7 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_with_reshape) {
   // unwritten portions of these buffers are matching.
   std::fill(convert_input.begin(), convert_input.end(), 0.0f);
   std::fill(subgraph_output.begin(), subgraph_output.end(), 0.0f);
+  std::fill(operator_output.begin(), operator_output.end(), 0.0f);
 
   // Adjust number of kernel elements for QC4W. input_channels should be padded
   // to byte boundary, hence even.

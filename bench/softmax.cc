@@ -14,7 +14,7 @@
 #include <random>
 #include <vector>
 
-#include "bench/utils.h"
+#include "utils.h"
 #include "xnnpack.h"
 #include "xnnpack/math.h"
 #include "xnnpack/buffer.h"

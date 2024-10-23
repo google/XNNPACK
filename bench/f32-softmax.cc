@@ -10,7 +10,7 @@
 #ifdef BENCHMARK_INTEL_DNNL
 #include <dnnl.h>
 #endif  // BENCHMARK_INTEL_DNNL
-#include "bench/utils.h"
+#include "utils.h"
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
@@ -419,6 +419,26 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
   BENCHMARK(DNNLSoftArgMax)->Apply(CharacteristicArguments)->UseManualTime();
 #endif
 
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+  BENCHMARK_CAPTURE(TwoPassSoftMax, avx512f_p5_scalef,
+    xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_u144_acc3,
+    xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u16,
+    benchmark::utils::CheckAVX512F)->Apply(CharacteristicArguments)->UseManualTime();
+  BENCHMARK_CAPTURE(ThreePassSoftMaxWithRecomputing, avx512f_p5_scalef,
+    xnn_f32_rmax_ukernel__avx512f_u64_acc4,
+    (xnn_init_f32_default_params_fn) nullptr,
+    xnn_f32_raddexpminusmax_ukernel__avx512f_p5_scalef_u128_acc4,
+    xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u16,
+    benchmark::utils::CheckAVX512F)->Apply(CharacteristicArguments)->UseManualTime();
+  BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, avx512f_p5_scalef,
+    xnn_f32_rmax_ukernel__avx512f_u64_acc4,
+    (xnn_init_f32_default_params_fn) nullptr,
+    xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_u64_acc2,
+    nullptr,
+    xnn_f32_vmulc_ukernel__avx512f_u32,
+    benchmark::utils::CheckAVX512F)->Apply(CharacteristicArguments)->UseManualTime();
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(TwoPassSoftMax, avx2_p5,
     xnn_f32_raddextexp_ukernel__avx2_p5_u96,
@@ -437,24 +457,6 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
     nullptr,
     xnn_f32_vmulc_ukernel__avx_u16,
     benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
-
-  BENCHMARK_CAPTURE(TwoPassSoftMax, avx512f_p5_scalef,
-    xnn_f32_raddextexp_ukernel__avx512f_p5_scalef_u144_acc3,
-    xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u16,
-    benchmark::utils::CheckAVX512F)->Apply(CharacteristicArguments)->UseManualTime();
-  BENCHMARK_CAPTURE(ThreePassSoftMaxWithRecomputing, avx512f_p5_scalef,
-    xnn_f32_rmax_ukernel__avx512f_u64_acc4,
-    (xnn_init_f32_default_params_fn) nullptr,
-    xnn_f32_raddexpminusmax_ukernel__avx512f_p5_scalef_u128_acc4,
-    xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u16,
-    benchmark::utils::CheckAVX512F)->Apply(CharacteristicArguments)->UseManualTime();
-  BENCHMARK_CAPTURE(ThreePassSoftMaxWithReloading, avx512f_p5_scalef,
-    xnn_f32_rmax_ukernel__avx512f_u64_acc4,
-    (xnn_init_f32_default_params_fn) nullptr,
-    xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_u64_acc2,
-    nullptr,
-    xnn_f32_vmulc_ukernel__avx512f_u32,
-    benchmark::utils::CheckAVX512F)->Apply(CharacteristicArguments)->UseManualTime();
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV

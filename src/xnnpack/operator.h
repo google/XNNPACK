@@ -150,7 +150,6 @@ struct xnn_operator {
   size_t group_input_channels;
   size_t group_output_channels;
   size_t channels;
-  size_t max_tokens;
 
   uint32_t pad_value;
 
@@ -333,7 +332,6 @@ struct xnn_operator {
       };
     };  // For softmax operator.
     const struct xnn_maxpool_config* maxpool_config;
-    const struct xnn_prelu_config* prelu_config;
     const struct xnn_unpool_config* unpool_config;
     const struct xnn_zip_config* zip_config;
     struct {
@@ -392,7 +390,6 @@ struct xnn_operator {
     struct max_pooling_context max_pooling;
     struct pad_context pad;
     struct pixelwise_average_pooling_context pixelwise_average_pooling;
-    struct prelu_context prelu;
     struct reduce_context reduce;
     struct {
       struct resize_bilinear_context resize_bilinear;

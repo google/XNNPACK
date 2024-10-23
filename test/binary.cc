@@ -165,6 +165,8 @@ static const char* binary_operator_to_string(
       return "Minimum";
     case xnn_binary_multiply:
       return "Multiply";
+    case xnn_binary_prelu:
+      return "Prelu";
     case xnn_binary_subtract:
       return "Subtract";
     case xnn_binary_squared_difference:
@@ -913,7 +915,8 @@ INSTANTIATE_TEST_SUITE_P(test, BinaryTestF16,
                          testing::Values(xnn_binary_add, xnn_binary_subtract,
                                          xnn_binary_multiply, xnn_binary_divide,
                                          xnn_binary_maximum, xnn_binary_minimum,
-                                         xnn_binary_squared_difference),
+                                         xnn_binary_squared_difference,
+                                         xnn_binary_prelu),
                          [](const auto& info) { return ToString(info.param); });
 #endif
 INSTANTIATE_TEST_SUITE_P(test, BinaryTestF32,
@@ -921,7 +924,8 @@ INSTANTIATE_TEST_SUITE_P(test, BinaryTestF32,
                                          xnn_binary_multiply, xnn_binary_divide,
                                          xnn_binary_maximum, xnn_binary_minimum,
                                          xnn_binary_copysign,
-                                         xnn_binary_squared_difference),
+                                         xnn_binary_squared_difference,
+                                         xnn_binary_prelu),
                          [](const auto& info) { return ToString(info.param); });
 INSTANTIATE_TEST_SUITE_P(test, BinaryTestS32,
                          testing::Values(xnn_binary_multiply),

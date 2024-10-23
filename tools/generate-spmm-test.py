@@ -486,8 +486,8 @@ def main(args):
 //   Generator: {generator}
 
 #include <benchmark/benchmark.h>
-#include "bench/spmm-benchmark.h"
-#include "bench/utils.h"
+#include "spmm-benchmark.h"
+#include "utils.h"
 #include "xnnpack/gemm.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"

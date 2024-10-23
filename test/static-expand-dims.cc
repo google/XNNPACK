@@ -16,6 +16,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
@@ -77,10 +78,11 @@ TEST_F(StaticExpandDimsTestInt8, define)
                           nullptr, 0, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
   ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
 
+  CalculateExpectedShape();
   output_id = XNN_INVALID_NODE_ID;
   ASSERT_EQ(
     xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, zero_point, scale, dims.size(), dims.data(),
+                          subgraph, xnn_datatype_qint8, zero_point, scale, expected_shape.size(), expected_shape.data(),
                           nullptr, 1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
@@ -135,10 +137,11 @@ TEST_F(StaticExpandDimsTestInt8, matches_operator_api)
                           nullptr, /*external_id=*/0, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
   ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
 
+  CalculateExpectedShape();
   output_id = XNN_INVALID_NODE_ID;
   ASSERT_EQ(
     xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, zero_point, scale, dims.size(), dims.data(),
+                          subgraph, xnn_datatype_qint8, zero_point, scale, expected_shape.size(), expected_shape.data(),
                           nullptr, /*external_id=*/1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
@@ -160,7 +163,6 @@ TEST_F(StaticExpandDimsTestInt8, matches_operator_api)
   std::vector<size_t> out_dims(XNN_MAX_TENSOR_DIMS);
   ASSERT_EQ(xnn_status_success, xnn_get_external_value_shape(runtime, output_id, &num_out_dims, &out_dims[0]));
   out_dims.resize(num_out_dims);
-  CalculateExpectedShape();
   EXPECT_EQ(expected_shape, out_dims);
 }
 
@@ -179,10 +181,11 @@ TEST_F(StaticExpandDimsTestF16, define)
                           nullptr, 0, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
   ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
 
+  CalculateExpectedShape();
   output_id = XNN_INVALID_NODE_ID;
   ASSERT_EQ(
     xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, dims.size(), dims.data(),
+                          subgraph, xnn_datatype_fp16, expected_shape.size(), expected_shape.data(),
                           nullptr, 1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
@@ -235,10 +238,11 @@ TEST_F(StaticExpandDimsTestF16, matches_operator_api)
                           nullptr, /*external_id=*/0, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
   ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
 
+  CalculateExpectedShape();
   output_id = XNN_INVALID_NODE_ID;
   ASSERT_EQ(
     xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, dims.size(), dims.data(),
+                          subgraph, xnn_datatype_fp16, expected_shape.size(), expected_shape.data(),
                           nullptr, /*external_id=*/1, /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
@@ -260,6 +264,5 @@ TEST_F(StaticExpandDimsTestF16, matches_operator_api)
   std::vector<size_t> out_dims(XNN_MAX_TENSOR_DIMS);
   ASSERT_EQ(xnn_status_success, xnn_get_external_value_shape(runtime, output_id, &num_out_dims, &out_dims[0]));
   out_dims.resize(num_out_dims);
-  CalculateExpectedShape();
   EXPECT_EQ(expected_shape, out_dims);
 }

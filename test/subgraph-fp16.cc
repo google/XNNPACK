@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/allocation-type.h"
+#include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/subgraph.h"
 #include "mock-allocator.h"

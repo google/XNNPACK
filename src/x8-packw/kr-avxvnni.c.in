@@ -36,7 +36,7 @@ void xnn_qs8${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${K
   const void* scale,
   ${WTYPE}* packed_weights,
   size_t extra_bytes,
-  const void* params)
+  const void* params) XNN_OOB_READS
 {
   assert(g != 0);
   assert(nc != 0);
@@ -107,69 +107,18 @@ void xnn_qs8${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${K
       // KC remainder of 1..${KR-1}
       if (k != 0) {
         assert(k >= 1 && k <= ${KR-1});
+
+        __m256i vmask = _mm256_srli_epi64(_mm256_set1_epi32(-1), (8 - k) * sizeof(int8_t) * 8);
+
         $for N in range(0, NR, 4):
-          __m256i v${N} = _mm256_setzero_si256();
+          __m256i v${N} = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N}));
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+1})), 0x0C);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+2})), 0x30);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+3})), 0xC0);
+          v${N} = _mm256_and_si256(v${N}, vmask);
 
-        if (k & 4) {
-          $for N in range(0, NR, 4):
-            v${N} = _mm256_insert_epi32(v${N}, *(const int32_t *)w${N}, 0);
-            v${N} = _mm256_insert_epi32(v${N}, *(const int32_t *)w${N+1}, 2);
-            v${N} = _mm256_insert_epi32(v${N}, *(const int32_t *)w${N+2}, 4);
-            v${N} = _mm256_insert_epi32(v${N}, *(const int32_t *)w${N+3}, 6);
-          $for N in range(NR):
-            w${N} += 4;
-        }
-        if (k & 2) {
-          if (k & 4) {
-            $for N in range(0, NR, 4):
-              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N}, 2);
-              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+1}, 6);
-              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+2}, 10);
-              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+3}, 14);
-          } else {
-            $for N in range(0, NR, 4):
-              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N}, 0);
-              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+1}, 4);
-              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+2}, 8);
-              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+3}, 12);
-          }
-
-          $for N in range(NR):
-            w${N} += 2;
-        }
-        if (k & 1) {
-          if ((k & 4) && (k & 2)) {
-            $for N in range(0, NR, 4):
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N}, 6);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+1}, 14);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+2}, 22);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+3}, 30);
-          }
-          else if (k & 4) {
-            $for N in range(0, NR, 4):
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N}, 4);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+1}, 12);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+2}, 20);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+3}, 28);
-          }
-          else if (k & 2) {
-            $for N in range(0, NR, 4):
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N}, 2);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+1}, 10);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+2}, 18);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+3}, 26);
-          }
-          else {
-            $for N in range(0, NR, 4):
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N}, 0);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+1}, 8);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+2}, 16);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+3}, 24);
-          }
-
-          $for N in range(NR):
-            w${N} += 1;
-        }
+        $for N in range(NR):
+          w${N} += k;
 
         $for N in range(0, NR, 4):
           vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, v${N});
@@ -259,69 +208,18 @@ void xnn_qs8${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${K
       // KC remainder of 1..${KR-1}
       if (k != 0) {
         assert(k >= 1 && k <= ${KR-1});
+
+        __m256i vmask = _mm256_srli_epi64(_mm256_set1_epi32(-1), (8 - k) * sizeof(int8_t) * 8);
+
         $for N in range(0, NR, 4):
-          __m256i v${N} = _mm256_setzero_si256();
+          __m256i v${N} = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N}));
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+1})), 0x0C);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+2})), 0x30);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+3})), 0xC0);
+          v${N} = _mm256_and_si256(v${N}, vmask);
 
-        if (k & 4) {
-          $for N in range(0, NR, 4):
-            v${N} = _mm256_insert_epi32(v${N}, *(const int32_t *)w${N}, 0);
-            v${N} = _mm256_insert_epi32(v${N}, *(const int32_t *)w${N+1}, 2);
-            v${N} = _mm256_insert_epi32(v${N}, *(const int32_t *)w${N+2}, 4);
-            v${N} = _mm256_insert_epi32(v${N}, *(const int32_t *)w${N+3}, 6);
-          $for N in range(NR):
-            w${N} += 4;
-        }
-        if (k & 2) {
-          if (k & 4) {
-            $for N in range(0, NR, 4):
-              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N}, 2);
-              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+1}, 6);
-              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+2}, 10);
-              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+3}, 14);
-          } else {
-            $for N in range(0, NR, 4):
-              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N}, 0);
-              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+1}, 4);
-              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+2}, 8);
-              v${N} = _mm256_insert_epi16(v${N}, *(const int16_t *)w${N+3}, 12);
-          }
-
-          $for N in range(NR):
-            w${N} += 2;
-        }
-        if (k & 1) {
-          if ((k & 4) && (k & 2)) {
-            $for N in range(0, NR, 4):
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N}, 6);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+1}, 14);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+2}, 22);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+3}, 30);
-          }
-          else if (k & 4) {
-            $for N in range(0, NR, 4):
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N}, 4);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+1}, 12);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+2}, 20);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+3}, 28);
-          }
-          else if (k & 2) {
-            $for N in range(0, NR, 4):
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N}, 2);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+1}, 10);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+2}, 18);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+3}, 26);
-          }
-          else {
-            $for N in range(0, NR, 4):
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N}, 0);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+1}, 8);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+2}, 16);
-              v${N} = _mm256_insert_epi8(v${N}, *(const int8_t *)w${N+3}, 24);
-          }
-
-          $for N in range(NR):
-            w${N} += 1;
-        }
+        $for N in range(NR):
+          w${N} += k;
 
         $for N in range(0, NR, 4):
           vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, v${N});

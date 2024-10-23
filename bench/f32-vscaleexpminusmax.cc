@@ -6,7 +6,7 @@
 #include <random>
 #include <vector>
 
-#include "bench/utils.h"
+#include "utils.h"
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
@@ -80,7 +80,7 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
   }
 }
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   BENCHMARK_CAPTURE(f32_vscaleexpminusmax, avx512f_p5_scalef_u16,
     xnn_f32_rmax_ukernel__avx512f_u64_acc4,
     xnn_f32_raddexpminusmax_ukernel__avx512f_p5_scalef_u128_acc2,
@@ -141,7 +141,9 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
     xnn_f32_raddexpminusmax_ukernel__avx512f_p5_scalef_u128_acc2,
     xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u192,
     benchmark::utils::CheckAVX512F)->Apply(CharacteristicArguments)->UseRealTime();
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_vscaleexpminusmax, avx2_p5_u8,
     xnn_f32_rmax_ukernel__avx_u32_acc4,
     xnn_f32_raddexpminusmax_ukernel__avx2_p5_u80_acc2,

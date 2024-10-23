@@ -92,6 +92,13 @@ xnnpack_cxx_library(
 )
 
 xnnpack_cxx_library(
+    name = "tanh_operator_tester",
+    testonly = True,
+    hdrs = ["tanh-operator-tester.h"],
+    deps = OPERATOR_TEST_DEPS + xnnpack_test_deps_for_library(),
+)
+
+xnnpack_cxx_library(
     name = "unary_operator_tester",
     testonly = True,
     srcs = ["unary-operator-tester.cc"],
@@ -555,15 +562,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f16_prelu_test",
-    srcs = [
-        "f16-prelu.cc",
-        "prelu-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "f16_spmm_minmax_test",
     srcs = [
         "f16-spmm-minmax.cc",
@@ -797,15 +795,6 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
-)
-
-xnnpack_unit_test(
-    name = "f32_prelu_test",
-    srcs = [
-        "f32-prelu.cc",
-        "prelu-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -1319,12 +1308,6 @@ xnnpack_unit_test(
 ########################## Size tests for the library #########################
 
 xnnpack_binary(
-    name = "operator_size_test",
-    srcs = ["operator-size.c"],
-    deps = ["//:XNNPACK"],
-)
-
-xnnpack_binary(
     name = "subgraph_size_test",
     srcs = ["subgraph-size.c"],
     deps = ["//:XNNPACK"],
@@ -1622,15 +1605,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "prelu_nc_test",
-    srcs = [
-        "prelu-nc.cc",
-        "prelu-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "resize_bilinear_nhwc_test",
     srcs = [
         "resize-bilinear-nhwc.cc",
@@ -1778,6 +1752,7 @@ xnnpack_cxx_library(
     deps = [
         ":replicable_random_device",
         ":subgraph_unary_tester",
+        ":tanh_operator_tester",
         "//:XNNPACK",
         "//:math",
         "//:node_type",
@@ -1897,6 +1872,7 @@ xnnpack_unit_test(
         "//:XNNPACK",
         "//:buffer",
         "//:common",
+        "//:math",
         "//:node_type",
         "//:operator_utils",
         "//:operators",
@@ -1926,6 +1902,7 @@ xnnpack_unit_test(
         "//:XNNPACK",
         "//:buffer",
         "//:common",
+        "//:math",
         "//:node_type",
         "//:operators",
         "//:subgraph",
@@ -1941,6 +1918,7 @@ xnnpack_unit_test(
         ":replicable_random_device",
         "//:XNNPACK",
         "//:buffer",
+        "//:math",
         "//:node_type",
         "//:operators",
         "//:subgraph",
@@ -1963,6 +1941,7 @@ xnnpack_unit_test(
         "//:XNNPACK",
         "//:buffer",
         "//:common",
+        "//:math",
         "//:node_type",
         "//:operator_utils",
         "//:operators",
@@ -1982,6 +1961,7 @@ xnnpack_unit_test(
         ":replicable_random_device",
         "//:XNNPACK",
         "//:buffer",
+        "//:math",
         "//:node_type",
         "//:operator_utils",
         "//:operators",
@@ -1999,6 +1979,7 @@ xnnpack_unit_test(
         ":replicable_random_device",
         "//:XNNPACK",
         "//:buffer",
+        "//:math",
         "//:node_type",
         "//:operators",
         "//:subgraph",
@@ -2016,6 +1997,7 @@ xnnpack_unit_test(
         "//:XNNPACK",
         "//:buffer",
         "//:common",
+        "//:math",
         "//:node_type",
         "//:operator_utils",
         "//:operators",
@@ -2033,6 +2015,7 @@ xnnpack_unit_test(
         ":replicable_random_device",
         "//:XNNPACK",
         "//:buffer",
+        "//:math",
         "//:node_type",
         "//:operators",
         "//:subgraph",
@@ -2075,6 +2058,7 @@ xnnpack_unit_test(
         "//:XNNPACK",
         "//:aligned_allocator",
         "//:common",
+        "//:math",
         "//:node_type",
         "//:operators",
         "//:requantization",
@@ -2092,6 +2076,7 @@ xnnpack_unit_test(
         "//:XNNPACK",
         "//:aligned_allocator",
         "//:common",
+        "//:math",
         "//:node_type",
         "//:operators",
         "//:requantization",
@@ -2109,6 +2094,7 @@ xnnpack_unit_test(
         "//:XNNPACK",
         "//:aligned_allocator",
         "//:common",
+        "//:math",
         "//:node_type",
         "//:operators",
         "//:subgraph",
@@ -2125,6 +2111,7 @@ xnnpack_unit_test(
         "//:XNNPACK",
         "//:aligned_allocator",
         "//:common",
+        "//:math",
         "//:node_type",
         "//:operators",
         "//:subgraph",
@@ -2140,25 +2127,11 @@ xnnpack_unit_test(
         ":replicable_random_device",
         "//:XNNPACK",
         "//:buffer",
+        "//:math",
         "//:node_type",
         "//:operator_utils",
         "//:operators",
         "//:requantization",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "prelu_test",
-    srcs = [
-        "prelu.cc",
-    ],
-    deps = [
-        ":replicable_random_device",
-        "//:XNNPACK",
-        "//:buffer",
-        "//:node_type",
-        "//:operators",
         "//:subgraph",
     ],
 )
@@ -2189,6 +2162,7 @@ xnnpack_unit_test(
         "//:XNNPACK",
         "//:aligned_allocator",
         "//:common",
+        "//:math",
         "//:node_type",
         "//:subgraph",
     ],
@@ -2234,6 +2208,7 @@ xnnpack_unit_test(
         ":replicable_random_device",
         "//:XNNPACK",
         "//:buffer",
+        "//:math",
         "//:node_type",
         "//:operators",
         "//:subgraph",
@@ -2360,6 +2335,7 @@ xnnpack_unit_test(
         "//:allocation_type",
         "//:allocator",
         "//:buffer",
+        "//:math",
         "//:node_type",
         "//:params",
         "//:subgraph",

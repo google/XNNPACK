@@ -8,8 +8,8 @@
 #include <random>
 #include <vector>
 
-#include "bench/bgemm.h"
-#include "bench/utils.h"
+#include "bgemm.h"
+#include "utils.h"
 #include "xnnpack/common.h"
 #include "xnnpack/pack.h"
 #include "xnnpack/packw.h"

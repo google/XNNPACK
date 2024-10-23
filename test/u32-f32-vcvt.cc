@@ -19,5 +19,5 @@ XNN_TEST_CVT_BATCH_DIV(ukernel, arch_flags, batch_tile, datatype_in, datatype_ou
 XNN_TEST_CVT_BATCH_LT(ukernel, arch_flags, batch_tile, datatype_in, datatype_out, ukernel, init_params); \
 XNN_TEST_CVT_BATCH_GT(ukernel, arch_flags, batch_tile, datatype_in, datatype_out, ukernel, init_params); \
 XNN_TEST_CVT_INPUT_ZERO_POINT(ukernel, arch_flags, batch_tile, datatype_in, datatype_out, ukernel, init_params);
-#include "src/u32-f32-vcvt/u32-f32-vcvt.h"
+#include "u32-f32-vcvt/u32-f32-vcvt.h"
 #undef XNN_CVT_UKERNEL_WITH_PARAMS

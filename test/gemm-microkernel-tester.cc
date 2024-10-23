@@ -1734,7 +1734,7 @@ void GemmMicrokernelTester::Test(
                                            input_qp8.data());
 
     std::generate(b.begin(), b.end(), std::ref(w8rng));
-    // std::generate(bias.begin(), bias.end(), std::ref(f32rng));
+    std::generate(bias.begin(), bias.end(), std::ref(f32rng));
     std::generate(kernel_scale.begin(), kernel_scale.end(), std::ref(scalerng));
     std::fill(packed_w.begin(), packed_w.end(), 0);
 
@@ -1747,8 +1747,8 @@ void GemmMicrokernelTester::Test(
          /*accumulator_init=*/nullptr,
          /*weights=*/b.data(),
          /*int_extra_data0_fn=*/nullptr,
-         /*extra_data0=*/nullptr,
-         /*extra_data0_size=*/0,
+         /*extra_data0=*/bias.data(),
+         /*extra_data0_size=*/sizeof(float),
          /*init_extra_data1_fn=*/
          nullptr,
          /*extra_data1=*/kernel_scale.data(),

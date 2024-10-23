@@ -9,7 +9,7 @@
 #include <random>
 #include <vector>
 
-#include "bench/utils.h"
+#include "utils.h"
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
@@ -61,7 +61,7 @@ static void f32_rminmax(
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   BENCHMARK_CAPTURE(f32_rminmax, avx512f_u16,
                     xnn_f32_rminmax_ukernel__avx512f_u16,
                     /*init_params=*/nullptr,
@@ -92,7 +92,9 @@ static void f32_rminmax(
                     benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::ReductionParameters<float>)
     ->UseRealTime();
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_rminmax, avx_u8,
                     xnn_f32_rminmax_ukernel__avx_u8,
                     /*init_params=*/nullptr,

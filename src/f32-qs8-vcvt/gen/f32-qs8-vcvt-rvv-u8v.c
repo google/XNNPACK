@@ -29,8 +29,9 @@ void xnn_f32_qs8_vcvt_ukernel__rvv_u8v(
   batch >>= XNN_LOG2_SIZEOF_FLOAT;
 
   const float scale = params->scalar.scale;
-  const float output_min_less_zero_point = (float) ((int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point);
-  const float output_max_less_zero_point = (float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point);
+  // TODO: Clamp may not be necessary. RISCV spec doesn't say if vncvt saturates...
+  const float output_min_less_zero_point = (float) ((int32_t) -128 - (int32_t) params->scalar.output_zero_point);
+  const float output_max_less_zero_point = (float) ((int32_t) 127 - (int32_t) params->scalar.output_zero_point);
   const int32_t output_zero_point = params->scalar.output_zero_point;
 
   for (; batch > 0; ) {

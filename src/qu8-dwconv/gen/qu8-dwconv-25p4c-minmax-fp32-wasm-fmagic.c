@@ -8,9 +8,13 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/dwconv.h"
 #include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
 
 void xnn_qu8_dwconv_minmax_fp32_ukernel_25p4c__wasm_fmagic(
     size_t channels,

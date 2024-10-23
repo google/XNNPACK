@@ -9,9 +9,13 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/dwconv.h"
 #include "xnnpack/math.h"
+#include "xnnpack/microparams.h"
 
 void xnn_qs8_dwconv_minmax_fp32_ukernel_9p4c__scalar_lrintf(
     size_t channels,

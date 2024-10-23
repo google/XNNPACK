@@ -51,6 +51,8 @@ OPERATOR_BENCHMARK_DEPS = [
     "//:math",
 ]
 
+############################### Helper libraries ###############################
+
 xnnpack_cxx_library(
     name = "bench_utils",
     srcs = ["utils.cc"],
@@ -98,8 +100,6 @@ cc_library(
     ],
 )
 
-######################### Benchmarks for micro-kernels #########################
-
 xnnpack_cxx_library(
     name = "gemm_benchmark",
     srcs = [
@@ -114,6 +114,29 @@ xnnpack_cxx_library(
         "@com_google_benchmark//:benchmark",
     ],
 )
+
+xnnpack_cxx_library(
+    name = "packw_benchmark",
+    hdrs = [
+        "packw-benchmark.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        "@com_google_benchmark//:benchmark",
+    ],
+)
+
+xnnpack_cxx_library(
+    name = "bgemm",
+    hdrs = [
+        "bgemm.h",
+    ],
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        "@com_google_benchmark//:benchmark",
+    ],
+)
+
+######################### Benchmarks for micro-kernels #########################
 
 [xnnpack_benchmark(
     name = "%s_bench" % kernel,
@@ -167,12 +190,12 @@ xnnpack_cxx_library(
 xnnpack_benchmark(
     name = "f32_bgemm_bench",
     srcs = [
-        "bgemm.h",
         "f32-bgemm.cc",
     ],
     copts = xnnpack_optional_ruy_copts(),
     tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
         "//:allocator",
     ] + xnnpack_optional_ruy_deps(),
 )
@@ -182,6 +205,19 @@ xnnpack_benchmark(
     srcs = [
         "qp8-f32-qc4w-gemm.cc",
     ],
+    defines = xnnpack_kleidiai_defines(),
+    tags = xnnpack_slow_benchmark_tags(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":gemm_benchmark",
+        "//:isa_checks",
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//kai/ukernels/matmul",
+    ]),
+)
+
+xnnpack_benchmark(
+    name = "qp8_f32_qb4w_gemm",
+    srcs = ["qp8-f32-qb4w-gemm.cc"],
     defines = xnnpack_kleidiai_defines(),
     tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
@@ -292,6 +328,7 @@ xnnpack_benchmark(
     srcs = [
         "qs8-dwconv.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
         ":dwconv",
         "//:indirection",
@@ -470,11 +507,11 @@ xnnpack_benchmark(
 xnnpack_cxx_library(
     name = "packq_benchmark",
     srcs = [
-        "bgemm.h",
         "packq-benchmark.cc",
     ],
     hdrs = ["packq-benchmark.h"],
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
         "@com_google_benchmark//:benchmark",
     ],
 )
@@ -482,10 +519,11 @@ xnnpack_cxx_library(
 xnnpack_benchmark(
     name = "x8_packq_bench",
     srcs = [
-        "bgemm.h",
         "x8-packq.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
         ":packq_benchmark",
         "//:allocator",
     ],
@@ -494,11 +532,12 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "x8_packw_bench",
     srcs = [
-        "bgemm.h",
-        "packw-benchmark.h",
         "x8-packw.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        ":packw_benchmark",
         "//:allocator",
     ],
 )
@@ -506,11 +545,12 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "qs8_packw_bench",
     srcs = [
-        "bgemm.h",
-        "packw-benchmark.h",
         "qs8-packw.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        ":packw_benchmark",
         "//:allocator",
     ],
 )
@@ -518,11 +558,12 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "x16_packw_bench",
     srcs = [
-        "bgemm.h",
-        "packw-benchmark.h",
         "x16-packw.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        ":packw_benchmark",
         "//:allocator",
     ],
 )
@@ -530,11 +571,12 @@ xnnpack_benchmark(
 xnnpack_benchmark(
     name = "x32_packw_bench",
     srcs = [
-        "bgemm.h",
-        "packw-benchmark.h",
         "x32-packw.cc",
     ],
+    tags = xnnpack_slow_benchmark_tags(),
     deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        ":packw_benchmark",
         "//:allocator",
     ],
 )

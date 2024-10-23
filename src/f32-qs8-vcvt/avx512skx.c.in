@@ -21,9 +21,7 @@ $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $_MM512_PACKXS_EPI16 = {"QS8": "_mm512_packs_epi16", "QU8": "_mm512_packus_epi16"}[DATATYPE]
 $_MM256_PACKXS_EPI16 = {"QS8": "_mm256_packs_epi16", "QU8": "_mm256_packus_epi16"}[DATATYPE]
 $_MM_PACKXS_EPI16 = {"QS8": "_mm_packs_epi16", "QU8": "_mm_packus_epi16"}[DATATYPE]
-$_MM512_MAX_EPX8 = {"QS8": "_mm512_max_epi8", "QU8": "_mm512_max_epu8"}[DATATYPE]
-$_MM256_MAX_EPX8 = {"QS8": "_mm256_max_epi8", "QU8": "_mm256_max_epu8"}[DATATYPE]
-$_MM_MAX_EPX8 = {"QS8": "_mm_max_epi8", "QU8": "_mm_max_epu8"}[DATATYPE]
+$OUTPUT_MAX = {"QS8": 127, "QU8": 255}[DATATYPE]
 void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__avx512skx_u${BATCH_TILE}(
     size_t batch,
     const float* input,
@@ -42,20 +40,15 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__avx512skx_u${BATCH_TILE}(
     XNN_ALIGN(32) static const uint32_t shuffle256_mask[8] = {0, 4, 2, 6, 1, 5, 3, 7};
 
   const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
-  const __m512 voutput_max_less_zero_point = _mm512_set1_ps((float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point));
+  const __m512 voutput_max_less_zero_point = _mm512_set1_ps((float) ((int32_t) ${OUTPUT_MAX} - (int32_t) params->scalar.output_zero_point));
   const __m512i voutput_zero_point = _mm512_set1_epi16(params->scalar.output_zero_point);
   $if SIMD_TILE > 8:
     const __m512i vshuffle512_mask = _mm512_load_si512(shuffle512_mask);
   $if SIMD_TILE % 16 != 0:
     const __m256i vshuffle256_mask = _mm256_load_si256((const __m256i*) shuffle256_mask);
-  $if SIMD_TILE > 8:
-    const __m512i voutput_min = _mm512_set1_epi8(params->scalar.output_min);
-  $else:
-    const __m256i voutput_min = _mm256_set1_epi8(params->scalar.output_min);
   XNN_FORCE_REALIZATION(vscale);
   XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
   XNN_FORCE_REALIZATION(voutput_zero_point);
-  XNN_FORCE_REALIZATION(voutput_min);
   for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
     __m512 vx0123 = _mm512_loadu_ps(input);
     $for N in range(4, SIMD_TILE, 4):
@@ -82,14 +75,6 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__avx512skx_u${BATCH_TILE}(
         __m512i vy${ABC[N]}${ABC[N+4]}${ABC[N+8]}${ABC[N+12]}${ABC[N+1]}${ABC[N+5]}${ABC[N+9]}${ABC[N+13]}${ABC[N+2]}${ABC[N+6]}${ABC[N+10]}${ABC[N+14]}${ABC[N+3]}${ABC[N+7]}${ABC[N+11]}${ABC[N+15]} = ${_MM512_PACKXS_EPI16}(vacc${ABC[N]}${ABC[N+4]}${ABC[N+1]}${ABC[N+5]}${ABC[N+2]}${ABC[N+6]}${ABC[N+3]}${ABC[N+7]}, vacc${ABC[N+8]}${ABC[N+12]}${ABC[N+9]}${ABC[N+13]}${ABC[N+10]}${ABC[N+14]}${ABC[N+11]}${ABC[N+15]});
       $else:
         __m256i vy${ABC[N]}${ABC[N+4]}${ABC[N+2]}${ABC[N+6]}${ABC[N+1]}${ABC[N+5]}${ABC[N+3]}${ABC[N+7]} = ${_MM256_PACKXS_EPI16}(_mm512_castsi512_si256(vacc${ABC[N]}${ABC[N+4]}${ABC[N+1]}${ABC[N+5]}${ABC[N+2]}${ABC[N+6]}${ABC[N+3]}${ABC[N+7]}), _mm512_extracti32x8_epi32(vacc${ABC[N]}${ABC[N+4]}${ABC[N+1]}${ABC[N+5]}${ABC[N+2]}${ABC[N+6]}${ABC[N+3]}${ABC[N+7]}, 1));
-
-    $for N in range(0, SIMD_TILE, 16):
-      $if N + 8 < SIMD_TILE:
-        vy${ABC[N]}${ABC[N+4]}${ABC[N+8]}${ABC[N+12]}${ABC[N+1]}${ABC[N+5]}${ABC[N+9]}${ABC[N+13]}${ABC[N+2]}${ABC[N+6]}${ABC[N+10]}${ABC[N+14]}${ABC[N+3]}${ABC[N+7]}${ABC[N+11]}${ABC[N+15]} = ${_MM512_MAX_EPX8}(vy${ABC[N]}${ABC[N+4]}${ABC[N+8]}${ABC[N+12]}${ABC[N+1]}${ABC[N+5]}${ABC[N+9]}${ABC[N+13]}${ABC[N+2]}${ABC[N+6]}${ABC[N+10]}${ABC[N+14]}${ABC[N+3]}${ABC[N+7]}${ABC[N+11]}${ABC[N+15]}, voutput_min);
-      $elif SIMD_TILE > 8:
-        vy${ABC[N]}${ABC[N+4]}${ABC[N+2]}${ABC[N+6]}${ABC[N+1]}${ABC[N+5]}${ABC[N+3]}${ABC[N+7]} = ${_MM256_MAX_EPX8}(vy${ABC[N]}${ABC[N+4]}${ABC[N+2]}${ABC[N+6]}${ABC[N+1]}${ABC[N+5]}${ABC[N+3]}${ABC[N+7]}, _mm512_castsi512_si256(voutput_min));
-      $else:
-        vy${ABC[N]}${ABC[N+4]}${ABC[N+2]}${ABC[N+6]}${ABC[N+1]}${ABC[N+5]}${ABC[N+3]}${ABC[N+7]} = ${_MM256_MAX_EPX8}(vy${ABC[N]}${ABC[N+4]}${ABC[N+2]}${ABC[N+6]}${ABC[N+1]}${ABC[N+5]}${ABC[N+3]}${ABC[N+7]}, voutput_min);
 
     $for N in range(0, SIMD_TILE, 16):
       $if N + 8 < SIMD_TILE:
@@ -120,10 +105,6 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__avx512skx_u${BATCH_TILE}(
     vacc0213 = _mm256_adds_epi16(vacc0213, _mm512_castsi512_si256(voutput_zero_point));
     const __m128i vy0213 = ${_MM_PACKXS_EPI16}(_mm256_castsi256_si128(vacc0213), _mm256_extracti128_si256(vacc0213, 1));
     __m128i vy0123 = _mm_shuffle_epi32(vy0213, _MM_SHUFFLE(3, 1, 2, 0));
-    $if SIMD_TILE > 8:
-      vy0123 = ${_MM_MAX_EPX8}(vy0123, _mm512_castsi512_si128(voutput_min));
-    $else:
-      vy0123 = ${_MM_MAX_EPX8}(vy0123, _mm256_castsi256_si128(voutput_min));
 
     _mm_storeu_si128((__m128i*) output, vy0123);
     output += 16;
@@ -146,10 +127,6 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__avx512skx_u${BATCH_TILE}(
     vacc0213 = _mm256_adds_epi16(vacc0213, _mm512_castsi512_si256(voutput_zero_point));
     const __m128i vy0213 = ${_MM_PACKXS_EPI16}(_mm256_castsi256_si128(vacc0213), _mm256_extracti128_si256(vacc0213, 1));
     __m128i vy0123 = _mm_shuffle_epi32(vy0213, _MM_SHUFFLE(3, 1, 2, 0));
-    $if SIMD_TILE > 8:
-      vy0123 = ${_MM_MAX_EPX8}(vy0123, _mm512_castsi512_si128(voutput_min));
-    $else:
-      vy0123 = ${_MM_MAX_EPX8}(vy0123, _mm256_castsi256_si128(voutput_min));
 
     _mm_mask_storeu_epi8(output, vmask, vy0123);
   }

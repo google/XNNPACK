@@ -28,13 +28,11 @@ void xnn_f32_qu8_vcvt_ukernel__sse2_u24(
   assert(output != NULL);
 
   const __m128 vscale = _mm_set1_ps(params->scalar.scale);
-  const __m128 voutput_max_less_zero_point = _mm_set1_ps((float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point));
+  const __m128 voutput_max_less_zero_point = _mm_set1_ps((float) ((int32_t) 255 - (int32_t) params->scalar.output_zero_point));
   const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
-  const __m128i voutput_min = _mm_set1_epi8(params->scalar.output_min);
   XNN_FORCE_REALIZATION(vscale);
   XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
   XNN_FORCE_REALIZATION(voutput_zero_point);
-  XNN_FORCE_REALIZATION(voutput_min);
 
   for (; batch >= 24 * sizeof(float); batch -= 24 * sizeof(float)) {
     __m128 vx0123 = _mm_loadu_ps(input);
@@ -74,12 +72,8 @@ void xnn_f32_qu8_vcvt_ukernel__sse2_u24(
     vy89ABCDEF = _mm_adds_epi16(vy89ABCDEF, voutput_zero_point);
     vyGHIJKLMN = _mm_adds_epi16(vyGHIJKLMN, voutput_zero_point);
 
-
     __m128i vy0123456789ABCDEF = _mm_packus_epi16(vy01234567, vy89ABCDEF);
     vyGHIJKLMN = _mm_packus_epi16(vyGHIJKLMN, vyGHIJKLMN);
-
-    vy0123456789ABCDEF = _mm_max_epu8(vy0123456789ABCDEF, voutput_min);
-    vyGHIJKLMN = _mm_max_epu8(vyGHIJKLMN, voutput_min);
 
     _mm_storeu_si128((__m128i*) output, vy0123456789ABCDEF);
     _mm_storel_epi64((__m128i*) (output + 16), vyGHIJKLMN);
@@ -102,7 +96,6 @@ void xnn_f32_qu8_vcvt_ukernel__sse2_u24(
     __m128i vy = _mm_packs_epi32(vy_lo, vy_hi);
     vy = _mm_adds_epi16(vy, voutput_zero_point);
     vy = _mm_packus_epi16(vy, vy);
-    vy = _mm_max_epu8(vy, voutput_min);
 
     _mm_storel_epi64((__m128i*) output, vy);
     output += 8;
@@ -124,7 +117,6 @@ void xnn_f32_qu8_vcvt_ukernel__sse2_u24(
     __m128i vy = _mm_packs_epi32(vy_lo, vy_hi);
     vy = _mm_adds_epi16(vy, voutput_zero_point);
     vy = _mm_packus_epi16(vy, vy);
-    vy = _mm_max_epu8(vy, voutput_min);
 
     if (batch & (4 * sizeof(float))) {
       unaligned_store_u32(output, (uint32_t) _mm_cvtsi128_si32(vy));

@@ -27,7 +27,7 @@
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 #endif  // BENCHMARK_TENSORFLOW_LITE
-#include "bench/utils.h"
+#include "utils.h"
 
 static void xnnpack_average_pooling_qu8(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);

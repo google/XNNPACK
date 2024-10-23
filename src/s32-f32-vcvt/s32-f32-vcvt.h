@@ -28,6 +28,9 @@ XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_s32_f32_vcvt_ukernel__avx2_u8
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_s32_f32_vcvt_ukernel__avx2_u16, 16, false, int32_t, float, struct xnn_s32_f32_cvt_params, xnn_init_s32_f32_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_s32_f32_vcvt_ukernel__avx2_u24, 24, false, int32_t, float, struct xnn_s32_f32_cvt_params, xnn_init_s32_f32_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_s32_f32_vcvt_ukernel__avx2_u32, 32, false, int32_t, float, struct xnn_s32_f32_cvt_params, xnn_init_s32_f32_cvt_scalar_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_s32_f32_vcvt_ukernel__avx512f_u16, 16, false, int32_t, float, struct xnn_s32_f32_cvt_params, xnn_init_s32_f32_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_s32_f32_vcvt_ukernel__avx512f_u32, 32, false, int32_t, float, struct xnn_s32_f32_cvt_params, xnn_init_s32_f32_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_s32_f32_vcvt_ukernel__avx512f_u48, 48, false, int32_t, float, struct xnn_s32_f32_cvt_params, xnn_init_s32_f32_cvt_scalar_params)

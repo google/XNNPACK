@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/fp16.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
 #include "replicable_random_device.h"

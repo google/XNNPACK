@@ -3,16 +3,17 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <benchmark/benchmark.h>
-#include "bench/utils.h"
-#include "bench/vcvt-benchmark.h"
+#include "utils.h"
+#include "vcvt-benchmark.h"
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/hardware-config.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams.h"
 #include "xnnpack/microparams-init.h"
+#include "xnnpack/microparams.h"
 #include "xnnpack/vcvt.h"
+#include <benchmark/benchmark.h>
 
 static void f16_f32_vcvt(
   benchmark::State& state,
@@ -28,7 +29,7 @@ static void f16_f32_vcvt(
 BENCHMARK_CAPTURE(f16_f32_vcvt, ukernel, arch_flags, ukernel, init_params)          \
   ->Apply(benchmark::utils::UnaryElementwiseParameters<datatype_in, datatype_out>)  \
   ->UseRealTime();
-#include "src/f16-f32-vcvt/f16-f32-vcvt.h"
+#include "f16-f32-vcvt/f16-f32-vcvt.h"
 #undef XNN_CVT_UKERNEL_WITH_PARAMS
 
 

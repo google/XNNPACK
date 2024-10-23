@@ -997,6 +997,7 @@ enum xnn_binary_operator {
   xnn_binary_minimum,
   xnn_binary_copysign,
   xnn_binary_squared_difference,
+  xnn_binary_prelu,
 };
 
 struct xnn_binary_params {
@@ -1650,7 +1651,7 @@ enum xnn_status xnn_define_static_resize_bilinear_2d(
 /// @param output_id - Value ID for the output tensor. The output tensor must be a 4D tensor defined in the @a subgraph
 ///                    with [N, H, W, channels] dimensions.
 /// @param flags - binary features of the PReLU Node. No supported flags are currently defined.
-enum xnn_status xnn_define_prelu(
+XNN_DEPRECATED enum xnn_status xnn_define_prelu(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t slope_id,
@@ -1660,7 +1661,7 @@ enum xnn_status xnn_define_prelu(
 /// Define a RoPE (Rotary Positional Embeddings) Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
-/// @param max_tokens - maximum possible number of tokens (maximum sequence length) of the input/output tensors.
+/// @param max_tokens - deprecated.
 /// @param input_id - Value ID for the input tensor. The input tensor must be a 4D tensor defined in the @a subgraph
 ///                   with [batch, tokens, heads, channels] dimensions.
 /// @param weights_id - Value ID for the weights tensor. The weights tensor must be a 2D tensor defined in the
@@ -2948,8 +2949,6 @@ enum xnn_status xnn_run_convert_nc_f32_f16(
 enum xnn_status xnn_create_convert_nc_f32_qs8(
   float output_scale,
   int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max,
   uint32_t flags,
   xnn_operator_t* convert_op_out);
 
@@ -2981,8 +2980,6 @@ enum xnn_status xnn_run_convert_nc_f32_qs8(
 enum xnn_status xnn_create_convert_nc_f32_qu8(
   float output_scale,
   uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max,
   uint32_t flags,
   xnn_operator_t* convert_op_out);
 
@@ -5094,48 +5091,6 @@ enum xnn_status xnn_run_negate_nc_f32(
   uint32_t flags,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_create_prelu_nc_f16(
-  size_t input_channels,
-  size_t slope_channels,
-  size_t input_stride,
-  size_t output_stride,
-  const void* negative_slope,
-  uint32_t flags,
-  xnn_code_cache_t code_cache,
-  xnn_weights_cache_t weights_cache,
-  xnn_operator_t* prelu_op_out);
-
-enum xnn_status xnn_reshape_prelu_nc_f16(
-  xnn_operator_t prelu_op,
-  size_t batch_size,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_prelu_nc_f16(
-  xnn_operator_t prelu_op,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_prelu_nc_f32(
-  size_t input_channels,
-  size_t slope_channels,
-  size_t input_stride,
-  size_t output_stride,
-  const float* negative_slope,
-  uint32_t flags,
-  xnn_code_cache_t code_cache,
-  xnn_weights_cache_t weights_cache,
-  xnn_operator_t* prelu_op_out);
-
-enum xnn_status xnn_reshape_prelu_nc_f32(
-  xnn_operator_t prelu_op,
-  size_t batch_size,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_prelu_nc_f32(
-  xnn_operator_t prelu_op,
-  const float* input,
-  float* output);
-
 enum xnn_status xnn_create_resize_bilinear2d_nchw_f32(
   size_t output_height,
   size_t output_width,
@@ -5275,7 +5230,6 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc_u8(
   uint8_t* output);
 
 enum xnn_status xnn_create_rope_nthc_f16(
-  size_t max_tokens,
   uint32_t flags,
   xnn_operator_t* rope_op_out);
 
@@ -5294,7 +5248,6 @@ enum xnn_status xnn_setup_rope_nthc_f16(
   void* output);
 
 enum xnn_status xnn_create_rope_nthc_f32(
-  size_t max_tokens,
   uint32_t flags,
   xnn_operator_t* rope_op_out);
 

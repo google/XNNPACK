@@ -22,7 +22,7 @@ extern "C" {
     void* output,                              \
     size_t output_stride,                      \
     const uint32_t fill_pattern);
-#include "src/xx-fill/xx-fill.h"
+#include "xx-fill/xx-fill.h"
 #undef XNN_FILL_UKERNEL
 
 #ifdef __cplusplus

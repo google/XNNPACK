@@ -19,6 +19,8 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $WASM_X8X16_NARROW_I16X8 = {"QS8": "wasm_i8x16_narrow_i16x8", "QU8": "wasm_u8x16_narrow_i16x8"}[DATATYPE]
 $WASM_X8X16_MIN = {"QS8": "wasm_i8x16_min", "QU8": "wasm_u8x16_min"}[DATATYPE]
+$OUTPUT_MIN = {"QS8": -128, "QU8": 0}[DATATYPE]
+$OUTPUT_MAX = {"QS8": 127, "QU8": 255}[DATATYPE]
 void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__wasmsimd_magic_u${BATCH_TILE}(
     size_t batch,
     const float* input,
@@ -30,12 +32,12 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__wasmsimd_magic_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float output_min_less_zero_point = (float) ((int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point);
+  const float output_min_less_zero_point = (float) ((int32_t) ${OUTPUT_MIN} - (int32_t) params->scalar.output_zero_point);
   const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
   const v128_t vmagic_bias = wasm_f32x4_const_splat(12582912.0f);
   const v128_t vmagic_min = wasm_u32x4_splat(float_as_uint32(12582912.0f + output_min_less_zero_point));
   const v128_t vmagic_bias_less_zero_point = wasm_i32x4_splat(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
-  const v128_t voutput_max = wasm_v128_load8_splat(&params->scalar.output_max);
+  const v128_t voutput_max = wasm_u8x16_const_splat(${OUTPUT_MAX});
   XNN_FORCE_REALIZATION(vscale);
   XNN_FORCE_REALIZATION(vmagic_bias);
   XNN_FORCE_REALIZATION(vmagic_min);

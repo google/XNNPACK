@@ -10,8 +10,8 @@
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 #include "xnnpack/microparams.h"
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -478,23 +478,17 @@ DECLARE_INIT_QS8_MUL_MINMAX_PARAMS_FUNCTION(xnn_init_qs8_mul_minmax_scalar_param
 XNN_INTERNAL size_t xnn_init_f16_qs8_cvt_scalar_params(
   struct xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   xnn_float16 scale,
-  int8_t zero_point,
-  int8_t output_min,
-  int8_t output_max);
+  int8_t zero_point);
 
 XNN_INTERNAL size_t xnn_init_f32_qs8_cvt_scalar_params(
   struct xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
-  int8_t zero_point,
-  int8_t output_min,
-  int8_t output_max);
+  int8_t zero_point);
 
 XNN_INTERNAL size_t xnn_init_f32_qu8_cvt_scalar_params(
   struct xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
-  uint8_t zero_point,
-  uint8_t output_min,
-  uint8_t output_max);
+  uint8_t zero_point);
 
 XNN_INTERNAL size_t xnn_init_s32_f32_cvt_scalar_params(
   struct xnn_s32_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],

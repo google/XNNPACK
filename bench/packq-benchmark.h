@@ -8,7 +8,7 @@
 
 #include <cstddef>
 
-#include "bench/utils.h"
+#include "utils.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/pack.h"

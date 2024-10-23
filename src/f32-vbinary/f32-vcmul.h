@@ -43,12 +43,14 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_vcmul_ukernel__fma3_u8, 8, fa
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_vcmul_ukernel__fma3_u16, 16, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_vcmul_ukernel__fma3_u32, 32, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_vcmul_ukernel__fma3_u64, 64, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512skx, xnn_f32_vcmul_ukernel__avx512f_u16, 16, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512skx, xnn_f32_vcmul_ukernel__avx512f_u32, 32, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512skx, xnn_f32_vcmul_ukernel__avx512f_u64, 64, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512skx, xnn_f32_vcmul_ukernel__avx512f_u128, 128, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vcmul_ukernel__avx512f_u16, 16, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vcmul_ukernel__avx512f_u32, 32, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vcmul_ukernel__avx512f_u64, 64, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vcmul_ukernel__avx512f_u128, 128, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_vcmul_ukernel__wasmsimd_u4, 4, false, float, struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))

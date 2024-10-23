@@ -40,9 +40,12 @@ XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_f16_vcvt_ukernel__avx_u24,
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_f16_vcvt_ukernel__avx_u32, 32, false, float, xnn_float16, void, NULL)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_f16c, xnn_f32_f16_vcvt_ukernel__f16c_u8, 8, false, float, xnn_float16, void, NULL)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_f16c, xnn_f32_f16_vcvt_ukernel__f16c_u16, 16, false, float, xnn_float16, void, NULL)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512skx, xnn_f32_f16_vcvt_ukernel__avx512skx_u16, 16, false, float, xnn_float16, void, NULL)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512skx, xnn_f32_f16_vcvt_ukernel__avx512skx_u32, 32, false, float, xnn_float16, void, NULL)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f32_f16_vcvt_ukernel__wasmsimd_u8, 8, false, float, xnn_float16, void, NULL)

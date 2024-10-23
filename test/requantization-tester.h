@@ -520,90 +520,6 @@ class RequantizationTester {
     }
   }
 
-  void TestRandomCasesRoundToNearestTiesAway(xnn_qu8_requantization_fn requantize) {
-    ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
-    ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
-    ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
-    ASSERT_LE(qmin(), std::numeric_limits<uint8_t>::max());
-    ASSERT_GE(qmax(), std::numeric_limits<uint8_t>::min());
-    ASSERT_LE(qmax(), std::numeric_limits<uint8_t>::max());
-    ASSERT_LT(qmin(), qmax());
-
-    xnnpack::ReplicableRandomDevice rng;
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      auto u8rng =
-        std::bind(std::uniform_int_distribution<uint32_t>(0, std::numeric_limits<uint8_t>::max()), std::ref(rng));
-
-      xnnpack::Buffer<int32_t> inputs(4096);
-      xnnpack::Buffer<uint8_t> outputs(inputs.size());
-
-      std::uniform_real_distribution<float> scale_distribution(0x1.000000p-23f, 0x1.FFFFFEp-1f);
-      const float scale = scale_distribution(rng);
-      for (size_t i = 0; i < inputs.size(); i++) {
-        const uint8_t approximate_output = std::min(std::max(uint8_t(u8rng()), uint8_t(qmin())), uint8_t(qmax()));
-        const int32_t input = int32_t(double(approximate_output) / double(scale));
-        inputs[i] = input;
-      }
-
-      requantize(
-        inputs.size(), inputs.data(), scale, zero_point(), qmin(), qmax(),
-        outputs.data());
-
-      /* Ensure that outputs are not all identical, as in this case the test doesn't validate much */
-      ASSERT_NE(
-        *std::max_element(outputs.cbegin(), outputs.cend()),
-        *std::min_element(outputs.cbegin(), outputs.cend()));
-
-      for (size_t i = 0; i < inputs.size(); i++) {
-        const uint8_t reference_output = xnn_qu8_requantize_rndna(
-          inputs[i], scale, zero_point(), qmin(), qmax());
-        ASSERT_EQ(uint32_t(reference_output), uint32_t(outputs[i]));
-      }
-    }
-  }
-
-  void TestRandomCasesRoundToNearestTiesAway(xnn_qs8_requantization_fn requantize) {
-    ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
-    ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
-    ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
-    ASSERT_LE(qmin(), std::numeric_limits<int8_t>::max());
-    ASSERT_GE(qmax(), std::numeric_limits<int8_t>::min());
-    ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
-    ASSERT_LT(qmin(), qmax());
-
-    xnnpack::ReplicableRandomDevice rng;
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      auto i8rng = std::bind(
-        std::uniform_int_distribution<int32_t>(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()), std::ref(rng));
-
-      xnnpack::Buffer<int32_t> inputs(4096);
-      xnnpack::Buffer<int8_t> outputs(inputs.size());
-
-      std::uniform_real_distribution<float> scale_distribution(0x1.000000p-23f, 0x1.FFFFFEp-1f);
-      const float scale = scale_distribution(rng);
-      for (size_t i = 0; i < inputs.size(); i++) {
-        const int8_t approximate_output = std::min(std::max(int8_t(i8rng()), int8_t(qmin())), int8_t(qmax()));
-        const int32_t input = int32_t(double(approximate_output) / double(scale));
-        inputs[i] = input;
-      }
-
-      requantize(
-        inputs.size(), inputs.data(), scale, zero_point(), qmin(), qmax(),
-        outputs.data());
-
-      /* Ensure that outputs are not all identical, as in this case the test doesn't validate much */
-      ASSERT_NE(
-        *std::max_element(outputs.cbegin(), outputs.cend()),
-        *std::min_element(outputs.cbegin(), outputs.cend()));
-
-      for (size_t i = 0; i < inputs.size(); i++) {
-        const int8_t reference_output = xnn_qs8_requantize_rndna(
-          inputs[i], scale, zero_point(), qmin(), qmax());
-        ASSERT_EQ(int32_t(reference_output), int32_t(outputs[i]));
-      }
-    }
-  }
-
   void TestRandomCasesRoundToNearestTiesUp(xnn_qs8_requantization_fn requantize) {
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
@@ -640,6 +556,48 @@ class RequantizationTester {
 
       for (size_t i = 0; i < inputs.size(); i++) {
         const int8_t reference_output = xnn_qs8_requantize_rndnu(
+          inputs[i], scale, zero_point(), qmin(), qmax());
+        ASSERT_EQ(int32_t(reference_output), int32_t(outputs[i]));
+      }
+    }
+  }
+
+  void TestRandomCasesRoundToNearestTiesUp(xnn_qu8_requantization_fn requantize) {
+    ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
+    ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
+    ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
+    ASSERT_LE(qmin(), std::numeric_limits<uint8_t>::max());
+    ASSERT_GE(qmax(), std::numeric_limits<uint8_t>::min());
+    ASSERT_LE(qmax(), std::numeric_limits<uint8_t>::max());
+    ASSERT_LT(qmin(), qmax());
+
+    xnnpack::ReplicableRandomDevice rng;
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      auto u8rng = std::bind(
+        std::uniform_int_distribution<int32_t>(std::numeric_limits<uint8_t>::min(), std::numeric_limits<uint8_t>::max()), std::ref(rng));
+
+      xnnpack::Buffer<int32_t> inputs(4096);
+      xnnpack::Buffer<uint8_t> outputs(inputs.size());
+
+      std::uniform_real_distribution<float> scale_distribution(0x1.000000p-23f, 0x1.FFFFFEp-1f);
+      const float scale = scale_distribution(rng);
+      for (size_t i = 0; i < inputs.size(); i++) {
+        const uint8_t approximate_output = std::min(std::max(uint8_t(u8rng()), uint8_t(qmin())), uint8_t(qmax()));
+        const int32_t input = int32_t(double(approximate_output) / double(scale));
+        inputs[i] = input;
+      }
+
+      requantize(
+        inputs.size(), inputs.data(), scale, zero_point(), qmin(), qmax(),
+        outputs.data());
+
+      /* Ensure that outputs are not all identical, as in this case the test doesn't validate much */
+      ASSERT_NE(
+        *std::max_element(outputs.cbegin(), outputs.cend()),
+        *std::min_element(outputs.cbegin(), outputs.cend()));
+
+      for (size_t i = 0; i < inputs.size(); i++) {
+        const uint8_t reference_output = xnn_qu8_requantize_rndnu(
           inputs[i], scale, zero_point(), qmin(), qmax());
         ASSERT_EQ(int32_t(reference_output), int32_t(outputs[i]));
       }

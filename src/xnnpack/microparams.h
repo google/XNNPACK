@@ -590,8 +590,6 @@ struct xnn_f16_qs8_cvt_params {
   struct {
     xnn_float16 scale;
     int16_t output_zero_point;
-    int8_t output_min;
-    int8_t output_max;
   } scalar;
 };
 
@@ -599,8 +597,6 @@ struct xnn_f32_qs8_cvt_params {
   struct {
     float scale;
     int16_t output_zero_point;
-    int8_t output_min;
-    int8_t output_max;
   } scalar;
 };
 
@@ -608,8 +604,6 @@ struct xnn_f32_qu8_cvt_params {
   struct {
     float scale;
     int16_t output_zero_point;
-    uint8_t output_min;
-    uint8_t output_max;
   } scalar;
 };
 

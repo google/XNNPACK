@@ -46,7 +46,7 @@ extern "C" {
       size_t output_increment,                                       \
       const struct xnn_f16_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-#include "src/f16-avgpool/f16-avgpool-minmax.h"
+#include "f16-avgpool/f16-avgpool-minmax.h"
 
 #undef XNN_UKERNEL_MULTIPASS
 #undef XNN_UKERNEL_UNIPASS
@@ -78,7 +78,7 @@ extern "C" {
       size_t output_increment,                                       \
       const struct xnn_f32_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-#include "src/f32-avgpool/f32-avgpool-minmax.h"
+#include "f32-avgpool/f32-avgpool-minmax.h"
 
 #undef XNN_UKERNEL_MULTIPASS
 #undef XNN_UKERNEL_UNIPASS
@@ -111,7 +111,7 @@ extern "C" {
       size_t output_increment,                                       \
       const union xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-#include "src/qu8-avgpool/qu8-avgpool-minmax.h"
+#include "qu8-avgpool/qu8-avgpool-minmax.h"
 
 #undef XNN_UKERNEL_MULTIPASS
 #undef XNN_UKERNEL_UNIPASS

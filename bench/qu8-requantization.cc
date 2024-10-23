@@ -9,7 +9,7 @@
 #include <random>
 #include <vector>
 
-#include "bench/utils.h"
+#include "utils.h"
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
@@ -71,12 +71,6 @@ static void qu8_requantization(
                     benchmark::utils::CheckNEON)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
     ->UseRealTime();
-
-  BENCHMARK_CAPTURE(qu8_requantization, rndna__neon,
-                    xnn_qu8_requantize_rndna__neon,
-                    benchmark::utils::CheckNEON)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
-    ->UseRealTime();
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -96,21 +90,6 @@ static void qu8_requantization(
     ->UseRealTime();
   BENCHMARK_CAPTURE(qu8_requantization, gemmlowp__sse41,
                     xnn_qu8_requantize_gemmlowp__sse41,
-                    benchmark::utils::CheckSSE41)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
-    ->UseRealTime();
-
-  BENCHMARK_CAPTURE(qu8_requantization, rndna__sse2,
-                    xnn_qu8_requantize_rndna__sse2)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(qu8_requantization, rndna__ssse3,
-                    xnn_qu8_requantize_rndna__ssse3,
-                    benchmark::utils::CheckSSSE3)
-    ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(qu8_requantization, rndna__sse41,
-                    xnn_qu8_requantize_rndna__sse41,
                     benchmark::utils::CheckSSE41)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
     ->UseRealTime();
@@ -139,19 +118,6 @@ BENCHMARK_CAPTURE(qu8_requantization, fp32__scalar_fmagic,
 
 BENCHMARK_CAPTURE(qu8_requantization, gemmlowp__scalar,
                   xnn_qu8_requantize_gemmlowp__scalar)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
-  ->UseRealTime();
-
-BENCHMARK_CAPTURE(qu8_requantization, rndna__scalar_signed64,
-                  xnn_qu8_requantize_rndna__scalar_signed64)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(qu8_requantization, rndna__scalar_unsigned32,
-                  xnn_qu8_requantize_rndna__scalar_unsigned32)
-  ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(qu8_requantization, rndna__scalar_unsigned64,
-                  xnn_qu8_requantize_rndna__scalar_unsigned64)
   ->Apply(benchmark::utils::UnaryElementwiseParameters<int32_t, uint8_t>)
   ->UseRealTime();
 

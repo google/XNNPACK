@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/math.h"
 #include "replicable_random_device.h"
 
 class TanhOperatorTester {

@@ -109,24 +109,6 @@ class ConvertOperatorTester {
     return this->zero_point_;
   }
 
-  ConvertOperatorTester& qmin(int16_t qmin) {
-    this->qmin_ = qmin;
-    return *this;
-  }
-
-  int16_t qmin() const {
-    return this->qmin_;
-  }
-
-  ConvertOperatorTester& qmax(int16_t qmax) {
-    this->qmax_ = qmax;
-    return *this;
-  }
-
-  int16_t qmax() const {
-    return this->qmax_;
-  }
-
   ConvertOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -412,10 +394,6 @@ class ConvertOperatorTester {
   }
 
   void TestF32toQS8() const {
-    ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
-    ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
-    ASSERT_LT(qmin(), qmax());
-
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
 
@@ -434,8 +412,8 @@ class ConvertOperatorTester {
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           float scaled_input = input[i * input_stride() + c] * inv_scale;
-          scaled_input = std::min<float>(scaled_input, float(qmax() - zero_point()));
-          scaled_input = std::max<float>(scaled_input, float(qmin() - zero_point()));
+          scaled_input = std::min<float>(scaled_input, float(std::numeric_limits<int8_t>::max() - zero_point()));
+          scaled_input = std::max<float>(scaled_input, float(std::numeric_limits<int8_t>::min() - zero_point()));
           output_ref[i * channels() + c] = int8_t(std::lrintf(scaled_input) + long(zero_point()));
         }
       }
@@ -446,7 +424,7 @@ class ConvertOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_convert_nc_f32_qs8(
-          output_scale(), int8_t(zero_point()), int8_t(qmin()), int8_t(qmax()),
+          output_scale(), int8_t(zero_point()),
           0, &convert_op));
       ASSERT_NE(nullptr, convert_op);
 
@@ -469,10 +447,6 @@ class ConvertOperatorTester {
   }
 
   void TestF32toQU8() const {
-    ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
-    ASSERT_LE(qmax(), std::numeric_limits<uint8_t>::max());
-    ASSERT_LT(qmin(), qmax());
-
     ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
 
@@ -491,8 +465,8 @@ class ConvertOperatorTester {
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           float scaled_input = input[i * input_stride() + c] * inv_scale;
-          scaled_input = std::min<float>(scaled_input, float(qmax() - zero_point()));
-          scaled_input = std::max<float>(scaled_input, float(qmin() - zero_point()));
+          scaled_input = std::min<float>(scaled_input, float(std::numeric_limits<uint8_t>::max() - zero_point()));
+          scaled_input = std::max<float>(scaled_input, float(std::numeric_limits<uint8_t>::min() - zero_point()));
           output_ref[i * channels() + c] = uint8_t(std::lrintf(scaled_input) + long(zero_point()));
         }
       }
@@ -503,7 +477,7 @@ class ConvertOperatorTester {
 
       ASSERT_EQ(xnn_status_success,
         xnn_create_convert_nc_f32_qu8(
-          output_scale(), uint8_t(zero_point()), uint8_t(qmin()), uint8_t(qmax()),
+          output_scale(), uint8_t(zero_point()),
           0, &convert_op));
       ASSERT_NE(nullptr, convert_op);
 
@@ -631,10 +605,6 @@ class ConvertOperatorTester {
   }
 
   void TestQS16toQS8() const {
-    ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
-    ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
-    ASSERT_LT(qmin(), qmax());
-
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
 
@@ -819,10 +789,6 @@ class ConvertOperatorTester {
   }
 
   void TestRunF32toQS8() const {
-    ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
-    ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
-    ASSERT_LT(qmin(), qmax());
-
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
 
@@ -841,8 +807,8 @@ class ConvertOperatorTester {
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           float scaled_input = input[i * input_stride() + c] * inv_scale;
-          scaled_input = std::min<float>(scaled_input, float(qmax() - zero_point()));
-          scaled_input = std::max<float>(scaled_input, float(qmin() - zero_point()));
+          scaled_input = std::min<float>(scaled_input, float(std::numeric_limits<int8_t>::max() - zero_point()));
+          scaled_input = std::max<float>(scaled_input, float(std::numeric_limits<int8_t>::min() - zero_point()));
           output_ref[i * channels() + c] = int8_t(std::lrintf(scaled_input) + long(zero_point()));
         }
       }
@@ -910,10 +876,6 @@ class ConvertOperatorTester {
   }
 
   void TestRunQS16toQS8() const {
-    ASSERT_GE(qmin(), std::numeric_limits<int8_t>::min());
-    ASSERT_LE(qmax(), std::numeric_limits<int8_t>::max());
-    ASSERT_LT(qmin(), qmax());
-
     ASSERT_GE(zero_point(), std::numeric_limits<int8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<int8_t>::max());
 
@@ -960,10 +922,6 @@ class ConvertOperatorTester {
   }
 
   void TestRunF32toQU8() const {
-    ASSERT_GE(qmin(), std::numeric_limits<uint8_t>::min());
-    ASSERT_LE(qmax(), std::numeric_limits<uint8_t>::max());
-    ASSERT_LT(qmin(), qmax());
-
     ASSERT_GE(zero_point(), std::numeric_limits<uint8_t>::min());
     ASSERT_LE(zero_point(), std::numeric_limits<uint8_t>::max());
 
@@ -982,8 +940,8 @@ class ConvertOperatorTester {
       for (size_t i = 0; i < batch_size(); i++) {
         for (size_t c = 0; c < channels(); c++) {
           float scaled_input = input[i * input_stride() + c] * inv_scale;
-          scaled_input = std::min<float>(scaled_input, float(qmax() - zero_point()));
-          scaled_input = std::max<float>(scaled_input, float(qmin() - zero_point()));
+          scaled_input = std::min<float>(scaled_input, float(std::numeric_limits<uint8_t>::max() - zero_point()));
+          scaled_input = std::max<float>(scaled_input, float(std::numeric_limits<uint8_t>::min() - zero_point()));
           output_ref[i * channels() + c] = uint8_t(std::lrintf(scaled_input) + long(zero_point()));
         }
       }
@@ -1057,7 +1015,5 @@ class ConvertOperatorTester {
   float input_scale_{150.0f};
   float output_scale_{3.0f};
   int16_t zero_point_{1};
-  int16_t qmin_{std::numeric_limits<int16_t>::min()};
-  int16_t qmax_{std::numeric_limits<int16_t>::max()};
   size_t iterations_{15};
 };

@@ -14,7 +14,7 @@
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/math.h"
 #include "xnnpack/unaligned.h"
-#include "xnnpack/vlrelu.h"
+#include "xnnpack/vunary.h"
 
 
 void xnn_qs8_vlrelu_ukernel__armsimd32_u4(

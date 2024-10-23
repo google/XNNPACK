@@ -45,6 +45,9 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx, xnn_f32_vsqrt_ukernel__avx_rsqrt_u32, 
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_fma3, xnn_f32_vsqrt_ukernel__fma3_rsqrt_u8, 8, false, float, struct xnn_f32_sqrt_params, ((xnn_init_f32_sqrt_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_fma3, xnn_f32_vsqrt_ukernel__fma3_rsqrt_u16, 16, false, float, struct xnn_f32_sqrt_params, ((xnn_init_f32_sqrt_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_fma3, xnn_f32_vsqrt_ukernel__fma3_rsqrt_u32, 32, false, float, struct xnn_f32_sqrt_params, ((xnn_init_f32_sqrt_params_fn) NULL))
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u16, 16, false, float, struct xnn_f32_sqrt_params, ((xnn_init_f32_sqrt_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u32, 32, false, float, struct xnn_f32_sqrt_params, ((xnn_init_f32_sqrt_params_fn) NULL))
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vsqrt_ukernel__avx512f_rsqrt_u48, 48, false, float, struct xnn_f32_sqrt_params, ((xnn_init_f32_sqrt_params_fn) NULL))
