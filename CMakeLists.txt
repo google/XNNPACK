@@ -403,8 +403,13 @@ ENDIF()
 
 # Generate and load the micorkernels.cmake files.
 MESSAGE(STATUS "Generating microkernels.cmake")
+if(WIN32)
+  set(PYTHON_EXE "python")
+else()
+  set(PYTHON_EXE "python3")
+endif()
 EXECUTE_PROCESS(
-  COMMAND python3 "${PROJECT_SOURCE_DIR}/tools/update-microkernels.py" --output "${PROJECT_BINARY_DIR}"
+  COMMAND ${PYTHON_EXE} "${PROJECT_SOURCE_DIR}/tools/update-microkernels.py" --output "${PROJECT_BINARY_DIR}"
   RESULT_VARIABLE UPDATE_MICROKERNELS_RESULT
 )
 IF(NOT UPDATE_MICROKERNELS_RESULT EQUAL 0)
