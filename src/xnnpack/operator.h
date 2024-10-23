@@ -355,6 +355,7 @@ struct xnn_operator {
       enum xnn_attention_logits_cap_type cap_type;
       struct xnn_attention_logits_cap_tanh_params cap_params;
     } attention;  // For attention operator.
+    const struct xnn_pack_lh_config* pack_lh_config;
   };
 
   struct compute_parameters compute[XNN_MAX_COMPUTE_INVOCATIONS];
@@ -411,6 +412,7 @@ struct xnn_operator {
     struct unpooling_context unpooling;
     struct vmulcaddc_context vmulcaddc;
     struct rope_context rope;
+    struct x32_pack_lh_context x32_pack_lh;
   } context;
 
   struct xnn_code_cache* code_cache;

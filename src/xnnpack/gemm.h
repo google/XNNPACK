@@ -157,6 +157,26 @@ DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_gemm_minmax_ukernel_8x64__avx51
       size_t cn_stride,                                 \
       const struct xnn_f32_relu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+#define DECLARE_PF32_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
+                                                           \
+  XNN_INTERNAL size_t fn_name ## _get_mr();                \
+  XNN_INTERNAL size_t fn_name ## _get_nr();                \
+                                                           \
+  XNN_INTERNAL void fn_name(                               \
+      size_t mr,                                           \
+      size_t nc,                                           \
+      size_t kc,                                           \
+      const void* a,                                       \
+      size_t a_stride,                                     \
+      const float* w,                                      \
+      float* c,                                            \
+      size_t cm_stride,                                    \
+      size_t cn_stride,                                    \
+      const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+DECLARE_PF32_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2)
+
 #define DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                              \
       size_t mr,                                          \

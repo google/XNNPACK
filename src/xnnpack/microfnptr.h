@@ -1549,6 +1549,16 @@ typedef void (*xnn_x32_packx_ukernel_fn)(
     size_t x_stride,
     uint32_t* y);
 
+// PACKLH: PACK LH (input) tensor according to the parameters from the gemm
+// config.
+typedef void (*xnn_x32_pack_lh_ukernel_fn)(
+    size_t m, size_t k, size_t mr, size_t kr, size_t sr, size_t m_idx_start,
+    const uint32_t* lhs, size_t lhs_stride, uint32_t* lhs_packed);
+
+// PACKLH Size: Size of packed buffer required.
+typedef size_t (*xnn_x32_pack_lh_size_fn)(size_t m, size_t k, size_t mr,
+                                          size_t kr, size_t sr);
+
 // FILL: FILL array with value
 
 typedef void (*xnn_fill_ukernel_fn)(
@@ -2967,7 +2977,7 @@ struct xnn_hmp_qp8gemm_bl_ukernel {
 
 // Largest GEMM/IGEMM MR used in init.c is 16 (x86 AVX512AMX).
 // Largest GEMM/IGEMM MR is 8 in e2e benchmarks.
-#define XNN_MAX_MR 16
+#define XNN_MAX_MR 32
 
 struct gemm_fused_ukernels {
   union {

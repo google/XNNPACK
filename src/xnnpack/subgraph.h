@@ -486,6 +486,10 @@ struct xnn_runtime {
 
 enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min, float output_max, struct xnn_node *node);
 
+enum xnn_status xnn_insert_pack_lh_node(xnn_subgraph_t subgraph,
+                                        const struct xnn_value* input,
+                                        uint32_t input_id, uint32_t* new_id);
+
 struct xnn_value* xnn_subgraph_new_internal_value(xnn_subgraph_t subgraph);
 
 struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph);

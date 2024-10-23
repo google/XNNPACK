@@ -145,6 +145,11 @@ struct xnn_avgpool_config {
   uint16_t channel_tile;
 };
 
+struct xnn_pack_lh_config {
+  xnn_x32_pack_lh_ukernel_fn ukernel;
+  xnn_x32_pack_lh_size_fn size_fn;
+};
+
 struct xnn_pavgpool_config {
   xnn_pavgpool_unipass_ukernel_fn unipass;
   xnn_pavgpool_multipass_ukernel_fn multipass;

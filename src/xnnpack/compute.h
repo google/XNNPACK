@@ -1580,17 +1580,35 @@ struct f32_qd8_convert_context {
       size_t batch_index);
 #endif
 
-struct f32_qp8_convert_context {
-  size_t m;
-  size_t k;
-  size_t mr;
-  size_t kr;
-  size_t sr;
-  const float* XNN_RESTRICT lhs;
-  size_t lhs_stride;
-  int8_t* XNN_RESTRICT lhs_packed;
-  xnn_x8_packq_f32qp8_ukernel_fn packq_ukernel;
-};
+  struct x32_pack_lh_context {
+    size_t m;
+    size_t k;
+    size_t mr;
+    size_t kr;
+    size_t sr;
+    const float* XNN_RESTRICT lhs;
+    size_t lhs_stride;
+    float* XNN_RESTRICT lhs_packed;
+    xnn_x32_pack_lh_ukernel_fn pack_lh_ukernel;
+  };
+
+#ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_x32_pack_lh(
+      const struct x32_pack_lh_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t m_idx_start, size_t tile);
+#endif
+
+  struct f32_qp8_convert_context {
+    size_t m;
+    size_t k;
+    size_t mr;
+    size_t kr;
+    size_t sr;
+    const float* XNN_RESTRICT lhs;
+    size_t lhs_stride;
+    int8_t* XNN_RESTRICT lhs_packed;
+    xnn_x8_packq_f32qp8_ukernel_fn packq_ukernel;
+  };
 
 #ifndef __cplusplus
   XNN_PRIVATE void xnn_compute_f32_qp8_convert(

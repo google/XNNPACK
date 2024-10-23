@@ -207,6 +207,7 @@ MICROKERNEL_DEFS = [
     "src/x16-transposec/x16-transposec.h",
     "src/x24-transposec/x24-transposec.h",
     "src/x32-packb/x32-packb.h",
+    "src/x32-pack-lh/x32-pack-lh.h",
     "src/x32-packw/x32-packw.h",
     "src/x32-packx/x32-packx.h",
     "src/x32-transposec/x32-transposec.h",
@@ -231,6 +232,7 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/packw.h",
     "src/xnnpack/packx.h",
     "src/xnnpack/pad.h",
+    "src/xnnpack/pack-lh.h",
     "src/xnnpack/pavgpool.h",
     "src/xnnpack/ppmm.h",
     "src/xnnpack/quantization.h",
@@ -805,8 +807,9 @@ xnnpack_cxx_library(
         "@KleidiAI//kai/ukernels/matmul",
         "@KleidiAI//kai/ukernels/matmul:rhs_pack_kxn_qsi4cxp_qs4cxs1s0",
         "@KleidiAI//kai/ukernels/matmul:rhs_pack_nxk_qsi4cxp_qs4cxs1s0",
-        "@KleidiAI//kai/ukernels/matmul:rhs_pack_nxk_qsi4c32p_qsu4c32s1s0",
+        "@KleidiAI//kai/ukernels/matmul:rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme",
         "@KleidiAI//kai/ukernels/matmul:rhs_pack_kxn_qsi4c32p_qsu4c32s1s0",
+        "@KleidiAI//kai/ukernels/matmul:rhs_pack_nxk_qsi4c32p_qsu4c32s1s0",
     ]),
 )
 

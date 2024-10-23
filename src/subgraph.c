@@ -19,6 +19,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/fp16.h"
 #include "xnnpack/hardware-config.h"
+#include "xnnpack/internal.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
@@ -71,6 +72,24 @@ enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min,
   node->activation.output_min = -INFINITY;
   node->activation.output_max = INFINITY;
   return xnn_define_clamp(subgraph, output_min, output_max, new_id, output_id, /*flags=*/0);
+}
+
+enum xnn_status xnn_insert_pack_lh_node(xnn_subgraph_t subgraph, const struct xnn_value* input, uint32_t input_id, uint32_t *new_id) {
+  enum xnn_status status;
+  switch (input->datatype) {
+    case xnn_datatype_fp32:
+      status = xnn_define_tensor_value(
+          subgraph, xnn_datatype_fp32, 0, NULL, NULL,
+          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, new_id);
+      break;
+    default:
+      XNN_UNREACHABLE;
+  }
+  if (status != xnn_status_success) {
+    return status;
+  }
+
+  return xnn_define_pack_lh(subgraph, input_id, *new_id, /*flags=*/0);
 }
 
 enum xnn_status xnn_create_subgraph(
