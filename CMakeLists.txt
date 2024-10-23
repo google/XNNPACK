@@ -1512,7 +1512,6 @@ IF(XNNPACK_BUILD_TESTS)
       packing
       qs8-gavgpool-minmax-fp32
       qs8-gavgpool-minmax-rndnu
-      qs8-requantization
       qs8-rdsum-minmax-fp32
       qu8-rdsum
       qs8-rsum
@@ -1521,7 +1520,6 @@ IF(XNNPACK_BUILD_TESTS)
       qs8-vlrelu
       qu8-gavgpool-minmax-fp32
       qu8-gavgpool-minmax-rndnu
-      qu8-requantization
       qu8-vhswish
       qu8-vlrelu
       s8-ibilinear
@@ -2039,7 +2037,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       qs8-f32-vcvt
       qs8-gemm
       qs8-qc8w-gemm-fp32
-      qs8-requantization
       qu8-rdsum
       qs8-rsum
       qu8-rsum
@@ -2048,7 +2045,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       qu8-gemm
       qu8-gemm-fp32
       qu8-gemm-rndnu
-      qu8-requantization
       qu8-vcvt
       x16-packw
       x32-packw

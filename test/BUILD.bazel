@@ -1058,16 +1058,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qs8_requantization_test",
-    srcs = [
-        "qs8-requantization.cc",
-        "requantization-tester.h",
-    ],
-    shard_count = 5,
-    deps = MICROKERNEL_TEST_DEPS + ["//:requantization_stubs"],
-)
-
-xnnpack_unit_test(
     name = "qs8_rdsum_minmax_fp32_test",
     srcs = [
         "qs8-rdsum-minmax-fp32.cc",
@@ -1161,16 +1151,6 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
-)
-
-xnnpack_unit_test(
-    name = "qu8_requantization_test",
-    srcs = [
-        "qu8-requantization.cc",
-        "requantization-tester.h",
-    ],
-    shard_count = 5,
-    deps = MICROKERNEL_TEST_DEPS + ["//:requantization_stubs"],
 )
 
 xnnpack_unit_test(

@@ -308,22 +308,6 @@ xnnpack_benchmark(
 ]]
 
 xnnpack_benchmark(
-    name = "qs8_requantization_bench",
-    srcs = [
-        "qs8-requantization.cc",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS + ["//:requantization_stubs"],
-)
-
-xnnpack_benchmark(
-    name = "qu8_requantization_bench",
-    srcs = [
-        "qu8-requantization.cc",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS + ["//:requantization_stubs"],
-)
-
-xnnpack_benchmark(
     name = "qs8_dwconv_bench",
     srcs = [
         "qs8-dwconv.cc",
