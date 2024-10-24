@@ -277,12 +277,10 @@ xnnpack_benchmark(
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 ) for kernel in [
-    "f16_gavgpool_cw",
     "f16_raddstoreexpminusmax",
     "f16_rmax",
     "f16_rminmax",
     "f16_rmin",
-    "f32_gavgpool_cw",
     "f32_raddexpminusmax",
     "f32_raddextexp",
     "f32_raddstoreexpminusmax",
@@ -639,13 +637,6 @@ xnnpack_benchmark(
     copts = xnnpack_optional_tflite_copts(),
     tags = ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
-)
-
-xnnpack_benchmark(
-    name = "global_average_pooling_bench",
-    srcs = ["global-average-pooling.cc"],
-    tags = xnnpack_slow_benchmark_tags(),
-    deps = OPERATOR_BENCHMARK_DEPS,
 )
 
 xnnpack_benchmark(

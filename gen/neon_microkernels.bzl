@@ -23,7 +23,6 @@ PROD_NEON_MICROKERNEL_SRCS = [
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5p2-minmax-neon-1x4.c",
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-neon-1x4.c",
     "src/f32-f16-vcvt/gen/f32-f16-vcvt-neon-u8.c",
-    "src/f32-gavgpool-cw/f32-gavgpool-cw-neon-u4.c",
     "src/f32-gavgpool/f32-gavgpool-7p7x-minmax-neon-c4.c",
     "src/f32-gavgpool/f32-gavgpool-7x-minmax-neon-c4.c",
     "src/f32-gemm/gen/f32-gemm-1x8-minmax-neon-lane-ld64.c",

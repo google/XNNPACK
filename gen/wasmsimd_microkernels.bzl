@@ -44,8 +44,6 @@ PROD_WASMSIMD_MICROKERNEL_SRCS = [
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-wasmsimd-arm-splat-1x4-acc2.c",
     "src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-5x5s2p2-minmax-wasmsimd-x86-splat-1x4-acc2.c",
     "src/f32-f16-vcvt/gen/f32-f16-vcvt-wasmsimd-u24.c",
-    "src/f32-gavgpool-cw/f32-gavgpool-cw-wasmsimd-arm-u4.c",
-    "src/f32-gavgpool-cw/f32-gavgpool-cw-wasmsimd-x86-u4.c",
     "src/f32-gavgpool/f32-gavgpool-7p7x-minmax-wasmsimd-arm-c4.c",
     "src/f32-gavgpool/f32-gavgpool-7p7x-minmax-wasmsimd-x86-c4.c",
     "src/f32-gavgpool/f32-gavgpool-7x-minmax-wasmsimd-arm-c4.c",

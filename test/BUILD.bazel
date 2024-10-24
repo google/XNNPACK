@@ -504,15 +504,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f16_gavgpool_cw_test",
-    srcs = [
-        "f16-gavgpool-cw.cc",
-        "gavgpool-cw-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "f16_gavgpool_minmax_test",
     srcs = [
         "f16-gavgpool-minmax.cc",
@@ -680,15 +671,6 @@ xnnpack_unit_test(
     srcs = [
         "f32-gavgpool-minmax.cc",
         "gavgpool-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "f32_gavgpool_cw_test",
-    srcs = [
-        "f32-gavgpool-cw.cc",
-        "gavgpool-cw-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -1503,35 +1485,6 @@ xnnpack_unit_test(
     deps = OPERATOR_TEST_DEPS + [
         "//:microkernels_h",
     ],
-)
-
-xnnpack_unit_test(
-    name = "global_average_pooling_nwc_test",
-    timeout = "moderate",
-    srcs = [
-        "global-average-pooling-nwc.cc",
-        "global-average-pooling-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "global_average_pooling_ncw_test",
-    srcs = [
-        "global-average-pooling-ncw.cc",
-        "global-average-pooling-operator-tester.h",
-    ],
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "global_sum_pooling_nwc_test",
-    srcs = [
-        "global-sum-pooling-nwc.cc",
-        "global-sum-pooling-operator-tester.h",
-    ],
-    shard_count = 10,
-    deps = OPERATOR_TEST_DEPS,
 )
 
 xnnpack_unit_test(
