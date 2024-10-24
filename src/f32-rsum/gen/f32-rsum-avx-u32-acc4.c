@@ -19,7 +19,7 @@ void xnn_f32_rsum_ukernel__avx_u32_acc4(
     size_t batch,
     const float* input,
     float* output,
-    const struct xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
@@ -64,7 +64,5 @@ void xnn_f32_rsum_ukernel__avx_u32_acc4(
   vacc = _mm_add_ps(vacc, _mm_movehl_ps(vacc, vacc));
   vacc = _mm_add_ss(vacc, _mm_movehdup_ps(vacc));
   vacc = _mm_mul_ss(vacc, _mm_load_ss(&params->scalar.scale));
-  vacc = _mm_max_ss(vacc, _mm_load_ss(&params->scalar.min));
-  vacc = _mm_min_ss(vacc, _mm_load_ss(&params->scalar.max));
   *output += _mm_cvtss_f32(vacc);
 }

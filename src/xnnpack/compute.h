@@ -1436,7 +1436,6 @@ struct reduce_context {
     struct xnn_f32_default_params f32_default;
     struct xnn_f16_f32acc_scale_params scale_params;
     struct xnn_f32_scale_params f32_scale;
-    struct xnn_f32_scaleminmax_params f32_scaleminmax;
   } params;
 };
 
