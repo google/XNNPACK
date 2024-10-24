@@ -45,10 +45,10 @@ class VBinaryMicrokernelTester {
           result[i] = a[i] + b[i * stride_b];
           break;
         case OpType::CopySign:
-          result[i] = std::copysign(a[i], b[i * stride_b]);
+          result[i] = copy_sign(a[i], b[i * stride_b]);
           break;
         case OpType::RCopySign:
-          result[i] = std::copysign(b[i * stride_b], a[i]);
+          result[i] = copy_sign(b[i * stride_b], a[i]);
           break;
         case OpType::Div:
           result[i] = a[i] / b[i * stride_b];
@@ -231,6 +231,19 @@ class VBinaryMicrokernelTester {
   uint8_t qmin_{0};
   uint8_t qmax_{255};
   size_t iterations_{15};
+
+  static float copy_sign(float a, float b) {
+    return std::copysign(a, b);
+  }
+
+  static int32_t copy_sign(int32_t a, int32_t b) {
+    return (int32_t)std::copysign((float)a, (float)b);
+  }
+
+  static xnn_float16 copy_sign(xnn_float16 a, xnn_float16 b) {
+    return (xnn_float16)std::copysign((float)a, (float)b);
+  }
+
 };
 
 #define XNN_TEST_BINARY_BATCH_EQ(ukernel, arch_flags, batch_tile, is_binaryc, \

@@ -9,6 +9,7 @@
 #include <cstddef>  // For size_t.
 #include <cstdint>
 #include <memory>  // For std::unique_ptr.
+#include <numeric>
 #include <random>  // For std::uniform_real_distribution.
 #include <vector>  // For std::vector.
 
@@ -137,8 +138,11 @@ TEST_F(StaticConstantPadTestF16, define)
   std::array<size_t, XNN_MAX_TENSOR_DIMS> post_paddings;
   std::fill(pre_paddings.begin(), pre_paddings.begin() + dims.size(), dim_dist(rng));
   std::fill(post_paddings.begin(), post_paddings.begin() + dims.size(), dim_dist(rng));
-  xnn_float16 padding_value = f32dist(rng);
-  uint32_t padding_value_as_bits = padding_value.value;
+  union {
+    xnn_float16 padding_value;
+    uint16_t padding_value_as_bits;
+  };
+  padding_value = f32dist(rng);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
