@@ -112,7 +112,6 @@ struct xnn_reduce_config {
     xnn_init_f16_default_params_fn f16_default;
     xnn_init_f32_default_params_fn f32_default;
     xnn_init_f32_scale_params_fn f32_scale;
-    xnn_init_f32_scaleminmax_params_fn f32_scaleminmax;
   } init;
 };
 

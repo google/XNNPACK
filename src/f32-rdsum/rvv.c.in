@@ -19,7 +19,7 @@ void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__rvv_u${LMUL}v(
     size_t input_stride,
     const float* zero,
     float* output,
-    const struct xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -27,8 +27,6 @@ void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__rvv_u${LMUL}v(
   assert(output != NULL);
 
   const float scale = params->scalar.scale;
-  const float min = params->scalar.min;
-  const float max = params->scalar.max;
 
   size_t input_increment = ${ACCUMULATORS} * input_stride;
   for (; channels > 0; ) {
@@ -55,7 +53,6 @@ void xnn_f32_rdsum_ukernel_${ACCUMULATORS}p${ACCUMULATORS}x__rvv_u${LMUL}v(
         i${N} = (const float*) ((uintptr_t) i${N} + input_increment);
     }
     acc_f32v = __riscv_vfmul_vf_f32m${LMUL}(acc_f32v, scale, n);
-    acc_f32v = __riscv_vfmin_vf_f32m${LMUL}(__riscv_vfmax_vf_f32m${LMUL}(acc_f32v, min, n), max, n);
     vfloat32m${LMUL}_t out_f32v = __riscv_vle32_v_f32m${LMUL}(output, n);
     out_f32v = __riscv_vfadd_vv_f32m${LMUL}(out_f32v, acc_f32v, n);
     __riscv_vse32_v_f32m${LMUL}(output, out_f32v, n); output += n;
