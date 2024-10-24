@@ -973,9 +973,3 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
-
-- name: xnn_f32_gemm_minmax_ukernel_32x32__neonsme2
-  init: xnn_init_f32_minmax_scalar_params
-  pack: xnn_pack_kai_f32_weights_and_biases
-  packed-stride: xnn_packed_stride_kai_f32_weights_and_biases
-  k-block: 2
