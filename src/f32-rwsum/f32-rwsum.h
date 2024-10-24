@@ -1,0 +1,33 @@
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#ifndef XNN_UKERNEL_WITH_PARAMS
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params) \
+    XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype)
+#define XNN_DEFINED_UKERNEL_WITH_PARAMS
+#endif
+
+#ifndef XNN_UKERNEL
+#define XNN_UKERNEL(arch_flags, ukernel, batch_tile, vector_tile, datatype) \
+    XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, void, /*init_params=*/nullptr)
+#define XNN_DEFINED_UKERNEL
+#endif
+
+
+XNN_UKERNEL_WITH_PARAMS(scalar_u1, xnn_f32_rwsum_ukernel__scalar_u1, 1, false, float,const struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(scalar_u2_acc2, xnn_f32_rwsum_ukernel__scalar_u2_acc2, 2, false, float,const struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(scalar_u3_acc3, xnn_f32_rwsum_ukernel__scalar_u3_acc3, 3, false, float,const struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+XNN_UKERNEL_WITH_PARAMS(scalar_u4_acc4, xnn_f32_rwsum_ukernel__scalar_u4_acc4, 4, false, float,const struct xnn_f32_default_params, ((xnn_init_f32_default_params_fn) NULL))
+
+
+#ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS
+#undef XNN_DEFINED_UKERNEL_WITH_PARAMS
+#undef XNN_UKERNEL_WITH_PARAMS
+#endif
+
+#ifdef XNN_DEFINED_UKERNEL
+#undef XNN_DEFINED_UKERNEL
+#undef XNN_UKERNEL
+#endif

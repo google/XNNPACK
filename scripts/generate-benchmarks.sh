@@ -15,4 +15,9 @@ tools/generate-rdsum-benchmark.py  --spec test/f16-f32acc-rsum.yaml --output ben
 tools/generate-rdsum-benchmark.py  --spec test/f32-rsum.yaml --output bench/f32-rsum.cc &
 tools/generate-rdsum-benchmark.py  --spec test/qs8-rsum.yaml --output bench/qs8-rsum.cc &
 tools/generate-rdsum-benchmark.py  --spec test/qu8-rsum.yaml --output bench/qu8-rsum.cc &
+
+### Test for ReduceWindow microkernels
+tools/generate-rw-benchmark.py --ukernel f32-rwsum --output bench/f32-rwsum.cc &
+tools/generate-rwd-benchmark.py --ukernel f32-rwdsum --output bench/f32-rwdsum.cc &
+
 wait
