@@ -29,7 +29,7 @@ void xnn_qu8_vcvt_ukernel__sse2_u32(
 
   const __m128i vmultiplier = _mm_set1_epi16(params->scalar.multiplier);
   const __m128i vbias = _mm_set1_epi32(
-      ((int32_t) params->scalar.output_zero_point << 8) -
+      (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 8) -
       (int32_t) params->scalar.multiplier * (int32_t) params->scalar.input_zero_point + 
       INT32_C(0x80));
   XNN_FORCE_REALIZATION(vmultiplier);

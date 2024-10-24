@@ -43,7 +43,7 @@ void xnn_qs16_qs8_vcvt_ukernel__sse41_u8(
   };
 
   const __m128i vmultiplier = _mm_set1_epi32(params->scalar.multiplier);
-  const __m128i vbias = _mm_set1_epi64x((int64_t) ((uint64_t) params->scalar.output_zero_point << 32) + INT64_C(0x80000000));
+  const __m128i vbias = _mm_set1_epi64x((int64_t) (((uint64_t) (int64_t) params->scalar.output_zero_point) << 32) + INT64_C(0x80000000));
   XNN_FORCE_REALIZATION(vmultiplier);
   XNN_FORCE_REALIZATION(vbias);
   const __m128i vshuffle01 = _mm_load_si128((const __m128i*) shuffle01);
