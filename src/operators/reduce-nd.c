@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -343,7 +342,7 @@ enum xnn_status xnn_create_reduce_nd(
 
   union {
     struct f16_f32acc_reduce_params f16;
-    struct xnn_f32_scaleminmax_params f32;
+    struct xnn_f32_scale_params f32;
     struct xnn_qs8_reduce_minmax_params qs8;
     struct xnn_qu8_reduce_minmax_params qu8;
   } params;
@@ -421,11 +420,11 @@ enum xnn_status xnn_create_reduce_nd(
       }
     case xnn_datatype_fp32: {
         log2_element_size = XNN_LOG2_SIZEOF_FLOAT;
-        const struct xnn_f32_scaleminmax_params param_init = {0};
+        const struct xnn_f32_scale_params param_init = {0};
         params.f32 = param_init;
-        rsum_config->init.f32_scaleminmax(&params.f32, /*scale=*/1.0f, /*min=*/-INFINITY, /*max=*/INFINITY);
+        rsum_config->init.f32_scale(&params.f32, /*scale=*/1.0f);
         params_ptr = &params.f32;
-        sizeof_params = sizeof(struct xnn_f32_scaleminmax_params);
+        sizeof_params = sizeof(struct xnn_f32_scale_params);
         break;
       }
     case xnn_datatype_qint8: { // qs8
@@ -471,8 +470,7 @@ static void update_params_mean_f32(
   size_t num_elements)
 {
   const float scale = 1.0f / (float) num_elements;
-  mean_op->rsum_config->init.f32_scaleminmax(&mean_op->params.f32_scaleminmax, scale, -INFINITY, INFINITY);
-  mean_op->rdsum_config->init.f32_scaleminmax(&mean_op->params.f32_scaleminmax, scale, -INFINITY, INFINITY);
+  mean_op->rsum_config->init.f32_scale(&mean_op->params.f32_scale, scale);
 }
 
 static void update_params_mean_qs8(
@@ -502,7 +500,7 @@ static void update_params_sum_f32(
   size_t num_elements)
 {
   const float scale = 1.0f;
-  sum_op->rsum_config->init.f32_scaleminmax(&sum_op->params.f32_scaleminmax, scale, -INFINITY, INFINITY);
+  sum_op->rsum_config->init.f32_scale(&sum_op->params.f32_scale, scale);
 }
 
 static void update_params_sum_qs8(
@@ -585,8 +583,8 @@ enum xnn_status xnn_reshape_reduce_nd(
     case xnn_datatype_fp32:
       log2_data_element_size = XNN_LOG2_SIZEOF_FLOAT;
       log2_accumulator_element_size = XNN_LOG2_SIZEOF_FLOAT;
-      scale_params = &reduce_op->params.f32_scaleminmax;
-      scale_params_size = sizeof(reduce_op->params.f32_scaleminmax);
+      scale_params = &reduce_op->params.f32_scale;
+      scale_params_size = sizeof(reduce_op->params.f32_scale);
       break;
     case xnn_datatype_qint8:
       log2_data_element_size = XNN_LOG2_SIZEOF_INT8_T;

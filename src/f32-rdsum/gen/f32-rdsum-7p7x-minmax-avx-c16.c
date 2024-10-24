@@ -23,7 +23,7 @@ void xnn_f32_rdsum_ukernel_7p7x__avx_c16(
     size_t input_stride,
     const float* zero,
     float* output,
-    const struct xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
@@ -33,8 +33,6 @@ void xnn_f32_rdsum_ukernel_7p7x__avx_c16(
   assert(output != NULL);
 
   const __m256 vscale = _mm256_set1_ps(params->scalar.scale);
-  const __m256 vmin = _mm256_set1_ps(params->scalar.min);
-  const __m256 vmax = _mm256_set1_ps(params->scalar.max);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 16; channels -= 16) {
@@ -107,11 +105,7 @@ void xnn_f32_rdsum_ukernel_7p7x__avx_c16(
       i6 = (const float*) ((uintptr_t) i6 + input_increment);
     }
     vacc0 = _mm256_mul_ps(vacc0, vscale);
-    vacc0 = _mm256_max_ps(vacc0, vmin);
-    vacc0 = _mm256_min_ps(vacc0, vmax);
     vacc1 = _mm256_mul_ps(vacc1, vscale);
-    vacc1 = _mm256_max_ps(vacc1, vmin);
-    vacc1 = _mm256_min_ps(vacc1, vmax);
 
     const float* o = output;
     __m256 vo0 = _mm256_loadu_ps(o); o += 8;
@@ -189,8 +183,6 @@ void xnn_f32_rdsum_ukernel_7p7x__avx_c16(
     }
     for (size_t i = 0; i < num_chunks; ++i) {
       vacc[i] = _mm256_mul_ps(vacc[i], vscale);
-      vacc[i] = _mm256_max_ps(vacc[i], vmin);
-      vacc[i] = _mm256_min_ps(vacc[i], vmax);
     }
 
     __m256 vo[2];
