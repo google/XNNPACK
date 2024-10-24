@@ -47,7 +47,7 @@ void VCvtMicrokernelTester::Test(
       ASSERT_EQ(float_as_uint32(output[i]),
                 float_as_uint32(input[i]))
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = 0x"
-          << std::hex << std::setw(4) << std::setfill('0') << input[i];
+          << std::hex << std::setw(4) << std::setfill('0') << (float) input[i];
     }
   }
 }
@@ -121,8 +121,8 @@ void VCvtMicrokernelTester::Test(xnn_f16_qs8_vcvt_ukernel_fn vcvt,
                   static_cast<int32_t>(output_ref[i]), 1)
           << "at " << i << " / " << batch_size() << ", x[" << i << "] = 0x"
           << std::hex << std::setw(8) << std::setfill('0')
-          << float_as_uint32(input[i]) << " (" << input[i] << ")" << " INPUT "
-          << input[i] << " scale " << scale() << " zp "
+          << float_as_uint32(input[i]) << " (" << (float)input[i] << ")" << " INPUT "
+          << (float)input[i] << " scale " << scale() << " zp "
           << (int)output_zero_point();
     }
   }

@@ -321,7 +321,7 @@ class VUnaryMicrokernelTester {
       for (size_t i = 0; i < batch_size(); i++) {
         ASSERT_NEAR(y[i], y_ref[i], tol(y_ref[i]))
             << "at " << i << " / " << batch_size() << ", x[" << i
-            << "] = " << std::scientific << x[i];
+            << "] = " << std::scientific << (float)x[i];
       }
     }
   }

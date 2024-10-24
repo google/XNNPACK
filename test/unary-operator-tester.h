@@ -192,7 +192,7 @@ class UnaryOperatorTester {
     EXPECT_NEAR(y_ref, y, AbsTolF16(y_ref))
         << "at batch " << batch << " / " << batch_size() << ", channel "
         << channel << " / " << channels() << ", input "
-        << input;
+        << (float)input;
   }
   virtual void CheckResultQS8(int8_t y, float y_ref, size_t batch,
                               size_t channel, int8_t input) const {
