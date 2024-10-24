@@ -32,8 +32,6 @@ SET(PROD_SSE41_MICROKERNEL_SRCS
   src/qs8-dwconv/gen/qs8-dwconv-9p8c-minmax-fp32-sse41-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-25p8c-minmax-fp32-sse41-mul16-add16.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-sse41-u16.c
-  src/qs8-gavgpool/gen/qs8-gavgpool-7p7x-minmax-fp32-sse41-c8.c
-  src/qs8-gavgpool/gen/qs8-gavgpool-7x-minmax-fp32-sse41-c8.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-3p8c-minmax-fp32-sse41-mul16.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-9p8c-minmax-fp32-sse41-mul16.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-25p8c-minmax-fp32-sse41-mul16.c
@@ -52,8 +50,6 @@ SET(PROD_SSE41_MICROKERNEL_SRCS
   src/qu8-dwconv/gen/qu8-dwconv-9p8c-minmax-fp32-sse41-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-25p8c-minmax-fp32-sse41-mul16.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-sse41-u16.c
-  src/qu8-gavgpool/gen/qu8-gavgpool-7p7x-minmax-fp32-sse41-c8.c
-  src/qu8-gavgpool/gen/qu8-gavgpool-7x-minmax-fp32-sse41-c8.c
   src/qu8-gemm/gen/qu8-gemm-1x4c8-minmax-fp32-sse41-ld64.c
   src/qu8-gemm/gen/qu8-gemm-3x4c8-minmax-fp32-sse41-ld64.c
   src/qu8-igemm/gen/qu8-igemm-1x4c8-minmax-fp32-sse41-ld64.c
@@ -202,10 +198,6 @@ SET(NON_PROD_SSE41_MICROKERNEL_SRCS
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-sse41-u8.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-sse41-u24.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-sse41-u32.c
-  src/qs8-gavgpool/gen/qs8-gavgpool-7p7x-minmax-fp32-sse41-c16.c
-  src/qs8-gavgpool/gen/qs8-gavgpool-7p7x-minmax-fp32-sse41-c24.c
-  src/qs8-gavgpool/gen/qs8-gavgpool-7x-minmax-fp32-sse41-c16.c
-  src/qs8-gavgpool/gen/qs8-gavgpool-7x-minmax-fp32-sse41-c24.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-5f5m5l8c4s4r-minmax-fp32-sse41-mul32.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-5f5m5l8c8s8r-minmax-fp32-sse41-mul16-add16.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-5f5m5l8c8s8r-minmax-fp32-sse41-mul16.c
@@ -322,10 +314,6 @@ SET(NON_PROD_SSE41_MICROKERNEL_SRCS
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-sse41-u8.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-sse41-u24.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-sse41-u32.c
-  src/qu8-gavgpool/gen/qu8-gavgpool-7p7x-minmax-fp32-sse41-c16.c
-  src/qu8-gavgpool/gen/qu8-gavgpool-7p7x-minmax-fp32-sse41-c24.c
-  src/qu8-gavgpool/gen/qu8-gavgpool-7x-minmax-fp32-sse41-c16.c
-  src/qu8-gavgpool/gen/qu8-gavgpool-7x-minmax-fp32-sse41-c24.c
   src/qu8-gemm/gen/qu8-gemm-1x4c2-minmax-fp32-sse41-ld64.c
   src/qu8-gemm/gen/qu8-gemm-1x4c2-minmax-fp32-sse41-ld128.c
   src/qu8-gemm/gen/qu8-gemm-1x4c2s4-minmax-fp32-sse41-ld64.c

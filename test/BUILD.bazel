@@ -504,15 +504,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "f16_gavgpool_minmax_test",
-    srcs = [
-        "f16-gavgpool-minmax.cc",
-        "gavgpool-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "f16_f32acc_gemm_minmax_test",
     srcs = [
         "f16-f32acc-gemm-minmax.cc",
@@ -662,15 +653,6 @@ xnnpack_unit_test(
     srcs = [
         "dwconv2d-microkernel-tester.h",
         "f32-dwconv2d-chw.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "f32_gavgpool_minmax_test",
-    srcs = [
-        "f32-gavgpool-minmax.cc",
-        "gavgpool-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -1022,24 +1004,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qs8_gavgpool_minmax_fp32_test",
-    srcs = [
-        "gavgpool-microkernel-tester.h",
-        "qs8-gavgpool-minmax-fp32.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "qs8_gavgpool_minmax_rndnu_test",
-    srcs = [
-        "gavgpool-microkernel-tester.h",
-        "qs8-gavgpool-minmax-rndnu.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "qs8_rdsum_minmax_fp32_test",
     srcs = [
         "qs8-rdsum-minmax-fp32.cc",
@@ -1069,24 +1033,6 @@ xnnpack_unit_test(
     srcs = [
         "qs8-vlrelu.cc",
         "vlrelu-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "qu8_gavgpool_minmax_fp32_test",
-    srcs = [
-        "gavgpool-microkernel-tester.h",
-        "qu8-gavgpool-minmax-fp32.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "qu8_gavgpool_minmax_rndnu_test",
-    srcs = [
-        "gavgpool-microkernel-tester.h",
-        "qu8-gavgpool-minmax-rndnu.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )

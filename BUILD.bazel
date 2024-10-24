@@ -221,7 +221,6 @@ MICROKERNEL_HDRS = [
     "src/xnnpack/conv.h",
     "src/xnnpack/dwconv.h",
     "src/xnnpack/fill.h",
-    "src/xnnpack/gavgpool.h",
     "src/xnnpack/gemm.h",
     "src/xnnpack/ibilinear.h",
     "src/xnnpack/igemm.h",

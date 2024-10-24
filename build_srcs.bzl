@@ -108,7 +108,6 @@ XNNPACK_SRCS = [
     "src/configs/conv-hwc2chw-config.c",
     "src/configs/dwconv-config.c",
     "src/configs/dwconv2d-chw-config.c",
-    "src/configs/gavgpool-config.c",
     "src/configs/gemm-config.c",
     "src/configs/ibilinear-chw-config.c",
     "src/configs/ibilinear-config.c",

@@ -9,9 +9,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "xnnpack/common.h"
 #include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -168,46 +166,6 @@ struct xnn_pavgpool_config {
   // Number of channels in a tile.
   // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
   uint16_t channel_tile;
-};
-
-struct xnn_gavgpool_config {
-  xnn_gavgpool_unipass_ukernel_fn unipass;
-  xnn_gavgpool_multipass_ukernel_fn multipass;
-  union {
-    xnn_init_f16_scaleminmax_params_fn f16;
-    xnn_init_f32_scaleminmax_params_fn f32;
-    xnn_init_qs8_avgpool_minmax_params_fn qs8;
-    xnn_init_qu8_avgpool_minmax_params_fn qu8;
-  } init;
-  union {
-    xnn_update_f16_scaleminmax_params_fn f16;
-    xnn_update_f32_scaleminmax_params_fn f32;
-    xnn_update_qs8_avgpool_minmax_params_fn qs8;
-    xnn_update_qu8_avgpool_minmax_params_fn qu8;
-  } update;
-  // Number of rows in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of rows in each call.
-  uint16_t row_tile;
-  // Number of channels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of channels in each call.
-  uint16_t channel_tile;
-};
-
-struct xnn_gavgpool_cw_config {
-  xnn_gavgpool_cw_ukernel_fn ukernel;
-  union {
-    xnn_init_f16_gavgpool_neon_params_fn f16;
-    xnn_init_f32_gavgpool_params_fn f32;
-  } init;
-  union {
-    xnn_update_f16_gavgpool_scalar_params_fn f16;
-    xnn_update_f32_gavgpool_params_fn f32;
-  } update;
-
-  // Number of input pixels in a tile.
-  // For best efficiency, micro-kernel must process a multiple of this number of pixels in each call.
-  uint8_t pixel_tile;
-  // Channel tile is always 1.
 };
 
 union xnn_dwconv_ukernel {

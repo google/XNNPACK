@@ -129,11 +129,6 @@ XNN_INTERNAL const struct xnn_avgpool_config* xnn_init_qu8_avgpool_config();
 XNN_INTERNAL const struct xnn_pavgpool_config* xnn_init_f16_pavgpool_config();
 XNN_INTERNAL const struct xnn_pavgpool_config* xnn_init_f32_pavgpool_config();
 
-XNN_INTERNAL const struct xnn_gavgpool_config* xnn_init_f16_gavgpool_config();
-XNN_INTERNAL const struct xnn_gavgpool_config* xnn_init_f32_gavgpool_config();
-XNN_INTERNAL const struct xnn_gavgpool_config* xnn_init_qs8_gavgpool_config();
-XNN_INTERNAL const struct xnn_gavgpool_config* xnn_init_qu8_gavgpool_config();
-
 #define XNN_MAX_F16_DWCONV_UKERNELS 4
 #define XNN_MAX_F32_DWCONV_UKERNELS 4
 #define XNN_MAX_QC8_DWCONV_UKERNELS 3

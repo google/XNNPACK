@@ -837,105 +837,6 @@ typedef void (*xnn_u8_ibilinear_ukernel_fn)(
     uint8_t* output,
     size_t output_increment);
 
-// GAVGPOOL: Global AVeraGe POOLing single-pass
-
-typedef void (*xnn_gavgpool_unipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const void* input,
-    size_t input_stride,
-    const void* zero,
-    void* output,
-    const void* params);
-
-typedef void (*xnn_f16_gavgpool_minmax_unipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const xnn_float16* input,
-    size_t input_stride,
-    const xnn_float16* zero,
-    xnn_float16* output,
-    const struct xnn_f16_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_gavgpool_minmax_unipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const float* input,
-    size_t input_stride,
-    const float* zero,
-    float* output,
-    const struct xnn_f32_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qs8_gavgpool_minmax_unipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const int8_t* input,
-    size_t input_stride,
-    const int8_t* zero,
-    int8_t* output,
-    const union xnn_qs8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qu8_gavgpool_minmax_unipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const uint8_t* input,
-    size_t input_stride,
-    const uint8_t* zero,
-    uint8_t* output,
-    const union xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// GAVGPOOL: Global AVeraGe POOLing multi-pass
-
-typedef void (*xnn_gavgpool_multipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const void* input,
-    size_t input_stride,
-    const void* zero,
-    void* buffer,
-    void* output,
-    const void* params);
-
-typedef void (*xnn_f16_gavgpool_minmax_multipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const xnn_float16* input,
-    size_t input_stride,
-    const xnn_float16* zero,
-    xnn_float16* buffer,
-    xnn_float16* output,
-    const struct xnn_f16_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_gavgpool_minmax_multipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const float* input,
-    size_t input_stride,
-    const float* zero,
-    float* buffer,
-    float* output,
-    const struct xnn_f32_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qs8_gavgpool_minmax_multipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const int8_t* input,
-    size_t input_stride,
-    const int8_t* zero,
-    int32_t* buffer,
-    int8_t* output,
-    const union xnn_qs8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qu8_gavgpool_minmax_multipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const uint8_t* input,
-    size_t input_stride,
-    const uint8_t* zero,
-    int32_t* buffer,
-    uint8_t* output,
-    const union xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
 // AVGPOOL: AVeraGe POOLing single-pass
 
 typedef void (*xnn_avgpool_unipass_ukernel_fn)(
@@ -2329,29 +2230,6 @@ typedef void (*xnn_f32_ibilinear_chw_ukernel_fn)(
     float* output,
     size_t input_increment);
 
-// GAVGPOOL-CW: Global AVeraGe POOLing in CW layout.
-
-typedef void (*xnn_gavgpool_cw_ukernel_fn)(
-    size_t batch,
-    size_t channels,
-    const float* input,
-    float* output,
-    const void* params);
-
-typedef void (*xnn_f16_gavgpool_cw_ukernel_fn)(
-    size_t batch,
-    size_t channels,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const union xnn_f16_gavgpool_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_gavgpool_cw_ukernel_fn)(
-    size_t batch,
-    size_t channels,
-    const float* input,
-    float* output,
-    const union xnn_f32_gavgpool_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
 
 /********************* JIT microkernel generator pointers ********************/
 
@@ -2624,11 +2502,6 @@ typedef void (*xnn_update_qu8_avgpool_minmax_params_fn)(
   union xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int32_t bias,
   float scale);
-
-typedef void (*xnn_update_f16_gavgpool_scalar_params_fn)(
-  union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t multiplier,
-  uint32_t width);
 
 typedef size_t (*xnn_init_qs8_add_minmax_params_fn)(
   struct xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2908,25 +2781,6 @@ typedef size_t (*xnn_packed_stride_weights_and_biases_fn)(
     size_t k,                                   //
     size_t k_stride,                            //
     size_t extra_bytes);
-
-typedef size_t (*xnn_init_f16_gavgpool_neon_params_fn)(
-  union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t multiplier,
-  uint16_t output_min,
-  uint16_t output_max,
-  uint32_t width);
-
-typedef size_t (*xnn_init_f32_gavgpool_params_fn)(
-  union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
-  float multiplier,
-  float output_min,
-  float output_max,
-  uint32_t width);
-
-typedef void (*xnn_update_f32_gavgpool_params_fn)(
-  union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
-  float multiplier,
-  uint32_t width);
 
 typedef void (*xnn_indirection_init_resize_bilinear2d_hwc_fn)(
   size_t output_y_start,

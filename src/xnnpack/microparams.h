@@ -58,7 +58,7 @@ struct xnn_f32_scale_params {
 };
 
 
-// Scale+Min+Max: used by AVGPOOL/GAVGPOOL microkernels.
+// Scale+Min+Max: used by AVGPOOL microkernels.
 
 struct xnn_f16_scaleminmax_params {
   struct {
@@ -397,7 +397,7 @@ struct xnn_qu8_reduce_minmax_params {
   } scalar;
 };
 
-// AvgPool w. Min+Max: used by quantized GAVGPOOL microkernels with MINMAX activation.
+// AvgPool w. Min+Max.
 
 union xnn_qs8_avgpool_minmax_params {
   struct {
@@ -822,43 +822,6 @@ union xnn_f16_tanh_params {
 
 union xnn_f32_tanh_params {
   char _;  // Dummy member variable to comply with the C standard
-};
-
-
-// GAvgPool (Global Average Pool): used by GAVGPOOL microkernels in CHW layout with Scale+Min+Max parameters.
-
-union xnn_f16_gavgpool_params {
-  struct {
-    XNN_ALIGN(16) uint16_t mask[8];
-    uint16_t multiplier;
-    uint16_t output_min;
-    uint16_t output_max;
-  } scalar;
-};
-
-union xnn_f32_gavgpool_params {
-  struct {
-    XNN_ALIGN(16) int32_t mask[4];
-    float multiplier;
-    float output_min;
-    float output_max;
-  } scalar;
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    XNN_ALIGN(16) float multiplier[4];
-    XNN_ALIGN(16) float output_min[4];
-    XNN_ALIGN(16) float output_max[4];
-    XNN_ALIGN(16) uint32_t mask[4];
-  } sse;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  struct {
-    XNN_ALIGN(16) uint32_t mask[4];
-    float multiplier;
-    float output_min;
-    float output_max;
-  } neon;
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64 */
 };
 
 struct xnn_qs8_packw_params {

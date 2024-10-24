@@ -507,7 +507,6 @@ SET(XNNPACK_SRCS
   src/configs/dwconv-config.c
   src/configs/dwconv2d-chw-config.c
   src/configs/experiments-config.c
-  src/configs/gavgpool-config.c
   src/configs/gemm-config.c
   src/configs/ibilinear-chw-config.c
   src/configs/ibilinear-config.c
@@ -1475,7 +1474,6 @@ IF(XNNPACK_BUILD_TESTS)
       f16-conv-hwc2chw
       f16-f32acc-rdsum
       f16-f32acc-rsum
-      f16-gavgpool-minmax
       f16-ibilinear-chw
       f16-ibilinear
       f16-raddstoreexpminusmax
@@ -1486,7 +1484,6 @@ IF(XNNPACK_BUILD_TESTS)
       f16-vmulcaddc-minmax
       f32-conv-hwc
       f32-conv-hwc2chw
-      f32-gavgpool-minmax
       f32-ibilinear-chw
       f32-ibilinear
       f32-raddexpminusmax
@@ -1503,16 +1500,12 @@ IF(XNNPACK_BUILD_TESTS)
       f32-vscaleextexp
       indirection
       packing
-      qs8-gavgpool-minmax-fp32
-      qs8-gavgpool-minmax-rndnu
       qs8-rdsum-minmax-fp32
       qu8-rdsum
       qs8-rsum
       qu8-rsum
       qs8-vhswish
       qs8-vlrelu
-      qu8-gavgpool-minmax-fp32
-      qu8-gavgpool-minmax-rndnu
       qu8-vhswish
       qu8-vlrelu
       s8-ibilinear

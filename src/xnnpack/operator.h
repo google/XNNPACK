@@ -226,9 +226,6 @@ struct xnn_operator {
     struct xnn_f32_sigmoid_params f32_sigmoid;
     struct xnn_f32_sqrt_params f32_sqrt;
     union xnn_f32_tanh_params f32_tanh;
-    // Parameters for Global Average Pooling in CHW layout
-    union xnn_f16_gavgpool_params f16_gavgpool;
-    union xnn_f32_gavgpool_params f32_gavgpool;
     struct xnn_f32_hswish_params f32_hswish;
     union xnn_f16_minmax_params f16_minmax;
     struct xnn_f16_scaleminmax_params f16_scaleminmax;
@@ -255,20 +252,14 @@ struct xnn_operator {
     struct xnn_qu8_f32_cvt_params qu8_f32_cvt;
     union xnn_qs8_conv_minmax_params qs8_conv_minmax;
     union xnn_qs8_qc8w_conv_minmax_params qs8_qc8w_conv_minmax;
-    // Average Pooling normally use qs8_avgpool_params, but also initialize qs8_gavgpool_params in case it needs to switch
-    // to Global Average Pooling operation.
     struct {
       union xnn_qs8_avgpool_minmax_params qs8_avgpool;
-      union xnn_qs8_avgpool_minmax_params qs8_gavgpool;
     };
     struct xnn_qs8_reduce_minmax_params qs8_reduce;
     struct xnn_qu8_reduce_minmax_params qu8_reduce;
     union xnn_qu8_conv_minmax_params qu8_conv_minmax;
-    // Average Pooling normally use qu8_avgpool_params, but also initialize qu8_gavgpool_params in case it needs to switch
-    // to Global Average Pooling operation.
     struct {
       union xnn_qu8_avgpool_minmax_params qu8_avgpool;
-      union xnn_qu8_avgpool_minmax_params qu8_gavgpool;
     };
     union xnn_qs8_hswish_params qs8_hswish;
     union xnn_qu8_hswish_params qu8_hswish;
@@ -308,7 +299,6 @@ struct xnn_operator {
     const struct xnn_argmaxpool_config* argmaxpool_config;
     struct {
       const struct xnn_avgpool_config* avgpool_config;
-      const struct xnn_gavgpool_config* gavgpool_config;
       const struct xnn_pavgpool_config* pavgpool_config;
       const struct xnn_reduce_config* rdsum_config;
       const struct xnn_reduce_config* rsum_config;
@@ -316,7 +306,6 @@ struct xnn_operator {
       const struct xnn_unary_elementwise_config* s32_f32_cvt_config;
       const struct xnn_unary_elementwise_config* u32_f32_cvt_config;
     };
-    const struct xnn_gavgpool_cw_config* gavgpool_cw_config;
     const struct xnn_ibilinear_chw_config* ibilinear_chw_config;
     const struct xnn_ibilinear_config* ibilinear_config;
     struct {
@@ -380,8 +369,6 @@ struct xnn_operator {
       struct packw_gemm_gio_context packw_gemm_gio;
       bool const_weights;
     } gemm;
-    struct global_average_pooling_nwc_context global_average_pooling_nwc;
-    struct global_average_pooling_ncw_context global_average_pooling_ncw;
     struct {
       struct igemm_context igemm;
       struct conv2d_igemm_indirection_init_context conv2d_igemm_indirection_init;

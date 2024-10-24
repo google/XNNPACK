@@ -276,42 +276,6 @@ XNN_INTERNAL void xnn_update_f32_scaleminmax_scalar_params(
   struct xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale);
 
-XNN_INTERNAL size_t xnn_init_f16_gavgpool_scalar_params(
-  union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t multiplier,
-  uint16_t output_min,
-  uint16_t output_max,
-  uint32_t width);
-
-#define DECLARE_INIT_F32_GAVGPOOL_PARAMS_FUNCITON(fn_name)     \
-  XNN_INTERNAL size_t fn_name(                                 \
-    union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)], \
-    float multiplier,                                          \
-    float output_min,                                          \
-    float output_max,                                          \
-    uint32_t width);
-
-DECLARE_INIT_F32_GAVGPOOL_PARAMS_FUNCITON(xnn_init_f32_gavgpool_scalar_params);
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  DECLARE_INIT_F32_GAVGPOOL_PARAMS_FUNCITON(xnn_init_f32_gavgpool_neon_params);
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_F32_GAVGPOOL_PARAMS_FUNCITON(xnn_init_f32_gavgpool_sse_params);
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-XNN_INTERNAL void xnn_update_f16_gavgpool_scalar_params(
-  union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t multiplier,
-  uint32_t width);
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-XNN_INTERNAL void xnn_update_f32_gavgpool_params(
-  union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
-  float multiplier,
-  uint32_t width);
-
-
 XNN_INTERNAL size_t xnn_init_s8_minmax_scalar_params(
   struct xnn_s8_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int8_t output_min,

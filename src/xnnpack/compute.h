@@ -1084,67 +1084,6 @@ struct pixelwise_average_pooling_context {
       size_t output_y);
 #endif
 
-struct global_average_pooling_nwc_context {
-  const void* input;
-  const void* zero;
-  size_t input_pixel_stride;
-  size_t input_batch_stride;
-  size_t input_elements;
-  size_t channels;
-  void* output;
-  size_t output_batch_stride;
-  union {
-    union xnn_qs8_avgpool_minmax_params qs8;
-    union xnn_qu8_avgpool_minmax_params qu8;
-    struct xnn_f16_scaleminmax_params f16;
-    struct xnn_f32_scaleminmax_params f32;
-  } params;
-  union {
-    xnn_gavgpool_unipass_ukernel_fn unipass_ukernel;
-    xnn_gavgpool_multipass_ukernel_fn multipass_ukernel;
-  };
-  size_t multipass_batch_stride;
-  void* multipass_buffer;
-};
-
-#ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_global_average_pooling_nwc_unipass(
-      const struct global_average_pooling_nwc_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index);
-
-  XNN_PRIVATE void xnn_compute_global_average_pooling_nwc_multipass(
-      const struct global_average_pooling_nwc_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index);
-
-  XNN_PRIVATE void xnn_compute_global_average_pooling_nwc_multipass_with_thread(
-      const struct global_average_pooling_nwc_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t thread_index,
-      size_t batch_index);
-#endif
-
-struct global_average_pooling_ncw_context {
-  size_t input_elements;
-  const void* input;
-  size_t input_channel_stride;
-  size_t input_batch_stride;
-  void* output;
-  size_t output_channel_stride;
-  size_t output_batch_stride;
-  xnn_gavgpool_cw_ukernel_fn ukernel;
-  union {
-    union xnn_f16_gavgpool_params f16;
-    union xnn_f32_gavgpool_params f32;
-  } params;
-};
-
-#ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_global_average_pooling_ncw(
-      const struct global_average_pooling_ncw_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index,
-      size_t channels_start,
-      size_t channels_slice);
-#endif
-
 struct resize_bilinear_nhwc_indirection_init_context {
   const void** buffer;
   const void* input;
