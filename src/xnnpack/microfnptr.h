@@ -885,7 +885,7 @@ typedef void (*xnn_qu8_avgpool_minmax_unipass_ukernel_fn)(
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // AVGPOOL: AVeraGe POOLing multi-pass
 
@@ -939,7 +939,7 @@ typedef void (*xnn_qu8_avgpool_minmax_multipass_ukernel_fn)(
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // PAVGPOOL: Pixelwise AVeraGe POOLing single-pass
 
@@ -2477,29 +2477,16 @@ typedef size_t (*xnn_init_qu8_conv_minmax_params_fn)(
 typedef size_t (*xnn_init_qs8_rsum_params_fn)(
   struct xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)]);
 
-typedef size_t (*xnn_init_qs8_avgpool_minmax_params_fn)(
-  union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int32_t bias,
-  float scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max);
-
 typedef size_t (*xnn_init_qu8_avgpool_minmax_params_fn)(
-  union xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int32_t bias,
   float scale,
   uint8_t output_zero_point,
   uint8_t output_min,
   uint8_t output_max);
 
-typedef void (*xnn_update_qs8_avgpool_minmax_params_fn)(
-  union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int32_t bias,
-  float scale);
-
 typedef void (*xnn_update_qu8_avgpool_minmax_params_fn)(
-  union xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int32_t bias,
   float scale);
 

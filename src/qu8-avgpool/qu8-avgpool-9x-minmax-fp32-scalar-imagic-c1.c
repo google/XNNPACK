@@ -27,19 +27,21 @@ void xnn_qu8_avgpool_minmax_fp32_ukernel_9x__scalar_imagic_c1(
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_qu8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_qu8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(output_pixels != 0);
   assert(kernel_elements != 0);
   assert(kernel_elements <= 9);
   assert(channels != 0);
 
-  const int32_t vinit_bias = params->fp32_scalar_imagic.init_bias;
-  const float vscale = params->fp32_scalar_imagic.scale;
-  const float vmagic_bias = params->fp32_scalar_imagic.magic_bias;
-  const int32_t vmagic_min = params->fp32_scalar_imagic.magic_min;
-  const int32_t vmagic_max = params->fp32_scalar_imagic.magic_max;
-  const int32_t vmagic_bias_less_zero_point = params->fp32_scalar_imagic.magic_bias_less_zero_point;
+  const int32_t vinit_bias = params->fp32_scalar.init_bias;
+  const float vscale = params->fp32_scalar.scale;
+  const float voutput_min_less_zero_point = (float) ((int32_t) params->fp32_scalar.output_min - (int32_t) params->fp32_scalar.output_zero_point);
+  const float voutput_max_less_zero_point = (float) ((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point);
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_min = (int32_t) float_as_uint32(12582912.0f + voutput_min_less_zero_point);
+  const int32_t vmagic_max = (int32_t) float_as_uint32(12582912.0f + voutput_max_less_zero_point);
+  const int32_t vmagic_bias_less_zero_point = INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point;
   do {
     const uint8_t* i0 = input[0];
     assert(i0 != NULL);
