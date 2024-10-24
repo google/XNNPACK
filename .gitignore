@@ -23,6 +23,7 @@ out/
 *.pyc
 *.pyo
 *.log
+.vs/
 
 # System files
 .DS_Store
