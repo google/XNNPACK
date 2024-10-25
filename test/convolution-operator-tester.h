@@ -1298,7 +1298,7 @@ class ConvolutionOperatorTester {
 
     xnnpack::Buffer<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()));
-    xnnpack::Buffer<int8_t> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
+    xnnpack::Buffer<int8_t> kernel(XNN_EXTRA_BYTES / sizeof(int8_t) + groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
     xnnpack::Buffer<int32_t> bias(groups() * group_output_channels());
     xnnpack::Buffer<int8_t> output(batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()));
     xnnpack::Buffer<int32_t> accumulators(batch_size() * output_height() * output_width() * groups() * group_output_channels());
