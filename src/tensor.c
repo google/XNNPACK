@@ -165,7 +165,7 @@ enum xnn_status xnn_define_quantized_tensor_value(
     uint32_t flags,
     uint32_t* id_out)
 {
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
+  if (true) { //(xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create Quantized Dense Tensor value: XNNPACK is not initialized");
     return xnn_status_uninitialized;
   }

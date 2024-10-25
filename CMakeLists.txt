@@ -992,9 +992,6 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^x86(_64)?$")
   ENDIF()
 ENDIF()
 
-# Set `XNN_LOG_LEVEL` transitively for all targets that depend on `logging`.
-TARGET_COMPILE_DEFINITIONS(logging PUBLIC "XNN_LOG_LEVEL=$<$<CONFIG:Debug>:5>$<$<NOT:$<CONFIG:Debug>>:0>")
-
 IF(MSVC)
   # Even though MSVC has __restrict, it can't be used in all the same contexts as the C99 restrict keyword
   TARGET_COMPILE_DEFINITIONS(xnnpack-base INTERFACE "restrict=")

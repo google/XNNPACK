@@ -35,7 +35,7 @@ jobs:
           max-size: "500M"
           save: ${{ inputs.update-caches }}
       - name: Configure and build
-        run: scripts/build-local.sh
+        run: scripts/build-local.sh -DXNN_LOG_LEVEL=5
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
@@ -57,7 +57,7 @@ jobs:
           max-size: "500M"
           save: ${{ inputs.update-caches }}
       - name: Configure and build
-        run: scripts/build-local.sh
+        run: scripts/build-local.sh -DXNN_LOG_LEVEL=5
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
@@ -81,7 +81,7 @@ jobs:
           max-size: "500M"
           save: ${{ inputs.update-caches }}
       - name: Configure and build
-        run: scripts/build-linux-armhf.sh -DCMAKE_BUILD_TYPE=Release
+        run: scripts/build-linux-armhf.sh -DCMAKE_BUILD_TYPE=Release -DXNN_LOG_LEVEL=5
         working-directory: ${{ github.workspace }}
       - name: Link the armhf loader to run the test binaries
         run: sudo ln -s /usr/arm-linux-gnueabihf/lib/ld-linux-armhf.so.3 /usr/lib/ld-linux-armhf.so.3
@@ -111,7 +111,7 @@ jobs:
           max-size: "500M"
           save: ${{ inputs.update-caches }}
       - name: Configure and build
-        run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release -DXNNPACK_ENABLE_RISCV_VECTOR=OFF
+        run: scripts/build-linux-riscv64.sh -DCMAKE_BUILD_TYPE=Release -DXNN_LOG_LEVEL=5 -DXNNPACK_ENABLE_RISCV_VECTOR=OFF
         working-directory: ${{ github.workspace }}
       - name: Run tests
         if: ${{ inputs.run-tests }}
@@ -141,6 +141,7 @@ jobs:
         run: |
           scripts/build-linux-riscv64.sh \
             -DCMAKE_BUILD_TYPE=Release \
+            -DXNN_LOG_LEVEL=5 \
             -DXNNPACK_ENABLE_RISCV_VECTOR=ON \
             -DUSE_GNU_SOURCE=ON \
             -DRISCV_TOOLCHAIN_ROOT=${{ github.workspace }}/riscv/ \
@@ -296,7 +297,7 @@ jobs:
         run: |
           find ${{ steps.setup-ndk.outputs.ndk-path }} -wholename '*/bin/clang*' -executable -type f,l -exec touch -h -t 202408130000 {} +
       - name: Configure and build
-        run: scripts/build-android-${{ matrix.arch }}.sh
+        run: scripts/build-android-${{ matrix.arch }}.sh -DXNN_LOG_LEVEL=5
         working-directory: ${{ github.workspace }}
         env:
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}

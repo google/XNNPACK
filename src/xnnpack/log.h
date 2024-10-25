@@ -16,7 +16,11 @@
 #include "xnnpack/common.h"
 
 #ifndef XNN_LOG_LEVEL
-  #error "Undefined XNN_LOG_LEVEL"
+  #ifndef NDEBUG
+    #define XNN_LOG_LEVEL 5
+  #else
+    #define XNN_LOG_LEVEL 0
+  #endif
 #endif
 
 #define XNN_LOG_NONE 0

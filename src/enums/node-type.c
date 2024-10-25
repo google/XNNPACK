@@ -6,6 +6,7 @@
 #include <assert.h>
 
 #include "xnnpack/node-type.h"
+#include "xnnpack/log.h"
 
 #if XNN_LOG_LEVEL > 0
 const char* xnn_node_type_to_string(enum xnn_node_type node_type) {
