@@ -62,8 +62,6 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x16c4__wasmsdot_u2_acc2(
     v128_t vacc0x1x4567 = wasm_u32x4_const(0, 0, 0, 0);
     v128_t vacc0x1x89AB = wasm_u32x4_const(0, 0, 0, 0);
     v128_t vacc0x1xCDEF = wasm_u32x4_const(0, 0, 0, 0);
- 
-
     w = (const int32_t*) w + 16;
 
     size_t p = ks;
