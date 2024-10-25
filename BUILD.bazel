@@ -148,6 +148,7 @@ MICROKERNEL_DEFS = [
     "src/f32-vrnd/f32-vrndu.h",
     "src/f32-vrnd/f32-vrndz.h",
     "src/f32-vrsqrt/f32-vrsqrt.h",
+    "src/f32-vscaleextexp/f32-vscaleextexp.h",
     "src/f32-vsigmoid/f32-vsigmoid.h",
     "src/f32-vsqr/f32-vsqr.h",
     "src/f32-vsqrt/f32-vsqrt.h",
