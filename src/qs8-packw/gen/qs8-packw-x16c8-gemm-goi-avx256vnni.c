@@ -139,7 +139,7 @@ void xnn_qs8_packw_gemm_goi_ukernel_x16c8__avx256vnni(
       if (k != 0) {
         assert(k >= 1 && k <= 7);
 
-        const __m256i vmask = _mm256_srli_epi64(_mm256_set1_epi32(-1), (8 - k) * sizeof(int8_t) * 8);
+        __m256i vmask = _mm256_srli_epi64(_mm256_set1_epi32(-1), (8 - k) * sizeof(int8_t) * 8);
 
         __m256i v0 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w0));
         v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w1)), 0x0C);
@@ -347,7 +347,7 @@ void xnn_qs8_packw_gemm_goi_ukernel_x16c8__avx256vnni(
       if (k != 0) {
         assert(k >= 1 && k <= 7);
 
-        const __m256i vmask = _mm256_srli_epi64(_mm256_set1_epi32(-1), (8 - k) * sizeof(int8_t) * 8);
+        __m256i vmask = _mm256_srli_epi64(_mm256_set1_epi32(-1), (8 - k) * sizeof(int8_t) * 8);
 
         __m256i v0 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w0));
         v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w1)), 0x0C);
