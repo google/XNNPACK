@@ -24,57 +24,28 @@
 #include "next_prime.h"
 #include "vunary-microkernel-tester.h"
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)\
-                                                                                                                 \
-XNN_TEST_UNARY_BATCH_EQ(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                        \
-XNN_TEST_UNARY_BATCH_DIV(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                       \
-XNN_TEST_UNARY_BATCH_LT(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                        \
-XNN_TEST_UNARY_BATCH_GT(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                        \
-                                                                                                                 \
-XNN_TEST_UNARY_INPLACE(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                         \
-TEST(ukernel, prescale) {                                                                                        \
-  TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                          \
-  const size_t batch_scale = get_batch_scale<datatype>();                                                        \
-  const size_t batch_end = batch_tile * batch_scale;                                                             \
-  const size_t batch_step = std::max(1, batch_tile - 1);                                                         \
-  for (float prescale : std::array<float, 2>({0.1f, 10.0f})) {                                                   \
-    for (size_t batch_size = 1; batch_size <= 5 * batch_end; batch_size += batch_step) {                         \
-      VUnaryMicrokernelTester()                                                                                  \
-        .batch_size(batch_size)                                                                                  \
-        .prescale(prescale)                                                                                      \
-        .Test(ukernel, init_params);                                                                             \
-    }                                                                                                            \
-  }                                                                                                              \
-}                                                                                                                \
-                                                                                                                 \
-TEST(ukernel, alpha) {                                                                                           \
-  TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                          \
-  const size_t batch_scale = get_batch_scale<datatype>();                                                        \
-  const size_t batch_end = batch_tile * batch_scale;                                                             \
-  const size_t batch_step = std::max(1, batch_tile - 1);                                                         \
-  for (float alpha : std::array<float, 2>({0.3f, 3.0f})) {                                                       \
-    for (size_t batch_size = 1; batch_size <= 5 * batch_end; batch_size += batch_step) {                         \
-      VUnaryMicrokernelTester()                                                                                  \
-        .batch_size(batch_size)                                                                                  \
-        .alpha(alpha)                                                                                            \
-        .Test(ukernel, init_params);                                                                             \
-    }                                                                                                            \
-  }                                                                                                              \
-}                                                                                                                \
-                                                                                                                 \
-TEST(ukernel, beta) {                                                                                            \
-  TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                          \
-  const size_t batch_scale = get_batch_scale<datatype>();                                                        \
-  const size_t batch_end = batch_tile * batch_scale;                                                             \
-  const size_t batch_step = std::max(1, batch_tile - 1);                                                         \
-  for (float beta : std::array<float, 2>({0.3f, 3.0f})) {                                                        \
-    for (size_t batch_size = 1; batch_size <= 5 * batch_end; batch_size += batch_step) {                         \
-      VUnaryMicrokernelTester()                                                                                  \
-        .batch_size(batch_size)                                                                                  \
-        .beta(beta)                                                                                              \
-        .Test(ukernel, init_params);                                                                             \
-    }                                                                                                            \
-  }                                                                                                              \
+using TestInfo = ELU;
+
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)       \
+  TEST(ukernel, batch_eq) { TestBatchEq<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }  \
+  TEST(ukernel, batch_div) { TestBatchDiv<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }\
+  TEST(ukernel, batch_lt) { TestBatchLT<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }  \
+  TEST(ukernel, batch_gt) { TestBatchGT<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }  \
+  TEST(ukernel, inplace) { TestInPlace<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }   \
+TEST(ukernel, alpha) {                                                                                                  \
+  TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                                 \
+  const size_t batch_scale = get_batch_scale<datatype>();                                                               \
+  const size_t batch_end = batch_tile * batch_scale;                                                                    \
+  const size_t batch_step = std::max(1, batch_tile - 1);                                                                \
+  for (float alpha : std::array<float, 2>({0.3f, 3.0f})) {                                                              \
+    for (size_t batch_size = 1; batch_size <= 5 * batch_end; batch_size += batch_step) {                                \
+      xnn_unary_params params;                                                                                          \
+      params.elu.alpha = alpha;                                                                                         \
+      VUnaryMicrokernelTester()                                                                                         \
+        .batch_size(batch_size)                                                                                         \
+        .Test<TestInfo>(ukernel, init_params, params);                                                                  \
+    }                                                                                                                   \
+  }                                                                                                                     \
 }
 #include "f16-velu/f16-velu.h"
 #undef XNN_UKERNEL_WITH_PARAMS

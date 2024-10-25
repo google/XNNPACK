@@ -150,21 +150,21 @@ static void init_f16_clamp_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vclamp_ukernel__neonfp16arith_u16;
-      f16_clamp_config.init.f16_minmax = xnn_init_f16_minmax_scalar_params;
+      f16_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_f16_clamp_scalar_params;
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vclamp_ukernel__neonfp16arith_u16;
-      f16_clamp_config.init.f16_minmax = xnn_init_f16_minmax_scalar_params;
+      f16_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_f16_clamp_scalar_params;
     }
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_f16c) {
       f16_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vclamp_ukernel__f16c_u16;
-      f16_clamp_config.init.f16_minmax = xnn_init_f16_minmax_scalar_params;
+      f16_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_f16_clamp_scalar_params;
     }
   #endif
 }
@@ -175,21 +175,21 @@ static void init_f16_elu_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_u16;
-      f16_elu_config.init.f16_elu = xnn_init_f16_elu_scalar_params;
+      f16_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f16_elu_scalar_params;
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_velu_ukernel__neonfp16arith_rr1_p3_u16;
-      f16_elu_config.init.f16_elu = xnn_init_f16_elu_scalar_params;
+      f16_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f16_elu_scalar_params;
     }
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_avx2) {
       f16_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_velu_ukernel__avx2_rr1_p3_u16;
-      f16_elu_config.init.f16_elu = xnn_init_f16_elu_scalar_params;
+      f16_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f16_elu_scalar_params;
     }
   #endif
 }
@@ -222,21 +222,21 @@ static void init_f16_lrelu_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vlrelu_ukernel__neonfp16arith_u16;
-      f16_lrelu_config.init.f16_lrelu = xnn_init_f16_lrelu_scalar_params;
+      f16_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f16_lrelu_scalar_params;
     }
   #elif XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vlrelu_ukernel__neonfp16arith_u16;
-      f16_lrelu_config.init.f16_lrelu = xnn_init_f16_lrelu_scalar_params;
+      f16_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f16_lrelu_scalar_params;
     }
   #elif (XNN_ARCH_X86 || XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_f16c) {
       f16_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vlrelu_ukernel__f16c_u16;
-      f16_lrelu_config.init.f16_lrelu = xnn_init_f16_lrelu_scalar_params;
+      f16_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f16_lrelu_scalar_params;
     }
   #endif
 }
@@ -453,10 +453,8 @@ static void init_f16_tanh_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_fma3) {
       f16_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vtanh_ukernel__fma3_polynomial_p19h9t2_u32;
-      f16_tanh_config.init.f16_tanh = NULL;
     } else if (hardware_config->use_x86_f16c) {
       f16_tanh_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vtanh_ukernel__f16c_expm1minus_rr1_p3h2ts_rcp_u72;
-      f16_tanh_config.init.f16_tanh = NULL;
     }
   #endif
 }
@@ -514,11 +512,11 @@ static void init_f16_to_qs8_cvt_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       f16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_qs8_vcvt_ukernel__neonfp16arith_u32;
-      f16_to_qs8_cvt_config.init.f16_qs8_cvt = xnn_init_f16_qs8_cvt_scalar_params;
+      f16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f16_qs8_cvt_scalar_params;
     }
   #else
     f16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_qs8_vcvt_ukernel__scalar_imagic_u4;
-    f16_to_qs8_cvt_config.init.f16_qs8_cvt = xnn_init_f16_qs8_cvt_scalar_params;
+    f16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f16_qs8_cvt_scalar_params;
   #endif
 }
 
@@ -563,49 +561,49 @@ static void init_f32_clamp_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__neon_u16;
-      f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+      f32_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_clamp_scalar_params;
     } else if (!XNN_PLATFORM_MOBILE) {
       f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__scalar_u4;
-      f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+      f32_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_clamp_scalar_params;
     }
   #elif XNN_ARCH_ARM64
     f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__neon_u16;
-    f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+    f32_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_clamp_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
         f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__avx512f_u16;
-        f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+        f32_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_clamp_scalar_params;
       } else
     #endif
     if (hardware_config->use_x86_avx) {
       f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__avx_u16;
-      f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+      f32_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_clamp_scalar_params;
     } else {
       f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__sse_u8;
-      f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+      f32_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_clamp_scalar_params;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {
       f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__wasmsimd_x86_u8;
-      f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+      f32_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_clamp_scalar_params;
     } else {
       f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__wasmsimd_arm_u8;
-      f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+      f32_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_clamp_scalar_params;
     }
   #elif XNN_ARCH_WASM
     f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__wasm_u4;
-    f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+    f32_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_clamp_scalar_params;
   #elif XNN_ARCH_RISCV
     f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__scalar_u4;
-    f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+    f32_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_clamp_scalar_params;
   #else
     f32_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vclamp_ukernel__scalar_u4;
-    f32_clamp_config.init.f32_minmax = xnn_init_f32_minmax_scalar_params;
+    f32_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_clamp_scalar_params;
   #endif
 }
 
@@ -616,50 +614,50 @@ static void init_f32_elu_config(void) {
     if (hardware_config->use_arm_neon) {
       if (hardware_config->use_arm_neon_fma) {
         f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__neonfma_rr1_p6_u8;
-        f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_params;
+        f32_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_elu_scalar_params;
       } else {
         f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__neon_rr2_lut16_p3_u8;
-        f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_params;
+        f32_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_elu_scalar_params;
       }
     } else if (!XNN_PLATFORM_MOBILE) {
       f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u4;
-      f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_params;
+      f32_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_elu_scalar_params;
     }
   #elif XNN_ARCH_ARM64
     f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__neonfma_rr1_lut16_p3_u16;
-    f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_params;
+    f32_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_elu_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
         f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__avx512f_rr1_p6_u128;
-        f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_params;
+        f32_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_elu_scalar_params;
       } else
     #endif
     if (hardware_config->use_x86_avx2) {
       f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__avx2_rr1_lut4_p4_perm_u56;
-      f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_params;
+      f32_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_elu_scalar_params;
     } else if (hardware_config->use_x86_avx) {
       f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__avx_rr2_lut4_p4_perm_u32;
-      f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_params;
+      f32_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_elu_scalar_params;
     } else {
       f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__sse2_rr2_lut16_p3_u12;
-      f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_params;
+      f32_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_elu_scalar_params;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     #if XNN_ARCH_WASMRELAXEDSIMD
       f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_p6_u24;
-      f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_params;
+      f32_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_elu_scalar_params;
     #else
       const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
       assert(hardware_config != NULL);
       if (hardware_config->is_x86) {
         f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__wasmsimd_x86_rr2_p6_u20;
-        f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_params;
+        f32_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_elu_scalar_params;
       } else {
         f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__wasmsimd_arm_rr2_p6_u20;
-        f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_params;
+        f32_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_elu_scalar_params;
       }
     #endif
   #elif XNN_ARCH_WASM
@@ -667,17 +665,17 @@ static void init_f32_elu_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {
       f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u2;
-      f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_params;
+      f32_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_elu_scalar_params;
     } else {
       f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__wasm_rr2_p6_u6;
-      f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_params;
+      f32_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_elu_scalar_params;
     }
   #elif XNN_ARCH_RISCV
     f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u4;
-    f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_params;
+    f32_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_elu_scalar_params;
   #else
     f32_elu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_velu_ukernel__scalar_rr2_lut16_p3_u4;
-    f32_elu_config.init.f32_elu = xnn_init_f32_elu_scalar_params;
+    f32_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_elu_scalar_params;
   #endif
 }
 
@@ -808,32 +806,32 @@ static void init_f32_lrelu_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__neon_u8;
-      f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
+      f32_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
     } else if (!XNN_PLATFORM_MOBILE) {
       f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__scalar_u4;
-      f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
+      f32_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
     }
   #elif XNN_ARCH_ARM64
     f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__neon_u8;
-    f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
+    f32_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512F
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
         f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__avx512f_u16;
-        f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
+        f32_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
       } else
     #endif
     if (hardware_config->use_x86_avx) {
       f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__avx_u16;
-      f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
+      f32_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
     } else if (hardware_config->use_x86_sse4_1) {
       f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__sse41_u8;
-      f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
+      f32_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
     } else {
       f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__sse_u8;
-      f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
+      f32_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -841,30 +839,30 @@ static void init_f32_lrelu_config(void) {
     #if XNN_ARCH_WASMRELAXEDSIMD
       if (hardware_config->is_x86) {
         f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_iminmax_u4;
-        f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
+        f32_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
       } else {
         f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__wasmrelaxedsimd_laneselect_u4;
-        f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
+        f32_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
       }
     #else
       if (hardware_config->is_x86) {
         f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__wasmsimd_iminmax_u8;
-        f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
+        f32_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
       } else {
         f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__wasmsimd_laneselect_u8;
-        f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
+        f32_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
       }
     #endif
   #elif XNN_ARCH_WASM
     f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__scalar_u4;
-    f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
+    f32_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__rvv_u4v;
-    f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
+    f32_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
   #else
     f32_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vlrelu_ukernel__scalar_u4;
-    f32_lrelu_config.init.f32_lrelu = xnn_init_f32_lrelu_scalar_params;
+    f32_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_lrelu_scalar_params;
   #endif
 }
 
@@ -1348,60 +1346,60 @@ static void init_f32_to_qs8_cvt_config(void) {
     if (hardware_config->use_arm_neon) {
       if (hardware_config->use_arm_neon_v8) {
         f32_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__neonv8_u32;
-        f32_to_qs8_cvt_config.init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_scalar_params;
+        f32_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qs8_cvt_scalar_params;
       } else {
         f32_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__neon_u32;
-        f32_to_qs8_cvt_config.init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_scalar_params;
+        f32_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qs8_cvt_scalar_params;
       }
     } else if (!XNN_PLATFORM_MOBILE) {
       f32_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__scalar_imagic_u4;
-      f32_to_qs8_cvt_config.init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_scalar_params;
+      f32_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qs8_cvt_scalar_params;
     }
   #elif XNN_ARCH_ARM64
     f32_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__neonv8_u32;
-    f32_to_qs8_cvt_config.init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_scalar_params;
+    f32_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qs8_cvt_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512SKX
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
         f32_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__avx512skx_u128;
-        f32_to_qs8_cvt_config.init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_scalar_params;
+        f32_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qs8_cvt_scalar_params;
       } else
     #endif
     if (hardware_config->use_x86_avx2) {
       f32_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__avx2_u64;
-      f32_to_qs8_cvt_config.init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_scalar_params;
+      f32_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qs8_cvt_scalar_params;
     } else if (hardware_config->use_x86_avx) {
       f32_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__avx_u32;
-      f32_to_qs8_cvt_config.init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_scalar_params;
+      f32_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qs8_cvt_scalar_params;
     } else if (hardware_config->use_x86_sse4_1) {
       f32_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__sse41_u32;
-      f32_to_qs8_cvt_config.init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_scalar_params;
+      f32_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qs8_cvt_scalar_params;
     } else {
       f32_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__sse2_u32;
-      f32_to_qs8_cvt_config.init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_scalar_params;
+      f32_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qs8_cvt_scalar_params;
       }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__wasmsimd_magic_u32;
-    f32_to_qs8_cvt_config.init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_scalar_params;
+    f32_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qs8_cvt_scalar_params;
   #elif XNN_ARCH_WASM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {
       f32_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__scalar_imagic_u1;
-      f32_to_qs8_cvt_config.init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_scalar_params;
+      f32_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qs8_cvt_scalar_params;
     } else {
       f32_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__wasm_fmagic_u4;
-      f32_to_qs8_cvt_config.init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_scalar_params;
+      f32_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qs8_cvt_scalar_params;
     }
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     f32_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__rvv_u2v;
-    f32_to_qs8_cvt_config.init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_scalar_params;
+    f32_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qs8_cvt_scalar_params;
   #else
     f32_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qs8_vcvt_ukernel__scalar_lrintf_u4;
-    f32_to_qs8_cvt_config.init.f32_qs8_cvt = xnn_init_f32_qs8_cvt_scalar_params;
+    f32_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qs8_cvt_scalar_params;
   #endif
 }
 
@@ -1412,57 +1410,57 @@ static void init_f32_to_qu8_cvt_config(void) {
     if (hardware_config->use_arm_neon) {
       if (hardware_config->use_arm_neon_v8) {
         f32_to_qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__neonv8_u32;
-        f32_to_qu8_cvt_config.init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_scalar_params;
+        f32_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qu8_cvt_scalar_params;
       } else {
         f32_to_qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__neon_u32;
-        f32_to_qu8_cvt_config.init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_scalar_params;
+        f32_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qu8_cvt_scalar_params;
       }
     } else if (!XNN_PLATFORM_MOBILE) {
       f32_to_qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__scalar_imagic_u4;
-      f32_to_qu8_cvt_config.init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_scalar_params;
+      f32_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qu8_cvt_scalar_params;
     }
   #elif XNN_ARCH_ARM64
     f32_to_qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__neonv8_u32;
-    f32_to_qu8_cvt_config.init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_scalar_params;
+    f32_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qu8_cvt_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512SKX
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
         f32_to_qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__avx512skx_u128;
-        f32_to_qu8_cvt_config.init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_scalar_params;
+        f32_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qu8_cvt_scalar_params;
       } else
     #endif
     if (hardware_config->use_x86_avx2) {
       f32_to_qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__avx2_u64;
-      f32_to_qu8_cvt_config.init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_scalar_params;
+      f32_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qu8_cvt_scalar_params;
     } else if (hardware_config->use_x86_avx) {
       f32_to_qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__avx_u32;
-      f32_to_qu8_cvt_config.init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_scalar_params;
+      f32_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qu8_cvt_scalar_params;
     } else {
       f32_to_qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__sse2_u32;
-      f32_to_qu8_cvt_config.init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_scalar_params;
+      f32_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qu8_cvt_scalar_params;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     f32_to_qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__wasmsimd_magic_u32;
-    f32_to_qu8_cvt_config.init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_scalar_params;
+    f32_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qu8_cvt_scalar_params;
   #elif XNN_ARCH_WASM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {
       f32_to_qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__scalar_imagic_u1;
-      f32_to_qu8_cvt_config.init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_scalar_params;
+      f32_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qu8_cvt_scalar_params;
     } else {
       f32_to_qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__wasm_fmagic_u4;
-      f32_to_qu8_cvt_config.init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_scalar_params;
+      f32_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qu8_cvt_scalar_params;
     }
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     f32_to_qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__rvv_u2v;
-    f32_to_qu8_cvt_config.init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_scalar_params;
+    f32_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qu8_cvt_scalar_params;
   #else
     f32_to_qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_qu8_vcvt_ukernel__scalar_lrintf_u4;
-    f32_to_qu8_cvt_config.init.f32_qu8_cvt = xnn_init_f32_qu8_cvt_scalar_params;
+    f32_to_qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_f32_qu8_cvt_scalar_params;
   #endif
 }
 
@@ -1472,10 +1470,10 @@ static void init_s32_to_f32_cvt_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       s32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_f32_vcvt_ukernel__neon_u16;
-      s32_to_f32_cvt_config.init.s32_f32_cvt = xnn_init_s32_f32_cvt_scalar_params;
+      s32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_s32_f32_cvt_scalar_params;
     } else {
       s32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_f32_vcvt_ukernel__scalar_u4;
-      s32_to_f32_cvt_config.init.s32_f32_cvt = xnn_init_s32_f32_cvt_scalar_params;
+      s32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_s32_f32_cvt_scalar_params;
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -1483,22 +1481,22 @@ static void init_s32_to_f32_cvt_config(void) {
     #if XNN_ENABLE_AVX512F
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
         s32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_f32_vcvt_ukernel__avx512f_u64;
-        s32_to_f32_cvt_config.init.s32_f32_cvt = xnn_init_s32_f32_cvt_scalar_params;
+        s32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_s32_f32_cvt_scalar_params;
       } else
     #endif
     if (hardware_config->use_x86_avx2) {
       s32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_f32_vcvt_ukernel__avx2_u32;
-      s32_to_f32_cvt_config.init.s32_f32_cvt = xnn_init_s32_f32_cvt_scalar_params;
+      s32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_s32_f32_cvt_scalar_params;
     } else {
       s32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_f32_vcvt_ukernel__scalar_u4;
-      s32_to_f32_cvt_config.init.s32_f32_cvt = xnn_init_s32_f32_cvt_scalar_params;
+      s32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_s32_f32_cvt_scalar_params;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     s32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_f32_vcvt_ukernel__wasmsimd_u16;
-    s32_to_f32_cvt_config.init.s32_f32_cvt = xnn_init_s32_f32_cvt_scalar_params;
+    s32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_s32_f32_cvt_scalar_params;
   #else
     s32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s32_f32_vcvt_ukernel__scalar_u4;
-    s32_to_f32_cvt_config.init.s32_f32_cvt = xnn_init_s32_f32_cvt_scalar_params;
+    s32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_s32_f32_cvt_scalar_params;
   #endif
 }
 
@@ -1508,10 +1506,10 @@ static void init_u32_to_f32_cvt_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       u32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u32_f32_vcvt_ukernel__neon_u16;
-      u32_to_f32_cvt_config.init.u32_f32_cvt = xnn_init_u32_f32_cvt_scalar_params;
+      u32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_u32_f32_cvt_scalar_params;
     } else {
       u32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u32_f32_vcvt_ukernel__scalar_u4;
-      u32_to_f32_cvt_config.init.u32_f32_cvt = xnn_init_u32_f32_cvt_scalar_params;
+      u32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_u32_f32_cvt_scalar_params;
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -1519,22 +1517,22 @@ static void init_u32_to_f32_cvt_config(void) {
     #if XNN_ENABLE_AVX512F
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
         u32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u32_f32_vcvt_ukernel__avx512f_u64;
-        u32_to_f32_cvt_config.init.u32_f32_cvt = xnn_init_u32_f32_cvt_scalar_params;
+        u32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_u32_f32_cvt_scalar_params;
       } else
     #endif
     if (hardware_config->use_x86_avx2) {
       u32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u32_f32_vcvt_ukernel__avx2_u32;
-      u32_to_f32_cvt_config.init.u32_f32_cvt = xnn_init_u32_f32_cvt_scalar_params;
+      u32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_u32_f32_cvt_scalar_params;
     } else {
       u32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u32_f32_vcvt_ukernel__scalar_u4;
-      u32_to_f32_cvt_config.init.u32_f32_cvt = xnn_init_u32_f32_cvt_scalar_params;
+      u32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_u32_f32_cvt_scalar_params;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     u32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u32_f32_vcvt_ukernel__wasmsimd_u16;
-    u32_to_f32_cvt_config.init.u32_f32_cvt = xnn_init_u32_f32_cvt_scalar_params;
+    u32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_u32_f32_cvt_scalar_params;
   #else
     u32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u32_f32_vcvt_ukernel__scalar_u4;
-    u32_to_f32_cvt_config.init.u32_f32_cvt = xnn_init_u32_f32_cvt_scalar_params;
+    u32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_u32_f32_cvt_scalar_params;
   #endif
 }
 
@@ -1544,57 +1542,57 @@ static void init_qs8_cvt_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_v8) {
       qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__neon_u32;
-      qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
+      qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
     } else {
       qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__armsimd32_u8;
-      qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
+      qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
     }
   #elif XNN_ARCH_ARM64
     qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__neon_u32;
-    qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
+    qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_avx2) {
       qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__avx2_u32;
-      qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
+      qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
     } else if (hardware_config->use_x86_avx) {
       qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__avx_u32;
-      qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
+      qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
     } else if (hardware_config->use_x86_sse4_1) {
       qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__sse41_u32;
-      qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
+      qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
     } else if (hardware_config->use_x86_ssse3) {
       qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__ssse3_u32;
-      qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
+      qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
     } else {
       qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__sse2_u32;
-      qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
+      qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     #if XNN_ARCH_WASMRELAXEDSIMD
       qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__wasmrelaxedsimd_u32;
-      qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
+      qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
     #else
       qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__wasmsimd_u16;
-      qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
+      qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
     #endif
   #elif XNN_ARCH_WASM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {
       qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__scalar_u1;
-      qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
+      qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
     } else {
       qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__scalar_u4;
-      qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
+      qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
     }
   #elif XNN_ARCH_RISCV
     qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__scalar_u4;
-    qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
+    qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
   #else
     qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vcvt_ukernel__scalar_u4;
-    qs8_cvt_config.init.qs8_cvt = xnn_init_qs8_cvt_scalar_params;
+    qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_cvt_scalar_params;
   #endif
 }
 
@@ -1604,36 +1602,36 @@ static void init_qs16_to_qs8_cvt_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       qs16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs16_qs8_vcvt_ukernel__asm_aarch32_neon_u16;
-      qs16_to_qs8_cvt_config.init.qs16_qs8_cvt = xnn_init_qs16_qs8_cvt_scalar_params;
+      qs16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs16_qs8_cvt_scalar_params;
     } else if (!XNN_PLATFORM_MOBILE) {
       qs16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs16_qs8_vcvt_ukernel__scalar_u4;
-      qs16_to_qs8_cvt_config.init.qs16_qs8_cvt = xnn_init_qs16_qs8_cvt_scalar_params;
+      qs16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs16_qs8_cvt_scalar_params;
     }
   #elif XNN_ARCH_ARM64
     qs16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs16_qs8_vcvt_ukernel__neon_u32;
-    qs16_to_qs8_cvt_config.init.qs16_qs8_cvt = xnn_init_qs16_qs8_cvt_scalar_params;
+    qs16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs16_qs8_cvt_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_avx) {
       qs16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs16_qs8_vcvt_ukernel__avx_u16;
-      qs16_to_qs8_cvt_config.init.qs16_qs8_cvt = xnn_init_qs16_qs8_cvt_scalar_params;
+      qs16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs16_qs8_cvt_scalar_params;
     } else if (hardware_config->use_x86_sse4_1) {
       qs16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs16_qs8_vcvt_ukernel__sse41_u16;
-      qs16_to_qs8_cvt_config.init.qs16_qs8_cvt = xnn_init_qs16_qs8_cvt_scalar_params;
+      qs16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs16_qs8_cvt_scalar_params;
     } else if (hardware_config->use_x86_ssse3) {
       qs16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs16_qs8_vcvt_ukernel__ssse3_u16;
-      qs16_to_qs8_cvt_config.init.qs16_qs8_cvt = xnn_init_qs16_qs8_cvt_scalar_params;
+      qs16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs16_qs8_cvt_scalar_params;
     } else {
       qs16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs16_qs8_vcvt_ukernel__sse2_u16;
-      qs16_to_qs8_cvt_config.init.qs16_qs8_cvt = xnn_init_qs16_qs8_cvt_scalar_params;
+      qs16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs16_qs8_cvt_scalar_params;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     qs16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs16_qs8_vcvt_ukernel__wasmsimd_u16;
-    qs16_to_qs8_cvt_config.init.qs16_qs8_cvt = xnn_init_qs16_qs8_cvt_scalar_params;
+    qs16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs16_qs8_cvt_scalar_params;
   #else
     qs16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs16_qs8_vcvt_ukernel__scalar_u4;
-    qs16_to_qs8_cvt_config.init.qs16_qs8_cvt = xnn_init_qs16_qs8_cvt_scalar_params;
+    qs16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs16_qs8_cvt_scalar_params;
   #endif
 }
 
@@ -1643,32 +1641,32 @@ static void init_qs8_lrelu_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__neon_u32;
-      qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
+      qs8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_lrelu_scalar_params;
     } else if (!XNN_PLATFORM_MOBILE) {
       qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__armsimd32_u4;
-      qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
+      qs8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_lrelu_scalar_params;
     }
   #elif XNN_ARCH_ARM64
     qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__neon_u32;
-    qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
+    qs8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_lrelu_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_avx2) {
       qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__avx2_u32;
-      qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
+      qs8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_lrelu_scalar_params;
     } else if (hardware_config->use_x86_avx) {
       qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__avx_u32;
-      qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
+      qs8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_lrelu_scalar_params;
     } else if (hardware_config->use_x86_sse4_1) {
       qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__sse41_u32;
-      qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
+      qs8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_lrelu_scalar_params;
     } else if (hardware_config->use_x86_sse4_1) {
       qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__ssse3_u32;
-      qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
+      qs8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_lrelu_scalar_params;
     } else {
       qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__sse2_u32;
-      qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
+      qs8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_lrelu_scalar_params;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -1676,18 +1674,18 @@ static void init_qs8_lrelu_config(void) {
     #if XNN_ARCH_WASMRELAXEDSIMD
       if (hardware_config->is_x86) {
         qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_x86_u32;
-        qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
+        qs8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_lrelu_scalar_params;
       } else {
         qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__wasmrelaxedsimd_arm_u32;
-        qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
+        qs8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_lrelu_scalar_params;
       }
     #else
       if (hardware_config->is_x86) {
         qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__wasmsimd_x86_u16;
-        qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
+        qs8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_lrelu_scalar_params;
       } else {
         qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__wasmsimd_arm_u32;
-        qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
+        qs8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_lrelu_scalar_params;
       }
     #endif
   #elif XNN_ARCH_WASM
@@ -1695,18 +1693,18 @@ static void init_qs8_lrelu_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {
       qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__scalar_select_u4;
-      qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
+      qs8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_lrelu_scalar_params;
     } else {
       qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__scalar_andxor_u4;
-      qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
+      qs8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_lrelu_scalar_params;
     }
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__rvv_u2v;
-    qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
+    qs8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_lrelu_scalar_params;
   #else
     qs8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_vlrelu_ukernel__scalar_andxor_u4;
-    qs8_lrelu_config.init.qs8_lrelu = xnn_init_qs8_lrelu_scalar_params;
+    qs8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_lrelu_scalar_params;
   #endif
 }
 
@@ -1716,14 +1714,14 @@ static void init_qs8_to_f16_cvt_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon_fp16_arith) {
       qs8_to_f16_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f16_vcvt_ukernel__neonfp16arith_u32;
-      qs8_to_f16_cvt_config.init.qs8_f16_cvt = xnn_init_qs8_f16_cvt_scalar_params;
+      qs8_to_f16_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f16_cvt_scalar_params;
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_avx2) {
       qs8_to_f16_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f16_vcvt_ukernel__avx2_u16;
-      qs8_to_f16_cvt_config.init.qs8_f16_cvt = xnn_init_qs8_f16_cvt_scalar_params;
+      qs8_to_f16_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f16_cvt_scalar_params;
     }
   #endif
 }
@@ -1734,49 +1732,49 @@ static void init_qs8_to_f32_cvt_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       qs8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f32_vcvt_ukernel__neon_u32;
-      qs8_to_f32_cvt_config.init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_scalar_params;
+      qs8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f32_cvt_scalar_params;
     } else if (!XNN_PLATFORM_MOBILE) {
       qs8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f32_vcvt_ukernel__scalar_u4;
-      qs8_to_f32_cvt_config.init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_scalar_params;
+      qs8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f32_cvt_scalar_params;
     }
   #elif XNN_ARCH_ARM64
     qs8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f32_vcvt_ukernel__neon_u32;
-    qs8_to_f32_cvt_config.init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_scalar_params;
+    qs8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f32_cvt_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512SKX
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
         qs8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f32_vcvt_ukernel__avx512skx_u32;
-        qs8_to_f32_cvt_config.init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_scalar_params;
+        qs8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f32_cvt_scalar_params;
       } else
     #endif
     if (hardware_config->use_x86_avx2) {
       qs8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f32_vcvt_ukernel__avx2_u16;
-      qs8_to_f32_cvt_config.init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_scalar_params;
+      qs8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f32_cvt_scalar_params;
     } else if (hardware_config->use_x86_avx) {
       qs8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f32_vcvt_ukernel__avx_u32;
-      qs8_to_f32_cvt_config.init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_scalar_params;
+      qs8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f32_cvt_scalar_params;
     } else if (hardware_config->use_x86_sse4_1) {
       qs8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f32_vcvt_ukernel__sse41_u16;
-      qs8_to_f32_cvt_config.init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_scalar_params;
+      qs8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f32_cvt_scalar_params;
     } else {
       qs8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f32_vcvt_ukernel__sse2_u32;
-      qs8_to_f32_cvt_config.init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_scalar_params;
+      qs8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f32_cvt_scalar_params;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     qs8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f32_vcvt_ukernel__wasmsimd_u32;
-    qs8_to_f32_cvt_config.init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_scalar_params;
+    qs8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f32_cvt_scalar_params;
   #elif XNN_ARCH_WASM
     qs8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f32_vcvt_ukernel__scalar_u1;
-    qs8_to_f32_cvt_config.init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_scalar_params;
+    qs8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f32_cvt_scalar_params;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     qs8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f32_vcvt_ukernel__rvv_u2v;
-    qs8_to_f32_cvt_config.init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_scalar_params;
+    qs8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f32_cvt_scalar_params;
   #else
     qs8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs8_f32_vcvt_ukernel__scalar_u4;
-    qs8_to_f32_cvt_config.init.qs8_f32_cvt = xnn_init_qs8_f32_cvt_scalar_params;
+    qs8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_f32_cvt_scalar_params;
   #endif
 }
 
@@ -1786,57 +1784,57 @@ static void init_qu8_cvt_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__neon_u32;
-      qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
+      qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
     } else if (!XNN_PLATFORM_MOBILE) {
       qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__armsimd32_u8;
-      qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
+      qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
     }
   #elif XNN_ARCH_ARM64
     qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__neon_u32;
-    qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
+    qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_avx2) {
       qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__avx2_u32;
-      qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
+      qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
     } else if (hardware_config->use_x86_avx) {
       qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__avx_u32;
-      qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
+      qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
     } else if (hardware_config->use_x86_sse4_1) {
       qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__sse41_u32;
-      qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
+      qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
     } else if (hardware_config->use_x86_ssse3) {
       qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__ssse3_u32;
-      qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
+      qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
     } else {
       qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__sse2_u32;
-      qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
+      qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     #if XNN_ARCH_WASMRELAXEDSIMD
       qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__wasmrelaxedsimd_u32;
-      qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
+      qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
     #else
       qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__wasmsimd_u16;
-      qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
+      qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
     #endif
   #elif XNN_ARCH_WASM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {
       qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__scalar_u1;
-      qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
+      qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
     } else {
       qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__scalar_u4;
-      qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
+      qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
     }
   #elif XNN_ARCH_RISCV
     qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__scalar_u4;
-    qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
+    qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
   #else
     qu8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vcvt_ukernel__scalar_u4;
-    qu8_cvt_config.init.qu8_cvt = xnn_init_qu8_cvt_scalar_params;
+    qu8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_cvt_scalar_params;
   #endif
 }
 
@@ -1846,32 +1844,32 @@ static void init_qu8_lrelu_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__neon_u32;
-      qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
+      qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
     } else if (!XNN_PLATFORM_MOBILE) {
       qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__armsimd32_u4;
-      qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
+      qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
     }
   #elif XNN_ARCH_ARM64
     qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__neon_u32;
-    qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
+    qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     if (hardware_config->use_x86_avx2) {
       qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__avx2_u32;
-      qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
+      qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
     } else if (hardware_config->use_x86_avx) {
       qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__avx_u32;
-      qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
+      qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
     } else if (hardware_config->use_x86_sse4_1) {
       qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__sse41_u32;
-      qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
+      qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
     } else if (hardware_config->use_x86_sse4_1) {
       qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__ssse3_u32;
-      qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
+      qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
     } else {
       qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__sse2_u32;
-      qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
+      qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -1879,18 +1877,18 @@ static void init_qu8_lrelu_config(void) {
     #if XNN_ARCH_WASMRELAXEDSIMD
       if (hardware_config->is_x86) {
         qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_x86_u32;
-        qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
+        qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
       } else {
         qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__wasmrelaxedsimd_arm_u32;
-        qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
+        qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
       }
     #else
       if (hardware_config->is_x86) {
         qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__wasmsimd_x86_u16;
-        qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
+        qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
       } else {
         qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__wasmsimd_arm_u32;
-        qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
+        qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
       }
     #endif
   #elif XNN_ARCH_WASM
@@ -1898,18 +1896,18 @@ static void init_qu8_lrelu_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->is_x86) {
       qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__scalar_select_u4;
-      qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
+      qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
     } else {
       qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__scalar_andxor_u4;
-      qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
+      qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
     }
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__rvv_u2v;
-    qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
+    qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
   #else
     qu8_lrelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_vlrelu_ukernel__scalar_andxor_u4;
-    qu8_lrelu_config.init.qu8_lrelu = xnn_init_qu8_lrelu_scalar_params;
+    qu8_lrelu_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_lrelu_scalar_params;
   #endif
 }
 
@@ -1919,49 +1917,49 @@ static void init_qu8_to_f32_cvt_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       qu8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_f32_vcvt_ukernel__neon_u32;
-      qu8_to_f32_cvt_config.init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_scalar_params;
+      qu8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_f32_cvt_scalar_params;
     } else if (!XNN_PLATFORM_MOBILE) {
       qu8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_f32_vcvt_ukernel__scalar_u4;
-      qu8_to_f32_cvt_config.init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_scalar_params;
+      qu8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_f32_cvt_scalar_params;
     }
   #elif XNN_ARCH_ARM64
     qu8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_f32_vcvt_ukernel__neon_u32;
-    qu8_to_f32_cvt_config.init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_scalar_params;
+    qu8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_f32_cvt_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512SKX
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
         qu8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_f32_vcvt_ukernel__avx512skx_u32;
-        qu8_to_f32_cvt_config.init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_scalar_params;
+        qu8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_f32_cvt_scalar_params;
       } else
     #endif
     if (hardware_config->use_x86_avx2) {
       qu8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_f32_vcvt_ukernel__avx2_u16;
-      qu8_to_f32_cvt_config.init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_scalar_params;
+      qu8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_f32_cvt_scalar_params;
     } else if (hardware_config->use_x86_avx) {
       qu8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_f32_vcvt_ukernel__avx_u32;
-      qu8_to_f32_cvt_config.init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_scalar_params;
+      qu8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_f32_cvt_scalar_params;
     } else if (hardware_config->use_x86_sse4_1) {
       qu8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_f32_vcvt_ukernel__sse41_u16;
-      qu8_to_f32_cvt_config.init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_scalar_params;
+      qu8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_f32_cvt_scalar_params;
     } else {
       qu8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_f32_vcvt_ukernel__sse2_u32;
-      qu8_to_f32_cvt_config.init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_scalar_params;
+      qu8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_f32_cvt_scalar_params;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     qu8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_f32_vcvt_ukernel__wasmsimd_u32;
-    qu8_to_f32_cvt_config.init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_scalar_params;
+    qu8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_f32_cvt_scalar_params;
   #elif XNN_ARCH_WASM
     qu8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_f32_vcvt_ukernel__scalar_u1;
-    qu8_to_f32_cvt_config.init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_scalar_params;
+    qu8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_f32_cvt_scalar_params;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     qu8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_f32_vcvt_ukernel__rvv_u2v;
-    qu8_to_f32_cvt_config.init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_scalar_params;
+    qu8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_f32_cvt_scalar_params;
   #else
     qu8_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qu8_f32_vcvt_ukernel__scalar_u4;
-    qu8_to_f32_cvt_config.init.qu8_f32_cvt = xnn_init_qu8_f32_cvt_scalar_params;
+    qu8_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_f32_cvt_scalar_params;
   #endif
 }
 
@@ -1971,43 +1969,43 @@ static void init_s8_clamp_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__neon_u64;
-      s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
+      s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
     } else if (!XNN_PLATFORM_MOBILE) {
       s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__scalar_u4;
-      s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
+      s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
     }
   #elif XNN_ARCH_ARM64
     s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__neon_u64;
-    s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
+    s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
 
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__rvv_u4v;
-    s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
+    s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512SKX
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
         s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__avx512skx_u256;
-        s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
+        s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
       } else
     #endif
     if (hardware_config->use_x86_avx2) {
       s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__avx2_u128;
-      s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
+      s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
     } else if (hardware_config->use_x86_sse4_1) {
       s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__sse41_u64;
-      s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
+      s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
     } else {
       s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__sse2_u64;
-      s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
+      s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__wasmsimd_u64;
-    s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
+    s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
   #else
     s8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_s8_vclamp_ukernel__scalar_u4;
-    s8_clamp_config.init.s8_minmax = xnn_init_s8_minmax_scalar_params;
+    s8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs8_clamp_scalar_params;
   #endif
 }
 
@@ -2017,45 +2015,45 @@ static void init_u8_clamp_config(void) {
     assert(hardware_config != NULL);
     if (hardware_config->use_arm_neon) {
       u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__neon_u64;
-      u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
+      u8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_clamp_scalar_params;
     } else if (!XNN_PLATFORM_MOBILE) {
       u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__scalar_u4;
-      u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
+      u8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_clamp_scalar_params;
     }
   #elif XNN_ARCH_ARM64
     u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__neon_u64;
-    u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
+    u8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_clamp_scalar_params;
   #elif XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
     u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__rvv_u4v;
-    u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
+    u8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_clamp_scalar_params;
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512SKX
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512skx) {
         u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__avx512skx_u256;
-        u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
+        u8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_clamp_scalar_params;
       } else
     #endif
     if (hardware_config->use_x86_avx2) {
       u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__avx2_u128;
-      u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
+      u8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_clamp_scalar_params;
     } else {
       u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__sse2_u64;
-      u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
+      u8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_clamp_scalar_params;
     }
   #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
     u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__wasmsimd_u64;
-    u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
+    u8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_clamp_scalar_params;
   #elif XNN_ARCH_WASM
     u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__scalar_u4;
-    u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
+    u8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_clamp_scalar_params;
   #elif XNN_ARCH_RISCV
     u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__scalar_u4;
-    u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
+    u8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_clamp_scalar_params;
   #else
     u8_clamp_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u8_vclamp_ukernel__scalar_u4;
-    u8_clamp_config.init.u8_minmax = xnn_init_u8_minmax_scalar_params;
+    u8_clamp_config.init = (xnn_init_unary_uparams_fn) xnn_init_qu8_clamp_scalar_params;
   #endif
 }
 

@@ -71,7 +71,11 @@ enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min,
   node->outputs[0] = new_id;
   node->activation.output_min = -INFINITY;
   node->activation.output_max = INFINITY;
-  return xnn_define_clamp(subgraph, output_min, output_max, new_id, output_id, /*flags=*/0);
+  union xnn_unary_params params;
+  params.clamp.min = output_min;
+  params.clamp.max = output_max;
+  return xnn_define_unary(subgraph, xnn_unary_clamp, &params, new_id, output_id,
+                          /*flags=*/0);
 }
 
 enum xnn_status xnn_insert_pack_lh_node(xnn_subgraph_t subgraph, const struct xnn_value* input, uint32_t input_id, uint32_t *new_id) {
@@ -1019,7 +1023,11 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       assert(value->datatype == xnn_datatype_fp32);
       if (xnn_value_is_static(value)) {
         const size_t num_elements = xnn_shape_multiply_all_dims(&value->shape);
-        xnn_run_convert_nc_f32_f16(1, 1, 1, num_elements, value->data, value->fp16_temp_data, 0, NULL);
+        xnn_run_unary_elementwise_nc(
+            xnn_unary_convert, xnn_datatype_fp32, xnn_datatype_fp16,
+            /*params=*/NULL, /*input_quantization=*/NULL,
+            /*output_quantization=*/NULL, 0, num_elements, 1, 1, 1, NULL,
+            value->data, value->fp16_temp_data);
         // Remember pointer to the original fp32 data, nodes like convolution need fp32 weights/biases.
         value->fp32_data = value->data;
         value->data = value->fp16_temp_data;
@@ -1210,6 +1218,12 @@ enum xnn_status xnn_subgraph_fusion(
               math_max_f32(producer->activation.output_min, consumer->activation.output_min);
             producer->activation.output_max =
               math_min_f32(producer->activation.output_max, consumer->activation.output_max);
+            producer->params.unary.clamp.min =
+                math_max_f32(producer->params.unary.clamp.min,
+                             consumer->params.unary.clamp.min);
+            producer->params.unary.clamp.max =
+                math_min_f32(producer->params.unary.clamp.max,
+                             consumer->params.unary.clamp.max);
 
             xnn_node_clear(consumer);
             xnn_value_clear(value);
@@ -1435,6 +1449,93 @@ enum xnn_status xnn_delete_subgraph(
     xnn_release_memory(subgraph);
   }
   return xnn_status_success;
+}
+
+enum xnn_unary_operator xnn_node_type_to_unary_operator(
+    enum xnn_node_type node_type) {
+  switch (node_type) {
+    case xnn_node_type_abs:
+      return xnn_unary_abs;
+    case xnn_node_type_bankers_rounding:
+      return xnn_unary_bankers_rounding;
+    case xnn_node_type_ceiling:
+      return xnn_unary_ceiling;
+    case xnn_node_type_clamp:
+      return xnn_unary_clamp;
+    case xnn_node_type_convert:
+      return xnn_unary_convert;
+    case xnn_node_type_elu:
+      return xnn_unary_elu;
+    case xnn_node_type_exp:
+      return xnn_unary_exp;
+    case xnn_node_type_floor:
+      return xnn_unary_floor;
+    case xnn_node_type_gelu:
+      return xnn_unary_gelu;
+    case xnn_node_type_hardswish:
+      return xnn_unary_hardswish;
+    case xnn_node_type_leaky_relu:
+      return xnn_unary_leaky_relu;
+    case xnn_node_type_log:
+      return xnn_unary_log;
+    case xnn_node_type_negate:
+      return xnn_unary_negate;
+    case xnn_node_type_reciprocal_square_root:
+      return xnn_unary_reciprocal_square_root;
+    case xnn_node_type_sigmoid:
+      return xnn_unary_sigmoid;
+    case xnn_node_type_square:
+      return xnn_unary_square;
+    case xnn_node_type_square_root:
+      return xnn_unary_square_root;
+    case xnn_node_type_tanh:
+      return xnn_unary_tanh;
+    default:
+      return xnn_unary_invalid;
+  }
+}
+
+enum xnn_node_type xnn_unary_operator_to_node_type(enum xnn_unary_operator op) {
+  switch (op) {
+    case xnn_unary_abs:
+      return xnn_node_type_abs;
+    case xnn_unary_bankers_rounding:
+      return xnn_node_type_bankers_rounding;
+    case xnn_unary_ceiling:
+      return xnn_node_type_ceiling;
+    case xnn_unary_clamp:
+      return xnn_node_type_clamp;
+    case xnn_unary_convert:
+      return xnn_node_type_convert;
+    case xnn_unary_elu:
+      return xnn_node_type_elu;
+    case xnn_unary_exp:
+      return xnn_node_type_exp;
+    case xnn_unary_floor:
+      return xnn_node_type_floor;
+    case xnn_unary_gelu:
+      return xnn_node_type_gelu;
+    case xnn_unary_hardswish:
+      return xnn_node_type_hardswish;
+    case xnn_unary_leaky_relu:
+      return xnn_node_type_leaky_relu;
+    case xnn_unary_log:
+      return xnn_node_type_log;
+    case xnn_unary_negate:
+      return xnn_node_type_negate;
+    case xnn_unary_reciprocal_square_root:
+      return xnn_node_type_reciprocal_square_root;
+    case xnn_unary_sigmoid:
+      return xnn_node_type_sigmoid;
+    case xnn_unary_square:
+      return xnn_node_type_square;
+    case xnn_unary_square_root:
+      return xnn_node_type_square_root;
+    case xnn_unary_tanh:
+      return xnn_node_type_tanh;
+    default:
+      return xnn_node_type_invalid;
+  }
 }
 
 enum xnn_node_type xnn_binary_operator_to_node_type(enum xnn_binary_operator type)

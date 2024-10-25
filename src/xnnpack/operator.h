@@ -23,6 +23,10 @@
 // Maximum number of pthreadpool parallelization invocations per operator.
 #define XNN_MAX_COMPUTE_INVOCATIONS 3
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct xnn_ukernel_conv2d {
   union {
     xnn_conv_hwc2chw_ukernel_fn hwc2chw_fn;
@@ -209,24 +213,14 @@ struct xnn_operator {
   uint32_t flags;
 
   uint32_t log2_elementwise_element_size;
+  uint32_t log2_elementwise_input_size;
+  uint32_t log2_elementwise_output_size;
 
   union {
     union xnn_binary_uparams binary;
+    union xnn_unary_uparams unary;
     struct xnn_f16_default_params f16_default;
-    struct xnn_f16_hswish_params f16_hswish;
-    struct xnn_f16_elu_params f16_elu;
-    struct xnn_f16_lrelu_params f16_lrelu;
-    struct xnn_f16_sigmoid_params f16_sigmoid;
-    union xnn_f16_tanh_params f16_tanh;
     struct xnn_f32_default_params f32_default;
-    struct xnn_f32_elu_params f32_elu;
-    struct xnn_f32_lrelu_params f32_lrelu;
-    struct xnn_f32_rnd_params f32_rnd;
-    struct xnn_f32_rsqrt_params f32_rsqrt;
-    struct xnn_f32_sigmoid_params f32_sigmoid;
-    struct xnn_f32_sqrt_params f32_sqrt;
-    union xnn_f32_tanh_params f32_tanh;
-    struct xnn_f32_hswish_params f32_hswish;
     union xnn_f16_minmax_params f16_minmax;
     struct xnn_f16_scaleminmax_params f16_scaleminmax;
     struct f16_f32acc_reduce_params reduce_params;
@@ -241,23 +235,12 @@ struct xnn_operator {
     union xnn_f32_minmax_params f32_chw;
     struct xnn_f32_qb4w_minmax_params f32_qb4w_minmax;
     struct xnn_f32_qc4w_minmax_params f32_qc4w_minmax;
-    struct xnn_f32_qs8_cvt_params f32_qs8_cvt;
-    struct xnn_f32_qu8_cvt_params f32_qu8_cvt;
-    struct xnn_s32_f32_cvt_params s32_f32_cvt;
-    struct xnn_qs8_cvt_params qs8_cvt;
-    struct xnn_qs8_f16_cvt_params qs8_f16_cvt;
-    struct xnn_qs8_f32_cvt_params qs8_f32_cvt;
-    struct xnn_qs16_qs8_cvt_params qs16_qs8_cvt;
-    struct xnn_qu8_cvt_params qu8_cvt;
-    struct xnn_qu8_f32_cvt_params qu8_f32_cvt;
     union xnn_qs8_conv_minmax_params qs8_conv_minmax;
     union xnn_qs8_qc8w_conv_minmax_params qs8_qc8w_conv_minmax;
     struct xnn_qs8_reduce_minmax_params qs8_reduce;
     struct xnn_qu8_reduce_minmax_params qu8_reduce;
     union xnn_qu8_conv_minmax_params qu8_conv_minmax;
     struct xnn_qu8_avgpool_minmax_params qu8_avgpool;
-    struct xnn_qs8_lrelu_params qs8_lrelu;
-    struct xnn_qu8_lrelu_params qu8_lrelu;
     struct xnn_s8_minmax_params s8_minmax;
     struct xnn_s32_default_params s32_default;
     struct xnn_u8_minmax_params u8_minmax;
@@ -282,8 +265,7 @@ struct xnn_operator {
   } params3;
   // Fourth set of params. Used by scaled dot attention operator.
   union {
-    union xnn_f16_tanh_params f16_tanh;
-    union xnn_f32_tanh_params f32_tanh;
+    union xnn_unary_uparams unary;
   } params4;
   enum xnn_operator_type type;
   struct xnn_ukernel ukernel;
@@ -406,7 +388,11 @@ XNN_INTERNAL enum xnn_status xnn_run_operator_with_index(
   size_t operator_object_index,
   pthreadpool_t threadpool);
 
-XNN_INTERNAL enum xnn_operator_type xnn_binary_operator_to_operator_type(
-  enum xnn_binary_operator op);
-
+XNN_INTERNAL enum xnn_operator_type xnn_unary_operator_to_operator_type(enum xnn_unary_operator op);
+XNN_INTERNAL const char* xnn_unary_operator_to_string(enum xnn_unary_operator op);
+XNN_INTERNAL enum xnn_operator_type xnn_binary_operator_to_operator_type(enum xnn_binary_operator op);
 XNN_INTERNAL enum xnn_operator_type xnn_reduce_operator_to_operator_type(enum xnn_reduce_operator op);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif

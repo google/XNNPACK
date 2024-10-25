@@ -31,10 +31,12 @@
 #include "tensorflow/lite/version.h"
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
-template <typename In, typename Out, typename Create, typename Reshape,
-          typename Setup>
-static void benchmark_unary_operator(Create create, Reshape reshape,
-                                     Setup setup, benchmark::State& state) {
+template <typename In, typename Out>
+static void benchmark_unary_operator(
+    benchmark::State& state, xnn_unary_operator op_type,
+    const xnn_unary_params* params = nullptr,
+    const xnn_quantization_params& input_quantization = {0, 1.0f},
+    const xnn_quantization_params& output_quantization = {0, 1.0f}) {
   const size_t batch_size = state.range(0);
 
   std::random_device random_device;
@@ -52,21 +54,24 @@ static void benchmark_unary_operator(Create create, Reshape reshape,
   }
 
   xnn_operator_t op = nullptr;
-  status = create(0 /* flags */, &op);
+  status = xnn_create_unary_elementwise_nc(
+      op_type, xnnpack::datatype_of<In>(), xnnpack::datatype_of<Out>(), params,
+      &input_quantization, &output_quantization, 0 /* flags */, &op);
   if (status != xnn_status_success || op == nullptr) {
     state.SkipWithError("failed to create Abs operator");
     return;
   }
 
-  status = reshape(op, batch_size,
-                   /*channels=*/1, /*input_stride=*/1, /*output_stride=*/1,
-                   /*threadpool=*/nullptr);
+  status = xnn_reshape_unary_elementwise_nc(op, batch_size,
+                                            /*channels=*/1, /*input_stride=*/1,
+                                            /*output_stride=*/1,
+                                            /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to reshape Abs operator");
     return;
   }
 
-  status = setup(op, input.data(), output.data());
+  status = xnn_setup_unary_elementwise_nc(op, input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup Abs operator");
     return;

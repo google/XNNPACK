@@ -232,29 +232,6 @@ xnnpack_benchmark(
     name = "%s_bench" % kernel,
     srcs = [
         "%s.cc" % kernel.replace("_", "-"),
-        "vcvt-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-) for kernel in [
-    "qs8_f16_vcvt",
-    "qs8_f32_vcvt",
-    "qs8_vcvt",
-    "qs16_qs8_vcvt",
-    "qu8_f32_vcvt",
-    "qu8_vcvt",
-    "f16_f32_vcvt",
-    "f16_qs8_vcvt",
-    "f32_f16_vcvt",
-    "f32_qs8_vcvt",
-    "f32_qu8_vcvt",
-    "s32_f32_vcvt",
-    "u32_f32_vcvt",
-]]
-
-[xnnpack_benchmark(
-    name = "%s_bench" % kernel,
-    srcs = [
-        "%s.cc" % kernel.replace("_", "-"),
         "rsum-benchmark.h",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
@@ -590,7 +567,6 @@ xnnpack_benchmark(
     "square",
     "square_root",
     "tanh",
-    "truncation",
 ]]
 
 xnnpack_benchmark(

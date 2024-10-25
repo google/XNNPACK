@@ -14,14 +14,11 @@
 
 static void xnnpack_square_root_f16(benchmark::State& state) {
   benchmark_unary_operator<xnn_float16, xnn_float16>(
-      xnn_create_square_root_nc_f16, xnn_reshape_square_root_nc_f16,
-      xnn_setup_square_root_nc_f16, state);
+      state, xnn_unary_square_root);
 }
 
 static void xnnpack_square_root_f32(benchmark::State& state) {
-  benchmark_unary_operator<float, float>(xnn_create_square_root_nc_f32,
-                                         xnn_reshape_square_root_nc_f32,
-                                         xnn_setup_square_root_nc_f32, state);
+  benchmark_unary_operator<float, float>(state, xnn_unary_square_root);
 }
 
 BENCHMARK(xnnpack_square_root_f16)

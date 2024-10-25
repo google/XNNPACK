@@ -57,44 +57,7 @@ struct xnn_binary_elementwise_config {
 
 struct xnn_unary_elementwise_config {
   xnn_vunary_ukernel_fn ukernel;
-  union {
-    xnn_init_s32_f32_cvt_params_fn s32_f32_cvt;
-    xnn_init_u32_f32_cvt_params_fn u32_f32_cvt;
-    xnn_init_f16_qs8_cvt_params_fn f16_qs8_cvt;
-    xnn_init_f16_default_params_fn f16_default;
-    xnn_init_f16_elu_params_fn f16_elu;
-    xnn_init_f16_hswish_params_fn f16_hswish;
-    xnn_init_f16_lrelu_params_fn f16_lrelu;
-    xnn_init_f16_minmax_params_fn f16_minmax;
-    xnn_init_f16_rsqrt_params_fn f16_rsqrt;
-    xnn_init_f16_sigmoid_params_fn f16_sigmoid;
-    xnn_init_f16_sqrt_params_fn f16_sqrt;
-    xnn_init_f16_tanh_params_fn f16_tanh;
-    xnn_init_f32_default_params_fn f32_default;
-    xnn_init_f32_elu_params_fn f32_elu;
-    xnn_init_f32_exp_params_fn f32_exp;
-    xnn_init_f32_hswish_params_fn f32_hswish;
-    xnn_init_f32_log_params_fn f32_log;
-    xnn_init_f32_lrelu_params_fn f32_lrelu;
-    xnn_init_f32_minmax_params_fn f32_minmax;
-    xnn_init_f32_qs8_cvt_params_fn f32_qs8_cvt;
-    xnn_init_f32_qu8_cvt_params_fn f32_qu8_cvt;
-    xnn_init_f32_rnd_params_fn f32_rnd;
-    xnn_init_f32_rsqrt_params_fn f32_rsqrt;
-    xnn_init_f32_sigmoid_params_fn f32_sigmoid;
-    xnn_init_f32_sqrt_params_fn f32_sqrt;
-    xnn_init_f32_tanh_params_fn f32_tanh;
-    xnn_init_qs8_cvt_params_fn qs8_cvt;
-    xnn_init_qs8_f16_cvt_params_fn qs8_f16_cvt;
-    xnn_init_qs8_f32_cvt_params_fn qs8_f32_cvt;
-    xnn_init_qs8_lrelu_params_fn qs8_lrelu;
-    xnn_init_qs16_qs8_cvt_params_fn qs16_qs8_cvt;
-    xnn_init_qu8_cvt_params_fn qu8_cvt;
-    xnn_init_qu8_f32_cvt_params_fn qu8_f32_cvt;
-    xnn_init_qu8_lrelu_params_fn qu8_lrelu;
-    xnn_init_s8_minmax_params_fn s8_minmax;
-    xnn_init_u8_minmax_params_fn u8_minmax;
-  } init;
+  xnn_init_unary_uparams_fn init;
 };
 
 struct xnn_reduce_config {
@@ -103,7 +66,6 @@ struct xnn_reduce_config {
   union {
     xnn_init_qs8_reduce_minmax_params_fn qs8_reduce;
     xnn_init_qu8_reduce_minmax_params_fn qu8_reduce;
-    xnn_init_f32_qs8_cvt_params_fn f32_qs8_cvt;
     xnn_init_f16_f32acc_scale_params_fn f16_f32acc_scale;
     xnn_init_f16_default_params_fn f16_default;
     xnn_init_f32_default_params_fn f32_default;

@@ -314,8 +314,10 @@ xnn_subgraph_t FP32Attention(size_t b, size_t t, size_t h, size_t n, size_t s) {
     return nullptr;
   }
 
-  status = xnn_define_tanh(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_tanh,
+    /*params=*/nullptr,
     v7,
     v8,
     0);

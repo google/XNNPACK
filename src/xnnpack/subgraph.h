@@ -212,6 +212,7 @@ enum xnn_compute_type {
   xnn_compute_type_qp8_to_fp32,
   xnn_compute_type_qs8,
   xnn_compute_type_qu8,
+  xnn_compute_type_fp16_to_qs8,
   xnn_compute_type_fp16_to_qd8,
   xnn_compute_type_fp16_to_fp32,
   xnn_compute_type_fp32_to_fp16,
@@ -299,12 +300,6 @@ struct xnn_node {
       uint32_t dilation_width;
     } pooling_2d;
     struct {
-      float alpha;
-    } elu;
-    struct {
-      float negative_slope;
-    } leaky_relu;
-    struct {
       size_t pre_paddings[XNN_MAX_TENSOR_DIMS];
       size_t post_paddings[XNN_MAX_TENSOR_DIMS];
       uint32_t padding_value;
@@ -339,6 +334,7 @@ struct xnn_node {
       enum xnn_attention_logits_cap_type cap_type;
       struct xnn_attention_logits_cap_tanh_params cap_tanh_params;
     } scaled_dot_product_attention;
+    union xnn_unary_params unary;
   } params;
   struct {
     float output_min;
@@ -583,6 +579,8 @@ enum xnn_status resize_fully_connected_output_tensor(
   size_t old_workspace_size,
   pthreadpool_t threadpool);
 
+XNN_INTERNAL enum xnn_node_type xnn_unary_operator_to_node_type(enum xnn_unary_operator type);
+XNN_INTERNAL enum xnn_unary_operator xnn_node_type_to_unary_operator(enum xnn_node_type type);
 XNN_INTERNAL enum xnn_node_type xnn_binary_operator_to_node_type(enum xnn_binary_operator type);
 XNN_INTERNAL enum xnn_binary_operator xnn_node_type_to_binary_operator(enum xnn_node_type type);
 

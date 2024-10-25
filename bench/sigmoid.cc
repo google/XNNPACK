@@ -18,39 +18,21 @@
 
 
 static void xnnpack_sigmoid_f16(benchmark::State& state) {
-  benchmark_unary_operator<xnn_float16, xnn_float16>(xnn_create_sigmoid_nc_f16,
-                                             xnn_reshape_sigmoid_nc_f16,
-                                             xnn_setup_sigmoid_nc_f16, state);
+  benchmark_unary_operator<xnn_float16, xnn_float16>(state, xnn_unary_sigmoid);
 }
 
 static void xnnpack_sigmoid_f32(benchmark::State& state) {
-  benchmark_unary_operator<float, float>(xnn_create_sigmoid_nc_f32,
-                                         xnn_reshape_sigmoid_nc_f32,
-                                         xnn_setup_sigmoid_nc_f32, state);
+  benchmark_unary_operator<float, float>(state, xnn_unary_sigmoid);
 }
 
 static void xnnpack_sigmoid_qs8(benchmark::State& state) {
   benchmark_unary_operator<int8_t, int8_t>(
-      [](uint32_t flags, xnn_operator_t* op) {
-        return xnn_create_sigmoid_nc_qs8(
-            1 /* input zero point */, 1.0f /* input scale */,
-            -128 /* output zero point */, 1.0f / 256.0f /* output scale */,
-            std::numeric_limits<int8_t>::min() /* output min */,
-            std::numeric_limits<int8_t>::max() /* output max */, flags, op);
-      },
-      xnn_reshape_sigmoid_nc_qs8, xnn_setup_sigmoid_nc_qs8, state);
+      state, xnn_unary_sigmoid, nullptr, {1, 1.0f}, {-128, 1.0f / 256.0f});
 }
 
 static void xnnpack_sigmoid_qu8(benchmark::State& state) {
-  benchmark_unary_operator<uint8_t, uint8_t>(
-      [](uint32_t flags, xnn_operator_t* op) {
-        return xnn_create_sigmoid_nc_qu8(
-            128 /* input zero point */, 1.0f /* input scale */,
-            0 /* output zero point */, 1.0f / 256.0f /* output scale */,
-            std::numeric_limits<uint8_t>::min() /* output min */,
-            std::numeric_limits<uint8_t>::max() /* output max */, flags, op);
-      },
-      xnn_reshape_sigmoid_nc_qu8, xnn_setup_sigmoid_nc_qu8, state);
+  benchmark_unary_operator<int8_t, int8_t>(
+      state, xnn_unary_sigmoid, nullptr, {128, 1.0f}, {0, 1.0f / 256.0f});
 }
 
 BENCHMARK(xnnpack_sigmoid_f16)

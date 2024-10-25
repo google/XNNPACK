@@ -14,9 +14,7 @@
 
 static void xnnpack_reciprocal_square_root_f32(benchmark::State& state) {
   benchmark_unary_operator<float, float>(
-      xnn_create_reciprocal_square_root_nc_f32,
-      xnn_reshape_reciprocal_square_root_nc_f32,
-      xnn_setup_reciprocal_square_root_nc_f32, state);
+      state, xnn_unary_reciprocal_square_root);
 }
 
 BENCHMARK(xnnpack_reciprocal_square_root_f32)

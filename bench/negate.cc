@@ -13,15 +13,11 @@
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 static void xnnpack_negate_f16(benchmark::State& state) {
-  benchmark_unary_operator<xnn_float16, xnn_float16>(xnn_create_negate_nc_f16,
-                                             xnn_reshape_negate_nc_f16,
-                                             xnn_setup_negate_nc_f16, state);
+  benchmark_unary_operator<xnn_float16, xnn_float16>(state, xnn_unary_negate);
 }
 
 static void xnnpack_negate_f32(benchmark::State& state) {
-  benchmark_unary_operator<float, float>(xnn_create_negate_nc_f32,
-                                         xnn_reshape_negate_nc_f32,
-                                         xnn_setup_negate_nc_f32, state);
+  benchmark_unary_operator<float, float>(state, xnn_unary_negate);
 }
 
 BENCHMARK(xnnpack_negate_f16)

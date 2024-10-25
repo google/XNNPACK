@@ -3086,8 +3086,10 @@ xnn_subgraph_t QS8MobileNetV2() {
   std::generate(w171_data.begin(), w171_data.end(), std::ref(qs8rng));
   std::generate(w172_data.begin(), w172_data.end(), std::ref(qs32rng));
 
-  status = xnn_define_convert(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_convert,
+    /*params=*/nullptr,
     v0,
     v1,
     0);
@@ -4286,8 +4288,10 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_convert(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_convert,
+    /*params=*/nullptr,
     v65,
     v66,
     0);

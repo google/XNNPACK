@@ -485,6 +485,7 @@ xnnpack_cc_library(
         ":logging",
         ":math",
         ":microparams",
+        ":requantization",
         ":unaligned",
         ":xnnpack_h",
     ],
@@ -971,6 +972,7 @@ xnnpack_cc_library(
         ":microkernel_utils",
         ":microkernels_h",
         ":microparams_init",
+        ":node_type",
         ":normalization",
         ":operator_type",
         ":operator_utils",
@@ -979,9 +981,7 @@ xnnpack_cc_library(
         ":quantization",
         ":xnnpack_h",
         "@pthreadpool",
-    ] + select({
-        "//conditions:default": [],
-    }),
+    ],
 )
 
 xnnpack_cc_library(

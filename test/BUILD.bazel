@@ -92,26 +92,18 @@ xnnpack_cxx_library(
 )
 
 xnnpack_cxx_library(
-    name = "tanh_operator_tester",
+    name = "unary_ops",
     testonly = True,
-    hdrs = ["tanh-operator-tester.h"],
-    deps = OPERATOR_TEST_DEPS + xnnpack_test_deps_for_library(),
-)
-
-xnnpack_cxx_library(
-    name = "unary_operator_tester",
-    testonly = True,
-    srcs = ["unary-operator-tester.cc"],
-    hdrs = ["unary-operator-tester.h"],
-    deps = OPERATOR_TEST_DEPS + xnnpack_test_deps_for_library(),
+    srcs = ["unary-ops.cc"],
+    hdrs = ["unary-ops.h"],
+    deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library(),
 )
 
 xnnpack_cxx_library(
     name = "vunary_microkernel_tester",
     testonly = True,
-    srcs = ["vunary-microkernel-tester.cc"],
     hdrs = ["vunary-microkernel-tester.h"],
-    deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library(),
+    deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library() + [":unary_ops"],
 )
 
 xnnpack_cxx_library(
@@ -130,14 +122,6 @@ xnnpack_cxx_library(
     deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library() + [
         "//:microkernel_utils",
     ],
-)
-
-xnnpack_cxx_library(
-    name = "vcvt_microkernel_tester",
-    testonly = True,
-    srcs = ["vcvt-microkernel-tester.cc"],
-    hdrs = ["vcvt-microkernel-tester.h"],
-    deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library(),
 )
 
 xnnpack_cxx_library(
@@ -310,6 +294,21 @@ sh_test(
     "f32_vtanh",
     "s8_vclamp",
     "u8_vclamp",
+    "qs8_vlrelu",
+    "qu8_vlrelu",
+    "f16_f32_vcvt",
+    "f16_qs8_vcvt",
+    "f32_f16_vcvt",
+    "f32_qs8_vcvt",
+    "f32_qu8_vcvt",
+    "s32_f32_vcvt",
+    "u32_f32_vcvt",
+    "qs16_qs8_vcvt",
+    "qs8_f16_vcvt",
+    "qs8_f32_vcvt",
+    "qs8_vcvt",
+    "qu8_vcvt",
+    "qu8_f32_vcvt",
 ]]
 
 [xnnpack_unit_test(
@@ -373,28 +372,6 @@ sh_test(
     "qu8_vmulc_minmax_rndnu",
     "s32_vmul",
     "s32_vmulc",
-]]
-
-[xnnpack_unit_test(
-    name = "%s_test" % kernel,
-    srcs = [
-        "%s.cc" % kernel.replace("_", "-"),
-    ],
-    deps = MICROKERNEL_TEST_DEPS + [":vcvt_microkernel_tester"],
-) for kernel in [
-    "f16_f32_vcvt",
-    "f16_qs8_vcvt",
-    "f32_f16_vcvt",
-    "f32_qs8_vcvt",
-    "f32_qu8_vcvt",
-    "s32_f32_vcvt",
-    "u32_f32_vcvt",
-    "qs16_qs8_vcvt",
-    "qs8_f16_vcvt",
-    "qs8_f32_vcvt",
-    "qs8_vcvt",
-    "qu8_vcvt",
-    "qu8_f32_vcvt",
 ]]
 
 [xnnpack_unit_test(
@@ -1020,15 +997,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qs8_vlrelu_test",
-    srcs = [
-        "qs8-vlrelu.cc",
-        "vlrelu-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "qu8_gemm_minmax_fp32_test",
     srcs = [
         "qu8-gemm-minmax-fp32.cc",
@@ -1070,15 +1038,6 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
-)
-
-xnnpack_unit_test(
-    name = "qu8_vlrelu_test",
-    srcs = [
-        "qu8-vlrelu.cc",
-        "vlrelu-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
@@ -1205,34 +1164,17 @@ xnnpack_binary(
 
 ########################### Unit tests for operators ##########################
 
-[xnnpack_unit_test(
-    name = "%s_test" % operator,
-    srcs = [
-        "%s.cc" % operator.replace("_", "-"),
-    ],
+xnnpack_unit_test(
+    name = "unary_elementwise_nc_test",
+    timeout = "long",
+    srcs = ["unary-elementwise-nc.cc"],
     deps = OPERATOR_TEST_DEPS + [
-        ":unary_operator_tester",
+        ":unary_ops",
+        "//:logging",
+        "//:operator_h",
+        "//:operator_utils",
     ],
-) for operator in [
-    "abs_nc",
-    "bankers_rounding_nc",
-    "ceiling_nc",
-    "clamp_nc",
-    "elu_nc",
-    "exp_nc",
-    "floor_nc",
-    "gelu_nc",
-    "hardswish_nc",
-    "leaky_relu_nc",
-    "log_nc",
-    "negate_nc",
-    "reciprocal_square_root_nc",
-    "sigmoid_nc",
-    "square_nc",
-    "square_root_nc",
-    "tanh_nc",
-    "truncation_nc",
-]]
+)
 
 xnnpack_unit_test(
     name = "binary_elementwise_nd_test",
@@ -1302,19 +1244,8 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "convert_nc_test",
-    timeout = "moderate",
     srcs = [
         "convert-nc.cc",
-        "convert-operator-tester.h",
-    ],
-    shard_count = 5,
-    deps = OPERATOR_TEST_DEPS + ["//:microkernels_h"],
-)
-
-xnnpack_unit_test(
-    name = "convert_nc_eager_test",
-    srcs = [
-        "convert-nc-eager.cc",
         "convert-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS + ["//:microkernels_h"],
@@ -1605,6 +1536,23 @@ xnnpack_cxx_library(
     ],
 )
 
+xnnpack_unit_test(
+    name = "unary_test",
+    srcs = [
+        "unary.cc",
+    ],
+    deps = [
+        ":replicable_random_device",
+        ":unary_ops",
+        "//:XNNPACK",
+        "//:buffer",
+        "//:logging",
+        "//:math",
+        "//:operators",
+        "//:subgraph",
+    ],
+)
+
 [xnnpack_unit_test(
     name = "%s_test" % operator,
     srcs = [
@@ -1613,7 +1561,6 @@ xnnpack_cxx_library(
     deps = [
         ":replicable_random_device",
         ":subgraph_unary_tester",
-        ":tanh_operator_tester",
         "//:XNNPACK",
         "//:math",
         "//:node_type",
@@ -1622,32 +1569,14 @@ xnnpack_cxx_library(
         "//:subgraph",
     ],
 ) for operator in [
-    "abs",
-    "bankers_rounding",
-    "ceiling",
-    "clamp",
-    "convert",
     "copy",
-    "elu",
-    "exp",
-    "floor",
-    "gelu",
-    "hardswish",
-    "leaky_relu",
-    "log",
-    "negate",
-    "reciprocal_square_root",
-    "sigmoid",
     "softmax",
     "space_to_depth_2d",
-    "square",
-    "square_root",
     "static_constant_pad",
     "static_expand_dims",
     "static_reshape",
     "static_slice",
     "static_transpose",
-    "tanh",
 ]]
 
 xnnpack_cxx_library(
@@ -1678,18 +1607,6 @@ xnnpack_unit_test(
         "//:allocation_type",
         "//:buffer",
         "//:math",
-        "//:subgraph",
-    ],
-)
-
-xnnpack_unit_test(
-    name = "abs_reshape_test",
-    srcs = [
-        "abs-reshape.cc",
-    ],
-    deps = [
-        "//:XNNPACK",
-        "//:node_type",
         "//:subgraph",
     ],
 )

@@ -184,9 +184,9 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f16(
     goto error;
   }
 
-  union xnn_f16_tanh_params tanh_params;
-  if XNN_LIKELY(vtanh_config->init.f16_tanh != NULL) {
-    vtanh_config->init.f16_tanh(&tanh_params);
+  union xnn_unary_uparams tanh_params;
+  if XNN_LIKELY(vtanh_config->init != NULL) {
+    vtanh_config->init(&tanh_params, NULL, NULL, NULL);
   }
 
   status = xnn_status_invalid_parameter;
@@ -294,9 +294,9 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f32(
     goto error;
   }
 
-  union xnn_f32_tanh_params tanh_params;
-  if XNN_LIKELY(vtanh_config->init.f32_tanh != NULL) {
-    vtanh_config->init.f32_tanh(&tanh_params);
+  union xnn_unary_uparams tanh_params;
+  if XNN_LIKELY(vtanh_config->init != NULL) {
+    vtanh_config->init(&tanh_params, NULL, NULL, NULL);
   }
 
   status = xnn_status_invalid_parameter;
@@ -655,7 +655,7 @@ enum xnn_status xnn_reshape_scaled_dot_product_attention_nhtc_f16(
     &attention_op->params.f16_minmax, sizeof(attention_op->params.f16_minmax),
     &attention_op->params2.f16_expminus_params, sizeof(attention_op->params2.f16_expminus_params),
     &attention_op->params3.f16_rmax, sizeof(attention_op->params3.f16_rmax),
-    &attention_op->params4.f16_tanh, sizeof(attention_op->params4.f16_tanh),
+    &attention_op->params4.unary, sizeof(attention_op->params4.unary),
     threadpool);
 }
 
@@ -693,7 +693,7 @@ enum xnn_status xnn_reshape_scaled_dot_product_attention_nhtc_f32(
     &attention_op->params.f32_minmax, sizeof(attention_op->params.f32_minmax),
     &attention_op->params2.f32_expminus_params, sizeof(attention_op->params2.f32_expminus_params),
     &attention_op->params3.f32_rmax, sizeof(attention_op->params3.f32_rmax),
-    &attention_op->params4.f32_tanh, sizeof(attention_op->params4.f32_tanh),
+    &attention_op->params4.unary, sizeof(attention_op->params4.unary),
     threadpool);
 }
 

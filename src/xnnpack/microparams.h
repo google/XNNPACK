@@ -627,6 +627,32 @@ struct xnn_x32_packb_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
+union xnn_unary_uparams {
+  struct xnn_f32_qs8_cvt_params f32_qs8_cvt;
+  struct xnn_f32_qu8_cvt_params f32_qu8_cvt;
+  struct xnn_f16_qs8_cvt_params f16_qs8_cvt;
+  struct xnn_qs8_f32_cvt_params qs8_f32_cvt;
+  struct xnn_qu8_f32_cvt_params qu8_f32_cvt;
+  struct xnn_qs8_f16_cvt_params qs8_f16_cvt;
+  struct xnn_qs16_qs8_cvt_params qs16_qs8_cvt;
+  struct xnn_s32_f32_cvt_params s32_f32_cvt;
+  struct xnn_u32_f32_cvt_params u32_f32_cvt;
+  struct xnn_qs8_cvt_params qs8_cvt;
+  struct xnn_qu8_cvt_params qu8_cvt;
+  struct xnn_f16_elu_params f16_elu;
+  struct xnn_f32_elu_params f32_elu;
+  union xnn_f16_tanh_params f16_tanh;
+  union xnn_f32_tanh_params f32_tanh;
+  struct xnn_f16_lrelu_params f16_lrelu;
+  struct xnn_f32_lrelu_params f32_lrelu;
+  struct xnn_qs8_lrelu_params qs8_lrelu;
+  struct xnn_qu8_lrelu_params qu8_lrelu;
+  union xnn_f32_minmax_params f32_minmax;
+  union xnn_f16_minmax_params f16_minmax;
+  struct xnn_s8_minmax_params s8_minmax;
+  struct xnn_u8_minmax_params u8_minmax;
+};
+
 struct subconvolution_params {
   void* weights;
   size_t w_stride;

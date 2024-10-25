@@ -26,20 +26,6 @@
 #include "replicable_random_device.h"
 
 template <typename T>
-class NumericLimits {
- public:
-  static constexpr T min() { return std::numeric_limits<T>::min(); }
-  static constexpr T max() { return std::numeric_limits<T>::max(); }
-};
-
-template <>
-class NumericLimits<xnn_float16> {
- public:
-  static xnn_float16 min() { return -std::numeric_limits<float>::infinity(); }
-  static xnn_float16 max() { return +std::numeric_limits<float>::infinity(); }
-};
-
-template <typename T>
 struct UniformDistribution {
   std::uniform_real_distribution<T> dist{-10.0f, 10.0f};
 

@@ -14,15 +14,11 @@
 
 
 static void xnnpack_ceiling_f16(benchmark::State& state) {
-  benchmark_unary_operator<xnn_float16, xnn_float16>(xnn_create_ceiling_nc_f16,
-                                             xnn_reshape_ceiling_nc_f16,
-                                             xnn_setup_ceiling_nc_f16, state);
+  benchmark_unary_operator<xnn_float16, xnn_float16>(state, xnn_unary_ceiling);
 }
 
 static void xnnpack_ceiling_f32(benchmark::State& state) {
-  benchmark_unary_operator<float, float>(xnn_create_ceiling_nc_f32,
-                                         xnn_reshape_ceiling_nc_f32,
-                                         xnn_setup_ceiling_nc_f32, state);
+  benchmark_unary_operator<float, float>(state, xnn_unary_ceiling);
 }
 
 BENCHMARK(xnnpack_ceiling_f16)
