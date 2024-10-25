@@ -989,7 +989,7 @@ TEST_F(DeconvolutionTestQD8F32QC8W, internally_allocated_dynamic_quantization_pa
                           subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr,
                           /*external_id=*/3, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-  ASSERT_EQ(xnn_status_success, xnn_define_convert(subgraph, input_id, dq_quantized_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr, input_id, dq_quantized_id, /*flags=*/0));
   ASSERT_EQ(
     xnn_status_success,
     xnn_define_deconvolution_2d(

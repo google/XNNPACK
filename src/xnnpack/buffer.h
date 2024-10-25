@@ -8,9 +8,79 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
+#include <cstdlib>
 #include <initializer_list>
+#include <limits>
+#include <type_traits>
+
+#include "xnnpack.h"
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
 
 namespace xnnpack {
+
+template <typename T>
+class NumericLimits {
+ public:
+  static constexpr T min() { return std::numeric_limits<T>::lowest(); }
+  static constexpr T max() { return std::numeric_limits<T>::max(); }
+};
+
+template <>
+class NumericLimits<xnn_float16> {
+ public:
+  static xnn_float16 min() { return std::numeric_limits<float>::lowest(); }
+  static xnn_float16 max() { return std::numeric_limits<float>::max(); }
+};
+
+template <typename T>
+xnn_datatype datatype_of() {
+  if (std::is_same<T, uint8_t>::value) {
+    return xnn_datatype_quint8;
+  } else if (std::is_same<T, int8_t>::value) {
+    return xnn_datatype_qint8;
+  } else if (std::is_same<T, int16_t>::value) {
+    // TODO: We don't have this type...
+    return xnn_datatype_qint8;
+  } else if (std::is_same<T, xnn_float16>::value) {
+    return xnn_datatype_fp16;
+  } else if (std::is_same<T, float>::value) {
+    return xnn_datatype_fp32;
+  } else if (std::is_same<T, int32_t>::value) {
+    return xnn_datatype_int32;
+  } else if (std::is_same<T, uint32_t>::value) {
+    // TODO: We don't have this type...
+    return xnn_datatype_quint8;
+  } else {
+    XNN_UNREACHABLE;
+  }
+}
+
+inline bool is_quantized(xnn_datatype datatype) {
+  switch (datatype) {
+    case xnn_datatype_qint8:
+    case xnn_datatype_quint8:
+      return true;
+    default:
+      return false;
+  }
+}
+
+inline size_t datatype_size(xnn_datatype datatype) {
+  switch (datatype) {
+    case xnn_datatype_qint8:
+    case xnn_datatype_quint8:
+      return 1;
+    case xnn_datatype_fp16:
+      return 2;
+    case xnn_datatype_fp32:
+    case xnn_datatype_int32:
+      return 4;
+    default:
+      XNN_UNREACHABLE;
+  }
+}
 
 // This is a container similar to std::vector, but it leaves the memory
 // uninitialized, supports alignment.
@@ -65,7 +135,7 @@ class Buffer {
   using const_iterator = const T*;
 
   Buffer() : data_(nullptr), size_(0) {}
-  Buffer(size_t size)
+  explicit Buffer(size_t size)
       : data_(reinterpret_cast<T*>(allocate(size * sizeof(T)))), size_(size) {}
   Buffer(size_t size, T value) : Buffer(size) {
     std::fill(begin(), end(), value);

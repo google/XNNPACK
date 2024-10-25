@@ -14,14 +14,12 @@
 
 static void xnnpack_bankers_rounding_f16(benchmark::State& state) {
   benchmark_unary_operator<xnn_float16, xnn_float16>(
-      xnn_create_bankers_rounding_nc_f16, xnn_reshape_bankers_rounding_nc_f16,
-      xnn_setup_bankers_rounding_nc_f16, state);
+      state, xnn_unary_bankers_rounding);
 }
 
 static void xnnpack_bankers_rounding_f32(benchmark::State& state) {
   benchmark_unary_operator<float, float>(
-      xnn_create_bankers_rounding_nc_f32, xnn_reshape_bankers_rounding_nc_f32,
-      xnn_setup_bankers_rounding_nc_f32, state);
+      state, xnn_unary_bankers_rounding);
 }
 
 BENCHMARK(xnnpack_bankers_rounding_f16)

@@ -19,45 +19,27 @@
 
 
 static void xnnpack_leaky_relu_f16(benchmark::State& state) {
-  benchmark_unary_operator<xnn_float16, xnn_float16>(
-      [](uint32_t flags, xnn_operator_t* op) {
-        return xnn_create_leaky_relu_nc_f16(
-
-            0.01f /* negative slope */, flags, op);
-      },
-      xnn_reshape_leaky_relu_nc_f16, xnn_setup_leaky_relu_nc_f16, state);
+  xnn_unary_params params;
+  params.leaky_relu.negative_slope = 0.1f;
+  benchmark_unary_operator<xnn_float16, xnn_float16>(state, xnn_unary_leaky_relu, &params);
 }
 
 static void xnnpack_leaky_relu_f32(benchmark::State& state) {
-  benchmark_unary_operator<float, float>(
-      [](uint32_t flags, xnn_operator_t* op) {
-        return xnn_create_leaky_relu_nc_f32(
-
-            0.01f /* negative slope */, flags, op);
-      },
-      xnn_reshape_leaky_relu_nc_f32, xnn_setup_leaky_relu_nc_f32, state);
+  xnn_unary_params params;
+  params.leaky_relu.negative_slope = 0.1f;
+  benchmark_unary_operator<float, float>(state, xnn_unary_leaky_relu, &params);
 }
 
 static void xnnpack_leaky_relu_qs8(benchmark::State& state) {
-  benchmark_unary_operator<int8_t, int8_t>(
-      [](uint32_t flags, xnn_operator_t* op) {
-        return xnn_create_leaky_relu_nc_qs8(
-            0.1f /* negative slope */, 5 /* input zero point */,
-            0.75f /* input scale */, -5 /* output zero point */,
-            0.5f /* output scale */, flags, op);
-      },
-      xnn_reshape_leaky_relu_nc_qs8, xnn_setup_leaky_relu_nc_qs8, state);
+  xnn_unary_params params;
+  params.leaky_relu.negative_slope = 0.1f;
+  benchmark_unary_operator<int8_t, int8_t>(state, xnn_unary_leaky_relu, &params, {5, 0.75f}, {-5, 0.5f});
 }
 
 static void xnnpack_leaky_relu_qu8(benchmark::State& state) {
-  benchmark_unary_operator<uint8_t, uint8_t>(
-      [](uint32_t flags, xnn_operator_t* op) {
-        return xnn_create_leaky_relu_nc_qu8(
-            0.1f /* negative slope */, 5 /* input zero point */,
-            0.75f /* input scale */, -5 /* output zero point */,
-            0.5f /* output scale */, flags, op);
-      },
-      xnn_reshape_leaky_relu_nc_qu8, xnn_setup_leaky_relu_nc_qu8, state);
+  xnn_unary_params params;
+  params.leaky_relu.negative_slope = 0.1f;
+  benchmark_unary_operator<uint8_t, uint8_t>(state, xnn_unary_leaky_relu, &params, {125, 0.75f}, {128, 0.5f});
 }
 
 BENCHMARK(xnnpack_leaky_relu_f16)

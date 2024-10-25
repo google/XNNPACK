@@ -18,33 +18,21 @@
 
 
 static void xnnpack_elu_f16(benchmark::State& state) {
-  benchmark_unary_operator<xnn_float16, xnn_float16>(
-      [](uint32_t flags, xnn_operator_t* op) {
-        return xnn_create_elu_nc_f16(
-            /*alpha=*/1.0f, flags, op);
-      },
-      xnn_reshape_elu_nc_f16, xnn_setup_elu_nc_f16, state);
+  xnn_unary_params params;
+  params.elu.alpha = 1.0f;
+  benchmark_unary_operator<xnn_float16, xnn_float16>(state, xnn_unary_elu, &params);
 }
 
 static void xnnpack_elu_f32(benchmark::State& state) {
-  benchmark_unary_operator<float, float>(
-      [](uint32_t flags, xnn_operator_t* op) {
-        return xnn_create_elu_nc_f32(
-            /*alpha=*/1.0f, flags, op);
-      },
-      xnn_reshape_elu_nc_f32, xnn_setup_elu_nc_f32, state);
+  xnn_unary_params params;
+  params.elu.alpha = 1.0f;
+  benchmark_unary_operator<float, float>(state, xnn_unary_elu, &params);
 }
 
 static void xnnpack_elu_qs8(benchmark::State& state) {
-  benchmark_unary_operator<int8_t, int8_t>(
-      [](uint32_t flags, xnn_operator_t* op) {
-        return xnn_create_elu_nc_qs8(
-            1.0f /* alpha */, 0 /* input zero point */, 1.0f /* input scale */,
-            0 /* output zero point */, 1.0f /* output scale */,
-            std::numeric_limits<int8_t>::min(),
-            std::numeric_limits<int8_t>::max(), flags, op);
-      },
-      xnn_reshape_elu_nc_qs8, xnn_setup_elu_nc_qs8, state);
+  xnn_unary_params params;
+  params.elu.alpha = 1.0f;
+  benchmark_unary_operator<int8_t, int8_t>(state, xnn_unary_elu, &params, {0, 1.0f}, {0, 1.0f});
 }
 
 BENCHMARK(xnnpack_elu_f16)

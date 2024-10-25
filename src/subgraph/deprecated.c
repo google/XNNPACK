@@ -212,3 +212,126 @@ enum xnn_status xnn_define_global_sum_pooling_2d(
 
   return xnn_status_success;
 }
+
+enum xnn_status xnn_define_convert(xnn_subgraph_t subgraph, uint32_t input_id,
+                                   uint32_t output_id, uint32_t flags) {
+  return xnn_define_unary(subgraph, xnn_unary_convert, NULL, input_id, output_id,
+                          flags);
+}
+
+enum xnn_status xnn_define_abs(xnn_subgraph_t subgraph, uint32_t input_id,
+                               uint32_t output_id, uint32_t flags) {
+  return xnn_define_unary(subgraph, xnn_unary_abs, NULL, input_id, output_id, 
+                          flags);
+}
+
+enum xnn_status xnn_define_bankers_rounding(xnn_subgraph_t subgraph,
+                                            uint32_t input_id,
+                                            uint32_t output_id,
+                                            uint32_t flags) {
+  return xnn_define_unary(subgraph, xnn_unary_bankers_rounding, NULL, input_id,
+                          output_id, flags);
+}
+
+enum xnn_status xnn_define_ceiling(xnn_subgraph_t subgraph, uint32_t input_id,
+                                   uint32_t output_id, uint32_t flags) {
+  return xnn_define_unary(subgraph, xnn_unary_ceiling, NULL, input_id, output_id,
+                          flags);
+}
+
+enum xnn_status xnn_define_clamp(xnn_subgraph_t subgraph, float output_min,
+                                 float output_max, uint32_t input_id,
+                                 uint32_t output_id, uint32_t flags) {
+  union xnn_unary_params params;
+  params.clamp.min = output_min;
+  params.clamp.max = output_max;
+  return xnn_define_unary(subgraph, xnn_unary_clamp, &params, input_id, output_id,
+                          flags);
+}
+
+enum xnn_status xnn_define_elu(xnn_subgraph_t subgraph, float alpha,
+                               uint32_t input_id, uint32_t output_id,
+                               uint32_t flags) {
+  union xnn_unary_params params;
+  params.elu.alpha = alpha;
+  return xnn_define_unary(subgraph, xnn_unary_elu, &params, input_id, output_id,
+                          flags);
+}
+
+enum xnn_status xnn_define_exp(xnn_subgraph_t subgraph, uint32_t input_id,
+                               uint32_t output_id, uint32_t flags) {
+  return xnn_define_unary(subgraph, xnn_unary_exp, NULL, input_id, output_id,
+                          flags);
+}
+
+enum xnn_status xnn_define_floor(xnn_subgraph_t subgraph, uint32_t input_id,
+                                 uint32_t output_id, uint32_t flags) {
+  return xnn_define_unary(subgraph, xnn_unary_floor, NULL, input_id, output_id,
+                          flags);
+}
+
+enum xnn_status xnn_define_gelu(xnn_subgraph_t subgraph, uint32_t input_id,
+                                uint32_t output_id, uint32_t flags) {
+  return xnn_define_unary(subgraph, xnn_unary_gelu, NULL, input_id, output_id,
+                          flags);
+}
+
+enum xnn_status xnn_define_hardswish(xnn_subgraph_t subgraph, uint32_t input_id,
+                                     uint32_t output_id, uint32_t flags) {
+  return xnn_define_unary(subgraph, xnn_unary_hardswish, NULL, input_id, output_id,
+                          flags);
+}
+
+enum xnn_status xnn_define_leaky_relu(xnn_subgraph_t subgraph,
+                                      float negative_slope, uint32_t input_id,
+                                      uint32_t output_id, uint32_t flags) {
+  union xnn_unary_params params;
+  params.leaky_relu.negative_slope = negative_slope;
+  return xnn_define_unary(subgraph, xnn_unary_leaky_relu, &params, input_id, output_id,
+                          flags);
+}
+
+enum xnn_status xnn_define_log(xnn_subgraph_t subgraph, uint32_t input_id,
+                               uint32_t output_id, uint32_t flags) {
+  return xnn_define_unary(subgraph, xnn_unary_log, NULL, input_id, output_id,
+                          flags);
+}
+
+enum xnn_status xnn_define_negate(xnn_subgraph_t subgraph, uint32_t input_id,
+                                  uint32_t output_id, uint32_t flags) {
+  return xnn_define_unary(subgraph, xnn_unary_negate, NULL, input_id, output_id,
+                          flags);
+}
+
+enum xnn_status xnn_define_sigmoid(xnn_subgraph_t subgraph, uint32_t input_id,
+                                   uint32_t output_id, uint32_t flags) {
+  return xnn_define_unary(subgraph, xnn_unary_sigmoid, NULL, input_id, output_id,
+                          flags);
+}
+
+enum xnn_status xnn_define_square(xnn_subgraph_t subgraph, uint32_t input_id,
+                                  uint32_t output_id, uint32_t flags) {
+  return xnn_define_unary(subgraph, xnn_unary_square, NULL, input_id, output_id,
+                          flags);
+}
+
+enum xnn_status xnn_define_square_root(xnn_subgraph_t subgraph,
+                                       uint32_t input_id, uint32_t output_id,
+                                       uint32_t flags) {
+  return xnn_define_unary(subgraph, xnn_unary_square_root, NULL, input_id, output_id,
+                          flags);
+}
+
+enum xnn_status xnn_define_reciprocal_square_root(xnn_subgraph_t subgraph,
+                                                  uint32_t input_id,
+                                                  uint32_t output_id,
+                                                  uint32_t flags) {
+  return xnn_define_unary(subgraph, xnn_unary_reciprocal_square_root, NULL, input_id,
+                          output_id, flags);
+}
+
+enum xnn_status xnn_define_tanh(xnn_subgraph_t subgraph, uint32_t input_id,
+                                uint32_t output_id, uint32_t flags) {
+  return xnn_define_unary(subgraph, xnn_unary_tanh, NULL, input_id, output_id,
+                          flags);
+}

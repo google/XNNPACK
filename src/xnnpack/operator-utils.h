@@ -65,6 +65,8 @@ XNN_INTERNAL uint32_t xnn_get_heuristic_mr_igemm(
   uint32_t nr,
   struct xnn_hmp_igemm_ukernel *igemm_cases);
 
+XNN_INTERNAL enum xnn_status xnn_destroy_operator(xnn_operator_t op);
+
 #ifdef __cplusplus
 }
 #endif

@@ -692,7 +692,7 @@ TEST_F(BatchMatrixMultiplyTestQD8ToF32, matches_operator_api) {
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
   // Define the ops.
-  ASSERT_EQ(xnn_status_success, xnn_define_convert(subgraph, input1_f32_id,
+  ASSERT_EQ(xnn_status_success, xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr, input1_f32_id,
                                                    input1_id, /*flags=*/0));
   ASSERT_EQ(xnn_status_success,
             xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id,
