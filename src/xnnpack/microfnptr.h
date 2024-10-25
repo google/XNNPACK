@@ -1535,7 +1535,7 @@ typedef void (*xnn_f32_rdsum_ukernel_fn)(
     size_t input_stride,
     const float* zero,
     float* output,
-    const struct xnn_f32_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f32_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_qs8_rdsum_ukernel_fn)(
     size_t rows,
@@ -1572,7 +1572,7 @@ typedef void (*xnn_f32_rsum_ukernel_fn)(
     size_t batch,
     const float* input,
     float* output,
-    const struct xnn_f32_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f32_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_qs8_rsum_ukernel_fn)(
     size_t batch,

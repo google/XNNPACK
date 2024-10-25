@@ -21,7 +21,7 @@ void xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16(
     size_t input_stride,
     const float* zero,
     float* output,
-    const struct xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -29,8 +29,6 @@ void xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16(
   assert(output != NULL);
 
   const v128_t vscale = wasm_v128_load32_splat(&params->scalar.scale);
-  const v128_t vmin = wasm_v128_load32_splat(&params->scalar.min);
-  const v128_t vmax = wasm_v128_load32_splat(&params->scalar.max);
 
   size_t input_increment = 7 * input_stride;
   for (; channels >= 16; channels -= 16) {
@@ -135,17 +133,9 @@ void xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16(
       i6 = (const float*) ((uintptr_t) i6 + input_increment);
     }
     vacc0 = wasm_f32x4_mul(vacc0, vscale);
-    vacc0 = wasm_f32x4_max(vacc0, vmin);
-    vacc0 = wasm_f32x4_min(vacc0, vmax);
     vacc1 = wasm_f32x4_mul(vacc1, vscale);
-    vacc1 = wasm_f32x4_max(vacc1, vmin);
-    vacc1 = wasm_f32x4_min(vacc1, vmax);
     vacc2 = wasm_f32x4_mul(vacc2, vscale);
-    vacc2 = wasm_f32x4_max(vacc2, vmin);
-    vacc2 = wasm_f32x4_min(vacc2, vmax);
     vacc3 = wasm_f32x4_mul(vacc3, vscale);
-    vacc3 = wasm_f32x4_max(vacc3, vmin);
-    vacc3 = wasm_f32x4_min(vacc3, vmax);
 
     const float* o = output;
     v128_t vo0 = wasm_v128_load(o); o += 4;
@@ -217,8 +207,6 @@ void xnn_f32_rdsum_ukernel_7p7x__wasmsimd_c16(
     }
     for (int i = 0; i < num_chunks; ++i) {
       vacc[i] = wasm_f32x4_mul(vacc[i], vscale);
-      vacc[i] = wasm_f32x4_max(vacc[i], vmin);
-      vacc[i] = wasm_f32x4_min(vacc[i], vmax);
     }
 
     v128_t vo[4];
