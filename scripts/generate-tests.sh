@@ -192,9 +192,6 @@ tools/generate-rdsum-test.py --spec test/f32-rdsum.yaml --output test/f32-rdsum.
 tools/generate-rdsum-test.py --spec test/qs8-rdsum-minmax-fp32.yaml --output test/qs8-rdsum-minmax-fp32.cc &
 tools/generate-rdsum-test.py --spec test/qu8-rdsum.yaml --output test/qu8-rdsum.cc &
 
-### Tests for LUT micro-kernels
-tools/generate-lut-test.py --spec test/x8-lut.yaml --output test/x8-lut.cc &
-
 ### Tests for Conv HWC layout micro-kernels
 tools/generate-conv-hwc-test.py --spec test/f32-conv-hwc.yaml --output test/f32-conv-hwc.cc &
 
