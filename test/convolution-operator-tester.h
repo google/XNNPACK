@@ -2385,7 +2385,7 @@ class ConvolutionOperatorTester {
               // FP16 saturates, it's the nature of the beast. If both reference and
               // actual are infinity, then consider the output to be correct.
               const bool reference_infinity = std::isinf(output_ref[(((i * oh + y) * ow + x) * groups() + g) * group_output_channels() + c]);
-              const bool actual_infinity = std::isinf(output[((i * oh + y) * ow + x) * output_channel_stride() + g * group_output_channels() + c]);
+              const bool actual_infinity = std::isinf((float)output[((i * oh + y) * ow + x) * output_channel_stride() + g * group_output_channels() + c]);
               const float tolerance = std::max(1.0e-4f, std::abs(output_ref[(((i * oh + y) * ow + x) * groups() + g) * group_output_channels() + c]) * 2.0e-2f);
               if (reference_infinity && actual_infinity) {
                 continue;

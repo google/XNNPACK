@@ -43,7 +43,7 @@ static void f16_rminmax(
     init_params(&params);
   }
 
-  xnn_float16 output[2] = {std::nanf(""), std::nanf("")};
+  xnn_float16 output[2];
   for (auto _ : state) {
     rminmax(elements * sizeof(xnn_float16), input.data(), output, &params);
   }

@@ -426,6 +426,45 @@ XNN_INLINE static uint16_t math_cvt_bf16_fp32(float x) {
 }  // extern "C"
 #endif
 
+// We want to use _Float16 if the compiler supports it fully, but it's
+// tricky to do this detection; there are compiler versions that define the
+// type in broken ways. We're only going to bother using it if the support is
+// known to be at least a robust f16<->f32 conversion, which generally means a
+// recent version of Clang or GCC, x86 or ARM or RISC-V architectures, and
+// (in some cases) the right architecture flags specified on the command line.
+
+#ifndef XNN_HAVE_FLOAT16
+
+// Some non-GCC compilers define __GNUC__, but we only want to detect the Real
+// Thing
+#if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && \
+    !defined(__INTEL_LLVM_COMPILER)
+#define XNN_GNUC_ACTUAL __GNUC__
+#else
+#define XNN_GNUC_ACTUAL 0
+#endif
+
+#if (defined(__i386__) || defined(__x86_64__)) && defined(__SSE2__) && \
+    defined(__FLT16_MAX__) &&                                          \
+    ((__clang_major__ >= 15 && !defined(_MSC_VER)) || (XNN_GNUC_ACTUAL >= 12))
+#define XNN_HAVE_FLOAT16 1
+#endif
+
+#if (defined(__aarch64__) && !defined(_MSC_VER)) &&     \
+    ((defined(__clang__) && (__clang_major__ >= 15)) || \
+     (XNN_GNUC_ACTUAL >= 13))
+#define XNN_HAVE_FLOAT16 1
+#endif
+
+#if defined(__riscv) && defined(__riscv_zvfh) && __clang__ >= 1600
+#define XNN_HAVE_FLOAT16 1
+#endif
+
+#endif  // XNN_HAVE_FLOAT16
+
+#ifdef XNN_HAVE_FLOAT16
+typedef _Float16 xnn_float16;
+#else
 // We want float16s to be a distinct type from uint16_t, to avoid accidental
 // reinterpret casts as integers. This type is designed to produce errors when
 // using it as an arithmetic type in C, and designed to emulate a native float16
@@ -441,6 +480,7 @@ struct xnn_float16 {
 #endif
 };
 typedef struct xnn_float16 xnn_float16;
+#endif
 
 struct xnn_bfloat16 {
   uint16_t value;
@@ -460,13 +500,21 @@ extern "C" {
 #endif
 
 XNN_INLINE static xnn_float16 xnn_float16_from_float(float f) {
+#ifdef XNN_HAVE_FLOAT16
+  return f;
+#else
   struct xnn_float16 result;
   result.value = fp16_ieee_from_fp32_value(f);
   return result;
+#endif
 }
 
 XNN_INLINE static float xnn_float16_to_float(xnn_float16 fp16) {
+#ifdef XNN_HAVE_FLOAT16
+  return (float) fp16;
+#else
   return fp16_ieee_to_fp32_value(fp16.value);
+#endif
 }
 
 XNN_INLINE static xnn_bfloat16 xnn_bfloat16_from_float(float f) {
@@ -480,14 +528,22 @@ XNN_INLINE static float xnn_bfloat16_to_float(xnn_bfloat16 bf16) {
 }
 
 XNN_INLINE static xnn_float16 xnn_float16_zero() {
+#ifdef XNN_HAVE_FLOAT16
+  return 0.0f;
+#else
   struct xnn_float16 result;
   result.value = 0;
   return result;
+#endif
 }
 
 XNN_INLINE static bool xnn_float16_is_zero(xnn_float16 f) {
+#ifdef XNN_HAVE_FLOAT16
+  return f == 0.0f || f == -0.0f;
+#else
   // Check for +/- zero (0x0000/0x8000). uint16 overflow is well defined to wrap around.
   return f.value * 2 == 0;
+#endif
 }
 
 #ifdef __cplusplus
