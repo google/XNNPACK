@@ -256,8 +256,6 @@ struct xnn_operator {
     struct xnn_qu8_reduce_minmax_params qu8_reduce;
     union xnn_qu8_conv_minmax_params qu8_conv_minmax;
     struct xnn_qu8_avgpool_minmax_params qu8_avgpool;
-    union xnn_qs8_hswish_params qs8_hswish;
-    union xnn_qu8_hswish_params qu8_hswish;
     struct xnn_qs8_lrelu_params qs8_lrelu;
     struct xnn_qu8_lrelu_params qu8_lrelu;
     struct xnn_s8_minmax_params s8_minmax;

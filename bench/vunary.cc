@@ -134,18 +134,6 @@ struct Config<uint8_t, xnn_qu8_lrelu_params> {
       xnn_init_qu8_lrelu_scalar_params, 0.1f, 1.0f, 1, 1);
 };
 
-template <>
-struct Config<int8_t, xnn_qs8_hswish_params> {
-  xnn_qs8_hswish_params params = make_params<xnn_qs8_hswish_params>(
-      xnn_init_qs8_hswish_scalar_params, 0, 0, 1.0f, 1.0f);
-};
-
-template <>
-struct Config<uint8_t, xnn_qu8_hswish_params> {
-  xnn_qu8_hswish_params params = make_params<xnn_qu8_hswish_params>(
-      xnn_init_qu8_hswish_scalar_params, 0, 0, 1.0f, 1.0f);
-};
-
 // Microkernel function, templated on the `params` type.
 template <typename TIn, typename TOut, typename UKernelParams>
 using UKernelFn = void (*)(size_t, const TIn*, TOut*,
@@ -230,9 +218,7 @@ void vunary(benchmark::State& state, uint64_t arch_flags,
 #include "f32-vsqr/f32-vsqr.h"
 #include "f32-vsqrt/f32-vsqrt.h"
 #include "f32-vtanh/f32-vtanh.h"
-#include "qs8-vhswish/qs8-vhswish.h"
 #include "qs8-vlrelu/qs8-vlrelu.h"
-#include "qu8-vhswish/qu8-vhswish.h"
 #include "qu8-vlrelu/qu8-vlrelu.h"
 #include "s8-vclamp/s8-vclamp.h"
 #include "u8-vclamp/u8-vclamp.h"

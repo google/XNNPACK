@@ -87,12 +87,10 @@ struct xnn_unary_elementwise_config {
     xnn_init_qs8_cvt_params_fn qs8_cvt;
     xnn_init_qs8_f16_cvt_params_fn qs8_f16_cvt;
     xnn_init_qs8_f32_cvt_params_fn qs8_f32_cvt;
-    xnn_init_qs8_hswish_params_fn qs8_hswish;
     xnn_init_qs8_lrelu_params_fn qs8_lrelu;
     xnn_init_qs16_qs8_cvt_params_fn qs16_qs8_cvt;
     xnn_init_qu8_cvt_params_fn qu8_cvt;
     xnn_init_qu8_f32_cvt_params_fn qu8_f32_cvt;
-    xnn_init_qu8_hswish_params_fn qu8_hswish;
     xnn_init_qu8_lrelu_params_fn qu8_lrelu;
     xnn_init_s8_minmax_params_fn s8_minmax;
     xnn_init_u8_minmax_params_fn u8_minmax;

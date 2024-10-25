@@ -1504,9 +1504,7 @@ IF(XNNPACK_BUILD_TESTS)
       qu8-rdsum
       qs8-rsum
       qu8-rsum
-      qs8-vhswish
       qs8-vlrelu
-      qu8-vhswish
       qu8-vlrelu
       s8-ibilinear
       u8-ibilinear

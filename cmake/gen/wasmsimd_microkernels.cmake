@@ -942,9 +942,6 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/qs8-vaddc-minmax-wasmsimd-u24.c
   src/qs8-vcvt/gen/qs8-vcvt-wasmsimd-u8.c
   src/qs8-vcvt/gen/qs8-vcvt-wasmsimd-u32.c
-  src/qs8-vhswish/gen/qs8-vhswish-wasmsimd-u8.c
-  src/qs8-vhswish/gen/qs8-vhswish-wasmsimd-u16.c
-  src/qs8-vhswish/gen/qs8-vhswish-wasmsimd-u32.c
   src/qs8-vlrelu/gen/qs8-vlrelu-wasmsimd-arm-u16.c
   src/qs8-vlrelu/gen/qs8-vlrelu-wasmsimd-x86-u8.c
   src/qs8-vlrelu/gen/qs8-vlrelu-wasmsimd-x86-u32.c
@@ -1018,9 +1015,6 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/qu8-vaddc/gen/qu8-vaddc-minmax-wasmsimd-u16.c
   src/qu8-vcvt/gen/qu8-vcvt-wasmsimd-u8.c
   src/qu8-vcvt/gen/qu8-vcvt-wasmsimd-u32.c
-  src/qu8-vhswish/gen/qu8-vhswish-wasmsimd-u8.c
-  src/qu8-vhswish/gen/qu8-vhswish-wasmsimd-u16.c
-  src/qu8-vhswish/gen/qu8-vhswish-wasmsimd-u32.c
   src/qu8-vlrelu/gen/qu8-vlrelu-wasmsimd-arm-u16.c
   src/qu8-vlrelu/gen/qu8-vlrelu-wasmsimd-x86-u8.c
   src/qu8-vlrelu/gen/qu8-vlrelu-wasmsimd-x86-u32.c

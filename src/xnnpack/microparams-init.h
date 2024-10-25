@@ -241,32 +241,6 @@ XNN_INTERNAL size_t xnn_init_f32_qb4w_minmax_scalar_params(
   uint8_t kernel_zero_point,
   size_t blocksize);
 
-#define DECLARE_INIT_QS8_HSWISH_PARAMS_FUNCTION(fn_name)       \
-  XNN_INTERNAL size_t fn_name(                                 \
-    union xnn_qs8_hswish_params params[XNN_MIN_ELEMENTS(1)],   \
-    int16_t input_zero_point,                                  \
-    int16_t output_zero_point,                                 \
-    float input_scale,                                         \
-    float output_scale);
-
-DECLARE_INIT_QS8_HSWISH_PARAMS_FUNCTION(xnn_init_qs8_hswish_scalar_params)
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_QS8_HSWISH_PARAMS_FUNCTION(xnn_init_qs8_hswish_sse2_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
-#define DECLARE_INIT_QU8_HSWISH_PARAMS_FUNCTION(fn_name)       \
-  XNN_INTERNAL size_t fn_name(                                 \
-    union xnn_qu8_hswish_params params[XNN_MIN_ELEMENTS(1)],   \
-    int16_t input_zero_point,                                  \
-    int16_t output_zero_point,                                 \
-    float input_scale,                                         \
-    float output_scale);
-
-DECLARE_INIT_QU8_HSWISH_PARAMS_FUNCTION(xnn_init_qu8_hswish_scalar_params)
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  DECLARE_INIT_QU8_HSWISH_PARAMS_FUNCTION(xnn_init_qu8_hswish_sse2_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-
 XNN_INTERNAL size_t xnn_init_f16_elu_scalar_params(
   struct xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)],
   xnn_float16 prescale,

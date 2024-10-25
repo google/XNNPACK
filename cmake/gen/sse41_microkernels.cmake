@@ -284,9 +284,6 @@ SET(NON_PROD_SSE41_MICROKERNEL_SRCS
   src/qs8-vaddc/gen/qs8-vaddc-minmax-sse41-mul32-ld32-u32.c
   src/qs8-vcvt/gen/qs8-vcvt-sse41-u8.c
   src/qs8-vcvt/gen/qs8-vcvt-sse41-u16.c
-  src/qs8-vhswish/gen/qs8-vhswish-sse41-u8.c
-  src/qs8-vhswish/gen/qs8-vhswish-sse41-u16.c
-  src/qs8-vhswish/gen/qs8-vhswish-sse41-u32.c
   src/qs8-vlrelu/gen/qs8-vlrelu-sse41-u8.c
   src/qs8-vlrelu/gen/qs8-vlrelu-sse41-u16.c
   src/qs8-vmul/gen/qs8-vmul-minmax-fp32-sse41-mul16-ld64-u8.c
@@ -362,9 +359,6 @@ SET(NON_PROD_SSE41_MICROKERNEL_SRCS
   src/qu8-vaddc/gen/qu8-vaddc-minmax-sse41-mul32-ld32-u16.c
   src/qu8-vcvt/gen/qu8-vcvt-sse41-u8.c
   src/qu8-vcvt/gen/qu8-vcvt-sse41-u16.c
-  src/qu8-vhswish/gen/qu8-vhswish-sse41-u8.c
-  src/qu8-vhswish/gen/qu8-vhswish-sse41-u16.c
-  src/qu8-vhswish/gen/qu8-vhswish-sse41-u32.c
   src/qu8-vlrelu/gen/qu8-vlrelu-sse41-u8.c
   src/qu8-vlrelu/gen/qu8-vlrelu-sse41-u16.c
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-sse41-mul16-ld64-u8.c

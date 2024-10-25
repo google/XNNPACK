@@ -529,42 +529,6 @@ struct xnn_f32_hswish_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
-union xnn_qs8_hswish_params {
-  struct {
-    int16_t input_zero_point;
-    int16_t output_zero_point;
-    int16_t input_scale_div_mantissa;
-    int16_t input_scale_div_exp;
-    int16_t scale_ratio;
-} scalar;
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    int16_t input_zero_point;
-    int16_t output_zero_point;
-    int16_t input_scale_div;
-    int16_t scale_ratio;
-  } sse2;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-};
-
-union xnn_qu8_hswish_params {
-struct {
-    int16_t input_zero_point;
-    int16_t output_zero_point;
-    int16_t input_scale_div_mantissa;
-    int16_t input_scale_div_exp;
-    int16_t scale_ratio;
-  } scalar;
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  struct {
-    int16_t input_zero_point;
-    int16_t output_zero_point;
-    int16_t input_scale_div;
-    int16_t scale_ratio;
-  } sse2;
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-};
-
 
 // LReLU (Leaky ReLU): used by VLRELU microkernels.
 

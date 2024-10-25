@@ -1020,15 +1020,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "qs8_vhswish_test",
-    srcs = [
-        "qs8-vhswish.cc",
-        "vhswish-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "qs8_vlrelu_test",
     srcs = [
         "qs8-vlrelu.cc",
@@ -1079,15 +1070,6 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
-)
-
-xnnpack_unit_test(
-    name = "qu8_vhswish_test",
-    srcs = [
-        "qu8-vhswish.cc",
-        "vhswish-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
 )
 
 xnnpack_unit_test(
