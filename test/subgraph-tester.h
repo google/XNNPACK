@@ -498,7 +498,7 @@ class SubgraphTester {
   }
 
   SubgraphTester& AddPrelu(uint32_t input_id, uint32_t slope_id, uint32_t output_id) {
-    const xnn_status status = xnn_define_prelu(subgraph_.get(), input_id, slope_id, output_id, /*flags=*/0);
+    const xnn_status status = xnn_define_binary(subgraph_.get(), xnn_binary_prelu, /*params=*/nullptr, input_id, slope_id, output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
