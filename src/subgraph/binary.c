@@ -15,6 +15,7 @@
 #include "xnnpack/log.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator-type.h"
+#include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/reshape-helpers.h"
 #include "xnnpack/subgraph-validation.h"
@@ -51,7 +52,7 @@ static enum xnn_status create_binary_operator(
   };
 
   return xnn_create_binary_elementwise_nd(
-    xnn_node_type_to_binary_operator(node->type),
+    node->binary_operator,
     datatype, &a_quantization, &b_quantization, &output_quantization,
     node->flags,
     &opdata->operator_objects[0]);
@@ -161,42 +162,40 @@ enum xnn_status xnn_define_binary(
   uint32_t output_id,
   uint32_t flags)
 {
-  enum xnn_node_type node_type = xnn_binary_operator_to_node_type(type);
-
   enum xnn_status status;
-  if ((status = xnn_subgraph_check_xnnpack_initialized(node_type)) != xnn_status_success) {
+  if ((status = xnn_subgraph_check_xnnpack_initialized(xnn_node_type_binary_elementwise)) != xnn_status_success) {
     return status;
   }
 
-  if ((status = xnn_subgraph_check_nth_input_node_id(node_type, input1_id, subgraph->num_values, 1)) !=
+  if ((status = xnn_subgraph_check_nth_input_node_id(xnn_node_type_binary_elementwise, input1_id, subgraph->num_values, 1)) !=
       xnn_status_success) {
     return status;
   }
 
   const struct xnn_value* input1_value = &subgraph->values[input1_id];
-  status = xnn_subgraph_check_nth_input_type_dense(node_type, input1_id, input1_value, 1);
+  status = xnn_subgraph_check_nth_input_type_dense(xnn_node_type_binary_elementwise, input1_id, input1_value, 1);
   if (status != xnn_status_success) {
     return status;
   }
 
-  if ((status = xnn_subgraph_check_nth_input_node_id(node_type, input2_id, subgraph->num_values, 2)) !=
+  if ((status = xnn_subgraph_check_nth_input_node_id(xnn_node_type_binary_elementwise, input2_id, subgraph->num_values, 2)) !=
       xnn_status_success) {
     return status;
   }
 
   const struct xnn_value* input2_value = &subgraph->values[input2_id];
-  status = xnn_subgraph_check_nth_input_type_dense(node_type, input2_id, input2_value, 2);
+  status = xnn_subgraph_check_nth_input_type_dense(xnn_node_type_binary_elementwise, input2_id, input2_value, 2);
   if (status != xnn_status_success) {
     return status;
   }
 
-  status = xnn_subgraph_check_output_node_id(node_type, output_id, subgraph->num_values);
+  status = xnn_subgraph_check_output_node_id(xnn_node_type_binary_elementwise, output_id, subgraph->num_values);
   if (status != xnn_status_success) {
     return status;
   }
 
   const struct xnn_value* output_value = &subgraph->values[output_id];
-  status = xnn_subgraph_check_output_type_dense(node_type, output_id, output_value);
+  status = xnn_subgraph_check_output_type_dense(xnn_node_type_binary_elementwise, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
   }
@@ -221,13 +220,13 @@ enum xnn_status xnn_define_binary(
     default:
       xnn_log_error(
         "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(node_type), output_id,
+        xnn_binary_operator_to_string(type), output_id,
         xnn_datatype_to_string(output_value->datatype), output_value->datatype);
       return xnn_status_invalid_parameter;
   }
 
   status = xnn_subgraph_check_datatype_matches_two_inputs(
-      node_type, input1_id, input1_value, input2_id, input2_value, output_id, output_value);
+      xnn_node_type_binary_elementwise, input1_id, input1_value, input2_id, input2_value, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
   }
@@ -237,7 +236,8 @@ enum xnn_status xnn_define_binary(
     return xnn_status_out_of_memory;
   }
 
-  node->type = node_type;
+  node->type = xnn_node_type_binary_elementwise;
+  node->binary_operator = type;
   node->compute_type = compute_type;
   node->num_inputs = 2;
   node->inputs[0] = input1_id;

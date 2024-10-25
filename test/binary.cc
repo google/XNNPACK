@@ -21,6 +21,7 @@
 #include "xnnpack.h"
 #include "xnnpack/math.h"
 #include "xnnpack/operator.h"
+#include "xnnpack/operator-utils.h"
 #include "xnnpack/subgraph.h"
 #include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
@@ -133,32 +134,6 @@ bool is_quantized(xnn_datatype t) {
       return true;
     default:
       return false;
-  }
-}
-
-static const char* binary_operator_to_string(
-    xnn_binary_operator operation_type) {
-  switch (operation_type) {
-    case xnn_binary_add:
-      return "Add";
-    case xnn_binary_copysign:
-      return "CopySign";
-    case xnn_binary_divide:
-      return "Divide";
-    case xnn_binary_maximum:
-      return "Maximum";
-    case xnn_binary_minimum:
-      return "Minimum";
-    case xnn_binary_multiply:
-      return "Multiply";
-    case xnn_binary_prelu:
-      return "Prelu";
-    case xnn_binary_subtract:
-      return "Subtract";
-    case xnn_binary_squared_difference:
-      return "SquaredDifference";
-    default:
-      return "Unknown";
   }
 }
 
@@ -448,7 +423,8 @@ void Reshape(xnn_datatype datatype, xnn_binary_operator binary_op) {
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_binary_operator_to_node_type(binary_op));
+  ASSERT_EQ(node->type, xnn_node_type_binary_elementwise);
+  ASSERT_EQ(node->binary_operator, binary_op);
   ASSERT_EQ(node->num_inputs, 2);
   ASSERT_EQ(node->inputs[0], input0_id);
   ASSERT_EQ(node->inputs[1], input1_id);
@@ -531,7 +507,8 @@ void ReshapeBroadcastDim0(xnn_datatype datatype,
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_binary_operator_to_node_type(binary_op));
+  ASSERT_EQ(node->type, xnn_node_type_binary_elementwise);
+  ASSERT_EQ(node->binary_operator, binary_op);
   ASSERT_EQ(node->num_inputs, 2);
   ASSERT_EQ(node->inputs[0], input0_id);
   ASSERT_EQ(node->inputs[1], input1_id);
@@ -613,7 +590,8 @@ void ReshapeBroadcast1D(xnn_datatype datatype, xnn_binary_operator binary_op) {
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_binary_operator_to_node_type(binary_op));
+  ASSERT_EQ(node->type, xnn_node_type_binary_elementwise);
+  ASSERT_EQ(node->binary_operator, binary_op);
   ASSERT_EQ(node->num_inputs, 2);
   ASSERT_EQ(node->inputs[0], input0_id);
   ASSERT_EQ(node->inputs[1], input1_id);
@@ -695,7 +673,8 @@ void ReshapeBroadcast2D(xnn_datatype datatype, xnn_binary_operator binary_op) {
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_binary_operator_to_node_type(binary_op));
+  ASSERT_EQ(node->type, xnn_node_type_binary_elementwise);
+  ASSERT_EQ(node->binary_operator, binary_op);
   ASSERT_EQ(node->num_inputs, 2);
   ASSERT_EQ(node->inputs[0], input0_id);
   ASSERT_EQ(node->inputs[1], input1_id);
@@ -777,7 +756,8 @@ void DegenerateDimension(xnn_datatype datatype, xnn_binary_operator binary_op) {
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_binary_operator_to_node_type(binary_op));
+  ASSERT_EQ(node->type, xnn_node_type_binary_elementwise);
+  ASSERT_EQ(node->binary_operator, binary_op);
   ASSERT_EQ(node->num_inputs, 2);
   ASSERT_EQ(node->inputs[0], input0_id);
   ASSERT_EQ(node->inputs[1], input1_id);
@@ -885,7 +865,7 @@ TEST_P(BinaryTestS32, degenerate_dimension) {
 }
 
 std::string ToString(xnn_binary_operator op) {
-  return binary_operator_to_string(op);
+  return xnn_binary_operator_to_string(op);
 }
 
 INSTANTIATE_TEST_SUITE_P(test, BinaryTestQS8,

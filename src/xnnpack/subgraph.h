@@ -228,6 +228,10 @@ enum xnn_compute_type {
 
 struct xnn_node {
   enum xnn_node_type type;
+  union {
+    enum xnn_binary_operator binary_operator;
+    enum xnn_unary_operator unary_operator;
+  };
   uint32_t id;
   enum xnn_compute_type compute_type;
   /// Static parameters of the operator node.
@@ -578,11 +582,6 @@ enum xnn_status resize_fully_connected_output_tensor(
   size_t num_values,
   size_t old_workspace_size,
   pthreadpool_t threadpool);
-
-XNN_INTERNAL enum xnn_node_type xnn_unary_operator_to_node_type(enum xnn_unary_operator type);
-XNN_INTERNAL enum xnn_unary_operator xnn_node_type_to_unary_operator(enum xnn_node_type type);
-XNN_INTERNAL enum xnn_node_type xnn_binary_operator_to_node_type(enum xnn_binary_operator type);
-XNN_INTERNAL enum xnn_binary_operator xnn_node_type_to_binary_operator(enum xnn_node_type type);
 
 XNN_INTERNAL enum xnn_node_type xnn_reduce_operator_to_node_type(enum xnn_reduce_operator type);
 XNN_INTERNAL enum xnn_reduce_operator xnn_node_type_to_reduce_operator(enum xnn_node_type type);

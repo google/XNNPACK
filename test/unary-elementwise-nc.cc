@@ -22,6 +22,7 @@
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
 #include "xnnpack/operator.h"
+#include "xnnpack/operator-utils.h"
 #include "replicable_random_device.h"
 #include "unary-ops.h"
 

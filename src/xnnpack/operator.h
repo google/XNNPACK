@@ -388,9 +388,6 @@ XNN_INTERNAL enum xnn_status xnn_run_operator_with_index(
   size_t operator_object_index,
   pthreadpool_t threadpool);
 
-XNN_INTERNAL enum xnn_operator_type xnn_unary_operator_to_operator_type(enum xnn_unary_operator op);
-XNN_INTERNAL const char* xnn_unary_operator_to_string(enum xnn_unary_operator op);
-XNN_INTERNAL enum xnn_operator_type xnn_binary_operator_to_operator_type(enum xnn_binary_operator op);
 XNN_INTERNAL enum xnn_operator_type xnn_reduce_operator_to_operator_type(enum xnn_reduce_operator op);
 
 #ifdef __cplusplus

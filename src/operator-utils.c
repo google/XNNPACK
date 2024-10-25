@@ -176,75 +176,79 @@ enum xnn_status xnn_destroy_operator(xnn_operator_t op)
   return xnn_status_success;
 }
 
-enum xnn_operator_type xnn_unary_operator_to_operator_type(enum xnn_unary_operator op) {
- switch (op) {
+
+const char* xnn_unary_operator_to_string(enum xnn_unary_operator op)
+{
+  switch (op) {
     case xnn_unary_abs:
-      return xnn_operator_type_abs;
+      return "abs";
     case xnn_unary_bankers_rounding:
-      return xnn_operator_type_bankers_rounding;
+      return "bankers_rounding";
     case xnn_unary_ceiling:
-      return xnn_operator_type_ceiling;
+      return "ceiling";
     case xnn_unary_clamp:
-      return xnn_operator_type_clamp;
+      return "clamp";
     case xnn_unary_convert:
-      return xnn_operator_type_convert;
+      return "convert";
     case xnn_unary_elu:
-      return xnn_operator_type_elu;
+      return "elu";
     case xnn_unary_exp:
-      return xnn_operator_type_exp;
+      return "exp";
     case xnn_unary_floor:
-      return xnn_operator_type_floor;
+      return "floor";
     case xnn_unary_gelu:
-      return xnn_operator_type_gelu;
+      return "gelu";
     case xnn_unary_hardswish:
-      return xnn_operator_type_hardswish;
+      return "hardswish";
     case xnn_unary_leaky_relu:
-      return xnn_operator_type_leaky_relu;
+      return "leaky_relu";
     case xnn_unary_log:
-      return xnn_operator_type_log;
+      return "log";
     case xnn_unary_negate:
-      return xnn_operator_type_negate;
+      return "negate";
     case xnn_unary_reciprocal_square_root:
-      return xnn_operator_type_reciprocal_square_root;
+      return "reciprocal_square_root";
     case xnn_unary_sigmoid:
-      return xnn_operator_type_sigmoid;
+      return "sigmoid";
     case xnn_unary_square:
-      return xnn_operator_type_square;
+      return "square";
     case xnn_unary_square_root:
-      return xnn_operator_type_square_root;
+      return "square_root";
     case xnn_unary_tanh:
-      return xnn_operator_type_tanh;
-    default:
-      return xnn_operator_type_invalid;
+      return "tanh";
+    case xnn_unary_invalid:
+      return "invalid";
   }
+  XNN_UNREACHABLE;
+  return "unknown";
 }
 
-const char* xnn_unary_operator_to_string(enum xnn_unary_operator op) {
-  return xnn_operator_type_to_string(xnn_unary_operator_to_operator_type(op));
-}
-
-enum xnn_operator_type xnn_binary_operator_to_operator_type(enum xnn_binary_operator op)
+const char* xnn_binary_operator_to_string(enum xnn_binary_operator op)
 {
   switch (op) {
     case xnn_binary_add:
-      return xnn_operator_type_add;
-    case xnn_binary_subtract:
-      return xnn_operator_type_subtract;
-    case xnn_binary_multiply:
-      return xnn_operator_type_multiply;
+      return "add";
     case xnn_binary_divide:
-      return xnn_operator_type_divide;
-    case xnn_binary_maximum:
-      return xnn_operator_type_maximum;
-    case xnn_binary_minimum:
-      return xnn_operator_type_minimum;
+      return "divide";
+    case xnn_binary_multiply:
+      return "multiply";
+    case xnn_binary_subtract:
+      return "subtract";
     case xnn_binary_copysign:
-      return xnn_operator_type_copysign;
+      return "copysign";
     case xnn_binary_squared_difference:
-      return xnn_operator_type_squared_difference;
-    default:
-      return xnn_operator_type_invalid;
+      return "squared_difference";
+    case xnn_binary_prelu:
+      return "prelu";
+    case xnn_binary_minimum:
+      return "minimum";
+    case xnn_binary_maximum:
+      return "maximum";
+    case xnn_binary_invalid:
+      return "invalid";
   }
+  XNN_UNREACHABLE;
+  return "unknown";
 }
 
 enum xnn_operator_type xnn_reduce_operator_to_operator_type(enum xnn_reduce_operator type)

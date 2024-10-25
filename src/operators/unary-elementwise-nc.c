@@ -136,7 +136,7 @@ static enum xnn_status init_op(
     const struct xnn_quantization_params* input_quantization,
     const struct xnn_quantization_params* output_quantization,
     uint32_t flags) {
-  op->type = xnn_unary_operator_to_operator_type(op_type);
+  op->type = xnn_operator_type_unary_elementwise;
   op->flags = flags;
   op->log2_elementwise_input_size = xnn_datatype_get_log2_element_size(input_datatype);
   op->log2_elementwise_output_size = xnn_datatype_get_log2_element_size(output_datatype);

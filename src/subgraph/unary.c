@@ -16,6 +16,7 @@
 #include "xnnpack/microparams.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator-type.h"
+#include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/reshape-helpers.h"
 #include "xnnpack/subgraph-validation.h"
@@ -251,7 +252,7 @@ static enum xnn_status create_unary_operator(
   };
 
   return xnn_create_unary_elementwise_nc(
-    xnn_node_type_to_unary_operator(node->type),
+    node->unary_operator,
     value_in->datatype,
     value_out->datatype,
     &node->params.unary,
@@ -382,18 +383,16 @@ enum xnn_status xnn_define_unary(
   uint32_t output_id,
   uint32_t flags)
 {
-  enum xnn_node_type node_type = xnn_unary_operator_to_node_type(type);
-
   enum xnn_status status;
-  if ((status = xnn_subgraph_check_xnnpack_initialized(node_type)) != xnn_status_success) {
+  if ((status = xnn_subgraph_check_xnnpack_initialized(xnn_node_type_unary_elementwise)) != xnn_status_success) {
     return status;
   }
 
-  if ((status = xnn_subgraph_check_input_node_id(node_type, input_id, subgraph->num_values)) != xnn_status_success) {
+  if ((status = xnn_subgraph_check_input_node_id(xnn_node_type_unary_elementwise, input_id, subgraph->num_values)) != xnn_status_success) {
     return status;
   }
 
-  if ((status = xnn_subgraph_check_output_node_id(node_type, output_id, subgraph->num_values)) != xnn_status_success) {
+  if ((status = xnn_subgraph_check_output_node_id(xnn_node_type_unary_elementwise, output_id, subgraph->num_values)) != xnn_status_success) {
     return status;
   }
 
@@ -405,7 +404,7 @@ enum xnn_status xnn_define_unary(
         xnn_log_error(
           "failed to define %s node with input ID #%" PRIu32 " and output ID #%" PRIu32
           ": missing clamp params",
-          xnn_node_type_to_string(node_type), input_id, output_id);
+          xnn_unary_operator_to_string(type), input_id, output_id);
         return xnn_status_invalid_parameter;
       }
     default:
@@ -413,13 +412,13 @@ enum xnn_status xnn_define_unary(
   }
 
   const struct xnn_value* input_value = &subgraph->values[input_id];
-  status = xnn_subgraph_check_input_type_dense(xnn_node_type_convert, input_id, input_value);
+  status = xnn_subgraph_check_input_type_dense(xnn_node_type_unary_elementwise, input_id, input_value);
   if (status != xnn_status_success) {
     return status;
   }
 
   const struct xnn_value* output_value = &subgraph->values[output_id];
-  status = xnn_subgraph_check_output_type_dense(xnn_node_type_convert, output_id, output_value);
+  status = xnn_subgraph_check_output_type_dense(xnn_node_type_unary_elementwise, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
   }
@@ -429,7 +428,7 @@ enum xnn_status xnn_define_unary(
     xnn_log_error(
       "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
       ": unsupported datatype input (%s) and output (%s)",
-      xnn_node_type_to_string(xnn_node_type_convert), input_id, output_id,
+      xnn_node_type_to_string(xnn_node_type_unary_elementwise), input_id, output_id,
       xnn_datatype_to_string(input_value->datatype),
       xnn_datatype_to_string(output_value->datatype));
     return xnn_status_invalid_parameter;
@@ -480,7 +479,8 @@ enum xnn_status xnn_define_unary(
     return xnn_status_out_of_memory;
   }
 
-  node->type = node_type;
+  node->type = xnn_node_type_unary_elementwise;
+  node->unary_operator = type;
   node->compute_type = compute_type;
   node->num_inputs = 1;
   node->inputs[0] = input_id;

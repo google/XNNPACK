@@ -262,7 +262,7 @@ enum xnn_status xnn_define_space_to_depth_2d(
   }
 
   status = xnn_subgraph_check_quantization_parameter_matches(
-      xnn_node_type_clamp, input_id, input_value, output_id, output_value);
+      xnn_node_type_space_to_depth_2d, input_id, input_value, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
   }
