@@ -81,38 +81,8 @@ void xnn_qs8${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${K
       $for N in range(0, NR, 4):
         __m256i vacc${N} = _mm256_setzero_si256();
 
-      // KC main loop multiple of ${NR}x${KR*2}
+      // KC main loop multiple of ${NR}x${KR}
       size_t k = kc;
-      for (; k >= ${2 * KR}; k -= ${2 * KR}) {
-        $for N in range(NR):
-          const __m128i v${N}_01 = _mm_loadu_si128((const __m128i*) w${N});
-
-        $for N in range(0, NR, 2):
-          const __m256i v${N}_0123 = _mm256_insertf128_si256(_mm256_castsi128_si256(v${N}_01), v${N+1}_01, 1);
-
-        $for N in range(0, NR, 4):
-          const __m256i v${N}_0 = _mm256_unpacklo_epi64(v${N}_0123, v${N+2}_0123);
-          const __m256i v${N}_1 = _mm256_unpackhi_epi64(v${N}_0123, v${N+2}_0123);
-
-        $if PREFETCH:
-          $for N in range(0, NR):
-            xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
-
-        $for N in range(0, NR, 4):
-          vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, v${N}_0);
-        $for N in range(0, NR, 4):
-          vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, v${N}_1);
-
-        $for N in range(0, NR, 4):
-          _mm256_storeu_si256((__m256i *)&out[${N * KR}],  v${N}_0);
-        $for N in range(0, NR, 4):
-          _mm256_storeu_si256((__m256i *)&out[${(N + KR) * KR}],  v${N}_1);
-
-        $for N in range(NR):
-          w${N} += ${2 * KR};
-        out += ${2*NR*KR};
-      }
-
       for (; k >= ${KR}; k -= ${KR}) {
         $for N in range(0, NR, 4):
           __m256i v${N} = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N}));
