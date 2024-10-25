@@ -58,8 +58,6 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x16c4__wasmsdot(
     v128_t vacc0x4567 = wasm_v128_load((const int32_t*) w + 4);
     v128_t vacc0x89AB = wasm_v128_load((const int32_t*) w + 8);
     v128_t vacc0xCDEF = wasm_v128_load((const int32_t*) w + 12);
- 
-
     w = (const int32_t*) w + 16;
 
     size_t p = ks;
