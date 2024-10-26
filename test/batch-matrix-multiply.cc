@@ -546,7 +546,7 @@ TEST_F(BatchMatrixMultiplyTestQD8ToF32, define) {
 
   uint32_t input2_id = XNN_INVALID_VALUE_ID;
   xnnpack::Buffer<float> channelwise_scale(
-      NumElements(input2_dims) / input2_dims.back(),
+      input2_dims.back(),
       1.0f / std::numeric_limits<int8_t>::max());
   ASSERT_EQ(xnn_status_success,
             xnn_define_channelwise_quantized_tensor_value(
