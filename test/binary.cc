@@ -14,73 +14,26 @@
 #include <memory>
 #include <numeric>
 #include <random>
+#include <sstream>
+#include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
-#include "xnnpack/datatype.h"
-#include "xnnpack/math.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/operator-utils.h"
-#include "xnnpack/subgraph.h"
 #include "xnnpack/buffer.h"
+#include "xnnpack/datatype.h"
+#include "xnnpack/log.h"
+#include "xnnpack/math.h"
+#include "xnnpack/operator-utils.h"
+#include "xnnpack/operator.h"
+#include "xnnpack/subgraph.h"
+#include "operator-test-utils.h"
 #include "replicable_random_device.h"
 
-template <typename T>
-struct UniformDistribution {
-  std::uniform_real_distribution<T> dist{-10.0f, 10.0f};
-
-  template <class Generator>
-  T operator()(Generator& g) {
-    return dist(g);
-  }
-};
-
-template <>
-struct UniformDistribution<xnn_float16> {
-  std::uniform_real_distribution<float> dist{-10.0f, 10.0f};
-
-  template <class Generator>
-  xnn_float16 operator()(Generator& g) {
-    return dist(g);
-  }
-};
-
-template <>
-struct UniformDistribution<int8_t> {
-  std::uniform_int_distribution<int> dist{std::numeric_limits<int8_t>::min(),
-                                          std::numeric_limits<int8_t>::max()};
-
-  template <class Generator>
-  int8_t operator()(Generator& g) {
-    return dist(g);
-  }
-};
-
-template <>
-struct UniformDistribution<uint8_t> {
-  std::uniform_int_distribution<int> dist{
-      std::numeric_limits<uint8_t>::min(),
-      std::numeric_limits<uint8_t>::max()};
-
-  template <class Generator>
-  uint8_t operator()(Generator& g) {
-    return dist(g);
-  }
-};
-
-template <>
-struct UniformDistribution<int32_t> {
-  std::uniform_int_distribution<int32_t> dist{
-      std::numeric_limits<int32_t>::min(),
-      std::numeric_limits<int32_t>::max()};
-
-  template <class Generator>
-  int32_t operator()(Generator& g) {
-    return dist(g);
-  }
-};
+using ::testing::Combine;
+using ::testing::Values;
 
 template <typename Rng>
 size_t RandomRank(Rng& rng) {
@@ -100,11 +53,21 @@ std::vector<size_t> RandomShape(Rng& rng) {
   return RandomShape(rng, RandomRank(rng));
 }
 
-template <typename T, typename Rng>
-xnn_quantization_params RandomQuantization(Rng& rng) {
-  if (std::is_same<T, int8_t>::value || std::is_same<T, uint8_t>::value) {
+template <typename Rng>
+xnn_quantization_params RandomQuantization(xnn_datatype datatype, Rng& rng) {
+  if (datatype == xnn_datatype_qint8) {
+    std::uniform_int_distribution<int> dist{std::numeric_limits<int8_t>::min(),
+                                            std::numeric_limits<int8_t>::max()};
     return {
-        static_cast<int32_t>(UniformDistribution<T>()(rng)),
+        static_cast<int32_t>(dist(rng)),
+        std::uniform_real_distribution<float>(0.1f, 5.0f)(rng),
+    };
+  } else if (datatype == xnn_datatype_quint8) {
+    std::uniform_int_distribution<int> dist{
+        std::numeric_limits<uint8_t>::min(),
+        std::numeric_limits<uint8_t>::max()};
+    return {
+        static_cast<int32_t>(dist(rng)),
         std::uniform_real_distribution<float>(0.1f, 5.0f)(rng),
     };
   } else {
@@ -127,29 +90,7 @@ size_t NumElements(const std::vector<size_t>& dims) {
                          std::multiplies<size_t>());
 }
 
-// TODO(dsharlet): We need a place to put helper functions like this.
-// XNNPACK's built-in equivalent helpers are not implemented in release
-// builds...
-const char* datatype_to_string(xnn_datatype datatype) {
-  switch (datatype) {
-    case xnn_datatype_qint8:
-      return "qint8";
-    case xnn_datatype_quint8:
-      return "quint8";
-    case xnn_datatype_fp16:
-      return "fp16";
-    case xnn_datatype_fp32:
-      return "fp32";
-    case xnn_datatype_int32:
-      return "int32";
-    default:
-      XNN_UNREACHABLE;
-  }
-}
-
-template <typename T>
-void MatchesOperatorApi(xnn_binary_operator binary_op) {
-  xnn_datatype datatype = xnn_datatype_of<T>();
+void MatchesOperatorApi(xnn_datatype datatype, xnn_binary_operator binary_op) {
   xnnpack::ReplicableRandomDevice rng;
 
   std::vector<size_t> input0_dims = RandomShape(rng);
@@ -203,24 +144,56 @@ void MatchesOperatorApi(xnn_binary_operator binary_op) {
     output_dims.erase(output_dims.begin());
   }
 
-  xnnpack::Buffer<T, XNN_ALLOCATION_ALIGNMENT> input0(NumElements(input0_dims) +
-                                              XNN_EXTRA_BYTES / sizeof(T));
-  xnnpack::Buffer<T, XNN_ALLOCATION_ALIGNMENT> input1(NumElements(input1_dims) +
-                                              XNN_EXTRA_BYTES / sizeof(T));
-  xnnpack::Buffer<T, XNN_ALLOCATION_ALIGNMENT> operator_output(
-      NumElements(output_dims));
-  xnnpack::Buffer<T, XNN_ALLOCATION_ALIGNMENT> subgraph_output(
-      NumElements(output_dims));
-  UniformDistribution<T> dist;
-  std::generate(input0.begin(), input0.end(), [&]() { return dist(rng); });
-  std::generate(input1.begin(), input1.end(), [&]() { return dist(rng); });
+  size_t datatype_size = xnn_datatype_size_bytes(datatype);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> input0(
+      NumElements(input0_dims) * datatype_size +
+      XNN_EXTRA_BYTES / sizeof(char));
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> input1(
+      NumElements(input1_dims) * datatype_size +
+      XNN_EXTRA_BYTES / sizeof(char));
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> operator_output(
+      NumElements(output_dims) * datatype_size);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> subgraph_output(
+      NumElements(output_dims) * datatype_size);
+
+  double datatype_min, datatype_max;
+  switch (datatype) {
+    case xnn_datatype_quint8:
+      datatype_min = std::numeric_limits<uint8_t>::min();
+      datatype_max = std::numeric_limits<uint8_t>::max();
+      break;
+    case xnn_datatype_qint8:
+      datatype_min = std::numeric_limits<int8_t>::min();
+      datatype_max = std::numeric_limits<int8_t>::max();
+      break;
+    case xnn_datatype_int32:
+      datatype_min = std::numeric_limits<int32_t>::min();
+      datatype_max = std::numeric_limits<int32_t>::max();
+      break;
+    case xnn_datatype_fp16:
+    case xnn_datatype_fp32:
+      datatype_min = -10.0;
+      datatype_max = 10.0;
+      break;
+    default:
+      datatype_min = 0;
+      datatype_max = 0;
+      assert(false);
+      break;
+  }
+  std::uniform_real_distribution<double> dist(datatype_min, datatype_max);
+  randomize_buffer(datatype, rng, dist, input0);
+  randomize_buffer(datatype, rng, dist, input1);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   bool quantized = xnn_datatype_is_quantized(datatype);
-  xnn_quantization_params input0_quantization = RandomQuantization<T>(rng);
-  xnn_quantization_params input1_quantization = RandomQuantization<T>(rng);
-  xnn_quantization_params output_quantization = RandomQuantization<T>(rng);
+  xnn_quantization_params input0_quantization =
+      RandomQuantization(datatype, rng);
+  xnn_quantization_params input1_quantization =
+      RandomQuantization(datatype, rng);
+  xnn_quantization_params output_quantization =
+      RandomQuantization(datatype, rng);
 
   // Call subgraph API.
   xnn_subgraph_t subgraph = nullptr;
@@ -738,118 +711,136 @@ void DegenerateDimension(xnn_datatype datatype, xnn_binary_operator binary_op) {
             xnn_status_success);
 }
 
-template <typename T>
-class BinaryTest : public testing::TestWithParam<xnn_binary_operator> {};
+struct Param {
+  using TupleT = std::tuple<xnn_datatype, xnn_binary_operator>;
+  explicit Param(TupleT p)
+      : datatype(std::get<0>(p)), binary_operator(std::get<1>(p)) {}
 
-using BinaryTestQS8 = BinaryTest<int8_t>;
-using BinaryTestQU8 = BinaryTest<uint8_t>;
-#ifndef XNN_EXCLUDE_F16_TESTS
-using BinaryTestF16 = BinaryTest<xnn_float16>;
-#endif  // XNN_EXCLUDE_F16_TESTS
-using BinaryTestF32 = BinaryTest<float>;
-using BinaryTestS32 = BinaryTest<int32_t>;
+  std::string Name() const {
+    std::stringstream sstr;
+    sstr << xnn_datatype_to_string(datatype) << "_"
+         << xnn_binary_operator_to_string(binary_operator);
+    return sstr.str();
+  }
 
-TEST_P(BinaryTestQS8, matches_operator_api) {
-  MatchesOperatorApi<int8_t>(GetParam());
-}
-TEST_P(BinaryTestQU8, matches_operator_api) {
-  MatchesOperatorApi<uint8_t>(GetParam());
-}
-#ifndef XNN_EXCLUDE_F16_TESTS
-TEST_P(BinaryTestF16, matches_operator_api) {
-  MatchesOperatorApi<xnn_float16>(GetParam());
-}
-#endif  // XNN_EXCLUDE_F16_TESTS
-TEST_P(BinaryTestF32, matches_operator_api) {
-  MatchesOperatorApi<float>(GetParam());
-}
-TEST_P(BinaryTestS32, matches_operator_api) {
-  MatchesOperatorApi<int32_t>(GetParam());
-}
+  xnn_datatype datatype;
+  xnn_binary_operator binary_operator;
+};
 
-#ifndef XNN_EXCLUDE_F16_TESTS
-TEST_P(BinaryTestF16, reshape) { Reshape(xnn_datatype_fp16, GetParam()); }
-#endif  // XNN_EXCLUDE_F16_TESTS
-TEST_P(BinaryTestF32, reshape) { Reshape(xnn_datatype_fp32, GetParam()); }
-TEST_P(BinaryTestS32, reshape) { Reshape(xnn_datatype_int32, GetParam()); }
+class BinaryTest : public testing::TestWithParam<Param> {};
 
-#ifndef XNN_EXCLUDE_F16_TESTS
-TEST_P(BinaryTestF16, reshape_broadcast_dim0) {
-  ReshapeBroadcastDim0(xnn_datatype_fp16, GetParam());
-}
-#endif  // XNN_EXCLUDE_F16_TESTS
-TEST_P(BinaryTestF32, reshape_broadcast_dim0) {
-  ReshapeBroadcastDim0(xnn_datatype_fp32, GetParam());
-}
-TEST_P(BinaryTestS32, reshape_broadcast_dim0) {
-  ReshapeBroadcastDim0(xnn_datatype_int32, GetParam());
-}
-
-#ifndef XNN_EXCLUDE_F16_TESTS
-TEST_P(BinaryTestF16, reshape_broadcast_1d) {
-  ReshapeBroadcast1D(xnn_datatype_fp16, GetParam());
-}
-#endif  // XNN_EXCLUDE_F16_TESTS
-TEST_P(BinaryTestF32, reshape_broadcast_1d) {
-  ReshapeBroadcast1D(xnn_datatype_fp32, GetParam());
-}
-TEST_P(BinaryTestS32, reshape_broadcast_1d) {
-  ReshapeBroadcast1D(xnn_datatype_int32, GetParam());
-}
-
-#ifndef XNN_EXCLUDE_F16_TESTS
-TEST_P(BinaryTestF16, reshape_broadcast_2d) {
-  ReshapeBroadcast2D(xnn_datatype_fp16, GetParam());
-}
-#endif  // XNN_EXCLUDE_F16_TESTS
-TEST_P(BinaryTestF32, reshape_broadcast_2d) {
-  ReshapeBroadcast2D(xnn_datatype_fp32, GetParam());
-}
-TEST_P(BinaryTestS32, reshape_broadcast_2d) {
-  ReshapeBroadcast2D(xnn_datatype_int32, GetParam());
-}
-
-#ifndef XNN_EXCLUDE_F16_TESTS
-TEST_P(BinaryTestF16, degenerate_dimension) {
-  DegenerateDimension(xnn_datatype_fp16, GetParam());
-}
-#endif  // XNN_EXCLUDE_F16_TESTS
-TEST_P(BinaryTestF32, degenerate_dimension) {
-  DegenerateDimension(xnn_datatype_fp32, GetParam());
-}
-TEST_P(BinaryTestS32, degenerate_dimension) {
-  DegenerateDimension(xnn_datatype_int32, GetParam());
-}
-
-std::string ToString(xnn_binary_operator op) {
-  return xnn_binary_operator_to_string(op);
-}
-
-INSTANTIATE_TEST_SUITE_P(test, BinaryTestQS8,
-                         testing::Values(xnn_binary_add, xnn_binary_subtract,
-                                         xnn_binary_multiply),
-                         [](const auto& info) { return ToString(info.param); });
-INSTANTIATE_TEST_SUITE_P(test, BinaryTestQU8,
-                         testing::Values(xnn_binary_add, xnn_binary_subtract,
-                                         xnn_binary_multiply),
-                         [](const auto& info) { return ToString(info.param); });
-#ifndef XNN_EXCLUDE_F16_TESTS
-INSTANTIATE_TEST_SUITE_P(test, BinaryTestF16,
-                         testing::Values(xnn_binary_add, xnn_binary_subtract,
-                                         xnn_binary_multiply, xnn_binary_divide,
-                                         xnn_binary_maximum, xnn_binary_minimum,
-                                         xnn_binary_squared_difference,
-                                         xnn_binary_prelu),
-                         [](const auto& info) { return ToString(info.param); });
+// Some combinations aren't implemented.
+bool SupportedBinaryTest(xnn_datatype datatype, xnn_binary_operator binary_op) {
+  switch (datatype) {
+    case xnn_datatype_quint8:
+    case xnn_datatype_qint8:
+      switch (binary_op) {
+        case xnn_binary_add:
+        case xnn_binary_multiply:
+        case xnn_binary_subtract:
+          return true;
+        default:
+          return false;
+      }
+    case xnn_datatype_int32:
+      switch (binary_op) {
+        case xnn_binary_multiply:
+          return true;
+        default:
+          return false;
+      }
+    case xnn_datatype_fp16:
+#ifdef XNN_EXCLUDE_F16_TESTS
+      return false;
+#else
+      switch (binary_op) {
+        case xnn_binary_add:
+        case xnn_binary_divide:
+        case xnn_binary_maximum:
+        case xnn_binary_minimum:
+        case xnn_binary_multiply:
+        case xnn_binary_prelu:
+        case xnn_binary_squared_difference:
+        case xnn_binary_subtract:
+          return true;
+        default:
+          return false;
+      }
 #endif
-INSTANTIATE_TEST_SUITE_P(test, BinaryTestF32,
-                         testing::Values(xnn_binary_add, xnn_binary_subtract,
-                                         xnn_binary_multiply, xnn_binary_divide,
-                                         xnn_binary_maximum, xnn_binary_minimum,
-                                         xnn_binary_copysign,
-                                         xnn_binary_squared_difference,
-                                         xnn_binary_prelu),
-                         [](const auto& info) { return ToString(info.param); });
-INSTANTIATE_TEST_SUITE_P(test, BinaryTestS32,
-                         testing::Values(xnn_binary_multiply),
-                         [](const auto& info) { return ToString(info.param); });
+    case xnn_datatype_fp32:
+      switch (binary_op) {
+        case xnn_binary_add:
+        case xnn_binary_copysign:
+        case xnn_binary_divide:
+        case xnn_binary_maximum:
+        case xnn_binary_minimum:
+        case xnn_binary_multiply:
+        case xnn_binary_prelu:
+        case xnn_binary_subtract:
+        case xnn_binary_squared_difference:
+          return true;
+        default:
+          return false;
+      }
+    default:
+      return false;
+  }
+}
+
+TEST_P(BinaryTest, matches_operator_api) {
+  if (!SupportedBinaryTest(GetParam().datatype, GetParam().binary_operator)) {
+    GTEST_SKIP();
+  }
+  MatchesOperatorApi(GetParam().datatype, GetParam().binary_operator);
+}
+
+TEST_P(BinaryTest, reshape) {
+  if (!SupportedBinaryTest(GetParam().datatype, GetParam().binary_operator)) {
+    GTEST_SKIP();
+  }
+  if (xnn_datatype_is_quantized(GetParam().datatype)) {
+    GTEST_SKIP();
+  }
+  Reshape(GetParam().datatype, GetParam().binary_operator);
+}
+
+TEST_P(BinaryTest, reshape_broadcast_dim0) {
+  if (!SupportedBinaryTest(GetParam().datatype, GetParam().binary_operator)) {
+    GTEST_SKIP();
+  }
+  if (xnn_datatype_is_quantized(GetParam().datatype)) {
+    GTEST_SKIP();
+  }
+  ReshapeBroadcastDim0(GetParam().datatype, GetParam().binary_operator);
+}
+
+TEST_P(BinaryTest, reshape_broadcast_1d) {
+  if (!SupportedBinaryTest(GetParam().datatype, GetParam().binary_operator)) {
+    GTEST_SKIP();
+  }
+  if (xnn_datatype_is_quantized(GetParam().datatype)) {
+    GTEST_SKIP();
+  }
+  ReshapeBroadcast1D(GetParam().datatype, GetParam().binary_operator);
+}
+
+TEST_P(BinaryTest, reshape_broadcast_2d) {
+  if (!SupportedBinaryTest(GetParam().datatype, GetParam().binary_operator)) {
+    GTEST_SKIP();
+  }
+  if (xnn_datatype_is_quantized(GetParam().datatype)) {
+    GTEST_SKIP();
+  }
+  ReshapeBroadcast2D(GetParam().datatype, GetParam().binary_operator);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    BinaryTest, BinaryTest,
+    testing::ConvertGenerator<Param::TupleT>(Combine(
+        Values(xnn_datatype_quint8, xnn_datatype_qint8, xnn_datatype_fp16,
+               xnn_datatype_fp32, xnn_datatype_int32),
+        Values(xnn_binary_add, xnn_binary_subtract, xnn_binary_multiply,
+               xnn_binary_divide, xnn_binary_maximum, xnn_binary_minimum,
+               xnn_binary_copysign, xnn_binary_squared_difference,
+               xnn_binary_prelu))),
+    [](const auto& info) { return info.param.Name(); });

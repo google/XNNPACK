@@ -76,6 +76,13 @@ xnnpack_cxx_library(
 )
 
 xnnpack_cxx_library(
+    name = "operator_test_utils",
+    testonly = True,
+    hdrs = ["operator-test-utils.h"],
+    deps = [":replicable_random_device"],
+)
+
+xnnpack_cxx_library(
     name = "next_prime",
     testonly = True,
     srcs = ["next_prime.cc"],
@@ -1182,7 +1189,11 @@ xnnpack_unit_test(
     name = "binary_elementwise_nd_test",
     timeout = "long",
     srcs = ["binary-elementwise-nd.cc"],
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + [
+        ":operator_test_utils",
+        "//:logging",
+        "//:operator_utils",
+    ],
 )
 
 xnnpack_unit_test(
@@ -1618,10 +1629,12 @@ xnnpack_unit_test(
     name = "binary_test",
     srcs = ["binary.cc"],
     deps = [
+        ":operator_test_utils",
         ":replicable_random_device",
         "//:XNNPACK",
         "//:buffer",
         "//:datatype",
+        "//:logging",
         "//:math",
         "//:operator_utils",
         "//:operators",

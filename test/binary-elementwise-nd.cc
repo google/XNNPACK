@@ -15,6 +15,7 @@
 #include <memory>
 #include <numeric>
 #include <random>
+#include <sstream>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -22,56 +23,78 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
-#include "xnnpack/datatype.h"
-#include "xnnpack/math.h"
 #include "xnnpack/buffer.h"
+#include "xnnpack/datatype.h"
+#include "xnnpack/log.h"
+#include "xnnpack/math.h"
+#include "xnnpack/operator-utils.h"
+#include "operator-test-utils.h"
 #include "replicable_random_device.h"
+
+using ::testing::Combine;
+using ::testing::Values;
+using ::testing::ValuesIn;
 
 enum class RunMode {
   kCreateReshapeRun,
   kEager,
 };
 
-template <typename T>
-double compute_tolerance(double output_ref) {
-  if (std::is_integral<T>::value) {
-    return 0.6;
-  } else if (std::is_same<T, xnn_float16>::value) {
-    return 1.0e-3 * std::abs(output_ref);
-  } else {
-    return 1.0e-6 * std::abs(output_ref);
+double ComputeTolerance(xnn_datatype datatype, double output_ref) {
+  switch (datatype) {
+    case xnn_datatype_fp16:
+      return std::abs(output_ref);
+    case xnn_datatype_fp32:
+      return 1.0e-6 * std::abs(output_ref);
+    default:
+      return 0.6;
   }
+}
+
+struct MinMaxLow {
+  double min, max, low;
+};
+
+MinMaxLow DatatypeMinMaxLow(xnn_datatype datatype) {
+  MinMaxLow result;
+  switch (datatype) {
+    case xnn_datatype_quint8:
+      result.low = std::numeric_limits<uint8_t>::lowest();
+      result.min = std::numeric_limits<uint8_t>::min();
+      result.max = std::numeric_limits<uint8_t>::max();
+      break;
+    case xnn_datatype_qint8:
+      result.low = std::numeric_limits<int8_t>::lowest();
+      result.min = std::numeric_limits<int8_t>::min();
+      result.max = std::numeric_limits<int8_t>::max();
+      break;
+    case xnn_datatype_int32:
+      result.low = std::numeric_limits<int32_t>::lowest();
+      result.min = std::numeric_limits<int32_t>::min();
+      result.max = std::numeric_limits<int32_t>::max();
+      break;
+    case xnn_datatype_fp16:
+      result.low = 0.0;  // don't use std::numeric_limits here
+      result.min = 0.01;
+      result.max = 1.0;
+      break;
+    case xnn_datatype_fp32:
+      result.low = std::numeric_limits<float>::lowest();
+      result.min = 0.01;
+      result.max = 1.0;
+      break;
+    default:
+      result.low = 0;
+      result.min = 0;
+      result.max = 0;
+      assert(false);
+      break;
+  }
+  return result;
 }
 
 class BinaryElementwiseOperatorTester {
  public:
-  static std::string ToString(xnn_binary_operator operation_type) {
-    switch (operation_type) {
-      case xnn_binary_invalid:
-        return "Unknown";
-      case xnn_binary_add:
-        return "Add";
-      case xnn_binary_copysign:
-        return "CopySign";
-      case xnn_binary_divide:
-        return "Divide";
-      case xnn_binary_maximum:
-        return "Maximum";
-      case xnn_binary_minimum:
-        return "Minimum";
-      case xnn_binary_multiply:
-        return "Multiply";
-      case xnn_binary_prelu:
-        return "Prelu";
-      case xnn_binary_subtract:
-        return "Subtract";
-      case xnn_binary_squared_difference:
-        return "SquaredDifference";
-      default:
-        return "Unknown";
-    }
-  }
-
   double Compute(double a, double b) const {
     switch (operation_type()) {
       case xnn_binary_add:
@@ -197,6 +220,13 @@ class BinaryElementwiseOperatorTester {
 
   xnn_binary_operator operation_type() const { return this->operation_type_; }
 
+  BinaryElementwiseOperatorTester& datatype(xnn_datatype datatype) {
+    this->datatype_ = datatype;
+    return *this;
+  }
+
+  xnn_datatype datatype() const { return this->datatype_; }
+
   BinaryElementwiseOperatorTester& iterations(size_t iterations) {
     this->iterations_ = iterations;
     return *this;
@@ -204,18 +234,67 @@ class BinaryElementwiseOperatorTester {
 
   size_t iterations() const { return this->iterations_; }
 
-  template <typename T>
+  // Some combinations aren't implemented.
+  bool SupportedBinaryNDTest() const {
+    switch (datatype()) {
+      case xnn_datatype_quint8:
+      case xnn_datatype_qint8:
+        switch (operation_type()) {
+          case xnn_binary_add:
+          case xnn_binary_multiply:
+          case xnn_binary_subtract:
+            return true;
+          default:
+            return false;
+        }
+      case xnn_datatype_int32:
+        switch (operation_type()) {
+          case xnn_binary_multiply:
+            return true;
+          default:
+            return false;
+        }
+      case xnn_datatype_fp16:
+        switch (operation_type()) {
+          case xnn_binary_add:
+          case xnn_binary_divide:
+          case xnn_binary_maximum:
+          case xnn_binary_minimum:
+          case xnn_binary_multiply:
+          case xnn_binary_subtract:
+          case xnn_binary_squared_difference:
+            return true;
+          default:
+            return false;
+        }
+      case xnn_datatype_fp32:
+        switch (operation_type()) {
+          case xnn_binary_add:
+          case xnn_binary_copysign:
+          case xnn_binary_divide:
+          case xnn_binary_maximum:
+          case xnn_binary_minimum:
+          case xnn_binary_multiply:
+          case xnn_binary_subtract:
+          case xnn_binary_squared_difference:
+            return true;
+          default:
+            return false;
+        }
+      default:
+        return false;
+    }
+  }
+
   void Test(RunMode mode) {
     ASSERT_NE(operation_type(), xnn_binary_invalid);
+    ASSERT_NE(datatype(), xnn_datatype_invalid);
+
+    MinMaxLow limits = DatatypeMinMaxLow(datatype());
+    size_t datatype_size_bytes = xnn_datatype_size_bytes(datatype());
 
     xnnpack::ReplicableRandomDevice rng;
-    double input_min = std::is_integral<T>::value
-                         ? static_cast<double>(std::numeric_limits<T>::min())
-                         : 0.01;
-    double input_max = std::is_integral<T>::value
-                         ? static_cast<double>(std::numeric_limits<T>::max())
-                         : 1.0;
-    std::uniform_real_distribution<double> dist(input_min, input_max);
+    std::uniform_real_distribution<double> dist(limits.min, limits.max);
 
     // Compute generalized shapes.
     std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_dims;
@@ -251,26 +330,27 @@ class BinaryElementwiseOperatorTester {
       output_stride *= output_dims[i - 1];
     }
 
-    xnn_datatype datatype = xnn_datatype_of<T>();
     xnn_quantization_params input1_quantization = {input1_zero_point(),
                                                    input1_scale()};
     xnn_quantization_params input2_quantization = {input2_zero_point(),
                                                    input2_scale()};
     xnn_quantization_params output_quantization = {output_zero_point(),
                                                    output_scale()};
-    xnnpack::Buffer<T> input1(XNN_EXTRA_BYTES / sizeof(T) + num_input1_elements());
-    xnnpack::Buffer<T> input2(XNN_EXTRA_BYTES / sizeof(T) + num_input2_elements());
-    xnnpack::Buffer<T> output(num_output_elements);
+    xnnpack::Buffer<char> input1(XNN_EXTRA_BYTES +
+                                 num_input1_elements() * datatype_size_bytes);
+    xnnpack::Buffer<char> input2(XNN_EXTRA_BYTES +
+                                 num_input2_elements() * datatype_size_bytes);
+    xnnpack::Buffer<char> output(num_output_elements * datatype_size_bytes);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      std::generate(input1.begin(), input1.end(), [&]() { return dist(rng); });
-      std::generate(input2.begin(), input2.end(), [&]() { return dist(rng); });
+      randomize_buffer(datatype(), rng, dist, input1);
+      randomize_buffer(datatype(), rng, dist, input2);
 
       if (mode == RunMode::kCreateReshapeRun) {
         // Create, setup, run, and destroy a binary elementwise operator.
         ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
         xnn_operator_t binary_elementwise_op = nullptr;
         xnn_status status = xnn_create_binary_elementwise_nd(
-            operation_type(), datatype, &input1_quantization,
+            operation_type(), datatype(), &input1_quantization,
             &input2_quantization, &output_quantization, 0,
             &binary_elementwise_op);
         if (status == xnn_status_unsupported_hardware) {
@@ -299,7 +379,7 @@ class BinaryElementwiseOperatorTester {
       } else if (mode == RunMode::kEager) {
         // Run a binary elementwise operator without creating it.
         xnn_status status = xnn_run_binary_elementwise_nd(
-            operation_type(), datatype, &input1_quantization,
+            operation_type(), datatype(), &input1_quantization,
             &input2_quantization, &output_quantization, 0, input1_dims.size(),
             input1_dims.data(), input2_dims.size(), input2_dims.data(),
             input1.data(), input2.data(), output.data(),
@@ -312,49 +392,95 @@ class BinaryElementwiseOperatorTester {
         XNN_UNREACHABLE;
       }
 
-      // Verify results.
-      for (size_t i = 0; i < output_dims[0]; i++) {
-        for (size_t j = 0; j < output_dims[1]; j++) {
-          for (size_t k = 0; k < output_dims[2]; k++) {
-            for (size_t l = 0; l < output_dims[3]; l++) {
-              for (size_t m = 0; m < output_dims[4]; m++) {
-                for (size_t n = 0; n < output_dims[5]; n++) {
-                  const double input1_value =
-                      input1_scale() *
-                      (input1[i * input1_strides[0] + j * input1_strides[1] +
-                              k * input1_strides[2] + l * input1_strides[3] +
-                              m * input1_strides[4] + n * input1_strides[5]] -
-                       input1_zero_point());
-                  const double input2_value =
-                      input2_scale() *
-                      (input2[i * input2_strides[0] + j * input2_strides[1] +
-                              k * input2_strides[2] + l * input2_strides[3] +
-                              m * input2_strides[4] + n * input2_strides[5]] -
-                       input2_zero_point());
-                  double output_ref =
-                      Compute(input1_value, input2_value) / output_scale() +
-                      output_zero_point();
-                  const size_t index =
+      switch (datatype()) {
+        case xnn_datatype_quint8:
+          ValidateResults<uint8_t>(input1, input1_strides, input2,
+                                   input2_strides, output, output_strides,
+                                   output_dims);
+          break;
+        case xnn_datatype_qint8:
+          ValidateResults<int8_t>(input1, input1_strides, input2,
+                                  input2_strides, output, output_strides,
+                                  output_dims);
+          break;
+        case xnn_datatype_int32:
+          ValidateResults<int32_t>(input1, input1_strides, input2,
+                                   input2_strides, output, output_strides,
+                                   output_dims);
+          break;
+        case xnn_datatype_fp16:
+          ValidateResults<xnn_float16>(input1, input1_strides, input2,
+                                       input2_strides, output, output_strides,
+                                       output_dims);
+          break;
+        case xnn_datatype_fp32:
+          ValidateResults<float>(input1, input1_strides, input2, input2_strides,
+                                 output, output_strides, output_dims);
+          break;
+        default:
+          assert(false);
+      }
+    }
+  }
+
+  template <typename T>
+  void ValidateResults(
+      const xnnpack::Buffer<char>& input1,
+      const std::array<size_t, XNN_MAX_TENSOR_DIMS>& input1_strides,
+      const xnnpack::Buffer<char>& input2,
+      const std::array<size_t, XNN_MAX_TENSOR_DIMS>& input2_strides,
+      const xnnpack::Buffer<char>& output,
+      const std::array<size_t, XNN_MAX_TENSOR_DIMS>& output_strides,
+      const std::array<size_t, XNN_MAX_TENSOR_DIMS>& output_dims) {
+    // Verify results.
+    MinMaxLow limits = DatatypeMinMaxLow(datatype());
+    for (size_t i = 0; i < output_dims[0]; i++) {
+      for (size_t j = 0; j < output_dims[1]; j++) {
+        for (size_t k = 0; k < output_dims[2]; k++) {
+          for (size_t l = 0; l < output_dims[3]; l++) {
+            for (size_t m = 0; m < output_dims[4]; m++) {
+              for (size_t n = 0; n < output_dims[5]; n++) {
+                const size_t input1_index =
+                    i * input1_strides[0] + j * input1_strides[1] +
+                    k * input1_strides[2] + l * input1_strides[3] +
+                    m * input1_strides[4] + n * input1_strides[5];
+                const double input1_value =
+                    input1_scale() *
+                    (reinterpret_cast<const T*>(&input1[0])[input1_index] -
+                     input1_zero_point());
+                const size_t input2_index =
+                    i * input2_strides[0] + j * input2_strides[1] +
+                    k * input2_strides[2] + l * input2_strides[3] +
+                    m * input2_strides[4] + n * input2_strides[5];
+                const double input2_value =
+                    input2_scale() *
+                    (reinterpret_cast<const T*>(&input2[0])[input2_index] -
+                     input2_zero_point());
+                double output_ref =
+                    Compute(input1_value, input2_value) / output_scale() +
+                    output_zero_point();
+                if (output_ref < limits.low || output_ref > limits.max) {
+                  // This is expected to overflow.
+                } else {
+                  const double tolerance =
+                      ComputeTolerance(datatype(), output_ref);
+                  const size_t output_index =
                       i * output_strides[0] + j * output_strides[1] +
                       k * output_strides[2] + l * output_strides[3] +
                       m * output_strides[4] + n * output_strides[5];
-                  if (output_ref < std::numeric_limits<T>::lowest() ||
-                      output_ref > std::numeric_limits<T>::max()) {
-                    // This is expected to overflow.
-                  } else {
-                    const double tolerance = compute_tolerance<T>(output_ref);
-                    ASSERT_NEAR(output[index], output_ref, tolerance)
-                        << "input1_value = " << input1_value << ", "
-                        << "input2_value = " << input2_value << ", "
-                        << "(i, j, k, l, m, n) = (" << i << ", " << j << ", "
-                        << k << ", " << l << ", " << m << ", " << n << ")"
-                        << ", input1 zero point = " << input1_zero_point()
-                        << ", input1 scale = " << input1_scale()
-                        << ", input2 zero point = " << input2_zero_point()
-                        << ", input2 scale = " << input2_scale()
-                        << ", output zero point = " << output_zero_point()
-                        << ", output scale = " << output_scale();
-                  }
+                  const double output_value =
+                      reinterpret_cast<const T*>(&output[0])[output_index];
+                  ASSERT_NEAR(output_value, output_ref, tolerance)
+                      << "input1_value = " << input1_value << ", "
+                      << "input2_value = " << input2_value << ", "
+                      << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k
+                      << ", " << l << ", " << m << ", " << n << ")"
+                      << ", input1 zero point = " << input1_zero_point()
+                      << ", input1 scale = " << input1_scale()
+                      << ", input2 zero point = " << input2_zero_point()
+                      << ", input2 scale = " << input2_scale()
+                      << ", output zero point = " << output_zero_point()
+                      << ", output scale = " << output_scale();
                 }
               }
             }
@@ -374,6 +500,7 @@ class BinaryElementwiseOperatorTester {
   int32_t output_zero_point_{0};
   float output_scale_{1.0f};
   xnn_binary_operator operation_type_{xnn_binary_invalid};
+  xnn_datatype datatype_{xnn_datatype_invalid};
   size_t iterations_{3};
 };
 
@@ -404,7 +531,6 @@ std::vector<size_t> RandomBroadcast(Rng& rng, std::vector<size_t> dims) {
   return dims;
 }
 
-template <typename T>
 void RunBinaryOpTester(RunMode run_mode,
                        BinaryElementwiseOperatorTester& tester) {
   xnnpack::ReplicableRandomDevice rng;
@@ -412,253 +538,174 @@ void RunBinaryOpTester(RunMode run_mode,
     std::vector<size_t> output_shape = RandomShape(rng);
     tester.input1_shape(RandomBroadcast(rng, output_shape))
         .input2_shape(RandomBroadcast(rng, output_shape));
-    tester.Test<T>(run_mode);
+    tester.Test(run_mode);
   }
 }
 
-template <typename T, typename Params>
-void BinaryNDTestImpl(const Params& params) {
-  RunMode mode = std::get<0>(params);
-  xnn_binary_operator op = std::get<1>(params);
-  BinaryElementwiseOperatorTester tester;
-  tester.operation_type(op);
-  RunBinaryOpTester<T>(mode, tester);
-}
+struct Param {
+  using TupleT = std::tuple<xnn_datatype, RunMode, xnn_binary_operator>;
+  explicit Param(TupleT p)
+      : datatype(std::get<0>(p)),
+        run_mode(std::get<1>(p)),
+        binary_operator(std::get<2>(p)) {}
 
-template <typename T>
-class BinaryNDTest
-    : public testing::TestWithParam<
-          std::tuple<RunMode, xnn_binary_operator>> {};
-
-using BinaryNDTestQS8 = BinaryNDTest<int8_t>;
-using BinaryNDTestQU8 = BinaryNDTest<uint8_t>;
-#ifndef XNN_EXCLUDE_F16_TESTS
-using BinaryNDTestF16 = BinaryNDTest<xnn_float16>;
-#endif  // XNN_EXCLUDE_F16_TESTS
-using BinaryNDTestF32 = BinaryNDTest<float>;
-using BinaryNDTestS32 = BinaryNDTest<int32_t>;
-
-TEST_P(BinaryNDTestQS8, op) { BinaryNDTestImpl<int8_t>(GetParam()); }
-TEST_P(BinaryNDTestQU8, op) { BinaryNDTestImpl<uint8_t>(GetParam()); }
-#ifndef XNN_EXCLUDE_F16_TESTS
-TEST_P(BinaryNDTestF16, op) { BinaryNDTestImpl<xnn_float16>(GetParam()); }
-#endif  // XNN_EXCLUDE_F16_TESTS
-TEST_P(BinaryNDTestF32, op) { BinaryNDTestImpl<float>(GetParam()); }
-TEST_P(BinaryNDTestS32, op) { BinaryNDTestImpl<int32_t>(GetParam()); }
-
-std::string ToString(const std::tuple<RunMode, xnn_binary_operator>& param) {
-  return BinaryElementwiseOperatorTester::ToString(std::get<1>(param));
-}
-
-INSTANTIATE_TEST_SUITE_P(
-    CreateReshapeRun, BinaryNDTestQS8,
-    testing::Combine(testing::Values(RunMode::kCreateReshapeRun),
-                     testing::Values(xnn_binary_add, xnn_binary_subtract,
-                                     xnn_binary_multiply)),
-    [](const auto& info) { return ToString(info.param); });
-INSTANTIATE_TEST_SUITE_P(Eager, BinaryNDTestQS8,
-                         testing::Combine(testing::Values(RunMode::kEager),
-                                          testing::Values(xnn_binary_add,
-                                                          xnn_binary_subtract,
-                                                          xnn_binary_multiply)),
-                         [](const auto& info) { return ToString(info.param); });
-INSTANTIATE_TEST_SUITE_P(
-    CreateReshapeRun, BinaryNDTestQU8,
-    testing::Combine(testing::Values(RunMode::kCreateReshapeRun),
-                     testing::Values(xnn_binary_add, xnn_binary_subtract,
-                                     xnn_binary_multiply)),
-    [](const auto& info) { return ToString(info.param); });
-INSTANTIATE_TEST_SUITE_P(Eager, BinaryNDTestQU8,
-                         testing::Combine(testing::Values(RunMode::kEager),
-                                          testing::Values(xnn_binary_add,
-                                                          xnn_binary_subtract,
-                                                          xnn_binary_multiply)),
-                         [](const auto& info) { return ToString(info.param); });
-#ifndef XNN_EXCLUDE_F16_TESTS
-INSTANTIATE_TEST_SUITE_P(
-    CreateReshapeRun, BinaryNDTestF16,
-    testing::Combine(
-        testing::Values(RunMode::kCreateReshapeRun),
-        testing::Values(xnn_binary_add, xnn_binary_divide, xnn_binary_maximum,
-                        xnn_binary_minimum, xnn_binary_multiply,
-                        xnn_binary_squared_difference, xnn_binary_subtract)),
-    [](const auto& info) { return ToString(info.param); });
-INSTANTIATE_TEST_SUITE_P(
-    Eager, BinaryNDTestF16,
-    testing::Combine(
-        testing::Values(RunMode::kEager),
-        testing::Values(xnn_binary_add, xnn_binary_divide, xnn_binary_maximum,
-                        xnn_binary_minimum, xnn_binary_multiply,
-                        xnn_binary_squared_difference, xnn_binary_subtract)),
-    [](const auto& info) { return ToString(info.param); });
-#endif
-INSTANTIATE_TEST_SUITE_P(
-    CreateReshapeRun, BinaryNDTestF32,
-    testing::Combine(testing::Values(RunMode::kCreateReshapeRun),
-                     testing::Values(xnn_binary_add, xnn_binary_copysign,
-                                     xnn_binary_divide, xnn_binary_maximum,
-                                     xnn_binary_minimum, xnn_binary_multiply,
-                                     xnn_binary_subtract,
-                                     xnn_binary_squared_difference)),
-    [](const auto& info) { return ToString(info.param); });
-INSTANTIATE_TEST_SUITE_P(
-    Eager, BinaryNDTestF32,
-    testing::Combine(testing::Values(RunMode::kEager),
-                     testing::Values(xnn_binary_add, xnn_binary_divide,
-                                     xnn_binary_maximum, xnn_binary_minimum,
-                                     xnn_binary_multiply, xnn_binary_subtract,
-                                     xnn_binary_squared_difference)),
-    [](const auto& info) { return ToString(info.param); });
-INSTANTIATE_TEST_SUITE_P(
-    CreateReshapeRun, BinaryNDTestS32,
-    testing::Combine(testing::Values(RunMode::kCreateReshapeRun),
-                     testing::Values(xnn_binary_multiply)),
-    [](const auto& info) { return ToString(info.param); });
-INSTANTIATE_TEST_SUITE_P(Eager, BinaryNDTestS32,
-                         testing::Combine(testing::Values(RunMode::kEager),
-                                          testing::Values(xnn_binary_multiply)),
-                         [](const auto& info) { return ToString(info.param); });
-
-template <typename T, typename Params>
-void QuantizedTest_Input1Scale(Params params) {
-  for (float input1_scale = 0.1f; input1_scale <= 10.0f;
-       input1_scale *= 3.14f) {
-    RunBinaryOpTester<T>(std::get<0>(params),
-                         BinaryElementwiseOperatorTester()
-                             .operation_type(std::get<1>(params))
-                             .input1_scale(input1_scale));
+  std::string Name() const {
+    std::stringstream sstr;
+    if (run_mode == RunMode::kEager) {
+      sstr << "Eager_";
+    } else {
+      sstr << "CreateReshapeRun_";
+    }
+    sstr << xnn_datatype_to_string(datatype) << "_"
+         << xnn_binary_operator_to_string(binary_operator);
+    return sstr.str();
   }
-}
 
-template <typename T, typename Params>
-void QuantizedTest_Input1ZeroPoint(Params params) {
-  for (int32_t input1_zero_point = std::numeric_limits<T>::min();
-       input1_zero_point <= std::numeric_limits<T>::max();
-       input1_zero_point += 51) {
-    RunBinaryOpTester<T>(std::get<0>(params),
-                         BinaryElementwiseOperatorTester()
-                             .operation_type(std::get<1>(params))
-                             .input1_zero_point(input1_zero_point));
-  }
-}
-
-template <typename T, typename Params>
-void QuantizedTest_Input2Scale(Params params) {
-  for (float input2_scale = 0.1f; input2_scale <= 10.0f;
-       input2_scale *= 3.14f) {
-    RunBinaryOpTester<T>(std::get<0>(params),
-                         BinaryElementwiseOperatorTester()
-                             .operation_type(std::get<1>(params))
-                             .input2_scale(input2_scale));
-  }
-}
-
-template <typename T, typename Params>
-void QuantizedTest_Input2ZeroPoint(Params params) {
-  for (int32_t input2_zero_point = std::numeric_limits<T>::min();
-       input2_zero_point <= std::numeric_limits<T>::max();
-       input2_zero_point += 51) {
-    RunBinaryOpTester<T>(std::get<0>(params),
-                         BinaryElementwiseOperatorTester()
-                             .operation_type(std::get<1>(params))
-                             .input2_zero_point(input2_zero_point));
-  }
-}
-
-template <typename T, typename Params>
-void QuantizedTest_OutputScale(Params params) {
-  for (float output_scale = 0.1f; output_scale <= 10.0f;
-       output_scale *= 3.14f) {
-    RunBinaryOpTester<T>(std::get<0>(params),
-                         BinaryElementwiseOperatorTester()
-                             .operation_type(std::get<1>(params))
-                             .output_scale(output_scale));
-  }
-}
-
-template <typename T, typename Params>
-void QuantizedTest_OutputZeroPoint(Params params) {
-  for (int32_t output_zero_point = std::numeric_limits<T>::min();
-       output_zero_point <= std::numeric_limits<T>::max();
-       output_zero_point += 51) {
-    RunBinaryOpTester<T>(std::get<0>(params),
-                         BinaryElementwiseOperatorTester()
-                             .operation_type(std::get<1>(params))
-                             .output_zero_point(output_zero_point));
-  }
-}
-
-template <typename T>
-class QuantizedTest
-    : public testing::TestWithParam<std::tuple<RunMode, xnn_binary_operator>> {
+  xnn_datatype datatype;
+  RunMode run_mode;
+  xnn_binary_operator binary_operator;
 };
 
-using QuantizedTestQS8 = QuantizedTest<int8_t>;
+class BinaryNDTest : public testing::TestWithParam<Param> {};
 
-TEST_P(QuantizedTestQS8, input1_scale) {
-  QuantizedTest_Input1Scale<int8_t>(GetParam());
-}
-TEST_P(QuantizedTestQS8, input1_zero_point) {
-  QuantizedTest_Input1ZeroPoint<int8_t>(GetParam());
-}
-TEST_P(QuantizedTestQS8, input2_scale) {
-  QuantizedTest_Input2Scale<int8_t>(GetParam());
-}
-TEST_P(QuantizedTestQS8, input2_zero_point) {
-  QuantizedTest_Input2ZeroPoint<int8_t>(GetParam());
-}
-
-TEST_P(QuantizedTestQS8, output_scale) {
-  QuantizedTest_OutputScale<int8_t>(GetParam());
-}
-TEST_P(QuantizedTestQS8, output_zero_point) {
-  QuantizedTest_OutputZeroPoint<int8_t>(GetParam());
+TEST_P(BinaryNDTest, op) {
+  BinaryElementwiseOperatorTester tester;
+  tester.operation_type(GetParam().binary_operator);
+  tester.datatype(GetParam().datatype);
+#ifdef XNN_EXCLUDE_F16_TESTS
+  if (GetParam().datatype == xnn_datatype_fp16) {
+    GTEST_SKIP();
+  }
+#endif
+  if (!tester.SupportedBinaryNDTest()) {
+    GTEST_SKIP();
+  }
+  RunBinaryOpTester(GetParam().run_mode, tester);
 }
 
+const xnn_binary_operator all_binary_ops[] = {
+    xnn_binary_add,     xnn_binary_copysign, xnn_binary_divide,
+    xnn_binary_maximum, xnn_binary_minimum,  xnn_binary_multiply,
+    xnn_binary_prelu,   xnn_binary_subtract, xnn_binary_squared_difference};
+
+// We do the full Cartesian combination here, but some are inappropriate
+// and will be skipped for certain combinations -- see SupportedBinaryNDTest
+// to see the logic for what is actually supported.
 INSTANTIATE_TEST_SUITE_P(
-    CreateReshapeRun, QuantizedTestQS8,
-    testing::Combine(testing::Values(RunMode::kCreateReshapeRun),
-                     testing::Values(xnn_binary_add, xnn_binary_subtract,
-                                     xnn_binary_multiply)),
-    [](const auto& info) { return ToString(info.param); });
-INSTANTIATE_TEST_SUITE_P(Eager, QuantizedTestQS8,
-                         testing::Combine(testing::Values(RunMode::kEager),
-                                          testing::Values(xnn_binary_add,
-                                                          xnn_binary_subtract,
-                                                          xnn_binary_multiply)),
-                         [](const auto& info) { return ToString(info.param); });
+    BinaryNDTest, BinaryNDTest,
+    testing::ConvertGenerator<Param::TupleT>(Combine(
+        Values(xnn_datatype_quint8, xnn_datatype_qint8, xnn_datatype_fp16,
+               xnn_datatype_fp32, xnn_datatype_int32),
+        Values(RunMode::kCreateReshapeRun, RunMode::kEager),
+        ValuesIn(all_binary_ops))),
+    [](const auto& info) { return info.param.Name(); });
 
-using QuantizedTestQU8 = QuantizedTest<uint8_t>;
+class QuantizedTest : public testing::TestWithParam<Param> {
+ public:
+  // Some combinations aren't implemented.
+  bool SupportedQuantizedTest(xnn_binary_operator op) const {
+    switch (op) {
+      case xnn_binary_add:
+      case xnn_binary_multiply:
+      case xnn_binary_subtract:
+        return true;
+      default:
+        return false;
+    }
+  }
+};
 
-TEST_P(QuantizedTestQU8, input1_scale) {
-  QuantizedTest_Input1Scale<uint8_t>(GetParam());
-}
-TEST_P(QuantizedTestQU8, input1_zero_point) {
-  QuantizedTest_Input1ZeroPoint<uint8_t>(GetParam());
-}
-TEST_P(QuantizedTestQU8, input2_scale) {
-  QuantizedTest_Input2Scale<uint8_t>(GetParam());
-}
-TEST_P(QuantizedTestQU8, input2_zero_point) {
-  QuantizedTest_Input2ZeroPoint<uint8_t>(GetParam());
-}
-
-TEST_P(QuantizedTestQU8, output_scale) {
-  QuantizedTest_OutputScale<uint8_t>(GetParam());
-}
-TEST_P(QuantizedTestQU8, output_zero_point) {
-  QuantizedTest_OutputZeroPoint<uint8_t>(GetParam());
+TEST_P(QuantizedTest, input1_scale) {
+  if (!SupportedQuantizedTest(GetParam().binary_operator)) {
+    GTEST_SKIP();
+  }
+  for (float input1_scale = 0.1f; input1_scale <= 10.0f;
+       input1_scale *= 3.14f) {
+    RunBinaryOpTester(GetParam().run_mode,
+                      BinaryElementwiseOperatorTester()
+                          .operation_type(GetParam().binary_operator)
+                          .datatype(GetParam().datatype)
+                          .input1_scale(input1_scale));
+  }
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    CreateReshapeRun, QuantizedTestQU8,
-    testing::Combine(testing::Values(RunMode::kCreateReshapeRun),
-                     testing::Values(xnn_binary_add, xnn_binary_subtract,
-                                     xnn_binary_multiply)),
-    [](const auto& info) { return ToString(info.param); });
-INSTANTIATE_TEST_SUITE_P(Eager, QuantizedTestQU8,
-                         testing::Combine(testing::Values(RunMode::kEager),
-                                          testing::Values(xnn_binary_add,
-                                                          xnn_binary_subtract,
-                                                          xnn_binary_multiply)),
-                         [](const auto& info) { return ToString(info.param); });
+TEST_P(QuantizedTest, input1_zero_point) {
+  if (!SupportedQuantizedTest(GetParam().binary_operator)) {
+    GTEST_SKIP();
+  }
+  MinMaxLow limits = DatatypeMinMaxLow(GetParam().datatype);
+  for (int32_t input1_zero_point = limits.min; input1_zero_point <= limits.max;
+       input1_zero_point += 51) {
+    RunBinaryOpTester(GetParam().run_mode,
+                      BinaryElementwiseOperatorTester()
+                          .operation_type(GetParam().binary_operator)
+                          .datatype(GetParam().datatype)
+                          .input1_zero_point(input1_zero_point));
+  }
+}
+
+TEST_P(QuantizedTest, input2_scale) {
+  if (!SupportedQuantizedTest(GetParam().binary_operator)) {
+    GTEST_SKIP();
+  }
+  for (float input2_scale = 0.1f; input2_scale <= 10.0f;
+       input2_scale *= 3.14f) {
+    RunBinaryOpTester(GetParam().run_mode,
+                      BinaryElementwiseOperatorTester()
+                          .operation_type(GetParam().binary_operator)
+                          .datatype(GetParam().datatype)
+                          .input2_scale(input2_scale));
+  }
+}
+
+TEST_P(QuantizedTest, input2_zero_point) {
+  if (!SupportedQuantizedTest(GetParam().binary_operator)) {
+    GTEST_SKIP();
+  }
+  MinMaxLow limits = DatatypeMinMaxLow(GetParam().datatype);
+  for (int32_t input2_zero_point = limits.min; input2_zero_point <= limits.max;
+       input2_zero_point += 51) {
+    RunBinaryOpTester(GetParam().run_mode,
+                      BinaryElementwiseOperatorTester()
+                          .operation_type(GetParam().binary_operator)
+                          .datatype(GetParam().datatype)
+                          .input2_zero_point(input2_zero_point));
+  }
+}
+
+TEST_P(QuantizedTest, output_scale) {
+  if (!SupportedQuantizedTest(GetParam().binary_operator)) {
+    GTEST_SKIP();
+  }
+  for (float output_scale = 0.1f; output_scale <= 10.0f;
+       output_scale *= 3.14f) {
+    RunBinaryOpTester(GetParam().run_mode,
+                      BinaryElementwiseOperatorTester()
+                          .operation_type(GetParam().binary_operator)
+                          .datatype(GetParam().datatype)
+                          .output_scale(output_scale));
+  }
+}
+
+TEST_P(QuantizedTest, output_zero_point) {
+  if (!SupportedQuantizedTest(GetParam().binary_operator)) {
+    GTEST_SKIP();
+  }
+  MinMaxLow limits = DatatypeMinMaxLow(GetParam().datatype);
+  for (int32_t output_zero_point = limits.min; output_zero_point <= limits.max;
+       output_zero_point += 51) {
+    RunBinaryOpTester(GetParam().run_mode,
+                      BinaryElementwiseOperatorTester()
+                          .operation_type(GetParam().binary_operator)
+                          .datatype(GetParam().datatype)
+                          .output_zero_point(output_zero_point));
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(QuantizedTest, QuantizedTest,
+                         testing::ConvertGenerator<Param::TupleT>(Combine(
+                             Values(xnn_datatype_quint8, xnn_datatype_qint8),
+                             Values(RunMode::kCreateReshapeRun,
+                                    RunMode::kEager),
+                             ValuesIn(all_binary_ops))),
+                         [](const auto& info) { return info.param.Name(); });
