@@ -14,11 +14,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
-#include <functional>
 #include <limits>
 #include <random>
 #include <type_traits>
-#include <iostream>
 
 #include "xnnpack.h"
 #include "xnnpack/buffer.h"
@@ -68,8 +66,12 @@ struct Interval {
 struct UnaryOpInfo {
   virtual ~UnaryOpInfo() = default;
 
-  virtual float ReferenceImpl(float x,
-                              const xnn_unary_params& params) const = 0;
+  virtual float ReferenceImpl(float x, const xnn_unary_params& params) const {
+    XNN_UNREACHABLE;
+  }
+  virtual int ReferenceImpl(int x, const xnn_unary_params& params) const {
+    XNN_UNREACHABLE;
+  }
 
   // Get the parameters to use by default for this operator.
   virtual xnn_unary_params DefaultParams() const { return xnn_unary_params(); }
@@ -115,11 +117,17 @@ struct Convert : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return x;
   }
+  int ReferenceImpl(int x, const xnn_unary_params&) const override {
+    return x;
+  }
 };
 
 struct ReLU : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::max(x, 0.0f);
+  }
+  int ReferenceImpl(int x, const xnn_unary_params&) const override {
+    return std::max(x, 0);
   }
 };
 
@@ -127,10 +135,16 @@ struct Abs : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::abs(x);
   }
+  int ReferenceImpl(int x, const xnn_unary_params&) const override {
+    return std::abs(x);
+  }
 };
 
 struct Negate : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
+    return -x;
+  }
+  int ReferenceImpl(int x, const xnn_unary_params&) const override {
     return -x;
   }
 };
@@ -146,6 +160,10 @@ struct Clamp : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params& params) const override {
     return std::min<float>(std::max<float>(x, params.clamp.min),
                            params.clamp.max);
+  }
+  int ReferenceImpl(int x, const xnn_unary_params& params) const override {
+    return std::min<int>(std::max<int>(x, params.clamp.min),
+                         params.clamp.max);
   }
 
   xnn_quantization_params InputQuantizationParams(
@@ -215,7 +233,6 @@ struct HardSwish : public UnaryOpInfo {
       case xnn_datatype_fp16:
         return TolMixed(y_ref, 1.0e-3f, 1.0e-2f);
       case xnn_datatype_qint8:
-        return 1;
       case xnn_datatype_quint8:
         return 1;
       default:
@@ -244,7 +261,6 @@ struct LeakyReLU : public UnaryOpInfo {
       case xnn_datatype_fp16:
         return TolMixed(y_ref, 1.0e-4f, 1.0e-3f);
       case xnn_datatype_qint8:
-        return 1;
       case xnn_datatype_quint8:
         return 1;
       default:
@@ -313,6 +329,9 @@ struct Sigmoid : public UnaryOpInfo {
 struct Square : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return x * x;
+  }
+  int ReferenceImpl(int x, const xnn_unary_params&) const override {
+    return static_cast<int64_t>(x) * static_cast<int64_t>(x);
   }
 
   float Tolerance(float y_ref, xnn_datatype datatype) const override {

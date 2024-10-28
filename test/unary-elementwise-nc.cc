@@ -139,8 +139,7 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
   xnnpack::ReplicableRandomDevice rng_;
 
   template <typename In, typename Out>
-  void RunUnaryTest(const UnaryOpTestParams& test_params, const Param& param,
-                    bool eager) {
+  void RunUnaryTest(const UnaryOpTestParams& test_params, const Param& param) {
     ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
     const xnn_unary_operator unary_op = param.unary_operator;
@@ -181,7 +180,7 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
                            input_quantization, output_quantization, op_params);
       }
 
-      if (eager) {
+      if (param.run_mode == RunMode::kEager) {
         xnn_status status = xnn_run_unary_elementwise_nc(
             unary_op, input_datatype, output_datatype, &op_params,
             &input_quantization, &output_quantization,
@@ -192,7 +191,7 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
           return;
         }
         ASSERT_EQ(xnn_status_success, status);
-      } else {
+      } else if (param.run_mode == RunMode::kCreateReshapeRun) {
         xnn_operator_t op = nullptr;
         xnn_status status = xnn_create_unary_elementwise_nc(
             unary_op, input_datatype, output_datatype, &op_params,
@@ -217,6 +216,8 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
                                           op, input.data(), output.data()));
         ASSERT_EQ(xnn_status_success,
                   xnn_run_operator(op, /*threadpool=*/nullptr));
+      } else {
+        XNN_UNREACHABLE;
       }
 
       // Verify results.
@@ -231,46 +232,44 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
   }
 
   template <typename In>
-  void RunUnaryTest(const UnaryOpTestParams& test_params, const Param& param,
-                    bool eager) {
+  void RunUnaryTest(const UnaryOpTestParams& test_params, const Param& param) {
     switch (param.output_datatype) {
       case xnn_datatype_fp16:
-        RunUnaryTest<In, xnn_float16>(test_params, param, eager);
+        RunUnaryTest<In, xnn_float16>(test_params, param);
         break;
       case xnn_datatype_fp32:
-        RunUnaryTest<In, float>(test_params, param, eager);
+        RunUnaryTest<In, float>(test_params, param);
         break;
       case xnn_datatype_int32:
-        RunUnaryTest<In, int32_t>(test_params, param, eager);
+        RunUnaryTest<In, int32_t>(test_params, param);
         break;
       case xnn_datatype_quint8:
-        RunUnaryTest<In, uint8_t>(test_params, param, eager);
+        RunUnaryTest<In, uint8_t>(test_params, param);
         break;
       case xnn_datatype_qint8:
-        RunUnaryTest<In, int8_t>(test_params, param, eager);
+        RunUnaryTest<In, int8_t>(test_params, param);
         break;
       default:
         XNN_UNREACHABLE;
     }
   }
 
-  void RunUnaryTest(const UnaryOpTestParams& test_params, const Param& param,
-                    bool eager) {
+  void RunUnaryTest(const UnaryOpTestParams& test_params, const Param& param) {
     switch (param.input_datatype) {
       case xnn_datatype_fp16:
-        RunUnaryTest<xnn_float16>(test_params, param, eager);
+        RunUnaryTest<xnn_float16>(test_params, param);
         break;
       case xnn_datatype_fp32:
-        RunUnaryTest<float>(test_params, param, eager);
+        RunUnaryTest<float>(test_params, param);
         break;
       case xnn_datatype_int32:
-        RunUnaryTest<int32_t>(test_params, param, eager);
+        RunUnaryTest<int32_t>(test_params, param);
         break;
       case xnn_datatype_quint8:
-        RunUnaryTest<uint8_t>(test_params, param, eager);
+        RunUnaryTest<uint8_t>(test_params, param);
         break;
       case xnn_datatype_qint8:
-        RunUnaryTest<int8_t>(test_params, param, eager);
+        RunUnaryTest<int8_t>(test_params, param);
         break;
       default:
         XNN_UNREACHABLE;
@@ -286,36 +285,33 @@ using UnaryNCTest_OutputQuantized =
 
 TEST_P(UnaryNCTest, UnitBatch) {
   for (size_t c = 0; c < 100; c += 15) {
-    RunUnaryTest(UnaryOpTestParams::UnitBatch().Channels(c), GetParam(),
-                 /*eager=*/false);
+    RunUnaryTest(UnaryOpTestParams::UnitBatch().Channels(c), GetParam());
   }
 }
 
 TEST_P(UnaryNCTest, SmallBatch) {
   for (size_t c = 0; c < 100; c += 15) {
-    RunUnaryTest(UnaryOpTestParams::SmallBatch().Channels(c), GetParam(),
-                 /*eager=*/false);
+    RunUnaryTest(UnaryOpTestParams::SmallBatch().Channels(c), GetParam());
   }
 }
 
 TEST_P(UnaryNCTest, SmallBatch_InputStride) {
   for (size_t c = 0; c < 100; c += 15) {
     RunUnaryTest(UnaryOpTestParams::UnitBatch().Channels(c).InputStride(129),
-                 GetParam(), /*eager=*/false);
+                 GetParam());
   }
 }
 
 TEST_P(UnaryNCTest, UnitBatch_OutputStride) {
   for (size_t c = 0; c < 100; c += 15) {
     RunUnaryTest(UnaryOpTestParams::UnitBatch().Channels(c).OutputStride(117),
-                 GetParam(), /*eager=*/false);
+                 GetParam());
   }
 }
 
 TEST_P(UnaryNCTest, StridedBatch) {
   for (size_t c = 0; c < 100; c += 15) {
-    RunUnaryTest(UnaryOpTestParams::StridedBatch().Channels(c), GetParam(),
-                 /*eager=*/false);
+    RunUnaryTest(UnaryOpTestParams::StridedBatch().Channels(c), GetParam());
   }
 }
 
@@ -335,8 +331,7 @@ TEST_P(UnaryNCTest_InputQuantized, InputQuantized) {
     for (float scale : {1.0e-2f, 1.0e2f, 10.0f}) {
       RunUnaryTest(
           UnaryOpTestParams::UnitBatch().InputQuantization({zero_point, scale}),
-          GetParam(),
-          /*eager=*/false);
+          GetParam());
     }
   }
 }
@@ -346,8 +341,7 @@ TEST_P(UnaryNCTest_OutputQuantized, OutputQuantized) {
     for (float scale : {1.0e-2f, 1.0e2f, 10.0f}) {
       RunUnaryTest(UnaryOpTestParams::UnitBatch().OutputQuantization(
                        {zero_point, scale}),
-                   GetParam(),
-                   /*eager=*/false);
+                   GetParam());
     }
   }
 }
