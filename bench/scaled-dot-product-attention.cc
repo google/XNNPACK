@@ -72,7 +72,7 @@ void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::Stat
   }
 
   xnn_operator_t tanh_op = nullptr;
-  status = xnn_create_tanh_nc_f32(/*flags=*/0, &tanh_op);
+  status = xnn_create_unary_elementwise_nc(xnn_unary_tanh, xnn_datatype_fp32, xnn_datatype_fp32, nullptr, nullptr, nullptr, /*flags=*/0, &tanh_op);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to create TanH operator");
   }
@@ -127,7 +127,7 @@ void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::Stat
     divide_op, logits_dims.size(), logits_dims.data(),
       cap_tanh_dims.size(), cap_tanh_dims.data(), /*threadpool=*/nullptr);
 
-  status = xnn_reshape_tanh_nc_f32(
+  status = xnn_reshape_unary_elementwise_nc(
       tanh_op, batch_size * heads * query_tokens, key_value_tokens, key_value_tokens, key_value_tokens, /*threadpool=*/nullptr);
 
   status = xnn_reshape_binary_elementwise_nd(
@@ -176,7 +176,7 @@ void xnnpack_multihead_scaled_batch_matrix_multiply_cap_tanh_f32(benchmark::Stat
     state.SkipWithError("failed to setup Divide operator");
   }
 
-  status = xnn_setup_tanh_nc_f32(tanh_op, logits.data(), logits.data());
+  status = xnn_setup_unary_elementwise_nc(tanh_op, logits.data(), logits.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup Tanh operator");
   }
