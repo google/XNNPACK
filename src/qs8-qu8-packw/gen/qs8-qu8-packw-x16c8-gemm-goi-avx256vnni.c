@@ -86,8 +86,9 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__avx256vnni(
       __m256i vacc8 = _mm256_setzero_si256();
       __m256i vacc12 = _mm256_setzero_si256();
 
-      // KC main loop multiple of 16x8
       size_t k = kc;
+
+      // KC main loop multiple of 16x8
       for (; k >= 8; k -= 8) {
         __m256i v0 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w0));
         v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w1)), 0x0C);
