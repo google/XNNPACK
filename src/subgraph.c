@@ -482,8 +482,12 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
       return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC;
     case xnn_node_type_global_average_pooling_2d:
       return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW | XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC;
-    case xnn_node_type_add2:
-    case xnn_node_type_multiply2:
+    case xnn_node_type_binary_elementwise:
+      if (node->binary_operator != xnn_binary_add &&
+          node->binary_operator != xnn_binary_multiply) {
+        // TODO: We can probably handle any binary operator here?
+        return false;
+      }
       assert(node->num_inputs == 2);
       assert(node->num_outputs == 1);
       if (subgraph->values[node->inputs[0]].shape.num_dims != 4 ||
@@ -530,17 +534,7 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
                      xnn_node_type_to_string(node->type));
         return 0;
       }
-    case xnn_node_type_abs:
-    case xnn_node_type_bankers_rounding:
-    case xnn_node_type_ceiling:
-    case xnn_node_type_clamp:
-    case xnn_node_type_elu:
-    case xnn_node_type_floor:
-    case xnn_node_type_hardswish:
-    case xnn_node_type_leaky_relu:
-    case xnn_node_type_negate:
-    case xnn_node_type_sigmoid:
-    case xnn_node_type_square:
+    case xnn_node_type_unary_elementwise:
       assert(node->num_inputs == 1);
       assert(node->num_outputs == 1);
       if (subgraph->values[node->inputs[0]].shape.num_dims == 4) {
@@ -817,44 +811,27 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         return false;
     }
     switch (node->type) {
-      case xnn_node_type_abs:
-      case xnn_node_type_add2:
+      case xnn_node_type_binary_elementwise:
+      case xnn_node_type_unary_elementwise:
       case xnn_node_type_batch_matrix_multiply:
-      case xnn_node_type_divide:
-      case xnn_node_type_maximum2:
-      case xnn_node_type_minimum2:
-      case xnn_node_type_multiply2:
       case xnn_node_type_concatenate2:
       case xnn_node_type_concatenate3:
       case xnn_node_type_concatenate4:
       case xnn_node_type_concatenate5:
       case xnn_node_type_convert:
-      case xnn_node_type_squared_difference:
-      case xnn_node_type_subtract:
       case xnn_node_type_average_pooling_2d:
-      case xnn_node_type_bankers_rounding:
-      case xnn_node_type_ceiling:
-      case xnn_node_type_clamp:
       case xnn_node_type_copy:
       case xnn_node_type_convolution_2d:
       case xnn_node_type_deconvolution_2d:
       case xnn_node_type_depthwise_convolution_2d:
       case xnn_node_type_depth_to_space_2d:
-      case xnn_node_type_elu:
       case xnn_node_type_even_split2:
       case xnn_node_type_even_split3:
       case xnn_node_type_even_split4:
-      case xnn_node_type_floor:
       case xnn_node_type_fully_connected:
       case xnn_node_type_global_average_pooling_2d:
       case xnn_node_type_global_sum_pooling_2d:
-      case xnn_node_type_hardswish:
-      case xnn_node_type_leaky_relu:
       case xnn_node_type_max_pooling_2d:
-      case xnn_node_type_negate:
-      case xnn_node_type_prelu:
-      case xnn_node_type_reciprocal_square_root:
-      case xnn_node_type_sigmoid:
       case xnn_node_type_softmax:
       case xnn_node_type_space_to_depth_2d:
       case xnn_node_type_static_constant_pad:
@@ -864,9 +841,6 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_static_reshape:
       case xnn_node_type_static_resize_bilinear_2d:
       case xnn_node_type_static_transpose:
-      case xnn_node_type_square:
-      case xnn_node_type_square_root:
-      case xnn_node_type_tanh:
       case xnn_node_type_rope:
         break;
       default:
@@ -877,14 +851,13 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
   }
 
   // Annotate Values to be converted to FP16 as FP16-compatible.
-  // Note that static weights in [Depthwise] Convolution, Fully Connected, and PReLU Nodes remain FP32,
+  // Note that static weights in [Depthwise] Convolution, Fully Connected Nodes remain FP32,
   // they will be converted to FP16 during weight repacking when the operator is created.
   for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
     struct xnn_node* node = &subgraph->nodes[n];
     switch (node->type) {
       case xnn_node_type_deconvolution_2d:
       case xnn_node_type_depthwise_convolution_2d:
-      case xnn_node_type_prelu:
         subgraph->values[node->inputs[0]].fp16_compatible = true;
         subgraph->values[node->outputs[0]].fp16_compatible = true;
         break;
@@ -1167,6 +1140,29 @@ static void xnn_node_replace_output(struct xnn_node* node, uint32_t old_output_i
   }
 }
 
+static bool is_clamp(const struct xnn_node* node)
+{
+  return node->type == xnn_node_type_unary_elementwise && node->unary_operator == xnn_unary_clamp;
+}
+
+static bool has_clamp(const struct xnn_node* node)
+{
+  if (is_clamp(node)) {
+    return true;
+  }
+  switch (node->type) {
+    case xnn_node_type_average_pooling_2d:
+    case xnn_node_type_convolution_2d:
+    case xnn_node_type_deconvolution_2d:
+    case xnn_node_type_depthwise_convolution_2d:
+    case xnn_node_type_fully_connected:
+    case xnn_node_type_max_pooling_2d:
+      return true;
+    default:
+      return false;
+  }
+}
+
 enum xnn_status xnn_subgraph_fusion(
     xnn_subgraph_t subgraph)
 {
@@ -1195,42 +1191,30 @@ enum xnn_status xnn_subgraph_fusion(
       }
 
       // Try to fuse Clamp Node upstream into producer Node
-      if (consumer->type == xnn_node_type_clamp) {
-        switch (producer->type) {
-          case xnn_node_type_average_pooling_2d:
-          case xnn_node_type_clamp:
-          case xnn_node_type_convolution_2d:
-          case xnn_node_type_deconvolution_2d:
-          case xnn_node_type_depthwise_convolution_2d:
-          case xnn_node_type_fully_connected:
-          case xnn_node_type_max_pooling_2d:
-            xnn_log_info("fuse Clamp Node #%"PRIu32" into upstream Node #%"PRIu32, consumer_id, producer_id);
-            assert(producer->num_outputs == 1);
-            assert(consumer->num_inputs == 1);
-            assert(consumer->num_outputs == 1);
+      if (is_clamp(consumer) && has_clamp(producer)) {
+        xnn_log_info("fuse Clamp Node #%"PRIu32" into upstream Node #%"PRIu32, consumer_id, producer_id);
+        assert(producer->num_outputs == 1);
+        assert(consumer->num_inputs == 1);
+        assert(consumer->num_outputs == 1);
 
-            const uint32_t fused_output_id = consumer->outputs[0];
-            assert(fused_output_id < subgraph->num_values);
-            subgraph->values[fused_output_id].producer = producer_id;
-            producer->outputs[0] = fused_output_id;
+        const uint32_t fused_output_id = consumer->outputs[0];
+        assert(fused_output_id < subgraph->num_values);
+        subgraph->values[fused_output_id].producer = producer_id;
+        producer->outputs[0] = fused_output_id;
 
-            producer->activation.output_min =
-              math_max_f32(producer->activation.output_min, consumer->activation.output_min);
-            producer->activation.output_max =
-              math_min_f32(producer->activation.output_max, consumer->activation.output_max);
-            producer->params.unary.clamp.min =
-                math_max_f32(producer->params.unary.clamp.min,
-                             consumer->params.unary.clamp.min);
-            producer->params.unary.clamp.max =
-                math_min_f32(producer->params.unary.clamp.max,
-                             consumer->params.unary.clamp.max);
+        producer->activation.output_min =
+          math_max_f32(producer->activation.output_min, consumer->activation.output_min);
+        producer->activation.output_max =
+          math_min_f32(producer->activation.output_max, consumer->activation.output_max);
+        producer->params.unary.clamp.min =
+            math_max_f32(producer->params.unary.clamp.min,
+                          consumer->params.unary.clamp.min);
+        producer->params.unary.clamp.max =
+            math_min_f32(producer->params.unary.clamp.max,
+                          consumer->params.unary.clamp.max);
 
-            xnn_node_clear(consumer);
-            xnn_value_clear(value);
-            break;
-          default:
-            break;
-        }
+        xnn_node_clear(consumer);
+        xnn_value_clear(value);
       }
       // Try to fuse Constant Pad node downstream into [Depthwise] Convolution 2D Node
       if (producer->type == xnn_node_type_static_constant_pad) {
@@ -1449,145 +1433,6 @@ enum xnn_status xnn_delete_subgraph(
     xnn_release_memory(subgraph);
   }
   return xnn_status_success;
-}
-
-enum xnn_unary_operator xnn_node_type_to_unary_operator(
-    enum xnn_node_type node_type) {
-  switch (node_type) {
-    case xnn_node_type_abs:
-      return xnn_unary_abs;
-    case xnn_node_type_bankers_rounding:
-      return xnn_unary_bankers_rounding;
-    case xnn_node_type_ceiling:
-      return xnn_unary_ceiling;
-    case xnn_node_type_clamp:
-      return xnn_unary_clamp;
-    case xnn_node_type_convert:
-      return xnn_unary_convert;
-    case xnn_node_type_elu:
-      return xnn_unary_elu;
-    case xnn_node_type_exp:
-      return xnn_unary_exp;
-    case xnn_node_type_floor:
-      return xnn_unary_floor;
-    case xnn_node_type_gelu:
-      return xnn_unary_gelu;
-    case xnn_node_type_hardswish:
-      return xnn_unary_hardswish;
-    case xnn_node_type_leaky_relu:
-      return xnn_unary_leaky_relu;
-    case xnn_node_type_log:
-      return xnn_unary_log;
-    case xnn_node_type_negate:
-      return xnn_unary_negate;
-    case xnn_node_type_reciprocal_square_root:
-      return xnn_unary_reciprocal_square_root;
-    case xnn_node_type_sigmoid:
-      return xnn_unary_sigmoid;
-    case xnn_node_type_square:
-      return xnn_unary_square;
-    case xnn_node_type_square_root:
-      return xnn_unary_square_root;
-    case xnn_node_type_tanh:
-      return xnn_unary_tanh;
-    default:
-      return xnn_unary_invalid;
-  }
-}
-
-enum xnn_node_type xnn_unary_operator_to_node_type(enum xnn_unary_operator op) {
-  switch (op) {
-    case xnn_unary_abs:
-      return xnn_node_type_abs;
-    case xnn_unary_bankers_rounding:
-      return xnn_node_type_bankers_rounding;
-    case xnn_unary_ceiling:
-      return xnn_node_type_ceiling;
-    case xnn_unary_clamp:
-      return xnn_node_type_clamp;
-    case xnn_unary_convert:
-      return xnn_node_type_convert;
-    case xnn_unary_elu:
-      return xnn_node_type_elu;
-    case xnn_unary_exp:
-      return xnn_node_type_exp;
-    case xnn_unary_floor:
-      return xnn_node_type_floor;
-    case xnn_unary_gelu:
-      return xnn_node_type_gelu;
-    case xnn_unary_hardswish:
-      return xnn_node_type_hardswish;
-    case xnn_unary_leaky_relu:
-      return xnn_node_type_leaky_relu;
-    case xnn_unary_log:
-      return xnn_node_type_log;
-    case xnn_unary_negate:
-      return xnn_node_type_negate;
-    case xnn_unary_reciprocal_square_root:
-      return xnn_node_type_reciprocal_square_root;
-    case xnn_unary_sigmoid:
-      return xnn_node_type_sigmoid;
-    case xnn_unary_square:
-      return xnn_node_type_square;
-    case xnn_unary_square_root:
-      return xnn_node_type_square_root;
-    case xnn_unary_tanh:
-      return xnn_node_type_tanh;
-    default:
-      return xnn_node_type_invalid;
-  }
-}
-
-enum xnn_node_type xnn_binary_operator_to_node_type(enum xnn_binary_operator type)
-{
-  switch (type) {
-    case xnn_binary_add:
-      return xnn_node_type_add2;
-    case xnn_binary_divide:
-      return xnn_node_type_divide;
-    case xnn_binary_multiply:
-      return xnn_node_type_multiply2;
-    case xnn_binary_subtract:
-      return xnn_node_type_subtract;
-    case xnn_binary_copysign:
-      return xnn_node_type_copysign;
-    case xnn_binary_squared_difference:
-      return xnn_node_type_squared_difference;
-    case xnn_binary_prelu:
-      return xnn_node_type_prelu;
-    case xnn_binary_minimum:
-      return xnn_node_type_minimum2;
-    case xnn_binary_maximum:
-      return xnn_node_type_maximum2;
-    default:
-      return xnn_node_type_invalid;
-  }
-}
-
-enum xnn_binary_operator xnn_node_type_to_binary_operator(enum xnn_node_type type)
-{
-  switch (type) {
-    case xnn_node_type_add2:
-      return xnn_binary_add;
-    case xnn_node_type_divide:
-      return xnn_binary_divide;
-    case xnn_node_type_multiply2:
-      return xnn_binary_multiply;
-    case xnn_node_type_subtract:
-      return xnn_binary_subtract;
-    case xnn_node_type_copysign:
-      return xnn_binary_copysign;
-    case xnn_node_type_squared_difference:
-      return xnn_binary_squared_difference;
-    case xnn_node_type_prelu:
-      return xnn_binary_prelu;
-    case xnn_node_type_minimum2:
-      return xnn_binary_minimum;
-    case xnn_node_type_maximum2:
-      return xnn_binary_maximum;
-    default:
-      return xnn_binary_invalid;
-  }
 }
 
 enum xnn_node_type xnn_reduce_operator_to_node_type(enum xnn_reduce_operator type)

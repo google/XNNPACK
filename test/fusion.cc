@@ -540,7 +540,8 @@ TEST(COPY, fused_downstream) {
   EXPECT_EQ(tester.NumOperators(), 1);
   EXPECT_EQ(unoptimized_output, optimized_output);
   const xnn_node* clamp_node = tester.Node(1);
-  ASSERT_EQ(clamp_node->type, xnn_node_type_clamp);
+  ASSERT_EQ(clamp_node->type, xnn_node_type_unary_elementwise);
+  ASSERT_EQ(clamp_node->unary_operator, xnn_unary_clamp);
   EXPECT_EQ(clamp_node->inputs[0], input_id);
   EXPECT_EQ(clamp_node->outputs[0], output_id);
 }
@@ -569,7 +570,8 @@ TEST(COPY, fused_downstream_node_with_multiple_inputs) {
   EXPECT_EQ(tester.NumOperators(), 1);
   EXPECT_EQ(unoptimized_output, optimized_output);
   const xnn_node* addition_node = tester.Node(1);
-  ASSERT_EQ(addition_node->type, xnn_node_type_add2);
+  ASSERT_EQ(addition_node->type, xnn_node_type_binary_elementwise);
+  ASSERT_EQ(addition_node->binary_operator, xnn_binary_add);
   ASSERT_EQ(addition_node->num_inputs, 2);
   EXPECT_EQ(addition_node->inputs[0], static_id);
   EXPECT_EQ(addition_node->inputs[1], input_id);
@@ -619,7 +621,8 @@ TEST(COPY, fused_upstream) {
   EXPECT_EQ(unoptimized_output, optimized_output);
 
   const xnn_node* clamp_node = tester.Node(0);
-  ASSERT_EQ(clamp_node->type, xnn_node_type_clamp);
+  ASSERT_EQ(clamp_node->type, xnn_node_type_unary_elementwise);
+  ASSERT_EQ(clamp_node->unary_operator, xnn_unary_clamp);
   EXPECT_EQ(clamp_node->inputs[0], input_id);
   EXPECT_EQ(clamp_node->outputs[0], output_id);
 }
@@ -696,7 +699,8 @@ TEST(COPY, not_fused_upstream_due_to_persistent_tensor) {
   EXPECT_EQ(unoptimized_output, optimized_output);
 
   const xnn_node* clamp_node = tester.Node(0);
-  ASSERT_EQ(clamp_node->type, xnn_node_type_clamp);
+  ASSERT_EQ(clamp_node->type, xnn_node_type_unary_elementwise);
+  ASSERT_EQ(clamp_node->unary_operator, xnn_unary_clamp);
   EXPECT_EQ(clamp_node->outputs[0], persistent_id);
 }
 
@@ -726,11 +730,13 @@ TEST(COPY, not_fused_upstream_due_to_persistent_tensor_but_can_be_fused_downstre
   EXPECT_EQ(unoptimized_output, optimized_output);
 
   const xnn_node* clamp_node = tester.Node(0);
-  ASSERT_EQ(clamp_node->type, xnn_node_type_clamp);
+  ASSERT_EQ(clamp_node->type, xnn_node_type_unary_elementwise);
+  ASSERT_EQ(clamp_node->unary_operator, xnn_unary_clamp);
   EXPECT_EQ(clamp_node->outputs[0], persistent_id);
 
   const xnn_node* hardswish_node = tester.Node(2);
-  ASSERT_EQ(hardswish_node->type, xnn_node_type_hardswish);
+  ASSERT_EQ(hardswish_node->type, xnn_node_type_unary_elementwise);
+  ASSERT_EQ(hardswish_node->unary_operator, xnn_unary_hardswish);
   EXPECT_EQ(hardswish_node->inputs[0], persistent_id);
 }
 

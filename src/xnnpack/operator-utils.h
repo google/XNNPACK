@@ -67,6 +67,9 @@ XNN_INTERNAL uint32_t xnn_get_heuristic_mr_igemm(
 
 XNN_INTERNAL enum xnn_status xnn_destroy_operator(xnn_operator_t op);
 
+XNN_INTERNAL const char* xnn_unary_operator_to_string(enum xnn_unary_operator op);
+XNN_INTERNAL const char* xnn_binary_operator_to_string(enum xnn_binary_operator op);
+
 #ifdef __cplusplus
 }
 #endif

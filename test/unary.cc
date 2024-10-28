@@ -23,7 +23,7 @@
 #include "xnnpack.h"
 #include "xnnpack/buffer.h"
 #include "xnnpack/log.h"
-#include "xnnpack/operator.h"
+#include "xnnpack/operator-utils.h"
 #include "xnnpack/subgraph.h"
 #include "replicable_random_device.h"
 #include "unary-ops.h"
@@ -227,7 +227,8 @@ TEST(AbsTest, reshape) {
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_abs);
+  ASSERT_EQ(node->type, xnn_node_type_unary_elementwise);
+  ASSERT_EQ(node->unary_operator, xnn_unary_abs);
   ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
