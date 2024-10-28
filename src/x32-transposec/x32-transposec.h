@@ -75,3 +75,6 @@ XNN_TRANSPOSE_UKERNEL(xnn_arch_arm_neon, xnn_x32_transposec_ukernel__4x4_reuse_s
 XNN_TRANSPOSE_UKERNEL(xnn_arch_arm_neon, xnn_x32_transposec_ukernel__4x4_aarch64_neon_tbl128, 32, uint32_t, 4, 4)
 #endif  // XNN_ARCH_ARM64
 
+#if XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
+XNN_TRANSPOSE_UKERNEL(0,xnn_x32_transposec_ukernel__2x32_multi_multi_hvx, 32, uint32_t, 2, 32)
+#endif  // XNN_ARCH_HEXAGON && XNN_ENABLE_HVX
