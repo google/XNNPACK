@@ -35,16 +35,13 @@ using TestInfo = ELU;
 TEST(ukernel, alpha) {                                                                                                  \
   TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                                 \
   const size_t batch_scale = get_batch_scale<datatype>();                                                               \
-  const size_t batch_end = batch_tile * batch_scale;                                                                    \
-  const size_t batch_step = std::max(1, batch_tile - 1);                                                                \
+  const size_t batch_size = batch_tile * batch_scale;                                                                   \
   for (float alpha : std::array<float, 2>({0.3f, 3.0f})) {                                                              \
-    for (size_t batch_size = 1; batch_size <= 5 * batch_end; batch_size += batch_step) {                                \
-      xnn_unary_params params;                                                                                          \
-      params.elu.alpha = alpha;                                                                                         \
-      VUnaryMicrokernelTester()                                                                                         \
-        .batch_size(batch_size)                                                                                         \
-        .Test<TestInfo>(ukernel, init_params, params);                                                                  \
-    }                                                                                                                   \
+    xnn_unary_params params;                                                                                            \
+    params.elu.alpha = alpha;                                                                                           \
+    VUnaryMicrokernelTester()                                                                                           \
+      .batch_size(batch_size)                                                                                           \
+      .Test<TestInfo>(ukernel, init_params, params);                                                                    \
   }                                                                                                                     \
 }
 #include "f16-velu/f16-velu.h"

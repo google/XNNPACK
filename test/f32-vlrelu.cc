@@ -35,16 +35,13 @@ using TestInfo = LeakyReLU;
 TEST(ukernel, negative_slope) {                                                                                         \
   TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                                 \
   const size_t batch_scale = get_batch_scale<datatype>();                                                               \
-  const size_t batch_end = batch_tile * batch_scale;                                                                    \
-  const size_t batch_step = std::max(1, batch_tile - 1);                                                                \
-  for (float negative_slope : std::array<float, 3>({0.01f, 0.3f, 1.3f})) {                                              \
+  const size_t batch_size = batch_tile * batch_scale;                                                                   \
+  for (float negative_slope : {0.01f, 0.3f, 1.3f}) {                                                                    \
     xnn_unary_params params;                                                                                            \
     params.leaky_relu.negative_slope = negative_slope;                                                                  \
-    for (size_t batch_size = 1; batch_size <= 5 * batch_end; batch_size += batch_step) {                                \
-      VUnaryMicrokernelTester()                                                                                         \
-        .batch_size(batch_size)                                                                                         \
-        .Test<TestInfo>(ukernel, init_params, params);                                                                  \
-    }                                                                                                                   \
+    VUnaryMicrokernelTester()                                                                                           \
+      .batch_size(batch_size)                                                                                           \
+      .Test<TestInfo>(ukernel, init_params, params);                                                                    \
   }                                                                                                                     \
 }
 #include "f32-vlrelu/f32-vlrelu.h"

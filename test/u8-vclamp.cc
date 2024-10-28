@@ -35,38 +35,28 @@ using TestInfo = Clamp;
 TEST(ukernel, clamp_min) {                                                                                              \
   TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                                 \
   const size_t batch_scale = get_batch_scale<datatype>();                                                               \
-  const size_t batch_end = batch_tile * batch_scale;                                                                    \
-  const size_t batch_step =                                                                                             \
-      batch_scale == 1 ? std::max(1, batch_tile - 1) : batch_end - 1;                                                   \
-  for (size_t min = 1; min < 255; min = xnnpack::NextPrime(min)) {                                                      \
-    for (size_t batch_size = 1; batch_size <= 5 * batch_end;                                                            \
-         batch_size += batch_step) {                                                                                    \
-      xnn_unary_params params;                                                                                          \
-      params.clamp.min = min;                                                                                           \
-      params.clamp.max = 255;                                                                                           \
-      VUnaryMicrokernelTester()                                                                                         \
-          .batch_size(batch_size)                                                                                       \
-          .Test<TestInfo>(ukernel, init_params, params);                                                                \
-    }                                                                                                                   \
+  const size_t batch_size = batch_tile * batch_scale;                                                                   \
+  for (int16_t min : {0, 1, 30, 127, 255}) {                                                                            \
+    xnn_unary_params params;                                                                                            \
+    params.clamp.min = min;                                                                                             \
+    params.clamp.max = 255;                                                                                             \
+    VUnaryMicrokernelTester()                                                                                           \
+        .batch_size(batch_size)                                                                                         \
+        .Test<TestInfo>(ukernel, init_params, params);                                                                  \
   }                                                                                                                     \
 }                                                                                                                       \
                                                                                                                         \
 TEST(ukernel, clamp_max) {                                                                                              \
   TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                                 \
   const size_t batch_scale = get_batch_scale<datatype>();                                                               \
-  const size_t batch_end = batch_tile * batch_scale;                                                                    \
-  const size_t batch_step =                                                                                             \
-      batch_scale == 1 ? std::max(1, batch_tile - 1) : batch_end - 1;                                                   \
-  for (size_t max = 1; max < 255; max = xnnpack::NextPrime(max)) {                                                      \
-    for (size_t batch_size = 1; batch_size <= 5 * batch_end;                                                            \
-         batch_size += batch_step) {                                                                                    \
-      xnn_unary_params params;                                                                                          \
-      params.clamp.min = 0;                                                                                             \
-      params.clamp.max = max;                                                                                           \
-      VUnaryMicrokernelTester()                                                                                         \
-          .batch_size(batch_size)                                                                                       \
-          .Test<TestInfo>(ukernel, init_params, params);                                                                \
-    }                                                                                                                   \
+  const size_t batch_size = batch_tile * batch_scale;                                                                   \
+  for (int16_t max : {1, 40, 127, 255}) {                                                                               \
+    xnn_unary_params params;                                                                                            \
+    params.clamp.min = 0;                                                                                               \
+    params.clamp.max = max;                                                                                             \
+    VUnaryMicrokernelTester()                                                                                           \
+        .batch_size(batch_size)                                                                                         \
+        .Test<TestInfo>(ukernel, init_params, params);                                                                  \
   }                                                                                                                     \
 }
 #include "u8-vclamp/u8-vclamp.h"

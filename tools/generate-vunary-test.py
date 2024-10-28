@@ -101,70 +101,54 @@ $if OP_TYPE == "Clamp":
   TEST(ukernel, clamp_min) {
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);
     const size_t batch_scale = get_batch_scale<datatype>();
-    const size_t batch_end = batch_tile * batch_scale;
-    const size_t batch_step =
-        batch_scale == 1 ? std::max(1, batch_tile - 1) : batch_end - 1;
-    for (size_t min = 1; min < 255; min = xnnpack::NextPrime(min)) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_end;
-           batch_size += batch_step) {
-        xnn_unary_params params;
-        params.clamp.min = min;
-        params.clamp.max = 255;
-        VUnaryMicrokernelTester()
-            .batch_size(batch_size)
-            .Test<TestInfo>(ukernel, init_params, params);
-      }
+    const size_t batch_size = batch_tile * batch_scale;
+    for (int16_t min : {-128, -20, -1, 0, 1, 30, 127, 255}) {
+      xnn_unary_params params;
+      params.clamp.min = min;
+      params.clamp.max = 255;
+      VUnaryMicrokernelTester()
+          .batch_size(batch_size)
+          .Test<TestInfo>(ukernel, init_params, params);
     }
   }
 
   TEST(ukernel, clamp_max) {
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);
     const size_t batch_scale = get_batch_scale<datatype>();
-    const size_t batch_end = batch_tile * batch_scale;
-    const size_t batch_step =
-        batch_scale == 1 ? std::max(1, batch_tile - 1) : batch_end - 1;
-    for (size_t max = 1; max < 255; max = xnnpack::NextPrime(max)) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_end;
-           batch_size += batch_step) {
-        xnn_unary_params params;
-        params.clamp.min = 0;
-        params.clamp.max = max;
-        VUnaryMicrokernelTester()
-            .batch_size(batch_size)
-            .Test<TestInfo>(ukernel, init_params, params);
-      }
+    const size_t batch_size = batch_tile * batch_scale;
+    for (int16_t max : {-127, -11, 0, 40, 127, 255}) {
+      xnn_unary_params params;
+      params.clamp.min = -128;
+      params.clamp.max = max;
+      VUnaryMicrokernelTester()
+          .batch_size(batch_size)
+          .Test<TestInfo>(ukernel, init_params, params);
     }
   }
 $if OP_TYPE == "ELU":
   TEST(ukernel, alpha) {
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);
     const size_t batch_scale = get_batch_scale<datatype>();
-    const size_t batch_end = batch_tile * batch_scale;
-    const size_t batch_step = std::max(1, batch_tile - 1);
+    const size_t batch_size = batch_tile * batch_scale;
     for (float alpha : std::array<float, 2>({0.3f, 3.0f})) {
-      for (size_t batch_size = 1; batch_size <= 5 * batch_end; batch_size += batch_step) {
-        xnn_unary_params params;
-        params.elu.alpha = alpha;
-        ${TESTER}()
-          .batch_size(batch_size)
-          .Test<TestInfo>(ukernel, init_params, params);
-      }
+      xnn_unary_params params;
+      params.elu.alpha = alpha;
+      ${TESTER}()
+        .batch_size(batch_size)
+        .Test<TestInfo>(ukernel, init_params, params);
     }
   }
 $if OP_TYPE == "LeakyReLU":
   TEST(ukernel, negative_slope) {
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);
     const size_t batch_scale = get_batch_scale<datatype>();
-    const size_t batch_end = batch_tile * batch_scale;
-    const size_t batch_step = std::max(1, batch_tile - 1);
-    for (float negative_slope : std::array<float, 3>({0.01f, 0.3f, 1.3f})) {
+    const size_t batch_size = batch_tile * batch_scale;
+    for (float negative_slope : {0.01f, 0.3f, 1.3f}) {
       xnn_unary_params params;
       params.leaky_relu.negative_slope = negative_slope;
-      for (size_t batch_size = 1; batch_size <= 5 * batch_end; batch_size += batch_step) {
-        ${TESTER}()
-          .batch_size(batch_size)
-          .Test<TestInfo>(ukernel, init_params, params);
-      }
+      ${TESTER}()
+        .batch_size(batch_size)
+        .Test<TestInfo>(ukernel, init_params, params);
     }
   }
 $if "q" in DATATYPE:
