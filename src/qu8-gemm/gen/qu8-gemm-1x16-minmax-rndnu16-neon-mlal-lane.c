@@ -231,8 +231,6 @@ void xnn_qu8_gemm_minmax_rndnu16_ukernel_1x16__neon_mlal_lane(
 
       uint8x16_t vout0x0123456789ABCDEF = vqmovun_high_s16(vqmovun_s16(vacc0x01234567), vacc0x89ABCDEF);
     #else
-      vacc0x01234567 = vcombine_s16(vqmovn_s32(vacc0x0123), vqmovn_s32(vacc0x4567));
-      vacc0x89ABCDEF = vcombine_s16(vqmovn_s32(vacc0x89AB), vqmovn_s32(vacc0xCDEF));
 
       vacc0x01234567 = vqaddq_s16(vacc0x01234567, voutput_zero_point);
       vacc0x89ABCDEF = vqaddq_s16(vacc0x89ABCDEF, voutput_zero_point);

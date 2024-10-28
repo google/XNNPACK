@@ -623,9 +623,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
             $elif M + 1 == MR:
               ${XINT8X8_T} vout${M}x${ABC[N:N+8]} = ${VQMOVXN_S16}(vacc${M}x${ABC[N:N+8]});
       #else
-        $for M in range(MR):
-          $for N in range(0, NR, 8):
-            vacc${M}x${ABC[N:N+8]} = vcombine_s16(vqmovn_s32(vacc${M}x${ABC[N:N+4]}), vqmovn_s32(vacc${M}x${ABC[N+4:N+8]}));
+        $if REQUANTIZATION != "RNDNU16":
+          $for M in range(MR):
+            $for N in range(0, NR, 8):
+              int16x8_t vacc${M}x${ABC[N:N+8]} = vcombine_s16(vqmovn_s32(vacc${M}x${ABC[N:N+4]}), vqmovn_s32(vacc${M}x${ABC[N+4:N+8]}));
 
         $if REQUANTIZATION != "FP32" or ARMV8:
           $for M in range(MR):
