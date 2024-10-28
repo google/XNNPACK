@@ -1039,6 +1039,16 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qu8_gemm_minmax_rndnu16_test",
+    srcs = [
+        "qu8-gemm-minmax-rndnu16.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "qu8_igemm_minmax_rndnu_test",
     srcs = [
         "qu8-igemm-minmax-rndnu.cc",

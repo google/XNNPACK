@@ -109,6 +109,43 @@ XNN_INLINE static uint64_t double_as_uint64(double f) {
   return bits.as_uint64;
 }
 
+XNN_INLINE static uint8_t saturating_cast_s16_u8(int16_t input) {
+  if (input > UINT8_MAX) return UINT8_MAX;
+  if (input < 0) return 0;
+  return input;
+}
+
+XNN_INLINE static int16_t saturating_cast_s32_s16(int32_t input) {
+  if (input > INT16_MAX) return INT16_MAX;
+  if (input < INT16_MIN) return INT16_MIN;
+  return input;
+}
+
+XNN_INLINE static int32_t saturating_cast_s64_s32(int64_t input) {
+  if (input > INT32_MAX) return INT32_MAX;
+  if (input < INT32_MIN) return INT32_MIN;
+  return input;
+}
+
+XNN_INLINE static int16_t saturating_add_s16(int16_t x, int16_t y) {
+  return saturating_cast_s32_s16((int32_t)x + (int32_t)y);
+}
+
+XNN_INLINE static int32_t math_asr_s32_rounding(int32_t x, int n) {
+  if (n == 0) return x;
+  int32_t rounding = 1 << (n - 1);
+  return ((int64_t)x + rounding) >> n;
+}
+
+XNN_INLINE static int32_t saturating_rounding_shift_left_s32(int32_t x,
+                                                             int32_t shift) {
+  if (shift >= 0) {
+    return saturating_cast_s64_s32((int64_t)x << shift);
+  } else {
+    return math_asr_s32_rounding(x, -shift);
+  }
+}
+
 XNN_INLINE static uint32_t math_abs_s32(int32_t n) {
   #if defined(_MSC_VER)
     return (uint32_t) abs((int) n);

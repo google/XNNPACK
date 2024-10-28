@@ -74,6 +74,78 @@ static inline uint8_t xnn_qu8_requantize_fp32(
   return (uint8_t) output;
 }
 
+// f32 = 2^exp * multiplier, multiplier is in [1, 2) * 2^23
+struct ExpMul {
+  int32_t exp;
+  // 24 bits
+  // multiplier_q24 is in [2^23, 2^24 - 1]
+  int32_t multiplier_q24;
+};
+
+static inline struct ExpMul parse_f32(float scale) {
+  assert(scale >= 0);
+  uint32_t scale_bits = float_as_uint32(scale);
+  const int32_t multiplier_q24 =
+      (scale_bits & UINT32_C(0x007FFFFF)) | UINT32_C(0x00800000);
+  int32_t exp = (scale_bits >> 23) - 127;
+  struct ExpMul ret;
+  ret.exp = exp;
+  ret.multiplier_q24 = multiplier_q24;
+  return ret;
+}
+
+// multiply_2x_high_s16 emulates X86_64 pmulhrsw.
+// int16_t range is [-2^15, 2^15 - 1]
+// int16_t * int16_t range is strictly included into [-2^30, 2^30 - 1],
+// so the result can modeled by signed int31.
+// To extract the most significant 16 bits one can shift int31 by 15.
+static int16_t multiply_2x_high_s16(int16_t x, int16_t y) {
+  int32_t product = (int32_t)x * (int32_t)y;
+  int32_t rounding = 1 << 14;
+  // This is safe from overflow since x, y are in [-2^15, 2^15 - 1],
+  // therefore, x * y is in [2^-30, 2^30).
+  int16_t result = (product + rounding) >> 15;
+  return result;
+}
+
+static inline uint8_t clamp_s16_u8(int16_t result, uint8_t zero_point,
+                                   uint8_t min, uint8_t max) {
+  int16_t min16 = (int16_t)min;
+  int16_t max16 = (int16_t)max;
+  int16_t zero_point16 = (int16_t)zero_point;
+  return math_max_s16(
+      min16, math_min_s16(max16, saturating_add_s16(result, zero_point16)));
+}
+
+static inline uint8_t xnn_qu8_requantize_rndnu16(int32_t input, float scale,
+                                                 uint8_t zero_point,
+                                                 uint8_t min, uint8_t max) {
+  assert(scale < 256.0f);
+  assert(scale >= 0x1.0p-32f);
+
+  struct ExpMul f32 = parse_f32(scale);
+
+  int exp = f32.exp;
+  assert(exp < 8);
+  assert(exp >= -32);
+
+  // multiplier_q15 is in the range [2^14, 2^15 - 1]
+  int16_t multiplier_q15 =
+      math_min_s32((1 << 15) - 1, math_asr_s32_rounding(f32.multiplier_q24, 9));
+
+  // Desired product: P = input * 2^exp * multiplier_q15 * 2^-14
+  // We care about the lower 8 bits of P with saturation,
+  // i.e. if P >= 2^8 the answer should be 2^8 - 1.
+  // To compute these 8 bits we would like to use the upper half
+  // of a 16 bit x 16 bit product.
+  // This is achived by a preshift of the input, depending on
+  // the value of exp.
+  int32_t preshifted_input = saturating_rounding_shift_left_s32(input, exp + 1);
+  int16_t input16 = saturating_cast_s32_s16(preshifted_input);
+  int16_t upper_half16 = multiply_2x_high_s16(input16, multiplier_q15);
+  return clamp_s16_u8(upper_half16, zero_point, min, max);
+}
+
 static inline int8_t xnn_qs8_requantize_rndnu(
   int32_t input,
   float scale,

@@ -761,6 +761,7 @@ NON_PROD_NEON_MICROKERNEL_SRCS = [
     "src/qu8-f32-vcvt/gen/qu8-f32-vcvt-neon-u24.c",
     "src/qu8-gemm/gen/qu8-gemm-1x8-minmax-fp32-neon-mlal-lane.c",
     "src/qu8-gemm/gen/qu8-gemm-1x16-minmax-fp32-neon-mlal-lane.c",
+    "src/qu8-gemm/gen/qu8-gemm-1x16-minmax-rndnu16-neon-mlal-lane.c",
     "src/qu8-gemm/gen/qu8-gemm-2x8-minmax-rndnu-neon-mlal-lane.c",
     "src/qu8-gemm/gen/qu8-gemm-2x16-minmax-rndnu-neon-mlal-lane.c",
     "src/qu8-gemm/gen/qu8-gemm-3x16-minmax-rndnu-neon-mlal-lane.c",
