@@ -75,14 +75,44 @@ void xnn_qs8${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${K
         const ${TYPE}* w${N} = w${N-1} + kc;
       $if PREFETCH:
         $for N in range(0, NR):
-          xnn_prefetch_to_l1((const int8_t*) w${N});
-          xnn_prefetch_to_l1((const int8_t*) w${N} + 64);
+          $for OFFSET in range(0, 448, 64):
+            xnn_prefetch_to_l1((const int8_t*) w${N} + ${OFFSET});
 
       $for N in range(0, NR, 4):
         __m256i vacc${N} = _mm256_setzero_si256();
 
-      // KC main loop multiple of ${NR}x${KR}
       size_t k = kc;
+      // KC main loop multiple of ${NR}x${4 * KR}
+      for (; k >= ${4 * KR}; k -= ${4 * KR}) {
+        $for N in range(NR):
+          const __m256i v${N}_0123 = _mm256_loadu_si256((const __m256i*) w${N});
+
+        $for N in range(0, NR, 2):
+          const __m256i v${N}${N+1}_02 = _mm256_unpacklo_epi64(v${N}_0123, v${N+1}_0123);
+          const __m256i v${N}${N+1}_13 = _mm256_unpackhi_epi64(v${N}_0123, v${N+1}_0123);
+
+        $if PREFETCH:
+          $for N in range(0, NR):
+            xnn_prefetch_to_l1((const int8_t*) w${N} + 448);
+
+        $for N in range(0, NR, 4):
+          $for I in range(0, 4):
+            const __m256i v${N}_${I} = _mm256_permute2f128_si256(v${N}${N+1}_${I%2}${I%2+2}, v${N+2}${N+3}_${I%2}${I%2+2}, _MM_SHUFFLE(0, ${I//2+2}, 0, ${I//2}));
+
+        $for N in range(0, NR, 4):
+          $for I in range(0, 4):
+            vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, v${N}_${I});
+
+        $for I in range(0, 4):
+          $for N in range(0, NR, 4):
+            _mm256_storeu_si256((__m256i *)&out[${(I*NR + N)*KR}],  v${N}_${I});
+
+        $for N in range(NR):
+          w${N} += ${4 * KR};
+        out += ${4*NR*KR};
+      }
+
+      // KC main loop multiple of ${NR}x${KR}
       for (; k >= ${KR}; k -= ${KR}) {
         $for N in range(0, NR, 4):
           __m256i v${N} = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N}));
@@ -91,7 +121,7 @@ void xnn_qs8${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${K
           v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+3})), 0xC0);
         $if PREFETCH:
           $for N in range(0, NR):
-            xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
+            xnn_prefetch_to_l1((const int8_t*) w${N} + 448);
 
         $for N in range(0, NR, 4):
           vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, v${N});
@@ -192,7 +222,7 @@ void xnn_qs8${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${K
           v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+3})), 0xC0);
         $if PREFETCH:
           $for N in range(0, NR):
-            xnn_prefetch_to_l1((const int8_t*) w${N} + 128);
+            xnn_prefetch_to_l1((const int8_t*) w${N} + 448);
 
         $for N in range(0, NR, 4):
           vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, v${N});

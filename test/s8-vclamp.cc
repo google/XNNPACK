@@ -36,7 +36,7 @@ TEST(ukernel, clamp_min) {                                                      
   TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                                 \
   const size_t batch_scale = get_batch_scale<datatype>();                                                               \
   const size_t batch_size = batch_tile * batch_scale;                                                                   \
-  for (int16_t min : {0, 1, 30, 127, 255}) {                                                                            \
+  for (int16_t min : {-128, -20, -1, 0, 1, 30, 127, 255}) {                                                             \
     xnn_unary_params params;                                                                                            \
     params.clamp.min = min;                                                                                             \
     params.clamp.max = 255;                                                                                             \
@@ -50,9 +50,9 @@ TEST(ukernel, clamp_max) {                                                      
   TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                                 \
   const size_t batch_scale = get_batch_scale<datatype>();                                                               \
   const size_t batch_size = batch_tile * batch_scale;                                                                   \
-  for (int16_t max : {1, 40, 127, 255}) {                                                                               \
+  for (int16_t max : {-127, -11, 0, 40, 127, 255}) {                                                                    \
     xnn_unary_params params;                                                                                            \
-    params.clamp.min = 0;                                                                                               \
+    params.clamp.min = -128;                                                                                            \
     params.clamp.max = max;                                                                                             \
     VUnaryMicrokernelTester()                                                                                           \
         .batch_size(batch_size)                                                                                         \
