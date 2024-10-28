@@ -509,27 +509,6 @@ struct xnn_f32_elu_params {
 };
 
 
-// ExpMinus: used by RADDEXPMINUSMAX microkernels.
-
-struct xnn_f16_expminus_params {
-  char _;  // Dummy member variable to comply with the C standard
-};
-
-struct xnn_f32_expminus_params {
-  char _;  // Dummy member variable to comply with the C standard
-};
-
-// HSwish: used by VHSWISH microkernels.
-
-struct xnn_f16_hswish_params {
-  char _;  // Dummy member variable to comply with the C standard
-};
-
-struct xnn_f32_hswish_params {
-  char _;  // Dummy member variable to comply with the C standard
-};
-
-
 // LReLU (Leaky ReLU): used by VLRELU microkernels.
 
 struct xnn_f16_lrelu_params {
@@ -562,66 +541,9 @@ struct xnn_qu8_lrelu_params {
   } scalar;
 };
 
-// Rnd (Round): used by VRNDNE/VRNDU/VRNDD/VRNDZ microkernels.
-
-struct xnn_f16_rnd_params {
-  char _;  // Dummy member variable to comply with the C standard
-};
-
-struct xnn_f32_rnd_params {
-  char _;  // Dummy member variable to comply with the C standard
-};
-
-
-// Sigmoid: used by VSIGMOID microkernels.
-
-struct xnn_f16_sigmoid_params {
-  char _;  // Dummy member variable to comply with the C standard
-};
-
-struct xnn_f32_sigmoid_params {
-  char _;  // Dummy member variable to comply with the C standard
-};
-
-
-// Sqrt (Square Root): used by VSQRT microkernels.
-
-struct xnn_f16_sqrt_params {
-  char _;  // Dummy member variable to comply with the C standard
-};
-
-struct xnn_f32_sqrt_params {
-  char _;  // Dummy member variable to comply with the C standard
-};
-
-// Rsqrt (Reciprocal Square Root): used by VRSQRT microkernels.
-
-struct xnn_f16_rsqrt_params {
-  char _;  // Dummy member variable to comply with the C standard
-};
-
-struct xnn_f32_rsqrt_params {
-  char _;  // Dummy member variable to comply with the C standard.
-};
-
-// TanH (Hyperbolic Tangent): used by VTANH microkernels.
-
-union xnn_f16_tanh_params {
-  char _;  // Dummy member variable to comply with the C standard
-};
-
-union xnn_f32_tanh_params {
-  char _;  // Dummy member variable to comply with the C standard
-};
-
 struct xnn_qs8_packw_params {
   int8_t input_zero_point;
 };
-
-// Forward declare for use in microkernel headers for JIT generator functions.
-struct xnn_code_buffer;
-
-typedef int xnn_status_t;
 
 struct xnn_x32_packb_params {
   char _;  // Dummy member variable to comply with the C standard
@@ -641,8 +563,6 @@ union xnn_unary_uparams {
   struct xnn_qu8_cvt_params qu8_cvt;
   struct xnn_f16_elu_params f16_elu;
   struct xnn_f32_elu_params f32_elu;
-  union xnn_f16_tanh_params f16_tanh;
-  union xnn_f32_tanh_params f32_tanh;
   struct xnn_f16_lrelu_params f16_lrelu;
   struct xnn_f32_lrelu_params f32_lrelu;
   struct xnn_qs8_lrelu_params qs8_lrelu;

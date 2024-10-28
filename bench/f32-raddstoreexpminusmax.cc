@@ -47,11 +47,6 @@ static void f32_raddstoreexpminusmax(
 
   benchmark::utils::DisableDenormals();
 
-  xnn_f32_expminus_params params;
-  if (init_params) {
-    init_params(&params);
-  }
-
   size_t buffer_index = 0;
   for (auto _ : state) {
     state.PauseTiming();
@@ -63,7 +58,7 @@ static void f32_raddstoreexpminusmax(
     state.ResumeTiming();
 
     float y_sum = nanf("");
-    raddstoreexpminusmax(elements * sizeof(float), x.data(), &x_max, y.data() + buffer_index * packed_elements, &y_sum, &params);
+    raddstoreexpminusmax(elements * sizeof(float), x.data(), &x_max, y.data() + buffer_index * packed_elements, &y_sum, nullptr);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();

@@ -142,7 +142,7 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f16(
     goto error;
   }
 
-  struct xnn_f16_expminus_params expminus_params;
+  struct xnn_f16_default_params expminus_params;
   if (raddstoreexpminusmax_config->init.f16 != NULL) {
     raddstoreexpminusmax_config->init.f16(&expminus_params);
   }
@@ -252,10 +252,7 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f32(
     goto error;
   }
 
-  struct xnn_f32_expminus_params expminus_params;
-  if (raddstoreexpminusmax_config->init.f32 != NULL) {
-    raddstoreexpminusmax_config->init.f32(&expminus_params);
-  }
+  struct xnn_f32_default_params expminus_params;
 
   const struct xnn_rmax_config* rmax_config = xnn_init_f32_rmax_config();
   if (rmax_config == NULL) {
@@ -266,9 +263,6 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f32(
   }
 
   struct xnn_f32_default_params rmax_params;
-  if (rmax_config->init.f32 != NULL) {
-    rmax_config->init.f32(&rmax_params);
-  }
 
   const struct xnn_binary_elementwise_config* vadd_config = xnn_init_f32_vadd_config();
   if (vadd_config == NULL) {
@@ -653,7 +647,7 @@ enum xnn_status xnn_reshape_scaled_dot_product_attention_nhtc_f16(
     (xnn_compute_reciprocal_fn) compute_reciprocal_f16,
     &cap, &cap_reciprocal, sizeof(uint16_t),
     &attention_op->params.f16_minmax, sizeof(attention_op->params.f16_minmax),
-    &attention_op->params2.f16_expminus_params, sizeof(attention_op->params2.f16_expminus_params),
+    &attention_op->params2.f16_default, sizeof(attention_op->params2.f16_default),
     &attention_op->params3.f16_rmax, sizeof(attention_op->params3.f16_rmax),
     &attention_op->params4.unary, sizeof(attention_op->params4.unary),
     threadpool);
@@ -691,7 +685,7 @@ enum xnn_status xnn_reshape_scaled_dot_product_attention_nhtc_f32(
     (xnn_compute_reciprocal_fn) compute_reciprocal_f32,
     &cap, &cap_reciprocal, sizeof(float),
     &attention_op->params.f32_minmax, sizeof(attention_op->params.f32_minmax),
-    &attention_op->params2.f32_expminus_params, sizeof(attention_op->params2.f32_expminus_params),
+    &attention_op->params2.f32_default, sizeof(attention_op->params2.f32_default),
     &attention_op->params3.f32_rmax, sizeof(attention_op->params3.f32_rmax),
     &attention_op->params4.unary, sizeof(attention_op->params4.unary),
     threadpool);

@@ -1628,7 +1628,7 @@ typedef void (*xnn_f16_raddstoreexpminusmax_ukernel_fn)(
     const xnn_float16* max,
     xnn_float16* output,
     xnn_float16* sum,
-    const struct xnn_f16_expminus_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const void* params);
 
 typedef void (*xnn_f32_raddstoreexpminusmax_ukernel_fn)(
     size_t batch,
@@ -1636,7 +1636,7 @@ typedef void (*xnn_f32_raddstoreexpminusmax_ukernel_fn)(
     const float* max,
     float* output,
     float* sum,
-    const struct xnn_f32_expminus_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const void* params);
 
 // VUNARY: Vector UNARY elementwise
 
@@ -1645,338 +1645,6 @@ typedef void (*xnn_vunary_ukernel_fn)(
     const void* input,
     void* output,
     const union xnn_unary_uparams* params);
-
-// VABS: Vector ABSolute value elementwise
-
-typedef void (*xnn_bf16_vabs_ukernel_fn)(
-    size_t batch,
-    const xnn_bfloat16* input,
-    xnn_bfloat16* output,
-    const struct xnn_bf16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f16_vabs_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const struct xnn_f16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vabs_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VCLAMP: Vector CLAMP elementwise
-
-typedef void (*xnn_f16_vclamp_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vclamp_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_s8_vclamp_ukernel_fn)(
-    size_t batch,
-    const int8_t* input,
-    int8_t* output,
-    const struct xnn_s8_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_u8_vclamp_ukernel_fn)(
-    size_t batch,
-    const uint8_t* input,
-    uint8_t* output,
-    const struct xnn_u8_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VCOPYSIGN: Vector Copysign elementwise
-
-typedef void (*xnn_f32_vcopysign_ukernel_fn)(
-    size_t batch,
-    const float* input_a,
-    const float* input_b,
-    float* output,
-    const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-
-// MULTIPLY: Vector Multiply (S32 bit)elementwise
-
-typedef void (*xnn_s32_vmul_ukernel_fn)(
-    size_t batch,
-    const int32_t* input_a,
-    const int32_t* input_b,
-    int32_t* output,
-    const struct xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-
-// VCVT: Vector ConVerT elementwise
-
-typedef void (*xnn_f16_f32_vcvt_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    float* output,
-    const void* params);
-
-typedef void (*xnn_f16_qs8_vcvt_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    int8_t* output,
-    const struct xnn_f16_qs8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_f16_vcvt_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    xnn_float16* output,
-    const void* params);
-
-typedef void (*xnn_f32_qs8_vcvt_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    int8_t* output,
-    const struct xnn_f32_qs8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_qu8_vcvt_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    uint8_t* output,
-    const struct xnn_f32_qu8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_s32_f32_vcvt_ukernel_fn)(
-    size_t batch,
-    const int32_t* input,
-    float* output,
-    const struct xnn_s32_f32_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_u32_f32_vcvt_ukernel_fn)(
-    size_t batch,
-    const uint32_t* input,
-    float* output,
-    const struct xnn_u32_f32_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qs8_vcvt_ukernel_fn)(
-    size_t batch,
-    const int8_t* input,
-    int8_t* output,
-    const struct xnn_qs8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qs8_f16_vcvt_ukernel_fn)(
-    size_t batch,
-    const int8_t* input,
-    xnn_float16* output,
-    const struct xnn_qs8_f16_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qs8_f32_vcvt_ukernel_fn)(
-    size_t batch,
-    const int8_t* input,
-    float* output,
-    const struct xnn_qs8_f32_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qs16_qs8_vcvt_ukernel_fn)(
-    size_t batch,
-    const int16_t* input,
-    int8_t* output,
-    const struct xnn_qs16_qs8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qu8_vcvt_ukernel_fn)(
-    size_t batch,
-    const uint8_t* input,
-    uint8_t* output,
-    const struct xnn_qu8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qu8_f32_vcvt_ukernel_fn)(
-    size_t batch,
-    const uint8_t* input,
-    float* output,
-    const struct xnn_qu8_f32_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VELU: Vector Exponential Linear Unit elementwise
-
-typedef void (*xnn_f16_velu_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const struct xnn_f16_elu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_velu_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_elu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VGELU: Vector Gaussian Error Linear Unit elementwise
-
-typedef void (*xnn_f32_vgelu_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VHSWISH: Vector Hard SWISH elementwise
-
-typedef void (*xnn_f16_vhswish_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const struct xnn_f16_hswish_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vhswish_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_hswish_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VLRELU: Vector Leaky REctified Linear Unit elementwise
-
-typedef void (*xnn_f16_vlrelu_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const struct xnn_f16_lrelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vlrelu_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_lrelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qs8_vlrelu_ukernel_fn)(
-    size_t batch,
-    const int8_t* input,
-    int8_t* output,
-    const struct xnn_qs8_lrelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qu8_vlrelu_ukernel_fn)(
-    size_t batch,
-    const uint8_t* input,
-    uint8_t* output,
-    const struct xnn_qu8_lrelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VNEG: Vector NEGate elementwise
-
-typedef void (*xnn_f16_vneg_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const struct xnn_f16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vneg_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VRELU: Vector REctified Linear Unit elementwise
-
-typedef void (*xnn_f32_vrelu_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_relu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VRELU generator
-typedef xnn_status_t (*xnn_vrelu_generator_fn)(
-    struct xnn_code_buffer*,
-    size_t,
-    int);
-
-// VROUND: Vector ROUNDing elementwise
-
-typedef void (*xnn_f16_vround_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const struct xnn_f16_rnd_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vround_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_rnd_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VSIGMOID: Vector SIGMOID elementwise
-
-typedef void (*xnn_f16_vsigmoid_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const struct xnn_f16_sigmoid_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vsigmoid_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_sigmoid_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VSQR: Vector SQuaRe elementwise
-
-typedef void (*xnn_f16_vsqr_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const struct xnn_f16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vsqr_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VSQRT: Vector SQuare RooT elementwise
-
-typedef void (*xnn_f16_vsqrt_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const struct xnn_f16_sqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vsqrt_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_sqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VRSQRT: Vector Reciprocal SQuare RooT elementwise
-
-typedef void (*xnn_f16_vrsqrt_ukernel_fn)(
-    size_t batch, const xnn_float16* input, xnn_float16* output,
-    const struct xnn_f16_rsqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vrsqrt_ukernel_fn)(
-    size_t batch, const float* input, float* output,
-    const struct xnn_f32_rsqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VTANH: Vector TANH elementwise
-
-typedef void (*xnn_f16_vtanh_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const union xnn_f16_tanh_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vtanh_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const union xnn_f32_tanh_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VEXP: Vector Exp elementwise
-
-typedef void (*xnn_f32_vexp_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VLOG: Vector Log elementwise
-
-typedef void (*xnn_f32_vlog_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // LUT: vector LookUp Table elementwise
 
@@ -2219,80 +1887,6 @@ typedef void (*xnn_f32_ibilinear_chw_ukernel_fn)(
     size_t input_increment);
 
 
-/********************* JIT microkernel generator pointers ********************/
-
-typedef xnn_status_t (*xnn_jit_gemm_code_generator_fn)(
-    struct xnn_code_buffer *code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void *params);
-typedef xnn_status_t (*xnn_jit_igemm_code_generator_fn)(
-    struct xnn_code_buffer *code, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const void *params);
-
-
-/***************** Audio pre-processing microkernel pointers *****************/
-
-typedef void (*xnn_s16_rmaxabs_ukernel_fn)(
-    size_t batch_size,
-    const int16_t* x,
-    uint16_t* y);
-
-typedef void (*xnn_s16_window_ukernel_fn)(
-    size_t rows,
-    size_t batch_size,
-    const int16_t* input,
-    const int16_t* weights,
-    int16_t* output,
-    uint32_t shift);
-
-typedef void (*xnn_u32_filterbank_accumulate_ukernel_fn)(
-    size_t rows,
-    const uint32_t* input,
-    const uint8_t* weight_widths,
-    const uint16_t* weights,
-    uint64_t* output);
-
-typedef void (*xnn_u32_filterbank_subtract_ukernel_fn)(
-    size_t batch_size,
-    const uint32_t* input,
-    uint32_t smoothing,
-    uint32_t alternate_smoothing,
-    uint32_t one_minus_smoothing,
-    uint32_t alternate_one_minus_smoothing,
-    uint32_t min_signal_remaining,
-    uint32_t smoothing_bits,
-    uint32_t spectral_subtraction_bits,
-    uint32_t* noise_estimate,
-    uint32_t* output);
-
-typedef void (*xnn_i16_vlshift_ukernel_fn)(
-    size_t batch,
-    const uint16_t* input,
-    uint16_t* output,
-    uint32_t shift);
-
-typedef void (*xnn_cs16_vsquareabs_ukernel_fn)(
-    size_t batch_size,
-    const int16_t* input,
-    uint32_t* output);
-
-typedef void (*xnn_u32_vlog_ukernel_fn)(
-    size_t batch_size,
-    const uint32_t* input,
-    uint32_t input_lshift,
-    uint32_t output_scale,
-    uint16_t* output);
-
-typedef void (*xnn_cs16_bfly4_ukernel_fn)(
-    size_t batch,
-    size_t samples,
-    int16_t* data,
-    const int16_t* twiddle,
-    size_t stride);
-
-typedef void (*xnn_cs16_fftr_ukernel_fn)(
-    size_t samples,
-    int16_t* data,
-    const int16_t* twiddle);
-
-
 /********************* Experimental microkernel pointers *********************/
 
 // ZIPC: ZIP Constant number of arrays
@@ -2461,14 +2055,15 @@ typedef size_t (*xnn_init_f16_default_params_fn)(
 
 typedef size_t (*xnn_init_f32_default_params_fn)(
   struct xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
-typedef size_t (*xnn_init_f16_expminus_params_fn)(
-  struct xnn_f16_expminus_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_f32_expminus_params_fn)(
-  struct xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_s32_default_params_fn)(
   struct xnn_s32_default_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef size_t (*xnn_init_f16_expminus_params_fn)(
+  struct xnn_f16_default_params params[XNN_MIN_ELEMENTS(1)]);
+
+typedef size_t (*xnn_init_f32_expminus_params_fn)(
+  struct xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_bf16_minmax_params_fn)(
   struct xnn_bf16_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2628,11 +2223,6 @@ typedef void (*xnn_indirection_init_resize_bilinear2d_hwc_fn)(
   void* packed_weights,
   bool align_corners,
   bool tensorflow_legacy);
-
-struct xnn_generated_code_chunk {
-  size_t offset;
-  size_t offset_end;
-};
 
 struct xnn_hmp_dqgemm_ukernel {
   xnn_dqgemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];

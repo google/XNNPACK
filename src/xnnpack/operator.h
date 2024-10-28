@@ -251,9 +251,8 @@ struct xnn_operator {
   // but params need to be swapped for commutative ops with per-operand params.
   union {
     union xnn_binary_uparams binary;
-    struct xnn_f16_expminus_params f16_expminus_params;
+    struct xnn_f16_default_params f16_default;
     union xnn_f32_minmax_params f32_minmax;
-    struct xnn_f32_expminus_params f32_expminus_params;
     struct xnn_f32_default_params f32_default;
     struct xnn_s8_minmax_params s8_minmax;
     struct xnn_u8_minmax_params u8_minmax;

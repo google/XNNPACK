@@ -38,7 +38,7 @@ static void f16_raddstoreexpminusmax(
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(-100.0f, 100.0f), std::ref(rng));
-  
+
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(), packed_elements * sizeof(xnn_float16));
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> x(elements);
@@ -48,11 +48,6 @@ static void f16_raddstoreexpminusmax(
   std::generate(x.begin(), x.end(), f32rng);
 
   benchmark::utils::DisableDenormals();
-
-  xnn_f16_expminus_params params;
-  if (init_params) {
-    init_params(&params);
-  }
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -65,7 +60,7 @@ static void f16_raddstoreexpminusmax(
     state.ResumeTiming();
 
     xnn_float16 y_sum = std::nanf("");
-    raddstoreexpminusmax(elements * sizeof(xnn_float16), x.data(), &x_max, y.data() + buffer_index * packed_elements, &y_sum, &params);
+    raddstoreexpminusmax(elements * sizeof(xnn_float16), x.data(), &x_max, y.data() + buffer_index * packed_elements, &y_sum, nullptr);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();

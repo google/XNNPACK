@@ -28,8 +28,8 @@
 #include "xnnpack/params.h"
 #include "pthreadpool.h"
 
-static xnn_status_t check_op_type(xnn_operator_t op,
-                                  enum xnn_operator_type expected_type) {
+static enum xnn_status check_op_type(xnn_operator_t op,
+                                     enum xnn_operator_type expected_type) {
   if (op->type != expected_type) {
     xnn_log_error(
         "failed to setup operator: operator type mismatch (expected %s, got "
@@ -1114,7 +1114,7 @@ enum xnn_status xnn_setup_convert_nc_f32_qd8(
 enum xnn_status xnn_setup_convert_nc_f32_qp8(xnn_operator_t convert_op,
                                              const float* input,
                                              int8_t* output) {
-  xnn_status_t status =
+  enum xnn_status status =
       check_op_type(convert_op, xnn_operator_type_convert_nc_f32_qp8);
   if (status != xnn_status_success) {
     return status;
