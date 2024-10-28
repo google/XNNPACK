@@ -14,11 +14,23 @@
 #endif  // XNN_ENABLE_KLEIDIAI
 
 size_t xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2_get_mr() {
+#if XNN_ENABLE_KLEIDIAI
   return kai_get_mr_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa();
+#else
+  assert(
+      "Calling KleidiAI kai_get_mr wrapper, but XNNPACK was compiled without "
+      "`XNN_ENABLE_KLEIDIAI`." && 0);
+#endif  // XNN_ENABLE_KLEIDIAI
 }
 
 size_t xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2_get_nr() {
+#if XNN_ENABLE_KLEIDIAI
   return kai_get_nr_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa();
+#else
+  assert(
+      "Calling KleidiAI kai_get_nr wrapper, but XNNPACK was compiled without "
+      "`XNN_ENABLE_KLEIDIAI`." && 0);
+#endif  // XNN_ENABLE_KLEIDIAI
 }
 
 // Wraps the `kai_run_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa`
