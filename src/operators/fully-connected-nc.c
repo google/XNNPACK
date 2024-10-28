@@ -2254,10 +2254,10 @@ static enum xnn_status reshape_fully_connected_nc(
       fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
     }
 #endif
-    fully_connected_op->compute[0].range[0] = batch_size;
-    fully_connected_op->compute[0].range[1] = output_channels;
-    fully_connected_op->compute[0].tile[0] = mr;
-    fully_connected_op->compute[0].tile[1] = nc;
+    fully_connected_op->compute[0].range[1] = batch_size;
+    fully_connected_op->compute[0].range[0] = output_channels;
+    fully_connected_op->compute[0].tile[1] = mr;
+    fully_connected_op->compute[0].tile[0] = nc;
     fully_connected_op->state = xnn_run_state_needs_setup;
 
     return xnn_status_success;
