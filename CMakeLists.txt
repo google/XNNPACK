@@ -1859,26 +1859,13 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
     # ---[ Build operator-level microbenchmarks
     SET(LIBRARY_OPERATOR_BENCHMARKS
-        abs
         average-pooling
-        bankers-rounding
-        ceiling
         channel-shuffle
-        convert
         convolution
         deconvolution
-        elu
-        floor
-        hardswish
-        leaky-relu
         max-pooling
-        negate
-        reciprocal-square-root
-        sigmoid
         softmax
-        square
-        square-root
-        tanh)
+        unary)
     FOREACH(BENCH ${LIBRARY_OPERATOR_BENCHMARKS})
       ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)
       TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE

@@ -542,32 +542,13 @@ xnnpack_benchmark(
 
 ########################### Benchmarks for operators ###########################
 
-[xnnpack_benchmark(
-    name = "%s_bench" % op,
-    srcs = [
-        "%s.cc" % op.replace("_", "-"),
-        "unary_operator.h",
-    ],
+xnnpack_benchmark(
+    name = "unary_bench",
+    srcs = ["unary.cc"],
     copts = xnnpack_optional_tflite_copts(),
     tags = ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
-) for op in [
-    "abs",
-    "bankers_rounding",
-    "ceiling",
-    "convert",
-    "elu",
-    "floor",
-    "leaky_relu",
-    "negate",
-    "hardswish",
-    "reciprocal_square_root",
-    "sigmoid",
-    "softmax",
-    "square",
-    "square_root",
-    "tanh",
-]]
+)
 
 xnnpack_benchmark(
     name = "average_pooling_bench",
