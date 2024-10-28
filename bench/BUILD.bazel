@@ -31,6 +31,7 @@ MICROKERNEL_BENCHMARK_DEPS = [
     "//:all_microkernels",
     "//:buffer",
     "//:common",
+    "//:datatype",
     "//:hardware_config",
     "//:math",
     "//:microkernels_h",
@@ -48,6 +49,7 @@ OPERATOR_BENCHMARK_DEPS = [
     "//:buffer",
     "//:cache",
     "//:common",
+    "//:datatype",
     "//:math",
 ]
 

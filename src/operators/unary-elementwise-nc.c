@@ -16,6 +16,7 @@
 #include "xnnpack/compute.h"
 #include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
@@ -26,29 +27,6 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/params.h"
 #include "pthreadpool.h"
-
-static uint32_t xnn_datatype_get_log2_element_size(enum xnn_datatype datatype) {
-  switch (datatype) {
-    case xnn_datatype_qcint4:
-    case xnn_datatype_qbint4:
-    case xnn_datatype_qdint8:
-    case xnn_datatype_qint8:
-    case xnn_datatype_quint8:
-    case xnn_datatype_qcint8:
-    case xnn_datatype_qpint8:
-      return 0;
-    case xnn_datatype_fp16:
-      return 1;
-    case xnn_datatype_qint32:
-    case xnn_datatype_qcint32:
-    case xnn_datatype_int32:
-    case xnn_datatype_fp32:
-      return 2;
-    case xnn_datatype_invalid:
-    default:
-      XNN_UNREACHABLE;
-  }
-}
 
 static xnn_status_t check_op_type(xnn_operator_t op,
                                   enum xnn_operator_type expected_type) {
@@ -138,8 +116,8 @@ static enum xnn_status init_op(
     uint32_t flags) {
   op->type = xnn_operator_type_unary_elementwise;
   op->flags = flags;
-  op->log2_elementwise_input_size = xnn_datatype_get_log2_element_size(input_datatype);
-  op->log2_elementwise_output_size = xnn_datatype_get_log2_element_size(output_datatype);
+  op->log2_elementwise_input_size = xnn_datatype_log2_size_bytes(input_datatype);
+  op->log2_elementwise_output_size = xnn_datatype_log2_size_bytes(output_datatype);
 
   if (input_datatype != output_datatype) {
     if (op_type == xnn_unary_convert) {

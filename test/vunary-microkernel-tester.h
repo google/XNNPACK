@@ -19,6 +19,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
@@ -109,7 +110,7 @@ class VUnaryMicrokernelTester {
             xnn_init_unary_uparams_fn init_params,
             const xnn_unary_params& params) const {
     TestInfo test_info;
-    auto domain = test_info.Domain(xnnpack::datatype_of<In>());
+    auto domain = test_info.Domain(xnn_datatype_of<In>());
     xnnpack::ReplicableRandomDevice rng;
 
     xnnpack::Buffer<In> x(batch_size() + XNN_EXTRA_BYTES / sizeof(In));
@@ -141,7 +142,7 @@ class VUnaryMicrokernelTester {
       // Verify results.
       for (size_t i = 0; i < batch_size(); i++) {
         ASSERT_NEAR(y[i], y_ref[i],
-                    test_info.Tolerance(y_ref[i], xnnpack::datatype_of<Out>()))
+                    test_info.Tolerance(y_ref[i], xnn_datatype_of<Out>()))
             << "at " << i << " / " << batch_size() << ", x[" << i
             << "] = " << std::scientific << (float)x[i];
       }
@@ -285,9 +286,9 @@ void TestInputScale(uint64_t arch_flags, size_t batch_tile, UKernelFn ukernel,
   for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
     for (float input_scale : {4.0f, 16.0f, 64.0f}) {
       xnn_quantization_params input_quantization =
-          TestInfo().InputQuantizationParams(xnnpack::datatype_of<In>());
+          TestInfo().InputQuantizationParams(xnn_datatype_of<In>());
       xnn_quantization_params output_quantization =
-          TestInfo().InputQuantizationParams(xnnpack::datatype_of<Out>());
+          TestInfo().InputQuantizationParams(xnn_datatype_of<Out>());
       input_quantization.scale = input_scale;
       VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -306,9 +307,9 @@ void TestOutputScale(uint64_t arch_flags, size_t batch_tile, UKernelFn ukernel,
   for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
     for (float output_scale : {4.0f, 16.0f, 64.0f}) {
       xnn_quantization_params input_quantization =
-          TestInfo().InputQuantizationParams(xnnpack::datatype_of<In>());
+          TestInfo().InputQuantizationParams(xnn_datatype_of<In>());
       xnn_quantization_params output_quantization =
-          TestInfo().InputQuantizationParams(xnnpack::datatype_of<Out>());
+          TestInfo().InputQuantizationParams(xnn_datatype_of<Out>());
       output_quantization.scale = output_scale;
       VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -329,9 +330,9 @@ void TestInputZeroPoint(uint64_t arch_flags, size_t batch_tile,
        input_zero_point += 3) {
     for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
       xnn_quantization_params input_quantization =
-          TestInfo().InputQuantizationParams(xnnpack::datatype_of<In>());
+          TestInfo().InputQuantizationParams(xnn_datatype_of<In>());
       xnn_quantization_params output_quantization =
-          TestInfo().InputQuantizationParams(xnnpack::datatype_of<Out>());
+          TestInfo().InputQuantizationParams(xnn_datatype_of<Out>());
       input_quantization.zero_point = input_zero_point;
       VUnaryMicrokernelTester()
           .batch_size(batch_size)
@@ -352,9 +353,9 @@ void TestOutputZeroPoint(uint64_t arch_flags, size_t batch_tile,
        output_zero_point += 3) {
     for (size_t batch_size = 1; batch_size <= 40; batch_size += 7) {
       xnn_quantization_params input_quantization =
-          TestInfo().InputQuantizationParams(xnnpack::datatype_of<In>());
+          TestInfo().InputQuantizationParams(xnn_datatype_of<In>());
       xnn_quantization_params output_quantization =
-          TestInfo().InputQuantizationParams(xnnpack::datatype_of<Out>());
+          TestInfo().InputQuantizationParams(xnn_datatype_of<Out>());
       output_quantization.zero_point = output_zero_point;
       VUnaryMicrokernelTester()
           .batch_size(batch_size)

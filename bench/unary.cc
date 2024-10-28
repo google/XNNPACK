@@ -15,6 +15,7 @@
 
 #include "utils.h"
 #include "xnnpack.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/buffer.h"
 #include "xnnpack/math.h"
 #include <benchmark/benchmark.h>
@@ -103,7 +104,7 @@ static void benchmark_unary_operator(benchmark::State& state,
   xnn_unary_params params;
   xnn_quantization_params input_quantization = {0, 1.0f};
   xnn_quantization_params output_quantization = {0, 1.0f};
-  init_params(op_type, xnnpack::datatype_of<In>(), xnnpack::datatype_of<Out>(),
+  init_params(op_type, xnn_datatype_of<In>(), xnn_datatype_of<Out>(),
               params, input_quantization, output_quantization);
 
   std::random_device random_device;
@@ -124,7 +125,7 @@ static void benchmark_unary_operator(benchmark::State& state,
 
   xnn_operator_t op = nullptr;
   status = xnn_create_unary_elementwise_nc(
-      op_type, xnnpack::datatype_of<In>(), xnnpack::datatype_of<Out>(), &params,
+      op_type, xnn_datatype_of<In>(), xnn_datatype_of<Out>(), &params,
       &input_quantization, &output_quantization, 0 /* flags */, &op);
   if (status != xnn_status_success || op == nullptr) {
     state.SkipWithError("failed to create operator");
@@ -354,7 +355,7 @@ static void benchmark_tflite_unary_operator(benchmark::State& state,
   xnn_unary_params params;
   xnn_quantization_params input_quantization = {0, 1.0f};
   xnn_quantization_params output_quantization = {0, 1.0f};
-  init_params(op, xnnpack::datatype_of<In>(), xnnpack::datatype_of<Out>(),
+  init_params(op, xnn_datatype_of<In>(), xnn_datatype_of<Out>(),
               params, input_quantization, output_quantization);
   auto in_quantization = [=](flatbuffers::FlatBufferBuilder& builder) {
     return CreateTfLiteQuantizationParameters(builder, input_quantization);

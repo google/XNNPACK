@@ -945,6 +945,18 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
+    name = "datatype",
+    srcs = ["src/datatype.c"],
+    hdrs = ["src/xnnpack/datatype.h"],
+    compatible_with = [],
+    deps = [
+        ":common",
+        ":math",
+        ":xnnpack_h",
+    ],
+)
+
+xnnpack_cc_library(
     name = "operators",
     srcs = OPERATOR_SRCS,
     hdrs = [
@@ -963,6 +975,7 @@ xnnpack_cc_library(
         ":allocator",
         ":cache",
         ":common",
+        ":datatype",
         ":fp16",
         ":indirection",
         ":logging",
@@ -1000,6 +1013,7 @@ xnnpack_cc_library(
         ":cache",
         ":common",
         ":config_hdrs",
+        ":datatype",
         ":fp16",
         ":hardware_config",
         ":internal",

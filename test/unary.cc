@@ -21,6 +21,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/buffer.h"
 #include "xnnpack/log.h"
 #include "xnnpack/operator-utils.h"
@@ -70,8 +71,8 @@ TEST_P(UnaryTest, matches_operator_api) {
   const xnn_datatype input_datatype = GetParam().input_datatype;
   const xnn_datatype output_datatype = GetParam().output_datatype;
 
-  const size_t sizeof_input = xnnpack::datatype_size(input_datatype);
-  const size_t sizeof_output = xnnpack::datatype_size(output_datatype);
+  const size_t sizeof_input = xnn_datatype_size_bytes(input_datatype);
+  const size_t sizeof_output = xnn_datatype_size_bytes(output_datatype);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -114,7 +115,7 @@ TEST_P(UnaryTest, matches_operator_api) {
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
   uint32_t input_id = XNN_INVALID_VALUE_ID;
-  if (xnnpack::is_quantized(input_datatype)) {
+  if (xnn_datatype_is_quantized(input_datatype)) {
     ASSERT_EQ(xnn_status_success,
               xnn_define_quantized_tensor_value(
                   subgraph, input_datatype, input_quantization.zero_point,
@@ -131,7 +132,7 @@ TEST_P(UnaryTest, matches_operator_api) {
   ASSERT_NE(input_id, XNN_INVALID_VALUE_ID);
 
   uint32_t output_id = XNN_INVALID_VALUE_ID;
-  if (xnnpack::is_quantized(output_datatype)) {
+  if (xnn_datatype_is_quantized(output_datatype)) {
     ASSERT_EQ(xnn_status_success,
               xnn_define_quantized_tensor_value(
                   subgraph, output_datatype, output_quantization.zero_point,

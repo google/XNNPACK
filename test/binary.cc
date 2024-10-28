@@ -19,6 +19,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/math.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/operator-utils.h"
@@ -126,50 +127,6 @@ size_t NumElements(const std::vector<size_t>& dims) {
                          std::multiplies<size_t>());
 }
 
-bool is_quantized(xnn_datatype t) {
-  switch (t) {
-    case xnn_datatype_qint8:
-    case xnn_datatype_quint8:
-    case xnn_datatype_qint32:
-      return true;
-    default:
-      return false;
-  }
-}
-
-template <typename T>
-xnn_datatype datatype_of() {
-  if (std::is_same<T, uint8_t>::value) {
-    return xnn_datatype_quint8;
-  } else if (std::is_same<T, int8_t>::value) {
-    return xnn_datatype_qint8;
-  } else if (std::is_same<T, xnn_float16>::value) {
-    return xnn_datatype_fp16;
-  } else if (std::is_same<T, float>::value) {
-    return xnn_datatype_fp32;
-  } else if (std::is_same<T, int32_t>::value) {
-    return xnn_datatype_int32;
-  } else {
-    XNN_UNREACHABLE;
-  }
-}
-
-size_t xnn_datatype_size(xnn_datatype datatype) {
-  switch (datatype) {
-    case xnn_datatype_qint8:
-    case xnn_datatype_quint8:
-      return sizeof(int8_t);
-    case xnn_datatype_fp16:
-      return sizeof(xnn_float16);
-    case xnn_datatype_fp32:
-      return sizeof(float);
-    case xnn_datatype_int32:
-      return sizeof(int32_t);
-    default:
-      XNN_UNREACHABLE;
-  }
-}
-
 // TODO(dsharlet): We need a place to put helper functions like this.
 // XNNPACK's built-in equivalent helpers are not implemented in release
 // builds...
@@ -192,7 +149,7 @@ const char* datatype_to_string(xnn_datatype datatype) {
 
 template <typename T>
 void MatchesOperatorApi(xnn_binary_operator binary_op) {
-  xnn_datatype datatype = datatype_of<T>();
+  xnn_datatype datatype = xnn_datatype_of<T>();
   xnnpack::ReplicableRandomDevice rng;
 
   std::vector<size_t> input0_dims = RandomShape(rng);
@@ -260,7 +217,7 @@ void MatchesOperatorApi(xnn_binary_operator binary_op) {
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
-  bool quantized = is_quantized(datatype);
+  bool quantized = xnn_datatype_is_quantized(datatype);
   xnn_quantization_params input0_quantization = RandomQuantization<T>(rng);
   xnn_quantization_params input1_quantization = RandomQuantization<T>(rng);
   xnn_quantization_params output_quantization = RandomQuantization<T>(rng);
@@ -463,7 +420,7 @@ void Reshape(xnn_datatype datatype, xnn_binary_operator binary_op) {
       dims.cbegin(), dims.cend(), size_t{1}, std::multiplies<size_t>());
   ASSERT_EQ(output_shape->dim[0], dims[0]);
   ASSERT_EQ(runtime->values[node->outputs[0]].size,
-            num_input_elements * xnn_datatype_size(datatype));
+            num_input_elements * xnn_datatype_size_bytes(datatype));
 }
 
 void ReshapeBroadcastDim0(xnn_datatype datatype,
@@ -547,7 +504,7 @@ void ReshapeBroadcastDim0(xnn_datatype datatype,
       dim0.cbegin(), dim0.cend(), size_t{1}, std::multiplies<size_t>());
   ASSERT_EQ(output_shape->dim[0], dim0[0]);
   ASSERT_EQ(runtime->values[node->outputs[0]].size,
-            num_input_elements * xnn_datatype_size(datatype));
+            num_input_elements * xnn_datatype_size_bytes(datatype));
 }
 
 void ReshapeBroadcast1D(xnn_datatype datatype, xnn_binary_operator binary_op) {
@@ -631,7 +588,7 @@ void ReshapeBroadcast1D(xnn_datatype datatype, xnn_binary_operator binary_op) {
       dim0.cbegin(), dim0.cend(), size_t{1}, std::multiplies<size_t>());
   ASSERT_EQ(output_shape->dim[0], dim0[0]);
   ASSERT_EQ(runtime->values[node->outputs[0]].size,
-            num_input_elements * xnn_datatype_size(datatype));
+            num_input_elements * xnn_datatype_size_bytes(datatype));
 }
 
 void ReshapeBroadcast2D(xnn_datatype datatype, xnn_binary_operator binary_op) {
@@ -713,7 +670,7 @@ void ReshapeBroadcast2D(xnn_datatype datatype, xnn_binary_operator binary_op) {
       dim0.cbegin(), dim0.cend(), size_t{1}, std::multiplies<size_t>());
   ASSERT_EQ(output_shape->dim[0], dim0[0]);
   ASSERT_EQ(runtime->values[node->outputs[0]].size,
-            num_input_elements * xnn_datatype_size(datatype));
+            num_input_elements * xnn_datatype_size_bytes(datatype));
 }
 
 void DegenerateDimension(xnn_datatype datatype, xnn_binary_operator binary_op) {

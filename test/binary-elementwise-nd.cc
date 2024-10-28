@@ -22,6 +22,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/math.h"
 #include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
@@ -30,23 +31,6 @@ enum class RunMode {
   kCreateReshapeRun,
   kEager,
 };
-
-template <typename T>
-xnn_datatype datatype_of() {
-  if (std::is_same<T, uint8_t>::value) {
-    return xnn_datatype_quint8;
-  } else if (std::is_same<T, int8_t>::value) {
-    return xnn_datatype_qint8;
-  } else if (std::is_same<T, xnn_float16>::value) {
-    return xnn_datatype_fp16;
-  } else if (std::is_same<T, float>::value) {
-    return xnn_datatype_fp32;
-  } else if (std::is_same<T, int32_t>::value) {
-    return xnn_datatype_int32;
-  } else {
-    XNN_UNREACHABLE;
-  }
-}
 
 template <typename T>
 double compute_tolerance(double output_ref) {
@@ -267,7 +251,7 @@ class BinaryElementwiseOperatorTester {
       output_stride *= output_dims[i - 1];
     }
 
-    xnn_datatype datatype = datatype_of<T>();
+    xnn_datatype datatype = xnn_datatype_of<T>();
     xnn_quantization_params input1_quantization = {input1_zero_point(),
                                                    input1_scale()};
     xnn_quantization_params input2_quantization = {input2_zero_point(),

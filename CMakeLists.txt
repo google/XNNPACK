@@ -799,6 +799,7 @@ TARGET_LINK_LIBRARIES(packing PRIVATE xnnpack-base logging)
 IF(XNNPACK_BUILD_LIBRARY)
   ADD_LIBRARY(allocator OBJECT src/allocator.c)
   ADD_LIBRARY(cache OBJECT src/cache.c)
+  ADD_LIBRARY(datatype OBJECT src/datatype.c)
   ADD_LIBRARY(memory OBJECT src/memory.c)
   ADD_LIBRARY(microkernel-utils OBJECT src/microkernel-utils.c)
   ADD_LIBRARY(mutex OBJECT src/mutex.c)
@@ -820,14 +821,15 @@ IF(XNNPACK_BUILD_LIBRARY)
 
   TARGET_LINK_LIBRARIES(allocator PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(cache PRIVATE xnnpack-base logging)
+  TARGET_LINK_LIBRARIES(datatype PRIVATE xnnpack-base)
   TARGET_LINK_LIBRARIES(memory PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(microkernel-utils PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(mutex PRIVATE xnnpack-base logging)
-  TARGET_LINK_LIBRARIES(operators PRIVATE xnnpack-base allocator indirection logging microkernel-utils normalization operator-utils packing)
+  TARGET_LINK_LIBRARIES(operators PRIVATE xnnpack-base allocator indirection logging microkernel-utils normalization operator-utils packing datatype)
   TARGET_LINK_LIBRARIES(operator-run PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(operator-utils PRIVATE xnnpack-base logging)
-  TARGET_LINK_LIBRARIES(subgraph PRIVATE xnnpack-base allocator logging memory mutex operators operator-run)
-  TARGET_LINK_LIBRARIES(XNNPACK PRIVATE xnnpack-base allocator cache hardware-config indirection memory microkernel-utils microparams-init mutex normalization operators operator-run operator-utils packing microkernels-prod subgraph)
+  TARGET_LINK_LIBRARIES(subgraph PRIVATE xnnpack-base allocator logging memory mutex operators operator-run datatype)
+  TARGET_LINK_LIBRARIES(XNNPACK PRIVATE xnnpack-base allocator cache hardware-config indirection memory microkernel-utils microparams-init mutex normalization operators operator-run operator-utils packing microkernels-prod subgraph datatype)
   TARGET_LINK_LIBRARIES(XNNPACK PUBLIC pthreadpool logging)
   SET_TARGET_PROPERTIES(XNNPACK PROPERTIES C_EXTENSIONS YES)
 ENDIF()
@@ -1026,6 +1028,7 @@ ENDIF()
 IF(XNNPACK_BUILD_ALL_MICROKERNELS)
   TARGET_INCLUDE_DIRECTORIES(microkernels-all PRIVATE include src)
 ENDIF()
+TARGET_INCLUDE_DIRECTORIES(datatype PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(microkernels-prod PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(hardware-config PRIVATE include src ${CPUINFO_SOURCE_DIR}/include)
 TARGET_INCLUDE_DIRECTORIES(indirection PRIVATE include src)
@@ -1295,6 +1298,7 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(unary-elementwise-nc-test PRIVATE
       GTest::gtest
       GTest::gtest_main
+      datatype
       unary-ops
       XNNPACK)
     ADD_TEST(NAME unary-elementwise-nc-test COMMAND unary-elementwise-nc-test)
@@ -1304,6 +1308,7 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(binary-elementwise-nd-test PRIVATE
       GTest::gtest
       GTest::gtest_main
+      datatype
       XNNPACK)
     ADD_TEST(NAME binary-elementwise-nd-test COMMAND binary-elementwise-nd-test)
 
@@ -1366,6 +1371,7 @@ IF(XNNPACK_BUILD_TESTS)
         GTest::gmock
         GTest::gtest
         GTest::gtest_main
+        datatype
         subgraph
         logging
         unary-ops
@@ -1871,6 +1877,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
         bench-utils
         benchmark::benchmark
+        datatype
         XNNPACK
       )
     ENDFOREACH()

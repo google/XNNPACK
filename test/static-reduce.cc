@@ -22,6 +22,7 @@
 #include "xnnpack.h"
 #include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
 #include "xnnpack/operator.h"
@@ -61,21 +62,6 @@ struct Param {
 };
 
 namespace {
-constexpr size_t SizeOf(xnn_datatype t) {
-  switch (t) {
-    case xnn_datatype_fp16:
-      return sizeof(xnn_float16);
-    case xnn_datatype_fp32:
-      return sizeof(float);
-    case xnn_datatype_qint8:
-      return sizeof(int8_t);
-    case xnn_datatype_quint8:
-      return sizeof(uint8_t);
-    default:
-      XNN_UNREACHABLE;
-  }
-}
-
 constexpr xnn_compute_type GetComputeType(xnn_datatype t) {
   switch (t) {
     case xnn_datatype_fp16:
@@ -131,11 +117,11 @@ class ReduceTestBase : public ::testing::TestWithParam<Param> {
                         std::multiplies<size_t>());
 
     input = xnnpack::Buffer<char>(XNN_EXTRA_BYTES / sizeof(char) +
-                                  num_input_elements * SizeOf(p.datatype));
+                                  num_input_elements * xnn_datatype_size_bytes(p.datatype));
     operator_output =
-        xnnpack::Buffer<char>(num_output_elements * SizeOf(p.datatype));
+        xnnpack::Buffer<char>(num_output_elements * xnn_datatype_size_bytes(p.datatype));
     subgraph_output =
-        xnnpack::Buffer<char>(num_output_elements * SizeOf(p.datatype));
+        xnnpack::Buffer<char>(num_output_elements * xnn_datatype_size_bytes(p.datatype));
   }
 
   struct QuantizationParams {

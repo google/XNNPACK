@@ -30,57 +30,9 @@ class NumericLimits {
 template <>
 class NumericLimits<xnn_float16> {
  public:
-  static xnn_float16 min() { return std::numeric_limits<float>::lowest(); }
-  static xnn_float16 max() { return std::numeric_limits<float>::max(); }
+  static xnn_float16 min() { return static_cast<xnn_float16>(-65504); }
+  static xnn_float16 max() { return static_cast<xnn_float16>(65504); }
 };
-
-template <typename T>
-xnn_datatype datatype_of() {
-  if (std::is_same<T, uint8_t>::value) {
-    return xnn_datatype_quint8;
-  } else if (std::is_same<T, int8_t>::value) {
-    return xnn_datatype_qint8;
-  } else if (std::is_same<T, int16_t>::value) {
-    // TODO: We don't have this type...
-    return xnn_datatype_qint8;
-  } else if (std::is_same<T, xnn_float16>::value) {
-    return xnn_datatype_fp16;
-  } else if (std::is_same<T, float>::value) {
-    return xnn_datatype_fp32;
-  } else if (std::is_same<T, int32_t>::value) {
-    return xnn_datatype_int32;
-  } else if (std::is_same<T, uint32_t>::value) {
-    // TODO: We don't have this type...
-    return xnn_datatype_quint8;
-  } else {
-    XNN_UNREACHABLE;
-  }
-}
-
-inline bool is_quantized(xnn_datatype datatype) {
-  switch (datatype) {
-    case xnn_datatype_qint8:
-    case xnn_datatype_quint8:
-      return true;
-    default:
-      return false;
-  }
-}
-
-inline size_t datatype_size(xnn_datatype datatype) {
-  switch (datatype) {
-    case xnn_datatype_qint8:
-    case xnn_datatype_quint8:
-      return 1;
-    case xnn_datatype_fp16:
-      return 2;
-    case xnn_datatype_fp32:
-    case xnn_datatype_int32:
-      return 4;
-    default:
-      XNN_UNREACHABLE;
-  }
-}
 
 // This is a container similar to std::vector, but it leaves the memory
 // uninitialized, supports alignment.

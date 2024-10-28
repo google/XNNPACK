@@ -16,6 +16,7 @@
 #include "xnnpack/compute.h"
 #include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microparams.h"
@@ -24,29 +25,6 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/params.h"
 #include "pthreadpool.h"
-
-static uint32_t xnn_datatype_get_log2_element_size(enum xnn_datatype datatype) {
-  switch (datatype) {
-    case xnn_datatype_qcint4:
-    case xnn_datatype_qbint4:
-    case xnn_datatype_qdint8:
-    case xnn_datatype_qint8:
-    case xnn_datatype_quint8:
-    case xnn_datatype_qcint8:
-    case xnn_datatype_qpint8:
-      return 0;
-    case xnn_datatype_fp16:
-      return 1;
-    case xnn_datatype_qint32:
-    case xnn_datatype_qcint32:
-    case xnn_datatype_int32:
-    case xnn_datatype_fp32:
-      return 2;
-    case xnn_datatype_invalid:
-    default:
-      XNN_UNREACHABLE;
-  }
-}
 
 static const struct xnn_binary_elementwise_config* init_config(
     enum xnn_binary_operator type, enum xnn_datatype datatype, int* sign_b) {
@@ -232,7 +210,7 @@ static enum xnn_status init_binary_elementwise_nd(
 
   op->binary_elementwise_config = config;
   op->log2_elementwise_element_size =
-      xnn_datatype_get_log2_element_size(datatype);
+      xnn_datatype_log2_size_bytes(datatype);
 
   op->type = xnn_operator_type_binary_elementwise;
   op->flags = flags;
