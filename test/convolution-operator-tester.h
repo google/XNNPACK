@@ -570,7 +570,7 @@ class ConvolutionOperatorTester {
 
     xnnpack::Buffer<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()));
-    xnnpack::Buffer<int8_t> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
+    xnnpack::Buffer<int8_t> kernel(XNN_EXTRA_BYTES / sizeof(int8_t) + groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
     xnnpack::Buffer<int32_t> bias(groups() * group_output_channels());
     xnnpack::Buffer<int8_t> output(batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()));
     xnnpack::Buffer<int32_t> accumulators(batch_size() * output_height() * output_width() * groups() * group_output_channels());
@@ -860,7 +860,7 @@ class ConvolutionOperatorTester {
         batch_size() *
             ((input_height() * input_width() - 1) * input_channel_stride() +
              groups() * group_input_channels()));
-    xnnpack::Buffer<int8_t> kernel(groups() * group_output_channels() *
+    xnnpack::Buffer<int8_t> kernel(XNN_EXTRA_BYTES / sizeof(int8_t) + groups() * group_output_channels() *
                                kernel_height() * kernel_width() *
                                group_input_channels());
     xnnpack::Buffer<float> bias(groups() * group_output_channels());
@@ -1083,7 +1083,7 @@ class ConvolutionOperatorTester {
         batch_size() *
             ((input_height() * input_width() - 1) * input_channel_stride() +
              groups() * group_input_channels()));
-    xnnpack::Buffer<int8_t> kernel(groups() * group_output_channels() *
+    xnnpack::Buffer<int8_t> kernel(XNN_EXTRA_BYTES / sizeof(int8_t) + groups() * group_output_channels() *
                                kernel_height() * kernel_width() *
                                group_input_channels());
     xnnpack::Buffer<float> bias(groups() * group_output_channels());
@@ -1562,7 +1562,7 @@ class ConvolutionOperatorTester {
 
     xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) +
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()));
-    xnnpack::Buffer<uint8_t> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
+    xnnpack::Buffer<uint8_t> kernel(XNN_EXTRA_BYTES / sizeof(uint8_t) + groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
     xnnpack::Buffer<int32_t> bias(groups() * group_output_channels());
     xnnpack::Buffer<uint8_t> output(batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()));
     xnnpack::Buffer<int32_t> accumulators(batch_size() * output_height() * output_width() * groups() * group_output_channels());
@@ -1846,7 +1846,7 @@ class ConvolutionOperatorTester {
 
     xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()));
-    xnnpack::Buffer<float> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
+    xnnpack::Buffer<float> kernel(XNN_EXTRA_BYTES / sizeof(float) + groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
     xnnpack::Buffer<float> bias(groups() * group_output_channels());
     xnnpack::Buffer<float> output(batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()));
     xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
@@ -2122,7 +2122,7 @@ class ConvolutionOperatorTester {
 
     xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()));
-    xnnpack::Buffer<xnn_float16> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
+    xnnpack::Buffer<xnn_float16> kernel(XNN_EXTRA_BYTES / sizeof(xnn_float16) + groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
     xnnpack::Buffer<float> kernel_as_float(kernel.size());
     xnnpack::Buffer<xnn_float16> bias(groups() * group_output_channels());
     xnnpack::Buffer<float> bias_as_float(bias.size());
@@ -2966,7 +2966,7 @@ class ConvolutionOperatorTester {
     xnnpack::Buffer<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + std::max(
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()),
       next_batch_size() * ((next_input_height() * next_input_width() - 1) * input_channel_stride() + groups() * group_input_channels())));
-    xnnpack::Buffer<int8_t> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
+    xnnpack::Buffer<int8_t> kernel(XNN_EXTRA_BYTES / sizeof(int8_t) + groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
     xnnpack::Buffer<int32_t> bias(groups() * group_output_channels());
     xnnpack::Buffer<int8_t> output(std::max(
       batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()),
@@ -3242,7 +3242,7 @@ class ConvolutionOperatorTester {
     xnnpack::Buffer<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) + std::max(
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()),
       next_batch_size() * ((next_input_height() * next_input_width() - 1) * input_channel_stride() + groups() * group_input_channels())));
-    xnnpack::Buffer<int8_t> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
+    xnnpack::Buffer<int8_t> kernel(XNN_EXTRA_BYTES / sizeof(int8_t) + groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
     xnnpack::Buffer<int32_t> bias(groups() * group_output_channels());
     xnnpack::Buffer<int8_t> output(std::max(
       batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()),
@@ -3487,7 +3487,7 @@ class ConvolutionOperatorTester {
     xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES / sizeof(uint8_t) + std::max(
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()),
       next_batch_size() * ((next_input_height() * next_input_width() - 1) * input_channel_stride() + groups() * group_input_channels())));
-    xnnpack::Buffer<uint8_t> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
+    xnnpack::Buffer<uint8_t> kernel(XNN_EXTRA_BYTES / sizeof(uint8_t) + groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
     xnnpack::Buffer<int32_t> bias(groups() * group_output_channels());
     xnnpack::Buffer<uint8_t> output(std::max(
       batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()),
@@ -3732,7 +3732,7 @@ class ConvolutionOperatorTester {
     xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) + std::max(
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()),
       next_batch_size() * ((next_input_height() * next_input_width() - 1) * input_channel_stride() + groups() * group_input_channels())));
-    xnnpack::Buffer<xnn_float16> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
+    xnnpack::Buffer<xnn_float16> kernel(XNN_EXTRA_BYTES / sizeof(xnn_float16) + groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
     xnnpack::Buffer<xnn_float16> bias(groups() * group_output_channels());
     xnnpack::Buffer<xnn_float16> output(std::max(
       batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()),
@@ -3931,7 +3931,7 @@ class ConvolutionOperatorTester {
     xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) + std::max(
       batch_size() * ((input_height() * input_width() - 1) * input_channel_stride() + groups() * group_input_channels()),
       next_batch_size() * ((next_input_height() * next_input_width() - 1) * input_channel_stride() + groups() * group_input_channels())));
-    xnnpack::Buffer<float> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
+    xnnpack::Buffer<float> kernel(XNN_EXTRA_BYTES / sizeof(float) + groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
     xnnpack::Buffer<float> bias(groups() * group_output_channels());
     xnnpack::Buffer<float> output(std::max(
       batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()),
