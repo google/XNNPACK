@@ -1417,93 +1417,6 @@ void xnn_compute_pixelwise_average_pooling_multipass_with_thread(
     &context->params);
 }
 
-void xnn_compute_global_average_pooling_nwc_unipass(
-    const struct global_average_pooling_nwc_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index)
-{
-  const void* input =
-    (const void*) ((uintptr_t) context->input + batch_index * context->input_batch_stride);
-  void* output =
-    (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride);
-
-  context->unipass_ukernel(
-    context->input_elements,
-    context->channels,
-    input,
-    context->input_pixel_stride,
-    context->zero,
-    output,
-    &context->params);
-}
-
-void xnn_compute_global_average_pooling_nwc_multipass(
-    const struct global_average_pooling_nwc_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index)
-{
-  const void* input =
-    (const void*) ((uintptr_t) context->input + batch_index * context->input_batch_stride);
-  void* output =
-    (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride);
-  void* multipass_buffer =
-    (void*) ((uintptr_t) context->multipass_buffer + batch_index * context->multipass_batch_stride);
-
-  assert(context->multipass_buffer != NULL);
-
-  context->multipass_ukernel(
-    context->input_elements,
-    context->channels,
-    input,
-    context->input_pixel_stride,
-    context->zero,
-    multipass_buffer,
-    output,
-    &context->params);
-}
-
-void xnn_compute_global_average_pooling_nwc_multipass_with_thread(
-    const struct global_average_pooling_nwc_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t thread_index,
-    size_t batch_index)
-{
-  const void* input =
-    (const void*) ((uintptr_t) context->input + batch_index * context->input_batch_stride);
-  void* output =
-    (void*) ((uintptr_t) context->output + batch_index * context->output_batch_stride);
-  void* multipass_buffer =
-    (void*) ((uintptr_t) context->multipass_buffer + thread_index * context->multipass_batch_stride);
-
-  assert(context->multipass_buffer != NULL);
-
-  context->multipass_ukernel(
-    context->input_elements,
-    context->channels,
-    input,
-    context->input_pixel_stride,
-    context->zero,
-    multipass_buffer,
-    output,
-    &context->params);
-}
-
-void xnn_compute_global_average_pooling_ncw(
-    const struct global_average_pooling_ncw_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index,
-    size_t channels_start,
-    size_t channels_slice)
-{
-  const void* input = (const void*) ((uintptr_t) context->input +
-    channels_start * context->input_channel_stride + batch_index * context->input_batch_stride);
-  void* output = (void*) ((uintptr_t) context->output +
-    channels_start * context->output_channel_stride + batch_index * context->output_batch_stride);
-
-  context->ukernel(
-    context->input_elements,
-    channels_slice,
-    input,
-    output,
-    &context->params);
-}
-
 void xnn_compute_resize_bilinear_indirection(
     const struct resize_bilinear_nhwc_indirection_init_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t output_y_start,
@@ -2180,22 +2093,24 @@ void xnn_compute_contiguous_reduce(
 
     if (context->s32_f32_cvt_ukernel) {
       struct xnn_s32_f32_cvt_params s32_f32_cvt_params;
-      xnn_init_s32_f32_cvt_scalar_params(&s32_f32_cvt_params, context->params.qs8_mean.scalar.num_elements * (int32_t) context->params.qs8_mean.scalar.input_zero_point);
+      s32_f32_cvt_params.scalar.zero_point = context->params.qs8_mean.scalar.num_elements * (int32_t) context->params.qs8_mean.scalar.input_zero_point;
       context->s32_f32_cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
-                                   workspace_ptr, /*params=*/&s32_f32_cvt_params);
+                                   workspace_ptr, (union xnn_unary_uparams*) &s32_f32_cvt_params);
       struct xnn_f32_qs8_cvt_params cvt_params;
-      xnn_init_f32_qs8_cvt_scalar_params(&cvt_params, context->params.qs8_mean.scalar.scale, context->params.qs8_mean.scalar.output_zero_point, INT8_MIN, INT8_MAX);
+      cvt_params.scalar.scale = context->params.qs8_mean.scalar.scale;
+      cvt_params.scalar.output_zero_point = context->params.qs8_mean.scalar.output_zero_point;
       context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
-                           output_ptr, /*params=*/&cvt_params);
+                           output_ptr, (union xnn_unary_uparams*) &cvt_params);
     } else if (context->u32_f32_cvt_ukernel) {
       struct xnn_u32_f32_cvt_params u32_f32_cvt_params;
-      xnn_init_u32_f32_cvt_scalar_params(&u32_f32_cvt_params, context->params.qu8_mean.scalar.num_elements * (int32_t) context->params.qu8_mean.scalar.input_zero_point);
+      u32_f32_cvt_params.scalar.zero_point = context->params.qu8_mean.scalar.num_elements * (int32_t) context->params.qu8_mean.scalar.input_zero_point;
       context->u32_f32_cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
-                                   workspace_ptr, /*params=*/&u32_f32_cvt_params);
+                                   workspace_ptr, (union xnn_unary_uparams*) &u32_f32_cvt_params);
       struct xnn_f32_qu8_cvt_params cvt_params;
-      xnn_init_f32_qu8_cvt_scalar_params(&cvt_params, context->params.qu8_mean.scalar.scale, context->params.qu8_mean.scalar.output_zero_point, 0, UINT8_MAX);
+      cvt_params.scalar.scale = context->params.qu8_mean.scalar.scale;
+      cvt_params.scalar.output_zero_point = context->params.qu8_mean.scalar.output_zero_point;
       context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
-                           output_ptr, /*params=*/&cvt_params);
+                           output_ptr, (union xnn_unary_uparams*) &cvt_params);
     } else {
       context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr, output_ptr, /*params=*/NULL);
     }
@@ -2261,22 +2176,24 @@ void xnn_compute_discontiguous_reduce(
 
     if (context->s32_f32_cvt_ukernel) {
       struct xnn_s32_f32_cvt_params s32_f32_cvt_params;
-      xnn_init_s32_f32_cvt_scalar_params(&s32_f32_cvt_params, context->params.qs8_mean.scalar.num_elements * (int32_t) context->params.qs8_mean.scalar.input_zero_point);
+      s32_f32_cvt_params.scalar.zero_point = context->params.qs8_mean.scalar.num_elements * (int32_t) context->params.qs8_mean.scalar.input_zero_point;
       context->s32_f32_cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
-                                   workspace_ptr, /*params=*/&s32_f32_cvt_params);
+                                   workspace_ptr, (union xnn_unary_uparams*) &s32_f32_cvt_params);
       struct xnn_f32_qs8_cvt_params cvt_params;
-      xnn_init_f32_qs8_cvt_scalar_params(&cvt_params, context->params.qs8_mean.scalar.scale, context->params.qs8_mean.scalar.output_zero_point, INT8_MIN, INT8_MAX);
+      cvt_params.scalar.scale = context->params.qs8_mean.scalar.scale;
+      cvt_params.scalar.output_zero_point = context->params.qs8_mean.scalar.output_zero_point;
       context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
-                           output_ptr, /*params=*/&cvt_params);
+                           output_ptr, (union xnn_unary_uparams*) &cvt_params);
     } else if (context->u32_f32_cvt_ukernel) {
       struct xnn_u32_f32_cvt_params u32_f32_cvt_params;
-      xnn_init_u32_f32_cvt_scalar_params(&u32_f32_cvt_params, context->params.qu8_mean.scalar.num_elements * (int32_t) context->params.qu8_mean.scalar.input_zero_point);
+      u32_f32_cvt_params.scalar.zero_point = context->params.qu8_mean.scalar.num_elements * (int32_t) context->params.qu8_mean.scalar.input_zero_point;
       context->u32_f32_cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
-                                   workspace_ptr, /*params=*/&u32_f32_cvt_params);
+                                   workspace_ptr, (union xnn_unary_uparams*) &u32_f32_cvt_params);
       struct xnn_f32_qu8_cvt_params cvt_params;
-      xnn_init_f32_qu8_cvt_scalar_params(&cvt_params, context->params.qu8_mean.scalar.scale, context->params.qu8_mean.scalar.output_zero_point, 0, UINT8_MAX);
+      cvt_params.scalar.scale = context->params.qu8_mean.scalar.scale;
+      cvt_params.scalar.output_zero_point = context->params.qu8_mean.scalar.output_zero_point;
       context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
-                           output_ptr, /*params=*/&cvt_params);
+                           output_ptr, (union xnn_unary_uparams*) &cvt_params);
     } else {
       context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr, output_ptr, /*params=*/NULL);
     }
@@ -2310,8 +2227,9 @@ void xnn_compute_f16_qd8_convert(
   context->quantization_params[batch_index] = xnn_f16_qd8_asymmetric_quantization_params(minmax[0], minmax[1], &f16_scale);
 
   struct xnn_f16_qs8_cvt_params params;
-  context->init_params(&params, f16_scale, context->quantization_params[batch_index].zero_point, INT8_MIN, INT8_MAX);
-  context->convert_ukernel(n, input, output, &params);
+  params.scalar.scale = f16_scale;
+  params.scalar.output_zero_point = context->quantization_params[batch_index].zero_point;
+  context->convert_ukernel(n, input, output, (union xnn_unary_uparams*) &params);
 }
 
 void xnn_compute_f32_qd8_convert(
@@ -2329,8 +2247,22 @@ void xnn_compute_f32_qd8_convert(
   context->quantization_params[batch_index] = xnn_f32_qd8_asymmetric_quantization_params(minmax[0], minmax[1]);
 
   struct xnn_f32_qs8_cvt_params params;
-  context->init_params(&params, 1.0f / context->quantization_params[batch_index].inv_scale, context->quantization_params[batch_index].zero_point, INT8_MIN, INT8_MAX);
-  context->convert_ukernel(n, input, output, &params);
+  params.scalar.scale = 1.0f / context->quantization_params[batch_index].inv_scale;
+  params.scalar.output_zero_point = context->quantization_params[batch_index].zero_point;
+  context->convert_ukernel(n, input, output, (union xnn_unary_uparams*) &params);
+}
+
+void xnn_compute_x32_pack_lh(
+    const struct x32_pack_lh_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t m_idx_start, size_t tile) {
+  const float* lhs = (const float*)((const char*)context->lhs +
+                                    m_idx_start * context->lhs_stride);
+  const size_t offset = context->k * m_idx_start;
+  float* lhs_packed = context->lhs_packed + offset;
+
+  context->pack_lh_ukernel(/*m=*/tile, context->k, context->mr, context->kr,
+                         context->sr, 0, (const uint32_t*) lhs, context->lhs_stride,
+                         (uint32_t*) lhs_packed);
 }
 
 void xnn_compute_f32_qp8_convert(

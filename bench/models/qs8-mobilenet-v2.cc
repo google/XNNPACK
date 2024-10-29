@@ -3086,8 +3086,10 @@ xnn_subgraph_t QS8MobileNetV2() {
   std::generate(w171_data.begin(), w171_data.end(), std::ref(qs8rng));
   std::generate(w172_data.begin(), w172_data.end(), std::ref(qs32rng));
 
-  status = xnn_define_convert(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_convert,
+    /*params=*/nullptr,
     v0,
     v1,
     0);
@@ -4259,10 +4261,12 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_global_average_pooling_2d(
+  size_t reduction_axes_v64[2] = {1, 2};
+  status = xnn_define_static_reduce(
     subgraph,
-    /*output_min=*/std::numeric_limits<int8_t>::min(),
-    /*output_max=*/std::numeric_limits<int8_t>::max(),
+    xnn_reduce_mean,
+    2,
+    &reduction_axes_v64[0],
     v63,
     v64,
     /*flags=*/0);
@@ -4284,8 +4288,10 @@ xnn_subgraph_t QS8MobileNetV2() {
     return nullptr;
   }
 
-  status = xnn_define_convert(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_convert,
+    /*params=*/nullptr,
     v65,
     v66,
     0);

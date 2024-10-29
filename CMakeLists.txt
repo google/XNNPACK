@@ -425,10 +425,8 @@ SET(OPERATOR_SRCS
   src/operators/deconvolution-nhwc.c
   src/operators/dynamic-fully-connected-nc.c
   src/operators/fully-connected-nc.c
-  src/operators/global-average-pooling-ncw.c
-  src/operators/global-average-pooling-nwc.c
-  src/operators/lut-elementwise-nc.c
   src/operators/max-pooling-nhwc.c
+  src/operators/pack-lh.c
   src/operators/reduce-nd.c
   src/operators/resize-bilinear-nchw.c
   src/operators/resize-bilinear-nhwc.c
@@ -444,51 +442,33 @@ SET(SUBGRAPH_SRCS
   src/memory-planner.c
   src/runtime.c
   src/subgraph.c
-  src/subgraph/abs.c
   src/subgraph/argmax-pooling-2d.c
   src/subgraph/average-pooling-2d.c
-  src/subgraph/bankers-rounding.c
   src/subgraph/batch-matrix-multiply.c
   src/subgraph/binary.c
-  src/subgraph/ceiling.c
-  src/subgraph/clamp.c
   src/subgraph/concatenate.c
-  src/subgraph/convert.c
   src/subgraph/convolution-2d.c
   src/subgraph/copy.c
   src/subgraph/deconvolution-2d.c
   src/subgraph/deprecated.c
   src/subgraph/depth-to-space-2d.c
   src/subgraph/depthwise-convolution-2d.c
-  src/subgraph/elu.c
   src/subgraph/even-split.c
-  src/subgraph/exp.c
-  src/subgraph/floor.c
   src/subgraph/fully-connected-sparse.c
   src/subgraph/fully-connected.c
-  src/subgraph/gelu.c
-  src/subgraph/global-average-pooling.c
-  src/subgraph/global-sum-pooling.c
-  src/subgraph/hardswish.c
-  src/subgraph/leaky-relu.c
-  src/subgraph/log.c
   src/subgraph/max-pooling-2d.c
-  src/subgraph/negate.c
-  src/subgraph/reciprocal-square-root.c
+  src/subgraph/pack-lh.c
   src/subgraph/reshape-helpers.c
   src/subgraph/scaled-dot-product-attention.c
-  src/subgraph/sigmoid.c
   src/subgraph/softmax.c
   src/subgraph/space-to-depth-2d.c
-  src/subgraph/square-root.c
-  src/subgraph/square.c
   src/subgraph/static-constant-pad.c
   src/subgraph/static-reduce.c
   src/subgraph/static-resize-bilinear-2d.c
   src/subgraph/static-slice.c
   src/subgraph/static-transpose.c
-  src/subgraph/tanh.c
   src/subgraph/unpooling-2d.c
+  src/subgraph/unary.c
   src/subgraph/validation.c
   src/tensor.c)
 
@@ -509,14 +489,13 @@ SET(XNNPACK_SRCS
   src/configs/dwconv-config.c
   src/configs/dwconv2d-chw-config.c
   src/configs/experiments-config.c
-  src/configs/gavgpool-config.c
-  src/configs/gavgpool-cw-config.c
   src/configs/gemm-config.c
   src/configs/ibilinear-chw-config.c
   src/configs/ibilinear-config.c
   src/configs/lut32norm-config.c
   src/configs/maxpool-config.c
   src/configs/pavgpool-config.c
+  src/configs/pack-lh-config.c
   src/configs/raddstoreexpminusmax-config.c
   src/configs/reduce-config.c
   src/configs/rmax-config.c
@@ -820,6 +799,7 @@ TARGET_LINK_LIBRARIES(packing PRIVATE xnnpack-base logging)
 IF(XNNPACK_BUILD_LIBRARY)
   ADD_LIBRARY(allocator OBJECT src/allocator.c)
   ADD_LIBRARY(cache OBJECT src/cache.c)
+  ADD_LIBRARY(datatype OBJECT src/datatype.c)
   ADD_LIBRARY(memory OBJECT src/memory.c)
   ADD_LIBRARY(microkernel-utils OBJECT src/microkernel-utils.c)
   ADD_LIBRARY(mutex OBJECT src/mutex.c)
@@ -841,14 +821,15 @@ IF(XNNPACK_BUILD_LIBRARY)
 
   TARGET_LINK_LIBRARIES(allocator PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(cache PRIVATE xnnpack-base logging)
+  TARGET_LINK_LIBRARIES(datatype PRIVATE xnnpack-base)
   TARGET_LINK_LIBRARIES(memory PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(microkernel-utils PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(mutex PRIVATE xnnpack-base logging)
-  TARGET_LINK_LIBRARIES(operators PRIVATE xnnpack-base allocator indirection logging microkernel-utils normalization operator-utils packing)
+  TARGET_LINK_LIBRARIES(operators PRIVATE xnnpack-base allocator indirection logging microkernel-utils normalization operator-utils packing datatype)
   TARGET_LINK_LIBRARIES(operator-run PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(operator-utils PRIVATE xnnpack-base logging)
-  TARGET_LINK_LIBRARIES(subgraph PRIVATE xnnpack-base allocator logging memory mutex operators operator-run)
-  TARGET_LINK_LIBRARIES(XNNPACK PRIVATE xnnpack-base allocator cache hardware-config indirection memory microkernel-utils microparams-init mutex normalization operators operator-run operator-utils packing microkernels-prod subgraph)
+  TARGET_LINK_LIBRARIES(subgraph PRIVATE xnnpack-base allocator logging memory mutex operators operator-run datatype)
+  TARGET_LINK_LIBRARIES(XNNPACK PRIVATE xnnpack-base allocator cache hardware-config indirection memory microkernel-utils microparams-init mutex normalization operators operator-run operator-utils packing microkernels-prod subgraph datatype)
   TARGET_LINK_LIBRARIES(XNNPACK PUBLIC pthreadpool logging)
   SET_TARGET_PROPERTIES(XNNPACK PROPERTIES C_EXTENSIONS YES)
 ENDIF()
@@ -1047,6 +1028,7 @@ ENDIF()
 IF(XNNPACK_BUILD_ALL_MICROKERNELS)
   TARGET_INCLUDE_DIRECTORIES(microkernels-all PRIVATE include src)
 ENDIF()
+TARGET_INCLUDE_DIRECTORIES(datatype PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(microkernels-prod PRIVATE include src)
 TARGET_INCLUDE_DIRECTORIES(hardware-config PRIVATE include src ${CPUINFO_SOURCE_DIR}/include)
 TARGET_INCLUDE_DIRECTORIES(indirection PRIVATE include src)
@@ -1234,10 +1216,6 @@ IF(XNNPACK_BUILD_TESTS)
   ENDIF()
   TARGET_LINK_LIBRARIES(gemm-microkernel-tester PUBLIC next-prime)
 
-  ADD_LIBRARY(unary-operator-tester STATIC test/unary-operator-tester.cc)
-  TARGET_INCLUDE_DIRECTORIES(unary-operator-tester PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(unary-operator-tester PRIVATE XNNPACK pthreadpool GTest::gtest)
-
   ADD_LIBRARY(dwconv-microkernel-tester STATIC test/dwconv-microkernel-tester.cc)
   TARGET_INCLUDE_DIRECTORIES(dwconv-microkernel-tester PRIVATE include src test)
   TARGET_LINK_LIBRARIES(dwconv-microkernel-tester PRIVATE XNNPACK pthreadpool GTest::gtest)
@@ -1248,14 +1226,9 @@ IF(XNNPACK_BUILD_TESTS)
   TARGET_INCLUDE_DIRECTORIES(vbinary-microkernel-tester PRIVATE include src test)
   TARGET_LINK_LIBRARIES(vbinary-microkernel-tester PRIVATE XNNPACK pthreadpool GTest::gtest)
 
-  ADD_LIBRARY(vcvt-microkernel-tester STATIC test/vcvt-microkernel-tester.cc)
-  TARGET_INCLUDE_DIRECTORIES(vcvt-microkernel-tester PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(vcvt-microkernel-tester PRIVATE XNNPACK pthreadpool GTest::gtest)
-
-  ADD_LIBRARY(vunary-microkernel-tester STATIC test/vunary-microkernel-tester.cc)
-  TARGET_INCLUDE_DIRECTORIES(vunary-microkernel-tester PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(vunary-microkernel-tester PRIVATE XNNPACK pthreadpool GTest::gtest)
-  TARGET_LINK_LIBRARIES(vunary-microkernel-tester PUBLIC next-prime)
+  ADD_LIBRARY(unary-ops STATIC test/unary-ops.cc)
+  TARGET_INCLUDE_DIRECTORIES(unary-ops PRIVATE include src test)
+  TARGET_LINK_LIBRARIES(unary-ops PRIVATE XNNPACK)
 
   ADD_LIBRARY(convolution-test-helpers OBJECT test/convolution-test-helpers.cc)
   TARGET_INCLUDE_DIRECTORIES(convolution-test-helpers PRIVATE include src)
@@ -1291,7 +1264,6 @@ IF(XNNPACK_BUILD_TESTS)
       microparams-init
       next-prime
       pthreadpool
-      vunary-microkernel-tester
       XNNPACK)
     ADD_SHARDED_TEST(${TEST}-test 10)
   ENDFOREACH()
@@ -1321,41 +1293,24 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE XNNPACK)
 
     # ---[ Build operator-level unit tests
-    SET(LIBRARY_UNARY_UNIT_TESTS
-        abs-nc
-        bankers-rounding-nc
-        ceiling-nc
-        clamp-nc
-        elu-nc
-        exp-nc
-        floor-nc
-        hardswish-nc
-        leaky-relu-nc
-        log-nc
-        negate-nc
-        reciprocal-square-root-nc
-        sigmoid-nc
-        square-nc
-        square-root-nc
-        tanh-nc
-        truncation-nc)
-    FOREACH(TEST ${LIBRARY_UNARY_UNIT_TESTS})
-      ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-      TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
-      TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        GTest::gtest
-        GTest::gtest_main
-        unary-operator-tester
-        XNNPACK)
-      ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
-    ENDFOREACH()
+    ADD_EXECUTABLE(unary-elementwise-nc-test test/unary-elementwise-nc.cc)
+    TARGET_INCLUDE_DIRECTORIES(unary-elementwise-nc-test PRIVATE src test)
+    TARGET_LINK_LIBRARIES(unary-elementwise-nc-test PRIVATE
+      GTest::gtest
+      GTest::gtest_main
+      datatype
+      unary-ops
+      XNNPACK)
+    ADD_TEST(NAME unary-elementwise-nc-test COMMAND unary-elementwise-nc-test)
 
     ADD_EXECUTABLE(binary-elementwise-nd-test test/binary-elementwise-nd.cc)
     TARGET_INCLUDE_DIRECTORIES(binary-elementwise-nd-test PRIVATE src test)
     TARGET_LINK_LIBRARIES(binary-elementwise-nd-test PRIVATE
       GTest::gtest
       GTest::gtest_main
+      datatype
       XNNPACK)
+    ADD_TEST(NAME binary-elementwise-nd-test COMMAND binary-elementwise-nd-test)
 
     # ---[ Build subgraph optimizations unit tests
     SET(LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS
@@ -1379,53 +1334,35 @@ IF(XNNPACK_BUILD_TESTS)
 
     # ---[ Build subgraph-level unit tests
     SET(LIBRARY_SUBGRAPH_UNIT_TESTS
-        abs
-        abs-reshape
         argmax-pooling-2d
         average-pooling-2d
         average-pooling-2d-reshape
-        bankers-rounding
         binary
-        ceiling
-        clamp
         concatenate2
         concatenate3
         concatenate4
         concatenate5
-        convert
         copy
         depth-to-space-2d
-        elu
-        gelu
-        exp
         even-split2
         even-split3
         even-split4
-        floor
         global-average-pooling-1d
         global-average-pooling-2d
         global-sum-pooling-1d
         global-sum-pooling-2d
-        hardswish
-        leaky-relu
-        log
         max-pooling-2d
-        negate
-        reciprocal-square-root
         reshape-helpers
-        sigmoid
         static-slice
         softmax
         space-to-depth-2d
-        square
-        square-root
         static-constant-pad
         static-reduce
         static-reshape
         static-resize-bilinear-2d
         static-transpose
-        tanh
         transpose-reshape
+        unary
         unpooling-2d)
     FOREACH(TEST ${LIBRARY_SUBGRAPH_UNIT_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
@@ -1434,8 +1371,10 @@ IF(XNNPACK_BUILD_TESTS)
         GTest::gmock
         GTest::gtest
         GTest::gtest_main
+        datatype
         subgraph
         logging
+        unary-ops
         XNNPACK)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
       SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
@@ -1477,8 +1416,6 @@ IF(XNNPACK_BUILD_TESTS)
       f16-conv-hwc2chw
       f16-f32acc-rdsum
       f16-f32acc-rsum
-      f16-gavgpool-cw
-      f16-gavgpool-minmax
       f16-ibilinear-chw
       f16-ibilinear
       f16-raddstoreexpminusmax
@@ -1489,8 +1426,6 @@ IF(XNNPACK_BUILD_TESTS)
       f16-vmulcaddc-minmax
       f32-conv-hwc
       f32-conv-hwc2chw
-      f32-gavgpool-cw
-      f32-gavgpool-minmax
       f32-ibilinear-chw
       f32-ibilinear
       f32-raddexpminusmax
@@ -1507,19 +1442,11 @@ IF(XNNPACK_BUILD_TESTS)
       f32-vscaleextexp
       indirection
       packing
-      qs8-gavgpool-minmax-fp32
-      qs8-gavgpool-minmax-rndnu
-      qs8-requantization
       qs8-rdsum-minmax-fp32
       qu8-rdsum
       qs8-rsum
       qu8-rsum
-      qs8-vhswish
       qs8-vlrelu
-      qu8-gavgpool-minmax-fp32
-      qu8-gavgpool-minmax-rndnu
-      qu8-requantization
-      qu8-vhswish
       qu8-vlrelu
       s8-ibilinear
       u8-ibilinear
@@ -1760,7 +1687,6 @@ IF(XNNPACK_BUILD_TESTS)
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        vcvt-microkernel-tester
         GTest::gmock
         GTest::gtest
         GTest::gtest_main
@@ -1813,7 +1739,6 @@ IF(XNNPACK_BUILD_TESTS)
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
     TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-        vunary-microkernel-tester
         GTest::gmock
         GTest::gtest
         GTest::gtest_main
@@ -1822,6 +1747,7 @@ IF(XNNPACK_BUILD_TESTS)
         microkernels-all
         microparams-init
         pthreadpool
+        next-prime
     )
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
@@ -1924,6 +1850,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       bench/models/fp32-mobilenet-v2.cc
       bench/models/fp32-mobilenet-v3-large.cc
       bench/models/fp32-mobilenet-v3-small.cc
+      bench/models/qd8-attention.cc
       bench/models/qs8-mobilenet-v2.cc)
     SET_TARGET_PROPERTIES(models PROPERTIES CXX_EXTENSIONS YES)
     TARGET_LINK_LIBRARIES(models PRIVATE XNNPACK)
@@ -1938,33 +1865,19 @@ IF(XNNPACK_BUILD_BENCHMARKS)
 
     # ---[ Build operator-level microbenchmarks
     SET(LIBRARY_OPERATOR_BENCHMARKS
-        abs
         average-pooling
-        bankers-rounding
-        ceiling
         channel-shuffle
-        convert
         convolution
         deconvolution
-        elu
-        floor
-        global-average-pooling
-        hardswish
-        leaky-relu
         max-pooling
-        negate
-        reciprocal-square-root
-        sigmoid
         softmax
-        square
-        square-root
-        truncation
-        tanh)
+        unary)
     FOREACH(BENCH ${LIBRARY_OPERATOR_BENCHMARKS})
       ADD_EXECUTABLE(${BENCH}-bench bench/${BENCH}.cc)
       TARGET_LINK_LIBRARIES(${BENCH}-bench PRIVATE
         bench-utils
         benchmark::benchmark
+        datatype
         XNNPACK
       )
     ENDFOREACH()
@@ -1976,12 +1889,10 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       f16-conv-hwc2chw
       f16-dwconv
       f16-dwconv2d-chw
-      f16-f32-vcvt
       f16-f32acc-gemm
       f16-f32acc-igemm
       f16-f32acc-rdsum
       f16-f32acc-rsum
-      f16-gavgpool-cw
       f16-gemm
       f16-gemm-minmax
       f16-igemm
@@ -1996,8 +1907,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       f32-conv-hwc2chw
       f32-dwconv
       f32-dwconv2d-chw
-      f32-f16-vcvt
-      f32-gavgpool-cw
       f32-gemm
       f32-gemm-goi-minmax
       f32-gemm-minmax
@@ -2005,8 +1914,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       f32-im2col-gemm
       f32-qc4w-gemm
       f32-qc8w-gemm
-      f32-qs8-vcvt
-      f32-qu8-vcvt
       f32-raddexpminusmax
       f32-raddextexp
       f32-raddstoreexpminusmax
@@ -2029,23 +1936,15 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       qd8-f32-qc8w-gemm
       qp8-f32-qc4w-gemm
       qp8-f32-qb4w-gemm
-      qs16-qs8-vcvt
       qs8-dwconv
-      qs8-f16-vcvt
-      qs8-f32-vcvt
       qs8-gemm
       qs8-qc8w-gemm-fp32
-      qs8-requantization
       qu8-rdsum
       qs8-rsum
       qu8-rsum
-      qs8-vcvt
-      qu8-f32-vcvt
       qu8-gemm
       qu8-gemm-fp32
       qu8-gemm-rndnu
-      qu8-requantization
-      qu8-vcvt
       x16-packw
       x32-packw
       x8-lut

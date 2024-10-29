@@ -4,18 +4,6 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-### Tests for GAvgPool micro-kernels
-tools/generate-gavgpool-test.py --spec test/f16-gavgpool-minmax.yaml --output test/f16-gavgpool-minmax.cc &
-tools/generate-gavgpool-test.py --spec test/f32-gavgpool-minmax.yaml --output test/f32-gavgpool-minmax.cc &
-tools/generate-gavgpool-test.py --spec test/qs8-gavgpool-minmax-fp32.yaml --output test/qs8-gavgpool-minmax-fp32.cc &
-tools/generate-gavgpool-test.py --spec test/qs8-gavgpool-minmax-rndnu.yaml --output test/qs8-gavgpool-minmax-rndnu.cc &
-tools/generate-gavgpool-test.py --spec test/qu8-gavgpool-minmax-fp32.yaml --output test/qu8-gavgpool-minmax-fp32.cc &
-tools/generate-gavgpool-test.py --spec test/qu8-gavgpool-minmax-rndnu.yaml --output test/qu8-gavgpool-minmax-rndnu.cc &
-
-### Tests for GAvgPool CW layout micro-kernels
-tools/generate-gavgpool-cw-test.py --spec test/f16-gavgpool-cw.yaml --output test/f16-gavgpool-cw.cc &
-tools/generate-gavgpool-cw-test.py --spec test/f32-gavgpool-cw.yaml --output test/f32-gavgpool-cw.cc &
-
 ### Tests for ArgMaxPool micro-kernels
 tools/generate-argmaxpool-test.py --spec test/f32-argmaxpool.yaml --output test/f32-argmaxpool.cc &
 
@@ -144,48 +132,48 @@ tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel s32-
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel s32-vmulc    --output test/s32-vmulc.cc &
 
 ### Tests for VUnary micro-kernels
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel bf16-vabs --output test/bf16-vabs.cc &
+tools/generate-vunary-test.py --ukernel bf16-vabs --output test/bf16-vabs.cc &
 
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-vclamp --output test/f16-vclamp.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-velu --output test/f16-velu.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-vabs --output test/f16-vabs.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-vneg --output test/f16-vneg.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-vsqr --output test/f16-vsqr.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-vrndne --output test/f16-vrndne.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-vrndz  --output test/f16-vrndz.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-vrndu  --output test/f16-vrndu.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-vrndd  --output test/f16-vrndd.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-vrsqrt --output test/f16-vrsqrt.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-vsigmoid --output test/f16-vsigmoid.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-vsqrt --output test/f16-vsqrt.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-vtanh --output test/f16-vtanh.cc &
+tools/generate-vunary-test.py --ukernel f16-vclamp --output test/f16-vclamp.cc &
+tools/generate-vunary-test.py --ukernel f16-velu --output test/f16-velu.cc &
+tools/generate-vunary-test.py --ukernel f16-vabs --output test/f16-vabs.cc &
+tools/generate-vunary-test.py --ukernel f16-vneg --output test/f16-vneg.cc &
+tools/generate-vunary-test.py --ukernel f16-vsqr --output test/f16-vsqr.cc &
+tools/generate-vunary-test.py --ukernel f16-vrndne --output test/f16-vrndne.cc &
+tools/generate-vunary-test.py --ukernel f16-vrndz  --output test/f16-vrndz.cc &
+tools/generate-vunary-test.py --ukernel f16-vrndu  --output test/f16-vrndu.cc &
+tools/generate-vunary-test.py --ukernel f16-vrndd  --output test/f16-vrndd.cc &
+tools/generate-vunary-test.py --ukernel f16-vrsqrt --output test/f16-vrsqrt.cc &
+tools/generate-vunary-test.py --ukernel f16-vsigmoid --output test/f16-vsigmoid.cc &
+tools/generate-vunary-test.py --ukernel f16-vsqrt --output test/f16-vsqrt.cc &
+tools/generate-vunary-test.py --ukernel f16-vtanh --output test/f16-vtanh.cc &
 
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vabs --output test/f32-vabs.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vclamp --output test/f32-vclamp.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-velu --output test/f32-velu.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vgelu --output test/f32-vgelu.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vexp --output test/f32-vexp.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vlog --output test/f32-vlog.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vneg --output test/f32-vneg.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vrelu --output test/f32-vrelu.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vrndd  --output test/f32-vrndd.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vrndne --output test/f32-vrndne.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vrndu  --output test/f32-vrndu.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vrndz  --output test/f32-vrndz.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vrsqrt --output test/f32-vrsqrt.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vsigmoid --output test/f32-vsigmoid.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vsqr --output test/f32-vsqr.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vsqrt --output test/f32-vsqrt.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vtanh --output test/f32-vtanh.cc &
+tools/generate-vunary-test.py --ukernel f32-vabs --output test/f32-vabs.cc &
+tools/generate-vunary-test.py --ukernel f32-vclamp --output test/f32-vclamp.cc &
+tools/generate-vunary-test.py --ukernel f32-velu --output test/f32-velu.cc &
+tools/generate-vunary-test.py --ukernel f32-vgelu --output test/f32-vgelu.cc &
+tools/generate-vunary-test.py --ukernel f32-vexp --output test/f32-vexp.cc &
+tools/generate-vunary-test.py --ukernel f32-vlog --output test/f32-vlog.cc &
+tools/generate-vunary-test.py --ukernel f32-vneg --output test/f32-vneg.cc &
+tools/generate-vunary-test.py --ukernel f32-vrelu --output test/f32-vrelu.cc &
+tools/generate-vunary-test.py --ukernel f32-vrndd  --output test/f32-vrndd.cc &
+tools/generate-vunary-test.py --ukernel f32-vrndne --output test/f32-vrndne.cc &
+tools/generate-vunary-test.py --ukernel f32-vrndu  --output test/f32-vrndu.cc &
+tools/generate-vunary-test.py --ukernel f32-vrndz  --output test/f32-vrndz.cc &
+tools/generate-vunary-test.py --ukernel f32-vrsqrt --output test/f32-vrsqrt.cc &
+tools/generate-vunary-test.py --ukernel f32-vsigmoid --output test/f32-vsigmoid.cc &
+tools/generate-vunary-test.py --ukernel f32-vsqr --output test/f32-vsqr.cc &
+tools/generate-vunary-test.py --ukernel f32-vsqrt --output test/f32-vsqrt.cc &
+tools/generate-vunary-test.py --ukernel f32-vtanh --output test/f32-vtanh.cc &
 
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel s8-vclamp --output test/s8-vclamp.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel u8-vclamp --output test/u8-vclamp.cc &
+tools/generate-vunary-test.py --ukernel s8-vclamp --output test/s8-vclamp.cc &
+tools/generate-vunary-test.py --ukernel u8-vclamp --output test/u8-vclamp.cc &
 
 ### Tests for VLRelu micro-kernels
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-vlrelu --output test/f16-vlrelu.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vlrelu --output test/f32-vlrelu.cc &
-tools/generate-vunary-test.py --tester VLReLUMicrokernelTester --ukernel qs8-vlrelu --output test/qs8-vlrelu.cc &
-tools/generate-vunary-test.py --tester VLReLUMicrokernelTester --ukernel qu8-vlrelu --output test/qu8-vlrelu.cc &
+tools/generate-vunary-test.py --ukernel f16-vlrelu --output test/f16-vlrelu.cc &
+tools/generate-vunary-test.py --ukernel f32-vlrelu --output test/f32-vlrelu.cc &
+tools/generate-vunary-test.py --ukernel qs8-vlrelu --output test/qs8-vlrelu.cc &
+tools/generate-vunary-test.py --ukernel qu8-vlrelu --output test/qu8-vlrelu.cc &
 
 ### Tests for Reduce micro-kernels
 tools/generate-reduce-test.py --tester ReduceMicrokernelTester --spec test/f16-rmax.yaml --output test/f16-rmax.cc &
@@ -247,10 +235,8 @@ tools/generate-dwconv2d-chw-test.py --spec test/f16-dwconv2d-chw.yaml --output t
 tools/generate-dwconv2d-chw-test.py --spec test/f32-dwconv2d-chw.yaml --output test/f32-dwconv2d-chw.cc &
 
 ### Tests for VHSwish micro-kernels
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f16-vhswish --output test/f16-vhswish.cc &
-tools/generate-vunary-test.py --tester VUnaryMicrokernelTester --ukernel f32-vhswish --output test/f32-vhswish.cc &
-tools/generate-vunary-test.py --tester VHSwishMicrokernelTester --ukernel qs8-vhswish --output test/qs8-vhswish.cc &
-tools/generate-vunary-test.py --tester VHSwishMicrokernelTester --ukernel qu8-vhswish --output test/qu8-vhswish.cc &
+tools/generate-vunary-test.py --ukernel f16-vhswish --output test/f16-vhswish.cc &
+tools/generate-vunary-test.py --ukernel f32-vhswish --output test/f32-vhswish.cc &
 
 ### Tests for IBilinear micro-kernels
 tools/generate-ibilinear-test.py --spec test/f16-ibilinear.yaml --output test/f16-ibilinear.cc &

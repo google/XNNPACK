@@ -47,11 +47,6 @@ static void f32_raddstoreexpminusmax(
 
   benchmark::utils::DisableDenormals();
 
-  xnn_f32_expminus_params params;
-  if (init_params) {
-    init_params(&params);
-  }
-
   size_t buffer_index = 0;
   for (auto _ : state) {
     state.PauseTiming();
@@ -63,7 +58,7 @@ static void f32_raddstoreexpminusmax(
     state.ResumeTiming();
 
     float y_sum = nanf("");
-    raddstoreexpminusmax(elements * sizeof(float), x.data(), &x_max, y.data() + buffer_index * packed_elements, &y_sum, &params);
+    raddstoreexpminusmax(elements * sizeof(float), x.data(), &x_max, y.data() + buffer_index * packed_elements, &y_sum, nullptr);
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -249,7 +244,7 @@ static void f32_raddstoreexpminusmax(
 
 #endif  // XNN_ENABLE_AVX256SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, avx512f_rr1_p5_scalef_u16,
                     xnn_f32_rmax_ukernel__avx_u32_acc4,
                     xnn_f32_raddstoreexpminusmax_ukernel__avx512f_rr1_p5_scalef_u16,
@@ -307,7 +302,9 @@ static void f32_raddstoreexpminusmax(
                     benchmark::utils::CheckAVX512F)
     ->Apply(benchmark::utils::UnaryElementwiseParameters<float, float>)
     ->UseRealTime();
+#endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(f32_raddstoreexpminusmax, avx2_rr1_p5_u8,
                     xnn_f32_rmax_ukernel__avx_u32_acc4,
                     xnn_f32_raddstoreexpminusmax_ukernel__avx2_rr1_p5_u8,

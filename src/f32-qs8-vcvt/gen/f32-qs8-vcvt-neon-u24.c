@@ -30,8 +30,6 @@ void xnn_f32_qs8_vcvt_ukernel__neon_u24(
   const float32x4_t vscale = vld1q_dup_f32(&params->scalar.scale);
   const float32x4_t vmagic_bias = vdupq_n_f32(12582912.0f);
   const int32x4_t vmagic_bias_less_zero_point = vdupq_n_s32(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
-  const int8x16_t voutput_min = vld1q_dup_s8(&params->scalar.output_min);
-  const int8x16_t voutput_max = vld1q_dup_s8(&params->scalar.output_max);
   XNN_FORCE_REALIZATION(vmagic_bias);
   for (; batch >= 24 * sizeof(float); batch -= 24 * sizeof(float)) {
     float32x4_t vx0123 = vld1q_f32(input); input += 4;
@@ -69,12 +67,6 @@ void xnn_f32_qs8_vcvt_ukernel__neon_u24(
     int8x16_t vy0123456789ABCDEF = vcombine_s8(vqmovn_s16(vacc01234567), vqmovn_s16(vacc89ABCDEF));
     int8x8_t vyGHIJKLMN = vqmovn_s16(vaccGHIJKLMN);
 
-    vy0123456789ABCDEF = vmaxq_s8(vy0123456789ABCDEF, voutput_min);
-    vyGHIJKLMN = vmax_s8(vyGHIJKLMN, vget_low_s8(voutput_min));
-
-    vy0123456789ABCDEF = vminq_s8(vy0123456789ABCDEF, voutput_max);
-    vyGHIJKLMN = vmin_s8(vyGHIJKLMN, vget_low_s8(voutput_max));
-
     vst1q_s8(output, vy0123456789ABCDEF); output += 16;
     vst1_s8(output, vyGHIJKLMN); output += 8;
   }
@@ -94,8 +86,6 @@ void xnn_f32_qs8_vcvt_ukernel__neon_u24(
     const int16x8_t vacc = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
 
     int8x8_t vy = vqmovn_s16(vacc);
-    vy = vmax_s8(vy, vget_low_s8(voutput_min));
-    vy = vmin_s8(vy, vget_low_s8(voutput_max));
     vst1_s8(output, vy); output += 8;
   }
   if XNN_UNLIKELY(batch != 0) {
@@ -117,8 +107,6 @@ void xnn_f32_qs8_vcvt_ukernel__neon_u24(
     const int16x8_t vacc = vcombine_s16(vqmovn_s32(vacc_lo), vqmovn_s32(vacc_hi));
 
     int8x8_t vy = vqmovn_s16(vacc);
-    vy = vmax_s8(vy, vget_low_s8(voutput_min));
-    vy = vmin_s8(vy, vget_low_s8(voutput_max));
 
     if (batch & (4 * sizeof(float))) {
       vst1_lane_u32((void*) output, vreinterpret_u32_s8(vy), 0); output += 4;

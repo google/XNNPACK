@@ -30,13 +30,11 @@ void xnn_f32_qs8_vcvt_ukernel__avx_u24(
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
   const __m256 vscale = _mm256_set1_ps(params->scalar.scale);
-  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point));
+  const __m256 voutput_max_less_zero_point = _mm256_set1_ps((float) ((int32_t) 127 - (int32_t) params->scalar.output_zero_point));
   const __m128i voutput_zero_point = _mm_set1_epi16(params->scalar.output_zero_point);
-  const __m128i voutput_min = _mm_set1_epi8(params->scalar.output_min);
   XNN_FORCE_REALIZATION(vscale);
   XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
   XNN_FORCE_REALIZATION(voutput_zero_point);
-  XNN_FORCE_REALIZATION(voutput_min);
 
   for (; batch >= 24 * sizeof(float); batch -= 24 * sizeof(float)) {
     __m256 vx01234567 = _mm256_loadu_ps(input);
@@ -67,9 +65,6 @@ void xnn_f32_qs8_vcvt_ukernel__avx_u24(
     __m128i vy0123456789ABCDEF = _mm_packs_epi16(vy01234567, vy89ABCDEF);
     vyGHIJKLMN = _mm_packs_epi16(vyGHIJKLMN, vyGHIJKLMN);
 
-    vy0123456789ABCDEF = _mm_max_epi8(vy0123456789ABCDEF, voutput_min);
-    vyGHIJKLMN = _mm_max_epi8(vyGHIJKLMN, voutput_min);
-
     _mm_storeu_si128((__m128i*) output, vy0123456789ABCDEF);
     _mm_storel_epi64((__m128i*) (output + 16), vyGHIJKLMN);
     output += 24;
@@ -85,7 +80,6 @@ void xnn_f32_qs8_vcvt_ukernel__avx_u24(
     __m128i vy = _mm_packs_epi32(_mm256_castsi256_si128(vacc), _mm256_extractf128_si256(vacc, 1));
     vy = _mm_adds_epi16(vy, voutput_zero_point);
     vy = _mm_packs_epi16(vy, vy);
-    vy = _mm_max_epi8(vy, voutput_min);
 
     _mm_storel_epi64((__m128i*) output, vy);
     output += 8;
@@ -104,7 +98,6 @@ void xnn_f32_qs8_vcvt_ukernel__avx_u24(
     __m128i vy = _mm_packs_epi32(_mm256_castsi256_si128(vacc), _mm256_extractf128_si256(vacc, 1));
     vy = _mm_adds_epi16(vy, voutput_zero_point);
     vy = _mm_packs_epi16(vy, vy);
-    vy = _mm_max_epi8(vy, voutput_min);
 
     if (batch & (4 * sizeof(float))) {
       _mm_storeu_si32(output, vy);

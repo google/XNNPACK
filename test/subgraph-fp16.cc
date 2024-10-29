@@ -92,7 +92,8 @@ TEST(SUBGRAPH_FP16, value_both_external_output_and_input) {
 
   // Check that Addition node refers to the FP16 value before conversion.
   const xnn_node* addition_node = tester.Node(3);
-  ASSERT_EQ(addition_node->type, xnn_node_type_add2);
+  ASSERT_EQ(addition_node->type, xnn_node_type_binary_elementwise);
+  ASSERT_EQ(addition_node->binary_operator, xnn_binary_add);
   ASSERT_EQ(addition_node->inputs[0], 5);
   ASSERT_EQ(addition_node->inputs[1], 1);
   ASSERT_EQ(tester.Value(5)->datatype, xnn_datatype_fp16);

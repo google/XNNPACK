@@ -18,6 +18,12 @@
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 
+using std::copysign;
+
+inline xnn_float16 copysign(xnn_float16 a, xnn_float16 b) {
+  return (xnn_float16)std::copysign((float)a, (float)b);
+}
+
 class VBinaryMicrokernelTester {
  public:
   enum class OpType {
@@ -45,10 +51,10 @@ class VBinaryMicrokernelTester {
           result[i] = a[i] + b[i * stride_b];
           break;
         case OpType::CopySign:
-          result[i] = std::copysign(a[i], b[i * stride_b]);
+          result[i] = copysign(a[i], b[i * stride_b]);
           break;
         case OpType::RCopySign:
-          result[i] = std::copysign(b[i * stride_b], a[i]);
+          result[i] = copysign(b[i * stride_b], a[i]);
           break;
         case OpType::Div:
           result[i] = a[i] / b[i * stride_b];

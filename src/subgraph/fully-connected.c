@@ -11,11 +11,13 @@
 #include "xnnpack.h"
 #include "xnnpack/allocation-type.h"
 #include "xnnpack/common.h"
+#include "xnnpack/config.h"
 #include "xnnpack/internal.h"
 #include "xnnpack/log.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator-type.h"
 #include "xnnpack/operator.h"
+#include "xnnpack/subgraph.h"
 #include "xnnpack/requantization.h"
 #include "xnnpack/subgraph-validation.h"
 #include "xnnpack/subgraph.h"
@@ -43,6 +45,7 @@ enum fully_connected_op_type {
   fc_type_qs8_qs8_qs8 = 17,
   fc_type_qu8_qu8_qu8 = 18,
   fc_type_qp8_f32_qb4w = 19,
+  fc_type_pf32_f32_f32 = 20,
 };
 
 enum fully_connected_op_type get_fully_connected_op_type(
@@ -93,7 +96,14 @@ enum fully_connected_op_type get_fully_connected_op_type(
           if (has_non_static_weights) {
             return fc_type_f32_f32_f32_dynamic;
           } else {
-            return fc_type_f32_f32_f32;
+            switch (input_datatype) {
+              case xnn_datatype_fp32:
+                return fc_type_f32_f32_f32;
+              case xnn_datatype_pfp32:
+                return fc_type_pf32_f32_f32;
+              default:
+                XNN_UNREACHABLE;
+            }
           }
         case xnn_datatype_qbint4:
           switch (input_datatype) {
@@ -262,6 +272,15 @@ static enum xnn_status create_fully_connected_operator(
       break;
     case fc_type_f32_f32_f32:
       status = xnn_create_fully_connected_nc_f32(
+          input_channels, output_channels,
+          /*input_stride=*/input_channels,
+          /*output_stride=*/output_channels, kernel_data, bias_data,
+          node->activation.output_min, node->activation.output_max,
+          /*flags=*/node->flags, code_cache, weights_cache,
+          &opdata->operator_objects[0]);
+      break;
+    case fc_type_pf32_f32_f32:
+      status = xnn_create_fully_connected_nc_pf32(
           input_channels, output_channels,
           /*input_stride=*/input_channels,
           /*output_stride=*/output_channels, kernel_data, bias_data,
@@ -1226,6 +1245,18 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
     }
   }
 
+  if (compute_type == xnn_compute_type_fp32) {
+    const struct xnn_gemm_config* gemm_config = xnn_init_pf32_gemm_config();
+    if (gemm_config != NULL && gemm_config->init.f32 != NULL) {
+      // Insert a node to pack the LHS.
+      uint32_t new_id = XNN_INVALID_VALUE_ID;
+      status = xnn_insert_pack_lh_node(subgraph, input_value, input_id, &new_id);
+      if (status != xnn_status_success) {
+        return status;
+      }
+      input_id = new_id;
+    }
+  }
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
   if (node == NULL) {
     return xnn_status_out_of_memory;

@@ -17,6 +17,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
 #include "xnnpack/packq.h"
@@ -126,6 +127,7 @@ enum xnn_status xnn_define_tensor_value(
     case xnn_datatype_fp32:
     case xnn_datatype_fp16:
     case xnn_datatype_int32:
+    case xnn_datatype_pfp32:  // TODO: Does this really belong here?
       break;
     default:
       xnn_log_error("failed to create Dense Tensor value: unsupported datatype %s (%d)",
@@ -616,41 +618,14 @@ size_t xnn_tensor_get_size(const struct xnn_value* value)
     return xnn_x8_packq_f32qp8_gemm_packed_size(m, k);
   }
 
-  size_t size = 0;
-  switch (value->datatype) {
-    case xnn_datatype_fp16:
-      size = 2;
-      break;
-    case xnn_datatype_fp32:
-      size = 4;
-      break;
-    case xnn_datatype_qcint4:
-    case xnn_datatype_qbint4:
-    case xnn_datatype_qdint8:
-    case xnn_datatype_qint8:
-    case xnn_datatype_quint8:
-    case xnn_datatype_qcint8:
-    case xnn_datatype_qpint8:
-      size = 1;
-      break;
-    case xnn_datatype_qint32:
-    case xnn_datatype_qcint32:
-    case xnn_datatype_int32:
-      size = 4;
-      break;
-    case xnn_datatype_invalid:
-      XNN_UNREACHABLE;
-  }
+  uint64_t size_bits = xnn_datatype_size_bits(value->datatype);
 
-  size *= xnn_shape_multiply_all_dims(&value->shape);
+  size_bits *= xnn_shape_multiply_all_dims(&value->shape);
 
-  // Adjustments for nibbles, assume that we can't have sizes are byte-aligned
-  // (rounded up).
-  if (value->datatype == xnn_datatype_qcint4) {
-    size = round_up_po2(size, 2) >> 1;
-  }
-
-  return size;
+  // Round size up to the nearest byte.
+  // TODO: We should not be using this helper for non-byte-addressable types,
+  // perhaps we should just assert here.
+  return round_up_po2(size_bits, 8) >> 3;
 }
 
 // Return size of the dynamic quantization params in this value

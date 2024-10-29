@@ -349,7 +349,7 @@ typedef void (*xnn_qp8_f32_qb4w_gemm_minmax_ukernel_fn)(
     float* dst,
     size_t dst_stride_row,
     size_t dst_stride_col,
-    const struct xnn_f32_qb4w_minmax_params 
+    const struct xnn_f32_qb4w_minmax_params
         minmax_params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // GEMMINC: GEMM INCremental with Min+Max activation
@@ -837,105 +837,6 @@ typedef void (*xnn_u8_ibilinear_ukernel_fn)(
     uint8_t* output,
     size_t output_increment);
 
-// GAVGPOOL: Global AVeraGe POOLing single-pass
-
-typedef void (*xnn_gavgpool_unipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const void* input,
-    size_t input_stride,
-    const void* zero,
-    void* output,
-    const void* params);
-
-typedef void (*xnn_f16_gavgpool_minmax_unipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const xnn_float16* input,
-    size_t input_stride,
-    const xnn_float16* zero,
-    xnn_float16* output,
-    const struct xnn_f16_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_gavgpool_minmax_unipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const float* input,
-    size_t input_stride,
-    const float* zero,
-    float* output,
-    const struct xnn_f32_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qs8_gavgpool_minmax_unipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const int8_t* input,
-    size_t input_stride,
-    const int8_t* zero,
-    int8_t* output,
-    const union xnn_qs8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qu8_gavgpool_minmax_unipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const uint8_t* input,
-    size_t input_stride,
-    const uint8_t* zero,
-    uint8_t* output,
-    const union xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// GAVGPOOL: Global AVeraGe POOLing multi-pass
-
-typedef void (*xnn_gavgpool_multipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const void* input,
-    size_t input_stride,
-    const void* zero,
-    void* buffer,
-    void* output,
-    const void* params);
-
-typedef void (*xnn_f16_gavgpool_minmax_multipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const xnn_float16* input,
-    size_t input_stride,
-    const xnn_float16* zero,
-    xnn_float16* buffer,
-    xnn_float16* output,
-    const struct xnn_f16_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_gavgpool_minmax_multipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const float* input,
-    size_t input_stride,
-    const float* zero,
-    float* buffer,
-    float* output,
-    const struct xnn_f32_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qs8_gavgpool_minmax_multipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const int8_t* input,
-    size_t input_stride,
-    const int8_t* zero,
-    int32_t* buffer,
-    int8_t* output,
-    const union xnn_qs8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qu8_gavgpool_minmax_multipass_ukernel_fn)(
-    size_t rows,
-    size_t channels,
-    const uint8_t* input,
-    size_t input_stride,
-    const uint8_t* zero,
-    int32_t* buffer,
-    uint8_t* output,
-    const union xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
 // AVGPOOL: AVeraGe POOLing single-pass
 
 typedef void (*xnn_avgpool_unipass_ukernel_fn)(
@@ -984,7 +885,7 @@ typedef void (*xnn_qu8_avgpool_minmax_unipass_ukernel_fn)(
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // AVGPOOL: AVeraGe POOLing multi-pass
 
@@ -1038,7 +939,7 @@ typedef void (*xnn_qu8_avgpool_minmax_multipass_ukernel_fn)(
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // PAVGPOOL: Pixelwise AVeraGe POOLing single-pass
 
@@ -1549,6 +1450,16 @@ typedef void (*xnn_x32_packx_ukernel_fn)(
     size_t x_stride,
     uint32_t* y);
 
+// PACKLH: PACK LH (input) tensor according to the parameters from the gemm
+// config.
+typedef void (*xnn_x32_pack_lh_ukernel_fn)(
+    size_t m, size_t k, size_t mr, size_t kr, size_t sr, size_t m_idx_start,
+    const uint32_t* lhs, size_t lhs_stride, uint32_t* lhs_packed);
+
+// PACKLH Size: Size of packed buffer required.
+typedef size_t (*xnn_x32_pack_lh_size_fn)(size_t m, size_t k, size_t mr,
+                                          size_t kr, size_t sr);
+
 // FILL: FILL array with value
 
 typedef void (*xnn_fill_ukernel_fn)(
@@ -1624,7 +1535,7 @@ typedef void (*xnn_f32_rdsum_ukernel_fn)(
     size_t input_stride,
     const float* zero,
     float* output,
-    const struct xnn_f32_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f32_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_qs8_rdsum_ukernel_fn)(
     size_t rows,
@@ -1661,7 +1572,7 @@ typedef void (*xnn_f32_rsum_ukernel_fn)(
     size_t batch,
     const float* input,
     float* output,
-    const struct xnn_f32_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f32_scale_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_qs8_rsum_ukernel_fn)(
     size_t batch,
@@ -1717,7 +1628,7 @@ typedef void (*xnn_f16_raddstoreexpminusmax_ukernel_fn)(
     const xnn_float16* max,
     xnn_float16* output,
     xnn_float16* sum,
-    const struct xnn_f16_expminus_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const void* params);
 
 typedef void (*xnn_f32_raddstoreexpminusmax_ukernel_fn)(
     size_t batch,
@@ -1725,7 +1636,7 @@ typedef void (*xnn_f32_raddstoreexpminusmax_ukernel_fn)(
     const float* max,
     float* output,
     float* sum,
-    const struct xnn_f32_expminus_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const void* params);
 
 // VUNARY: Vector UNARY elementwise
 
@@ -1733,351 +1644,7 @@ typedef void (*xnn_vunary_ukernel_fn)(
     size_t batch,
     const void* input,
     void* output,
-    const void* params);
-
-// VABS: Vector ABSolute value elementwise
-
-typedef void (*xnn_bf16_vabs_ukernel_fn)(
-    size_t batch,
-    const xnn_bfloat16* input,
-    xnn_bfloat16* output,
-    const struct xnn_bf16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f16_vabs_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const struct xnn_f16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vabs_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VCLAMP: Vector CLAMP elementwise
-
-typedef void (*xnn_f16_vclamp_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vclamp_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_s8_vclamp_ukernel_fn)(
-    size_t batch,
-    const int8_t* input,
-    int8_t* output,
-    const struct xnn_s8_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_u8_vclamp_ukernel_fn)(
-    size_t batch,
-    const uint8_t* input,
-    uint8_t* output,
-    const struct xnn_u8_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VCOPYSIGN: Vector Copysign elementwise
-
-typedef void (*xnn_f32_vcopysign_ukernel_fn)(
-    size_t batch,
-    const float* input_a,
-    const float* input_b,
-    float* output,
-    const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-
-// MULTIPLY: Vector Multiply (S32 bit)elementwise
-
-typedef void (*xnn_s32_vmul_ukernel_fn)(
-    size_t batch,
-    const int32_t* input_a,
-    const int32_t* input_b,
-    int32_t* output,
-    const struct xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-
-// VCVT: Vector ConVerT elementwise
-
-typedef void (*xnn_f16_f32_vcvt_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    float* output,
-    const void* params);
-
-typedef void (*xnn_f16_qs8_vcvt_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    int8_t* output,
-    const struct xnn_f16_qs8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_f16_vcvt_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    xnn_float16* output,
-    const void* params);
-
-typedef void (*xnn_f32_qs8_vcvt_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    int8_t* output,
-    const struct xnn_f32_qs8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_qu8_vcvt_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    uint8_t* output,
-    const struct xnn_f32_qu8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_s32_f32_vcvt_ukernel_fn)(
-    size_t batch,
-    const int32_t* input,
-    float* output,
-    const struct xnn_s32_f32_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_u32_f32_vcvt_ukernel_fn)(
-    size_t batch,
-    const uint32_t* input,
-    float* output,
-    const struct xnn_u32_f32_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qs8_vcvt_ukernel_fn)(
-    size_t batch,
-    const int8_t* input,
-    int8_t* output,
-    const struct xnn_qs8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qs8_f16_vcvt_ukernel_fn)(
-    size_t batch,
-    const int8_t* input,
-    xnn_float16* output,
-    const struct xnn_qs8_f16_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qs8_f32_vcvt_ukernel_fn)(
-    size_t batch,
-    const int8_t* input,
-    float* output,
-    const struct xnn_qs8_f32_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qs16_qs8_vcvt_ukernel_fn)(
-    size_t batch,
-    const int16_t* input,
-    int8_t* output,
-    const struct xnn_qs16_qs8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qu8_vcvt_ukernel_fn)(
-    size_t batch,
-    const uint8_t* input,
-    uint8_t* output,
-    const struct xnn_qu8_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qu8_f32_vcvt_ukernel_fn)(
-    size_t batch,
-    const uint8_t* input,
-    float* output,
-    const struct xnn_qu8_f32_cvt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VELU: Vector Exponential Linear Unit elementwise
-
-typedef void (*xnn_f16_velu_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const struct xnn_f16_elu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_velu_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_elu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VGELU: Vector Gaussian Error Linear Unit elementwise
-
-typedef void (*xnn_f32_vgelu_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VHSWISH: Vector Hard SWISH elementwise
-
-typedef void (*xnn_f16_vhswish_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const struct xnn_f16_hswish_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vhswish_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_hswish_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qs8_vhswish_ukernel_fn)(
-    size_t batch,
-    const int8_t* input,
-    int8_t* output,
-    const union xnn_qs8_hswish_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qu8_vhswish_ukernel_fn)(
-    size_t batch,
-    const uint8_t* input,
-    uint8_t* output,
-    const union xnn_qu8_hswish_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VLRELU: Vector Leaky REctified Linear Unit elementwise
-
-typedef void (*xnn_f16_vlrelu_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const struct xnn_f16_lrelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vlrelu_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_lrelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qs8_vlrelu_ukernel_fn)(
-    size_t batch,
-    const int8_t* input,
-    int8_t* output,
-    const struct xnn_qs8_lrelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qu8_vlrelu_ukernel_fn)(
-    size_t batch,
-    const uint8_t* input,
-    uint8_t* output,
-    const struct xnn_qu8_lrelu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VNEG: Vector NEGate elementwise
-
-typedef void (*xnn_f16_vneg_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const struct xnn_f16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vneg_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VRELU: Vector REctified Linear Unit elementwise
-
-typedef void (*xnn_f32_vrelu_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_relu_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VRELU generator
-typedef xnn_status_t (*xnn_vrelu_generator_fn)(
-    struct xnn_code_buffer*,
-    size_t,
-    int);
-
-// VROUND: Vector ROUNDing elementwise
-
-typedef void (*xnn_f16_vround_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const struct xnn_f16_rnd_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vround_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_rnd_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VSIGMOID: Vector SIGMOID elementwise
-
-typedef void (*xnn_f16_vsigmoid_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const struct xnn_f16_sigmoid_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vsigmoid_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_sigmoid_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VSQR: Vector SQuaRe elementwise
-
-typedef void (*xnn_f16_vsqr_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const struct xnn_f16_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vsqr_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VSQRT: Vector SQuare RooT elementwise
-
-typedef void (*xnn_f16_vsqrt_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const struct xnn_f16_sqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vsqrt_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_sqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VRSQRT: Vector Reciprocal SQuare RooT elementwise
-
-typedef void (*xnn_f16_vrsqrt_ukernel_fn)(
-    size_t batch, const xnn_float16* input, xnn_float16* output,
-    const struct xnn_f16_rsqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vrsqrt_ukernel_fn)(
-    size_t batch, const float* input, float* output,
-    const struct xnn_f32_rsqrt_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VTANH: Vector TANH elementwise
-
-typedef void (*xnn_f16_vtanh_ukernel_fn)(
-    size_t batch,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const union xnn_f16_tanh_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_vtanh_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const union xnn_f32_tanh_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VEXP: Vector Exp elementwise
-
-typedef void (*xnn_f32_vexp_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-// VLOG: Vector Log elementwise
-
-typedef void (*xnn_f32_vlog_ukernel_fn)(
-    size_t batch,
-    const float* input,
-    float* output,
-    const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const union xnn_unary_uparams* params);
 
 // LUT: vector LookUp Table elementwise
 
@@ -2319,103 +1886,6 @@ typedef void (*xnn_f32_ibilinear_chw_ukernel_fn)(
     float* output,
     size_t input_increment);
 
-// GAVGPOOL-CW: Global AVeraGe POOLing in CW layout.
-
-typedef void (*xnn_gavgpool_cw_ukernel_fn)(
-    size_t batch,
-    size_t channels,
-    const float* input,
-    float* output,
-    const void* params);
-
-typedef void (*xnn_f16_gavgpool_cw_ukernel_fn)(
-    size_t batch,
-    size_t channels,
-    const xnn_float16* input,
-    xnn_float16* output,
-    const union xnn_f16_gavgpool_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_f32_gavgpool_cw_ukernel_fn)(
-    size_t batch,
-    size_t channels,
-    const float* input,
-    float* output,
-    const union xnn_f32_gavgpool_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-
-/********************* JIT microkernel generator pointers ********************/
-
-typedef xnn_status_t (*xnn_jit_gemm_code_generator_fn)(
-    struct xnn_code_buffer *code, size_t max_mr, size_t nc_mod_nr, size_t kc, const void *params);
-typedef xnn_status_t (*xnn_jit_igemm_code_generator_fn)(
-    struct xnn_code_buffer *code, size_t max_mr, size_t nc_mod_nr, size_t kc, size_t ks, const void *params);
-
-
-/***************** Audio pre-processing microkernel pointers *****************/
-
-typedef void (*xnn_s16_rmaxabs_ukernel_fn)(
-    size_t batch_size,
-    const int16_t* x,
-    uint16_t* y);
-
-typedef void (*xnn_s16_window_ukernel_fn)(
-    size_t rows,
-    size_t batch_size,
-    const int16_t* input,
-    const int16_t* weights,
-    int16_t* output,
-    uint32_t shift);
-
-typedef void (*xnn_u32_filterbank_accumulate_ukernel_fn)(
-    size_t rows,
-    const uint32_t* input,
-    const uint8_t* weight_widths,
-    const uint16_t* weights,
-    uint64_t* output);
-
-typedef void (*xnn_u32_filterbank_subtract_ukernel_fn)(
-    size_t batch_size,
-    const uint32_t* input,
-    uint32_t smoothing,
-    uint32_t alternate_smoothing,
-    uint32_t one_minus_smoothing,
-    uint32_t alternate_one_minus_smoothing,
-    uint32_t min_signal_remaining,
-    uint32_t smoothing_bits,
-    uint32_t spectral_subtraction_bits,
-    uint32_t* noise_estimate,
-    uint32_t* output);
-
-typedef void (*xnn_i16_vlshift_ukernel_fn)(
-    size_t batch,
-    const uint16_t* input,
-    uint16_t* output,
-    uint32_t shift);
-
-typedef void (*xnn_cs16_vsquareabs_ukernel_fn)(
-    size_t batch_size,
-    const int16_t* input,
-    uint32_t* output);
-
-typedef void (*xnn_u32_vlog_ukernel_fn)(
-    size_t batch_size,
-    const uint32_t* input,
-    uint32_t input_lshift,
-    uint32_t output_scale,
-    uint16_t* output);
-
-typedef void (*xnn_cs16_bfly4_ukernel_fn)(
-    size_t batch,
-    size_t samples,
-    int16_t* data,
-    const int16_t* twiddle,
-    size_t stride);
-
-typedef void (*xnn_cs16_fftr_ukernel_fn)(
-    size_t samples,
-    int16_t* data,
-    const int16_t* twiddle);
-
 
 /********************* Experimental microkernel pointers *********************/
 
@@ -2496,19 +1966,11 @@ typedef size_t (*xnn_init_binary_params_fn)(
   const struct xnn_quantization_params* b_quantization,
   const struct xnn_quantization_params* output_quantization);
 
-typedef size_t (*xnn_init_f16_qs8_cvt_params_fn)(
-  struct xnn_f16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  xnn_float16 scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max);
-
-typedef size_t (*xnn_init_f32_qs8_cvt_params_fn)(
-  struct xnn_f32_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max);
+typedef size_t (*xnn_init_unary_uparams_fn)(
+  union xnn_unary_uparams* microparams,
+  const union xnn_unary_params* op_params,
+  const struct xnn_quantization_params* input_quantization,
+  const struct xnn_quantization_params* output_quantization);
 
 typedef size_t (*xnn_init_qs8_reduce_minmax_params_fn)(
   struct xnn_qs8_reduce_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2523,53 +1985,6 @@ typedef size_t (*xnn_init_qu8_reduce_minmax_params_fn)(
   int32_t num_elements,
   uint8_t input_zero_point,
   uint8_t output_zero_point);
-
-typedef size_t (*xnn_init_f32_qu8_cvt_params_fn)(
-  struct xnn_f32_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max);
-
-typedef size_t (*xnn_init_s32_f32_cvt_params_fn)(
-  struct xnn_s32_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  int32_t zero_point);
-
-typedef size_t (*xnn_init_u32_f32_cvt_params_fn)(
-  struct xnn_u32_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  int32_t zero_point);
-
-typedef size_t (*xnn_init_qs8_cvt_params_fn)(
-  struct xnn_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  int8_t input_zero_point,
-  int8_t output_zero_point);
-
-typedef size_t (*xnn_init_qs8_f16_cvt_params_fn)(
-  struct xnn_qs8_f16_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  xnn_float16 scale,
-  int8_t zero_point);
-
-typedef size_t (*xnn_init_qs8_f32_cvt_params_fn)(
-  struct xnn_qs8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int8_t zero_point);
-
-typedef size_t (*xnn_init_qs16_qs8_cvt_params_fn)(
-  struct xnn_qs16_qs8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  int8_t zero_point);
-
-typedef size_t (*xnn_init_qu8_cvt_params_fn)(
-  struct xnn_qu8_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float input_output_scale,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point);
-
-typedef size_t (*xnn_init_qu8_f32_cvt_params_fn)(
-  struct xnn_qu8_f32_cvt_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  uint8_t zero_point);
 
 typedef size_t (*xnn_init_qs8_qc8w_conv_minmax_params_fn)(
   union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2595,36 +2010,18 @@ typedef size_t (*xnn_init_qu8_conv_minmax_params_fn)(
 typedef size_t (*xnn_init_qs8_rsum_params_fn)(
   struct xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)]);
 
-typedef size_t (*xnn_init_qs8_avgpool_minmax_params_fn)(
-  union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int32_t bias,
-  float scale,
-  int8_t output_zero_point,
-  int8_t output_min,
-  int8_t output_max);
-
 typedef size_t (*xnn_init_qu8_avgpool_minmax_params_fn)(
-  union xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int32_t bias,
   float scale,
   uint8_t output_zero_point,
   uint8_t output_min,
   uint8_t output_max);
 
-typedef void (*xnn_update_qs8_avgpool_minmax_params_fn)(
-  union xnn_qs8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int32_t bias,
-  float scale);
-
 typedef void (*xnn_update_qu8_avgpool_minmax_params_fn)(
-  union xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
   int32_t bias,
   float scale);
-
-typedef void (*xnn_update_f16_gavgpool_scalar_params_fn)(
-  union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t multiplier,
-  uint32_t width);
 
 typedef size_t (*xnn_init_qs8_add_minmax_params_fn)(
   struct xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2658,77 +2055,15 @@ typedef size_t (*xnn_init_f16_default_params_fn)(
 
 typedef size_t (*xnn_init_f32_default_params_fn)(
   struct xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
-typedef size_t (*xnn_init_f16_expminus_params_fn)(
-  struct xnn_f16_expminus_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_f32_expminus_params_fn)(
-  struct xnn_f32_expminus_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef size_t (*xnn_init_s32_default_params_fn)(
   struct xnn_s32_default_params params[XNN_MIN_ELEMENTS(1)]);
 
-typedef size_t (*xnn_init_f16_elu_params_fn)(
-  struct xnn_f16_elu_params params[XNN_MIN_ELEMENTS(1)],
-  xnn_float16 prescale,
-  xnn_float16 alpha,
-  xnn_float16 beta);
+typedef size_t (*xnn_init_f16_expminus_params_fn)(
+  struct xnn_f16_default_params params[XNN_MIN_ELEMENTS(1)]);
 
-typedef size_t (*xnn_init_f32_exp_params_fn)(
+typedef size_t (*xnn_init_f32_expminus_params_fn)(
   struct xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_f32_elu_params_fn)(
-  struct xnn_f32_elu_params params[XNN_MIN_ELEMENTS(1)],
-  float prescale,
-  float alpha,
-  float beta);
-
-typedef size_t (*xnn_init_f16_hswish_params_fn)(
-  struct xnn_f16_hswish_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_f32_hswish_params_fn)(
-  struct xnn_f32_hswish_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_qs8_hswish_params_fn)(
-  union xnn_qs8_hswish_params params[XNN_MIN_ELEMENTS(1)],
-  int16_t input_zero_point,
-  int16_t output_zero_point,
-  float input_scale,
-  float output_scale);
-
-typedef size_t (*xnn_init_qu8_hswish_params_fn)(
-  union xnn_qu8_hswish_params params[XNN_MIN_ELEMENTS(1)],
-  int16_t input_zero_point,
-  int16_t output_zero_point,
-  float input_scale,
-  float output_scale);
-
-typedef size_t (*xnn_init_f16_lrelu_params_fn)(
-  struct xnn_f16_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  xnn_float16 slope);
-
-typedef size_t (*xnn_init_f32_lrelu_params_fn)(
-  struct xnn_f32_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float slope);
-
-typedef size_t (*xnn_init_f32_log_params_fn)(
-  struct xnn_f32_default_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_f32_relu_params_fn)(
-  struct xnn_f32_relu_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_qs8_lrelu_params_fn)(
-  struct xnn_qs8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float positive_slope,
-  float negative_slope,
-  int8_t input_zero_point,
-  int8_t output_zero_point);
-
-typedef size_t (*xnn_init_qu8_lrelu_params_fn)(
-  struct xnn_qu8_lrelu_params params[XNN_MIN_ELEMENTS(1)],
-  float positive_slope,
-  float negative_slope,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point);
 
 typedef size_t (*xnn_init_bf16_minmax_params_fn)(
   struct xnn_bf16_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2781,12 +2116,6 @@ typedef size_t (*xnn_init_u8_minmax_params_fn)(
   uint8_t min,
   uint8_t max);
 
-typedef size_t (*xnn_init_f16_rnd_params_fn)(
-  struct xnn_f16_rnd_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_f32_rnd_params_fn)(
-  struct xnn_f32_rnd_params params[XNN_MIN_ELEMENTS(1)]);
-
 typedef size_t (*xnn_init_f16_scale_params_fn)(
   struct xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)],
   xnn_float16 scale);
@@ -2818,30 +2147,6 @@ typedef size_t (*xnn_init_f32_scaleminmax_params_fn)(
 typedef void (*xnn_update_f32_scaleminmax_params_fn)(
   struct xnn_f32_scaleminmax_params params[XNN_MIN_ELEMENTS(1)],
   float scale);
-
-typedef size_t (*xnn_init_f16_sigmoid_params_fn)(
-  struct xnn_f16_sigmoid_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_f32_sigmoid_params_fn)(
-  struct xnn_f32_sigmoid_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_f16_sqrt_params_fn)(
-  struct xnn_f16_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_f32_sqrt_params_fn)(
-  struct xnn_f32_sqrt_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_f16_rsqrt_params_fn)(
-  struct xnn_f16_rsqrt_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_f32_rsqrt_params_fn)(
-  struct xnn_f32_rsqrt_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_f16_tanh_params_fn)(
-  union xnn_f16_tanh_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_f32_tanh_params_fn)(
-  union xnn_f32_tanh_params params[XNN_MIN_ELEMENTS(1)]);
 
 typedef void (*xnn_init_scale_params_fn)(
   size_t channels,
@@ -2905,25 +2210,6 @@ typedef size_t (*xnn_packed_stride_weights_and_biases_fn)(
     size_t k_stride,                            //
     size_t extra_bytes);
 
-typedef size_t (*xnn_init_f16_gavgpool_neon_params_fn)(
-  union xnn_f16_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
-  uint16_t multiplier,
-  uint16_t output_min,
-  uint16_t output_max,
-  uint32_t width);
-
-typedef size_t (*xnn_init_f32_gavgpool_params_fn)(
-  union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
-  float multiplier,
-  float output_min,
-  float output_max,
-  uint32_t width);
-
-typedef void (*xnn_update_f32_gavgpool_params_fn)(
-  union xnn_f32_gavgpool_params params[XNN_MIN_ELEMENTS(1)],
-  float multiplier,
-  uint32_t width);
-
 typedef void (*xnn_indirection_init_resize_bilinear2d_hwc_fn)(
   size_t output_y_start,
   size_t output_y_end,
@@ -2937,11 +2223,6 @@ typedef void (*xnn_indirection_init_resize_bilinear2d_hwc_fn)(
   void* packed_weights,
   bool align_corners,
   bool tensorflow_legacy);
-
-struct xnn_generated_code_chunk {
-  size_t offset;
-  size_t offset_end;
-};
 
 struct xnn_hmp_dqgemm_ukernel {
   xnn_dqgemm_ukernel_fn function[XNN_MAX_UARCH_TYPES];
@@ -2973,7 +2254,7 @@ struct xnn_hmp_qp8gemm_bl_ukernel {
 
 // Largest GEMM/IGEMM MR used in init.c is 16 (x86 AVX512AMX).
 // Largest GEMM/IGEMM MR is 8 in e2e benchmarks.
-#define XNN_MAX_MR 16
+#define XNN_MAX_MR 32
 
 struct gemm_fused_ukernels {
   union {

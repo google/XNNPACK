@@ -517,17 +517,10 @@ enum xnn_status xnn_reshape_softmax_nc_f16(
     size_t batch_size,
     pthreadpool_t threadpool)
 {
-  struct xnn_f16_default_params rmax_params;
-  if (softmax_op->rmax_config->init.f16 != NULL) {
-    softmax_op->rmax_config->init.f16(&rmax_params);
-  }
-
-  struct xnn_f16_expminus_params expminus_params;
-  if (softmax_op->raddstoreexpminusmax_config->init.f16 != NULL) {
-    softmax_op->raddstoreexpminusmax_config->init.f16(&expminus_params);
-  }
   const struct xnn_binary_elementwise_config* f16_vmul_config = softmax_op->vmul_config;
 
+  struct xnn_f16_default_params rmax_params;
+  struct xnn_f16_default_params expminus_params;
   struct xnn_f16_default_params mul_params;
   return reshape_softmax_nc_floating_point(
     softmax_op, xnn_operator_type_softmax_nc_f16,
@@ -552,14 +545,7 @@ enum xnn_status xnn_reshape_softmax_nc_f32(
   const struct xnn_binary_elementwise_config* f32_vmul_config = softmax_op->vmul_config;
 
   struct xnn_f32_default_params rmax_params;
-  if (softmax_op->rmax_config->init.f32 != NULL) {
-    softmax_op->rmax_config->init.f32(&rmax_params);
-  }
-
-  struct xnn_f32_expminus_params expminus_params;
-  if (softmax_op->raddstoreexpminusmax_config->init.f32 != NULL) {
-    softmax_op->raddstoreexpminusmax_config->init.f32(&expminus_params);
-  }
+  struct xnn_f32_default_params expminus_params;
   struct xnn_f32_default_params mul_params;
   return reshape_softmax_nc_floating_point(
     softmax_op, xnn_operator_type_softmax_nc_f32,

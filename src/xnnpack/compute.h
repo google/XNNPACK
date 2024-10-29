@@ -1000,7 +1000,7 @@ struct average_pooling_context {
   union {
     struct xnn_f16_scaleminmax_params f16;
     struct xnn_f32_scaleminmax_params f32;
-    union xnn_qu8_avgpool_minmax_params qu8;
+    struct xnn_qu8_avgpool_minmax_params qu8;
   } params;
   union {
     xnn_avgpool_unipass_ukernel_fn unipass_ukernel;
@@ -1082,67 +1082,6 @@ struct pixelwise_average_pooling_context {
       size_t thread_index,
       size_t batch_index,
       size_t output_y);
-#endif
-
-struct global_average_pooling_nwc_context {
-  const void* input;
-  const void* zero;
-  size_t input_pixel_stride;
-  size_t input_batch_stride;
-  size_t input_elements;
-  size_t channels;
-  void* output;
-  size_t output_batch_stride;
-  union {
-    union xnn_qs8_avgpool_minmax_params qs8;
-    union xnn_qu8_avgpool_minmax_params qu8;
-    struct xnn_f16_scaleminmax_params f16;
-    struct xnn_f32_scaleminmax_params f32;
-  } params;
-  union {
-    xnn_gavgpool_unipass_ukernel_fn unipass_ukernel;
-    xnn_gavgpool_multipass_ukernel_fn multipass_ukernel;
-  };
-  size_t multipass_batch_stride;
-  void* multipass_buffer;
-};
-
-#ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_global_average_pooling_nwc_unipass(
-      const struct global_average_pooling_nwc_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index);
-
-  XNN_PRIVATE void xnn_compute_global_average_pooling_nwc_multipass(
-      const struct global_average_pooling_nwc_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index);
-
-  XNN_PRIVATE void xnn_compute_global_average_pooling_nwc_multipass_with_thread(
-      const struct global_average_pooling_nwc_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t thread_index,
-      size_t batch_index);
-#endif
-
-struct global_average_pooling_ncw_context {
-  size_t input_elements;
-  const void* input;
-  size_t input_channel_stride;
-  size_t input_batch_stride;
-  void* output;
-  size_t output_channel_stride;
-  size_t output_batch_stride;
-  xnn_gavgpool_cw_ukernel_fn ukernel;
-  union {
-    union xnn_f16_gavgpool_params f16;
-    union xnn_f32_gavgpool_params f32;
-  } params;
-};
-
-#ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_global_average_pooling_ncw(
-      const struct global_average_pooling_ncw_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index,
-      size_t channels_start,
-      size_t channels_slice);
 #endif
 
 struct resize_bilinear_nhwc_indirection_init_context {
@@ -1329,37 +1268,7 @@ struct univector_strided_context {
   void* y;
   size_t y_stride;
   xnn_vunary_ukernel_fn ukernel;
-  union {
-    struct xnn_f16_default_params f16_default;
-    struct xnn_f16_hswish_params f16_hswish;
-    struct xnn_f16_lrelu_params f16_lrelu;
-    union xnn_f16_minmax_params f16_minmax;
-    struct xnn_f16_default_params f16_neg;
-    struct xnn_f16_sigmoid_params f16_sigmoid;
-    union xnn_f16_tanh_params f16_tanh;
-    struct xnn_f32_default_params f32_default;
-    struct xnn_f32_elu_params f32_elu;
-    struct xnn_f32_hswish_params f32_hswish;
-    struct xnn_f32_lrelu_params f32_lrelu;
-    union xnn_f32_minmax_params f32_minmax;
-    struct xnn_f32_qs8_cvt_params f32_qs8_cvt;
-    struct xnn_f32_qu8_cvt_params f32_qu8_cvt;
-    struct xnn_f32_rnd_params f32_rnd;
-    struct xnn_f32_sigmoid_params f32_sigmoid;
-    struct xnn_f32_sqrt_params f32_sqrt;
-    union xnn_f32_tanh_params f32_tanh;
-    struct xnn_qs8_cvt_params qs8_cvt;
-    struct xnn_qs16_qs8_cvt_params qs16_qs8_cvt;
-    struct xnn_qs8_f32_cvt_params qs8_f32_cvt;
-    union xnn_qs8_hswish_params qs8_hswish;
-    struct xnn_qs8_lrelu_params qs8_lrelu;
-    struct xnn_qu8_cvt_params qu8_cvt;
-    struct xnn_qu8_f32_cvt_params qu8_f32_cvt;
-    union xnn_qu8_hswish_params qu8_hswish;
-    struct xnn_qu8_lrelu_params qu8_lrelu;
-    struct xnn_s8_minmax_params s8_minmax;
-    struct xnn_u8_minmax_params u8_minmax;
-  } params;
+  union xnn_unary_uparams params;
 };
 
 #ifndef __cplusplus
@@ -1375,34 +1284,7 @@ struct univector_contiguous_context {
   uint16_t log2_xsize;
   uint16_t log2_ysize;
   xnn_vunary_ukernel_fn ukernel;
-  union {
-    struct xnn_f16_default_params f16_default;
-    struct xnn_f16_hswish_params f16_hswish;
-    struct xnn_f16_lrelu_params f16_lrelu;
-    union xnn_f16_minmax_params f16_minmax;
-    struct xnn_f16_sigmoid_params f16_sigmoid;
-    struct xnn_f32_default_params f32_default;
-    struct xnn_f32_elu_params f32_elu;
-    struct xnn_f32_hswish_params f32_hswish;
-    struct xnn_f32_lrelu_params f32_lrelu;
-    union xnn_f32_minmax_params f32_minmax;
-    struct xnn_f32_qs8_cvt_params f32_qs8_cvt;
-    struct xnn_f32_qu8_cvt_params f32_qu8_cvt;
-    struct xnn_f32_rnd_params f32_rnd;
-    struct xnn_f32_sigmoid_params f32_sigmoid;
-    struct xnn_f32_sqrt_params f32_sqrt;
-    struct xnn_qs8_cvt_params qs8_cvt;
-    struct xnn_qs16_qs8_cvt_params qs16_qs8_cvt;
-    struct xnn_qs8_f32_cvt_params qs8_f32_cvt;
-    union xnn_qs8_hswish_params qs8_hswish;
-    struct xnn_qs8_lrelu_params qs8_lrelu;
-    struct xnn_qu8_cvt_params qu8_cvt;
-    struct xnn_qu8_f32_cvt_params qu8_f32_cvt;
-    union xnn_qu8_hswish_params qu8_hswish;
-    struct xnn_qu8_lrelu_params qu8_lrelu;
-    struct xnn_s8_minmax_params s8_minmax;
-    struct xnn_u8_minmax_params u8_minmax;
-  } params;
+  union xnn_unary_uparams params;
 };
 
 #ifndef __cplusplus
@@ -1436,7 +1318,6 @@ struct reduce_context {
     struct xnn_f32_default_params f32_default;
     struct xnn_f16_f32acc_scale_params scale_params;
     struct xnn_f32_scale_params f32_scale;
-    struct xnn_f32_scaleminmax_params f32_scaleminmax;
   } params;
 };
 
@@ -1544,7 +1425,7 @@ struct f16_qd8_convert_context {
   struct xnn_qd8_quantization_params* quantization_params;
   xnn_reduce_ukernel_fn rminmax_ukernel;
   xnn_vunary_ukernel_fn convert_ukernel;
-  xnn_init_f16_qs8_cvt_params_fn init_params;
+  xnn_init_unary_uparams_fn init_params;
   union {
     struct xnn_f16_default_params f16_default;
   } params;
@@ -1560,7 +1441,7 @@ struct f32_qd8_convert_context {
   struct xnn_qd8_quantization_params* quantization_params;
   xnn_reduce_ukernel_fn rminmax_ukernel;
   xnn_vunary_ukernel_fn convert_ukernel;
-  xnn_init_f32_qs8_cvt_params_fn init_params;
+  xnn_init_unary_uparams_fn init_params;
   union {
     struct xnn_f32_default_params f32_default;
   } params;
@@ -1580,17 +1461,35 @@ struct f32_qd8_convert_context {
       size_t batch_index);
 #endif
 
-struct f32_qp8_convert_context {
-  size_t m;
-  size_t k;
-  size_t mr;
-  size_t kr;
-  size_t sr;
-  const float* XNN_RESTRICT lhs;
-  size_t lhs_stride;
-  int8_t* XNN_RESTRICT lhs_packed;
-  xnn_x8_packq_f32qp8_ukernel_fn packq_ukernel;
-};
+  struct x32_pack_lh_context {
+    size_t m;
+    size_t k;
+    size_t mr;
+    size_t kr;
+    size_t sr;
+    const float* XNN_RESTRICT lhs;
+    size_t lhs_stride;
+    float* XNN_RESTRICT lhs_packed;
+    xnn_x32_pack_lh_ukernel_fn pack_lh_ukernel;
+  };
+
+#ifndef __cplusplus
+  XNN_PRIVATE void xnn_compute_x32_pack_lh(
+      const struct x32_pack_lh_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t m_idx_start, size_t tile);
+#endif
+
+  struct f32_qp8_convert_context {
+    size_t m;
+    size_t k;
+    size_t mr;
+    size_t kr;
+    size_t sr;
+    const float* XNN_RESTRICT lhs;
+    size_t lhs_stride;
+    int8_t* XNN_RESTRICT lhs_packed;
+    xnn_x8_packq_f32qp8_ukernel_fn packq_ukernel;
+  };
 
 #ifndef __cplusplus
   XNN_PRIVATE void xnn_compute_f32_qp8_convert(
@@ -1633,8 +1532,8 @@ struct floating_point_softmax_context {
     union xnn_f32_minmax_params f32;
   } minmax_params;
   union {
-    struct xnn_f16_expminus_params f16;
-    struct xnn_f32_expminus_params f32;
+    struct xnn_f16_default_params f16;
+    struct xnn_f32_default_params f32;
   } expminus_params;
   union {
     struct xnn_f16_default_params f16;
@@ -1756,8 +1655,8 @@ struct scaled_dot_product_attention_context {
   xnn_vunary_ukernel_fn vtanh_ukernel;
 
   union {
-    struct xnn_f16_expminus_params f16;
-    struct xnn_f32_expminus_params f32;
+    struct xnn_f16_default_params f16;
+    struct xnn_f32_default_params f32;
   } expminus_params;
   union {
     union xnn_f16_minmax_params f16;
@@ -1767,10 +1666,7 @@ struct scaled_dot_product_attention_context {
     struct xnn_f16_default_params f16;
     struct xnn_f32_default_params f32;
   } rmax_params;
-  union {
-    union xnn_f16_tanh_params f16;
-    union xnn_f32_tanh_params f32;
-  } tanh_params;
+  union xnn_unary_uparams tanh_params;
 
   // Attention uses a single workspace for multiple intermediates:
   // - scaled query

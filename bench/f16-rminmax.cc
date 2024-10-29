@@ -43,7 +43,7 @@ static void f16_rminmax(
     init_params(&params);
   }
 
-  xnn_float16 output[2] = {std::nanf(""), std::nanf("")};
+  xnn_float16 output[2];
   for (auto _ : state) {
     rminmax(elements * sizeof(xnn_float16), input.data(), output, &params);
   }
@@ -128,7 +128,7 @@ static void f16_rminmax(
     ->UseRealTime();
 #endif  // XNN_ENABLE_AVX512FP16 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   BENCHMARK_CAPTURE(f16_rminmax, avx512skx_u16,
                     xnn_f16_rminmax_ukernel__avx512skx_u16,
                     /*init_params=*/nullptr,
@@ -159,7 +159,7 @@ static void f16_rminmax(
                     benchmark::utils::CheckAVX512SKX)
     ->Apply(benchmark::utils::ReductionParameters<xnn_float16>)
     ->UseRealTime();
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 BENCHMARK_CAPTURE(f16_rminmax, scalar_u1,
                   xnn_f16_rminmax_ukernel__scalar_u1)

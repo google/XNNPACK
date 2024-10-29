@@ -13,8 +13,6 @@ PROD_WASM_MICROKERNEL_SRCS = [
     "src/f32-dwconv/gen/f32-dwconv-5f5m5l1c1s1r-minmax-wasm-acc2.c",
     "src/f32-dwconv/gen/f32-dwconv-9p1c-minmax-wasm-acc2.c",
     "src/f32-dwconv/gen/f32-dwconv-25p1c-minmax-wasm-acc2.c",
-    "src/f32-gavgpool/f32-gavgpool-7p7x-minmax-wasm-c1.c",
-    "src/f32-gavgpool/f32-gavgpool-7x-minmax-wasm-c1.c",
     "src/f32-gemm/gen/f32-gemm-1x4-minmax-wasm.c",
     "src/f32-gemm/gen/f32-gemm-1x4-relu-wasm.c",
     "src/f32-gemm/gen/f32-gemm-4x2-minmax-wasm.c",

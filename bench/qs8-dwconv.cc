@@ -700,8 +700,7 @@ static void DWConvBenchmark(benchmark::State& state,
 
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   static void qs8_dwconv_9p16c__avx512skx_mul32(benchmark::State& state, const char* net) {
     DWConvBenchmark(state,
       xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx512skx_mul32,
@@ -714,6 +713,12 @@ static void DWConvBenchmark(benchmark::State& state,
       xnn_init_qs8_conv_minmax_fp32_scalar_params,
       32 /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckAVX512SKX);
   }
+
+  BENCHMARK_DWCONV(qs8_dwconv_9p16c__avx512skx_mul32);
+  BENCHMARK_DWCONV(qs8_dwconv_9p32c__avx512skx_mul32);
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   static void qs8_dwconv_9p16c__avx2_mul16_vpmovsx(benchmark::State& state, const char* net) {
     DWConvBenchmark(state,
       xnn_qs8_dwconv_minmax_fp32_ukernel_9p16c__avx2_mul16_vpmovsx,
@@ -1259,9 +1264,6 @@ static void DWConvBenchmark(benchmark::State& state,
       /*channel_tile=*/32, /*channel_subtile=*/16, /*channel_round=*/16,
       benchmark::utils::CheckAVX2);
   }
-
-  BENCHMARK_DWCONV(qs8_dwconv_9p16c__avx512skx_mul32);
-  BENCHMARK_DWCONV(qs8_dwconv_9p32c__avx512skx_mul32);
 
   BENCHMARK_DWCONV(qs8_dwconv_9p16c__avx2_mul16_vpmovsx);
   BENCHMARK_DWCONV(qs8_dwconv_9p32c__avx2_mul16_vpmovsx);

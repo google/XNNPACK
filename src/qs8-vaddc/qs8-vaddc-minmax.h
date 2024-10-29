@@ -50,9 +50,12 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_qs8_vaddc_minmax_ukernel__avx2_mu
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_u16, 16, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_u24, 24, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_qs8_vaddc_minmax_ukernel__avx2_mul32_ld64_u32, 32, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512skx, xnn_qs8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_u16, 16, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512skx, xnn_qs8_vaddc_minmax_ukernel__avx512skx_mul32_ld128_u32, 32, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_UKERNEL_WITH_PARAMS(0, xnn_qs8_vaddc_minmax_ukernel__wasmsimd_u8, 8, false, int8_t, struct xnn_qs8_add_minmax_params, xnn_init_qs8_add_minmax_scalar_params)

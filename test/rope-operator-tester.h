@@ -133,7 +133,7 @@ class RoPEOperatorTester {
       xnn_operator_t rope_op = nullptr;
 
       const xnn_status status = xnn_create_rope_nthc_f16(
-        /*max_tokens=*/tokens(), /*flags=*/0, &rope_op);
+        /*flags=*/0, &rope_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -237,7 +237,7 @@ class RoPEOperatorTester {
       xnn_operator_t rope_op = nullptr;
 
       const xnn_status status = xnn_create_rope_nthc_f32(
-        /*max_tokens=*/tokens(), /*flags=*/0, &rope_op);
+        /*flags=*/0, &rope_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }

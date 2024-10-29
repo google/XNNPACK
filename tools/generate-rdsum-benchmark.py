@@ -6,19 +6,17 @@
 
 import argparse
 import codecs
-import math
 import os
 import re
 import sys
 import yaml
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from primes import next_prime
 import xngen
 import xnncommon
 
 
-parser = argparse.ArgumentParser(description='GAvgPool microkernel test generator')
+parser = argparse.ArgumentParser(description="RDsum microkernel test generator")
 parser.add_argument("-s", "--spec", metavar="FILE", required=True,
                     help="Specification (YAML) file")
 parser.add_argument(

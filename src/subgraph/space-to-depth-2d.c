@@ -10,6 +10,7 @@
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/log.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator-type.h"
@@ -37,22 +38,21 @@ static enum xnn_status create_space_to_depth_operator(
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
   const struct xnn_value *input_value = &values[input_id];
-  switch (input_value->datatype) {
-    case xnn_datatype_fp16:
+  switch (xnn_datatype_size_bytes(input_value->datatype)) {
+    case 1:
+      status = xnn_create_space_to_depth_nhwc_x8(
+          node->params.space_to_depth_2d.block_size,
+          node->flags,
+          &opdata->operator_objects[0]);
+      break;
+    case 2:
       status = xnn_create_space_to_depth_nhwc_x16(
           node->params.space_to_depth_2d.block_size,
           node->flags,
           &opdata->operator_objects[0]);
       break;
-    case xnn_datatype_fp32:
+    case 4:
       status = xnn_create_space_to_depth_nhwc_x32(
-          node->params.space_to_depth_2d.block_size,
-          node->flags,
-          &opdata->operator_objects[0]);
-      break;
-    case xnn_datatype_qint8:
-    case xnn_datatype_quint8:
-      status = xnn_create_space_to_depth_nhwc_x8(
           node->params.space_to_depth_2d.block_size,
           node->flags,
           &opdata->operator_objects[0]);
@@ -207,18 +207,12 @@ enum xnn_status xnn_define_space_to_depth_2d(
     return status;
   }
 
-  switch (input_value->datatype) {
-    case xnn_datatype_fp16:
-    case xnn_datatype_fp32:
-    case xnn_datatype_qint8:
-    case xnn_datatype_quint8:
-      break;
-    default:
-      xnn_log_error(
-        "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(xnn_node_type_space_to_depth_2d), input_id,
-        xnn_datatype_to_string(input_value->datatype), input_value->datatype);
-      return xnn_status_invalid_parameter;
+  if (!xnn_datatype_is_byte_addressable(input_value->datatype)) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+      xnn_node_type_to_string(xnn_node_type_space_to_depth_2d), input_id,
+      xnn_datatype_to_string(input_value->datatype), input_value->datatype);
+    return xnn_status_invalid_parameter;
   }
 
   status = xnn_subgraph_check_output_node_id(xnn_node_type_space_to_depth_2d, output_id, subgraph->num_values);
@@ -262,7 +256,7 @@ enum xnn_status xnn_define_space_to_depth_2d(
   }
 
   status = xnn_subgraph_check_quantization_parameter_matches(
-      xnn_node_type_clamp, input_id, input_value, output_id, output_value);
+      xnn_node_type_space_to_depth_2d, input_id, input_value, output_id, output_value);
   if (status != xnn_status_success) {
     return status;
   }

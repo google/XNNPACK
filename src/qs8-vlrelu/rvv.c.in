@@ -27,7 +27,7 @@ void xnn_${DATATYPE.lower()}_vlrelu_ukernel__rvv_u${LMUL}v(
   const int32_t input_zero_point = params->scalar.input_zero_point;
   const int32_t multiplier_diff = params->scalar.negative_multiplier ^ params->scalar.positive_multiplier;
   const int32_t multiplier_base = params->scalar.positive_multiplier;
-  const int32_t bias = (params->scalar.output_zero_point << 8) + 128;
+  const int32_t bias = (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 8) + 128;
   int32_t n = __riscv_vsetvl_e8m${LMUL}(batch);
   vint32m${LMUL*4}_t bias_i32v = __riscv_vmv_v_x_i32m${LMUL*4}(bias, n);
 

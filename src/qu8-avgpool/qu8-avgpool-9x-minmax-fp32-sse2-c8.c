@@ -28,7 +28,7 @@ void xnn_qu8_avgpool_minmax_fp32_ukernel_9x__sse2_c8(
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_qu8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_qu8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(output_pixels != 0);
   assert(kernel_elements != 0);
@@ -36,11 +36,16 @@ void xnn_qu8_avgpool_minmax_fp32_ukernel_9x__sse2_c8(
   assert(channels != 0);
 
   const __m128i vzero = _mm_setzero_si128();
-  const __m128i vinit_bias = _mm_load_si128((const __m128i*) params->fp32_sse2.init_bias);
-  const __m128 vscale = _mm_load_ps(params->fp32_sse2.scale);
-  const __m128 voutput_max_less_zero_point = _mm_load_ps(params->fp32_sse2.output_max_less_zero_point);
-  const __m128i voutput_zero_point = _mm_load_si128((const __m128i*) params->fp32_sse2.output_zero_point);
-  const __m128i voutput_min = _mm_load_si128((const __m128i*) params->fp32_sse2.output_min);
+  const __m128i vinit_bias = _mm_set1_epi32(params->fp32_scalar.init_bias);
+  const __m128 vscale = _mm_set1_ps(params->fp32_scalar.scale);
+  const __m128 voutput_max_less_zero_point = _mm_set1_ps((float) ((int32_t) params->fp32_scalar.output_max - (int32_t) params->fp32_scalar.output_zero_point));
+  const __m128i voutput_zero_point = _mm_set1_epi16(params->fp32_scalar.output_zero_point);
+  const __m128i voutput_min = _mm_set1_epi8(params->fp32_scalar.output_min);
+  XNN_FORCE_REALIZATION(vinit_bias);
+  XNN_FORCE_REALIZATION(vscale);
+  XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
+  XNN_FORCE_REALIZATION(voutput_zero_point);
+  XNN_FORCE_REALIZATION(voutput_min);
 
   do {
     const uint8_t* i0 = input[0];

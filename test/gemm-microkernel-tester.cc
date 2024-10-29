@@ -233,7 +233,7 @@ void GemmMicrokernelTester::Test(
         const float tolerance = std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f);
         EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
-            << "), optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
+            << "), optimized = " << (float)c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
             << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
       }
     }
@@ -950,7 +950,7 @@ void GemmMicrokernelTester::Test(
         const float tolerance = std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f);
         EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
-            << "), optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
+            << "), optimized = " << (float)c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
             << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
       }
     }
@@ -1219,7 +1219,7 @@ void GemmMicrokernelTester::Test(
         EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << " (accumulator = " << acc[i * n() + j]
-            << "), optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
+            << "), optimized = " << (float)c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
             << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
       }
     }
@@ -1381,7 +1381,7 @@ void GemmMicrokernelTester::Test(
         const float tolerance = std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-3f);
         EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
-            << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
+            << ", optimized = " << (float)c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
             << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k2;
       }
     }
@@ -2229,9 +2229,9 @@ void GemmMicrokernelTester::Test(
 
     std::fill(packed_w.begin(), packed_w.end(), 0);
     pack(/*g=*/1, n(), k(), nr(), kr(), sr(),
-         reinterpret_cast<const uint16_t*>(b.data()), 
+         reinterpret_cast<const uint16_t*>(b.data()),
          reinterpret_cast<const uint16_t*>(bias.data()), /*scale=*/nullptr,
-         reinterpret_cast<uint16_t*>(packed_w.data()), 
+         reinterpret_cast<uint16_t*>(packed_w.data()),
          /*extra_bytes=*/0, /*params=*/nullptr);
 
     for (size_t m_index = 0; m_index < m(); m_index++) {
@@ -2292,7 +2292,7 @@ void GemmMicrokernelTester::Test(
 
   xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
-  
+
   xnnpack::Buffer<xnn_float16> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   xnnpack::Buffer<xnn_float16> b(n() * k());
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> packed_w(
@@ -2309,10 +2309,10 @@ void GemmMicrokernelTester::Test(
 
     std::fill(packed_w.begin(), packed_w.end(), 0);
     pack(/*g=*/1, n(), k(), nr(), kr(), sr(),
-         reinterpret_cast<const uint16_t*>(b.data()), 
-         reinterpret_cast<const uint16_t*>(bias.data()), 
-         /*scale=*/nullptr, 
-         reinterpret_cast<uint16_t*>(packed_w.data()), 
+         reinterpret_cast<const uint16_t*>(b.data()),
+         reinterpret_cast<const uint16_t*>(bias.data()),
+         /*scale=*/nullptr,
+         reinterpret_cast<uint16_t*>(packed_w.data()),
          /*extra_bytes=*/0, /*params=*/nullptr);
 
     for (size_t m_index = 0; m_index < m(); m_index++) {
@@ -2355,7 +2355,7 @@ void GemmMicrokernelTester::Test(
       for (size_t j = 0; j < n(); j++) {
         EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], c_ref[i * n() + j], std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f))
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
-            << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << ", optimized = " << (float)c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
       }
     }
@@ -2371,7 +2371,7 @@ void GemmMicrokernelTester::Test(
 
   xnnpack::ReplicableRandomDevice rng;
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
-  
+
   xnnpack::Buffer<xnn_float16> a((mr() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   xnnpack::Buffer<xnn_float16> b(n() * ks() * k());
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> packed_w(
@@ -2390,9 +2390,9 @@ void GemmMicrokernelTester::Test(
 
     std::fill(packed_w.begin(), packed_w.end(), 0);
     pack(/*g=*/1, n(), ks(), k(), nr(), kr(), sr(),
-         reinterpret_cast<const uint16_t*>(b.data()), 
-         reinterpret_cast<const uint16_t*>(bias.data()), /*scale=*/nullptr, 
-         reinterpret_cast<uint16_t*>(packed_w.data()), 
+         reinterpret_cast<const uint16_t*>(b.data()),
+         reinterpret_cast<const uint16_t*>(bias.data()), /*scale=*/nullptr,
+         reinterpret_cast<uint16_t*>(packed_w.data()),
          /*extra_bytes=*/0, /*params=*/nullptr);
 
     for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
@@ -2469,15 +2469,15 @@ void GemmMicrokernelTester::Test(
       for (size_t j = 0; j < n(); j++) {
         EXPECT_LE(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], c_max)
             << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
-            << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << ", optimized = " << (float)c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
         EXPECT_GE(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], c_min)
             << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
-            << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << ", optimized = " << (float)c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
         EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], c_ref[i * n() + j], std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f))
             << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
-            << ", optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
+            << ", optimized = " << (float)c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
       }
     }

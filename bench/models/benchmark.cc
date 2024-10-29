@@ -180,6 +180,18 @@ static void FP16MobileNetV3Small(benchmark::State& state) {
                   XNN_FLAG_FORCE_FP16_INFERENCE);
 }
 
+static void QD8Attention(benchmark::State& state) {
+  models::QD8AttentionWeights weights;
+  BenchmarkInvoke(
+      state,
+      [&state, &weights]() {
+        return models::QD8Attention(state.range(0), state.range(1),
+                                    state.range(2), state.range(3),
+                                    state.range(4), weights);
+      },
+      0);
+}
+
 static void QS8MobileNetV2(benchmark::State& state) {
   BenchmarkInvoke(state, models::QS8MobileNetV2);
 }
@@ -216,6 +228,11 @@ BENCHMARK(FP16MobileNetV1)->Unit(benchmark::kMicrosecond)->UseRealTime();
 BENCHMARK(FP16MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 BENCHMARK(FP16MobileNetV3Large)->Unit(benchmark::kMicrosecond)->UseRealTime();
 BENCHMARK(FP16MobileNetV3Small)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+BENCHMARK(QD8Attention)
+    ->Unit(benchmark::kMicrosecond)
+    ->UseRealTime()
+    ->Apply(AttentionArguments);
 
 BENCHMARK(QS8MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 

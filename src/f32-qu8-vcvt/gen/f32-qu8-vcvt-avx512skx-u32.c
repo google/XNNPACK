@@ -31,14 +31,12 @@ void xnn_f32_qu8_vcvt_ukernel__avx512skx_u32(
   XNN_ALIGN(32) static const uint32_t shuffle256_mask[8] = {0, 4, 2, 6, 1, 5, 3, 7};
 
   const __m512 vscale = _mm512_set1_ps(params->scalar.scale);
-  const __m512 voutput_max_less_zero_point = _mm512_set1_ps((float) ((int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point));
+  const __m512 voutput_max_less_zero_point = _mm512_set1_ps((float) ((int32_t) 255 - (int32_t) params->scalar.output_zero_point));
   const __m512i voutput_zero_point = _mm512_set1_epi16(params->scalar.output_zero_point);
   const __m256i vshuffle256_mask = _mm256_load_si256((const __m256i*) shuffle256_mask);
-  const __m256i voutput_min = _mm256_set1_epi8(params->scalar.output_min);
   XNN_FORCE_REALIZATION(vscale);
   XNN_FORCE_REALIZATION(voutput_max_less_zero_point);
   XNN_FORCE_REALIZATION(voutput_zero_point);
-  XNN_FORCE_REALIZATION(voutput_min);
   for (; batch >= 32 * sizeof(float); batch -= 32 * sizeof(float)) {
     __m512 vx0123 = _mm512_loadu_ps(input);
     __m512 vx4567 = _mm512_loadu_ps(input + 16);
@@ -59,8 +57,6 @@ void xnn_f32_qu8_vcvt_ukernel__avx512skx_u32(
 
     __m256i vy04261537 = _mm256_packus_epi16(_mm512_castsi512_si256(vacc04152637), _mm512_extracti32x8_epi32(vacc04152637, 1));
 
-    vy04261537 = _mm256_max_epu8(vy04261537, voutput_min);
-
     const __m256i vy01234567 = _mm256_permutevar8x32_epi32(vy04261537, vshuffle256_mask);
 
     _mm256_storeu_si256((__m256i*) output, vy01234567);
@@ -78,7 +74,6 @@ void xnn_f32_qu8_vcvt_ukernel__avx512skx_u32(
     vacc0213 = _mm256_adds_epi16(vacc0213, _mm512_castsi512_si256(voutput_zero_point));
     const __m128i vy0213 = _mm_packus_epi16(_mm256_castsi256_si128(vacc0213), _mm256_extracti128_si256(vacc0213, 1));
     __m128i vy0123 = _mm_shuffle_epi32(vy0213, _MM_SHUFFLE(3, 1, 2, 0));
-    vy0123 = _mm_max_epu8(vy0123, _mm256_castsi256_si128(voutput_min));
 
     _mm_storeu_si128((__m128i*) output, vy0123);
     output += 16;
@@ -101,7 +96,6 @@ void xnn_f32_qu8_vcvt_ukernel__avx512skx_u32(
     vacc0213 = _mm256_adds_epi16(vacc0213, _mm512_castsi512_si256(voutput_zero_point));
     const __m128i vy0213 = _mm_packus_epi16(_mm256_castsi256_si128(vacc0213), _mm256_extracti128_si256(vacc0213, 1));
     __m128i vy0123 = _mm_shuffle_epi32(vy0213, _MM_SHUFFLE(3, 1, 2, 0));
-    vy0123 = _mm_max_epu8(vy0123, _mm256_castsi256_si128(voutput_min));
 
     _mm_mask_storeu_epi8(output, vmask, vy0123);
   }

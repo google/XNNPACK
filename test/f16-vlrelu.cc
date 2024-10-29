@@ -24,27 +24,25 @@
 #include "next_prime.h"
 #include "vunary-microkernel-tester.h"
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)\
-                                                                                                                 \
-XNN_TEST_UNARY_BATCH_EQ(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                        \
-XNN_TEST_UNARY_BATCH_DIV(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                       \
-XNN_TEST_UNARY_BATCH_LT(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                        \
-XNN_TEST_UNARY_BATCH_GT(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                        \
-                                                                                                                 \
-XNN_TEST_UNARY_INPLACE(ukernel, arch_flags, batch_tile, datatype, ukernel, init_params);                         \
-TEST(ukernel, slope) {                                                                                           \
-  TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                          \
-  const size_t batch_scale = get_batch_scale<datatype>();                                                        \
-  const size_t batch_end = batch_tile * batch_scale;                                                             \
-  const size_t batch_step = std::max(1, batch_tile - 1);                                                         \
-  for (float slope : std::array<float, 3>({-0.7f, 0.3f, 1.3f})) {                                                \
-    for (size_t batch_size = 1; batch_size <= 5 * batch_end; batch_size += batch_step) {                         \
-      VUnaryMicrokernelTester()                                                                                  \
-        .batch_size(batch_size)                                                                                  \
-        .slope(slope)                                                                                            \
-        .Test(ukernel, init_params);                                                                             \
-    }                                                                                                            \
-  }                                                                                                              \
+using TestInfo = LeakyReLU;
+
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)       \
+  TEST(ukernel, batch_eq) { TestBatchEq<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }  \
+  TEST(ukernel, batch_div) { TestBatchDiv<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }\
+  TEST(ukernel, batch_lt) { TestBatchLT<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }  \
+  TEST(ukernel, batch_gt) { TestBatchGT<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }  \
+  TEST(ukernel, inplace) { TestInPlace<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }   \
+TEST(ukernel, negative_slope) {                                                                                         \
+  TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                                 \
+  const size_t batch_scale = get_batch_scale<datatype>();                                                               \
+  const size_t batch_size = batch_tile * batch_scale;                                                                   \
+  for (float negative_slope : {0.01f, 0.3f, 1.3f}) {                                                                    \
+    xnn_unary_params params;                                                                                            \
+    params.leaky_relu.negative_slope = negative_slope;                                                                  \
+    VUnaryMicrokernelTester()                                                                                           \
+      .batch_size(batch_size)                                                                                           \
+      .Test<TestInfo>(ukernel, init_params, params);                                                                    \
+  }                                                                                                                     \
 }
 #include "f16-vlrelu/f16-vlrelu.h"
 #undef XNN_UKERNEL_WITH_PARAMS

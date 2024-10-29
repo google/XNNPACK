@@ -98,7 +98,6 @@ TEST_F(RoPETestF16, define)
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_rope);
   ASSERT_EQ(node->compute_type, xnn_compute_type_fp16);
-  ASSERT_EQ(node->params.rope.max_tokens, max_tokens);
   ASSERT_EQ(node->num_inputs, 2);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->inputs[1], weights_id);
@@ -143,7 +142,6 @@ TEST_F(RoPETestF32, define)
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_rope);
   ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
-  ASSERT_EQ(node->params.rope.max_tokens, max_tokens);
   ASSERT_EQ(node->num_inputs, 2);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->inputs[1], weights_id);
@@ -161,7 +159,7 @@ TEST_F(RoPETestF16, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(weights.begin(), weights.end(), [&]() { return f32dist(rng); });
 
-  const xnn_status status = xnn_create_rope_nthc_f16(max_tokens, /*flags=*/0, &op);
+  const xnn_status status = xnn_create_rope_nthc_f16(/*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -239,7 +237,7 @@ TEST_F(RoPETestF32, matches_operator_api)
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(weights.begin(), weights.end(), [&]() { return f32dist(rng); });
 
-  const xnn_status status = xnn_create_rope_nthc_f32(max_tokens, /*flags=*/0, &op);
+  const xnn_status status = xnn_create_rope_nthc_f32(/*flags=*/0, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }

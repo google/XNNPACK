@@ -40,11 +40,14 @@ XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_qs8_f32_vcvt_ukernel__avx2_u8
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_qs8_f32_vcvt_ukernel__avx2_u16, 16, false, int8_t, float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_qs8_f32_vcvt_ukernel__avx2_u24, 24, false, int8_t, float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_qs8_f32_vcvt_ukernel__avx2_u32, 32, false, int8_t, float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512skx, xnn_qs8_f32_vcvt_ukernel__avx512skx_u16, 16, false, int8_t, float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512skx, xnn_qs8_f32_vcvt_ukernel__avx512skx_u32, 32, false, int8_t, float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512skx, xnn_qs8_f32_vcvt_ukernel__avx512skx_u48, 48, false, int8_t, float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512skx, xnn_qs8_f32_vcvt_ukernel__avx512skx_u64, 64, false, int8_t, float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_qs8_f32_vcvt_ukernel__wasmsimd_u8, 8, false, int8_t, float, struct xnn_qs8_f32_cvt_params, xnn_init_qs8_f32_cvt_scalar_params)

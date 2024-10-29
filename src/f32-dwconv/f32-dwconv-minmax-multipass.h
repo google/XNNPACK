@@ -76,6 +76,9 @@ XNN_DWCONV_MULTIPASS(xnn_arch_x86_fma3, xnn_f32_dwconv_minmax_ukernel_7f6m6l16c8
 XNN_DWCONV_MULTIPASS(xnn_arch_x86_fma3, xnn_f32_dwconv_minmax_ukernel_7f6m6l16c8s4r__fma3_acc2, 7, 6, 6, 16, 8, 4, float, float, float, union xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_DWCONV_MULTIPASS(xnn_arch_x86_fma3, xnn_f32_dwconv_minmax_ukernel_7f6m6l32c8s4r__fma3, 7, 6, 6, 32, 8, 4, float, float, float, union xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_DWCONV_MULTIPASS(xnn_arch_x86_fma3, xnn_f32_dwconv_minmax_ukernel_7f6m6l32c8s4r__fma3_acc2, 7, 6, 6, 32, 8, 4, float, float, float, union xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
+#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_DWCONV_MULTIPASS(xnn_arch_x86_avx512f, xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s1r__avx512f, 5, 5, 5, 16, 16, 1, float, float, float, union xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_DWCONV_MULTIPASS(xnn_arch_x86_avx512f, xnn_f32_dwconv_minmax_ukernel_5f5m5l16c16s1r__avx512f_acc2, 5, 5, 5, 16, 16, 1, float, float, float, union xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)
 XNN_DWCONV_MULTIPASS(xnn_arch_x86_avx512f, xnn_f32_dwconv_minmax_ukernel_5f5m5l32c16s1r__avx512f, 5, 5, 5, 32, 16, 1, float, float, float, union xnn_f32_minmax_params, xnn_init_f32_minmax_scalar_params)

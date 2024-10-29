@@ -38,7 +38,7 @@ void DefineGraphWithoutInternalTensors(xnn_subgraph_t* subgraph, std::array<size
     XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
-  ASSERT_EQ(xnn_status_success, xnn_define_abs(*subgraph, input_id, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_define_unary(*subgraph, xnn_unary_abs, /*params=*/nullptr, input_id, output_id, /*flags=*/0));
 }
 
 // Helper function to create a subgraph with 1 input, 1 output, and 1 intermediate tensor.
@@ -65,8 +65,8 @@ void DefineGraph(xnn_subgraph_t* subgraph, std::array<size_t, 4> dims)
     XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
-  ASSERT_EQ(xnn_status_success, xnn_define_abs(*subgraph, input_id, intermediate_id, /*flags=*/0));
-  ASSERT_EQ(xnn_status_success, xnn_define_hardswish(*subgraph, intermediate_id, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_define_unary(*subgraph, xnn_unary_abs, /*params=*/nullptr,input_id, intermediate_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_define_unary(*subgraph, xnn_unary_hardswish, /*params=*/nullptr,intermediate_id, output_id, /*flags=*/0));
 }
 
 void DefineGraphWithStaticData(xnn_subgraph_t* subgraph, std::array<size_t, 4> dims, const xnnpack::Buffer<float>* static_value)
@@ -125,9 +125,9 @@ void DefineGraphWithPersistentTensors(xnn_subgraph_t* subgraph, std::array<size_
     XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id);
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
-  ASSERT_EQ(xnn_status_success, xnn_define_abs(*subgraph, input_id, intermediate_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_define_unary(*subgraph, xnn_unary_abs, /*params=*/nullptr, input_id, intermediate_id, /*flags=*/0));
   ASSERT_EQ(xnn_status_success, xnn_define_copy(*subgraph, intermediate_id, intermediate_id2, /*flags=*/0));
-  ASSERT_EQ(xnn_status_success, xnn_define_hardswish(*subgraph, intermediate_id2, output_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_define_unary(*subgraph, xnn_unary_hardswish, /*params=*/nullptr, intermediate_id2, output_id, /*flags=*/0));
 }
 
 testing::AssertionResult ValueInWorkspace(xnn_value* value, xnn_workspace_t workspace) {
@@ -861,7 +861,7 @@ TEST(WORKSPACE, internally_allocated_dynamic_quantization_parameters)
   ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_define_convert(subgraph, input_id, dq_quantized_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success, xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr, input_id, dq_quantized_id, /*flags=*/0));
   ASSERT_EQ(xnn_status_success, xnn_define_fully_connected(subgraph, output_min, output_max, dq_quantized_id, kernel_id, bias_id, output_id, /*flags=*/0));
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
   ASSERT_NE(nullptr, runtime);

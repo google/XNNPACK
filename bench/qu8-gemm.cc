@@ -537,8 +537,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(qu8_gemm_2x2c4__armsimd32)
 #endif  // XNN_ARCH_ARM
 
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
+#if XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
   static void qu8_gemm_1x16c8__avx512skx(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_fp32_ukernel_1x16c8__avx512skx,
@@ -546,6 +545,11 @@ static void ruy_st(benchmark::State& state, const char* net)
       1, 16, 8, 1,
       benchmark::utils::CheckAVX512SKX);
   }
+
+  BENCHMARK_GEMM(qu8_gemm_1x16c8__avx512skx)
+#endif  // XNN_ENABLE_AVX512SKX && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+
+#if XNN_ARCH_X86 || XNN_ARCH_X86_64
   static void qu8_gemm_1x8c8__avx2(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_fp32_ukernel_1x8c8__avx2,
@@ -848,8 +852,6 @@ static void ruy_st(benchmark::State& state, const char* net)
       xnn_init_qu8_conv_minmax_fp32_scalar_params,
       /*mr=*/3, /*nr=*/4, /*kr=*/8, /*sr=*/1);
   }
-
-  BENCHMARK_GEMM(qu8_gemm_1x16c8__avx512skx)
 
   BENCHMARK_GEMM(qu8_gemm_1x8c8__avx2)
   BENCHMARK_GEMM(qu8_gemm_2x8c8__avx2)

@@ -23,7 +23,7 @@ void xnn_f16_vtanh_ukernel__f16c_expm1minus_rr1_p3h2ts_div_u24(
     size_t batch,
     const xnn_float16* input,
     xnn_float16* output,
-    const union xnn_f16_tanh_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f16_default_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);
