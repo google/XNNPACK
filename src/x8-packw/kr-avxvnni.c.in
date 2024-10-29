@@ -12,6 +12,7 @@ $assert IZP in [0, 128]
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>  // for memcpy
 
 #include <immintrin.h>
 
@@ -40,7 +41,7 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_uk
   const void* scale,
   ${WTYPE}* packed_weights,
   size_t extra_bytes,
-  const void* params) XNN_OOB_READS
+  const void* params)
 {
   assert(g != 0);
   assert(nc != 0);
@@ -148,13 +149,19 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_uk
       if (k != 0) {
         assert(k >= 1 && k <= ${KR-1});
 
+       // TODO: more efficient copy
+        // uint64_t for KR=${KR} bytes
+        uint64_t remainder_buffer[${NR}] = { 0, };
+        $for N in range(NR):
+          __builtin_memcpy(remainder_buffer + ${N}, w${N}, k);
+
         const __m256i vmask = _mm256_srli_epi64(_mm256_set1_epi32(-1), (8 - k) * sizeof(int8_t) * 8);
 
         $for N in range(0, NR, 4):
-          __m256i v${N} = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N}));
-          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+1})), 0x0C);
-          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+2})), 0x30);
-          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+3})), 0xC0);
+          __m256i v${N} = _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + ${N}));
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + ${N+1})), 0x0C);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + ${N+2})), 0x30);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + ${N+3})), 0xC0);
           v${N} = _mm256_and_si256(v${N}, vmask);
 
         $for N in range(NR):
@@ -254,13 +261,19 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_uk
       if (k != 0) {
         assert(k >= 1 && k <= ${KR-1});
 
+        // TODO: more efficient copy
+        // uint64_t for KR=${KR} bytes
+        uint64_t remainder_buffer[${NR}] = { 0, };
+        $for N in range(NR):
+          __builtin_memcpy(remainder_buffer + ${N}, w${N}, k);
+
         const __m256i vmask = _mm256_srli_epi64(_mm256_set1_epi32(-1), (8 - k) * sizeof(int8_t) * 8);
 
         $for N in range(0, NR, 4):
-          __m256i v${N} = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N}));
-          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+1})), 0x0C);
-          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+2})), 0x30);
-          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N+3})), 0xC0);
+          __m256i v${N} = _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + ${N}));
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + ${N+1})), 0x0C);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + ${N+2})), 0x30);
+          v${N} = _mm256_blend_epi32(v${N}, _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + ${N+3})), 0xC0);
           v${N} = _mm256_and_si256(v${N}, vmask);
 
         $for N in range(NR):
