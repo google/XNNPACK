@@ -89,7 +89,7 @@ jobs:
           echo "SDE_PATH=$SDE_PATH" >> $GITHUB_ENV
         shell: bash
 
-      - name: Run SDE testS (Linux-x86_64)
+      - name: Run SDE tests (Linux-x86_64)
         if: matrix.arch == 'linux-x86_64'
         run: |
           chmod +x ./*
