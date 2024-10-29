@@ -448,3 +448,45 @@ BENCHMARK_BGEMM(x32_packw_x8__reference)
 BENCHMARK_BGEMM(x32_packw_x8s4__reference)
 BENCHMARK_BGEMM(x32_packw_x16__reference)
 BENCHMARK_BGEMM(x32_packw_x16s4__reference)
+
+static void x32_packw_gio__reference(
+  size_t batch,
+  size_t dim_n,
+  size_t dim_k,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const uint32_t* weights,
+  const uint32_t* bias,
+  const void* scale,
+  uint32_t* packed_weights,
+  size_t extra_bytes,
+  const void* params)
+{
+  xnn_pack_f32_gemm_gio_w(batch, dim_n, dim_k, nr, kr, sr, dim_n,
+     reinterpret_cast<const float*>(weights),
+     reinterpret_cast<const float*>(bias),
+     scale,
+     reinterpret_cast<float*>(packed_weights),
+     extra_bytes, params);
+}
+
+static void x32_packw_x8_gio__reference(benchmark::State& state, const char* net) {
+  x32_packw(state,
+    x32_packw_gio__reference,
+    /*nr=*/8, /*kr=*/1, /*sr=*/1);
+}
+static void x32_packw_x16_gio__reference(benchmark::State& state, const char* net) {
+  x32_packw(state,
+    x32_packw_gio__reference,
+    /*nr=*/16, /*kr=*/1, /*sr=*/1);
+}
+static void x32_packw_x32_gio__reference(benchmark::State& state, const char* net) {
+  x32_packw(state,
+    x32_packw_gio__reference,
+    /*nr=*/32, /*kr=*/1, /*sr=*/1);
+}
+
+BENCHMARK_BGEMM(x32_packw_x8_gio__reference)
+BENCHMARK_BGEMM(x32_packw_x16_gio__reference)
+BENCHMARK_BGEMM(x32_packw_x32_gio__reference)
