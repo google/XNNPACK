@@ -1,8 +1,0 @@
-name: Run Linux and Windows (x86, x64) Tests with Intel SDE Processors
-
-on:
-  workflow_dispatch: # Allows manual trigger of the workflow
-
-jobs:
-  build-and-test:
-    uses: ./.github/workflows/build-linux-windows.yml
