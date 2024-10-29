@@ -118,7 +118,9 @@ class VUnaryMicrokernelTester {
                            (inplace() ? XNN_EXTRA_BYTES / sizeof(Out) : 0));
     xnnpack::Buffer<Out> y_ref(batch_size());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      FillRandom(rng, x.data(), batch_size(), domain, input_quantization_);
+      // This should only fill batch_size() elements, but some kernels trigger
+      // msan errors if we don't initialize the XNN_EXTRA_BYTES.
+      FillRandom(rng, x.data(), x.size(), domain, input_quantization_);
       if (inplace()) {
         std::copy(x.begin(), x.end(), y.begin());
       }
