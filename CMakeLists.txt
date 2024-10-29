@@ -438,6 +438,10 @@ SET(OPERATOR_SRCS
   src/operators/unary-elementwise-nc.c
   src/operators/unpooling-nhwc.c)
 
+SET(REFERENCE_SRCS
+  src/reference/unary-elementwise.cc
+  src/reference/binary-elementwise.cc)
+
 SET(SUBGRAPH_SRCS
   src/memory-planner.c
   src/runtime.c
@@ -806,6 +810,7 @@ IF(XNNPACK_BUILD_LIBRARY)
   ADD_LIBRARY(operators OBJECT ${OPERATOR_SRCS})
   ADD_LIBRARY(operator-run OBJECT src/operator-run.c)
   ADD_LIBRARY(operator-utils OBJECT src/operator-utils.c)
+  ADD_LIBRARY(reference-ukernels OBJECT ${REFERENCE_SRCS})
   ADD_LIBRARY(subgraph OBJECT ${SUBGRAPH_SRCS})
   # Need C_EXTENSIONS to get constants for mmap (MAP_ANONYMOUS).
   SET_TARGET_PROPERTIES(memory PROPERTIES C_EXTENSIONS YES)
@@ -825,11 +830,12 @@ IF(XNNPACK_BUILD_LIBRARY)
   TARGET_LINK_LIBRARIES(memory PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(microkernel-utils PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(mutex PRIVATE xnnpack-base logging)
-  TARGET_LINK_LIBRARIES(operators PRIVATE xnnpack-base allocator indirection logging microkernel-utils normalization operator-utils packing datatype)
+  TARGET_LINK_LIBRARIES(operators PRIVATE xnnpack-base allocator indirection logging microkernel-utils normalization operator-utils packing reference-ukernels datatype)
   TARGET_LINK_LIBRARIES(operator-run PRIVATE xnnpack-base logging)
   TARGET_LINK_LIBRARIES(operator-utils PRIVATE xnnpack-base logging)
+  TARGET_LINK_LIBRARIES(reference-ukernels PRIVATE xnnpack-base)
   TARGET_LINK_LIBRARIES(subgraph PRIVATE xnnpack-base allocator logging memory mutex operators operator-run datatype)
-  TARGET_LINK_LIBRARIES(XNNPACK PRIVATE xnnpack-base allocator cache hardware-config indirection memory microkernel-utils microparams-init mutex normalization operators operator-run operator-utils packing microkernels-prod subgraph datatype)
+  TARGET_LINK_LIBRARIES(XNNPACK PRIVATE xnnpack-base allocator cache hardware-config indirection memory microkernel-utils microparams-init mutex normalization operators operator-run operator-utils packing microkernels-prod subgraph datatype reference-ukernels)
   TARGET_LINK_LIBRARIES(XNNPACK PUBLIC pthreadpool logging)
   SET_TARGET_PROPERTIES(XNNPACK PROPERTIES C_EXTENSIONS YES)
 ENDIF()
@@ -1046,6 +1052,7 @@ IF(XNNPACK_BUILD_LIBRARY)
   TARGET_INCLUDE_DIRECTORIES(operators PRIVATE include src)
   TARGET_INCLUDE_DIRECTORIES(operator-run PRIVATE include src)
   TARGET_INCLUDE_DIRECTORIES(operator-utils PRIVATE include src)
+  TARGET_INCLUDE_DIRECTORIES(reference-ukernels PRIVATE include src)
   TARGET_INCLUDE_DIRECTORIES(memory PRIVATE include src)
   TARGET_INCLUDE_DIRECTORIES(mutex PRIVATE include src)
   IF(WIN32)
@@ -1276,6 +1283,7 @@ IF(XNNPACK_BUILD_TESTS)
       deconvolution-nhwc
       fully-connected
       scaled-dot-product-attention
+      binary-elementwise-nd
     )
     FOREACH(TEST ${LIBRARY_SHARDED_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
@@ -1302,15 +1310,6 @@ IF(XNNPACK_BUILD_TESTS)
       unary-ops
       XNNPACK)
     ADD_TEST(NAME unary-elementwise-nc-test COMMAND unary-elementwise-nc-test)
-
-    ADD_EXECUTABLE(binary-elementwise-nd-test test/binary-elementwise-nd.cc)
-    TARGET_INCLUDE_DIRECTORIES(binary-elementwise-nd-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(binary-elementwise-nd-test PRIVATE
-      GTest::gtest
-      GTest::gtest_main
-      datatype
-      XNNPACK)
-    ADD_TEST(NAME binary-elementwise-nd-test COMMAND binary-elementwise-nd-test)
 
     # ---[ Build subgraph optimizations unit tests
     SET(LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS

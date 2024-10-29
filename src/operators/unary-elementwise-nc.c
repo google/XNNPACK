@@ -26,6 +26,7 @@
 #include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/params.h"
+#include "xnnpack/reference-config.h"
 #include "pthreadpool.h"
 
 static enum xnn_status check_op_type(xnn_operator_t op,
@@ -88,21 +89,141 @@ static enum xnn_status init_lut_op(
   return xnn_status_success;
 }
 
-static enum xnn_status init_op_config(xnn_operator_t op, const struct xnn_unary_elementwise_config* config, const union xnn_unary_params* params,
+static const struct xnn_unary_elementwise_config* get_config(
+    enum xnn_unary_operator op_type,
+    enum xnn_datatype input_datatype,
+    enum xnn_datatype output_datatype,
     const struct xnn_quantization_params* input_quantization,
     const struct xnn_quantization_params* output_quantization) {
-  if (!config) {
-    xnn_log_error(
-      "failed to create config for operator %s", xnn_operator_type_to_string(op->type));
-    return xnn_status_unsupported_parameter;
+  if (input_datatype != output_datatype) {
+    if (op_type == xnn_unary_convert) {
+      if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp16) {
+        return xnn_init_f32_to_f16_cvt_config();
+      } else if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_qint8) {
+        return xnn_init_f32_to_qs8_cvt_config();
+      } else if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_quint8) {
+        return xnn_init_f32_to_qu8_cvt_config();
+      } else if (input_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_fp32) {
+        return xnn_init_f16_to_f32_cvt_config();
+      } else if (input_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_qint8) {
+        return xnn_init_f16_to_qs8_cvt_config();
+      } else if (input_datatype == xnn_datatype_qint8 && output_datatype == xnn_datatype_fp16) {
+        return xnn_init_qs8_to_f16_cvt_config();
+      } else if (input_datatype == xnn_datatype_qint8 && output_datatype == xnn_datatype_fp32) {
+        return xnn_init_qs8_to_f32_cvt_config();
+      } else if (input_datatype == xnn_datatype_quint8 && output_datatype == xnn_datatype_fp32) {
+        return xnn_init_qu8_to_f32_cvt_config();
+      }
+    }
+    return NULL;
   }
-  op->unary_elementwise_config = config;
-  op->state = xnn_run_state_invalid;
-
-  if (config->init != NULL) {
-    config->init(&op->params.unary, params, input_quantization, output_quantization);
+  enum xnn_datatype datatype = output_datatype;
+  if (datatype == xnn_datatype_qint8) {
+    switch (op_type) {
+      case xnn_unary_clamp:
+        if (input_quantization->scale != output_quantization->scale ||
+            input_quantization->zero_point != output_quantization->zero_point) {
+          xnn_log_debug("unsupported operator clamp for datatype QINT8: quantization parameters differ");
+          return NULL;
+        }
+        return xnn_init_s8_clamp_config();
+      case xnn_unary_leaky_relu:
+        return xnn_init_qs8_lrelu_config();
+      case xnn_unary_convert:
+        return xnn_init_qs8_cvt_config();
+      default:
+        return NULL;
+    }
+  } else if (datatype == xnn_datatype_quint8) {
+    switch (op_type) {
+      case xnn_unary_clamp:
+        if (input_quantization->scale != output_quantization->scale ||
+            input_quantization->zero_point != output_quantization->zero_point) {
+          xnn_log_debug("unsupported operator clamp for datatype QUINT8: quantization parameters differ");
+          return NULL;
+        }
+        return xnn_init_u8_clamp_config();
+      case xnn_unary_leaky_relu:
+        return xnn_init_qu8_lrelu_config();
+      case xnn_unary_convert:
+        return xnn_init_qu8_cvt_config();
+      default:
+        return NULL;
+    }
+  } else if (datatype == xnn_datatype_fp16) {
+    switch (op_type) {
+      case xnn_unary_abs:
+        return xnn_init_f16_abs_config();
+      case xnn_unary_bankers_rounding:
+        return xnn_init_f16_rndne_config();
+      case xnn_unary_ceiling:
+        return xnn_init_f16_rndu_config();
+      case xnn_unary_clamp:
+        return xnn_init_f16_clamp_config();
+      case xnn_unary_elu:
+        return xnn_init_f16_elu_config();
+      case xnn_unary_floor:
+        return xnn_init_f16_rndd_config();
+      case xnn_unary_hardswish:
+        return xnn_init_f16_hswish_config();
+      case xnn_unary_leaky_relu:
+        return xnn_init_f16_lrelu_config();
+      case xnn_unary_negate:
+        return xnn_init_f16_neg_config();
+      case xnn_unary_reciprocal_square_root:
+        return xnn_init_f16_rsqrt_config();
+      case xnn_unary_sigmoid:
+        return xnn_init_f16_sigmoid_config();
+      case xnn_unary_square_root:
+        return xnn_init_f16_sqrt_config();
+      case xnn_unary_square:
+        return xnn_init_f16_sqr_config();
+      case xnn_unary_tanh:
+        return xnn_init_f16_tanh_config();
+      default:
+        return NULL;
+    }
+  } else if (datatype == xnn_datatype_fp32) {
+    switch (op_type) {
+      case xnn_unary_abs:
+        return xnn_init_f32_abs_config();
+      case xnn_unary_bankers_rounding:
+        return xnn_init_f32_rndne_config();
+      case xnn_unary_ceiling:
+        return xnn_init_f32_rndu_config();
+      case xnn_unary_clamp:
+        return xnn_init_f32_clamp_config();
+      case xnn_unary_elu:
+        return xnn_init_f32_elu_config();
+      case xnn_unary_exp:
+        return xnn_init_f32_exp_config();
+      case xnn_unary_floor:
+        return xnn_init_f32_rndd_config();
+      case xnn_unary_gelu:
+        return xnn_init_f32_gelu_config();
+      case xnn_unary_hardswish:
+        return xnn_init_f32_hswish_config();
+      case xnn_unary_leaky_relu:
+        return xnn_init_f32_lrelu_config();
+      case xnn_unary_log:
+        return xnn_init_f32_log_config();
+      case xnn_unary_negate:
+        return xnn_init_f32_neg_config();
+      case xnn_unary_reciprocal_square_root:
+        return xnn_init_f32_rsqrt_config();
+      case xnn_unary_sigmoid:
+        return xnn_init_f32_sigmoid_config();
+      case xnn_unary_square_root:
+        return xnn_init_f32_sqrt_config();
+      case xnn_unary_square:
+        return xnn_init_f32_sqr_config();
+      case xnn_unary_tanh:
+        return xnn_init_f32_tanh_config();
+      default:
+        return NULL;
+    }
   }
-  return xnn_status_success;
+  return NULL;
 }
 
 static enum xnn_status init_op(
@@ -119,151 +240,65 @@ static enum xnn_status init_op(
   op->log2_elementwise_input_size = xnn_datatype_log2_size_bytes(input_datatype);
   op->log2_elementwise_output_size = xnn_datatype_log2_size_bytes(output_datatype);
 
-  if (input_datatype != output_datatype) {
-    if (op_type == xnn_unary_convert) {
-      if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp16) {
-        return init_op_config(op, xnn_init_f32_to_f16_cvt_config(), params, input_quantization, output_quantization);
-      } else if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_qint8) {
-        return init_op_config(op, xnn_init_f32_to_qs8_cvt_config(), params, input_quantization, output_quantization);
-      } else if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_quint8) {
-        return init_op_config(op, xnn_init_f32_to_qu8_cvt_config(), params, input_quantization, output_quantization);
-      } else if (input_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_fp32) {
-        return init_op_config(op, xnn_init_f16_to_f32_cvt_config(), params, input_quantization, output_quantization);
-      } else if (input_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_qint8) {
-        return init_op_config(op, xnn_init_f16_to_qs8_cvt_config(), params, input_quantization, output_quantization);
-      } else if (input_datatype == xnn_datatype_qint8 && output_datatype == xnn_datatype_fp16) {
-        return init_op_config(op, xnn_init_qs8_to_f16_cvt_config(), params, input_quantization, output_quantization);
-      } else if (input_datatype == xnn_datatype_qint8 && output_datatype == xnn_datatype_fp32) {
-        return init_op_config(op, xnn_init_qs8_to_f32_cvt_config(), params, input_quantization, output_quantization);
-      } else if (input_datatype == xnn_datatype_quint8 && output_datatype == xnn_datatype_fp32) {
-        return init_op_config(op, xnn_init_qu8_to_f32_cvt_config(), params, input_quantization, output_quantization);
+  const struct xnn_unary_elementwise_config* config = get_config(op_type, input_datatype, output_datatype, input_quantization, output_quantization);
+  if (config) {
+    // We have an elementwise config, use it.
+    op->unary_elementwise_config = config;
+    op->state = xnn_run_state_invalid;
+
+    if (config->init != NULL) {
+      config->init(&op->params.unary, params, input_quantization, output_quantization);
+    }
+    return xnn_status_success;
+  }
+  if (input_datatype == output_datatype) {
+    // Try to use a LUT.
+    enum xnn_datatype datatype = output_datatype;
+    if (datatype == xnn_datatype_qint8) {
+      switch (op_type) {
+        case xnn_unary_elu:
+          return init_lut_op(op, calculate_elu, INT8_MIN, INT8_MAX, params, input_quantization, output_quantization);
+        case xnn_unary_sigmoid:
+          return init_lut_op(op, calculate_sigmoid, INT8_MIN, INT8_MAX, params, input_quantization, output_quantization);
+        case xnn_unary_tanh:
+          return init_lut_op(op, calculate_tanh, INT8_MIN, INT8_MAX, params, input_quantization, output_quantization);
+        default:
+          break;
+      }
+    } else if (datatype == xnn_datatype_quint8) {
+      switch (op_type) {
+        case xnn_unary_elu:
+          return init_lut_op(op, calculate_elu, 0, UINT8_MAX, params, input_quantization, output_quantization);
+        case xnn_unary_sigmoid:
+          return init_lut_op(op, calculate_sigmoid, 0, UINT8_MAX, params, input_quantization, output_quantization);
+        case xnn_unary_tanh:
+          return init_lut_op(op, calculate_tanh, 0, UINT8_MAX, params, input_quantization, output_quantization);
+        default:
+          break;
       }
     }
+  }
+
+  // Fall back to reference.
+  config = xnn_init_unary_reference_config(op_type, input_datatype, output_datatype);
+  if (config) {
+    xnn_log_debug(
+      "unsupported operator %s for datatypes %s -> %s, falling back to reference kernel",
+      xnn_unary_operator_to_string(op_type), xnn_datatype_to_string(input_datatype), xnn_datatype_to_string(output_datatype));
+
+    op->unary_elementwise_config = config;
+    op->state = xnn_run_state_invalid;
+
+    if (config->init != NULL) {
+      config->init(&op->params.unary, params, input_quantization, output_quantization);
+    }
+    return xnn_status_success;
+  } else {
     xnn_log_error(
-      "failed to create unsupported operator %s for datatypes %s -> %s",
+      "unsupported operator %s for datatypes %s -> %s, falling back to reference kernel",
       xnn_unary_operator_to_string(op_type), xnn_datatype_to_string(input_datatype), xnn_datatype_to_string(output_datatype));
     return xnn_status_unsupported_parameter;
   }
-  enum xnn_datatype datatype = output_datatype;
-  if (datatype == xnn_datatype_qint8) {
-    switch (op_type) {
-      case xnn_unary_clamp:
-        if (input_quantization->scale != output_quantization->scale ||
-            input_quantization->zero_point != output_quantization->zero_point) {
-          xnn_log_error("failed to create unsupported operator clamp for datatype QINT8: quantization parameters differ");
-          return xnn_status_unsupported_parameter;
-        }
-        return init_op_config(op, xnn_init_s8_clamp_config(), params, input_quantization, output_quantization);
-      case xnn_unary_leaky_relu:
-        return init_op_config(op, xnn_init_qs8_lrelu_config(), params, input_quantization, output_quantization);
-      case xnn_unary_log:
-        break;
-      case xnn_unary_convert:
-        return init_op_config(op, xnn_init_qs8_cvt_config(), params, input_quantization, output_quantization);
-      case xnn_unary_elu:
-        return init_lut_op(op, calculate_elu, INT8_MIN, INT8_MAX,params, input_quantization, output_quantization);
-      case xnn_unary_sigmoid:
-        return init_lut_op(op, calculate_sigmoid, INT8_MIN, INT8_MAX,params, input_quantization, output_quantization);
-      case xnn_unary_tanh:
-        return init_lut_op(op, calculate_tanh, INT8_MIN, INT8_MAX, params, input_quantization, output_quantization);
-      default: break;
-    }
-  } else if (datatype == xnn_datatype_quint8) {
-    switch (op_type) {
-      case xnn_unary_clamp:
-        if (input_quantization->scale != output_quantization->scale ||
-            input_quantization->zero_point != output_quantization->zero_point) {
-          xnn_log_error("failed to create unsupported operator clamp for datatype QUINT8: quantization parameters differ");
-          return xnn_status_unsupported_parameter;
-        }
-        return init_op_config(op, xnn_init_u8_clamp_config(), params, input_quantization, output_quantization);
-      case xnn_unary_leaky_relu:
-        return init_op_config(op, xnn_init_qu8_lrelu_config(), params, input_quantization, output_quantization);
-      case xnn_unary_convert:
-        return init_op_config(op, xnn_init_qu8_cvt_config(), params, input_quantization, output_quantization);
-      case xnn_unary_elu:
-        return init_lut_op(op, calculate_elu, 0, UINT8_MAX, params, input_quantization, output_quantization);
-      case xnn_unary_sigmoid:
-        return init_lut_op(op, calculate_sigmoid, 0, UINT8_MAX, params, input_quantization, output_quantization);
-      case xnn_unary_tanh:
-        return init_lut_op(op, calculate_tanh, 0, UINT8_MAX, params, input_quantization, output_quantization);
-      default: break;
-    }
-  } else if (datatype == xnn_datatype_fp16) {
-    switch (op_type) {
-      case xnn_unary_abs:
-        return init_op_config(op, xnn_init_f16_abs_config(), params, input_quantization, output_quantization);
-      case xnn_unary_bankers_rounding:
-        return init_op_config(op, xnn_init_f16_rndne_config(), params, input_quantization, output_quantization);
-      case xnn_unary_ceiling:
-        return init_op_config(op, xnn_init_f16_rndu_config(), params, input_quantization, output_quantization);
-      case xnn_unary_clamp:
-        return init_op_config(op, xnn_init_f16_clamp_config(), params, input_quantization, output_quantization);
-      case xnn_unary_elu:
-        return init_op_config(op, xnn_init_f16_elu_config(), params, input_quantization, output_quantization);
-      case xnn_unary_floor:
-        return init_op_config(op, xnn_init_f16_rndd_config(), params, input_quantization, output_quantization);
-      case xnn_unary_hardswish:
-        return init_op_config(op, xnn_init_f16_hswish_config(), params, input_quantization, output_quantization);
-      case xnn_unary_leaky_relu:
-        return init_op_config(op, xnn_init_f16_lrelu_config(), params, input_quantization, output_quantization);
-      case xnn_unary_negate:
-        return init_op_config(op, xnn_init_f16_neg_config(), params, input_quantization, output_quantization);
-      case xnn_unary_reciprocal_square_root:
-        return init_op_config(op, xnn_init_f16_rsqrt_config(), params, input_quantization, output_quantization);
-      case xnn_unary_sigmoid:
-        return init_op_config(op, xnn_init_f16_sigmoid_config(), params, input_quantization, output_quantization);
-      case xnn_unary_square_root:
-        return init_op_config(op, xnn_init_f16_sqrt_config(), params, input_quantization, output_quantization);
-      case xnn_unary_square:
-        return init_op_config(op, xnn_init_f16_sqr_config(), params, input_quantization, output_quantization);
-      case xnn_unary_tanh:
-        return init_op_config(op, xnn_init_f16_tanh_config(), params, input_quantization, output_quantization);
-      default: break;
-    }
-  } else if (datatype == xnn_datatype_fp32) {
-    switch (op_type) {
-      case xnn_unary_abs:
-        return init_op_config(op, xnn_init_f32_abs_config(), params, input_quantization, output_quantization);
-      case xnn_unary_bankers_rounding:
-        return init_op_config(op, xnn_init_f32_rndne_config(), params, input_quantization, output_quantization);
-      case xnn_unary_ceiling:
-        return init_op_config(op, xnn_init_f32_rndu_config(), params, input_quantization, output_quantization);
-      case xnn_unary_clamp:
-        return init_op_config(op, xnn_init_f32_clamp_config(), params, input_quantization, output_quantization);
-      case xnn_unary_elu:
-        return init_op_config(op, xnn_init_f32_elu_config(), params, input_quantization, output_quantization);
-      case xnn_unary_exp:
-        return init_op_config(op, xnn_init_f32_exp_config(), params, input_quantization, output_quantization);
-      case xnn_unary_floor:
-        return init_op_config(op, xnn_init_f32_rndd_config(), params, input_quantization, output_quantization);
-      case xnn_unary_gelu:
-        return init_op_config(op, xnn_init_f32_gelu_config(), params, input_quantization, output_quantization);
-      case xnn_unary_hardswish:
-        return init_op_config(op, xnn_init_f32_hswish_config(), params, input_quantization, output_quantization);
-      case xnn_unary_leaky_relu:
-        return init_op_config(op, xnn_init_f32_lrelu_config(), params, input_quantization, output_quantization);
-      case xnn_unary_log:
-        return init_op_config(op, xnn_init_f32_log_config(), params, input_quantization, output_quantization);
-      case xnn_unary_negate:
-        return init_op_config(op, xnn_init_f32_neg_config(), params, input_quantization, output_quantization);
-      case xnn_unary_reciprocal_square_root:
-        return init_op_config(op, xnn_init_f32_rsqrt_config(), params, input_quantization, output_quantization);
-      case xnn_unary_sigmoid:
-        return init_op_config(op, xnn_init_f32_sigmoid_config(), params, input_quantization, output_quantization);
-      case xnn_unary_square_root:
-        return init_op_config(op, xnn_init_f32_sqrt_config(), params, input_quantization, output_quantization);
-      case xnn_unary_square:
-        return init_op_config(op, xnn_init_f32_sqr_config(), params, input_quantization, output_quantization);
-      case xnn_unary_tanh:
-        return init_op_config(op, xnn_init_f32_tanh_config(), params, input_quantization, output_quantization);
-      default: break;
-    }
-  }
-  xnn_log_error(
-    "failed to create unsupported operator %s for datatype %s",
-    xnn_unary_operator_to_string(op_type), xnn_datatype_to_string(datatype));
-  return xnn_status_unsupported_parameter;
 }
 
 enum xnn_status xnn_create_unary_elementwise_nc(
@@ -837,12 +872,6 @@ enum xnn_status xnn_reshape_convert_nc_f16_qd8(
   }
   convert_op->state = xnn_run_state_invalid;
 
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f16_qd8));
-    return xnn_status_uninitialized;
-  }
-
   if (batch_size == 0) {
     convert_op->state = xnn_run_state_skip;
     return xnn_status_success;
@@ -890,12 +919,6 @@ enum xnn_status xnn_reshape_convert_nc_f32_qd8(
   }
   convert_op->state = xnn_run_state_invalid;
 
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qd8));
-    return xnn_status_uninitialized;
-  }
-
   if (batch_size == 0) {
     convert_op->state = xnn_run_state_skip;
     return xnn_status_success;
@@ -941,13 +964,6 @@ enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,
     return xnn_status_invalid_parameter;
   }
   convert_op->state = xnn_run_state_invalid;
-
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error(
-        "failed to setup %s operator: XNNPACK is not initialized",
-        xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qp8));
-    return xnn_status_uninitialized;
-  }
 
   if (batch_size == 0) {
     convert_op->state = xnn_run_state_skip;

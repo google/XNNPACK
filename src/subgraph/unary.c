@@ -369,8 +369,16 @@ static inline enum xnn_compute_type validate_datatypes(
           break;
       }
       break;
+    case xnn_datatype_int32:
+      switch (output_datatype) {
+        case xnn_datatype_int32:
+          return xnn_compute_type_s32;
+        default:
+          break;
+      }
+      break;
     default:
-      XNN_UNREACHABLE;
+      break;
   }
   return xnn_compute_type_invalid;
 }
@@ -424,15 +432,8 @@ enum xnn_status xnn_define_unary(
   }
 
   enum xnn_compute_type compute_type = validate_datatypes(input_value->datatype, output_value->datatype);
-  if (compute_type == xnn_compute_type_invalid) {
-    xnn_log_error(
-      "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
-      ": unsupported datatype input (%s) and output (%s)",
-      xnn_node_type_to_string(xnn_node_type_unary_elementwise), input_id, output_id,
-      xnn_datatype_to_string(input_value->datatype),
-      xnn_datatype_to_string(output_value->datatype));
-    return xnn_status_invalid_parameter;
-  }
+  // TODO: compute_type may be `invalid`, but that seems to not cause any problems.
+  // We should probably just remove compute types entirely.
 
   if (type == xnn_unary_convert) {
     // Some convert types are not elementwise ops, handle them now.

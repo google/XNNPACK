@@ -944,6 +944,26 @@ xnnpack_cc_library(
     ],
 )
 
+xnnpack_cxx_library(
+    name = "reference_ukernels",
+    srcs = [
+        "src/reference/binary-elementwise.cc",
+        "src/reference/unary-elementwise.cc",
+    ],
+    hdrs = [
+        "src/xnnpack/reference-config.h",
+    ],
+    compatible_with = [],
+    defines = xnnpack_configurable_defines(),
+    deps = [
+        ":common",
+        ":config_hdrs",
+        ":hardware_config",
+        ":math",
+        ":xnnpack_h",
+    ],
+)
+
 xnnpack_cc_library(
     name = "datatype",
     srcs = ["src/datatype.c"],
@@ -992,6 +1012,7 @@ xnnpack_cc_library(
         ":packing",
         ":params",
         ":quantization",
+        ":reference_ukernels",
         ":xnnpack_h",
         "@pthreadpool",
     ],

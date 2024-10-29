@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #ifdef _MSC_VER
   #include <intrin.h>
@@ -554,6 +555,18 @@ XNN_INLINE static float xnn_float16_to_float(xnn_float16 fp16) {
 #endif
 }
 
+XNN_INLINE static uint16_t xnn_float16_to_bits(xnn_float16 fp16) {
+  uint16_t result;
+  memcpy(&result, &fp16, sizeof(result));
+  return result;
+}
+
+XNN_INLINE static xnn_float16 xnn_float16_from_bits(uint16_t x) {
+  xnn_float16 result;
+  memcpy(&result, &x, sizeof(result));
+  return result;
+}
+
 XNN_INLINE static xnn_bfloat16 xnn_bfloat16_from_float(float f) {
   xnn_bfloat16 result;
   result.value = math_cvt_bf16_fp32(f);
@@ -562,6 +575,18 @@ XNN_INLINE static xnn_bfloat16 xnn_bfloat16_from_float(float f) {
 
 XNN_INLINE static float xnn_bfloat16_to_float(xnn_bfloat16 bf16) {
   return math_cvt_fp32_bf16(bf16.value);
+}
+
+XNN_INLINE static uint16_t xnn_bfloat16_to_bits(xnn_bfloat16 fp16) {
+  uint16_t result;
+  memcpy(&result, &fp16, sizeof(result));
+  return result;
+}
+
+XNN_INLINE static xnn_bfloat16 xnn_bfloat16_from_bits(uint16_t x) {
+  xnn_bfloat16 result;
+  memcpy(&result, &x, sizeof(result));
+  return result;
 }
 
 XNN_INLINE static xnn_float16 xnn_float16_zero() {

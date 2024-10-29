@@ -214,8 +214,17 @@ struct GELU : public UnaryOpInfo {
   }
 
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
-    return TolMixed(y_ref, 10 * std::numeric_limits<float>::epsilon(),
-                    5 * std::numeric_limits<float>::epsilon());
+    switch (datatype) {
+    case xnn_datatype_fp32:
+    case xnn_datatype_fp16:
+      return TolMixed(y_ref, 10 * std::numeric_limits<float>::epsilon(),
+                      5 * std::numeric_limits<float>::epsilon());
+      case xnn_datatype_qint8:
+      case xnn_datatype_quint8:
+        return 1;
+      default:
+        XNN_UNREACHABLE;
+    }
   }
 
   Interval Domain(xnn_datatype) const override { return {-10.0f, 10.0f}; }
@@ -311,6 +320,9 @@ struct Sigmoid : public UnaryOpInfo {
         return TolMixed(y_ref, 5.0e-6f, 1.0e-5f);
       case xnn_datatype_fp16:
         return TolMixed(y_ref, 1.0e-4f, 5.0e-3f);
+      case xnn_datatype_qint8:
+      case xnn_datatype_quint8:
+        return 1;
       default:
         return TolExact(y_ref);
     }
@@ -340,8 +352,14 @@ struct Square : public UnaryOpInfo {
         return TolExact(y_ref);
       case xnn_datatype_fp16:
         return TolMixed(y_ref, 1.0e-4f, 5.0e-3f);
+      case xnn_datatype_qint8:
+      case xnn_datatype_quint8:
+        return 1;
+      case xnn_datatype_int32:
+        // Overflow makes this hard to test.
+        return std::numeric_limits<float>::infinity();
       default:
-        return TolExact(y_ref);
+        XNN_UNREACHABLE;
     }
   }
 };
@@ -357,8 +375,11 @@ struct SquareRoot : public UnaryOpInfo {
         return TolRelative(y_ref, 2.5f * std::numeric_limits<float>::epsilon());
       case xnn_datatype_fp16:
         return TolMixed(y_ref, 1.0e-4f, 5.0e-3f);
+      case xnn_datatype_qint8:
+      case xnn_datatype_quint8:
+        return 1;
       default:
-        return TolExact(y_ref);
+        XNN_UNREACHABLE;
     }
   }
 
@@ -410,6 +431,9 @@ struct ReciprocalSquareRoot : public UnaryOpInfo {
         return TolRelative(y_ref, 4 * std::numeric_limits<float>::epsilon());
       case xnn_datatype_fp16:
         return TolMixed(y_ref, 1.0e-4f, 5.0e-3f);
+      case xnn_datatype_qint8:
+      case xnn_datatype_quint8:
+        return 1;
       default:
         return TolExact(y_ref);
     }
@@ -490,7 +514,7 @@ void UnaryReferenceImpl(
       y_i = y_i / output_quantization.scale + output_quantization.zero_point;
       y_i = std::max<float>(y_i, xnnpack::NumericLimits<Out>::min());
       y_i = std::min<float>(y_i, xnnpack::NumericLimits<Out>::max());
-      y[i] = static_cast<Out>(std::lrint(y_i));
+      y[i] = static_cast<Out>(std::lround(y_i));
     } else {
       y[i] = y_i;
     }

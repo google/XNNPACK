@@ -1199,6 +1199,7 @@ xnnpack_unit_test(
     name = "binary_elementwise_nd_test",
     timeout = "long",
     srcs = ["binary-elementwise-nd.cc"],
+    shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
         ":operator_test_utils",
         "//:logging",
