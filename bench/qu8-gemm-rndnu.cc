@@ -202,6 +202,17 @@
 
   BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_1x16__neon_mlal_lane)
 
+  static void qu8_gemm_minmax_rndnu16_ukernel_1x16__neon_mlal_lane(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qu8_gemm_minmax_rndnu16_ukernel_1x16__neon_mlal_lane,
+      xnn_init_qu8_conv_minmax_rndnu16_scalar_params,
+      xnn_pack_qu8_gemm_goi_w,
+      /*mr=*/1, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckNEON);
+  }
+
+  BENCHMARK_GEMM(qu8_gemm_minmax_rndnu16_ukernel_1x16__neon_mlal_lane)
+
   static void qu8_gemm_minmax_rndnu_ukernel_2x8__neon_mlal_lane(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_qu8_gemm_minmax_rndnu_ukernel_2x8__neon_mlal_lane,
