@@ -216,13 +216,9 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
   //
   //  * `(N, N)`: the values match,
   //  * `(1, N)` or `(N, 1)`: either of the dimensions is `1`,
-  //  * `(N, k*N)`: the dimension in `input_a` is a divisor of the dimension in
-  //    `input_b`,
-  //  * `(k*N, N)': the dimension in `input_b` is a divisor of the dimension in
-  //    `input_a`.
   for (size_t i = 0; i < num_batch_dims; i++) {
-    if (padded_dims_a[i] % padded_dims_b[i] != 0 &&
-        padded_dims_b[i] % padded_dims_a[i] != 0) {
+    if (padded_dims_a[i] != 1 && padded_dims_b[i] != 1 &&
+        padded_dims_a[i] != padded_dims_b[i]) {
       xnn_log_error(
           "failed to reshape %s operator with input_a ID #%" PRIu32
           " and input_b ID #%" PRIu32
