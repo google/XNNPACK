@@ -1277,8 +1277,8 @@ class FullyConnectedOperatorTester {
             int32_t c_ref_acc = 0;
             for (size_t ki = 0; ki < block_size(); ki++) {
               const size_t k_index = bi * block_size() + ki;
-              const size_t nb_index = transpose_weights() ? 
-                                      (k_index * kernel_stride) + (ni / 2) : 
+              const size_t nb_index = transpose_weights() ?
+                                      (k_index * kernel_stride) + (ni / 2) :
                                       (ni * kernel_stride) + (k_index / 2);
               const size_t plane_idx = transpose_weights() ? ni : ki;
               const int32_t kernel_value = int32_t((plane_idx % 2 == 0) ? (kernel[nb_index] & UINT8_C(0xF)) : (kernel[nb_index] >> 4)) - kernel_zero_point();
@@ -1340,14 +1340,14 @@ class FullyConnectedOperatorTester {
       }
 
       const xnn_status status = xnn_create_fully_connected_nc_qp8_f32_qb4w(
-          input_channels(), output_channels(), 
-          input_stride(), output_stride(), 
+          input_channels(), output_channels(),
+          input_stride(), output_stride(),
           block_size(),
-          kernel_zero_point(), 
-          kernel_scale2d.data(), 
+          kernel_zero_point(),
+          kernel_scale2d.data(),
           kernel.data(),
-          has_bias() ? bias.data() : nullptr, 
-          output_min, output_max, 
+          has_bias() ? bias.data() : nullptr,
+          output_min, output_max,
           transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
           nullptr, auto_weights_cache.get(), &fully_connected_op);
       if (status == xnn_status_unsupported_hardware) {
@@ -3194,7 +3194,7 @@ class FullyConnectedOperatorTester {
         // FP16 overflows, it's the nature of the beast. If both reference and
         // actual are infinity, then consider the output to be correct.
         const bool reference_infinity = std::isinf(output_ref[i * output_channels() + c]);
-        const bool actual_infinity = std::isinf(output[i * output_stride() + c]);
+        const bool actual_infinity = std::isinf((float)output[i * output_stride() + c]);
         if (reference_infinity && actual_infinity) {
           continue;
         }

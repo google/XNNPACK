@@ -212,6 +212,7 @@ enum xnn_compute_type {
   xnn_compute_type_qp8_to_fp32,
   xnn_compute_type_qs8,
   xnn_compute_type_qu8,
+  xnn_compute_type_fp16_to_qs8,
   xnn_compute_type_fp16_to_qd8,
   xnn_compute_type_fp16_to_fp32,
   xnn_compute_type_fp32_to_fp16,
@@ -227,6 +228,10 @@ enum xnn_compute_type {
 
 struct xnn_node {
   enum xnn_node_type type;
+  union {
+    enum xnn_binary_operator binary_operator;
+    enum xnn_unary_operator unary_operator;
+  };
   uint32_t id;
   enum xnn_compute_type compute_type;
   /// Static parameters of the operator node.
@@ -299,12 +304,6 @@ struct xnn_node {
       uint32_t dilation_width;
     } pooling_2d;
     struct {
-      float alpha;
-    } elu;
-    struct {
-      float negative_slope;
-    } leaky_relu;
-    struct {
       size_t pre_paddings[XNN_MAX_TENSOR_DIMS];
       size_t post_paddings[XNN_MAX_TENSOR_DIMS];
       uint32_t padding_value;
@@ -339,15 +338,12 @@ struct xnn_node {
       enum xnn_attention_logits_cap_type cap_type;
       struct xnn_attention_logits_cap_tanh_params cap_tanh_params;
     } scaled_dot_product_attention;
+    union xnn_unary_params unary;
   } params;
   struct {
     float output_min;
     float output_max;
   } activation;
-  struct {
-    int32_t output_min;
-    int32_t output_max;
-  } activation_int;
   /// Value IDs for node inputs.
   uint32_t inputs[XNN_MAX_INPUTS];
   uint32_t num_inputs;
@@ -486,6 +482,10 @@ struct xnn_runtime {
 
 enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min, float output_max, struct xnn_node *node);
 
+enum xnn_status xnn_insert_pack_lh_node(xnn_subgraph_t subgraph,
+                                        const struct xnn_value* input,
+                                        uint32_t input_id, uint32_t* new_id);
+
 struct xnn_value* xnn_subgraph_new_internal_value(xnn_subgraph_t subgraph);
 
 struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph);
@@ -582,9 +582,6 @@ enum xnn_status resize_fully_connected_output_tensor(
   size_t num_values,
   size_t old_workspace_size,
   pthreadpool_t threadpool);
-
-XNN_INTERNAL enum xnn_node_type xnn_binary_operator_to_node_type(enum xnn_binary_operator type);
-XNN_INTERNAL enum xnn_binary_operator xnn_node_type_to_binary_operator(enum xnn_node_type type);
 
 XNN_INTERNAL enum xnn_node_type xnn_reduce_operator_to_node_type(enum xnn_reduce_operator type);
 XNN_INTERNAL enum xnn_reduce_operator xnn_node_type_to_reduce_operator(enum xnn_node_type type);

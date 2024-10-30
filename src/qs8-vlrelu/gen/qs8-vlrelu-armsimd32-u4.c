@@ -31,7 +31,7 @@ void xnn_qs8_vlrelu_ukernel__armsimd32_u4(
   const int16x2_t vinput_zero_point = (int16x2_t) broadcast2x_uint16(params->scalar.input_zero_point);
   const int16x2_t vpositive_multiplier = (int16x2_t) broadcast2x_uint16(-params->scalar.positive_multiplier);
   const int16x2_t vnegative_multiplier = (int16x2_t) broadcast2x_uint16(-params->scalar.negative_multiplier);
-  const int32_t vbias = (params->scalar.output_zero_point << 8) + 0x80;
+  const int32_t vbias = (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 8) + 0x80;
   for (; batch >= 4 * sizeof(int8_t); batch -= 4 * sizeof(int8_t)) {
     const int8x4_t vx0123 = (int8x4_t) unaligned_load_u32(input);
     input += 4;

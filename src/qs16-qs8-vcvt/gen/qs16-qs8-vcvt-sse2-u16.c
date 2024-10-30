@@ -29,7 +29,7 @@ void xnn_qs16_qs8_vcvt_ukernel__sse2_u16(
   const __m128i vinput_bias = _mm_set1_epi16(UINT16_C(0x8000));
   const __m128i vmultiplier = _mm_set1_epi32(params->scalar.multiplier);
   const __m128i vbias = _mm_set1_epi64x(
-      (int64_t) ((uint64_t) params->scalar.output_zero_point << 32) + 
+      (int64_t) (((uint64_t) (int64_t) params->scalar.output_zero_point) << 32) + 
       INT64_C(0x80000000) -
       (INT64_C(0x80000000) * (int64_t) params->scalar.multiplier));
   const __m128i vzero = _mm_setzero_si128();

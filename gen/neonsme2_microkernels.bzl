@@ -6,6 +6,8 @@ Auto-generated file. Do not edit!
 """
 
 PROD_NEONSME2_MICROKERNEL_SRCS = [
+    "src/pf32-gemm/pf32-gemm-32x32-minmax-neonsme2.c",
+    "src/x32-pack-lh/x32-packlh-neonsme2.c",
 ]
 
 NON_PROD_NEONSME2_MICROKERNEL_SRCS = [

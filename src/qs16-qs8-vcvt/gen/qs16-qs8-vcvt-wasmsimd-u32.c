@@ -27,7 +27,7 @@ void xnn_qs16_qs8_vcvt_ukernel__wasmsimd_u32(
   assert(output != NULL);
 
   const v128_t vmultiplier = wasm_v128_load32_splat(&params->scalar.multiplier);
-  const v128_t vbias = wasm_i64x2_splat(((int32_t) params->scalar.output_zero_point << 16) + INT32_C(0x8000));
+  const v128_t vbias = wasm_i64x2_splat((int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 16) + INT32_C(0x8000));
   XNN_FORCE_REALIZATION(vmultiplier);
   XNN_FORCE_REALIZATION(vbias);
   for (; batch >= 32 * sizeof(int16_t); batch -= 32 * sizeof(int16_t)) {

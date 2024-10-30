@@ -301,7 +301,7 @@ static void ThreePassSoftMaxWithReloading(
   benchmark::utils::DisableDenormals();
 
   xnn_f32_default_params rmax_params;
-  xnn_f32_expminus_params expminus_params;
+  xnn_f32_default_params expminus_params;
   if (init_rmax_params) {
     init_rmax_params(&rmax_params);
   }

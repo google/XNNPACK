@@ -31,6 +31,7 @@ MICROKERNEL_BENCHMARK_DEPS = [
     "//:all_microkernels",
     "//:buffer",
     "//:common",
+    "//:datatype",
     "//:hardware_config",
     "//:math",
     "//:microkernels_h",
@@ -48,6 +49,7 @@ OPERATOR_BENCHMARK_DEPS = [
     "//:buffer",
     "//:cache",
     "//:common",
+    "//:datatype",
     "//:math",
 ]
 
@@ -232,29 +234,6 @@ xnnpack_benchmark(
     name = "%s_bench" % kernel,
     srcs = [
         "%s.cc" % kernel.replace("_", "-"),
-        "vcvt-benchmark.h",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS,
-) for kernel in [
-    "qs8_f16_vcvt",
-    "qs8_f32_vcvt",
-    "qs8_vcvt",
-    "qs16_qs8_vcvt",
-    "qu8_f32_vcvt",
-    "qu8_vcvt",
-    "f16_f32_vcvt",
-    "f16_qs8_vcvt",
-    "f32_f16_vcvt",
-    "f32_qs8_vcvt",
-    "f32_qu8_vcvt",
-    "s32_f32_vcvt",
-    "u32_f32_vcvt",
-]]
-
-[xnnpack_benchmark(
-    name = "%s_bench" % kernel,
-    srcs = [
-        "%s.cc" % kernel.replace("_", "-"),
         "rsum-benchmark.h",
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
@@ -277,12 +256,10 @@ xnnpack_benchmark(
     ],
     deps = MICROKERNEL_BENCHMARK_DEPS,
 ) for kernel in [
-    "f16_gavgpool_cw",
     "f16_raddstoreexpminusmax",
     "f16_rmax",
     "f16_rminmax",
     "f16_rmin",
-    "f32_gavgpool_cw",
     "f32_raddexpminusmax",
     "f32_raddextexp",
     "f32_raddstoreexpminusmax",
@@ -306,22 +283,6 @@ xnnpack_benchmark(
     "xx_transposev",
     "xN_transposec",
 ]]
-
-xnnpack_benchmark(
-    name = "qs8_requantization_bench",
-    srcs = [
-        "qs8-requantization.cc",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS + ["//:requantization_stubs"],
-)
-
-xnnpack_benchmark(
-    name = "qu8_requantization_bench",
-    srcs = [
-        "qu8-requantization.cc",
-    ],
-    deps = MICROKERNEL_BENCHMARK_DEPS + ["//:requantization_stubs"],
-)
 
 xnnpack_benchmark(
     name = "qs8_dwconv_bench",
@@ -583,33 +544,13 @@ xnnpack_benchmark(
 
 ########################### Benchmarks for operators ###########################
 
-[xnnpack_benchmark(
-    name = "%s_bench" % op,
-    srcs = [
-        "%s.cc" % op.replace("_", "-"),
-        "unary_operator.h",
-    ],
+xnnpack_benchmark(
+    name = "unary_bench",
+    srcs = ["unary.cc"],
     copts = xnnpack_optional_tflite_copts(),
     tags = ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
-) for op in [
-    "abs",
-    "bankers_rounding",
-    "ceiling",
-    "convert",
-    "elu",
-    "floor",
-    "leaky_relu",
-    "negate",
-    "hardswish",
-    "reciprocal_square_root",
-    "sigmoid",
-    "softmax",
-    "square",
-    "square_root",
-    "tanh",
-    "truncation",
-]]
+)
 
 xnnpack_benchmark(
     name = "average_pooling_bench",
@@ -655,13 +596,6 @@ xnnpack_benchmark(
     copts = xnnpack_optional_tflite_copts(),
     tags = ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
-)
-
-xnnpack_benchmark(
-    name = "global_average_pooling_bench",
-    srcs = ["global-average-pooling.cc"],
-    tags = xnnpack_slow_benchmark_tags(),
-    deps = OPERATOR_BENCHMARK_DEPS,
 )
 
 xnnpack_benchmark(

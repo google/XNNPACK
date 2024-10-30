@@ -104,7 +104,7 @@ class PackWMicrokernelTester {
   }
 
   void Test(xnn_qs8_packw_gemm_goi_ukernel_fn packw) const {
-    xnnpack::Buffer<int8_t> weights(n() * k());
+    xnnpack::Buffer<int8_t> weights(XNN_EXTRA_BYTES / sizeof(int8_t) + n() * k());
     xnnpack::Buffer<int32_t> bias(n());
     xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
         packed_n() * packed_k() + packed_n() * sizeof(uint32_t));
@@ -155,7 +155,7 @@ class PackWMicrokernelTester {
   }
 
   void Test(xnn_x8_packw_gemm_goi_ukernel_fn packw) const {
-    xnnpack::Buffer<int8_t> weights(n() * k());
+    xnnpack::Buffer<int8_t> weights(XNN_EXTRA_BYTES / sizeof(int8_t) + n() * k());
     xnnpack::Buffer<uint32_t> bias(n());
     xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
         packed_n() * k() + packed_n() * sizeof(uint32_t));
@@ -191,7 +191,7 @@ class PackWMicrokernelTester {
   }
 
   void Test(xnn_x16_packw_gemm_goi_ukernel_fn packw) const {
-    xnnpack::Buffer<xnn_float16> weights(g() * n() * k());
+    xnnpack::Buffer<xnn_float16> weights(XNN_EXTRA_BYTES / sizeof(xnn_float16) + g() * n() * k());
     xnnpack::Buffer<xnn_float16> padded_weights(g() * n() * packed_k());
     xnnpack::Buffer<xnn_float16> bias(g() * n());
     xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> packed_w(
@@ -243,7 +243,7 @@ class PackWMicrokernelTester {
   }
 
   void Test(xnn_x32_packw_gemm_goi_ukernel_fn packw) const {
-    xnnpack::Buffer<uint32_t> weights(g() * n() * k());
+    xnnpack::Buffer<uint32_t> weights(XNN_EXTRA_BYTES / sizeof(uint32_t) + g() * n() * k());
     xnnpack::Buffer<uint32_t> padded_weights(g() * n() * packed_k());
     xnnpack::Buffer<uint32_t> bias(g() * n());
     xnnpack::Buffer<uint32_t, XNN_ALLOCATION_ALIGNMENT> packed_w(

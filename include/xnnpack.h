@@ -31,6 +31,9 @@ extern "C" {
 /// Maximum number of dimensions in tensor shape.
 #define XNN_MAX_TENSOR_DIMS 6
 
+/// A value ID that cannot be valid.
+#define XNN_INVALID_VALUE_ID UINT32_MAX
+
 /// Allow sparse inference in a Runtime.
 ///
 /// Note: this flag is a hint to XNNPACK that it should consider sparse inference, but does not guarantee it.
@@ -281,6 +284,8 @@ enum xnn_datatype {
   /// Quantized 4-bit signed integer with shared per-channel-block quantization
   /// parameters.
   xnn_datatype_qbint4 = 12,
+  /// IEEE754 single-precision packed floating-point.
+  xnn_datatype_pfp32 = 13,
 };
 
 /// Define a tensor-type Value and add it to a Subgraph.
@@ -469,6 +474,64 @@ enum xnn_status xnn_define_dynamically_quantized_tensor_value(
   uint32_t flags,
   uint32_t* id_out);
 
+/// Type of unary operation
+enum xnn_unary_operator {
+  xnn_unary_invalid = -1,
+  xnn_unary_convert,
+  xnn_unary_clamp,
+  xnn_unary_abs,
+  xnn_unary_bankers_rounding,
+  xnn_unary_ceiling,
+  xnn_unary_elu,
+  xnn_unary_exp,
+  xnn_unary_floor,
+  xnn_unary_gelu,
+  xnn_unary_hardswish,
+  xnn_unary_leaky_relu,
+  xnn_unary_log,
+  xnn_unary_negate,
+  xnn_unary_sigmoid,
+  xnn_unary_square,
+  xnn_unary_square_root,
+  xnn_unary_reciprocal_square_root,
+  xnn_unary_tanh,
+};
+
+/// Parameters for xnn_define_unary
+union xnn_unary_params {
+  struct {
+    /// lower bound for clipping output values.
+    float min;
+    /// upper bound for clipping output values.
+    float max;
+  } clamp;
+  struct {
+    /// scale factor for negative input elements.
+    float alpha;
+  } elu;
+  struct {
+    /// scale factor for negative input elements.
+    float negative_slope;
+  } leaky_relu;
+};
+
+/// Define a unary operator Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param operator - type of unary operator to define.
+/// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
+///                    shape must match the shape of the input tensor.
+/// @param params - parameters to be interpreted by the specific operator type.
+/// @param flags - binary features of the Node. No supported flags are currently defined.
+enum xnn_status xnn_define_unary(
+  xnn_subgraph_t subgraph,
+  enum xnn_unary_operator type,
+  const union xnn_unary_params* params,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a Convert Node and add it to a Subgraph.
 ///
 /// @param subgraph - a Subgraph object that will own the created Node.
@@ -476,7 +539,7 @@ enum xnn_status xnn_define_dynamically_quantized_tensor_value(
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor.
 /// @param flags - binary features of the Convert Node. No supported flags are currently defined.
-enum xnn_status xnn_define_convert(
+XNN_DEPRECATED enum xnn_status xnn_define_convert(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t output_id,
@@ -688,7 +751,7 @@ enum xnn_status xnn_define_depth_to_space(
 ///                    dimensions defined in the @a subgraph.
 /// @param flags - binary features of the 1D Global Average Pooling Node. The only currently supported value is
 ///                XNN_FLAG_KEEP_DIMS.
-enum xnn_status xnn_define_global_average_pooling_1d(
+XNN_DEPRECATED enum xnn_status xnn_define_global_average_pooling_1d(
   xnn_subgraph_t subgraph,
   float output_min,
   float output_max,
@@ -708,7 +771,7 @@ enum xnn_status xnn_define_global_average_pooling_1d(
 ///                    dimensions defined in the @a subgraph.
 /// @param flags - binary features of the 2D Global Average Pooling Node. The only currently supported value is
 ///                XNN_FLAG_KEEP_DIMS.
-enum xnn_status xnn_define_global_average_pooling_2d(
+XNN_DEPRECATED enum xnn_status xnn_define_global_average_pooling_2d(
   xnn_subgraph_t subgraph,
   float output_min,
   float output_max,
@@ -727,7 +790,7 @@ enum xnn_status xnn_define_global_average_pooling_2d(
 ///                    dimensions defined in the @a subgraph.
 /// @param flags - binary features of the 1D Global Sum Pooling Node. The only currently supported value is
 ///                XNN_FLAG_KEEP_DIMS.
-enum xnn_status xnn_define_global_sum_pooling_1d(
+XNN_DEPRECATED enum xnn_status xnn_define_global_sum_pooling_1d(
   xnn_subgraph_t subgraph,
   float output_min,
   float output_max,
@@ -747,7 +810,7 @@ enum xnn_status xnn_define_global_sum_pooling_1d(
 ///                    dimensions defined in the @a subgraph.
 /// @param flags - binary features of the 2D Global Sum Pooling Node. The only currently supported value is
 ///                XNN_FLAG_KEEP_DIMS.
-enum xnn_status xnn_define_global_sum_pooling_2d(
+XNN_DEPRECATED enum xnn_status xnn_define_global_sum_pooling_2d(
   xnn_subgraph_t subgraph,
   float output_min,
   float output_max,
@@ -1684,7 +1747,7 @@ enum xnn_status xnn_define_rope(
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor.
 /// @param flags - binary features of the Abs Node. No supported flags are currently defined.
-enum xnn_status xnn_define_abs(
+XNN_DEPRECATED enum xnn_status xnn_define_abs(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t output_id,
@@ -1697,7 +1760,7 @@ enum xnn_status xnn_define_abs(
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor.
 /// @param flags - binary features of the Bankers' Rounding Node. No supported flags are currently defined.
-enum xnn_status xnn_define_bankers_rounding(
+XNN_DEPRECATED enum xnn_status xnn_define_bankers_rounding(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t output_id,
@@ -1737,7 +1800,7 @@ enum xnn_status xnn_define_batch_matrix_multiply(
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor.
 /// @param flags - binary features of the Ceiling Node. No supported flags are currently defined.
-enum xnn_status xnn_define_ceiling(
+XNN_DEPRECATED enum xnn_status xnn_define_ceiling(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t output_id,
@@ -1752,7 +1815,7 @@ enum xnn_status xnn_define_ceiling(
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor.
 /// @param flags - binary features of the Clamp Node. No supported flags are currently defined.
-enum xnn_status xnn_define_clamp(
+XNN_DEPRECATED enum xnn_status xnn_define_clamp(
   xnn_subgraph_t subgraph,
   float output_min,
   float output_max,
@@ -1768,7 +1831,7 @@ enum xnn_status xnn_define_clamp(
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor.
 /// @param flags - binary features of the ELU Node. No supported flags are currently defined.
-enum xnn_status xnn_define_elu(
+XNN_DEPRECATED enum xnn_status xnn_define_elu(
   xnn_subgraph_t subgraph,
   float alpha,
   uint32_t input_id,
@@ -1782,7 +1845,7 @@ enum xnn_status xnn_define_elu(
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor.
 /// @param flags - binary features of the Exp Node. No supported flags are currently defined.
-enum xnn_status xnn_define_exp(
+XNN_DEPRECATED enum xnn_status xnn_define_exp(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t output_id,
@@ -1795,7 +1858,7 @@ enum xnn_status xnn_define_exp(
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor.
 /// @param flags - binary features of the Floor Node. No supported flags are currently defined.
-enum xnn_status xnn_define_floor(
+XNN_DEPRECATED enum xnn_status xnn_define_floor(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t output_id,
@@ -1808,7 +1871,7 @@ enum xnn_status xnn_define_floor(
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor.
 /// @param flags - binary features of the GELU Node. No supported flags are currently defined.
-enum xnn_status xnn_define_gelu(
+XNN_DEPRECATED enum xnn_status xnn_define_gelu(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t output_id,
@@ -1821,7 +1884,7 @@ enum xnn_status xnn_define_gelu(
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor.
 /// @param flags - binary features of the HardSwish Node. No supported flags are currently defined.
-enum xnn_status xnn_define_hardswish(
+XNN_DEPRECATED enum xnn_status xnn_define_hardswish(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t output_id,
@@ -1835,7 +1898,7 @@ enum xnn_status xnn_define_hardswish(
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor.
 /// @param flags - binary features of the Leaky ReLU Node. No supported flags are currently defined.
-enum xnn_status xnn_define_leaky_relu(
+XNN_DEPRECATED enum xnn_status xnn_define_leaky_relu(
   xnn_subgraph_t subgraph,
   float negative_slope,
   uint32_t input_id,
@@ -1849,7 +1912,7 @@ enum xnn_status xnn_define_leaky_relu(
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor.
 /// @param flags - binary features of the Log Node. No supported flags are currently defined.
-enum xnn_status xnn_define_log(
+XNN_DEPRECATED enum xnn_status xnn_define_log(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t output_id,
@@ -1862,7 +1925,7 @@ enum xnn_status xnn_define_log(
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor.
 /// @param flags - binary features of the Negate Node. No supported flags are currently defined.
-enum xnn_status xnn_define_negate(
+XNN_DEPRECATED enum xnn_status xnn_define_negate(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t output_id,
@@ -1875,7 +1938,7 @@ enum xnn_status xnn_define_negate(
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor.
 /// @param flags - binary features of the Sigmoid Node. No supported flags are currently defined.
-enum xnn_status xnn_define_sigmoid(
+XNN_DEPRECATED enum xnn_status xnn_define_sigmoid(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t output_id,
@@ -1923,7 +1986,7 @@ enum xnn_status xnn_define_space_to_depth_2d(
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor.
 /// @param flags - binary features of the Square Node. No supported flags are currently defined.
-enum xnn_status xnn_define_square(
+XNN_DEPRECATED enum xnn_status xnn_define_square(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t output_id,
@@ -1936,7 +1999,7 @@ enum xnn_status xnn_define_square(
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor.
 /// @param flags - binary features of the Square Root Node. No supported flags are currently defined.
-enum xnn_status xnn_define_square_root(
+XNN_DEPRECATED enum xnn_status xnn_define_square_root(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t output_id,
@@ -1952,10 +2015,11 @@ enum xnn_status xnn_define_square_root(
 ///                    shape must match the shape of the input tensor.
 /// @param flags - binary features of the Square Root Node. No supported flags
 /// are currently defined.
-enum xnn_status xnn_define_reciprocal_square_root(xnn_subgraph_t subgraph,
-                                                  uint32_t input_id,
-                                                  uint32_t output_id,
-                                                  uint32_t flags);
+XNN_DEPRECATED enum xnn_status xnn_define_reciprocal_square_root(
+  xnn_subgraph_t subgraph,
+  uint32_t input_id,
+  uint32_t output_id,
+  uint32_t flags);
 
 /// Define a Static Slice Node add it to a Subgraph.
 ///
@@ -2004,7 +2068,7 @@ enum xnn_status xnn_define_static_transpose(
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    shape must match the shape of the input tensor.
 /// @param flags - binary features of the Tanh Node. No supported flags are currently defined.
-enum xnn_status xnn_define_tanh(
+XNN_DEPRECATED enum xnn_status xnn_define_tanh(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t output_id,
@@ -2328,49 +2392,47 @@ enum xnn_status xnn_run_binary_elementwise_nd(
   void* output,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_create_abs_nc_f16(
+enum xnn_status xnn_create_unary_elementwise_nc(
+  enum xnn_unary_operator op_type,
+  enum xnn_datatype input_datatype,
+  enum xnn_datatype output_datatype,
+  const union xnn_unary_params* params,
+  const struct xnn_quantization_params* input_quantization,
+  const struct xnn_quantization_params* output_quantization,
   uint32_t flags,
-  xnn_operator_t* abs_op_out);
+  xnn_operator_t* op_out);
 
-enum xnn_status xnn_reshape_abs_nc_f16(
-  xnn_operator_t abs_op,
+enum xnn_status xnn_reshape_unary_elementwise_nc(
+  xnn_operator_t op,
   size_t batch_size,
   size_t channels,
   size_t input_stride,
   size_t output_stride,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_setup_abs_nc_f16(
-  xnn_operator_t abs_op,
+enum xnn_status xnn_setup_unary_elementwise_nc(
+  xnn_operator_t op,
   const void* input,
   void* output);
 
-enum xnn_status xnn_create_abs_nc_f32(
+enum xnn_status xnn_run_unary_elementwise_nc(
+  // create parameters
+  enum xnn_unary_operator op_type,
+  enum xnn_datatype input_datatype,
+  enum xnn_datatype output_datatype,
+  const union xnn_unary_params* params,
+  const struct xnn_quantization_params* input_quantization,
+  const struct xnn_quantization_params* output_quantization,
   uint32_t flags,
-  xnn_operator_t* abs_op_out);
-
-enum xnn_status xnn_reshape_abs_nc_f32(
-  xnn_operator_t abs_op,
+  // reshape parameters
   size_t batch_size,
   size_t channels,
   size_t input_stride,
   size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_abs_nc_f32(
-  xnn_operator_t abs_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_run_abs_nc_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const float* input,
-  float* output,
-  uint32_t flags,
-  pthreadpool_t threadpool);
+  pthreadpool_t threadpool,
+  // setup parameters
+  const void* input,
+  void* output);
 
 enum xnn_status xnn_create_argmax_pooling2d_nhwc_f32(
   uint32_t input_padding_top,
@@ -2509,50 +2571,6 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_qu8(
   const uint8_t* input,
   uint8_t* output);
 
-enum xnn_status xnn_create_bankers_rounding_nc_f16(
-  uint32_t flags,
-  xnn_operator_t* rounding_op_out);
-
-enum xnn_status xnn_reshape_bankers_rounding_nc_f16(
-  xnn_operator_t rounding_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_bankers_rounding_nc_f16(
-  xnn_operator_t rounding_op,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_bankers_rounding_nc_f32(
-  uint32_t flags,
-  xnn_operator_t* rounding_op_out);
-
-enum xnn_status xnn_reshape_bankers_rounding_nc_f32(
-  xnn_operator_t rounding_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_bankers_rounding_nc_f32(
-  xnn_operator_t rounding_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_run_bankers_rounding_nc_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const float* input,
-  float* output,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
 enum xnn_status xnn_create_batch_matrix_multiply_nc_f16(
   uint32_t flags,
   xnn_operator_t* batch_matrix_multiply_op);
@@ -2599,50 +2617,6 @@ enum xnn_status xnn_setup_batch_matrix_multiply_nc_qd8_f32_qc8w(
     const struct xnn_quantization_params* quantization_params,
     float* output);
 
-enum xnn_status xnn_create_ceiling_nc_f16(
-  uint32_t flags,
-  xnn_operator_t* ceiling_op_out);
-
-enum xnn_status xnn_reshape_ceiling_nc_f16(
-  xnn_operator_t ceiling_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_ceiling_nc_f16(
-  xnn_operator_t ceiling_op,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_ceiling_nc_f32(
-  uint32_t flags,
-  xnn_operator_t* ceiling_op_out);
-
-enum xnn_status xnn_run_ceiling_nc_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const float* input,
-  float* output,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_reshape_ceiling_nc_f32(
-  xnn_operator_t ceiling_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_ceiling_nc_f32(
-  xnn_operator_t ceiling_op,
-  const float* input,
-  float* output);
-
 enum xnn_status xnn_create_channel_shuffle_nc_x8(
   size_t groups,
   size_t group_channels,
@@ -2678,94 +2652,6 @@ enum xnn_status xnn_setup_channel_shuffle_nc_x32(
   xnn_operator_t channel_shuffle_op,
   const void* input,
   void* output);
-
-enum xnn_status xnn_create_clamp_nc_f16(
-  float output_min,
-  float output_max,
-  uint32_t flags,
-  xnn_operator_t* clamp_op_out);
-
-enum xnn_status xnn_reshape_clamp_nc_f16(
-  xnn_operator_t clamp_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_clamp_nc_f16(
-  xnn_operator_t clamp_op,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_clamp_nc_f32(
-  float output_min,
-  float output_max,
-  uint32_t flags,
-  xnn_operator_t* clamp_op_out);
-
-enum xnn_status xnn_reshape_clamp_nc_f32(
-  xnn_operator_t clamp_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_clamp_nc_f32(
-  xnn_operator_t clamp_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_run_clamp_nc_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const float* input,
-  float* output,
-  float output_min,
-  float output_max,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_clamp_nc_s8(
-  int8_t output_min,
-  int8_t output_max,
-  uint32_t flags,
-  xnn_operator_t* clamp_op_out);
-
-enum xnn_status xnn_reshape_clamp_nc_s8(
-  xnn_operator_t clamp_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_clamp_nc_s8(
-  xnn_operator_t clamp_op,
-  const int8_t* input,
-  int8_t* output);
-
-enum xnn_status xnn_create_clamp_nc_u8(
-  uint8_t output_min,
-  uint8_t output_max,
-  uint32_t flags,
-  xnn_operator_t* clamp_op_out);
-
-enum xnn_status xnn_reshape_clamp_nc_u8(
-  xnn_operator_t clamp_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_clamp_nc_u8(
-  xnn_operator_t clamp_op,
-  const uint8_t* input,
-  uint8_t* output);
 
 enum xnn_status xnn_create_constant_pad_nd_x8(
   const void* padding_value,
@@ -2854,33 +2740,6 @@ enum xnn_status xnn_run_constant_pad_nd_x32(
   const void* padding_value,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_create_convert_nc_f16_f32(
-  uint32_t flags,
-  xnn_operator_t* convert_op_out);
-
-enum xnn_status xnn_reshape_convert_nc_f16_f32(
-  xnn_operator_t convert_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_convert_nc_f16_f32(
-  xnn_operator_t convert_op,
-  const void* input,
-  float* output);
-
-enum xnn_status xnn_run_convert_nc_f16_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const void* input,
-  float* output,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
 enum xnn_status xnn_create_convert_nc_f16_qd8(
   uint32_t flags,
   xnn_operator_t* convert_op_out);
@@ -2919,248 +2778,13 @@ enum xnn_status xnn_setup_convert_nc_f32_qd8(
   int8_t* output,
   struct xnn_quantization_params* quantization_params);
 
-enum xnn_status xnn_create_convert_nc_f32_f16(
-  uint32_t flags,
-  xnn_operator_t* convert_op_out);
-
-enum xnn_status xnn_reshape_convert_nc_f32_f16(
-  xnn_operator_t convert_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_convert_nc_f32_f16(
-  xnn_operator_t convert_op,
-  const float* input,
-  void* output);
-
-enum xnn_status xnn_run_convert_nc_f32_f16(
+XNN_DEPRECATED enum xnn_status xnn_run_convert_nc_f32_f16(
   size_t channels,
   size_t input_stride,
   size_t output_stride,
   size_t batch_size,
   const float* input,
   void* output,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_convert_nc_f32_qs8(
-  float output_scale,
-  int8_t output_zero_point,
-  uint32_t flags,
-  xnn_operator_t* convert_op_out);
-
-enum xnn_status xnn_reshape_convert_nc_f32_qs8(
-  xnn_operator_t convert_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_convert_nc_f32_qs8(
-  xnn_operator_t convert_op,
-  const float* input,
-  int8_t* output);
-
-enum xnn_status xnn_run_convert_nc_f32_qs8(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const float* input,
-  int8_t* output,
-  float output_scale,
-  int8_t output_zero_point,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_convert_nc_f32_qu8(
-  float output_scale,
-  uint8_t output_zero_point,
-  uint32_t flags,
-  xnn_operator_t* convert_op_out);
-
-enum xnn_status xnn_reshape_convert_nc_f32_qu8(
-  xnn_operator_t convert_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_convert_nc_f32_qu8(
-  xnn_operator_t convert_op,
-  const float* input,
-  uint8_t* output);
-
-enum xnn_status xnn_run_convert_nc_f32_qu8(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const float* input,
-  uint8_t* output,
-  float output_scale,
-  uint8_t output_zero_point,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_convert_nc_qs8(
-  float input_scale,
-  int8_t input_zero_point,
-  float output_scale,
-  int8_t output_zero_point,
-  uint32_t flags,
-  xnn_operator_t* convert_op_out);
-
-enum xnn_status xnn_reshape_convert_nc_qs8(
-  xnn_operator_t convert_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_convert_nc_qs8(
-  xnn_operator_t convert_op,
-  const int8_t* input,
-  int8_t* output);
-
-enum xnn_status xnn_create_convert_nc_qs8_f16(
-  float input_scale,
-  int8_t input_zero_point,
-  uint32_t flags,
-  xnn_operator_t* convert_op_out);
-
-enum xnn_status xnn_reshape_convert_nc_qs8_f16(
-  xnn_operator_t convert_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_convert_nc_qs8_f16(
-  xnn_operator_t convert_op,
-  const int8_t* input,
-  void* output);
-
-enum xnn_status xnn_create_convert_nc_qs8_f32(
-  float input_scale,
-  int8_t input_zero_point,
-  uint32_t flags,
-  xnn_operator_t* convert_op_out);
-
-enum xnn_status xnn_reshape_convert_nc_qs8_f32(
-  xnn_operator_t convert_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_convert_nc_qs8_f32(
-  xnn_operator_t convert_op,
-  const int8_t* input,
-  float* output);
-
-enum xnn_status xnn_run_convert_nc_qs8_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const int8_t* input,
-  float* output,
-  float input_scale,
-  int8_t input_zero_point,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_convert_nc_qs16_qs8(
-  float input_scale,
-  float output_scale,
-  int8_t output_zero_point,
-  uint32_t flags,
-  xnn_operator_t* convert_op_out);
-
-enum xnn_status xnn_reshape_convert_nc_qs16_qs8(
-  xnn_operator_t convert_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_convert_nc_qs16_qs8(
-  xnn_operator_t convert_op,
-  const int16_t* input,
-  int8_t* output);
-
-enum xnn_status xnn_run_convert_nc_qs16_qs8(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const int16_t* input,
-  int8_t* output,
-  float input_scale,
-  float output_scale,
-  int8_t output_zero_point,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_convert_nc_qu8(
-  float input_scale,
-  uint8_t input_zero_point,
-  float output_scale,
-  uint8_t output_zero_point,
-  uint32_t flags,
-  xnn_operator_t* convert_op_out);
-
-enum xnn_status xnn_reshape_convert_nc_qu8(
-  xnn_operator_t convert_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_convert_nc_qu8(
-  xnn_operator_t convert_op,
-  const uint8_t* input,
-  uint8_t* output);
-
-enum xnn_status xnn_create_convert_nc_qu8_f32(
-  float input_scale,
-  uint8_t input_zero_point,
-  uint32_t flags,
-  xnn_operator_t* convert_op_out);
-
-enum xnn_status xnn_reshape_convert_nc_qu8_f32(
-  xnn_operator_t convert_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_convert_nc_qu8_f32(
-  xnn_operator_t convert_op,
-  const uint8_t* input,
-  float* output);
-
-enum xnn_status xnn_run_convert_nc_qu8_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const uint8_t* input,
-  float* output,
-  float input_scale,
-  uint8_t input_zero_point,
   uint32_t flags,
   pthreadpool_t threadpool);
 
@@ -4023,138 +3647,6 @@ enum xnn_status xnn_setup_dynamic_fully_connected_nc_f32(
   const float* bias,
   float* output);
 
-enum xnn_status xnn_create_elu_nc_f16(
-  float alpha,
-  uint32_t flags,
-  xnn_operator_t* elu_op_out);
-
-enum xnn_status xnn_reshape_elu_nc_f16(
-  xnn_operator_t elu_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_elu_nc_f16(
-  xnn_operator_t elu_op,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_elu_nc_f32(
-  float alpha,
-  uint32_t flags,
-  xnn_operator_t* elu_op_out);
-
-enum xnn_status xnn_reshape_elu_nc_f32(
-  xnn_operator_t elu_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_elu_nc_f32(
-  xnn_operator_t elu_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_run_elu_nc_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const float* input,
-  float* output,
-  float alpha,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_elu_nc_qs8(
-  float alpha,
-  int8_t input_zero_point,
-  float input_scale,
-  int8_t output_zero_point,
-  float output_scale,
-  int8_t output_min,
-  int8_t output_max,
-  uint32_t flags,
-  xnn_operator_t* elu_op_out);
-
-enum xnn_status xnn_reshape_elu_nc_qs8(
-  xnn_operator_t elu_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_elu_nc_qs8(
-  xnn_operator_t elu_op,
-  const int8_t* input,
-  int8_t* output);
-
-enum xnn_status xnn_create_exp_nc_f32(
-  uint32_t flags,
-  xnn_operator_t* exp_op_out);
-
-enum xnn_status xnn_reshape_exp_nc_f32(
-  xnn_operator_t exp_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_exp_nc_f32(
-  xnn_operator_t exp_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_create_floor_nc_f16(
-  uint32_t flags,
-  xnn_operator_t* floor_op_out);
-
-enum xnn_status xnn_reshape_floor_nc_f16(
-  xnn_operator_t floor_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_floor_nc_f16(
-  xnn_operator_t floor_op,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_floor_nc_f32(
-  uint32_t flags,
-  xnn_operator_t* floor_op_out);
-
-enum xnn_status xnn_reshape_floor_nc_f32(
-  xnn_operator_t floor_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_floor_nc_f32(
-  xnn_operator_t floor_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_run_floor_nc_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const float* input,
-  float* output,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
 enum xnn_status xnn_create_fully_connected_nc_f16(
   size_t input_channels,
   size_t output_channels,
@@ -4528,366 +4020,6 @@ enum xnn_status xnn_setup_fully_connected_nc_qu8(
   const uint8_t* input,
   uint8_t* output);
 
-enum xnn_status xnn_create_gelu_nc_f32(
-  uint32_t flags,
-  xnn_operator_t* gelu_op_out);
-
-enum xnn_status xnn_reshape_gelu_nc_f32(
-  xnn_operator_t gelu_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_gelu_nc_f32(
-  xnn_operator_t gelu_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_run_gelu_nc_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const float* input,
-  float* output,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_global_average_pooling_ncw_f16(
-  float output_min,
-  float output_max,
-  uint32_t flags,
-  xnn_operator_t* global_average_pooling_op_out);
-
-enum xnn_status xnn_reshape_global_average_pooling_ncw_f16(
-  xnn_operator_t global_average_pooling_op,
-  size_t batch_size,
-  size_t width,
-  size_t channels,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_global_average_pooling_ncw_f16(
-  xnn_operator_t global_average_pooling_op,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_global_average_pooling_ncw_f32(
-  float output_min,
-  float output_max,
-  uint32_t flags,
-  xnn_operator_t* global_average_pooling_op_out);
-
-enum xnn_status xnn_reshape_global_average_pooling_ncw_f32(
-  xnn_operator_t global_average_pooling_op,
-  size_t batch_size,
-  size_t width,
-  size_t channels,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_global_average_pooling_ncw_f32(
-  xnn_operator_t global_average_pooling_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_create_global_average_pooling_nwc_f16(
-  float output_min,
-  float output_max,
-  uint32_t flags,
-  xnn_operator_t* global_average_pooling_op_out);
-
-enum xnn_status xnn_reshape_global_average_pooling_nwc_f16(
-  xnn_operator_t global_average_pooling_op,
-  size_t batch_size,
-  size_t width,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_global_average_pooling_nwc_f16(
-  xnn_operator_t global_average_pooling_op,
-  void* workspace,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_global_average_pooling_nwc_f32(
-  float output_min,
-  float output_max,
-  uint32_t flags,
-  xnn_operator_t* global_average_pooling_op_out);
-
-enum xnn_status xnn_reshape_global_average_pooling_nwc_f32(
-  xnn_operator_t global_average_pooling_op,
-  size_t batch_size,
-  size_t width,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_global_average_pooling_nwc_f32(
-  xnn_operator_t global_average_pooling_op,
-  void* workspace,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_create_global_average_pooling_nwc_qs8(
-  int8_t input_zero_point,
-  float input_scale,
-  int8_t output_zero_point,
-  float output_scale,
-  int8_t output_min,
-  int8_t output_max,
-  uint32_t flags,
-  xnn_operator_t* global_average_pooling_op_out);
-
-enum xnn_status xnn_reshape_global_average_pooling_nwc_qs8(
-  xnn_operator_t global_average_pooling_op,
-  size_t batch_size,
-  size_t width,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_global_average_pooling_nwc_qs8(
-  xnn_operator_t global_average_pooling_op,
-  void* workspace,
-  const int8_t* input,
-  int8_t* output);
-
-enum xnn_status xnn_create_global_average_pooling_nwc_qu8(
-  uint8_t input_zero_point,
-  float input_scale,
-  uint8_t output_zero_point,
-  float output_scale,
-  uint8_t output_min,
-  uint8_t output_max,
-  uint32_t flags,
-  xnn_operator_t* global_average_pooling_op_out);
-
-enum xnn_status xnn_reshape_global_average_pooling_nwc_qu8(
-  xnn_operator_t global_average_pooling_op,
-  size_t batch_size,
-  size_t width,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_global_average_pooling_nwc_qu8(
-  xnn_operator_t global_average_pooling_op,
-  void* workspace,
-  const uint8_t* input,
-  uint8_t* output);
-
-enum xnn_status xnn_create_global_sum_pooling_nwc_f16(
-  float output_min,
-  float output_max,
-  uint32_t flags,
-  xnn_operator_t* global_sum_pooling_op_out);
-
-enum xnn_status xnn_reshape_global_sum_pooling_nwc_f16(
-  xnn_operator_t global_sum_pooling_op,
-  size_t batch_size,
-  size_t width,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_global_sum_pooling_nwc_f16(
-  xnn_operator_t global_sum_pooling_op,
-  void* workspace,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_global_sum_pooling_nwc_f32(
-  float output_min,
-  float output_max,
-  uint32_t flags,
-  xnn_operator_t* global_sum_pooling_op_out);
-
-enum xnn_status xnn_reshape_global_sum_pooling_nwc_f32(
-  xnn_operator_t global_sum_pooling_op,
-  size_t batch_size,
-  size_t width,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_global_sum_pooling_nwc_f32(
-  xnn_operator_t global_sum_pooling_op,
-  void* workspace,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_create_hardswish_nc_f16(
-  uint32_t flags,
-  xnn_operator_t* hardswish_op_out);
-
-enum xnn_status xnn_reshape_hardswish_nc_f16(
-  xnn_operator_t hardswish_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_hardswish_nc_f16(
-  xnn_operator_t hardswish_op,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_hardswish_nc_f32(
-  uint32_t flags,
-  xnn_operator_t* hardswish_op_out);
-
-enum xnn_status xnn_reshape_hardswish_nc_f32(
-  xnn_operator_t hardswish_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_hardswish_nc_f32(
-  xnn_operator_t hardswish_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_run_hardswish_nc_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const float* input,
-  float* output,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_leaky_relu_nc_f16(
-  float negative_slope,
-  uint32_t flags,
-  xnn_operator_t* leaky_relu_op_out);
-
-enum xnn_status xnn_reshape_leaky_relu_nc_f16(
-  xnn_operator_t leaky_relu_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_leaky_relu_nc_f16(
-  xnn_operator_t leaky_relu_op,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_leaky_relu_nc_f32(
-  float negative_slope,
-  uint32_t flags,
-  xnn_operator_t* leaky_relu_op_out);
-
-enum xnn_status xnn_reshape_leaky_relu_nc_f32(
-  xnn_operator_t leaky_relu_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_leaky_relu_nc_f32(
-  xnn_operator_t leaky_relu_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_run_leaky_relu_nc_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const float* input,
-  float* output,
-  float negative_slope,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_leaky_relu_nc_qs8(
-  float negative_slope,
-  int8_t input_zero_point,
-  float input_scale,
-  int8_t output_zero_point,
-  float output_scale,
-  uint32_t flags,
-  xnn_operator_t* leaky_relu_op_out);
-
-enum xnn_status xnn_reshape_leaky_relu_nc_qs8(
-  xnn_operator_t leaky_relu_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_leaky_relu_nc_qs8(
-  xnn_operator_t leaky_relu_op,
-  const int8_t* input,
-  int8_t* output);
-
-enum xnn_status xnn_create_leaky_relu_nc_qu8(
-  float negative_slope,
-  uint8_t input_zero_point,
-  float input_scale,
-  uint8_t output_zero_point,
-  float output_scale,
-  uint32_t flags,
-  xnn_operator_t* leaky_relu_op_out);
-
-enum xnn_status xnn_create_log_nc_f32(
-  uint32_t flags,
-  xnn_operator_t* log_op_out);
-
-enum xnn_status xnn_reshape_log_nc_f32(
-  xnn_operator_t log_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_log_nc_f32(
-  xnn_operator_t log_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_reshape_leaky_relu_nc_qu8(
-  xnn_operator_t leaky_relu_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_leaky_relu_nc_qu8(
-  xnn_operator_t leaky_relu_op,
-  const uint8_t* input,
-  uint8_t* output);
 
 enum xnn_status xnn_create_max_pooling2d_nhwc_f16(
   uint32_t input_padding_top,
@@ -5046,50 +4178,6 @@ enum xnn_status xnn_setup_reduce_nd(
     void* workspace,
     const void* input,
     void* output);
-
-enum xnn_status xnn_create_negate_nc_f16(
-  uint32_t flags,
-  xnn_operator_t* negate_op_out);
-
-enum xnn_status xnn_reshape_negate_nc_f16(
-  xnn_operator_t negate_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_negate_nc_f16(
-  xnn_operator_t negate_op,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_negate_nc_f32(
-  uint32_t flags,
-  xnn_operator_t* negate_op_out);
-
-enum xnn_status xnn_reshape_negate_nc_f32(
-  xnn_operator_t negate_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_negate_nc_f32(
-  xnn_operator_t negate_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_run_negate_nc_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const float* input,
-  float* output,
-  uint32_t flags,
-  pthreadpool_t threadpool);
 
 enum xnn_status xnn_create_resize_bilinear2d_nchw_f32(
   size_t output_height,
@@ -5344,95 +4432,6 @@ enum xnn_status xnn_setup_scaled_dot_product_attention_nhtc_f32(
   const float* mask,
   float* output);
 
-enum xnn_status xnn_create_sigmoid_nc_f16(
-  uint32_t flags,
-  xnn_operator_t* sigmoid_op_out);
-
-enum xnn_status xnn_reshape_sigmoid_nc_f16(
-  xnn_operator_t sigmoid_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_sigmoid_nc_f16(
-  xnn_operator_t sigmoid_op,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_sigmoid_nc_f32(
-  uint32_t flags,
-  xnn_operator_t* sigmoid_op_out);
-
-enum xnn_status xnn_reshape_sigmoid_nc_f32(
-  xnn_operator_t sigmoid_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_sigmoid_nc_f32(
-  xnn_operator_t sigmoid_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_run_sigmoid_nc_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const float* input,
-  float* output,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_sigmoid_nc_qs8(
-  int8_t input_zero_point,
-  float input_scale,
-  int8_t output_zero_point,
-  float output_scale,
-  int8_t output_min,
-  int8_t output_max,
-  uint32_t flags,
-  xnn_operator_t* sigmoid_op_out);
-
-enum xnn_status xnn_reshape_sigmoid_nc_qs8(
-  xnn_operator_t sigmoid_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_sigmoid_nc_qs8(
-  xnn_operator_t sigmoid_op,
-  const int8_t* input,
-  int8_t* output);
-
-enum xnn_status xnn_create_sigmoid_nc_qu8(
-  uint8_t input_zero_point,
-  float input_scale,
-  uint8_t output_zero_point,
-  float output_scale,
-  uint8_t output_min,
-  uint8_t output_max,
-  uint32_t flags,
-  xnn_operator_t* sigmoid_op_out);
-
-enum xnn_status xnn_reshape_sigmoid_nc_qu8(
-  xnn_operator_t sigmoid_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_sigmoid_nc_qu8(
-  xnn_operator_t sigmoid_op,
-  const uint8_t* input,
-  uint8_t* output);
 
 enum xnn_status xnn_create_slice_nd_x16(
   uint32_t flags,
@@ -5574,211 +4573,6 @@ enum xnn_status xnn_setup_space_to_depth_nhwc_x32(
   const void* input,
   void* output);
 
-enum xnn_status xnn_create_square_nc_f16(
-  uint32_t flags,
-  xnn_operator_t* square_op_out);
-
-enum xnn_status xnn_reshape_square_nc_f16(
-  xnn_operator_t square_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_square_nc_f16(
-  xnn_operator_t square_op,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_square_nc_f32(
-  uint32_t flags,
-  xnn_operator_t* square_op_out);
-
-enum xnn_status xnn_reshape_square_nc_f32(
-  xnn_operator_t square_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_square_nc_f32(
-  xnn_operator_t square_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_run_square_nc_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const float* input,
-  float* output,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_square_root_nc_f16(
-  uint32_t flags,
-  xnn_operator_t* sqrt_op_out);
-
-enum xnn_status xnn_reshape_square_root_nc_f16(
-  xnn_operator_t sqrt_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_square_root_nc_f16(
-  xnn_operator_t sqrt_op,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_square_root_nc_f32(
-  uint32_t flags,
-  xnn_operator_t* sqrt_op_out);
-
-enum xnn_status xnn_reshape_square_root_nc_f32(
-  xnn_operator_t sqrt_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_square_root_nc_f32(
-  xnn_operator_t sqrt_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_run_square_root_nc_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const float* input,
-  float* output,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_reciprocal_square_root_nc_f16(
-    uint32_t flags, xnn_operator_t* sqrt_op_out);
-
-enum xnn_status xnn_reshape_reciprocal_square_root_nc_f16(
-    xnn_operator_t sqrt_op, size_t batch_size, size_t channels,
-    size_t input_stride, size_t output_stride, pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_reciprocal_square_root_nc_f16(xnn_operator_t sqrt_op,
-                                                        const void* input,
-                                                        void* output);
-
-enum xnn_status xnn_create_reciprocal_square_root_nc_f32(
-    uint32_t flags, xnn_operator_t* sqrt_op_out);
-
-enum xnn_status xnn_reshape_reciprocal_square_root_nc_f32(
-    xnn_operator_t sqrt_op, size_t batch_size, size_t channels,
-    size_t input_stride, size_t output_stride, pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_reciprocal_square_root_nc_f32(xnn_operator_t sqrt_op,
-                                                        const float* input,
-                                                        float* output);
-
-enum xnn_status xnn_run_reciprocal_square_root_nc_f32(
-    size_t channels, size_t input_stride, size_t output_stride,
-    size_t batch_size, const float* input, float* output, uint32_t flags,
-    pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_tanh_nc_f16(
-  uint32_t flags,
-  xnn_operator_t* tanh_op_out);
-
-enum xnn_status xnn_reshape_tanh_nc_f16(
-  xnn_operator_t tanh_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_tanh_nc_f16(
-  xnn_operator_t tanh_op,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_tanh_nc_f32(
-  uint32_t flags,
-  xnn_operator_t* tanh_op_out);
-
-enum xnn_status xnn_reshape_tanh_nc_f32(
-  xnn_operator_t tanh_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_tanh_nc_f32(
-  xnn_operator_t tanh_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_run_tanh_nc_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const float* input,
-  float* output,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_tanh_nc_qs8(
-  int8_t input_zero_point,
-  float input_scale,
-  int8_t output_zero_point,
-  float output_scale,
-  int8_t output_min,
-  int8_t output_max,
-  uint32_t flags,
-  xnn_operator_t* tanh_op_out);
-
-enum xnn_status xnn_reshape_tanh_nc_qs8(
-  xnn_operator_t tanh_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_tanh_nc_qs8(
-  xnn_operator_t tanh_op,
-  const int8_t* input,
-  int8_t* output);
-
-enum xnn_status xnn_create_tanh_nc_qu8(
-  uint8_t input_zero_point,
-  float input_scale,
-  uint8_t output_zero_point,
-  float output_scale,
-  uint8_t output_min,
-  uint8_t output_max,
-  uint32_t flags,
-  xnn_operator_t* tanh_op_out);
-
-enum xnn_status xnn_reshape_tanh_nc_qu8(
-  xnn_operator_t tanh_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_tanh_nc_qu8(
-  xnn_operator_t tanh_op,
-  const uint8_t* input,
-  uint8_t* output);
-
 enum xnn_status xnn_create_transpose_nd_x8(
   uint32_t flags,
   xnn_operator_t* transpose_op_out);
@@ -5876,50 +4670,6 @@ enum xnn_status xnn_run_transpose_nd_x64(
   size_t num_dims,
   const size_t* input_shape,
   const size_t* output_perm,
-  uint32_t flags,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_create_truncation_nc_f16(
-  uint32_t flags,
-  xnn_operator_t* truncation_op_out);
-
-enum xnn_status xnn_reshape_truncation_nc_f16(
-  xnn_operator_t truncation_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_truncation_nc_f16(
-  xnn_operator_t truncation_op,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_truncation_nc_f32(
-  uint32_t flags,
-  xnn_operator_t* truncation_op_out);
-
-enum xnn_status xnn_reshape_truncation_nc_f32(
-  xnn_operator_t truncation_op,
-  size_t batch_size,
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_truncation_nc_f32(
-  xnn_operator_t truncation_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_run_truncation_nc_f32(
-  size_t channels,
-  size_t input_stride,
-  size_t output_stride,
-  size_t batch_size,
-  const float* input,
-  float* output,
   uint32_t flags,
   pthreadpool_t threadpool);
 

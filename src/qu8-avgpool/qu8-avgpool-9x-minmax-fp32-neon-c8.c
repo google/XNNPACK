@@ -24,19 +24,19 @@ void xnn_qu8_avgpool_minmax_fp32_ukernel_9x__neon_c8(
     uint8_t* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_qu8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_qu8_avgpool_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(output_pixels != 0);
   assert(kernel_elements != 0);
   assert(kernel_elements <= 9);
   assert(channels != 0);
 
-  const int32x4_t vinit_bias = vld1q_dup_s32(&params->fp32_neon.init_bias);
-  const float32x4_t vscale = vld1q_dup_f32(&params->fp32_neon.scale);
-  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->fp32_neon.magic_bias);
-  const int32x4_t vmagic_bias_less_output_zero_point = vld1q_dup_s32(&params->fp32_neon.magic_bias_less_output_zero_point);
-  const uint8x8_t voutput_min = vld1_dup_u8(&params->fp32_neon.output_min);
-  const uint8x8_t voutput_max = vld1_dup_u8(&params->fp32_neon.output_max);
+  const int32x4_t vinit_bias = vdupq_n_s32(params->fp32_scalar.init_bias);
+  const float32x4_t vscale = vdupq_n_f32(params->fp32_scalar.scale);
+  const float32x4_t vmagic_bias = vdupq_n_f32(12582912.0f);
+  const int32x4_t vmagic_bias_less_output_zero_point = vdupq_n_s32(INT32_C(0x4B400000) - (int32_t) params->fp32_scalar.output_zero_point);
+  const uint8x8_t voutput_min = vdup_n_u8(params->fp32_scalar.output_min);
+  const uint8x8_t voutput_max = vdup_n_u8(params->fp32_scalar.output_max);
 
   do {
     const uint8_t* i0 = input[0];

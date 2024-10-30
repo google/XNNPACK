@@ -38,22 +38,16 @@ SET(NON_PROD_SSSE3_MICROKERNEL_SRCS
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x4c8-minmax-ssse3-madd-prfm.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x4c8-minmax-ssse3-madd.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x4c8-minmax-ssse3-madd-prfm.c
-  src/qs8-requantization/qs8-requantization-gemmlowp-ssse3.c
   src/qs8-rsum/gen/qs8-rsum-ssse3-u16.c
   src/qs8-rsum/gen/qs8-rsum-ssse3-u64-acc2.c
   src/qs8-rsum/gen/qs8-rsum-ssse3-u64-acc4.c
   src/qs8-vcvt/gen/qs8-vcvt-ssse3-u16.c
-  src/qs8-vhswish/gen/qs8-vhswish-ssse3-u16.c
-  src/qs8-vhswish/gen/qs8-vhswish-ssse3-u32.c
   src/qs8-vlrelu/gen/qs8-vlrelu-ssse3-u16.c
   src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-ssse3-u4.c
   src/qs16-qs8-vcvt/gen/qs16-qs8-vcvt-ssse3-u8.c
   src/qu8-rdsum/gen/qu8-rdsum-7p7x-ssse3-c16.c
   src/qu8-rdsum/gen/qu8-rdsum-7p7x-ssse3-c32.c
-  src/qu8-requantization/qu8-requantization-gemmlowp-ssse3.c
   src/qu8-vcvt/gen/qu8-vcvt-ssse3-u16.c
-  src/qu8-vhswish/gen/qu8-vhswish-ssse3-u16.c
-  src/qu8-vhswish/gen/qu8-vhswish-ssse3-u32.c
   src/qu8-vlrelu/gen/qu8-vlrelu-ssse3-u16.c
   src/x8-lut/gen/x8-lut-ssse3-u16.c
   src/x8-lut/gen/x8-lut-ssse3-u32.c)

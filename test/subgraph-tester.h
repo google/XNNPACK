@@ -283,8 +283,8 @@ class SubgraphTester {
   }
 
   SubgraphTester& AddConvert(uint32_t input_id, uint32_t output_id) {
-    const xnn_status status = xnn_define_convert(
-        subgraph_.get(), input_id, output_id, 0 /* flags */);
+    const xnn_status status = xnn_define_unary(
+        subgraph_.get(), xnn_unary_convert, /*params=*/nullptr, input_id, output_id, 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
     return *this;
   }
@@ -357,8 +357,11 @@ class SubgraphTester {
   }
 
   SubgraphTester& AddClamp(float output_min, float output_max, uint32_t input_id, uint32_t output_id) {
+    xnn_unary_params params;
+    params.clamp.min = output_min;
+    params.clamp.max = output_max;
     const xnn_status status =
-        xnn_define_clamp(subgraph_.get(), output_min, output_max, input_id, output_id, 0 /* flags */);
+        xnn_define_unary(subgraph_.get(), xnn_unary_clamp, &params, input_id, output_id, 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
@@ -436,11 +439,11 @@ class SubgraphTester {
     return *this;
   }
 
-
   SubgraphTester& AddGlobalAveragePooling(uint32_t input_id, uint32_t output_id) {
-    const xnn_status status = xnn_define_global_average_pooling_2d(
-        subgraph_.get(), -std::numeric_limits<float>::infinity(),
-        std::numeric_limits<float>::infinity(), input_id, output_id, 0 /* flags */);
+    size_t reduction_axes[2] = {1, 2};
+    const xnn_status status = xnn_define_static_reduce(
+        subgraph_.get(), xnn_reduce_mean, 2, &reduction_axes[0], input_id,
+        output_id, 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
@@ -456,15 +459,17 @@ class SubgraphTester {
 
   SubgraphTester& AddHardSwish(uint32_t input_id, uint32_t output_id) {
     const xnn_status status =
-        xnn_define_hardswish(subgraph_.get(), input_id, output_id, 0 /* flags */);
+        xnn_define_unary(subgraph_.get(), xnn_unary_hardswish, nullptr, input_id, output_id, 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
   }
 
   SubgraphTester& AddLeakyRelu(float negative_slope, uint32_t input_id, uint32_t output_id) {
+    xnn_unary_params params;
+    params.leaky_relu.negative_slope = negative_slope;
     const xnn_status status =
-        xnn_define_leaky_relu(subgraph_.get(), negative_slope, input_id, output_id, 0 /* flags */);
+        xnn_define_unary(subgraph_.get(), xnn_unary_leaky_relu, &params, input_id, output_id, 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;
@@ -498,7 +503,7 @@ class SubgraphTester {
   }
 
   SubgraphTester& AddPrelu(uint32_t input_id, uint32_t slope_id, uint32_t output_id) {
-    const xnn_status status = xnn_define_prelu(subgraph_.get(), input_id, slope_id, output_id, /*flags=*/0);
+    const xnn_status status = xnn_define_binary(subgraph_.get(), xnn_binary_prelu, /*params=*/nullptr, input_id, slope_id, output_id, /*flags=*/0);
     EXPECT_EQ(status, xnn_status_success);
 
     return *this;

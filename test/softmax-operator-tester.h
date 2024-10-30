@@ -130,10 +130,10 @@ class SoftMaxOperatorTester {
       for (size_t i = 0; i < batch_size(); i++) {
         float sum_exp = 0.0;
         for (size_t c = 0; c < channels(); c++) {
-          sum_exp += std::exp(input[i * input_stride() + c]);
+          sum_exp += std::exp((float)input[i * input_stride() + c]);
         }
         for (size_t c = 0; c < channels(); c++) {
-          output_ref[i * channels() + c] = std::exp(input[i * input_stride() + c]) / sum_exp;
+          output_ref[i * channels() + c] = std::exp((float)input[i * input_stride() + c]) / sum_exp;
         }
       }
 

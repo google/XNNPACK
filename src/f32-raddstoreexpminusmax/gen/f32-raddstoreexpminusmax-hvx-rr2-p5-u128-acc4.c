@@ -19,7 +19,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u128_acc4(
     const float* max,
     float* output,
     float* sum,
-    const struct xnn_f32_expminus_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const void* params) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
@@ -48,7 +48,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__hvx_rr2_p5_u128_acc4(
   XNN_FORCE_REALIZATION(vc4);
   XNN_FORCE_REALIZATION(vc3);
   XNN_FORCE_REALIZATION(vc2);
-  XNN_FORCE_REALIZATION(vc1);  
+  XNN_FORCE_REALIZATION(vc1);
   XNN_FORCE_REALIZATION(vdenorm_cutoff);
 
   HVX_Vector vacc0 = Q6_V_vzero();

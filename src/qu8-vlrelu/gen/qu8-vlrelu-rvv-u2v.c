@@ -28,7 +28,7 @@ void xnn_qu8_vlrelu_ukernel__rvv_u2v(
   const int32_t input_zero_point = params->scalar.input_zero_point;
   const int32_t multiplier_diff = params->scalar.negative_multiplier ^ params->scalar.positive_multiplier;
   const int32_t multiplier_base = params->scalar.positive_multiplier;
-  const int32_t bias = (params->scalar.output_zero_point << 8) + 128;
+  const int32_t bias = (int32_t) (((uint32_t) (int32_t) params->scalar.output_zero_point) << 8) + 128;
   int32_t n = __riscv_vsetvl_e8m2(batch);
   vint32m8_t bias_i32v = __riscv_vmv_v_x_i32m8(bias, n);
 

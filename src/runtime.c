@@ -387,29 +387,11 @@ static void optimize_tensor_allocation_for_in_place_operations(
   for (uint32_t n = 0; n < runtime->num_ops; n++) {
     const struct xnn_operator_data* node = &runtime->opdata[n];
     switch (node->type) {
-      case xnn_node_type_abs:
-      case xnn_node_type_add2:
-      case xnn_node_type_bankers_rounding:
-      case xnn_node_type_ceiling:
-      case xnn_node_type_clamp:
+      case xnn_node_type_unary_elementwise:
+      case xnn_node_type_binary_elementwise:
       case xnn_node_type_copy:
-      case xnn_node_type_divide:
-      case xnn_node_type_elu:
-      case xnn_node_type_floor:
-      case xnn_node_type_hardswish:
-      case xnn_node_type_leaky_relu:
-      case xnn_node_type_maximum2:
-      case xnn_node_type_minimum2:
-      case xnn_node_type_multiply2:
-      case xnn_node_type_negate:
-      case xnn_node_type_prelu:
-      case xnn_node_type_sigmoid:
       case xnn_node_type_softmax:
-      case xnn_node_type_square:
-      case xnn_node_type_square_root:
-      case xnn_node_type_squared_difference:
       case xnn_node_type_static_reshape:
-      case xnn_node_type_subtract:
         // Valid operation types that can be optimized.
         break;
       default:

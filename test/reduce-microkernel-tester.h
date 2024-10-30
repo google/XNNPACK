@@ -70,7 +70,7 @@ class ReduceMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      xnn_float16 output[2] = {std::nanf(""), std::nanf("")};
+      xnn_float16 output[2];
       reduce(batch_size() * sizeof(xnn_float16), input.data(), output, init_params != nullptr ? &params : nullptr);
 
       // Verify results.

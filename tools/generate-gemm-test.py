@@ -64,7 +64,7 @@ def split_ukernel_name(name):
     mr_packed = mr
 
   requantization = common_parts[-3]
-  if requantization not in ["fp32", "rndnu"]:
+  if requantization not in ["fp32", "rndnu", "rndnu16"]:
     requantization = None
   return mr, nr, kr, sr, mr_packed, vector_tile, requantization, arch, isa, assembly
 

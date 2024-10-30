@@ -3027,8 +3027,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v1,
     v2,
     /*flags=*/0);
@@ -3310,8 +3312,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v17,
     v18,
     /*flags=*/0);
@@ -3339,8 +3343,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v19,
     v20,
     /*flags=*/0);
@@ -3471,8 +3477,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v27,
     v28,
     /*flags=*/0);
@@ -3500,8 +3508,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v29,
     v30,
     /*flags=*/0);
@@ -3646,8 +3656,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v38,
     v39,
     /*flags=*/0);
@@ -3675,8 +3687,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v40,
     v41,
     /*flags=*/0);
@@ -3821,8 +3835,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v49,
     v50,
     /*flags=*/0);
@@ -3850,8 +3866,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v51,
     v52,
     /*flags=*/0);
@@ -3982,8 +4000,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v59,
     v60,
     /*flags=*/0);
@@ -4011,8 +4031,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v61,
     v62,
     /*flags=*/0);
@@ -4157,8 +4179,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v70,
     v71,
     /*flags=*/0);
@@ -4186,8 +4210,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v72,
     v73,
     /*flags=*/0);
@@ -4318,8 +4344,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v80,
     v81,
     /*flags=*/0);
@@ -4347,8 +4375,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v82,
     v83,
     /*flags=*/0);
@@ -4493,8 +4523,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v91,
     v92,
     /*flags=*/0);
@@ -4522,8 +4554,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v93,
     v94,
     /*flags=*/0);
@@ -4668,8 +4702,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v102,
     v103,
     /*flags=*/0);
@@ -4712,8 +4748,10 @@ xnn_subgraph_t FP32MobileNetV3Small() {
     return nullptr;
   }
 
-  status = xnn_define_hardswish(
+  status = xnn_define_unary(
     subgraph,
+    xnn_unary_hardswish,
+    /*params=*/nullptr,
     v105,
     v106,
     /*flags=*/0);

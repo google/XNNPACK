@@ -22,7 +22,7 @@ void xnn_f32_rdsum_ukernel_7p7x__rvv_u4v(
     size_t input_stride,
     const float* zero,
     float* output,
-    const struct xnn_f32_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_scale_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(rows != 0);
   assert(channels != 0);
@@ -30,8 +30,6 @@ void xnn_f32_rdsum_ukernel_7p7x__rvv_u4v(
   assert(output != NULL);
 
   const float scale = params->scalar.scale;
-  const float min = params->scalar.min;
-  const float max = params->scalar.max;
 
   size_t input_increment = 7 * input_stride;
   for (; channels > 0; ) {
@@ -89,7 +87,6 @@ void xnn_f32_rdsum_ukernel_7p7x__rvv_u4v(
       i6 = (const float*) ((uintptr_t) i6 + input_increment);
     }
     acc_f32v = __riscv_vfmul_vf_f32m4(acc_f32v, scale, n);
-    acc_f32v = __riscv_vfmin_vf_f32m4(__riscv_vfmax_vf_f32m4(acc_f32v, min, n), max, n);
     vfloat32m4_t out_f32v = __riscv_vle32_v_f32m4(output, n);
     out_f32v = __riscv_vfadd_vv_f32m4(out_f32v, acc_f32v, n);
     __riscv_vse32_v_f32m4(output, out_f32v, n); output += n;

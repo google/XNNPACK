@@ -115,7 +115,6 @@ extern "C" {
   XNN_INTERNAL void fn_name(                                                  \
       size_t n, const int8_t* input, int8_t* output,                          \
       const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-#include "qs8-vhswish/qs8-vhswish.h"
 #include "qs8-vlrelu/qs8-vlrelu.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 
@@ -124,7 +123,6 @@ extern "C" {
   XNN_INTERNAL void fn_name(                                                  \
       size_t n, const uint8_t* input, uint8_t* output,                        \
       const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-#include "qu8-vhswish/qu8-vhswish.h"
 #include "qu8-vlrelu/qu8-vlrelu.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 

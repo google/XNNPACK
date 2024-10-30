@@ -8,9 +8,31 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
+#include <cstdlib>
 #include <initializer_list>
+#include <limits>
+#include <type_traits>
+
+#include "xnnpack.h"
+#include "xnnpack/common.h"
+#include "xnnpack/math.h"
 
 namespace xnnpack {
+
+template <typename T>
+class NumericLimits {
+ public:
+  static constexpr T min() { return std::numeric_limits<T>::lowest(); }
+  static constexpr T max() { return std::numeric_limits<T>::max(); }
+};
+
+template <>
+class NumericLimits<xnn_float16> {
+ public:
+  static xnn_float16 min() { return static_cast<xnn_float16>(-65504); }
+  static xnn_float16 max() { return static_cast<xnn_float16>(65504); }
+};
 
 // This is a container similar to std::vector, but it leaves the memory
 // uninitialized, supports alignment.
@@ -65,7 +87,7 @@ class Buffer {
   using const_iterator = const T*;
 
   Buffer() : data_(nullptr), size_(0) {}
-  Buffer(size_t size)
+  explicit Buffer(size_t size)
       : data_(reinterpret_cast<T*>(allocate(size * sizeof(T)))), size_(size) {}
   Buffer(size_t size, T value) : Buffer(size) {
     std::fill(begin(), end(), value);

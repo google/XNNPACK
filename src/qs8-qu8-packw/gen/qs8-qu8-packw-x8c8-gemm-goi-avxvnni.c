@@ -73,8 +73,67 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avxvnni(
       __m256i vacc0 = _mm256_setzero_si256();
       __m256i vacc4 = _mm256_setzero_si256();
 
-      // KC main loop multiple of 8x8
       size_t k = kc;
+      // KC main loop multiple of 8x32
+      for (; k >= 32; k -= 32) {
+        const __m256i v0_0123 = _mm256_loadu_si256((const __m256i*) w0);
+        const __m256i v1_0123 = _mm256_loadu_si256((const __m256i*) w1);
+        const __m256i v2_0123 = _mm256_loadu_si256((const __m256i*) w2);
+        const __m256i v3_0123 = _mm256_loadu_si256((const __m256i*) w3);
+        const __m256i v4_0123 = _mm256_loadu_si256((const __m256i*) w4);
+        const __m256i v5_0123 = _mm256_loadu_si256((const __m256i*) w5);
+        const __m256i v6_0123 = _mm256_loadu_si256((const __m256i*) w6);
+        const __m256i v7_0123 = _mm256_loadu_si256((const __m256i*) w7);
+
+        const __m256i v01_02 = _mm256_unpacklo_epi64(v0_0123, v1_0123);
+        const __m256i v01_13 = _mm256_unpackhi_epi64(v0_0123, v1_0123);
+        const __m256i v23_02 = _mm256_unpacklo_epi64(v2_0123, v3_0123);
+        const __m256i v23_13 = _mm256_unpackhi_epi64(v2_0123, v3_0123);
+        const __m256i v45_02 = _mm256_unpacklo_epi64(v4_0123, v5_0123);
+        const __m256i v45_13 = _mm256_unpackhi_epi64(v4_0123, v5_0123);
+        const __m256i v67_02 = _mm256_unpacklo_epi64(v6_0123, v7_0123);
+        const __m256i v67_13 = _mm256_unpackhi_epi64(v6_0123, v7_0123);
+
+
+        const __m256i v0_0 = _mm256_permute2f128_si256(v01_02, v23_02, _MM_SHUFFLE(0, 2, 0, 0));
+        const __m256i v0_1 = _mm256_permute2f128_si256(v01_13, v23_13, _MM_SHUFFLE(0, 2, 0, 0));
+        const __m256i v0_2 = _mm256_permute2f128_si256(v01_02, v23_02, _MM_SHUFFLE(0, 3, 0, 1));
+        const __m256i v0_3 = _mm256_permute2f128_si256(v01_13, v23_13, _MM_SHUFFLE(0, 3, 0, 1));
+        const __m256i v4_0 = _mm256_permute2f128_si256(v45_02, v67_02, _MM_SHUFFLE(0, 2, 0, 0));
+        const __m256i v4_1 = _mm256_permute2f128_si256(v45_13, v67_13, _MM_SHUFFLE(0, 2, 0, 0));
+        const __m256i v4_2 = _mm256_permute2f128_si256(v45_02, v67_02, _MM_SHUFFLE(0, 3, 0, 1));
+        const __m256i v4_3 = _mm256_permute2f128_si256(v45_13, v67_13, _MM_SHUFFLE(0, 3, 0, 1));
+
+        vacc0 = _mm256_dpbusd_avx_epi32(vacc0, vone, v0_0);
+        vacc0 = _mm256_dpbusd_avx_epi32(vacc0, vone, v0_1);
+        vacc0 = _mm256_dpbusd_avx_epi32(vacc0, vone, v0_2);
+        vacc0 = _mm256_dpbusd_avx_epi32(vacc0, vone, v0_3);
+        vacc4 = _mm256_dpbusd_avx_epi32(vacc4, vone, v4_0);
+        vacc4 = _mm256_dpbusd_avx_epi32(vacc4, vone, v4_1);
+        vacc4 = _mm256_dpbusd_avx_epi32(vacc4, vone, v4_2);
+        vacc4 = _mm256_dpbusd_avx_epi32(vacc4, vone, v4_3);
+
+        _mm256_storeu_si256((__m256i *)&out[0],  v0_0);
+        _mm256_storeu_si256((__m256i *)&out[32],  v4_0);
+        _mm256_storeu_si256((__m256i *)&out[64],  v0_1);
+        _mm256_storeu_si256((__m256i *)&out[96],  v4_1);
+        _mm256_storeu_si256((__m256i *)&out[128],  v0_2);
+        _mm256_storeu_si256((__m256i *)&out[160],  v4_2);
+        _mm256_storeu_si256((__m256i *)&out[192],  v0_3);
+        _mm256_storeu_si256((__m256i *)&out[224],  v4_3);
+
+        w0 += 32;
+        w1 += 32;
+        w2 += 32;
+        w3 += 32;
+        w4 += 32;
+        w5 += 32;
+        w6 += 32;
+        w7 += 32;
+        out += 256;
+      }
+
+      // KC main loop multiple of 8x8
       for (; k >= 8; k -= 8) {
         __m256i v0 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w0));
         v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w1)), 0x0C);
@@ -106,7 +165,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avxvnni(
       if (k != 0) {
         assert(k >= 1 && k <= 7);
 
-        __m256i vmask = _mm256_srli_epi64(_mm256_set1_epi32(-1), (8 - k) * sizeof(int8_t) * 8);
+        const __m256i vmask = _mm256_srli_epi64(_mm256_set1_epi32(-1), (8 - k) * sizeof(int8_t) * 8);
 
         __m256i v0 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w0));
         v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w1)), 0x0C);
@@ -232,7 +291,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avxvnni(
       if (k != 0) {
         assert(k >= 1 && k <= 7);
 
-        __m256i vmask = _mm256_srli_epi64(_mm256_set1_epi32(-1), (8 - k) * sizeof(int8_t) * 8);
+        const __m256i vmask = _mm256_srli_epi64(_mm256_set1_epi32(-1), (8 - k) * sizeof(int8_t) * 8);
 
         __m256i v0 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w0));
         v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w1)), 0x0C);
