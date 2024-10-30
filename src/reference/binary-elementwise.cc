@@ -324,6 +324,7 @@ const struct xnn_binary_elementwise_config* xnn_init_binary_reference_config(
     case xnn_binary_invalid:
       return nullptr;
   }
+  return nullptr;
 }
 
 }  // extern "C"

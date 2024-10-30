@@ -352,7 +352,7 @@ class MaxPoolMicrokernelTester {
 
       // Prepare parameters.
       xnn_f16_minmax_params params;
-      init_params(&params, output_min, output_max);
+      init_params(&params, static_cast<xnn_float16>(output_min), static_cast<xnn_float16>(output_max));
 
       // Clamp reference results.
       for (float& output_value : output_ref) {

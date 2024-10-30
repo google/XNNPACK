@@ -115,9 +115,11 @@ class BinaryElementwiseOperatorTester {
         return (a - b) * (a - b);
       case xnn_binary_prelu:
         return a < 0 ? a * b : a;
-      default:
-        return std::nanf("");
+      case xnn_binary_invalid:
+        break;
     }
+    XNN_UNREACHABLE;
+    return 0.0;
   }
 
   BinaryElementwiseOperatorTester& input1_shape(

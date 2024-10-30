@@ -244,8 +244,6 @@ class SubgraphTester {
     AddDynamicTensorF32(dims, external_id, XNN_VALUE_FLAG_EXTERNAL_OUTPUT);
     size_t num_elements = NumElements(dims);
     xnnpack::Buffer<char> output(num_elements * sizeof(float));
-    float* data = reinterpret_cast<float*>(output.data());
-    std::fill(data, data + num_elements, std::nanf(""));
     auto it = external_tensors_.insert({external_id, std::move(output)});
     EXPECT_TRUE(it.second);
     return *this;

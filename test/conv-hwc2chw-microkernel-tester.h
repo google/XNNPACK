@@ -401,7 +401,7 @@ class ConvHWC2CHWMicrokernelTester {
 
     xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       batch_size() * ((input_height() * input_width() - 1) * input_pixel_stride() + input_channels()));
-    xnnpack::Buffer<xnn_float16> zero(XNN_EXTRA_BYTES / sizeof(xnn_float16) + input_width() * input_channels(), 0.0f);
+    xnnpack::Buffer<xnn_float16> zero(XNN_EXTRA_BYTES / sizeof(xnn_float16) + input_width() * input_channels(), 0);
     xnnpack::Buffer<xnn_float16> kernel(output_channels() * kernel_height() * kernel_width() * input_channels());
     xnnpack::Buffer<xnn_float16> bias(output_channels());
     xnnpack::Buffer<xnn_float16> output(batch_size() * output_channels() * output_height() * output_width());
@@ -420,8 +420,8 @@ class ConvHWC2CHWMicrokernelTester {
         input_channels(),
         output_channels_tile(),
         kernel_height(), kernel_width(),
-        reinterpret_cast<const uint16_t*>(kernel.data()), 
-        reinterpret_cast<const uint16_t*>(bias.data()), 
+        reinterpret_cast<const uint16_t*>(kernel.data()),
+        reinterpret_cast<const uint16_t*>(bias.data()),
         reinterpret_cast<uint16_t*>(packed_weights.data()), nullptr);
 
       // Compute reference results, without clamping.
@@ -465,7 +465,7 @@ class ConvHWC2CHWMicrokernelTester {
 
       // Prepare parameters.
       xnn_f16_minmax_params params;
-      init_params(&params, output_min, output_max);
+      init_params(&params, static_cast<xnn_float16>(output_min), static_cast<xnn_float16>(output_max));
 
       // Call optimized micro-kernel.
       conv(

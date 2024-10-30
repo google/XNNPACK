@@ -42,7 +42,7 @@ static void f32_rmin(
     init_params(&params);
   }
 
-  float output = std::nanf("");
+  float output;
   for (auto _ : state) {
     rmin(elements * sizeof(float), input.data(), &output, &params);
   }

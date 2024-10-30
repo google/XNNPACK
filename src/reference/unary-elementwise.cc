@@ -31,7 +31,7 @@ void unary_ukernel_unquantized(size_t input_batch_size_bytes, const TIn* x,
   const size_t batch_size = input_batch_size_bytes / sizeof(TIn);
   Operator op(params);
   for (size_t i = 0; i < batch_size; ++i) {
-    y[i] = op(x[i]);
+    y[i] = static_cast<TOut>(op(x[i]));
   }
 }
 
@@ -56,7 +56,7 @@ void unary_ukernel_quantized_input(size_t input_batch_size_bytes, const TIn* x,
   for (size_t i = 0; i < batch_size; ++i) {
     const float x_i = dequantize(x[i], params->reference.x_scale,
                                  params->reference.x_zero_point);
-    y[i] = op(x_i);
+    y[i] = static_cast<TOut>(op(x_i));
   }
 }
 
@@ -248,10 +248,10 @@ struct ClampOp {
   T max;
 
   explicit ClampOp(const xnn_unary_uparams* params)
-      : min(params->reference.params.clamp.min),
-        max(params->reference.params.clamp.max) {}
+      : min(static_cast<T>(params->reference.params.clamp.min)),
+        max(static_cast<T>(params->reference.params.clamp.max)) {}
 
-  T operator()(T x) const { return std::min<T>(std::max<T>(x, min), max); }
+  T operator()(T x) const { return std::min(std::max(x, min), max); }
 };
 
 template <typename T>
@@ -269,7 +269,7 @@ struct GELUOp {
   explicit GELUOp(const xnn_unary_uparams*) {}
 
   T operator()(T x) const {
-    return (x / 2) * (1 + std::erf(x * std::sqrt(2) / 2));
+    return static_cast<T>((x / 2) * (1 + std::erf(x * std::sqrt(2) / 2)));
   }
 };
 
@@ -278,7 +278,7 @@ struct HardSwishOp {
   explicit HardSwishOp(const xnn_unary_uparams*) {}
 
   T operator()(T x) const {
-    return (x / 6) * std::max<T>(std::min<T>(x + 3, 6), 0);
+    return static_cast<T>((x / 6) * std::max<T>(std::min<T>(x + 3, 6), 0));
   }
 };
 
@@ -347,7 +347,7 @@ struct SigmoidOp {
       return 0;
     } else {
       const double e = std::exp(static_cast<double>(x));
-      return e / (1 + e);
+      return static_cast<T>(e / (1 + e));
     }
   }
 };

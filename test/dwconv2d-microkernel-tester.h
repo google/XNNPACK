@@ -238,7 +238,7 @@ class DWConv2DMicrokernelTester {
 
     xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> input(
         input_height() * input_width() + 2 * XNN_EXTRA_BYTES);
-    xnnpack::Buffer<xnn_float16> zero(input_width() + 2 * XNN_EXTRA_BYTES, 0.0f);
+    xnnpack::Buffer<xnn_float16> zero(input_width() + 2 * XNN_EXTRA_BYTES, 0);
     xnnpack::Buffer<xnn_float16> packed_weights(kernel_size() + 1);
     xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> output(output_height() *
                                                           output_width());

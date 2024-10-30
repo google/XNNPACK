@@ -46,7 +46,7 @@ static void f16_gemm(benchmark::State& state,
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
-  
+
   xnnpack::Buffer<xnn_float16> a(mc * kc + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::generate(a.begin(), a.end(), f32rng);
   xnnpack::Buffer<xnn_float16> k(nc * kc);
@@ -62,17 +62,16 @@ static void f16_gemm(benchmark::State& state,
 
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
   xnn_pack_f16_gemm_goi_w(/*groups=*/1, nc, kc, nr, kr, sr,
-                          reinterpret_cast<const uint16_t*>(k.data()), 
-                          reinterpret_cast<const uint16_t*>(b.data()), 
-                          /*scale=*/nullptr, 
-                          reinterpret_cast<uint16_t*>(w.data()), 
+                          reinterpret_cast<const uint16_t*>(k.data()),
+                          reinterpret_cast<const uint16_t*>(b.data()),
+                          /*scale=*/nullptr,
+                          reinterpret_cast<uint16_t*>(w.data()),
                           /*extra_bytes=*/0, /*params=*/nullptr);
   xnnpack::Buffer<xnn_float16> c(c_elements * num_buffers);
 
   // Prepare minmax parameters.
   xnn_f16_minmax_params params;
-  init_params(&params,
-    -INFINITY, INFINITY);
+  init_params(&params, static_cast<xnn_float16>(-INFINITY), static_cast<xnn_float16>(INFINITY));
 
   size_t buffer_index = 0;
   for (auto _ : state) {

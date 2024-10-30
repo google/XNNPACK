@@ -52,14 +52,14 @@ static void f16_raddstoreexpminusmax(
   size_t buffer_index = 0;
   for (auto _ : state) {
     state.PauseTiming();
-    xnn_float16 x_max = std::nanf("");
+    xnn_float16 x_max;
     rmax(elements * sizeof(xnn_float16), x.data(), &x_max, /*params=*/nullptr);
     if (++buffer_index == num_buffers) {
       buffer_index = 0;
     }
     state.ResumeTiming();
 
-    xnn_float16 y_sum = std::nanf("");
+    xnn_float16 y_sum;
     raddstoreexpminusmax(elements * sizeof(xnn_float16), x.data(), &x_max, y.data() + buffer_index * packed_elements, &y_sum, nullptr);
   }
 

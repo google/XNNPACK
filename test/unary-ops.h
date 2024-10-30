@@ -516,7 +516,7 @@ void UnaryReferenceImpl(
       y_i = std::min<float>(y_i, xnnpack::NumericLimits<Out>::max());
       y[i] = static_cast<Out>(std::lround(y_i));
     } else {
-      y[i] = y_i;
+      y[i] = static_cast<Out>(y_i);
     }
   }
 }

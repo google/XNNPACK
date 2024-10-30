@@ -43,7 +43,7 @@ struct UniformDistribution<xnn_float16> {
 
   template <class Generator>
   xnn_float16 operator()(Generator& g) {
-    return dist(g);
+    return static_cast<xnn_float16>(dist(g));
   }
 };
 

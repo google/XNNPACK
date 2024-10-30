@@ -138,9 +138,9 @@ class VMulCAddCMicrokernelTester {
       const xnn_float16* x_data = inplace() ? y.data() : x.data();
 
       xnn_pack_f16_vmulcaddc_w(channels(), channel_tile(),
-                               reinterpret_cast<const uint16_t*>(scale.data()), 
-                               reinterpret_cast<const uint16_t*>(bias.data()), 
-                               reinterpret_cast<uint16_t*>(packed_w.data()), 
+                               reinterpret_cast<const uint16_t*>(scale.data()),
+                               reinterpret_cast<const uint16_t*>(bias.data()),
+                               reinterpret_cast<uint16_t*>(packed_w.data()),
                                nullptr);
 
       // Compute reference results.
@@ -161,7 +161,7 @@ class VMulCAddCMicrokernelTester {
 
       // Prepare parameters.
       xnn_f16_minmax_params params;
-      init_params(&params, y_min, y_max);
+      init_params(&params, static_cast<xnn_float16>(y_min), static_cast<xnn_float16>(y_max));
 
       // Call optimized micro-kernel.
       vmulcaddc(rows(), channels() * sizeof(xnn_float16),

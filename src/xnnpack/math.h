@@ -539,7 +539,7 @@ extern "C" {
 
 XNN_INLINE static xnn_float16 xnn_float16_from_float(float f) {
 #ifdef XNN_HAVE_FLOAT16
-  return f;
+  return (xnn_float16) f;
 #else
   struct xnn_float16 result;
   result.value = fp16_ieee_from_fp32_value(f);
@@ -591,7 +591,7 @@ XNN_INLINE static xnn_bfloat16 xnn_bfloat16_from_bits(uint16_t x) {
 
 XNN_INLINE static xnn_float16 xnn_float16_zero() {
 #ifdef XNN_HAVE_FLOAT16
-  return 0.0f;
+  return (xnn_float16) 0.0f;
 #else
   struct xnn_float16 result;
   result.value = 0;

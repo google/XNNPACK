@@ -48,7 +48,7 @@ static void f32_raddextexp(
       buffer_index = 0;
     }
 
-    float y_sum[2] = { nanf(""), nanf("") };
+    float y_sum[2];
     raddextexp(elements * sizeof(float), x.data(), y_sum);
   }
 
