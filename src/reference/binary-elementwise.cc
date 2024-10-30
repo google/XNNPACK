@@ -261,6 +261,13 @@ xnn_float16 copysign(xnn_float16 a, xnn_float16 b) {
   return xnn_float16_from_bits((a_bits & 0x7FFF) | (sign_bit & 0x8000));
 }
 
+xnn_bfloat16 copysign(xnn_bfloat16 a, xnn_bfloat16 b) {
+  uint16_t a_bits = xnn_bfloat16_to_bits(a);
+  uint16_t b_bits = xnn_bfloat16_to_bits(b);
+  uint16_t sign_bit = b_bits & 0x8000;
+  return xnn_bfloat16_from_bits((a_bits & 0x7FFF) | (sign_bit & 0x8000));
+}
+
 template <typename T>
 struct CopysignOp {
   T operator()(T a, T b) const { return copysign(a, b); }
@@ -272,6 +279,8 @@ struct CopysignOp {
       return get_config<float, op<float>>();                                 \
     case xnn_datatype_fp16:                                                  \
       return get_config<xnn_float16, op<xnn_float16>>();                     \
+    case xnn_datatype_bf16:                                                  \
+      return get_config<xnn_bfloat16, op<xnn_bfloat16>>();                   \
     case xnn_datatype_qint8:                                                 \
       return get_config<int8_t, op<float>>(/*quantized=*/std::true_type());  \
     case xnn_datatype_quint8:                                                \
@@ -288,6 +297,8 @@ struct CopysignOp {
       return get_config<float, op<float>>();                                 \
     case xnn_datatype_fp16:                                                  \
       return get_config<xnn_float16, op<xnn_float16>>();                     \
+    case xnn_datatype_bf16:                                                  \
+      return get_config<xnn_bfloat16, op<xnn_bfloat16>>();                   \
     case xnn_datatype_qint8:                                                 \
       return get_config<int8_t, op<float>>(/*quantized=*/std::true_type());  \
     case xnn_datatype_quint8:                                                \

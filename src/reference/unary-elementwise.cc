@@ -194,6 +194,10 @@ const xnn_unary_elementwise_config* get_convert_config(xnn_datatype output,
       return get_convert_config<TIn, xnn_float16>(
           InputQuantized(),
           /*output_quantized=*/std::false_type());
+    case xnn_datatype_bf16:
+      return get_convert_config<TIn, xnn_bfloat16>(
+          InputQuantized(),
+          /*output_quantized=*/std::false_type());
     case xnn_datatype_qint8:
       return get_convert_config<TIn, int8_t>(
           InputQuantized(),
@@ -219,6 +223,9 @@ const xnn_unary_elementwise_config* get_convert_config(xnn_datatype input,
                                        /*input_quantized=*/std::false_type());
     case xnn_datatype_fp16:
       return get_convert_config<xnn_float16>(
+          output, /*input_quantized=*/std::false_type());
+    case xnn_datatype_bf16:
+      return get_convert_config<xnn_bfloat16>(
           output, /*input_quantized=*/std::false_type());
     case xnn_datatype_qint8:
       return get_convert_config<int8_t>(output,
@@ -406,6 +413,8 @@ struct ExpOp {
       return get_config<float, op<float>>();                                 \
     case xnn_datatype_fp16:                                                  \
       return get_config<xnn_float16, op<xnn_float16>>();                     \
+    case xnn_datatype_bf16:                                                  \
+      return get_config<xnn_bfloat16, op<xnn_bfloat16>>();                     \
     case xnn_datatype_qint8:                                                 \
       return get_config<int8_t, op<float>>(/*quantized=*/std::true_type());  \
     case xnn_datatype_quint8:                                                \
@@ -420,6 +429,8 @@ struct ExpOp {
       return get_config<float, op<float>>();                                 \
     case xnn_datatype_fp16:                                                  \
       return get_config<xnn_float16, op<xnn_float16>>();                     \
+    case xnn_datatype_bf16:                                                  \
+      return get_config<xnn_bfloat16, op<xnn_bfloat16>>();                     \
     case xnn_datatype_qint8:                                                 \
       return get_config<int8_t, op<float>>(/*quantized=*/std::true_type());  \
     case xnn_datatype_quint8:                                                \
@@ -427,7 +438,7 @@ struct ExpOp {
     case xnn_datatype_int32:                                                 \
       return get_config<int32_t, op<int32_t>>();                             \
     default:                                                                 \
-      return nullptr;                                                        \
+    return nullptr;                                                        \
   }
 
 const xnn_unary_elementwise_config* get_config(xnn_unary_operator op,

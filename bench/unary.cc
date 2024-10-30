@@ -222,14 +222,17 @@ tflite::BuiltinOperator xnn_unary_operator_to_tflite(xnn_unary_operator op) {
 template <typename T>
 struct TypeToTfliteType {
   using type = T;
+  static constexpr auto tensor_type = tflite::TensorTypeFor<T>::value;
 };
 template <>
 struct TypeToTfliteType<xnn_float16> {
   using type = TfLiteFloat16;
+  static constexpr auto tensor_type = tflite::TensorType_FLOAT16;
 };
 template <>
 struct TypeToTfliteType<xnn_bfloat16> {
   using type = TfLiteBFloat16;
+  static constexpr auto tensor_type = tflite::TensorType_BFLOAT16;
 };
 
 template <typename In, typename Out, class BuildInQuantization,
@@ -252,11 +255,11 @@ static void benchmark_tflite_unary_operator(
   const std::array<flatbuffers::Offset<tflite::Tensor>, 2> tensors{{
       tflite::CreateTensor(
           builder, builder.CreateVector<int32_t>(shape.data(), shape.size()),
-          tflite::TensorTypeFor<typename TypeToTfliteType<In>::type>::value,
+          TypeToTfliteType<In>::tensor_type,
           /*buffer=*/0, /*name=*/0, in_quantization(builder)),
       tflite::CreateTensor(
           builder, builder.CreateVector<int32_t>(shape.data(), shape.size()),
-          tflite::TensorTypeFor<typename TypeToTfliteType<Out>::type>::value,
+          TypeToTfliteType<Out>::tensor_type,
           /*buffer=*/0, /*name=*/0, out_quantization(builder)),
   }};
 
@@ -302,8 +305,7 @@ static void benchmark_tflite_unary_operator(
   auto f32dist = std::uniform_real_distribution<float>(
       std::max<float>(std::numeric_limits<In>::lowest(), -128.0f),
       std::min<float>(std::numeric_limits<In>::max(), 127.0f));
-  In* input_ptr = reinterpret_cast<In*>(
-      interpreter->typed_tensor<typename TypeToTfliteType<In>::type>(0));
+  In* input_ptr = reinterpret_cast<In*>(interpreter->tensor(0)->data.raw);
   std::generate(input_ptr, input_ptr + batch_size,
                 [&]() { return f32dist(rng); });
 
@@ -347,6 +349,7 @@ static auto CreateTfLiteQuantizationParameters(
 bool is_quantized(int8_t) { return true; }
 bool is_quantized(uint8_t) { return true; }
 bool is_quantized(xnn_float16) { return false; }
+bool is_quantized(xnn_bfloat16) { return false; }
 bool is_quantized(float) { return false; }
 
 template <typename In, typename Out>
@@ -440,6 +443,7 @@ static void benchmark_tflite_convert(benchmark::State& state) {
 #define BENCHMARK_OP(op)                  \
   BENCHMARK_OP_TYPE(op, f32, float)       \
   BENCHMARK_OP_TYPE(op, f16, xnn_float16) \
+  BENCHMARK_OP_TYPE(op, bf16, xnn_bfloat16) \
   BENCHMARK_OP_TYPE(op, qs8, int8_t)      \
   BENCHMARK_OP_TYPE(op, qu8, uint8_t)
 
@@ -464,21 +468,31 @@ BENCHMARK_OP(tanh);
 BENCHMARK_CONVERT(qs8_qs8, int8_t, int8_t);
 BENCHMARK_CONVERT(qs8_qu8, int8_t, uint8_t);
 BENCHMARK_CONVERT(qs8_f16, int8_t, xnn_float16);
+BENCHMARK_CONVERT(qs8_bf16, int8_t, xnn_bfloat16);
 BENCHMARK_CONVERT(qs8_f32, int8_t, float);
 
 BENCHMARK_CONVERT(qu8_qs8, uint8_t, int8_t);
 BENCHMARK_CONVERT(qu8_qu8, uint8_t, uint8_t);
 BENCHMARK_CONVERT(qu8_f16, uint8_t, xnn_float16);
+BENCHMARK_CONVERT(qu8_bf16, uint8_t, xnn_bfloat16);
 BENCHMARK_CONVERT(qu8_f32, uint8_t, float);
 
 BENCHMARK_CONVERT(f16_qs8, xnn_float16, int8_t);
 BENCHMARK_CONVERT(f16_qu8, xnn_float16, uint8_t);
 // BENCHMARK_CONVERT(f16_f16, xnn_float16, xnn_float16);
+BENCHMARK_CONVERT(f16_bf16, xnn_float16, xnn_bfloat16);
 BENCHMARK_CONVERT(f16_f32, xnn_float16, float);
+
+BENCHMARK_CONVERT(bf16_qs8, xnn_bfloat16, int8_t);
+BENCHMARK_CONVERT(bf16_qu8, xnn_bfloat16, uint8_t);
+BENCHMARK_CONVERT(bf16_f16, xnn_bfloat16, xnn_float16);
+// BENCHMARK_CONVERT(bf16_bf16, xnn_bfloat16, xnn_bfloat16);
+BENCHMARK_CONVERT(bf16_f32, xnn_bfloat16, float);
 
 BENCHMARK_CONVERT(f32_qs8, float, int8_t);
 BENCHMARK_CONVERT(f32_qu8, float, uint8_t);
 BENCHMARK_CONVERT(f32_f16, float, xnn_float16);
+BENCHMARK_CONVERT(f32_bf16, float, xnn_bfloat16);
 // BENCHMARK_CONVERT(f32_f32, float, float);
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
