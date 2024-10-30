@@ -16,6 +16,7 @@
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/dwconv.h"
+#include "xnnpack/hardware-config.h"
 #include "xnnpack/indirection.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microkernel-utils.h"
@@ -1592,6 +1593,37 @@ static void f32_dwconv(
   BENCHMARK_DWCONV(f32_dwconv_5f5m5l4c4s4r__wasmrelaxedsimd_fma_acc2)
 #endif
 
+#if XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
+static void f32_dwconv_3p8vc__rvv(benchmark::State& state, const char* net) {
+  f32_dwconv(state,
+    xnn_f32_dwconv_minmax_ukernel_3p8vc__rvv,
+    xnn_init_f32_minmax_scalar_params,
+    8 * (xnn_init_hardware_config()->vlenb / sizeof(float)) /* channel tile */, 3 /* primary tile */);
+}
+static void f32_dwconv_4p8vc__rvv(benchmark::State& state, const char* net) {
+  f32_dwconv(state,
+    xnn_f32_dwconv_minmax_ukernel_4p8vc__rvv,
+    xnn_init_f32_minmax_scalar_params,
+    8 * (xnn_init_hardware_config()->vlenb / sizeof(float)) /* channel tile */, 4 /* primary tile */);
+}
+static void f32_dwconv_9p8vc__rvv(benchmark::State& state, const char* net) {
+  f32_dwconv(state,
+    xnn_f32_dwconv_minmax_ukernel_9p8vc__rvv,
+    xnn_init_f32_minmax_scalar_params,
+    8 * (xnn_init_hardware_config()->vlenb / sizeof(float)) /* channel tile */, 9 /* primary tile */);
+}
+static void f32_dwconv_25p8vc__rvv(benchmark::State& state, const char* net) {
+  f32_dwconv(state,
+    xnn_f32_dwconv_minmax_ukernel_25p8vc__rvv,
+    xnn_init_f32_minmax_scalar_params,
+    8 * (xnn_init_hardware_config()->vlenb / sizeof(float)) /* channel tile */, 25 /* primary tile */);
+}
+
+BENCHMARK_DWCONV(f32_dwconv_3p8vc__rvv)
+BENCHMARK_DWCONV(f32_dwconv_4p8vc__rvv)
+BENCHMARK_DWCONV(f32_dwconv_9p8vc__rvv)
+BENCHMARK_DWCONV(f32_dwconv_25p8vc__rvv)
+#endif // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
 
 static void f32_dwconv_4p1c__scalar(benchmark::State& state, const char* net) {
   f32_dwconv(state,
