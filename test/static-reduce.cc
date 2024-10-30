@@ -61,23 +61,6 @@ struct Param {
   bool keep_dims;
 };
 
-namespace {
-constexpr xnn_compute_type GetComputeType(xnn_datatype t) {
-  switch (t) {
-    case xnn_datatype_fp16:
-      return xnn_compute_type_fp16;
-    case xnn_datatype_fp32:
-      return xnn_compute_type_fp32;
-    case xnn_datatype_qint8:
-      return xnn_compute_type_qs8;
-    case xnn_datatype_quint8:
-      return xnn_compute_type_qu8;
-    default:
-      XNN_UNREACHABLE;
-  }
-}
-}  // namespace
-
 namespace xnnpack {
 template <class T>
 class ReduceTestBase : public ::testing::TestWithParam<Param> {
@@ -321,7 +304,6 @@ TEST_P(ReduceTest, define) {
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_reduce_operator_to_node_type(p.reduce_operator));
-  ASSERT_EQ(node->compute_type, GetComputeType(p.datatype));
   ASSERT_EQ(node->params.reduce.num_reduction_axes, reduction_axes.size());
   for (size_t i = 0; i < reduction_axes.size(); i++) {
     ASSERT_EQ(node->params.reduce.reduction_axes[i], reduction_axes[i]);

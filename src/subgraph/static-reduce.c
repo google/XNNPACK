@@ -297,28 +297,6 @@ enum xnn_status xnn_define_static_reduce(
     return status;
   }
 
-  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
-  switch (output_value->datatype) {
-    case xnn_datatype_fp16:
-      compute_type = xnn_compute_type_fp16;
-      break;
-    case xnn_datatype_fp32:
-      compute_type = xnn_compute_type_fp32;
-      break;
-    case xnn_datatype_qint8:
-      compute_type = xnn_compute_type_qs8;
-      break;
-    case xnn_datatype_quint8:
-      compute_type = xnn_compute_type_qu8;
-      break;
-    default:
-      xnn_log_error(
-        "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(node_type), output_id,
-        xnn_datatype_to_string(output_value->datatype), output_value->datatype);
-      return xnn_status_invalid_parameter;
-  }
-
   if (num_reduction_axes == 0) {
     xnn_log_error(
       "failed to define %s operator with %zu reduction axes: the number of reduction axes must be non-zero",
@@ -342,7 +320,6 @@ enum xnn_status xnn_define_static_reduce(
   }
 
   node->type = node_type;
-  node->compute_type = compute_type;
   node->params.reduce.num_reduction_axes = num_reduction_axes;
   memcpy(node->params.reduce.reduction_axes, reduction_axes, num_reduction_axes * sizeof(size_t));
   node->num_inputs = 1;

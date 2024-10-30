@@ -143,7 +143,6 @@ TEST_F(MaxPooling2DTestQS8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_max_pooling_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qs8);
   ASSERT_EQ(node->params.pooling_2d.padding_top, padding_top);
   ASSERT_EQ(node->params.pooling_2d.padding_right, padding_right);
   ASSERT_EQ(node->params.pooling_2d.padding_bottom, padding_bottom);
@@ -195,7 +194,6 @@ TEST_F(MaxPooling2DTestQU8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_max_pooling_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qu8);
   ASSERT_EQ(node->params.pooling_2d.padding_top, padding_top);
   ASSERT_EQ(node->params.pooling_2d.padding_right, padding_right);
   ASSERT_EQ(node->params.pooling_2d.padding_bottom, padding_bottom);
@@ -246,7 +244,6 @@ TEST_F(MaxPooling2DTestF16, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_max_pooling_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp16);
   ASSERT_EQ(node->params.pooling_2d.padding_top, padding_top);
   ASSERT_EQ(node->params.pooling_2d.padding_right, padding_right);
   ASSERT_EQ(node->params.pooling_2d.padding_bottom, padding_bottom);
@@ -297,7 +294,6 @@ TEST_F(MaxPooling2DTestF32, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_max_pooling_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->params.pooling_2d.padding_top, padding_top);
   ASSERT_EQ(node->params.pooling_2d.padding_right, padding_right);
   ASSERT_EQ(node->params.pooling_2d.padding_bottom, padding_bottom);
@@ -633,7 +629,6 @@ TEST_F(MaxPooling2DTestF32, Reshape)
   ASSERT_EQ(subgraph->num_nodes, 1);
   struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_max_pooling_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);
@@ -706,7 +701,6 @@ TEST_F(MaxPooling2DTestF32, ReshapeWithPadding)
   ASSERT_EQ(subgraph->num_nodes, 1);
   struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_max_pooling_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);
@@ -778,7 +772,6 @@ TEST_F(MaxPooling2DTestF32, ReshapeWithPaddingAndDilation)
   ASSERT_EQ(subgraph->num_nodes, 1);
   struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_max_pooling_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);

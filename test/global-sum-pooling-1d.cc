@@ -109,7 +109,6 @@ TEST_F(GlobalSumPooling1DTestF16, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_static_sum);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp16);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);
@@ -148,7 +147,6 @@ TEST_F(GlobalSumPooling1DTestF32, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_static_sum);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);

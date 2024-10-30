@@ -53,7 +53,6 @@ TEST_F(CopyTestQS8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_copy);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qs8);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);
@@ -91,7 +90,6 @@ TEST_F(CopyTestQU8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_copy);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qu8);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);
@@ -125,7 +123,6 @@ TEST_F(CopyTestF16, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_copy);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp16);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);
@@ -159,7 +156,6 @@ TEST_F(CopyTestF32, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_copy);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);

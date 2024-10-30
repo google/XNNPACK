@@ -210,13 +210,11 @@ static enum xnn_status setup_convert_operator(
 
 void xnn_init_convert_node(
   struct xnn_node* node,
-  enum xnn_compute_type compute_type,
   uint32_t input_id,
   uint32_t output_id,
   uint32_t flags)
 {
   node->type = xnn_node_type_convert;
-  node->compute_type = compute_type;
   node->num_inputs = 1;
   node->inputs[0] = input_id;
   node->num_outputs = 1;
@@ -310,79 +308,6 @@ static enum xnn_status setup_unary_operator(
   return xnn_setup_unary_elementwise_nc(op, input_data, output_data);
 }
 
-static inline enum xnn_compute_type validate_datatypes(
-  enum xnn_datatype input_datatype,
-  enum xnn_datatype output_datatype)
-{
-  switch (input_datatype) {
-    case xnn_datatype_fp32:
-      switch (output_datatype) {
-        case xnn_datatype_fp32:
-          return xnn_compute_type_fp32;
-        case xnn_datatype_fp16:
-          return xnn_compute_type_fp32_to_fp16;
-        case xnn_datatype_qdint8:
-          return xnn_compute_type_fp32_to_qd8;
-        case xnn_datatype_qpint8:
-          return xnn_compute_type_fp32_to_qp8;
-        case xnn_datatype_qint8:
-          return xnn_compute_type_fp32_to_qs8;
-        case xnn_datatype_quint8:
-          return xnn_compute_type_fp32_to_qu8;
-        default:
-          break;
-      }
-      break;
-    case xnn_datatype_fp16:
-      switch (output_datatype) {
-        case xnn_datatype_fp32:
-          return xnn_compute_type_fp16_to_fp32;
-        case xnn_datatype_fp16:
-          return xnn_compute_type_fp16;
-        case xnn_datatype_qint8:
-          return xnn_compute_type_fp16_to_qs8;
-        case xnn_datatype_qdint8:
-          return xnn_compute_type_fp16_to_qd8;
-        default:
-          break;
-      }
-      break;
-    case xnn_datatype_qint8:
-      switch (output_datatype) {
-        case xnn_datatype_fp16:
-          return xnn_compute_type_qs8_to_fp16;
-        case xnn_datatype_fp32:
-          return xnn_compute_type_qs8_to_fp32;
-        case xnn_datatype_qint8:
-          return xnn_compute_type_qs8;
-        default:
-          break;
-      }
-      break;
-    case xnn_datatype_quint8:
-      switch (output_datatype) {
-        case xnn_datatype_fp32:
-          return xnn_compute_type_qu8_to_fp32;
-        case xnn_datatype_quint8:
-          return xnn_compute_type_qu8;
-        default:
-          break;
-      }
-      break;
-    case xnn_datatype_int32:
-      switch (output_datatype) {
-        case xnn_datatype_int32:
-          return xnn_compute_type_s32;
-        default:
-          break;
-      }
-      break;
-    default:
-      break;
-  }
-  return xnn_compute_type_invalid;
-}
-
 enum xnn_status xnn_define_unary(
   xnn_subgraph_t subgraph,
   enum xnn_unary_operator type,
@@ -431,10 +356,6 @@ enum xnn_status xnn_define_unary(
     return status;
   }
 
-  enum xnn_compute_type compute_type = validate_datatypes(input_value->datatype, output_value->datatype);
-  // TODO: compute_type may be `invalid`, but that seems to not cause any problems.
-  // We should probably just remove compute types entirely.
-
   if (type == xnn_unary_convert) {
     // Some convert types are not elementwise ops, handle them now.
     if (output_value->datatype == xnn_datatype_qdint8 ||
@@ -470,7 +391,7 @@ enum xnn_status xnn_define_unary(
         return xnn_status_out_of_memory;
       }
 
-      xnn_init_convert_node(node, compute_type, input_id, output_id, flags);
+      xnn_init_convert_node(node, input_id, output_id, flags);
       return xnn_status_success;
     }
   }
@@ -482,7 +403,6 @@ enum xnn_status xnn_define_unary(
 
   node->type = xnn_node_type_unary_elementwise;
   node->unary_operator = type;
-  node->compute_type = compute_type;
   node->num_inputs = 1;
   node->inputs[0] = input_id;
   node->num_outputs = 1;

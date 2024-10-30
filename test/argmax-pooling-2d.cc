@@ -122,7 +122,6 @@ TEST_F(ArgmaxPoolingTestF32, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_argmax_pooling_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->params.pooling_2d.padding_top, input_padding_top);
   ASSERT_EQ(node->params.pooling_2d.padding_right, input_padding_right);
   ASSERT_EQ(node->params.pooling_2d.padding_bottom, input_padding_bottom);
@@ -262,7 +261,6 @@ TEST_F(ArgmaxPoolingTestF32, reshape_output)
   ASSERT_EQ(subgraph->num_nodes, 1);
   struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_argmax_pooling_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 2);

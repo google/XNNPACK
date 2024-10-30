@@ -202,31 +202,6 @@ typedef enum xnn_status (*xnn_setup_operator_fn)(
   size_t num_values,
   pthreadpool_t threadpool);
 
-enum xnn_compute_type {
-  xnn_compute_type_invalid = 0,
-  xnn_compute_type_fp32,
-  xnn_compute_type_fp16,
-  xnn_compute_type_bf16,
-  xnn_compute_type_qc8,
-  xnn_compute_type_qd8_to_fp16,
-  xnn_compute_type_qd8_to_fp32,
-  xnn_compute_type_qp8_to_fp32,
-  xnn_compute_type_qs8,
-  xnn_compute_type_qu8,
-  xnn_compute_type_fp16_to_qs8,
-  xnn_compute_type_fp16_to_qd8,
-  xnn_compute_type_fp16_to_fp32,
-  xnn_compute_type_fp32_to_fp16,
-  xnn_compute_type_fp32_to_qd8,
-  xnn_compute_type_fp32_to_qp8,
-  xnn_compute_type_fp32_to_qs8,
-  xnn_compute_type_fp32_to_qu8,
-  xnn_compute_type_qs8_to_fp16,
-  xnn_compute_type_qs8_to_fp32,
-  xnn_compute_type_qu8_to_fp32,
-  xnn_compute_type_s32,
-};
-
 struct xnn_node {
   enum xnn_node_type type;
   union {
@@ -234,7 +209,6 @@ struct xnn_node {
     enum xnn_unary_operator unary_operator;
   };
   uint32_t id;
-  enum xnn_compute_type compute_type;
   /// Static parameters of the operator node.
   union {
     struct {
@@ -561,7 +535,6 @@ void xnn_value_copy(struct xnn_value* dst_value, const struct xnn_value* src_val
 
 void xnn_init_convert_node(
   struct xnn_node* node,
-  enum xnn_compute_type compute_type,
   uint32_t input_id,
   uint32_t output_id,
   uint32_t flags);

@@ -716,13 +716,10 @@ enum xnn_status xnn_define_scaled_dot_product_attention(
     return xnn_status_invalid_parameter;
   }
 
-  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output->datatype) {
     case xnn_datatype_fp16:
-      compute_type = xnn_compute_type_fp16;
       break;
     case xnn_datatype_fp32:
-      compute_type = xnn_compute_type_fp32;
       break;
     default:
       xnn_log_error(
@@ -738,7 +735,6 @@ enum xnn_status xnn_define_scaled_dot_product_attention(
   }
 
   node->type = node_type;
-  node->compute_type = compute_type;
   node->params.scaled_dot_product_attention.cap_type = cap_type;
   if (cap_type == xnn_attention_logits_cap_type_tanh) {
     memcpy(&node->params.scaled_dot_product_attention.cap_tanh_params, cap_params,

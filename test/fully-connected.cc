@@ -186,7 +186,6 @@ TEST_F(FullyConnectedTestQP8F32QC4W, define) {
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qp8_to_fp32);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 3);
@@ -475,7 +474,6 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api) {
   ASSERT_EQ(subgraph->num_nodes, 2);
   const struct xnn_node* fc_node = &subgraph->nodes[1];
   ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(fc_node->compute_type, xnn_compute_type_qp8_to_fp32);
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(
@@ -641,7 +639,6 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_with_reshape) {
   ASSERT_EQ(subgraph->num_nodes, 2);
   const struct xnn_node* fc_node = &subgraph->nodes[1];
   ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(fc_node->compute_type, xnn_compute_type_qp8_to_fp32);
 
   ASSERT_EQ(
       xnn_status_success,
@@ -823,7 +820,6 @@ TEST_F(FullyConnectedTestQP8F32QC4W, matches_operator_api_transposed_weights) {
   ASSERT_EQ(subgraph->num_nodes, 2);
   const struct xnn_node* fc_node = &subgraph->nodes[1];
   ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(fc_node->compute_type, xnn_compute_type_qp8_to_fp32);
 
   ASSERT_EQ(
       xnn_status_success,
@@ -912,7 +908,6 @@ TEST_F(FullyConnectedTestQC8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qc8);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 3);
@@ -965,7 +960,6 @@ TEST_F(FullyConnectedTestQS8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qs8);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 3);
@@ -1019,7 +1013,6 @@ TEST_F(FullyConnectedTestQU8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qu8);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 3);
@@ -1076,7 +1069,6 @@ TEST_P(FullyConnectedTestF16, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp16);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, use_bias ? 3 : 2);
@@ -1130,7 +1122,6 @@ TEST_F(FullyConnectedTestF32, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 3);
@@ -1185,7 +1176,6 @@ TEST_F(FullyConnectedTestF32QC4W, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 3);
@@ -1235,7 +1225,6 @@ TEST_F(FullyConnectedTestF32QC4W, define_without_bias)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 2);
@@ -1289,7 +1278,6 @@ TEST_F(FullyConnectedTestF32QC8W, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 3);
@@ -1337,7 +1325,6 @@ TEST_F(FullyConnectedTestF32QC8W, define_without_bias)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 2);
@@ -1391,7 +1378,6 @@ TEST_F(DynamicFullyConnectedTestF32, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 3);
@@ -2825,7 +2811,6 @@ TEST_F(FullyConnectedTestQD8F16QC4W, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qd8_to_fp16);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 3);
@@ -2996,7 +2981,6 @@ TEST_F(FullyConnectedTestQD8F16QB4W, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qd8_to_fp16);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 3);
@@ -3166,7 +3150,6 @@ TEST_F(FullyConnectedTestQD8F16QC8W, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qd8_to_fp16);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 3);
@@ -3326,7 +3309,6 @@ TEST_F(FullyConnectedTestQD8F32QC8W, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qd8_to_fp32);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 3);
@@ -3493,7 +3475,6 @@ TEST_F(FullyConnectedTestQD8F32QC4W, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qd8_to_fp32);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 3);
@@ -3938,7 +3919,6 @@ TEST_F(FullyConnectedTestQD8F32QB4W, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qd8_to_fp32);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 3);
@@ -4109,7 +4089,6 @@ TEST_F(FullyConnectedTestF32, reshape)
   ASSERT_EQ(subgraph->num_values, 4);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 3);
@@ -4228,7 +4207,6 @@ TEST_F(FullyConnectedTestQP8F32QB4W, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qp8_to_fp32);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 3);

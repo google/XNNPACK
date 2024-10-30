@@ -214,7 +214,6 @@ TEST_F(DepthwiseConvolutionTestQC8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_depthwise_convolution_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qc8);
   ASSERT_EQ(node->params.depthwise_convolution_2d.input_padding_top, input_padding_top);
   ASSERT_EQ(node->params.depthwise_convolution_2d.input_padding_right, input_padding_right);
   ASSERT_EQ(node->params.depthwise_convolution_2d.input_padding_bottom, input_padding_bottom);
@@ -287,7 +286,6 @@ TEST_F(DepthwiseConvolutionTestQS8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_depthwise_convolution_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qs8);
   ASSERT_EQ(node->params.depthwise_convolution_2d.input_padding_top, input_padding_top);
   ASSERT_EQ(node->params.depthwise_convolution_2d.input_padding_right, input_padding_right);
   ASSERT_EQ(node->params.depthwise_convolution_2d.input_padding_bottom, input_padding_bottom);
@@ -360,7 +358,6 @@ TEST_F(DepthwiseConvolutionTestQU8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_depthwise_convolution_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qu8);
   ASSERT_EQ(node->params.depthwise_convolution_2d.input_padding_top, input_padding_top);
   ASSERT_EQ(node->params.depthwise_convolution_2d.input_padding_right, input_padding_right);
   ASSERT_EQ(node->params.depthwise_convolution_2d.input_padding_bottom, input_padding_bottom);
@@ -430,7 +427,6 @@ TEST_F(DepthwiseConvolutionTestF16, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_depthwise_convolution_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp16);
   ASSERT_EQ(node->params.depthwise_convolution_2d.input_padding_top, input_padding_top);
   ASSERT_EQ(node->params.depthwise_convolution_2d.input_padding_right, input_padding_right);
   ASSERT_EQ(node->params.depthwise_convolution_2d.input_padding_bottom, input_padding_bottom);
@@ -500,7 +496,6 @@ TEST_F(DepthwiseConvolutionTestF32, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_depthwise_convolution_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->params.depthwise_convolution_2d.input_padding_top, input_padding_top);
   ASSERT_EQ(node->params.depthwise_convolution_2d.input_padding_right, input_padding_right);
   ASSERT_EQ(node->params.depthwise_convolution_2d.input_padding_bottom, input_padding_bottom);

@@ -606,7 +606,7 @@ static enum xnn_status setup_convolution_operator(
   }
 }
 
-static inline enum xnn_compute_type validate_datatypes_with_bias(
+static inline bool validate_datatypes_with_bias(
   enum xnn_datatype input_datatype,
   enum xnn_datatype filter_datatype,
   enum xnn_datatype bias_datatype,
@@ -618,12 +618,12 @@ static inline enum xnn_compute_type validate_datatypes_with_bias(
           bias_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32)
       {
-        return xnn_compute_type_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_fp16 &&
           bias_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp16) {
         // Flag: XNN_FLAG_FP32_STATIC_WEIGHTS
-        return xnn_compute_type_fp16;
+        return true;
       }
       break;
     case xnn_datatype_qint8:
@@ -631,7 +631,7 @@ static inline enum xnn_compute_type validate_datatypes_with_bias(
           bias_datatype == xnn_datatype_qint32 &&
           output_datatype == xnn_datatype_qint8)
       {
-        return xnn_compute_type_qs8;
+        return true;
       }
       break;
     case xnn_datatype_qcint8:
@@ -639,17 +639,17 @@ static inline enum xnn_compute_type validate_datatypes_with_bias(
           bias_datatype == xnn_datatype_qcint32 &&
           output_datatype == xnn_datatype_qint8)
       {
-        return xnn_compute_type_qc8;
+        return true;
       } else if (input_datatype == xnn_datatype_qdint8 &&
           bias_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32)
       {
-        return xnn_compute_type_qd8_to_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_qdint8 &&
           bias_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp16)
       {
-        return xnn_compute_type_qd8_to_fp16;
+        return true;
       }
       break;
     case xnn_datatype_quint8:
@@ -657,16 +657,16 @@ static inline enum xnn_compute_type validate_datatypes_with_bias(
           bias_datatype == xnn_datatype_qint32 &&
           output_datatype == xnn_datatype_quint8)
       {
-        return xnn_compute_type_qu8;
+        return true;
       }
       break;
     default:
       XNN_UNREACHABLE;
   }
-  return xnn_compute_type_invalid;
+  return false;
 }
 
-static inline enum xnn_compute_type validate_datatypes_without_bias(
+static inline bool validate_datatypes_without_bias(
   enum xnn_datatype input_datatype,
   enum xnn_datatype filter_datatype,
   enum xnn_datatype output_datatype)
@@ -674,35 +674,35 @@ static inline enum xnn_compute_type validate_datatypes_without_bias(
   switch (filter_datatype) {
     case xnn_datatype_fp32:
       if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_fp16) {
         // Flag: XNN_FLAG_FP32_STATIC_WEIGHTS
-        return xnn_compute_type_fp16;
+        return true;
       }
       break;
     case xnn_datatype_qint8:
       if (input_datatype == xnn_datatype_qint8 && output_datatype == xnn_datatype_qint8) {
-        return xnn_compute_type_qs8;
+        return true;
       }
       break;
     case xnn_datatype_qcint8:
       if (input_datatype == xnn_datatype_qint8 && output_datatype == xnn_datatype_qint8) {
-        return xnn_compute_type_qc8;
+        return true;
       } else if (input_datatype == xnn_datatype_qdint8 && output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_qd8_to_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_qdint8 && output_datatype == xnn_datatype_fp16) {
-        return xnn_compute_type_qd8_to_fp16;
+        return true;
       }
       break;
     case xnn_datatype_quint8:
       if (input_datatype == xnn_datatype_quint8 && output_datatype == xnn_datatype_quint8) {
-        return xnn_compute_type_qu8;
+        return true;
       }
       break;
     default:
       XNN_UNREACHABLE;
   }
-  return xnn_compute_type_invalid;
+  return false;
 }
 
 enum xnn_status xnn_define_convolution_2d(
@@ -964,11 +964,9 @@ enum xnn_status xnn_define_convolution_2d(
       return xnn_status_invalid_parameter;
   }
 
-  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   if (bias_value != NULL) {
-    compute_type = validate_datatypes_with_bias(
-      input_value->datatype, filter_value->datatype, bias_value->datatype, output_value->datatype);
-    if (compute_type == xnn_compute_type_invalid) {
+    if (!validate_datatypes_with_bias(
+      input_value->datatype, filter_value->datatype, bias_value->datatype, output_value->datatype)) {
       xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32 ", filter ID #%" PRIu32 ", bias ID #%" PRIu32 ", and output ID #%" PRIu32
         ": mismatching datatypes across input (%s), filter (%s), bias (%s), and output (%s)",
@@ -980,9 +978,8 @@ enum xnn_status xnn_define_convolution_2d(
       return xnn_status_invalid_parameter;
     }
   } else {
-    compute_type = validate_datatypes_without_bias(
-      input_value->datatype, filter_value->datatype, output_value->datatype);
-    if (compute_type == xnn_compute_type_invalid) {
+    if (!validate_datatypes_without_bias(
+      input_value->datatype, filter_value->datatype, output_value->datatype)) {
       xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32 ", filter ID #%" PRIu32 ", and output ID #%" PRIu32
         ": mismatching datatypes across input (%s), filter (%s), and output (%s)",
@@ -1019,7 +1016,6 @@ enum xnn_status xnn_define_convolution_2d(
   }
 
   node->type = xnn_node_type_convolution_2d;
-  node->compute_type = compute_type;
   node->params.convolution_2d.input_padding_top = input_padding_top;
   node->params.convolution_2d.input_padding_right = input_padding_right;
   node->params.convolution_2d.input_padding_bottom = input_padding_bottom;

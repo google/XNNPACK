@@ -306,12 +306,28 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph)
 #define XNN_LAYOUT_FLAG_COMPATIBLE_NCHW2NHWC 4
 #define XNN_LAYOUT_FLAG_INCOMPATIBLE_CLUSTER 8
 
+static bool all_values_fp(xnn_subgraph_t subgraph, const struct xnn_node* node) {
+  for (uint32_t i = 0; i < node->num_inputs; i++) {
+    if (subgraph->values[node->inputs[i]].datatype != xnn_datatype_fp16 &&
+        subgraph->values[node->inputs[i]].datatype != xnn_datatype_fp32) {
+      return false;
+    }
+  }
+  for (uint32_t i = 0; i < node->num_outputs; i++) {
+    if (subgraph->values[node->outputs[i]].datatype != xnn_datatype_fp16 &&
+        subgraph->values[node->outputs[i]].datatype != xnn_datatype_fp32) {
+      return false;
+    }
+  }
+  return true;
+}
+
 uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* node) {
-  if (node->compute_type != xnn_compute_type_fp16 && node->compute_type != xnn_compute_type_fp32) {
+  if (!all_values_fp(subgraph, node)) {
     if (node->type != xnn_node_type_invalid) {
       xnn_log_info(
-          "Node %s compute type %d is incompatible with sparse inference",
-          xnn_node_type_to_string(node->type), node->compute_type);
+          "Node %s compute type is incompatible with sparse inference",
+          xnn_node_type_to_string(node->type));
     }
     return 0;
   }
@@ -780,6 +796,34 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
   }
 }
 
+static bool any_values_fp32(xnn_subgraph_t subgraph, const struct xnn_node* node) {
+  for (uint32_t i = 0; i < node->num_inputs; i++) {
+    if (subgraph->values[node->inputs[i]].datatype == xnn_datatype_fp32) {
+      return true;
+    }
+  }
+  for (uint32_t i = 0; i < node->num_outputs; i++) {
+    if (subgraph->values[node->outputs[i]].datatype == xnn_datatype_fp32) {
+      return true;
+    }
+  }
+  return false;
+}
+
+static bool all_values_fp32(xnn_subgraph_t subgraph, const struct xnn_node* node) {
+  for (uint32_t i = 0; i < node->num_inputs; i++) {
+    if (subgraph->values[node->inputs[i]].datatype != xnn_datatype_fp32) {
+      return false;
+    }
+  }
+  for (uint32_t i = 0; i < node->num_outputs; i++) {
+    if (subgraph->values[node->outputs[i]].datatype != xnn_datatype_fp32) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
 {
   xnn_log_info("Analyzing subgraph for FP16 compatibility");
@@ -800,15 +844,9 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       continue;
     }
 
-    switch (node->compute_type) {
-      case xnn_compute_type_fp32:
-      case xnn_compute_type_fp32_to_qd8:
-      case xnn_compute_type_qd8_to_fp32:
-      case xnn_compute_type_qs8_to_fp32:
-        break;
-      default:
-        xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) is not FP32", n, xnn_node_type_to_string(node->type));
-        return false;
+    if (!any_values_fp32(subgraph, node)) {
+      xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) is not FP32", n, xnn_node_type_to_string(node->type));
+      return false;
     }
     switch (node->type) {
       case xnn_node_type_binary_elementwise:
@@ -862,7 +900,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         subgraph->values[node->outputs[0]].fp16_compatible = true;
         break;
       case xnn_node_type_convolution_2d:
-        if (node->compute_type == xnn_compute_type_qd8_to_fp32) {
+        if (subgraph->values[node->inputs[0]].datatype == xnn_datatype_qdint8) {
           subgraph->values[node->outputs[0]].fp16_compatible = true;
         } else {
           subgraph->values[node->inputs[0]].fp16_compatible = true;
@@ -870,29 +908,23 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         }
         break;
       case xnn_node_type_fully_connected:
-        if (node->compute_type == xnn_compute_type_qd8_to_fp32) {
+        if (subgraph->values[node->inputs[0]].datatype == xnn_datatype_qdint8) {
           subgraph->values[node->outputs[0]].fp16_compatible = true;
-        } else if (node->compute_type == xnn_compute_type_fp32) {
+        } else if (all_values_fp32(subgraph, node)) {
           subgraph->values[node->inputs[0]].fp16_compatible = true;
           subgraph->values[node->outputs[0]].fp16_compatible = true;
         } else {
-          xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s). Invalid compute type: %d",
-            n, xnn_node_type_to_string(node->type), node->compute_type);
+          xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s). Invalid compute type",
+            n, xnn_node_type_to_string(node->type));
           return false;
         }
         break;
       case xnn_node_type_convert:
-        switch (node->compute_type) {
-          case xnn_compute_type_fp32_to_qd8:
-          case xnn_compute_type_fp32_to_qs8:
-          case xnn_compute_type_fp32_to_qu8:
-            subgraph->values[node->inputs[0]].fp16_compatible = true;
-            break;
-          case xnn_compute_type_qs8_to_fp32:
-          case xnn_compute_type_qu8_to_fp32:
-            subgraph->values[node->outputs[0]].fp16_compatible = true;
-          default:
-            break;
+        if (subgraph->values[node->inputs[0]].datatype == xnn_datatype_fp32) {
+          subgraph->values[node->inputs[0]].fp16_compatible = true;
+        }
+        if (subgraph->values[node->outputs[0]].datatype == xnn_datatype_fp32) {
+          subgraph->values[node->outputs[0]].fp16_compatible = true;
         }
         break;
       default:
@@ -1027,22 +1059,6 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       continue;
     }
 
-    switch (node->compute_type) {
-      case xnn_compute_type_fp32:
-        node->compute_type = xnn_compute_type_fp16;
-        break;
-      case xnn_compute_type_fp32_to_qd8:
-        node->compute_type = xnn_compute_type_fp16_to_qd8;
-        break;
-      case xnn_compute_type_qd8_to_fp32:
-        node->compute_type = xnn_compute_type_qd8_to_fp16;
-        break;
-      case xnn_compute_type_qs8_to_fp32:
-        node->compute_type = xnn_compute_type_qs8_to_fp16;
-        break;
-      default:
-        XNN_UNREACHABLE;
-    }
     if (node->type == xnn_node_type_static_constant_pad) {
       node->params.static_pad.padding_value =
         fp16_ieee_from_fp32_value(uint32_as_float(node->params.static_pad.padding_value));
@@ -1076,7 +1092,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         assert(output_node >= subgraph->nodes);
         xnn_node_clear(output_node);
         output_node->id = output_node_id;
-        xnn_init_convert_node(output_node, xnn_compute_type_fp16_to_fp32, value->id, value->fp32_id, 0 /* flags */);
+        xnn_init_convert_node(output_node, value->id, value->fp32_id, 0 /* flags */);
         output_node -= 1;
       }
     }
@@ -1101,7 +1117,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
           assert(output_node >= subgraph->nodes);
           xnn_node_clear(output_node);
           output_node->id = output_node_id;
-          xnn_init_convert_node(output_node, xnn_compute_type_fp32_to_fp16, value->fp32_id, value->id, 0 /* flags */);
+          xnn_init_convert_node(output_node, value->fp32_id, value->id, 0 /* flags */);
           output_node -= 1;
         }
       }

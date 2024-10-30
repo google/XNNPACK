@@ -67,7 +67,6 @@ TEST_F(StaticConstantPadTestInt8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_static_constant_pad);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qs8);
   for (size_t i = 0; i < dims.size(); i++) {
     ASSERT_EQ(node->params.static_pad.pre_paddings[i], pre_paddings[i]);
     ASSERT_EQ(node->params.static_pad.post_paddings[i], post_paddings[i]);
@@ -119,7 +118,6 @@ TEST_F(StaticConstantPadTestUint8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_static_constant_pad);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qu8);
   for (size_t i = 0; i < dims.size(); i++) {
     ASSERT_EQ(node->params.static_pad.pre_paddings[i], pre_paddings[i]);
     ASSERT_EQ(node->params.static_pad.post_paddings[i], post_paddings[i]);
@@ -172,7 +170,6 @@ TEST_F(StaticConstantPadTestF16, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_static_constant_pad);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp16);
   for (size_t i = 0; i < dims.size(); i++) {
     ASSERT_EQ(node->params.static_pad.pre_paddings[i], pre_paddings[i]);
     ASSERT_EQ(node->params.static_pad.post_paddings[i], post_paddings[i]);
@@ -222,7 +219,6 @@ TEST_F(StaticConstantPadTestF32, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_static_constant_pad);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   for (size_t i = 0; i < dims.size(); i++) {
     ASSERT_EQ(node->params.static_pad.pre_paddings[i], pre_paddings[i]);
     ASSERT_EQ(node->params.static_pad.post_paddings[i], post_paddings[i]);

@@ -40,7 +40,6 @@ TEST(AVERAGE_POOLING_2D_THEN_CLAMP, fusion) {
   ASSERT_EQ(tester.Node(0)->activation.output_min, output_min);
   ASSERT_EQ(tester.Node(0)->activation.output_max, output_max);
   ASSERT_EQ(tester.Node(0)->outputs[0], output_id);
-  ASSERT_EQ(tester.Node(1)->compute_type, xnn_compute_type_invalid);
 
   ASSERT_EQ(unoptimized_output, optimized_output);
 }
@@ -72,7 +71,6 @@ TEST(CLAMP_THEN_CLAMP, fusion) {
   ASSERT_EQ(tester.Node(0)->activation.output_min, output_min);
   ASSERT_EQ(tester.Node(0)->activation.output_max, output_max);
   ASSERT_EQ(tester.Node(0)->outputs[0], output_id);
-  ASSERT_EQ(tester.Node(1)->compute_type, xnn_compute_type_invalid);
 
   ASSERT_EQ(unoptimized_output, optimized_output);
 }
@@ -113,7 +111,6 @@ TEST(CONVOLUTION_2D_THEN_CLAMP, fusion) {
   ASSERT_EQ(tester.Node(0)->activation.output_min, output_min);
   ASSERT_EQ(tester.Node(0)->activation.output_max, output_max);
   ASSERT_EQ(tester.Node(0)->outputs[0], output_id);
-  ASSERT_EQ(tester.Node(1)->compute_type, xnn_compute_type_invalid);
 
   ASSERT_EQ(unoptimized_output, optimized_output);
 }
@@ -155,7 +152,6 @@ TEST(DECONVOLUTION_2D_THEN_CLAMP, fusion) {
   ASSERT_EQ(tester.Node(0)->activation.output_min, output_min);
   ASSERT_EQ(tester.Node(0)->activation.output_max, output_max);
   ASSERT_EQ(tester.Node(0)->outputs[0], output_id);
-  ASSERT_EQ(tester.Node(1)->compute_type, xnn_compute_type_invalid);
 
   ASSERT_EQ(unoptimized_output, optimized_output);
 }
@@ -195,7 +191,6 @@ TEST(DEPTHWISE_CONVOLUTION_2D_THEN_CLAMP, fusion) {
   ASSERT_EQ(tester.Node(0)->activation.output_min, output_min);
   ASSERT_EQ(tester.Node(0)->activation.output_max, output_max);
   ASSERT_EQ(tester.Node(0)->outputs[0], output_id);
-  ASSERT_EQ(tester.Node(1)->compute_type, xnn_compute_type_invalid);
 
   ASSERT_EQ(unoptimized_output, optimized_output);
 }
@@ -227,7 +222,6 @@ TEST(FULLY_CONNECTED_2D_THEN_CLAMP, fusion) {
   ASSERT_EQ(tester.Node(0)->activation.output_min, output_min);
   ASSERT_EQ(tester.Node(0)->activation.output_max, output_max);
   ASSERT_EQ(tester.Node(0)->outputs[0], output_id);
-  ASSERT_EQ(tester.Node(1)->compute_type, xnn_compute_type_invalid);
 
   ASSERT_EQ(unoptimized_output, optimized_output);
 }
@@ -263,7 +257,6 @@ TEST(FULLY_CONNECTED_2D_THEN_COPY_THEN_FULLY_CONNECTED, fusion) {
   ASSERT_EQ(tester.NumOperators(), 2);
   // Copy is optimized away.
   ASSERT_EQ(tester.Node(0)->outputs[0], reshape_output_id);
-  ASSERT_EQ(tester.Node(1)->compute_type, xnn_compute_type_invalid);
 
   ASSERT_EQ(unoptimized_output, optimized_output);
 }
@@ -291,7 +284,6 @@ TEST(MAX_POOLING_THEN_CLAMP, fusion) {
   ASSERT_EQ(tester.Node(0)->activation.output_min, output_min);
   ASSERT_EQ(tester.Node(0)->activation.output_max, output_max);
   ASSERT_EQ(tester.Node(0)->outputs[0], output_id);
-  ASSERT_EQ(tester.Node(1)->compute_type, xnn_compute_type_invalid);
 
   ASSERT_EQ(unoptimized_output, optimized_output);
 }
@@ -331,7 +323,6 @@ TEST(CONSTANT_PAD_THEN_CONVOLUTION, fusion) {
   xnnpack::Buffer<float> optimized_output = tester.RunWithFusion<float>();
 
   ASSERT_EQ(tester.NumOperators(), 1);
-  ASSERT_EQ(tester.Node(0)->compute_type, xnn_compute_type_invalid);
   ASSERT_EQ(tester.Node(1)->params.convolution_2d.input_padding_top, 2);
   ASSERT_EQ(tester.Node(1)->params.convolution_2d.input_padding_left, 4);
   ASSERT_EQ(tester.Node(1)->params.convolution_2d.input_padding_right, 8);
@@ -441,7 +432,6 @@ TEST(CONSTANT_PAD_THEN_DEPTHWISE_CONVOLUTION, fusion) {
   xnnpack::Buffer<float> optimized_output = tester.RunWithFusion<float>();
 
   ASSERT_EQ(tester.NumOperators(), 1);
-  ASSERT_EQ(tester.Node(0)->compute_type, xnn_compute_type_invalid);
   ASSERT_EQ(tester.Node(1)->params.depthwise_convolution_2d.input_padding_top, 2);
   ASSERT_EQ(tester.Node(1)->params.depthwise_convolution_2d.input_padding_left, 4);
   ASSERT_EQ(tester.Node(1)->params.depthwise_convolution_2d.input_padding_right, 8);

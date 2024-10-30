@@ -199,7 +199,6 @@ TEST_F(DeconvolutionTestQS8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_deconvolution_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qc8);
   ASSERT_EQ(node->params.deconvolution_2d.padding_top, padding_top);
   ASSERT_EQ(node->params.deconvolution_2d.padding_right, padding_right);
   ASSERT_EQ(node->params.deconvolution_2d.padding_bottom, padding_bottom);
@@ -271,7 +270,6 @@ TEST_F(DeconvolutionTestQU8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_deconvolution_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qu8);
   ASSERT_EQ(node->params.deconvolution_2d.padding_top, padding_top);
   ASSERT_EQ(node->params.deconvolution_2d.padding_right, padding_right);
   ASSERT_EQ(node->params.deconvolution_2d.padding_bottom, padding_bottom);
@@ -344,7 +342,6 @@ TEST_F(DeconvolutionTestF16, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_deconvolution_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp16);
   ASSERT_EQ(node->params.deconvolution_2d.padding_top, padding_top);
   ASSERT_EQ(node->params.deconvolution_2d.padding_right, padding_right);
   ASSERT_EQ(node->params.deconvolution_2d.padding_bottom, padding_bottom);
@@ -420,7 +417,6 @@ TEST_F(DeconvolutionTestQD8F32QC8W, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_deconvolution_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qd8_to_fp32);
   ASSERT_EQ(node->params.deconvolution_2d.padding_top, padding_top);
   ASSERT_EQ(node->params.deconvolution_2d.padding_right, padding_right);
   ASSERT_EQ(node->params.deconvolution_2d.padding_bottom, padding_bottom);
@@ -493,7 +489,6 @@ TEST_F(DeconvolutionTestF32, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_deconvolution_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->params.deconvolution_2d.padding_top, padding_top);
   ASSERT_EQ(node->params.deconvolution_2d.padding_right, padding_right);
   ASSERT_EQ(node->params.deconvolution_2d.padding_bottom, padding_bottom);

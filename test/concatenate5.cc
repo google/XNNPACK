@@ -213,7 +213,6 @@ TEST_F(Concatenate5TestQS8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_concatenate5);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qs8);
   ASSERT_EQ(node->params.concatenate.axis, axis);
   ASSERT_EQ(node->num_inputs, 5);
   ASSERT_EQ(node->inputs[0], input1_id);
@@ -289,7 +288,6 @@ TEST_F(Concatenate5TestQU8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_concatenate5);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qu8);
   ASSERT_EQ(node->params.concatenate.axis, axis);
   ASSERT_EQ(node->num_inputs, 5);
   ASSERT_EQ(node->inputs[0], input1_id);
@@ -359,7 +357,6 @@ TEST_F(Concatenate5TestF16, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_concatenate5);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp16);
   ASSERT_EQ(node->params.concatenate.axis, axis);
   ASSERT_EQ(node->num_inputs, 5);
   ASSERT_EQ(node->inputs[0], input1_id);
@@ -429,7 +426,6 @@ TEST_F(Concatenate5TestF32, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_concatenate5);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->params.concatenate.axis, axis);
   ASSERT_EQ(node->num_inputs, 5);
   ASSERT_EQ(node->inputs[0], input1_id);
@@ -1008,7 +1004,6 @@ TEST_F(Concatenate5TestF32, Reshape)
   ASSERT_EQ(subgraph->num_nodes, 1);
   struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_concatenate5);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->num_inputs, 5);
   ASSERT_EQ(node->inputs[0], input1_id);
   ASSERT_EQ(node->inputs[1], input2_id);

@@ -196,7 +196,7 @@ static enum xnn_status setup_fully_connected_operator(
   }
 }
 
-static inline enum xnn_compute_type validate_datatypes_with_bias(
+static inline bool validate_datatypes_with_bias(
   enum xnn_datatype input_datatype,
   enum xnn_datatype kernel_datatype,
   enum xnn_datatype bias_datatype,
@@ -208,21 +208,21 @@ static inline enum xnn_compute_type validate_datatypes_with_bias(
           bias_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32)
       {
-        return xnn_compute_type_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_fp16 &&
           bias_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp16) {
         // Flag: XNN_FLAG_FP32_STATIC_WEIGHTS
-        return xnn_compute_type_fp16;
+        return true;
       }
       break;
     default:
       XNN_UNREACHABLE;
   }
-  return xnn_compute_type_invalid;
+  return false;
 }
 
-static inline enum xnn_compute_type validate_datatypes_without_bias(
+static inline bool validate_datatypes_without_bias(
   enum xnn_datatype input_datatype,
   enum xnn_datatype kernel_datatype,
   enum xnn_datatype output_datatype)
@@ -230,16 +230,16 @@ static inline enum xnn_compute_type validate_datatypes_without_bias(
   switch (kernel_datatype) {
     case xnn_datatype_fp32:
       if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_fp16) {
         // Flag: XNN_FLAG_FP32_STATIC_WEIGHTS
-        return xnn_compute_type_fp16;
+        return true;
       }
       break;
     default:
       XNN_UNREACHABLE;
   }
-  return xnn_compute_type_invalid;
+  return false;
 }
 
 enum xnn_status xnn_define_fully_connected_sparse(
@@ -379,11 +379,9 @@ enum xnn_status xnn_define_fully_connected_sparse(
       return xnn_status_invalid_parameter;
   }
 
-  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   if (bias_value != NULL) {
-    compute_type = validate_datatypes_with_bias(
-      input_value->datatype, kernel_value->datatype, bias_value->datatype, output_value->datatype);
-    if (compute_type == xnn_compute_type_invalid) {
+    if (!validate_datatypes_with_bias(
+        input_value->datatype, kernel_value->datatype, bias_value->datatype, output_value->datatype)) {
       xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32 ", filter ID #%" PRIu32 ", bias ID #%" PRIu32 ", and output ID #%" PRIu32
         ": mismatching datatypes across input (%s), filter (%s), bias (%s), and output (%s)",
@@ -395,9 +393,8 @@ enum xnn_status xnn_define_fully_connected_sparse(
       return xnn_status_invalid_parameter;
     }
   } else {
-    compute_type = validate_datatypes_without_bias(
-      input_value->datatype, kernel_value->datatype, output_value->datatype);
-    if (compute_type == xnn_compute_type_invalid) {
+    if (!validate_datatypes_without_bias(
+        input_value->datatype, kernel_value->datatype, output_value->datatype)) {
       xnn_log_error(
         "failed to define %s operator with input ID #%" PRIu32 ", filter ID #%" PRIu32 ", and output ID #%" PRIu32
         ": mismatching datatypes across input (%s), filter (%s), and output (%s)",
@@ -415,7 +412,6 @@ enum xnn_status xnn_define_fully_connected_sparse(
   }
 
   node->type = xnn_node_type_fully_connected_sparse;
-  node->compute_type = compute_type;
   node->activation.output_min = output_min;
   node->activation.output_max = output_max;
   node->num_inputs = 2 + (size_t) (bias_id != XNN_INVALID_VALUE_ID);
