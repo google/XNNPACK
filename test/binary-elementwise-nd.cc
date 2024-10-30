@@ -74,6 +74,7 @@ MinMaxLow DatatypeMinMaxLow(xnn_datatype datatype) {
       result.max = std::numeric_limits<int32_t>::max();
       break;
     case xnn_datatype_fp16:
+    case xnn_datatype_bf16:
       result.low = 0.0;  // don't use std::numeric_limits here
       result.min = 0.01;
       result.max = 1.0;
@@ -470,6 +471,9 @@ void RunBinaryOpTester(RunMode run_mode,
       case xnn_datatype_fp16:
         tester.Test<xnn_float16>(run_mode);
         break;
+      case xnn_datatype_bf16:
+        tester.Test<xnn_bfloat16>(run_mode);
+        break;
       case xnn_datatype_fp32:
         tester.Test<float>(run_mode);
         break;
@@ -524,9 +528,10 @@ TEST_P(BinaryNDTest, op) {
 const xnn_datatype all_datatypes[] = {
     xnn_datatype_quint8,
     xnn_datatype_qint8,
-#ifdef XNN_EXCLUDE_F16_TESTS
+#ifndef XNN_EXCLUDE_F16_TESTS
     xnn_datatype_fp16,
 #endif
+    xnn_datatype_bf16,
     xnn_datatype_fp32,
     xnn_datatype_int32,
 };

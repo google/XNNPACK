@@ -215,10 +215,11 @@ struct GELU : public UnaryOpInfo {
 
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
     switch (datatype) {
-    case xnn_datatype_fp32:
-    case xnn_datatype_fp16:
-      return TolMixed(y_ref, 10 * std::numeric_limits<float>::epsilon(),
-                      5 * std::numeric_limits<float>::epsilon());
+      case xnn_datatype_fp32:
+      case xnn_datatype_fp16:
+      case xnn_datatype_bf16:
+        return TolMixed(y_ref, 10 * std::numeric_limits<float>::epsilon(),
+                        5 * std::numeric_limits<float>::epsilon());
       case xnn_datatype_qint8:
       case xnn_datatype_quint8:
         return 1;
@@ -240,6 +241,7 @@ struct HardSwish : public UnaryOpInfo {
       case xnn_datatype_fp32:
         return TolMixed(y_ref, 5.0e-6f, 1.0e-5f);
       case xnn_datatype_fp16:
+      case xnn_datatype_bf16:
         return TolMixed(y_ref, 1.0e-3f, 1.0e-2f);
       case xnn_datatype_qint8:
       case xnn_datatype_quint8:
@@ -268,6 +270,7 @@ struct LeakyReLU : public UnaryOpInfo {
       case xnn_datatype_fp32:
         return TolExact(y_ref);
       case xnn_datatype_fp16:
+      case xnn_datatype_bf16:
         return TolMixed(y_ref, 1.0e-4f, 1.0e-3f);
       case xnn_datatype_qint8:
       case xnn_datatype_quint8:
@@ -319,6 +322,7 @@ struct Sigmoid : public UnaryOpInfo {
       case xnn_datatype_fp32:
         return TolMixed(y_ref, 5.0e-6f, 1.0e-5f);
       case xnn_datatype_fp16:
+      case xnn_datatype_bf16:
         return TolMixed(y_ref, 1.0e-4f, 5.0e-3f);
       case xnn_datatype_qint8:
       case xnn_datatype_quint8:
@@ -351,6 +355,7 @@ struct Square : public UnaryOpInfo {
       case xnn_datatype_fp32:
         return TolExact(y_ref);
       case xnn_datatype_fp16:
+      case xnn_datatype_bf16:
         return TolMixed(y_ref, 1.0e-4f, 5.0e-3f);
       case xnn_datatype_qint8:
       case xnn_datatype_quint8:
@@ -374,6 +379,7 @@ struct SquareRoot : public UnaryOpInfo {
       case xnn_datatype_fp32:
         return TolRelative(y_ref, 2.5f * std::numeric_limits<float>::epsilon());
       case xnn_datatype_fp16:
+      case xnn_datatype_bf16:
         return TolMixed(y_ref, 1.0e-4f, 5.0e-3f);
       case xnn_datatype_qint8:
       case xnn_datatype_quint8:
@@ -404,6 +410,7 @@ struct TanH : public UnaryOpInfo {
             y_ref,
             4.0f * std::numeric_limits<float>::epsilon());  // 4 ULP
       case xnn_datatype_fp16:
+      case xnn_datatype_bf16:
         return TolMixed(y_ref, /*abs_tol=*/1.0e-4f, /*rel_tol=*/5.0e-3f);
       default:
         return TolExact(y_ref);
@@ -430,6 +437,7 @@ struct ReciprocalSquareRoot : public UnaryOpInfo {
       case xnn_datatype_fp32:
         return TolRelative(y_ref, 4 * std::numeric_limits<float>::epsilon());
       case xnn_datatype_fp16:
+      case xnn_datatype_bf16:
         return TolMixed(y_ref, 1.0e-4f, 5.0e-3f);
       case xnn_datatype_qint8:
       case xnn_datatype_quint8:

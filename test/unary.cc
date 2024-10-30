@@ -183,9 +183,15 @@ xnn_unary_operator all_unary_ops[] = {
     xnn_unary_tanh,
 };
 
-xnn_datatype all_datatypes[] = {
-    xnn_datatype_quint8, xnn_datatype_qint8, xnn_datatype_fp16,
-    xnn_datatype_fp32,   xnn_datatype_int32,
+const xnn_datatype all_datatypes[] = {
+    xnn_datatype_quint8,
+    xnn_datatype_qint8,
+#ifndef XNN_EXCLUDE_F16_TESTS
+    xnn_datatype_fp16,
+#endif
+    xnn_datatype_bf16,
+    xnn_datatype_fp32,
+    xnn_datatype_int32,
 };
 
 INSTANTIATE_TEST_SUITE_P(

@@ -237,6 +237,9 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
       case xnn_datatype_fp16:
         RunUnaryTest<In, xnn_float16>(test_params, param);
         break;
+      case xnn_datatype_bf16:
+        RunUnaryTest<In, xnn_bfloat16>(test_params, param);
+        break;
       case xnn_datatype_fp32:
         RunUnaryTest<In, float>(test_params, param);
         break;
@@ -258,6 +261,9 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
     switch (param.input_datatype) {
       case xnn_datatype_fp16:
         RunUnaryTest<xnn_float16>(test_params, param);
+        break;
+      case xnn_datatype_bf16:
+        RunUnaryTest<xnn_bfloat16>(test_params, param);
         break;
       case xnn_datatype_fp32:
         RunUnaryTest<float>(test_params, param);
@@ -367,8 +373,14 @@ xnn_unary_operator all_unary_ops[] = {
 };
 
 xnn_datatype all_datatypes[] = {
-    xnn_datatype_quint8, xnn_datatype_qint8, xnn_datatype_fp16,
-    xnn_datatype_fp32,   xnn_datatype_int32,
+    xnn_datatype_quint8,
+    xnn_datatype_qint8,
+#ifndef XNN_EXCLUDE_F16_TESTS
+    xnn_datatype_fp16,
+#endif
+    xnn_datatype_bf16,
+    xnn_datatype_fp32,
+    xnn_datatype_int32,
 };
 
 xnn_datatype quantized_datatypes[] = {
@@ -377,7 +389,10 @@ xnn_datatype quantized_datatypes[] = {
 };
 
 xnn_datatype unquantized_datatypes[] = {
+#ifndef XNN_EXCLUDE_F16_TESTS
     xnn_datatype_fp16,
+#endif
+    xnn_datatype_bf16,
     xnn_datatype_fp32,
     xnn_datatype_int32,
 };

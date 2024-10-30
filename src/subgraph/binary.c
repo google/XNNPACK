@@ -211,6 +211,9 @@ enum xnn_status xnn_define_binary(
     case xnn_datatype_fp16:
       compute_type = xnn_compute_type_fp16;
       break;
+    case xnn_datatype_bf16:
+      compute_type = xnn_compute_type_bf16;
+      break;
     case xnn_datatype_qint8:
       compute_type = xnn_compute_type_qs8;
       break;

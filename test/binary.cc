@@ -171,6 +171,7 @@ void MatchesOperatorApi(xnn_datatype datatype, xnn_binary_operator binary_op) {
       datatype_max = std::numeric_limits<int32_t>::max();
       break;
     case xnn_datatype_fp16:
+    case xnn_datatype_bf16:
     case xnn_datatype_fp32:
       datatype_min = -10.0;
       datatype_max = 10.0;
@@ -764,9 +765,10 @@ TEST_P(BinaryTest, reshape_broadcast_2d) {
 const xnn_datatype all_datatypes[] = {
     xnn_datatype_quint8,
     xnn_datatype_qint8,
-#ifdef XNN_EXCLUDE_F16_TESTS
+#ifndef XNN_EXCLUDE_F16_TESTS
     xnn_datatype_fp16,
 #endif
+    xnn_datatype_bf16,
     xnn_datatype_fp32,
     xnn_datatype_int32,
 };

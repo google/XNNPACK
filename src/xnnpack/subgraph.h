@@ -206,6 +206,7 @@ enum xnn_compute_type {
   xnn_compute_type_invalid = 0,
   xnn_compute_type_fp32,
   xnn_compute_type_fp16,
+  xnn_compute_type_bf16,
   xnn_compute_type_qc8,
   xnn_compute_type_qd8_to_fp16,
   xnn_compute_type_qd8_to_fp32,
