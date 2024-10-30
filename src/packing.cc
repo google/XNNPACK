@@ -42,22 +42,9 @@ struct unaligned_int32_t {
 };
 
 template <typename Src, typename Dst>
-void copy_bias(const Src* b, size_t b_offset, size_t n, Dst* packed_b) {
-  if (b) {
-    std::copy_n(b + b_offset, n, packed_b);
-  } else {
-    std::fill_n(packed_b, n, 0);
-  }
-}
-
-template <typename Src, typename Dst>
-void copy_bias(const Src* b, size_t b_offset, size_t n, Dst* packed_b, Src zero_point) {
-  if (b) {
-    for (size_t i = 0; i < n; ++i) {
-      *packed_b++ = zero_point + b[b_offset + i];
-    }
-  } else {
-    std::fill_n(packed_b, n, zero_point);
+void copy_n(const Src* src, size_t n, Dst* dst) {
+  for (size_t i = 0; i < n; ++i) {
+    dst[i] = src[i];
   }
 }
 
@@ -65,11 +52,35 @@ template <typename Src, typename Dst>
 int32_t copy_n_and_sum(const Src* src, size_t n, Dst* dst) {
   int32_t sum = 0;
   for (size_t i = 0; i < n; ++i) {
-    const auto v = *src++;
+    const auto v = src[i];
     sum += (int32_t) v;
-    *dst++ = v;
+    dst[i] = v;
   }
   return sum;
+}
+
+template <typename Src, typename Dst>
+void copy_bias(const Src* b, size_t b_offset, size_t n, Dst* packed_b) {
+  if (b) {
+    copy_n(b + b_offset, n, packed_b);
+  } else {
+    for (size_t i = 0; i < n; ++i) {
+      packed_b[i] = 0;
+    }
+  }
+}
+
+template <typename Src, typename Dst>
+void copy_bias(const Src* b, size_t b_offset, size_t n, Dst* packed_b, Src zero_point) {
+  if (b) {
+    for (size_t i = 0; i < n; ++i) {
+      packed_b[i] = zero_point + b[b_offset + i];
+    }
+  } else {
+    for (size_t i = 0; i < n; ++i) {
+      packed_b[i] = zero_point;
+    }
+  }
 }
 
 extern "C" {
@@ -105,7 +116,7 @@ void xnn_pack_f32_gemm_goi_w(
           const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           const size_t kc_end = std::min(kc, kc_begin + kr);
           if (kc_begin < kc_end) {
-            std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, packed_weights);
+            copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, packed_weights);
           }
           packed_weights += kr;
         }
@@ -151,7 +162,7 @@ void xnn_pack_f16_gemm_goi_w(
           const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           const size_t kc_end = std::min(kc, kc_begin + kr);
           if (kc_begin < kc_end) {
-            std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, packed_weights);
+            copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, packed_weights);
           }
           packed_weights += kr;
         }
@@ -197,7 +208,7 @@ void xnn_pack_f32_to_f16_gemm_goi_w(
           const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           const size_t kc_end = std::min(kc, kc_begin + kr);
           if (kc_begin < kc_end) {
-            std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, packed_weights);
+            copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, packed_weights);
           }
           packed_weights += kr;
         }
@@ -934,7 +945,7 @@ void xnn_pack_f32_qs8w_gemm_goi_w(
           const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           const size_t kc_end = std::min(kc, kc_begin + kr);
           if (kc_begin < kc_end) {
-            std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, (int8_t*) packed_weights);
+            copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, (int8_t*) packed_weights);
           }
           packed_weights = (int8_t*) packed_weights + kr;
         }
@@ -985,7 +996,7 @@ void xnn_pack_f32_qc4w_gemm_goi_w(
           const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
           const size_t kc_end = std::min(kc, kc_begin + kr);
           if (kc_begin < kc_end) {
-            std::copy_n(&((const uint8_t*) k)[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, (uint8_t*) packed_weights);
+            copy_n(&((const uint8_t*) k)[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, (uint8_t*) packed_weights);
           }
           packed_weights = (uint8_t*) packed_weights + kr;
         }
@@ -1022,7 +1033,7 @@ void xnn_pack_f32_gemm_gio_w(size_t g, size_t nc, size_t kc, size_t nr,
         for (size_t kr_block_start = 0; kr_block_start < kc; kr_block_start++) {
           const size_t kc_idx = round_down_po2(kr_block_start, skr);
           if (kc_idx < kc) {
-            std::copy_n(&k[kc_idx * k_stride + nr_block_start], nr_block_size,
+            copy_n(&k[kc_idx * k_stride + nr_block_start], nr_block_size,
                         packed_weights);
           }
           packed_weights += nr;
@@ -1080,7 +1091,7 @@ void xnn_pack_f16_gemm_gio_w(size_t g, size_t nc, size_t kc, size_t nr,
         for (size_t kr_block_start = 0; kr_block_start < kc; kr_block_start++) {
           const size_t kc_idx = round_down_po2(kr_block_start, skr);
           if (kc_idx < kc) {
-            std::copy_n(&k[kc_idx * k_stride + nr_block_start], nr_block_size,
+            copy_n(&k[kc_idx * k_stride + nr_block_start], nr_block_size,
                         packed_weights);
           }
           packed_weights += nr;
@@ -1773,7 +1784,7 @@ void xnn_pack_f32_conv_goki_w(
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       if XNN_LIKELY(b != nullptr) {
-        std::copy_n(&b[nr_block_start], nr_block_size, packed_weights);
+        copy_n(&b[nr_block_start], nr_block_size, packed_weights);
       }
       packed_weights += nr;
 
@@ -1783,7 +1794,7 @@ void xnn_pack_f32_conv_goki_w(
             const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
             const size_t kc_end = std::min(kc, kc_begin + kr);
             if (kc_begin < kc_end) {
-              std::copy_n(&k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_begin], kc_end - kc_begin, packed_weights);
+              copy_n(&k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_begin], kc_end - kc_begin, packed_weights);
             }
             packed_weights += kr;
           }
@@ -1824,7 +1835,7 @@ void xnn_pack_f16_conv_goki_w(
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       if XNN_LIKELY(b != nullptr) {
-        std::copy_n(&b[nr_block_start], nr_block_size, packed_weights);
+        copy_n(&b[nr_block_start], nr_block_size, packed_weights);
       }
       packed_weights += nr;
 
@@ -1834,7 +1845,7 @@ void xnn_pack_f16_conv_goki_w(
             const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
             const size_t kc_end = std::min(kc, kc_begin + kr);
             if (kc_begin < kc_end) {
-              std::copy_n(&k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_begin], kc_end - kc_begin, packed_weights);
+              copy_n(&k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_begin], kc_end - kc_begin, packed_weights);
             }
             packed_weights += kr;
           }
@@ -1875,7 +1886,7 @@ void xnn_pack_f32_to_f16_conv_goki_w(
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       if XNN_LIKELY(b != nullptr) {
-        std::copy_n(&b[nr_block_start], nr_block_size, packed_weights);
+        copy_n(&b[nr_block_start], nr_block_size, packed_weights);
       }
       packed_weights += nr;
 
@@ -1885,7 +1896,7 @@ void xnn_pack_f32_to_f16_conv_goki_w(
             const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
             const size_t kc_end = std::min(kc, kc_begin + kr);
             if (kc_begin < kc_end) {
-              std::copy_n(&k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_begin], kc_end - kc_begin, packed_weights);
+              copy_n(&k[((nr_block_start + nr_block_offset) * ks + ki) * kc + kc_begin], kc_end - kc_begin, packed_weights);
             }
             packed_weights += kr;
           }
@@ -2081,7 +2092,7 @@ void xnn_pack_f32_conv_kgo_w(
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       if XNN_LIKELY(b != nullptr) {
-        std::copy_n(&b[nr_block_start], nr_block_size, packed_weights);
+        copy_n(&b[nr_block_start], nr_block_size, packed_weights);
       }
       packed_weights += nr;
 
@@ -2125,7 +2136,7 @@ void xnn_pack_f16_conv_kgo_w(
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       if XNN_LIKELY(b != nullptr) {
-        std::copy_n(&b[nr_block_start], nr_block_size, packed_weights);
+        copy_n(&b[nr_block_start], nr_block_size, packed_weights);
       }
       packed_weights += nr;
 
@@ -2169,7 +2180,7 @@ void xnn_pack_f32_to_f16_conv_kgo_w(
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       if XNN_LIKELY(b != nullptr) {
-        std::copy_n(&b[nr_block_start], nr_block_size, packed_weights);
+        copy_n(&b[nr_block_start], nr_block_size, packed_weights);
       }
       packed_weights += nr;
 
@@ -2354,7 +2365,7 @@ void xnn_pack_f32_deconv_goki_w(
         for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
           const size_t nr_block_size = min(nc - nr_block_start, nr);
           if XNN_LIKELY(b != nullptr) {
-            std::copy_n(&b[nr_block_start], nr_block_size, packed_weights);
+            copy_n(&b[nr_block_start], nr_block_size, packed_weights);
           }
           packed_weights += nr;
           for (size_t ky = oy; ky < kh; ky += sh) {
@@ -2364,7 +2375,7 @@ void xnn_pack_f32_deconv_goki_w(
                   const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
                   const size_t kc_end = std::min(kc, kc_begin + kr);
                   if (kc_begin < kc_end) {
-                    std::copy_n(&k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_begin], kc_end - kc_begin, packed_weights);
+                    copy_n(&k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_begin], kc_end - kc_begin, packed_weights);
                   }
                   packed_weights += kr;
                 }
@@ -2417,7 +2428,7 @@ void xnn_pack_f16_deconv_goki_w(
         for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
           const size_t nr_block_size = min(nc - nr_block_start, nr);
           if XNN_LIKELY(b != nullptr) {
-            std::copy_n(&b[nr_block_start], nr_block_size, packed_weights);
+            copy_n(&b[nr_block_start], nr_block_size, packed_weights);
           }
           packed_weights += nr;
           for (size_t ky = oy; ky < kh; ky += sh) {
@@ -2427,7 +2438,7 @@ void xnn_pack_f16_deconv_goki_w(
                   const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
                   const size_t kc_end = std::min(kc, kc_begin + kr);
                   if (kc_begin < kc_end) {
-                    std::copy_n(&k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_begin], kc_end - kc_begin, packed_weights);
+                    copy_n(&k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_begin], kc_end - kc_begin, packed_weights);
                   }
                   packed_weights += kr;
                 }
@@ -2480,7 +2491,7 @@ void xnn_pack_f32_to_f16_deconv_goki_w(
         for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
           const size_t nr_block_size = min(nc - nr_block_start, nr);
           if XNN_LIKELY(b != nullptr) {
-            std::copy_n(&b[nr_block_start], nr_block_size, packed_weights);
+            copy_n(&b[nr_block_start], nr_block_size, packed_weights);
           }
           packed_weights += nr;
           for (size_t ky = oy; ky < kh; ky += sh) {
@@ -2490,7 +2501,7 @@ void xnn_pack_f32_to_f16_deconv_goki_w(
                   const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
                   const size_t kc_end = std::min(kc, kc_begin + kr);
                   if (kc_begin < kc_end) {
-                    std::copy_n(&k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_begin], kc_end - kc_begin, packed_weights);
+                    copy_n(&k[(((nr_block_start + nr_block_offset) * kh + ky) * kw + kx) * kc + kc_begin], kc_end - kc_begin, packed_weights);
                   }
                   packed_weights += kr;
                 }
@@ -4585,7 +4596,7 @@ void xnn_pack_f32_gemminc_goi_w(
             const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
             const size_t kc_end = std::min(kc, kc_begin + kr);
             if (kc_begin < kc_end) {
-              std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, packed_weights);
+              copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, packed_weights);
             }
           }
           packed_weights += kr;
@@ -4624,7 +4635,7 @@ void xnn_pack_f16_gemminc_goi_w(
             const size_t kc_begin = round_down_po2(kr_block_start, skr) + ((kr_block_start + nr_block_offset * kr) & (skr - 1));
             const size_t kc_end = std::min(kc, kc_begin + kr);
             if (kc_begin < kc_end) {
-              std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, packed_weights);
+              copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin], kc_end - kc_begin, packed_weights);
             }
           }
           packed_weights += kr;
