@@ -34,6 +34,9 @@
 /// Disable fusion of nodes in subgraph. Fusion is enabled by default, set this flag to turn it off.
 #define XNN_FLAG_NO_OPERATOR_FUSION 0x80000000
 
+/// Enable Slinky (disabled unless this flag is set)
+#define XNN_FLAG_SLINKY_ENABLED 0x40000000
+
 #ifdef __cplusplus
 extern "C" {
 #endif

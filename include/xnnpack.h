@@ -95,9 +95,6 @@ extern "C" {
 /// Retain reduced dimensions with length 1.
 #define XNN_FLAG_KEEP_DIMS 0x00000040
 
-/// Enable Slinky (if available).
-#define XNN_FLAG_SLINKY_ENABLED 0x00000080
-
 // Next unused flag value: 0x00000100.
 
 /// The number of entries in an array of xnn_quantization_params that XNNPACK may read beyond array bounds.
