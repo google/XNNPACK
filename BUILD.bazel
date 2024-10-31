@@ -789,7 +789,7 @@ xnnpack_cc_library(
 
 xnnpack_cxx_library(
     name = "packing",
-    srcs = ["src/packing.cc"],
+    srcs = ["src/reference/packing.cc"],
     hdrs = ["src/xnnpack/pack.h"],
     defines = xnnpack_configurable_defines(),
     deps = [
@@ -826,7 +826,7 @@ py_binary(
 # srcs attribute.
 xnnpack_transitive_source_list(
     name = "build_identifier_ukernel_srcs",
-    srcs = ["src/packing.cc"],
+    srcs = ["src/reference/packing.cc"],
     deps = [":prod_microkernels"],
 )
 
