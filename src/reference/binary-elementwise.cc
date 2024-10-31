@@ -390,7 +390,7 @@ const struct xnn_binary_elementwise_config* xnn_init_binary_reference_config(
     case xnn_binary_modulus:
       DISPATCH_OPERATOR_FOR_DATATYPE(datatype, ModulusOp);
     case xnn_binary_atan2:
-      DISPATCH_OPERATOR_FOR_DATATYPE(datatype, Atan2Op);
+      DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, Atan2Op);
     case xnn_binary_pow:
       DISPATCH_OPERATOR_FOR_DATATYPE(datatype, PowOp);
     case xnn_binary_bitwise_and:
