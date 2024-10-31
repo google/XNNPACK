@@ -16,6 +16,7 @@ load(
     "xnnpack_if_kleidiai_enabled",
     "xnnpack_min_size_copts",
     "xnnpack_slinky_deps",
+    "xnnpack_slinky_srcs",
     "xnnpack_source_list_file",
     "xnnpack_transitive_source_list",
     "xnnpack_visibility",
@@ -1019,16 +1020,8 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "subgraph_h",
-    hdrs = [
-        "src/xnnpack/subgraph.h",
-    ],
-    compatible_with = [],
-)
-
-xnnpack_cc_library(
     name = "subgraph",
-    srcs = SUBGRAPH_SRCS,
+    srcs = SUBGRAPH_SRCS + xnnpack_slinky_srcs(),
     hdrs = [
         "src/xnnpack/memory-planner.h",
         "src/xnnpack/reshape-helpers.h",
@@ -1057,7 +1050,6 @@ xnnpack_cc_library(
         ":operators",
         ":params",
         ":requantization",
-        ":subgraph_h",
         ":xnnpack_h",
         "@pthreadpool",
     ] + xnnpack_slinky_deps(),

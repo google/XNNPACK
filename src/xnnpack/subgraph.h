@@ -34,21 +34,18 @@
 /// Disable fusion of nodes in subgraph. Fusion is enabled by default, set this flag to turn it off.
 #define XNN_FLAG_NO_OPERATOR_FUSION 0x80000000
 
-/// Enable Slinky (disabled unless this flag is set)
-#define XNN_FLAG_SLINKY_ENABLED 0x40000000
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/// Slinky interface -- unused unless XNN_FLAG_SLINKY_ENABLED is set
+#ifdef XNN_SLINKY_ENABLED
+struct xnn_value;
 struct slinky_pipeline;
 typedef struct slinky_pipeline* slinky_pipeline_t;
-
-void slinky_init_pipeline(xnn_runtime_t runtime);
-void slinky_setup_inputs_and_outputs(xnn_runtime_t runtime);
-void slinky_destroy_pipeline(xnn_runtime_t runtime);
-bool slinky_evaluate(xnn_runtime_t runtime, enum xnn_status* status);
+slinky_pipeline_t xnn_runtime_to_slinky_pipeline(xnn_runtime_t runtime);
+void destroy_slinky_pipeline(slinky_pipeline_t pipeline);
+enum xnn_status evaluate(slinky_pipeline_t p, struct xnn_value* const* input_values, size_t num_inputs, struct xnn_value* const* output_values, size_t num_outputs);
+#endif
 
 struct xnn_shape {
   size_t num_dims;
@@ -449,12 +446,13 @@ struct xnn_runtime {
   bool has_been_setup;
   bool memory_planned;
 
-  // Fields used by Slinky -- unused unless XNN_FLAG_SLINKY_ENABLED is set
+#ifdef XNN_SLINKY_ENABLED
   slinky_pipeline_t slinky_pipeline;
-  size_t slinky_num_inputs;
-  size_t slinky_num_outputs;
-  struct xnn_value* slinky_input_values[XNN_MAX_SUBGRAPH_INPUT_OR_OUTPUTS];
-  struct xnn_value* slinky_output_values[XNN_MAX_SUBGRAPH_INPUT_OR_OUTPUTS];
+  size_t num_inputs;
+  size_t num_outputs;
+  struct xnn_value* input_values[XNN_MAX_SUBGRAPH_INPUT_OR_OUTPUTS];
+  struct xnn_value* output_values[XNN_MAX_SUBGRAPH_INPUT_OR_OUTPUTS];
+#endif
 };
 
 enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min, float output_max, struct xnn_node *node);
