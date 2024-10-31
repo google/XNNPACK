@@ -533,6 +533,10 @@ SET(NON_PROD_AVX2_MICROKERNEL_SRCS
   src/x8-lut/gen/x8-lut-avx2-u32.c
   src/x8-lut/gen/x8-lut-avx2-u64.c
   src/x8-lut/gen/x8-lut-avx2-u96.c
+  src/x8-packw/gen/x8-packw-x8c8-gemm-goi-avx2-prfm.c
+  src/x8-packw/gen/x8-packw-x8c8-gemm-goi-avx2.c
+  src/x8-packw/gen/x8-packw-x16c8-gemm-goi-avx2-prfm.c
+  src/x8-packw/gen/x8-packw-x16c8-gemm-goi-avx2.c
   src/x8-transposec/gen/x8-transposec-32x32-reuse-mov-avx2.c
   src/x16-packw/gen/x16-packw-x8-gemm-goi-avx2-u16-prfm.c
   src/x16-packw/gen/x16-packw-x8-gemm-goi-avx2-u16.c

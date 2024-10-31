@@ -42,9 +42,10 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__avxvnni_prfm(
   assert(weights != NULL);
   assert(packed_weights != NULL);
 
-  const __m256i vone = _mm256_set1_epi8(1);
   int8_t* out = (int8_t*) packed_weights;
-  const uint32_t* b = (const uint32_t*) bias;
+  const int32_t* b = (const int32_t*) bias;
+
+  const __m256i vone = _mm256_set1_epi8(1);
   const uint32_t izp = (uint32_t) (params ? (((const struct xnn_qs8_packw_params*) params)->input_zero_point + 128): 128);
   __m256i vzeropoint = _mm256_set1_epi32((int32_t) izp);
 
@@ -64,7 +65,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__avxvnni_prfm(
         _mm256_storeu_si256((__m256i*) (out + 0), _mm256_setzero_si256());
         _mm256_storeu_si256((__m256i*) (out + 32), _mm256_setzero_si256());
       }
-      out += 16 * sizeof(uint32_t);
+      out += 16 * sizeof(int32_t);
 
       const int8_t* w1 = w0 + kc;
       const int8_t* w2 = w1 + kc;
@@ -468,17 +469,17 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__avxvnni_prfm(
       if XNN_LIKELY(b != NULL) {
         size_t nb = n;
         do {
-          *((uint32_t*) out) = *b++;
-          out += sizeof(uint32_t);
+          *((int32_t*) out) = *b++;
+          out += sizeof(int32_t);
         } while (--nb != 0);
       } else {
         size_t nb = n;
         do {
-          *((uint32_t*) out) = 0;
-          out += sizeof(uint32_t);
+          *((int32_t*) out) = 0;
+          out += sizeof(int32_t);
         } while (--nb != 0);
       }
-      out += (16 - n) * sizeof(uint32_t);
+      out += (16 - n) * sizeof(int32_t);
 
       const int8_t* w1 = w0 + kc;
       if XNN_UNPREDICTABLE(n < 2) {
