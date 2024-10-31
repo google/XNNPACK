@@ -3,15 +3,12 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <functional>
-#include <limits>
 #include <type_traits>
 
 #include "xnnpack.h"
@@ -19,6 +16,14 @@
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
+#include "xnnpack/reference-utils.h"
+
+using xnnpack::dequantize;
+using xnnpack::euclidean_div;
+using xnnpack::euclidean_mod;
+using xnnpack::integer_pow;
+using xnnpack::quantize;
+using xnnpack::widen;
 
 namespace {
 
@@ -70,19 +75,6 @@ const xnn_binary_elementwise_config* get_config(
       /*element_tile=*/1,
   };
   return &config;
-}
-
-template <typename T>
-float dequantize(T x, float scale, int32_t zero_point) {
-  return (static_cast<float>(x) - static_cast<float>(zero_point)) * scale;
-}
-
-template <typename T>
-T quantize(float x, float inv_scale, int32_t zero_point) {
-  const float q = x * inv_scale + zero_point;
-  return std::lround(
-      std::min<float>(std::max<float>(q, std::numeric_limits<T>::min()),
-                      std::numeric_limits<T>::max()));
 }
 
 template <typename T, typename Operator>
@@ -168,9 +160,7 @@ struct AddOp {
 
 template <>
 struct AddOp<int32_t> {
-  int32_t operator()(int32_t a, int32_t b) const {
-    return static_cast<int64_t>(a) + static_cast<int64_t>(b);
-  }
+  int32_t operator()(int32_t a, int32_t b) const { return widen(a) + widen(b); }
 };
 
 template <typename T>
@@ -180,9 +170,7 @@ struct SubOp {
 
 template <>
 struct SubOp<int32_t> {
-  int32_t operator()(int32_t a, int32_t b) const {
-    return static_cast<int64_t>(a) - static_cast<int64_t>(b);
-  }
+  int32_t operator()(int32_t a, int32_t b) const { return widen(a) - widen(b); }
 };
 
 template <typename T>
@@ -192,36 +180,34 @@ struct MultiplyOp {
 
 template <>
 struct MultiplyOp<int32_t> {
-  int32_t operator()(int32_t a, int32_t b) const {
-    return static_cast<int64_t>(a) * static_cast<int64_t>(b);
-  }
+  int32_t operator()(int32_t a, int32_t b) const { return widen(a) * widen(b); }
 };
 
 template <typename T>
 struct DivideOp {
-  T operator()(T a, T b) const {
-    return a / b;
-  }
+  T operator()(T a, T b) const { return a / b; }
 };
 
 template <>
 struct DivideOp<int32_t> {
-  int32_t operator()(int32_t a, int32_t b) const {
-    // This implements "Euclidean division", which is the way integer division
-    // should be: (a / b) * b + r = a, where r is always in [0, |b|). This is
-    // unlike "computer division" where, annoyingly, a / b is rounded towards 0,
-    // and the remainder may be positive or negative accordingly. This
-    // implementation of Euclidean integer division is taken from
-    // https://github.com/dsharlet/slinky/blob/5020dae47ecb176bcd917ecd07d37e19615b955b/base/arithmetic.h#L12-L26
+  int32_t operator()(int32_t a, int32_t b) const { return euclidean_div(a, b); }
+};
+
+template <typename T>
+struct ModulusOp {
+  float operator()(float a, float b) const {
+    // Define division by zero to be 0?
     if (b == 0) {
       return 0;
+    } else {
+      return std::fmod(a, b);
     }
-    int32_t q = a / b;
-    int32_t r = a - q * b;
-    int32_t bs = b >> (sizeof(int32_t) * 8 - 1);
-    int32_t rs = r >> (sizeof(int32_t) * 8 - 1);
-    return q - (rs & bs) + (rs & ~bs);
   }
+};
+
+template <>
+struct ModulusOp<int32_t> {
+  int32_t operator()(int32_t a, int32_t b) const { return euclidean_mod(a, b); }
 };
 
 template <typename T>
@@ -242,7 +228,7 @@ struct SquaredDifferenceOp {
 template <>
 struct SquaredDifferenceOp<int32_t> {
   int32_t operator()(int32_t a, int32_t b) const {
-    int32_t diff = static_cast<int64_t>(a) - static_cast<int64_t>(b);
+    int32_t diff = widen(a) - widen(b);
     return static_cast<int64_t>(diff) * static_cast<int64_t>(diff);
   }
 };
@@ -250,6 +236,67 @@ struct SquaredDifferenceOp<int32_t> {
 template <typename T>
 struct PreluOp {
   T operator()(T a, T b) const { return (a < 0) ? static_cast<T>(a * b) : a; }
+};
+
+template <typename T>
+struct Atan2Op {
+  float operator()(float a, float b) const { return std::atan2(a, b); }
+};
+
+template <typename T>
+struct PowOp {
+  float operator()(float a, float b) const { return std::pow(a, b); }
+};
+
+template <>
+struct PowOp<int32_t> {
+  int32_t operator()(int32_t a, int32_t b) const {
+    if (b < 0) {
+      return 0;
+    } else if (b == 0) {
+      return 1;
+    } else {
+      return integer_pow(a, b);
+    }
+  }
+};
+
+template <typename T>
+struct BitwiseAndOp {
+  T operator()(T a, T b) const { return a & b; }
+};
+
+template <typename T>
+struct BitwiseOrOp {
+  T operator()(T a, T b) const { return a | b; }
+};
+
+template <typename T>
+struct BitwiseXorOp {
+  T operator()(T a, T b) const { return a ^ b; }
+};
+
+template <typename T>
+struct ShiftLeftOp {
+  static constexpr T type_mask = sizeof(T) * 8 - 1;
+  T operator()(T a, T b) const { return a << (b & type_mask); }
+};
+
+template <typename T>
+struct ShiftRightLogicalOp {
+  T operator()(T a, T b) const {
+    static constexpr T type_mask = sizeof(T) * 8 - 1;
+    return static_cast<typename std::make_unsigned<T>::type>(a) >>
+           (b & type_mask);
+  }
+};
+template <typename T>
+struct ShiftRightArithmeticOp {
+  T operator()(T a, T b) const {
+    static constexpr T type_mask = sizeof(T) * 8 - 1;
+    return static_cast<typename std::make_signed<T>::type>(a) >>
+           (b & type_mask);
+  }
 };
 
 using std::copysign;
@@ -307,6 +354,14 @@ struct CopysignOp {
       return nullptr;                                                        \
   }
 
+#define DISPATCH_OPERATOR_FOR_INTEGRAL_DATATYPE(datatype, op) \
+  switch (datatype) {                                         \
+    case xnn_datatype_int32:                                  \
+      return get_config<int32_t, op<int32_t>>();              \
+    default:                                                  \
+      return nullptr;                                         \
+  }
+
 }  // namespace
 
 extern "C" {
@@ -332,6 +387,24 @@ const struct xnn_binary_elementwise_config* xnn_init_binary_reference_config(
       DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, PreluOp);
     case xnn_binary_squared_difference:
       DISPATCH_OPERATOR_FOR_DATATYPE(datatype, SquaredDifferenceOp);
+    case xnn_binary_modulus:
+      DISPATCH_OPERATOR_FOR_DATATYPE(datatype, ModulusOp);
+    case xnn_binary_atan2:
+      DISPATCH_OPERATOR_FOR_DATATYPE(datatype, Atan2Op);
+    case xnn_binary_pow:
+      DISPATCH_OPERATOR_FOR_DATATYPE(datatype, PowOp);
+    case xnn_binary_bitwise_and:
+      DISPATCH_OPERATOR_FOR_INTEGRAL_DATATYPE(datatype, BitwiseAndOp);
+    case xnn_binary_bitwise_or:
+      DISPATCH_OPERATOR_FOR_INTEGRAL_DATATYPE(datatype, BitwiseOrOp);
+    case xnn_binary_bitwise_xor:
+      DISPATCH_OPERATOR_FOR_INTEGRAL_DATATYPE(datatype, BitwiseXorOp);
+    case xnn_binary_shift_left:
+      DISPATCH_OPERATOR_FOR_INTEGRAL_DATATYPE(datatype, ShiftLeftOp);
+    case xnn_binary_shift_right_logical:
+      DISPATCH_OPERATOR_FOR_INTEGRAL_DATATYPE(datatype, ShiftRightLogicalOp);
+    case xnn_binary_shift_right_arithmetic:
+      DISPATCH_OPERATOR_FOR_INTEGRAL_DATATYPE(datatype, ShiftRightArithmeticOp);
     case xnn_binary_invalid:
       return nullptr;
   }

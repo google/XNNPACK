@@ -783,6 +783,15 @@ const xnn_binary_operator all_binary_ops[] = {
     xnn_binary_prelu,
     xnn_binary_subtract,
     xnn_binary_squared_difference,
+    xnn_binary_modulus,
+    xnn_binary_atan2,
+    xnn_binary_pow,
+    xnn_binary_bitwise_and,
+    xnn_binary_bitwise_or,
+    xnn_binary_bitwise_xor,
+    xnn_binary_shift_left,
+    xnn_binary_shift_right_logical,
+    xnn_binary_shift_right_arithmetic,
 };
 
 INSTANTIATE_TEST_SUITE_P(

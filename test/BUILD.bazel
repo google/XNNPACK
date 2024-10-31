@@ -105,7 +105,7 @@ xnnpack_cxx_library(
     testonly = True,
     srcs = ["unary-ops.cc"],
     hdrs = ["unary-ops.h"],
-    deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library(),
+    deps = MICROKERNEL_TEST_DEPS + ["//:reference_ukernels"] + xnnpack_test_deps_for_library(),
 )
 
 xnnpack_cxx_library(
@@ -1204,6 +1204,7 @@ xnnpack_unit_test(
         ":operator_test_utils",
         "//:logging",
         "//:operator_utils",
+        "//:reference_ukernels",
     ],
 )
 

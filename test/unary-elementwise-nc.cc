@@ -140,6 +140,9 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
 
   template <typename In, typename Out>
   void RunUnaryTest(const UnaryOpTestParams& test_params, const Param& param) {
+    if (::testing::Test::IsSkipped()) {
+      return;
+    }
     ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
     const xnn_unary_operator unary_op = param.unary_operator;
@@ -173,11 +176,6 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
       for (size_t i = 0; i < batch_size; i++) {
         FillRandom(rng_, input.data() + i * input_stride, channels, domain,
                    input_quantization);
-
-        // Compute reference results.
-        UnaryReferenceImpl(input.data() + i * input_stride, channels,
-                           output_ref.data() + i * channels, *op_info,
-                           input_quantization, output_quantization, op_params);
       }
 
       if (param.run_mode == RunMode::kEager) {
@@ -222,10 +220,22 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
 
       // Verify results.
       for (size_t i = 0; i < batch_size; i++) {
+        // Compute reference results.
+        UnaryReferenceImpl(input.data() + i * input_stride, channels,
+                           output_ref.data() + i * channels, *op_info,
+                           input_quantization, output_quantization, op_params);
+
         for (size_t c = 0; c < channels; c++) {
+          const float x = input[i * input_stride + c];
           const float y = output[i * output_stride + c];
           const float y_ref = output_ref[i * channels + c];
-          ASSERT_NEAR(y, y_ref, op_info->Tolerance(y_ref, output_datatype));
+          ASSERT_NEAR(y, y_ref, op_info->Tolerance(y_ref, output_datatype))
+              << "x = " << x
+              << ", y = " << y
+              << ", input1 zero point = " << input_quantization.zero_point
+              << ", input1 scale = " << input_quantization.scale
+              << ", output zero point = " << output_quantization.zero_point
+              << ", output scale = " << output_quantization.scale;
         }
       }
     }
@@ -370,6 +380,13 @@ xnn_unary_operator all_unary_ops[] = {
     xnn_unary_square_root,
     xnn_unary_reciprocal_square_root,
     xnn_unary_tanh,
+    xnn_unary_cube_root,
+    xnn_unary_cosine,
+    xnn_unary_sine,
+    xnn_unary_count_leading_zeros,
+    xnn_unary_bitwise_not,
+    xnn_unary_popcount,
+    xnn_unary_sign,
 };
 
 xnn_datatype all_datatypes[] = {

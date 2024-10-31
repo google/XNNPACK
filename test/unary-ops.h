@@ -21,6 +21,7 @@
 #include "xnnpack.h"
 #include "xnnpack/buffer.h"
 #include "xnnpack/math.h"
+#include "xnnpack/reference-utils.h"
 
 static float TolExact(float) { return 0.0f; }
 static float TolExact16(float y_ref) { return std::abs(y_ref) * 1.0e-3f; }
@@ -69,8 +70,8 @@ struct UnaryOpInfo {
   virtual float ReferenceImpl(float x, const xnn_unary_params& params) const {
     XNN_UNREACHABLE;
   }
-  virtual int ReferenceImpl(int x, const xnn_unary_params& params) const {
-    XNN_UNREACHABLE;
+  virtual float ReferenceImpl(int x, const xnn_unary_params& params) const {
+    return ReferenceImpl(static_cast<float>(x), params);
   }
 
   // Get the parameters to use by default for this operator.
@@ -117,16 +118,14 @@ struct Convert : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return x;
   }
-  int ReferenceImpl(int x, const xnn_unary_params&) const override {
-    return x;
-  }
+  float ReferenceImpl(int x, const xnn_unary_params&) const override { return x; }
 };
 
 struct ReLU : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::max(x, 0.0f);
   }
-  int ReferenceImpl(int x, const xnn_unary_params&) const override {
+  float ReferenceImpl(int x, const xnn_unary_params&) const override {
     return std::max(x, 0);
   }
 };
@@ -135,7 +134,7 @@ struct Abs : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::abs(x);
   }
-  int ReferenceImpl(int x, const xnn_unary_params&) const override {
+  float ReferenceImpl(int x, const xnn_unary_params&) const override {
     return std::abs(x);
   }
 };
@@ -144,7 +143,7 @@ struct Negate : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return -x;
   }
-  int ReferenceImpl(int x, const xnn_unary_params&) const override {
+  float ReferenceImpl(int x, const xnn_unary_params&) const override {
     return -x;
   }
 };
@@ -161,9 +160,8 @@ struct Clamp : public UnaryOpInfo {
     return std::min<float>(std::max<float>(x, params.clamp.min),
                            params.clamp.max);
   }
-  int ReferenceImpl(int x, const xnn_unary_params& params) const override {
-    return std::min<int>(std::max<int>(x, params.clamp.min),
-                         params.clamp.max);
+  float ReferenceImpl(int x, const xnn_unary_params& params) const override {
+    return std::min<int>(std::max<int>(x, params.clamp.min), params.clamp.max);
   }
 
   xnn_quantization_params InputQuantizationParams(
@@ -346,7 +344,7 @@ struct Square : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return x * x;
   }
-  int ReferenceImpl(int x, const xnn_unary_params&) const override {
+  float ReferenceImpl(int x, const xnn_unary_params&) const override {
     return static_cast<int64_t>(x) * static_cast<int64_t>(x);
   }
 
@@ -413,7 +411,7 @@ struct TanH : public UnaryOpInfo {
       case xnn_datatype_bf16:
         return TolMixed(y_ref, /*abs_tol=*/1.0e-4f, /*rel_tol=*/5.0e-3f);
       default:
-        return TolExact(y_ref);
+        return 1;
     }
   }
 
@@ -483,6 +481,84 @@ struct Exp : public UnaryOpInfo {
   Interval Domain(xnn_datatype) const override { return {-10.0f, 10.0f}; }
 };
 
+struct CubeRoot : public UnaryOpInfo {
+  float ReferenceImpl(float x, const xnn_unary_params&) const override {
+    return std::cbrt(x);
+  }
+
+  float Tolerance(float y_ref, xnn_datatype datatype) const override {
+    switch (datatype) {
+      case xnn_datatype_fp32:
+        return TolRelative(y_ref, 2.5f * std::numeric_limits<float>::epsilon());
+      case xnn_datatype_fp16:
+      case xnn_datatype_bf16:
+        return TolMixed(y_ref, 1.0e-4f, 5.0e-3f);
+      case xnn_datatype_qint8:
+      case xnn_datatype_quint8:
+        return 1;
+      default:
+        XNN_UNREACHABLE;
+    }
+  }
+
+  Interval Domain(xnn_datatype datatype) const override {
+    if (datatype == xnn_datatype_fp16 || datatype == xnn_datatype_bf16) {
+      return {0.001f, 10.0f};
+    } else {
+      return Interval::Positive(datatype);
+    }
+  }
+};
+
+struct Cosine : public UnaryOpInfo {
+  float ReferenceImpl(float x, const xnn_unary_params&) const override {
+    return std::cos(x);
+  }
+
+  float Tolerance(float y_ref, xnn_datatype datatype) const override {
+    return 1e-6f;
+  }
+  Interval Domain(xnn_datatype) const override { return {-10.0f, 10.0f}; }
+};
+
+struct Sine : public UnaryOpInfo {
+  float ReferenceImpl(float x, const xnn_unary_params&) const override {
+    return std::sin(x);
+  }
+
+  float Tolerance(float y_ref, xnn_datatype datatype) const override {
+    return 1e-6f;
+  }
+  Interval Domain(xnn_datatype) const override { return {-10.0f, 10.0f}; }
+};
+
+struct CountLeadingZeros : public UnaryOpInfo {
+  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+    return math_clz_u32(x);
+  }
+};
+
+struct BitwiseNot : public UnaryOpInfo {
+  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+    return ~x;
+  }
+};
+
+struct Popcount : public UnaryOpInfo {
+  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+    return math_popcount_u32(x);
+  }
+};
+
+struct Sign : public UnaryOpInfo {
+  float ReferenceImpl(float x, const xnn_unary_params&) const override {
+    return x < 0.0f ? -1.0f : x > 0.0f ? 1.0f : 0.0f;
+  }
+  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+    return x < 0 ? -1 : x > 0 ? 1 : 0;
+  }
+};
+
 const UnaryOpInfo* GetUnaryOpInfo(xnn_unary_operator op);
 
 // Generate random data in the given domain, where the domain is given as
@@ -513,18 +589,25 @@ void UnaryReferenceImpl(
     const xnn_quantization_params& output_quantization = {0, 1.0f},
     const xnn_unary_params& params = xnn_unary_params()) {
   for (size_t i = 0; i < n; i++) {
-    float x_i = static_cast<float>(x[i]);
-    if (std::is_integral<In>::value) {
-      x_i = (x_i - input_quantization.zero_point) * input_quantization.scale;
+    float y_i;
+    if (std::is_integral<In>::value &&
+        (input_quantization.zero_point == 0 &&
+         input_quantization.scale == 1.0f)) {
+      y_i = op_info.ReferenceImpl(static_cast<int>(x[i]), params);
+    } else if (std::is_integral<In>::value) {
+      float x_i =
+          (x[i] - input_quantization.zero_point) * input_quantization.scale;
+      y_i = op_info.ReferenceImpl(x_i, params);
+    } else {
+      y_i = op_info.ReferenceImpl(static_cast<float>(x[i]), params);
     }
-    float y_i = op_info.ReferenceImpl(x_i, params);
     if (std::is_integral<Out>::value) {
       y_i = y_i / output_quantization.scale + output_quantization.zero_point;
       y_i = std::max<float>(y_i, xnnpack::NumericLimits<Out>::min());
       y_i = std::min<float>(y_i, xnnpack::NumericLimits<Out>::max());
-      y[i] = static_cast<Out>(std::lround(y_i));
+      y[i] = xnnpack::round_float_to_int<Out>(y_i);
     } else {
-      y[i] = static_cast<Out>(y_i);
+      y[i] = y_i;
     }
   }
 }

@@ -26,6 +26,13 @@ const UnaryOpInfo* GetUnaryOpInfo(xnn_unary_operator op) {
   static RoundToNearestEven bankers_rounding;
   static RoundUp ceiling;
   static RoundDown floor;
+  static CubeRoot cube_root;
+  static Cosine cosine;
+  static Sine sine;
+  static CountLeadingZeros count_leading_zeros;
+  static BitwiseNot bitwise_not;
+  static Popcount popcount;
+  static Sign sign;
 
   switch (op) {
     case xnn_unary_abs:
@@ -64,7 +71,21 @@ const UnaryOpInfo* GetUnaryOpInfo(xnn_unary_operator op) {
       return &square_root;
     case xnn_unary_tanh:
       return &tanh;
-    default:
-      XNN_UNREACHABLE;
+    case xnn_unary_cube_root:
+      return &cube_root;
+    case xnn_unary_cosine:
+      return &cosine;
+    case xnn_unary_sine:
+      return &sine;
+    case xnn_unary_count_leading_zeros:
+      return &count_leading_zeros;
+    case xnn_unary_bitwise_not:
+      return &bitwise_not;
+    case xnn_unary_popcount:
+      return &popcount;
+    case xnn_unary_sign:
+      return &sign;
+    case xnn_unary_invalid:
+      return nullptr;
   }
 }

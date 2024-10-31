@@ -19,6 +19,11 @@
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
+#include "xnnpack/reference-utils.h"
+
+using xnnpack::dequantize;
+using xnnpack::round_float_to_int;
+using xnnpack::quantize;
 
 namespace {
 
@@ -33,19 +38,6 @@ void unary_ukernel_unquantized(size_t input_batch_size_bytes, const TIn* x,
   for (size_t i = 0; i < batch_size; ++i) {
     y[i] = static_cast<TOut>(op(x[i]));
   }
-}
-
-template <typename T>
-float dequantize(T x, float scale, int32_t zero_point) {
-  return (static_cast<float>(x) - static_cast<float>(zero_point)) * scale;
-}
-
-template <typename T>
-T quantize(float x, float inv_scale, int32_t zero_point) {
-  const float q = x * inv_scale + zero_point;
-  return std::lround(
-      std::min<float>(std::max<float>(q, std::numeric_limits<T>::min()),
-                      std::numeric_limits<T>::max()));
 }
 
 template <typename TIn, typename TOut, typename Operator>
@@ -128,10 +120,7 @@ struct ConvertOp {
   explicit ConvertOp(const xnn_unary_uparams*) {}
   TOut operator()(TIn x) const {
     if (std::is_integral<TOut>::value && !std::is_integral<TIn>::value) {
-      float x_f = static_cast<float>(x);
-      x_f = std::min<float>(x_f, std::numeric_limits<TOut>::max());
-      x_f = std::max<float>(x_f, std::numeric_limits<TOut>::min());
-      return static_cast<TOut>(std::lround(x_f));
+      return round_float_to_int<TOut>(x);
     } else {
       return static_cast<TOut>(x);
     }
@@ -380,10 +369,31 @@ struct SquareRootOp {
 };
 
 template <typename T>
+struct CubeRootOp {
+  explicit CubeRootOp(const xnn_unary_uparams*) {}
+
+  float operator()(float x) const { return std::cbrt(x); }
+};
+
+template <typename T>
 struct TanHOp {
   explicit TanHOp(const xnn_unary_uparams*) {}
 
   float operator()(float x) const { return std::tanh(x); }
+};
+
+template <typename T>
+struct SineOp {
+  explicit SineOp(const xnn_unary_uparams*) {}
+
+  float operator()(float x) const { return std::sin(x); }
+};
+
+template <typename T>
+struct CosineOp {
+  explicit CosineOp(const xnn_unary_uparams*) {}
+
+  float operator()(float x) const { return std::cos(x); }
 };
 
 template <typename T>
@@ -407,6 +417,34 @@ struct ExpOp {
   float operator()(float x) const { return std::exp(x); }
 };
 
+template <typename T>
+struct BitwiseNotOp {
+  explicit BitwiseNotOp(const xnn_unary_uparams*) {}
+
+  T operator()(T x) const { return ~x; }
+};
+
+template <typename T>
+struct CountLeadingZerosOp {
+  explicit CountLeadingZerosOp(const xnn_unary_uparams*) {}
+
+  T operator()(T x) const { return math_clz_u32(x); }
+};
+
+template <typename T>
+struct PopCountOp {
+  explicit PopCountOp(const xnn_unary_uparams*) {}
+
+  T operator()(T x) const { return math_popcount_u32(x); }
+};
+
+template <typename T>
+struct SignOp {
+  explicit SignOp(const xnn_unary_uparams*) {}
+
+  T operator()(T x) const { return x < 0 ? -1 : x > 0 ? 1 : 0; }
+};
+
 #define DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, op)                    \
   switch (datatype) {                                                        \
     case xnn_datatype_fp32:                                                  \
@@ -414,7 +452,7 @@ struct ExpOp {
     case xnn_datatype_fp16:                                                  \
       return get_config<xnn_float16, op<xnn_float16>>();                     \
     case xnn_datatype_bf16:                                                  \
-      return get_config<xnn_bfloat16, op<xnn_bfloat16>>();                     \
+      return get_config<xnn_bfloat16, op<xnn_bfloat16>>();                   \
     case xnn_datatype_qint8:                                                 \
       return get_config<int8_t, op<float>>(/*quantized=*/std::true_type());  \
     case xnn_datatype_quint8:                                                \
@@ -430,7 +468,7 @@ struct ExpOp {
     case xnn_datatype_fp16:                                                  \
       return get_config<xnn_float16, op<xnn_float16>>();                     \
     case xnn_datatype_bf16:                                                  \
-      return get_config<xnn_bfloat16, op<xnn_bfloat16>>();                     \
+      return get_config<xnn_bfloat16, op<xnn_bfloat16>>();                   \
     case xnn_datatype_qint8:                                                 \
       return get_config<int8_t, op<float>>(/*quantized=*/std::true_type());  \
     case xnn_datatype_quint8:                                                \
@@ -439,6 +477,14 @@ struct ExpOp {
       return get_config<int32_t, op<int32_t>>();                             \
     default:                                                                 \
     return nullptr;                                                        \
+  }
+
+#define DISPATCH_OPERATOR_FOR_INTEGRAL_DATATYPE(datatype, op)                \
+  switch (datatype) {                                                        \
+    case xnn_datatype_int32:                                                 \
+      return get_config<int32_t, op<int32_t>>();                             \
+    default:                                                                 \
+      return nullptr;                                                        \
   }
 
 const xnn_unary_elementwise_config* get_config(xnn_unary_operator op,
@@ -478,6 +524,20 @@ const xnn_unary_elementwise_config* get_config(xnn_unary_operator op,
       DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, ReciprocalSquareRootOp);
     case xnn_unary_tanh:
       DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, TanHOp);
+    case xnn_unary_cube_root:
+      DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, CubeRootOp);
+    case xnn_unary_cosine:
+      DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, CosineOp);
+    case xnn_unary_sine:
+      DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, SineOp);
+    case xnn_unary_bitwise_not:
+      DISPATCH_OPERATOR_FOR_INTEGRAL_DATATYPE(datatype, BitwiseNotOp);
+    case xnn_unary_count_leading_zeros:
+      DISPATCH_OPERATOR_FOR_INTEGRAL_DATATYPE(datatype, CountLeadingZerosOp);
+    case xnn_unary_popcount:
+      DISPATCH_OPERATOR_FOR_INTEGRAL_DATATYPE(datatype, PopCountOp);
+    case xnn_unary_sign:
+      DISPATCH_OPERATOR_FOR_DATATYPE(datatype, SignOp);
     default:
       return nullptr;
   }

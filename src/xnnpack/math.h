@@ -369,6 +369,18 @@ XNN_INLINE static uint32_t math_ctz_u32(uint32_t x) {
   #endif
 }
 
+XNN_INLINE static uint32_t math_popcount_u32(uint32_t x) {
+  #if defined(_MSC_VER) && !defined(__clang__)
+    uint32_t result = 0;
+    for (int i = 0; i < 32; ++i) {
+      result += (x >> i) & 1;
+    }
+    return result;
+  #else
+    return (uint32_t) __builtin_popcount((unsigned int) x);
+  #endif
+}
+
 XNN_INLINE static uint32_t math_rotl_u32(uint32_t x, int8_t r)
 {
   #if XNN_COMPILER_MSVC

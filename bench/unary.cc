@@ -33,6 +33,26 @@ void init_params(xnn_unary_operator op, xnn_datatype in_type,
                  xnn_datatype out_type, xnn_unary_params& params,
                  xnn_quantization_params& input_quantization,
                  xnn_quantization_params& output_quantization) {
+  switch (in_type) {
+    case xnn_datatype_qint8:
+      input_quantization = {0, 1.0f / 128.0f};
+      break;
+    case xnn_datatype_quint8:
+      input_quantization = {128, 1.0f / 128.0f};
+      break;
+    default:
+      break;
+  }
+  switch (out_type) {
+    case xnn_datatype_qint8:
+      output_quantization = {128, 1.0f / 128.0f};
+      break;
+    case xnn_datatype_quint8:
+      output_quantization = {0, 1.0f / 256.0f};
+      break;
+    default:
+      break;
+  }
   switch (op) {
     case xnn_unary_clamp:
       params.clamp.min = -10.0f;
@@ -68,25 +88,19 @@ void init_params(xnn_unary_operator op, xnn_datatype in_type,
           break;
       }
       break;
-    default:
-      break;
-  }
-  switch (in_type) {
-    case xnn_datatype_qint8:
-      input_quantization = {0, 1.0f / 128.0f};
-      break;
-    case xnn_datatype_quint8:
-      input_quantization = {128, 1.0f / 128.0f};
-      break;
-    default:
-      break;
-  }
-  switch (out_type) {
-    case xnn_datatype_qint8:
-      output_quantization = {128, 1.0f / 128.0f};
-      break;
-    case xnn_datatype_quint8:
-      output_quantization = {0, 1.0f / 256.0f};
+    case xnn_unary_log:
+    case xnn_unary_square_root:
+    case xnn_unary_reciprocal_square_root:
+      switch (in_type) {
+        case xnn_datatype_qint8:
+          input_quantization = {-128, 1.0f};
+          break;
+        case xnn_datatype_quint8:
+          input_quantization = {0, 1.0f};
+          break;
+        default:
+          break;
+      }
       break;
     default:
       break;
@@ -212,11 +226,18 @@ tflite::BuiltinOperator xnn_unary_operator_to_tflite(xnn_unary_operator op) {
       return tflite::BuiltinOperator_RSQRT;
     case xnn_unary_tanh:
       return tflite::BuiltinOperator_TANH;
-    case xnn_unary_invalid:
-      break;
+    case xnn_unary_cube_root:
+      return tflite::BuiltinOperator_STABLEHLO_CBRT;
+    case xnn_unary_cosine:
+      return tflite::BuiltinOperator_COS;
+    case xnn_unary_sine:
+      return tflite::BuiltinOperator_SIN;
+    case xnn_unary_sign:
+      return tflite::BuiltinOperator_SIGN;
+    default:
+      XNN_UNREACHABLE;
+      return tflite::BuiltinOperator_CUSTOM;
   }
-  XNN_UNREACHABLE;
-  return tflite::BuiltinOperator_CUSTOM;
 }
 
 template <typename T>
@@ -464,6 +485,14 @@ BENCHMARK_OP(square);
 BENCHMARK_OP(square_root);
 BENCHMARK_OP(reciprocal_square_root);
 BENCHMARK_OP(tanh);
+BENCHMARK_OP(cube_root);
+BENCHMARK_OP(cosine);
+BENCHMARK_OP(sine);
+// Missing in TFlite?
+//BENCHMARK_OP(count_leading_zeros);
+//BENCHMARK_OP(bitwise_not);
+//BENCHMARK_OP(popcount);
+BENCHMARK_OP(sign);
 
 BENCHMARK_CONVERT(qs8_qs8, int8_t, int8_t);
 BENCHMARK_CONVERT(qs8_qu8, int8_t, uint8_t);

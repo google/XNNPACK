@@ -951,6 +951,7 @@ xnnpack_cxx_library(
     ],
     hdrs = [
         "src/xnnpack/reference-config.h",
+        "src/xnnpack/reference-utils.h",
     ],
     compatible_with = [],
     defines = xnnpack_configurable_defines(),

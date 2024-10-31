@@ -500,6 +500,14 @@ enum xnn_unary_operator {
   xnn_unary_square_root,
   xnn_unary_reciprocal_square_root,
   xnn_unary_tanh,
+  // The following operators are experimental and may be removed.
+  xnn_unary_cube_root,
+  xnn_unary_cosine,
+  xnn_unary_sine,
+  xnn_unary_count_leading_zeros,
+  xnn_unary_bitwise_not,
+  xnn_unary_popcount,
+  xnn_unary_sign,
 };
 
 /// Parameters for xnn_define_unary
@@ -1066,6 +1074,16 @@ enum xnn_binary_operator {
   xnn_binary_copysign,
   xnn_binary_squared_difference,
   xnn_binary_prelu,
+  // The following operators are experimental and may be removed.
+  xnn_binary_modulus,
+  xnn_binary_atan2,
+  xnn_binary_pow,
+  xnn_binary_bitwise_and,
+  xnn_binary_bitwise_or,
+  xnn_binary_bitwise_xor,
+  xnn_binary_shift_left,
+  xnn_binary_shift_right_logical,
+  xnn_binary_shift_right_arithmetic,
 };
 
 struct xnn_binary_params {
