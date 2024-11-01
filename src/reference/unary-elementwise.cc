@@ -235,7 +235,14 @@ template <typename T>
 struct AbsOp {
   explicit AbsOp(const xnn_unary_uparams*) {}
 
+  int operator()(int x) const { return std::abs(x); }
   float operator()(float x) const { return std::abs(x); }
+  xnn_float16 operator()(xnn_float16 x) const {
+    return xnn_float16_from_bits(xnn_float16_to_bits(x) & 0x7fff);
+  }
+  xnn_bfloat16 operator()(xnn_bfloat16 x) const {
+    return xnn_bfloat16_from_bits(xnn_bfloat16_to_bits(x) & 0x7fff);
+  }
 };
 
 template <typename T>
@@ -294,14 +301,33 @@ template <typename T>
 struct NegateOp {
   explicit NegateOp(const xnn_unary_uparams*) {}
 
-  T operator()(T x) const { return -x; }
+  static const uint16_t sign_mask = 0x8000;
+  int operator()(int x) const { return -x; }
+  float operator()(float x) const { return -x; }
+  xnn_float16 operator()(xnn_float16 x) const {
+    return xnn_float16_from_bits(xnn_float16_to_bits(x) ^ sign_mask);
+  }
+  xnn_bfloat16 operator()(xnn_bfloat16 x) const {
+    return xnn_bfloat16_from_bits(xnn_bfloat16_to_bits(x) ^ sign_mask);
+  }
 };
 
 template <typename T>
 struct ReLUOp {
   explicit ReLUOp(const xnn_unary_uparams*) {}
 
-  T operator()(T x) const { return std::max<T>(x, 0); }
+  int operator()(int x) const { return std::max(x, 0); }
+  float operator()(float x) const { return std::max(x, 0.0f); }
+  static const uint16_t sign_mask = 0x8000;
+  xnn_float16 operator()(xnn_float16 x) const {
+    return (xnn_float16_to_bits(x) & sign_mask) != 0 ? xnn_float16_from_bits(0)
+                                                     : x;
+  }
+  xnn_bfloat16 operator()(xnn_bfloat16 x) const {
+    return (xnn_bfloat16_to_bits(x) & sign_mask) != 0
+               ? xnn_bfloat16_from_bits(0)
+               : x;
+  }
 };
 
 template <typename T>
@@ -442,7 +468,20 @@ template <typename T>
 struct SignOp {
   explicit SignOp(const xnn_unary_uparams*) {}
 
-  T operator()(T x) const { return x < 0 ? -1 : x > 0 ? 1 : 0; }
+  int operator()(int x) const { return x < 0 ? -1 : x > 0 ? 1 : 0; }
+  float operator()(float x) const { return x < 0 ? -1 : x > 0 ? 1 : 0; }
+
+  static const uint16_t sign_mask = 0x8000;
+  xnn_float16 operator()(xnn_float16 x) const {
+    uint16_t sign = xnn_float16_to_bits(x) & sign_mask;
+    static constexpr uint16_t one = 0x3c00;
+    return xnn_float16_is_zero(x) ? x : xnn_float16_from_bits(one | sign);
+  }
+  xnn_bfloat16 operator()(xnn_bfloat16 x) const {
+    uint16_t sign = xnn_bfloat16_to_bits(x) & sign_mask;
+    static constexpr uint16_t one = 0x3f80;
+    return xnn_bfloat16_is_zero(x) ? x : xnn_bfloat16_from_bits(one | sign);
+  }
 };
 
 #define DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, op)                    \
