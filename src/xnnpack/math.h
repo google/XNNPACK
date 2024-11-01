@@ -495,7 +495,7 @@ XNN_INLINE static uint16_t math_cvt_bf16_fp32(float x) {
 #endif
 
 #if (defined(__i386__) || defined(__x86_64__)) && defined(__SSE2__) && \
-    defined(__FLT16_MAX__) &&                                          \
+    defined(__FLT16_MAX__) && defined(__F16C__) &&                     \
     ((__clang_major__ >= 15 && !defined(_MSC_VER)) || (XNN_GNUC_ACTUAL >= 12))
 #define XNN_HAVE_FLOAT16 1
 #endif
