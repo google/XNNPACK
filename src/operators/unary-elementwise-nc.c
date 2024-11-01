@@ -42,47 +42,34 @@ static enum xnn_status check_op_type(xnn_operator_t op,
   return xnn_status_success;
 }
 
-typedef float (*xnn_lut_init_fn)(float, const union xnn_unary_params*);
-
-static float calculate_elu(float x, const union xnn_unary_params* params) {
-  return signbit(x) ? params->elu.alpha * expm1f(x) : x;
-}
-
-static float calculate_sigmoid(float x, const union xnn_unary_params* params) {
-  return signbit(x) ? 1.0f / (1.0f + expf(-x)) : 1.0f - 1.0f / (1.0f + expf(x));
-}
-
-static float calculate_tanh(float x, const union xnn_unary_params* params) {
-  return tanhf(x);
-}
-
 static enum xnn_status init_lut_op(
     xnn_operator_t op,
-    xnn_lut_init_fn init_fn,
-    int32_t min,
-    int32_t max,
+    const struct xnn_unary_elementwise_config* reference_config,
     const union xnn_unary_params* params,
     const struct xnn_quantization_params* input_quantization,
     const struct xnn_quantization_params* output_quantization) {
-  op->lookup_table = xnn_allocate_simd_memory(256 * sizeof(uint8_t));
+  const int lookup_table_elements = 256;
+  op->lookup_table = xnn_allocate_simd_memory(lookup_table_elements * sizeof(uint8_t));
   if (op->lookup_table == NULL) {
     xnn_log_error(
-      "failed to allocate 256 bytes for %s operator lookup table",
+      "failed to allocate %s operator lookup table",
       xnn_operator_type_to_string(op->type));
     return xnn_status_out_of_memory;
   }
 
-  uint8_t* lookup_table = op->lookup_table;
-  const float inv_output_scale = 1.0f / output_quantization->scale;
-  for (int32_t i = min; i < min + 256; i++) {
-    const float dequantized_input = (i - input_quantization->zero_point) * input_quantization->scale;
-    const float dequantized_output = init_fn(dequantized_input, params);
-    long quantized_output = lrintf(dequantized_output * inv_output_scale) + output_quantization->zero_point;
-    lookup_table[(uint8_t) i] = (uint8_t) math_min_s32(max, math_max_s32(min, quantized_output));
+  union xnn_unary_uparams uparams;
+  if (reference_config->init) {
+    reference_config->init(&uparams, params, input_quantization, output_quantization);
   }
 
-  const struct xnn_x8_lut_config* lut_config = xnn_init_x8_lut_config();
-  op->lut_config = lut_config;
+  // Run the reference kernel on the lookup table itself to initialize it.
+  uint8_t* lookup_table = op->lookup_table;
+  for (int i = 0; i < lookup_table_elements; i++) {
+    lookup_table[i] = i;
+  }
+  reference_config->ukernel(lookup_table_elements, lookup_table, lookup_table, &uparams);
+
+  op->lut_config = xnn_init_x8_lut_config();
 
   op->state = xnn_run_state_invalid;
 
@@ -251,37 +238,15 @@ static enum xnn_status init_op(
     }
     return xnn_status_success;
   }
-  if (input_datatype == output_datatype) {
-    // Try to use a LUT.
-    enum xnn_datatype datatype = output_datatype;
-    if (datatype == xnn_datatype_qint8) {
-      switch (op_type) {
-        case xnn_unary_elu:
-          return init_lut_op(op, calculate_elu, INT8_MIN, INT8_MAX, params, input_quantization, output_quantization);
-        case xnn_unary_sigmoid:
-          return init_lut_op(op, calculate_sigmoid, INT8_MIN, INT8_MAX, params, input_quantization, output_quantization);
-        case xnn_unary_tanh:
-          return init_lut_op(op, calculate_tanh, INT8_MIN, INT8_MAX, params, input_quantization, output_quantization);
-        default:
-          break;
-      }
-    } else if (datatype == xnn_datatype_quint8) {
-      switch (op_type) {
-        case xnn_unary_elu:
-          return init_lut_op(op, calculate_elu, 0, UINT8_MAX, params, input_quantization, output_quantization);
-        case xnn_unary_sigmoid:
-          return init_lut_op(op, calculate_sigmoid, 0, UINT8_MAX, params, input_quantization, output_quantization);
-        case xnn_unary_tanh:
-          return init_lut_op(op, calculate_tanh, 0, UINT8_MAX, params, input_quantization, output_quantization);
-        default:
-          break;
-      }
-    }
-  }
 
   // Fall back to reference.
   config = xnn_init_unary_reference_config(op_type, input_datatype, output_datatype);
   if (config) {
+    if (xnn_datatype_size_bytes(input_datatype) == 1 && xnn_datatype_size_bytes(output_datatype) == 1) {
+      // We can use a LUT for this op.
+      return init_lut_op(op, config, params, input_quantization, output_quantization);
+    }
+
     xnn_log_debug(
       "unsupported operator %s for datatypes %s -> %s, falling back to reference kernel",
       xnn_unary_operator_to_string(op_type), xnn_datatype_to_string(input_datatype), xnn_datatype_to_string(output_datatype));
