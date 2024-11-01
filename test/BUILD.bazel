@@ -266,7 +266,6 @@ sh_test(
     ],
     deps = MICROKERNEL_TEST_DEPS + [":vunary_microkernel_tester"],
 ) for kernel in [
-    "bf16_vabs",
     "f16_vabs",
     "f16_vclamp",
     "f16_velu",
@@ -379,8 +378,6 @@ sh_test(
     "qu8_vmul_minmax_rndnu",
     "qu8_vmulc_minmax_fp32",
     "qu8_vmulc_minmax_rndnu",
-    "s32_vmul",
-    "s32_vmulc",
 ]]
 
 [xnnpack_unit_test(

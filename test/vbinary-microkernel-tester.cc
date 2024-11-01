@@ -108,44 +108,6 @@ void VBinaryMicrokernelTester::Test(xnn_f32_vbinary_ukernel_fn vbinary,
   }
 }
 
-void VBinaryMicrokernelTester::Test(xnn_s32_vbinary_ukernel_fn vbinary,
-                                    OpType op_type,
-                                    xnn_init_s32_default_params_fn) const {
-  xnnpack::ReplicableRandomDevice rng;
-  std::uniform_int_distribution<int32_t> s32dist(-100000, 100000);
-
-  xnnpack::Buffer<int32_t> a(batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
-  xnnpack::Buffer<int32_t> b(
-      broadcast_b() ? 1 : batch_size() + XNN_EXTRA_BYTES / sizeof(int32_t));
-  xnnpack::Buffer<int32_t> y(
-      batch_size() +
-      (inplace_a() || inplace_b() ? XNN_EXTRA_BYTES / sizeof(int32_t) : 0));
-  xnnpack::Buffer<int32_t> y_ref(batch_size());
-  for (size_t iteration = 0; iteration < iterations(); iteration++) {
-    if (!inplace_a()) {
-      std::generate(a.begin(), a.end(), [&]() { return s32dist(rng); });
-    }
-    if (!inplace_b()) {
-      std::generate(b.begin(), b.end(), [&]() { return s32dist(rng); });
-    }
-    if (inplace_a() || inplace_b()) {
-      std::generate(y.begin(), y.end(), [&]() { return s32dist(rng); });
-    }
-    const int32_t* a_data = inplace_a() ? y.data() : a.data();
-    const int32_t* b_data = inplace_b() ? y.data() : b.data();
-    reference_op_impl(a_data, b_data, y_ref.data(), batch_size(), op_type);
-
-    // Call optimized micro-kernel.
-    vbinary(batch_size() * sizeof(int32_t), a_data, b_data, y.data(), nullptr);
-
-    // Verify results.
-    for (size_t i = 0; i < batch_size(); i++) {
-      EXPECT_EQ(y[i], y_ref[i])
-          << "at " << i << " / " << batch_size();
-    }
-  }
-}
-
 void VBinaryMicrokernelTester::Test(
     xnn_qu8_vadd_minmax_ukernel_fn vadd_minmax,
     xnn_init_qu8_add_minmax_params_fn init_params) const {

@@ -52,15 +52,6 @@ extern "C" {
 #undef XNN_UKERNEL
 
 #define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype) \
-  DECLARE_BF16_UKERNEL_FUNCTION(fn_name, xnn_bf16_default_params);
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, fn_name, batch_tile, vector_tile, \
-                                datatype, params_type, init_params)           \
-  DECLARE_BF16_UKERNEL_FUNCTION(fn_name, params_type);
-#include "bf16-vabs/bf16-vabs.h"
-#undef XNN_UKERNEL
-#undef XNN_UKERNEL_WITH_PARAMS
-
-#define XNN_UKERNEL(arch_flags, fn_name, batch_tile, vector_tile, datatype) \
   DECLARE_F16_UKERNEL_FUNCTION(fn_name, xnn_f16_default_params);
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, fn_name, batch_tile, vector_tile, \
                                 datatype, params_type, init_params)           \

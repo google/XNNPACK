@@ -1685,13 +1685,6 @@ typedef void (*xnn_f32_vbinary_ukernel_fn)(
     float* output,
     const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-typedef void (*xnn_s32_vbinary_ukernel_fn)(
-    size_t batch,
-    const int32_t* input_x,
-    const int32_t* input_y,
-    int32_t* output,
-    const struct xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
 // VBINARY: Vector BINARY elementwise with Min+Max activation
 
 typedef void (*xnn_f16_vbinary_minmax_ukernel_fn)(

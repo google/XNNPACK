@@ -68,8 +68,6 @@ static const struct xnn_binary_elementwise_config* init_config(
           return xnn_init_qs8_vmul_config();
         case xnn_datatype_quint8:
           return xnn_init_qu8_vmul_config();
-        case xnn_datatype_int32:
-          return xnn_init_s32_vmul_config();
         default:
           return NULL;
       }

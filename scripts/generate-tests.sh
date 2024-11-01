@@ -128,12 +128,7 @@ tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b -
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel qu8-vmulc-minmax-fp32 --output test/qu8-vmulc-minmax-fp32.cc &
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel qu8-vmulc-minmax-rndnu --output test/qu8-vmulc-minmax-rndnu.cc &
 
-tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel s32-vmul   --output test/s32-vmul.cc &
-tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel s32-vmulc    --output test/s32-vmulc.cc &
-
 ### Tests for VUnary micro-kernels
-tools/generate-vunary-test.py --ukernel bf16-vabs --output test/bf16-vabs.cc &
-
 tools/generate-vunary-test.py --ukernel f16-vclamp --output test/f16-vclamp.cc &
 tools/generate-vunary-test.py --ukernel f16-velu --output test/f16-velu.cc &
 tools/generate-vunary-test.py --ukernel f16-vabs --output test/f16-vabs.cc &

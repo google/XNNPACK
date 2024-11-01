@@ -1647,9 +1647,7 @@ IF(XNNPACK_BUILD_TESTS)
       qu8-vmul-minmax-fp32
       qu8-vmul-minmax-rndnu
       qu8-vmulc-minmax-fp32
-      qu8-vmulc-minmax-rndnu
-      s32-vmul
-      s32-vmulc)
+      qu8-vmulc-minmax-rndnu)
   FOREACH(TEST ${MICROKERNEL_VBINARY_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
@@ -1700,7 +1698,6 @@ IF(XNNPACK_BUILD_TESTS)
   ENDFOREACH()
 
   SET(MICROKERNEL_VUNARY_TESTS
-      bf16-vabs
       f16-vabs
       f16-vclamp
       f16-velu

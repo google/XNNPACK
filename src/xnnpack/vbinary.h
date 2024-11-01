@@ -103,16 +103,6 @@ extern "C" {
 #include "qs8-vmulc/qs8-vmulc-minmax-rndnu.h"
 #undef XNN_UKERNEL_WITH_PARAMS
 
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, \
-                                datatype, params_type, init_params)           \
-  XNN_INTERNAL void ukernel(                                                  \
-      size_t n, const int32_t* input_a, const int32_t* input_b,               \
-      int32_t* output,                                                        \
-      const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-#include "s32-vmul/s32-vmul.h"
-#include "s32-vmul/s32-vmulc.h"
-#undef XNN_UKERNEL_WITH_PARAMS
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif

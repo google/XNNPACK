@@ -32,9 +32,6 @@ static struct xnn_binary_elementwise_config f32_vprelu_config = {0};
 static struct xnn_binary_elementwise_config f32_vsub_config = {0};
 static struct xnn_binary_elementwise_config f32_vsqrdiff_config = {0};
 
-
-static struct xnn_binary_elementwise_config s32_vmul_config = {0};
-
 static struct xnn_binary_elementwise_config qs8_vadd_config = {0};
 static struct xnn_binary_elementwise_config qs8_vmul_config = {0};
 
@@ -58,7 +55,6 @@ XNN_INIT_ONCE_GUARD(f32_vmul);
 XNN_INIT_ONCE_GUARD(f32_vprelu);
 XNN_INIT_ONCE_GUARD(f32_vsub);
 XNN_INIT_ONCE_GUARD(f32_vsqrdiff);
-XNN_INIT_ONCE_GUARD(s32_vmul);
 XNN_INIT_ONCE_GUARD(qs8_vadd);
 XNN_INIT_ONCE_GUARD(qs8_vmul);
 XNN_INIT_ONCE_GUARD(qu8_vadd);
@@ -496,64 +492,6 @@ static void init_f32_vcopysign_config(void) {
     f32_vcopysign_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcopysignc_ukernel__scalar_u2;
     f32_vcopysign_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrcopysignc_ukernel__scalar_u2;
     f32_vcopysign_config.element_tile = 2;
-  #endif
-}
-
-
-static void init_s32_vmul_config(void) {
-  #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    if (hardware_config->use_arm_neon) {
-      s32_vmul_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmul_ukernel__neon_u8;
-      s32_vmul_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_ukernel__neon_u8;
-      s32_vmul_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_ukernel__neon_u8;
-      s32_vmul_config.element_tile = 8;
-    }
-    else if (!XNN_PLATFORM_MOBILE) {
-      s32_vmul_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmul_ukernel__scalar_u2;
-      s32_vmul_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_ukernel__scalar_u2;
-      s32_vmul_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_ukernel__scalar_u2;
-      s32_vmul_config.element_tile = 2;
-    }
-  #elif XNN_ARCH_ARM64
-    s32_vmul_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmul_ukernel__neon_u8;
-    s32_vmul_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_ukernel__neon_u8;
-    s32_vmul_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_ukernel__neon_u8;
-    s32_vmul_config.element_tile = 8;
-  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-        s32_vmul_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmul_ukernel__avx512f_u32;
-        s32_vmul_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_ukernel__avx512f_u32;
-        s32_vmul_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_ukernel__avx512f_u32;
-        s32_vmul_config.element_tile = 32;
-      } else
-    #endif
-    if (hardware_config->use_x86_avx2) {
-      s32_vmul_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmul_ukernel__avx2_u16;
-      s32_vmul_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_ukernel__avx2_u16;
-      s32_vmul_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_ukernel__avx2_u16;
-      s32_vmul_config.element_tile = 16;
-    }
-    else {
-      s32_vmul_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmul_ukernel__sse41_u8;
-      s32_vmul_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_ukernel__sse41_u8;
-      s32_vmul_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_ukernel__sse41_u8;
-      s32_vmul_config.element_tile = 8;
-    }
-  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    s32_vmul_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmul_ukernel__wasmsimd_u16;
-    s32_vmul_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_ukernel__wasmsimd_u16;
-    s32_vmul_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_ukernel__wasmsimd_u16;
-    s32_vmul_config.element_tile = 16;
-  #else
-    s32_vmul_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmul_ukernel__scalar_u2;
-    s32_vmul_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_ukernel__scalar_u2;
-    s32_vmul_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_s32_vmulc_ukernel__scalar_u2;
-    s32_vmul_config.element_tile = 2;
   #endif
 }
 
@@ -1396,15 +1334,6 @@ const struct xnn_binary_elementwise_config* xnn_init_f32_vcopysign_config() {
   }
   XNN_INIT_ONCE(f32_vcopysign);
   return &f32_vcopysign_config;
-}
-
-const struct xnn_binary_elementwise_config* xnn_init_s32_vmul_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL) {
-    return NULL;
-  }
-  XNN_INIT_ONCE(s32_vmul);
-  return &s32_vmul_config;
 }
 
 const struct xnn_binary_elementwise_config* xnn_init_f32_vdiv_config() {
