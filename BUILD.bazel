@@ -1540,6 +1540,18 @@ config_setting(
     define_values = {"xnn_enable_dwconv_multipass": "false"},
 )
 
+# Enables usage of WASM SIMD AVX-256 revectorization kernels.
+config_setting(
+    name = "xnn_enable_wasm_revectorize_explicit_true",
+    define_values = {"xnn_enable_wasm_revectorize": "true"},
+)
+
+# Disables usage of WASM SIMD AVX-256 revectorization kernels.
+config_setting(
+    name = "xnn_enable_wasm_revectorize_explicit_false",
+    define_values = {"xnn_enable_wasm_revectorize": "false"},
+)
+
 # Force logging to stderr/stdout
 config_setting(
     name = "xnn_log_to_stdio_explicit_true",
@@ -2083,6 +2095,23 @@ alias(
         ":xnn_enable_dwconv_multipass_explicit_true": ":xnn_enable_dwconv_multipass_explicit_true",
         ":xnn_enable_dwconv_multipass_explicit_false": ":xnn_enable_dwconv_multipass_explicit_true",
         "//conditions:default": ":dwconv_multipass_enabled_by_default",
+    }),
+)
+
+selects.config_setting_group(
+    name = "wasm_revectorize_enabled_by_default",
+    match_any = [
+        "//build_config:emscripten_wasmsimd",
+        "//build_config:emscripten_wasmrelaxedsimd",
+    ],
+)
+
+alias(
+    name = "wasm_revectorize_enabled",
+    actual = select({
+        ":xnn_enable_wasm_revectorize_explicit_true": ":xnn_enable_wasm_revectorize_explicit_true",
+        ":xnn_enable_wasm_revectorize_explicit_false": ":xnn_enable_wasm_revectorize_explicit_true",
+        "//conditions:default": ":wasm_revectorize_enabled_by_default",
     }),
 )
 
