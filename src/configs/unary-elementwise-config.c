@@ -61,7 +61,6 @@ static struct xnn_unary_elementwise_config qs8_cvt_config = {0};
 static struct xnn_unary_elementwise_config qs8_lrelu_config = {0};
 static struct xnn_unary_elementwise_config qs8_to_f16_cvt_config = {0};
 static struct xnn_unary_elementwise_config qs8_to_f32_cvt_config = {0};
-static struct xnn_unary_elementwise_config qs16_to_qs8_cvt_config = {0};
 static struct xnn_unary_elementwise_config qu8_cvt_config = {0};
 static struct xnn_unary_elementwise_config qu8_lrelu_config = {0};
 static struct xnn_unary_elementwise_config qu8_to_f32_cvt_config = {0};
@@ -116,7 +115,6 @@ XNN_INIT_ONCE_GUARD(qs8_cvt);
 XNN_INIT_ONCE_GUARD(qs8_lrelu);
 XNN_INIT_ONCE_GUARD(qs8_to_f16_cvt);
 XNN_INIT_ONCE_GUARD(qs8_to_f32_cvt);
-XNN_INIT_ONCE_GUARD(qs16_to_qs8_cvt);
 XNN_INIT_ONCE_GUARD(qu8_cvt);
 XNN_INIT_ONCE_GUARD(qu8_lrelu);
 XNN_INIT_ONCE_GUARD(qu8_to_f32_cvt);
@@ -1596,45 +1594,6 @@ static void init_qs8_cvt_config(void) {
   #endif
 }
 
-static void init_qs16_to_qs8_cvt_config(void) {
-  #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    if (hardware_config->use_arm_neon) {
-      qs16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs16_qs8_vcvt_ukernel__asm_aarch32_neon_u16;
-      qs16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs16_qs8_cvt_scalar_params;
-    } else if (!XNN_PLATFORM_MOBILE) {
-      qs16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs16_qs8_vcvt_ukernel__scalar_u4;
-      qs16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs16_qs8_cvt_scalar_params;
-    }
-  #elif XNN_ARCH_ARM64
-    qs16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs16_qs8_vcvt_ukernel__neon_u32;
-    qs16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs16_qs8_cvt_scalar_params;
-  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    if (hardware_config->use_x86_avx) {
-      qs16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs16_qs8_vcvt_ukernel__avx_u16;
-      qs16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs16_qs8_cvt_scalar_params;
-    } else if (hardware_config->use_x86_sse4_1) {
-      qs16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs16_qs8_vcvt_ukernel__sse41_u16;
-      qs16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs16_qs8_cvt_scalar_params;
-    } else if (hardware_config->use_x86_ssse3) {
-      qs16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs16_qs8_vcvt_ukernel__ssse3_u16;
-      qs16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs16_qs8_cvt_scalar_params;
-    } else {
-      qs16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs16_qs8_vcvt_ukernel__sse2_u16;
-      qs16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs16_qs8_cvt_scalar_params;
-    }
-  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    qs16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs16_qs8_vcvt_ukernel__wasmsimd_u16;
-    qs16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs16_qs8_cvt_scalar_params;
-  #else
-    qs16_to_qs8_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_qs16_qs8_vcvt_ukernel__scalar_u4;
-    qs16_to_qs8_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_qs16_qs8_cvt_scalar_params;
-  #endif
-}
-
 static void init_qs8_lrelu_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -2462,15 +2421,6 @@ const struct xnn_unary_elementwise_config* xnn_init_qs8_cvt_config() {
   }
   XNN_INIT_ONCE(qs8_cvt);
   return &qs8_cvt_config;
-}
-
-const struct xnn_unary_elementwise_config* xnn_init_qs16_to_qs8_cvt_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL) {
-    return NULL;
-  }
-  XNN_INIT_ONCE(qs16_to_qs8_cvt);
-  return &qs16_to_qs8_cvt_config;
 }
 
 const struct xnn_unary_elementwise_config* xnn_init_qs8_lrelu_config() {

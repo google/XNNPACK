@@ -473,13 +473,6 @@ struct xnn_qs8_cvt_params {
   } scalar;
 };
 
-struct xnn_qs16_qs8_cvt_params {
-  struct {
-    int32_t multiplier;
-    int32_t output_zero_point;
-  } scalar;
-};
-
 struct xnn_qs8_f16_cvt_params {
   struct {
     int16_t zero_point;
@@ -584,7 +577,6 @@ union xnn_unary_uparams {
   struct xnn_qs8_f32_cvt_params qs8_f32_cvt;
   struct xnn_qu8_f32_cvt_params qu8_f32_cvt;
   struct xnn_qs8_f16_cvt_params qs8_f16_cvt;
-  struct xnn_qs16_qs8_cvt_params qs16_qs8_cvt;
   struct xnn_s32_f32_cvt_params s32_f32_cvt;
   struct xnn_u32_f32_cvt_params u32_f32_cvt;
   struct xnn_qs8_cvt_params qs8_cvt;

@@ -289,7 +289,6 @@ void vlrelu(benchmark::State& state, uint64_t arch_flags,
 #include "f32-f16-vcvt/f32-f16-vcvt.h"
 #include "f32-qs8-vcvt/f32-qs8-vcvt.h"
 #include "f32-qu8-vcvt/f32-qu8-vcvt.h"
-#include "qs16-qs8-vcvt/qs16-qs8-vcvt.h"
 #include "qs8-f16-vcvt/qs8-f16-vcvt.h"
 #include "qs8-f32-vcvt/qs8-f32-vcvt.h"
 #include "qs8-vcvt/qs8-vcvt.h"

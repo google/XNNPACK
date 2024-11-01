@@ -1676,7 +1676,6 @@ IF(XNNPACK_BUILD_TESTS)
       qs8-f16-vcvt
       qs8-f32-vcvt
       qs8-vcvt
-      qs16-qs8-vcvt
       qu8-f32-vcvt
       qu8-vcvt
       u32-f32-vcvt)

@@ -170,7 +170,6 @@ MICROKERNEL_DEFS = [
     "src/qs8-vmul/qs8-vmul-minmax-rndnu.h",
     "src/qs8-vmulc/qs8-vmulc-minmax-fp32.h",
     "src/qs8-vmulc/qs8-vmulc-minmax-rndnu.h",
-    "src/qs16-qs8-vcvt/qs16-qs8-vcvt.h",
     "src/qu8-avgpool/qu8-avgpool-minmax.h",
     "src/qu8-dwconv/qu8-dwconv-minmax-multipass-fp32.h",
     "src/qu8-dwconv/qu8-dwconv-minmax-multipass-rndnu.h",
