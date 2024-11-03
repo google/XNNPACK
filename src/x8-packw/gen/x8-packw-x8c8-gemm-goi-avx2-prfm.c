@@ -9,7 +9,6 @@
 
 
 #include <assert.h>
-#include <stdio.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -34,7 +33,6 @@ void xnn_x8_packw_gemm_goi_ukernel_x8c8__avx2_prfm(
   size_t extra_bytes,
   const void* params) XNN_OOB_READS
 {
-  printf("kr %zu\n", kr);
   assert(g != 0);
   assert(nc != 0);
   assert(kc != 0);
