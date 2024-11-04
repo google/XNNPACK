@@ -152,17 +152,17 @@ void xnn_f32_igemm_minmax_ukernel_5x16__avx512f_broadcast(
       a = (const float**restrict) ((uintptr_t) a - ks);
       nc -= 16;
     } else {
-      if (nc & 15) {
-        // Prepare mask for valid 32-bit elements (depends on nc).
-        const __mmask16 vmask = _cvtu32_mask16((uint32_t) (UINT32_C(1) << (nc & 15)) - UINT32_C(1));
+      // NC remainder (1..15)
+      assert(nc >= 1);
+      assert(nc <= 15);
+      // Prepare mask for valid 32-bit elements (depends on nc).
+      const __mmask16 vmask0 = _cvtu32_mask16((uint32_t) (((UINT64_C(1) << nc) - 1) >> 0));
 
-        _mm512_mask_storeu_ps(c4, vmask, vacc4x0);
-        _mm512_mask_storeu_ps(c3, vmask, vacc3x0);
-        _mm512_mask_storeu_ps(c2, vmask, vacc2x0);
-        _mm512_mask_storeu_ps(c1, vmask, vacc1x0);
-        _mm512_mask_storeu_ps(c0, vmask, vacc0x0);
-      }
-
+      _mm512_mask_storeu_ps(c4 + 0, vmask0, vacc4x0);
+      _mm512_mask_storeu_ps(c3 + 0, vmask0, vacc3x0);
+      _mm512_mask_storeu_ps(c2 + 0, vmask0, vacc2x0);
+      _mm512_mask_storeu_ps(c1 + 0, vmask0, vacc1x0);
+      _mm512_mask_storeu_ps(c0 + 0, vmask0, vacc0x0);
       nc = 0;
     }
   } while (nc != 0);

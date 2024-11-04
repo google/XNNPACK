@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert NR % 16 == 0
+$assert 16 <= NR <= 64
 #include <assert.h>
 
 #include <immintrin.h>
@@ -113,31 +114,16 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__avx512f_broadcast(
       a = (const float**restrict) ((uintptr_t) a - ks);
       nc -= ${NR};
     } else {
-      $for LOG2N in reversed(range(4, NR.bit_length())):
-        $if NR != 1 << LOG2N:
-          if (nc & ${1 << LOG2N}) {
-            $if LOG2N >= 4:
-              $for M in reversed(range(MR)):
-                _mm512_storeu_ps(c${M}, vacc${M}x0);
-                $for N in range(16, 1 << LOG2N, 16):
-                  _mm512_storeu_ps(c${M} + ${N}, vacc${M}x${N//16});
+      // NC remainder (1..${NR-1})
+      assert(nc >= 1);
+      assert(nc <= ${NR-1});
+      // Prepare mask for valid 32-bit elements (depends on nc).
+      $for N in range(0, NR, 16):
+        const __mmask16 vmask${N//16} = _cvtu32_mask16((uint32_t) (((UINT64_C(1) << nc) - 1) >> ${N}));
 
-              $for M in reversed(range(MR)):
-                $for N in range(0, NR - (1 << LOG2N), 16):
-                  vacc${M}x${N//16} = vacc${M}x${(N + (1 << LOG2N))//16};
-
-              $for M in reversed(range(MR)):
-                c${M} += ${1 << LOG2N};
-          }
-        $if LOG2N == 4:
-          if (nc & 15) {
-            // Prepare mask for valid 32-bit elements (depends on nc).
-            const __mmask16 vmask = _cvtu32_mask16((uint32_t) (UINT32_C(1) << (nc & 15)) - UINT32_C(1));
-
-            $for M in reversed(range(MR)):
-              _mm512_mask_storeu_ps(c${M}, vmask, vacc${M}x0);
-          }
-
+      $for M in reversed(range(MR)):
+        $for N in range(0, NR, 16):
+          _mm512_mask_storeu_ps(c${M} + ${N}, vmask${N//16}, vacc${M}x${N//16});
       nc = 0;
     }
   } while (nc != 0);

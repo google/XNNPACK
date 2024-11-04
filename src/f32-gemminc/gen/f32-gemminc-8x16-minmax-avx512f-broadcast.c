@@ -176,18 +176,20 @@ void xnn_f32_gemminc_minmax_ukernel_8x16__avx512f_broadcast(
 
       nc -= 16;
     } else {
-      assert(nc != 0);
-      assert(nc < 16);
+      // NC remainder (1..15)
+      assert(nc >= 1);
+      assert(nc <= 15);
       // Prepare mask for valid 32-bit elements (depends on nc).
-      const __mmask16 vmask = _cvtu32_mask16((uint32_t) (UINT32_C(1) << nc) - UINT32_C(1));
-      _mm512_mask_storeu_ps(c7, vmask, vacc7x0);
-      _mm512_mask_storeu_ps(c6, vmask, vacc6x0);
-      _mm512_mask_storeu_ps(c5, vmask, vacc5x0);
-      _mm512_mask_storeu_ps(c4, vmask, vacc4x0);
-      _mm512_mask_storeu_ps(c3, vmask, vacc3x0);
-      _mm512_mask_storeu_ps(c2, vmask, vacc2x0);
-      _mm512_mask_storeu_ps(c1, vmask, vacc1x0);
-      _mm512_mask_storeu_ps(c0, vmask, vacc0x0);
+      const __mmask16 vmask0 = _cvtu32_mask16((uint32_t) (((UINT64_C(1) << nc) - 1) >> 0));
+
+      _mm512_mask_storeu_ps(c7 + 0, vmask0, vacc7x0);
+      _mm512_mask_storeu_ps(c6 + 0, vmask0, vacc6x0);
+      _mm512_mask_storeu_ps(c5 + 0, vmask0, vacc5x0);
+      _mm512_mask_storeu_ps(c4 + 0, vmask0, vacc4x0);
+      _mm512_mask_storeu_ps(c3 + 0, vmask0, vacc3x0);
+      _mm512_mask_storeu_ps(c2 + 0, vmask0, vacc2x0);
+      _mm512_mask_storeu_ps(c1 + 0, vmask0, vacc1x0);
+      _mm512_mask_storeu_ps(c0 + 0, vmask0, vacc0x0);
       nc = 0;
     }
   } while (nc != 0);
