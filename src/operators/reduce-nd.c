@@ -78,6 +78,12 @@ error:
   return status;
 }
 
+static int cmp_value_size_t(const void* a_ptr, const void* b_ptr) {
+  const size_t a = *((const size_t*)a_ptr);
+  const size_t b = *((const size_t*)b_ptr);
+  return (b < a) - (b > a);
+}
+
 static enum xnn_status reshape_reduce_nd(
     xnn_operator_t reduce_op, size_t num_reduction_axes,
     const int64_t* reduction_axes, size_t num_input_dims,
@@ -128,16 +134,10 @@ static enum xnn_status reshape_reduce_nd(
   assert(num_input_dims <= XNN_MAX_TENSOR_DIMS);
   memcpy(normalized_input_shape, input_shape, num_input_dims * sizeof(size_t));
 
-  size_t normalized_reduction_axes[XNN_MAX_TENSOR_DIMS];
-  assert(num_reduction_axes <= XNN_MAX_TENSOR_DIMS);
-  for (int i = 0; i < num_reduction_axes; i++) {
-    normalized_reduction_axes[i] = 0 <= reduction_axes[i]
-                                       ? reduction_axes[i]
-                                       : num_input_dims + reduction_axes[i];
-  }
-
   for (size_t i = 0; i < num_reduction_axes; i++) {
-    if (num_input_dims <= normalized_reduction_axes[i]) {
+    const int64_t signed_num_input_dims = (int64_t)num_input_dims;
+    if (signed_num_input_dims <= reduction_axes[i] ||
+        reduction_axes[i] < -signed_num_input_dims) {
       xnn_log_error(
           "failed to reshape %s operator with #%zu reduction axis of %" PRIi64
           ": the index is out of bounds for a %zuD input shape",
@@ -147,11 +147,21 @@ static enum xnn_status reshape_reduce_nd(
     }
   }
 
+  size_t normalized_reduction_axes[XNN_MAX_TENSOR_DIMS];
+  assert(num_reduction_axes <= XNN_MAX_TENSOR_DIMS);
+  for (int i = 0; i < num_reduction_axes; i++) {
+    normalized_reduction_axes[i] = 0 <= reduction_axes[i]
+                                       ? reduction_axes[i]
+                                       : num_input_dims + reduction_axes[i];
+  }
+  qsort(normalized_reduction_axes, num_reduction_axes, sizeof(size_t),
+        cmp_value_size_t);
+
   for (size_t i = 1; i < num_reduction_axes; i++) {
     if (normalized_reduction_axes[i] <= normalized_reduction_axes[i - 1]) {
       xnn_log_error(
           "failed to reshape %s operator with #%zu reduction axis of %" PRIi64
-          ": the reduction axes must be in ascending order and unique",
+          ": the reduction axes must be unique",
           xnn_operator_type_to_string(reduce_op->type), i, reduction_axes[i]);
       return xnn_status_invalid_parameter;
     }

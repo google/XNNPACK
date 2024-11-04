@@ -322,16 +322,6 @@ enum xnn_status xnn_define_static_reduce_v2(
     return xnn_status_invalid_parameter;
   }
 
-  for (size_t i = 1; i < num_reduction_axes; i++) {
-    if (reduction_axes[i] <= reduction_axes[i - 1]) {
-      xnn_log_error(
-          "failed to define %s operator with #%zu reduction axis of %" PRIi64
-          ": the reduction axes must be in ascending order and unique",
-          xnn_node_type_to_string(node_type), i, reduction_axes[i]);
-      return xnn_status_invalid_parameter;
-    }
-  }
-
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
   if (node == NULL) {
     return xnn_status_out_of_memory;

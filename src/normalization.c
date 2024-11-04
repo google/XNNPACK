@@ -294,7 +294,6 @@ void xnn_normalize_reduction(
     size_t* input_dims)
 {
   size_t num_reduction_axes = *num_reduction_axes_ptr;
-  qsort(reduction_axes, num_reduction_axes, sizeof(size_t), cmp_value_size_t);
 
   // The original number of input dimensions.
   const size_t num_input_dims = *num_input_dims_ptr;
