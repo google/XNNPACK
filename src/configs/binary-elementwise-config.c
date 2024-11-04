@@ -447,12 +447,12 @@ static void init_f32_vcopysign_config(void) {
       f32_vcopysign_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcopysign_ukernel__neon_u8;
       f32_vcopysign_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcopysignc_ukernel__neon_u8;
       f32_vcopysign_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrcopysignc_ukernel__neon_u8;
-      f32_vcopysign_config.element_tile = 2;
+      f32_vcopysign_config.element_tile = 8;
     } else if (!XNN_PLATFORM_MOBILE) {
       f32_vcopysign_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcopysign_ukernel__scalar_u2;
       f32_vcopysign_config.opc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcopysignc_ukernel__scalar_u2;
       f32_vcopysign_config.ropc_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vrcopysignc_ukernel__scalar_u2;
-      f32_vcopysign_config.element_tile = 2;
+      f32_vcopysign_config.element_tile = 8;
     }
   #elif XNN_ARCH_ARM64
     f32_vcopysign_config.op_ukernel = (xnn_vbinary_ukernel_fn) xnn_f32_vcopysign_ukernel__neon_u8;

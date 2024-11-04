@@ -420,7 +420,7 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
             op->compute[0].tile[0] =
                 max(element_tile,
                     round_up_po2(op->compute[0].range[0] / num_threads,
-                                 (1 << log2_element_size)));
+                                 (element_tile << log2_element_size)));
           } else {
             op->compute[0].type = xnn_parallelization_type_1d;
             op->compute[0].task_1d =
