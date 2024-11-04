@@ -611,6 +611,13 @@ tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=7 -D NR=16 -D INC=1 -D DATA
 tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=8 -D NR=16 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-8x16-minmax-avx512f-broadcast.c &
 tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=8 -D NR=16 -D INC=1 -D DATATYPE=F32 -o src/f32-gemminc/gen/f32-gemminc-8x16-minmax-avx512f-broadcast.c &
 
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=1 -D NR=32 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=4 -D NR=32 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=5 -D NR=32 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-5x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=6 -D NR=32 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=7 -D NR=32 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-7x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=8 -D NR=32 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-8x32-minmax-avx512f-broadcast.c &
+
 ################################ RISC-V Vector ################################
 tools/xngen src/f32-gemm/MRxNRv-rvv.c.in -D MR=7 -D NR=m4 -D ACTIVATION=LINEAR -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-7x4v-rvv.c &
 tools/xngen src/f32-gemm/MRxNRv-rvv.c.in -D MR=7 -D NR=m4 -D ACTIVATION=RELU   -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-7x4v-relu-rvv.c &

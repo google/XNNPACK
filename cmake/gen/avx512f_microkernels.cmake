@@ -15,10 +15,10 @@ SET(PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-5f5m5l32c16s1r-minmax-avx512f.c
   src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-avx512f.c
   src/f32-dwconv/gen/f32-dwconv-25p16c-minmax-avx512f.c
-  src/f32-gemm/gen/f32-gemm-1x16-minmax-avx512f-broadcast.c
-  src/f32-gemm/gen/f32-gemm-7x16-minmax-avx512f-broadcast.c
-  src/f32-igemm/gen/f32-igemm-1x16-minmax-avx512f-broadcast.c
-  src/f32-igemm/gen/f32-igemm-7x16-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-1x32-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-7x32-minmax-avx512f-broadcast.c
+  src/f32-igemm/gen/f32-igemm-1x32-minmax-avx512f-broadcast.c
+  src/f32-igemm/gen/f32-igemm-7x32-minmax-avx512f-broadcast.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx512f-rr2-p5-u64-acc2.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-avx512f-c64.c
   src/f32-rminmax/gen/f32-rmax-avx512f-u64-acc4.c
@@ -66,7 +66,7 @@ SET(PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-vunary/gen/f32-vsqr-avx512f.c
   src/s32-f32-vcvt/gen/s32-f32-vcvt-avx512f.c
   src/u32-f32-vcvt/gen/u32-f32-vcvt-avx512f.c
-  src/x32-packw/gen/x32-packw-x16-gemm-goi-avx512f-u4-prfm.c)
+  src/x32-packw/gen/x32-packw-x32-gemm-goi-avx512f-u4-prfm.c)
 
 SET(NON_PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-avx512f-acc2.c
@@ -84,20 +84,32 @@ SET(NON_PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-25p16c-minmax-avx512f-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p32c-minmax-avx512f-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p32c-minmax-avx512f.c
+  src/f32-gemm/gen/f32-gemm-1x16-minmax-avx512f-broadcast.c
   src/f32-gemm/gen/f32-gemm-4x16-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-4x32-minmax-avx512f-broadcast.c
   src/f32-gemm/gen/f32-gemm-5x16-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-5x32-minmax-avx512f-broadcast.c
   src/f32-gemm/gen/f32-gemm-6x16-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-6x32-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-7x16-minmax-avx512f-broadcast.c
   src/f32-gemm/gen/f32-gemm-8x16-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-8x32-minmax-avx512f-broadcast.c
   src/f32-gemminc/gen/f32-gemminc-1x16-minmax-avx512f-broadcast.c
   src/f32-gemminc/gen/f32-gemminc-4x16-minmax-avx512f-broadcast.c
   src/f32-gemminc/gen/f32-gemminc-5x16-minmax-avx512f-broadcast.c
   src/f32-gemminc/gen/f32-gemminc-6x16-minmax-avx512f-broadcast.c
   src/f32-gemminc/gen/f32-gemminc-7x16-minmax-avx512f-broadcast.c
   src/f32-gemminc/gen/f32-gemminc-8x16-minmax-avx512f-broadcast.c
+  src/f32-igemm/gen/f32-igemm-1x16-minmax-avx512f-broadcast.c
   src/f32-igemm/gen/f32-igemm-4x16-minmax-avx512f-broadcast.c
+  src/f32-igemm/gen/f32-igemm-4x32-minmax-avx512f-broadcast.c
   src/f32-igemm/gen/f32-igemm-5x16-minmax-avx512f-broadcast.c
+  src/f32-igemm/gen/f32-igemm-5x32-minmax-avx512f-broadcast.c
   src/f32-igemm/gen/f32-igemm-6x16-minmax-avx512f-broadcast.c
+  src/f32-igemm/gen/f32-igemm-6x32-minmax-avx512f-broadcast.c
+  src/f32-igemm/gen/f32-igemm-7x16-minmax-avx512f-broadcast.c
   src/f32-igemm/gen/f32-igemm-8x16-minmax-avx512f-broadcast.c
+  src/f32-igemm/gen/f32-igemm-8x32-minmax-avx512f-broadcast.c
   src/f32-raddexpminusmax/gen/f32-raddexpminusmax-avx512f-p5-scalef-u64-acc2.c
   src/f32-raddexpminusmax/gen/f32-raddexpminusmax-avx512f-p5-scalef-u64-acc4.c
   src/f32-raddexpminusmax/gen/f32-raddexpminusmax-avx512f-p5-scalef-u64.c
@@ -279,6 +291,8 @@ SET(NON_PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt-u32.c
   src/f32-vsqrt/gen/f32-vsqrt-avx512f-rsqrt-u48.c
   src/f32-vtanh/gen/f32-vtanh-avx512f-rational-9-8-div.c
-  src/x32-packw/gen/x32-packw-x16-gemm-goi-avx512f-u4.c)
+  src/x32-packw/gen/x32-packw-x16-gemm-goi-avx512f-u4-prfm.c
+  src/x32-packw/gen/x32-packw-x16-gemm-goi-avx512f-u4.c
+  src/x32-packw/gen/x32-packw-x32-gemm-goi-avx512f-u4.c)
 
 SET(ALL_AVX512F_MICROKERNEL_SRCS ${PROD_AVX512F_MICROKERNEL_SRCS} + ${NON_PROD_AVX512F_MICROKERNEL_SRCS})

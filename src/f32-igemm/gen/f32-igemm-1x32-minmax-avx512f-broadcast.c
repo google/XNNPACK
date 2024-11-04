@@ -15,7 +15,7 @@
 #include "xnnpack/intrinsics-polyfill.h"
 
 
-void xnn_f32_igemm_minmax_ukernel_1x16__avx512f_broadcast(
+void xnn_f32_igemm_minmax_ukernel_1x32__avx512f_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -45,7 +45,8 @@ void xnn_f32_igemm_minmax_ukernel_1x16__avx512f_broadcast(
 
   do {
     __m512 vacc0x0 = _mm512_load_ps(w);
-    w += 16;
+    __m512 vacc0x1 = _mm512_load_ps(w + 16);
+    w += 32;
 
     size_t p = ks;
     do {
@@ -59,10 +60,12 @@ void xnn_f32_igemm_minmax_ukernel_1x16__avx512f_broadcast(
       size_t k = kc;
       do {
         const __m512 vb0 = _mm512_load_ps(w);
-        w += 16;
+        const __m512 vb1 = _mm512_load_ps(w + 16);
+        w += 32;
 
         const __m512 va0 = _mm512_set1_ps(*a0);
         vacc0x0 = _mm512_fmadd_ps(va0, vb0, vacc0x0);
+        vacc0x1 = _mm512_fmadd_ps(va0, vb1, vacc0x1);
 
         a0 += 1;
 
@@ -73,17 +76,27 @@ void xnn_f32_igemm_minmax_ukernel_1x16__avx512f_broadcast(
 
     const __m512 vmin = _mm512_set1_ps(params->scalar.min);
     vacc0x0 = _mm512_max_ps(vmin, vacc0x0);
+    vacc0x1 = _mm512_max_ps(vmin, vacc0x1);
 
     const __m512 vmax = _mm512_set1_ps(params->scalar.max);
     vacc0x0 = _mm512_min_ps(vmax, vacc0x0);
+    vacc0x1 = _mm512_min_ps(vmax, vacc0x1);
 
-    if XNN_LIKELY(nc >= 16) {
+    if XNN_LIKELY(nc >= 32) {
       _mm512_storeu_ps(c0, vacc0x0);
+      _mm512_storeu_ps(c0 + 16, vacc0x1);
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
 
       a = (const float**restrict) ((uintptr_t) a - ks);
-      nc -= 16;
+      nc -= 32;
     } else {
+      if (nc & 16) {
+        _mm512_storeu_ps(c0, vacc0x0);
+
+        vacc0x0 = vacc0x1;
+
+        c0 += 16;
+      }
       if (nc & 15) {
         // Prepare mask for valid 32-bit elements (depends on nc).
         const __mmask16 vmask = _cvtu32_mask16((uint32_t) (UINT32_C(1) << (nc & 15)) - UINT32_C(1));

@@ -577,6 +577,30 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_conv_goki_w
   k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_1x32__avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_4x32__avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_5x32__avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_6x32__avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_7x32__avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_8x32__avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
 # WAsm SIMD
 - name: xnn_f32_igemm_minmax_ukernel_1x8__wasmsimd_arm_loadsplat
   init: xnn_init_f32_minmax_scalar_params
