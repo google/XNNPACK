@@ -76,11 +76,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
           __m512 vacc${M}x${N//16} = _mm512_load_ps(acc + ${M*NR+N});
       acc += ${MR*NR};
     $else:
-      $if DATATYPE == "F32":
-        __m512 vacc0x0 = _mm512_load_ps(w);
-      $else:
-        __m512 vacc0x0 = _mm512_loadu_ps(w);
-      $for N in range(16, NR, 16):
+      $for N in range(0, NR, 16):
         $if DATATYPE == "F32":
           __m512 vacc0x${N//16} = _mm512_load_ps(w + ${N});
         $else:
@@ -96,13 +92,11 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
     size_t k = kc;
     do {
       $if DATATYPE == "F32":
-        const __m512 vb0 = _mm512_load_ps(w);
-        $for N in range(16, NR, 16):
-          const __m512 vb${N//16} = _mm512_loadu_ps(w + ${N});
+        $for N in range(0, NR, 16):
+          const __m512 vb${N//16} = _mm512_load_ps(w + ${N});
         w += ${NR};
       $else:
-        const __m512i vbi0 = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) w));
-        $for N in range(16, NR, 16):
+        $for N in range(0, NR, 16):
           const __m512i vbi${N//16}  = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) ((const int8_t*) w + ${N})));
         $for N in range(0, NR, 16):
           const __m512 vb${N//16}  = _mm512_cvtepi32_ps(vbi${N//16});
@@ -137,47 +131,23 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
 
     if XNN_LIKELY(nc >= ${NR}) {
       $for M in RANGE_MR:
-        _mm512_storeu_ps(c${M}, vacc${M}x0);
-        $for N in range(16, NR, 16):
+        $for N in range(0, NR, 16):
           _mm512_storeu_ps(c${M} + ${N}, vacc${M}x${N//16});
-        c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
-
-      $for M in RANGE_MR:
         a${M} = (const float*) ((uintptr_t) a${M} - kc);
-
+        c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
       nc -= ${NR};
     } else {
-      $for LOG2N in reversed(range(4, NR.bit_length())):
-        $if NR != 1 << LOG2N:
-          if (nc & ${1 << LOG2N}) {
-            $if LOG2N >= 4:
-              $for M in RANGE_MR:
-                _mm512_storeu_ps(c${M}, vacc${M}x0);
-                $for N in range(16, 1 << LOG2N, 16):
-                  _mm512_storeu_ps(c${M} + ${N}, vacc${M}x${N//16});
+      // NC remainder (1..${NR-1})
+      assert(nc >= 1);
+      assert(nc <= ${NR-1});
+      // Prepare mask for valid 32-bit elements (depends on nc).
+      $for N in range(0, NR, 16):
+        const __mmask16 vmask${N//16} = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> ${N}) & 0xFFFF));
 
-              $for M in RANGE_MR:
-                $for N in range(0, NR - (1 << LOG2N), 16):
-                  vacc${M}x${N//16} = vacc${M}x${(N + (1 << LOG2N))//16};
+      $for M in RANGE_MR:
+        $for N in range(0, NR, 16):
+          _mm_mask_storeu_epi32(c${M} + ${N}, vmask${N//16}, vacc${M}x${N//16});
 
-              $for M in RANGE_MR:
-                c${M} += ${1 << LOG2N};
-          }
-        $if LOG2N == 4:
-          $if NR > 16:
-            if (nc & 15) {
-              // Prepare mask for valid 32-bit elements (depends on nc).
-              const __mmask16 vmask = _cvtu32_mask16((uint32_t) (UINT32_C(1) << (nc & 15)) - UINT32_C(1));
-              $for M in RANGE_MR:
-                _mm512_mask_storeu_ps(c${M}, vmask, vacc${M}x0);
-            }
-          $else:
-            assert(nc != 0);
-            assert(nc < ${NR});
-            // Prepare mask for valid 32-bit elements (depends on nc).
-            const __mmask16 vmask = _cvtu32_mask16((uint32_t) (UINT32_C(1) << nc) - UINT32_C(1));
-            $for M in RANGE_MR:
-              _mm512_mask_storeu_ps(c${M}, vmask, vacc${M}x0);
       nc = 0;
     }
   } while (nc != 0);

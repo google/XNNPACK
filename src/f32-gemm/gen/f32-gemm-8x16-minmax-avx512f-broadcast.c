@@ -81,7 +81,7 @@ void xnn_f32_gemm_minmax_ukernel_8x16__avx512f_broadcast(
     c7 = c6;
   }
   do {
-    __m512 vacc0x0 = _mm512_load_ps(w);
+    __m512 vacc0x0 = _mm512_load_ps(w + 0);
     __m512 vacc1x0 = vacc0x0;
     __m512 vacc2x0 = vacc0x0;
     __m512 vacc3x0 = vacc0x0;
@@ -93,7 +93,7 @@ void xnn_f32_gemm_minmax_ukernel_8x16__avx512f_broadcast(
 
     size_t k = kc;
     do {
-      const __m512 vb0 = _mm512_load_ps(w);
+      const __m512 vb0 = _mm512_load_ps(w + 0);
       w += 16;
 
       const __m512 va0 = _mm512_set1_ps(*a0);
@@ -146,46 +146,47 @@ void xnn_f32_gemm_minmax_ukernel_8x16__avx512f_broadcast(
     vacc7x0 = _mm512_min_ps(vmax, vacc7x0);
 
     if XNN_LIKELY(nc >= 16) {
-      _mm512_storeu_ps(c0, vacc0x0);
-      c0 = (float*) ((uintptr_t) c0 + cn_stride);
-      _mm512_storeu_ps(c1, vacc1x0);
-      c1 = (float*) ((uintptr_t) c1 + cn_stride);
-      _mm512_storeu_ps(c2, vacc2x0);
-      c2 = (float*) ((uintptr_t) c2 + cn_stride);
-      _mm512_storeu_ps(c3, vacc3x0);
-      c3 = (float*) ((uintptr_t) c3 + cn_stride);
-      _mm512_storeu_ps(c4, vacc4x0);
-      c4 = (float*) ((uintptr_t) c4 + cn_stride);
-      _mm512_storeu_ps(c5, vacc5x0);
-      c5 = (float*) ((uintptr_t) c5 + cn_stride);
-      _mm512_storeu_ps(c6, vacc6x0);
-      c6 = (float*) ((uintptr_t) c6 + cn_stride);
-      _mm512_storeu_ps(c7, vacc7x0);
-      c7 = (float*) ((uintptr_t) c7 + cn_stride);
-
+      _mm512_storeu_ps(c0 + 0, vacc0x0);
       a0 = (const float*) ((uintptr_t) a0 - kc);
+      c0 = (float*) ((uintptr_t) c0 + cn_stride);
+      _mm512_storeu_ps(c1 + 0, vacc1x0);
       a1 = (const float*) ((uintptr_t) a1 - kc);
+      c1 = (float*) ((uintptr_t) c1 + cn_stride);
+      _mm512_storeu_ps(c2 + 0, vacc2x0);
       a2 = (const float*) ((uintptr_t) a2 - kc);
+      c2 = (float*) ((uintptr_t) c2 + cn_stride);
+      _mm512_storeu_ps(c3 + 0, vacc3x0);
       a3 = (const float*) ((uintptr_t) a3 - kc);
+      c3 = (float*) ((uintptr_t) c3 + cn_stride);
+      _mm512_storeu_ps(c4 + 0, vacc4x0);
       a4 = (const float*) ((uintptr_t) a4 - kc);
+      c4 = (float*) ((uintptr_t) c4 + cn_stride);
+      _mm512_storeu_ps(c5 + 0, vacc5x0);
       a5 = (const float*) ((uintptr_t) a5 - kc);
+      c5 = (float*) ((uintptr_t) c5 + cn_stride);
+      _mm512_storeu_ps(c6 + 0, vacc6x0);
       a6 = (const float*) ((uintptr_t) a6 - kc);
+      c6 = (float*) ((uintptr_t) c6 + cn_stride);
+      _mm512_storeu_ps(c7 + 0, vacc7x0);
       a7 = (const float*) ((uintptr_t) a7 - kc);
-
+      c7 = (float*) ((uintptr_t) c7 + cn_stride);
       nc -= 16;
     } else {
-      assert(nc != 0);
-      assert(nc < 16);
+      // NC remainder (1..15)
+      assert(nc >= 1);
+      assert(nc <= 15);
       // Prepare mask for valid 32-bit elements (depends on nc).
-      const __mmask16 vmask = _cvtu32_mask16((uint32_t) (UINT32_C(1) << nc) - UINT32_C(1));
-      _mm512_mask_storeu_ps(c0, vmask, vacc0x0);
-      _mm512_mask_storeu_ps(c1, vmask, vacc1x0);
-      _mm512_mask_storeu_ps(c2, vmask, vacc2x0);
-      _mm512_mask_storeu_ps(c3, vmask, vacc3x0);
-      _mm512_mask_storeu_ps(c4, vmask, vacc4x0);
-      _mm512_mask_storeu_ps(c5, vmask, vacc5x0);
-      _mm512_mask_storeu_ps(c6, vmask, vacc6x0);
-      _mm512_mask_storeu_ps(c7, vmask, vacc7x0);
+      const __mmask16 vmask0 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 0) & 0xFFFF));
+
+      _mm_mask_storeu_epi32(c0 + 0, vmask0, vacc0x0);
+      _mm_mask_storeu_epi32(c1 + 0, vmask0, vacc1x0);
+      _mm_mask_storeu_epi32(c2 + 0, vmask0, vacc2x0);
+      _mm_mask_storeu_epi32(c3 + 0, vmask0, vacc3x0);
+      _mm_mask_storeu_epi32(c4 + 0, vmask0, vacc4x0);
+      _mm_mask_storeu_epi32(c5 + 0, vmask0, vacc5x0);
+      _mm_mask_storeu_epi32(c6 + 0, vmask0, vacc6x0);
+      _mm_mask_storeu_epi32(c7 + 0, vmask0, vacc7x0);
+
       nc = 0;
     }
   } while (nc != 0);

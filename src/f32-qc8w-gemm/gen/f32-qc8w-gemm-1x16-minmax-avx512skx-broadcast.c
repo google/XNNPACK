@@ -40,12 +40,12 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x16__avx512skx_broadcast(
   const float* a0 = a;
   float* c0 = c;
   do {
-    __m512 vacc0x0 = _mm512_loadu_ps(w);
+    __m512 vacc0x0 = _mm512_loadu_ps((const float*) w + 0);
     w = (const float*) w + 16;
 
     size_t k = kc;
     do {
-      const __m512i vbi0 = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) w));
+      const __m512i vbi0  = _mm512_cvtepi8_epi32(_mm_loadu_si128((const __m128i*) ((const int8_t*) w + 0)));
       const __m512 vb0  = _mm512_cvtepi32_ps(vbi0);
       w = (const int8_t*) w + 16;
 
@@ -67,18 +67,19 @@ void xnn_f32_qc8w_gemm_minmax_ukernel_1x16__avx512skx_broadcast(
     vacc0x0 = _mm512_min_ps(vmax, vacc0x0);
 
     if XNN_LIKELY(nc >= 16) {
-      _mm512_storeu_ps(c0, vacc0x0);
-      c0 = (float*) ((uintptr_t) c0 + cn_stride);
-
+      _mm512_storeu_ps(c0 + 0, vacc0x0);
       a0 = (const float*) ((uintptr_t) a0 - kc);
-
+      c0 = (float*) ((uintptr_t) c0 + cn_stride);
       nc -= 16;
     } else {
-      assert(nc != 0);
-      assert(nc < 16);
+      // NC remainder (1..15)
+      assert(nc >= 1);
+      assert(nc <= 15);
       // Prepare mask for valid 32-bit elements (depends on nc).
-      const __mmask16 vmask = _cvtu32_mask16((uint32_t) (UINT32_C(1) << nc) - UINT32_C(1));
-      _mm512_mask_storeu_ps(c0, vmask, vacc0x0);
+      const __mmask16 vmask0 = _cvtu32_mask16((uint32_t) ((((UINT64_C(1) << nc) - 1) >> 0) & 0xFFFF));
+
+      _mm_mask_storeu_epi32(c0 + 0, vmask0, vacc0x0);
+
       nc = 0;
     }
   } while (nc != 0);
