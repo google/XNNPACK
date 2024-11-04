@@ -1445,6 +1445,34 @@ enum xnn_status xnn_define_static_reduce(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a Reduce Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param num_reduction_axes - number of axes along which reduce is computed.
+/// @param reduction_axes - axes along which reduce is computed. Negative values
+///                         are interpreted as offsets from @a
+///                         num_reduction_axes.
+/// @param input_id - Value ID for the input tensor. The input tensor must be a
+///                   dense tensor with at least @a num_reduction_axes
+///                   dimensions defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be
+///                    a dense tensor defined in the @a subgraph with @a
+///                    num_reduction_axes fewer dimensions than the input tensor
+///                    (if XNN_FLAG_KEEP_DIMS is not specified), or has same
+///                    dimension rank but the dimension at
+///                    @a reduction_axes reduced to 1 (if XNN_FLAG_KEEP_DIMS is
+///                    specified).
+/// @param flags - binary features of the Reduce Node. The only currently
+///                supported value is XNN_FLAG_KEEP_DIMS
+enum xnn_status xnn_define_static_reduce_v2(        //
+    xnn_subgraph_t subgraph,                        //
+    enum xnn_reduce_operator reduce_operator_type,  //
+    size_t num_reduction_axes,                      //
+    const int64_t* reduction_axes,                  //
+    uint32_t input_id,                              //
+    uint32_t output_id,                             //
+    uint32_t flags);
+
 /// Define a 2-Input Concatenate Node and add it to a Subgraph.
 ///
 /// The 2-Input Concatenate Node concatenates two tensors along a specified axis.
@@ -4182,16 +4210,16 @@ enum xnn_status xnn_create_reduce_nd(
   uint32_t flags,
   xnn_operator_t* reduce_op_out);
 
-enum xnn_status xnn_reshape_reduce_nd(
-  xnn_operator_t reduce_op,
-  enum xnn_datatype type,
-  size_t num_reduction_axes,
-  const size_t* reduction_axes,
-  size_t num_input_dims,
-  const size_t* input_shape,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
-  pthreadpool_t threadpool);
+enum xnn_status xnn_reshape_reduce_nd(  //
+    xnn_operator_t reduce_op,           //
+    enum xnn_datatype type,             //
+    size_t num_reduction_axes,          //
+    const int64_t* reduction_axes,      //
+    size_t num_input_dims,              //
+    const size_t* input_shape,          //
+    size_t* workspace_size,             //
+    size_t* workspace_alignment,        //
+    pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_reduce_nd(
     xnn_operator_t reduce_op,

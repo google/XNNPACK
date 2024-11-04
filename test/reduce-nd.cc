@@ -57,19 +57,21 @@ class ReduceOperatorTester {
       this->input_shape_.begin(), this->input_shape_.end(), size_t(1), std::multiplies<size_t>());
   }
 
-  ReduceOperatorTester& reduction_axes(std::initializer_list<size_t> reduction_axes) {
+  ReduceOperatorTester& reduction_axes(
+      std::initializer_list<int64_t> reduction_axes) {
     assert(reduction_axes.size() <= XNN_MAX_TENSOR_DIMS);
-    this->reduction_axes_ = std::vector<size_t>(reduction_axes);
+    this->reduction_axes_ = std::vector<int64_t>(reduction_axes);
     return *this;
   }
 
-  ReduceOperatorTester& reduction_axes(const std::vector<size_t> reduction_axes) {
+  ReduceOperatorTester& reduction_axes(
+      const std::vector<int64_t> reduction_axes) {
     assert(reduction_axes.size() <= XNN_MAX_TENSOR_DIMS);
     this->reduction_axes_ = reduction_axes;
     return *this;
   }
 
-  const std::vector<size_t>& reduction_axes() const {
+  const std::vector<int64_t>& reduction_axes() const {
     return this->reduction_axes_;
   }
 
@@ -224,7 +226,10 @@ class ReduceOperatorTester {
     std::fill(output_dims.begin(), output_dims.end(), 1);
     std::copy(input_shape().cbegin(), input_shape().cend(), input_dims.end() - num_input_dims());
     std::copy(input_dims.cbegin(), input_dims.cend(), output_dims.begin());
-    for (size_t axis : reduction_axes()) {
+    for (int64_t axis : reduction_axes()) {
+      if (axis < 0) {
+        axis = num_input_dims() + axis;
+      }
       (output_dims.end() - num_input_dims())[axis] = 1;
     }
     const size_t num_output_elements =
@@ -396,7 +401,7 @@ class ReduceOperatorTester {
 
  private:
   std::vector<size_t> input_shape_;
-  std::vector<size_t> reduction_axes_;
+  std::vector<int64_t> reduction_axes_;
   bool multithreaded_{false};
   size_t iterations_{3};
   enum xnn_reduce_operator reduce_operator_;
@@ -415,6 +420,7 @@ struct TestParam {
   int dims;
   int reduction_axes;
   bool multithreaded;
+  bool use_neg_axes;
 
   static std::string GetName(const testing::TestParamInfo<TestParam>& info) {
     std::stringstream sstr;
@@ -443,6 +449,9 @@ struct TestParam {
       sstr << ((param.reduction_axes & (uint32_t(1) << 4)) != 0 ? "_5" : "");
       sstr << ((param.reduction_axes & (uint32_t(1) << 5)) != 0 ? "_6" : "");
     }
+    if (param.use_neg_axes) {
+      sstr << "_neg_axes";
+    }
     if(param.multithreaded) {
       sstr << "_multithreaded";
     }
@@ -457,7 +466,7 @@ class ReduceNDTest : public testing::TestWithParam<TestParam> {
                                reference_shape.begin() + params.dims);
   }
 
-  std::vector<size_t> GetReductionAxes(const TestParam& param) {
+  std::vector<int64_t> GetReductionAxes(const TestParam& param) {
     const bool reduce_dims[6] = {
       (param.reduction_axes & (uint32_t(1) << 0)) != 0,
       (param.reduction_axes & (uint32_t(1) << 1)) != 0,
@@ -467,10 +476,14 @@ class ReduceNDTest : public testing::TestWithParam<TestParam> {
       (param.reduction_axes & (uint32_t(1) << 5)) != 0
     };
 
-    std::vector<size_t> reduction_axes;
+    std::vector<int64_t> reduction_axes;
     for(int i = 0; i < param.dims; ++i) {
       if(reduce_dims[i]) {
-        reduction_axes.push_back(i);
+        if (param.use_neg_axes) {
+          reduction_axes.push_back(i - param.dims);
+        } else {
+          reduction_axes.push_back(i);
+        }
       }
     }
     return reduction_axes;
@@ -488,7 +501,7 @@ constexpr std::array<size_t, 6> ReduceNDTest::reference_shape;
 TEST_P(ReduceNDTest, reduce) {
   TestParam param(GetParam());
     const std::vector<size_t> input_shape = GetInputShape(param);
-    const std::vector<size_t> reduction_axes = GetReductionAxes(param);
+    const std::vector<int64_t> reduction_axes = GetReductionAxes(param);
     ASSERT_FALSE(input_shape.empty());
     ASSERT_FALSE(reduction_axes.empty());
 
@@ -521,13 +534,15 @@ std::vector<TestParam> GenerateTests() {
                                       xnn_datatype_qint8, xnn_datatype_quint8}) {
       for(int dims = 1; dims <= 6; ++dims) {
         for(int reduction_axes = 1; reduction_axes < (1 << dims); ++reduction_axes) {
-          for(bool multithreaded : {false, true}) {
-            params.push_back(TestParam{
-              operation, datatype, dims, reduction_axes, multithreaded
-            });
-            if(dims != 6 || reduction_axes != (1 << dims)-1) {
-              break; // Only do the multithreaded test when we have 6 dims and
-                     // reduce over all the axes.
+          for (bool use_neg_axes : {false, true}) {
+            for (bool multithreaded : {false, true}) {
+              params.push_back(TestParam{operation, datatype, dims,
+                                         reduction_axes, multithreaded,
+                                         use_neg_axes});
+              if (dims != 6 || reduction_axes != (1 << dims) - 1) {
+                break;  // Only do the multithreaded test when we have 6 dims
+                        // and reduce over all the axes.
+              }
             }
           }
         }

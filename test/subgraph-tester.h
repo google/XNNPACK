@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -438,8 +437,8 @@ class SubgraphTester {
   }
 
   SubgraphTester& AddGlobalAveragePooling(uint32_t input_id, uint32_t output_id) {
-    size_t reduction_axes[2] = {1, 2};
-    const xnn_status status = xnn_define_static_reduce(
+    int64_t reduction_axes[2] = {1, 2};
+    const xnn_status status = xnn_define_static_reduce_v2(
         subgraph_.get(), xnn_reduce_mean, 2, &reduction_axes[0], input_id,
         output_id, 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
