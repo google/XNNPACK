@@ -429,6 +429,87 @@ static void optimize_tensor_allocation_for_in_place_operations(
   }
 }
 
+// Propagtes the rank through the subgraph so that each tensor's rank is
+// correctly set.
+void propagate_rank(
+  xnn_subgraph_t subgraph)
+{
+  for (size_t i = 0; i < subgraph->num_nodes; i++) {
+    const struct xnn_node* node = subgraph->nodes + i;
+    const struct xnn_value* input_value = &subgraph->values[node->inputs[0]];
+    const struct xnn_value* input_value_b = NULL;
+    const uint32_t flags = node->flags;
+    if (node->num_inputs > 1) {
+      input_value_b = &subgraph->values[node->inputs[1]];
+    }
+    struct xnn_value* output_value = &subgraph->values[node->outputs[0]];
+    switch (node->type) {
+      case xnn_node_type_argmax_pooling_2d:
+      case xnn_node_type_average_pooling_2d:
+      case xnn_node_type_convolution_2d:
+      case xnn_node_type_deconvolution_2d:
+      case xnn_node_type_depth_to_space_2d:
+      case xnn_node_type_depthwise_convolution_2d:
+      case xnn_node_type_max_pooling_2d:
+      case xnn_node_type_rope:
+      case xnn_node_type_space_to_depth_2d:
+      case xnn_node_type_static_resize_bilinear_2d:
+      case xnn_node_type_unpooling_2d:
+        output_value->shape.num_dims = 4;
+        break;
+      case xnn_node_type_global_average_pooling_2d:
+      case xnn_node_type_global_sum_pooling_1d:
+      case xnn_node_type_global_sum_pooling_2d:
+      case xnn_node_type_static_mean:
+      case xnn_node_type_static_sum:
+        if (flags & XNN_FLAG_KEEP_DIMS) {
+          output_value->shape.num_dims = input_value->shape.num_dims;
+        } else {
+          output_value->shape.num_dims = input_value->shape.num_dims - node->params.reduce.num_reduction_axes;
+        }
+        break;
+      case xnn_node_type_batch_matrix_multiply:
+      case xnn_node_type_binary_elementwise:
+        output_value->shape.num_dims = max(input_value->shape.num_dims, input_value_b->shape.num_dims);
+        break;
+      case xnn_node_type_concatenate2:
+      case xnn_node_type_concatenate3:
+      case xnn_node_type_concatenate4:
+      case xnn_node_type_concatenate5:
+      case xnn_node_type_copy:
+      case xnn_node_type_even_split2:
+      case xnn_node_type_even_split3:
+      case xnn_node_type_even_split4:
+      case xnn_node_type_unary_elementwise:
+      case xnn_node_type_convert:
+      case xnn_node_type_pack_lh:
+      case xnn_node_type_scaled_dot_product_attention:
+      case xnn_node_type_softmax:
+      case xnn_node_type_static_transpose:
+      case xnn_node_type_static_constant_pad:
+      case xnn_node_type_static_slice:
+        output_value->shape.num_dims = input_value->shape.num_dims;
+        break;
+      case xnn_node_type_static_expand_dims:
+        output_value->shape.num_dims = input_value->shape.num_dims + node->params.static_reshape.new_shape.num_dims;
+        break;
+      case xnn_node_type_fully_connected:
+      case xnn_node_type_fully_connected_sparse:
+        if (flags & XNN_FLAG_TENSORFLOW_RESHAPE_2D) {
+          output_value->shape.num_dims = 2;
+        } else {
+          output_value->shape.num_dims = input_value->shape.num_dims;
+        }
+        break;
+      case xnn_node_type_static_reshape:
+        output_value->shape.num_dims = node->params.static_reshape.new_shape.num_dims;
+        break;
+      default:
+        XNN_UNREACHABLE;
+    }
+  }
+}
+
 enum xnn_status xnn_create_runtime_v4(
   xnn_subgraph_t subgraph,
   xnn_weights_cache_t weights_cache,
@@ -437,6 +518,7 @@ enum xnn_status xnn_create_runtime_v4(
   uint32_t flags,
   xnn_runtime_t* runtime_out)
 {
+  propagate_rank(subgraph);
   struct xnn_runtime* runtime = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 

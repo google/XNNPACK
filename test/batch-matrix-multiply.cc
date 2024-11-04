@@ -904,20 +904,6 @@ INSTANTIATE_TEST_SUITE_P(
          /*.input_b_dims = */{5, 7},
          /*.expected_output_dims = */{2, 3, 7}},
 
-        {/*.name = */"output_num_dim_less_than_3_fails",
-         /*.input_a_dims = */{2, 3, 5},
-         /*.input_b_dims = */{2, 7, 5},
-         /*.expected_output_dims = */{2, 3},
-         /*.flags = */0,
-         /*.expected_status = */xnn_status_invalid_parameter},
-
-        {/*.name = */"input_a_num_dim_ne_input2_num_dim",
-         /*.input_a_dims = */{2, 3, 5},
-         /*.input_b_dims = */{2, 7, 5, 5},
-         /*.expected_output_dims = */{2, 3, 7},
-         /*.flags = */0,
-         /*.expected_status = */xnn_status_invalid_parameter},
-
         {/*.name = */"input_a_k_dim_ne_input2_dim",
          /*.input_a_dims = */{2, 3, 7},
          /*.input_b_dims = */{2, 5, 7},
@@ -930,13 +916,6 @@ INSTANTIATE_TEST_SUITE_P(
          /*.input_b_dims = */{2, 7, 5},
          /*.expected_output_dims = */{2, 3, 7},
          /*.flags = */XNN_FLAG_TRANSPOSE_B,
-         /*.expected_status = */xnn_status_invalid_parameter},
-
-        {/*.name = */"output_num_dim_ne_input1_num_dim",
-         /*.input_a_dims = */{2, 3, 5},
-         /*.input_b_dims = */{2, 7, 5},
-         /*.expected_output_dims = */{2, 3, 7, 5},
-         /*.flags = */0,
          /*.expected_status = */xnn_status_invalid_parameter},
 
         {/*.name = */"output_m_ne_input_m",
