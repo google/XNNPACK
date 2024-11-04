@@ -286,6 +286,8 @@ enum xnn_datatype {
   xnn_datatype_qbint4 = 12,
   /// IEEE754 single-precision packed floating-point.
   xnn_datatype_pfp32 = 13,
+  /// BFloat16, i.e. the upper 16 bits of a float32.
+  xnn_datatype_bf16 = 14,
 };
 
 /// Define a tensor-type Value and add it to a Subgraph.
@@ -495,6 +497,14 @@ enum xnn_unary_operator {
   xnn_unary_square_root,
   xnn_unary_reciprocal_square_root,
   xnn_unary_tanh,
+  // The following operators are experimental and may be removed.
+  xnn_unary_cube_root,
+  xnn_unary_cosine,
+  xnn_unary_sine,
+  xnn_unary_count_leading_zeros,
+  xnn_unary_bitwise_not,
+  xnn_unary_popcount,
+  xnn_unary_sign,
 };
 
 /// Parameters for xnn_define_unary
@@ -1061,6 +1071,16 @@ enum xnn_binary_operator {
   xnn_binary_copysign,
   xnn_binary_squared_difference,
   xnn_binary_prelu,
+  // The following operators are experimental and may be removed.
+  xnn_binary_modulus,
+  xnn_binary_atan2,
+  xnn_binary_pow,
+  xnn_binary_bitwise_and,
+  xnn_binary_bitwise_or,
+  xnn_binary_bitwise_xor,
+  xnn_binary_shift_left,
+  xnn_binary_shift_right_logical,
+  xnn_binary_shift_right_arithmetic,
 };
 
 struct xnn_binary_params {
@@ -1424,6 +1444,34 @@ enum xnn_status xnn_define_static_reduce(
   uint32_t input_id,
   uint32_t output_id,
   uint32_t flags);
+
+/// Define a Reduce Node and add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param num_reduction_axes - number of axes along which reduce is computed.
+/// @param reduction_axes - axes along which reduce is computed. Negative values
+///                         are interpreted as offsets from @a
+///                         num_reduction_axes.
+/// @param input_id - Value ID for the input tensor. The input tensor must be a
+///                   dense tensor with at least @a num_reduction_axes
+///                   dimensions defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be
+///                    a dense tensor defined in the @a subgraph with @a
+///                    num_reduction_axes fewer dimensions than the input tensor
+///                    (if XNN_FLAG_KEEP_DIMS is not specified), or has same
+///                    dimension rank but the dimension at
+///                    @a reduction_axes reduced to 1 (if XNN_FLAG_KEEP_DIMS is
+///                    specified).
+/// @param flags - binary features of the Reduce Node. The only currently
+///                supported value is XNN_FLAG_KEEP_DIMS
+enum xnn_status xnn_define_static_reduce_v2(        //
+    xnn_subgraph_t subgraph,                        //
+    enum xnn_reduce_operator reduce_operator_type,  //
+    size_t num_reduction_axes,                      //
+    const int64_t* reduction_axes,                  //
+    uint32_t input_id,                              //
+    uint32_t output_id,                             //
+    uint32_t flags);
 
 /// Define a 2-Input Concatenate Node and add it to a Subgraph.
 ///
@@ -4162,16 +4210,16 @@ enum xnn_status xnn_create_reduce_nd(
   uint32_t flags,
   xnn_operator_t* reduce_op_out);
 
-enum xnn_status xnn_reshape_reduce_nd(
-  xnn_operator_t reduce_op,
-  enum xnn_datatype type,
-  size_t num_reduction_axes,
-  const size_t* reduction_axes,
-  size_t num_input_dims,
-  const size_t* input_shape,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
-  pthreadpool_t threadpool);
+enum xnn_status xnn_reshape_reduce_nd(  //
+    xnn_operator_t reduce_op,           //
+    enum xnn_datatype type,             //
+    size_t num_reduction_axes,          //
+    const int64_t* reduction_axes,      //
+    size_t num_input_dims,              //
+    const size_t* input_shape,          //
+    size_t* workspace_size,             //
+    size_t* workspace_alignment,        //
+    pthreadpool_t threadpool);
 
 enum xnn_status xnn_setup_reduce_nd(
     xnn_operator_t reduce_op,

@@ -61,7 +61,7 @@ class RAddExpMinusMaxMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      float sum = std::nanf("");
+      float sum;
       raddexpminusmax(elements() * sizeof(float), x.data(), &sum, x_max);
 
       // Verify results.

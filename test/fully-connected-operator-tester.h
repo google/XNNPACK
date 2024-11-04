@@ -400,7 +400,7 @@ class FullyConnectedOperatorTester {
             batch_size(),
             /*threadpool=*/nullptr));
 
-        xnnpack::Buffer<float> output2(output.size(), nanf(""));
+        xnnpack::Buffer<float> output2(output.size());
         ASSERT_EQ(xnn_status_success,
           xnn_setup_fully_connected_nc_qd8_f16_qc4w(
             fully_connected_op2,
@@ -589,7 +589,7 @@ class FullyConnectedOperatorTester {
             batch_size(),
             /*threadpool=*/nullptr));
 
-        xnnpack::Buffer<xnn_float16> output2(output.size(), nanf(""));
+        xnnpack::Buffer<xnn_float16> output2(output.size());
         ASSERT_EQ(xnn_status_success,
           xnn_setup_fully_connected_nc_qd8_f16_qb4w(
             fully_connected_op2,
@@ -783,7 +783,7 @@ class FullyConnectedOperatorTester {
             batch_size(),
             /*threadpool=*/nullptr));
 
-        xnnpack::Buffer<float> output2(output.size(), nanf(""));
+        xnnpack::Buffer<float> output2(output.size());
         ASSERT_EQ(xnn_status_success,
           xnn_setup_fully_connected_nc_qd8_f32_qc4w(
             fully_connected_op2,
@@ -969,7 +969,7 @@ class FullyConnectedOperatorTester {
             batch_size(),
             /*threadpool=*/nullptr));
 
-        xnnpack::Buffer<float> output2(output.size(), nanf(""));
+        xnnpack::Buffer<float> output2(output.size());
         ASSERT_EQ(xnn_status_success,
           xnn_setup_fully_connected_nc_qd8_f32_qb4w(
             fully_connected_op2,
@@ -1197,7 +1197,7 @@ class FullyConnectedOperatorTester {
                       fully_connected_op2, batch_size(),
                       /*threadpool=*/nullptr));
 
-        xnnpack::Buffer<float> output2(output.size(), nanf(""));
+        xnnpack::Buffer<float> output2(output.size());
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_fully_connected_nc_qp8_f32_qc4w(
                       fully_connected_op2, input_qp8.data(), output2.data()));
@@ -1407,7 +1407,7 @@ class FullyConnectedOperatorTester {
             batch_size(),
             /*threadpool=*/nullptr));
 
-        xnnpack::Buffer<float> output2(output.size(), nanf(""));
+        xnnpack::Buffer<float> output2(output.size());
         ASSERT_EQ(xnn_status_success,
           xnn_setup_fully_connected_nc_qp8_f32_qb4w(
             fully_connected_op2,
@@ -1762,7 +1762,7 @@ class FullyConnectedOperatorTester {
             batch_size(),
             /*threadpool=*/nullptr));
 
-        xnnpack::Buffer<float> output2(output.size(), nanf(""));
+        xnnpack::Buffer<float> output2(output.size());
         ASSERT_EQ(xnn_status_success,
           xnn_setup_fully_connected_nc_qd8_f32_qc8w(
             fully_connected_op2,
@@ -2604,7 +2604,7 @@ class FullyConnectedOperatorTester {
             GTEST_FAIL() <<"unexpected weights type";
         }
 
-        xnnpack::Buffer<float> output2(output.size(), nanf(""));
+        xnnpack::Buffer<float> output2(output.size());
         switch (weights_type()) {
           case WeightsType::FP32:
             ASSERT_EQ(xnn_status_success,
@@ -2805,7 +2805,7 @@ class FullyConnectedOperatorTester {
                       batch_size(),
                       /*threadpool=*/nullptr));
 
-        xnnpack::Buffer<float> output2(output.size(), nanf(""));
+        xnnpack::Buffer<float> output2(output.size());
 
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_fully_connected_nc_f32_qc4w(
@@ -2989,7 +2989,7 @@ class FullyConnectedOperatorTester {
                       batch_size(),
                       /*threadpool=*/nullptr));
 
-        xnnpack::Buffer<float> output2(output.size(), nanf(""));
+        xnnpack::Buffer<float> output2(output.size());
 
         ASSERT_EQ(xnn_status_success,
                   xnn_setup_fully_connected_nc_f32_qc8w(
@@ -3162,7 +3162,7 @@ class FullyConnectedOperatorTester {
 
         // Smart pointer to automatically delete fully_connected_op2.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fully_connected_op(fully_connected_op2, xnn_delete_operator);
-        xnnpack::Buffer<xnn_float16> output2(output.size(), std::nanf(""));
+        xnnpack::Buffer<xnn_float16> output2(output.size());
 
         ASSERT_EQ(xnn_status_success,
                   xnn_reshape_fully_connected_nc_f16(

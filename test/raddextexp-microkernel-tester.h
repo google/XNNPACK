@@ -59,7 +59,7 @@ class RAddExtExpMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      float sum[2] = { nanf(""), nanf("") };
+      float sum[2];
       raddextexp(elements() * sizeof(float), x.data(), sum);
 
       // Verify results.

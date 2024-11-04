@@ -33,6 +33,26 @@ void init_params(xnn_unary_operator op, xnn_datatype in_type,
                  xnn_datatype out_type, xnn_unary_params& params,
                  xnn_quantization_params& input_quantization,
                  xnn_quantization_params& output_quantization) {
+  switch (in_type) {
+    case xnn_datatype_qint8:
+      input_quantization = {0, 1.0f / 128.0f};
+      break;
+    case xnn_datatype_quint8:
+      input_quantization = {128, 1.0f / 128.0f};
+      break;
+    default:
+      break;
+  }
+  switch (out_type) {
+    case xnn_datatype_qint8:
+      output_quantization = {128, 1.0f / 128.0f};
+      break;
+    case xnn_datatype_quint8:
+      output_quantization = {0, 1.0f / 256.0f};
+      break;
+    default:
+      break;
+  }
   switch (op) {
     case xnn_unary_clamp:
       params.clamp.min = -10.0f;
@@ -68,25 +88,19 @@ void init_params(xnn_unary_operator op, xnn_datatype in_type,
           break;
       }
       break;
-    default:
-      break;
-  }
-  switch (in_type) {
-    case xnn_datatype_qint8:
-      input_quantization = {0, 1.0f / 128.0f};
-      break;
-    case xnn_datatype_quint8:
-      input_quantization = {128, 1.0f / 128.0f};
-      break;
-    default:
-      break;
-  }
-  switch (out_type) {
-    case xnn_datatype_qint8:
-      output_quantization = {128, 1.0f / 128.0f};
-      break;
-    case xnn_datatype_quint8:
-      output_quantization = {0, 1.0f / 256.0f};
+    case xnn_unary_log:
+    case xnn_unary_square_root:
+    case xnn_unary_reciprocal_square_root:
+      switch (in_type) {
+        case xnn_datatype_qint8:
+          input_quantization = {-128, 1.0f};
+          break;
+        case xnn_datatype_quint8:
+          input_quantization = {0, 1.0f};
+          break;
+        default:
+          break;
+      }
       break;
     default:
       break;
@@ -212,24 +226,34 @@ tflite::BuiltinOperator xnn_unary_operator_to_tflite(xnn_unary_operator op) {
       return tflite::BuiltinOperator_RSQRT;
     case xnn_unary_tanh:
       return tflite::BuiltinOperator_TANH;
-    case xnn_unary_invalid:
-      break;
+    case xnn_unary_cube_root:
+      return tflite::BuiltinOperator_STABLEHLO_CBRT;
+    case xnn_unary_cosine:
+      return tflite::BuiltinOperator_COS;
+    case xnn_unary_sine:
+      return tflite::BuiltinOperator_SIN;
+    case xnn_unary_sign:
+      return tflite::BuiltinOperator_SIGN;
+    default:
+      XNN_UNREACHABLE;
+      return tflite::BuiltinOperator_CUSTOM;
   }
-  XNN_UNREACHABLE;
-  return tflite::BuiltinOperator_CUSTOM;
 }
 
 template <typename T>
 struct TypeToTfliteType {
   using type = T;
+  static constexpr auto tensor_type = tflite::TensorTypeFor<T>::value;
 };
 template <>
 struct TypeToTfliteType<xnn_float16> {
   using type = TfLiteFloat16;
+  static constexpr auto tensor_type = tflite::TensorType_FLOAT16;
 };
 template <>
 struct TypeToTfliteType<xnn_bfloat16> {
   using type = TfLiteBFloat16;
+  static constexpr auto tensor_type = tflite::TensorType_BFLOAT16;
 };
 
 template <typename In, typename Out, class BuildInQuantization,
@@ -252,11 +276,11 @@ static void benchmark_tflite_unary_operator(
   const std::array<flatbuffers::Offset<tflite::Tensor>, 2> tensors{{
       tflite::CreateTensor(
           builder, builder.CreateVector<int32_t>(shape.data(), shape.size()),
-          tflite::TensorTypeFor<typename TypeToTfliteType<In>::type>::value,
+          TypeToTfliteType<In>::tensor_type,
           /*buffer=*/0, /*name=*/0, in_quantization(builder)),
       tflite::CreateTensor(
           builder, builder.CreateVector<int32_t>(shape.data(), shape.size()),
-          tflite::TensorTypeFor<typename TypeToTfliteType<Out>::type>::value,
+          TypeToTfliteType<Out>::tensor_type,
           /*buffer=*/0, /*name=*/0, out_quantization(builder)),
   }};
 
@@ -302,8 +326,7 @@ static void benchmark_tflite_unary_operator(
   auto f32dist = std::uniform_real_distribution<float>(
       std::max<float>(std::numeric_limits<In>::lowest(), -128.0f),
       std::min<float>(std::numeric_limits<In>::max(), 127.0f));
-  In* input_ptr = reinterpret_cast<In*>(
-      interpreter->typed_tensor<typename TypeToTfliteType<In>::type>(0));
+  In* input_ptr = reinterpret_cast<In*>(interpreter->tensor(0)->data.raw);
   std::generate(input_ptr, input_ptr + batch_size,
                 [&]() { return f32dist(rng); });
 
@@ -347,6 +370,7 @@ static auto CreateTfLiteQuantizationParameters(
 bool is_quantized(int8_t) { return true; }
 bool is_quantized(uint8_t) { return true; }
 bool is_quantized(xnn_float16) { return false; }
+bool is_quantized(xnn_bfloat16) { return false; }
 bool is_quantized(float) { return false; }
 
 template <typename In, typename Out>
@@ -440,6 +464,7 @@ static void benchmark_tflite_convert(benchmark::State& state) {
 #define BENCHMARK_OP(op)                  \
   BENCHMARK_OP_TYPE(op, f32, float)       \
   BENCHMARK_OP_TYPE(op, f16, xnn_float16) \
+  BENCHMARK_OP_TYPE(op, bf16, xnn_bfloat16) \
   BENCHMARK_OP_TYPE(op, qs8, int8_t)      \
   BENCHMARK_OP_TYPE(op, qu8, uint8_t)
 
@@ -460,25 +485,43 @@ BENCHMARK_OP(square);
 BENCHMARK_OP(square_root);
 BENCHMARK_OP(reciprocal_square_root);
 BENCHMARK_OP(tanh);
+BENCHMARK_OP(cube_root);
+BENCHMARK_OP(cosine);
+BENCHMARK_OP(sine);
+// Missing in TFlite?
+//BENCHMARK_OP(count_leading_zeros);
+//BENCHMARK_OP(bitwise_not);
+//BENCHMARK_OP(popcount);
+BENCHMARK_OP(sign);
 
 BENCHMARK_CONVERT(qs8_qs8, int8_t, int8_t);
 BENCHMARK_CONVERT(qs8_qu8, int8_t, uint8_t);
 BENCHMARK_CONVERT(qs8_f16, int8_t, xnn_float16);
+BENCHMARK_CONVERT(qs8_bf16, int8_t, xnn_bfloat16);
 BENCHMARK_CONVERT(qs8_f32, int8_t, float);
 
 BENCHMARK_CONVERT(qu8_qs8, uint8_t, int8_t);
 BENCHMARK_CONVERT(qu8_qu8, uint8_t, uint8_t);
 BENCHMARK_CONVERT(qu8_f16, uint8_t, xnn_float16);
+BENCHMARK_CONVERT(qu8_bf16, uint8_t, xnn_bfloat16);
 BENCHMARK_CONVERT(qu8_f32, uint8_t, float);
 
 BENCHMARK_CONVERT(f16_qs8, xnn_float16, int8_t);
 BENCHMARK_CONVERT(f16_qu8, xnn_float16, uint8_t);
 // BENCHMARK_CONVERT(f16_f16, xnn_float16, xnn_float16);
+BENCHMARK_CONVERT(f16_bf16, xnn_float16, xnn_bfloat16);
 BENCHMARK_CONVERT(f16_f32, xnn_float16, float);
+
+BENCHMARK_CONVERT(bf16_qs8, xnn_bfloat16, int8_t);
+BENCHMARK_CONVERT(bf16_qu8, xnn_bfloat16, uint8_t);
+BENCHMARK_CONVERT(bf16_f16, xnn_bfloat16, xnn_float16);
+// BENCHMARK_CONVERT(bf16_bf16, xnn_bfloat16, xnn_bfloat16);
+BENCHMARK_CONVERT(bf16_f32, xnn_bfloat16, float);
 
 BENCHMARK_CONVERT(f32_qs8, float, int8_t);
 BENCHMARK_CONVERT(f32_qu8, float, uint8_t);
 BENCHMARK_CONVERT(f32_f16, float, xnn_float16);
+BENCHMARK_CONVERT(f32_bf16, float, xnn_bfloat16);
 // BENCHMARK_CONVERT(f32_f32, float, float);
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN

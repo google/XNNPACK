@@ -40,8 +40,6 @@ TEST(SUBGRAPH, hanging_nodes) {
 
   // The hanging node is still there.
   ASSERT_EQ(tester.NumNodes(), 3);
-  // But empty.
-  ASSERT_EQ(tester.Node(2)->compute_type, xnn_compute_type_invalid);
 }
 
 TEST(SUBGRAPH, multiple_outputs_with_hanging_nodes) {

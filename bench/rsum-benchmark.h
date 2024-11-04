@@ -42,7 +42,7 @@ void f16_rsum(
 
   // Prepare parameters.
   xnn_f16_scale_params params;
-  init_params(&params, /*scale=*/1.0f);
+  init_params(&params, /*scale=*/1);
 
   for (auto _ : state) {
     for (int i = 0; i < rows; ++i) {

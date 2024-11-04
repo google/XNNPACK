@@ -244,9 +244,9 @@ static void ThreePassSoftMaxWithRecomputing(
     }
 
     const auto start = std::chrono::high_resolution_clock::now();
-    float x_max = nanf("");
+    float x_max;
     rmax(elements * sizeof(float), x.data(), &x_max, &rmax_params);
-    float y_sum = nanf("");
+    float y_sum;
     raddexpminusmax(elements * sizeof(float), x.data(), &y_sum, x_max);
     vscaleexpminusmax(elements * sizeof(float), x.data(), y.data() + packed_elements * buffer_index, x_max, 1.0f / y_sum);
     const auto end = std::chrono::high_resolution_clock::now();
@@ -317,9 +317,9 @@ static void ThreePassSoftMaxWithReloading(
     }
 
     const auto start = std::chrono::high_resolution_clock::now();
-    float x_max = nanf("");
+    float x_max;
     rmax(elements * sizeof(float), x.data(), &x_max, &rmax_params);
-    float y_sum = nanf("");
+    float y_sum;
     raddstoreexpminusmax(elements * sizeof(float), x.data(), &x_max, y.data() + packed_elements * buffer_index, &y_sum, &expminus_params);
     const float inv_y_sum = 1.0f / y_sum;
     vmulc(elements * sizeof(float), y.data() + packed_elements * buffer_index, &inv_y_sum, y.data() + packed_elements * buffer_index, nullptr);

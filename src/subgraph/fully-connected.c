@@ -762,7 +762,7 @@ static enum xnn_status setup_fully_connected_operator(
   }
 }
 
-static inline enum xnn_compute_type validate_datatypes_with_bias(
+static inline bool validate_datatypes_with_bias(
     enum xnn_datatype input_datatype, enum xnn_datatype kernel_datatype,
     enum xnn_datatype bias_datatype, enum xnn_datatype output_datatype) {
   switch (kernel_datatype) {
@@ -770,179 +770,179 @@ static inline enum xnn_compute_type validate_datatypes_with_bias(
       if (input_datatype == xnn_datatype_fp32 &&
           bias_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_fp16 &&
                  bias_datatype == xnn_datatype_fp32 &&
                  output_datatype == xnn_datatype_fp16) {
         // Flag: XNN_FLAG_FP32_STATIC_WEIGHTS
-        return xnn_compute_type_fp16;
+        return true;
       }
       break;
     case xnn_datatype_fp16:
       if (input_datatype == xnn_datatype_fp16 &&
           bias_datatype == xnn_datatype_fp16 &&
           output_datatype == xnn_datatype_fp16) {
-        return xnn_compute_type_fp16;
+        return true;
       }
       break;
     case xnn_datatype_qcint4:
       if (input_datatype == xnn_datatype_fp32 &&
           bias_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_qdint8 &&
                  bias_datatype == xnn_datatype_fp32 &&
                  output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_qd8_to_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_qpint8 &&
                  bias_datatype == xnn_datatype_fp32 &&
                  output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_qp8_to_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_qdint8 &&
                  bias_datatype == xnn_datatype_fp32 &&
                  output_datatype == xnn_datatype_fp16) {
-        return xnn_compute_type_qd8_to_fp16;
+        return true;
       }
       break;
     case xnn_datatype_qbint4:
       if (input_datatype == xnn_datatype_qdint8 &&
           bias_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_qd8_to_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_qdint8 &&
                  bias_datatype == xnn_datatype_fp32 &&
                  output_datatype == xnn_datatype_fp16) {
-        return xnn_compute_type_qd8_to_fp16;
+        return true;
       } else if (input_datatype == xnn_datatype_qpint8 &&
           bias_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32)
       {
-        return xnn_compute_type_qp8_to_fp32;
+        return true;
       }
       break;
     case xnn_datatype_qcint8:
       if (input_datatype == xnn_datatype_fp32 &&
           bias_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_qdint8 &&
                  bias_datatype == xnn_datatype_fp32 &&
                  output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_qd8_to_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_qpint8 &&
                  bias_datatype == xnn_datatype_fp32 &&
                  output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_qp8_to_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_qdint8 &&
                  bias_datatype == xnn_datatype_fp32 &&
                  output_datatype == xnn_datatype_fp16) {
-        return xnn_compute_type_qd8_to_fp16;
+        return true;
       } else if (input_datatype == xnn_datatype_qint8 &&
                  bias_datatype == xnn_datatype_qcint32 &&
                  output_datatype == xnn_datatype_qint8) {
-        return xnn_compute_type_qc8;
+        return true;
       }
       break;
     case xnn_datatype_qint8:
       if (input_datatype == xnn_datatype_qint8 &&
           bias_datatype == xnn_datatype_qint32 &&
           output_datatype == xnn_datatype_qint8) {
-        return xnn_compute_type_qs8;
+        return true;
       }
       break;
     case xnn_datatype_quint8:
       if (input_datatype == xnn_datatype_quint8 &&
           bias_datatype == xnn_datatype_qint32 &&
           output_datatype == xnn_datatype_quint8) {
-        return xnn_compute_type_qu8;
+        return true;
       }
       break;
     default:
       XNN_UNREACHABLE;
   }
-  return xnn_compute_type_invalid;
+  return false;
 }
 
-static inline enum xnn_compute_type validate_datatypes_without_bias(
+static inline bool validate_datatypes_without_bias(
     enum xnn_datatype input_datatype, enum xnn_datatype kernel_datatype,
     enum xnn_datatype output_datatype) {
   switch (kernel_datatype) {
     case xnn_datatype_fp32:
       if (input_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_fp16 &&
                  output_datatype == xnn_datatype_fp16) {
         // Flag: XNN_FLAG_FP32_STATIC_WEIGHTS
-        return xnn_compute_type_fp16;
+        return true;
       }
       break;
     case xnn_datatype_fp16:
       if (input_datatype == xnn_datatype_fp16 &&
           output_datatype == xnn_datatype_fp16) {
-        return xnn_compute_type_fp16;
+        return true;
       }
       break;
     case xnn_datatype_qcint4:
       if (input_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_qdint8 &&
                  output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_qd8_to_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_qpint8 &&
                  output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_qp8_to_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_qdint8 &&
                  output_datatype == xnn_datatype_fp16) {
-        return xnn_compute_type_qd8_to_fp16;
+        return true;
       }
       break;
     case xnn_datatype_qbint4:
       if (input_datatype == xnn_datatype_qdint8 &&
           output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_qd8_to_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_qdint8 &&
                  output_datatype == xnn_datatype_fp16) {
-        return xnn_compute_type_qd8_to_fp16;
+        return true;
       } else if (input_datatype == xnn_datatype_qpint8 && output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_qp8_to_fp32;
+        return true;
       }
       break;
     case xnn_datatype_qcint8:
       if (input_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_qdint8 &&
                  output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_qd8_to_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_qpint8 &&
                  output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_qp8_to_fp32;
+        return true;
       } else if (input_datatype == xnn_datatype_qdint8 &&
                  output_datatype == xnn_datatype_fp16) {
-        return xnn_compute_type_qd8_to_fp16;
+        return true;
       } else if (input_datatype == xnn_datatype_qint8 &&
                  output_datatype == xnn_datatype_qint8) {
-        return xnn_compute_type_qc8;
+        return true;
       }
       break;
     case xnn_datatype_qint8:
       if (input_datatype == xnn_datatype_qint8 &&
           output_datatype == xnn_datatype_qint8) {
-        return xnn_compute_type_qs8;
+        return true;
       }
       break;
     case xnn_datatype_quint8:
       if (input_datatype == xnn_datatype_quint8 &&
           output_datatype == xnn_datatype_quint8) {
-        return xnn_compute_type_qu8;
+        return true;
       }
       break;
     default:
       XNN_UNREACHABLE;
   }
-  return xnn_compute_type_invalid;
+  return false;
 }
 
 enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
@@ -1209,12 +1209,10 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
       return xnn_status_invalid_parameter;
   }
 
-  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   if (bias_value != NULL) {
-    compute_type = validate_datatypes_with_bias(
+    if (!validate_datatypes_with_bias(
         input_value->datatype, kernel_value->datatype, bias_value->datatype,
-        output_value->datatype);
-    if (compute_type == xnn_compute_type_invalid) {
+        output_value->datatype)) {
       xnn_log_error("failed to define %s operator with input ID #%" PRIu32
                     ", filter ID #%" PRIu32 ", bias ID #%" PRIu32
                     ", and output ID #%" PRIu32
@@ -1229,9 +1227,8 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
       return xnn_status_invalid_parameter;
     }
   } else {
-    compute_type = validate_datatypes_without_bias(
-        input_value->datatype, kernel_value->datatype, output_value->datatype);
-    if (compute_type == xnn_compute_type_invalid) {
+    if (!validate_datatypes_without_bias(
+        input_value->datatype, kernel_value->datatype, output_value->datatype)) {
       xnn_log_error("failed to define %s operator with input ID #%" PRIu32
                     ", filter ID #%" PRIu32 ", and output ID #%" PRIu32
                     ": mismatching datatypes across input (%s), filter (%s), "
@@ -1245,7 +1242,7 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
     }
   }
 
-  if (compute_type == xnn_compute_type_fp32) {
+  if (input_value->datatype == xnn_datatype_fp32 && output_value->datatype == xnn_datatype_fp32 && (!bias_value || bias_value->datatype == xnn_datatype_fp32)) {
     const struct xnn_gemm_config* gemm_config = xnn_init_pf32_gemm_config();
     if (gemm_config != NULL && gemm_config->init.f32 != NULL) {
       // Insert a node to pack the LHS.
@@ -1263,7 +1260,6 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
   }
 
   node->type = xnn_node_type_fully_connected;
-  node->compute_type = compute_type;
   node->activation.output_min = output_min;
   node->activation.output_max = output_max;
   node->num_inputs = 2 + (size_t)(bias_id != XNN_INVALID_VALUE_ID);

@@ -158,9 +158,9 @@ class PackWMicrokernelTester {
     xnnpack::Buffer<int8_t> weights(XNN_EXTRA_BYTES / sizeof(int8_t) + n() * k());
     xnnpack::Buffer<uint32_t> bias(n());
     xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
-        packed_n() * k() + packed_n() * sizeof(uint32_t));
-    xnnpack::Buffer<int8_t> packed_w_ref(packed_n() * k() + packed_n() * sizeof(uint32_t));
-
+        packed_n() * packed_k() + packed_n() * sizeof(uint32_t));
+    xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w_ref(
+        packed_n() * packed_k() + packed_n() * sizeof(uint32_t));
     std::iota(weights.begin(), weights.end(), 0);
     std::iota(bias.begin(), bias.end(), UINT32_C(0));
     std::fill(packed_w.begin(), packed_w.end(), INT8_C(0x12));
@@ -170,7 +170,7 @@ class PackWMicrokernelTester {
     const xnn_qs8_packing_params packing_params = { 127 };
 
     // Compute reference results.
-    xnn_pack_f32_qs8w_gemm_goi_w(/*g=*/1, n(), k(), nr(), /*kr=*/1, sr(),
+    xnn_pack_f32_qs8w_gemm_goi_w(/*g=*/1, n(), k(), nr(), kr(), sr(),
       reinterpret_cast<const int8_t *>(weights.data()),
       reinterpret_cast<const float *>(bias_data),
       /*scale=*/nullptr,
@@ -178,7 +178,7 @@ class PackWMicrokernelTester {
       /*extra_bytes=*/0, &packing_params);
 
     // Call optimized micro-kernel.
-    packw(/*g=*/1, n(), k(), nr(), /*kr=*/1, sr(),
+    packw(/*g=*/1, n(), k(), nr(), kr(), sr(),
       weights.data(), bias_data, /*scale=*/nullptr, packed_w.data(), /*extra_bytes=*/0, &packing_params);
 
     // Verify results.
@@ -288,6 +288,64 @@ class PackWMicrokernelTester {
         ASSERT_EQ(packed_w[i], packed_w_ref[i])
             << "at position " << i << " / " << packed_w.size()
             << ", n " << n() << ", k " << k();
+      }
+    }
+  }
+
+  void Test(xnn_x32_packw_gemm_gio_ukernel_fn packw) const {
+    xnnpack::Buffer<uint32_t> weights(XNN_EXTRA_BYTES / sizeof(uint32_t) + g() * n() * k());
+    xnnpack::Buffer<uint32_t> padded_weights(g() * n() * packed_k());
+    xnnpack::Buffer<uint32_t> bias(g() * n());
+    xnnpack::Buffer<uint32_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
+        g() * (packed_n() * packed_k() + packed_n()));
+    xnnpack::Buffer<uint32_t> packed_w_ref(g() * (packed_n() * packed_k() + packed_n()));
+
+    const uint32_t pad_value = UINT32_C(0xDEADBEEF);
+    std::iota(weights.begin(), weights.end(), UINT32_C(0x00000003));
+    std::iota(bias.begin(), bias.end(), UINT32_C(0x80000000));
+    std::fill(packed_w.begin(), packed_w.end(), UINT32_C(0x12345678));
+    std::fill(packed_w_ref.begin(), packed_w_ref.end(), pad_value);
+
+    // Mandate zero-padding of weights to packed_k() in K dimension.
+    std::fill(padded_weights.begin(), padded_weights.end(), 0);
+    for (size_t gid = 0; gid < g(); gid++) {
+      for (size_t i = 0; i < n(); i++) {
+        for (size_t j = 0; j < k(); j++) {
+          padded_weights[(gid * n() + i) * packed_k() + j] = weights[(gid * n() + i) * k() + j];
+        }
+      }
+    }
+
+    const uint32_t* bias_data = nullbias() ? nullptr : bias.data();
+
+    // Compute reference results.
+    xnn_pack_f32_gemm_gio_w(g(), n(), packed_k(), nr(), kr(), sr(), n(),
+      reinterpret_cast<const float*>(padded_weights.data()),
+      reinterpret_cast<const float*>(bias_data),
+      /*scale=*/nullptr,
+      reinterpret_cast<float*>(packed_w_ref.data()),
+      /*extra_bytes=*/0, /*params=*/nullptr);
+
+    // Call optimized micro-kernel.
+    packw(g(), n(), k(), nr(), kr(), sr(), n(),
+      weights.data(), bias_data, /*scale=*/nullptr, packed_w.data(),
+      /*extra_bytes=*/0, /*params=*/nullptr);
+
+    // Verify bias results.
+    for (size_t i = 0; i < packed_n(); i++) {
+      if (packed_w_ref[i] != pad_value) {  // Allow pad to differ
+        EXPECT_EQ((int32_t) packed_w[i], (int32_t) packed_w_ref[i]);
+      }
+    }
+
+    // Verify results.
+    for (size_t i = 0; i < packed_w.size(); i++) {
+      // Ignore padding in N dimension.
+      if (packed_w_ref[i] != pad_value) {
+        ASSERT_EQ(packed_w[i], packed_w_ref[i])
+            << "kr " << kr() << " of kc " << k() << " packed_k " << packed_k() << "\n"
+            << "nr " << nr() << " of nc " << n() << " packed_n " << packed_n() << "\n"
+            << "at n " << i << " of " << packed_w.size();
       }
     }
   }

@@ -124,7 +124,6 @@ TEST_F(AveragePoolingTestF16, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_average_pooling_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp16);
 
   ASSERT_EQ(node->params.pooling_2d.padding_top, input_padding_top);
   ASSERT_EQ(node->params.pooling_2d.padding_right, input_padding_right);
@@ -175,7 +174,6 @@ TEST_F(AveragePoolingTestF32, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_average_pooling_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
 
   ASSERT_EQ(node->params.pooling_2d.padding_top, input_padding_top);
   ASSERT_EQ(node->params.pooling_2d.padding_right, input_padding_right);

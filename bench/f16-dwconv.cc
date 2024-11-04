@@ -54,7 +54,7 @@ static void f16_dwconv(benchmark::State& state,
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
-  
+
   const size_t effective_kernel_height = (kernel_height - 1) * dilation + 1;
   const size_t effective_kernel_width = (kernel_width - 1) * dilation + 1;
   const size_t padding_left = padding_width / 2;
@@ -88,7 +88,7 @@ static void f16_dwconv(benchmark::State& state,
   xnn_pack_f16_dwconv_ghw_w(primary_tile, 0, 0, kernel_height, kernel_width, channels,
                             channel_tile, channel_tile, /*channel_round=*/1,
                             reinterpret_cast<const uint16_t*>(k.data()),
-                            reinterpret_cast<const uint16_t*>(b.data()), 
+                            reinterpret_cast<const uint16_t*>(b.data()),
                             /*scale=*/nullptr, reinterpret_cast<uint16_t*>(w.data()),
                             /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, /*params=*/nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
@@ -116,7 +116,7 @@ static void f16_dwconv(benchmark::State& state,
   xnnpack::Buffer<xnn_float16> c(c_elements * num_buffers);
 
   xnn_f16_minmax_params params;
-  init_params(&params, -INFINITY, INFINITY);
+  init_params(&params, static_cast<xnn_float16>(-INFINITY), static_cast<xnn_float16>(INFINITY));
 
   size_t buffer_index = 0;
   for (auto _ : state) {
@@ -183,7 +183,7 @@ static void f16_dwconv(benchmark::State& state,
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
-  
+
   const size_t effective_kernel_height = (kernel_height - 1) * dilation + 1;
   const size_t effective_kernel_width = (kernel_width - 1) * dilation + 1;
   const size_t padding_left = padding_width / 2;
@@ -224,9 +224,9 @@ static void f16_dwconv(benchmark::State& state,
     first_pass_tile, middle_pass_tile, last_pass_tile,
     kernel_height, kernel_width,
     channels, channel_tile, channel_subtile, channel_round,
-    reinterpret_cast<const uint16_t*>(k.data()), 
-    reinterpret_cast<const uint16_t*>(b.data()), 
-    /*scale=*/nullptr, reinterpret_cast<uint16_t*>(w.data()), 
+    reinterpret_cast<const uint16_t*>(k.data()),
+    reinterpret_cast<const uint16_t*>(b.data()),
+    /*scale=*/nullptr, reinterpret_cast<uint16_t*>(w.data()),
     /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0, nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
@@ -253,7 +253,7 @@ static void f16_dwconv(benchmark::State& state,
   xnnpack::Buffer<xnn_float16> c(c_elements * num_buffers);
 
   xnn_f16_minmax_params params;
-  init_params(&params, -INFINITY, INFINITY);
+  init_params(&params, static_cast<xnn_float16>(-INFINITY), static_cast<xnn_float16>(INFINITY));
 
   const int input_advanced = tile_size - last_pass_tile;
   const int input_stride_elements = kernel_height * step_width - input_advanced;

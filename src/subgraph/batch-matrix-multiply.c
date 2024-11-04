@@ -216,13 +216,9 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
   //
   //  * `(N, N)`: the values match,
   //  * `(1, N)` or `(N, 1)`: either of the dimensions is `1`,
-  //  * `(N, k*N)`: the dimension in `input_a` is a divisor of the dimension in
-  //    `input_b`,
-  //  * `(k*N, N)': the dimension in `input_b` is a divisor of the dimension in
-  //    `input_a`.
   for (size_t i = 0; i < num_batch_dims; i++) {
-    if (padded_dims_a[i] % padded_dims_b[i] != 0 &&
-        padded_dims_b[i] % padded_dims_a[i] != 0) {
+    if (padded_dims_a[i] != 1 && padded_dims_b[i] != 1 &&
+        padded_dims_a[i] != padded_dims_b[i]) {
       xnn_log_error(
           "failed to reshape %s operator with input_a ID #%" PRIu32
           " and input_b ID #%" PRIu32
@@ -325,7 +321,7 @@ static enum xnn_status setup_batch_matrix_multiply_operator(
   }
 }
 
-static inline enum xnn_compute_type validate_datatypes(
+static inline bool validate_datatypes(
   enum xnn_datatype input1_datatype,
   enum xnn_datatype input2_datatype,
   enum xnn_datatype output_datatype)
@@ -333,24 +329,24 @@ static inline enum xnn_compute_type validate_datatypes(
   switch (input2_datatype) {
     case xnn_datatype_fp16:
       if (input1_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_fp16) {
-        return xnn_compute_type_fp16;
+        return true;
       }
       break;
     case xnn_datatype_fp32:
       if (input1_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_fp32;
+        return true;
       }
       break;
     case xnn_datatype_qcint8:
       if (input1_datatype == xnn_datatype_qdint8 &&
           output_datatype == xnn_datatype_fp32) {
-        return xnn_compute_type_qd8_to_fp32;
+        return true;
       }
       break;
     default:
       XNN_UNREACHABLE;
   }
-  return xnn_compute_type_invalid;
+  return false;
 }
 
 enum xnn_status xnn_define_batch_matrix_multiply(
@@ -461,9 +457,7 @@ enum xnn_status xnn_define_batch_matrix_multiply(
       return xnn_status_invalid_parameter;
   }
 
-  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
-  compute_type = validate_datatypes(input1_value->datatype, input2_value->datatype, output_value->datatype);
-  if (compute_type == xnn_compute_type_invalid) {
+  if (!validate_datatypes(input1_value->datatype, input2_value->datatype, output_value->datatype)) {
     xnn_log_error(
       "failed to define %s operator with input1 ID #%" PRIu32 ", input2 ID #%" PRIu32 ", and output ID #%" PRIu32
       ": mismatching datatypes across input1 (%s), input2 (%s), and output (%s)",
@@ -480,7 +474,6 @@ enum xnn_status xnn_define_batch_matrix_multiply(
   }
 
   node->type = xnn_node_type_batch_matrix_multiply;
-  node->compute_type = compute_type;
   node->num_inputs = 2;
   node->inputs[0] = input1_id;
   node->inputs[1] = input2_id;

@@ -199,7 +199,6 @@ TEST_F(ConvolutionTestQC8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_convolution_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qc8);
   ASSERT_EQ(node->params.convolution_2d.input_padding_top, input_padding_top);
   ASSERT_EQ(node->params.convolution_2d.input_padding_right, input_padding_right);
   ASSERT_EQ(node->params.convolution_2d.input_padding_bottom, input_padding_bottom);
@@ -272,7 +271,6 @@ TEST_F(ConvolutionTestQD8F16QC8W, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_convolution_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qd8_to_fp16);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 3);
@@ -442,7 +440,6 @@ TEST_F(ConvolutionTestQD8F32QC8W, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_convolution_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qd8_to_fp32);
   ASSERT_EQ(node->activation.output_min, output_min);
   ASSERT_EQ(node->activation.output_max, output_max);
   ASSERT_EQ(node->num_inputs, 3);
@@ -612,7 +609,6 @@ TEST_F(ConvolutionTestQS8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_convolution_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qs8);
   ASSERT_EQ(node->params.convolution_2d.input_padding_top, input_padding_top);
   ASSERT_EQ(node->params.convolution_2d.input_padding_right, input_padding_right);
   ASSERT_EQ(node->params.convolution_2d.input_padding_bottom, input_padding_bottom);
@@ -682,7 +678,6 @@ TEST_F(ConvolutionTestQU8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_convolution_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qu8);
   ASSERT_EQ(node->params.convolution_2d.input_padding_top, input_padding_top);
   ASSERT_EQ(node->params.convolution_2d.input_padding_right, input_padding_right);
   ASSERT_EQ(node->params.convolution_2d.input_padding_bottom, input_padding_bottom);
@@ -753,7 +748,6 @@ TEST_F(ConvolutionTestF16, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_convolution_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp16);
   ASSERT_EQ(node->params.convolution_2d.input_padding_top, input_padding_top);
   ASSERT_EQ(node->params.convolution_2d.input_padding_right, input_padding_right);
   ASSERT_EQ(node->params.convolution_2d.input_padding_bottom, input_padding_bottom);
@@ -824,7 +818,6 @@ TEST_F(ConvolutionTestF32, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_convolution_2d);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->params.convolution_2d.input_padding_top, input_padding_top);
   ASSERT_EQ(node->params.convolution_2d.input_padding_right, input_padding_right);
   ASSERT_EQ(node->params.convolution_2d.input_padding_bottom, input_padding_bottom);

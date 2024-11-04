@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #ifdef _MSC_VER
   #include <intrin.h>
@@ -368,6 +369,18 @@ XNN_INLINE static uint32_t math_ctz_u32(uint32_t x) {
   #endif
 }
 
+XNN_INLINE static uint32_t math_popcount_u32(uint32_t x) {
+  #if defined(_MSC_VER) && !defined(__clang__)
+    uint32_t result = 0;
+    for (int i = 0; i < 32; ++i) {
+      result += (x >> i) & 1;
+    }
+    return result;
+  #else
+    return (uint32_t) __builtin_popcount((unsigned int) x);
+  #endif
+}
+
 XNN_INLINE static uint32_t math_rotl_u32(uint32_t x, int8_t r)
 {
   #if XNN_COMPILER_MSVC
@@ -482,7 +495,7 @@ XNN_INLINE static uint16_t math_cvt_bf16_fp32(float x) {
 #endif
 
 #if (defined(__i386__) || defined(__x86_64__)) && defined(__SSE2__) && \
-    defined(__FLT16_MAX__) &&                                          \
+    defined(__FLT16_MAX__) && defined(__F16C__) &&                     \
     ((__clang_major__ >= 15 && !defined(_MSC_VER)) || (XNN_GNUC_ACTUAL >= 12))
 #define XNN_HAVE_FLOAT16 1
 #endif
@@ -538,7 +551,7 @@ extern "C" {
 
 XNN_INLINE static xnn_float16 xnn_float16_from_float(float f) {
 #ifdef XNN_HAVE_FLOAT16
-  return f;
+  return (xnn_float16) f;
 #else
   struct xnn_float16 result;
   result.value = fp16_ieee_from_fp32_value(f);
@@ -554,6 +567,18 @@ XNN_INLINE static float xnn_float16_to_float(xnn_float16 fp16) {
 #endif
 }
 
+XNN_INLINE static uint16_t xnn_float16_to_bits(xnn_float16 fp16) {
+  uint16_t result;
+  memcpy(&result, &fp16, sizeof(result));
+  return result;
+}
+
+XNN_INLINE static xnn_float16 xnn_float16_from_bits(uint16_t x) {
+  xnn_float16 result;
+  memcpy(&result, &x, sizeof(result));
+  return result;
+}
+
 XNN_INLINE static xnn_bfloat16 xnn_bfloat16_from_float(float f) {
   xnn_bfloat16 result;
   result.value = math_cvt_bf16_fp32(f);
@@ -564,9 +589,21 @@ XNN_INLINE static float xnn_bfloat16_to_float(xnn_bfloat16 bf16) {
   return math_cvt_fp32_bf16(bf16.value);
 }
 
+XNN_INLINE static uint16_t xnn_bfloat16_to_bits(xnn_bfloat16 fp16) {
+  uint16_t result;
+  memcpy(&result, &fp16, sizeof(result));
+  return result;
+}
+
+XNN_INLINE static xnn_bfloat16 xnn_bfloat16_from_bits(uint16_t x) {
+  xnn_bfloat16 result;
+  memcpy(&result, &x, sizeof(result));
+  return result;
+}
+
 XNN_INLINE static xnn_float16 xnn_float16_zero() {
 #ifdef XNN_HAVE_FLOAT16
-  return 0.0f;
+  return (xnn_float16) 0.0f;
 #else
   struct xnn_float16 result;
   result.value = 0;
@@ -575,12 +612,13 @@ XNN_INLINE static xnn_float16 xnn_float16_zero() {
 }
 
 XNN_INLINE static bool xnn_float16_is_zero(xnn_float16 f) {
-#ifdef XNN_HAVE_FLOAT16
-  return f == 0.0f || f == -0.0f;
-#else
   // Check for +/- zero (0x0000/0x8000). uint16 overflow is well defined to wrap around.
-  return f.value * 2 == 0;
-#endif
+  return xnn_float16_to_bits(f) * 2 == 0;
+}
+
+XNN_INLINE static bool xnn_bfloat16_is_zero(xnn_bfloat16 f) {
+  // Check for +/- zero (0x0000/0x8000). uint16 overflow is well defined to wrap around.
+  return xnn_bfloat16_to_bits(f) * 2 == 0;
 }
 
 #ifdef __cplusplus

@@ -50,6 +50,8 @@ xnn_datatype xnn_datatype_of() {
     return xnn_datatype_qint8;
   } else if (std::is_same<T, xnn_float16>::value) {
     return xnn_datatype_fp16;
+  } else if (std::is_same<T, xnn_bfloat16>::value) {
+    return xnn_datatype_bf16;
   } else if (std::is_same<T, float>::value) {
     return xnn_datatype_fp32;
   } else if (std::is_same<T, int32_t>::value) {

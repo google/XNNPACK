@@ -71,7 +71,7 @@ static void f16_dwconv2d_chw(benchmark::State& state,
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
-  
+
   const size_t effective_kernel_height = (kernel_height - 1) * dilation + 1;
   const size_t effective_kernel_width = (kernel_width - 1) * dilation + 1;
   const size_t output_height = (input_height + padding_height - effective_kernel_height) / subsampling + 1;
@@ -87,7 +87,7 @@ static void f16_dwconv2d_chw(benchmark::State& state,
   std::generate(bias.begin(), bias.end(), f32rng);
   xnnpack::Buffer<xnn_float16> kernel(channels * kernel_size);
   std::generate(kernel.begin(), kernel.end(), f32rng);
-  xnnpack::Buffer<xnn_float16> zero(input_width + padding_width);
+  xnnpack::Buffer<xnn_float16> zero(input_width + padding_width, 0);
 
   const size_t w_elements = (kernel_size + 1) * channels;
   const size_t o_elements = output_size * channels;
@@ -457,7 +457,7 @@ static void f16_dwconv2d_chw(benchmark::State& state,
   BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__neonfp16arith_1x8_acc3)
   BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__neonfp16arith_1x8_acc4)
   BENCHMARK_DWCONV(dwconv2d_chw_3x3s2p1__neonfp16arith_2x8_acc2)
-  
+
   BENCHMARK_DWCONV(dwconv2d_chw_5x5p2__neonfp16arith_1x8)
   BENCHMARK_DWCONV(dwconv2d_chw_5x5p2__neonfp16arith_2x8)
   BENCHMARK_DWCONV(dwconv2d_chw_5x5p2__neonfp16arith_3x8)

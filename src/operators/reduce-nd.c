@@ -4,6 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -78,21 +79,14 @@ error:
 }
 
 static enum xnn_status reshape_reduce_nd(
-    xnn_operator_t reduce_op,
-    size_t num_reduction_axes,
-    const size_t* reduction_axes,
-    size_t num_input_dims,
-    const size_t* input_shape,
-    size_t* workspace_size,
-    size_t* workspace_alignment,
-    size_t log2_data_element_size,
+    xnn_operator_t reduce_op, size_t num_reduction_axes,
+    const int64_t* reduction_axes, size_t num_input_dims,
+    const size_t* input_shape, size_t* workspace_size,
+    size_t* workspace_alignment, size_t log2_data_element_size,
     size_t log2_accumulator_element_size,
-    enum xnn_operator_type expected_operator_type,
-    const void* scale_params,
-    size_t scale_params_size,
-    void (*update_params)(xnn_operator_t, size_t),
-    pthreadpool_t threadpool)
-{
+    enum xnn_operator_type expected_operator_type, const void* scale_params,
+    size_t scale_params_size, void (*update_params)(xnn_operator_t, size_t),
+    pthreadpool_t threadpool) {
   if (reduce_op->type != expected_operator_type) {
     xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
       xnn_operator_type_to_string(expected_operator_type),
@@ -130,32 +124,38 @@ static enum xnn_status reshape_reduce_nd(
     return xnn_status_invalid_parameter;
   }
 
-  for (size_t i = 0; i < num_reduction_axes; i++) {
-    if (reduction_axes[i] > num_input_dims) {
-      xnn_log_error(
-        "failed to reshape %s operator with #%zu reduction axis of %zu: the index is out of bounds for a %zuD input shape",
-        xnn_operator_type_to_string(reduce_op->type), i, reduction_axes[i], num_input_dims);
-      return xnn_status_invalid_parameter;
-    }
-  }
-
-  for (size_t i = 1; i < num_reduction_axes; i++) {
-    if (reduction_axes[i] <= reduction_axes[i - 1]) {
-      xnn_log_error(
-        "failed to reshape %s operator with #%zu reduction axis of %zu: the reduction "
-        "axes must be in ascending order and unique",
-        xnn_operator_type_to_string(reduce_op->type), i, reduction_axes[i]);
-      return xnn_status_invalid_parameter;
-    }
-  }
-
   size_t normalized_input_shape[XNN_MAX_TENSOR_DIMS];
   assert(num_input_dims <= XNN_MAX_TENSOR_DIMS);
   memcpy(normalized_input_shape, input_shape, num_input_dims * sizeof(size_t));
 
   size_t normalized_reduction_axes[XNN_MAX_TENSOR_DIMS];
   assert(num_reduction_axes <= XNN_MAX_TENSOR_DIMS);
-  memcpy(normalized_reduction_axes, reduction_axes, num_reduction_axes * sizeof(size_t));
+  for (int i = 0; i < num_reduction_axes; i++) {
+    normalized_reduction_axes[i] = 0 <= reduction_axes[i]
+                                       ? reduction_axes[i]
+                                       : num_input_dims + reduction_axes[i];
+  }
+
+  for (size_t i = 0; i < num_reduction_axes; i++) {
+    if (num_input_dims <= normalized_reduction_axes[i]) {
+      xnn_log_error(
+          "failed to reshape %s operator with #%zu reduction axis of %" PRIi64
+          ": the index is out of bounds for a %zuD input shape",
+          xnn_operator_type_to_string(reduce_op->type), i, reduction_axes[i],
+          num_input_dims);
+      return xnn_status_invalid_parameter;
+    }
+  }
+
+  for (size_t i = 1; i < num_reduction_axes; i++) {
+    if (normalized_reduction_axes[i] <= normalized_reduction_axes[i - 1]) {
+      xnn_log_error(
+          "failed to reshape %s operator with #%zu reduction axis of %" PRIi64
+          ": the reduction axes must be in ascending order and unique",
+          xnn_operator_type_to_string(reduce_op->type), i, reduction_axes[i]);
+      return xnn_status_invalid_parameter;
+    }
+  }
 
   xnn_normalize_reduction(
     &num_reduction_axes, normalized_reduction_axes,
@@ -349,7 +349,7 @@ enum xnn_status xnn_create_reduce_nd(
 
   // The config initialization functions return NULL on error. Because each
   // datatype uses a different combination of functions, we use an `unused`
-  // sentinel value (!= NULL) to have one shared check for sucessful
+  // sentinel value (!= NULL) to have one shared check for successful
   // configuration. The unsued pointers must then be reset to NULL before
   // calling `create_reduce_nd`.
   const struct xnn_unary_elementwise_config* unused = (void*) -1;
@@ -559,16 +559,10 @@ static update_function_ptr get_update_function (
 }
 
 enum xnn_status xnn_reshape_reduce_nd(
-  xnn_operator_t reduce_op,
-  const enum xnn_datatype type,
-  size_t num_reduction_axes,
-  const size_t* reduction_axes,
-  size_t num_input_dims,
-  const size_t* input_shape,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
-  pthreadpool_t threadpool)
-{
+    xnn_operator_t reduce_op, const enum xnn_datatype type,
+    size_t num_reduction_axes, const int64_t* reduction_axes,
+    size_t num_input_dims, const size_t* input_shape, size_t* workspace_size,
+    size_t* workspace_alignment, pthreadpool_t threadpool) {
   size_t log2_data_element_size = 0;
   size_t log2_accumulator_element_size = 0;
   const void* scale_params = NULL;

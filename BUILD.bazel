@@ -16,7 +16,6 @@ load(
     "xnnpack_if_kleidiai_enabled",
     "xnnpack_min_size_copts",
     "xnnpack_slinky_deps",
-    "xnnpack_slinky_srcs",
     "xnnpack_source_list_file",
     "xnnpack_transitive_source_list",
     "xnnpack_visibility",
@@ -60,7 +59,6 @@ exports_files(["LICENSE"])
 exports_files(["preamble.js.lds"])
 
 MICROKERNEL_DEFS = [
-    "src/bf16-vabs/bf16-vabs.h",
     "src/f16-avgpool/f16-avgpool-minmax.h",
     "src/f16-dwconv/f16-dwconv-minmax-multipass.h",
     "src/f16-dwconv/f16-dwconv-minmax-unipass.h",
@@ -172,7 +170,6 @@ MICROKERNEL_DEFS = [
     "src/qs8-vmul/qs8-vmul-minmax-rndnu.h",
     "src/qs8-vmulc/qs8-vmulc-minmax-fp32.h",
     "src/qs8-vmulc/qs8-vmulc-minmax-rndnu.h",
-    "src/qs16-qs8-vcvt/qs16-qs8-vcvt.h",
     "src/qu8-avgpool/qu8-avgpool-minmax.h",
     "src/qu8-dwconv/qu8-dwconv-minmax-multipass-fp32.h",
     "src/qu8-dwconv/qu8-dwconv-minmax-multipass-rndnu.h",
@@ -190,8 +187,6 @@ MICROKERNEL_DEFS = [
     "src/s8-maxpool/s8-maxpool-minmax.h",
     "src/s8-vclamp/s8-vclamp.h",
     "src/s32-f32-vcvt/s32-f32-vcvt.h",
-    "src/s32-vmul/s32-vmul.h",
-    "src/s32-vmul/s32-vmulc.h",
     "src/u8-maxpool/u8-maxpool-minmax.h",
     "src/u8-vclamp/u8-vclamp.h",
     "src/u32-f32-vcvt/u32-f32-vcvt.h",
@@ -789,7 +784,7 @@ xnnpack_cc_library(
 
 xnnpack_cxx_library(
     name = "packing",
-    srcs = ["src/packing.cc"],
+    srcs = ["src/reference/packing.cc"],
     hdrs = ["src/xnnpack/pack.h"],
     defines = xnnpack_configurable_defines(),
     deps = [
@@ -826,7 +821,7 @@ py_binary(
 # srcs attribute.
 xnnpack_transitive_source_list(
     name = "build_identifier_ukernel_srcs",
-    srcs = ["src/packing.cc"],
+    srcs = ["src/reference/packing.cc"],
     deps = [":prod_microkernels"],
 )
 
@@ -944,6 +939,27 @@ xnnpack_cc_library(
     ],
 )
 
+xnnpack_cxx_library(
+    name = "reference_ukernels",
+    srcs = [
+        "src/reference/binary-elementwise.cc",
+        "src/reference/unary-elementwise.cc",
+    ],
+    hdrs = [
+        "src/xnnpack/reference-config.h",
+        "src/xnnpack/reference-utils.h",
+    ],
+    compatible_with = [],
+    defines = xnnpack_configurable_defines(),
+    deps = [
+        ":common",
+        ":config_hdrs",
+        ":hardware_config",
+        ":math",
+        ":xnnpack_h",
+    ],
+)
+
 xnnpack_cc_library(
     name = "datatype",
     srcs = ["src/datatype.c"],
@@ -992,14 +1008,23 @@ xnnpack_cc_library(
         ":packing",
         ":params",
         ":quantization",
+        ":reference_ukernels",
         ":xnnpack_h",
         "@pthreadpool",
     ],
 )
 
 xnnpack_cc_library(
+    name = "subgraph_h",
+    hdrs = [
+        "src/xnnpack/subgraph.h",
+    ],
+    compatible_with = [],
+)
+
+xnnpack_cc_library(
     name = "subgraph",
-    srcs = SUBGRAPH_SRCS + xnnpack_slinky_srcs(),
+    srcs = SUBGRAPH_SRCS,
     hdrs = [
         "src/xnnpack/memory-planner.h",
         "src/xnnpack/reshape-helpers.h",
@@ -1028,6 +1053,7 @@ xnnpack_cc_library(
         ":operators",
         ":params",
         ":requantization",
+        ":subgraph_h",
         ":xnnpack_h",
         "@pthreadpool",
     ] + xnnpack_slinky_deps(),

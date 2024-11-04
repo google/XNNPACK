@@ -186,10 +186,10 @@ class RSumMicrokernelTester {
 
       // Prepare parameters.
       xnn_f16_scale_params params;
-      init_params(&params, scale());
+      init_params(&params, static_cast<xnn_float16>(scale()));
 
       // Call optimized micro-kernel.
-      xnn_float16 output = std::nanf("");  /* NaN */
+      xnn_float16 output;
       rsum(batch_size() * sizeof(xnn_float16), input.data(), &output, &params);
 
       // Verify results.

@@ -38,6 +38,10 @@ void randomize_buffer(xnn_datatype datatype,
       std::generate(reinterpret_cast<xnn_float16*>(buf.begin()),
                     reinterpret_cast<xnn_float16*>(buf.end()), f);
       break;
+    case xnn_datatype_bf16:
+      std::generate(reinterpret_cast<xnn_bfloat16*>(buf.begin()),
+                    reinterpret_cast<xnn_bfloat16*>(buf.end()), f);
+      break;
     case xnn_datatype_fp32:
       std::generate(reinterpret_cast<float*>(buf.begin()),
                     reinterpret_cast<float*>(buf.end()), f);

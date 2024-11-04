@@ -105,7 +105,7 @@ xnnpack_cxx_library(
     testonly = True,
     srcs = ["unary-ops.cc"],
     hdrs = ["unary-ops.h"],
-    deps = MICROKERNEL_TEST_DEPS + xnnpack_test_deps_for_library(),
+    deps = MICROKERNEL_TEST_DEPS + ["//:reference_ukernels"] + xnnpack_test_deps_for_library(),
 )
 
 xnnpack_cxx_library(
@@ -266,7 +266,6 @@ sh_test(
     ],
     deps = MICROKERNEL_TEST_DEPS + [":vunary_microkernel_tester"],
 ) for kernel in [
-    "bf16_vabs",
     "f16_vabs",
     "f16_vclamp",
     "f16_velu",
@@ -312,7 +311,6 @@ sh_test(
     "f32_qu8_vcvt",
     "s32_f32_vcvt",
     "u32_f32_vcvt",
-    "qs16_qs8_vcvt",
     "qs8_f16_vcvt",
     "qs8_f32_vcvt",
     "qs8_vcvt",
@@ -379,8 +377,6 @@ sh_test(
     "qu8_vmul_minmax_rndnu",
     "qu8_vmulc_minmax_fp32",
     "qu8_vmulc_minmax_rndnu",
-    "s32_vmul",
-    "s32_vmulc",
 ]]
 
 [xnnpack_unit_test(
@@ -1199,10 +1195,12 @@ xnnpack_unit_test(
     name = "binary_elementwise_nd_test",
     timeout = "long",
     srcs = ["binary-elementwise-nd.cc"],
+    shard_count = 10,
     deps = OPERATOR_TEST_DEPS + [
         ":operator_test_utils",
         "//:logging",
         "//:operator_utils",
+        "//:reference_ukernels",
     ],
 )
 

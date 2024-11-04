@@ -82,7 +82,6 @@ TEST_F(StaticTransposeTestQS8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_static_transpose);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qs8);
   ASSERT_EQ(node->params.transpose.num_dims, dims.size());
   for (size_t i = 0; i < dims.size(); i++) {
     ASSERT_EQ(node->params.transpose.perm[i], perm[i]);
@@ -130,7 +129,6 @@ TEST_F(StaticTransposeTestQU8, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_static_transpose);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_qu8);
   for (size_t i = 0; i < dims.size(); i++) {
     ASSERT_EQ(node->params.transpose.perm[i], perm[i]);
   }
@@ -173,7 +171,6 @@ TEST_F(StaticTransposeTestF16, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_static_transpose);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp16);
   for (size_t i = 0; i < dims.size(); i++) {
     ASSERT_EQ(node->params.transpose.perm[i], perm[i]);
   }
@@ -216,7 +213,6 @@ TEST_F(StaticTransposeTestF32, define)
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_static_transpose);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   for (size_t i = 0; i < dims.size(); i++) {
     ASSERT_EQ(node->params.transpose.perm[i], perm[i]);
   }

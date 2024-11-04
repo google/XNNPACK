@@ -172,10 +172,8 @@ enum xnn_status xnn_define_pack_lh(
     return status;
   }
 
-  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
     case xnn_datatype_fp32:
-      compute_type = xnn_compute_type_fp32;
       // Coerce the output from `xnn_datatype_fp32` to `xnn_datatype_pfp32` so
       // that the correct GEMM path is taken.
       output_value->datatype = xnn_datatype_pfp32;
@@ -187,7 +185,6 @@ enum xnn_status xnn_define_pack_lh(
         xnn_datatype_to_string(output_value->datatype), output_value->datatype);
       return xnn_status_invalid_parameter;
   }
-  assert(compute_type != xnn_compute_type_invalid);
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
   if (node == NULL) {
@@ -195,7 +192,6 @@ enum xnn_status xnn_define_pack_lh(
   }
 
   node->type = xnn_node_type_pack_lh;
-  node->compute_type = compute_type;
   node->num_inputs = 1;
   node->inputs[0] = input_id;
   node->num_outputs = 1;

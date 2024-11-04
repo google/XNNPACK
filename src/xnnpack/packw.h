@@ -88,9 +88,26 @@ extern "C" {
       size_t extra_bytes,                                                 \
       const void* params);                                                \
 
+#define XNN_GIO_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale) \
+  XNN_INTERNAL void ukernel(                                                  \
+      size_t g,                                                               \
+      size_t nc,                                                              \
+      size_t kc,                                                              \
+      size_t nr,                                                              \
+      size_t kr,                                                              \
+      size_t sr,                                                              \
+      size_t k_stride,                                                        \
+      const uint32_t* weights,                                                \
+      const uint32_t* bias,                                                   \
+      const void* scale,                                                      \
+      uint32_t* packed_weights,                                               \
+      size_t extra_bytes,                                                     \
+      const void* params);                                                    \
+
 #include "x32-packw/x32-packw.h"
 
 #undef XNN_UKERNEL
+#undef XNN_GIO_UKERNEL
 
 #ifdef __cplusplus
 }  // extern "C"

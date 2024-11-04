@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
 
@@ -373,13 +374,24 @@ union xnn_qu8_mul_minmax_params {
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 };
 
+struct xnn_binary_reference_params {
+  float a_scale;
+  int32_t a_zero_point;
+  float b_scale;
+  int32_t b_zero_point;
+  float inv_output_scale;
+  int32_t output_zero_point;
+  struct xnn_binary_params params;
+};
+
 union xnn_binary_uparams {
-  struct xnn_qs8_add_minmax_params qs8_add;
-  struct xnn_qu8_add_minmax_params qu8_add;
+  struct xnn_qs8_add_minmax_params qs8_addsub;
+  struct xnn_qu8_add_minmax_params qu8_addsub;
   union xnn_qs8_mul_minmax_params qs8_mul;
   union xnn_qu8_mul_minmax_params qu8_mul;
-  union xnn_f16_minmax_params f16_minmax;
-  union xnn_f32_minmax_params f32_minmax;
+  union xnn_f16_minmax_params f16;
+  union xnn_f32_minmax_params f32;
+  struct xnn_binary_reference_params reference;
 };
 
 // RSum params used by RSUM & RDSUM microkernels.
@@ -458,13 +470,6 @@ struct xnn_qs8_cvt_params {
     int16_t input_zero_point;
     int32_t multiplier;
     int16_t output_zero_point;
-  } scalar;
-};
-
-struct xnn_qs16_qs8_cvt_params {
-  struct {
-    int32_t multiplier;
-    int32_t output_zero_point;
   } scalar;
 };
 
@@ -557,6 +562,14 @@ struct xnn_x32_packb_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
+struct xnn_unary_reference_params {
+  float x_scale;
+  int32_t x_zero_point;
+  float inv_y_scale;
+  int32_t y_zero_point;
+  union xnn_unary_params params;
+};
+
 union xnn_unary_uparams {
   struct xnn_f32_qs8_cvt_params f32_qs8_cvt;
   struct xnn_f32_qu8_cvt_params f32_qu8_cvt;
@@ -564,7 +577,6 @@ union xnn_unary_uparams {
   struct xnn_qs8_f32_cvt_params qs8_f32_cvt;
   struct xnn_qu8_f32_cvt_params qu8_f32_cvt;
   struct xnn_qs8_f16_cvt_params qs8_f16_cvt;
-  struct xnn_qs16_qs8_cvt_params qs16_qs8_cvt;
   struct xnn_s32_f32_cvt_params s32_f32_cvt;
   struct xnn_u32_f32_cvt_params u32_f32_cvt;
   struct xnn_qs8_cvt_params qs8_cvt;
@@ -579,6 +591,7 @@ union xnn_unary_uparams {
   union xnn_f16_minmax_params f16_minmax;
   struct xnn_s8_minmax_params s8_minmax;
   struct xnn_u8_minmax_params u8_minmax;
+  struct xnn_unary_reference_params reference;
 };
 
 struct subconvolution_params {

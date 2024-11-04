@@ -211,9 +211,7 @@ void GemmMicrokernelTester::Test(
 
     // Prepare parameters.
     xnn_f16_minmax_params params;
-    init_params(&params,
-      c_min,
-      c_max);
+    init_params(&params, static_cast<xnn_float16>(c_min), static_cast<xnn_float16>(c_max));
 
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
@@ -929,9 +927,7 @@ void GemmMicrokernelTester::Test(
 
     // Prepare parameters.
     xnn_f16_minmax_params params;
-    init_params(&params,
-      c_min,
-      c_max);
+    init_params(&params, static_cast<xnn_float16>(c_min), static_cast<xnn_float16>(c_max));
 
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
@@ -1197,9 +1193,7 @@ void GemmMicrokernelTester::Test(
 
     // Prepare parameters.
     xnn_f16_qc4w_minmax_params params;
-    init_params(&params,
-      c_min,
-      c_max, 8);
+    init_params(&params, static_cast<xnn_float16>(c_min), static_cast<xnn_float16>(c_max), 8);
 
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
@@ -1359,8 +1353,8 @@ void GemmMicrokernelTester::Test(
     // Prepare parameters.
     xnn_f16_qb4w_minmax_params params;
     init_params(&params,
-      c_min,
-      c_max,
+      static_cast<xnn_float16>(c_min),
+      static_cast<xnn_float16>(c_max),
       8,
       bl());
 
@@ -2336,9 +2330,7 @@ void GemmMicrokernelTester::Test(
 
     // Prepare parameters.
     xnn_f16_minmax_params params;
-    init_params(&params,
-      c_min,
-      c_max);
+    init_params(&params, static_cast<xnn_float16>(c_min), static_cast<xnn_float16>(c_max));
 
     for (float& c_value : c_ref) {
       c_value = std::max(std::min(c_value, c_max), c_min);
@@ -2448,9 +2440,7 @@ void GemmMicrokernelTester::Test(
 
     // Prepare parameters.
     xnn_f16_minmax_params params;
-    init_params(&params,
-      c_min,
-      c_max);
+    init_params(&params, static_cast<xnn_float16>(c_min), static_cast<xnn_float16>(c_max));
 
     for (float& c_value : c_ref) {
       c_value = std::max(std::min(c_value, c_max), c_min);

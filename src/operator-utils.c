@@ -216,6 +216,20 @@ const char* xnn_unary_operator_to_string(enum xnn_unary_operator op)
       return "square_root";
     case xnn_unary_tanh:
       return "tanh";
+    case xnn_unary_cube_root:
+      return "cube_root";
+    case xnn_unary_cosine:
+      return "cosine";
+    case xnn_unary_sine:
+      return "sine";
+    case xnn_unary_count_leading_zeros:
+      return "count_leading_zeros";
+    case xnn_unary_bitwise_not:
+      return "bitwise_not";
+    case xnn_unary_popcount:
+      return "popcount";
+    case xnn_unary_sign:
+      return "sign";
     case xnn_unary_invalid:
       return "invalid";
   }
@@ -244,6 +258,24 @@ const char* xnn_binary_operator_to_string(enum xnn_binary_operator op)
       return "minimum";
     case xnn_binary_maximum:
       return "maximum";
+    case xnn_binary_modulus:
+      return "modulus";
+    case xnn_binary_atan2:
+      return "atan2";
+    case xnn_binary_pow:
+      return "pow";
+    case xnn_binary_bitwise_and:
+      return "bitwise_and";
+    case xnn_binary_bitwise_or:
+      return "bitwise_or";
+    case xnn_binary_bitwise_xor:
+      return "bitwise_xor";
+    case xnn_binary_shift_left:
+      return "shift_left";
+    case xnn_binary_shift_right_logical:
+      return "shift_right_logical";
+    case xnn_binary_shift_right_arithmetic:
+      return "shift_right_arithmetic";
     case xnn_binary_invalid:
       return "invalid";
   }

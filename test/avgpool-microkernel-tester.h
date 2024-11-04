@@ -214,7 +214,7 @@ class AvgPoolMicrokernelTester {
     xnnpack::Buffer<const xnn_float16*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       input_offset() + indirect_input.size() * channels());
-    xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0.0f);
+    xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
     xnnpack::Buffer<xnn_float16> output((output_pixels() - 1) * output_stride() + channels());
     xnnpack::Buffer<float> output_ref(output_pixels() * channels());
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
@@ -253,8 +253,8 @@ class AvgPoolMicrokernelTester {
       const float accumulated_range = accumulated_max - accumulated_min;
       float output_min_as_float = accumulated_min + float(qmin()) / 255.0f * accumulated_range;
       float output_max_as_float = accumulated_max - float(255 - qmax()) / 255.0f * accumulated_range;
-      const xnn_float16 output_min_as_half = output_min_as_float;
-      const xnn_float16 output_max_as_half = output_max_as_float;
+      const xnn_float16 output_min_as_half = static_cast<xnn_float16>(output_min_as_float);
+      const xnn_float16 output_max_as_half = static_cast<xnn_float16>(output_max_as_float);
       output_min_as_float = output_min_as_half;
       output_max_as_float = output_max_as_half;
 
@@ -265,7 +265,7 @@ class AvgPoolMicrokernelTester {
 
       // Prepare parameters.
       xnn_f16_scaleminmax_params params;
-      init_params(&params, 1.0f / float(pooling_elements()), output_min_as_half, output_max_as_half);
+      init_params(&params, static_cast<xnn_float16>(1.0f / float(pooling_elements())), output_min_as_half, output_max_as_half);
 
       // Call optimized micro-kernel.
       avgpool_minmax(output_pixels(), pooling_elements(), channels(),
@@ -305,7 +305,7 @@ class AvgPoolMicrokernelTester {
     xnnpack::Buffer<const xnn_float16*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       input_offset() + indirect_input.size() * channels());
-    xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0.0f);
+    xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
     xnnpack::Buffer<xnn_float16> output((output_pixels() - 1) * output_stride() + channels());
     xnnpack::Buffer<float> output_ref(output_pixels() * channels());
     xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> buffer(
@@ -346,8 +346,8 @@ class AvgPoolMicrokernelTester {
       const float accumulated_range = accumulated_max - accumulated_min;
       float output_min_as_float = accumulated_min + float(qmin()) / 255.0f * accumulated_range;
       float output_max_as_float = accumulated_max - float(255 - qmax()) / 255.0f * accumulated_range;
-      const xnn_float16 output_min_as_half = output_min_as_float;
-      const xnn_float16 output_max_as_half = output_max_as_float;
+      const xnn_float16 output_min_as_half = static_cast<xnn_float16>(output_min_as_float);
+      const xnn_float16 output_max_as_half = static_cast<xnn_float16>(output_max_as_float);
       output_min_as_float = output_min_as_half;
       output_max_as_float = output_max_as_half;
 
@@ -358,7 +358,7 @@ class AvgPoolMicrokernelTester {
 
       // Prepare parameters.
       xnn_f16_scaleminmax_params params;
-      init_params(&params, 1.0f / float(pooling_elements()), output_min_as_half, output_max_as_half);
+      init_params(&params, static_cast<xnn_float16>(1.0f / float(pooling_elements())), output_min_as_half, output_max_as_half);
 
       // Call optimized micro-kernel.
       avgpool_minmax(output_pixels(), pooling_elements(), channels(),
@@ -767,7 +767,7 @@ class AvgPoolMicrokernelTester {
     xnnpack::Buffer<const xnn_float16*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       input_offset() + indirect_input.size() * channels());
-    xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0.0f);
+    xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
     xnnpack::Buffer<xnn_float16> multiplier(output_pixels());
     xnnpack::Buffer<xnn_float16> output((output_pixels() - 1) * output_stride() + channels());
     xnnpack::Buffer<float> output_ref(output_pixels() * channels());
@@ -808,8 +808,8 @@ class AvgPoolMicrokernelTester {
       const float accumulated_range = accumulated_max - accumulated_min;
       float output_min_as_float = accumulated_min + float(qmin()) / 255.0f * accumulated_range;
       float output_max_as_float = accumulated_max - float(255 - qmax()) / 255.0f * accumulated_range;
-      const xnn_float16 output_min_as_half = output_min_as_float;
-      const xnn_float16 output_max_as_half = output_max_as_float;
+      const xnn_float16 output_min_as_half = static_cast<xnn_float16>(output_min_as_float);
+      const xnn_float16 output_max_as_half = static_cast<xnn_float16>(output_max_as_float);
       output_min_as_float = output_min_as_half;
       output_max_as_float = output_max_as_half;
 
@@ -861,7 +861,7 @@ class AvgPoolMicrokernelTester {
     xnnpack::Buffer<const xnn_float16*> indirect_input((output_pixels() - 1) * step() + packed_pooling_elements());
     xnnpack::Buffer<xnn_float16> input(XNN_EXTRA_BYTES / sizeof(xnn_float16) +
       input_offset() + indirect_input.size() * channels());
-    xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0.0f);
+    xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
     xnnpack::Buffer<xnn_float16> multiplier(output_pixels());
     xnnpack::Buffer<xnn_float16> output((output_pixels() - 1) * output_stride() + channels());
     xnnpack::Buffer<float> output_ref(output_pixels() * channels());
@@ -904,8 +904,8 @@ class AvgPoolMicrokernelTester {
       const float accumulated_range = accumulated_max - accumulated_min;
       float output_min_as_float = accumulated_min + float(qmin()) / 255.0f * accumulated_range;
       float output_max_as_float = accumulated_max - float(255 - qmax()) / 255.0f * accumulated_range;
-      const xnn_float16 output_min_as_half = output_min_as_float;
-      const xnn_float16 output_max_as_half = output_max_as_float;
+      const xnn_float16 output_min_as_half = static_cast<xnn_float16>(output_min_as_float);
+      const xnn_float16 output_max_as_half = static_cast<xnn_float16>(output_max_as_float);
       output_min_as_float = output_min_as_half;
       output_max_as_float = output_max_as_half;
 

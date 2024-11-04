@@ -62,7 +62,7 @@ class RAddStoreExpMinusMaxMicrokernelTester {
       for (size_t i = 0; i < elements(); i++) {
         x_max_as_float = std::max<float>(x_max_as_float, x[i]);
       }
-      const xnn_float16 x_max_as_half = x_max_as_float;
+      const xnn_float16 x_max_as_half = static_cast<xnn_float16>(x_max_as_float);
       for (size_t i = 0; i < elements(); i++) {
         const float y_ref_value = exp(x[i] - x_max_as_float);
         y_ref[i] = y_ref_value;
@@ -70,7 +70,7 @@ class RAddStoreExpMinusMaxMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      xnn_float16 sum = std::nanf("");
+      xnn_float16 sum;
       raddstoreexpminusmax(elements() * sizeof(xnn_float16), x.data(), &x_max_as_half, y.data(), &sum, nullptr);
 
       // Verify results.
@@ -105,7 +105,7 @@ class RAddStoreExpMinusMaxMicrokernelTester {
       }
 
       // Call optimized micro-kernel.
-      float sum = std::nanf("");
+      float sum;
       raddstoreexpminusmax(elements() * sizeof(float), x.data(), &x_max, y.data(), &sum, nullptr);
 
       // Verify results.

@@ -10,10 +10,8 @@
 #include <string.h>
 
 #include "xnnpack.h"
-#include "xnnpack/common.h"
 #include "xnnpack/log.h"
 #include "xnnpack/node-type.h"
-#include "xnnpack/operator-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph-validation.h"
 #include "xnnpack/subgraph.h"
@@ -22,10 +20,12 @@
 static const size_t NCHW_AXES_MAPPING[4] = {0, 2, 3, 1};
 static const size_t INVERSE_NCHW_AXES_MAPPING[4] = {0, 3, 2, 1};
 
-static void rewrite_reduction_axes_for_nchw(size_t num_reduction_axes, size_t* reduction_axes) {
+static void rewrite_reduction_axes_for_nchw(size_t num_reduction_axes,
+                                            int64_t* reduction_axes) {
   bool mask[4] = {false};
-  size_t original_reduction_axes[4];
-  memcpy(original_reduction_axes, reduction_axes, num_reduction_axes * sizeof(size_t));
+  int64_t original_reduction_axes[4];
+  memcpy(original_reduction_axes, reduction_axes,
+         num_reduction_axes * sizeof(int64_t));
 
   for (size_t idx = 0; idx < num_reduction_axes; ++idx) {
     reduction_axes[idx] = NCHW_AXES_MAPPING[original_reduction_axes[idx]];
@@ -87,7 +87,8 @@ static enum xnn_status create_reduce_operator(
   if (status == xnn_status_success) {
     const size_t num_reduction_axes = node->params.reduce.num_reduction_axes;
     opdata->num_reduction_axes = num_reduction_axes;
-    memcpy(opdata->reduction_axes, node->params.reduce.reduction_axes, num_reduction_axes * sizeof(size_t));
+    memcpy(opdata->reduction_axes, node->params.reduce.reduction_axes,
+           num_reduction_axes * sizeof(int64_t));
   }
   return status;
 }
@@ -123,9 +124,13 @@ static enum xnn_status reshape_reduce_operator(
   size_t input_num_dims = input_value->shape.num_dims;
 
   // This is the case when NHWC was rewritten to NCHW.
-  size_t reduction_axes[XNN_MAX_TENSOR_DIMS];
+  int64_t reduction_axes[XNN_MAX_TENSOR_DIMS];
+  for (int i = 0; i < num_reduction_axes; i++) {
+    reduction_axes[i] = 0 <= opdata->reduction_axes[i]
+                            ? opdata->reduction_axes[i]
+                            : input_num_dims + opdata->reduction_axes[i];
+  }
   size_t input_dims[XNN_MAX_TENSOR_DIMS];
-  memcpy(reduction_axes, opdata->reduction_axes, num_reduction_axes * sizeof(size_t));
   memcpy(input_dims, input_value->shape.dim, input_num_dims * sizeof(size_t));
   if (input_value->shape.num_dims == 4 && input_value->layout == xnn_layout_type_nchw) {
     rewrite_reduction_axes_for_nchw(num_reduction_axes, reduction_axes);
@@ -250,6 +255,19 @@ enum xnn_status xnn_define_static_reduce(
   uint32_t output_id,
   uint32_t flags)
 {
+  int64_t signed_reduction_axes[XNN_MAX_TENSOR_DIMS];
+  for (int i = 0; i < num_reduction_axes; i++) {
+    signed_reduction_axes[i] = reduction_axes[i];
+  }
+  return xnn_define_static_reduce_v2(subgraph, reduce_operator,
+                                     num_reduction_axes, signed_reduction_axes,
+                                     input_id, output_id, flags);
+}
+
+enum xnn_status xnn_define_static_reduce_v2(
+    xnn_subgraph_t subgraph, enum xnn_reduce_operator reduce_operator,
+    size_t num_reduction_axes, const int64_t* reduction_axes, uint32_t input_id,
+    uint32_t output_id, uint32_t flags) {
   const enum xnn_node_type node_type = xnn_reduce_operator_to_node_type(reduce_operator);
   if(node_type == xnn_node_type_invalid) {
     xnn_log_error("failed to define reduce operator: invalid operation %d.", reduce_operator);
@@ -297,28 +315,6 @@ enum xnn_status xnn_define_static_reduce(
     return status;
   }
 
-  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
-  switch (output_value->datatype) {
-    case xnn_datatype_fp16:
-      compute_type = xnn_compute_type_fp16;
-      break;
-    case xnn_datatype_fp32:
-      compute_type = xnn_compute_type_fp32;
-      break;
-    case xnn_datatype_qint8:
-      compute_type = xnn_compute_type_qs8;
-      break;
-    case xnn_datatype_quint8:
-      compute_type = xnn_compute_type_qu8;
-      break;
-    default:
-      xnn_log_error(
-        "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(node_type), output_id,
-        xnn_datatype_to_string(output_value->datatype), output_value->datatype);
-      return xnn_status_invalid_parameter;
-  }
-
   if (num_reduction_axes == 0) {
     xnn_log_error(
       "failed to define %s operator with %zu reduction axes: the number of reduction axes must be non-zero",
@@ -329,9 +325,9 @@ enum xnn_status xnn_define_static_reduce(
   for (size_t i = 1; i < num_reduction_axes; i++) {
     if (reduction_axes[i] <= reduction_axes[i - 1]) {
       xnn_log_error(
-        "failed to define %s operator with #%zu reduction axis of %zu: the reduction "
-        "axes must be in ascending order and unique",
-        xnn_node_type_to_string(node_type), i, reduction_axes[i]);
+          "failed to define %s operator with #%zu reduction axis of %" PRIi64
+          ": the reduction axes must be in ascending order and unique",
+          xnn_node_type_to_string(node_type), i, reduction_axes[i]);
       return xnn_status_invalid_parameter;
     }
   }
@@ -342,9 +338,9 @@ enum xnn_status xnn_define_static_reduce(
   }
 
   node->type = node_type;
-  node->compute_type = compute_type;
   node->params.reduce.num_reduction_axes = num_reduction_axes;
-  memcpy(node->params.reduce.reduction_axes, reduction_axes, num_reduction_axes * sizeof(size_t));
+  memcpy(node->params.reduce.reduction_axes, reduction_axes,
+         num_reduction_axes * sizeof(int64_t));
   node->num_inputs = 1;
   node->inputs[0] = input_id;
   node->num_outputs = 1;

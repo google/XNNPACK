@@ -48,7 +48,7 @@ static void f16_igemm(benchmark::State& state,
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
   auto f32rng = std::bind(std::uniform_real_distribution<float>(), std::ref(rng));
-  
+
   const size_t output_pixel_stride = group_output_channels;
   const size_t input_pixel_stride = group_input_channels;
   const size_t effective_kernel_height = (kernel_height - 1) * dilation + 1;
@@ -82,9 +82,9 @@ static void f16_igemm(benchmark::State& state,
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> w(w_elements * num_buffers);
   xnn_pack_f16_conv_goki_w(
       /*groups=*/1, group_output_channels, kernel_size, group_input_channels,
-      nr, kr, sr, reinterpret_cast<const uint16_t*>(k.data()), 
-      reinterpret_cast<const uint16_t*>(b.data()), 
-      /*scale=*/nullptr, reinterpret_cast<uint16_t*>(w.data()), 
+      nr, kr, sr, reinterpret_cast<const uint16_t*>(k.data()),
+      reinterpret_cast<const uint16_t*>(b.data()),
+      /*scale=*/nullptr, reinterpret_cast<uint16_t*>(w.data()),
       /*extra_bytes=*/0, /*params=*/nullptr);
   for (size_t n = 1; n < num_buffers; n++) {
     std::copy(w.cbegin(), w.cbegin() + w_elements, w.begin() + n * w_elements);
@@ -114,8 +114,8 @@ static void f16_igemm(benchmark::State& state,
 
   // Prepare minmax parameters.
   xnn_f16_minmax_params params;
-  init_params(&params,
-    INFINITY, -INFINITY);
+  // TODO: min = INFINITY, max = -INFINITY?!
+  init_params(&params, static_cast<xnn_float16>(INFINITY), static_cast<xnn_float16>(-INFINITY));
 
   size_t buffer_index = 0;
   for (auto _ : state) {

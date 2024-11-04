@@ -1360,6 +1360,21 @@ typedef void (*xnn_x32_packw_gemm_goi_ukernel_fn)(
     size_t extra_bytes,
     const void* params);
 
+typedef void (*xnn_x32_packw_gemm_gio_ukernel_fn)(
+    size_t g,
+    size_t nc,
+    size_t kc,
+    size_t nr,
+    size_t kr,
+    size_t sr,
+    size_t k_stride,
+    const uint32_t* k,
+    const uint32_t* b,
+    const void* scale,
+    uint32_t* packed_weights,
+    size_t extra_bytes,
+    const void* params);
+
 // PACKW: PACK W (weights) for GEMM matrix multiplication
 // Weights in GIO layout: Groups, Input channels, Output channels.
 typedef void (*xnn_packw_gemm_gio_ukernel_fn)(
@@ -1684,13 +1699,6 @@ typedef void (*xnn_f32_vbinary_ukernel_fn)(
     const float* input_y,
     float* output,
     const struct xnn_f32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_s32_vbinary_ukernel_fn)(
-    size_t batch,
-    const int32_t* input_x,
-    const int32_t* input_y,
-    int32_t* output,
-    const struct xnn_s32_default_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // VBINARY: Vector BINARY elementwise with Min+Max activation
 

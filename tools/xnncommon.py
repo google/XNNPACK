@@ -22,7 +22,7 @@ def _remove_duplicate_newlines(text):
     last_newline = is_newline
   return "\n".join(filtered_lines)
 
-_XNNPACK_SRC = "src"
+_XNNPACK_SRC = ""
 
 _ARCH_TO_MACRO_MAP = {
   "aarch32": "XNN_ARCH_ARM",

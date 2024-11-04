@@ -972,7 +972,7 @@ void DWConvMicrokernelTester::Test(
   xnnpack::Buffer<xnn_float16> bias(channels());
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> packed_weights(
       (kernel_tile() + 1) * packed_channels());
-  xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0.0f);
+  xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
   xnnpack::Buffer<xnn_float16> output((width() - 1) * output_stride() + channels());
   xnnpack::Buffer<float> output_ref(width() * channels());
 
@@ -987,10 +987,10 @@ void DWConvMicrokernelTester::Test(
     std::fill(packed_weights.begin(), packed_weights.end(), 0);
     xnn_pack_f16_dwconv_ghw_w(
         kernel_tile(), 0, 0, kernel_tile(), 1, channels(), channel_tile(),
-        channel_tile(), channel_tile(), 
-        reinterpret_cast<const uint16_t*>(kernel.data()), 
+        channel_tile(), channel_tile(),
+        reinterpret_cast<const uint16_t*>(kernel.data()),
         reinterpret_cast<const uint16_t*>(bias.data()),
-        /*scale=*/nullptr, 
+        /*scale=*/nullptr,
         reinterpret_cast<uint16_t*>(packed_weights.data()),
         /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0,
         /*params=*/nullptr);
@@ -1033,8 +1033,7 @@ void DWConvMicrokernelTester::Test(
 
     // Prepare parameters.
     xnn_f16_minmax_params params;
-    init_params(&params, output_min,
-                output_max);
+    init_params(&params, static_cast<xnn_float16>(output_min), static_cast<xnn_float16>(output_max));
 
     // Clamp reference results.
     for (float& output_val : output_ref) {
@@ -1090,7 +1089,7 @@ void DWConvMicrokernelTester::Test(
           /*log2_filter_element_size=*/1,
           /*extra_weights_byte=*/0) /
       sizeof(xnn_float16));
-  xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0.0f);
+  xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
   xnnpack::Buffer<xnn_float16> output((width() - 1) * output_stride() + channels());
   xnnpack::Buffer<float> output_ref(width() * channels());
 
@@ -1106,8 +1105,8 @@ void DWConvMicrokernelTester::Test(
     xnn_pack_f16_dwconv_ghw_w(
         first_pass_tile(), middle_pass_tile(), last_pass_tile(), kernel_size(),
         1, channels(), channel_tile(), channel_subtile(), channel_round(),
-        reinterpret_cast<const uint16_t*>(kernel.data()), 
-        reinterpret_cast<const uint16_t*>(bias.data()), /*scale=*/nullptr, 
+        reinterpret_cast<const uint16_t*>(kernel.data()),
+        reinterpret_cast<const uint16_t*>(bias.data()), /*scale=*/nullptr,
         reinterpret_cast<uint16_t*>(packed_weights.data()),
         /*per_tile_extra_bytes=*/0, /*per_subtile_extra_bytes=*/0,
         /*params=*/nullptr);
@@ -1150,8 +1149,7 @@ void DWConvMicrokernelTester::Test(
 
     // Prepare parameters.
     xnn_f16_minmax_params params;
-    init_params(&params, output_min,
-                output_max);
+    init_params(&params, static_cast<xnn_float16>(output_min), static_cast<xnn_float16>(output_max));
 
     // Clamp reference results.
     for (float& output_val : output_ref) {

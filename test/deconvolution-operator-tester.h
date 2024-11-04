@@ -1082,7 +1082,7 @@ class DeconvolutionOperatorTester {
 
         // Smart pointer to automatically delete deconvolution_op2.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op2, xnn_delete_operator);
-        xnnpack::Buffer<xnn_float16> output2(output.size(), std::nanf(""));
+        xnnpack::Buffer<xnn_float16> output2(output.size());
 
         ASSERT_EQ(xnn_status_success,
                   xnn_reshape_deconvolution2d_nhwc_f16(
@@ -1326,7 +1326,7 @@ class DeconvolutionOperatorTester {
 
         // Smart pointer to automatically delete deconvolution_op2.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op2, xnn_delete_operator);
-        xnnpack::Buffer<float> output2(output.size(), nanf(""));
+        xnnpack::Buffer<float> output2(output.size());
 
         ASSERT_EQ(xnn_status_success,
                   xnn_reshape_deconvolution2d_nhwc_qd8_f32_qc8w(
@@ -1535,7 +1535,7 @@ class DeconvolutionOperatorTester {
 
         // Smart pointer to automatically delete deconvolution_op2.
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_deconvolution_op(deconvolution_op2, xnn_delete_operator);
-        xnnpack::Buffer<float> output2(output.size(), nanf(""));
+        xnnpack::Buffer<float> output2(output.size());
 
         ASSERT_EQ(xnn_status_success,
                   xnn_reshape_deconvolution2d_nhwc_f32(

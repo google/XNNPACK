@@ -77,7 +77,7 @@ static void f16_spmm(benchmark::State& state,
       if (!xnn_float16_is_zero(b[nn * kc + kk])) {
         // Every non-zero actually corresponds to nr adjacent non-zeros.
         for (size_t i = 0; i < nr; ++i)
-          w[wcnt++] = xnn_float16(b[nn * kc + kk]) + static_cast<float>(i);
+          w[wcnt++] = b[nn * kc + kk] + static_cast<xnn_float16>(i);
         // Skip the very first non-zero weight as we record only the difference.
         if (first_nzz) {
           first_kk = kk;

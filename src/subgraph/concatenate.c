@@ -11,6 +11,7 @@
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/log.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator-type.h"
@@ -390,7 +391,7 @@ enum xnn_status check_input_value(
   return xnn_status_success;
 }
 
-enum xnn_status check_input_compute_type(
+static enum xnn_status check_datatype_copyable(
   xnn_subgraph_t subgraph,
   uint32_t input_id,
   uint32_t output_id,
@@ -399,23 +400,12 @@ enum xnn_status check_input_compute_type(
 {
   const struct xnn_value* input_value = &subgraph->values[input_id];
   const struct xnn_value* output_value = &subgraph->values[output_id];
-  if (input_value->quantization.zero_point != output_value->quantization.zero_point) {
-    xnn_log_error(
-        "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
-        ": mismatching quantization zero point across the %s input (%" PRId32 ") and the output (%" PRId32 ")",
-        xnn_node_type_to_string(node_type), input_id, output_id,
-        nth, input_value->quantization.zero_point, output_value->quantization.zero_point);
-    return xnn_status_invalid_parameter;
+
+  enum xnn_status status = xnn_subgraph_check_datatype_matches(node_type, input_id, input_value, output_id, output_value);
+  if (status != xnn_status_success) {
+    return status;
   }
-  if (input_value->quantization.scale != output_value->quantization.scale) {
-    xnn_log_error(
-        "failed to define %s operator with input ID #%" PRIu32 " and output ID #%" PRIu32
-        ": mismatching quantization scale across the %s input (%.7g) and the output (%.7g)",
-        xnn_node_type_to_string(node_type), input_id, output_id,
-        nth, input_value->quantization.scale, output_value->quantization.scale);
-    return xnn_status_invalid_parameter;
-  }
-  return xnn_status_success;
+  return xnn_subgraph_check_quantization_parameter_matches(node_type, input_id, input_value, output_id, output_value);
 }
 
 enum xnn_status xnn_define_concatenate_n(
@@ -454,52 +444,28 @@ enum xnn_status xnn_define_concatenate_n(
     }
   }
 
-  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
-  switch (output_value->datatype) {
-    case xnn_datatype_fp16:
-      compute_type = xnn_compute_type_fp16;
-      break;
-    case xnn_datatype_fp32:
-      compute_type = xnn_compute_type_fp32;
-      break;
-    case xnn_datatype_qint8:
-      compute_type = xnn_compute_type_qs8;
-      break;
-    case xnn_datatype_quint8:
-      compute_type = xnn_compute_type_qu8;
-      break;
-    default:
-      xnn_log_error(
-        "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(node_type), output_id,
-        xnn_datatype_to_string(output_value->datatype), output_value->datatype);
-      return xnn_status_invalid_parameter;
+  status = check_datatype_copyable(subgraph, input_ids[0], output_id, "first", node_type);
+  if (status != xnn_status_success) {
+    return status;
   }
-
-  if (compute_type == xnn_compute_type_qs8 || compute_type == xnn_compute_type_qu8) {
-    status = check_input_compute_type(subgraph, input_ids[0], output_id, "first", node_type);
-    if (status != xnn_status_success) {
-      return status;
-    }
-    status = check_input_compute_type(subgraph, input_ids[1], output_id, "second", node_type);
-    if (status != xnn_status_success) {
-      return status;
-    }
+  status = check_datatype_copyable(subgraph, input_ids[1], output_id, "second", node_type);
+  if (status != xnn_status_success) {
+    return status;
   }
   if (num_inputs > 2) {
-    status = check_input_compute_type(subgraph, input_ids[2], output_id, "third", node_type);
+    status = check_datatype_copyable(subgraph, input_ids[2], output_id, "third", node_type);
     if (status != xnn_status_success) {
       return status;
     }
   }
   if (num_inputs > 3) {
-    status = check_input_compute_type(subgraph, input_ids[3], output_id, "fourth", node_type);
+    status = check_datatype_copyable(subgraph, input_ids[3], output_id, "fourth", node_type);
     if (status !=  xnn_status_success) {
       return status;
     }
   }
   if (num_inputs > 4) {
-    status = check_input_compute_type(subgraph, input_ids[4], output_id, "fifth", node_type);
+    status = check_datatype_copyable(subgraph, input_ids[4], output_id, "fifth", node_type);
     if (status !=  xnn_status_success) {
       return status;
     }
@@ -512,7 +478,6 @@ enum xnn_status xnn_define_concatenate_n(
 
   node->params.concatenate.axis = axis;
   node->type = node_type;
-  node->compute_type = compute_type;
   node->num_inputs = num_inputs;
   node->num_outputs = 1;
   node->outputs[0] = output_id;

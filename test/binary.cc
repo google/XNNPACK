@@ -33,7 +33,7 @@
 #include "replicable_random_device.h"
 
 using ::testing::Combine;
-using ::testing::Values;
+using ::testing::ValuesIn;
 
 template <typename Rng>
 size_t RandomRank(Rng& rng) {
@@ -171,6 +171,7 @@ void MatchesOperatorApi(xnn_datatype datatype, xnn_binary_operator binary_op) {
       datatype_max = std::numeric_limits<int32_t>::max();
       break;
     case xnn_datatype_fp16:
+    case xnn_datatype_bf16:
     case xnn_datatype_fp32:
       datatype_min = -10.0;
       datatype_max = 10.0;
@@ -258,7 +259,7 @@ void MatchesOperatorApi(xnn_datatype datatype, xnn_binary_operator binary_op) {
   xnn_runtime_t runtime = nullptr;
   xnn_status status =
       xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime);
-  if (status == xnn_status_unsupported_hardware) {
+  if (status == xnn_status_unsupported_parameter) {
     GTEST_SKIP();
   }
   ASSERT_EQ(xnn_status_success, status);
@@ -365,7 +366,7 @@ void Reshape(xnn_datatype datatype, xnn_binary_operator binary_op) {
   xnn_runtime_t runtime = nullptr;
   xnn_status status =
       xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime);
-  if (status == xnn_status_unsupported_hardware) {
+  if (status == xnn_status_unsupported_parameter) {
     GTEST_SKIP();
   }
   ASSERT_EQ(xnn_status_success, status);
@@ -449,7 +450,7 @@ void ReshapeBroadcastDim0(xnn_datatype datatype,
   xnn_runtime_t runtime = nullptr;
   xnn_status status =
       xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime);
-  if (status == xnn_status_unsupported_hardware) {
+  if (status == xnn_status_unsupported_parameter) {
     GTEST_SKIP();
   }
   ASSERT_EQ(xnn_status_success, status);
@@ -532,7 +533,7 @@ void ReshapeBroadcast1D(xnn_datatype datatype, xnn_binary_operator binary_op) {
   xnn_runtime_t runtime = nullptr;
   xnn_status status =
       xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime);
-  if (status == xnn_status_unsupported_hardware) {
+  if (status == xnn_status_unsupported_parameter) {
     GTEST_SKIP();
   }
   ASSERT_EQ(xnn_status_success, status);
@@ -615,7 +616,7 @@ void ReshapeBroadcast2D(xnn_datatype datatype, xnn_binary_operator binary_op) {
   xnn_runtime_t runtime = nullptr;
   xnn_status status =
       xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime);
-  if (status == xnn_status_unsupported_hardware) {
+  if (status == xnn_status_unsupported_parameter) {
     GTEST_SKIP();
   }
   ASSERT_EQ(xnn_status_success, status);
@@ -698,7 +699,7 @@ void DegenerateDimension(xnn_datatype datatype, xnn_binary_operator binary_op) {
   xnn_runtime_t runtime = nullptr;
   xnn_status status =
       xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime);
-  if (status == xnn_status_unsupported_hardware) {
+  if (status == xnn_status_unsupported_parameter) {
     GTEST_SKIP();
   }
   ASSERT_EQ(xnn_status_success, status);
@@ -729,75 +730,11 @@ struct Param {
 
 class BinaryTest : public testing::TestWithParam<Param> {};
 
-// Some combinations aren't implemented.
-bool SupportedBinaryTest(xnn_datatype datatype, xnn_binary_operator binary_op) {
-  switch (datatype) {
-    case xnn_datatype_quint8:
-    case xnn_datatype_qint8:
-      switch (binary_op) {
-        case xnn_binary_add:
-        case xnn_binary_multiply:
-        case xnn_binary_subtract:
-          return true;
-        default:
-          return false;
-      }
-    case xnn_datatype_int32:
-      switch (binary_op) {
-        case xnn_binary_multiply:
-          return true;
-        default:
-          return false;
-      }
-    case xnn_datatype_fp16:
-#ifdef XNN_EXCLUDE_F16_TESTS
-      return false;
-#else
-      switch (binary_op) {
-        case xnn_binary_add:
-        case xnn_binary_divide:
-        case xnn_binary_maximum:
-        case xnn_binary_minimum:
-        case xnn_binary_multiply:
-        case xnn_binary_prelu:
-        case xnn_binary_squared_difference:
-        case xnn_binary_subtract:
-          return true;
-        default:
-          return false;
-      }
-#endif
-    case xnn_datatype_fp32:
-      switch (binary_op) {
-        case xnn_binary_add:
-        case xnn_binary_copysign:
-        case xnn_binary_divide:
-        case xnn_binary_maximum:
-        case xnn_binary_minimum:
-        case xnn_binary_multiply:
-        case xnn_binary_prelu:
-        case xnn_binary_subtract:
-        case xnn_binary_squared_difference:
-          return true;
-        default:
-          return false;
-      }
-    default:
-      return false;
-  }
-}
-
 TEST_P(BinaryTest, matches_operator_api) {
-  if (!SupportedBinaryTest(GetParam().datatype, GetParam().binary_operator)) {
-    GTEST_SKIP();
-  }
   MatchesOperatorApi(GetParam().datatype, GetParam().binary_operator);
 }
 
 TEST_P(BinaryTest, reshape) {
-  if (!SupportedBinaryTest(GetParam().datatype, GetParam().binary_operator)) {
-    GTEST_SKIP();
-  }
   if (xnn_datatype_is_quantized(GetParam().datatype)) {
     GTEST_SKIP();
   }
@@ -805,9 +742,6 @@ TEST_P(BinaryTest, reshape) {
 }
 
 TEST_P(BinaryTest, reshape_broadcast_dim0) {
-  if (!SupportedBinaryTest(GetParam().datatype, GetParam().binary_operator)) {
-    GTEST_SKIP();
-  }
   if (xnn_datatype_is_quantized(GetParam().datatype)) {
     GTEST_SKIP();
   }
@@ -815,9 +749,6 @@ TEST_P(BinaryTest, reshape_broadcast_dim0) {
 }
 
 TEST_P(BinaryTest, reshape_broadcast_1d) {
-  if (!SupportedBinaryTest(GetParam().datatype, GetParam().binary_operator)) {
-    GTEST_SKIP();
-  }
   if (xnn_datatype_is_quantized(GetParam().datatype)) {
     GTEST_SKIP();
   }
@@ -825,22 +756,47 @@ TEST_P(BinaryTest, reshape_broadcast_1d) {
 }
 
 TEST_P(BinaryTest, reshape_broadcast_2d) {
-  if (!SupportedBinaryTest(GetParam().datatype, GetParam().binary_operator)) {
-    GTEST_SKIP();
-  }
   if (xnn_datatype_is_quantized(GetParam().datatype)) {
     GTEST_SKIP();
   }
   ReshapeBroadcast2D(GetParam().datatype, GetParam().binary_operator);
 }
 
+const xnn_datatype all_datatypes[] = {
+    xnn_datatype_quint8,
+    xnn_datatype_qint8,
+#ifndef XNN_EXCLUDE_F16_TESTS
+    xnn_datatype_fp16,
+#endif
+    xnn_datatype_bf16,
+    xnn_datatype_fp32,
+    xnn_datatype_int32,
+};
+
+const xnn_binary_operator all_binary_ops[] = {
+    xnn_binary_add,
+    xnn_binary_copysign,
+    xnn_binary_divide,
+    xnn_binary_maximum,
+    xnn_binary_minimum,
+    xnn_binary_multiply,
+    xnn_binary_prelu,
+    xnn_binary_subtract,
+    xnn_binary_squared_difference,
+    xnn_binary_modulus,
+    xnn_binary_atan2,
+    xnn_binary_pow,
+    xnn_binary_bitwise_and,
+    xnn_binary_bitwise_or,
+    xnn_binary_bitwise_xor,
+    xnn_binary_shift_left,
+    xnn_binary_shift_right_logical,
+    xnn_binary_shift_right_arithmetic,
+};
+
 INSTANTIATE_TEST_SUITE_P(
     BinaryTest, BinaryTest,
     testing::ConvertGenerator<Param::TupleT>(Combine(
-        Values(xnn_datatype_quint8, xnn_datatype_qint8, xnn_datatype_fp16,
-               xnn_datatype_fp32, xnn_datatype_int32),
-        Values(xnn_binary_add, xnn_binary_subtract, xnn_binary_multiply,
-               xnn_binary_divide, xnn_binary_maximum, xnn_binary_minimum,
-               xnn_binary_copysign, xnn_binary_squared_difference,
-               xnn_binary_prelu))),
+        ValuesIn(all_datatypes),
+        ValuesIn(all_binary_ops))),
     [](const auto& info) { return info.param.Name(); });

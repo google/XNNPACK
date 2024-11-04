@@ -123,7 +123,6 @@ static void f32_spmm(benchmark::State& state,
   std::vector<float, AlignedAllocator<float, 64>> c(num_buffers * c_elements);
 
   std::generate(a.begin(), a.end(), std::ref(f32rng));
-  std::fill(c.begin(), c.end(), nanf(""));
 
   xnn_f32_minmax_params params;
   init_params(&params, -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity());

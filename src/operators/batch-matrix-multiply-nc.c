@@ -468,6 +468,11 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
     }
   }
 
+  if (batch_size_c == 0) {
+    batch_matrix_multiply_op->state = xnn_run_state_skip;
+    return xnn_status_success;
+  }
+
   // Fail if the batch sizes for `A` and `B` are not compatible.
   for (int k = 0; k < num_batch_dims; k++) {
     if ((batch_dims_a[k] != 1 && batch_dims_c[k] != batch_dims_a[k]) ||
@@ -480,11 +485,6 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
           batch_dims_a[k], batch_dims_b[k]);
       return xnn_status_invalid_parameter;
     }
-  }
-
-  if (batch_size_c == 0) {
-    batch_matrix_multiply_op->state = xnn_run_state_skip;
-    return xnn_status_success;
   }
 
   const uint32_t nr = batch_matrix_multiply_op->ukernel.gemm.nr;

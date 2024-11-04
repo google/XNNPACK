@@ -225,13 +225,10 @@ enum xnn_status xnn_define_rope(
     return status;
   }
 
-  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
   switch (output_value->datatype) {
     case xnn_datatype_fp16:
-      compute_type = xnn_compute_type_fp16;
       break;
     case xnn_datatype_fp32:
-      compute_type = xnn_compute_type_fp32;
       break;
     default:
       xnn_log_error(
@@ -252,7 +249,6 @@ enum xnn_status xnn_define_rope(
   }
 
   node->type = xnn_node_type_rope;
-  node->compute_type = compute_type;
   node->num_inputs = 2;
   node->inputs[0] = input_id;
   node->inputs[1] = weights_id;

@@ -140,6 +140,9 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
 
   template <typename In, typename Out>
   void RunUnaryTest(const UnaryOpTestParams& test_params, const Param& param) {
+    if (::testing::Test::IsSkipped()) {
+      return;
+    }
     ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
     const xnn_unary_operator unary_op = param.unary_operator;
@@ -173,11 +176,6 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
       for (size_t i = 0; i < batch_size; i++) {
         FillRandom(rng_, input.data() + i * input_stride, channels, domain,
                    input_quantization);
-
-        // Compute reference results.
-        UnaryReferenceImpl(input.data() + i * input_stride, channels,
-                           output_ref.data() + i * channels, *op_info,
-                           input_quantization, output_quantization, op_params);
       }
 
       if (param.run_mode == RunMode::kEager) {
@@ -222,10 +220,22 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
 
       // Verify results.
       for (size_t i = 0; i < batch_size; i++) {
+        // Compute reference results.
+        UnaryReferenceImpl(input.data() + i * input_stride, channels,
+                           output_ref.data() + i * channels, *op_info,
+                           input_quantization, output_quantization, op_params);
+
         for (size_t c = 0; c < channels; c++) {
+          const float x = input[i * input_stride + c];
           const float y = output[i * output_stride + c];
           const float y_ref = output_ref[i * channels + c];
-          ASSERT_NEAR(y, y_ref, op_info->Tolerance(y_ref, output_datatype));
+          ASSERT_NEAR(y, y_ref, op_info->Tolerance(y_ref, output_datatype))
+              << "x = " << x
+              << ", y = " << y
+              << ", input1 zero point = " << input_quantization.zero_point
+              << ", input1 scale = " << input_quantization.scale
+              << ", output zero point = " << output_quantization.zero_point
+              << ", output scale = " << output_quantization.scale;
         }
       }
     }
@@ -236,6 +246,9 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
     switch (param.output_datatype) {
       case xnn_datatype_fp16:
         RunUnaryTest<In, xnn_float16>(test_params, param);
+        break;
+      case xnn_datatype_bf16:
+        RunUnaryTest<In, xnn_bfloat16>(test_params, param);
         break;
       case xnn_datatype_fp32:
         RunUnaryTest<In, float>(test_params, param);
@@ -258,6 +271,9 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
     switch (param.input_datatype) {
       case xnn_datatype_fp16:
         RunUnaryTest<xnn_float16>(test_params, param);
+        break;
+      case xnn_datatype_bf16:
+        RunUnaryTest<xnn_bfloat16>(test_params, param);
         break;
       case xnn_datatype_fp32:
         RunUnaryTest<float>(test_params, param);
@@ -364,11 +380,24 @@ xnn_unary_operator all_unary_ops[] = {
     xnn_unary_square_root,
     xnn_unary_reciprocal_square_root,
     xnn_unary_tanh,
+    xnn_unary_cube_root,
+    xnn_unary_cosine,
+    xnn_unary_sine,
+    xnn_unary_count_leading_zeros,
+    xnn_unary_bitwise_not,
+    xnn_unary_popcount,
+    xnn_unary_sign,
 };
 
 xnn_datatype all_datatypes[] = {
-    xnn_datatype_quint8, xnn_datatype_qint8, xnn_datatype_fp16,
-    xnn_datatype_fp32,   xnn_datatype_int32,
+    xnn_datatype_quint8,
+    xnn_datatype_qint8,
+#ifndef XNN_EXCLUDE_F16_TESTS
+    xnn_datatype_fp16,
+#endif
+    xnn_datatype_bf16,
+    xnn_datatype_fp32,
+    xnn_datatype_int32,
 };
 
 xnn_datatype quantized_datatypes[] = {
@@ -377,7 +406,10 @@ xnn_datatype quantized_datatypes[] = {
 };
 
 xnn_datatype unquantized_datatypes[] = {
+#ifndef XNN_EXCLUDE_F16_TESTS
     xnn_datatype_fp16,
+#endif
+    xnn_datatype_bf16,
     xnn_datatype_fp32,
     xnn_datatype_int32,
 };

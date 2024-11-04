@@ -108,7 +108,6 @@ TEST_F(StaticSliceTestQS8, define)
   EXPECT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   EXPECT_EQ(node->type, xnn_node_type_static_slice);
-  EXPECT_EQ(node->compute_type, xnn_compute_type_qs8);
   EXPECT_EQ(node->num_inputs, 1);
   EXPECT_EQ(node->inputs[0], input_id);
   EXPECT_EQ(node->num_outputs, 1);
@@ -151,7 +150,6 @@ TEST_F(StaticSliceTestQU8, define)
   EXPECT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   EXPECT_EQ(node->type, xnn_node_type_static_slice);
-  EXPECT_EQ(node->compute_type, xnn_compute_type_qu8);
   EXPECT_EQ(node->num_inputs, 1);
   EXPECT_EQ(node->inputs[0], input_id);
   EXPECT_EQ(node->num_outputs, 1);
@@ -191,7 +189,6 @@ TEST_F(StaticSliceTestF16, define)
   EXPECT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   EXPECT_EQ(node->type, xnn_node_type_static_slice);
-  EXPECT_EQ(node->compute_type, xnn_compute_type_fp16);
   EXPECT_EQ(node->num_inputs, 1);
   EXPECT_EQ(node->inputs[0], input_id);
   EXPECT_EQ(node->num_outputs, 1);
@@ -231,7 +228,6 @@ TEST_F(StaticSliceTestF32, define)
   EXPECT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
   EXPECT_EQ(node->type, xnn_node_type_static_slice);
-  EXPECT_EQ(node->compute_type, xnn_compute_type_fp32);
   EXPECT_EQ(node->num_inputs, 1);
   EXPECT_EQ(node->inputs[0], input_id);
   EXPECT_EQ(node->num_outputs, 1);

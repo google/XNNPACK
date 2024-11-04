@@ -24,6 +24,7 @@
 #include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/params.h"
+#include "xnnpack/reference-config.h"
 #include "pthreadpool.h"
 
 static const struct xnn_binary_elementwise_config* init_config(
@@ -43,15 +44,16 @@ static const struct xnn_binary_elementwise_config* init_config(
           return NULL;
       }
     case xnn_binary_subtract:
-      *sign_b = -1;
       switch (datatype) {
         case xnn_datatype_fp32:
           return xnn_init_f32_vsub_config();
         case xnn_datatype_fp16:
           return xnn_init_f16_vsub_config();
         case xnn_datatype_qint8:
+          *sign_b = -1;
           return xnn_init_qs8_vadd_config();
         case xnn_datatype_quint8:
+          *sign_b = -1;
           return xnn_init_qu8_vadd_config();
         default:
           return NULL;
@@ -66,8 +68,6 @@ static const struct xnn_binary_elementwise_config* init_config(
           return xnn_init_qs8_vmul_config();
         case xnn_datatype_quint8:
           return xnn_init_qu8_vmul_config();
-        case xnn_datatype_int32:
-          return xnn_init_s32_vmul_config();
         default:
           return NULL;
       }
@@ -134,20 +134,21 @@ static enum xnn_status init_binary_elementwise_nd(
     const struct xnn_quantization_params* a_quantization,
     const struct xnn_quantization_params* b_quantization,
     const struct xnn_quantization_params* output_quantization, uint32_t flags) {
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-                  xnn_binary_operator_to_string(type));
-    return xnn_status_uninitialized;
-  }
-
   int sign_b = 1;
   const struct xnn_binary_elementwise_config* config =
       init_config(type, datatype, &sign_b);
   if (config == NULL) {
+    xnn_log_debug(
+      "unsupported operator %s for datatype %s, falling back to reference kernel",
+      xnn_binary_operator_to_string(type), xnn_datatype_to_string(datatype));
+    config = xnn_init_binary_reference_config(type, datatype);
+  }
+  if (config == NULL) {
     xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
-        xnn_binary_operator_to_string(type));
-    return xnn_status_unsupported_hardware;
+        "failed to create %s operator: unsupported datatype %s",
+        xnn_binary_operator_to_string(type),
+        xnn_datatype_to_string(datatype));
+    return xnn_status_unsupported_parameter;
   }
 
   union xnn_binary_uparams uparams;
@@ -199,12 +200,6 @@ static enum xnn_status init_binary_elementwise_nd(
     }
   }
 
-  if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
-    xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-                  xnn_binary_operator_to_string(type));
-    return xnn_status_uninitialized;
-  }
-
   memcpy(&op->params, &uparams, sizeof(uparams));
   memcpy(&op->params2, &uparams2, sizeof(uparams2));
 
@@ -245,7 +240,7 @@ enum xnn_status xnn_create_binary_elementwise_nd(
       init_binary_elementwise_nd(op, type, datatype, a_quantization,
                                  b_quantization, output_quantization, flags);
   if (status != xnn_status_success) {
-    xnn_release_memory(op);
+    xnn_delete_operator(op);
     return status;
   }
 
@@ -425,7 +420,7 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
             op->compute[0].tile[0] =
                 max(element_tile,
                     round_up_po2(op->compute[0].range[0] / num_threads,
-                                 (1 << log2_element_size)));
+                                 (element_tile << log2_element_size)));
           } else {
             op->compute[0].type = xnn_parallelization_type_1d;
             op->compute[0].task_1d =

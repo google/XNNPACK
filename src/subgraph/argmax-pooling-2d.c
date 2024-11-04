@@ -233,7 +233,6 @@ enum xnn_status xnn_define_argmax_pooling_2d(
   }
 
   node->type = xnn_node_type_argmax_pooling_2d;
-  node->compute_type = xnn_compute_type_fp32;
   node->params.pooling_2d.padding_top = input_padding_top;
   node->params.pooling_2d.padding_right = input_padding_right;
   node->params.pooling_2d.padding_bottom = input_padding_bottom;

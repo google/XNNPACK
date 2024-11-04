@@ -42,7 +42,7 @@ static void f32_rmax(
     init_params(&params);
   }
 
-  float output = std::nanf("");
+  float output;
   for (auto _ : state) {
     rmax(elements * sizeof(float), input.data(), &output, &params);
   }

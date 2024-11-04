@@ -1270,24 +1270,6 @@ size_t xnn_init_qs8_cvt_scalar_params(
   return sizeof(params->qs8_cvt);
 }
 
-size_t xnn_init_qs16_qs8_cvt_scalar_params(
-  union xnn_unary_uparams* params,
-  const union xnn_unary_params* op_params,
-  const struct xnn_quantization_params* input_quantization,
-  const struct xnn_quantization_params* output_quantization)
-{
-  const float input_output_scale = input_quantization->scale / output_quantization->scale;
-  assert(input_output_scale >= 0x1.0p-16);
-  assert(input_output_scale <= 0x1.0p+8);
-
-  const long multiplier = lrintf(65536.0f * input_output_scale);
-  assert(multiplier >= 1L);
-  assert(multiplier <= 0x01000000L);
-  params->qs16_qs8_cvt.scalar.multiplier = (int32_t) multiplier;
-  params->qs16_qs8_cvt.scalar.output_zero_point = (int32_t) output_quantization->zero_point;
-  return sizeof(params->qs16_qs8_cvt);
-}
-
 size_t xnn_init_qs8_f32_cvt_scalar_params(
   union xnn_unary_uparams* params,
   const union xnn_unary_params* op_params,

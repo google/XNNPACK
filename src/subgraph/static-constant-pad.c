@@ -11,6 +11,7 @@
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/fp16.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
@@ -226,26 +227,12 @@ enum xnn_status xnn_define_static_constant_pad(
     return status;
   }
 
-  enum xnn_compute_type compute_type = xnn_compute_type_invalid;
-  switch (output_value->datatype) {
-    case xnn_datatype_fp16:
-      compute_type = xnn_compute_type_fp16;
-      break;
-    case xnn_datatype_fp32:
-      compute_type = xnn_compute_type_fp32;
-      break;
-    case xnn_datatype_qint8:
-      compute_type = xnn_compute_type_qs8;
-      break;
-    case xnn_datatype_quint8:
-      compute_type = xnn_compute_type_qu8;
-      break;
-    default:
-      xnn_log_error(
-        "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(xnn_node_type_static_constant_pad), output_id,
-        xnn_datatype_to_string(output_value->datatype), output_value->datatype);
-      return xnn_status_invalid_parameter;
+  if (!xnn_datatype_is_byte_addressable(output_value->datatype)) {
+    xnn_log_error(
+      "failed to define %s operator with output ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+      xnn_node_type_to_string(xnn_node_type_static_constant_pad), output_id,
+      xnn_datatype_to_string(output_value->datatype), output_value->datatype);
+    return xnn_status_invalid_parameter;
   }
 
   status = xnn_subgraph_check_datatype_matches(
@@ -294,7 +281,6 @@ enum xnn_status xnn_define_static_constant_pad(
   }
 
   node->type = xnn_node_type_static_constant_pad;
-  node->compute_type = compute_type;
   node->num_inputs = 1;
   node->inputs[0] = input_id;
   node->num_outputs = 1;

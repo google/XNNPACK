@@ -42,7 +42,7 @@ static void f32_rminmax(
     init_params(&params);
   }
 
-  float output[2] = {std::nanf(""), std::nanf("")};
+  float output[2];
   for (auto _ : state) {
     rminmax(elements * sizeof(float), input.data(), output, &params);
   }

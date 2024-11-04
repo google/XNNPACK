@@ -181,11 +181,24 @@ xnn_unary_operator all_unary_ops[] = {
     xnn_unary_square_root,
     xnn_unary_reciprocal_square_root,
     xnn_unary_tanh,
+    xnn_unary_cube_root,
+    xnn_unary_cosine,
+    xnn_unary_sine,
+    xnn_unary_count_leading_zeros,
+    xnn_unary_bitwise_not,
+    xnn_unary_popcount,
+    xnn_unary_sign,
 };
 
-xnn_datatype all_datatypes[] = {
-    xnn_datatype_quint8, xnn_datatype_qint8, xnn_datatype_fp16,
-    xnn_datatype_fp32,   xnn_datatype_int32,
+const xnn_datatype all_datatypes[] = {
+    xnn_datatype_quint8,
+    xnn_datatype_qint8,
+#ifndef XNN_EXCLUDE_F16_TESTS
+    xnn_datatype_fp16,
+#endif
+    xnn_datatype_bf16,
+    xnn_datatype_fp32,
+    xnn_datatype_int32,
 };
 
 INSTANTIATE_TEST_SUITE_P(
@@ -230,7 +243,6 @@ TEST(AbsTest, reshape) {
   struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_unary_elementwise);
   ASSERT_EQ(node->unary_operator, xnn_unary_abs);
-  ASSERT_EQ(node->compute_type, xnn_compute_type_fp32);
   ASSERT_EQ(node->num_inputs, 1);
   ASSERT_EQ(node->inputs[0], input_id);
   ASSERT_EQ(node->num_outputs, 1);
