@@ -19,7 +19,7 @@ $if PREFETCH:
   #include "xnnpack/prefetch.h"
 
 
-void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx${"_prfm" if PREFETCH else ""}(
+void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx${"_u" if KBLOCK else ""}${KBLOCK if KBLOCK else ""}${"_prfm" if PREFETCH else ""}(
   size_t g,
   size_t nc,
   size_t kc,
@@ -71,8 +71,20 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx${"_prfm" if PREFETCH else ""}(
       packed_w += ${NR};
 
       // KC main loop
-      // todo: KBLOCK rows at a time
-      for (size_t k = kc; k > 0; --k) {
+      size_t k = kc;
+      $if KBLOCK:
+        for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
+          $for N in range(0,NR,8):
+            $for K in range(0,KBLOCK):
+              const __m256 v${N}_${K} = _mm256_loadu_ps(w + ${N} + ${K} * k_stride);
+          $for N in range(0,NR,8):
+            $for K in range(0,KBLOCK):
+              _mm256_store_ps(packed_w + ${N} + ${K} * ${NR}, v${N}_${K});
+          w += k_stride * ${KBLOCK};
+          packed_w += ${NR} * ${KBLOCK};
+        }
+
+      for (; k > 0; --k) {
         $for N in range(0,NR,8):
           const __m256 v${N} = _mm256_loadu_ps(w + ${N});
         $for N in range(0,NR,8):

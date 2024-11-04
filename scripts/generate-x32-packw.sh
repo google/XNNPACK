@@ -81,8 +81,11 @@ tools/xngen src/x32-packw/s4-avx.c.in -D NR=8  -D SR=4 -D PREFETCH=1 -D KBLOCK=4
 tools/xngen src/x32-packw/s4-avx.c.in -D NR=16 -D SR=4 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16s4-gemm-goi-avx-u4-prfm.c &
 
 ### GUI NR multiple of 8
-tools/xngen src/x32-packw/gio-avx.c.in -D NR=8  -D PREFETCH=0 -o src/x32-packw/gen/x32-packw-x8-gemm-gio-avx.c &
-tools/xngen src/x32-packw/gio-avx.c.in -D NR=8  -D PREFETCH=1 -o src/x32-packw/gen/x32-packw-x8-gemm-gio-avx-prfm.c &
+tools/xngen src/x32-packw/gio-avx.c.in -D NR=8  -D PREFETCH=0 -D KBLOCK=0 -o src/x32-packw/gen/x32-packw-x8-gemm-gio-avx.c &
+tools/xngen src/x32-packw/gio-avx.c.in -D NR=8  -D PREFETCH=1 -D KBLOCK=0 -o src/x32-packw/gen/x32-packw-x8-gemm-gio-avx-prfm.c &
+
+tools/xngen src/x32-packw/gio-avx.c.in -D NR=8  -D PREFETCH=0 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x8-gemm-gio-avx-u8.c &
+tools/xngen src/x32-packw/gio-avx.c.in -D NR=8  -D PREFETCH=1 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x8-gemm-gio-avx-u8-prfm.c &
 
 ################################### x86 AVX512 ##################################
 ### NR multiple of 16

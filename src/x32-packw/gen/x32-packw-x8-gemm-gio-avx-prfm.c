@@ -67,8 +67,9 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__avx_prfm(
       packed_w += 8;
 
       // KC main loop
-      // todo: KBLOCK rows at a time
-      for (size_t k = kc; k > 0; --k) {
+      size_t k = kc;
+
+      for (; k > 0; --k) {
         const __m256 v0 = _mm256_loadu_ps(w + 0);
         _mm256_store_ps(packed_w + 0, v0);
         w += k_stride;
