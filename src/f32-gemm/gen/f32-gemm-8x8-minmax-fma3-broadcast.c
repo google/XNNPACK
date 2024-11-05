@@ -8,10 +8,14 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
+#include "xnnpack/microparams.h"
 
 
 void xnn_f32_gemm_minmax_ukernel_8x8__fma3_broadcast(

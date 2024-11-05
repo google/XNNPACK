@@ -9,12 +9,16 @@ $assert FMA in [0, 3]
 $assert NR % 8 == 0
 $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <immintrin.h>
 
+#include "xnnpack/common.h"
 #include "xnnpack/gemm.h"
 $if AVX == 1 and DATATYPE == "QC8":
   #include "xnnpack/unaligned.h"
+#include "xnnpack/microparams.h"
 
 
 $RANGE_MR = list(reversed(range(MR))) if INC else list(range(MR))
