@@ -1258,6 +1258,8 @@ IF(XNNPACK_BUILD_TESTS)
     f32-rdsum
     f32-velu
     f32-argmaxpool
+    s8-vclamp
+    u8-vclamp
   )
   FOREACH(TEST ${SHARDED_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
@@ -1727,9 +1729,7 @@ IF(XNNPACK_BUILD_TESTS)
       f32-vsqr
       f32-vsqrt
       f32-vrsqrt
-      f32-vtanh
-      s8-vclamp
-      u8-vclamp)
+      f32-vtanh)
   FOREACH(TEST ${MICROKERNEL_VUNARY_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
