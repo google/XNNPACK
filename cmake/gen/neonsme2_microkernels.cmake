@@ -11,6 +11,8 @@
 
 SET(PROD_NEONSME2_MICROKERNEL_SRCS
   src/pf32-gemm/pf32-gemm-32x32-minmax-neonsme2.c
+  src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-minmax-1x128c4-neonsme2.c
+  src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-minmax-32x128c4-neonsme2.c
   src/x32-pack-lh/x32-packlh-neonsme2.c)
 
 SET(NON_PROD_NEONSME2_MICROKERNEL_SRCS)
