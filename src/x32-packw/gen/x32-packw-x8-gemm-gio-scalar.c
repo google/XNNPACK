@@ -1,5 +1,5 @@
 // Auto-generated file. Do not edit!
-//   Template: src/x32-packw/gio-avx.c.in
+//   Template: src/x32-packw/gio-scalar.c.in
 //   Generator: tools/xngen
 //
 // Copyright 2024 Google LLC
@@ -7,18 +7,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#include <immintrin.h>
-
-#include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/packw.h"
 
 
-void xnn_x32_packw_gemm_gio_ukernel_x8__avx(
+void xnn_x32_packw_gemm_gio_ukernel_x8__scalar(
   size_t g,
   size_t nc,
   size_t kc,
@@ -43,12 +39,6 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__avx(
   assert(weights != NULL);
   assert(packed_weights != NULL);
 
-  const __m256 vzero = _mm256_setzero_ps();
-  static const int32_t mask_table[16] = {
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    0, 0, 0, 0, 0, 0, 0, 0,
-  };
-
   const float* b = (const float*) bias;
   float* packed_w = (float*) packed_weights;
   do {
@@ -58,19 +48,33 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__avx(
 
     for (; n >= 8; n -= 8) {
       if XNN_LIKELY(b != NULL) {
-        const __m256 vb0 = _mm256_loadu_ps(b + 0);
-        _mm256_store_ps(packed_w + 0, vb0);
+        const uint64_t v0 = ((const uint64_t*)b)[0];
+        const uint64_t v1 = ((const uint64_t*)b)[1];
+        const uint64_t v2 = ((const uint64_t*)b)[2];
+        const uint64_t v3 = ((const uint64_t*)b)[3];
+        ((uint64_t*)packed_w)[0] = v0;
+        ((uint64_t*)packed_w)[1] = v1;
+        ((uint64_t*)packed_w)[2] = v2;
+        ((uint64_t*)packed_w)[3] = v3;
         b += 8;
       } else {
-        _mm256_store_ps(packed_w + 0, vzero);
+        ((uint64_t*)packed_w)[0] = 0;
+        ((uint64_t*)packed_w)[1] = 0;
+        ((uint64_t*)packed_w)[2] = 0;
+        ((uint64_t*)packed_w)[3] = 0;
       }
       packed_w += 8;
 
       // KC main loop
-      // todo: KBLOCK rows at a time
       for (size_t k = kc; k > 0; --k) {
-        const __m256 v0 = _mm256_loadu_ps(w + 0);
-        _mm256_store_ps(packed_w + 0, v0);
+        const uint64_t v0 = ((const uint64_t*)w)[0];
+        const uint64_t v1 = ((const uint64_t*)w)[1];
+        const uint64_t v2 = ((const uint64_t*)w)[2];
+        const uint64_t v3 = ((const uint64_t*)w)[3];
+        ((uint64_t*)packed_w)[0] = v0;
+        ((uint64_t*)packed_w)[1] = v1;
+        ((uint64_t*)packed_w)[2] = v2;
+        ((uint64_t*)packed_w)[3] = v3;
         w += k_stride;
         packed_w += 8;
       }
@@ -81,21 +85,25 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__avx(
     if XNN_UNLIKELY(n != 0) {
       assert(n >= 1);
       assert(n <= 7);
-      const __m256i vmask0 = _mm256_loadu_si256((const __m256i*) &mask_table[8 - n]);
 
       if XNN_LIKELY(b != NULL) {
-        const __m256 vb0 = _mm256_maskload_ps(b + 0, vmask0);
-        _mm256_store_ps(packed_w + 0, vb0);
+        for (size_t i = 0; i < n; ++i) {
+          packed_w[i] = b[i];
+        }
         b += n;
       } else {
-        _mm256_store_ps(packed_w + 0, vzero);
+        ((uint64_t*)packed_w)[0] = 0;
+        ((uint64_t*)packed_w)[1] = 0;
+        ((uint64_t*)packed_w)[2] = 0;
+        ((uint64_t*)packed_w)[3] = 0;
       }
       packed_w += 8;
 
       // KC main loop
       for (size_t k = kc; k > 0; --k) {
-        const __m256 v0 = _mm256_maskload_ps(w + 0, vmask0);
-        _mm256_store_ps(packed_w + 0, v0);
+        for (size_t i = 0; i < n; ++i) {
+          packed_w[i] = w[i];
+        }
         w += k_stride;
         packed_w += 8;
       }

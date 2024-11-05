@@ -17,6 +17,12 @@ tools/xngen src/x32-packw/scalar.c.in -D NR=4  -D KBLOCK=4 -D TYPE=float    -o s
 tools/xngen src/x32-packw/scalar.c.in -D NR=8  -D KBLOCK=4 -D TYPE=float    -o src/x32-packw/gen/x32-packw-x8-gemm-goi-scalar-float-u4.c &
 tools/xngen src/x32-packw/scalar.c.in -D NR=16 -D KBLOCK=4 -D TYPE=float    -o src/x32-packw/gen/x32-packw-x16-gemm-goi-scalar-float-u4.c &
 
+### GIO KR=1
+tools/xngen src/x32-packw/gio-scalar.c.in -D NR=4  -o src/x32-packw/gen/x32-packw-x4-gemm-gio-scalar.c &
+tools/xngen src/x32-packw/gio-scalar.c.in -D NR=8  -o src/x32-packw/gen/x32-packw-x8-gemm-gio-scalar.c &
+tools/xngen src/x32-packw/gio-scalar.c.in -D NR=16 -o src/x32-packw/gen/x32-packw-x16-gemm-gio-scalar.c &
+tools/xngen src/x32-packw/gio-scalar.c.in -D NR=32 -o src/x32-packw/gen/x32-packw-x32-gemm-gio-scalar.c &
+
 ################################### ARM NEON ##################################
 ### NR multiple of 4
 tools/xngen src/x32-packw/neon.c.in -D NR=8  -D SR=1 -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8-gemm-goi-neon-ld4lane-u4.c &
@@ -80,15 +86,18 @@ tools/xngen src/x32-packw/s4-avx.c.in -D NR=16 -D SR=4 -D PREFETCH=0 -D KBLOCK=4
 tools/xngen src/x32-packw/s4-avx.c.in -D NR=8  -D SR=4 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x8s4-gemm-goi-avx-u4-prfm.c &
 tools/xngen src/x32-packw/s4-avx.c.in -D NR=16 -D SR=4 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16s4-gemm-goi-avx-u4-prfm.c &
 
-### GUI NR multiple of 8
+### GIO NR multiple of 8
 tools/xngen src/x32-packw/gio-avx.c.in -D NR=8  -D PREFETCH=0 -o src/x32-packw/gen/x32-packw-x8-gemm-gio-avx.c &
 tools/xngen src/x32-packw/gio-avx.c.in -D NR=8  -D PREFETCH=1 -o src/x32-packw/gen/x32-packw-x8-gemm-gio-avx-prfm.c &
+tools/xngen src/x32-packw/gio-avx.c.in -D NR=16 -D PREFETCH=0 -o src/x32-packw/gen/x32-packw-x16-gemm-gio-avx.c &
+tools/xngen src/x32-packw/gio-avx.c.in -D NR=16 -D PREFETCH=1 -o src/x32-packw/gen/x32-packw-x16-gemm-gio-avx-prfm.c &
+tools/xngen src/x32-packw/gio-avx.c.in -D NR=32 -D PREFETCH=0 -o src/x32-packw/gen/x32-packw-x32-gemm-gio-avx.c &
+tools/xngen src/x32-packw/gio-avx.c.in -D NR=32 -D PREFETCH=1 -o src/x32-packw/gen/x32-packw-x32-gemm-gio-avx-prfm.c &
 
 ################################### x86 AVX512 ##################################
 ### NR multiple of 16
 tools/xngen src/x32-packw/avx512.c.in -D NR=16 -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16-gemm-goi-avx512f-u4.c &
 tools/xngen src/x32-packw/avx512.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16-gemm-goi-avx512f-u4-prfm.c &
-
 tools/xngen src/x32-packw/avx512.c.in -D NR=32 -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x32-gemm-goi-avx512f-u4.c &
 tools/xngen src/x32-packw/avx512.c.in -D NR=32 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x32-gemm-goi-avx512f-u4-prfm.c &
 

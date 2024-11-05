@@ -16,9 +16,10 @@
 
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/packw.h"
+#include "xnnpack/prefetch.h"
 
 
-void xnn_x32_packw_gemm_gio_ukernel_x8__avx(
+void xnn_x32_packw_gemm_gio_ukernel_x16__avx_prfm(
   size_t g,
   size_t nc,
   size_t kc,
@@ -36,7 +37,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__avx(
   assert(g != 0);
   assert(nc != 0);
   assert(kc != 0);
-  assert(nr == 8);   // This kernel is for NR=8
+  assert(nr == 16);   // This kernel is for NR=16
   assert(kr == 1);
   assert(sr == 1);
   assert(k_stride != 0);
@@ -44,60 +45,74 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__avx(
   assert(packed_weights != NULL);
 
   const __m256 vzero = _mm256_setzero_ps();
-  static const int32_t mask_table[16] = {
+  static const int32_t mask_table[32] = {
     -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0,
   };
 
   const float* b = (const float*) bias;
   float* packed_w = (float*) packed_weights;
   do {
-    // NC main loop multiple of 8
+    // NC main loop multiple of 16
     const float* w = (const float*) weights;
     size_t n = nc;
 
-    for (; n >= 8; n -= 8) {
+    for (; n >= 16; n -= 16) {
       if XNN_LIKELY(b != NULL) {
         const __m256 vb0 = _mm256_loadu_ps(b + 0);
+        const __m256 vb8 = _mm256_loadu_ps(b + 8);
         _mm256_store_ps(packed_w + 0, vb0);
-        b += 8;
+        _mm256_store_ps(packed_w + 8, vb8);
+        b += 16;
       } else {
         _mm256_store_ps(packed_w + 0, vzero);
+        _mm256_store_ps(packed_w + 8, vzero);
       }
-      packed_w += 8;
+      packed_w += 16;
 
       // KC main loop
       // todo: KBLOCK rows at a time
       for (size_t k = kc; k > 0; --k) {
         const __m256 v0 = _mm256_loadu_ps(w + 0);
+        const __m256 v8 = _mm256_loadu_ps(w + 8);
+        xnn_prefetch_to_l1((const int8_t*) w + 960);
         _mm256_store_ps(packed_w + 0, v0);
+        _mm256_store_ps(packed_w + 8, v8);
         w += k_stride;
-        packed_w += 8;
+        packed_w += 16;
       }
-      w = w - kc * k_stride + 8;  // Advance to next column of 8 floats
+      w = w - kc * k_stride + 16;  // Advance to next column of 16 floats
     }
 
-    // NC remainder (1..7)
+    // NC remainder (1..15)
     if XNN_UNLIKELY(n != 0) {
       assert(n >= 1);
-      assert(n <= 7);
-      const __m256i vmask0 = _mm256_loadu_si256((const __m256i*) &mask_table[8 - n]);
+      assert(n <= 15);
+      const __m256i vmask0 = _mm256_loadu_si256((const __m256i*) &mask_table[16 - n]);
+      const __m256i vmask8 = _mm256_loadu_si256((const __m256i*) &mask_table[16 - n]);
 
       if XNN_LIKELY(b != NULL) {
         const __m256 vb0 = _mm256_maskload_ps(b + 0, vmask0);
+        const __m256 vb8 = _mm256_maskload_ps(b + 8, vmask8);
         _mm256_store_ps(packed_w + 0, vb0);
+        _mm256_store_ps(packed_w + 8, vb8);
         b += n;
       } else {
         _mm256_store_ps(packed_w + 0, vzero);
+        _mm256_store_ps(packed_w + 8, vzero);
       }
-      packed_w += 8;
+      packed_w += 16;
 
       // KC main loop
       for (size_t k = kc; k > 0; --k) {
         const __m256 v0 = _mm256_maskload_ps(w + 0, vmask0);
+        const __m256 v8 = _mm256_maskload_ps(w + 8, vmask8);
         _mm256_store_ps(packed_w + 0, v0);
+        _mm256_store_ps(packed_w + 8, v8);
         w += k_stride;
-        packed_w += 8;
+        packed_w += 16;
       }
     }
     weights += nc * kc;

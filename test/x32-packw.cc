@@ -245,9 +245,6 @@ INSTANTIATE_TEST_SUITE_P(x32_packw,
                          testing::ValuesIn(xnn_test_params),
                          GetTestName);
 
-// Enable on all platforms when scalar available
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-
 namespace {
 
 struct XnnTestGIOParam {
@@ -302,9 +299,6 @@ TEST_P(XnnTestGIO, null_bias) {
 }
 
 TEST_P(XnnTestGIO, k_div_kblock) {
-  if (GetParam().kblock <= 1) {
-    GTEST_SKIP();
-  }
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   PackWMicrokernelTester()
     .n(GetParam().nr * GetParam().nr_scale)
@@ -316,9 +310,6 @@ TEST_P(XnnTestGIO, k_div_kblock) {
 }
 
 TEST_P(XnnTestGIO, k_lt_kblock) {
-  if (GetParam().kblock <= 1) {
-    GTEST_SKIP();
-  }
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t k = 1; k < GetParam().kblock; k++) {
     PackWMicrokernelTester()
@@ -381,9 +372,6 @@ TEST_P(XnnTestGIO, n_eq_1) {
 }
 
 TEST_P(XnnTestGIO, n_lt_nr) {
-  if (GetParam().nr <= 1 || GetParam().nr_scale != 1) {
-    GTEST_SKIP();
-  }
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
   for (size_t n = 1; n < GetParam().nr * GetParam().nr_scale; n++) {
     PackWMicrokernelTester()
@@ -462,6 +450,3 @@ INSTANTIATE_TEST_SUITE_P(x32_packw_gio,
                          XnnTestGIO,
                          testing::ValuesIn(xnn_test_gio_params),
                          GetTestGIOName);
-
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-

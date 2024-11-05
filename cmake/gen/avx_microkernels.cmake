@@ -477,8 +477,12 @@ SET(NON_PROD_AVX_MICROKERNEL_SRCS
   src/x32-packw/gen/x32-packw-x8-gemm-goi-avx-u4.c
   src/x32-packw/gen/x32-packw-x8s4-gemm-goi-avx-u4-prfm.c
   src/x32-packw/gen/x32-packw-x8s4-gemm-goi-avx-u4.c
+  src/x32-packw/gen/x32-packw-x16-gemm-gio-avx-prfm.c
+  src/x32-packw/gen/x32-packw-x16-gemm-gio-avx.c
   src/x32-packw/gen/x32-packw-x16-gemm-goi-avx-u4-prfm.c
   src/x32-packw/gen/x32-packw-x16s4-gemm-goi-avx-u4-prfm.c
+  src/x32-packw/gen/x32-packw-x32-gemm-gio-avx-prfm.c
+  src/x32-packw/gen/x32-packw-x32-gemm-gio-avx.c
   src/x32-transposec/gen/x32-transposec-8x8-multi-mov-avx.c
   src/x32-transposec/gen/x32-transposec-8x8-multi-switch-avx.c
   src/x32-transposec/gen/x32-transposec-8x8-reuse-mov-avx.c
