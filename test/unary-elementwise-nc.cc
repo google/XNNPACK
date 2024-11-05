@@ -174,7 +174,8 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
     xnnpack::Buffer<Out> output_ref(batch_size * channels);
     for (size_t iteration = 0; iteration < iterations; iteration++) {
       for (size_t i = 0; i < batch_size; i++) {
-        FillRandom(rng_, input.data() + i * input_stride, channels, domain,
+        FillRandom(rng_, input.data() + i * input_stride,
+                   channels + XNN_EXTRA_BYTES / sizeof(In), domain,
                    input_quantization);
       }
 
