@@ -1,0 +1,107 @@
+name: Run Linux and Windows (x86, x64) Tests with Intel SDE Processors
+
+env:
+  SDE_WINDOWS_URL: https://downloadmirror.intel.com/831748/sde-external-9.44.0-2024-08-22-win.tar.xz
+  SDE_LINUX_URL: https://downloadmirror.intel.com/831748/sde-external-9.44.0-2024-08-22-lin.tar.xz
+  
+on:
+  workflow_dispatch:
+
+jobs:
+
+  build:
+    uses: ./.github/workflows/build-linux-windows.yml
+
+  run-sde-tests:
+    strategy:
+      matrix:
+        arch: [windows-x86, windows-x64, linux-x86_64]
+        sde-processor: [snb, ivb, hsw, bdw, skl, cnl, icl, skx, clx, cpx, icx, tgl, adl, mtl, rpl, spr, emr, gnr, gnr256, srf, arl, lnl, future]
+    runs-on: ${{ matrix.arch == 'linux-x86_64' && 'ubuntu-latest' || 'windows-latest' }}
+    needs: build
+    continue-on-error: true
+
+    name: >
+      (${{ matrix.arch }}, ${{ matrix.sde-processor }})
+      - ${{ fromJson('{
+        "snb": {"main": "Sandy Bridge Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX"},
+        "ivb": {"main": "Ivy Bridge Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C "},
+        "hsw": {"main": "Haswell Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2"},
+        "bdw": {"main": "Broadwell Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2"},
+        "skl": {"main": "Skylake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2"},
+        "cnl": {"main": "Cannon Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX, AVX512VBMI"},
+        "icl": {"main": "Ice Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI"},
+        "skx": {"main": "Skylake Server Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX"},
+        "clx": {"main": "Cascade Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX, AVX512VNNI"},
+        "cpx": {"main": "Cooper Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX, AVX512VNNI"},
+        "icx": {"main": "Ice Lake Server Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI"},
+        "tgl": {"main": "Tiger Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2 AVX512F, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI"},
+        "adl": {"main": "Alder Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8	"},
+        "mtl": {"main": "Meteor Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
+        "rpl": {"main": "Raptor Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
+        "spr": {"main": "Sapphire Rapids Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512FP16, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI, AVX256VNNI, AVX256VNNIGFNI, AVXVNNI, AVXVNNIINT8"},
+        "emr": {"main": "Emerald Rapids Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512FP16, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI, AVX256VNNI, AVX256VNNIGFNI, AVXVNNI,  AVXVNNIINT8"},
+        "gnr": {"main": "Granite Rapids Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512FP16, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI, AVX256VNNI, AVX256VNNIGFNI, AVXVNNI,  AVXVNNIINT8"},
+        "gnr256": {"main": "Granite Rapids (AVX 10.1/256VL) Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX256SKX, AVX256VNNI, AVX256VNNIGFNI, AVXVNNI, AVXVNNIINT8"},
+        "srf": {"main": "Sierra Forest Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
+        "arl": {"main": "Arrow Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
+        "lnl": {"main": "Lunar Lake Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
+        "future": {"main": "Future Chip Processor - Supports SSE, SSE2, SSSE3, SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512FP16, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI, AVX256VNNI, AVX256VNNIGFNI, AVXVNNI,  AVXVNNIINT8"}
+         }')[matrix.sde-processor].main }}
+
+    steps:
+
+      - name: Set Build Path
+        run: |
+          case "${{ matrix.arch }}" in
+            "linux-x86_64") BUILD_PATH="build/local" ;;
+            "windows-x86") BUILD_PATH="build/windows/x86" ;;
+            "windows-x64") BUILD_PATH="build/windows/x64" ;;
+          esac
+          echo "BUILD_PATH=$BUILD_PATH" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-${{ matrix.arch }}
+          path: ${{ env.BUILD_PATH }}
+
+      - name: Download and Extract Intel SDE
+        run: |
+          if [ "${{ matrix.arch }}" == "linux-x86_64" ]; then
+            echo "Downloading Linux Intel SDE"
+            wget "$SDE_LINUX_URL" || { echo "Download failed"; exit 1; }
+            tar -xf "$(basename "$SDE_LINUX_URL")" || { echo "Extraction failed"; exit 1; }
+          elif [[ "${{ matrix.arch }}" == "windows-x86" || "${{ matrix.arch }}" == "windows-x64" ]]; then
+            echo "Downloading Windows Intel SDE"
+            curl -LO "$SDE_WINDOWS_URL" || { echo "Download failed"; exit 1; }
+            tar -xf "$(basename "$SDE_WINDOWS_URL")" || { echo "Extraction failed"; exit 1; }
+          fi
+        shell: bash
+
+      - name: Set SDE PATH
+        run: |
+          if [ "${{ matrix.arch }}" == "linux-x86_64" ]; then
+            SDE_DIR="$(basename "$SDE_LINUX_URL" | sed 's/.tar.xz//')"
+          elif [[ "${{ matrix.arch }}" == "windows-x86" || "${{ matrix.arch }}" == "windows-x64" ]]; then
+            SDE_DIR="$(basename "$SDE_WINDOWS_URL" | sed 's/.tar.xz//')"
+          fi
+          SDE_PATH="${{ github.workspace }}/${SDE_DIR}/sde"
+          echo "SDE_PATH=$SDE_PATH" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Run SDE tests (Linux-x86_64)
+        if: matrix.arch == 'linux-x86_64'
+        run: |
+          chmod +x ./*
+          "${{ env.SDE_PATH }}" -${{ matrix.sde-processor }} -- ctest -C Release --parallel $(nproc)
+        working-directory: ${{ env.BUILD_PATH }}
+        shell: bash
+
+      - name: Run SDE tests (Windows-x86 and Windows-x64)
+        if: matrix.arch == 'windows-x86' || matrix.arch == 'windows-x64'
+        run: |
+          & "$env:SDE_PATH" -${{ matrix.sde-processor }} -- ctest -C Release --parallel $env:NUMBER_OF_PROCESSORS
+        working-directory: ${{ env.BUILD_PATH }}
+        shell: pwsh
