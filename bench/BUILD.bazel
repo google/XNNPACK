@@ -564,8 +564,11 @@ xnnpack_benchmark(
     name = "batch_matrix_multiply_bench",
     srcs = ["batch-matrix-multiply.cc"],
     copts = xnnpack_optional_tflite_copts(),
-    tags = ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+    tags = xnnpack_slow_benchmark_tags() + ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps() + [
+        "//test:next_prime",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_benchmark(
