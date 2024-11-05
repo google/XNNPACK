@@ -16,9 +16,10 @@
 
 #include "xnnpack/intrinsics-polyfill.h"
 #include "xnnpack/packw.h"
+#include "xnnpack/prefetch.h"
 
 
-void xnn_x32_packw_gemm_gio_ukernel_x8__avx(
+void xnn_x32_packw_gemm_gio_ukernel_x8__avx_u8_prfm(
   size_t g,
   size_t nc,
   size_t kc,
@@ -67,6 +68,26 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__avx(
 
       // KC main loop
       size_t k = kc;
+      for (; k >= 8; k -= 8) {
+        const __m256 v0_0 = _mm256_loadu_ps(w + 0 + 0 * k_stride);
+        const __m256 v0_1 = _mm256_loadu_ps(w + 0 + 1 * k_stride);
+        const __m256 v0_2 = _mm256_loadu_ps(w + 0 + 2 * k_stride);
+        const __m256 v0_3 = _mm256_loadu_ps(w + 0 + 3 * k_stride);
+        const __m256 v0_4 = _mm256_loadu_ps(w + 0 + 4 * k_stride);
+        const __m256 v0_5 = _mm256_loadu_ps(w + 0 + 5 * k_stride);
+        const __m256 v0_6 = _mm256_loadu_ps(w + 0 + 6 * k_stride);
+        const __m256 v0_7 = _mm256_loadu_ps(w + 0 + 7 * k_stride);
+        _mm256_store_ps(packed_w + 0 + 0 * 8, v0_0);
+        _mm256_store_ps(packed_w + 0 + 1 * 8, v0_1);
+        _mm256_store_ps(packed_w + 0 + 2 * 8, v0_2);
+        _mm256_store_ps(packed_w + 0 + 3 * 8, v0_3);
+        _mm256_store_ps(packed_w + 0 + 4 * 8, v0_4);
+        _mm256_store_ps(packed_w + 0 + 5 * 8, v0_5);
+        _mm256_store_ps(packed_w + 0 + 6 * 8, v0_6);
+        _mm256_store_ps(packed_w + 0 + 7 * 8, v0_7);
+        w += k_stride * 8;
+        packed_w += 8 * 8;
+      }
 
       for (; k > 0; --k) {
         const __m256 v0 = _mm256_loadu_ps(w + 0);
