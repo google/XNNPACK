@@ -553,6 +553,14 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "binary_bench",
+    srcs = ["binary.cc"],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
+
+xnnpack_benchmark(
     name = "average_pooling_bench",
     srcs = ["average-pooling.cc"],
     copts = xnnpack_optional_tflite_copts(),
