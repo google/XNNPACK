@@ -39,7 +39,6 @@ def split_ukernel_name(name):
   arch, isa, assembly = xnncommon.parse_target_name(target_name=match.group(2))
   return elements_tile, arch, isa
 
-
 VMULCADDC_TEST_TEMPLATE = """\
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, row_tile,channel_tile, datatype, params_type, init_params) \
 XNN_TEST_VMULCADDC_ROW_DIV(ukernel,arch_flags,  ${", ".join(TEST_ARGS)});
@@ -91,7 +90,6 @@ def main(args):
     test_args.append("datatype")
     test_args.append("params_type")
     test_args.append("init_params")
-    print("test args",test_args)
     tests += xnncommon.make_multiline_macro(xngen.preprocess(
       VMULCADDC_TEST_TEMPLATE,
       {
@@ -101,8 +99,7 @@ def main(args):
       },
   ))
     folder = datatype + "-" + ("vmulcaddc" if datatype.startswith("f") else op)
-    print("options",options.ukernel)
-    tests += f'#include "{xnncommon._XNNPACK_SRC}{folder}/{options.ukernel}.h"\n'
+    tests += f'#include "{xnncommon._XNNPACK_SRC}/{folder}/{options.ukernel}.h"\n'
     tests += "#undef XNN_UKERNEL_WITH_PARAMS\n"
 
     xnncommon.overwrite_if_changed(options.output, tests)

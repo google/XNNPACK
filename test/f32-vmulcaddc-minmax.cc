@@ -27,5 +27,5 @@ XNN_TEST_VMULCADDC_OUTPUT_STRIDE(ukernel,arch_flags,  row_tile, channel_tile, da
 XNN_TEST_VMULCADDC_INPLACE(ukernel,arch_flags,  row_tile, channel_tile, datatype, params_type, init_params);                                                                                                                \
 XNN_TEST_VMULCADDC_QMAX(ukernel,arch_flags,  row_tile, channel_tile, datatype, params_type, init_params);                                                                                                                   \
 XNN_TEST_VMULCADDC_QMIN(ukernel,arch_flags,  row_tile, channel_tile, datatype, params_type, init_params);
-#include "srcf32-vmulcaddc/f32-vmulcaddc.h"
+#include "src/f32-vmulcaddc/f32-vmulcaddc.h"
 #undef XNN_UKERNEL_WITH_PARAMS
