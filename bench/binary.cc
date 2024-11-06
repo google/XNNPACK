@@ -394,7 +394,7 @@ BENCHMARK_OP_ALL(divide);
 BENCHMARK_OP_ALL(maximum);
 BENCHMARK_OP_ALL(minimum);
 // BENCHMARK_OP_ALL(copysign);  // Missing in TFLite
-BENCHMARK_OP_ALL(squared_difference);
+BENCHMARK_OP_REAL(squared_difference);
 BENCHMARK_OP_REAL(prelu);
 // BENCHMARK_OP_ALL(modulus);  // Missing in TFLite
 BENCHMARK_OP_REAL(atan2);

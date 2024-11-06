@@ -225,14 +225,6 @@ struct SquaredDifferenceOp {
   T operator()(T a, T b) const { return (a - b) * (a - b); }
 };
 
-template <>
-struct SquaredDifferenceOp<int32_t> {
-  int32_t operator()(int32_t a, int32_t b) const {
-    int32_t diff = widen(a) - widen(b);
-    return static_cast<int64_t>(diff) * static_cast<int64_t>(diff);
-  }
-};
-
 template <typename T>
 struct PreluOp {
   T operator()(T a, T b) const { return (a < 0) ? static_cast<T>(a * b) : a; }
@@ -386,7 +378,7 @@ const struct xnn_binary_elementwise_config* xnn_init_binary_reference_config(
     case xnn_binary_prelu:
       DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, PreluOp);
     case xnn_binary_squared_difference:
-      DISPATCH_OPERATOR_FOR_DATATYPE(datatype, SquaredDifferenceOp);
+      DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, SquaredDifferenceOp);
     case xnn_binary_modulus:
       DISPATCH_OPERATOR_FOR_DATATYPE(datatype, ModulusOp);
     case xnn_binary_atan2:
