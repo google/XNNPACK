@@ -18,6 +18,7 @@ import xnncommon
 
 
 parser = argparse.ArgumentParser(
+<<<<<<< HEAD
     description="IBILINEAR microkernel test generator"
 )
 parser.add_argument(
@@ -49,119 +50,33 @@ def split_ukernel_name(name):
   return channel_tile, pixel_tile, arch, isa
 
 
+=======
+  description='IBILINEAR microkernel test generator')
+parser.add_argument("-t", "--tester", metavar="TESTER", required=True,
+                    choices=["IBilinearMicrokernelTester"],
+                    help="Tester class to be used in the generated test")
+parser.add_argument("-k", "--ukernel", metavar="FILE", required=True,
+                    help="Microkernel type")
+parser.add_argument("-o", "--output", metavar="FILE", required=True,
+                    help='Output (C++ source) file')
+parser.set_defaults(defines=list())
+
+
+>>>>>>> c2bcc7bd5 (Replace ibilinear yaml with table header)
 IBILINEAR_TEST_TEMPLATE = """\
-TEST(${TEST_NAME}, channels_eq_${CHANNEL_TILE}) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  IBilinearMicrokernelTester()
-    .pixels(${PIXEL_TILE})
-    .channels(${CHANNEL_TILE})
-    .Test(${TEST_FUNC});
-}
-
-$if CHANNEL_TILE > 1:
-  TEST(${TEST_NAME}, channels_div_${CHANNEL_TILE}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t channels = ${CHANNEL_TILE*2}; channels < ${CHANNEL_TILE*10}; channels += ${CHANNEL_TILE}) {
-      IBilinearMicrokernelTester()
-        .pixels(${PIXEL_TILE})
-        .channels(channels)
-        .Test(${TEST_FUNC});
-    }
-  }
-
-  TEST(${TEST_NAME}, channels_lt_${CHANNEL_TILE}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t channels = 1; channels < ${CHANNEL_TILE}; channels++) {
-      IBilinearMicrokernelTester()
-        .pixels(${PIXEL_TILE})
-        .channels(channels)
-        .Test(${TEST_FUNC});
-    }
-  }
-
-TEST(${TEST_NAME}, channels_gt_${CHANNEL_TILE}) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t channels = ${CHANNEL_TILE+1}; channels < ${10 if CHANNEL_TILE == 1 else CHANNEL_TILE*2}; channels++) {
-    IBilinearMicrokernelTester()
-      .pixels(${PIXEL_TILE})
-      .channels(channels)
-      .Test(${TEST_FUNC});
-  }
-}
-
-$if PIXEL_TILE > 1:
-  TEST(${TEST_NAME}, pixels_div_${PIXEL_TILE}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t pixels = ${PIXEL_TILE*2}; pixels < ${PIXEL_TILE*10}; pixels += ${PIXEL_TILE}) {
-      for (size_t channels = 1; channels <= ${CHANNEL_TILE * 5}; channels += ${max(1, CHANNEL_TILE - 1)}) {
-        IBilinearMicrokernelTester()
-          .pixels(pixels)
-          .channels(channels)
-          .Test(${TEST_FUNC});
-      }
-    }
-  }
-
-  TEST(${TEST_NAME}, pixels_lt_${PIXEL_TILE}) {
-    $if ISA_CHECK:
-      ${ISA_CHECK};
-    for (size_t pixels = 1; pixels < ${PIXEL_TILE}; pixels++) {
-      for (size_t channels = 1; channels <= ${CHANNEL_TILE * 5}; channels += ${max(1, CHANNEL_TILE - 1)}) {
-        IBilinearMicrokernelTester()
-          .pixels(pixels)
-          .channels(channels)
-          .Test(${TEST_FUNC});
-      }
-    }
-  }
-
-TEST(${TEST_NAME}, pixels_gt_${PIXEL_TILE}) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t pixels = ${PIXEL_TILE+1}; pixels < ${max(PIXEL_TILE*2, 3)}; pixels++) {
-    for (size_t channels = 1; channels <= ${CHANNEL_TILE * 5}; channels += ${max(1, CHANNEL_TILE - 1)}) {
-      IBilinearMicrokernelTester()
-        .pixels(pixels)
-        .channels(channels)
-        .Test(${TEST_FUNC});
-    }
-  }
-}
-
-TEST(${TEST_NAME}, input_offset) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t pixels = 1; pixels < ${PIXEL_TILE * 5}; pixels += ${max(1, PIXEL_TILE - 1)}) {
-    for (size_t channels = 1; channels <= ${CHANNEL_TILE * 5}; channels += ${max(1, CHANNEL_TILE - 1)}) {
-      IBilinearMicrokernelTester()
-        .pixels(pixels)
-        .channels(channels)
-        .input_offset(${next_prime(CHANNEL_TILE * 5 + 1)})
-        .Test(${TEST_FUNC});
-    }
-  }
-}
-
-TEST(${TEST_NAME}, output_stride) {
-  $if ISA_CHECK:
-    ${ISA_CHECK};
-  for (size_t pixels = 1; pixels < ${PIXEL_TILE * 5}; pixels += ${max(1, PIXEL_TILE - 1)}) {
-    for (size_t channels = 1; channels <= ${CHANNEL_TILE * 5}; channels += ${max(1, CHANNEL_TILE - 1)}) {
-      IBilinearMicrokernelTester()
-        .pixels(pixels)
-        .channels(channels)
-        .output_stride(${next_prime(CHANNEL_TILE * 5 + 1)})
-        .Test(${TEST_FUNC});
-    }
-  }
-}
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, channel_tile, pixel_tile, datatype, params_type, init_params) \
+XNN_TEST_IBILINEAR_CHANNELS_EQ(ukernel, arch_flags, ${", ".join(TEST_ARGS)});
+XNN_TEST_IBILINEAR_CHANNELS_DIV(ukernel, arch_flags, ${", ".join(TEST_ARGS)});
+XNN_TEST_IBILINEAR_CHANNELS_LT(ukernel, arch_flags, ${", ".join(TEST_ARGS)});
+XNN_TEST_IBILINEAR_CHANNELS_GT(ukernel, arch_flags, ${", ".join(TEST_ARGS)});
+XNN_TEST_IBILINEAR_PIXELS_DIV(ukernel, arch_flags, ${", ".join(TEST_ARGS)});
+XNN_TEST_IBILINEAR_PIXELS_LT(ukernel, arch_flags, ${", ".join(TEST_ARGS)});
+XNN_TEST_IBILINEAR_PIXELS_GT(ukernel, arch_flags, ${", ".join(TEST_ARGS)});
+XNN_TEST_IBILINEAR_INPUT_OFFSET(ukernel, arch_flags, ${", ".join(TEST_ARGS)});
+XNN_TEST_IBILINEAR_OUTPUT_STRIDE(ukernel, arch_flags, ${", ".join(TEST_ARGS)});
 """
 
+<<<<<<< HEAD
 
 def generate_test_cases(ukernel, channel_tile, pixel_tile, isa):
   """Generates all tests cases for a BILINEAR micro-kernel.
@@ -196,9 +111,17 @@ def generate_test_cases(ukernel, channel_tile, pixel_tile, isa):
   )
 
 
+=======
+>>>>>>> c2bcc7bd5 (Replace ibilinear yaml with table header)
 def main(args):
   options = parser.parse_args(args)
+  tester = options.tester
+  tester_header = {
+  "IBilinearMicrokernelTester": "ibilinear-microkernel-tester.h",
+  }[tester]
+  ukernel = options.ukernel
 
+<<<<<<< HEAD
   with codecs.open(options.spec, "r", encoding="utf-8") as spec_file:
     spec_yaml = yaml.safe_load(spec_file)
     if not isinstance(spec_yaml, list):
@@ -206,31 +129,54 @@ def main(args):
 
     tests = """\
 // clang-format off
+=======
+  tests = """\
+>>>>>>> c2bcc7bd5 (Replace ibilinear yaml with table header)
 // Copyright 2019 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 //
 // Auto-generated file. Do not edit!
-//   Specification: {specification}
+//   Microkernel: {ukernel}
 //   Generator: {generator}
 
 
 #include <gtest/gtest.h>
+<<<<<<< HEAD
 #include "src/xnnpack/common.h"
 #include "src/xnnpack/ibilinear.h"
 #include "src/xnnpack/isa-checks.h"
 #include "test/ibilinear-microkernel-tester.h"
 """.format(specification=options.spec, generator=sys.argv[0])
+=======
+#include "xnnpack/common.h"
+#include "xnnpack/ibilinear.h"
+#include "xnnpack/isa-checks.h"
+#include "ibilinear-microkernel-tester.h"
+""".format(ukernel=options.ukernel, generator=sys.argv[0])
+>>>>>>> c2bcc7bd5 (Replace ibilinear yaml with table header)
 
-    for ukernel_spec in spec_yaml:
-      name = ukernel_spec["name"]
-      channel_tile, pixel_tile, arch, isa = split_ukernel_name(name)
-
-      test_case = generate_test_cases(name, channel_tile, pixel_tile, isa)
-      tests += "\n\n" + xnncommon.postprocess_test_case(test_case, arch, isa)
-
-    xnncommon.overwrite_if_changed(options.output, tests)
+  ukernel_parts = options.ukernel.split("-")
+  datatype = ukernel_parts[0]
+  op = ukernel_parts[1]
+  test_args = ["channel_tile"]
+  test_args.append("pixel_tile")
+  test_args.append("datatype")
+  test_args.append("params_type")
+  test_args.append("init_params")
+  tests += xnncommon.make_multiline_macro(xngen.preprocess(
+    IBILINEAR_TEST_TEMPLATE,
+    {
+        "TEST_ARGS": test_args,
+        "TESTER": tester,
+        "DATATYPE": datatype,
+    },
+  ))
+  folder = datatype + "-" + ("ibilinear" if datatype.startswith("f") else op)
+  tests += f'#include "{folder}/{options.ukernel}.h"\n'
+  tests += "#undef XNN_UKERNEL_WITH_PARAMS\n"
+  xnncommon.overwrite_if_changed(options.output, tests)
 
 
 if __name__ == "__main__":
