@@ -67,7 +67,8 @@ void xnnpack_batch_matrix_multiply_f32(benchmark::State& state,
   xnn_operator_t op;
 
   uint32_t flags = transpose_b ? XNN_FLAG_TRANSPOSE_B : 0;
-  status = xnn_create_batch_matrix_multiply_nc_f32(flags, &op);
+  status = xnn_create_batch_matrix_multiply_nc_f32_const_weights(
+      batch_size, k, n, input2.data(), flags, &op);
   if (status != xnn_status_success) {
     state.SkipWithError("failed to create FP32 BatchMatrixMultiply operator");
     return;
