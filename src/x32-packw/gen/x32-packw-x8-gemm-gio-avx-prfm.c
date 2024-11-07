@@ -42,6 +42,11 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__avx_prfm(
   assert(k_stride != 0);
   assert(weights != NULL);
   assert(packed_weights != NULL);
+  static const int32_t mask_table[16] = {
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    0, 0, 0, 0, 0, 0, 0, 0,
+  };
+
 
   const __m256 vzero = _mm256_setzero_ps();
   const float* b = (const float*) bias;
@@ -77,11 +82,11 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__avx_prfm(
     if XNN_UNLIKELY(n != 0) {
       assert(n >= 1);
       assert(n <= 7);
+      const __m256i vmask0 = _mm256_loadu_si256((const __m256i*) &mask_table[8 - n]);
 
       if XNN_LIKELY(b != NULL) {
-        for (size_t i = 0; i < n; ++i) {
-          packed_w[i] = b[i];
-        }
+        const __m256 vb0 = _mm256_maskload_ps(b + 0, vmask0);
+        _mm256_store_ps(packed_w + 0, vb0);
         b += n;
       } else {
         _mm256_store_ps(packed_w + 0, vzero);
@@ -90,9 +95,8 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__avx_prfm(
 
       // KC main loop
       for (size_t k = kc; k > 0; --k) {
-        for (size_t i = 0; i < n; ++i) {
-          packed_w[i] = w[i];
-        }
+        const __m256 v0 = _mm256_maskload_ps(w + 0, vmask0);
+        _mm256_store_ps(packed_w + 0, v0);
         w += k_stride;
         packed_w += 8;
       }
