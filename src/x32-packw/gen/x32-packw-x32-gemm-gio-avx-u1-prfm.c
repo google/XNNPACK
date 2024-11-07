@@ -18,7 +18,7 @@
 #include "xnnpack/prefetch.h"
 
 
-void xnn_x32_packw_gemm_gio_ukernel_x32__avx_prfm(
+void xnn_x32_packw_gemm_gio_ukernel_x32__avx_u1_prfm(
   size_t g,
   size_t nc,
   size_t kc,
@@ -53,7 +53,6 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx_prfm(
     0, 0, 0, 0, 0, 0, 0, 0,
   };
 
-
   const __m256 vzero = _mm256_setzero_ps();
   const float* b = (const float*) bias;
   float* packed_w = (float*) packed_weights;
@@ -82,6 +81,7 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx_prfm(
       packed_w += 32;
 
       size_t k = kc;
+
       // KC remainder loop
       for (; k > 0; --k) {
         const __m256 v0 = _mm256_loadu_ps(w + 0);
