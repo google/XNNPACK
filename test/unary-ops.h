@@ -70,7 +70,10 @@ struct UnaryOpInfo {
   virtual float ReferenceImpl(float x, const xnn_unary_params& params) const {
     XNN_UNREACHABLE;
   }
-  virtual float ReferenceImpl(int x, const xnn_unary_params& params) const {
+  virtual float ReferenceImpl(int32_t x, const xnn_unary_params& params) const {
+    return ReferenceImpl(static_cast<float>(x), params);
+  }
+  virtual float ReferenceImpl(uint32_t x, const xnn_unary_params& params) const {
     return ReferenceImpl(static_cast<float>(x), params);
   }
 
@@ -118,14 +121,13 @@ struct Convert : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return x;
   }
-  float ReferenceImpl(int x, const xnn_unary_params&) const override { return x; }
 };
 
 struct ReLU : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::max(x, 0.0f);
   }
-  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+  float ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
     return std::max(x, 0);
   }
 };
@@ -134,7 +136,7 @@ struct Abs : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::abs(x);
   }
-  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+  float ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
     return std::abs(x);
   }
 };
@@ -143,7 +145,7 @@ struct Negate : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return -x;
   }
-  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+  float ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
     return -x;
   }
 };
@@ -160,7 +162,7 @@ struct Clamp : public UnaryOpInfo {
     return std::min<float>(std::max<float>(x, params.clamp.min),
                            params.clamp.max);
   }
-  float ReferenceImpl(int x, const xnn_unary_params& params) const override {
+  float ReferenceImpl(int32_t x, const xnn_unary_params& params) const override {
     return std::min<int>(std::max<int>(x, params.clamp.min), params.clamp.max);
   }
 
@@ -344,7 +346,7 @@ struct Square : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return x * x;
   }
-  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+  float ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
     return static_cast<int64_t>(x) * static_cast<int64_t>(x);
   }
 
@@ -533,19 +535,19 @@ struct Sine : public UnaryOpInfo {
 };
 
 struct CountLeadingZeros : public UnaryOpInfo {
-  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+  float ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
     return math_clz_u32(x);
   }
 };
 
 struct BitwiseNot : public UnaryOpInfo {
-  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+  float ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
     return ~x;
   }
 };
 
 struct Popcount : public UnaryOpInfo {
-  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+  float ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
     return math_popcount_u32(x);
   }
 };
@@ -554,7 +556,7 @@ struct Sign : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return x < 0.0f ? -1.0f : x > 0.0f ? 1.0f : 0.0f;
   }
-  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+  float ReferenceImpl(int32_t x, const xnn_unary_params&) const override {
     return x < 0 ? -1 : x > 0 ? 1 : 0;
   }
 };
@@ -593,10 +595,10 @@ void UnaryReferenceImpl(
     if (std::is_integral<In>::value &&
         (input_quantization.zero_point == 0 &&
          input_quantization.scale == 1.0f)) {
-      y_i = op_info.ReferenceImpl(static_cast<int>(x[i]), params);
+      y_i = op_info.ReferenceImpl(x[i], params);
     } else if (std::is_integral<In>::value) {
       float x_i =
-          (x[i] - input_quantization.zero_point) * input_quantization.scale;
+          (static_cast<int64_t>(x[i]) - input_quantization.zero_point) * input_quantization.scale;
       y_i = op_info.ReferenceImpl(x_i, params);
     } else {
       y_i = op_info.ReferenceImpl(static_cast<float>(x[i]), params);
