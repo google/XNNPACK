@@ -2093,22 +2093,22 @@ void xnn_compute_contiguous_reduce(
 
     if (context->s32_f32_cvt_ukernel) {
       struct xnn_s32_f32_cvt_params s32_f32_cvt_params;
-      s32_f32_cvt_params.scalar.zero_point = context->params.qs8_mean.scalar.num_elements * (int32_t) context->params.qs8_mean.scalar.input_zero_point;
+      s32_f32_cvt_params.scalar.zero_point = context->params.qs8.num_elements * (int32_t) context->params.qs8.input_zero_point;
       context->s32_f32_cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
                                    workspace_ptr, (union xnn_unary_uparams*) &s32_f32_cvt_params);
       struct xnn_f32_qs8_cvt_params cvt_params;
-      cvt_params.scalar.scale = context->params.qs8_mean.scalar.scale;
-      cvt_params.scalar.output_zero_point = context->params.qs8_mean.scalar.output_zero_point;
+      cvt_params.scalar.scale = context->params.qs8.scale;
+      cvt_params.scalar.output_zero_point = context->params.qs8.output_zero_point;
       context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
                            output_ptr, (union xnn_unary_uparams*) &cvt_params);
     } else if (context->u32_f32_cvt_ukernel) {
       struct xnn_u32_f32_cvt_params u32_f32_cvt_params;
-      u32_f32_cvt_params.scalar.zero_point = context->params.qu8_mean.scalar.num_elements * (int32_t) context->params.qu8_mean.scalar.input_zero_point;
+      u32_f32_cvt_params.scalar.zero_point = context->params.qu8.num_elements * (int32_t) context->params.qu8.input_zero_point;
       context->u32_f32_cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
                                    workspace_ptr, (union xnn_unary_uparams*) &u32_f32_cvt_params);
       struct xnn_f32_qu8_cvt_params cvt_params;
-      cvt_params.scalar.scale = context->params.qu8_mean.scalar.scale;
-      cvt_params.scalar.output_zero_point = context->params.qu8_mean.scalar.output_zero_point;
+      cvt_params.scalar.scale = context->params.qu8.scale;
+      cvt_params.scalar.output_zero_point = context->params.qu8.output_zero_point;
       context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
                            output_ptr, (union xnn_unary_uparams*) &cvt_params);
     } else {
@@ -2176,22 +2176,22 @@ void xnn_compute_discontiguous_reduce(
 
     if (context->s32_f32_cvt_ukernel) {
       struct xnn_s32_f32_cvt_params s32_f32_cvt_params;
-      s32_f32_cvt_params.scalar.zero_point = context->params.qs8_mean.scalar.num_elements * (int32_t) context->params.qs8_mean.scalar.input_zero_point;
+      s32_f32_cvt_params.scalar.zero_point = context->params.qs8.num_elements * (int32_t) context->params.qs8.input_zero_point;
       context->s32_f32_cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
                                    workspace_ptr, (union xnn_unary_uparams*) &s32_f32_cvt_params);
       struct xnn_f32_qs8_cvt_params cvt_params;
-      cvt_params.scalar.scale = context->params.qs8_mean.scalar.scale;
-      cvt_params.scalar.output_zero_point = context->params.qs8_mean.scalar.output_zero_point;
+      cvt_params.scalar.scale = context->params.qs8.scale;
+      cvt_params.scalar.output_zero_point = context->params.qs8.output_zero_point;
       context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
                            output_ptr, (union xnn_unary_uparams*) &cvt_params);
     } else if (context->u32_f32_cvt_ukernel) {
       struct xnn_u32_f32_cvt_params u32_f32_cvt_params;
-      u32_f32_cvt_params.scalar.zero_point = context->params.qu8_mean.scalar.num_elements * (int32_t) context->params.qu8_mean.scalar.input_zero_point;
+      u32_f32_cvt_params.scalar.zero_point = context->params.qu8.num_elements * (int32_t) context->params.qu8.input_zero_point;
       context->u32_f32_cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
                                    workspace_ptr, (union xnn_unary_uparams*) &u32_f32_cvt_params);
       struct xnn_f32_qu8_cvt_params cvt_params;
-      cvt_params.scalar.scale = context->params.qu8_mean.scalar.scale;
-      cvt_params.scalar.output_zero_point = context->params.qu8_mean.scalar.output_zero_point;
+      cvt_params.scalar.scale = context->params.qu8.scale;
+      cvt_params.scalar.output_zero_point = context->params.qu8.output_zero_point;
       context->cvt_ukernel(context->accumulation_element_size * output2_block_size, workspace_ptr,
                            output_ptr, (union xnn_unary_uparams*) &cvt_params);
     } else {

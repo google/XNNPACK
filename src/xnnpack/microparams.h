@@ -399,22 +399,32 @@ struct xnn_qs8_rsum_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
-struct xnn_qs8_reduce_minmax_params {
-  struct {
-    float scale;
-    int32_t num_elements;
-    int8_t input_zero_point;
-    int8_t output_zero_point;
-  } scalar;
+struct xnn_f32_reduce_params {
+  float scale;
 };
 
-struct xnn_qu8_reduce_minmax_params {
-  struct {
-    float scale;
-    int32_t num_elements;
-    uint8_t input_zero_point;
-    uint8_t output_zero_point;
-  } scalar;
+struct xnn_qs8_reduce_params {
+  int32_t num_elements;
+  float scale;
+  float input_output_scale;
+  int8_t input_zero_point;
+  int8_t output_zero_point;
+};
+
+struct xnn_qu8_reduce_params {
+  int32_t num_elements;
+  float scale;
+  float input_output_scale;
+  uint8_t input_zero_point;
+  uint8_t output_zero_point;
+};
+
+struct xnn_reduce_params {
+  union {
+    struct xnn_f32_reduce_params f32;
+    struct xnn_qs8_reduce_params qs8;
+    struct xnn_qu8_reduce_params qu8;
+  };
 };
 
 // AvgPool w. Min+Max.

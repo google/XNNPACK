@@ -204,7 +204,7 @@ static enum xnn_status init_binary_elementwise_nd(
   memcpy(&op->params2, &uparams2, sizeof(uparams2));
 
   op->binary_elementwise_config = config;
-  op->log2_elementwise_element_size =
+  op->binary_elementwise.log2_element_size =
       xnn_datatype_log2_size_bytes(datatype);
 
   op->type = xnn_operator_type_binary_elementwise;
@@ -355,7 +355,7 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
     return xnn_status_success;
   }
 
-  const uint32_t log2_element_size = op->log2_elementwise_element_size;
+  const uint32_t log2_element_size = op->binary_elementwise.log2_element_size;
   op->context.elementwise_binary = (struct elementwise_binary_context){
       .elements = compressed_output_shape[0] << log2_element_size,
   };

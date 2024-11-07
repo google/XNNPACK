@@ -118,34 +118,32 @@ class ReduceTestBase : public ::testing::TestWithParam<Param> {
   }
 
   struct QuantizationParams {
-    float input_scale;
-    float output_scale;
-    int32_t input_zero_point;
-    int32_t output_zero_point;
+    xnn_quantization_params input;
+    xnn_quantization_params output;
 
-    constexpr bool IsQuantized() const { return input_scale != 0; }
+    constexpr bool IsQuantized() const { return input.scale != 0; }
   };
 
   QuantizationParams RandomQuantizationParams(xnn_datatype t) {
     QuantizationParams qp;
     switch (t) {
       case xnn_datatype_qint8:
-        qp.input_scale = scale_dist(rng);
-        qp.output_scale = scale_dist(rng);
-        qp.input_zero_point = i8dist(rng);
-        qp.output_zero_point = i8dist(rng);
+        qp.input.scale = scale_dist(rng);
+        qp.output.scale = scale_dist(rng);
+        qp.input.zero_point = i8dist(rng);
+        qp.output.zero_point = i8dist(rng);
         break;
       case xnn_datatype_quint8:
-        qp.input_scale = scale_dist(rng);
-        qp.output_scale = scale_dist(rng);
-        qp.input_zero_point = u8dist(rng);
-        qp.output_zero_point = u8dist(rng);
+        qp.input.scale = scale_dist(rng);
+        qp.output.scale = scale_dist(rng);
+        qp.input.zero_point = u8dist(rng);
+        qp.output.zero_point = u8dist(rng);
         break;
       default:
-        qp.input_scale = 0;
-        qp.output_scale = 0;
-        qp.input_zero_point = 0;
-        qp.output_zero_point = 0;
+        qp.input.scale = 0;
+        qp.output.scale = 0;
+        qp.input.zero_point = 0;
+        qp.output.zero_point = 0;
     }
     return qp;
   }
@@ -156,7 +154,7 @@ class ReduceTestBase : public ::testing::TestWithParam<Param> {
     if (qp.IsQuantized()) {
       ASSERT_EQ(xnn_status_success,
                 xnn_define_quantized_tensor_value(
-                    subgraph, p.datatype, qp.input_zero_point, qp.input_scale,
+                    subgraph, p.datatype, qp.input.zero_point, qp.input.scale,
                     input_shape.size(), input_shape.data(), nullptr,
                     /*external_id=*/0,
                     /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
@@ -164,7 +162,7 @@ class ReduceTestBase : public ::testing::TestWithParam<Param> {
 
       ASSERT_EQ(xnn_status_success,
                 xnn_define_quantized_tensor_value(
-                    subgraph, p.datatype, qp.output_zero_point, qp.output_scale,
+                    subgraph, p.datatype, qp.output.zero_point, qp.output.scale,
                     output_shape.size(), output_shape.data(), nullptr,
                     /*external_id=*/1,
                     /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
@@ -337,11 +335,8 @@ TEST_P(ReduceTest, matches_operator_api) {
   const uint32_t flags = p.keep_dims ? XNN_FLAG_KEEP_DIMS : 0;
   const QuantizationParams qp = RandomQuantizationParams(p.datatype);
   // Call operator API.
-  const float scale =
-      qp.output_scale == 0 ? 0 : qp.input_scale / qp.output_scale;
   const xnn_status status = xnn_create_reduce_nd(
-      p.reduce_operator, p.datatype, scale, qp.input_zero_point,
-      qp.output_zero_point, flags, &op);
+      p.reduce_operator, p.datatype, &qp.input, &qp.output, flags, &op);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -354,7 +349,7 @@ TEST_P(ReduceTest, matches_operator_api) {
   size_t workspace_size = SIZE_MAX;
   size_t workspace_alignment = SIZE_MAX;
   ASSERT_EQ(xnn_status_success,
-            xnn_reshape_reduce_nd(op, p.datatype, reduction_axes.size(),
+            xnn_reshape_reduce_nd(op, reduction_axes.size(),
                                   reduction_axes.data(), input_shape.size(),
                                   input_shape.data(), &workspace_size,
                                   &workspace_alignment,
@@ -390,7 +385,7 @@ TEST_P(ReduceTest, matches_operator_api) {
   if (qp.IsQuantized()) {
     ASSERT_EQ(xnn_status_success,
               xnn_define_quantized_tensor_value(
-                  subgraph, p.datatype, qp.input_zero_point, qp.input_scale,
+                  subgraph, p.datatype, qp.input.zero_point, qp.input.scale,
                   input_shape.size(), input_shape.data(), nullptr,
                   /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
     ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
@@ -398,7 +393,7 @@ TEST_P(ReduceTest, matches_operator_api) {
     ASSERT_EQ(
         xnn_status_success,
         xnn_define_quantized_tensor_value(
-            subgraph, p.datatype, qp.output_zero_point, qp.output_scale,
+            subgraph, p.datatype, qp.output.zero_point, qp.output.scale,
             output_shape.size(), output_shape.data(), nullptr,
             /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
     ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
@@ -462,7 +457,7 @@ TEST_P(ReduceTest, reshape) {
   if (qp.IsQuantized()) {
     ASSERT_EQ(xnn_status_success,
               xnn_define_quantized_tensor_value(
-                  subgraph, p.datatype, qp.input_zero_point, qp.input_scale,
+                  subgraph, p.datatype, qp.input.zero_point, qp.input.scale,
                   input_shape.size(), input_shape.data(), nullptr,
                   /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
     ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
@@ -470,7 +465,7 @@ TEST_P(ReduceTest, reshape) {
     ASSERT_EQ(
         xnn_status_success,
         xnn_define_quantized_tensor_value(
-            subgraph, p.datatype, qp.output_zero_point, qp.output_scale,
+            subgraph, p.datatype, qp.output.zero_point, qp.output.scale,
             output_num_dims, output_shape.data(), nullptr, /*external_id=*/1,
             XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
     ASSERT_NE(output_id, XNN_INVALID_NODE_ID);

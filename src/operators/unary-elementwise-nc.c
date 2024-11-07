@@ -224,8 +224,8 @@ static enum xnn_status init_op(
     uint32_t flags) {
   op->type = xnn_operator_type_unary_elementwise;
   op->flags = flags;
-  op->log2_elementwise_input_size = xnn_datatype_log2_size_bytes(input_datatype);
-  op->log2_elementwise_output_size = xnn_datatype_log2_size_bytes(output_datatype);
+  op->unary_elementwise.log2_input_size = xnn_datatype_log2_size_bytes(input_datatype);
+  op->unary_elementwise.log2_output_size = xnn_datatype_log2_size_bytes(output_datatype);
 
   const struct xnn_unary_elementwise_config* config = get_config(op_type, input_datatype, output_datatype, input_quantization, output_quantization);
   if (config) {
@@ -383,22 +383,22 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
       const size_t block_size = 4096;
 
       op->context.univector_contiguous = (struct univector_contiguous_context) {
-        .log2_xsize = op->log2_elementwise_input_size,
-        .log2_ysize = op->log2_elementwise_output_size,
+        .log2_xsize = op->unary_elementwise.log2_input_size,
+        .log2_ysize = op->unary_elementwise.log2_output_size,
         .ukernel = ukernel,
       };
       memcpy(&op->context.univector_contiguous.params, &op->params.unary, sizeof(op->params.unary));
 
-      const size_t range = (batch_size * channels) << op->log2_elementwise_input_size;
+      const size_t range = (batch_size * channels) << op->unary_elementwise.log2_input_size;
       op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
       op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t) xnn_compute_univector_contiguous;
       op->compute[0].range[0] = range;
       op->compute[0].tile[0] = (num_threads == 1) ? range : block_size;
     } else {
       op->context.univector_strided = (struct univector_strided_context) {
-        .n = channels << op->log2_elementwise_input_size,
-        .x_stride = input_stride << op->log2_elementwise_input_size,
-        .y_stride = output_stride << op->log2_elementwise_output_size,
+        .n = channels << op->unary_elementwise.log2_input_size,
+        .x_stride = input_stride << op->unary_elementwise.log2_input_size,
+        .y_stride = output_stride << op->unary_elementwise.log2_output_size,
         .ukernel = ukernel,
       };
       memcpy(&op->context.univector_strided.params, &op->params.unary, sizeof(op->params.unary));
@@ -724,9 +724,6 @@ enum xnn_status xnn_create_convert_nc_f16_qd8(
   }
 
   struct xnn_f16_default_params params;
-  if (f16_rminmax_config->init.f16_default != NULL) {
-    f16_rminmax_config->init.f16_default(&params);
-  }
 
   enum xnn_status status = create_unary_elementwise_nc(
     flags, xnn_init_f16_to_qs8_cvt_config(),
@@ -751,9 +748,6 @@ enum xnn_status xnn_create_convert_nc_f32_qd8(
   }
 
   struct xnn_f32_default_params params;
-  if (f32_rminmax_config->init.f32_default != NULL) {
-    f32_rminmax_config->init.f32_default(&params);
-  }
 
   enum xnn_status status = create_unary_elementwise_nc(
     flags, xnn_init_f32_to_qs8_cvt_config(),
@@ -777,9 +771,6 @@ enum xnn_status xnn_create_convert_nc_f32_qp8(uint32_t flags,
   }
 
   struct xnn_f32_default_params params;
-  if (f32_rminmax_config->init.f32_default != NULL) {
-    f32_rminmax_config->init.f32_default(&params);
-  }
 
   enum xnn_status status = create_unary_elementwise_nc(
     flags, xnn_init_f32_to_qp8_cvt_config(),

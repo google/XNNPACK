@@ -113,15 +113,13 @@ class ReduceOperatorTester {
 
    struct QuantizationConfig {
      // Zero means no quantization.
-     float input_scale = 0;
-     float output_scale;
-     int32_t input_zero_point;
-     int32_t output_zero_point;
+     xnn_quantization_params input = {0, 0};
+     xnn_quantization_params output = {0, 0};
      int32_t quantized_output_min;
      int32_t quantized_output_max;
 
-     bool IsQuantized() const { return input_scale != 0; }
-     static QuantizationConfig Invalid() { return {0}; }
+     bool IsQuantized() const { return input.scale != 0; }
+     static QuantizationConfig Invalid() { return {}; }
    };
 
   struct QS8Config {
@@ -140,13 +138,11 @@ class ReduceOperatorTester {
     static QuantizationConfig GenerateQuantization(xnnpack::ReplicableRandomDevice& rng,
                                                    std::uniform_int_distribution<int32_t>& dist) {
       QuantizationConfig q{
-          /*input_scale=*/0.5,
-          /*output_scale=*/0.75,
-          /*input_zero_point=*/dist(rng),
-          /*output_zero_point=*/dist(rng),
+        /*input=*/{dist(rng), 0.5f},
+        /*output=*/{dist(rng), 0.75f},
       };
-      q.quantized_output_min = xnn_qs8_quantize(-INFINITY, q.output_scale, q.output_zero_point);
-      q.quantized_output_max = xnn_qs8_quantize(INFINITY, q.output_scale, q.output_zero_point);
+      q.quantized_output_min = xnn_qs8_quantize(-INFINITY, q.output.scale, q.output.zero_point);
+      q.quantized_output_max = xnn_qs8_quantize(INFINITY, q.output.scale, q.output.zero_point);
       return q;
     }
   };
@@ -167,13 +163,11 @@ class ReduceOperatorTester {
     static QuantizationConfig GenerateQuantization(xnnpack::ReplicableRandomDevice& rng,
                                                    std::uniform_int_distribution<int32_t>& dist) {
       QuantizationConfig q{
-          /*input_scale=*/0.5,
-          /*output_scale=*/0.75,
-          /*input_zero_point=*/dist(rng),
-          /*output_zero_point=*/dist(rng),
+          /*input=*/{dist(rng), 0.5f},
+          /*output=*/{dist(rng), 0.75f},
       };
-      q.quantized_output_min = xnn_qu8_quantize(-INFINITY, q.output_scale, q.output_zero_point);
-      q.quantized_output_max = xnn_qu8_quantize(INFINITY, q.output_scale, q.output_zero_point);
+      q.quantized_output_min = xnn_qu8_quantize(-INFINITY, q.output.scale, q.output.zero_point);
+      q.quantized_output_max = xnn_qu8_quantize(INFINITY, q.output.scale, q.output.zero_point);
       return q;
     }
   };
@@ -305,16 +299,16 @@ class ReduceOperatorTester {
           // Shift by input zero point.
           output_ref[idx] =
               static_cast<float>(static_cast<int64_t>(accumulator[idx]) -
-                                 q.input_zero_point * num_reduced_elements);
+                                 q.input.zero_point * num_reduced_elements);
           // Apply scaling & clamp.
-          output_ref[idx] *= q.input_scale * reduce_scale / q.output_scale;
+          output_ref[idx] *= q.input.scale * reduce_scale / q.output.scale;
           output_ref[idx] = std::min<double>(
-              output_ref[idx], q.quantized_output_max - q.output_zero_point);
+              output_ref[idx], q.quantized_output_max - q.output.zero_point);
           output_ref[idx] = std::max<double>(
-              output_ref[idx], q.quantized_output_min - q.output_zero_point);
+              output_ref[idx], q.quantized_output_min - q.output.zero_point);
           // Shift by output zero point.
           output_ref[idx] = static_cast<StorageType>(
-              std::lrintf(output_ref[idx]) + q.output_zero_point);
+              std::lrintf(output_ref[idx]) + q.output.zero_point);
         }
       } else {
         for (size_t i = 0; i < accumulator.size(); ++i) {
@@ -325,10 +319,8 @@ class ReduceOperatorTester {
       // Create, setup, run, and destroy a reduce operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t reduce_op = nullptr;
-      const float scale = q.IsQuantized() ? q.input_scale / q.output_scale : 1;
       const xnn_status status =
-          xnn_create_reduce_nd(operation(), Config::GetXNNDatatype(), scale,
-                               q.input_zero_point, q.output_zero_point,
+          xnn_create_reduce_nd(operation(), Config::GetXNNDatatype(), &q.input, &q.output,
                                /*flags=*/0, &reduce_op);
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
@@ -352,7 +344,6 @@ class ReduceOperatorTester {
       ASSERT_EQ(xnn_status_success,
         xnn_reshape_reduce_nd(
           reduce_op,
-          Config::GetXNNDatatype(),
           num_reduction_axes(),
           reduction_axes().data(),
           num_input_dims(),

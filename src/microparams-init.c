@@ -1192,32 +1192,57 @@ size_t xnn_init_f32_qs8_cvt_scalar_params(
   return sizeof(params->f32_qs8_cvt);
 }
 
-size_t xnn_init_qs8_reduce_minmax_scalar_params(
-  struct xnn_qs8_reduce_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int32_t num_elements,
-  int8_t input_zero_point,
-  int8_t output_zero_point)
+size_t xnn_init_qs8_reduce_scalar_params(
+  struct xnn_reduce_params params[XNN_MIN_ELEMENTS(1)],
+  const struct xnn_quantization_params* input_quantization,
+  const struct xnn_quantization_params* output_quantization)
 {
-  params->scalar.scale = scale;
-  params->scalar.num_elements = num_elements;
-  params->scalar.input_zero_point = input_zero_point;
-  params->scalar.output_zero_point = output_zero_point;
-  return sizeof(params->scalar);
+  params->qs8.scale = input_quantization->scale / output_quantization->scale;
+  params->qs8.input_output_scale = params->qs8.scale;
+  params->qs8.input_zero_point = input_quantization->zero_point;
+  params->qs8.output_zero_point = output_quantization->zero_point;
+  return sizeof(params->qs8);
 }
 
-size_t xnn_init_qu8_reduce_minmax_scalar_params(
-  struct xnn_qu8_reduce_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int32_t num_elements,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point)
+size_t xnn_init_qu8_reduce_scalar_params(
+  struct xnn_reduce_params params[XNN_MIN_ELEMENTS(1)],
+  const struct xnn_quantization_params* input_quantization,
+  const struct xnn_quantization_params* output_quantization)
 {
-  params->scalar.scale = scale;
-  params->scalar.num_elements = num_elements;
-  params->scalar.input_zero_point = input_zero_point;
-  params->scalar.output_zero_point = output_zero_point;
-  return sizeof(params->scalar);
+  params->qu8.scale = input_quantization->scale / output_quantization->scale;
+  params->qu8.input_output_scale = params->qs8.scale;
+  params->qu8.input_zero_point = input_quantization->zero_point;
+  params->qu8.output_zero_point = output_quantization->zero_point;
+  return sizeof(params->qu8);
+}
+
+size_t xnn_update_f32_reduce_scalar_params(
+  struct xnn_reduce_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int32_t num_elements)
+{
+  params->f32.scale = scale;
+  return sizeof(params->f32);
+}
+
+size_t xnn_update_qs8_reduce_scalar_params(
+  struct xnn_reduce_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int32_t num_elements)
+{
+  params->qs8.scale = params->qs8.input_output_scale * scale;
+  params->qs8.num_elements = num_elements;
+  return sizeof(params->qs8);
+}
+
+size_t xnn_update_qu8_reduce_scalar_params(
+  struct xnn_reduce_params params[XNN_MIN_ELEMENTS(1)],
+  float scale,
+  int32_t num_elements)
+{
+  params->qu8.scale = params->qs8.input_output_scale * scale;
+  params->qu8.num_elements = num_elements;
+  return sizeof(params->qu8);
 }
 
 size_t xnn_init_f32_qu8_cvt_scalar_params(

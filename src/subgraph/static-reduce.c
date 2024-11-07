@@ -63,16 +63,16 @@ static enum xnn_status create_reduce_operator(
   assert(output_id != XNN_INVALID_VALUE_ID);
   assert(output_id < num_values);
 
-  float scale = 0;
-  int32_t input_zero_point = 0;
-  int32_t output_zero_point = 0;
+  struct xnn_quantization_params input_quantization;
+  struct xnn_quantization_params output_quantization;
 
   switch (input_value->datatype) {
     case xnn_datatype_qint8:
     case xnn_datatype_quint8:
-      scale = values[input_id].quantization.scale / values[output_id].quantization.scale;
-      input_zero_point = values[input_id].quantization.zero_point;
-      output_zero_point = values[output_id].quantization.zero_point;
+      input_quantization.zero_point = values[input_id].quantization.zero_point;
+      input_quantization.scale = values[input_id].quantization.scale;
+      output_quantization.zero_point = values[output_id].quantization.zero_point;
+      output_quantization.scale = values[output_id].quantization.scale;
       break;
     default:
       break;
@@ -81,7 +81,7 @@ static enum xnn_status create_reduce_operator(
   status = xnn_create_reduce_nd(
     xnn_node_type_to_reduce_operator(node->type),
     input_value->datatype,
-    scale, input_zero_point, output_zero_point,
+    &input_quantization, &output_quantization,
     node->flags,
     &opdata->operator_objects[0]);
   if (status == xnn_status_success) {
@@ -142,7 +142,6 @@ static enum xnn_status reshape_reduce_operator(
 
   status = xnn_reshape_reduce_nd(
       opdata->operator_objects[0],
-      input_value->datatype,
       num_reduction_axes,
       reduction_axes,
       input_num_dims,

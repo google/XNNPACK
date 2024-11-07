@@ -133,10 +133,6 @@ enum xnn_run_state {
   xnn_run_state_needs_setup,
 };
 
-struct f16_f32acc_reduce_params {
-  struct xnn_f16_f32acc_scale_params f16_f32acc_scale;
-};
-
 struct xnn_operator {
   size_t batch_size;
   uint32_t padding_top;
@@ -212,9 +208,19 @@ struct xnn_operator {
   struct subconvolution_params* subconvolution_buffer;
   uint32_t flags;
 
-  uint32_t log2_elementwise_element_size;
-  uint32_t log2_elementwise_input_size;
-  uint32_t log2_elementwise_output_size;
+  union {
+    struct {
+      uint32_t log2_element_size;
+    } binary_elementwise;
+    struct {
+      uint32_t log2_input_size;
+      uint32_t log2_output_size;
+    } unary_elementwise;
+    struct {
+      uint32_t log2_data_element_size;
+      uint32_t log2_accumulator_element_size;
+    } reduce;
+  };
 
   union {
     union xnn_binary_uparams binary;
@@ -223,7 +229,7 @@ struct xnn_operator {
     struct xnn_f32_default_params f32_default;
     union xnn_f16_minmax_params f16_minmax;
     struct xnn_f16_scaleminmax_params f16_scaleminmax;
-    struct f16_f32acc_reduce_params reduce_params;
+    struct xnn_reduce_params reduce;
     // Pixelwise Average Pooling normally use f32_minmax_params, but also initialize
     // f32_scaleminmax_params in case it needs to switch to Global Average Pooling operation.
     struct {
@@ -237,8 +243,6 @@ struct xnn_operator {
     struct xnn_f32_qc4w_minmax_params f32_qc4w_minmax;
     union xnn_qs8_conv_minmax_params qs8_conv_minmax;
     union xnn_qs8_qc8w_conv_minmax_params qs8_qc8w_conv_minmax;
-    struct xnn_qs8_reduce_minmax_params qs8_reduce;
-    struct xnn_qu8_reduce_minmax_params qu8_reduce;
     union xnn_qu8_conv_minmax_params qu8_conv_minmax;
     struct xnn_qu8_avgpool_minmax_params qu8_avgpool;
     struct xnn_s8_minmax_params s8_minmax;

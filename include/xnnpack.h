@@ -4204,15 +4204,13 @@ enum xnn_status xnn_setup_max_pooling2d_nhwc_u8(
 enum xnn_status xnn_create_reduce_nd(
   enum xnn_reduce_operator reduce_operator_type,
   enum xnn_datatype datatype,
-  float scale,
-  int32_t input_zero_point,
-  int32_t output_zero_point,
+  const struct xnn_quantization_params* input_quantization,
+  const struct xnn_quantization_params* output_quantization,
   uint32_t flags,
   xnn_operator_t* reduce_op_out);
 
 enum xnn_status xnn_reshape_reduce_nd(  //
     xnn_operator_t reduce_op,           //
-    enum xnn_datatype type,             //
     size_t num_reduction_axes,          //
     const int64_t* reduction_axes,      //
     size_t num_input_dims,              //

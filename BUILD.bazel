@@ -477,7 +477,6 @@ xnnpack_cc_library(
     hdrs = ["src/xnnpack/microparams-init.h"],
     deps = [
         ":common",
-        ":logging",
         ":math",
         ":microparams",
         ":requantization",

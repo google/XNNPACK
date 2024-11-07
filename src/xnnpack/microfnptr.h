@@ -1980,19 +1980,15 @@ typedef size_t (*xnn_init_unary_uparams_fn)(
   const struct xnn_quantization_params* input_quantization,
   const struct xnn_quantization_params* output_quantization);
 
-typedef size_t (*xnn_init_qs8_reduce_minmax_params_fn)(
-  struct xnn_qs8_reduce_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int32_t num_elements,
-  int8_t input_zero_point,
-  int8_t output_zero_point);
+typedef size_t (*xnn_init_reduce_params_fn)(
+  struct xnn_reduce_params params[XNN_MIN_ELEMENTS(1)],
+  const struct xnn_quantization_params* input_quantization,
+  const struct xnn_quantization_params* output_quantization);
 
-typedef size_t (*xnn_init_qu8_reduce_minmax_params_fn)(
-  struct xnn_qu8_reduce_minmax_params params[XNN_MIN_ELEMENTS(1)],
+typedef size_t (*xnn_update_reduce_params_fn)(
+  struct xnn_reduce_params params[XNN_MIN_ELEMENTS(1)],
   float scale,
-  int32_t num_elements,
-  uint8_t input_zero_point,
-  uint8_t output_zero_point);
+  int32_t num_elements);
 
 typedef size_t (*xnn_init_qs8_qc8w_conv_minmax_params_fn)(
   union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
