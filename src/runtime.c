@@ -643,7 +643,8 @@ enum xnn_status xnn_create_runtime_v4(
 #endif
   if (use_slinky) {
     #ifdef XNN_SLINKY_AVAILABLE
-    // slinky_init_pipeline(runtime);
+    const int max_threads = 16;
+    // slinky_init_pipeline(runtime, max_threads);
     #else
     xnn_log_warning("Slinky requested but not available");
     #endif
