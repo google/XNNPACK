@@ -25,7 +25,7 @@ Result round_float_to_int(float x) {
   // avoid converting to an out of bounds integer. To avoid this problem, we've
   // determined a constant that when added to the min/max float values, results
   // in the upper bound of the integer range.
-  constexpr float half_mantissa = sizeof(Result) * 8 > 23 ? 128.0f : 0.0f;
+  constexpr int half_mantissa = sizeof(Result) * 8 > 23 ? 127 : 0;
   x = std::max<float>(x, std::numeric_limits<Result>::min());
   x = std::min<float>(x, std::numeric_limits<Result>::max() - half_mantissa);
   return static_cast<Result>(x);
