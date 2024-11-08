@@ -149,7 +149,6 @@ SET(PROD_NEON_MICROKERNEL_SRCS
   src/u8-maxpool/u8-maxpool-9p8x-minmax-neon-c16.c
   src/u8-rmax/u8-rmax-neon-u16.c
   src/u8-vclamp/u8-vclamp-neon-u64.c
-  src/u32-f32-vcvt/gen/u32-f32-vcvt-neon.c
   src/x8-transposec/gen/x8-transposec-16x16-reuse-dec-zip-neon.c
   src/x8-zip/x8-zip-x2-neon.c
   src/x8-zip/x8-zip-x3-neon.c

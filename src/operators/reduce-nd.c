@@ -401,7 +401,9 @@ enum xnn_status xnn_create_reduce_nd(
       rdsum_config = xnn_init_qu8_rdsum_config();
       cvt_config = xnn_init_f32_to_qu8_cvt_config();
       s32_f32_cvt_config = unused;
-      u32_f32_cvt_config = xnn_init_u32_to_f32_cvt_config();
+      // We just use an int32 -> f32 conversion. This means we effectively only
+      // have a 31-bit accumulator instead of 32-bit, but that seems insignificant.
+      u32_f32_cvt_config = xnn_init_s32_to_f32_cvt_config();
       break;
     }
     default:

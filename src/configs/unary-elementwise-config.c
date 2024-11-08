@@ -65,7 +65,6 @@ static struct xnn_unary_elementwise_config qu8_cvt_config = {0};
 static struct xnn_unary_elementwise_config qu8_lrelu_config = {0};
 static struct xnn_unary_elementwise_config qu8_to_f32_cvt_config = {0};
 static struct xnn_unary_elementwise_config s32_to_f32_cvt_config = {0};
-static struct xnn_unary_elementwise_config u32_to_f32_cvt_config = {0};
 static struct xnn_unary_elementwise_config s8_clamp_config = {0};
 static struct xnn_unary_elementwise_config u8_clamp_config = {0};
 static struct xnn_unary_elementwise_config xx_copy_config = {0};
@@ -119,7 +118,6 @@ XNN_INIT_ONCE_GUARD(qu8_cvt);
 XNN_INIT_ONCE_GUARD(qu8_lrelu);
 XNN_INIT_ONCE_GUARD(qu8_to_f32_cvt);
 XNN_INIT_ONCE_GUARD(s32_to_f32_cvt);
-XNN_INIT_ONCE_GUARD(u32_to_f32_cvt);
 XNN_INIT_ONCE_GUARD(s8_clamp);
 XNN_INIT_ONCE_GUARD(u8_clamp);
 XNN_INIT_ONCE_GUARD(xx_copy);
@@ -1498,42 +1496,6 @@ static void init_s32_to_f32_cvt_config(void) {
   #endif
 }
 
-static void init_u32_to_f32_cvt_config(void) {
-  #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    if (hardware_config->use_arm_neon) {
-      u32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u32_f32_vcvt_ukernel__neon_u16;
-      u32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_u32_f32_cvt_scalar_params;
-    } else {
-      u32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u32_f32_vcvt_ukernel__scalar_u4;
-      u32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_u32_f32_cvt_scalar_params;
-    }
-  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    #if XNN_ENABLE_AVX512F
-      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
-        u32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u32_f32_vcvt_ukernel__avx512f_u64;
-        u32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_u32_f32_cvt_scalar_params;
-      } else
-    #endif
-    if (hardware_config->use_x86_avx2) {
-      u32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u32_f32_vcvt_ukernel__avx2_u32;
-      u32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_u32_f32_cvt_scalar_params;
-    } else {
-      u32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u32_f32_vcvt_ukernel__scalar_u4;
-      u32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_u32_f32_cvt_scalar_params;
-    }
-  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-    u32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u32_f32_vcvt_ukernel__wasmsimd_u16;
-    u32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_u32_f32_cvt_scalar_params;
-  #else
-    u32_to_f32_cvt_config.ukernel = (xnn_vunary_ukernel_fn) xnn_u32_f32_vcvt_ukernel__scalar_u4;
-    u32_to_f32_cvt_config.init = (xnn_init_unary_uparams_fn) xnn_init_u32_f32_cvt_scalar_params;
-  #endif
-}
-
 static void init_qs8_cvt_config(void) {
   #if XNN_ARCH_ARM
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
@@ -2403,15 +2365,6 @@ const struct xnn_unary_elementwise_config* xnn_init_s32_to_f32_cvt_config() {
   }
   XNN_INIT_ONCE(s32_to_f32_cvt);
   return &s32_to_f32_cvt_config;
-}
-
-const struct xnn_unary_elementwise_config* xnn_init_u32_to_f32_cvt_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL) {
-    return NULL;
-  }
-  XNN_INIT_ONCE(u32_to_f32_cvt);
-  return &u32_to_f32_cvt_config;
 }
 
 const struct xnn_unary_elementwise_config* xnn_init_qs8_cvt_config() {

@@ -33,7 +33,6 @@ load(
     "xnnpack_simd_s16_archs",
     "xnnpack_simd_s32_archs",
     "xnnpack_simd_s8_archs",
-    "xnnpack_simd_u32_archs",
 )
 load(
     "//gen:microkernels.bzl",
@@ -189,7 +188,6 @@ MICROKERNEL_DEFS = [
     "src/s32-f32-vcvt/s32-f32-vcvt.h",
     "src/u8-maxpool/u8-maxpool-minmax.h",
     "src/u8-vclamp/u8-vclamp.h",
-    "src/u32-f32-vcvt/u32-f32-vcvt.h",
     "src/xx-fill/xx-fill.h",
     "src/xx-pad/xx-pad.h",
     "src/xx-transposev/xx-transposev.h",
@@ -275,9 +273,6 @@ SIMD_HEADERS = [
 ] + [
     "src/xnnpack/simd/s8-" + arch + ".h"
     for arch in xnnpack_simd_s8_archs()
-] + [
-    "src/xnnpack/simd/u32-" + arch + ".h"
-    for arch in xnnpack_simd_u32_archs()
 ]
 
 exports_files(SIMD_HEADERS)

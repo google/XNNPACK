@@ -271,7 +271,6 @@ DECLARE_INIT_UNARY_MICROPARAMS_FUNCTION(xnn_init_qs8_f32_cvt_scalar_params);
 DECLARE_INIT_UNARY_MICROPARAMS_FUNCTION(xnn_init_qu8_cvt_scalar_params);
 DECLARE_INIT_UNARY_MICROPARAMS_FUNCTION(xnn_init_qu8_f32_cvt_scalar_params);
 DECLARE_INIT_UNARY_MICROPARAMS_FUNCTION(xnn_init_s32_f32_cvt_scalar_params);
-DECLARE_INIT_UNARY_MICROPARAMS_FUNCTION(xnn_init_u32_f32_cvt_scalar_params);
 
 XNN_INTERNAL size_t xnn_init_qs8_add_minmax_scalar_params(
     struct xnn_qs8_add_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
