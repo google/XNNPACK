@@ -5,7 +5,6 @@
 
 #include <algorithm>  // For std::generate, std::shuffle.
 #include <array>      // For std::array.
-#include <cmath>
 #include <cstddef>  // For size_t.
 #include <cstdint>
 #include <memory>  // For std::unique_ptr.
@@ -15,12 +14,12 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/buffer.h"
 #include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/requantization.h"
 #include "xnnpack/subgraph.h"
-#include "replicable_random_device.h"
 #include "subgraph-unary-tester.h"
 
 using StaticConstantPadTestInt8 = UnaryTest<int8_t>;

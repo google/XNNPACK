@@ -146,15 +146,6 @@ static enum xnn_status reshape_constant_pad_nd(
     return xnn_status_unsupported_parameter;
   }
 
-  for (size_t i = 0; i < num_dims; i++) {
-    if (input_shape[i] == 0) {
-      xnn_log_error(
-        "failed to setup %s operator: input shape dimension #%zu is zero",
-        xnn_operator_type_to_string(constant_pad_op->type), i);
-      return xnn_status_invalid_parameter;
-    }
-  }
-
   size_t num_squeezed_dims = 0;
   size_t normalized_pre_paddings[XNN_MAX_TENSOR_DIMS];
   size_t normalized_input_shape[XNN_MAX_TENSOR_DIMS];
@@ -188,6 +179,18 @@ static enum xnn_status reshape_constant_pad_nd(
       normalized_input_shape[XNN_MAX_TENSOR_DIMS - num_squeezed_dims] *= input_dim;
       normalized_output_shape[XNN_MAX_TENSOR_DIMS - num_squeezed_dims] *= input_dim;
     }
+  }
+
+  // If the resulting output has size zero, then there is nothing left to do.
+  size_t output_size = 1;
+  for (int i = 0; i < XNN_MAX_TENSOR_DIMS; i++) {
+    output_size *= normalized_output_shape[i];
+  }
+  if (output_size == 0) {
+    xnn_log_debug("skipping %s operator: output size is zero",
+                  xnn_operator_type_to_string(constant_pad_op->type));
+    constant_pad_op->state = xnn_run_state_skip;
+    return xnn_status_success;
   }
 
   const struct xnn_xx_fill_config* xx_fill_config = constant_pad_op->fill_config;
