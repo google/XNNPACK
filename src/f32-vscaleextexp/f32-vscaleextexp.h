@@ -30,7 +30,7 @@ XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_vscaleextexp_ukernel__avx2_p5
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_vscaleextexp_ukernel__avx2_p5_u96, 96, float, struct xnn_f32_default_params, xnn_f32_vscaleextexp_ukernel_fn)
 #endif //XNN_ENABLE_XNN_ARCH_X86
 
-#if XNN_ENABLE_AVX512F_U32 && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
+#if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u16, 16, float, struct xnn_f32_default_params, xnn_f32_vscaleextexp_ukernel_fn)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u32, 32, float, struct xnn_f32_default_params, xnn_f32_vscaleextexp_ukernel_fn)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx512f, xnn_f32_vscaleextexp_ukernel__avx512f_p5_scalef_u48, 48, float, struct xnn_f32_default_params, xnn_f32_vscaleextexp_ukernel_fn)
