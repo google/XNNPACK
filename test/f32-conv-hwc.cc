@@ -2,5047 +2,877 @@
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
-//
-// Auto-generated file. Do not edit!
-//   Specification: test/f32-conv-hwc.yaml
-//   Generator: tools/generate-conv-hwc-test.py
 
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <limits>
+#include <random>
+#include <vector>
 
 #include <gtest/gtest.h>
+#include "replicable_random_device.h"
+#include "xnnpack.h"
+#include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
 #include "xnnpack/conv.h"
 #include "xnnpack/isa-checks.h"
+#include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
-#include "conv-hwc-microkernel-tester.h"
-
-
-#if XNN_ARCH_ARM64
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X1, input_width_eq_2) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_right(1)
-      .input_channels(3)
-      .output_channels_tile(4)
-      .output_channels(4)
-      .input_width(2)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X1, input_width_div_2) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 4; input_width <= 16; input_width += 6) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X1, input_width_lt_2) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 2; input_width < 2; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X1, input_width_gt_2) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 3; input_width < 4; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X1, output_channels_lt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 4; output_channels++) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X1, output_channels_div_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 8; output_channels <= 16; output_channels += 4) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X1, output_channels_gt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 5; output_channels < 8; output_channels++) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X1, input_height_lt_3) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_height = 1; input_height < 3; input_height++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_height(1) // padded input height of at least 3 required
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X1, input_height_gt_3) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_height = 4; input_height <= 9; input_height++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X1, padding_top) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_top(padding_top)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X1, padding_bottom) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_bottom(padding_bottom)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X1, output_y_start) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_start(output_y_start)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X1, output_y_end) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_end(output_y_end)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X1, qmin) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmin(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X1, qmax) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmax(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-#endif  // XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM64
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X2, input_width_eq_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_right(1)
-      .input_channels(3)
-      .output_channels_tile(4)
-      .output_channels(4)
-      .input_width(4)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X2, input_width_div_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 8; input_width <= 32; input_width += 12) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X2, input_width_lt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 2; input_width < 4; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X2, input_width_gt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 5; input_width < 8; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X2, output_channels_lt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 4; output_channels++) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X2, output_channels_div_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 8; output_channels <= 16; output_channels += 4) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X2, output_channels_gt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 5; output_channels < 8; output_channels++) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X2, input_height_lt_3) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_height = 1; input_height < 3; input_height++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_height(1) // padded input height of at least 3 required
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X2, input_height_gt_3) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_height = 4; input_height <= 9; input_height++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X2, padding_top) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_top(padding_top)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X2, padding_bottom) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_bottom(padding_bottom)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X2, output_y_start) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_start(output_y_start)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X2, output_y_end) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_end(output_y_end)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X2, qmin) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmin(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__AARCH64_NEONFMA_2X2, qmax) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmax(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-#endif  // XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X1, input_width_eq_2) {
-    TEST_REQUIRES_ARM_NEON;
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_right(1)
-      .input_channels(3)
-      .output_channels_tile(4)
-      .output_channels(4)
-      .input_width(2)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X1, input_width_div_2) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 4; input_width <= 16; input_width += 6) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X1, input_width_lt_2) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 2; input_width < 2; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X1, input_width_gt_2) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 3; input_width < 4; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X1, output_channels_lt_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 4; output_channels++) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X1, output_channels_div_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 8; output_channels <= 16; output_channels += 4) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X1, output_channels_gt_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 5; output_channels < 8; output_channels++) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X1, input_height_lt_3) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_height = 1; input_height < 3; input_height++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_height(1) // padded input height of at least 3 required
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X1, input_height_gt_3) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_height = 4; input_height <= 9; input_height++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X1, padding_top) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_top(padding_top)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X1, padding_bottom) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_bottom(padding_bottom)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X1, output_y_start) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_start(output_y_start)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X1, output_y_end) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_end(output_y_end)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X1, qmin) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmin(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X1, qmax) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmax(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X2, input_width_eq_4) {
-    TEST_REQUIRES_ARM_NEON;
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_right(1)
-      .input_channels(3)
-      .output_channels_tile(4)
-      .output_channels(4)
-      .input_width(4)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X2, input_width_div_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 8; input_width <= 32; input_width += 12) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X2, input_width_lt_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 2; input_width < 4; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X2, input_width_gt_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 5; input_width < 8; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X2, output_channels_lt_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 4; output_channels++) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X2, output_channels_div_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 8; output_channels <= 16; output_channels += 4) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X2, output_channels_gt_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 5; output_channels < 8; output_channels++) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X2, input_height_lt_3) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_height = 1; input_height < 3; input_height++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_height(1) // padded input height of at least 3 required
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X2, input_height_gt_3) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_height = 4; input_height <= 9; input_height++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X2, padding_top) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_top(padding_top)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X2, padding_bottom) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_bottom(padding_bottom)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X2, output_y_start) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_start(output_y_start)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X2, output_y_end) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_end(output_y_end)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X2, qmin) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmin(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X4__NEON_2X2, qmax) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmax(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM64
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X1, input_width_eq_2) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_right(1)
-      .input_channels(3)
-      .output_channels_tile(8)
-      .output_channels(8)
-      .input_width(2)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X1, input_width_div_2) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 4; input_width <= 16; input_width += 6) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X1, input_width_lt_2) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 2; input_width < 2; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X1, input_width_gt_2) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 3; input_width < 4; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X1, output_channels_lt_8) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 8; output_channels++) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X1, output_channels_div_8) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 16; output_channels <= 32; output_channels += 8) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X1, output_channels_gt_8) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 9; output_channels < 16; output_channels++) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X1, input_height_lt_3) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_height = 1; input_height < 3; input_height++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_height(1) // padded input height of at least 3 required
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X1, input_height_gt_3) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_height = 4; input_height <= 9; input_height++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X1, padding_top) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_top(padding_top)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X1, padding_bottom) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_bottom(padding_bottom)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X1, output_y_start) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_start(output_y_start)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X1, output_y_end) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_end(output_y_end)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X1, qmin) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmin(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X1, qmax) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmax(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-#endif  // XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM64
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X2, input_width_eq_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_right(1)
-      .input_channels(3)
-      .output_channels_tile(8)
-      .output_channels(8)
-      .input_width(4)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X2, input_width_div_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 8; input_width <= 32; input_width += 12) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X2, input_width_lt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 2; input_width < 4; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X2, input_width_gt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 5; input_width < 8; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X2, output_channels_lt_8) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 8; output_channels++) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X2, output_channels_div_8) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 16; output_channels <= 32; output_channels += 8) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X2, output_channels_gt_8) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 9; output_channels < 16; output_channels++) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X2, input_height_lt_3) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_height = 1; input_height < 3; input_height++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_height(1) // padded input height of at least 3 required
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X2, input_height_gt_3) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_height = 4; input_height <= 9; input_height++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X2, padding_top) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_top(padding_top)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X2, padding_bottom) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_bottom(padding_bottom)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X2, output_y_start) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_start(output_y_start)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X2, output_y_end) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_end(output_y_end)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X2, qmin) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmin(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__AARCH64_NEONFMA_2X2, qmax) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmax(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-#endif  // XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X1, input_width_eq_2) {
-    TEST_REQUIRES_ARM_NEON;
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_right(1)
-      .input_channels(3)
-      .output_channels_tile(8)
-      .output_channels(8)
-      .input_width(2)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X1, input_width_div_2) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 4; input_width <= 16; input_width += 6) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X1, input_width_lt_2) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 2; input_width < 2; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X1, input_width_gt_2) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 3; input_width < 4; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X1, output_channels_lt_8) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 8; output_channels++) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X1, output_channels_div_8) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 16; output_channels <= 32; output_channels += 8) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X1, output_channels_gt_8) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 9; output_channels < 16; output_channels++) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X1, input_height_lt_3) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_height = 1; input_height < 3; input_height++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_height(1) // padded input height of at least 3 required
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X1, input_height_gt_3) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_height = 4; input_height <= 9; input_height++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X1, padding_top) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_top(padding_top)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X1, padding_bottom) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_bottom(padding_bottom)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X1, output_y_start) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_start(output_y_start)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X1, output_y_end) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_end(output_y_end)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X1, qmin) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmin(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X1, qmax) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmax(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X2, input_width_eq_4) {
-    TEST_REQUIRES_ARM_NEON;
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_right(1)
-      .input_channels(3)
-      .output_channels_tile(8)
-      .output_channels(8)
-      .input_width(4)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X2, input_width_div_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 8; input_width <= 32; input_width += 12) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X2, input_width_lt_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 2; input_width < 4; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X2, input_width_gt_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 5; input_width < 8; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X2, output_channels_lt_8) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 8; output_channels++) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X2, output_channels_div_8) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 16; output_channels <= 32; output_channels += 8) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X2, output_channels_gt_8) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 9; output_channels < 16; output_channels++) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X2, input_height_lt_3) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_height = 1; input_height < 3; input_height++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_height(1) // padded input height of at least 3 required
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X2, input_height_gt_3) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_height = 4; input_height <= 9; input_height++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X2, padding_top) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_top(padding_top)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X2, padding_bottom) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .padding_bottom(padding_bottom)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X2, output_y_start) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_start(output_y_start)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X2, output_y_end) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 2; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_right(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_end(output_y_end)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X2, qmin) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmin(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P0P1C3X8__NEON_2X2, qmax) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-      for (size_t input_width = 2; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmax(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM64
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X1, input_width_eq_2) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_width(1)
-      .input_channels(3)
-      .output_channels_tile(4)
-      .output_channels(4)
-      .input_width(2)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X1, input_width_div_2) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 4; input_width <= 16; input_width += 6) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X1, input_width_lt_2) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 1; input_width < 2; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X1, input_width_gt_2) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 3; input_width < 4; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X1, output_channels_lt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 4; output_channels++) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X1, output_channels_div_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 8; output_channels <= 16; output_channels += 4) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X1, output_channels_gt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 5; output_channels < 8; output_channels++) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X1, input_height_lt_3) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_height = 1; input_height < 3; input_height++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding(1) // padded input height of at least 3 required
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X1, input_height_gt_3) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_height = 4; input_height <= 9; input_height++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X1, padding_top) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .padding_top(padding_top)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X1, padding_bottom) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .padding_bottom(padding_bottom)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X1, output_y_start) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_start(output_y_start)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X1, output_y_end) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_end(output_y_end)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X1, qmin) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmin(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X1, qmax) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmax(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-#endif  // XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM64
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X2, input_width_eq_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_width(1)
-      .input_channels(3)
-      .output_channels_tile(4)
-      .output_channels(4)
-      .input_width(4)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X2, input_width_div_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 8; input_width <= 32; input_width += 12) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X2, input_width_lt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 1; input_width < 4; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X2, input_width_gt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 5; input_width < 8; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X2, output_channels_lt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 4; output_channels++) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X2, output_channels_div_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 8; output_channels <= 16; output_channels += 4) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X2, output_channels_gt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 5; output_channels < 8; output_channels++) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X2, input_height_lt_3) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_height = 1; input_height < 3; input_height++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding(1) // padded input height of at least 3 required
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X2, input_height_gt_3) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_height = 4; input_height <= 9; input_height++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X2, padding_top) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .padding_top(padding_top)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X2, padding_bottom) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .padding_bottom(padding_bottom)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X2, output_y_start) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_start(output_y_start)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X2, output_y_end) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_end(output_y_end)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X2, qmin) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmin(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__AARCH64_NEONFMA_2X2, qmax) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmax(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-#endif  // XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X1, input_width_eq_2) {
-    TEST_REQUIRES_ARM_NEON;
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_width(1)
-      .input_channels(3)
-      .output_channels_tile(4)
-      .output_channels(4)
-      .input_width(2)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X1, input_width_div_2) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 4; input_width <= 16; input_width += 6) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X1, input_width_lt_2) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 1; input_width < 2; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X1, input_width_gt_2) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 3; input_width < 4; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X1, output_channels_lt_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 4; output_channels++) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X1, output_channels_div_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 8; output_channels <= 16; output_channels += 4) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X1, output_channels_gt_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 5; output_channels < 8; output_channels++) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X1, input_height_lt_3) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_height = 1; input_height < 3; input_height++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding(1) // padded input height of at least 3 required
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X1, input_height_gt_3) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_height = 4; input_height <= 9; input_height++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X1, padding_top) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .padding_top(padding_top)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X1, padding_bottom) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .padding_bottom(padding_bottom)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X1, output_y_start) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_start(output_y_start)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X1, output_y_end) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_end(output_y_end)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X1, qmin) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmin(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X1, qmax) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmax(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X2, input_width_eq_4) {
-    TEST_REQUIRES_ARM_NEON;
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_width(1)
-      .input_channels(3)
-      .output_channels_tile(4)
-      .output_channels(4)
-      .input_width(4)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X2, input_width_div_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 8; input_width <= 32; input_width += 12) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X2, input_width_lt_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 1; input_width < 4; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X2, input_width_gt_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 5; input_width < 8; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(4)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X2, output_channels_lt_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 4; output_channels++) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X2, output_channels_div_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 8; output_channels <= 16; output_channels += 4) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
+#include "xnnpack/microparams.h"
+#include "xnnpack/pack.h"
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X2, output_channels_gt_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 5; output_channels < 8; output_channels++) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
+class ConvHWCMicrokernelTester {
+ public:
+  ConvHWCMicrokernelTester& output_channels_tile(
+      uint32_t output_channels_tile) {
+    this->output_channels_tile_ = output_channels_tile;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X2, input_height_lt_3) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_height = 1; input_height < 3; input_height++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding(1) // padded input height of at least 3 required
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  uint32_t output_channels_tile() const {
+    return this->output_channels_tile_;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X2, input_height_gt_3) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_height = 4; input_height <= 9; input_height++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  ConvHWCMicrokernelTester& padding(uint32_t padding) {
+    this->padding_top_ = padding;
+    this->padding_right_ = padding;
+    this->padding_bottom_ = padding;
+    this->padding_left_ = padding;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X2, padding_top) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .padding_top(padding_top)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  ConvHWCMicrokernelTester& padding_height(uint32_t padding_height) {
+    this->padding_top_ = padding_height;
+    this->padding_bottom_ = padding_height;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X2, padding_bottom) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .padding_bottom(padding_bottom)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  ConvHWCMicrokernelTester& padding_width(uint32_t padding_width) {
+    this->padding_right_ = padding_width;
+    this->padding_left_ = padding_width;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X2, output_y_start) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_start(output_y_start)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  ConvHWCMicrokernelTester& padding_top(uint32_t padding_top) {
+    this->padding_top_ = padding_top;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X2, output_y_end) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-      for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(4)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_end(output_y_end)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  uint32_t padding_top() const {
+    return this->padding_top_;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X2, qmin) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmin(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
+  ConvHWCMicrokernelTester& padding_right(uint32_t padding_right) {
+    this->padding_right_ = padding_right;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X4__NEON_2X2, qmax) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmax(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM64
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X1, input_width_eq_2) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_width(1)
-      .input_channels(3)
-      .output_channels_tile(8)
-      .output_channels(8)
-      .input_width(2)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X1, input_width_div_2) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 4; input_width <= 16; input_width += 6) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-    }
+  uint32_t padding_right() const {
+    return this->padding_right_;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X1, input_width_lt_2) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 1; input_width < 2; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-    }
+  ConvHWCMicrokernelTester& padding_bottom(uint32_t padding_bottom) {
+    this->padding_bottom_ = padding_bottom;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X1, input_width_gt_2) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 3; input_width < 4; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-    }
+  uint32_t padding_bottom() const {
+    return this->padding_bottom_;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X1, output_channels_lt_8) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 8; output_channels++) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
+  ConvHWCMicrokernelTester& padding_left(uint32_t padding_left) {
+    this->padding_left_ = padding_left;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X1, output_channels_div_8) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 16; output_channels <= 32; output_channels += 8) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
+  uint32_t padding_left() const {
+    return this->padding_left_;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X1, output_channels_gt_8) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 9; output_channels < 16; output_channels++) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
+  ConvHWCMicrokernelTester& input_size(uint32_t input_height, uint32_t input_width) {
+    assert(input_height >= 1);
+    assert(input_width >= 1);
+    this->input_height_ = input_height;
+    this->input_width_ = input_width;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X1, input_height_lt_3) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_height = 1; input_height < 3; input_height++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding(1) // padded input height of at least 3 required
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  ConvHWCMicrokernelTester& input_height(uint32_t input_height) {
+    assert(input_height >= 1);
+    this->input_height_ = input_height;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X1, input_height_gt_3) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_height = 4; input_height <= 9; input_height++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  uint32_t input_height() const {
+    return this->input_height_;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X1, padding_top) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .padding_top(padding_top)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  ConvHWCMicrokernelTester& input_width(uint32_t input_width) {
+    assert(input_width >= 1);
+    this->input_width_ = input_width;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X1, padding_bottom) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .padding_bottom(padding_bottom)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  uint32_t input_width() const {
+    return this->input_width_;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X1, output_y_start) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_start(output_y_start)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  ConvHWCMicrokernelTester& input_channels(size_t input_channels) {
+    assert(input_channels >= 1);
+    this->input_channels_ = input_channels;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X1, output_y_end) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_end(output_y_end)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  size_t input_channels() const {
+    return this->input_channels_;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X1, qmin) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmin(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
+  ConvHWCMicrokernelTester& output_channels(size_t output_channels) {
+    assert(output_channels >= 1);
+    this->output_channels_ = output_channels;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X1, qmax) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmax(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-#endif  // XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM64
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X2, input_width_eq_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_width(1)
-      .input_channels(3)
-      .output_channels_tile(8)
-      .output_channels(8)
-      .input_width(4)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X2, input_width_div_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 8; input_width <= 32; input_width += 12) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-    }
+  size_t output_channels() const {
+    return this->output_channels_;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X2, input_width_lt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 1; input_width < 4; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-    }
+  size_t packed_output_channels() const {
+    return output_channels() % output_channels_tile() == 0 ? output_channels() : output_channels() / output_channels_tile() * output_channels_tile() + output_channels_tile();
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X2, input_width_gt_4) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_width = 5; input_width < 8; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-    }
+  ConvHWCMicrokernelTester& batch_size(size_t batch_size) {
+    assert(batch_size >= 1);
+    this->batch_size_ = batch_size;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X2, output_channels_lt_8) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 8; output_channels++) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
+  size_t batch_size() const {
+    return this->batch_size_;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X2, output_channels_div_8) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 16; output_channels <= 32; output_channels += 8) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
+  ConvHWCMicrokernelTester& kernel_size(uint32_t kernel_size) {
+    assert(kernel_size >= 1);
+    this->kernel_height_ = kernel_size;
+    this->kernel_width_ = kernel_size;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X2, output_channels_gt_8) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 9; output_channels < 16; output_channels++) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
+  ConvHWCMicrokernelTester& kernel_height(uint32_t kernel_height) {
+    assert(kernel_height >= 1);
+    this->kernel_height_ = kernel_height;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X2, input_height_lt_3) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_height = 1; input_height < 3; input_height++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding(1) // padded input height of at least 3 required
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  uint32_t kernel_height() const {
+    return this->kernel_height_;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X2, input_height_gt_3) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t input_height = 4; input_height <= 9; input_height++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  ConvHWCMicrokernelTester& kernel_width(uint32_t kernel_width) {
+    assert(kernel_width >= 1);
+    this->kernel_width_ = kernel_width;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X2, padding_top) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .padding_top(padding_top)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  uint32_t kernel_width() const {
+    return this->kernel_width_;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X2, padding_bottom) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .padding_bottom(padding_bottom)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  ConvHWCMicrokernelTester& subsampling(uint32_t subsampling) {
+    assert(subsampling >= 1);
+    this->subsampling_height_ = subsampling;
+    this->subsampling_width_ = subsampling;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X2, output_y_start) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_start(output_y_start)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  ConvHWCMicrokernelTester& subsampling_height(uint32_t subsampling_height) {
+    assert(subsampling_height >= 1);
+    this->subsampling_height_ = subsampling_height;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X2, output_y_end) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_end(output_y_end)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  uint32_t subsampling_height() const {
+    return this->subsampling_height_;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X2, qmin) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmin(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
+  ConvHWCMicrokernelTester& subsampling_width(uint32_t subsampling_width) {
+    assert(subsampling_width >= 1);
+    this->subsampling_width_ = subsampling_width;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__AARCH64_NEONFMA_2X2, qmax) {
-    TEST_REQUIRES_ARM_NEON_FMA;
-    for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmax(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-#endif  // XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X1, input_width_eq_2) {
-    TEST_REQUIRES_ARM_NEON;
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_width(1)
-      .input_channels(3)
-      .output_channels_tile(8)
-      .output_channels(8)
-      .input_width(2)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X1, input_width_div_2) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 4; input_width <= 16; input_width += 6) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-    }
+  uint32_t subsampling_width() const {
+    return this->subsampling_width_;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X1, input_width_lt_2) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 1; input_width < 2; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-    }
+  ConvHWCMicrokernelTester& output_y_start(uint32_t output_y_start) {
+    this->output_y_start_ = output_y_start;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X1, input_width_gt_2) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 3; input_width < 4; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-    }
+  uint32_t output_y_start() const {
+    return this->output_y_start_;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X1, output_channels_lt_8) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 8; output_channels++) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
+  ConvHWCMicrokernelTester& output_y_end(uint32_t output_y_end) {
+    this->output_y_end_ = output_y_end;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X1, output_channels_div_8) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 16; output_channels <= 32; output_channels += 8) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
+  uint32_t output_y_end() const {
+    if (this->output_y_end_ == std::numeric_limits<uint32_t>::max()) {
+      return output_height();
+    } else {
+      return this->output_y_end_;
     }
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X1, output_channels_gt_8) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 9; output_channels < 16; output_channels++) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
+  size_t input_pixel_stride() const {
+    return input_channels();
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X1, input_height_lt_3) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_height = 1; input_height < 3; input_height++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding(1) // padded input height of at least 3 required
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  size_t output_pixel_stride() const {
+    return output_channels();
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X1, input_height_gt_3) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_height = 4; input_height <= 9; input_height++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  size_t output_height() const {
+    const size_t padded_input_height = padding_top() + input_height() + padding_bottom();
+    return (std::max<size_t>(padded_input_height + subsampling_height(), kernel_height()) - kernel_height())
+      / subsampling_height();
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X1, padding_top) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .padding_top(padding_top)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  size_t output_width() const {
+    const size_t padded_input_width = padding_left() + input_width() + padding_right();
+    return (std::max<size_t>(padded_input_width + subsampling_width(), kernel_width()) - kernel_width())
+      / subsampling_width();
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X1, padding_bottom) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .padding_bottom(padding_bottom)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  ConvHWCMicrokernelTester& qmin(uint8_t qmin) {
+    this->qmin_ = qmin;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X1, output_y_start) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_start(output_y_start)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  uint8_t qmin() const {
+    return this->qmin_;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X1, output_y_end) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 16; input_width += 3) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_end(output_y_end)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
+  ConvHWCMicrokernelTester& qmax(uint8_t qmax) {
+    this->qmax_ = qmax;
+    return *this;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X1, qmin) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmin(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
+  uint8_t qmax() const {
+    return this->qmax_;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X1, qmax) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmax(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
+  ConvHWCMicrokernelTester& iterations(size_t iterations) {
+    this->iterations_ = iterations;
+    return *this;
   }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X2, input_width_eq_4) {
-    TEST_REQUIRES_ARM_NEON;
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_width(1)
-      .input_channels(3)
-      .output_channels_tile(8)
-      .output_channels(8)
-      .input_width(4)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-  }
-
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X2, input_width_div_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 8; input_width <= 32; input_width += 12) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X2, input_width_lt_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 1; input_width < 4; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-    }
+  size_t iterations() const {
+    return this->iterations_;
   }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X2, input_width_gt_4) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_width = 5; input_width < 8; input_width++) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(8)
-        .output_channels(8)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-    }
-  }
+  void Test(xnn_f32_conv_hwc_ukernel_fn conv, xnn_init_f32_minmax_params_fn init_params) const {
+    ASSERT_LT(output_y_start(), output_height());
+    ASSERT_LE(output_y_end(), output_height());
+    ASSERT_GT(output_y_end(), output_y_start());
+    ASSERT_GE(output_width(), 1);
+    ASSERT_GE(output_height(), 1);
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X2, output_channels_lt_8) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 8; output_channels++) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
+    xnnpack::ReplicableRandomDevice rng;
+    std::uniform_real_distribution<float> f32dist(0.1f, 1.0f);
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X2, output_channels_div_8) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 16; output_channels <= 32; output_channels += 8) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+      batch_size() * ((input_height() * input_width() - 1) * input_pixel_stride() + input_channels()));
+    xnnpack::Buffer<float> zero(XNN_EXTRA_BYTES / sizeof(float) + input_width() * input_channels(), 0.0f);
+    xnnpack::Buffer<float> kernel(output_channels() * kernel_height() * kernel_width() * input_channels());
+    xnnpack::Buffer<float> bias(output_channels());
+    xnnpack::Buffer<float> output(batch_size() * ((output_height() * output_width() - 1) * output_pixel_stride() + output_channels()));
+    xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * output_channels());
+    xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> packed_weights(
+        (input_channels() * kernel_height() * kernel_width() + 1) *
+        packed_output_channels());
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X2, output_channels_gt_8) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 9; output_channels < 16; output_channels++) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(3)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+      std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
+      std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X2, input_height_lt_3) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_height = 1; input_height < 3; input_height++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding(1) // padded input height of at least 3 required
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
+      xnn_pack_f32_dconv_oki_w(
+        output_channels(),
+        input_channels(),
+        output_channels_tile(),
+        kernel_height(), kernel_width(),
+        kernel.data(), bias.data(), packed_weights.data(), nullptr);
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X2, input_height_gt_3) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t input_height = 4; input_height <= 9; input_height++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(input_height)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
+      // Compute reference results, without clamping.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t oy = 0; oy < output_height(); oy++) {
+          for (size_t ox = 0; ox < output_width(); ox++) {
+            for (size_t oc = 0; oc < output_channels(); oc++) {
+              float acc = bias[oc];
+              for (size_t ky = 0; ky < kernel_height(); ky++) {
+                const size_t iy = oy * subsampling_height() + ky - padding_top();
+                if (iy < input_height()) {
+                  for (size_t kx = 0; kx < kernel_width(); kx++) {
+                    const size_t ix = ox * subsampling_width() + kx - padding_left();
+                    if (ix < input_width()) {
+                      for (size_t ic = 0; ic < input_channels(); ic++) {
+                        acc +=
+                          input[((i * input_height() + iy) * input_width() + ix) * input_pixel_stride() + ic] *
+                          kernel[((oc * kernel_height() + ky) * kernel_width() + kx) * input_channels() + ic];
+                      }
+                    }
+                  }
+                }
+              }
+              output_ref[((i * output_height() + oy) * output_width() + ox) * output_channels() + oc] = acc;
+            }
+          }
         }
       }
-    }
-  }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X2, padding_top) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .padding_top(padding_top)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
+      // Compute clamping parameters.
+      const float accumulated_min = *std::min_element(output_ref.cbegin(), output_ref.cend());
+      const float accumulated_max = *std::max_element(output_ref.cbegin(), output_ref.cend());
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X2, padding_bottom) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .padding_bottom(padding_bottom)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
+      const float output_min = accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin());
+      const float output_max = accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax());
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X2, output_y_start) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_start(output_y_start)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
+      // Clamp reference results.
+      for (float& value : output_ref) {
+        value = std::max(std::min(value, output_max), output_min);
       }
-    }
-  }
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X2, output_y_end) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-      for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-        for (size_t input_width = 1; input_width < 32; input_width += 7) {
-          ConvHWCMicrokernelTester()
-            .kernel_size(3)
-            .subsampling(2)
-            .padding_width(1)
-            .input_channels(3)
-            .output_channels_tile(8)
-            .output_channels(output_channels)
-            .input_width(input_width)
-            .input_height(9)
-            .output_y_end(output_y_end)
-            .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-        }
-      }
-    }
-  }
+      // Prepare parameters.
+      xnn_f32_minmax_params params;
+      init_params(&params, output_min, output_max);
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X2, qmin) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmin(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
+      // Call optimized micro-kernel.
+      conv(
+        input_height(), input_width(),
+        output_y_start(), output_y_end(),
+        input.data(), zero.data(), packed_weights.data(), output.data(),
+        padding_top(), output_channels(),
+        output_pixel_stride() * output_width() * sizeof(float),
+        output_pixel_stride() * sizeof(float),
+        &params);
 
-  TEST(F32_CONV_HWC_3X3S2P1C3X8__NEON_2X2, qmax) {
-    TEST_REQUIRES_ARM_NEON;
-    for (size_t output_channels = 1; output_channels < 16; output_channels += 7) {
-      for (size_t input_width = 1; input_width < 32; input_width += 7) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(8)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(6)
-          .qmax(128)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
-
-
-TEST(F32_CONV_HWC_3X3S2P0P1C3X4__SCALAR_1X1, input_width_eq_2) {
-  ConvHWCMicrokernelTester()
-    .kernel_size(3)
-    .subsampling(2)
-    .padding_right(1)
-    .input_channels(3)
-    .output_channels_tile(4)
-    .output_channels(4)
-    .input_width(2)
-    .input_height(3)
-    .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-}
-
-TEST(F32_CONV_HWC_3X3S2P0P1C3X4__SCALAR_1X1, input_width_div_2) {
-  for (size_t input_width = 4; input_width <= 16; input_width += 6) {
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_right(1)
-      .input_channels(3)
-      .output_channels_tile(4)
-      .output_channels(4)
-      .input_width(input_width)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P0P1C3X4__SCALAR_1X1, input_width_lt_2) {
-  for (size_t input_width = 2; input_width < 2; input_width++) {
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_right(1)
-      .input_channels(3)
-      .output_channels_tile(4)
-      .output_channels(4)
-      .input_width(input_width)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P0P1C3X4__SCALAR_1X1, input_width_gt_2) {
-  for (size_t input_width = 3; input_width < 4; input_width++) {
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_right(1)
-      .input_channels(3)
-      .output_channels_tile(4)
-      .output_channels(4)
-      .input_width(input_width)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P0P1C3X4__SCALAR_1X1, output_channels_lt_4) {
-  for (size_t output_channels = 1; output_channels < 4; output_channels++) {
-    for (size_t input_width = 2; input_width < 16; input_width += 3) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(output_channels)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P0P1C3X4__SCALAR_1X1, output_channels_div_4) {
-  for (size_t output_channels = 8; output_channels <= 16; output_channels += 4) {
-    for (size_t input_width = 2; input_width < 16; input_width += 3) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(output_channels)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P0P1C3X4__SCALAR_1X1, output_channels_gt_4) {
-  for (size_t output_channels = 5; output_channels < 8; output_channels++) {
-    for (size_t input_width = 2; input_width < 16; input_width += 3) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(output_channels)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P0P1C3X4__SCALAR_1X1, input_height_lt_3) {
-  for (size_t input_height = 1; input_height < 3; input_height++) {
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .padding_height(1) // padded input height of at least 3 required
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(input_height)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P0P1C3X4__SCALAR_1X1, input_height_gt_3) {
-  for (size_t input_height = 4; input_height <= 9; input_height++) {
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(input_height)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P0P1C3X4__SCALAR_1X1, padding_top) {
-  for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .padding_top(padding_top)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(9)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P0P1C3X4__SCALAR_1X1, padding_bottom) {
-  for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .padding_bottom(padding_bottom)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(9)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P0P1C3X4__SCALAR_1X1, output_y_start) {
-  for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(9)
-          .output_y_start(output_y_start)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P0P1C3X4__SCALAR_1X1, output_y_end) {
-  for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 2; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_right(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(9)
-          .output_y_end(output_y_end)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P0P1C3X4__SCALAR_1X1, qmin) {
-  for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-    for (size_t input_width = 2; input_width < 16; input_width += 3) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(output_channels)
-        .input_width(input_width)
-        .input_height(6)
-        .qmin(128)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P0P1C3X4__SCALAR_1X1, qmax) {
-  for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-    for (size_t input_width = 2; input_width < 16; input_width += 3) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_right(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(output_channels)
-        .input_width(input_width)
-        .input_height(6)
-        .qmax(128)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P1C3X4__SCALAR_1X1, input_width_eq_2) {
-  ConvHWCMicrokernelTester()
-    .kernel_size(3)
-    .subsampling(2)
-    .padding_width(1)
-    .input_channels(3)
-    .output_channels_tile(4)
-    .output_channels(4)
-    .input_width(2)
-    .input_height(3)
-    .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-}
-
-TEST(F32_CONV_HWC_3X3S2P1C3X4__SCALAR_1X1, input_width_div_2) {
-  for (size_t input_width = 4; input_width <= 16; input_width += 6) {
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_width(1)
-      .input_channels(3)
-      .output_channels_tile(4)
-      .output_channels(4)
-      .input_width(input_width)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P1C3X4__SCALAR_1X1, input_width_lt_2) {
-  for (size_t input_width = 1; input_width < 2; input_width++) {
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_width(1)
-      .input_channels(3)
-      .output_channels_tile(4)
-      .output_channels(4)
-      .input_width(input_width)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P1C3X4__SCALAR_1X1, input_width_gt_2) {
-  for (size_t input_width = 3; input_width < 4; input_width++) {
-    ConvHWCMicrokernelTester()
-      .kernel_size(3)
-      .subsampling(2)
-      .padding_width(1)
-      .input_channels(3)
-      .output_channels_tile(4)
-      .output_channels(4)
-      .input_width(input_width)
-      .input_height(3)
-      .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P1C3X4__SCALAR_1X1, output_channels_lt_4) {
-  for (size_t output_channels = 1; output_channels < 4; output_channels++) {
-    for (size_t input_width = 1; input_width < 16; input_width += 3) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(output_channels)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P1C3X4__SCALAR_1X1, output_channels_div_4) {
-  for (size_t output_channels = 8; output_channels <= 16; output_channels += 4) {
-    for (size_t input_width = 1; input_width < 16; input_width += 3) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(output_channels)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P1C3X4__SCALAR_1X1, output_channels_gt_4) {
-  for (size_t output_channels = 5; output_channels < 8; output_channels++) {
-    for (size_t input_width = 1; input_width < 16; input_width += 3) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(output_channels)
-        .input_width(input_width)
-        .input_height(3)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P1C3X4__SCALAR_1X1, input_height_lt_3) {
-  for (size_t input_height = 1; input_height < 3; input_height++) {
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding(1) // padded input height of at least 3 required
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(input_height)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P1C3X4__SCALAR_1X1, input_height_gt_3) {
-  for (size_t input_height = 4; input_height <= 9; input_height++) {
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(input_height)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P1C3X4__SCALAR_1X1, padding_top) {
-  for (size_t padding_top = 0; padding_top <= 1; padding_top++) {
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .padding_top(padding_top)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(9)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P1C3X4__SCALAR_1X1, padding_bottom) {
-  for (size_t padding_bottom = 0; padding_bottom <= 1; padding_bottom++) {
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .padding_bottom(padding_bottom)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(9)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P1C3X4__SCALAR_1X1, output_y_start) {
-  for (size_t output_y_start = 1; output_y_start <= 3; output_y_start++) {
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(9)
-          .output_y_start(output_y_start)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P1C3X4__SCALAR_1X1, output_y_end) {
-  for (size_t output_y_end = 2; output_y_end < 5; output_y_end++) {
-    for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-      for (size_t input_width = 1; input_width < 16; input_width += 3) {
-        ConvHWCMicrokernelTester()
-          .kernel_size(3)
-          .subsampling(2)
-          .padding_width(1)
-          .input_channels(3)
-          .output_channels_tile(4)
-          .output_channels(output_channels)
-          .input_width(input_width)
-          .input_height(9)
-          .output_y_end(output_y_end)
-          .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-      }
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P1C3X4__SCALAR_1X1, qmin) {
-  for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-    for (size_t input_width = 1; input_width < 16; input_width += 3) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(output_channels)
-        .input_width(input_width)
-        .input_height(6)
-        .qmin(128)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-}
-
-TEST(F32_CONV_HWC_3X3S2P1C3X4__SCALAR_1X1, qmax) {
-  for (size_t output_channels = 1; output_channels < 8; output_channels += 3) {
-    for (size_t input_width = 1; input_width < 16; input_width += 3) {
-      ConvHWCMicrokernelTester()
-        .kernel_size(3)
-        .subsampling(2)
-        .padding_width(1)
-        .input_channels(3)
-        .output_channels_tile(4)
-        .output_channels(output_channels)
-        .input_width(input_width)
-        .input_height(6)
-        .qmax(128)
-        .Test(xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1, xnn_init_f32_minmax_scalar_params);
-    }
-  }
-}
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        for (size_t y = output_y_start(); y < output_y_end(); y++) {
+          for (size_t x = 0; x < output_width(); x++) {
+            for (size_t c = 0; c < output_channels(); c++) {
+              EXPECT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_min)
+                << "(x, y) = (" << x << ", " << y << "), channel = " << c;
+              EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max)
+                << "(x, y) = (" << x << ", " << y << "), channel = " << c;
+              EXPECT_NEAR(
+                  output_ref[((i * output_height() + y) * output_width() + x) * output_channels() + c],
+                  output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c],
+                  1.0e-4 * std::abs(output_ref[((i * output_height() + y) * output_width() + x) * output_channels() + c]))
+                << "(x, y) = (" << x << ", " << y << "), channel = " << c;
+            }
+          }
+        }
+      }
+    }
+  }
+
+ private:
+  uint32_t padding_top_{0};
+  uint32_t padding_right_{0};
+  uint32_t padding_bottom_{0};
+  uint32_t padding_left_{0};
+  size_t input_height_{1};
+  size_t input_width_{1};
+  size_t input_channels_{1};
+  size_t output_channels_{1};
+  uint32_t output_channels_tile_{1};
+  size_t batch_size_{1};
+  uint32_t kernel_height_{1};
+  uint32_t kernel_width_{1};
+  uint32_t subsampling_height_{1};
+  uint32_t subsampling_width_{1};
+  uint32_t output_y_start_{0};
+  uint32_t output_y_end_{std::numeric_limits<uint32_t>::max()};
+  uint8_t qmin_{0};
+  uint8_t qmax_{255};
+  size_t iterations_{1};
+};
+
+#define XNN_TEST_CONVHWC_INPUT_WIDTH_EQ(                                                                               \
+  ukernel, arch_flags, kernel_sizes, subsamplings, padding_right_, padding_left_, input_channel, output_channel_tile,  \
+  input_widths, init_params, ...)                                                                                      \
+  TEST(ukernel, input_width_eq)                                                                                        \
+  {                                                                                                                    \
+    auto tester = ConvHWCMicrokernelTester()                                                                           \
+                    .kernel_size(kernel_sizes)                                                                         \
+                    .subsampling(subsamplings)                                                                         \
+                    .input_channels(input_channel)                                                                     \
+                    .output_channels_tile(output_channel_tile)                                                         \
+                    .output_channels(output_channel_tile)                                                              \
+                    .input_width(input_widths)                                                                         \
+                    .input_height(kernel_sizes);                                                                       \
+    if (padding_left_ == 1 && padding_right_ == 1) {                                                                   \
+      tester.padding_width(padding_right_);                                                                            \
+    }                                                                                                                  \
+    else if (padding_left_ == 0 && padding_right_ == 1) {                                                              \
+      tester.padding_right(padding_right_);                                                                            \
+    }                                                                                                                  \
+    tester.Test(ukernel, init_params);                                                                                 \
+  }
+
+#define XNN_TEST_CONVHWC_INPUT_WIDTH_DIV(                                                                              \
+  ukernel, arch_flags, kernel_sizes, subsamplings, padding_right_, padding_left_, input_channel, output_channel_tile,  \
+  input_widths, init_params, ...)                                                                                      \
+  TEST(ukernel, input_width_div)                                                                                       \
+  {                                                                                                                    \
+    for (size_t input_widths_ = input_widths * 2; input_widths_ < (input_widths * 8);                                  \
+         input_widths_ += input_widths * 3) {                                                                          \
+      auto tester = ConvHWCMicrokernelTester()                                                                         \
+                      .kernel_size(kernel_sizes)                                                                       \
+                      .subsampling(subsamplings)                                                                       \
+                      .input_channels(input_channel)                                                                   \
+                      .output_channels_tile(output_channel_tile)                                                       \
+                      .output_channels(output_channel_tile)                                                            \
+                      .input_width(input_widths_)                                                                      \
+                      .input_height(kernel_sizes);                                                                     \
+      if (padding_left_ == 1 && padding_right_ == 1) {                                                                 \
+        tester.padding_width(padding_right_);                                                                          \
+      }                                                                                                                \
+      else if (padding_left_ == 0 && padding_right_ == 1) {                                                            \
+        tester.padding_right(padding_right_);                                                                          \
+      }                                                                                                                \
+      tester.Test(ukernel, init_params);                                                                               \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_CONVHWC_INPUT_WIDTH_LT(                                                                               \
+  ukernel, arch_flags, kernel_sizes, subsamplings, padding_right_, padding_left_, input_channel, output_channel_tile,  \
+  input_widths, init_params, ...)                                                                                      \
+  TEST(ukernel, input_width_lt)                                                                                        \
+  {                                                                                                                    \
+    for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths; input_widths_++) {              \
+      auto tester = ConvHWCMicrokernelTester()                                                                         \
+                      .kernel_size(kernel_sizes)                                                                       \
+                      .subsampling(subsamplings)                                                                       \
+                      .input_channels(input_channel)                                                                   \
+                      .output_channels_tile(output_channel_tile)                                                       \
+                      .output_channels(output_channel_tile)                                                            \
+                      .input_width(input_widths_)                                                                      \
+                      .input_height(kernel_sizes);                                                                     \
+      if (padding_left_ == 1 && padding_right_ == 1) {                                                                 \
+        tester.padding_width(padding_right_);                                                                          \
+      }                                                                                                                \
+      else if (padding_left_ == 0 && padding_right_ == 1) {                                                            \
+        tester.padding_right(padding_right_);                                                                          \
+      }                                                                                                                \
+      tester.Test(ukernel, init_params);                                                                               \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_CONVHWC_INPUT_WIDTH_GT(                                                                               \
+  ukernel, arch_flags, kernel_sizes, subsamplings, padding_right_, padding_left_, input_channel, output_channel_tile,  \
+  input_widths, init_params, ...)                                                                                      \
+  TEST(ukernel, input_width_gt)                                                                                        \
+  {                                                                                                                    \
+    for (size_t input_widths_ = input_widths + 1; input_widths_ < input_widths * 2; input_widths_++) {                 \
+      auto tester = ConvHWCMicrokernelTester()                                                                         \
+                      .kernel_size(kernel_sizes)                                                                       \
+                      .subsampling(subsamplings)                                                                       \
+                      .input_channels(input_channel)                                                                   \
+                      .output_channels_tile(output_channel_tile)                                                       \
+                      .output_channels(output_channel_tile)                                                            \
+                      .input_width(input_widths_)                                                                      \
+                      .input_height(kernel_sizes);                                                                     \
+      if (padding_left_ == 1 && padding_right_ == 1) {                                                                 \
+        tester.padding_width(padding_right_);                                                                          \
+      }                                                                                                                \
+      else if (padding_left_ == 0 && padding_right_ == 1) {                                                            \
+        tester.padding_right(padding_right_);                                                                          \
+      }                                                                                                                \
+      tester.Test(ukernel, init_params);                                                                               \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_CONVHWC_OUTPUT_CHANNELS_LT(                                                                           \
+  ukernel, arch_flags, kernel_sizes, subsamplings, padding_right_, padding_left_, input_channel, output_channel_tile,  \
+  input_widths, init_params, ...)                                                                                      \
+  TEST(ukernel, output_channels_lt)                                                                                    \
+  {                                                                                                                    \
+    for (size_t output_channels = 1; output_channels < output_channel_tile; output_channels++) {                       \
+      for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                           \
+           input_widths_ += (input_widths * 2 - 1)) {                                                                  \
+        auto tester = ConvHWCMicrokernelTester()                                                                       \
+                        .kernel_size(kernel_sizes)                                                                     \
+                        .subsampling(subsamplings)                                                                     \
+                        .input_channels(input_channel)                                                                 \
+                        .output_channels_tile(output_channel_tile)                                                     \
+                        .output_channels(output_channels)                                                              \
+                        .input_width(input_widths_)                                                                    \
+                        .input_height(kernel_sizes);                                                                   \
+        if (padding_left_ == 1 && padding_right_ == 1) {                                                               \
+          tester.padding_width(padding_right_);                                                                        \
+        }                                                                                                              \
+        else if (padding_left_ == 0 && padding_right_ == 1) {                                                          \
+          tester.padding_right(padding_right_);                                                                        \
+        }                                                                                                              \
+        tester.Test(ukernel, init_params);                                                                             \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_CONVHWC_OUTPUT_CHANNELS_DIV(                                                                          \
+  ukernel, arch_flags, kernel_sizes, subsamplings, padding_right_, padding_left_, input_channel, output_channel_tile,  \
+  input_widths, init_params, ...)                                                                                      \
+  TEST(ukernel, output_channels_div)                                                                                   \
+  {                                                                                                                    \
+    for (size_t output_channels = output_channel_tile * 2; output_channels <= output_channel_tile * 4;                 \
+         output_channels += output_channel_tile) {                                                                     \
+      for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                           \
+           input_widths_ += (input_widths * 2 - 1)) {                                                                  \
+        auto tester = ConvHWCMicrokernelTester()                                                                       \
+                        .kernel_size(kernel_sizes)                                                                     \
+                        .subsampling(subsamplings)                                                                     \
+                        .input_channels(input_channel)                                                                 \
+                        .output_channels_tile(output_channel_tile)                                                     \
+                        .output_channels(output_channels)                                                              \
+                        .input_width(input_widths_)                                                                    \
+                        .input_height(kernel_sizes);                                                                   \
+        if (padding_left_ == 1 && padding_right_ == 1) {                                                               \
+          tester.padding_width(padding_right_);                                                                        \
+        }                                                                                                              \
+        else if (padding_left_ == 0 && padding_right_ == 1) {                                                          \
+          tester.padding_right(padding_right_);                                                                        \
+        }                                                                                                              \
+        tester.Test(ukernel, init_params);                                                                             \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_CONVHWC_OUTPUT_CHANNELS_GT(                                                                           \
+  ukernel, arch_flags, kernel_sizes, subsamplings, padding_right_, padding_left_, input_channel, output_channel_tile,  \
+  input_widths, init_params, ...)                                                                                      \
+  TEST(ukernel, output_channels_gt)                                                                                    \
+  {                                                                                                                    \
+    for (size_t output_channels = output_channel_tile + 1; output_channels < output_channel_tile * 2;                  \
+         output_channels++) {                                                                                          \
+      for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                           \
+           input_widths_ += (input_widths * 2 - 1)) {                                                                  \
+        auto tester = ConvHWCMicrokernelTester()                                                                       \
+                        .kernel_size(kernel_sizes)                                                                     \
+                        .subsampling(subsamplings)                                                                     \
+                        .input_channels(input_channel)                                                                 \
+                        .output_channels_tile(output_channel_tile)                                                     \
+                        .output_channels(output_channels)                                                              \
+                        .input_width(input_widths_)                                                                    \
+                        .input_height(kernel_sizes);                                                                   \
+        if (padding_left_ == 1 && padding_right_ == 1) {                                                               \
+          tester.padding_width(padding_right_);                                                                        \
+        }                                                                                                              \
+        else if (padding_left_ == 0 && padding_right_ == 1) {                                                          \
+          tester.padding_right(padding_right_);                                                                        \
+        }                                                                                                              \
+        tester.Test(ukernel, init_params);                                                                             \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_CONVHWC_INPUT_HEIGHT_LT(                                                                              \
+  ukernel, arch_flags, kernel_sizes, subsamplings, padding_right_, padding_left_, input_channel, output_channel_tile,  \
+  input_widths, init_params, ...)                                                                                      \
+  TEST(ukernel, input_height_lt)                                                                                       \
+  {                                                                                                                    \
+    for (size_t input_heights = 1; input_heights < 3; input_heights++) {                                               \
+      for (size_t output_channels = 1; output_channels < output_channel_tile * 2;                                      \
+           output_channels += output_channel_tile - 1) {                                                               \
+        for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                         \
+             input_widths_ += (input_widths * 2 - 1)) {                                                                \
+          auto tester = ConvHWCMicrokernelTester()                                                                     \
+                          .kernel_size(kernel_sizes)                                                                   \
+                          .subsampling(subsamplings)                                                                   \
+                          .input_channels(input_channel)                                                               \
+                          .output_channels_tile(output_channel_tile)                                                   \
+                          .output_channels(output_channels)                                                            \
+                          .input_width(input_widths_)                                                                  \
+                          .input_height(input_heights);                                                                \
+          if (padding_left_ == 0) {                                                                                    \
+            tester.padding_right(1);                                                                                   \
+            tester.padding_height(1);                                                                                  \
+          }                                                                                                            \
+          else {                                                                                                       \
+            tester.padding(1);                                                                                         \
+          }                                                                                                            \
+          tester.Test(ukernel, init_params);                                                                           \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_CONVHWC_INPUT_HEIGHT_GT(                                                                              \
+  ukernel, arch_flags, kernel_sizes, subsamplings, padding_right_, padding_left_, input_channel, output_channel_tile,  \
+  input_widths, init_params, ...)                                                                                      \
+  TEST(ukernel, input_height_gt)                                                                                       \
+  {                                                                                                                    \
+    for (size_t input_heights = 4; input_heights <= 9; input_heights++) {                                              \
+      for (size_t output_channels = 1; output_channels < output_channel_tile * 2;                                      \
+           output_channels += output_channel_tile - 1) {                                                               \
+        for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                         \
+             input_widths_ += (input_widths * 2 - 1)) {                                                                \
+          auto tester = ConvHWCMicrokernelTester()                                                                     \
+                          .kernel_size(kernel_sizes)                                                                   \
+                          .subsampling(subsamplings)                                                                   \
+                          .input_channels(input_channel)                                                               \
+                          .output_channels_tile(output_channel_tile)                                                   \
+                          .output_channels(output_channels)                                                            \
+                          .input_width(input_widths_)                                                                  \
+                          .input_height(input_heights);                                                                \
+          if (padding_left_ == 1 && padding_right_ == 1) {                                                             \
+            tester.padding_width(padding_right_);                                                                      \
+          }                                                                                                            \
+          else if (padding_left_ == 0 && padding_right_ == 1) {                                                        \
+            tester.padding_right(padding_right_);                                                                      \
+          }                                                                                                            \
+          tester.Test(ukernel, init_params);                                                                           \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_CONVHWC_PADDING_TOP(                                                                                  \
+  ukernel, arch_flags, kernel_sizes, subsamplings, padding_right_, padding_left_, input_channel, output_channel_tile,  \
+  input_widths, init_params, ...)                                                                                      \
+  TEST(ukernel, padding_top)                                                                                           \
+  {                                                                                                                    \
+    for (size_t padding_tops = 0; padding_tops <= 1; padding_tops++) {                                                 \
+      for (size_t output_channels = 1; output_channels < output_channel_tile * 2;                                      \
+           output_channels += output_channel_tile - 1) {                                                               \
+        for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                         \
+             input_widths_ += (input_widths * 2 - 1)) {                                                                \
+          auto tester = ConvHWCMicrokernelTester()                                                                     \
+                          .kernel_size(kernel_sizes)                                                                   \
+                          .subsampling(subsamplings)                                                                   \
+                          .input_channels(input_channel)                                                               \
+                          .output_channels_tile(output_channel_tile)                                                   \
+                          .output_channels(output_channels)                                                            \
+                          .input_width(input_widths_)                                                                  \
+                          .input_height(9);                                                                            \
+          if (padding_left_ == 1 && padding_right_ == 1) {                                                             \
+            tester.padding_width(padding_right_);                                                                      \
+          }                                                                                                            \
+          else if (padding_left_ == 0 && padding_right_ == 1) {                                                        \
+            tester.padding_right(padding_right_);                                                                      \
+          }                                                                                                            \
+          tester.padding_top(padding_tops).Test(ukernel, init_params);                                                 \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_CONVHWC_PADDING_BOTTOM(                                                                               \
+  ukernel, arch_flags, kernel_sizes, subsamplings, padding_right_, padding_left_, input_channel, output_channel_tile,  \
+  input_widths, init_params, ...)                                                                                      \
+  TEST(ukernel, padding_bottom)                                                                                        \
+  {                                                                                                                    \
+    for (size_t padding_bottoms = 0; padding_bottoms <= 1; padding_bottoms++) {                                        \
+      for (size_t output_channels = 1; output_channels < output_channel_tile * 2;                                      \
+           output_channels += output_channel_tile - 1) {                                                               \
+        for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                         \
+             input_widths_ += (input_widths * 2 - 1)) {                                                                \
+          auto tester = ConvHWCMicrokernelTester()                                                                     \
+                          .kernel_size(kernel_sizes)                                                                   \
+                          .subsampling(subsamplings)                                                                   \
+                          .input_channels(input_channel)                                                               \
+                          .output_channels_tile(output_channel_tile)                                                   \
+                          .output_channels(output_channels)                                                            \
+                          .input_width(input_widths_)                                                                  \
+                          .input_height(9);                                                                            \
+          if (padding_left_ == 1 && padding_right_ == 1) {                                                             \
+            tester.padding_width(padding_right_);                                                                      \
+          }                                                                                                            \
+          else if (padding_left_ == 0 && padding_right_ == 1) {                                                        \
+            tester.padding_right(padding_right_);                                                                      \
+          }                                                                                                            \
+          tester.padding_bottom(padding_bottoms).Test(ukernel, init_params);                                           \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_CONVHWC_OUTPUT_Y_START(                                                                               \
+  ukernel, arch_flags, kernel_sizes, subsamplings, padding_right_, padding_left_, input_channel, output_channel_tile,  \
+  input_widths, init_params, ...)                                                                                      \
+  TEST(ukernel, output_y_start)                                                                                        \
+  {                                                                                                                    \
+    for (size_t output_y_starts = 1; output_y_starts <= 3; output_y_starts++) {                                        \
+      for (size_t output_channels = 1; output_channels < output_channel_tile * 2;                                      \
+           output_channels += output_channel_tile - 1) {                                                               \
+        for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                         \
+             input_widths_ += (input_widths * 2 - 1)) {                                                                \
+          auto tester = ConvHWCMicrokernelTester()                                                                     \
+                          .kernel_size(kernel_sizes)                                                                   \
+                          .subsampling(subsamplings)                                                                   \
+                          .input_channels(input_channel)                                                               \
+                          .output_channels_tile(output_channel_tile)                                                   \
+                          .output_channels(output_channels)                                                            \
+                          .input_width(input_widths_)                                                                  \
+                          .input_height(9)                                                                             \
+                          .output_y_start(output_y_starts);                                                            \
+          if (padding_left_ == 1 && padding_right_ == 1) {                                                             \
+            tester.padding_width(padding_right_);                                                                      \
+          }                                                                                                            \
+          else if (padding_left_ == 0 && padding_right_ == 1) {                                                        \
+            tester.padding_right(padding_right_);                                                                      \
+          }                                                                                                            \
+          tester.Test(ukernel, init_params);                                                                           \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_CONVHWC_OUTPUT_Y_END(                                                                                 \
+  ukernel, arch_flags, kernel_sizes, subsamplings, padding_right_, padding_left_, input_channel, output_channel_tile,  \
+  input_widths, init_params, ...)                                                                                      \
+  TEST(ukernel, output_y_end)                                                                                          \
+  {                                                                                                                    \
+    for (size_t output_y_ends = 2; output_y_ends < 5; output_y_ends++) {                                               \
+      for (size_t output_channels = 1; output_channels < output_channel_tile * 2;                                      \
+           output_channels += output_channel_tile - 1) {                                                               \
+        for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                         \
+             input_widths_ += (input_widths * 2 - 1)) {                                                                \
+          auto tester = ConvHWCMicrokernelTester()                                                                     \
+                          .kernel_size(kernel_sizes)                                                                   \
+                          .subsampling(subsamplings)                                                                   \
+                          .input_channels(input_channel)                                                               \
+                          .output_channels_tile(output_channel_tile)                                                   \
+                          .output_channels(output_channels)                                                            \
+                          .input_width(input_widths_)                                                                  \
+                          .input_height(9)                                                                             \
+                          .output_y_end(output_y_ends);                                                                \
+          if (padding_left_ == 1 && padding_right_ == 1) {                                                             \
+            tester.padding_width(padding_right_);                                                                      \
+          }                                                                                                            \
+          else if (padding_left_ == 0 && padding_right_ == 1) {                                                        \
+            tester.padding_right(padding_right_);                                                                      \
+          }                                                                                                            \
+          tester.Test(ukernel, init_params);                                                                           \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_CONVHWC_QMIN(                                                                                         \
+  ukernel, arch_flags, kernel_sizes, subsamplings, padding_right_, padding_left_, input_channel, output_channel_tile,  \
+  input_widths, init_params, ...)                                                                                      \
+  TEST(ukernel, qmin)                                                                                                  \
+  {                                                                                                                    \
+    for (size_t output_channels = 1; output_channels < output_channel_tile * 2;                                        \
+         output_channels += output_channel_tile - 1) {                                                                 \
+      for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                           \
+           input_widths_ += (input_widths * 2 - 1)) {                                                                  \
+        auto tester = ConvHWCMicrokernelTester()                                                                       \
+                        .kernel_size(kernel_sizes)                                                                     \
+                        .subsampling(subsamplings)                                                                     \
+                        .input_channels(input_channel)                                                                 \
+                        .output_channels_tile(output_channel_tile)                                                     \
+                        .output_channels(output_channels)                                                              \
+                        .input_width(input_widths_)                                                                    \
+                        .input_height(6)                                                                               \
+                        .qmin(128);                                                                                    \
+        if (padding_left_ == 1 && padding_right_ == 1) {                                                               \
+          tester.padding_width(padding_right_);                                                                        \
+        }                                                                                                              \
+        else if (padding_left_ == 0 && padding_right_ == 1) {                                                          \
+          tester.padding_right(padding_right_);                                                                        \
+        }                                                                                                              \
+        tester.Test(ukernel, init_params);                                                                             \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_CONVHWC_QMAX(                                                                                         \
+  ukernel, arch_flags, kernel_sizes, subsamplings, padding_right_, padding_left_, input_channel, output_channel_tile,  \
+  input_widths, init_params, ...)                                                                                      \
+  TEST(ukernel, qmax)                                                                                                  \
+  {                                                                                                                    \
+    for (size_t output_channels = 1; output_channels < output_channel_tile * 2;                                        \
+         output_channels += output_channel_tile - 1) {                                                                 \
+      for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                           \
+           input_widths_ += (input_widths * 2 - 1)) {                                                                  \
+        auto tester = ConvHWCMicrokernelTester()                                                                       \
+                        .kernel_size(kernel_sizes)                                                                     \
+                        .subsampling(subsamplings)                                                                     \
+                        .input_channels(input_channel)                                                                 \
+                        .output_channels_tile(output_channel_tile)                                                     \
+                        .output_channels(output_channels)                                                              \
+                        .input_width(input_widths_)                                                                    \
+                        .input_height(6)                                                                               \
+                        .qmax(128);                                                                                    \
+        if (padding_left_ == 1 && padding_right_ == 1) {                                                               \
+          tester.padding_width(padding_right_);                                                                        \
+        }                                                                                                              \
+        else if (padding_left_ == 0 && padding_right_ == 1) {                                                          \
+          tester.padding_right(padding_right_);                                                                        \
+        }                                                                                                              \
+        tester.Test(ukernel, init_params);                                                                             \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
+
+#define XNN_UKERNEL_WITH_PARAMS(                                                                                       \
+  arch_flags, ukernel, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile,    \
+  input_widths, datatype, params_type, init_params)                                                                    \
+  XNN_TEST_CONVHWC_INPUT_WIDTH_EQ(                                                                                     \
+    ukernel, arch_flags, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile,  \
+    input_widths, init_params);                                                                                        \
+  XNN_TEST_CONVHWC_INPUT_WIDTH_DIV(                                                                                    \
+    ukernel, arch_flags, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile,  \
+    input_widths, init_params);                                                                                        \
+  XNN_TEST_CONVHWC_INPUT_WIDTH_LT(                                                                                     \
+    ukernel, arch_flags, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile,  \
+    input_widths, init_params);                                                                                        \
+  XNN_TEST_CONVHWC_INPUT_WIDTH_GT(                                                                                     \
+    ukernel, arch_flags, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile,  \
+    input_widths, init_params);                                                                                        \
+  XNN_TEST_CONVHWC_OUTPUT_CHANNELS_LT(                                                                                 \
+    ukernel, arch_flags, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile,  \
+    input_widths, init_params);                                                                                        \
+  XNN_TEST_CONVHWC_OUTPUT_CHANNELS_DIV(                                                                                \
+    ukernel, arch_flags, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile,  \
+    input_widths, init_params);                                                                                        \
+  XNN_TEST_CONVHWC_OUTPUT_CHANNELS_GT(                                                                                 \
+    ukernel, arch_flags, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile,  \
+    input_widths, init_params);                                                                                        \
+  XNN_TEST_CONVHWC_INPUT_HEIGHT_LT(                                                                                    \
+    ukernel, arch_flags, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile,  \
+    input_widths, init_params);                                                                                        \
+  XNN_TEST_CONVHWC_INPUT_HEIGHT_GT(                                                                                    \
+    ukernel, arch_flags, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile,  \
+    input_widths, init_params);                                                                                        \
+  XNN_TEST_CONVHWC_PADDING_TOP(                                                                                        \
+    ukernel, arch_flags, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile,  \
+    input_widths, init_params);                                                                                        \
+  XNN_TEST_CONVHWC_PADDING_BOTTOM(                                                                                     \
+    ukernel, arch_flags, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile,  \
+    input_widths, init_params);                                                                                        \
+  XNN_TEST_CONVHWC_OUTPUT_Y_START(                                                                                     \
+    ukernel, arch_flags, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile,  \
+    input_widths, init_params);                                                                                        \
+  XNN_TEST_CONVHWC_OUTPUT_Y_END(                                                                                       \
+    ukernel, arch_flags, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile,  \
+    input_widths, init_params);                                                                                        \
+  XNN_TEST_CONVHWC_QMIN(                                                                                               \
+    ukernel, arch_flags, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile,  \
+    input_widths, init_params);                                                                                        \
+  XNN_TEST_CONVHWC_QMAX(                                                                                               \
+    ukernel, arch_flags, kernel_size, subsampling, padding_right, padding_left, input_channels, output_channels_tile,  \
+    input_widths, init_params);
+#include "f32-conv-hwc/f32-conv-hwc.h"
+#undef XNN_UKERNEL_WITH_PARAMS
