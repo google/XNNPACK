@@ -1059,7 +1059,6 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "x8_lut_test",
     srcs = [
-        "lut-microkernel-tester.h",
         "x8-lut.cc",
     ],
     deps = MICROKERNEL_TEST_DEPS,
