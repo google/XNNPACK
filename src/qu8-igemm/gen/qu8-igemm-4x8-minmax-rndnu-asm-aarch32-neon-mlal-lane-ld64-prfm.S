@@ -42,7 +42,8 @@
 
 // params structure is 20 bytes
 //  struct {
-//    uint8_t kernel_zero_point[4]; d14
+//    uint8_t kernel_zero_point;    d14
+//    uint8_t padding[3];
 //    int32_t right_pre_shift;         d12[0]
 //    int32_t multiplier;              d12[1]
 //    int32_t right_post_shift;        d13[0]
@@ -77,7 +78,8 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lan
         MOVLO       r6, r8                  // c3
 
         # Load params values
-        VLD1.32     {d14[]}, [r5]!          // QU8 kernel_zero_point
+        VLD1.8     {d14[]}, [r5]!          // QU8 kernel_zero_point
+        ADD        r5, r5, 3               // Skip padding
         VLDM        r5, {d12-d13}           // RNDNU params
 
         PLD         [r9,  64]               // Prefetch B

@@ -69,7 +69,7 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${FIRS
   assert(kernel_size > ${FIRST_PASS_TILE});
 
   $if DATATYPE == "QU8":
-    const uint8x8_t vkernel_zero_point = vld1_dup_u8(params->${PARAMS_STRUCT}.kernel_zero_point);
+    const uint8x8_t vkernel_zero_point = vld1_dup_u8(&params->${PARAMS_STRUCT}.kernel_zero_point);
   $if REQUANTIZATION == "RNDNU":
     const int32x4_t vright_pre_shift = vld1q_dup_s32(&params->${PARAMS_STRUCT}.right_pre_shift);
     const int32x4_t vmultiplier = vld1q_dup_s32(&params->${PARAMS_STRUCT}.multiplier);

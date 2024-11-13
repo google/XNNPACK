@@ -330,10 +330,7 @@ size_t xnn_init_qu8_conv_minmax_fp32_neon_params(
   assert(scale >= 0x1.0p-32f);
   assert(scale < 256.0f);
 
-  params->fp32_neon.kernel_zero_point[0] = kernel_zero_point;
-  params->fp32_neon.kernel_zero_point[1] = kernel_zero_point;
-  params->fp32_neon.kernel_zero_point[2] = kernel_zero_point;
-  params->fp32_neon.kernel_zero_point[3] = kernel_zero_point;
+  params->fp32_neon.kernel_zero_point = kernel_zero_point;
   params->fp32_neon.scale = scale;
   params->fp32_neon.magic_bias = 12582912.0f;
   params->fp32_neon.magic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) output_zero_point;
@@ -353,10 +350,7 @@ size_t xnn_init_qu8_conv_minmax_fp32_neonv8_params(
   assert(scale >= 0x1.0p-32f);
   assert(scale < 256.0f);
 
-  params->fp32_neonv8.kernel_zero_point[0] = kernel_zero_point;
-  params->fp32_neonv8.kernel_zero_point[1] = kernel_zero_point;
-  params->fp32_neonv8.kernel_zero_point[2] = kernel_zero_point;
-  params->fp32_neonv8.kernel_zero_point[3] = kernel_zero_point;
+  params->fp32_neonv8.kernel_zero_point = kernel_zero_point;
   params->fp32_neonv8.scale = scale;
   params->fp32_neonv8.output_zero_point = (int16_t) (uint16_t) output_zero_point;
   params->fp32_neonv8.output_min = output_min;
@@ -392,10 +386,7 @@ size_t xnn_init_qu8_conv_minmax_rndnu_neon_params(
   const int32_t post_shift = math_max_s32(shift, 1);
   const int32_t pre_shift = shift - post_shift;
 
-  params->rndnu_neon.kernel_zero_point[0] = kernel_zero_point;
-  params->rndnu_neon.kernel_zero_point[1] = kernel_zero_point;
-  params->rndnu_neon.kernel_zero_point[2] = kernel_zero_point;
-  params->rndnu_neon.kernel_zero_point[3] = kernel_zero_point;
+  params->rndnu_neon.kernel_zero_point = kernel_zero_point;
   params->rndnu_neon.right_pre_shift = -pre_shift;
   params->rndnu_neon.multiplier = multiplier;
   params->rndnu_neon.right_post_shift = -post_shift;

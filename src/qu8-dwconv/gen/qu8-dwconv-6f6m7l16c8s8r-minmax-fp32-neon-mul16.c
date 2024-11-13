@@ -34,7 +34,7 @@ void xnn_qu8_dwconv_minmax_fp32_ukernel_6f6m7l16c8s8r__neon_mul16(
   assert(output_width != 0);
   assert(kernel_size > 6);
 
-  const uint8x8_t vkernel_zero_point = vld1_dup_u8(params->fp32_neon.kernel_zero_point);
+  const uint8x8_t vkernel_zero_point = vld1_dup_u8(&params->fp32_neon.kernel_zero_point);
   const float32x4_t vscale = vld1q_dup_f32(&params->fp32_neon.scale);
   const float32x4_t vmagic_bias = vld1q_dup_f32(&params->fp32_neon.magic_bias);
   const int32x4_t vmagic_bias_less_output_zero_point = vld1q_dup_s32(&params->fp32_neon.magic_bias_less_output_zero_point);

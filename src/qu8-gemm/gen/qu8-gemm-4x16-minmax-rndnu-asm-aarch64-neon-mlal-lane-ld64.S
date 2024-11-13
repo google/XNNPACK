@@ -24,7 +24,8 @@
 
 # params structure is 20 bytes
 #  struct {
-#    uint8_t kernel_zero_point[4];
+#    uint8_t kernel_zero_point;
+#    uint8_t padding[3];
 #    int32_t right_pre_shift;
 #    int32_t multiplier;
 #    int32_t right_post_shift;
@@ -69,7 +70,8 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lan
         ADD         x7,  x9, x7             // c3 = c2 + cm_stride
         CSEL        x4, x13, x4, LO         //   a3 = a2
         CSEL        x7,  x9, x7, LO         //   c3 = c2
-        LD1R        {v7.4s}, [x11], 4           // kernel_zero_point
+        LD1R        {v7.16b}, [x11], 1           // kernel_zero_point
+        ADD         x11, x11, 3
 
         .p2align    3
 0:

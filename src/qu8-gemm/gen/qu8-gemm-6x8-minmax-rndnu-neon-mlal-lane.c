@@ -69,7 +69,7 @@ void xnn_qu8_gemm_minmax_rndnu_ukernel_6x8__neon_mlal_lane(
     c5 = c4;
   }
 
-  const uint8x8_t vb_zero_point = vld1_dup_u8(&params->rndnu_neon.kernel_zero_point[0]);
+  const uint8x8_t vb_zero_point = vld1_dup_u8(&params->rndnu_neon.kernel_zero_point);
   do {
     int32x4_t vacc0x0123 = vld1q_s32(w); w = (const int32_t*) w + 4;
     int32x4_t vacc0x4567 = vld1q_s32(w); w = (const int32_t*) w + 4;

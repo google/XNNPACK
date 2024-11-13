@@ -76,7 +76,8 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x8__asm_aarch32_neon_mlal_lan
         MOVLO       r6, r8                  // c3
 
         # Load params values
-        VLD1.32     {d14[]}, [r5]!          // QU8 kernel_zero_point
+        VLD1.8     {d14[]}, [r5]!          // QU8 kernel_zero_point
+        ADD        r5, r5, 3               // Skip padding
         VLDM        r5, {d12-d13}           // RNDNU params
 
 

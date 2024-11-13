@@ -38,7 +38,8 @@ $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
 $if REQUANTIZATION == "RNDNU" and DATATYPE == "QU8":
   # params structure is 20 bytes
   #  struct {
-  #    ${XINT8_T} kernel_zero_point[4];
+  #    ${XINT8_T} kernel_zero_point;
+  #    ${XINT8_T} padding[3];
   #    int32_t right_pre_shift;
   #    int32_t multiplier;
   #    int32_t right_post_shift;
@@ -85,7 +86,7 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukern
         CSEL        x7,  x17, x7, LO        //   c3 = c2
 
         $if DATATYPE == "QU8":
-          LD1R        {v7.4s}, [x11]          // kernel_zero_point
+          LD1R        {v7.16b}, [x11]          // kernel_zero_point
 
         .p2align    3
 0:

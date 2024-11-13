@@ -70,8 +70,8 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lan
         ADD         x7,  x9, x7             // c3 = c2 + cm_stride
         CSEL        x4, x13, x4, LO         //   a3 = a2
         CSEL        x7,  x9, x7, LO         //   c3 = c2
-        LD1R        {v7.4s}, [x11], 4           // kernel_zero_point
-
+        LD1R        {v7.16b}, [x11], 1           // kernel_zero_point
+        ADD         x11, x11, 3                  // skip padding
         .p2align    3
 0:
         # Load initial bias from w into accumulators

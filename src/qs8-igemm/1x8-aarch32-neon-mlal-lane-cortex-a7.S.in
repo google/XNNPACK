@@ -102,7 +102,8 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukern
 
         # Load params values
         $if DATATYPE == "QU8":
-          VLD1.32     {d14[]}, [r5]!          // QU8 kernel_zero_point
+          VLD1.8      {d14[]}, [r5]!          // QU8 kernel_zero_point
+          ADD         r5, r5, 3               // Skip padding
         $if REQUANTIZATION == "RNDNU":
           VLDM        r5, {d12-d13}           // RNDNU params
         $elif DATATYPE == "QC8" and ARMV8:
