@@ -821,7 +821,6 @@ xnnpack_unit_test(
     name = "f32_vscaleextexp_test",
     srcs = [
         "f32-vscaleextexp.cc",
-        "vscaleextexp-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
