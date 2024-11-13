@@ -739,7 +739,6 @@ xnnpack_unit_test(
     name = "f32_raddextexp_test",
     srcs = [
         "f32-raddextexp.cc",
-        "raddextexp-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
