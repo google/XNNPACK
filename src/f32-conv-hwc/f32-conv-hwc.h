@@ -19,23 +19,26 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__scalar_1x1, 3
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__scalar_1x1, 3, 2, 1, 1, 3, 4, 2, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
 
 #if XNN_ARCH_ARM || XNN_ARCH_ARM64
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x1, 3, 2, 1, 0, 3, 4, 2, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x2, 3, 2, 1, 0, 3, 4, 4, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x1, 3, 2, 1, 0, 3, 4, 2, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__neon_2x2, 3, 2, 1, 0, 3, 4, 4, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x1, 3, 2, 1, 0, 3, 8, 2, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x2, 3, 2, 1, 0, 3, 8, 4, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x1, 3, 2, 1, 0, 3, 8, 2, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__neon_2x2, 3, 2, 1, 0, 3, 8, 4, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1, 3, 2, 1, 1, 3, 4, 2, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2, 3, 2, 1, 1, 3, 4, 4, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1, 3, 2, 1, 1, 3, 4, 2, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x2, 3, 2, 1, 1, 3, 4, 4, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1, 3, 2, 1, 1, 3, 8, 2, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2, 3, 2, 1, 1, 3, 8, 4, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x1, 3, 2, 1, 1, 3, 8, 2, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__neon_2x2, 3, 2, 1, 1, 3, 8, 4, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+
+#if XNN_ARCH_ARM64
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x1, 3, 2, 1, 0, 3, 4, 2, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x4__aarch64_neonfma_2x2, 3, 2, 1, 0, 3, 4, 4, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x1, 3, 2, 1, 0, 3, 8, 2, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p0p1c3x8__aarch64_neonfma_2x2, 3, 2, 1, 0, 3, 8, 4, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x1, 3, 2, 1, 1, 3, 4, 2, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__aarch64_neonfma_2x2, 3, 2, 1, 1, 3, 4, 4, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x1, 3, 2, 1, 1, 3, 8, 2, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2, 3, 2, 1, 1, 3, 8, 4, float, struct xnn_f32_default_params, xnn_init_f32_minmax_scalar_params)
+#endif  // XNN_ARCH_ARM64
 
 #ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS
 #undef XNN_DEFINED_UKERNEL_WITH_PARAMS
