@@ -84,8 +84,8 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_igemm_minmax_${REQUANTIZATION.lower()}_ukern
         ADD         x7,  x17, x7            // c3 = c2 + cm_stride
         CSEL        x7,  x17, x7, LO        //   c3 = c2
         $if DATATYPE == "QU8":
-          LD1R        {v7.16b}, [x11], 1           // kernel_zero_point
-          ADD         x11, x11, 3                  // skip padding
+          LD1R        {v7.16b}, [x11]              // kernel_zero_point
+          ADD         x11, x11, 4                  // skip padding
         .p2align    3
 0:
         # Load initial bias from w into accumulators
