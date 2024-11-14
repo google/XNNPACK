@@ -25,7 +25,7 @@
 # params structure is 20 bytes
 #  struct {
 #    uint8_t kernel_zero_point;
-#    uint8_t padding;
+#    uint8_t padding[3];
 #    int32_t right_pre_shift;
 #    int32_t multiplier;
 #    int32_t right_post_shift;
