@@ -243,7 +243,8 @@ tflite::BuiltinOperator xnn_unary_operator_to_tflite(xnn_unary_operator op) {
 template <typename T>
 struct TypeToTfliteType {
   using type = T;
-  static constexpr auto tensor_type = tflite::TensorTypeFor<T>::value;
+  static constexpr auto tensor_type =
+      tflite::TensorTypeFor<typename xnnpack::unwrap_quantized<T>::type>::value;
 };
 template <>
 struct TypeToTfliteType<xnn_float16> {
@@ -367,12 +368,6 @@ static auto CreateTfLiteQuantizationParameters(
       builder.CreateVector<int64_t>({params.zero_point}));
 }
 
-bool is_quantized(int8_t) { return true; }
-bool is_quantized(uint8_t) { return true; }
-bool is_quantized(xnn_float16) { return false; }
-bool is_quantized(xnn_bfloat16) { return false; }
-bool is_quantized(float) { return false; }
-
 template <typename In, typename Out>
 static void benchmark_tflite_unary_operator(benchmark::State& state,
                                             xnn_unary_operator op) {
@@ -388,21 +383,23 @@ static void benchmark_tflite_unary_operator(benchmark::State& state,
     return CreateTfLiteQuantizationParameters(builder, output_quantization);
   };
 
-  if (!is_quantized(In()) && !is_quantized(Out())) {
+  constexpr bool is_quantized_in = xnnpack::is_quantized<In>::value;
+  constexpr bool is_quantized_out = xnnpack::is_quantized<Out>::value;
+  if (!is_quantized_in && !is_quantized_out) {
     tflite::BuiltinOperator op_code = xnn_unary_operator_to_tflite(op);
     return benchmark_tflite_unary_operator<In, Out>(state, no_quantization,
                                                     no_quantization, op_code);
-  } else if (is_quantized(In()) && !is_quantized(Out())) {
+  } else if (is_quantized_in && !is_quantized_out) {
     assert(op == xnn_unary_convert);
     return benchmark_tflite_unary_operator<In, Out>(
         state, in_quantization, no_quantization,
         tflite::BuiltinOperator_DEQUANTIZE);
-  } else if (!is_quantized(In()) && is_quantized(Out())) {
+  } else if (!is_quantized_in && is_quantized_out) {
     assert(op == xnn_unary_convert);
     return benchmark_tflite_unary_operator<In, Out>(
         state, no_quantization, out_quantization,
         tflite::BuiltinOperator_QUANTIZE);
-  } else if (is_quantized(In()) && is_quantized(Out())) {
+  } else if (is_quantized_in && is_quantized_out) {
     tflite::BuiltinOperator op_code;
     if (op == xnn_unary_convert) {
       op_code = tflite::BuiltinOperator_QUANTIZE;
@@ -461,12 +458,12 @@ static void benchmark_tflite_convert(benchmark::State& state) {
 
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
-#define BENCHMARK_OP(op)                  \
-  BENCHMARK_OP_TYPE(op, f32, float)       \
-  BENCHMARK_OP_TYPE(op, f16, xnn_float16) \
-  BENCHMARK_OP_TYPE(op, bf16, xnn_bfloat16) \
-  BENCHMARK_OP_TYPE(op, qs8, int8_t)      \
-  BENCHMARK_OP_TYPE(op, qu8, uint8_t)
+#define BENCHMARK_OP(op)                                 \
+  BENCHMARK_OP_TYPE(op, f32, float)                      \
+  BENCHMARK_OP_TYPE(op, f16, xnn_float16)                \
+  BENCHMARK_OP_TYPE(op, bf16, xnn_bfloat16)              \
+  BENCHMARK_OP_TYPE(op, qs8, xnnpack::quantized<int8_t>) \
+  BENCHMARK_OP_TYPE(op, qu8, xnnpack::quantized<uint8_t>)
 
 BENCHMARK_OP(clamp);
 BENCHMARK_OP(abs);
@@ -494,32 +491,36 @@ BENCHMARK_OP(sine);
 //BENCHMARK_OP(popcount);
 BENCHMARK_OP(sign);
 
-BENCHMARK_CONVERT(qs8_qs8, int8_t, int8_t);
-BENCHMARK_CONVERT(qs8_qu8, int8_t, uint8_t);
-BENCHMARK_CONVERT(qs8_f16, int8_t, xnn_float16);
-BENCHMARK_CONVERT(qs8_bf16, int8_t, xnn_bfloat16);
-BENCHMARK_CONVERT(qs8_f32, int8_t, float);
+BENCHMARK_CONVERT(qs8_qs8, xnnpack::quantized<int8_t>,
+                  xnnpack::quantized<int8_t>);
+BENCHMARK_CONVERT(qs8_qu8, xnnpack::quantized<int8_t>,
+                  xnnpack::quantized<uint8_t>);
+BENCHMARK_CONVERT(qs8_f16, xnnpack::quantized<int8_t>, xnn_float16);
+BENCHMARK_CONVERT(qs8_bf16, xnnpack::quantized<int8_t>, xnn_bfloat16);
+BENCHMARK_CONVERT(qs8_f32, xnnpack::quantized<int8_t>, float);
 
-BENCHMARK_CONVERT(qu8_qs8, uint8_t, int8_t);
-BENCHMARK_CONVERT(qu8_qu8, uint8_t, uint8_t);
-BENCHMARK_CONVERT(qu8_f16, uint8_t, xnn_float16);
-BENCHMARK_CONVERT(qu8_bf16, uint8_t, xnn_bfloat16);
-BENCHMARK_CONVERT(qu8_f32, uint8_t, float);
+BENCHMARK_CONVERT(qu8_qs8, xnnpack::quantized<uint8_t>,
+                  xnnpack::quantized<int8_t>);
+BENCHMARK_CONVERT(qu8_qu8, xnnpack::quantized<uint8_t>,
+                  xnnpack::quantized<uint8_t>);
+BENCHMARK_CONVERT(qu8_f16, xnnpack::quantized<uint8_t>, xnn_float16);
+BENCHMARK_CONVERT(qu8_bf16, xnnpack::quantized<uint8_t>, xnn_bfloat16);
+BENCHMARK_CONVERT(qu8_f32, xnnpack::quantized<uint8_t>, float);
 
-BENCHMARK_CONVERT(f16_qs8, xnn_float16, int8_t);
-BENCHMARK_CONVERT(f16_qu8, xnn_float16, uint8_t);
+BENCHMARK_CONVERT(f16_qs8, xnn_float16, xnnpack::quantized<int8_t>);
+BENCHMARK_CONVERT(f16_qu8, xnn_float16, xnnpack::quantized<uint8_t>);
 // BENCHMARK_CONVERT(f16_f16, xnn_float16, xnn_float16);
 BENCHMARK_CONVERT(f16_bf16, xnn_float16, xnn_bfloat16);
 BENCHMARK_CONVERT(f16_f32, xnn_float16, float);
 
-BENCHMARK_CONVERT(bf16_qs8, xnn_bfloat16, int8_t);
-BENCHMARK_CONVERT(bf16_qu8, xnn_bfloat16, uint8_t);
+BENCHMARK_CONVERT(bf16_qs8, xnn_bfloat16, xnnpack::quantized<int8_t>);
+BENCHMARK_CONVERT(bf16_qu8, xnn_bfloat16, xnnpack::quantized<uint8_t>);
 BENCHMARK_CONVERT(bf16_f16, xnn_bfloat16, xnn_float16);
 // BENCHMARK_CONVERT(bf16_bf16, xnn_bfloat16, xnn_bfloat16);
 BENCHMARK_CONVERT(bf16_f32, xnn_bfloat16, float);
 
-BENCHMARK_CONVERT(f32_qs8, float, int8_t);
-BENCHMARK_CONVERT(f32_qu8, float, uint8_t);
+BENCHMARK_CONVERT(f32_qs8, float, xnnpack::quantized<int8_t>);
+BENCHMARK_CONVERT(f32_qu8, float, xnnpack::quantized<uint8_t>);
 BENCHMARK_CONVERT(f32_f16, float, xnn_float16);
 BENCHMARK_CONVERT(f32_bf16, float, xnn_bfloat16);
 // BENCHMARK_CONVERT(f32_f32, float, float);

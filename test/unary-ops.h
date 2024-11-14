@@ -70,8 +70,8 @@ struct UnaryOpInfo {
   virtual float ReferenceImpl(float x, const xnn_unary_params& params) const {
     XNN_UNREACHABLE;
   }
-  virtual float ReferenceImpl(int x, const xnn_unary_params& params) const {
-    return ReferenceImpl(static_cast<float>(x), params);
+  virtual int ReferenceImpl(int x, const xnn_unary_params& params) const {
+    XNN_UNREACHABLE;
   }
 
   // Get the parameters to use by default for this operator.
@@ -118,14 +118,14 @@ struct Convert : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return x;
   }
-  float ReferenceImpl(int x, const xnn_unary_params&) const override { return x; }
+  int ReferenceImpl(int x, const xnn_unary_params&) const override { return x; }
 };
 
 struct ReLU : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::max(x, 0.0f);
   }
-  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+  int ReferenceImpl(int x, const xnn_unary_params&) const override {
     return std::max(x, 0);
   }
 };
@@ -134,7 +134,7 @@ struct Abs : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return std::abs(x);
   }
-  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+  int ReferenceImpl(int x, const xnn_unary_params&) const override {
     return std::abs(x);
   }
 };
@@ -143,7 +143,7 @@ struct Negate : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return -x;
   }
-  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+  int ReferenceImpl(int x, const xnn_unary_params&) const override {
     return -x;
   }
 };
@@ -160,7 +160,7 @@ struct Clamp : public UnaryOpInfo {
     return std::min<float>(std::max<float>(x, params.clamp.min),
                            params.clamp.max);
   }
-  float ReferenceImpl(int x, const xnn_unary_params& params) const override {
+  int ReferenceImpl(int x, const xnn_unary_params& params) const override {
     return std::min<int>(std::max<int>(x, params.clamp.min), params.clamp.max);
   }
 
@@ -344,8 +344,8 @@ struct Square : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return x * x;
   }
-  float ReferenceImpl(int x, const xnn_unary_params&) const override {
-    return static_cast<int64_t>(x) * static_cast<int64_t>(x);
+  int ReferenceImpl(int x, const xnn_unary_params&) const override {
+    return static_cast<int>(static_cast<int64_t>(x) * static_cast<int64_t>(x));
   }
 
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
@@ -533,19 +533,28 @@ struct Sine : public UnaryOpInfo {
 };
 
 struct CountLeadingZeros : public UnaryOpInfo {
-  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+  float ReferenceImpl(float x, const xnn_unary_params&) const override {
+    return (float)math_clz_u32((int)x);
+  }
+  int ReferenceImpl(int x, const xnn_unary_params&) const override {
     return math_clz_u32(x);
   }
 };
 
 struct BitwiseNot : public UnaryOpInfo {
-  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+  float ReferenceImpl(float x, const xnn_unary_params&) const override {
+    return ~(int)x;
+  }
+  int ReferenceImpl(int x, const xnn_unary_params&) const override {
     return ~x;
   }
 };
 
 struct Popcount : public UnaryOpInfo {
-  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+  float ReferenceImpl(float x, const xnn_unary_params&) const override {
+    return (float)math_popcount_u32((int)x);
+  }
+  int ReferenceImpl(int x, const xnn_unary_params&) const override {
     return math_popcount_u32(x);
   }
 };
@@ -554,7 +563,7 @@ struct Sign : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return x < 0.0f ? -1.0f : x > 0.0f ? 1.0f : 0.0f;
   }
-  float ReferenceImpl(int x, const xnn_unary_params&) const override {
+  int ReferenceImpl(int x, const xnn_unary_params&) const override {
     return x < 0 ? -1 : x > 0 ? 1 : 0;
   }
 };
@@ -584,30 +593,77 @@ void FillRandom(Rng& rng, T* x, size_t n, const Interval& domain,
 // Compute the result of a unary operator using the reference implementation.
 template <typename In, typename Out, typename UnaryOp>
 void UnaryReferenceImpl(
-    const In* x, size_t n, Out* y, const UnaryOp& op_info,
+    const xnnpack::quantized<In>* x, size_t n, xnnpack::quantized<Out>* y,
+    const UnaryOp& op_info,
     const xnn_quantization_params& input_quantization = {0, 1.0f},
     const xnn_quantization_params& output_quantization = {0, 1.0f},
     const xnn_unary_params& params = xnn_unary_params()) {
   for (size_t i = 0; i < n; i++) {
-    float y_i;
-    if (std::is_integral<In>::value &&
-        (input_quantization.zero_point == 0 &&
-         input_quantization.scale == 1.0f)) {
-      y_i = op_info.ReferenceImpl(static_cast<int>(x[i]), params);
-    } else if (std::is_integral<In>::value) {
-      float x_i =
-          (x[i] - input_quantization.zero_point) * input_quantization.scale;
-      y_i = op_info.ReferenceImpl(x_i, params);
-    } else {
-      y_i = op_info.ReferenceImpl(static_cast<float>(x[i]), params);
-    }
+    float x_i = (x[i] - input_quantization.zero_point) * input_quantization.scale;
+    float y_i = op_info.ReferenceImpl(x_i, params);
+    y_i = y_i / output_quantization.scale + output_quantization.zero_point;
+    y[i] = xnnpack::round_float_to_int<Out>(y_i);
+  }
+}
+
+// Compute the result of a unary operator using the reference implementation.
+template <typename In, typename Out, typename UnaryOp>
+void UnaryReferenceImpl(
+    const In* x, size_t n, xnnpack::quantized<Out>* y, const UnaryOp& op_info,
+    const xnn_quantization_params& input_quantization = {0, 1.0f},
+    const xnn_quantization_params& output_quantization = {0, 1.0f},
+    const xnn_unary_params& params = xnn_unary_params()) {
+  static_assert(!xnnpack::is_quantized<In>::value, "");
+  for (size_t i = 0; i < n; i++) {
+    float y_i = op_info.ReferenceImpl(static_cast<float>(x[i]), params);
+    y_i = y_i / output_quantization.scale + output_quantization.zero_point;
+    y[i] = xnnpack::round_float_to_int<Out>(y_i);
+  }
+}
+
+// Compute the result of a unary operator using the reference implementation.
+template <typename In, typename Out, typename UnaryOp>
+void UnaryReferenceImpl(
+    const xnnpack::quantized<In>* x, size_t n, Out* y, const UnaryOp& op_info,
+    const xnn_quantization_params& input_quantization = {0, 1.0f},
+    const xnn_quantization_params& output_quantization = {0, 1.0f},
+    const xnn_unary_params& params = xnn_unary_params()) {
+  static_assert(!xnnpack::is_quantized<Out>::value, "");
+  for (size_t i = 0; i < n; i++) {
+    float x_i = (x[i] - input_quantization.zero_point) * input_quantization.scale;
+    float y_i = op_info.ReferenceImpl(x_i, params);
     if (std::is_integral<Out>::value) {
-      y_i = y_i / output_quantization.scale + output_quantization.zero_point;
-      y_i = std::max<float>(y_i, xnnpack::NumericLimits<Out>::min());
-      y_i = std::min<float>(y_i, xnnpack::NumericLimits<Out>::max());
       y[i] = xnnpack::round_float_to_int<Out>(y_i);
     } else {
       y[i] = y_i;
+    }
+  }
+}
+
+// Compute the result of a unary operator using the reference implementation.
+template <typename In, typename Out, typename UnaryOp>
+void UnaryReferenceImpl(
+    const In* x, size_t n, Out* y, const UnaryOp& op_info,
+    const xnn_quantization_params& input_quantization = {0, 1.0f},
+    const xnn_quantization_params& output_quantization = {0, 1.0f},
+    const xnn_unary_params& params = xnn_unary_params()) {
+  static_assert(!xnnpack::is_quantized<In>::value, "");
+  static_assert(!xnnpack::is_quantized<Out>::value, "");
+  for (size_t i = 0; i < n; i++) {
+    float y_i;
+    if (std::is_integral<In>::value && std::is_integral<Out>::value) {
+      y[i] = op_info.ReferenceImpl((int)x[i], params);
+    } else {
+      if (std::is_integral<In>::value) {
+        y_i = op_info.ReferenceImpl((int)x[i], params);
+      } else {
+        y_i = op_info.ReferenceImpl(static_cast<float>(x[i]), params);
+      }
+      if (std::is_integral<Out>::value) {
+        y[i] = xnnpack::round_float_to_int<Out>(y_i);
+      } else {
+        y[i] = y_i;
+      }
     }
   }
 }

@@ -557,6 +557,7 @@ xnnpack_cc_library(
 xnnpack_cxx_library(
     name = "buffer",
     hdrs = ["src/xnnpack/buffer.h"],
+    deps = [":datatype"],
 )
 
 xnnpack_cc_library(
@@ -948,6 +949,7 @@ xnnpack_cxx_library(
     deps = [
         ":common",
         ":config_hdrs",
+        ":datatype",
         ":hardware_config",
         ":math",
         ":xnnpack_h",

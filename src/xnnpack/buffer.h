@@ -16,6 +16,7 @@
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/math.h"
 
 namespace xnnpack {
@@ -32,6 +33,17 @@ class NumericLimits<xnn_float16> {
  public:
   static xnn_float16 min() { return static_cast<xnn_float16>(-65504); }
   static xnn_float16 max() { return static_cast<xnn_float16>(65504); }
+};
+
+template <typename T>
+class NumericLimits<quantized<T>> {
+ public:
+  static quantized<T> min() {
+    return {std::numeric_limits<T>::lowest()};
+  }
+  static quantized<T> max() {
+    return {std::numeric_limits<T>::max()};
+  }
 };
 
 // This is a container similar to std::vector, but it leaves the memory

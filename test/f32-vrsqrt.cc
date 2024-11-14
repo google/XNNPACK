@@ -26,6 +26,7 @@
 
 using TestInfo = ReciprocalSquareRoot;
 
+#define XNN_QUANTIZED(T) xnnpack::quantized<T>
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)       \
   TEST(ukernel, batch_eq) { TestBatchEq<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }  \
   TEST(ukernel, batch_div) { TestBatchDiv<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }\
@@ -34,3 +35,4 @@ using TestInfo = ReciprocalSquareRoot;
   TEST(ukernel, inplace) { TestInPlace<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
 #include "f32-vrsqrt/f32-vrsqrt.h"
 #undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_QUANTIZED

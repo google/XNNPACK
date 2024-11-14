@@ -6,8 +6,8 @@
 #pragma once
 
 #include <assert.h>
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
@@ -42,12 +42,61 @@ bool xnn_datatype_is_byte_addressable(enum xnn_datatype t);
 #ifdef __cplusplus
 }  // extern "C"
 
+namespace xnnpack {
+
+// We need a type that distinguishes an intX_t from a quantized intX_t. We can't
+// do arithmetic on these, because we don't know the quantization parameters.
+template <typename T>
+struct quantized {
+  T value;
+  using type = T;
+
+  operator T() const { return value; }
+
+  quantized() = default;
+  quantized(T t) : value(t) {}
+  quantized<T>& operator=(T t) {
+    value = t;
+    return *this;
+  }
+};
+
+template <typename T>
+struct is_quantized : std::false_type {};
+
+template <typename T>
+struct is_quantized<quantized<T>> : std::true_type {};
+
+template <typename T>
+struct unwrap_quantized {
+  using type = T;
+};
+
+template <>
+struct unwrap_quantized<quantized<int8_t>> {
+  using type = int8_t;
+};
+
+template <>
+struct unwrap_quantized<quantized<uint8_t>> {
+  using type = uint8_t;
+};
+
+template <>
+struct unwrap_quantized<quantized<int32_t>> {
+  using type = int32_t;
+};
+
+}  // namespace xnnpack
+
 template <typename T>
 xnn_datatype xnn_datatype_of() {
-  if (std::is_same<T, uint8_t>::value) {
+  if (std::is_same<T, xnnpack::quantized<uint8_t>>::value) {
     return xnn_datatype_quint8;
-  } else if (std::is_same<T, int8_t>::value) {
+  } else if (std::is_same<T, xnnpack::quantized<int8_t>>::value) {
     return xnn_datatype_qint8;
+  } else if (std::is_same<T, xnnpack::quantized<int32_t>>::value) {
+    return xnn_datatype_qint32;
   } else if (std::is_same<T, xnn_float16>::value) {
     return xnn_datatype_fp16;
   } else if (std::is_same<T, xnn_bfloat16>::value) {

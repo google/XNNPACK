@@ -108,7 +108,7 @@ $if OP_TYPE == "Clamp":
       params.clamp.max = 255;
       VUnaryMicrokernelTester()
           .batch_size(batch_size)
-          .Test<TestInfo>(ukernel, init_params, params);
+          .Test<TestInfo, datatype, datatype>(ukernel, init_params, params);
     }
   }
 
@@ -122,7 +122,7 @@ $if OP_TYPE == "Clamp":
       params.clamp.max = max;
       VUnaryMicrokernelTester()
           .batch_size(batch_size)
-          .Test<TestInfo>(ukernel, init_params, params);
+          .Test<TestInfo, datatype, datatype>(ukernel, init_params, params);
     }
   }
 $if OP_TYPE == "ELU":
@@ -135,7 +135,7 @@ $if OP_TYPE == "ELU":
       params.elu.alpha = alpha;
       ${TESTER}()
         .batch_size(batch_size)
-        .Test<TestInfo>(ukernel, init_params, params);
+        .Test<TestInfo, datatype, datatype>(ukernel, init_params, params);
     }
   }
 $if OP_TYPE == "LeakyReLU":
@@ -148,7 +148,7 @@ $if OP_TYPE == "LeakyReLU":
       params.leaky_relu.negative_slope = negative_slope;
       ${TESTER}()
         .batch_size(batch_size)
-        .Test<TestInfo>(ukernel, init_params, params);
+        .Test<TestInfo, datatype, datatype>(ukernel, init_params, params);
     }
   }
 $if "q" in DATATYPE:
@@ -159,7 +159,7 @@ $if "q" in DATATYPE:
 $if DATATYPE == "f32" and OP_TYPE in SPECIAL_VALUES_F32:
   TEST(ukernel, special_values) {
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);
-    VUnaryMicrokernelTester().Test<TestInfo>(ukernel, init_params,
+    VUnaryMicrokernelTester().Test<TestInfo, datatype, datatype>(ukernel, init_params,
       /*inputs=*/${SPECIAL_VALUES_F32[OP_TYPE][1]},
       /*outputs=*/${SPECIAL_VALUES_F32[OP_TYPE][2]},
       /*tolerance_ulp=*/${SPECIAL_VALUES_F32[OP_TYPE][3]});
@@ -218,6 +218,7 @@ using TestInfo = {op_type};
 
 """.format(op_type=op_type)
 
+  tests += "#define XNN_QUANTIZED(T) xnnpack::quantized<T>\n"
   tests += xnncommon.make_multiline_macro(xngen.preprocess(
       TEST_TEMPLATE,
       {
@@ -236,6 +237,7 @@ using TestInfo = {op_type};
 
   tests += f'#include "{xnncommon.xnnpack_src()}{folder}/{options.ukernel}.h"\n'
   tests += "#undef XNN_UKERNEL_WITH_PARAMS\n"
+  tests += "#undef XNN_QUANTIZED\n"
 
   xnncommon.overwrite_if_changed(options.output, tests)
 

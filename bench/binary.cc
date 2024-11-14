@@ -177,7 +177,8 @@ tflite::BuiltinOperator xnn_binary_operator_to_tflite(xnn_binary_operator op) {
 template <typename T>
 struct TypeToTfliteType {
   using type = T;
-  static constexpr auto tensor_type = tflite::TensorTypeFor<T>::value;
+  static constexpr auto tensor_type =
+      tflite::TensorTypeFor<typename xnnpack::unwrap_quantized<T>::type>::value;
 };
 template <>
 struct TypeToTfliteType<xnn_float16> {
@@ -305,21 +306,6 @@ static auto CreateTfLiteQuantizationParameters(
 }
 
 template <typename T>
-struct is_quantized {
-  static constexpr bool value = false;
-};
-
-template <>
-struct is_quantized<int8_t> {
-  static constexpr bool value = true;
-};
-
-template <>
-struct is_quantized<uint8_t> {
-  static constexpr bool value = true;
-};
-
-template <typename T>
 static void benchmark_tflite_binary_operator(benchmark::State& state,
                                              xnn_binary_operator op) {
   xnn_binary_params params;
@@ -339,7 +325,7 @@ static void benchmark_tflite_binary_operator(benchmark::State& state,
     state.SkipWithMessage("no corresponding TFLite operator");
     return;
   }
-  if (!is_quantized<T>::value) {
+  if (!xnnpack::is_quantized<T>::value) {
     return benchmark_tflite_binary_operator<T>(state, no_quantization,
                                                no_quantization, op_code);
   } else {
@@ -374,12 +360,12 @@ static void benchmark_tflite_binary_operator(benchmark::State& state,
 
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
-#define BENCHMARK_OP_REAL(op)               \
-  BENCHMARK_OP_TYPE(op, f32, float)         \
-  BENCHMARK_OP_TYPE(op, f16, xnn_float16)   \
-  BENCHMARK_OP_TYPE(op, bf16, xnn_bfloat16) \
-  BENCHMARK_OP_TYPE(op, qs8, int8_t)        \
-  BENCHMARK_OP_TYPE(op, qu8, uint8_t)
+#define BENCHMARK_OP_REAL(op)                            \
+  BENCHMARK_OP_TYPE(op, f32, float)                      \
+  BENCHMARK_OP_TYPE(op, f16, xnn_float16)                \
+  BENCHMARK_OP_TYPE(op, bf16, xnn_bfloat16)              \
+  BENCHMARK_OP_TYPE(op, qs8, xnnpack::quantized<int8_t>) \
+  BENCHMARK_OP_TYPE(op, qu8, xnnpack::quantized<uint8_t>)
 
 #define BENCHMARK_OP_INTEGRAL(op) BENCHMARK_OP_TYPE(op, s32, int32_t)
 
