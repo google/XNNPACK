@@ -90,6 +90,15 @@ XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_u4
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_x32_packw_gemm_goi_ukernel_x16__avx512f_u4_prfm, 16, 1, 1, 4, 1)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_x32_packw_gemm_goi_ukernel_x32__avx512f_u4, 32, 1, 1, 4, 1)
 XNN_UKERNEL(xnn_arch_x86_avx512f, xnn_x32_packw_gemm_goi_ukernel_x32__avx512f_u4_prfm, 32, 1, 1, 4, 1)
+
+XNN_GIO_UKERNEL(xnn_arch_x86_avx512f, xnn_x32_packw_gemm_gio_ukernel_x16__avx512f_u1, 16, 1, 1, 1, 1)
+XNN_GIO_UKERNEL(xnn_arch_x86_avx512f, xnn_x32_packw_gemm_gio_ukernel_x16__avx512f_u1_prfm, 16, 1, 1, 1, 1)
+XNN_GIO_UKERNEL(xnn_arch_x86_avx512f, xnn_x32_packw_gemm_gio_ukernel_x32__avx512f_u1, 32, 1, 1, 1, 1)
+XNN_GIO_UKERNEL(xnn_arch_x86_avx512f, xnn_x32_packw_gemm_gio_ukernel_x32__avx512f_u1_prfm, 32, 1, 1, 1, 1)
+XNN_GIO_UKERNEL(xnn_arch_x86_avx512f, xnn_x32_packw_gemm_gio_ukernel_x16__avx512f_u8, 16, 1, 1, 8, 1)
+XNN_GIO_UKERNEL(xnn_arch_x86_avx512f, xnn_x32_packw_gemm_gio_ukernel_x16__avx512f_u8_prfm, 16, 1, 1, 8, 1)
+XNN_GIO_UKERNEL(xnn_arch_x86_avx512f, xnn_x32_packw_gemm_gio_ukernel_x32__avx512f_u8, 32, 1, 1, 8, 1)
+XNN_GIO_UKERNEL(xnn_arch_x86_avx512f, xnn_x32_packw_gemm_gio_ukernel_x32__avx512f_u8_prfm, 32, 1, 1, 8, 1)
 #endif  // XNN_ENABLE_AVX512F && (XNN_ARCH_X86_64 || XNN_ARCH_X86)
 
 
