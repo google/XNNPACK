@@ -60,8 +60,8 @@ tools/generate-gemm-test.py --spec test/qs8-qc8w-igemm-minmax-fp32.yaml --output
 tools/generate-gemm-test.py --spec test/f32-ppmm-minmax.yaml --output-test test/f32-ppmm-minmax.cc &
 
 ### Tests for SPMM micro-kernels
-tools/generate-spmm-test.py --spec test/f16-spmm-minmax.yaml --output-test test/f16-spmm-minmax.cc &
-tools/generate-spmm-test.py --spec test/f32-spmm-minmax.yaml --output-test test/f32-spmm-minmax.cc  --output-test test/f32-spmm-minmax-2.cc  --output-test test/f32-spmm-minmax-3.cc  --output-test test/f32-spmm-minmax-4.cc --output-bench bench/f32-spmm.cc &
+# tools/generate-spmm-test.py --tester SpMMMicrokernelTester --ukernel f16-spmm-minmax --output-test test/f16-spmm-minmax.cc &
+# tools/generate-spmm-test.py --tester SpMMMicrokernelTester --ukernel f32-spmm-minmax --output-test test/f32-spmm-minmax.cc &
 
 ### Tests for VBinary micro-kernels
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester  --ukernel f16-vadd --output test/f16-vadd.cc &
@@ -191,9 +191,6 @@ tools/generate-rdsum-test.py --spec test/f16-f32acc-rdsum.yaml --output test/f16
 tools/generate-rdsum-test.py --spec test/f32-rdsum.yaml --output test/f32-rdsum.cc &
 tools/generate-rdsum-test.py --spec test/qs8-rdsum-minmax-fp32.yaml --output test/qs8-rdsum-minmax-fp32.cc &
 tools/generate-rdsum-test.py --spec test/qu8-rdsum.yaml --output test/qu8-rdsum.cc &
-
-### Tests for LUT micro-kernels
-tools/generate-lut-test.py --spec test/x8-lut.yaml --output test/x8-lut.cc &
 
 ### Tests for Conv HWC layout micro-kernels
 tools/generate-conv-hwc-test.py --spec test/f32-conv-hwc.yaml --output test/f32-conv-hwc.cc &
