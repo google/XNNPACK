@@ -84,15 +84,45 @@ SET(NON_PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-25p32c-minmax-avx512f-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p32c-minmax-avx512f.c
   src/f32-gemm/gen/f32-gemm-1x16-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-1x64-minmax-avx512f-broadcast.c
   src/f32-gemm/gen/f32-gemm-4x16-minmax-avx512f-broadcast.c
   src/f32-gemm/gen/f32-gemm-4x32-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-4x64-minmax-avx512f-broadcast.c
   src/f32-gemm/gen/f32-gemm-5x16-minmax-avx512f-broadcast.c
   src/f32-gemm/gen/f32-gemm-5x32-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-5x64-minmax-avx512f-broadcast.c
   src/f32-gemm/gen/f32-gemm-6x16-minmax-avx512f-broadcast.c
   src/f32-gemm/gen/f32-gemm-6x32-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-6x64-minmax-avx512f-broadcast.c
   src/f32-gemm/gen/f32-gemm-7x16-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-7x64-minmax-avx512f-broadcast.c
   src/f32-gemm/gen/f32-gemm-8x16-minmax-avx512f-broadcast.c
   src/f32-gemm/gen/f32-gemm-8x32-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-8x64-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-9x16-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-9x32-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-9x64-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-10x16-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-10x32-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-10x64-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-11x16-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-11x32-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-11x64-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-12x16-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-12x32-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-12x64-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-13x16-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-13x32-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-13x64-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-14x16-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-14x32-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-14x64-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-15x16-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-15x32-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-15x64-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-16x16-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-16x32-minmax-avx512f-broadcast.c
+  src/f32-gemm/gen/f32-gemm-16x64-minmax-avx512f-broadcast.c
   src/f32-gemminc/gen/f32-gemminc-1x16-minmax-avx512f-broadcast.c
   src/f32-gemminc/gen/f32-gemminc-4x16-minmax-avx512f-broadcast.c
   src/f32-gemminc/gen/f32-gemminc-5x16-minmax-avx512f-broadcast.c
