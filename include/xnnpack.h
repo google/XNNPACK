@@ -2088,12 +2088,14 @@ enum xnn_status xnn_define_static_slice(
 /// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
 ///                    dimensions must match @a sizes.
 /// @param flags - binary features of the Static Slice Node. No supported flags are currently defined.
-enum xnn_status xnn_define_static_slice_v2(xnn_subgraph_t subgraph,
-                                           size_t num_dims,
-                                           const int64_t* offsets,
-                                           const int64_t* sizes,
-                                           uint32_t input_id,
-                                           uint32_t output_id, uint32_t flags);
+enum xnn_status xnn_define_static_slice_v2(  //
+    xnn_subgraph_t subgraph,                 //
+    size_t num_dims,                         //
+    const int64_t* offsets,                  //
+    const size_t* sizes,                     //
+    uint32_t input_id,                       //
+    uint32_t output_id,                      //
+    uint32_t flags);
 
 /// Define a Static Transpose Node and add it to a Subgraph.
 ///

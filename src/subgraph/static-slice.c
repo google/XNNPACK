@@ -54,7 +54,7 @@ static enum xnn_status create_slice_operator(
   if (status == xnn_status_success) {
     const int num_dims = node->params.slice.num_dims;
     opdata->shape2.num_dims = num_dims;
-    memcpy(opdata->offsets, node->params.slice.offsets, num_dims * sizeof(size_t));
+    memcpy(opdata->offsets, node->params.slice.offsets, num_dims * sizeof(int64_t));
     memcpy(opdata->sizes, node->params.slice.sizes, num_dims * sizeof(size_t));
   }
 
@@ -169,15 +169,12 @@ static enum xnn_status setup_slice_operator(
   }
 }
 
-enum xnn_status xnn_define_static_slice_v2(
-    xnn_subgraph_t subgraph,
-    size_t num_dims,
-    const int64_t* offsets,
-    const int64_t* sizes,
-    uint32_t input_id,
-    uint32_t output_id,
-    uint32_t flags)
-{
+enum xnn_status xnn_define_static_slice_v2(xnn_subgraph_t subgraph,
+                                           size_t num_dims,
+                                           const int64_t* offsets,
+                                           const size_t* sizes,
+                                           uint32_t input_id,
+                                           uint32_t output_id, uint32_t flags) {
   enum xnn_status status = xnn_subgraph_check_xnnpack_initialized(xnn_node_type_static_slice);
   if (status != xnn_status_success) {
     return status;
@@ -252,7 +249,7 @@ enum xnn_status xnn_define_static_slice_v2(
   node->flags = flags;
   node->params.slice.num_dims = num_dims;
   memcpy(node->params.slice.offsets, offsets, num_dims * sizeof(int64_t));
-  memcpy(node->params.slice.sizes, sizes, num_dims * sizeof(int64_t));
+  memcpy(node->params.slice.sizes, sizes, num_dims * sizeof(size_t));
 
   node->create = create_slice_operator;
   node->reshape = reshape_slice_operator;
@@ -270,10 +267,9 @@ enum xnn_status xnn_define_static_slice(
     uint32_t output_id,
     uint32_t flags) {
   int64_t signed_offsets[XNN_MAX_TENSOR_DIMS];
-  int64_t signed_sizes[XNN_MAX_TENSOR_DIMS];
   for (int i = 0; i < num_dims; i++) {
     signed_offsets[i] = offsets[i];
-    signed_sizes[i] = sizes[i];
   }
-  return xnn_define_static_slice_v2(subgraph, num_dims, signed_offsets, signed_sizes, input_id, output_id, flags);
+  return xnn_define_static_slice_v2(subgraph, num_dims, signed_offsets, sizes,
+                                    input_id, output_id, flags);
 }
