@@ -93,7 +93,6 @@ tools/xngen src/x32-packw/gio-avx.c.in -D NR=16 -D PREFETCH=0 -D KBLOCK=1 -o src
 tools/xngen src/x32-packw/gio-avx.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=1 -o src/x32-packw/gen/x32-packw-x16-gemm-gio-avx-u1-prfm.c &
 tools/xngen src/x32-packw/gio-avx.c.in -D NR=32 -D PREFETCH=0 -D KBLOCK=1 -o src/x32-packw/gen/x32-packw-x32-gemm-gio-avx-u1.c &
 tools/xngen src/x32-packw/gio-avx.c.in -D NR=32 -D PREFETCH=1 -D KBLOCK=1 -o src/x32-packw/gen/x32-packw-x32-gemm-gio-avx-u1-prfm.c &
-
 tools/xngen src/x32-packw/gio-avx.c.in -D NR=8  -D PREFETCH=0 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x8-gemm-gio-avx-u8.c &
 tools/xngen src/x32-packw/gio-avx.c.in -D NR=8  -D PREFETCH=1 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x8-gemm-gio-avx-u8-prfm.c &
 tools/xngen src/x32-packw/gio-avx.c.in -D NR=16 -D PREFETCH=0 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x16-gemm-gio-avx-u8.c &
@@ -107,6 +106,16 @@ tools/xngen src/x32-packw/avx512.c.in -D NR=16 -D PREFETCH=0 -D KBLOCK=4 -o src/
 tools/xngen src/x32-packw/avx512.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x16-gemm-goi-avx512f-u4-prfm.c &
 tools/xngen src/x32-packw/avx512.c.in -D NR=32 -D PREFETCH=0 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x32-gemm-goi-avx512f-u4.c &
 tools/xngen src/x32-packw/avx512.c.in -D NR=32 -D PREFETCH=1 -D KBLOCK=4 -o src/x32-packw/gen/x32-packw-x32-gemm-goi-avx512f-u4-prfm.c &
+
+### GIO NR multiple of 16
+tools/xngen src/x32-packw/gio-avx512.c.in -D NR=16 -D PREFETCH=0 -D KBLOCK=1 -o src/x32-packw/gen/x32-packw-x16-gemm-gio-avx512f-u1.c &
+tools/xngen src/x32-packw/gio-avx512.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=1 -o src/x32-packw/gen/x32-packw-x16-gemm-gio-avx512f-u1-prfm.c &
+tools/xngen src/x32-packw/gio-avx512.c.in -D NR=32 -D PREFETCH=0 -D KBLOCK=1 -o src/x32-packw/gen/x32-packw-x32-gemm-gio-avx512f-u1.c &
+tools/xngen src/x32-packw/gio-avx512.c.in -D NR=32 -D PREFETCH=1 -D KBLOCK=1 -o src/x32-packw/gen/x32-packw-x32-gemm-gio-avx512f-u1-prfm.c &
+tools/xngen src/x32-packw/gio-avx512.c.in -D NR=16 -D PREFETCH=0 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x16-gemm-gio-avx512f-u8.c &
+tools/xngen src/x32-packw/gio-avx512.c.in -D NR=16 -D PREFETCH=1 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x16-gemm-gio-avx512f-u8-prfm.c &
+tools/xngen src/x32-packw/gio-avx512.c.in -D NR=32 -D PREFETCH=0 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x32-gemm-gio-avx512f-u8.c &
+tools/xngen src/x32-packw/gio-avx512.c.in -D NR=32 -D PREFETCH=1 -D KBLOCK=8 -o src/x32-packw/gen/x32-packw-x32-gemm-gio-avx512f-u8-prfm.c &
 
 ################################## Wasm SIMD ##################################
 ### NR multiple of 4
