@@ -38,7 +38,7 @@ static void x8_packw(benchmark::State& state,
   // Computer num_buffers that fit cache with source weights + packed_weights.
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
-      sizeof(int8_t) * batch * (dim_n * dim_k + rounded_n * rounded_k + rounded_n));
+      batch * (dim_n * dim_k + rounded_n * rounded_k + rounded_n * sizeof(uint32_t)));
 
   xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> weights(num_buffers * batch *
                                                     dim_n * dim_k);
@@ -58,7 +58,7 @@ static void x8_packw(benchmark::State& state,
     packw(batch, dim_n, dim_k, nr, kr, sr,
       weights.data() + buffer_index * batch * dim_n * dim_k,
       /*bias=*/nullptr, /*scale=*/nullptr,
-      packed_weights.data() + buffer_index * batch * (rounded_n * rounded_k + rounded_n),
+      packed_weights.data() + buffer_index * batch * (rounded_n * rounded_k + rounded_n * sizeof(uint32_t)),
       /*extra_bytes=*/0, &params);
   }
 
@@ -71,7 +71,7 @@ static void x8_packw(benchmark::State& state,
   state.counters["elements"] =
     benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration, benchmark::Counter::kIsRate);
 
-  const size_t bytes_per_iteration = (elements_per_iteration + batch * (rounded_n * rounded_k + rounded_n)) * sizeof(int8_t);
+  const size_t bytes_per_iteration = (elements_per_iteration + batch * (rounded_n * rounded_k + rounded_n * sizeof(uint32_t)));
   state.counters["bytes"] =
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
@@ -98,7 +98,7 @@ static void qs8_packw(benchmark::State& state,
   // Computer num_buffers that fit cache with source weights + packed_weights.
   const size_t num_buffers = 1 +
     benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
-      sizeof(int8_t) * batch * (dim_n * dim_k + rounded_n * rounded_k + rounded_n));
+      batch * (dim_n * dim_k + rounded_n * rounded_k + rounded_n * sizeof(uint32_t)));
 
   xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> weights(num_buffers * batch *
                                                     dim_n * dim_k);
@@ -118,7 +118,7 @@ static void qs8_packw(benchmark::State& state,
     packw(batch, dim_n, dim_k, nr, kr, sr,
       weights.data() + buffer_index * batch * dim_n * dim_k,
       /*bias=*/nullptr, /*scale=*/nullptr,
-      packed_weights.data() + buffer_index * batch * (rounded_n * rounded_k + rounded_n),
+      packed_weights.data() + buffer_index * batch * (rounded_n * rounded_k + rounded_n * sizeof(uint32_t)),
       /*extra_bytes=*/0, &params);
   }
 
@@ -131,7 +131,7 @@ static void qs8_packw(benchmark::State& state,
   state.counters["elements"] =
     benchmark::Counter(uint64_t(state.iterations()) * elements_per_iteration, benchmark::Counter::kIsRate);
 
-  const size_t bytes_per_iteration = (elements_per_iteration + batch * (rounded_n * rounded_k + rounded_n)) * sizeof(int8_t);
+  const size_t bytes_per_iteration = (elements_per_iteration + batch * (rounded_n * rounded_k + rounded_n * sizeof(uint32_t)));
   state.counters["bytes"] =
     benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration, benchmark::Counter::kIsRate);
 }
