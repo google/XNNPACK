@@ -2069,16 +2069,6 @@ XNN_DEPRECATED enum xnn_status xnn_define_reciprocal_square_root(
   uint32_t output_id,
   uint32_t flags);
 
-/// Define a Static Slice Node add it to a Subgraph.
-///
-/// @param subgraph - a Subgraph object that will own the created Node.
-/// @param num_dims - number of shape dimensions in the input and output tensor.
-/// @param offsets - offsets in each dimension of the input tensor. This array must have @a num_dims elements.
-/// @param sizes - size of each dimension in output tensor. This array must have @a num_dims elements.
-/// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
-/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
-///                    dimensions must match @a sizes.
-/// @param flags - binary features of the Static Slice Node. No supported flags are currently defined.
 enum xnn_status xnn_define_static_slice(
   xnn_subgraph_t subgraph,
   size_t num_dims,
@@ -2087,6 +2077,23 @@ enum xnn_status xnn_define_static_slice(
   uint32_t input_id,
   uint32_t output_id,
   uint32_t flags);
+/// Define a Static Slice Node add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param num_dims - number of shape dimensions in the input and output tensor.
+/// @param offsets - offsets in each dimension of the input tensor. This array must have @a num_dims elements. Can be
+///                  negative meaning that the offset is relative to the end of the dimension.
+/// @param sizes - size of each dimension in output tensor. This array must have @a num_dims elements.
+/// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
+///                    dimensions must match @a sizes.
+/// @param flags - binary features of the Static Slice Node. No supported flags are currently defined.
+enum xnn_status xnn_define_static_slice_v2(xnn_subgraph_t subgraph,
+                                           size_t num_dims,
+                                           const int64_t* offsets,
+                                           const int64_t* sizes,
+                                           uint32_t input_id,
+                                           uint32_t output_id, uint32_t flags);
 
 /// Define a Static Transpose Node and add it to a Subgraph.
 ///
