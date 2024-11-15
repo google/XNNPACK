@@ -249,12 +249,13 @@ union xnn_qu8_conv_minmax_params {
     int64_t rounding;
   } rndnu_scalar;
   struct {
+    uint8_t kernel_zero_point;
+    uint8_t padding[3];
     int32_t left_pre_shift;
     int16_t multiplier;
+    int16_t output_zero_point;
     uint8_t output_min;
     uint8_t output_max;
-    int16_t output_zero_point;
-    uint8_t kernel_zero_point;
   } rndnu16_scalar;
 #if XNN_ARCH_ARM
   struct {

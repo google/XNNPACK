@@ -46,6 +46,10 @@
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
   pack: xnn_pack_qu8_gemm_goi_w
   k-block: 8
+- name: xnn_qu8_gemm_minmax_rndnu16_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm
+  init: xnn_init_qu8_conv_minmax_rndnu16_scalar_params
+  pack: xnn_pack_qu8_gemm_goi_w
+  k-block: 8
 - name: xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a75
   init: xnn_init_qu8_conv_minmax_rndnu_neon_params
   pack: xnn_pack_qu8_gemm_goi_w

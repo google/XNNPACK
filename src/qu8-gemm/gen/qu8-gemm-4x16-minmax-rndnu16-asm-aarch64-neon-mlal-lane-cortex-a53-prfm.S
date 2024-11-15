@@ -10,7 +10,7 @@
 
 #include "xnnpack/assembly.h"
 
-# void xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm(
+# void xnn_qu8_gemm_minmax_rndnu16_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm(
 #     size_t mr,                 x0
 #     size_t nc,                 x1
 #     size_t kc,                 x2 / x0
@@ -22,17 +22,16 @@
 #     size_t cn_stride,          [sp] -> x12
 #     const union xnn_qs8_conv_minmax_params params)  [sp + 8] -> x11
 
-# params structure is 20 bytes
+# params structure is 14 bytes
 #  struct {
-#    uint8_t kernel_zero_point;
-#    uint8_t padding[3];
-#    int32_t right_pre_shift;
-#    int32_t multiplier;
-#    int32_t right_post_shift;
-#    int16_t output_zero_point;
-#    uint8_t output_min;
-#    uint8_t output_max;
-#  } rndnu_neon;
+#   uint8_t kernel_zero_point;
+#   uint8_t padding[3];
+#   int32_t left_pre_shift;
+#   int16_t multiplier;
+#   int16_t output_zero_point;
+#   uint8_t output_min;
+#   uint8_t output_max;
+# } rndnu16_scalar;
 #
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -50,7 +49,7 @@
 // zero_point  v7
 // unused v8 v9 v10 v11 v12 v13 v14 v15
 
-BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm
+BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu16_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm
 
         # Clamp A and C pointers
         CMP         x0, 2                   // if mr < 2
@@ -481,57 +480,25 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lan
 
 3:
         # Apply params - preshift, scale, postshift, bias and clamp
-        LD1R        {v4.4s}, [x11], 4
-        SQSHL       v16.4s, v16.4s, v4.4s   // shift to upper bits
-        SQSHL       v17.4s, v17.4s, v4.4s
-        SQSHL       v18.4s, v18.4s, v4.4s
-        SQSHL       v19.4s, v19.4s, v4.4s
-        SQSHL       v20.4s, v20.4s, v4.4s
-        SQSHL       v21.4s, v21.4s, v4.4s
-        SQSHL       v22.4s, v22.4s, v4.4s
-        SQSHL       v23.4s, v23.4s, v4.4s
-        LD1R        {v5.4s}, [x11], 4
-        SQSHL       v24.4s, v24.4s, v4.4s
-        SQSHL       v25.4s, v25.4s, v4.4s
-        SQSHL       v26.4s, v26.4s, v4.4s
-        SQSHL       v27.4s, v27.4s, v4.4s
-        SQSHL       v28.4s, v28.4s, v4.4s
-        SQSHL       v29.4s, v29.4s, v4.4s
-        SQSHL       v30.4s, v30.4s, v4.4s
-        SQSHL       v31.4s, v31.4s, v4.4s
-        LD1R        {v6.4s}, [x11], 4
-        SQDMULH     v16.4s, v16.4s, v5.4s   // scale without rounding
-        SQDMULH     v17.4s, v17.4s, v5.4s
-        SQDMULH     v18.4s, v18.4s, v5.4s
-        SQDMULH     v19.4s, v19.4s, v5.4s
-        SQDMULH     v20.4s, v20.4s, v5.4s
-        SQDMULH     v21.4s, v21.4s, v5.4s
-        SQDMULH     v22.4s, v22.4s, v5.4s
-        SQDMULH     v23.4s, v23.4s, v5.4s
-        SQDMULH     v24.4s, v24.4s, v5.4s
-        SQDMULH     v25.4s, v25.4s, v5.4s
-        SQDMULH     v26.4s, v26.4s, v5.4s
-        SQDMULH     v27.4s, v27.4s, v5.4s
-        SQDMULH     v28.4s, v28.4s, v5.4s
-        SQDMULH     v29.4s, v29.4s, v5.4s
-        SQDMULH     v30.4s, v30.4s, v5.4s
-        SQDMULH     v31.4s, v31.4s, v5.4s
-        SRSHL       v16.4s, v16.4s, v6.4s   // signed rounding shift left
-        SRSHL       v17.4s, v17.4s, v6.4s
-        SRSHL       v18.4s, v18.4s, v6.4s
-        SRSHL       v19.4s, v19.4s, v6.4s
-        SRSHL       v20.4s, v20.4s, v6.4s
-        SRSHL       v21.4s, v21.4s, v6.4s
-        SRSHL       v22.4s, v22.4s, v6.4s
-        SRSHL       v23.4s, v23.4s, v6.4s
-        SRSHL       v24.4s, v24.4s, v6.4s
-        SRSHL       v25.4s, v25.4s, v6.4s
-        SRSHL       v26.4s, v26.4s, v6.4s
-        SRSHL       v27.4s, v27.4s, v6.4s
-        SRSHL       v28.4s, v28.4s, v6.4s
-        SRSHL       v29.4s, v29.4s, v6.4s
-        SRSHL       v30.4s, v30.4s, v6.4s
-        SRSHL       v31.4s, v31.4s, v6.4s
+        LD1R        {v4.4s}, [x11], 4      // load pre shift
+        LD1R        {v5.8h}, [x11], 2      // load 16-bit multiplier
+        LD1R        {v6.8h}, [x11], 2      // load 16-bit add bias
+        SQRSHL      v16.4s, v16.4s, v4.4s
+        SQRSHL      v17.4s, v17.4s, v4.4s
+        SQRSHL      v18.4s, v18.4s, v4.4s
+        SQRSHL      v19.4s, v19.4s, v4.4s
+        SQRSHL      v20.4s, v20.4s, v4.4s
+        SQRSHL      v21.4s, v21.4s, v4.4s
+        SQRSHL      v22.4s, v22.4s, v4.4s
+        SQRSHL      v23.4s, v23.4s, v4.4s
+        SQRSHL      v24.4s, v24.4s, v4.4s
+        SQRSHL      v25.4s, v25.4s, v4.4s
+        SQRSHL      v26.4s, v26.4s, v4.4s
+        SQRSHL      v27.4s, v27.4s, v4.4s
+        SQRSHL      v28.4s, v28.4s, v4.4s
+        SQRSHL      v29.4s, v29.4s, v4.4s
+        SQRSHL      v30.4s, v30.4s, v4.4s
+        SQRSHL      v31.4s, v31.4s, v4.4s
         SQXTN       v16.4h, v16.4s
         SQXTN       v17.4h, v17.4s
         SQXTN       v18.4h, v18.4s
@@ -540,7 +507,6 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lan
         SQXTN       v25.4h, v25.4s
         SQXTN       v26.4h, v26.4s
         SQXTN       v27.4h, v27.4s
-        LD1R        {v6.8h}, [x11], 2       // add bias
         SQXTN2      v16.8h, v20.4s
         SQXTN2      v17.8h, v21.4s
         SQXTN2      v18.8h, v22.4s
@@ -549,6 +515,14 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lan
         SQXTN2      v25.8h, v29.4s
         SQXTN2      v26.8h, v30.4s
         SQXTN2      v27.8h, v31.4s
+        SQRDMULH     v16.8h, v16.8h, v5.8h
+        SQRDMULH     v17.8h, v17.8h, v5.8h
+        SQRDMULH     v18.8h, v18.8h, v5.8h
+        SQRDMULH     v19.8h, v19.8h, v5.8h
+        SQRDMULH     v24.8h, v24.8h, v5.8h
+        SQRDMULH     v25.8h, v25.8h, v5.8h
+        SQRDMULH     v26.8h, v26.8h, v5.8h
+        SQRDMULH     v27.8h, v27.8h, v5.8h
         SQADD       v16.8h, v16.8h, v6.8h
         SQADD       v17.8h, v17.8h, v6.8h
         SQADD       v18.8h, v18.8h, v6.8h
@@ -568,7 +542,7 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lan
         SQXTUN2  v1.16b, v25.8h
         SQXTUN2  v2.16b, v26.8h
         SQXTUN2  v3.16b, v27.8h
-        SUB         x11, x11, 15               // rewind params pointer
+        SUB         x11, x11, 9               // rewind params pointer
 
         UMAX    v0.16b, v0.16b, v4.16b
         UMAX    v1.16b, v1.16b, v4.16b
@@ -797,7 +771,7 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lan
 9:
         RET
 
-END_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm
+END_FUNCTION xnn_qu8_gemm_minmax_rndnu16_ukernel_4x16__asm_aarch64_neon_mlal_lane_cortex_a53_prfm
 
 #ifdef __ELF__
 .section ".note.GNU-stack","",%progbits

@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$assert REQUANTIZATION in ["FP32", "RNDNU"]
+$assert REQUANTIZATION in ["FP32", "RNDNU", "RNDNU16"]
 $assert DATATYPE in ["QC8", "QS8", "QU8"]
 $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 
@@ -12,9 +12,9 @@ $assert DATATYPE != "QC8" or REQUANTIZATION == "FP32"
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QS8": "qs8", "QU8": "qu8"}[DATATYPE]
 $PARAMS_UNION = "xnn_qs8_qc8w_conv_minmax_params" if DATATYPE == "QC8" else "xnn_%s_conv_minmax_params" % DATATYPE.lower()
 $if DATATYPE == "QU8":
-  $REWIND_DECREMENT = 15
+  $REWIND_DECREMENT = {"RNDNU": 15, "RNDNU16": 9}[REQUANTIZATION]
 $else:
-  $REWIND_DECREMENT = 3 if DATATYPE == "QC8" else {"RNDNU": 15, "FP32": 7}[REQUANTIZATION]
+  $REWIND_DECREMENT = 3 if DATATYPE == "QC8" else {"RNDNU": 15, "RNDNU16": 9, "FP32": 7}[REQUANTIZATION]
 $XMIN = "UMIN" if DATATYPE == "QU8" else "SMIN"
 $XMAX = "UMAX" if DATATYPE == "QU8" else "SMAX"
 $XXTL = "UXTL" if DATATYPE == "QU8" else "SXTL"
@@ -45,6 +45,18 @@ $if REQUANTIZATION == "RNDNU" and DATATYPE == "QU8":
   #    ${XINT8_T} output_min;
   #    ${XINT8_T} output_max;
   #  } rndnu_neon;
+  #
+$elif REQUANTIZATION == "RNDNU16" and DATATYPE == "QU8":
+  # params structure is 14 bytes
+  #  struct {
+  #   uint8_t kernel_zero_point;
+  #   uint8_t padding[3];
+  #   int32_t left_pre_shift;
+  #   int16_t multiplier;
+  #   int16_t output_zero_point;
+  #   uint8_t output_min;
+  #   uint8_t output_max;
+  # } rndnu16_scalar;
   #
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 
@@ -651,6 +663,51 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukerne
           SRSHL       v29.4s, v29.4s, v6.4s
           SRSHL       v30.4s, v30.4s, v6.4s
           SRSHL       v31.4s, v31.4s, v6.4s
+        $elif REQUANTIZATION == "RNDNU16":
+          # Apply params - preshift, scale, postshift, bias and clamp
+          LD1R        {v4.4s}, [x11], 4      // load pre shift
+          LD1R        {v5.8h}, [x11], 2      // load 16-bit multiplier
+          LD1R        {v6.8h}, [x11], 2      // load 16-bit add bias
+          SQRSHL      v16.4s, v16.4s, v4.4s
+          SQRSHL      v17.4s, v17.4s, v4.4s
+          SQRSHL      v18.4s, v18.4s, v4.4s
+          SQRSHL      v19.4s, v19.4s, v4.4s
+          SQRSHL      v20.4s, v20.4s, v4.4s
+          SQRSHL      v21.4s, v21.4s, v4.4s
+          SQRSHL      v22.4s, v22.4s, v4.4s
+          SQRSHL      v23.4s, v23.4s, v4.4s
+          SQRSHL      v24.4s, v24.4s, v4.4s
+          SQRSHL      v25.4s, v25.4s, v4.4s
+          SQRSHL      v26.4s, v26.4s, v4.4s
+          SQRSHL      v27.4s, v27.4s, v4.4s
+          SQRSHL      v28.4s, v28.4s, v4.4s
+          SQRSHL      v29.4s, v29.4s, v4.4s
+          SQRSHL      v30.4s, v30.4s, v4.4s
+          SQRSHL      v31.4s, v31.4s, v4.4s
+          SQXTN       v16.4h, v16.4s
+          SQXTN       v17.4h, v17.4s
+          SQXTN       v18.4h, v18.4s
+          SQXTN       v19.4h, v19.4s
+          SQXTN       v24.4h, v24.4s
+          SQXTN       v25.4h, v25.4s
+          SQXTN       v26.4h, v26.4s
+          SQXTN       v27.4h, v27.4s
+          SQXTN2      v16.8h, v20.4s
+          SQXTN2      v17.8h, v21.4s
+          SQXTN2      v18.8h, v22.4s
+          SQXTN2      v19.8h, v23.4s
+          SQXTN2      v24.8h, v28.4s
+          SQXTN2      v25.8h, v29.4s
+          SQXTN2      v26.8h, v30.4s
+          SQXTN2      v27.8h, v31.4s
+          SQRDMULH     v16.8h, v16.8h, v5.8h
+          SQRDMULH     v17.8h, v17.8h, v5.8h
+          SQRDMULH     v18.8h, v18.8h, v5.8h
+          SQRDMULH     v19.8h, v19.8h, v5.8h
+          SQRDMULH     v24.8h, v24.8h, v5.8h
+          SQRDMULH     v25.8h, v25.8h, v5.8h
+          SQRDMULH     v26.8h, v26.8h, v5.8h
+          SQRDMULH     v27.8h, v27.8h, v5.8h
         $elif REQUANTIZATION == "FP32":
           SCVTF       v16.4s, v16.4s
           SCVTF       v17.4s, v17.4s
@@ -731,26 +788,24 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukerne
           FCVTNS      v29.4s, v29.4s
           FCVTNS      v30.4s, v30.4s
           FCVTNS      v31.4s, v31.4s
-
-        SQXTN       v16.4h, v16.4s
-        SQXTN       v17.4h, v17.4s
-        SQXTN       v18.4h, v18.4s
-        SQXTN       v19.4h, v19.4s
-        SQXTN       v24.4h, v24.4s
-        SQXTN       v25.4h, v25.4s
-        SQXTN       v26.4h, v26.4s
-        SQXTN       v27.4h, v27.4s
-        LD1R        {v6.8h}, [x11], 2       // add bias
-
-        SQXTN2      v16.8h, v20.4s
-        SQXTN2      v17.8h, v21.4s
-        SQXTN2      v18.8h, v22.4s
-        SQXTN2      v19.8h, v23.4s
-        SQXTN2      v24.8h, v28.4s
-        SQXTN2      v25.8h, v29.4s
-        SQXTN2      v26.8h, v30.4s
-        SQXTN2      v27.8h, v31.4s
-
+        $if REQUANTIZATION == "RNDNU" or REQUANTIZATION == "FP32":
+          SQXTN       v16.4h, v16.4s
+          SQXTN       v17.4h, v17.4s
+          SQXTN       v18.4h, v18.4s
+          SQXTN       v19.4h, v19.4s
+          SQXTN       v24.4h, v24.4s
+          SQXTN       v25.4h, v25.4s
+          SQXTN       v26.4h, v26.4s
+          SQXTN       v27.4h, v27.4s
+          LD1R        {v6.8h}, [x11], 2       // add bias
+          SQXTN2      v16.8h, v20.4s
+          SQXTN2      v17.8h, v21.4s
+          SQXTN2      v18.8h, v22.4s
+          SQXTN2      v19.8h, v23.4s
+          SQXTN2      v24.8h, v28.4s
+          SQXTN2      v25.8h, v29.4s
+          SQXTN2      v26.8h, v30.4s
+          SQXTN2      v27.8h, v31.4s
         SQADD       v16.8h, v16.8h, v6.8h
         SQADD       v17.8h, v17.8h, v6.8h
         SQADD       v18.8h, v18.8h, v6.8h
