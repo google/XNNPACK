@@ -769,6 +769,7 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/qu8-gemm/gen/qu8-gemm-6x16-minmax-rndnu-neon-mlal-lane.c
   src/qu8-igemm/gen/qu8-igemm-1x8-minmax-fp32-neon-mlal-lane.c
   src/qu8-igemm/gen/qu8-igemm-1x16-minmax-fp32-neon-mlal-lane.c
+  src/qu8-igemm/gen/qu8-igemm-1x16-minmax-rndnu16-neon-mlal-lane.c
   src/qu8-igemm/gen/qu8-igemm-2x8-minmax-rndnu-neon-mlal-lane.c
   src/qu8-igemm/gen/qu8-igemm-2x16-minmax-rndnu-neon-mlal-lane.c
   src/qu8-igemm/gen/qu8-igemm-3x16-minmax-rndnu-neon-mlal-lane.c
