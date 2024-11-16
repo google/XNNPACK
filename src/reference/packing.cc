@@ -588,6 +588,8 @@ void xnn_pack_qs8_qb4w_gemm_goi_w(
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       float* packed_b = (float*) packed_weights;
+      // Zero out ksum scaled
+      copy_bias(bias, nr_block_start, nr_block_size, packed_b);
       packed_weights = (float*) packed_weights + nr_block_size;
       packed_weights = (float*) packed_weights + (nr - nr_block_size);
 
@@ -679,6 +681,8 @@ void xnn_pack_qs8_qb4w_gemm_gio_w(
     do {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       int32_t* packed_b = (int32_t*) packed_weights;
+      // Zero out ksum scaled
+      copy_bias(bias, nr_block_start, nr_block_size, packed_b);
       packed_weights = (float*) packed_weights + nr_block_size;
       packed_weights = (float*) packed_weights + (nr - nr_block_size);
 
