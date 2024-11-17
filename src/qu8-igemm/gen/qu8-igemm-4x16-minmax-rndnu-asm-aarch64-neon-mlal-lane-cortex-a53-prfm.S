@@ -558,7 +558,6 @@ BEGIN_FUNCTION xnn_qu8_igemm_minmax_rndnu_ukernel_4x16__asm_aarch64_neon_mlal_la
         SRSHL       v29.4s, v29.4s, v6.4s
         SRSHL       v30.4s, v30.4s, v6.4s
         SRSHL       v31.4s, v31.4s, v6.4s
-
         SQXTN       v16.4h, v16.4s
         SQXTN       v17.4h, v17.4s
         SQXTN       v18.4h, v18.4s
