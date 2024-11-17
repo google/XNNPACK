@@ -381,9 +381,6 @@ void xnn_compute_hmp_grouped_gemm(
     const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
     uint32_t uarch_index, size_t group_index, size_t mr_block_start,
     size_t nr_block_start, size_t mr_block_size, size_t nr_block_size) {
-  const size_t k_scaled  = context->k_scaled;
-  const size_t a_stride  = context->a_stride;
-  const size_t cm_stride = context->cm_stride;
   const size_t num_batch_dims = context->num_batch_dims;
   const size_t group_index_c = group_index;
 
@@ -401,6 +398,12 @@ void xnn_compute_hmp_grouped_gemm(
     group_index_b = (index % context->batch_dims_b[k]) +
                     context->batch_dims_b[k] * group_index_b;
   }
+
+  const size_t k_scaled = context->k_scaled;
+  const size_t a_stride = context->a_stride;
+  const size_t cm_stride = context->cm_stride;
+  const size_t mr = context->mr;
+
   if (context->quantization_params != NULL) {
     // If the effective `mr_block_size` is smaller than the kernel's `mr`,
     // create a padded copy of the dynamic quantization params.
@@ -409,9 +412,10 @@ void xnn_compute_hmp_grouped_gemm(
                                       mr_block_start];
     struct xnn_qd8_quantization_params padded_quantization_params[XNN_MAX_MR];
     if (mr_block_size < context->mr) {
-      memcpy(padded_quantization_params, quantization_params,
-             mr_block_size * sizeof(struct xnn_qd8_quantization_params));
-      for (size_t i = mr_block_size; i < context->mr; i++) {
+      for (size_t i = 0; i < mr_block_size; i++) {
+        padded_quantization_params[i] = quantization_params[i];
+      }
+      for (size_t i = mr_block_size; i < mr; i++) {
         padded_quantization_params[i] =
             padded_quantization_params[mr_block_size - 1];
       }
