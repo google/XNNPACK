@@ -161,7 +161,7 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
           _mm256_storeu_si256((__m256i *)&out[${N * KR}],  v${N});
 
         $for N in range(NR):
-          w${N} += ${KR} * k_stride;
+          w${N} += k * k_stride;
         out += ${NR*KR};
       }
 

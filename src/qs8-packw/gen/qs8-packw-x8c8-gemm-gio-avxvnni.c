@@ -182,14 +182,14 @@ void xnn_qs8_packw_gemm_gio_ukernel_x8c8__avxvnni(
         _mm256_storeu_si256((__m256i *)&out[0],  v0);
         _mm256_storeu_si256((__m256i *)&out[32],  v4);
 
-        w0 += 8 * k_stride;
-        w1 += 8 * k_stride;
-        w2 += 8 * k_stride;
-        w3 += 8 * k_stride;
-        w4 += 8 * k_stride;
-        w5 += 8 * k_stride;
-        w6 += 8 * k_stride;
-        w7 += 8 * k_stride;
+        w0 += k * k_stride;
+        w1 += k * k_stride;
+        w2 += k * k_stride;
+        w3 += k * k_stride;
+        w4 += k * k_stride;
+        w5 += k * k_stride;
+        w6 += k * k_stride;
+        w7 += k * k_stride;
         out += 64;
       }
 
