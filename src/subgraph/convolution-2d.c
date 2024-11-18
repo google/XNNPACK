@@ -10,13 +10,13 @@
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
 #include "xnnpack/internal.h"
 #include "xnnpack/log.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator-type.h"
 #include "xnnpack/operator.h"
-#include "xnnpack/subgraph.h"
 #include "xnnpack/requantization.h"
 #include "xnnpack/subgraph-validation.h"
 #include "xnnpack/subgraph.h"
@@ -48,8 +48,9 @@ static enum xnn_status create_convolution_operator(
   assert(filter_data != NULL);
 
   const void* bias_data = NULL;
+  uint32_t bias_id = XNN_INVALID_VALUE_ID;
   if (node->num_inputs > 2) {
-    const uint32_t bias_id = node->inputs[2];
+    bias_id = node->inputs[2];
     assert(bias_id != XNN_INVALID_VALUE_ID);
     assert(bias_id < num_values);
 
@@ -60,6 +61,9 @@ static enum xnn_status create_convolution_operator(
   enum xnn_status status;
   const enum xnn_datatype input_datatype = values[input_id].datatype;
   const enum xnn_datatype filter_datatype = values[filter_id].datatype;
+  const enum xnn_datatype bias_datatype = bias_id != XNN_INVALID_VALUE_ID
+                                              ? values[filter_id].datatype
+                                              : xnn_datatype_invalid;
   const enum xnn_datatype output_datatype = values[output_id].datatype;
   if (values[output_id].layout == xnn_layout_type_nchw) {
     switch (output_datatype) {
@@ -124,6 +128,42 @@ static enum xnn_status create_convolution_operator(
     switch (output_datatype) {
       case xnn_datatype_fp32:
         switch (filter_datatype) {
+          case xnn_datatype_fp16: {
+            uint32_t flags = node->flags;
+            if (bias_datatype == xnn_datatype_fp32) {
+              flags |= XNN_FLAG_FP32_STATIC_BIASES;
+            }
+            switch (input_datatype) {
+              case xnn_datatype_fp32:
+                status = xnn_create_convolution2d_nhwc_f32_f16(
+                    node->params.convolution_2d.input_padding_top,
+                    node->params.convolution_2d.input_padding_right,
+                    node->params.convolution_2d.input_padding_bottom,
+                    node->params.convolution_2d.input_padding_left,
+                    node->params.convolution_2d.kernel_height,
+                    node->params.convolution_2d.kernel_width,
+                    node->params.convolution_2d.subsampling_height,
+                    node->params.convolution_2d.subsampling_width,
+                    node->params.convolution_2d.dilation_height,
+                    node->params.convolution_2d.dilation_width,
+                    node->params.convolution_2d.groups,
+                    node->params.convolution_2d.group_input_channels,
+                    node->params.convolution_2d.group_output_channels,
+                    node->params.convolution_2d.group_input_channels *
+                        node->params.convolution_2d
+                            .groups /* input_pixel_stride */,
+                    node->params.convolution_2d.group_output_channels *
+                        node->params.convolution_2d
+                            .groups /* output_pixel_stride */,
+                    filter_data, bias_data, node->activation.output_min,
+                    node->activation.output_max, flags, code_cache,
+                    weights_cache, &opdata->operator_objects[0]);
+                break;
+              default:
+                XNN_UNREACHABLE;
+            }
+            break;
+          }
           case xnn_datatype_fp32:
             switch (input_datatype) {
               case xnn_datatype_fp32:
@@ -217,6 +257,9 @@ static enum xnn_status create_convolution_operator(
         uint32_t flags = node->flags;
         if (filter_datatype == xnn_datatype_fp32) {
           flags |= XNN_FLAG_FP32_STATIC_WEIGHTS;
+        }
+        if (bias_datatype == xnn_datatype_fp32) {
+          flags |= XNN_FLAG_FP32_STATIC_BIASES;
         }
         switch (filter_datatype) {
           case xnn_datatype_fp16:
@@ -662,6 +705,18 @@ static inline bool validate_datatypes_with_bias(
         return true;
       }
       break;
+    case xnn_datatype_fp16:
+      if (input_datatype == xnn_datatype_fp32 &&
+          bias_datatype == xnn_datatype_fp16 &&
+          output_datatype == xnn_datatype_fp32) {
+        return true;
+      } else if (input_datatype == xnn_datatype_fp32 &&
+                 bias_datatype == xnn_datatype_fp32 &&
+                 output_datatype == xnn_datatype_fp32) {
+        // Flag: XNN_FLAG_FP32_STATIC_BIASES
+        return true;
+      }
+      break;
     case xnn_datatype_qint8:
       if (input_datatype == xnn_datatype_qint8 &&
           bias_datatype == xnn_datatype_qint32 &&
@@ -713,6 +768,12 @@ static inline bool validate_datatypes_without_bias(
         return true;
       } else if (input_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_fp16) {
         // Flag: XNN_FLAG_FP32_STATIC_WEIGHTS
+        return true;
+      }
+      break;
+    case xnn_datatype_fp16:
+      if (input_datatype == xnn_datatype_fp32 &&
+          output_datatype == xnn_datatype_fp32) {
         return true;
       }
       break;

@@ -1261,7 +1261,8 @@ enum xnn_status xnn_create_fully_connected_nc_f32_f16(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out)
 {
-  float *fp32_kernel_buffer = (float*) malloc(input_channels * output_channels * sizeof(float));
+  float* fp32_kernel_buffer = (float*)xnn_allocate_memory(
+      input_channels * output_channels * sizeof(float));
   float *fp32_bias_buffer = NULL;
   const xnn_float16 *f16_kernel = (const xnn_float16*) kernel;
   const xnn_float16 *f16_bias = (const xnn_float16*) bias;
@@ -1269,14 +1270,14 @@ enum xnn_status xnn_create_fully_connected_nc_f32_f16(
     fp32_kernel_buffer[i] = xnn_float16_to_float(f16_kernel[i]);
   }
   if (bias) {
-    fp32_bias_buffer = (float*) malloc(output_channels * sizeof(float));
+    fp32_bias_buffer = (float*) xnn_allocate_memory(output_channels * sizeof(float));
     for (size_t i = 0; i < output_channels; ++i) {
       fp32_bias_buffer[i] = xnn_float16_to_float(f16_bias[i]);
     }
   }
   enum xnn_status status = xnn_create_fully_connected_nc_f32(input_channels, output_channels, input_stride, output_stride, fp32_kernel_buffer, fp32_bias_buffer, output_min, output_max, flags, code_cache, weights_cache, fully_connected_op_out);
-  free(fp32_kernel_buffer);
-  free(fp32_bias_buffer);
+  xnn_release_memory(fp32_kernel_buffer);
+  xnn_release_memory(fp32_bias_buffer);
   return status;
 }
 

@@ -83,6 +83,9 @@ extern "C" {
 /// Static weights of the FP16 operator are in FP32 format.
 #define XNN_FLAG_FP32_STATIC_WEIGHTS 0x00000008
 
+/// Static biases of the FP16 operator are in FP32 format.
+#define XNN_FLAG_FP32_STATIC_BIASES 0x00000080
+
 /// Align corners of input and output images in resize operations.
 #define XNN_FLAG_ALIGN_CORNERS 0x00000008
 
@@ -2990,6 +2993,31 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* convolution_op_out);
 
+enum xnn_status xnn_create_convolution2d_nhwc_f32_f16(
+  uint32_t input_padding_top,
+  uint32_t input_padding_right,
+  uint32_t input_padding_bottom,
+  uint32_t input_padding_left,
+  uint32_t kernel_height,
+  uint32_t kernel_width,
+  uint32_t subsampling_height,
+  uint32_t subsampling_width,
+  uint32_t dilation_height,
+  uint32_t dilation_width,
+  uint32_t groups,
+  size_t group_input_channels,
+  size_t group_output_channels,
+  size_t input_channel_stride,
+  size_t output_channel_stride,
+  const void* kernel,
+  const void* bias,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* convolution_op_out);
+
 // Forward declare.
 struct xnn_post_operation;
 
@@ -3344,6 +3372,31 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
   size_t output_pixel_stride,
   const float* kernel,
   const float* bias,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* deconvolution_op_out);
+
+enum xnn_status xnn_create_deconvolution2d_nhwc_f32_f16(
+  uint32_t output_padding_top,
+  uint32_t output_padding_right,
+  uint32_t output_padding_bottom,
+  uint32_t output_padding_left,
+  uint32_t kernel_height,
+  uint32_t kernel_width,
+  uint32_t stride_height,
+  uint32_t stride_width,
+  uint32_t dilation_height,
+  uint32_t dilation_width,
+  uint32_t groups,
+  size_t group_input_channels,
+  size_t group_output_channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
+  const void* kernel,
+  const void* bias,
   float output_min,
   float output_max,
   uint32_t flags,
