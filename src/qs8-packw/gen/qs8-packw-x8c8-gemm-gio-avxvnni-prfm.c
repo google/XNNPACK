@@ -164,9 +164,9 @@ void xnn_qs8_packw_gemm_gio_ukernel_x8c8__avxvnni_prfm(
         __m128i v4567x4567 = _mm_unpackhi_epi16(v45x01234567, v67x01234567);
 
         __m128i v01234567x01 = _mm_unpacklo_epi32(v0123x0123, v4567x0123);
-        __m128i v01234567x23 = _mm_unpacklo_epi32(v0123x0123, v4567x0123);
+        __m128i v01234567x23 = _mm_unpackhi_epi32(v0123x0123, v4567x0123);
         __m128i v01234567x45 = _mm_unpacklo_epi32(v0123x4567, v4567x4567);
-        __m128i v01234567x67 = _mm_unpacklo_epi32(v0123x4567, v4567x4567);
+        __m128i v01234567x67 = _mm_unpackhi_epi32(v0123x4567, v4567x4567);
 
         __m256i v0 = _mm256_inserti128_si256(_mm256_castsi128_si256(v01234567x01), v01234567x23, 1);
         __m256i v4 = _mm256_inserti128_si256(_mm256_castsi128_si256(v01234567x45), v01234567x67, 1);
@@ -234,9 +234,9 @@ void xnn_qs8_packw_gemm_gio_ukernel_x8c8__avxvnni_prfm(
         __m128i v4567x4567 = _mm_unpackhi_epi16(v45x01234567, v67x01234567);
 
         __m128i v01234567x01 = _mm_unpacklo_epi32(v0123x0123, v4567x0123);
-        __m128i v01234567x23 = _mm_unpacklo_epi32(v0123x0123, v4567x0123);
+        __m128i v01234567x23 = _mm_unpackhi_epi32(v0123x0123, v4567x0123);
         __m128i v01234567x45 = _mm_unpacklo_epi32(v0123x4567, v4567x4567);
-        __m128i v01234567x67 = _mm_unpacklo_epi32(v0123x4567, v4567x4567);
+        __m128i v01234567x67 = _mm_unpackhi_epi32(v0123x4567, v4567x4567);
 
         __m256i v0 = _mm256_inserti128_si256(_mm256_castsi128_si256(v01234567x01), v01234567x23, 1);
         __m256i v4 = _mm256_inserti128_si256(_mm256_castsi128_si256(v01234567x45), v01234567x67, 1);

@@ -108,8 +108,9 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
           __m128i v${ABC[K:K+4]}x${ABC[0:4]} = _mm_unpacklo_epi16(v${ABC[K:K+2]}x${ABC[0:NR]}, v${ABC[K+2:K+4]}x${ABC[0:NR]});
           __m128i v${ABC[K:K+4]}x${ABC[4:8]} = _mm_unpackhi_epi16(v${ABC[K:K+2]}x${ABC[0:NR]}, v${ABC[K+2:K+4]}x${ABC[0:NR]});
 
-        $for K in range(0, KR, 2):
+        $for K in range(0, KR, 4):
           __m128i v${ABC[0:NR]}x${ABC[K:K+2]} = _mm_unpacklo_epi32(v0123x${ABC[(K//4)*4:(K//4)*4 + 4]}, v4567x${ABC[(K//4)*4:(K//4)*4 + 4]});
+          __m128i v${ABC[0:NR]}x${ABC[K+2:K+4]} = _mm_unpackhi_epi32(v0123x${ABC[(K//4)*4:(K//4)*4 + 4]}, v4567x${ABC[(K//4)*4:(K//4)*4 + 4]});
 
         $for N in range(0, NR, 4):
           __m256i v${N} = _mm256_inserti128_si256(_mm256_castsi128_si256(v${ABC[0:NR]}x${ABC[N:N+2]}), v${ABC[0:NR]}x${ABC[N+2:N+4]}, 1);
@@ -145,8 +146,9 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
           __m128i v${ABC[K:K+4]}x${ABC[0:4]} = _mm_unpacklo_epi16(v${ABC[K:K+2]}x${ABC[0:NR]}, v${ABC[K+2:K+4]}x${ABC[0:NR]});
           __m128i v${ABC[K:K+4]}x${ABC[4:8]} = _mm_unpackhi_epi16(v${ABC[K:K+2]}x${ABC[0:NR]}, v${ABC[K+2:K+4]}x${ABC[0:NR]});
 
-        $for K in range(0, KR, 2):
+        $for K in range(0, KR, 4):
           __m128i v${ABC[0:NR]}x${ABC[K:K+2]} = _mm_unpacklo_epi32(v0123x${ABC[(K//4)*4:(K//4)*4 + 4]}, v4567x${ABC[(K//4)*4:(K//4)*4 + 4]});
+          __m128i v${ABC[0:NR]}x${ABC[K+2:K+4]} = _mm_unpackhi_epi32(v0123x${ABC[(K//4)*4:(K//4)*4 + 4]}, v4567x${ABC[(K//4)*4:(K//4)*4 + 4]});
 
         $for N in range(0, NR, 4):
           __m256i v${N} = _mm256_inserti128_si256(_mm256_castsi128_si256(v${ABC[0:NR]}x${ABC[N:N+2]}), v${ABC[0:NR]}x${ABC[N+2:N+4]}, 1);
