@@ -507,37 +507,44 @@ static void x8_packw_gio__reference(
      extra_bytes, params);
 }
 
-static void x8_packw_x2_gio__reference(benchmark::State& state, const char* net) {
+static void x8_packw_gio_x2__reference(benchmark::State& state, const char* net) {
   x8_packw(state,
     x8_packw_gio__reference,
     /*nr=*/2, /*kr=*/1, /*sr=*/1);
 }
-static void x8_packw_x4_gio__reference(benchmark::State& state, const char* net) {
+static void x8_packw_gio_x4__reference(benchmark::State& state, const char* net) {
   x8_packw(state,
     x8_packw_gio__reference,
     /*nr=*/4, /*kr=*/1, /*sr=*/1);
 }
-static void x8_packw_x8_gio__reference(benchmark::State& state, const char* net) {
+static void x8_packw_gio_x8__reference(benchmark::State& state, const char* net) {
   x8_packw(state,
     x8_packw_gio__reference,
     /*nr=*/8, /*kr=*/1, /*sr=*/1);
 }
-static void x8_packw_x16_gio__reference(benchmark::State& state, const char* net) {
+static void x8_packw_gio_x16__reference(benchmark::State& state, const char* net) {
   x8_packw(state,
     x8_packw_gio__reference,
     /*nr=*/16, /*kr=*/1, /*sr=*/1);
 }
-static void x8_packw_x32_gio__reference(benchmark::State& state, const char* net) {
+static void x8_packw_gio_x32__reference(benchmark::State& state, const char* net) {
   x8_packw(state,
     x8_packw_gio__reference,
     /*nr=*/32, /*kr=*/1, /*sr=*/1);
 }
 
-BENCHMARK_BGEMM(x8_packw_x2_gio__reference)
-BENCHMARK_BGEMM(x8_packw_x4_gio__reference)
-BENCHMARK_BGEMM(x8_packw_x8_gio__reference)
-BENCHMARK_BGEMM(x8_packw_x16_gio__reference)
-BENCHMARK_BGEMM(x8_packw_x32_gio__reference)
+static void x8_packw_gio_x8c8__reference(benchmark::State& state, const char* net) {
+  x8_packw(state,
+    x8_packw_gio__reference,
+    /*nr=*/8, /*kr=*/8, /*sr=*/1);
+}
+
+BENCHMARK_BGEMM(x8_packw_gio_x2__reference)
+BENCHMARK_BGEMM(x8_packw_gio_x4__reference)
+BENCHMARK_BGEMM(x8_packw_gio_x8__reference)
+BENCHMARK_BGEMM(x8_packw_gio_x16__reference)
+BENCHMARK_BGEMM(x8_packw_gio_x32__reference)
+BENCHMARK_BGEMM(x8_packw_gio_x8c8__reference)
 
 static void qs8_packw__reference(
   size_t batch,
