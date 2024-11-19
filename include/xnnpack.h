@@ -101,7 +101,7 @@ extern "C" {
 /// The caller must allocate at least this many extra xnn_quantization_params before passing the array to XNNPACK.
 ///
 /// Note: XNNPACK reads, but never writes beyond array bounds.
-#define XNN_EXTRA_QUANTIZATION_PARAMS 10
+#define XNN_EXTRA_QUANTIZATION_PARAMS 15
 
 /// The minimum blocksize for blockwise quantized operators.
 #define XNN_MIN_BLOCKSIZE 32
