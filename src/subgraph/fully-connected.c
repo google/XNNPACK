@@ -46,6 +46,7 @@ enum fully_connected_op_type {
   fc_type_qu8_qu8_qu8 = 18,
   fc_type_qp8_f32_qb4w = 19,
   fc_type_pf32_f32_f32 = 20,
+  fc_type_f32_f16_f32 = 21,
 };
 
 enum fully_connected_op_type get_fully_connected_op_type(
@@ -92,6 +93,13 @@ enum fully_connected_op_type get_fully_connected_op_type(
       break;
     case xnn_datatype_fp32:
       switch (filter_datatype) {
+        case xnn_datatype_fp16:
+          switch (input_datatype) {
+            case xnn_datatype_fp32:
+              return fc_type_f32_f16_f32;
+            default:
+              XNN_UNREACHABLE;
+          }
         case xnn_datatype_fp32:
           if (has_non_static_weights) {
             return fc_type_f32_f32_f32_dynamic;
@@ -300,6 +308,19 @@ static enum xnn_status create_fully_connected_operator(
           node->activation.output_max, node->flags, code_cache, weights_cache,
           &opdata->operator_objects[0]);
       break;
+    case fc_type_f32_f16_f32: {
+      uint32_t flags = node->flags;
+      if (bias_value != NULL && bias_value->datatype == xnn_datatype_fp32) {
+        flags |= XNN_FLAG_FP32_STATIC_BIASES;
+      }
+      status = xnn_create_fully_connected_nc_f32_f16(
+          input_channels, output_channels,
+          /*input_stride=*/input_channels,
+          /*output_stride=*/output_channels, kernel_data, bias_data,
+          node->activation.output_min, node->activation.output_max, flags,
+          code_cache, weights_cache, &opdata->operator_objects[0]);
+      break;
+    }
     case fc_type_qp8_f32_qb4w:
       status = xnn_create_fully_connected_nc_qp8_f32_qb4w(
           input_channels, output_channels,
@@ -783,6 +804,15 @@ static inline bool validate_datatypes_with_bias(
           bias_datatype == xnn_datatype_fp16 &&
           output_datatype == xnn_datatype_fp16) {
         return true;
+      } else if (input_datatype == xnn_datatype_fp32 &&
+                 bias_datatype == xnn_datatype_fp16 &&
+                 output_datatype == xnn_datatype_fp32) {
+        return true;
+      } else if (input_datatype == xnn_datatype_fp32 &&
+                 bias_datatype == xnn_datatype_fp32 &&
+                 output_datatype == xnn_datatype_fp32) {
+        // Flag: XNN_FLAG_FP32_STATIC_BIASES
+        return true;
       }
       break;
     case xnn_datatype_qcint4:
@@ -880,6 +910,9 @@ static inline bool validate_datatypes_without_bias(
     case xnn_datatype_fp16:
       if (input_datatype == xnn_datatype_fp16 &&
           output_datatype == xnn_datatype_fp16) {
+        return true;
+      } else if (input_datatype == xnn_datatype_fp32 &&
+                 output_datatype == xnn_datatype_fp32) {
         return true;
       }
       break;
