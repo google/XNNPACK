@@ -16,6 +16,7 @@
 
 #include <gtest/gtest.h>
 
+#include "next_prime.h"
 #include "replicable_random_device.h"
 #include "xnnpack/buffer.h"
 #include "xnnpack/math.h"
@@ -446,62 +447,47 @@ private:
 };
 
 
-#define XNN_TEST_SPMM_K_EQ(ukernel, arch_flags, mr_, nr_, pipelined, kblock, ...)                                                \
+#define XNN_TEST_SPMM_K_EQ(ukernel, arch_flags, mr_, nr_, pipelined, kblock, init_params, ...)                         \
   TEST(ukernel, k_eq)                                                                                                  \
   {                                                                                                                    \
     SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(nr_).k(kblock).sparsity(0.0f).Test(ukernel, init_params);         \
   }                                                                                                                    \
-  if (nr_ > 1)                                                                                                         \
-    TEST(ukernel, k_eq_kblock_subtile)                                                                                 \
-    {                                                                                                                  \
+  TEST(ukernel, k_eq_kblock_subtile)                                                                                   \
+  {                                                                                                                    \
+    for (uint32_t n_ = 1; n_ <= nr_; n_++) {                                                                           \
+      SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(n_).k(kblock).sparsity(0.0f).Test(ukernel, init_params);        \
+    }                                                                                                                  \
+  }                                                                                                                    \
+  TEST(ukernel, k_eq_kblock_2)                                                                                         \
+  {                                                                                                                    \
+    SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(nr_).k(kblock * 2).sparsity(0.0f).Test(ukernel, init_params);     \
+  }                                                                                                                    \
+  TEST(ukernel, k_eq_kblock_2_subtile)                                                                                 \
+  {                                                                                                                    \
+    for (uint32_t n_ = 1; n_ <= nr_; n_++) {                                                                           \
+      SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(n_).k(kblock * 2).sparsity(0.0f).Test(ukernel, init_params);    \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_SPMM_K_LT(ukernel, arch_flags, mr_, nr_, pipelined, kblock, init_params, ...)                         \
+  TEST(ukernel, k_lt_adjkblock)                                                                                        \
+  {                                                                                                                    \
+    ((pipelined) ? kblock * 2 : kblock);                                                                               \
+    for (size_t k_ = 1; k_ < kblock; k_++) {                                                                           \
+      SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(nr_).k(k_).sparsity(0.0f).Test(ukernel, init_params);           \
+    }                                                                                                                  \
+  }                                                                                                                    \
+  TEST(ukernel, k_lt_adjkblock_subtile)                                                                                \
+  {                                                                                                                    \
+    ((pipelined) ? kblock * 2 : kblock);                                                                               \
+    for (size_t k_ = 1; k_ < kblock; k_++) {                                                                           \
       for (uint32_t n_ = 1; n_ <= nr_; n_++) {                                                                         \
-        SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(n_).k(kblock).sparsity(0.0f).Test(ukernel, init_params);      \
-      }                                                                                                                \
-    }                                                                                                                  \
-  if (pipelined) {                                                                                                     \
-    TEST(ukernel, k_eq_kblock_2)                                                                                       \
-    {                                                                                                                  \
-      SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(nr_).k(kblock * 2).sparsity(0.0f).Test(ukernel, init_params);   \
-    }                                                                                                                  \
-    if (nr_ > 1)                                                                                                       \
-      TEST(ukernel, k_eq_kblock_2_subtile)                                                                             \
-      {                                                                                                                \
-        for (uint32_t n_ = 1; n_ <= nr_; n_++) {                                                                       \
-          SpMMMicrokernelTester()                                                                                      \
-            .mr(mr_)                                                                                                   \
-            .nr(nr_)                                                                                                   \
-            .m(mr_)                                                                                                    \
-            .n(n_)                                                                                                     \
-            .k(kblock * 2)                                                                                             \
-            .sparsity(0.0f)                                                                                            \
-            .Test(ukernel, init_params);                                                                               \
-        }                                                                                                              \
-      }                                                                                                                \
-  }
-
-#define XNN_TEST_SPMM_K_LT(ukernel, arch_flags, mr_, nr_, pipelined, kblock, ...)                                                \
-  if (kblock > 1) {                                                                                                    \
-    TEST(ukernel, k_lt_adjkblock)                                                                                      \
-    {                                                                                                                  \
-      ((pipelined) ? kblock * 2 : kblock);                                                                             \
-      for (size_t k_ = 1; k_ < kblock; k_++) {                                                                         \
-        SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(nr_).k(k_).sparsity(0.0f).Test(ukernel, init_params);         \
-      }                                                                                                                \
-    }                                                                                                                  \
-    if (nr > 1) {                                                                                                      \
-      TEST(ukernel, k_lt_adjkblock_subtile)                                                                            \
-      {                                                                                                                \
-        ((pipelined) ? kblock * 2 : kblock);                                                                           \
-        for (size_t k_ = 1; k_ < kblock; k_++) {                                                                       \
-          for (uint32_t n_ = 1; n_ <= nr_; n_++) {                                                                     \
-            SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(n_).k(k_).sparsity(0.0f).Test(ukernel, init_params);      \
-          }                                                                                                            \
-        }                                                                                                              \
+        SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(n_).k(k_).sparsity(0.0f).Test(ukernel, init_params);          \
       }                                                                                                                \
     }                                                                                                                  \
   }
 
-#define XNN_TEST_SPMM_K_GT(ukernel, arch_flags, mr_, nr_, pipelined, kblock, ...)                                                \
+#define XNN_TEST_SPMM_K_GT(ukernel, arch_flags, mr_, nr_, pipelined, kblock, init_params, ...)                         \
   TEST(ukernel, k_gt_adjkblock)                                                                                        \
   {                                                                                                                    \
     size_t adjkblock = pipelined ? kblock * 2 : kblock;                                                                \
@@ -509,41 +495,35 @@ private:
       SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(nr_).k(k_).sparsity(0.0f).Test(ukernel, init_params);           \
     }                                                                                                                  \
   }                                                                                                                    \
-  if (nr > 1) {                                                                                                        \
-    TEST(ukernel, k_gt_kblock_subtile)                                                                                 \
-    {                                                                                                                  \
-      size_t adjkblock = pipelined ? kblock * 2 : kblock;                                                              \
-      for (size_t k_ = adjkblock + 1; k_ < ((kblock == 1) ? kblock * 10 : kblock * 2); k_++) {                         \
-        for (uint32_t n_ = 1; n_ <= nr_; n_++) {                                                                       \
-          SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(n_).k(k_).sparsity(0.0f).Test(ukernel, init_params);        \
-        }                                                                                                              \
+  TEST(ukernel, k_gt_kblock_subtile)                                                                                   \
+  {                                                                                                                    \
+    size_t adjkblock = pipelined ? kblock * 2 : kblock;                                                                \
+    for (size_t k_ = adjkblock + 1; k_ < ((kblock == 1) ? kblock * 10 : kblock * 2); k_++) {                           \
+      for (uint32_t n_ = 1; n_ <= nr_; n_++) {                                                                         \
+        SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(n_).k(k_).sparsity(0.0f).Test(ukernel, init_params);          \
       }                                                                                                                \
     }                                                                                                                  \
   }
 
-#define XNN_TEST_SPMM_K_DIV(ukernel, arch_flags, mr_, nr_, pipelined, kblock, ...)                                               \
-  if (kblock > 1) {                                                                                                    \
-    TEST(ukernel, k_div_kblock)                                                                                        \
-    {                                                                                                                  \
-      size_t adjkblock = pipelined ? kblock * 2 : kblock;                                                              \
-      for (size_t k_ = adjkblock + kblock; k_ <= kblock * 10; k_ += kblock) {                                          \
-        SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(nr_).k(k_).sparsity(0.0f).Test(ukernel, init_params);         \
-      }                                                                                                                \
+#define XNN_TEST_SPMM_K_DIV(ukernel, arch_flags, mr_, nr_, pipelined, kblock, init_params, ...)                        \
+  TEST(ukernel, k_div_kblock)                                                                                          \
+  {                                                                                                                    \
+    size_t adjkblock = pipelined ? kblock * 2 : kblock;                                                                \
+    for (size_t k_ = adjkblock + kblock; k_ <= kblock * 10; k_ += kblock) {                                            \
+      SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(nr_).k(k_).sparsity(0.0f).Test(ukernel, init_params);           \
     }                                                                                                                  \
-    if (nr > 1) {                                                                                                      \
-      TEST(ukernel, k_div_kblock_subtile)                                                                              \
-      {                                                                                                                \
-        size_t adjkblock = pipelined ? kblock * 2 : kblock;                                                            \
-        for (size_t k_ = adjkblock + kblock; k_ < kblock * 10; k_ += kblock) {                                         \
-          for (uint32_t n_ = 1; n_ <= nr_; n_++) {                                                                     \
-            SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(n_).k(k_).sparsity(0.0f).Test(ukernel, init_params);      \
-          }                                                                                                            \
-        }                                                                                                              \
+  }                                                                                                                    \
+  TEST(ukernel, k_div_kblock_subtile)                                                                                  \
+  {                                                                                                                    \
+    size_t adjkblock = pipelined ? kblock * 2 : kblock;                                                                \
+    for (size_t k_ = adjkblock + kblock; k_ < kblock * 10; k_ += kblock) {                                             \
+      for (uint32_t n_ = 1; n_ <= nr_; n_++) {                                                                         \
+        SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(n_).k(k_).sparsity(0.0f).Test(ukernel, init_params);          \
       }                                                                                                                \
     }                                                                                                                  \
   }
 
-#define XNN_TEST_SPMM_N_GT(ukernel, arch_flags, mr_, nr_, pipelined, kblock, ...)                                                \
+#define XNN_TEST_SPMM_N_GT(ukernel, arch_flags, mr_, nr_, pipelined, kblock, init_params, ...)                         \
   TEST(ukernel, n_gt)                                                                                                  \
   {                                                                                                                    \
     for (uint32_t n_ = nr_ + 1; n_ < max(10, nr_ * 2); n_++) {                                                         \
@@ -553,19 +533,17 @@ private:
     }                                                                                                                  \
   }
 
-#define XNN_TEST_SPMM_N_DIV(ukernel, arch_flags, mr_, nr_, pipelined, kblock, ...)                                               \
-  if (nr > 1) {                                                                                                        \
-    TEST(ukernel, n_div)                                                                                               \
-    {                                                                                                                  \
-      for (uint32_t n_ = nr_ * 2; n_ <= nr_ * 3; n_ += nr_) {                                                          \
-        for (size_t k_ = 1; k_ <= kblock * 5; k_ += kblock + 1) {                                                      \
-          SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(n_).k(k_).Test(ukernel, init_params);                       \
-        }                                                                                                              \
+#define XNN_TEST_SPMM_N_DIV(ukernel, arch_flags, mr_, nr_, pipelined, kblock, init_params, ...)                        \
+  TEST(ukernel, n_div)                                                                                                 \
+  {                                                                                                                    \
+    for (uint32_t n_ = nr_ * 2; n_ <= nr_ * 3; n_ += nr_) {                                                            \
+      for (size_t k_ = 1; k_ <= kblock * 5; k_ += kblock + 1) {                                                        \
+        SpMMMicrokernelTester().mr(mr_).nr(nr_).m(mr_).n(n_).k(k_).Test(ukernel, init_params);                         \
       }                                                                                                                \
     }                                                                                                                  \
   }
 
-#define XNN_TEST_SPMM_M_LT(ukernel, arch_flags, mr_, nr_, pipelined, kblock, ...)                                                \
+#define XNN_TEST_SPMM_M_LT(ukernel, arch_flags, mr_, nr_, pipelined, kblock, init_params, ...)                         \
   TEST(ukernel, m_lt)                                                                                                  \
   {                                                                                                                    \
     for (uint32_t m_ = 1; m_ < mr_; m_++) {                                                                            \
@@ -577,7 +555,7 @@ private:
     }                                                                                                                  \
   }
 
-#define XNN_TEST_SPMM_M_DIV(ukernel, arch_flags, mr_, nr_, pipelined, kblock, ...)                                               \
+#define XNN_TEST_SPMM_M_DIV(ukernel, arch_flags, mr_, nr_, pipelined, kblock, init_params, ...)                        \
   TEST(ukernel, m_div)                                                                                                 \
   {                                                                                                                    \
     for (uint32_t m_ = mr_ * 2; m_ <= mr_ * 3; m_ += mr_) {                                                            \
@@ -589,7 +567,7 @@ private:
     }                                                                                                                  \
   }
 
-#define XNN_TEST_SPMM_M_GT(ukernel, arch_flags, mr_, nr_, pipelined, kblock, ...)                                                \
+#define XNN_TEST_SPMM_M_GT(ukernel, arch_flags, mr_, nr_, pipelined, kblock, init_params, ...)                         \
   TEST(ukernel, m_gt)                                                                                                  \
   {                                                                                                                    \
     for (uint32_t m_ = mr_ + 21; m_ < mr_ * 2; m_++) {                                                                 \
@@ -601,7 +579,7 @@ private:
     }                                                                                                                  \
   }
 
-#define XNN_TEST_SPMM_OUTPUT_STRIDE(ukernel, arch_flags, mr_, nr_, pipelined, kblock, ...)                                       \
+#define XNN_TEST_SPMM_OUTPUT_STRIDE(ukernel, arch_flags, mr_, nr_, pipelined, kblock, init_params, ...)                \
   TEST(ukernel, output_stride)                                                                                         \
   {                                                                                                                    \
     for (uint32_t n_ = 1; n_ < max(10, nr_ * 5); n_ += nr_ + 1) {                                                      \
@@ -612,14 +590,14 @@ private:
           .m(mr_ * 2)                                                                                                  \
           .n(n_)                                                                                                       \
           .k(k_)                                                                                                       \
-          .output_stride(next_prime(mr_ * 2 + 1))                                                                      \
+          .output_stride(xnnpack::NextPrime(mr_ * 2 + 1))                                                              \
           .sparsity(0.0f)                                                                                              \
           .Test(ukernel, init_params);                                                                                 \
       }                                                                                                                \
     }                                                                                                                  \
   }
 
-#define XNN_TEST_SPMM_QMIN(ukernel, arch_flags, mr_, nr_, pipelined, kblock, ...)                                                \
+#define XNN_TEST_SPMM_QMIN(ukernel, arch_flags, mr_, nr_, pipelined, kblock, init_params, ...)                         \
   TEST(ukernel, qmin)                                                                                                  \
   {                                                                                                                    \
     for (uint32_t n_ = 1; n_ < max(10, nr_ * 5); n_ += nr_ + 1) {                                                      \
@@ -630,7 +608,7 @@ private:
     }                                                                                                                  \
   }
 
-#define XNN_TEST_SPMM_QMAX(ukernel, arch_flags, mr_, nr_, pipelined, kblock, ...)                                                \
+#define XNN_TEST_SPMM_QMAX(ukernel, arch_flags, mr_, nr_, pipelined, kblock, init_params, ...)                         \
   TEST(ukernel, qmax)                                                                                                  \
   {                                                                                                                    \
     for (uint32_t n_ = 1; n_ < max(10, nr_ * 5); n_ += nr_ + 1) {                                                      \
@@ -641,7 +619,7 @@ private:
     }                                                                                                                  \
   }
 
-#define XNN_TEST_SPMM_HALF_SPARSE(ukernel, arch_flags, mr_, nr_, pipelined, kblock, ...)                                         \
+#define XNN_TEST_SPMM_HALF_SPARSE(ukernel, arch_flags, mr_, nr_, pipelined, kblock, init_params, ...)                  \
   TEST(ukernel, half_sparse)                                                                                           \
   {                                                                                                                    \
     for (uint32_t n_ = 1; n_ < max(10, nr_ * 5); n_ += nr_ + 1) {                                                      \
@@ -651,7 +629,7 @@ private:
     }                                                                                                                  \
   }
 
-#define XNN_TEST_SPMM_ZERO_WEIGHTS(ukernel, arch_flags, mr_, nr_, pipelined, kblock, ...)                                        \
+#define XNN_TEST_SPMM_ZERO_WEIGHTS(ukernel, arch_flags, mr_, nr_, pipelined, kblock, init_params, ...)                 \
   TEST(ukernel, zero_weights)                                                                                          \
   {                                                                                                                    \
     for (uint32_t n_ = 1; n_ < max(10, nr_ * 5); n_ += nr_ + 1) {                                                      \
