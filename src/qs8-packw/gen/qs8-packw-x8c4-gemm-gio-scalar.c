@@ -400,78 +400,90 @@ void xnn_qs8_packw_gemm_gio_ukernel_x8c4__scalar(
         out[1] = v1x0;
         out[2] = v2x0;
         out[3] = v3x0;
-        const int8_t v0x1 = w0[1];
-        const int8_t v1x1 = w1[1];
-        const int8_t v2x1 = w2[1];
-        const int8_t v3x1 = w3[1];
-        ksum1 += (uint32_t) v0x1;
-        ksum1 += (uint32_t) v1x1;
-        ksum1 += (uint32_t) v2x1;
-        ksum1 += (uint32_t) v3x1;
-        out[4] = v0x1;
-        out[5] = v1x1;
-        out[6] = v2x1;
-        out[7] = v3x1;
-        const int8_t v0x2 = w0[2];
-        const int8_t v1x2 = w1[2];
-        const int8_t v2x2 = w2[2];
-        const int8_t v3x2 = w3[2];
-        ksum2 += (uint32_t) v0x2;
-        ksum2 += (uint32_t) v1x2;
-        ksum2 += (uint32_t) v2x2;
-        ksum2 += (uint32_t) v3x2;
-        out[8] = v0x2;
-        out[9] = v1x2;
-        out[10] = v2x2;
-        out[11] = v3x2;
-        const int8_t v0x3 = w0[3];
-        const int8_t v1x3 = w1[3];
-        const int8_t v2x3 = w2[3];
-        const int8_t v3x3 = w3[3];
-        ksum3 += (uint32_t) v0x3;
-        ksum3 += (uint32_t) v1x3;
-        ksum3 += (uint32_t) v2x3;
-        ksum3 += (uint32_t) v3x3;
-        out[12] = v0x3;
-        out[13] = v1x3;
-        out[14] = v2x3;
-        out[15] = v3x3;
-        const int8_t v0x4 = w0[4];
-        const int8_t v1x4 = w1[4];
-        const int8_t v2x4 = w2[4];
-        const int8_t v3x4 = w3[4];
-        ksum4 += (uint32_t) v0x4;
-        ksum4 += (uint32_t) v1x4;
-        ksum4 += (uint32_t) v2x4;
-        ksum4 += (uint32_t) v3x4;
-        out[16] = v0x4;
-        out[17] = v1x4;
-        out[18] = v2x4;
-        out[19] = v3x4;
-        const int8_t v0x5 = w0[5];
-        const int8_t v1x5 = w1[5];
-        const int8_t v2x5 = w2[5];
-        const int8_t v3x5 = w3[5];
-        ksum5 += (uint32_t) v0x5;
-        ksum5 += (uint32_t) v1x5;
-        ksum5 += (uint32_t) v2x5;
-        ksum5 += (uint32_t) v3x5;
-        out[20] = v0x5;
-        out[21] = v1x5;
-        out[22] = v2x5;
-        out[23] = v3x5;
-        const int8_t v0x6 = w0[6];
-        const int8_t v1x6 = w1[6];
-        const int8_t v2x6 = w2[6];
-        const int8_t v3x6 = w3[6];
-        ksum6 += (uint32_t) v0x6;
-        ksum6 += (uint32_t) v1x6;
-        ksum6 += (uint32_t) v2x6;
-        ksum6 += (uint32_t) v3x6;
-        out[24] = v0x6;
-        out[25] = v1x6;
-        out[26] = v2x6;
-        out[27] = v3x6;
+        if (1 < n) {
+          const int8_t v0x1 = w0[1];
+          const int8_t v1x1 = w1[1];
+          const int8_t v2x1 = w2[1];
+          const int8_t v3x1 = w3[1];
+          ksum1 += (uint32_t) v0x1;
+          ksum1 += (uint32_t) v1x1;
+          ksum1 += (uint32_t) v2x1;
+          ksum1 += (uint32_t) v3x1;
+          out[4] = v0x1;
+          out[5] = v1x1;
+          out[6] = v2x1;
+          out[7] = v3x1;
+        }
+        if (2 < n) {
+          const int8_t v0x2 = w0[2];
+          const int8_t v1x2 = w1[2];
+          const int8_t v2x2 = w2[2];
+          const int8_t v3x2 = w3[2];
+          ksum2 += (uint32_t) v0x2;
+          ksum2 += (uint32_t) v1x2;
+          ksum2 += (uint32_t) v2x2;
+          ksum2 += (uint32_t) v3x2;
+          out[8] = v0x2;
+          out[9] = v1x2;
+          out[10] = v2x2;
+          out[11] = v3x2;
+        }
+        if (3 < n) {
+          const int8_t v0x3 = w0[3];
+          const int8_t v1x3 = w1[3];
+          const int8_t v2x3 = w2[3];
+          const int8_t v3x3 = w3[3];
+          ksum3 += (uint32_t) v0x3;
+          ksum3 += (uint32_t) v1x3;
+          ksum3 += (uint32_t) v2x3;
+          ksum3 += (uint32_t) v3x3;
+          out[12] = v0x3;
+          out[13] = v1x3;
+          out[14] = v2x3;
+          out[15] = v3x3;
+        }
+        if (4 < n) {
+          const int8_t v0x4 = w0[4];
+          const int8_t v1x4 = w1[4];
+          const int8_t v2x4 = w2[4];
+          const int8_t v3x4 = w3[4];
+          ksum4 += (uint32_t) v0x4;
+          ksum4 += (uint32_t) v1x4;
+          ksum4 += (uint32_t) v2x4;
+          ksum4 += (uint32_t) v3x4;
+          out[16] = v0x4;
+          out[17] = v1x4;
+          out[18] = v2x4;
+          out[19] = v3x4;
+        }
+        if (5 < n) {
+          const int8_t v0x5 = w0[5];
+          const int8_t v1x5 = w1[5];
+          const int8_t v2x5 = w2[5];
+          const int8_t v3x5 = w3[5];
+          ksum5 += (uint32_t) v0x5;
+          ksum5 += (uint32_t) v1x5;
+          ksum5 += (uint32_t) v2x5;
+          ksum5 += (uint32_t) v3x5;
+          out[20] = v0x5;
+          out[21] = v1x5;
+          out[22] = v2x5;
+          out[23] = v3x5;
+        }
+        if (6 < n) {
+          const int8_t v0x6 = w0[6];
+          const int8_t v1x6 = w1[6];
+          const int8_t v2x6 = w2[6];
+          const int8_t v3x6 = w3[6];
+          ksum6 += (uint32_t) v0x6;
+          ksum6 += (uint32_t) v1x6;
+          ksum6 += (uint32_t) v2x6;
+          ksum6 += (uint32_t) v3x6;
+          out[24] = v0x6;
+          out[25] = v1x6;
+          out[26] = v2x6;
+          out[27] = v3x6;
+        }
         w0 += 4 * k_stride;
         w1 += 4 * k_stride;
         w2 += 4 * k_stride;
@@ -482,131 +494,145 @@ void xnn_qs8_packw_gemm_gio_ukernel_x8c4__scalar(
       // KC remainder of 1..3
       if (k != 0) {
         assert(k >= 1 && k <= 3);
-        const int8_t v0x0 = w0[0];
-        ksum0 += (uint32_t) v0x0;
-        out[0] = v0x0;
-        if (1 < k) {
-          const int8_t v1x0 = w1[0];
-          ksum0 += (uint32_t) v1x0;
-          out[1] = v1x0;
+        if (0 < n) {
+          const int8_t v0x0 = w0[0];
+          ksum0 += (uint32_t) v0x0;
+          out[0] = v0x0;
+          if (1 < k) {
+            const int8_t v1x0 = w1[0];
+            ksum0 += (uint32_t) v1x0;
+            out[1] = v1x0;
+          }
+          if (2 < k) {
+            const int8_t v2x0 = w2[0];
+            ksum0 += (uint32_t) v2x0;
+            out[2] = v2x0;
+          }
+          if (3 < k) {
+            const int8_t v3x0 = w3[0];
+            ksum0 += (uint32_t) v3x0;
+            out[3] = v3x0;
+          }
         }
-        if (2 < k) {
-          const int8_t v2x0 = w2[0];
-          ksum0 += (uint32_t) v2x0;
-          out[2] = v2x0;
+        if (1 < n) {
+          const int8_t v0x1 = w0[1];
+          ksum1 += (uint32_t) v0x1;
+          out[4] = v0x1;
+          if (1 < k) {
+            const int8_t v1x1 = w1[1];
+            ksum1 += (uint32_t) v1x1;
+            out[5] = v1x1;
+          }
+          if (2 < k) {
+            const int8_t v2x1 = w2[1];
+            ksum1 += (uint32_t) v2x1;
+            out[6] = v2x1;
+          }
+          if (3 < k) {
+            const int8_t v3x1 = w3[1];
+            ksum1 += (uint32_t) v3x1;
+            out[7] = v3x1;
+          }
         }
-        if (3 < k) {
-          const int8_t v3x0 = w3[0];
-          ksum0 += (uint32_t) v3x0;
-          out[3] = v3x0;
+        if (2 < n) {
+          const int8_t v0x2 = w0[2];
+          ksum2 += (uint32_t) v0x2;
+          out[8] = v0x2;
+          if (1 < k) {
+            const int8_t v1x2 = w1[2];
+            ksum2 += (uint32_t) v1x2;
+            out[9] = v1x2;
+          }
+          if (2 < k) {
+            const int8_t v2x2 = w2[2];
+            ksum2 += (uint32_t) v2x2;
+            out[10] = v2x2;
+          }
+          if (3 < k) {
+            const int8_t v3x2 = w3[2];
+            ksum2 += (uint32_t) v3x2;
+            out[11] = v3x2;
+          }
         }
-        const int8_t v0x1 = w0[1];
-        ksum1 += (uint32_t) v0x1;
-        out[4] = v0x1;
-        if (1 < k) {
-          const int8_t v1x1 = w1[1];
-          ksum1 += (uint32_t) v1x1;
-          out[5] = v1x1;
+        if (3 < n) {
+          const int8_t v0x3 = w0[3];
+          ksum3 += (uint32_t) v0x3;
+          out[12] = v0x3;
+          if (1 < k) {
+            const int8_t v1x3 = w1[3];
+            ksum3 += (uint32_t) v1x3;
+            out[13] = v1x3;
+          }
+          if (2 < k) {
+            const int8_t v2x3 = w2[3];
+            ksum3 += (uint32_t) v2x3;
+            out[14] = v2x3;
+          }
+          if (3 < k) {
+            const int8_t v3x3 = w3[3];
+            ksum3 += (uint32_t) v3x3;
+            out[15] = v3x3;
+          }
         }
-        if (2 < k) {
-          const int8_t v2x1 = w2[1];
-          ksum1 += (uint32_t) v2x1;
-          out[6] = v2x1;
+        if (4 < n) {
+          const int8_t v0x4 = w0[4];
+          ksum4 += (uint32_t) v0x4;
+          out[16] = v0x4;
+          if (1 < k) {
+            const int8_t v1x4 = w1[4];
+            ksum4 += (uint32_t) v1x4;
+            out[17] = v1x4;
+          }
+          if (2 < k) {
+            const int8_t v2x4 = w2[4];
+            ksum4 += (uint32_t) v2x4;
+            out[18] = v2x4;
+          }
+          if (3 < k) {
+            const int8_t v3x4 = w3[4];
+            ksum4 += (uint32_t) v3x4;
+            out[19] = v3x4;
+          }
         }
-        if (3 < k) {
-          const int8_t v3x1 = w3[1];
-          ksum1 += (uint32_t) v3x1;
-          out[7] = v3x1;
+        if (5 < n) {
+          const int8_t v0x5 = w0[5];
+          ksum5 += (uint32_t) v0x5;
+          out[20] = v0x5;
+          if (1 < k) {
+            const int8_t v1x5 = w1[5];
+            ksum5 += (uint32_t) v1x5;
+            out[21] = v1x5;
+          }
+          if (2 < k) {
+            const int8_t v2x5 = w2[5];
+            ksum5 += (uint32_t) v2x5;
+            out[22] = v2x5;
+          }
+          if (3 < k) {
+            const int8_t v3x5 = w3[5];
+            ksum5 += (uint32_t) v3x5;
+            out[23] = v3x5;
+          }
         }
-        const int8_t v0x2 = w0[2];
-        ksum2 += (uint32_t) v0x2;
-        out[8] = v0x2;
-        if (1 < k) {
-          const int8_t v1x2 = w1[2];
-          ksum2 += (uint32_t) v1x2;
-          out[9] = v1x2;
-        }
-        if (2 < k) {
-          const int8_t v2x2 = w2[2];
-          ksum2 += (uint32_t) v2x2;
-          out[10] = v2x2;
-        }
-        if (3 < k) {
-          const int8_t v3x2 = w3[2];
-          ksum2 += (uint32_t) v3x2;
-          out[11] = v3x2;
-        }
-        const int8_t v0x3 = w0[3];
-        ksum3 += (uint32_t) v0x3;
-        out[12] = v0x3;
-        if (1 < k) {
-          const int8_t v1x3 = w1[3];
-          ksum3 += (uint32_t) v1x3;
-          out[13] = v1x3;
-        }
-        if (2 < k) {
-          const int8_t v2x3 = w2[3];
-          ksum3 += (uint32_t) v2x3;
-          out[14] = v2x3;
-        }
-        if (3 < k) {
-          const int8_t v3x3 = w3[3];
-          ksum3 += (uint32_t) v3x3;
-          out[15] = v3x3;
-        }
-        const int8_t v0x4 = w0[4];
-        ksum4 += (uint32_t) v0x4;
-        out[16] = v0x4;
-        if (1 < k) {
-          const int8_t v1x4 = w1[4];
-          ksum4 += (uint32_t) v1x4;
-          out[17] = v1x4;
-        }
-        if (2 < k) {
-          const int8_t v2x4 = w2[4];
-          ksum4 += (uint32_t) v2x4;
-          out[18] = v2x4;
-        }
-        if (3 < k) {
-          const int8_t v3x4 = w3[4];
-          ksum4 += (uint32_t) v3x4;
-          out[19] = v3x4;
-        }
-        const int8_t v0x5 = w0[5];
-        ksum5 += (uint32_t) v0x5;
-        out[20] = v0x5;
-        if (1 < k) {
-          const int8_t v1x5 = w1[5];
-          ksum5 += (uint32_t) v1x5;
-          out[21] = v1x5;
-        }
-        if (2 < k) {
-          const int8_t v2x5 = w2[5];
-          ksum5 += (uint32_t) v2x5;
-          out[22] = v2x5;
-        }
-        if (3 < k) {
-          const int8_t v3x5 = w3[5];
-          ksum5 += (uint32_t) v3x5;
-          out[23] = v3x5;
-        }
-        const int8_t v0x6 = w0[6];
-        ksum6 += (uint32_t) v0x6;
-        out[24] = v0x6;
-        if (1 < k) {
-          const int8_t v1x6 = w1[6];
-          ksum6 += (uint32_t) v1x6;
-          out[25] = v1x6;
-        }
-        if (2 < k) {
-          const int8_t v2x6 = w2[6];
-          ksum6 += (uint32_t) v2x6;
-          out[26] = v2x6;
-        }
-        if (3 < k) {
-          const int8_t v3x6 = w3[6];
-          ksum6 += (uint32_t) v3x6;
-          out[27] = v3x6;
+        if (6 < n) {
+          const int8_t v0x6 = w0[6];
+          ksum6 += (uint32_t) v0x6;
+          out[24] = v0x6;
+          if (1 < k) {
+            const int8_t v1x6 = w1[6];
+            ksum6 += (uint32_t) v1x6;
+            out[25] = v1x6;
+          }
+          if (2 < k) {
+            const int8_t v2x6 = w2[6];
+            ksum6 += (uint32_t) v2x6;
+            out[26] = v2x6;
+          }
+          if (3 < k) {
+            const int8_t v3x6 = w3[6];
+            ksum6 += (uint32_t) v3x6;
+            out[27] = v3x6;
+          }
         }
         w0 += k * k_stride;
         w1 += k * k_stride;

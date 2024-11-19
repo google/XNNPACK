@@ -160,14 +160,23 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
       // KC main loop multiple of ${NR}x${KR}
       size_t k = kc;
       for (; k >= ${KR}; k -= ${KR}) {
-        $for N in range(NR-1):
-          $for K in range(KR):
-            const ${TYPE} v${K}x${N} = w${K}[${N}];
-          $for K in range(KR):
-            $if DATATYPE in ["QS8"]:
-              ksum${N} += (uint32_t) v${K}x${N};
-          $for K in range(KR):
-            out[${N*KR+K}] = v${K}x${N};
+        $for K in range(KR):
+          const ${TYPE} v${K}x0 = w${K}[0];
+        $for K in range(KR):
+          $if DATATYPE in ["QS8"]:
+            ksum0 += (uint32_t) v${K}x0;
+        $for K in range(KR):
+          out[${K}] = v${K}x0;
+        $for N in range(1, NR-1):
+          if (${N} < n) {
+            $for K in range(KR):
+              const ${TYPE} v${K}x${N} = w${K}[${N}];
+            $for K in range(KR):
+              $if DATATYPE in ["QS8"]:
+                ksum${N} += (uint32_t) v${K}x${N};
+            $for K in range(KR):
+              out[${N*KR+K}] = v${K}x${N};
+          }
         $for K in range(KR):
           w${K} += ${KR} * k_stride;
         out += ${NR*KR};
@@ -177,17 +186,19 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
       if (k != 0) {
         assert(k >= 1 && k <= ${KR-1});
         $for N in range(NR-1):
-          const ${TYPE} v0x${N} = w0[${N}];
-          $if DATATYPE in ["QS8"]:
-            ksum${N} += (uint32_t) v0x${N};
-          out[${N*KR}] = v0x${N};
-          $for K in range(1, KR):
-            if (${K} < k) {
-              const ${TYPE} v${K}x${N} = w${K}[${N}];
-              $if DATATYPE in ["QS8"]:
-                ksum${N} += (uint32_t) v${K}x${N};
-              out[${N*KR+K}] = v${K}x${N};
-            }
+          if (${N} < n) {
+            const ${TYPE} v0x${N} = w0[${N}];
+            $if DATATYPE in ["QS8"]:
+              ksum${N} += (uint32_t) v0x${N};
+            out[${N*KR}] = v0x${N};
+            $for K in range(1, KR):
+              if (${K} < k) {
+                const ${TYPE} v${K}x${N} = w${K}[${N}];
+                $if DATATYPE in ["QS8"]:
+                  ksum${N} += (uint32_t) v${K}x${N};
+                out[${N*KR+K}] = v${K}x${N};
+              }
+          }
         $for K in range(KR):
           w${K} += k * k_stride;
         out += ${NR*KR};
