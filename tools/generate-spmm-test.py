@@ -1,4 +1,4 @@
-.#!/usr/bin/env python
+#!/usr/bin/env python
 # Copyright 2019 Google LLC
 #
 # This source code is licensed under the BSD-style license found in the
@@ -20,18 +20,13 @@ import xnncommon
 
 
 parser = argparse.ArgumentParser(description='XNNPACK generator')
-parser.add_argument("-s", "--spec", metavar="FILE", required=True,
-                    help="Spec (YAML) file")
-parser.add_argument(
-    "-o",
-    "--output-test",
-    action="append",
-    metavar="FILE",
-    required=True,
-    help="Test output (C++ source) file(s)")
-parser.add_argument( "-b", "--output-bench",
-                    metavar="FILE", required=False,
-                    help="Benchmark output (C++ source) file(s)")
+parser.add_argument("-t", "--tester", metavar="TESTER", required=True,
+                    choices=["SpMMMicrokernelTester"],
+                    help="Tester class to be used in the generated test")
+parser.add_argument("-k", "--ukernel", metavar="FILE", required=True,
+                    help="Microkernel type")
+parser.add_argument("-o", "--output", metavar="FILE", required=True, 
+                    help="Test output (C++ source) file(s)")
 parser.set_defaults(defines=list())
 
 
@@ -57,7 +52,7 @@ BENCHMARK_SPMM(${UKERNEL_NAME})
 """
 
 TEST_TEMPLATE = """\
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, mr, nr, pipelined, datatype, params_type, init_params) \
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, mr, nr, pipelined, kblock, datatype, params_type, init_params) \
 XNN_TEST_SPMM_K_EQ(ukernel,arch_flags, ${", ".join(TEST_ARGS)});  
 XNN_TEST_SPMM_K_LT(ukernel,arch_flags, ${", ".join(TEST_ARGS)});  
 XNN_TEST_SPMM_K_GT(ukernel,arch_flags, ${", ".join(TEST_ARGS)});
@@ -77,7 +72,6 @@ XNN_TEST_SPMM_ZERO_WEIGHTS(ukernel,arch_flags, ${", ".join(TEST_ARGS)});
 
 def main(args):
   options = parser.parse_args(args)
-  num_output_files = len(options.output_test)
 
   tester = options.tester
   tester_header = {
@@ -101,63 +95,30 @@ def main(args):
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/spmm.h"
 #include "spmm-microkernel-tester.h"
-""".format(specification=options.spec, generator=sys.argv[0])
+""".format(specification=options.ukernel, generator=sys.argv[0])
+  
+  ukernel_parts = options.ukernel.split("-")
+  datatype = ukernel_parts[0]
+  op = ukernel_parts[1]
+  test_args = ["mr"]
+  test_args.append("nr")
+  test_args.append("pipelined")
+  test_args.append("kblock")
+  test_args.append("init_params")
+  tests += xnncommon.make_multiline_macro(xngen.preprocess(
+    TEST_TEMPLATE,
+    {
+      "TEST_ARGS": test_args,
+      "TESTER": tester,
+      "DATATYPE": datatype,
+    },
+  ))
+  folder = datatype + "-" + ("spmm" if datatype.startswith("f") else op)
+  tests += f'#include "{xnncommon.xnnpack_src()}{folder}/{options.ukernel}.h"\n'
+  tests += "#undef XNN_UKERNEL_WITH_PARAMS\n"
 
-    benches = """\
-// Copyright 2023 Google LLC
-//
-// This source code is licensed under the BSD-style license found in the
-// LICENSE file in the root directory of this source tree.
-//
-// Auto-generated file. Do not edit!
-//   Specification: {specification}
-//   Generator: {generator}
-
-#include <benchmark/benchmark.h>
-#include "spmm-benchmark.h"
-#include "utils.h"
-#include "xnnpack/gemm.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams-init.h"
-""".format(specification=options.spec, generator=sys.argv[0])
-
-    test_outputs = collections.defaultdict(lambda: tests)
-    bench_outputs = benches
-    sorted_spec_yaml = collections.defaultdict(list)
-    isa_hierarchy = xnncommon.isa_hierarchy_map()
-
-    benches = [""] * len(isa_hierarchy)
-    for ukernel_spec in spec_yaml:
-      name = ukernel_spec["name"]
-      init_fn = ukernel_spec["init"]
-      k_block = int(ukernel_spec["k-block"])
-      pipelined = bool(ukernel_spec.get("pipelined", False))
-      mr, nr, arch, isa = split_ukernel_name(name)
-
-      test_case, bench_case = generate_test_cases(name, init_fn, mr, nr, k_block,
-                                      pipelined, isa)
-      # Hash the name of each microkernel and figure out which output file to
-      # write it to.
-      output_index = zlib.crc32(bytes(name, "utf-8")) % num_output_files
-      test_outputs[options.output_test[output_index]] += "\n\n" + xnncommon.postprocess_test_case(
-          test_case, arch, isa)
-      benches[isa_hierarchy.get(isa, 0)] +=  "\n\n" + xnncommon.postprocess_test_case(bench_case, arch, isa)
-
-    for arch_idx in reversed(range(len(isa_hierarchy))):
-      bench_outputs += benches[arch_idx]
-
-    bench_outputs += """\n
-#ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
-#endif
-"""
-    for output_name in options.output_test:
-      xnncommon.overwrite_if_changed(output_name, test_outputs[output_name])
-
-    if options.output_bench:
-      output_name = options.output_bench
-      xnncommon.overwrite_if_changed(output_name, bench_outputs)
-
+  # xnncommon.overwrite_if_changed(output_name, test_outputs[output_name])
+  xnncommon.overwrite_if_changed(options.output, tests)
 
 if __name__ == "__main__":
   main(sys.argv[1:])
