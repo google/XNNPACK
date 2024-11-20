@@ -66,7 +66,6 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx512f_u1_prfm(
       }
       packed_w += 32;
 
-      // KC main loop 1x32
       size_t k = kc;
 
       // KC remainder loop
@@ -74,7 +73,6 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx512f_u1_prfm(
         const __m512 v0 = _mm512_loadu_ps(w + 0);
         const __m512 v1 = _mm512_loadu_ps(w + 16);
         xnn_prefetch_to_l1((const int8_t*) w + 960);
-        xnn_prefetch_to_l1((const int8_t*) w + 1024);
         _mm512_store_ps(packed_w + 0, v0);
         _mm512_store_ps(packed_w + 16, v1);
         w += k_stride;

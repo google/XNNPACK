@@ -62,8 +62,8 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__avx512f_u8(
       }
       packed_w += 16;
 
-      // KC main loop 8x16
       size_t k = kc;
+      // KC main loop 8x16
       for (; k >= 8; k -= 8) {
         const __m512 v0_0 = _mm512_loadu_ps(w + 0 + 0 * k_stride);
         const __m512 v0_1 = _mm512_loadu_ps(w + 0 + 1 * k_stride);

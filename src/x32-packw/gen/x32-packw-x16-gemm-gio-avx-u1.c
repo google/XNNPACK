@@ -59,9 +59,9 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__avx_u1(
     for (; n >= 16; n -= 16) {
       if XNN_LIKELY(b != NULL) {
         const __m256 vb0 = _mm256_loadu_ps(b + 0);
-        const __m256 vb8 = _mm256_loadu_ps(b + 8);
+        const __m256 vb1 = _mm256_loadu_ps(b + 8);
         _mm256_store_ps(packed_w + 0, vb0);
-        _mm256_store_ps(packed_w + 8, vb8);
+        _mm256_store_ps(packed_w + 8, vb1);
         b += 16;
       } else {
         _mm256_store_ps(packed_w + 0, vzero);
@@ -74,9 +74,9 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__avx_u1(
       // KC remainder loop
       for (; k > 0; --k) {
         const __m256 v0 = _mm256_loadu_ps(w + 0);
-        const __m256 v8 = _mm256_loadu_ps(w + 8);
+        const __m256 v1 = _mm256_loadu_ps(w + 8);
         _mm256_store_ps(packed_w + 0, v0);
-        _mm256_store_ps(packed_w + 8, v8);
+        _mm256_store_ps(packed_w + 8, v1);
         w += k_stride;
         packed_w += 16;
       }
@@ -88,13 +88,13 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__avx_u1(
       assert(n >= 1);
       assert(n <= 15);
       const __m256i vmask0 = _mm256_loadu_si256((const __m256i*) &mask_table[16 - n]);
-      const __m256i vmask8 = _mm256_loadu_si256((const __m256i*) &mask_table[24 - n]);
+      const __m256i vmask1 = _mm256_loadu_si256((const __m256i*) &mask_table[24 - n]);
 
       if XNN_LIKELY(b != NULL) {
         const __m256 vb0 = _mm256_maskload_ps(b + 0, vmask0);
-        const __m256 vb8 = _mm256_maskload_ps(b + 8, vmask8);
+        const __m256 vb1 = _mm256_maskload_ps(b + 8, vmask1);
         _mm256_store_ps(packed_w + 0, vb0);
-        _mm256_store_ps(packed_w + 8, vb8);
+        _mm256_store_ps(packed_w + 8, vb1);
         b += n;
       } else {
         _mm256_store_ps(packed_w + 0, vzero);
@@ -105,9 +105,9 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__avx_u1(
       // KC main loop
       for (size_t k = kc; k > 0; --k) {
         const __m256 v0 = _mm256_maskload_ps(w + 0, vmask0);
-        const __m256 v8 = _mm256_maskload_ps(w + 8, vmask8);
+        const __m256 v1 = _mm256_maskload_ps(w + 8, vmask1);
         _mm256_store_ps(packed_w + 0, v0);
-        _mm256_store_ps(packed_w + 8, v8);
+        _mm256_store_ps(packed_w + 8, v1);
         w += k_stride;
         packed_w += 16;
       }

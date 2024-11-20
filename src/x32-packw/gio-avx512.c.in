@@ -5,6 +5,8 @@
 
 $assert NR % 16 == 0
 $assert NR <= 64
+$SIMD_SIZE = 16
+$SIMD_TILE = NR // 16
 
 #include <assert.h>
 #include <stddef.h>
@@ -54,44 +56,44 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx512f_u${KBLOCK}${"_prfm" if PREFE
 
     for (; n >= ${NR}; n -= ${NR}) {
       if XNN_LIKELY(b != NULL) {
-        $for N in range(0,NR,16):
-          const __m512 vb${N//16} = _mm512_loadu_ps(b + ${N});
-        $for N in range(0,NR,16):
-          _mm512_store_ps(packed_w + ${N}, vb${N//16});
+        $for N in range(SIMD_TILE):
+          const __m512 vb${N} = _mm512_loadu_ps(b + ${N*SIMD_SIZE});
+        $for N in range(SIMD_TILE):
+          _mm512_store_ps(packed_w + ${N*SIMD_SIZE}, vb${N});
         b += ${NR};
       } else {
-        $for N in range(0,NR,16):
-          _mm512_store_ps(packed_w + ${N}, vzero);
+        $for N in range(SIMD_TILE):
+          _mm512_store_ps(packed_w + ${N*SIMD_SIZE}, vzero);
       }
       packed_w += ${NR};
 
-      // KC main loop ${KBLOCK}x${NR}
       size_t k = kc;
       $if KBLOCK > 1:
+        // KC main loop ${KBLOCK}x${NR}
         for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
           $for K in range(KBLOCK):
-            $for N in range(0,NR,16):
-              const __m512 v${N//16}_${K} = _mm512_loadu_ps(w + ${N} + ${K} * k_stride);
+            $for N in range(SIMD_TILE):
+              const __m512 v${N}_${K} = _mm512_loadu_ps(w + ${N*SIMD_SIZE} + ${K} * k_stride);
           $if PREFETCH:
             $for K in range(KBLOCK):
-              $for N in range(0,NR,16):
-                xnn_prefetch_to_l1((const int8_t*) w + ${N*4+960});
+              $for N in range(0,SIMD_TILE*SIMD_SIZE,64):
+                xnn_prefetch_to_l1((const int8_t*) w + ${N+960} + ${K} * k_stride);
           $for K in range(KBLOCK):
-            $for N in range(0,NR,16):
-              _mm512_store_ps(packed_w + ${N+K*NR}, v${N//16}_${K});
+            $for N in range(SIMD_TILE):
+              _mm512_store_ps(packed_w + ${N*SIMD_SIZE+K*NR}, v${N}_${K});
           w += k_stride * ${KBLOCK};
           packed_w += ${NR*KBLOCK};
         }
 
       // KC remainder loop
       for (; k > 0; --k) {
-        $for N in range(0,NR,16):
-          const __m512 v${N//16} = _mm512_loadu_ps(w + ${N});
+        $for N in range(SIMD_TILE):
+          const __m512 v${N} = _mm512_loadu_ps(w + ${N*SIMD_SIZE});
         $if PREFETCH:
-          $for N in range(0,NR,16):
-            xnn_prefetch_to_l1((const int8_t*) w + ${N*4+960});
-        $for N in range(0,NR,16):
-          _mm512_store_ps(packed_w + ${N}, v${N//16});
+          $for N in range(0,SIMD_TILE*SIMD_SIZE,64):
+            xnn_prefetch_to_l1((const int8_t*) w + ${N+960});
+        $for N in range(SIMD_TILE):
+          _mm512_store_ps(packed_w + ${N*SIMD_SIZE}, v${N});
         w += k_stride;
         packed_w += ${NR};
       }
@@ -104,27 +106,27 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx512f_u${KBLOCK}${"_prfm" if PREFE
       assert(n <= ${NR-1});
 
       // Prepare mask for valid 32-bit elements (depends on n).
-      $for N in range(0,NR,16):
-        const __mmask16 vmask${N//16} = _cvtu32_mask16((uint32_t) (((UINT64_C(1) << n) - 1) >> ${N}));
+      $for N in range(SIMD_TILE):
+        const __mmask16 vmask${N} = _cvtu32_mask16((uint32_t) (((UINT64_C(1) << n) - 1) >> ${N*SIMD_SIZE}));
 
       if XNN_LIKELY(b != NULL) {
-        $for N in range(0,NR,16):
-          const __m512 vb${N//16} = _mm512_maskz_loadu_ps(vmask${N//16}, b + ${N});
-        $for N in range(0,NR,16):
-          _mm512_store_ps(packed_w + ${N}, vb${N//16});
+        $for N in range(SIMD_TILE):
+          const __m512 vb${N} = _mm512_maskz_loadu_ps(vmask${N}, b + ${N*SIMD_SIZE});
+        $for N in range(SIMD_TILE):
+          _mm512_store_ps(packed_w + ${N*SIMD_SIZE}, vb${N});
         b += n;
       } else {
-        $for N in range(0,NR,16):
-          _mm512_store_ps(packed_w + ${N}, vzero);
+        $for N in range(SIMD_TILE):
+          _mm512_store_ps(packed_w + ${N*SIMD_SIZE}, vzero);
       }
       packed_w += ${NR};
 
       // KC main loop
       for (size_t k = kc; k > 0; --k) {
-        $for N in range(0,NR,16):
-          const __m512 v${N//16} = _mm512_maskz_loadu_ps(vmask${N//16}, w + ${N});
-        $for N in range(0,NR,16):
-          _mm512_store_ps(packed_w + ${N}, v${N//16});
+        $for N in range(SIMD_TILE):
+          const __m512 v${N} = _mm512_maskz_loadu_ps(vmask${N}, w + ${N*SIMD_SIZE});
+        $for N in range(SIMD_TILE):
+          _mm512_store_ps(packed_w + ${N*SIMD_SIZE}, v${N});
         w += k_stride;
         packed_w += ${NR};
       }

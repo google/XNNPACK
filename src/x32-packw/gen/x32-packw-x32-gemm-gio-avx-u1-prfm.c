@@ -64,13 +64,13 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx_u1_prfm(
     for (; n >= 32; n -= 32) {
       if XNN_LIKELY(b != NULL) {
         const __m256 vb0 = _mm256_loadu_ps(b + 0);
-        const __m256 vb8 = _mm256_loadu_ps(b + 8);
-        const __m256 vb16 = _mm256_loadu_ps(b + 16);
-        const __m256 vb24 = _mm256_loadu_ps(b + 24);
+        const __m256 vb1 = _mm256_loadu_ps(b + 8);
+        const __m256 vb2 = _mm256_loadu_ps(b + 16);
+        const __m256 vb3 = _mm256_loadu_ps(b + 24);
         _mm256_store_ps(packed_w + 0, vb0);
-        _mm256_store_ps(packed_w + 8, vb8);
-        _mm256_store_ps(packed_w + 16, vb16);
-        _mm256_store_ps(packed_w + 24, vb24);
+        _mm256_store_ps(packed_w + 8, vb1);
+        _mm256_store_ps(packed_w + 16, vb2);
+        _mm256_store_ps(packed_w + 24, vb3);
         b += 32;
       } else {
         _mm256_store_ps(packed_w + 0, vzero);
@@ -85,15 +85,14 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx_u1_prfm(
       // KC remainder loop
       for (; k > 0; --k) {
         const __m256 v0 = _mm256_loadu_ps(w + 0);
-        const __m256 v8 = _mm256_loadu_ps(w + 8);
-        const __m256 v16 = _mm256_loadu_ps(w + 16);
-        const __m256 v24 = _mm256_loadu_ps(w + 24);
+        const __m256 v1 = _mm256_loadu_ps(w + 8);
+        const __m256 v2 = _mm256_loadu_ps(w + 16);
+        const __m256 v3 = _mm256_loadu_ps(w + 24);
         xnn_prefetch_to_l1((const int8_t*) w + 960);
-        xnn_prefetch_to_l1((const int8_t*) w + 1024);
         _mm256_store_ps(packed_w + 0, v0);
-        _mm256_store_ps(packed_w + 8, v8);
-        _mm256_store_ps(packed_w + 16, v16);
-        _mm256_store_ps(packed_w + 24, v24);
+        _mm256_store_ps(packed_w + 8, v1);
+        _mm256_store_ps(packed_w + 16, v2);
+        _mm256_store_ps(packed_w + 24, v3);
         w += k_stride;
         packed_w += 32;
       }
@@ -105,19 +104,19 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx_u1_prfm(
       assert(n >= 1);
       assert(n <= 31);
       const __m256i vmask0 = _mm256_loadu_si256((const __m256i*) &mask_table[32 - n]);
-      const __m256i vmask8 = _mm256_loadu_si256((const __m256i*) &mask_table[40 - n]);
-      const __m256i vmask16 = _mm256_loadu_si256((const __m256i*) &mask_table[48 - n]);
-      const __m256i vmask24 = _mm256_loadu_si256((const __m256i*) &mask_table[56 - n]);
+      const __m256i vmask1 = _mm256_loadu_si256((const __m256i*) &mask_table[40 - n]);
+      const __m256i vmask2 = _mm256_loadu_si256((const __m256i*) &mask_table[48 - n]);
+      const __m256i vmask3 = _mm256_loadu_si256((const __m256i*) &mask_table[56 - n]);
 
       if XNN_LIKELY(b != NULL) {
         const __m256 vb0 = _mm256_maskload_ps(b + 0, vmask0);
-        const __m256 vb8 = _mm256_maskload_ps(b + 8, vmask8);
-        const __m256 vb16 = _mm256_maskload_ps(b + 16, vmask16);
-        const __m256 vb24 = _mm256_maskload_ps(b + 24, vmask24);
+        const __m256 vb1 = _mm256_maskload_ps(b + 8, vmask1);
+        const __m256 vb2 = _mm256_maskload_ps(b + 16, vmask2);
+        const __m256 vb3 = _mm256_maskload_ps(b + 24, vmask3);
         _mm256_store_ps(packed_w + 0, vb0);
-        _mm256_store_ps(packed_w + 8, vb8);
-        _mm256_store_ps(packed_w + 16, vb16);
-        _mm256_store_ps(packed_w + 24, vb24);
+        _mm256_store_ps(packed_w + 8, vb1);
+        _mm256_store_ps(packed_w + 16, vb2);
+        _mm256_store_ps(packed_w + 24, vb3);
         b += n;
       } else {
         _mm256_store_ps(packed_w + 0, vzero);
@@ -130,13 +129,13 @@ void xnn_x32_packw_gemm_gio_ukernel_x32__avx_u1_prfm(
       // KC main loop
       for (size_t k = kc; k > 0; --k) {
         const __m256 v0 = _mm256_maskload_ps(w + 0, vmask0);
-        const __m256 v8 = _mm256_maskload_ps(w + 8, vmask8);
-        const __m256 v16 = _mm256_maskload_ps(w + 16, vmask16);
-        const __m256 v24 = _mm256_maskload_ps(w + 24, vmask24);
+        const __m256 v1 = _mm256_maskload_ps(w + 8, vmask1);
+        const __m256 v2 = _mm256_maskload_ps(w + 16, vmask2);
+        const __m256 v3 = _mm256_maskload_ps(w + 24, vmask3);
         _mm256_store_ps(packed_w + 0, v0);
-        _mm256_store_ps(packed_w + 8, v8);
-        _mm256_store_ps(packed_w + 16, v16);
-        _mm256_store_ps(packed_w + 24, v24);
+        _mm256_store_ps(packed_w + 8, v1);
+        _mm256_store_ps(packed_w + 16, v2);
+        _mm256_store_ps(packed_w + 24, v3);
         w += k_stride;
         packed_w += 32;
       }

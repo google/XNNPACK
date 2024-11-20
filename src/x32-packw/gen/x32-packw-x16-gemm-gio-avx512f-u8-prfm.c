@@ -63,8 +63,8 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__avx512f_u8_prfm(
       }
       packed_w += 16;
 
-      // KC main loop 8x16
       size_t k = kc;
+      // KC main loop 8x16
       for (; k >= 8; k -= 8) {
         const __m512 v0_0 = _mm512_loadu_ps(w + 0 + 0 * k_stride);
         const __m512 v0_1 = _mm512_loadu_ps(w + 0 + 1 * k_stride);
@@ -74,14 +74,14 @@ void xnn_x32_packw_gemm_gio_ukernel_x16__avx512f_u8_prfm(
         const __m512 v0_5 = _mm512_loadu_ps(w + 0 + 5 * k_stride);
         const __m512 v0_6 = _mm512_loadu_ps(w + 0 + 6 * k_stride);
         const __m512 v0_7 = _mm512_loadu_ps(w + 0 + 7 * k_stride);
-        xnn_prefetch_to_l1((const int8_t*) w + 960);
-        xnn_prefetch_to_l1((const int8_t*) w + 960);
-        xnn_prefetch_to_l1((const int8_t*) w + 960);
-        xnn_prefetch_to_l1((const int8_t*) w + 960);
-        xnn_prefetch_to_l1((const int8_t*) w + 960);
-        xnn_prefetch_to_l1((const int8_t*) w + 960);
-        xnn_prefetch_to_l1((const int8_t*) w + 960);
-        xnn_prefetch_to_l1((const int8_t*) w + 960);
+        xnn_prefetch_to_l1((const int8_t*) w + 960 + 0 * k_stride);
+        xnn_prefetch_to_l1((const int8_t*) w + 960 + 1 * k_stride);
+        xnn_prefetch_to_l1((const int8_t*) w + 960 + 2 * k_stride);
+        xnn_prefetch_to_l1((const int8_t*) w + 960 + 3 * k_stride);
+        xnn_prefetch_to_l1((const int8_t*) w + 960 + 4 * k_stride);
+        xnn_prefetch_to_l1((const int8_t*) w + 960 + 5 * k_stride);
+        xnn_prefetch_to_l1((const int8_t*) w + 960 + 6 * k_stride);
+        xnn_prefetch_to_l1((const int8_t*) w + 960 + 7 * k_stride);
         _mm512_store_ps(packed_w + 0, v0_0);
         _mm512_store_ps(packed_w + 16, v0_1);
         _mm512_store_ps(packed_w + 32, v0_2);
