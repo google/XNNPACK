@@ -17,7 +17,7 @@
 #include "xnnpack/packw.h"
 #include "xnnpack/unaligned.h"
 
-XNN_INLINE static uint64_t safe_load_64bytes(const void* src, size_t n) {
+XNN_INLINE static uint64_t safe_load_64bits(const void* src, size_t n) {
   uint64_t value = 0;
   const uint8_t* bytes = (const uint8_t*)src;
   for (size_t i = 0; i < n; ++i) {
@@ -244,14 +244,14 @@ void xnn_qs8_packw_gemm_gio_ukernel_x8c8__avxvnni(
 
      // KC main loop multiple of 8x8
      for (; k >= 8; k -= 8) {
-       __m128i v0x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bytes(w0, n));
-       __m128i v1x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bytes(w1, n));
-       __m128i v2x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bytes(w2, n));
-       __m128i v3x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bytes(w3, n));
-       __m128i v4x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bytes(w4, n));
-       __m128i v5x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bytes(w5, n));
-       __m128i v6x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bytes(w6, n));
-       __m128i v7x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bytes(w7, n));
+       __m128i v0x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bits(w0, n));
+       __m128i v1x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bits(w1, n));
+       __m128i v2x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bits(w2, n));
+       __m128i v3x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bits(w3, n));
+       __m128i v4x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bits(w4, n));
+       __m128i v5x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bits(w5, n));
+       __m128i v6x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bits(w6, n));
+       __m128i v7x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bits(w7, n));
 
        __m128i v01x01234567 = _mm_unpacklo_epi8(v0x01234567, v1x01234567);
        __m128i v23x01234567 = _mm_unpacklo_epi8(v2x01234567, v3x01234567);
@@ -293,34 +293,34 @@ void xnn_qs8_packw_gemm_gio_ukernel_x8c8__avxvnni(
        assert(k >= 1 && k <= 7);
 
        __m128i vzero = _mm_setzero_pd();
-       __m128i v0x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bytes(w0, n));
+       __m128i v0x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bits(w0, n));
        __m128i v1x01234567 = vzero;
        if (1 < k) {
-         v1x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bytes(w1, n));
+         v1x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bits(w1, n));
        }
        __m128i v2x01234567 = vzero;
        if (2 < k) {
-         v2x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bytes(w2, n));
+         v2x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bits(w2, n));
        }
        __m128i v3x01234567 = vzero;
        if (3 < k) {
-         v3x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bytes(w3, n));
+         v3x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bits(w3, n));
        }
        __m128i v4x01234567 = vzero;
        if (4 < k) {
-         v4x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bytes(w4, n));
+         v4x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bits(w4, n));
        }
        __m128i v5x01234567 = vzero;
        if (5 < k) {
-         v5x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bytes(w5, n));
+         v5x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bits(w5, n));
        }
        __m128i v6x01234567 = vzero;
        if (6 < k) {
-         v6x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bytes(w6, n));
+         v6x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bits(w6, n));
        }
        __m128i v7x01234567 = vzero;
        if (7 < k) {
-         v7x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bytes(w7, n));
+         v7x01234567 = _mm_movpi64_epi64((__m64)safe_load_64bits(w7, n));
        }
 
        __m128i v01x01234567 = _mm_unpacklo_epi8(v0x01234567, v1x01234567);
