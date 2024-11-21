@@ -122,8 +122,11 @@ struct ConvertOp {
   TOut operator()(TIn x) const {
     if (std::is_integral<TOut>::value && !std::is_integral<TIn>::value) {
       return round_float_to_int<TOut>(x);
-    } else {
+    } else if (std::is_integral<TOut>::value && std::is_integral<TIn>::value) {
       return static_cast<TOut>(x);
+    } else {
+      // Cast to intermediate float to work around issue #7489
+      return static_cast<TOut>(static_cast<float>(x));
     }
   }
 };
