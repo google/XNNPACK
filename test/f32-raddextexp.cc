@@ -79,11 +79,13 @@ class RAddExtExpMicrokernelTester {
 #define XNN_TEST_RADDEXTEXP_ELEMENT_EQ(ukernel, arch_flags, element_tile, ...)                                         \
   TEST(ukernel, element_eq)                                                                                            \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     RAddExtExpMicrokernelTester().elements(element_tile).Test(ukernel);                                                \
   }
 #define XNN_TEST_RADDEXTEXP_ELEMENT_DIV(ukernel, arch_flags, element_tile, ...)                                        \
   TEST(ukernel, element_gt)                                                                                            \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t element_size = element_tile * 2; element_size < element_tile * 10; element_size += element_tile) {     \
       RAddExtExpMicrokernelTester().elements(element_size).Test(ukernel);                                              \
     }                                                                                                                  \
@@ -91,6 +93,7 @@ class RAddExtExpMicrokernelTester {
 #define XNN_TEST_RADDEXTEXP_ELEMENT_LT(ukernel, arch_flags, element_tile, ...)                                         \
   TEST(ukernel, element_lt)                                                                                            \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t element_size = 1; element_size < element_tile; element_size++) {                                       \
       RAddExtExpMicrokernelTester().elements(element_size).Test(ukernel);                                              \
     }                                                                                                                  \
@@ -98,6 +101,7 @@ class RAddExtExpMicrokernelTester {
 #define XNN_TEST_RADDEXTEXP_ELEMENT_GT(ukernel, arch_flags, element_tile, ...)                                         \
   TEST(ukernel, element_div)                                                                                           \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t element_size = element_tile + 1; element_size < (element_tile == 1 ? 10 : element_tile * 2);           \
          element_size++) {                                                                                             \
       RAddExtExpMicrokernelTester().elements(element_size).Test(ukernel);                                              \

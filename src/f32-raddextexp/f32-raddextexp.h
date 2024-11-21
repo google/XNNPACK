@@ -15,18 +15,18 @@
 #endif
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86, xnn_f32_raddextexp_ukernel__avx2_p5_u64, 64, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86, xnn_f32_raddextexp_ukernel__avx2_p5_u64_acc2, 64,  float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86, xnn_f32_raddextexp_ukernel__avx2_p5_u64_acc4, 64,  float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86, xnn_f32_raddextexp_ukernel__avx2_p5_u72, 72,  float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86, xnn_f32_raddextexp_ukernel__avx2_p5_u72_acc3, 72,  float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86, xnn_f32_raddextexp_ukernel__avx2_p5_u80, 80,  float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86, xnn_f32_raddextexp_ukernel__avx2_p5_u80_acc2, 80,  float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86, xnn_f32_raddextexp_ukernel__avx2_p5_u80_acc5, 80,  float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86, xnn_f32_raddextexp_ukernel__avx2_p5_u96, 96,  float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86, xnn_f32_raddextexp_ukernel__avx2_p5_u96_acc2, 96,  float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86, xnn_f32_raddextexp_ukernel__avx2_p5_u96_acc3, 96,  float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86, xnn_f32_raddextexp_ukernel__avx2_p5_u96_acc6, 96,  float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_raddextexp_ukernel__avx2_p5_u64, 64, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_raddextexp_ukernel__avx2_p5_u64_acc2, 64,  float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_raddextexp_ukernel__avx2_p5_u64_acc4, 64,  float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_raddextexp_ukernel__avx2_p5_u72, 72,  float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_raddextexp_ukernel__avx2_p5_u72_acc3, 72,  float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_raddextexp_ukernel__avx2_p5_u80, 80,  float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_raddextexp_ukernel__avx2_p5_u80_acc2, 80,  float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_raddextexp_ukernel__avx2_p5_u80_acc5, 80,  float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_raddextexp_ukernel__avx2_p5_u96, 96,  float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_raddextexp_ukernel__avx2_p5_u96_acc2, 96,  float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_raddextexp_ukernel__avx2_p5_u96_acc3, 96,  float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_x86_avx2, xnn_f32_raddextexp_ukernel__avx2_p5_u96_acc6, 96,  float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ENABLE_AVX512F && (XNN_ARCH_X86 || XNN_ARCH_X86_64)
