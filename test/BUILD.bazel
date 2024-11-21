@@ -1251,7 +1251,6 @@ xnnpack_unit_test(
     name = "convert_nc_test",
     srcs = [
         "convert-nc.cc",
-        "convert-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS + ["//:microkernels_h"],
 )
