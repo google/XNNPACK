@@ -99,18 +99,21 @@ class LUTMicrokernelTester {
 #define XNN_TEST_LUT_BATCH_EQ(arch_flags, ukernel, batch_tile, ...)                                                  \
   TEST(ukernel, batch_eq)                                                                                            \
   {                                                                                                                  \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                            \
     LUTMicrokernelTester().batch_size(batch_tile).Test(ukernel);                                                     \
   }
 
 #define XNN_TEST_LUT_BATCH_DIV(arch_flags, ukernel, batch_tile, ...)                                                 \
   TEST(ukernel, batch_div)                                                                                           \
   {                                                                                                                  \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                            \
     LUTMicrokernelTester().batch_size(batch_tile).Test(ukernel);                                                     \
   }
 
 #define XNN_TEST_LUT_BATCH_LT(arch_flags, ukernel, batch_tile, ...)                                                  \
   TEST(ukernel, batch_lt)                                                                                            \
   {                                                                                                                  \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                            \
     for (size_t batch= 1; batch < batch_tile; batch++) {                                                             \
       LUTMicrokernelTester().batch_size(batch).Test(ukernel);                                                        \
     }                                                                                                                \
@@ -119,6 +122,7 @@ class LUTMicrokernelTester {
 #define XNN_TEST_LUT_BATCH_GT(arch_flags, ukernel, batch_tile, ...)                                                  \
   TEST(ukernel, batch_gt)                                                                                            \
   {                                                                                                                  \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                            \
     for (size_t batch = 2 * batch_tile; batch < 10 * batch_tile; batch += batch_tile) {                              \
       LUTMicrokernelTester().batch_size(batch).Test(ukernel);                                                        \
     }                                                                                                                \
@@ -127,6 +131,7 @@ class LUTMicrokernelTester {
 #define XNN_TEST_LUT_BATCH_IP(arch_flags, ukernel, batch_tile, ...)                                                  \
   TEST(ukernel, batch_ip)                                                                                            \
   {                                                                                                                  \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                            \
     for (size_t batch = 2 * batch_tile; batch < 10 * batch_tile; batch += batch_tile) {                              \
       LUTMicrokernelTester().batch_size(batch).inplace(true).Test(ukernel);                                          \
     }                                                                                                                \
