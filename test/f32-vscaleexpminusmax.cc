@@ -94,11 +94,13 @@ private:
 #define XNN_TEST_VSCALEEXPMINUSMAX_ELEMENT_EQ(ukernel, arch_flags, element_tile, ...)                                  \
   TEST(ukernel, element_eq)                                                                                            \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     VScaleExpMinusMaxMicrokernelTester().elements(element_tile).Test(ukernel);                                         \
   }
 #define XNN_TEST_VSCALEEXPMINUSMAX_ELEMENT_GT(ukernel, arch_flags, element_tile, ...)                                  \
   TEST(ukernel, element_gt)                                                                                            \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t element_size = element_tile + 1; element_size < ((element_tile == 1) ? 10 : element_tile * 2);         \
          element_size++) {                                                                                             \
       VScaleExpMinusMaxMicrokernelTester().elements(element_size).Test(ukernel);                                       \
@@ -107,6 +109,7 @@ private:
 #define XNN_TEST_VSCALEEXPMINUSMAX_ELEMENT_LT(ukernel, arch_flags, element_tile, ...)                                  \
   TEST(ukernel, element_lt)                                                                                            \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t element_size = 1; element_size < element_tile; element_size++) {                                       \
       VScaleExpMinusMaxMicrokernelTester().elements(element_size).Test(ukernel);                                       \
     }                                                                                                                  \
@@ -114,6 +117,7 @@ private:
 #define XNN_TEST_VSCALEEXPMINUSMAX_ELEMENT_DIV(ukernel, arch_flags, element_tile, ...)                                 \
   TEST(ukernel, element_div)                                                                                           \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t element_size = 2 * element_tile; element_size < 10 * element_tile; element_size += element_tile) {     \
       VScaleExpMinusMaxMicrokernelTester().elements(element_size).Test(ukernel);                                       \
     }                                                                                                                  \
@@ -122,6 +126,7 @@ private:
 #define XNN_TEST_VSCALEEXPMINUSMAX_SCALE(ukernel, arch_flags, element_tile, ...)                                       \
   TEST(ukernel, scale)                                                                                                 \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t element_size = 1; element_size <= 5 * element_tile; element_size += max(1, element_tile - 1)) {        \
       VScaleExpMinusMaxMicrokernelTester().elements(element_size).scale(0.01f).Test(ukernel);                          \
       VScaleExpMinusMaxMicrokernelTester().elements(element_size).scale(100.0f).Test(ukernel);                         \
