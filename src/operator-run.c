@@ -2244,10 +2244,11 @@ void xnn_compute_f32_qd8_convert(
 
   float minmax[2];
   context->rminmax_ukernel(n, input, minmax, &context->params);
-  context->quantization_params[batch_index] = xnn_f32_qd8_asymmetric_quantization_params(minmax[0], minmax[1]);
+  float scale;
+  context->quantization_params[batch_index] = xnn_f32_qd8_asymmetric_quantization_params(minmax[0], minmax[1], &scale);
 
   struct xnn_f32_qs8_cvt_params params;
-  params.scalar.scale = 1.0f / context->quantization_params[batch_index].inv_scale;
+  params.scalar.scale = scale;
   params.scalar.output_zero_point = context->quantization_params[batch_index].zero_point;
   context->convert_ukernel(n, input, output, (union xnn_unary_uparams*) &params);
 }

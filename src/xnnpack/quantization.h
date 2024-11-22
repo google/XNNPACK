@@ -40,9 +40,10 @@ static inline struct xnn_qd8_quantization_params xnn_qd8_asymmetric_quantization
 }
 
 static inline struct xnn_qd8_quantization_params xnn_f32_qd8_asymmetric_quantization_params(
-    float min, float max)
+    float min, float max, float* f32_scale)
 {
   struct xnn_qd8_quantization_params params = xnn_qd8_asymmetric_quantization_params(min, max);
+  *f32_scale = params.inv_scale;
   params.inv_scale = 1.f / params.inv_scale;
   return params;
 }

@@ -120,8 +120,8 @@ void GemmMicrokernelTester::Test(
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), std::ref(f32rng));
     const auto minmax = std::minmax_element(input.begin(), input.begin() + mr() * k());
-    quantization_params[0] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second);
-    const float inv_scale = 1.f / quantization_params[0].inv_scale;
+    float inv_scale;
+    quantization_params[0] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second, &inv_scale);
     for (size_t i = 0; i < mr(); ++i) {
       const float* input_ptr = &input[i * k()];
       for (size_t j = 0; j < k(); ++j) {
@@ -270,8 +270,8 @@ void GemmMicrokernelTester::Test(
   for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), std::ref(f32rng));
     const auto minmax = std::minmax_element(input.begin(), input.begin() + mr() * k());
-    quantization_params[0] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second);
-    const float inv_scale = 1.f / quantization_params[0].inv_scale;
+    float inv_scale;
+    quantization_params[0] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second, &inv_scale);
     for (size_t i = 0; i < mr(); ++i) {
       const float* input_ptr = &input[i * k()];
       for (size_t j = 0; j < k(); ++j) {
@@ -855,8 +855,8 @@ void GemmMicrokernelTester::Test(
     for (size_t i = 0; i < m(); ++i) {
       const float* input_ptr = &input[i * k()];
       const auto minmax = std::minmax_element(input_ptr, input_ptr + k());
-      quantization_params[i] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second);
-      const float inv_scale = 1.f / quantization_params[i].inv_scale;
+      float inv_scale;
+      quantization_params[i] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second, &inv_scale);
       for (size_t j = 0; j < k(); ++j) {
         float scaled_input = input_ptr[j] * inv_scale;
         scaled_input = std::min<float>(scaled_input, float(std::numeric_limits<int8_t>::max()
@@ -985,8 +985,8 @@ void GemmMicrokernelTester::Test(
     for (size_t i = 0; i < m(); ++i) {
       const float* input_ptr = &input[i * k()];
       const auto minmax = std::minmax_element(input_ptr, input_ptr + k());
-      quantization_params[i] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second);
-      const float inv_scale = 1.f / quantization_params[i].inv_scale;
+      float inv_scale;
+      quantization_params[i] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second, &inv_scale);
       for (size_t j = 0; j < k(); ++j) {
         float scaled_input = input_ptr[j] * inv_scale;
         scaled_input = std::min<float>(scaled_input, float(std::numeric_limits<int8_t>::max()
@@ -1121,8 +1121,8 @@ void GemmMicrokernelTester::Test(
     for (size_t i = 0; i < m(); ++i) {
       const float* input_ptr = &input[i * k2];
       const auto minmax = std::minmax_element(input_ptr, input_ptr + k2);
-      quantization_params[i] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second);
-      const float inv_scale = 1.f / quantization_params[i].inv_scale;
+      float inv_scale;
+      quantization_params[i] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second, &inv_scale);
       for (size_t j = 0; j < k2; ++j) {
         float scaled_input = input_ptr[j] * inv_scale;
         scaled_input = std::min<float>(scaled_input, float(std::numeric_limits<int8_t>::max()
@@ -1262,8 +1262,8 @@ void GemmMicrokernelTester::Test(
     for (size_t i = 0; i < m(); ++i) {
       const float* input_ptr = &input[i * k2];
       const auto minmax = std::minmax_element(input_ptr, input_ptr + k2);
-      quantization_params[i] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second);
-      const float inv_scale = 1.f / quantization_params[i].inv_scale;
+      float inv_scale;
+      quantization_params[i] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second, &inv_scale);
       for (size_t j = 0; j < k2; ++j) {
         float scaled_input = input_ptr[j] * inv_scale;
         scaled_input = std::min<float>(scaled_input, float(std::numeric_limits<int8_t>::max()
@@ -1419,8 +1419,8 @@ void GemmMicrokernelTester::Test(
     for (size_t i = 0; i < m(); ++i) {
       const float* input_ptr = &input[i * k2];
       const auto minmax = std::minmax_element(input_ptr, input_ptr + k2);
-      quantization_params[i] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second);
-      const float inv_scale = 1.f / quantization_params[i].inv_scale;
+      float inv_scale;
+      quantization_params[i] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second, &inv_scale);
       for (size_t j = 0; j < k2; ++j) {
         float scaled_input = input_ptr[j] * inv_scale;
         scaled_input = std::min<float>(scaled_input, float(std::numeric_limits<int8_t>::max()
@@ -1559,8 +1559,8 @@ void GemmMicrokernelTester::Test(
     for (size_t i = 0; i < m(); ++i) {
       const float* input_ptr = &input[i * k2];
       const auto minmax = std::minmax_element(input_ptr, input_ptr + k2);
-      quantization_params[i] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second);
-      const float inv_scale = 1.f / quantization_params[i].inv_scale;
+      float inv_scale;
+      quantization_params[i] = xnn_f32_qd8_asymmetric_quantization_params(*minmax.first, *minmax.second, &inv_scale);
       for (size_t j = 0; j < k2; ++j) {
         float scaled_input = input_ptr[j] * inv_scale;
         scaled_input = std::min<float>(scaled_input, float(std::numeric_limits<int8_t>::max()
