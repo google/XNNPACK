@@ -11,6 +11,7 @@
 #include "xnnpack.h"
 #include "xnnpack/allocation-type.h"
 #include "xnnpack/common.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
 #include "xnnpack/internal.h"
 #include "xnnpack/log.h"

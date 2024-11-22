@@ -115,6 +115,32 @@ class SubgraphTester {
     return *this;
   }
 
+  inline SubgraphTester& AddStaticTensorF32(const std::vector<size_t>& dims,
+                                   uint32_t external_id, void *data,
+                                   uint32_t flags = 0) {
+    uint32_t id_out = 0;
+    const xnn_status status =
+        xnn_define_tensor_value(subgraph_.get(), xnn_datatype_fp32, dims.size(),
+                                dims.data(), data, external_id, flags, &id_out);
+    EXPECT_EQ(status, xnn_status_success);
+    EXPECT_EQ(id_out, external_id);
+
+    return *this;
+  }
+
+  inline SubgraphTester& AddStaticTensorF16(const std::vector<size_t>& dims,
+                                   uint32_t external_id, void *data,
+                                   uint32_t flags = 0) {
+    uint32_t id_out = 0;
+    const xnn_status status =
+        xnn_define_tensor_value(subgraph_.get(), xnn_datatype_fp16, dims.size(),
+                                dims.data(), data, external_id, flags, &id_out);
+    EXPECT_EQ(status, xnn_status_success);
+    EXPECT_EQ(id_out, external_id);
+
+    return *this;
+  }
+
   inline SubgraphTester& AddDynamicTensorQS8(
     int32_t zero_point,
     float scale,

@@ -898,6 +898,10 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_depthwise_convolution_2d:
         subgraph->values[node->inputs[0]].fp16_compatible = true;
         subgraph->values[node->outputs[0]].fp16_compatible = true;
+        if (node->num_inputs > 2 &&
+            subgraph->values[node->inputs[2]].datatype == xnn_datatype_fp32) {
+          subgraph->values[node->inputs[2]].fp16_compatible = true;
+        }
         break;
       case xnn_node_type_convolution_2d:
         if (subgraph->values[node->inputs[0]].datatype == xnn_datatype_qdint8) {
@@ -905,11 +909,27 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         } else {
           subgraph->values[node->inputs[0]].fp16_compatible = true;
           subgraph->values[node->outputs[0]].fp16_compatible = true;
+          if (2 < node->num_inputs &&
+              subgraph->values[node->inputs[2]].datatype == xnn_datatype_fp32) {
+            subgraph->values[node->inputs[2]].fp16_compatible = true;
+          }
         }
         break;
       case xnn_node_type_fully_connected:
         if (subgraph->values[node->inputs[0]].datatype == xnn_datatype_qdint8) {
           subgraph->values[node->outputs[0]].fp16_compatible = true;
+        } else if (subgraph->values[node->inputs[0]].datatype ==
+                       xnn_datatype_fp32 &&
+                   subgraph->values[node->inputs[1]].datatype ==
+                       xnn_datatype_fp16 &&
+                   subgraph->values[node->outputs[0]].datatype ==
+                       xnn_datatype_fp32) {
+          subgraph->values[node->inputs[0]].fp16_compatible = true;
+          subgraph->values[node->outputs[0]].fp16_compatible = true;
+          if (2 < node->num_inputs &&
+              subgraph->values[node->inputs[2]].datatype == xnn_datatype_fp32) {
+            subgraph->values[node->inputs[2]].fp16_compatible = true;
+          }
         } else if (all_values_fp32(subgraph, node)) {
           subgraph->values[node->inputs[0]].fp16_compatible = true;
           subgraph->values[node->outputs[0]].fp16_compatible = true;
@@ -929,10 +949,15 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         break;
       default:
         for (uint32_t i = 0; i < node->num_inputs; i++) {
-          subgraph->values[node->inputs[i]].fp16_compatible = true;
+          if (subgraph->values[node->inputs[i]].datatype == xnn_datatype_fp32) {
+            subgraph->values[node->inputs[i]].fp16_compatible = true;
+          }
         }
         for (uint32_t o = 0; o < node->num_outputs; o++) {
-          subgraph->values[node->outputs[o]].fp16_compatible = true;
+          if (subgraph->values[node->outputs[o]].datatype ==
+              xnn_datatype_fp32) {
+            subgraph->values[node->outputs[o]].fp16_compatible = true;
+          }
         }
         break;
     }
