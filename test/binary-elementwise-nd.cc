@@ -184,10 +184,6 @@ class BinaryElementwiseOperatorTester {
     return 0;
   }
 
-  int Compute(int a, int b) const {
-    return Compute(static_cast<int32_t>(a), static_cast<int32_t>(b));
-  }
-
   BinaryElementwiseOperatorTester& input1_shape(
       std::vector<size_t> input1_shape) {
     assert(input1_shape.size() <= XNN_MAX_TENSOR_DIMS);
@@ -513,13 +509,13 @@ class BinaryElementwiseOperatorTester {
                     i * input1_strides[0] + j * input1_strides[1] +
                     k * input1_strides[2] + l * input1_strides[3] +
                     m * input1_strides[4] + n * input1_strides[5];
-                const int input1_value =
+                const int32_t input1_value =
                     reinterpret_cast<const T*>(&input1[0])[input1_index];
                 const size_t input2_index =
                     i * input2_strides[0] + j * input2_strides[1] +
                     k * input2_strides[2] + l * input2_strides[3] +
                     m * input2_strides[4] + n * input2_strides[5];
-                const int input2_value =
+                const int32_t input2_value =
                     reinterpret_cast<const T*>(&input2[0])[input2_index];
                 int output_ref = Compute(input1_value, input2_value);
                 if (std::isnan(output_ref) || output_ref < limits.low ||
