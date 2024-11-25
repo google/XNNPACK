@@ -184,6 +184,10 @@ class BinaryElementwiseOperatorTester {
     return 0;
   }
 
+  int Compute(int a, int b) const {
+    return Compute(static_cast<int32_t>(a), static_cast<int32_t>(b));
+  }
+
   BinaryElementwiseOperatorTester& input1_shape(
       std::vector<size_t> input1_shape) {
     assert(input1_shape.size() <= XNN_MAX_TENSOR_DIMS);

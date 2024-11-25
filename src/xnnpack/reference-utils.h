@@ -92,7 +92,7 @@ T euclidean_mod(T a, T b) {
 template <typename T>
 T integer_pow(T a, T b) {
   if (b < 0) {
-    return euclidean_div(1, integer_pow(a, -b));
+    return euclidean_div<T>(1, integer_pow(a, -b));
   }
   T result = 1;
   for (; b; b >>= 1) {
