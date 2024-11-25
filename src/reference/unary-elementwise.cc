@@ -122,14 +122,21 @@ struct ConvertOp {
   TOut operator()(TIn x) const {
     if (std::is_integral<TOut>::value && !std::is_integral<TIn>::value) {
       return round_float_to_int<TOut>(x);
-    } else if (std::is_integral<TOut>::value && std::is_integral<TIn>::value) {
-      return static_cast<TOut>(x);
     } else {
-      // Cast to intermediate float to work around issue #7489
-      return static_cast<TOut>(static_cast<float>(x));
+      return static_cast<TOut>(x);
     }
   }
 };
+
+#ifdef XNN_HAVE_FLOAT16
+template <>
+struct ConvertOp<xnn_bfloat16, _Float16> {
+  explicit ConvertOp(const xnn_unary_uparams*) {}
+  _Float16 operator()(xnn_bfloat16 x) const {
+    return static_cast<_Float16>(static_cast<float>(x));
+  }
+};
+#endif
 
 template <typename TIn, typename TOut>
 const xnn_unary_elementwise_config* get_convert_config(

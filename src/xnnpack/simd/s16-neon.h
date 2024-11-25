@@ -70,7 +70,7 @@ static XNN_INLINE void xnn_store_tail_s16(int16_t* output, xnn_simd_s16_t v,
     v_low = vget_high_s16(v);
   }
   if (num_elements & 2) {
-    vst1_lane_s32((void*) output, vreinterpret_s32_s16(v_low), 0);
+    vst1_lane_s32((int32_t*) output, vreinterpret_s32_s16(v_low), 0);
     output += 2;
     v_low = vext_s16(v_low, v_low, 2);
   }

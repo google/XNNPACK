@@ -416,7 +416,7 @@ jobs:
         with:
           path: "/home/runner/.cache/bazel"
           key: ${{ github.job }}-${{ github.sha }}
-  bazel-linux-aarch64:
+  bazel-linux-aarch64-clang18:
     runs-on: arm-ubuntu-arm-22.04-4core
     timeout-minutes: 60
     steps:
@@ -474,11 +474,13 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
-      - name: Update apt
-        run: sudo apt update
       - name: Install gcc-13
+        # Pull in gcc-13 from the ubuntu-23.10 repository since it is not available
+        # for ubuntu-22.04.
         working-directory: ${{ github.workspace }}
         run: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+          sudo apt update
           sudo apt install gcc-13 g++-13
       - name: Restore bazel cache
         uses: actions/cache/restore@v4
