@@ -52,7 +52,8 @@ void xnnpack_batch_matrix_multiply_f32(benchmark::State& state,
               sizeof(float) *
                   (output_elements + input1_elements + input2_elements));
 
-  xnnpack::Buffer<float> input1(num_buffers * input1_elements);
+  xnnpack::Buffer<float> input1(num_buffers * input1_elements +
+                                XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input1.begin(), input1.end(), std::ref(f32rng));
   xnnpack::Buffer<float> input2(num_buffers * input2_elements);
   std::generate(input2.begin(), input2.end(), std::ref(f32rng));
@@ -155,7 +156,8 @@ void xnnpack_batch_matrix_multiply_qd8_f32_qc8w(benchmark::State& state,
               sizeof(float) *
                   (output_elements + input1_elements + input2_elements));
 
-  xnnpack::Buffer<int8_t> input1(num_buffers * input1_elements);
+  xnnpack::Buffer<int8_t> input1(num_buffers * input1_elements +
+                                 XNN_EXTRA_BYTES / sizeof(int8_t));
   std::generate(input1.begin(), input1.end(), std::ref(q8rng));
   xnnpack::Buffer<int8_t> input2(input2_elements);
   std::generate(input2.begin(), input2.end(), std::ref(q8rng));
