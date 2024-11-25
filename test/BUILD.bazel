@@ -1104,6 +1104,7 @@ xnnpack_unit_test(
 ) for kernel in [
     "x8_packw",
     "qs8_packw",
+    "qs8_qc4w_packw",
     "x16_packw",
     "x32_packw",
 ]]
