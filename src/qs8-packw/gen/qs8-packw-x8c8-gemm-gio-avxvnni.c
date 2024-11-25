@@ -23,7 +23,17 @@ XNN_INLINE static __m128i safe_load_u64_to_m128(const void* src, size_t n) {
   for (size_t i = 0; i < n; ++i) {
     value |= (uint64_t)bytes[i] << (i * 8);
   }
+#if defined(_MSC_VER) && !defined(__x86_64__)
+  union {
+    int64_t i64x2[2];
+    int32_t i32x4[4];
+  } cvt;
+  cvt.i64x2[0] = value;
+  cvt.i64x2[1] = 0;
+  return _mm_setr_epi32(cvt.i32x4[0], cvt.i32x4[1], cvt.i32x4[2], cvt.i32x4[3]);
+#else
   return _mm_set_epi64x(0, value);
+#endif
 }
 
 void xnn_qs8_packw_gemm_gio_ukernel_x8c8__avxvnni(
