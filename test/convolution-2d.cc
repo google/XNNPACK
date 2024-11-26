@@ -1583,6 +1583,9 @@ TEST_F(ConvolutionTestF32, reshape_output)
       group_input_channels, group_output_channels, output_min, output_max, input_id, filter_id, bias_id, output_id,
       /*flags=*/0));
 
+  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+  std::generate(filter.begin(), filter.end(), [&]() { return f32dist(rng); });
+  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
   ASSERT_NE(nullptr, runtime);
