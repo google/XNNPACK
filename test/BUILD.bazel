@@ -290,6 +290,7 @@ sh_test(
     "qu8_vlrelu",
     "f16_f32_vcvt",
     "f16_qs8_vcvt",
+    "f16_qu8_vcvt",
     "f32_f16_vcvt",
     "f32_qs8_vcvt",
     "f32_qu8_vcvt",

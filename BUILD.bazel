@@ -64,6 +64,7 @@ MICROKERNEL_DEFS = [
     "src/f16-f32-vcvt/f16-f32-vcvt.h",
     "src/f16-maxpool/f16-maxpool-minmax.h",
     "src/f16-pavgpool/f16-pavgpool-minmax.h",
+    "src/f16-qu8-vcvt/f16-qu8-vcvt.h",
     "src/f16-qs8-vcvt/f16-qs8-vcvt.h",
     "src/f16-vabs/f16-vabs.h",
     "src/f16-vbinary/f16-vadd.h",

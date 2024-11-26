@@ -6,7 +6,6 @@
 $assert BATCH_TILE >= 1
 $assert IDATATYPE in ["F16", "F32"]
 $assert ODATATYPE in ["QS8", "QU8"]
-$assert IDATATYPE == "F16" and ODATATYPE == "QS8" or IDATATYPE == "F32"
 #include <assert.h>
 
 #include "xnnpack/common.h"
