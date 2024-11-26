@@ -112,18 +112,17 @@ void xnn_x32_packw_gemm_goi_ukernel_x3__scalar_int_u4(
 
     // NC remainder (1..2)
     if XNN_UNLIKELY(n != 0) {
+      size_t nb = 0;
       if XNN_LIKELY(b != NULL) {
-        size_t nb = n;
-        do {
-          *out++ = *b++;
-        } while (--nb != 0);
-      } else {
-        size_t nb = n;
-        do {
+        if XNN_LIKELY(b != NULL) {
+          while (nb < n) {
+            *out++ = *b++;
+            ++nb;
+          }
+        }
+        while (nb < 3) {
           *out++ = 0;
-        } while (--nb != 0);
-      }
-      out += (3 - n);
+        }
 
       // NR remainder has less than 3 rows so last row is not loaded
       const uint32_t* w1 = w0 + kc;

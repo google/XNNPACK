@@ -98,18 +98,17 @@ void xnn_x32_packw_gemm_goi_ukernel_x2__scalar_float_u4(
 
     // NC remainder (1..1)
     if XNN_UNLIKELY(n != 0) {
+      size_t nb = 0;
       if XNN_LIKELY(b != NULL) {
-        size_t nb = n;
-        do {
-          *out++ = *b++;
-        } while (--nb != 0);
-      } else {
-        size_t nb = n;
-        do {
+        if XNN_LIKELY(b != NULL) {
+          while (nb < n) {
+            *out++ = *b++;
+            ++nb;
+          }
+        }
+        while (nb < 2) {
           *out++ = 0;
-        } while (--nb != 0);
-      }
-      out += (2 - n);
+        }
 
 
       // KC main loop multiple of 2x4

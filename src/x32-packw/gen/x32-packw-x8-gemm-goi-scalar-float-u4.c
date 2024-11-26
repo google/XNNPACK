@@ -182,18 +182,17 @@ void xnn_x32_packw_gemm_goi_ukernel_x8__scalar_float_u4(
 
     // NC remainder (1..7)
     if XNN_UNLIKELY(n != 0) {
+      size_t nb = 0;
       if XNN_LIKELY(b != NULL) {
-        size_t nb = n;
-        do {
-          *out++ = *b++;
-        } while (--nb != 0);
-      } else {
-        size_t nb = n;
-        do {
+        if XNN_LIKELY(b != NULL) {
+          while (nb < n) {
+            *out++ = *b++;
+            ++nb;
+          }
+        }
+        while (nb < 8) {
           *out++ = 0;
-        } while (--nb != 0);
-      }
-      out += (8 - n);
+        }
 
       // NR remainder has less than 8 rows so last row is not loaded
       const float* w1 = w0 + kc;

@@ -118,29 +118,25 @@ void xnn_x${BITS}_packw_gemm_goi_ukernel_x${NR}__scalar_${TYPE_SUFFIX}_u${KBLOCK
     if XNN_UNLIKELY(n != 0) {
       $if BITS == 8:
         int32_t* packed_b = (int32_t*) out;
+      size_t nb = 0;
       if XNN_LIKELY(b != NULL) {
-        size_t nb = n;
-        do {
-          $if BTYPE == TYPE:
-            *out++ = *b++;
-          $else:
-            *((${BTYPE}*) out) = *b++;
-            out += sizeof(${BTYPE});
-        } while (--nb != 0);
-      } else {
-        size_t nb = n;
-        do {
+        if XNN_LIKELY(b != NULL) {
+          while (nb < n) {
+            $if BTYPE == TYPE:
+              *out++ = *b++;
+            $else:
+              *((${BTYPE}*) out) = *b++;
+              out += sizeof(${BTYPE});
+            ++nb;
+          }
+        }
+        while (nb < ${NR}) {
           $if BTYPE == TYPE:
             *out++ = 0;
           $else:
             *((${BTYPE}*) out) = 0;
             out += sizeof(${BTYPE});
-        } while (--nb != 0);
-      }
-      $if BTYPE == TYPE:
-        out += (${NR} - n);
-      $else:
-        out += (${NR} - n) * sizeof(${BTYPE});
+        }
 
       $if NR > 2:
         // NR remainder has less than ${NR} rows so last row is not loaded
