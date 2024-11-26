@@ -51,14 +51,15 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
     do {
       const size_t nr_block_size = min(nc - nr_block_start, ${NR});
       int32_t* packed_b = (int32_t*) packed_weights;
+      size_t n = 0;
       if XNN_LIKELY(b != NULL) {
-        for (size_t n = 0; n < nr_block_size; ++n) {
+        while (n < nr_block_size) {
           packed_b[n] = b[n + nr_block_start];
+          ++n;
         }
-      } else {
-        for (size_t n = 0; n < nr_block_size; ++n) {
-          packed_b[n] = 0;
-        }
+      }
+      while (n < ${NR}) {
+        packed_b[n++] = 0;
       }
       packed_weights = (int32_t*) packed_weights + ${NR};
 
