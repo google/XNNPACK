@@ -3,11 +3,13 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include "xnnpack/microkernel-utils.h"
+
 #include <assert.h>
 #include <stddef.h>
 
+#include "xnnpack/log.h"
 #include "xnnpack/math.h"
-#include "xnnpack/microkernel-utils.h"
 
 size_t xnn_gemm_best_nc(size_t num_groups, size_t m, size_t n, size_t mr,
                         size_t nr, size_t num_threads) {
@@ -29,7 +31,12 @@ size_t xnn_gemm_best_nc(size_t num_groups, size_t m, size_t n, size_t mr,
     const size_t num_tiles_m = divide_round_up(m, mr);
     const size_t num_tiles_n = divide_round_up(n, nc);
     const size_t num_tiles = num_groups * num_tiles_m * num_tiles_n;
-    assert(target_tiles_per_thread * num_threads <= num_tiles);
+    if (num_tiles < target_tiles_per_thread * num_threads) {
+      xnn_log_warning(
+          "Didn't generate enough tiles, num_groups=%zu, m=%zu, n=%zu, mr=%zu, "
+          "nc=%zu, num_threads=%zu.",
+          num_groups, m, n, mr, nc, num_threads);
+    }
   }
 #endif  // NDEBUG
 
