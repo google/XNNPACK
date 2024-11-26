@@ -40,4 +40,3 @@ BENCHMARK_CAPTURE_BGEMM(qs8_gio_packw, ukernel##_, ukernel, arch_flags, nr, kr, 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 BENCHMARK_MAIN();
 #endif
-
