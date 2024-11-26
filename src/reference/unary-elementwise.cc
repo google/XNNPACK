@@ -231,7 +231,7 @@ template <typename T>
 struct AbsOp {
   explicit AbsOp(const xnn_unary_uparams*) {}
 
-  int operator()(int x) const { return std::abs(x); }
+  int32_t operator()(int32_t x) const { return std::abs(x); }
   float operator()(float x) const { return std::abs(x); }
   xnn_float16 operator()(xnn_float16 x) const {
     return xnn_float16_from_bits(xnn_float16_to_bits(x) & 0x7fff);
@@ -298,7 +298,7 @@ struct NegateOp {
   explicit NegateOp(const xnn_unary_uparams*) {}
 
   static const uint16_t sign_mask = 0x8000;
-  int operator()(int x) const { return -x; }
+  int32_t operator()(int32_t x) const { return -x; }
   float operator()(float x) const { return -x; }
   xnn_float16 operator()(xnn_float16 x) const {
     return xnn_float16_from_bits(xnn_float16_to_bits(x) ^ sign_mask);
@@ -464,7 +464,7 @@ template <typename T>
 struct SignOp {
   explicit SignOp(const xnn_unary_uparams*) {}
 
-  int operator()(int x) const { return x < 0 ? -1 : x > 0 ? 1 : 0; }
+  int32_t operator()(int32_t x) const { return x < 0 ? -1 : x > 0 ? 1: 0; }
   float operator()(float x) const { return x < 0 ? -1 : x > 0 ? 1 : 0; }
 
   static const uint16_t sign_mask = 0x8000;
