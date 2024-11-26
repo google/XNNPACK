@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>  // for memcpy
 
 #include <immintrin.h>
 
@@ -30,7 +31,7 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avxvnni(
   const void* scale,
   int8_t* packed_weights,
   size_t extra_bytes,
-  const void* params) XNN_OOB_READS
+  const void* params)
 {
   assert(g != 0);
   assert(nc != 0);
@@ -166,17 +167,29 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avxvnni(
       if (k != 0) {
         assert(k >= 1 && k <= 7);
 
+       // TODO: more efficient copy
+        // uint64_t for KR=8 bytes
+        uint64_t remainder_buffer[8] = { 0, };
+        __builtin_memcpy(remainder_buffer + 0, w0, k);
+        __builtin_memcpy(remainder_buffer + 1, w1, k);
+        __builtin_memcpy(remainder_buffer + 2, w2, k);
+        __builtin_memcpy(remainder_buffer + 3, w3, k);
+        __builtin_memcpy(remainder_buffer + 4, w4, k);
+        __builtin_memcpy(remainder_buffer + 5, w5, k);
+        __builtin_memcpy(remainder_buffer + 6, w6, k);
+        __builtin_memcpy(remainder_buffer + 7, w7, k);
+
         const __m256i vmask = _mm256_srli_epi64(_mm256_set1_epi32(-1), (8 - k) * sizeof(int8_t) * 8);
 
-        __m256i v0 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w0));
-        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w1)), 0x0C);
-        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w2)), 0x30);
-        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w3)), 0xC0);
+        __m256i v0 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + 0));
+        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + 1)), 0x0C);
+        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + 2)), 0x30);
+        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + 3)), 0xC0);
         v0 = _mm256_and_si256(v0, vmask);
-        __m256i v4 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w4));
-        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w5)), 0x0C);
-        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w6)), 0x30);
-        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w7)), 0xC0);
+        __m256i v4 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + 4));
+        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + 5)), 0x0C);
+        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + 6)), 0x30);
+        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + 7)), 0xC0);
         v4 = _mm256_and_si256(v4, vmask);
 
         w0 += k;
@@ -292,17 +305,29 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avxvnni(
       if (k != 0) {
         assert(k >= 1 && k <= 7);
 
+        // TODO: more efficient copy
+        // uint64_t for KR=8 bytes
+        uint64_t remainder_buffer[8] = { 0, };
+        __builtin_memcpy(remainder_buffer + 0, w0, k);
+        __builtin_memcpy(remainder_buffer + 1, w1, k);
+        __builtin_memcpy(remainder_buffer + 2, w2, k);
+        __builtin_memcpy(remainder_buffer + 3, w3, k);
+        __builtin_memcpy(remainder_buffer + 4, w4, k);
+        __builtin_memcpy(remainder_buffer + 5, w5, k);
+        __builtin_memcpy(remainder_buffer + 6, w6, k);
+        __builtin_memcpy(remainder_buffer + 7, w7, k);
+
         const __m256i vmask = _mm256_srli_epi64(_mm256_set1_epi32(-1), (8 - k) * sizeof(int8_t) * 8);
 
-        __m256i v0 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w0));
-        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w1)), 0x0C);
-        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w2)), 0x30);
-        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w3)), 0xC0);
+        __m256i v0 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + 0));
+        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + 1)), 0x0C);
+        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + 2)), 0x30);
+        v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + 3)), 0xC0);
         v0 = _mm256_and_si256(v0, vmask);
-        __m256i v4 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w4));
-        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w5)), 0x0C);
-        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w6)), 0x30);
-        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w7)), 0xC0);
+        __m256i v4 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + 4));
+        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + 5)), 0x0C);
+        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + 6)), 0x30);
+        v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(remainder_buffer + 7)), 0xC0);
         v4 = _mm256_and_si256(v4, vmask);
 
         w0 += k;
