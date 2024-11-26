@@ -783,7 +783,10 @@ xnnpack_cc_library(
 
 xnnpack_cxx_library(
     name = "packing",
-    srcs = ["src/reference/packing.cc"],
+    srcs = [
+        "src/reference/packing.cc",
+        "src/packw.c"
+    ],
     hdrs = ["src/xnnpack/pack.h"],
     defines = xnnpack_configurable_defines(),
     deps = [
