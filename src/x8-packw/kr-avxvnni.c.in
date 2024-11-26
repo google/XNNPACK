@@ -19,16 +19,26 @@ $assert IZP in [0, 128]
 #include "xnnpack/unaligned.h"
 $if PREFETCH:
   #include "xnnpack/prefetch.h"
+$if VARIANT == "MADD":
+  // AVXVNNI replacement that uses vpmaddubsw.
+  // u7 is vone.  s8 is int8 weights.
+  static XNN_INTRINSIC
+  __m256i _mm256_dpbusd_epi32_madd(__m256i i32, const __m256i u7, const __m256i s8) {
+    const __m256i vone = _mm256_set1_epi16(1);
+    const __m256i i16 = _mm256_maddubs_epi16(u7, s8);  // u7 * s8 = s16
+    const __m256i v = _mm256_madd_epi16(i16, vone);  // convert 16 bits to 32 bits
+    return _mm256_add_epi32(i32, v);
+  }
 
 
 $BTYPE = {"QS8": "int32_t", "X8": "uint32_t"}[DATATYPE]
 $WTYPE = "int8_t"
 $if DATATYPE in ["QS8"]:
-  $_MM256_DPBUSD_EPI32 = "_mm256_dpbusd_avx_epi32" if AVX == 2 else "_mm256_dpbusd_epi32"
-  $ISA = "avxvnni" if AVX == 2 else "avx256vnni"
+  $_MM256_DPBUSD_EPI32 = "_mm256_dpbusd_epi32_madd" if VARIANT == "MADD" else "_mm256_dpbusd_avx_epi32" if AVX == 2 else "_mm256_dpbusd_epi32"
+  $ISA = "avx2" if VARIANT == "MADD" else "avxvnni" if AVX == 2 else "avx256vnni"
 $else:
   $ISA = "avx2" if AVX == 2 else "avx256skx"
-void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_prfm" if PREFETCH else ""}(
+void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" if VARIANT == "MADD" else ""}${"_prfm" if PREFETCH else ""}(
   size_t g,
   size_t nc,
   size_t kc,

@@ -434,6 +434,7 @@ NON_PROD_AVX2_MICROKERNEL_SRCS = [
     "src/qs8-f32-vcvt/gen/qs8-f32-vcvt-avx2-u8.c",
     "src/qs8-f32-vcvt/gen/qs8-f32-vcvt-avx2-u24.c",
     "src/qs8-f32-vcvt/gen/qs8-f32-vcvt-avx2-u32.c",
+    "src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-avx2-madd.c",
     "src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-5f5m5l8c8s8r-minmax-fp32-avx2-mul32.c",
     "src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-5f5m5l16c8s8r-minmax-fp32-avx2-mul32.c",
     "src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-5f5m5l16c16s16r-minmax-fp32-avx2-mul16-add16-vpunpck.c",
