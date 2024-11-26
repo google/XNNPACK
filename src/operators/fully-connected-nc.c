@@ -24,6 +24,7 @@
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microkernel-type.h"
+#include "xnnpack/microkernel-utils.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/operator-type.h"
@@ -1981,20 +1982,11 @@ static enum xnn_status reshape_fully_connected_nc(
   memcpy(&fully_connected_op->context.gemm.gemm.gemm.params, params, params_size);
   fully_connected_op->context.gemm.gemm.gemm.fused_params = &fully_connected_op->context.gemm.gemm.gemm.params;
 
-  size_t nc = output_channels;
-  const size_t num_threads = pthreadpool_get_threads_count(threadpool);
-  if (num_threads > 1) {
-    const size_t num_other_tiles = divide_round_up(batch_size, mr);
-    const size_t target_tiles_per_thread = 5;
-    const size_t max_nc = divide_round_up(output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
-    if (max_nc < nc) {
-      nc = min(nc, divide_round_up(output_channels,
-                                   divide_round_up(nc, max_nc) * nr) *
-                       nr);
-    }
-  }
+  size_t nc =
+      xnn_gemm_best_nc(/*num_groups=*/1, batch_size, output_channels, mr, nr,
+                       pthreadpool_get_threads_count(threadpool));
 
-  #if XNN_MAX_UARCH_TYPES > 1
+#if XNN_MAX_UARCH_TYPES > 1
     if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
       fully_connected_op->compute[0].type = xnn_parallelization_type_2d_tile_2d_with_uarch;
       if (dynamic_quantization) {

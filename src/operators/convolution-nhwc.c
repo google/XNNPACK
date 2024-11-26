@@ -1946,15 +1946,8 @@ static enum xnn_status reshape_gemm(
   memcpy(&convolution_op->context.gemm.gemm.gemm.params, &convolution_op->params, sizeof(convolution_op->context.gemm.gemm.gemm.params));
   convolution_op->context.gemm.gemm.gemm.fused_params = &convolution_op->context.gemm.gemm.gemm.params;
 
-  size_t nc = group_output_channels;
-  if (num_threads > 1) {
-    const size_t num_other_tiles = groups * divide_round_up(batch_output_size, mr);
-    const size_t target_tiles_per_thread = 5;
-    const size_t max_nc = divide_round_up(group_output_channels * num_other_tiles, num_threads * target_tiles_per_thread);
-    if (max_nc < nc) {
-      nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
-    }
-  }
+  size_t nc = xnn_gemm_best_nc(groups, batch_output_size, group_output_channels,
+                               mr, nr, num_threads);
 
   if (groups == 1) {
     #if XNN_MAX_UARCH_TYPES > 1

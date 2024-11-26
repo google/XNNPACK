@@ -13,6 +13,11 @@
 extern "C" {
 #endif
 
+// Computes the largest `nc`, the largest multiple of `nr` such that there are
+// at least five tiles per thread (if `num_threads > 1`).
+size_t xnn_gemm_best_nc(size_t num_groups, size_t m, size_t n, size_t mr,
+                        size_t nr, size_t num_threads);
+
 // The total tile size needed to cover kernel_size.
 XNN_INTERNAL size_t xnn_dwconv_multipass_tile_size(
   size_t kernel_size,
