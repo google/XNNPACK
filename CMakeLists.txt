@@ -1947,6 +1947,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       qu8-gemm
       qu8-gemm-fp32
       qu8-gemm-rndnu
+      qb4-packw
       x16-packw
       x32-packw
       x8-lut
