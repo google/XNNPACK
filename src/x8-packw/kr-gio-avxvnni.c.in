@@ -21,23 +21,13 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $if PREFETCH:
   #include "xnnpack/prefetch.h"
 
-XNN_INLINE static __m128i safe_load_u64_to_m128(const void* src, size_t n) {
+XNN_INLINE static uint64_t safe_load_u64(const void* src, size_t n) {
   uint64_t value = 0;
   const uint8_t* bytes = (const uint8_t*)src;
   for (size_t i = 0; i < n; ++i) {
     value |= (uint64_t)bytes[i] << (i * 8);
   }
-#if defined(_MSC_VER) && !defined(__x86_64__)
-  union {
-    int64_t i64x2[2];
-    int32_t i32x4[4];
-  } cvt;
-  cvt.i64x2[0] = value;
-  cvt.i64x2[1] = 0;
-  return _mm_setr_epi32(cvt.i32x4[0], cvt.i32x4[1], cvt.i32x4[2], cvt.i32x4[3]);
-#else
-  return _mm_set_epi64x(0, value);
-#endif
+  return value;
 }
 
 $BTYPE = {"QS8": "int32_t", "X8": "uint32_t"}[DATATYPE]
@@ -240,7 +230,7 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
       // KC main loop multiple of ${NR}x${KR}
       for (; k >= ${KR}; k -= ${KR}) {
         $for K in range(KR):
-          __m128i v${K}x${ABC[0:NR]} = safe_load_u64_to_m128(w${K}, n);
+          __m128i v${K}x${ABC[0:NR]} = _mm_set1_epi64x((int64_t) safe_load_u64(w${K}, n));
 
         $for K in range(0, KR, 2):
           __m128i v${ABC[K:K+2]}x${ABC[0:NR]} = _mm_unpacklo_epi8(v${K}x${ABC[0:NR]}, v${K+1}x${ABC[0:NR]});
@@ -273,11 +263,11 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
         assert(k >= 1 && k <= ${KR-1});
 
         __m128i vzero = _mm_setzero_si128();
-        __m128i v0x${ABC[0:NR]} = safe_load_u64_to_m128(w0, n);
+        __m128i v0x${ABC[0:NR]} = _mm_set1_epi64x((int64_t) safe_load_u64(w0, n));
         $for K in range(1, KR):
           __m128i v${K}x${ABC[0:NR]} = vzero;
           if (${K} < k) {
-            v${K}x${ABC[0:NR]} = safe_load_u64_to_m128(w${K}, n);
+            v${K}x${ABC[0:NR]} = _mm_set1_epi64x((int64_t) safe_load_u64(w${K}, n));
           }
 
         $for K in range(0, KR, 2):
