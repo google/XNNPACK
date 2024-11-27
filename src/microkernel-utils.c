@@ -8,37 +8,17 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "xnnpack/log.h"
 #include "xnnpack/math.h"
 
 size_t xnn_gemm_best_nc(size_t num_groups, size_t m, size_t n, size_t mr,
                         size_t nr, size_t num_threads) {
-  const size_t target_tiles_per_thread = 5;
   size_t nc = n;
   if (num_threads > 1) {
     const size_t num_tile_rows = divide_round_up(m, mr) * num_groups;
-    const size_t max_nc = divide_round_up(
-        n * num_tile_rows, num_threads * target_tiles_per_thread);
-    if (max_nc < nc) {
-      nc = min(nc, divide_round_up(nc, divide_round_up(nc, max_nc) * nr) * nr);
-    }
+    nc = min(max(1, (n * num_tile_rows) /
+                    (nr * num_threads * XNN_GEMM_TILES_PER_THREAD)) *
+         nr, n);
   }
-
-#ifndef NDEBUG
-  // Verify that we indeed have at least `target_tiles_per_thread` tiles per
-  // thread.
-  if (num_threads > 1 && nr < nc) {
-    const size_t num_tiles_m = divide_round_up(m, mr);
-    const size_t num_tiles_n = divide_round_up(n, nc);
-    const size_t num_tiles = num_groups * num_tiles_m * num_tiles_n;
-    if (num_tiles < target_tiles_per_thread * num_threads) {
-      xnn_log_warning(
-          "Didn't generate enough tiles, num_groups=%zu, m=%zu, n=%zu, mr=%zu, "
-          "nc=%zu, num_threads=%zu.",
-          num_groups, m, n, mr, nc, num_threads);
-    }
-  }
-#endif  // NDEBUG
 
   return nc;
 }

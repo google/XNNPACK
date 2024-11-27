@@ -13,6 +13,10 @@
 extern "C" {
 #endif
 
+// When parallelizing GEMMs, try to tile the computation such that we have at
+// least this many tiles per thread.
+#define XNN_GEMM_TILES_PER_THREAD 5
+
 // Computes the largest `nc`, the largest multiple of `nr` such that there are
 // at least five tiles per thread (if `num_threads > 1`).
 size_t xnn_gemm_best_nc(size_t num_groups, size_t m, size_t n, size_t mr,

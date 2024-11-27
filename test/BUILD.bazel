@@ -2156,7 +2156,12 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "microkernel_utils_test",
     srcs = ["microkernel-utils.cc"],
-    deps = ["//:microkernel_utils"],
+    deps = [
+        ":replicable_random_device",
+        "//:math",
+        "//:microkernel_utils",
+        "//:params",
+    ],
 )
 
 xnnpack_unit_test(

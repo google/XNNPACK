@@ -894,7 +894,6 @@ xnnpack_cc_library(
     hdrs = ["src/xnnpack/microkernel-utils.h"],
     deps = [
         ":common",
-        ":logging",
         ":math",
     ],
 )
