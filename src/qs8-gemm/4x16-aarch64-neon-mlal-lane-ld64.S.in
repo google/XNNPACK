@@ -86,8 +86,8 @@ BEGIN_FUNCTION xnn_${DATATYPE_SPEC}_gemm_minmax_${REQUANTIZATION.lower()}_ukerne
         CSEL        x4, x13, x4, LO         //   a3 = a2
         CSEL        x7,  x9, x7, LO         //   c3 = c2
         $if DATATYPE == "QU8":
-          LD1R        {v7.16b}, [x11], 1           // kernel_zero_point
-          ADD         x11, x11, 3
+          LD1R        {v7.16b}, [x11]       // kernel_zero_point
+          ADD         x11, x11, 4           // skip padding
 
         .p2align    3
 0:

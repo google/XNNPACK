@@ -83,6 +83,9 @@ extern "C" {
 /// Static weights of the FP16 operator are in FP32 format.
 #define XNN_FLAG_FP32_STATIC_WEIGHTS 0x00000008
 
+/// Static biases of the FP16 operator are in FP32 format.
+#define XNN_FLAG_FP32_STATIC_BIASES 0x00000080
+
 /// Align corners of input and output images in resize operations.
 #define XNN_FLAG_ALIGN_CORNERS 0x00000008
 
@@ -101,7 +104,7 @@ extern "C" {
 /// The caller must allocate at least this many extra xnn_quantization_params before passing the array to XNNPACK.
 ///
 /// Note: XNNPACK reads, but never writes beyond array bounds.
-#define XNN_EXTRA_QUANTIZATION_PARAMS 10
+#define XNN_EXTRA_QUANTIZATION_PARAMS 15
 
 /// The minimum blocksize for blockwise quantized operators.
 #define XNN_MIN_BLOCKSIZE 32
@@ -2069,16 +2072,6 @@ XNN_DEPRECATED enum xnn_status xnn_define_reciprocal_square_root(
   uint32_t output_id,
   uint32_t flags);
 
-/// Define a Static Slice Node add it to a Subgraph.
-///
-/// @param subgraph - a Subgraph object that will own the created Node.
-/// @param num_dims - number of shape dimensions in the input and output tensor.
-/// @param offsets - offsets in each dimension of the input tensor. This array must have @a num_dims elements.
-/// @param sizes - size of each dimension in output tensor. This array must have @a num_dims elements.
-/// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
-/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
-///                    dimensions must match @a sizes.
-/// @param flags - binary features of the Static Slice Node. No supported flags are currently defined.
 enum xnn_status xnn_define_static_slice(
   xnn_subgraph_t subgraph,
   size_t num_dims,
@@ -2087,6 +2080,25 @@ enum xnn_status xnn_define_static_slice(
   uint32_t input_id,
   uint32_t output_id,
   uint32_t flags);
+/// Define a Static Slice Node add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param num_dims - number of shape dimensions in the input and output tensor.
+/// @param offsets - offsets in each dimension of the input tensor. This array must have @a num_dims elements. Can be
+///                  negative meaning that the offset is relative to the end of the dimension.
+/// @param sizes - size of each dimension in output tensor. This array must have @a num_dims elements.
+/// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
+///                    dimensions must match @a sizes.
+/// @param flags - binary features of the Static Slice Node. No supported flags are currently defined.
+enum xnn_status xnn_define_static_slice_v2(  //
+    xnn_subgraph_t subgraph,                 //
+    size_t num_dims,                         //
+    const int64_t* offsets,                  //
+    const size_t* sizes,                     //
+    uint32_t input_id,                       //
+    uint32_t output_id,                      //
+    uint32_t flags);
 
 /// Define a Static Transpose Node and add it to a Subgraph.
 ///
@@ -2981,6 +2993,31 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* convolution_op_out);
 
+enum xnn_status xnn_create_convolution2d_nhwc_f32_f16(
+  uint32_t input_padding_top,
+  uint32_t input_padding_right,
+  uint32_t input_padding_bottom,
+  uint32_t input_padding_left,
+  uint32_t kernel_height,
+  uint32_t kernel_width,
+  uint32_t subsampling_height,
+  uint32_t subsampling_width,
+  uint32_t dilation_height,
+  uint32_t dilation_width,
+  uint32_t groups,
+  size_t group_input_channels,
+  size_t group_output_channels,
+  size_t input_channel_stride,
+  size_t output_channel_stride,
+  const void* kernel,
+  const void* bias,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* convolution_op_out);
+
 // Forward declare.
 struct xnn_post_operation;
 
@@ -3335,6 +3372,31 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
   size_t output_pixel_stride,
   const float* kernel,
   const float* bias,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* deconvolution_op_out);
+
+enum xnn_status xnn_create_deconvolution2d_nhwc_f32_f16(
+  uint32_t output_padding_top,
+  uint32_t output_padding_right,
+  uint32_t output_padding_bottom,
+  uint32_t output_padding_left,
+  uint32_t kernel_height,
+  uint32_t kernel_width,
+  uint32_t stride_height,
+  uint32_t stride_width,
+  uint32_t dilation_height,
+  uint32_t dilation_width,
+  uint32_t groups,
+  size_t group_input_channels,
+  size_t group_output_channels,
+  size_t input_pixel_stride,
+  size_t output_pixel_stride,
+  const void* kernel,
+  const void* bias,
   float output_min,
   float output_max,
   uint32_t flags,

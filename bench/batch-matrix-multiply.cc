@@ -7,6 +7,8 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
+#include <cstring>
 #include <functional>
 #include <limits>
 #include <memory>
@@ -18,6 +20,10 @@
 #include <benchmark/benchmark.h>
 #include "pthreadpool.h"
 
+#if XNN_ENABLE_CPUINFO
+#include <cpuinfo.h>
+#endif  // XNN_ENABLE_CPUINFO
+
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/buffer.h"
 #include "flatbuffers/include/flatbuffers/flatbuffer_builder.h"
@@ -28,6 +34,29 @@
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 #endif  // BENCHMARK_TENSORFLOW_LITE
+
+// Pthreadpool-compatible function to wipe the cache in each thread.
+void PthreadpoolClearL2Cache(void* context, size_t id) {
+#if XNN_ENABLE_CPUINFO
+  static const size_t wipe_buffer_size = []() {
+    const auto* l2_cache = cpuinfo_get_l2_cache(0);
+    return l2_cache == nullptr ? 0 : l2_cache->size;
+  }();
+  static const char* wipe_buffer = wipe_buffer_size ? [&]() -> char* {
+    char* const buff = (char*)malloc(wipe_buffer_size);
+    memset(buff, 0xA5, wipe_buffer_size);
+    return buff;
+  }()
+      : nullptr;
+  if (wipe_buffer_size) {
+    benchmark::utils::PrefetchToL1(wipe_buffer, wipe_buffer_size);
+  } else {
+    benchmark::utils::WipeCache();
+  }
+#else
+  benchmark::utils::WipeCache();
+#endif  // XNN_ENABLE_CPUINFO
+}
 
 void xnnpack_batch_matrix_multiply_f32(benchmark::State& state,
                                        const char* net) {
@@ -46,17 +75,13 @@ void xnnpack_batch_matrix_multiply_f32(benchmark::State& state,
   const size_t input1_elements = batch_size * m * k;
   const size_t input2_elements = batch_size * k * n;
   const size_t output_elements = batch_size * m * n;
-  const size_t num_buffers =
-      1 + benchmark::utils::DivideRoundUp<size_t>(
-              benchmark::utils::GetMaxCacheSize(),
-              sizeof(float) *
-                  (output_elements + input1_elements + input2_elements));
 
-  xnnpack::Buffer<float> input1(num_buffers * input1_elements);
+  xnnpack::Buffer<float> input1(input1_elements +
+                                XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input1.begin(), input1.end(), std::ref(f32rng));
-  xnnpack::Buffer<float> input2(num_buffers * input2_elements);
+  xnnpack::Buffer<float> input2(input2_elements);
   std::generate(input2.begin(), input2.end(), std::ref(f32rng));
-  xnnpack::Buffer<float> output(output_elements * num_buffers);
+  xnnpack::Buffer<float> output(output_elements);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
@@ -83,24 +108,24 @@ void xnnpack_batch_matrix_multiply_f32(benchmark::State& state,
       /*batch_dims_b=*/&batch_size, m, k, n, &workspace_size,
       &workspace_alignment, threadpool);
 
-  auto workspace =
-      std::make_unique<xnnpack::Buffer<char>>(num_buffers * workspace_size);
-
   if (status != xnn_status_success) {
-    state.SkipWithError("failed to create FP32 BatchMatrixMultiply operator");
+    state.SkipWithError("failed to reshape FP32 BatchMatrixMultiply operator");
     return;
   }
 
-  size_t buffer_index = 0;
+  status = xnn_setup_batch_matrix_multiply_nc_f32(
+      op, /*workspace=*/nullptr, input1.data(),
+      /*input_b=*/nullptr, output.data());
+
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to setup FP32 BatchMatrixMultiply operator");
+    return;
+  }
 
   for (auto _ : state) {
     state.PauseTiming();
-    buffer_index = (buffer_index + 1) % num_buffers;
-    status = xnn_setup_batch_matrix_multiply_nc_f32(
-        op, workspace->data() + buffer_index * workspace_size,
-        input1.data() + buffer_index * input1_elements,
-        input2.data() + buffer_index * input2_elements,
-        output.data() + output_elements * buffer_index);
+    pthreadpool_parallelize_1d(threadpool, PthreadpoolClearL2Cache, nullptr,
+                               num_threads, 0);
     state.ResumeTiming();
 
     status = xnn_run_operator(op, threadpool);
@@ -149,17 +174,13 @@ void xnnpack_batch_matrix_multiply_qd8_f32_qc8w(benchmark::State& state,
   const size_t input1_elements = batch_size * m * k;
   const size_t input2_elements = batch_size * k * n;
   const size_t output_elements = batch_size * m * n;
-  const size_t num_buffers =
-      1 + benchmark::utils::DivideRoundUp<size_t>(
-              benchmark::utils::GetMaxCacheSize(),
-              sizeof(float) *
-                  (output_elements + input1_elements + input2_elements));
 
-  xnnpack::Buffer<int8_t> input1(num_buffers * input1_elements);
+  xnnpack::Buffer<int8_t> input1(input1_elements +
+                                 XNN_EXTRA_BYTES / sizeof(int8_t));
   std::generate(input1.begin(), input1.end(), std::ref(q8rng));
   xnnpack::Buffer<int8_t> input2(input2_elements);
   std::generate(input2.begin(), input2.end(), std::ref(q8rng));
-  xnnpack::Buffer<float> output(num_buffers * output_elements);
+  xnnpack::Buffer<float> output(output_elements);
 
   // Allocate and fill the quantization parameters.
   xnnpack::Buffer<float> channelwise_scales(batch_size * n +
@@ -197,18 +218,23 @@ void xnnpack_batch_matrix_multiply_qd8_f32_qc8w(benchmark::State& state,
 
   if (status != xnn_status_success) {
     state.SkipWithError(
-        "failed to create QD8_F32_QC8W BatchMatrixMultiply operator");
+        "failed to reshape QD8_F32_QC8W BatchMatrixMultiply operator");
     return;
   }
 
-  size_t buffer_index = 0;
+  status = xnn_setup_batch_matrix_multiply_nc_qd8_f32_qc8w(
+      op, input1.data(), quantization_params.data(), output.data());
+
+  if (status != xnn_status_success) {
+    state.SkipWithError(
+        "failed to setup QD8_F32_QC8W BatchMatrixMultiply operator");
+    return;
+  }
+
   for (auto _ : state) {
     state.PauseTiming();
-    buffer_index = (buffer_index + 1) % num_buffers;
-    status = xnn_setup_batch_matrix_multiply_nc_qd8_f32_qc8w(
-        op, input1.data() + buffer_index * input1_elements,
-        quantization_params.data(),
-        output.data() + output_elements * buffer_index);
+    pthreadpool_parallelize_1d(threadpool, PthreadpoolClearL2Cache, nullptr,
+                               num_threads, 0);
     state.ResumeTiming();
 
     status = xnn_run_operator(op, threadpool);

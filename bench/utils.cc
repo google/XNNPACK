@@ -64,7 +64,10 @@ uint32_t PrefetchToL1(const void* ptr, size_t size) {
   uint32_t step = 16;
   #if XNN_ENABLE_CPUINFO
     if (cpuinfo_initialize()) {
-      step = cpuinfo_get_l1d_cache(0)->line_size;
+      const struct cpuinfo_cache* cpuinfo_cache_info = cpuinfo_get_l1d_cache(0);
+      if (cpuinfo_cache_info) {
+        step = cpuinfo_cache_info->line_size;
+      }
     }
   #endif  // XNN_ENABLE_CPUINFO
 

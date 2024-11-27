@@ -126,14 +126,14 @@ static enum xnn_status reshape_slice_nd(
 
   if (num_dims == 0) {
     xnn_log_error(
-      "failed to create %s operator with %zu num_dims: num_dims must be non-zero",
+      "failed to reshape %s operator with %zu num_dims: num_dims must be non-zero",
       xnn_operator_type_to_string(slice_op->type), num_dims);
     return xnn_status_unsupported_parameter;
   }
 
   if (num_dims > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
-      "failed to create %s operator with %zu num_dims: num_dims must be <= %d",
+      "failed to reshape %s operator with %zu num_dims: num_dims must be <= %d",
       xnn_operator_type_to_string(slice_op->type), num_dims, XNN_MAX_TENSOR_DIMS);
     return xnn_status_unsupported_parameter;
   }
@@ -147,19 +147,19 @@ static enum xnn_status reshape_slice_nd(
     }
     if (offsets[i] >= input_shape[i]) {
       xnn_log_error(
-          "failed to create %s operator with %zu offsets[%zu]: 0 <= offset < %zu",
+          "failed to reshape %s operator with %zu offsets[%zu]: 0 <= offset < %zu",
           xnn_operator_type_to_string(slice_op->type), offsets[i], i, input_shape[i]);
       return xnn_status_unsupported_parameter;
     }
     if (sizes[i] > input_shape[i]) {
       xnn_log_error(
-          "failed to create %s operator with %zu sizes[%zu]: 0 <= size <= %zu",
+          "failed to reshape %s operator with %zu sizes[%zu]: 0 <= size <= %zu",
           xnn_operator_type_to_string(slice_op->type), sizes[i], i, input_shape[i]);
       return xnn_status_unsupported_parameter;
     }
     if (sizes[i] > 0 && offsets[i] + sizes[i] > input_shape[i]) {
       xnn_log_error(
-          "failed to create %s operator with %zu offsets[%zu] and %zu sizes[%zu]: offset + size <= %zu",
+          "failed to reshape %s operator with %zu offsets[%zu] and %zu sizes[%zu]: offset + size <= %zu",
           xnn_operator_type_to_string(slice_op->type), offsets[i], i, sizes[i], i, input_shape[i]);
       return xnn_status_unsupported_parameter;
     }
@@ -387,7 +387,7 @@ static enum xnn_status xnn_run_slice_nd(
   const struct xnn_unary_elementwise_config* copy_config = xnn_init_xx_copy_config();
   if (copy_config == NULL) {
     xnn_log_error(
-        "failed to create %s operator: unsupported hardware configuration",
+        "failed to run %s operator: unsupported hardware configuration",
         xnn_operator_type_to_string(operator_type));
     return xnn_status_unsupported_hardware;
   }
@@ -427,7 +427,7 @@ enum xnn_status xnn_run_slice_nd_x32(
 {
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error(
-      "failed to create %s operator: XNNPACK is not initialized",
+      "failed to run %s operator: XNNPACK is not initialized",
       xnn_operator_type_to_string(xnn_operator_type_slice_nd_x32));
     return xnn_status_uninitialized;
   }

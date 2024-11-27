@@ -58,8 +58,8 @@ BEGIN_FUNCTION xnn_qu8_gemm_minmax_rndnu_ukernel_1x8__asm_aarch32_neon_mlal_lane
         LDR         r5, [sp, 116]           // params
 
         # Load params values
-        VLD1.8     {d14[]}, [r5]!          // QU8 kernel_zero_point
-        ADD r5, r5, 3                      // skip padding
+        VLD1.8     {d14[]}, [r5]           // QU8 kernel_zero_point
+        ADD r5, r5, 4                      // skip padding
         VLDM        r5, {d12-d13}           // RNDNU params
         LDR         r7, [sp, 112]               // cn_stride
 

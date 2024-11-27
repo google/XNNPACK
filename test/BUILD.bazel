@@ -290,6 +290,7 @@ sh_test(
     "qu8_vlrelu",
     "f16_f32_vcvt",
     "f16_qs8_vcvt",
+    "f16_qu8_vcvt",
     "f32_f16_vcvt",
     "f32_qs8_vcvt",
     "f32_qu8_vcvt",
@@ -820,7 +821,6 @@ xnnpack_unit_test(
     name = "f32_vscaleextexp_test",
     srcs = [
         "f32-vscaleextexp.cc",
-        "vscaleextexp-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -1103,6 +1103,7 @@ xnnpack_unit_test(
 ) for kernel in [
     "x8_packw",
     "qs8_packw",
+    "qs8_qc4w_packw",
     "x16_packw",
     "x32_packw",
 ]]
@@ -1250,7 +1251,6 @@ xnnpack_unit_test(
     name = "convert_nc_test",
     srcs = [
         "convert-nc.cc",
-        "convert-operator-tester.h",
     ],
     deps = OPERATOR_TEST_DEPS + ["//:microkernels_h"],
 )
@@ -2155,7 +2155,12 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "microkernel_utils_test",
     srcs = ["microkernel-utils.cc"],
-    deps = ["//:microkernel_utils"],
+    deps = [
+        ":replicable_random_device",
+        "//:math",
+        "//:microkernel_utils",
+        "//:params",
+    ],
 )
 
 xnnpack_unit_test(

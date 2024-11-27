@@ -90,9 +90,11 @@ PROD_AARCH64_ASM_MICROKERNEL_SRCS = [
     "src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-cortex-a53-prfm.S",
     "src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-cortex-a75-prfm.S",
     "src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-cortex-a75.S",
+    "src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu16-asm-aarch64-neon-mlal-lane-cortex-a53-prfm.S",
     "src/qu8-igemm/gen/qu8-igemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-cortex-a53-prfm.S",
     "src/qu8-igemm/gen/qu8-igemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-cortex-a75-prfm.S",
     "src/qu8-igemm/gen/qu8-igemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-cortex-a75.S",
+    "src/qu8-igemm/gen/qu8-igemm-4x16-minmax-rndnu16-asm-aarch64-neon-mlal-lane-cortex-a53-prfm.S",
 ]
 
 NON_PROD_AARCH64_ASM_MICROKERNEL_SRCS = [
@@ -243,9 +245,11 @@ NON_PROD_AARCH64_ASM_MICROKERNEL_SRCS = [
     "src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-cortex-a53.S",
     "src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-ld64-prfm.S",
     "src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-ld64.S",
+    "src/qu8-gemm/gen/qu8-gemm-4x16-minmax-rndnu16-asm-aarch64-neon-mlal-lane-cortex-a53.S",
     "src/qu8-igemm/gen/qu8-igemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-cortex-a53.S",
     "src/qu8-igemm/gen/qu8-igemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-ld64-prfm.S",
     "src/qu8-igemm/gen/qu8-igemm-4x16-minmax-rndnu-asm-aarch64-neon-mlal-lane-ld64.S",
+    "src/qu8-igemm/gen/qu8-igemm-4x16-minmax-rndnu16-asm-aarch64-neon-mlal-lane-cortex-a53.S",
 ]
 
 AARCH64_ASM_MICROKERNEL_SRCS = PROD_AARCH64_ASM_MICROKERNEL_SRCS + NON_PROD_AARCH64_ASM_MICROKERNEL_SRCS

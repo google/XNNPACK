@@ -253,9 +253,6 @@ tools/generate-raddextexp-test.py --spec test/f32-raddextexp.yaml --output test/
 tools/generate-raddstoreexpminusmax-test.py --spec test/f16-raddstoreexpminusmax.yaml --output test/f16-raddstoreexpminusmax.cc &
 tools/generate-raddstoreexpminusmax-test.py --spec test/f32-raddstoreexpminusmax.yaml --output test/f32-raddstoreexpminusmax.cc &
 
-### Tests for VScaleExtExp micro-kernels
-tools/generate-vscaleextexp-test.py --spec test/f32-vscaleextexp.yaml --output test/f32-vscaleextexp.cc &
-
 ### Tests for VMulCAddC micro-kernels
 tools/generate-vmulcaddc-test.py --spec test/f16-vmulcaddc-minmax.yaml --output test/f16-vmulcaddc-minmax.cc &
 tools/generate-vmulcaddc-test.py --spec test/f32-vmulcaddc-minmax.yaml --output test/f32-vmulcaddc-minmax.cc &

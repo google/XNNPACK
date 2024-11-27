@@ -300,7 +300,7 @@ class BinaryElementwiseOperatorTester {
 
   size_t iterations() const { return this->iterations_; }
 
-  template <typename IsIntegral, typename T>
+  template <typename T>
   void Test(RunMode mode) {
     if (::testing::Test::IsSkipped()) {
       return;
@@ -407,21 +407,23 @@ class BinaryElementwiseOperatorTester {
         XNN_UNREACHABLE;
       }
 
-      ValidateResults(IsIntegral(), input1, input1_strides, input2,
-                      input2_strides, output, output_strides, output_dims);
+      ValidateResults(input1, input1_strides, input2, input2_strides, output,
+                      output_strides, output_dims);
     }
   }
 
+  // ValidateResults for quantized types.
   template <typename T>
   void ValidateResults(
-      std::false_type /*is_integral*/, const xnnpack::Buffer<T>& input1,
+      const xnnpack::Buffer<xnnpack::quantized<T>>& input1,
       const std::array<size_t, XNN_MAX_TENSOR_DIMS>& input1_strides,
-      const xnnpack::Buffer<T>& input2,
+      const xnnpack::Buffer<xnnpack::quantized<T>>& input2,
       const std::array<size_t, XNN_MAX_TENSOR_DIMS>& input2_strides,
-      const xnnpack::Buffer<T>& output,
+      const xnnpack::Buffer<xnnpack::quantized<T>>& output,
       const std::array<size_t, XNN_MAX_TENSOR_DIMS>& output_strides,
       const std::array<size_t, XNN_MAX_TENSOR_DIMS>& output_dims) {
     // Verify results.
+    using Q = xnnpack::quantized<T>;
     MinMaxLow limits = DatatypeMinMaxLow(datatype());
     for (size_t i = 0; i < output_dims[0]; i++) {
       for (size_t j = 0; j < output_dims[1]; j++) {
@@ -435,7 +437,8 @@ class BinaryElementwiseOperatorTester {
                     m * input1_strides[4] + n * input1_strides[5];
                 const float input1_value =
                     input1_scale() *
-                    (reinterpret_cast<const T*>(&input1[0])[input1_index] -
+                    (reinterpret_cast<const Q*>(&input1[0])[input1_index]
+                         .value -
                      input1_zero_point());
                 const size_t input2_index =
                     i * input2_strides[0] + j * input2_strides[1] +
@@ -443,26 +446,25 @@ class BinaryElementwiseOperatorTester {
                     m * input2_strides[4] + n * input2_strides[5];
                 const float input2_value =
                     input2_scale() *
-                    (reinterpret_cast<const T*>(&input2[0])[input2_index] -
+                    (reinterpret_cast<const Q*>(&input2[0])[input2_index]
+                         .value -
                      input2_zero_point());
-                float output_ref =
-                    Compute(input1_value, input2_value) / output_scale() +
-                    output_zero_point();
+                const float output_ref =
+                    (Compute(input1_value, input2_value) / output_scale() +
+                     output_zero_point());
                 if (std::isnan(output_ref) || output_ref < limits.low ||
                     output_ref > limits.max) {
                   // This is expected to overflow.
                 } else {
-                  const float tolerance =
-                      ComputeTolerance(datatype(), output_ref);
                   const size_t output_index =
                       i * output_strides[0] + j * output_strides[1] +
                       k * output_strides[2] + l * output_strides[3] +
                       m * output_strides[4] + n * output_strides[5];
-                  if (std::is_integral<T>::value) {
-                    output_ref = std::round(output_ref);
-                  }
                   const float output_value =
-                      reinterpret_cast<const T*>(&output[0])[output_index];
+                      reinterpret_cast<const Q*>(&output[0])[output_index]
+                          .value;
+                  const float tolerance =
+                      ComputeTolerance(datatype(), output_ref);
                   ASSERT_NEAR(output_value, output_ref, tolerance)
                       << "input1_value = " << input1_value << ", "
                       << "input2_value = " << input2_value << ", "
@@ -483,9 +485,11 @@ class BinaryElementwiseOperatorTester {
     }
   }
 
-  template <typename T>
+  // ValidateResults for integral (but non-quantized) types.
+  template <typename T,
+            typename std::enable_if<std::is_integral<T>::value>::type* = nullptr>
   void ValidateResults(
-      std::true_type /*is_integral*/, const xnnpack::Buffer<T>& input1,
+      const xnnpack::Buffer<T>& input1,
       const std::array<size_t, XNN_MAX_TENSOR_DIMS>& input1_strides,
       const xnnpack::Buffer<T>& input2,
       const std::array<size_t, XNN_MAX_TENSOR_DIMS>& input2_strides,
@@ -493,6 +497,7 @@ class BinaryElementwiseOperatorTester {
       const std::array<size_t, XNN_MAX_TENSOR_DIMS>& output_strides,
       const std::array<size_t, XNN_MAX_TENSOR_DIMS>& output_dims) {
     // Verify results.
+    static_assert(!xnnpack::is_quantized<T>::value);
     MinMaxLow limits = DatatypeMinMaxLow(datatype());
     for (size_t i = 0; i < output_dims[0]; i++) {
       for (size_t j = 0; j < output_dims[1]; j++) {
@@ -504,18 +509,22 @@ class BinaryElementwiseOperatorTester {
                     i * input1_strides[0] + j * input1_strides[1] +
                     k * input1_strides[2] + l * input1_strides[3] +
                     m * input1_strides[4] + n * input1_strides[5];
-                const int input1_value =
+                const int32_t input1_value =
                     reinterpret_cast<const T*>(&input1[0])[input1_index];
                 const size_t input2_index =
                     i * input2_strides[0] + j * input2_strides[1] +
                     k * input2_strides[2] + l * input2_strides[3] +
                     m * input2_strides[4] + n * input2_strides[5];
-                const int input2_value =
+                const int32_t input2_value =
                     reinterpret_cast<const T*>(&input2[0])[input2_index];
                 int output_ref = Compute(input1_value, input2_value);
-                if (output_ref < limits.low || output_ref > limits.max) {
+                if (std::isnan(output_ref) || output_ref < limits.low ||
+                    output_ref > limits.max) {
                   // This is expected to overflow.
                 } else {
+                  if (std::is_integral<T>::value) {
+                    output_ref = std::round(output_ref);
+                  }
                   const size_t output_index =
                       i * output_strides[0] + j * output_strides[1] +
                       k * output_strides[2] + l * output_strides[3] +
@@ -523,6 +532,65 @@ class BinaryElementwiseOperatorTester {
                   const int output_value =
                       reinterpret_cast<const T*>(&output[0])[output_index];
                   ASSERT_EQ(output_value, output_ref)
+                      << "input1_value = " << input1_value << ", "
+                      << "input2_value = " << input2_value << ", "
+                      << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k
+                      << ", " << l << ", " << m << ", " << n << ")";
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // ValidateResults for all other types (float variants).
+  template <typename T,
+            typename std::enable_if<!std::is_integral<T>::value>::type* = nullptr>
+  void ValidateResults(
+      const xnnpack::Buffer<T>& input1,
+      const std::array<size_t, XNN_MAX_TENSOR_DIMS>& input1_strides,
+      const xnnpack::Buffer<T>& input2,
+      const std::array<size_t, XNN_MAX_TENSOR_DIMS>& input2_strides,
+      const xnnpack::Buffer<T>& output,
+      const std::array<size_t, XNN_MAX_TENSOR_DIMS>& output_strides,
+      const std::array<size_t, XNN_MAX_TENSOR_DIMS>& output_dims) {
+    // Verify results.
+    static_assert(!xnnpack::is_quantized<T>::value);
+    MinMaxLow limits = DatatypeMinMaxLow(datatype());
+    for (size_t i = 0; i < output_dims[0]; i++) {
+      for (size_t j = 0; j < output_dims[1]; j++) {
+        for (size_t k = 0; k < output_dims[2]; k++) {
+          for (size_t l = 0; l < output_dims[3]; l++) {
+            for (size_t m = 0; m < output_dims[4]; m++) {
+              for (size_t n = 0; n < output_dims[5]; n++) {
+                const size_t input1_index =
+                    i * input1_strides[0] + j * input1_strides[1] +
+                    k * input1_strides[2] + l * input1_strides[3] +
+                    m * input1_strides[4] + n * input1_strides[5];
+                const float input1_value =
+                    reinterpret_cast<const T*>(&input1[0])[input1_index];
+                const size_t input2_index =
+                    i * input2_strides[0] + j * input2_strides[1] +
+                    k * input2_strides[2] + l * input2_strides[3] +
+                    m * input2_strides[4] + n * input2_strides[5];
+                const float input2_value =
+                    reinterpret_cast<const T*>(&input2[0])[input2_index];
+                float output_ref = Compute(input1_value, input2_value);
+                if (std::isnan(output_ref) || output_ref < limits.low ||
+                    output_ref > limits.max) {
+                  // This is expected to overflow.
+                } else {
+                  const size_t output_index =
+                      i * output_strides[0] + j * output_strides[1] +
+                      k * output_strides[2] + l * output_strides[3] +
+                      m * output_strides[4] + n * output_strides[5];
+                  const float output_value =
+                      reinterpret_cast<const T*>(&output[0])[output_index];
+                  const float tolerance =
+                      ComputeTolerance(datatype(), output_ref);
+                  ASSERT_NEAR(output_value, output_ref, tolerance)
                       << "input1_value = " << input1_value << ", "
                       << "input2_value = " << input2_value << ", "
                       << "(i, j, k, l, m, n) = (" << i << ", " << j << ", " << k
@@ -586,22 +654,22 @@ void RunBinaryOpTester(RunMode run_mode,
         .input2_shape(RandomBroadcast(rng, output_shape));
     switch (tester.datatype()) {
       case xnn_datatype_fp16:
-        tester.Test<std::false_type /*IsIntegral*/, xnn_float16>(run_mode);
+        tester.Test<xnn_float16>(run_mode);
         break;
       case xnn_datatype_bf16:
-        tester.Test<std::false_type /*IsIntegral*/, xnn_bfloat16>(run_mode);
+        tester.Test<xnn_bfloat16>(run_mode);
         break;
       case xnn_datatype_fp32:
-        tester.Test<std::false_type /*IsIntegral*/, float>(run_mode);
+        tester.Test<float>(run_mode);
         break;
       case xnn_datatype_int32:
-        tester.Test<std::true_type /*IsIntegral*/, int32_t>(run_mode);
+        tester.Test<int32_t>(run_mode);
         break;
       case xnn_datatype_quint8:
-        tester.Test<std::false_type /*IsIntegral*/, uint8_t>(run_mode);
+        tester.Test<xnnpack::quantized<uint8_t>>(run_mode);
         break;
       case xnn_datatype_qint8:
-        tester.Test<std::false_type /*IsIntegral*/, int8_t>(run_mode);
+        tester.Test<xnnpack::quantized<int8_t>>(run_mode);
         break;
       default:
         XNN_UNREACHABLE;

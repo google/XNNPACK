@@ -19,10 +19,11 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/buffer.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
-#include "xnnpack/operator.h"
 #include "xnnpack/operator-utils.h"
+#include "xnnpack/operator.h"
 #include "replicable_random_device.h"
 #include "unary-ops.h"
 
@@ -130,11 +131,7 @@ struct Param {
   RunMode run_mode;
 };
 
-// These template parameters only exist to allow us to instantiate a subset of
-// the test suite at a time. We only want to try to run the quantized tests for
-// datatypes that are actually quantized.
-template <bool InputQuantized = false, bool OutputQuantized = false>
-class UnaryNCTestT : public testing::TestWithParam<Param> {
+class UnaryNCTest : public testing::TestWithParam<Param> {
  public:
   xnnpack::ReplicableRandomDevice rng_;
 
@@ -152,11 +149,13 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
     const UnaryOpInfo* op_info = GetUnaryOpInfo(unary_op);
     const xnn_unary_params op_params = op_info->DefaultParams();
     xnn_quantization_params input_quantization =
-        InputQuantized ? test_params.input_quantization
-                       : op_info->InputQuantizationParams(input_datatype);
+        xnnpack::is_quantized<In>::value
+            ? test_params.input_quantization
+            : op_info->InputQuantizationParams(input_datatype);
     xnn_quantization_params output_quantization =
-        OutputQuantized ? test_params.output_quantization
-                        : op_info->OutputQuantizationParams(output_datatype);
+        xnnpack::is_quantized<Out>::value
+            ? test_params.output_quantization
+            : op_info->OutputQuantizationParams(output_datatype);
     op_info->InputQuantizationParams(input_datatype);
 
     Interval domain = op_info->Domain(input_datatype);
@@ -258,10 +257,10 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
         RunUnaryTest<In, int32_t>(test_params, param);
         break;
       case xnn_datatype_quint8:
-        RunUnaryTest<In, uint8_t>(test_params, param);
+        RunUnaryTest<In, xnnpack::quantized<uint8_t>>(test_params, param);
         break;
       case xnn_datatype_qint8:
-        RunUnaryTest<In, int8_t>(test_params, param);
+        RunUnaryTest<In, xnnpack::quantized<int8_t>>(test_params, param);
         break;
       default:
         XNN_UNREACHABLE;
@@ -283,10 +282,10 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
         RunUnaryTest<int32_t>(test_params, param);
         break;
       case xnn_datatype_quint8:
-        RunUnaryTest<uint8_t>(test_params, param);
+        RunUnaryTest<xnnpack::quantized<uint8_t>>(test_params, param);
         break;
       case xnn_datatype_qint8:
-        RunUnaryTest<int8_t>(test_params, param);
+        RunUnaryTest<xnnpack::quantized<int8_t>>(test_params, param);
         break;
       default:
         XNN_UNREACHABLE;
@@ -294,11 +293,8 @@ class UnaryNCTestT : public testing::TestWithParam<Param> {
   }
 };
 
-using UnaryNCTest = UnaryNCTestT<>;
-using UnaryNCTest_InputQuantized =
-    UnaryNCTestT</*InputQuantized=*/true, /*OutputQuantized=*/false>;
-using UnaryNCTest_OutputQuantized =
-    UnaryNCTestT</*InputQuantized=*/false, /*OutputQuantized=*/true>;
+using UnaryNCTest_InputQuantized = UnaryNCTest;
+using UnaryNCTest_OutputQuantized = UnaryNCTest;
 
 TEST_P(UnaryNCTest, UnitBatch) {
   for (size_t c = 0; c < 100; c += 15) {

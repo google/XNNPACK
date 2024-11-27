@@ -19,6 +19,7 @@
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microkernel-type.h"
+#include "xnnpack/microkernel-utils.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/operator-type.h"
@@ -34,7 +35,6 @@ enum xnn_status create_batch_matrix_multiply_nc(
   size_t params_size,
   const struct xnn_gemm_config* gemm_config,
   const struct gemm_fused_ukernels* gemm_ukernels,
-  xnn_packw_gemm_gio_ukernel_fn pack_gemm_gio,
   enum xnn_operator_type operator_type,
   xnn_operator_t* batch_matrix_multiply_op_out)
 {
@@ -76,7 +76,7 @@ enum xnn_status create_batch_matrix_multiply_nc(
   if (batch_matrix_multiply_op->flags & XNN_FLAG_TRANSPOSE_B) {
     batch_matrix_multiply_op->ukernel.gemm.packw_gemm_goi = gemm_config->pack_gemm_goi;
   } else {
-    batch_matrix_multiply_op->ukernel.gemm.packw_gemm_gio = pack_gemm_gio;
+    batch_matrix_multiply_op->ukernel.gemm.packw_gemm_gio = gemm_config->pack_gemm_gio;
   }
 
   batch_matrix_multiply_op->state = xnn_run_state_invalid;
@@ -110,7 +110,6 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_f32(
 
   return create_batch_matrix_multiply_nc(
       flags, &params, sizeof(params), gemm_config, gemm_ukernels,
-      (xnn_packw_gemm_gio_ukernel_fn)xnn_pack_f32_gemm_gio_w,
       xnn_operator_type_batch_matrix_multiply_nc_f32,
       batch_matrix_multiply_op_out);
 }
@@ -249,7 +248,6 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_f16(
     flags,
     &params, sizeof(params),
     gemm_config, gemm_ukernels,
-    (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_f16_gemm_gio_w,
     xnn_operator_type_batch_matrix_multiply_nc_f16,
     batch_matrix_multiply_op_out);
 }
@@ -281,7 +279,6 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_qd8_f32_qc8w(
 
   enum xnn_status status = create_batch_matrix_multiply_nc(
       flags, &params, sizeof(params), gemm_config, gemm_ukernels,
-      (xnn_packw_gemm_gio_ukernel_fn)gemm_config->pack_gemm_gio,
       xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w,
       batch_matrix_multiply_op_out);
   if (status != xnn_status_success) {
@@ -631,17 +628,9 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
   memcpy(&batch_matrix_multiply_op->context.gemm.gemm.gemm.params, params, params_size);
   batch_matrix_multiply_op->context.gemm.gemm.gemm.fused_params = &batch_matrix_multiply_op->context.gemm.gemm.gemm.params;
 
-  size_t nc = n;
-  if (num_threads > 1) {
-    const size_t num_other_tiles = divide_round_up(m, mr);
-    const size_t target_tiles_per_thread = 5;
-    const size_t max_nc = divide_round_up(n * num_other_tiles, num_threads * target_tiles_per_thread);
-    if (max_nc < nc) {
-      nc = min(nc, divide_round_up(nc, max_nc * nr) * nr);
-    }
-  }
+  size_t nc = xnn_gemm_best_nc(batch_size_c, m, n, mr, nr, num_threads);
 
-  #if XNN_MAX_UARCH_TYPES > 1
+#if XNN_MAX_UARCH_TYPES > 1
     if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
       gemm_compute->type = xnn_parallelization_type_3d_tile_2d_with_uarch;
       gemm_compute->task_3d_tile_2d_with_id =

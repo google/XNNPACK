@@ -31,40 +31,56 @@ tools/xngen src/x8-packw/kr-scalar.c.in -D NR=16 -D KR=8 -D TYPE=int8_t -D IZP=0
 tools/xngen src/x8-packw/kr-scalar.c.in -D NR=8  -D KR=8 -D TYPE=int8_t -D IZP=128 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x8c8-gemm-goi-scalar.c &
 tools/xngen src/x8-packw/kr-scalar.c.in -D NR=16 -D KR=8 -D TYPE=int8_t -D IZP=128 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x16c8-gemm-goi-scalar.c &
 
+### GIO packing
+tools/xngen src/x8-packw/kr-gio-scalar.c.in -D NR=8  -D KR=8 -D DATATYPE=X8 -D TYPE=int8_t -D IZP=0   -o src/x8-packw/gen/x8-packw-x8c8-gemm-gio-scalar.c &
+
+tools/xngen src/x8-packw/kr-gio-scalar.c.in -D NR=8  -D KR=4 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x8c4-gemm-gio-scalar.c &
+tools/xngen src/x8-packw/kr-gio-scalar.c.in -D NR=16 -D KR=4 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x16c4-gemm-gio-scalar.c &
+tools/xngen src/x8-packw/kr-gio-scalar.c.in -D NR=32 -D KR=4 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x32c4-gemm-gio-scalar.c &
+tools/xngen src/x8-packw/kr-gio-scalar.c.in -D NR=64 -D KR=4 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x64c4-gemm-gio-scalar.c &
+
+tools/xngen src/x8-packw/kr-gio-scalar.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-gio-scalar.c &
+tools/xngen src/x8-packw/kr-gio-scalar.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -o src/qs8-packw/gen/qs8-packw-x16c8-gemm-gio-scalar.c &
+
+tools/xngen src/x8-packw/kr-gio-scalar.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128   -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x8c8-gemm-gio-scalar.c &
+tools/xngen src/x8-packw/kr-gio-scalar.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128   -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x16c8-gemm-gio-scalar.c &
+
 ### AVXVNNI micro-kernels
 ### C8 packing
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D PREFETCH=0 -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-avxvnni.c &
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D PREFETCH=1 -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-avxvnni-prfm.c &
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -D AVX=2  -D PREFETCH=0 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x8c8-gemm-goi-avxvnni.c &
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -D AVX=2  -D PREFETCH=1 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x8c8-gemm-goi-avxvnni-prfm.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT= -D PREFETCH=0 -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-avxvnni.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT= -D PREFETCH=1 -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-avxvnni-prfm.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -D AVX=2  -D VARIANT= -D PREFETCH=0 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x8c8-gemm-goi-avxvnni.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -D AVX=2  -D VARIANT= -D PREFETCH=1 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x8c8-gemm-goi-avxvnni-prfm.c &
 
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=10 -D PREFETCH=0 -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-avx256vnni.c &
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=10 -D PREFETCH=1 -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-avx256vnni-prfm.c &
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -D AVX=10 -D PREFETCH=0 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x8c8-gemm-goi-avx256vnni.c &
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -D AVX=10 -D PREFETCH=1 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x8c8-gemm-goi-avx256vnni-prfm.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT= -D PREFETCH=0 -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-avx256vnni.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT= -D PREFETCH=1 -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-avx256vnni-prfm.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -D AVX=10 -D VARIANT= -D PREFETCH=0 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x8c8-gemm-goi-avx256vnni.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -D AVX=10 -D VARIANT= -D PREFETCH=1 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x8c8-gemm-goi-avx256vnni-prfm.c &
 
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D PREFETCH=0 -o src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-avxvnni.c &
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D PREFETCH=1 -o src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-avxvnni-prfm.c &
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -D AVX=2  -D PREFETCH=0 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x16c8-gemm-goi-avxvnni.c &
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -D AVX=2  -D PREFETCH=1 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x16c8-gemm-goi-avxvnni-prfm.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT= -D PREFETCH=0 -o src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-avxvnni.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT= -D PREFETCH=1 -o src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-avxvnni-prfm.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -D AVX=2  -D VARIANT= -D PREFETCH=0 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x16c8-gemm-goi-avxvnni.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -D AVX=2  -D VARIANT= -D PREFETCH=1 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x16c8-gemm-goi-avxvnni-prfm.c &
 
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=10 -D PREFETCH=0 -o src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-avx256vnni.c &
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=10 -D PREFETCH=1 -o src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-avx256vnni-prfm.c &
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -D AVX=10 -D PREFETCH=0 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x16c8-gemm-goi-avx256vnni.c &
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -D AVX=10 -D PREFETCH=1 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x16c8-gemm-goi-avx256vnni-prfm.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT= -D PREFETCH=0 -o src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-avx256vnni.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT= -D PREFETCH=1 -o src/qs8-packw/gen/qs8-packw-x16c8-gemm-goi-avx256vnni-prfm.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -D AVX=10 -D VARIANT= -D PREFETCH=0 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x16c8-gemm-goi-avx256vnni.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=128 -D AVX=10 -D VARIANT= -D PREFETCH=1 -o src/qs8-qu8-packw/gen/qs8-qu8-packw-x16c8-gemm-goi-avx256vnni-prfm.c &
 
 # X8 packing
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0   -D AVX=2  -D PREFETCH=0 -o src/x8-packw/gen/x8-packw-x8c8-gemm-goi-avx2.c &
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0   -D AVX=2  -D PREFETCH=1 -o src/x8-packw/gen/x8-packw-x8c8-gemm-goi-avx2-prfm.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT= -D PREFETCH=0 -o src/x8-packw/gen/x8-packw-x8c8-gemm-goi-avx2.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT= -D PREFETCH=1 -o src/x8-packw/gen/x8-packw-x8c8-gemm-goi-avx2-prfm.c &
 
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0   -D AVX=10 -D PREFETCH=0 -o src/x8-packw/gen/x8-packw-x8c8-gemm-goi-avx256skx.c &
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0   -D AVX=10 -D PREFETCH=1 -o src/x8-packw/gen/x8-packw-x8c8-gemm-goi-avx256skx-prfm.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT= -D PREFETCH=0 -o src/x8-packw/gen/x8-packw-x8c8-gemm-goi-avx256skx.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT= -D PREFETCH=1 -o src/x8-packw/gen/x8-packw-x8c8-gemm-goi-avx256skx-prfm.c &
 
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0   -D AVX=2  -D PREFETCH=0 -o src/x8-packw/gen/x8-packw-x16c8-gemm-goi-avx2.c &
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0   -D AVX=2  -D PREFETCH=1 -o src/x8-packw/gen/x8-packw-x16c8-gemm-goi-avx2-prfm.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT= -D PREFETCH=0 -o src/x8-packw/gen/x8-packw-x16c8-gemm-goi-avx2.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT= -D PREFETCH=1 -o src/x8-packw/gen/x8-packw-x16c8-gemm-goi-avx2-prfm.c &
 
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0   -D AVX=10 -D PREFETCH=0 -o src/x8-packw/gen/x8-packw-x16c8-gemm-goi-avx256skx.c &
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0   -D AVX=10 -D PREFETCH=1 -o src/x8-packw/gen/x8-packw-x16c8-gemm-goi-avx256skx-prfm.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT= -D PREFETCH=0 -o src/x8-packw/gen/x8-packw-x16c8-gemm-goi-avx256skx.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=X8  -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT= -D PREFETCH=1 -o src/x8-packw/gen/x8-packw-x16c8-gemm-goi-avx256skx-prfm.c &
+
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT=MADD -D PREFETCH=0 -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-avx2-madd.c &
 
 ### WAsm Relaxed SIMD
 ### C8 packing

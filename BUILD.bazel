@@ -64,6 +64,7 @@ MICROKERNEL_DEFS = [
     "src/f16-f32-vcvt/f16-f32-vcvt.h",
     "src/f16-maxpool/f16-maxpool-minmax.h",
     "src/f16-pavgpool/f16-pavgpool-minmax.h",
+    "src/f16-qu8-vcvt/f16-qu8-vcvt.h",
     "src/f16-qs8-vcvt/f16-qs8-vcvt.h",
     "src/f16-vabs/f16-vabs.h",
     "src/f16-vbinary/f16-vadd.h",
@@ -149,6 +150,7 @@ MICROKERNEL_DEFS = [
     "src/f32-vrnd/f32-vrndz.h",
     "src/f32-vrsqrt/f32-vrsqrt.h",
     "src/f32-vscaleexpminusmax/f32-vscaleexpminusmax.h",
+    "src/f32-vscaleextexp/f32-vscaleextexp.h",
     "src/f32-vsigmoid/f32-vsigmoid.h",
     "src/f32-vsqr/f32-vsqr.h",
     "src/f32-vsqrt/f32-vsqrt.h",
@@ -160,6 +162,7 @@ MICROKERNEL_DEFS = [
     "src/qs8-f16-vcvt/qs8-f16-vcvt.h",
     "src/qs8-f32-vcvt/qs8-f32-vcvt.h",
     "src/qs8-packw/qs8-packw.h",
+    "src/qs8-qc4w-packw/qs8-qc4w-packw.h",
     "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-multipass-fp32.h",
     "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-unipass-fp32.h",
     "src/qs8-vadd/qs8-vadd-minmax.h",
@@ -558,6 +561,7 @@ xnnpack_cc_library(
 xnnpack_cxx_library(
     name = "buffer",
     hdrs = ["src/xnnpack/buffer.h"],
+    deps = [":datatype"],
 )
 
 xnnpack_cc_library(
@@ -793,11 +797,6 @@ xnnpack_cxx_library(
         ":xnnpack_h",
     ] + xnnpack_if_kleidiai_enabled([
         "@KleidiAI//kai/ukernels/matmul",
-        "@KleidiAI//kai/ukernels/matmul:rhs_pack_kxn_qsi4cxp_qs4cxs1s0",
-        "@KleidiAI//kai/ukernels/matmul:rhs_pack_nxk_qsi4cxp_qs4cxs1s0",
-        "@KleidiAI//kai/ukernels/matmul:rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme",
-        "@KleidiAI//kai/ukernels/matmul:rhs_pack_kxn_qsi4c32p_qsu4c32s1s0",
-        "@KleidiAI//kai/ukernels/matmul:rhs_pack_nxk_qsi4c32p_qsu4c32s1s0",
     ]),
 )
 
@@ -949,6 +948,7 @@ xnnpack_cxx_library(
     deps = [
         ":common",
         ":config_hdrs",
+        ":datatype",
         ":hardware_config",
         ":math",
         ":xnnpack_h",

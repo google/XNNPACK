@@ -10,13 +10,16 @@
 #include <cstdint>
 #include <limits>
 
+#include "xnnpack/datatype.h"
+
 namespace xnnpack {
 
 // A cast that:
 // - Rounds to nearest integer
 // - Replaces NaN with 0
 // - Saturates to the bounds of the result type
-template <typename Result>
+template <typename Result, typename std::enable_if<!xnnpack::is_quantized<
+                               Result>::value>::type* = nullptr>
 Result round_float_to_int(float x) {
   x = std::isnan(x) ? 0.0f : x;
   x = std::round(x);
@@ -29,6 +32,13 @@ Result round_float_to_int(float x) {
   x = std::max<float>(x, std::numeric_limits<Result>::min());
   x = std::min<float>(x, std::numeric_limits<Result>::max() - half_mantissa);
   return static_cast<Result>(x);
+}
+
+template <typename Result,
+          typename std::enable_if<xnnpack::is_quantized<Result>::value>::type* =
+              nullptr>
+Result round_float_to_int(float x) {
+  return round_float_to_int<typename Result::type>(x);
 }
 
 template <typename T>
@@ -82,7 +92,7 @@ T euclidean_mod(T a, T b) {
 template <typename T>
 T integer_pow(T a, T b) {
   if (b < 0) {
-    return euclidean_div(1, integer_pow(a, -b));
+    return euclidean_div<T>(1, integer_pow(a, -b));
   }
   T result = 1;
   for (; b; b >>= 1) {

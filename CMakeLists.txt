@@ -1465,6 +1465,7 @@ IF(XNNPACK_BUILD_TESTS)
       x8-lut
       x8-packw
       qs8-packw
+      qs8-qc4w-packw
       x8-zip
       xN-transpose
       xx-fill

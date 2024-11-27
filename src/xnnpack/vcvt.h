@@ -19,15 +19,16 @@ extern "C" {
   XNN_INTERNAL void ukernel(size_t n, const type_in* input, type_out* output, const params_type* params);
 #include "f16-f32-vcvt/f16-f32-vcvt.h"
 #include "f16-qs8-vcvt/f16-qs8-vcvt.h"
+#include "f16-qu8-vcvt/f16-qu8-vcvt.h"
 #include "f32-f16-vcvt/f32-f16-vcvt.h"
 #include "f32-qs8-vcvt/f32-qs8-vcvt.h"
 #include "f32-qu8-vcvt/f32-qu8-vcvt.h"
 #include "qs8-f16-vcvt/qs8-f16-vcvt.h"
 #include "qs8-f32-vcvt/qs8-f32-vcvt.h"
-#include "qu8-f32-vcvt/qu8-f32-vcvt.h"
-#include "s32-f32-vcvt/s32-f32-vcvt.h"
 #include "qs8-vcvt/qs8-vcvt.h"
+#include "qu8-f32-vcvt/qu8-f32-vcvt.h"
 #include "qu8-vcvt/qu8-vcvt.h"
+#include "s32-f32-vcvt/s32-f32-vcvt.h"
 #undef XNN_CVT_UKERNEL_WITH_PARAMS
 
 #ifdef __cplusplus

@@ -26,6 +26,7 @@
 
 using TestInfo = LeakyReLU;
 
+#define XNN_QUANTIZED(T) xnnpack::quantized<T>
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)                    \
   TEST(ukernel, batch_eq) { TestBatchEq<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }               \
   TEST(ukernel, batch_div) { TestBatchDiv<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }             \
@@ -41,7 +42,7 @@ TEST(ukernel, negative_slope) {                                                 
     params.leaky_relu.negative_slope = negative_slope;                                                                               \
     VUnaryMicrokernelTester()                                                                                                        \
       .batch_size(batch_size)                                                                                                        \
-      .Test<TestInfo>(ukernel, init_params, params);                                                                                 \
+      .Test<TestInfo, datatype, datatype>(ukernel, init_params, params);                                                             \
   }                                                                                                                                  \
 }                                                                                                                                    \
 TEST(ukernel, input_scale) { TestInputScale<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }           \
@@ -50,3 +51,4 @@ TEST(ukernel, input_zero_point) { TestInputZeroPoint<TestInfo, datatype, datatyp
 TEST(ukernel, output_zero_point) { TestOutputZeroPoint<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }
 #include "qs8-vlrelu/qs8-vlrelu.h"
 #undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_QUANTIZED

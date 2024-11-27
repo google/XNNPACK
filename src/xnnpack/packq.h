@@ -23,10 +23,9 @@ extern "C" {
 // `kai_run_lhs_quant_pack_qai8dxp_f32` as a reference scalar implementation.
 
 inline static size_t k_roundedup(size_t k, size_t kr, size_t sr) {
-  // Since we pack a float and int32 value at the end of the row,
-  // we must make sure that k is a multiple of 4 for memory alignment.
-  size_t kr_sr_roundedup4 = round_up(kr * sr, 4);
-  return round_up(k, kr_sr_roundedup4);
+  // Round up k to be a multiple of 32.
+  size_t kai_k_multiple_of = 32;
+  return round_up(k, kai_k_multiple_of);
 }
 
 inline static size_t lhs_packed_stride(size_t k, size_t mr_packed, size_t kr,

@@ -416,7 +416,7 @@ jobs:
         with:
           path: "/home/runner/.cache/bazel"
           key: ${{ github.job }}-${{ github.sha }}
-  bazel-linux-aarch64:
+  bazel-linux-aarch64-clang18:
     runs-on: arm-ubuntu-arm-22.04-4core
     timeout-minutes: 60
     steps:
@@ -448,6 +448,59 @@ jobs:
         env:
           CC: clang-18
           CXX: clang++-18
+        run: |
+          # We only test the KleidiAI integration for now.
+          bazel test \
+            --test_output=all \
+            --test_filter=*QP8* \
+            test:qp8_f32_qc4w_gemm_minmax_test \
+            test:fully_connected_nc_test \
+            test:fully_connected_test
+        working-directory: ${{ github.workspace }}
+      - name: Compress disk cache
+        # Bazel's `--disk-cache` currently grows without bounds, so we remove files
+        # that haven't been accessed in 7+ days manually.
+        if: ${{ inputs.update-caches }}
+        run: find $HOME/.cache/bazel -type f -atime +7 -delete
+      - name: Save bazel cache
+        if: ${{ inputs.update-caches }}
+        uses: actions/cache/save@v4
+        with:
+          path: "/home/runner/.cache/bazel"
+          key: ${{ github.job }}-${{ github.sha }}
+  bazel-linux-aarch64-gcc13:
+    # This ensures we have solid test coverage for _Float16
+    runs-on: arm-ubuntu-arm-22.04-4core
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install gcc-13
+        # Pull in gcc-13 from the ubuntu-23.10 repository since it is not available
+        # for ubuntu-22.04.
+        working-directory: ${{ github.workspace }}
+        run: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+          sudo apt update
+          sudo apt install gcc-13 g++-13
+      - name: Restore bazel cache
+        uses: actions/cache/restore@v4
+        with:
+          path: "/home/runner/.cache/bazel"
+          key: ${{ github.job }}
+          restore-keys: |
+            ${{ github.job }}-
+      - name: Build tests
+        env:
+          CC: gcc-13
+          CXX: g++-13
+        run: |
+            bazel build test:all
+        working-directory: ${{ github.workspace }}
+      - name: Run tests
+        if: ${{ inputs.run-tests }}
+        env:
+          CC: gcc-13
+          CXX: g++-13
         run: |
           # We only test the KleidiAI integration for now.
           bazel test \

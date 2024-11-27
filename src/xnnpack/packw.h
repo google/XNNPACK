@@ -31,9 +31,26 @@ extern "C" {
       size_t extra_bytes,                                                 \
       const void* params);
 
+#define XNN_GIO_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale) \
+  XNN_INTERNAL void ukernel(                                                  \
+      size_t g,                                                               \
+      size_t nc,                                                              \
+      size_t kc,                                                              \
+      size_t nr,                                                              \
+      size_t kr,                                                              \
+      size_t sr,                                                              \
+      size_t k_stride,                                                        \
+      const int8_t* weights,                                                  \
+      const uint32_t* bias,                                                   \
+      const void* scale,                                                      \
+      int8_t* packed_weights,                                                 \
+      size_t extra_bytes,                                                     \
+      const void* params);
+
 #include "x8-packw/x8-packw.h"
 
 #undef XNN_UKERNEL
+#undef XNN_GIO_UKERNEL
 
 #define XNN_QS8_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale, izp) \
   XNN_INTERNAL void ukernel(                                                       \
@@ -50,9 +67,26 @@ extern "C" {
       size_t extra_bytes,                                                          \
       const void* params);
 
+#define XNN_QS8_GIO_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale, izp)  \
+  XNN_INTERNAL void ukernel(                                                            \
+      size_t g,                                                                         \
+      size_t nc,                                                                        \
+      size_t kc,                                                                        \
+      size_t nr,                                                                        \
+      size_t kr,                                                                        \
+      size_t sr,                                                                        \
+      size_t k_stride,                                                                  \
+      const int8_t* weights,                                                            \
+      const int32_t* bias,                                                              \
+      const void* scale,                                                                \
+      int8_t* packed_weights,                                                           \
+      size_t extra_bytes,                                                               \
+      const void* params);
+
 #include "qs8-packw/qs8-packw.h"
 
 #undef XNN_QS8_UKERNEL
+#undef XNN_QS8_GIO_UKERNEL
 
 #define XNN_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale) \
   XNN_INTERNAL void ukernel(                                              \
@@ -108,6 +142,26 @@ extern "C" {
 
 #undef XNN_UKERNEL
 #undef XNN_GIO_UKERNEL
+
+#define XNN_UKERNEL(arch_flags, ukernel, nr_, kr_, sr_, kblock, nr_scale) \
+  XNN_INTERNAL void ukernel(                                              \
+      size_t g,                                                           \
+      size_t nc,                                                          \
+      size_t kc,                                                          \
+      size_t nr,                                                          \
+      size_t kr,                                                          \
+      size_t sr,                                                          \
+      const uint8_t* k,                                                   \
+      const int32_t* b,                                                   \
+      const float* scale,                                                 \
+      void* packed_weights,                                               \
+      size_t extra_bytes,                                                 \
+      const struct xnn_qs8_qc4w_packing_params* params);
+
+#include "qs8-qc4w-packw/qs8-qc4w-packw.h"
+
+#undef XNN_UKERNEL
+
 
 #ifdef __cplusplus
 }  // extern "C"

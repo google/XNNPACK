@@ -3,11 +3,25 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include "xnnpack/microkernel-utils.h"
+
 #include <assert.h>
 #include <stddef.h>
 
 #include "xnnpack/math.h"
-#include "xnnpack/microkernel-utils.h"
+
+size_t xnn_gemm_best_nc(size_t num_groups, size_t m, size_t n, size_t mr,
+                        size_t nr, size_t num_threads) {
+  size_t nc = n;
+  if (num_threads > 1) {
+    const size_t num_tile_rows = divide_round_up(m, mr) * num_groups;
+    nc = min(max(1, (n * num_tile_rows) /
+                    (nr * num_threads * XNN_GEMM_TILES_PER_THREAD)) *
+         nr, n);
+  }
+
+  return nc;
+}
 
 static size_t dwconv_num_middle_pass(
   size_t kernel_size,

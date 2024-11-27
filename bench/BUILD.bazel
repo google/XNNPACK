@@ -517,6 +517,19 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "qs8_qc4w_packw_bench",
+    srcs = [
+        "qs8-qc4w-packw.cc",
+    ],
+    tags = xnnpack_slow_benchmark_tags(),
+    deps = MICROKERNEL_BENCHMARK_DEPS + [
+        ":bgemm",
+        ":packw_benchmark",
+        "//:allocator",
+    ],
+)
+
+xnnpack_benchmark(
     name = "x16_packw_bench",
     srcs = [
         "x16-packw.cc",
@@ -575,6 +588,7 @@ xnnpack_benchmark(
     tags = xnnpack_slow_benchmark_tags() + ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps() + [
         "//test:next_prime",
+        "@cpuinfo",
         "@pthreadpool",
     ],
 )

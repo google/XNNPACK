@@ -64,9 +64,9 @@ void rbinaryc_ukernel_unquantized(size_t batch_size_bytes, const T* a,
   }
 }
 
-template <typename T, typename Operator>
-const xnn_binary_elementwise_config* get_config(
-    std::false_type = std::false_type()) {
+template <typename Operator, typename T>
+const xnn_binary_elementwise_config* get_config(T) {
+  static_assert(!xnnpack::is_quantized<T>::value);
   static xnn_binary_elementwise_config config = {
       (xnn_vbinary_ukernel_fn)binary_ukernel_unquantized<T, Operator>,
       (xnn_vbinary_ukernel_fn)binaryc_ukernel_unquantized<T, Operator>,
@@ -139,12 +139,15 @@ size_t init_quantized_binary_op(
   return sizeof(params->reference);
 }
 
-template <typename T, typename Operator>
-const xnn_binary_elementwise_config* get_config(std::true_type) {
+template <typename Operator, typename T>
+const xnn_binary_elementwise_config* get_config(xnnpack::quantized<T>) {
   static xnn_binary_elementwise_config config = {
-      (xnn_vbinary_ukernel_fn)binary_ukernel_quantized<T, Operator>,
-      (xnn_vbinary_ukernel_fn)binaryc_ukernel_quantized<T, Operator>,
-      (xnn_vbinary_ukernel_fn)rbinaryc_ukernel_quantized<T, Operator>,
+      (xnn_vbinary_ukernel_fn)
+          binary_ukernel_quantized<xnnpack::quantized<T>, Operator>,
+      (xnn_vbinary_ukernel_fn)
+          binaryc_ukernel_quantized<xnnpack::quantized<T>, Operator>,
+      (xnn_vbinary_ukernel_fn)
+          rbinaryc_ukernel_quantized<xnnpack::quantized<T>, Operator>,
       init_quantized_binary_op,
       /*element_tile=*/1,
   };
@@ -312,44 +315,44 @@ struct CopysignOp {
   T operator()(T a, T b) const { return copysign(a, b); }
 };
 
-#define DISPATCH_OPERATOR_FOR_DATATYPE(datatype, op)                         \
-  switch (datatype) {                                                        \
-    case xnn_datatype_fp32:                                                  \
-      return get_config<float, op<float>>();                                 \
-    case xnn_datatype_fp16:                                                  \
-      return get_config<xnn_float16, op<xnn_float16>>();                     \
-    case xnn_datatype_bf16:                                                  \
-      return get_config<xnn_bfloat16, op<xnn_bfloat16>>();                   \
-    case xnn_datatype_qint8:                                                 \
-      return get_config<int8_t, op<float>>(/*quantized=*/std::true_type());  \
-    case xnn_datatype_quint8:                                                \
-      return get_config<uint8_t, op<float>>(/*quantized=*/std::true_type()); \
-    case xnn_datatype_int32:                                                 \
-      return get_config<int32_t, op<int32_t>>();                             \
-    default:                                                                 \
-      return nullptr;                                                        \
+#define DISPATCH_OPERATOR_FOR_DATATYPE(datatype, op)               \
+  switch (datatype) {                                              \
+    case xnn_datatype_fp32:                                        \
+      return get_config<op<float>>(float());                       \
+    case xnn_datatype_fp16:                                        \
+      return get_config<op<xnn_float16>>(xnn_float16());           \
+    case xnn_datatype_bf16:                                        \
+      return get_config<op<xnn_bfloat16>>(xnn_bfloat16());         \
+    case xnn_datatype_qint8:                                       \
+      return get_config<op<float>>(xnnpack::quantized<int8_t>());  \
+    case xnn_datatype_quint8:                                      \
+      return get_config<op<float>>(xnnpack::quantized<uint8_t>()); \
+    case xnn_datatype_int32:                                       \
+      return get_config<op<int32_t>>(int32_t());                   \
+    default:                                                       \
+      return nullptr;                                              \
   }
 
-#define DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, op)                    \
-  switch (datatype) {                                                        \
-    case xnn_datatype_fp32:                                                  \
-      return get_config<float, op<float>>();                                 \
-    case xnn_datatype_fp16:                                                  \
-      return get_config<xnn_float16, op<xnn_float16>>();                     \
-    case xnn_datatype_bf16:                                                  \
-      return get_config<xnn_bfloat16, op<xnn_bfloat16>>();                   \
-    case xnn_datatype_qint8:                                                 \
-      return get_config<int8_t, op<float>>(/*quantized=*/std::true_type());  \
-    case xnn_datatype_quint8:                                                \
-      return get_config<uint8_t, op<float>>(/*quantized=*/std::true_type()); \
-    default:                                                                 \
-      return nullptr;                                                        \
+#define DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, op)          \
+  switch (datatype) {                                              \
+    case xnn_datatype_fp32:                                        \
+      return get_config<op<float>>(float());                       \
+    case xnn_datatype_fp16:                                        \
+      return get_config<op<xnn_float16>>(xnn_float16());           \
+    case xnn_datatype_bf16:                                        \
+      return get_config<op<xnn_bfloat16>>(xnn_bfloat16());         \
+    case xnn_datatype_qint8:                                       \
+      return get_config<op<float>>(xnnpack::quantized<int8_t>());  \
+    case xnn_datatype_quint8:                                      \
+      return get_config<op<float>>(xnnpack::quantized<uint8_t>()); \
+    default:                                                       \
+      return nullptr;                                              \
   }
 
 #define DISPATCH_OPERATOR_FOR_INTEGRAL_DATATYPE(datatype, op) \
   switch (datatype) {                                         \
     case xnn_datatype_int32:                                  \
-      return get_config<int32_t, op<int32_t>>();              \
+      return get_config<op<int32_t>>(int32_t());              \
     default:                                                  \
       return nullptr;                                         \
   }

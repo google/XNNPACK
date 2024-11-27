@@ -3,6 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 $assert NR % 8 == 0
+$SIMD_SIZE = 8
+$SIMD_TILE = NR // 8
 
 #include <assert.h>
 #include <stddef.h>
@@ -41,9 +43,9 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
   assert(weights != NULL);
   assert(packed_weights != NULL);
   static const int32_t mask_table[${NR*2}] = {
-    $for N in range(0,NR,8):
+    $for N in range(SIMD_TILE):
       -1, -1, -1, -1, -1, -1, -1, -1,
-    $for N in range(0,NR,8):
+    $for N in range(SIMD_TILE):
       0, 0, 0, 0, 0, 0, 0, 0,
   };
 
@@ -57,14 +59,14 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
 
     for (; n >= ${NR}; n -= ${NR}) {
       if XNN_LIKELY(b != NULL) {
-        $for N in range(0,NR,8):
-          const __m256 vb${N} = _mm256_loadu_ps(b + ${N});
-        $for N in range(0,NR,8):
-          _mm256_store_ps(packed_w + ${N}, vb${N});
+        $for N in range(SIMD_TILE):
+          const __m256 vb${N} = _mm256_loadu_ps(b + ${N*SIMD_SIZE});
+        $for N in range(SIMD_TILE):
+          _mm256_store_ps(packed_w + ${N*SIMD_SIZE}, vb${N});
         b += ${NR};
       } else {
-        $for N in range(0,NR,8):
-          _mm256_store_ps(packed_w + ${N}, vzero);
+        $for N in range(SIMD_TILE):
+          _mm256_store_ps(packed_w + ${N*SIMD_SIZE}, vzero);
       }
       packed_w += ${NR};
 
@@ -73,28 +75,28 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
         // KC main loop ${KBLOCK}x${NR}
         for (; k >= ${KBLOCK}; k -= ${KBLOCK}) {
           $for K in range(KBLOCK):
-            $for N in range(0,NR,8):
-              const __m256 v${N}_${K} = _mm256_loadu_ps(w + ${N} + ${K} * k_stride);
+            $for N in range(SIMD_TILE):
+              const __m256 v${N}_${K} = _mm256_loadu_ps(w + ${N*SIMD_SIZE} + ${K} * k_stride);
           $if PREFETCH:
             $for K in range(KBLOCK):
-              $for N in range(0,NR,16):
-                xnn_prefetch_to_l1((const int8_t*) w + ${N*4+960});
+              $for N in range(0,SIMD_TILE*SIMD_SIZE,64):
+                xnn_prefetch_to_l1((const int8_t*) w + ${N+960} + ${K} * k_stride);
           $for K in range(KBLOCK):
-            $for N in range(0,NR,8):
-              _mm256_store_ps(packed_w + ${N+K*NR}, v${N}_${K});
+            $for N in range(SIMD_TILE):
+              _mm256_store_ps(packed_w + ${N*SIMD_SIZE+K*NR}, v${N}_${K});
           w += k_stride * ${KBLOCK};
           packed_w += ${NR*KBLOCK};
         }
 
       // KC remainder loop
       for (; k > 0; --k) {
-        $for N in range(0,NR,8):
-          const __m256 v${N} = _mm256_loadu_ps(w + ${N});
+        $for N in range(SIMD_TILE):
+          const __m256 v${N} = _mm256_loadu_ps(w + ${N*SIMD_SIZE});
         $if PREFETCH:
-          $for N in range(0,NR,16):
-            xnn_prefetch_to_l1((const int8_t*) w + ${N*4+960});
-        $for N in range(0,NR,8):
-          _mm256_store_ps(packed_w + ${N}, v${N});
+          $for N in range(0,SIMD_TILE*SIMD_SIZE,64):
+            xnn_prefetch_to_l1((const int8_t*) w + ${N+960});
+        $for N in range(SIMD_TILE):
+          _mm256_store_ps(packed_w + ${N*SIMD_SIZE}, v${N});
         w += k_stride;
         packed_w += ${NR};
       }
@@ -105,27 +107,27 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__avx_u${KBLOCK}${"_prfm" if PREFETCH 
     if XNN_UNLIKELY(n != 0) {
       assert(n >= 1);
       assert(n <= ${NR-1});
-      $for N in range(0,NR,8):
-        const __m256i vmask${N} = _mm256_loadu_si256((const __m256i*) &mask_table[${NR+N} - n]);
+      $for N in range(SIMD_TILE):
+        const __m256i vmask${N} = _mm256_loadu_si256((const __m256i*) &mask_table[${NR+N*SIMD_SIZE} - n]);
 
       if XNN_LIKELY(b != NULL) {
-        $for N in range(0,NR,8):
-          const __m256 vb${N} = _mm256_maskload_ps(b + ${N}, vmask${N});
-        $for N in range(0,NR,8):
-          _mm256_store_ps(packed_w + ${N}, vb${N});
+        $for N in range(SIMD_TILE):
+          const __m256 vb${N} = _mm256_maskload_ps(b + ${N*SIMD_SIZE}, vmask${N});
+        $for N in range(SIMD_TILE):
+          _mm256_store_ps(packed_w + ${N*SIMD_SIZE}, vb${N});
         b += n;
       } else {
-        $for N in range(0,NR,8):
-          _mm256_store_ps(packed_w + ${N}, vzero);
+        $for N in range(SIMD_TILE):
+          _mm256_store_ps(packed_w + ${N*SIMD_SIZE}, vzero);
       }
       packed_w += ${NR};
 
       // KC main loop
       for (size_t k = kc; k > 0; --k) {
-        $for N in range(0,NR,8):
-          const __m256 v${N} = _mm256_maskload_ps(w + ${N}, vmask${N});
-        $for N in range(0,NR,8):
-          _mm256_store_ps(packed_w + ${N}, v${N});
+        $for N in range(SIMD_TILE):
+          const __m256 v${N} = _mm256_maskload_ps(w + ${N*SIMD_SIZE}, vmask${N});
+        $for N in range(SIMD_TILE):
+          _mm256_store_ps(packed_w + ${N*SIMD_SIZE}, v${N});
         w += k_stride;
         packed_w += ${NR};
       }

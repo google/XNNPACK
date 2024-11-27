@@ -134,10 +134,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}_
       }
 
   $if DATATYPE == "QU8":
-    $if REQUANTIZATION == "RNDNU16":
-      const uint8x8_t vb_zero_point = vld1_dup_u8(&params->${PARAMS_STRUCT}.kernel_zero_point);
-    $else:
-      const uint8x8_t vb_zero_point = vld1_dup_u8(&params->${PARAMS_STRUCT}.kernel_zero_point);
+    const uint8x8_t vb_zero_point = vld1_dup_u8(&params->${PARAMS_STRUCT}.kernel_zero_point);
   $if DATATYPE in ["QC4_F16", "QC4_F32", "QB4_F16", "QB4_F32"]:
     const int8x8_t vmask = vmov_n_s8(INT8_C(0xF0));
     kc = round_up_po2(kc, 2);

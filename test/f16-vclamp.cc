@@ -26,6 +26,7 @@
 
 using TestInfo = Clamp;
 
+#define XNN_QUANTIZED(T) xnnpack::quantized<T>
 #define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, batch_tile, vector_tile, datatype, params_type, init_params)       \
   TEST(ukernel, batch_eq) { TestBatchEq<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }  \
   TEST(ukernel, batch_div) { TestBatchDiv<TestInfo, datatype, datatype>(arch_flags, batch_tile, ukernel, init_params); }\
@@ -42,7 +43,7 @@ TEST(ukernel, clamp_min) {                                                      
     params.clamp.max = 255;                                                                                             \
     VUnaryMicrokernelTester()                                                                                           \
         .batch_size(batch_size)                                                                                         \
-        .Test<TestInfo>(ukernel, init_params, params);                                                                  \
+        .Test<TestInfo, datatype, datatype>(ukernel, init_params, params);                                              \
   }                                                                                                                     \
 }                                                                                                                       \
                                                                                                                         \
@@ -56,8 +57,9 @@ TEST(ukernel, clamp_max) {                                                      
     params.clamp.max = max;                                                                                             \
     VUnaryMicrokernelTester()                                                                                           \
         .batch_size(batch_size)                                                                                         \
-        .Test<TestInfo>(ukernel, init_params, params);                                                                  \
+        .Test<TestInfo, datatype, datatype>(ukernel, init_params, params);                                              \
   }                                                                                                                     \
 }
 #include "f16-vclamp/f16-vclamp.h"
 #undef XNN_UKERNEL_WITH_PARAMS
+#undef XNN_QUANTIZED

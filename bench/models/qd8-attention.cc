@@ -57,8 +57,8 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
     return nullptr;
   }
 
-  status = xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr, input_id, quantized_input_id,
-                              /*XNN_FLAG_MAYBE_PACK_FOR_GEMM=*/0x00000080);
+  status = xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr,
+                            input_id, quantized_input_id, /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create create convert " << std::endl;
     return nullptr;
@@ -334,9 +334,9 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
     return nullptr;
   }
 
-  status =
-      xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr, outcome_reshaped_id, quantized_outcome_id,
-                         /*XNN_FLAG_MAYBE_PACK_FOR_GEMM=*/0x00000080);
+  status = xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr,
+                            outcome_reshaped_id, quantized_outcome_id,
+                            /*flags=*/0);
   if (status != xnn_status_success) {
     std::cerr << "failed to create create convert " << std::endl;
     return nullptr;
