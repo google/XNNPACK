@@ -61,6 +61,17 @@ enum xnn_status xnn_setup_convert_nc_f32_qp8(xnn_operator_t convert_op,  //
                                              const float* input,         //
                                              int8_t* output);
 
+enum xnn_status xnn_create_pack_lh_x16(uint32_t flags,
+                                       xnn_operator_t* pack_lh_op_out);
+
+enum xnn_status xnn_reshape_pack_lh_x16(xnn_operator_t pack_lh_op,
+                                        size_t batch_size, size_t channels,
+                                        size_t* output_size_bytes,
+                                        pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_pack_lh_x16(xnn_operator_t pack_lh_op,
+                                      const void* input, void* output);
+
 enum xnn_status xnn_create_pack_lh_x32(uint32_t flags,
                                        xnn_operator_t* pack_lh_op_out);
 
@@ -120,6 +131,20 @@ enum xnn_status xnn_create_convolution2d_nhwc_pf32(
     float output_min, float output_max, uint32_t flags,
     xnn_code_cache_t code_cache, xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out);
+
+enum xnn_status xnn_create_fully_connected_nc_pf16(
+  size_t input_channels,
+  size_t output_channels,
+  size_t input_stride,
+  size_t output_stride,
+  const void* kernel,
+  const void* bias,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* fully_connected_op_out);
 
 #ifdef __cplusplus
 }  // extern "C"

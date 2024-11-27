@@ -2253,17 +2253,17 @@ void xnn_compute_f32_qd8_convert(
   context->convert_ukernel(n, input, output, (union xnn_unary_uparams*) &params);
 }
 
-void xnn_compute_x32_pack_lh(
-    const struct x32_pack_lh_context context[restrict XNN_MIN_ELEMENTS(1)],
+void xnn_compute_pack_lh(
+    const struct pack_lh_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t m_idx_start, size_t tile) {
-  const float* lhs = (const float*)((const char*)context->lhs +
+  const void* lhs = (const void*)((const char*)context->lhs +
                                     m_idx_start * context->lhs_stride);
   const size_t offset = context->k * m_idx_start;
-  float* lhs_packed = context->lhs_packed + offset;
+  void* lhs_packed = context->lhs_packed + offset;
 
   context->pack_lh_ukernel(/*m=*/tile, context->k, context->mr, context->kr,
-                         context->sr, 0, (const uint32_t*) lhs, context->lhs_stride,
-                         (uint32_t*) lhs_packed);
+                         context->sr, 0, lhs, context->lhs_stride,
+                         lhs_packed);
 }
 
 void xnn_compute_f32_qp8_convert(
