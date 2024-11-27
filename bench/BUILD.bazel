@@ -588,6 +588,7 @@ xnnpack_benchmark(
     tags = xnnpack_slow_benchmark_tags() + ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps() + [
         "//test:next_prime",
+        "@cpuinfo",
         "@pthreadpool",
     ],
 )
