@@ -134,20 +134,14 @@ NON_PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS = [
     "src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut64-p2-div-u8.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut64-p2-div-u12.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut64-p2-div-u16.c",
-    "src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut64-p2-div-u20.c",
-    "src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut64-p2-div-u24.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut2048-p1-div-u4.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut2048-p1-div-u8.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut2048-p1-div-u12.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut2048-p1-div-u16.c",
-    "src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut2048-p1-div-u20.c",
-    "src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-lut2048-p1-div-u24.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-p5-div-u4.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-p5-div-u8.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-p5-div-u12.c",
     "src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-p5-div-u16.c",
-    "src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-p5-div-u20.c",
-    "src/f32-vsigmoid/gen/f32-vsigmoid-aarch64-neonfma-rr1-p5-div-u24.c",
 ]
 
 ALL_NEONFMA_AARCH64_MICROKERNEL_SRCS = PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS + NON_PROD_NEONFMA_AARCH64_MICROKERNEL_SRCS

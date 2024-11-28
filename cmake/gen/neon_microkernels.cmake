@@ -409,14 +409,10 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/f32-velu/gen/f32-velu-neon-rr2-lut16-p3-u4.c
   src/f32-velu/gen/f32-velu-neon-rr2-lut16-p3-u12.c
   src/f32-velu/gen/f32-velu-neon-rr2-lut16-p3-u16.c
-  src/f32-velu/gen/f32-velu-neon-rr2-lut16-p3-u20.c
-  src/f32-velu/gen/f32-velu-neon-rr2-lut16-p3-u24.c
   src/f32-velu/gen/f32-velu-neon-rr2-p6-u4.c
   src/f32-velu/gen/f32-velu-neon-rr2-p6-u8.c
   src/f32-velu/gen/f32-velu-neon-rr2-p6-u12.c
   src/f32-velu/gen/f32-velu-neon-rr2-p6-u16.c
-  src/f32-velu/gen/f32-velu-neon-rr2-p6-u20.c
-  src/f32-velu/gen/f32-velu-neon-rr2-p6-u24.c
   src/f32-vhswish/gen/f32-vhswish-neon-u4.c
   src/f32-vhswish/gen/f32-vhswish-neon-u8.c
   src/f32-vlrelu/gen/f32-vlrelu-neon-u4.c
@@ -432,20 +428,14 @@ SET(NON_PROD_NEON_MICROKERNEL_SRCS
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut64-p2-nr2recps-u4.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut64-p2-nr2recps-u12.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut64-p2-nr2recps-u16.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut64-p2-nr2recps-u20.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut64-p2-nr2recps-u24.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut2048-p1-nr2recps-u4.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut2048-p1-nr2recps-u8.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut2048-p1-nr2recps-u12.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut2048-p1-nr2recps-u16.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut2048-p1-nr2recps-u20.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-lut2048-p1-nr2recps-u24.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-p5-nr2recps-u4.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-p5-nr2recps-u8.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-p5-nr2recps-u12.c
   src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-p5-nr2recps-u16.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-p5-nr2recps-u20.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-neon-rr2-p5-nr2recps-u24.c
   src/f32-vtanh/gen/f32-vtanh-neon-rational-9-8-nr.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x16-minmax-neon-mlal-lane-prfm.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-2x16-minmax-neon-mlal-lane-prfm.c

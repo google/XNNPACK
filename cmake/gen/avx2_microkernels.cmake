@@ -26,9 +26,9 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-avx2-u64.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-avx2-u64.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-avx2-rr2-p5-u32-acc2.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut4-p4-perm-u56.c
+  src/f32-velu/gen/f32-velu-avx2-rr1-lut4-p4-perm-u32.c
   src/f32-vlog/gen/f32-vlog-avx2-rational-3-3-div.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-div-u40.c
+  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-div-u16.c
   src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-1x8c8-minmax-avx2.c
   src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-3x8c8-minmax-avx2.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx2-madd-prfm.c
@@ -142,37 +142,17 @@ SET(NON_PROD_AVX2_MICROKERNEL_SRCS
   src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-div-u16.c
   src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-div-u24.c
   src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-div-u32.c
-  src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-div-u40.c
-  src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-div-u48.c
-  src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-div-u56.c
-  src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-div-u64.c
   src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-rcp-u8.c
   src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-rcp-u16.c
   src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-rcp-u24.c
-  src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-rcp-u40.c
-  src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-rcp-u48.c
-  src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-rcp-u56.c
-  src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-rcp-u64.c
   src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-div-u8.c
   src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-div-u16.c
   src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-div-u24.c
   src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-div-u32.c
-  src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-div-u40.c
-  src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-div-u48.c
-  src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-div-u56.c
-  src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-div-u64.c
-  src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-div-u72.c
-  src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-div-u80.c
   src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-rcp-u8.c
   src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-rcp-u16.c
   src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-rcp-u24.c
   src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-rcp-u32.c
-  src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-rcp-u40.c
-  src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-rcp-u48.c
-  src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-rcp-u56.c
-  src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-rcp-u64.c
-  src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-rcp-u72.c
-  src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-rcp-u80.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-2x16-minmax-avx2-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x16-minmax-avx2-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x16-minmax-avx2-broadcast.c
@@ -243,95 +223,37 @@ SET(NON_PROD_AVX2_MICROKERNEL_SRCS
   src/f32-velu/gen/f32-velu-avx2-rr1-lut4-p4-perm-u8.c
   src/f32-velu/gen/f32-velu-avx2-rr1-lut4-p4-perm-u16.c
   src/f32-velu/gen/f32-velu-avx2-rr1-lut4-p4-perm-u24.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut4-p4-perm-u32.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut4-p4-perm-u40.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut4-p4-perm-u48.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut4-p4-perm-u64.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut4-p4-perm-u72.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut4-p4-perm-u80.c
   src/f32-velu/gen/f32-velu-avx2-rr1-lut8-p4-perm-u8.c
   src/f32-velu/gen/f32-velu-avx2-rr1-lut8-p4-perm-u16.c
   src/f32-velu/gen/f32-velu-avx2-rr1-lut8-p4-perm-u24.c
   src/f32-velu/gen/f32-velu-avx2-rr1-lut8-p4-perm-u32.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut8-p4-perm-u40.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut8-p4-perm-u48.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut8-p4-perm-u56.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut8-p4-perm-u64.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut8-p4-perm-u72.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut8-p4-perm-u80.c
   src/f32-velu/gen/f32-velu-avx2-rr1-lut16-p3-gather-u8.c
   src/f32-velu/gen/f32-velu-avx2-rr1-lut16-p3-gather-u16.c
   src/f32-velu/gen/f32-velu-avx2-rr1-lut16-p3-gather-u24.c
   src/f32-velu/gen/f32-velu-avx2-rr1-lut16-p3-gather-u32.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut16-p3-gather-u40.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut16-p3-gather-u48.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut16-p3-gather-u56.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut16-p3-gather-u64.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut16-p3-gather-u72.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-lut16-p3-gather-u80.c
   src/f32-velu/gen/f32-velu-avx2-rr1-p6-u8.c
   src/f32-velu/gen/f32-velu-avx2-rr1-p6-u16.c
   src/f32-velu/gen/f32-velu-avx2-rr1-p6-u24.c
   src/f32-velu/gen/f32-velu-avx2-rr1-p6-u32.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-p6-u40.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-p6-u48.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-p6-u56.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-p6-u64.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-p6-u72.c
-  src/f32-velu/gen/f32-velu-avx2-rr1-p6-u80.c
   src/f32-vscaleexpminusmax/gen/f32-vscaleexpminusmax-avx2-p5-u8.c
   src/f32-vscaleexpminusmax/gen/f32-vscaleexpminusmax-avx2-p5-u16.c
   src/f32-vscaleexpminusmax/gen/f32-vscaleexpminusmax-avx2-p5-u24.c
   src/f32-vscaleexpminusmax/gen/f32-vscaleexpminusmax-avx2-p5-u32.c
-  src/f32-vscaleexpminusmax/gen/f32-vscaleexpminusmax-avx2-p5-u40.c
-  src/f32-vscaleexpminusmax/gen/f32-vscaleexpminusmax-avx2-p5-u48.c
-  src/f32-vscaleexpminusmax/gen/f32-vscaleexpminusmax-avx2-p5-u56.c
-  src/f32-vscaleexpminusmax/gen/f32-vscaleexpminusmax-avx2-p5-u64.c
-  src/f32-vscaleexpminusmax/gen/f32-vscaleexpminusmax-avx2-p5-u72.c
-  src/f32-vscaleexpminusmax/gen/f32-vscaleexpminusmax-avx2-p5-u80.c
-  src/f32-vscaleexpminusmax/gen/f32-vscaleexpminusmax-avx2-p5-u88.c
-  src/f32-vscaleexpminusmax/gen/f32-vscaleexpminusmax-avx2-p5-u96.c
   src/f32-vscaleextexp/gen/f32-vscaleextexp-avx2-p5-u8.c
   src/f32-vscaleextexp/gen/f32-vscaleextexp-avx2-p5-u16.c
   src/f32-vscaleextexp/gen/f32-vscaleextexp-avx2-p5-u24.c
   src/f32-vscaleextexp/gen/f32-vscaleextexp-avx2-p5-u32.c
-  src/f32-vscaleextexp/gen/f32-vscaleextexp-avx2-p5-u40.c
-  src/f32-vscaleextexp/gen/f32-vscaleextexp-avx2-p5-u48.c
-  src/f32-vscaleextexp/gen/f32-vscaleextexp-avx2-p5-u56.c
-  src/f32-vscaleextexp/gen/f32-vscaleextexp-avx2-p5-u64.c
-  src/f32-vscaleextexp/gen/f32-vscaleextexp-avx2-p5-u72.c
-  src/f32-vscaleextexp/gen/f32-vscaleextexp-avx2-p5-u80.c
-  src/f32-vscaleextexp/gen/f32-vscaleextexp-avx2-p5-u88.c
-  src/f32-vscaleextexp/gen/f32-vscaleextexp-avx2-p5-u96.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-div-u8.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-div-u16.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-div-u24.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-div-u32.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-div-u48.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-div-u56.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-div-u64.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-div-u72.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-div-u80.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr1fma-u8.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr1fma-u16.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr1fma-u24.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr1fma-u32.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr1fma-u40.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr1fma-u48.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr1fma-u56.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr1fma-u64.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr1fma-u72.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr1fma-u80.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr2fma-u8.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr2fma-u16.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr2fma-u24.c
   src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr2fma-u32.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr2fma-u40.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr2fma-u48.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr2fma-u56.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr2fma-u64.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr2fma-u72.c
-  src/f32-vsigmoid/gen/f32-vsigmoid-avx2-rr1-p5-nr2fma-u80.c
   src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-2x8c8-minmax-avx2.c
   src/qd8-f16-qb4w-gemm/gen/qd8-f16-qb4w-gemm-4x8c8-minmax-avx2.c
   src/qd8-f16-qc4w-gemm/gen/qd8-f16-qc4w-gemm-1x8c8-minmax-avx2-madd.c

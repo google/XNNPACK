@@ -442,7 +442,7 @@ static void CharacteristicArguments(benchmark::internal::Benchmark* b) {
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
   BENCHMARK_CAPTURE(TwoPassSoftMax, avx2_p5,
     xnn_f32_raddextexp_ukernel__avx2_p5_u96,
-    xnn_f32_vscaleextexp_ukernel__avx2_p5_u40,
+    xnn_f32_vscaleextexp_ukernel__avx2_p5_u32,
     benchmark::utils::CheckAVX2)->Apply(CharacteristicArguments)->UseManualTime();
   BENCHMARK_CAPTURE(ThreePassSoftMaxWithRecomputing, avx2_p5,
     xnn_f32_rmax_ukernel__avx_u32_acc4,

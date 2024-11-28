@@ -87,31 +87,13 @@ SET(NON_PROD_FMA3_MICROKERNEL_SRCS
   src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-div-u16.c
   src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-div-u24.c
   src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-div-u32.c
-  src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-div-u40.c
-  src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-div-u48.c
-  src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-div-u56.c
-  src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-div-u64.c
-  src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-div-u72.c
-  src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-div-u80.c
   src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-rcp-u8.c
   src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-rcp-u16.c
   src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-rcp-u24.c
   src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-rcp-u32.c
-  src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-rcp-u40.c
-  src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-rcp-u48.c
-  src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-rcp-u56.c
-  src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-rcp-u64.c
-  src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-rcp-u72.c
-  src/f16-vtanh/gen/f16-vtanh-fma3-expm1minus-rr1-p3h2ts-rcp-u80.c
   src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9t2-u8.c
   src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9t2-u16.c
   src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9t2-u24.c
-  src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9t2-u40.c
-  src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9t2-u48.c
-  src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9t2-u56.c
-  src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9t2-u64.c
-  src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9t2-u72.c
-  src/f16-vtanh/gen/f16-vtanh-fma3-polynomial-p19h9t2-u80.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-fma3-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-fma3.c
   src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-fma3-acc2.c
