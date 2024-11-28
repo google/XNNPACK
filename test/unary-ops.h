@@ -613,7 +613,7 @@ void UnaryReferenceImpl(
     const xnn_quantization_params& input_quantization = {0, 1.0f},
     const xnn_quantization_params& output_quantization = {0, 1.0f},
     const xnn_unary_params& params = xnn_unary_params()) {
-  static_assert(!xnnpack::is_quantized<In>::value, "");
+  assert(!xnnpack::is_quantized<In>::value, "");
   for (size_t i = 0; i < n; i++) {
     float y_i = op_info.ReferenceImpl(static_cast<float>(x[i]), params);
     y_i = y_i / output_quantization.scale + output_quantization.zero_point;
@@ -628,7 +628,7 @@ void UnaryReferenceImpl(
     const xnn_quantization_params& input_quantization = {0, 1.0f},
     const xnn_quantization_params& output_quantization = {0, 1.0f},
     const xnn_unary_params& params = xnn_unary_params()) {
-  static_assert(!xnnpack::is_quantized<Out>::value, "");
+  assert(!xnnpack::is_quantized<Out>::value, "");
   for (size_t i = 0; i < n; i++) {
     float x_i = (x[i] - input_quantization.zero_point) * input_quantization.scale;
     float y_i = op_info.ReferenceImpl(x_i, params);
@@ -647,8 +647,8 @@ void UnaryReferenceImpl(
     const xnn_quantization_params& input_quantization = {0, 1.0f},
     const xnn_quantization_params& output_quantization = {0, 1.0f},
     const xnn_unary_params& params = xnn_unary_params()) {
-  static_assert(!xnnpack::is_quantized<In>::value, "");
-  static_assert(!xnnpack::is_quantized<Out>::value, "");
+  assert(!xnnpack::is_quantized<In>::value, "");
+  assert(!xnnpack::is_quantized<Out>::value, "");
   for (size_t i = 0; i < n; i++) {
     float y_i;
     if (std::is_integral<In>::value && std::is_integral<Out>::value) {

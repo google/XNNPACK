@@ -497,7 +497,7 @@ class BinaryElementwiseOperatorTester {
       const std::array<size_t, XNN_MAX_TENSOR_DIMS>& output_strides,
       const std::array<size_t, XNN_MAX_TENSOR_DIMS>& output_dims) {
     // Verify results.
-    static_assert(!xnnpack::is_quantized<T>::value);
+    assert(!xnnpack::is_quantized<T>::value);
     MinMaxLow limits = DatatypeMinMaxLow(datatype());
     for (size_t i = 0; i < output_dims[0]; i++) {
       for (size_t j = 0; j < output_dims[1]; j++) {
@@ -557,7 +557,7 @@ class BinaryElementwiseOperatorTester {
       const std::array<size_t, XNN_MAX_TENSOR_DIMS>& output_strides,
       const std::array<size_t, XNN_MAX_TENSOR_DIMS>& output_dims) {
     // Verify results.
-    static_assert(!xnnpack::is_quantized<T>::value);
+    assert(!xnnpack::is_quantized<T>::value);
     MinMaxLow limits = DatatypeMinMaxLow(datatype());
     for (size_t i = 0; i < output_dims[0]; i++) {
       for (size_t j = 0; j < output_dims[1]; j++) {

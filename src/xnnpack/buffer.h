@@ -52,7 +52,7 @@ class NumericLimits<quantized<T>> {
 // the client code to see the unpadded data, and the padding was hidden.
 template <typename T, size_t Alignment = alignof(T)>
 class Buffer {
-  static_assert(std::is_trivial<T>::value, "");
+  assert(std::is_trivial<T>::value, "");
   T* data_;
   size_t size_;
 

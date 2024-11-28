@@ -98,7 +98,7 @@ size_t init_reference_unary_params(
 
 template <typename Operator, typename T>
 const xnn_unary_elementwise_config* get_config(T) {
-  static_assert(!xnnpack::is_quantized<T>::value, "");
+  assert(!xnnpack::is_quantized<T>::value, "");
   static xnn_unary_elementwise_config config = {
       (xnn_vunary_ukernel_fn)unary_ukernel_unquantized<T, T, Operator>,
       init_reference_unary_params,
@@ -153,7 +153,7 @@ const xnn_unary_elementwise_config* get_convert_config(
 template <typename TIn, typename TOut>
 const xnn_unary_elementwise_config* get_convert_config(xnnpack::quantized<TIn>,
                                                        TOut) {
-  static_assert(!xnnpack::is_quantized<TOut>::value, "");
+  assert(!xnnpack::is_quantized<TOut>::value, "");
   static xnn_unary_elementwise_config config = {
       (xnn_vunary_ukernel_fn)unary_ukernel_quantized_input<
           xnnpack::quantized<TIn>, TOut, ConvertOp<float, TOut>>,
@@ -165,7 +165,7 @@ const xnn_unary_elementwise_config* get_convert_config(xnnpack::quantized<TIn>,
 template <typename TIn, typename TOut>
 const xnn_unary_elementwise_config* get_convert_config(
     TIn, xnnpack::quantized<TOut>) {
-  static_assert(!xnnpack::is_quantized<TIn>::value, "");
+  assert(!xnnpack::is_quantized<TIn>::value, "");
   static xnn_unary_elementwise_config config = {
       (xnn_vunary_ukernel_fn)unary_ukernel_quantized_output<
           TIn, xnnpack::quantized<TOut>, ConvertOp<TIn, float>>,
@@ -176,8 +176,8 @@ const xnn_unary_elementwise_config* get_convert_config(
 
 template <typename TIn, typename TOut>
 const xnn_unary_elementwise_config* get_convert_config(TIn, TOut) {
-  static_assert(!xnnpack::is_quantized<TIn>::value, "");
-  static_assert(!xnnpack::is_quantized<TOut>::value, "");
+  assert(!xnnpack::is_quantized<TIn>::value, "");
+  assert(!xnnpack::is_quantized<TOut>::value, "");
   static xnn_unary_elementwise_config config = {
       (xnn_vunary_ukernel_fn)
           unary_ukernel_unquantized<TIn, TOut, ConvertOp<TIn, TOut>>,
