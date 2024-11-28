@@ -1107,7 +1107,7 @@ enum xnn_status xnn_reshape_copy_nc_x32(
 enum xnn_status setup_convert_nc_f16_qx8(
   xnn_operator_t convert_op,
   const void* input,
-  int8_t* output,
+  void* output,
   enum xnn_operator_type expected_operator_type,
   struct xnn_quantization_params* quantization_params)
 {
