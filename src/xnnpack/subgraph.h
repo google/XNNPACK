@@ -128,6 +128,7 @@ struct xnn_value {
   /// Index of the first Node that consume the value, or XNN_INVALID_NODE_ID if the Value has no consumers within the
   /// graph (e.g. Value is an external output).
   uint32_t first_consumer;
+  bool all_consumers_types_same;
   /// Number of Nodes that consume the value.
   /// If multiple inputs in a Node refer to this Value as input, the Node is counted as consumer multiple times.
   /// If the Value is an external output, it counts as having an extra consumer.
@@ -521,7 +522,8 @@ size_t xnn_shape_multiply_trailing_dims(
 size_t xnn_tensor_get_dynamic_quant_param_size(const struct xnn_value* value);
 
 XNN_INLINE static size_t xnn_tensor_get_rounded_dynamic_quant_param_size(const struct xnn_value *value) {
-  assert (value->datatype == xnn_datatype_qdint8);
+  assert(value->datatype == xnn_datatype_qdint8 ||
+         value->datatype == xnn_datatype_qduint8);
 
   // We may read out of bounds for qparams.
   return xnn_get_rounded_size(value->quantization.dynamic_params_size

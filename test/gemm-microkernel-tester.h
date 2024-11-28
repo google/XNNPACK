@@ -120,6 +120,13 @@ class GemmMicrokernelTester {
     return round_up(n(), nr());
   }
 
+  bool unsigned_inputs() const { return this->unsigned_inputs_; }
+
+  GemmMicrokernelTester& unsigned_inputs(bool unsigned_inputs) {
+    this->unsigned_inputs_ = unsigned_inputs;
+    return *this;
+  }
+
   GemmMicrokernelTester& a_stride(size_t a_stride) {
     this->a_stride_ = a_stride;
     return *this;
@@ -413,6 +420,7 @@ class GemmMicrokernelTester {
   size_t k_{1};
   size_t ks_{1};
   size_t bl_{SIZE_MAX};
+  bool unsigned_inputs_{false};
   size_t a_stride_{0};
   size_t cm_stride_{0};
   size_t cn_stride_{0};

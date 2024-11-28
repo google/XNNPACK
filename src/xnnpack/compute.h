@@ -1438,8 +1438,17 @@ struct f32_qd8_convert_context {
       const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index);
 
+  XNN_PRIVATE void xnn_compute_f16_qdu8_convert(
+      const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index);
+
   XNN_PRIVATE void xnn_compute_f32_qd8_convert(
       const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index);
+
+  XNN_PRIVATE void xnn_compute_f32_qdu8_convert(
+      const struct f32_qd8_convert_context
+          context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index);
 
   XNN_PRIVATE void xnn_compute_pad_qd8_params(

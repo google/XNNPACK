@@ -291,6 +291,9 @@ enum xnn_datatype {
   xnn_datatype_pfp32 = 13,
   /// BFloat16, i.e. the upper 16 bits of a float32.
   xnn_datatype_bf16 = 14,
+  /// Dynamically quantized 8-bit unsigned integer with per-batch quantization
+  /// parameters.
+  xnn_datatype_qduint8 = 15,
 };
 
 /// Define a tensor-type Value and add it to a Subgraph.

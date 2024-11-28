@@ -46,9 +46,7 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c8__avxvnni(
   kc = round_up_po2(kc, 8 * sizeof(int8_t));
   uint16_t* c0 = (uint16_t*) c;
 
-  const __m256i vsign_mask = _mm256_set1_epi8(0x80);
-  XNN_FORCE_REALIZATION(vsign_mask);
-  const __m256i vinput_zero_point = _mm256_set1_epi32((int) quantization_params->zero_point + 128);
+  const __m256i vinput_zero_point = _mm256_set1_epi32((int) quantization_params->zero_point);
   const __m256 vinput_inv_scale = _mm256_set1_ps(quantization_params->inv_scale);
   const __m256 voutput_min = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.min));
   const __m256 voutput_max = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
@@ -77,8 +75,8 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c8__avxvnni(
 
       size_t k = kc;
       while (k >= 16 * sizeof(int8_t)) {
-        const __m256i va0x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a0)), vsign_mask);
-        const __m256i va0x89ABCDEF = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a0 + 8)), vsign_mask);
+        const __m256i va0x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a0));
+        const __m256i va0x89ABCDEF = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a0 + 8));
         a0 += 16;
 
         const __m256i vb01234567x0123 = _mm256_load_si256(w);
@@ -96,7 +94,7 @@ void xnn_qd8_f16_qc8w_igemm_minmax_ukernel_1x8c8__avxvnni(
       }
 
       if (k != 0) {
-        const __m256i va0x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a0)), vsign_mask);
+        const __m256i va0x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a0));
         a0 += 8;
 
         const __m256i vb01234567x0123 = _mm256_load_si256(w);

@@ -213,8 +213,8 @@ class ConvertOperatorTester {
       xnn_operator_t convert_op = nullptr;
 
       ASSERT_EQ(xnn_status_success,
-        xnn_create_convert_nc_f32_qd8(
-          0, &convert_op));
+                xnn_create_convert_nc_f32_qd8(
+                    /*flags=*/0, &convert_op));
       ASSERT_NE(nullptr, convert_op);
 
       // Smart pointer to automatically delete convert op.
@@ -235,6 +235,74 @@ class ConvertOperatorTester {
         for (size_t c = 0; c < channels(); c++) {
           float expected = input[i * input_stride() + c];
           int8_t quantized_val = output[i * output_stride() + c];
+          float dequantized_val =
+              float((int)quantized_val - quantization_params[i].zero_point) *
+              quantization_params[i].scale;
+          EXPECT_NEAR(expected, dequantized_val, max_acceptable_error)
+              << "at batch " << i << " / " << batch_size() << ", channel " << c
+              << " / " << channels() << " scale "
+              << quantization_params[i].scale << " zp "
+              << quantization_params[i].zero_point << " int "
+              << (int)quantized_val;
+        }
+      }
+    }
+  }
+
+  void TestF32toQDU8() const {
+    xnnpack::ReplicableRandomDevice rng;
+
+    xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
+                                 (batch_size() - 1) * input_stride() +
+                                 channels());
+    xnnpack::Buffer<uint8_t> output((batch_size() - 1) * output_stride() +
+                                    channels());
+    xnnpack::Buffer<xnn_quantization_params> quantization_params(
+        batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
+    // std::uniform_real_distribution<float> range_dist(-100000, 100000);
+    // std::uniform_real_distribution<float> range_dist(-1, 1);
+    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      // const float first_val = range_dist(rng);
+      // const float second_val = range_dist(rng);
+      // std::uniform_real_distribution<float> f32dist(std::min(first_val,
+      // second_val), std::max(first_val, second_val));
+      std::uniform_real_distribution<float> f32dist(-1.f, 1.f);
+      std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+
+      // Create, setup, run, and destroy Convert operator.
+      ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+      xnn_operator_t convert_op = nullptr;
+
+      ASSERT_EQ(xnn_status_success, xnn_create_convert_nc_f32_qdu8(
+                                        /*flags=*/0, &convert_op));
+      ASSERT_NE(nullptr, convert_op);
+
+      // Smart pointer to automatically delete convert op.
+      std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
+          auto_convert_op(convert_op, xnn_delete_operator);
+
+      ASSERT_EQ(xnn_status_success,
+                xnn_reshape_convert_nc_f32_qdu8(
+                    convert_op, batch_size(), channels(), input_stride(),
+                    output_stride(), /*threadpool=*/nullptr));
+      ASSERT_EQ(xnn_status_success, xnn_setup_convert_nc_f32_qdu8(
+                                        convert_op, input.data(), output.data(),
+                                        quantization_params.data()));
+      ASSERT_EQ(xnn_status_success,
+                xnn_run_operator(convert_op, /*threadpool=*/nullptr));
+
+      // Verify results.
+      for (size_t i = 0; i < batch_size(); i++) {
+        const float* input_ptr = &input[i * input_stride()];
+        const auto minmax =
+            std::minmax_element(input_ptr, input_ptr + channels());
+        const float rmin = math_min_f32(0.0f, *minmax.first);
+        const float rmax = math_max_f32(0.0f, *minmax.second);
+        const float max_acceptable_error =
+            0.5001f * (rmax - rmin) / std::numeric_limits<uint8_t>::max();
+        for (size_t c = 0; c < channels(); c++) {
+          float expected = input[i * input_stride() + c];
+          uint8_t quantized_val = output[i * output_stride() + c];
           float dequantized_val = float(quantized_val - quantization_params[i].zero_point) * quantization_params[i].scale;
           EXPECT_NEAR(expected, dequantized_val, max_acceptable_error)
             << "at batch " << i << " / " << batch_size() << ", channel " << c << " / " << channels();
@@ -448,5 +516,59 @@ TEST(CONVERT_NC_F32_QP8, small_batch_with_input_stride) {
         .input_stride(129)
         .iterations(3)
         .TestF32toQD8();
+  }
+}
+
+TEST(CONVERT_NC_F32_QDU8, unit_batch) {
+  for (size_t channels = 1; channels < 100; channels++) {
+    ConvertOperatorTester()
+        .batch_size(1)
+        .channels(channels)
+        .iterations(3)
+        .TestF32toQDU8();
+  }
+}
+
+TEST(CONVERT_NC_F32_QDU8, small_batch) {
+  for (size_t channels = 1; channels < 100; channels++) {
+    ConvertOperatorTester()
+        .batch_size(3)
+        .channels(channels)
+        .iterations(3)
+        .TestF32toQDU8();
+  }
+}
+
+TEST(CONVERT_NC_F32_QDU8, small_batch_with_input_stride) {
+  for (size_t channels = 10; channels < 11; channels += 15) {
+    ConvertOperatorTester()
+        .batch_size(3)
+        .channels(channels)
+        .input_stride(129)
+        .iterations(3)
+        .TestF32toQDU8();
+  }
+}
+
+TEST(CONVERT_NC_F32_QDU8, small_batch_with_output_stride) {
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    ConvertOperatorTester()
+        .batch_size(3)
+        .channels(channels)
+        .output_stride(117)
+        .iterations(3)
+        .TestF32toQDU8();
+  }
+}
+
+TEST(CONVERT_NC_F32_QDU8, small_batch_with_input_and_output_stride) {
+  for (size_t channels = 1; channels < 100; channels += 15) {
+    ConvertOperatorTester()
+        .batch_size(3)
+        .channels(channels)
+        .input_stride(129)
+        .output_stride(117)
+        .iterations(3)
+        .TestF32toQDU8();
   }
 }

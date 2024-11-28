@@ -54,6 +54,11 @@ static enum xnn_status create_convert_operator(
               node->flags,
               &opdata->operator_objects[0]);
           break;
+        case xnn_datatype_qduint8:
+          status = xnn_create_convert_nc_f32_qdu8(
+              node->flags,
+              &opdata->operator_objects[0]);
+          break;
         case xnn_datatype_qpint8:
           status = xnn_create_convert_nc_f32_qp8(node->flags,
                                                  &opdata->operator_objects[0]);
@@ -68,6 +73,11 @@ static enum xnn_status create_convert_operator(
           status = xnn_create_convert_nc_f16_qd8(
             node->flags,
             &opdata->operator_objects[0]);
+          break;
+        case xnn_datatype_qduint8:
+          status = xnn_create_convert_nc_f16_qdu8(
+              node->flags,
+              &opdata->operator_objects[0]);
           break;
         default:
           break;
@@ -100,15 +110,15 @@ static enum xnn_status reshape_convert_operator(
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;
 
+  const uint32_t output_id = opdata->outputs[0];
+  assert(output_id < num_values);
+  const struct xnn_value* output_value = values + output_id;
+  // Channel stride depends on number of non batch dims.
+  size_t num_nonbatch_dims = output_value->quantization.num_nonbatch_dims;
+  size_t dq_batch_size = xnn_shape_multiply_batch_dims(&input_value->shape, num_nonbatch_dims);
+  size_t dq_channel_stride = xnn_shape_multiply_trailing_dims(&input_value->shape, num_input_dims - num_nonbatch_dims);
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_convert_nc_f16_qd8: {
-       // Channel stride depends on number of non batch dims.
-       const uint32_t output_id = opdata->outputs[0];
-       assert(output_id < num_values);
-       const struct xnn_value* output_value = values + output_id;
-       const size_t num_nonbatch_dims = output_value->quantization.num_nonbatch_dims;
-       const size_t dq_batch_size = xnn_shape_multiply_batch_dims(&input_value->shape, num_nonbatch_dims);
-       const size_t dq_channel_stride = xnn_shape_multiply_trailing_dims(&input_value->shape, num_input_dims - num_nonbatch_dims);
       status = xnn_reshape_convert_nc_f16_qd8(
         opdata->operator_objects[0],
         dq_batch_size,
@@ -117,13 +127,6 @@ static enum xnn_status reshape_convert_operator(
       break;
     }
     case xnn_operator_type_convert_nc_f32_qd8: {
-       // Channel stride depends on number of non batch dims.
-       const uint32_t output_id = opdata->outputs[0];
-       assert(output_id < num_values);
-       const struct xnn_value* output_value = values + output_id;
-       const size_t num_nonbatch_dims = output_value->quantization.num_nonbatch_dims;
-       const size_t dq_batch_size = xnn_shape_multiply_batch_dims(&input_value->shape, num_nonbatch_dims);
-       const size_t dq_channel_stride = xnn_shape_multiply_trailing_dims(&input_value->shape, num_input_dims - num_nonbatch_dims);
       status = xnn_reshape_convert_nc_f32_qd8(
         opdata->operator_objects[0],
         dq_batch_size,
@@ -131,11 +134,27 @@ static enum xnn_status reshape_convert_operator(
         threadpool);
       break;
     }
+    case xnn_operator_type_convert_nc_f32_qdu8: {
+      status = xnn_reshape_convert_nc_f32_qdu8(
+        opdata->operator_objects[0],
+        dq_batch_size,
+        /*channels=*/dq_channel_stride, /*input_stride=*/dq_channel_stride,  /*output_stride=*/dq_channel_stride,
+        threadpool);
+      break;
+    }
+    case xnn_operator_type_convert_nc_f16_qdu8: {
+      status = xnn_reshape_convert_nc_f16_qdu8(
+        opdata->operator_objects[0],
+        dq_batch_size,
+        /*channels=*/dq_channel_stride, /*input_stride=*/dq_channel_stride,  /*output_stride=*/dq_channel_stride,
+        threadpool);
+      break;
+    }
     case xnn_operator_type_convert_nc_f32_qp8: {
-      const size_t num_nonbatch_dims = 1;
-      const size_t dq_batch_size =
+      num_nonbatch_dims = 1;
+      dq_batch_size =
           xnn_shape_multiply_batch_dims(&input_value->shape, num_nonbatch_dims);
-      const size_t dq_channel_stride = xnn_shape_multiply_trailing_dims(
+      dq_channel_stride = xnn_shape_multiply_trailing_dims(
           &input_value->shape, num_input_dims - num_nonbatch_dims);
       status = xnn_reshape_convert_nc_f32_qp8(
           opdata->operator_objects[0], dq_batch_size,
@@ -195,6 +214,26 @@ static enum xnn_status setup_convert_operator(
       void* quantization_params = output_value->quantization.dynamic_params;
       assert(quantization_params != NULL);
       return xnn_setup_convert_nc_f32_qd8(
+        opdata->operator_objects[0],
+        input_data,
+        output_data,
+        quantization_params);
+    }
+    case xnn_operator_type_convert_nc_f16_qdu8:
+    {
+      void* quantization_params = output_value->quantization.dynamic_params;
+      assert(quantization_params != NULL);
+      return xnn_setup_convert_nc_f16_qdu8(
+        opdata->operator_objects[0],
+        input_data,
+        output_data,
+        quantization_params);
+    }
+    case xnn_operator_type_convert_nc_f32_qdu8:
+    {
+      void* quantization_params = output_value->quantization.dynamic_params;
+      assert(quantization_params != NULL);
+      return xnn_setup_convert_nc_f32_qdu8(
         opdata->operator_objects[0],
         input_data,
         output_data,
@@ -359,38 +398,11 @@ enum xnn_status xnn_define_unary(
   if (type == xnn_unary_convert) {
     // Some convert types are not elementwise ops, handle them now.
     if (output_value->datatype == xnn_datatype_qdint8 ||
-        // TODO(b/340399245) - Uncomment once we have full support for `qpint8`.
-        // output_value->datatype == xnn_datatype_qpint8 ||
-        false) {
-      // Coerce the input from `xnn_datatype_qdint8` to `xnn_datatype_qpint8` if we
-      // know that we're converting for a GEMM and `qp8_f32_*` kernels are
-      // available.
-      // TODO(b/340399245) - Remove xnn_init_qp8_f32_qc4w_gemm_config check once we
-      // have full qp8 support.
-      bool pack_activation_for_qc4w = (
-        (flags & XNN_FLAG_MAYBE_PACK_FOR_GEMM) &&
-        xnn_init_qp8_f32_qc4w_gemm_config() != NULL
-      );
-      bool pack_activation_for_qb4w = (
-        (flags & XNN_FLAG_MAYBE_PACK_FOR_QB4W_GEMM) &&
-        xnn_init_qp8_f32_qb4w_gemm_config() != NULL
-      );
-      if ((pack_activation_for_qb4w || pack_activation_for_qc4w) &&
-          input_value->datatype == xnn_datatype_fp32 &&
-          output_value->datatype == xnn_datatype_qdint8) {
-        xnn_log_debug("Coercing type of output ID #%" PRIu32
-                      " of %s operator from `%s` to `%s`.",
-                      output_id, xnn_node_type_to_string(xnn_node_type_convert),
-                      xnn_datatype_to_string(output_value->datatype),
-                      xnn_datatype_to_string(xnn_datatype_qpint8));
-        subgraph->values[output_id].datatype = xnn_datatype_qpint8;
-      }
-
+        output_value->datatype == xnn_datatype_qduint8) {
       struct xnn_node* node = xnn_subgraph_new_node(subgraph);
       if (node == NULL) {
         return xnn_status_out_of_memory;
       }
-
       xnn_init_convert_node(node, input_id, output_id, flags);
       return xnn_status_success;
     }

@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/buffer.h"
+#include "xnnpack/internal.h"
 #include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator-utils.h"
@@ -908,7 +909,7 @@ TEST_F(DeconvolutionTestQD8F32QC8W, internally_allocated_dynamic_quantization_pa
   xnn_operator_t convert_op = nullptr;
   const size_t quantized_batch_size = input_height * input_width * group_input_channels * groups;
   xnn_status status = xnn_create_convert_nc_f32_qd8(
-    /*flags=*/0, &convert_op);
+      /*flags=*/0, &convert_op);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_convert_op(convert_op, xnn_delete_operator);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();

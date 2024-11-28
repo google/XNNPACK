@@ -78,11 +78,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
         c${M} = c${M-1};
       }
 
-  const __m512i vsign_mask = _mm512_set1_epi8(0x80);
-  XNN_FORCE_REALIZATION(vsign_mask);
+  $if DATATYPE not in ["QD8", "QC4"]:
+    const __m512i vsign_mask = _mm512_set1_epi8(0x80);
+    XNN_FORCE_REALIZATION(vsign_mask);
   $if DATATYPE in ["QD8", "QC4"]:
     $for M in range(MR):
-      const __m512i vinput_zero_point${M} = _mm512_set1_epi32((int) quantization_params[${M}].zero_point + 128);
+      const __m512i vinput_zero_point${M} = _mm512_set1_epi32((int) quantization_params[${M}].zero_point);
     const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
     const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
     // XNN_FORCE_REALIZATION(voutput_min);
@@ -123,8 +124,12 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
     size_t k = kc;
     while (k >= 8 * sizeof(int8_t)) {
       $for M in range(MR):
-        const __m512i va${M}x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a${M})), vsign_mask);
-        const __m512i va${M}x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a${M} + 4)), vsign_mask);
+        $if DATATYPE in ["QD8", "QC4"]:
+          const __m512i va${M}x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a${M}));
+          const __m512i va${M}x4567 = _mm512_set1_epi32((int) unaligned_load_u32(a${M} + 4));
+        $else:
+          const __m512i va${M}x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a${M})), vsign_mask);
+          const __m512i va${M}x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a${M} + 4)), vsign_mask);
         a${M} += 8;
 
       $if DATATYPE == "QC4":
@@ -164,7 +169,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x16c4__
 
     if (k != 0) {
       $for M in range(MR):
-        const __m512i va${M}x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a${M})), vsign_mask);
+        $if DATATYPE in ["QD8", "QC4"]:
+          const __m512i va${M}x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a${M}));
+        $else:
+          const __m512i va${M}x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a${M})), vsign_mask);
         a${M} += 4;
 
       $if DATATYPE == "QC4":

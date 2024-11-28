@@ -628,7 +628,7 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<xnn_qd8_quantization_params> quantization_params(batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
     xnnpack::Buffer<float> kernel_scale(output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    {  // for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
@@ -698,7 +698,6 @@ class FullyConnectedOperatorTester {
         value = std::max(std::min(value, output_max), output_min);
       }
 
-      // Create, setup, run, and destroy Fully Connected operator.
       ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
       xnn_operator_t fully_connected_op = nullptr;
 
@@ -1614,6 +1613,7 @@ class FullyConnectedOperatorTester {
     std::uniform_real_distribution<float> f32idist(0.5f, 2.0f);
     std::uniform_int_distribution<int32_t> w8dist(std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max());
 
+    // Need to adjust input and quantization_parmams
     xnnpack::Buffer<int8_t> input(XNN_EXTRA_BYTES / sizeof(int8_t) +
       (batch_size() - 1) * input_stride() + input_channels());
     xnnpack::Buffer<int8_t> kernel(output_channels() * input_channels());

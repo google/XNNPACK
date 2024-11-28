@@ -17,6 +17,7 @@
 #include "xnnpack/allocation-type.h"
 #include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
+#include "xnnpack/config.h"
 #include "xnnpack/fp16.h"
 #include "xnnpack/hardware-config.h"
 #include "xnnpack/internal.h"
@@ -191,6 +192,7 @@ void xnn_value_copy(
   dst_value->data = src_value->data;
   dst_value->producer = src_value->producer;
   dst_value->first_consumer = src_value->first_consumer;
+  dst_value->all_consumers_types_same = src_value->all_consumers_types_same;
   dst_value->num_consumers = src_value->num_consumers;
   dst_value->num_nchw_compatible_consumers = src_value->num_nchw_compatible_consumers;
   dst_value->layout = src_value->layout;
@@ -277,6 +279,10 @@ void xnn_subgraph_analyze_consumers_and_producers(xnn_subgraph_t subgraph)
       if (subgraph->values[input_id].num_consumers++ == 0) {
         assert(subgraph->values[input_id].first_consumer == XNN_INVALID_NODE_ID);
         subgraph->values[input_id].first_consumer = n;
+        subgraph->values[input_id].all_consumers_types_same = true;
+      } else {
+        enum xnn_node_type first_consumer_type = subgraph->nodes[subgraph->values[input_id].first_consumer].type;
+        subgraph->values[input_id].all_consumers_types_same &= (first_consumer_type == node->type);
       }
     }
 
@@ -1379,9 +1385,135 @@ enum xnn_status xnn_subgraph_fusion(
   return xnn_status_success;
 }
 
+void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
+  enum xnn_weights_type {
+    xnn_weights_type_invalid = 0,
+    xnn_weights_type_qb4w = 1,
+    xnn_weights_type_qc4w = 2,
+    xnn_weights_type_qc8w = 4,
+  };
+  enum xnn_consumer_type {
+    xnn_consumer_type_invalid = 0,
+    xnn_consumer_type_batch_mat_mul = 1,
+    xnn_consumer_type_convolution_2d = 2,
+    xnn_consumer_type_deconvolution = 4,
+    xnn_consumer_type_fully_connected = 8,
+  };
+  for (uint32_t n = 0; n < subgraph->num_nodes; n++) {
+    enum xnn_consumer_type consumer_type = xnn_consumer_type_invalid;
+    enum xnn_weights_type weights_type = xnn_weights_type_invalid;
+    struct xnn_node* node = &subgraph->nodes[n];
+    const uint32_t input_id = node->inputs[0];
+    const uint32_t output_id = node->outputs[0];
+    const struct xnn_value* input = &subgraph->values[input_id];
+    const struct xnn_value* output = &subgraph->values[output_id];
+    // Only replace nodes for which all consumer are of the same type.
+    if (!output->all_consumers_types_same) continue;
+    if (output->datatype == xnn_datatype_qdint8) {
+      struct xnn_node* first_consumer_node = &subgraph->nodes[output->first_consumer];
+      switch (first_consumer_node->type) {
+        case xnn_node_type_fully_connected:
+          consumer_type = xnn_consumer_type_fully_connected;
+          break;
+        case xnn_node_type_convolution_2d:
+          consumer_type = xnn_consumer_type_convolution_2d;
+          break;
+        case xnn_node_type_deconvolution_2d:
+          consumer_type = xnn_consumer_type_deconvolution;
+          break;
+        case xnn_node_type_batch_matrix_multiply:
+          consumer_type = xnn_consumer_type_batch_mat_mul;
+          break;
+        default:
+          XNN_UNREACHABLE;
+      }
+      const struct xnn_value* filter = &subgraph->values[first_consumer_node->inputs[1]];
+      switch (filter->datatype) {
+        case xnn_datatype_qbint4:
+          weights_type = xnn_weights_type_qb4w;
+          break;
+        case xnn_datatype_qcint4:
+          weights_type = xnn_weights_type_qc4w;
+          break;
+        case xnn_datatype_qcint8:
+          weights_type = xnn_weights_type_qc8w;
+          break;
+          break;
+        default:
+          XNN_UNREACHABLE;
+      }
+      bool pack_activations = false;
+      if (input->datatype == xnn_datatype_fp32) {
+        // Coerce the input from `xnn_datatype_qdint8` to `xnn_datatype_qpint8` if we
+        // know that we're converting for a GEMM and `qp8_f32_*` kernels are
+        // available.
+        // TODO(b/340399245) - Remove xnn_init_qp8_f32_qc4w_gemm_config check once we
+        // have full qp8 support.
+
+        if (consumer_type == xnn_consumer_type_fully_connected) {
+          if ((weights_type == xnn_weights_type_qc4w) && xnn_init_qp8_f32_qc4w_gemm_config() != NULL) {
+            pack_activations = true;
+          } else if ((weights_type == xnn_weights_type_qb4w) && xnn_init_qp8_f32_qc4w_gemm_config() != NULL) {
+            pack_activations = true;
+          }
+        }
+        if (pack_activations) {
+          xnn_log_debug("Coercing type of output ID #%" PRIu32
+                        " of %s operator from `%s` to `%s`.",
+                        output_id, xnn_node_type_to_string(xnn_node_type_convert),
+                        xnn_datatype_to_string(output->datatype),
+                        xnn_datatype_to_string(xnn_datatype_qpint8));
+          subgraph->values[output_id].datatype = xnn_datatype_qpint8;
+        }
+      }
+
+      if (!pack_activations) {
+        const struct xnn_gemm_config *original_config = NULL;
+        const struct xnn_gemm_config *unsigned_config = NULL;
+        if (input->datatype == xnn_datatype_fp32) {
+          if (weights_type == xnn_weights_type_qc4w) {
+            original_config = xnn_init_qd8_f32_qc4w_gemm_config();
+            unsigned_config = xnn_init_qdu8_f32_qc4w_gemm_config();
+          } else if (weights_type == xnn_weights_type_qc8w) {
+            original_config = xnn_init_qd8_f32_qc8w_gemm_config();
+            unsigned_config = xnn_init_qdu8_f32_qc8w_gemm_config();
+          } else if (weights_type == xnn_weights_type_qb4w) {
+            original_config = xnn_init_qd8_f32_qb4w_gemm_config();
+            unsigned_config = xnn_init_qdu8_f32_qb4w_gemm_config();
+          }
+        } else if (input->datatype == xnn_datatype_fp16) {
+          if (weights_type == xnn_weights_type_qc4w) {
+            original_config = xnn_init_qd8_f16_qc4w_gemm_config();
+            unsigned_config = xnn_init_qdu8_f16_qc4w_gemm_config();
+          } else if (weights_type == xnn_weights_type_qc8w) {
+            original_config = xnn_init_qd8_f16_qc8w_gemm_config();
+            unsigned_config = xnn_init_qdu8_f16_qc8w_gemm_config();
+          }
+        }
+        bool convert_to_qu8 = false;
+        if (original_config && unsigned_config) {
+          enum xnn_arch_flags qdu8_arch = unsigned_config->arch;
+          enum xnn_arch_flags qd8_arch = original_config->arch;
+          if (qdu8_arch > qd8_arch) {
+            convert_to_qu8 = true;
+          }
+        }
+        if (convert_to_qu8) {
+          xnn_log_debug("Coercing type of output ID #%" PRIu32
+                        " of %s operator from `%s` to `%s`.",
+                        output_id, xnn_node_type_to_string(xnn_node_type_convert),
+                        xnn_datatype_to_string(output->datatype),
+                        xnn_datatype_to_string(xnn_datatype_qduint8));
+          subgraph->values[output_id].datatype = xnn_datatype_qduint8;
+        }
+      }
+    }
+  }
+}
+
 enum xnn_status xnn_subgraph_optimize(
   xnn_subgraph_t subgraph,
-  uint32_t flags)
+  uint32_t optimization_flags)
 {
   xnn_subgraph_analyze_consumers_and_producers(subgraph);
 
@@ -1403,7 +1535,7 @@ enum xnn_status xnn_subgraph_optimize(
     }
   }
 
-  if (!(flags & XNN_FLAG_NO_OPERATOR_FUSION)) {
+  if (!(optimization_flags & XNN_FLAG_NO_OPERATOR_FUSION)) {
     xnn_subgraph_fusion(subgraph);
   }
 
@@ -1413,13 +1545,13 @@ enum xnn_status xnn_subgraph_optimize(
     return xnn_status_unsupported_hardware;
   }
 
-  if ((flags & XNN_FLAG_FORCE_FP16_INFERENCE) && (!xnn_is_f16_compatible_config(hardware_config))) {
+  if ((optimization_flags & XNN_FLAG_FORCE_FP16_INFERENCE) && (!xnn_is_f16_compatible_config(hardware_config))) {
     xnn_log_error("failed to force FP16 inference: hardware supports neither native nor emulated FP16 operators");
     return xnn_status_unsupported_hardware;
   }
   const bool try_native_fp16 =
-    (flags & XNN_FLAG_HINT_FP16_INFERENCE) && xnn_is_f16_supported_natively(hardware_config);
-  const bool force_fp16 = (flags & XNN_FLAG_FORCE_FP16_INFERENCE);
+    (optimization_flags & XNN_FLAG_HINT_FP16_INFERENCE) && xnn_is_f16_supported_natively(hardware_config);
+  const bool force_fp16 = (optimization_flags & XNN_FLAG_FORCE_FP16_INFERENCE);
   if (try_native_fp16 || force_fp16) {
     const bool fp16_rewrite_succeeded = xnn_subgraph_rewrite_for_fp16(subgraph);
     if (force_fp16 && !fp16_rewrite_succeeded) {
@@ -1429,10 +1561,12 @@ enum xnn_status xnn_subgraph_optimize(
   }
 
   #if XNN_ENABLE_SPARSE
-    if ((flags & XNN_FLAG_HINT_SPARSE_INFERENCE) && (xnn_is_chw_compatible_config(hardware_config))) {
+    if ((optimization_flags & XNN_FLAG_HINT_SPARSE_INFERENCE) && (xnn_is_chw_compatible_config(hardware_config))) {
       xnn_subgraph_rewrite_for_nchw(subgraph);
     }
   #endif
+
+  xnn_subgraph_optimize_dynamic_quantization_ops(subgraph);
 
   return xnn_status_success;
 }

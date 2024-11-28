@@ -266,7 +266,8 @@ static enum xnn_status initialize_workspace_values(
       // Value is purely internal to the runtime, allocate it in the workspace.
       value->data =
         (void*) ((uintptr_t) runtime->workspace->data + persistent_size + mem_alloc_tracker->usage[i].alloc_offset);
-      if (value->datatype == xnn_datatype_qdint8) {
+      if (value->datatype == xnn_datatype_qdint8 ||
+          value->datatype == xnn_datatype_qduint8) {
         value->quantization.dynamic_params =
           (void*) ((uintptr_t) runtime->workspace->data + persistent_size + mem_alloc_tracker->usage[i].alloc_offset
                    + xnn_tensor_get_rounded_size(value));
@@ -310,7 +311,8 @@ static enum xnn_status initialize_workspace_values(
           if (value->data != NULL) {
             // Data can be null as the runtime using this workspace might not have been set up.
             value->data = (void*) ((uintptr_t) value->data + workspace_data_delta);
-            if (value->datatype == xnn_datatype_qdint8) {
+            if (value->datatype == xnn_datatype_qdint8 ||
+                value->datatype == xnn_datatype_qduint8) {
               value->quantization.dynamic_params = (void*) ((uintptr_t) value->quantization.dynamic_params
                                                             + workspace_data_delta);
             }
@@ -700,7 +702,7 @@ enum xnn_status xnn_plan_memory(
     if (value->allocation_type == xnn_allocation_type_workspace) {
       // Value is purely internal to the runtime, and must be allocated in its workspace.
       size_t tensor_size = xnn_tensor_get_rounded_size(value);
-      if (value->datatype == xnn_datatype_qdint8) {
+      if (value->datatype == xnn_datatype_qdint8 || value->datatype == xnn_datatype_qduint8) {
         tensor_size += xnn_tensor_get_rounded_dynamic_quant_param_size(value);
       }
       xnn_add_value_allocation_tracker(&mem_alloc_tracker, i, tensor_size);

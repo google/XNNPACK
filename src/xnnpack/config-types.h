@@ -9,6 +9,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "xnnpack/hardware-config.h"
 #include "xnnpack/microfnptr.h"
 
 #ifdef __cplusplus
@@ -203,6 +204,7 @@ struct xnn_gemm_config {
   uint8_t log2_sr;
   uint8_t planes;  // number of 4 bit planes (1 for legacy, 2 for unzip)
   uint8_t mr_packed;  // `mr` value used for packed left-hand operands.
+  enum xnn_arch_flags arch;
 };
 
 struct xnn_maxpool_config {

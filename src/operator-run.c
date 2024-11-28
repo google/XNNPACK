@@ -2211,8 +2211,12 @@ void xnn_compute_pad_qd8_params(
   }
 }
 
-void xnn_compute_f16_qd8_convert(
+typedef struct xnn_qd8_quantization_params(f16_quantization_params_fn)(xnn_float16 min, xnn_float16 max, xnn_float16* f32_scale);
+typedef struct xnn_qd8_quantization_params(f32_quantization_params_fn)(float min, float max, float* f32_scale);
+
+void xnn_compute_f16_qx8_convert(
     const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    f16_quantization_params_fn quantization_params_function,
     size_t batch_index)
 {
   const size_t x_stride = context->x_stride;
@@ -2224,7 +2228,7 @@ void xnn_compute_f16_qd8_convert(
   xnn_float16 minmax[2];
   context->rminmax_ukernel(n, input, minmax, &context->params);
   xnn_float16 f16_scale;
-  context->quantization_params[batch_index] = xnn_f16_qd8_asymmetric_quantization_params(minmax[0], minmax[1], &f16_scale);
+  context->quantization_params[batch_index] = quantization_params_function(minmax[0], minmax[1], &f16_scale);
 
   struct xnn_f16_qs8_cvt_params params;
   params.scalar.scale = f16_scale;
@@ -2232,8 +2236,23 @@ void xnn_compute_f16_qd8_convert(
   context->convert_ukernel(n, input, output, (union xnn_unary_uparams*) &params);
 }
 
-void xnn_compute_f32_qd8_convert(
+void xnn_compute_f16_qd8_convert(
+    const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index)
+{
+  return xnn_compute_f16_qx8_convert(context, xnn_f16_qd8_asymmetric_quantization_params, batch_index);
+}
+
+void xnn_compute_f16_qdu8_convert(
+    const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index)
+{
+  return xnn_compute_f16_qx8_convert(context, xnn_f16_qdu8_asymmetric_quantization_params, batch_index);
+}
+
+void xnn_compute_f32_qx8_convert(
     const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    f32_quantization_params_fn quantization_params_function,
     size_t batch_index)
 {
   const size_t x_stride = context->x_stride;
@@ -2245,12 +2264,26 @@ void xnn_compute_f32_qd8_convert(
   float minmax[2];
   context->rminmax_ukernel(n, input, minmax, &context->params);
   float scale;
-  context->quantization_params[batch_index] = xnn_f32_qd8_asymmetric_quantization_params(minmax[0], minmax[1], &scale);
+  context->quantization_params[batch_index] = quantization_params_function(minmax[0], minmax[1], &scale);
 
   struct xnn_f32_qs8_cvt_params params;
   params.scalar.scale = scale;
   params.scalar.output_zero_point = context->quantization_params[batch_index].zero_point;
   context->convert_ukernel(n, input, output, (union xnn_unary_uparams*) &params);
+}
+
+void xnn_compute_f32_qd8_convert(
+    const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index)
+{
+  return xnn_compute_f32_qx8_convert(context, xnn_f32_qd8_asymmetric_quantization_params, batch_index);
+}
+
+void xnn_compute_f32_qdu8_convert(
+    const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index)
+{
+  return xnn_compute_f32_qx8_convert(context, xnn_f32_qdu8_asymmetric_quantization_params, batch_index);
 }
 
 void xnn_compute_x32_pack_lh(
