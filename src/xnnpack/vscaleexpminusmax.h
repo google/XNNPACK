@@ -14,39 +14,16 @@
 extern "C" {
 #endif
 
-#define DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(fn_name) \
-  XNN_INTERNAL void fn_name(                                    \
-      size_t n,                                                 \
-      const float* input,                                       \
-      float* output,                                            \
-      float scale,                                              \
+#define XNN_UKERNEL(arch_flags, fn_name, element_tile, datatype) \
+  XNN_INTERNAL void fn_name(                               \
+      size_t n,                                            \
+      const float* input,                                  \
+      float* output,                                       \
+      float scale,                                         \
       float max);
+#include "f32-vscaleexpminusmax/f32-vscaleexpminusmax.h"
+#undef XNN_UKERNEL
 
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u8)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u16)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u24)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u32)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u40)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u48)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u56)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u64)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u72)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u80)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u88)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx2_p5_u96)
-
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u16)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u32)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u48)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u64)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u80)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u96)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u112)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u128)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u144)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u160)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u176)
-DECLARE_F32_VSCALEEXPMINUSMAX_UKERNEL_FUNCTION(xnn_f32_vscaleexpminusmax_ukernel__avx512f_p5_scalef_u192)
 
 #ifdef __cplusplus
 } /* extern "C" */
