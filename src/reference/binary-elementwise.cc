@@ -13,6 +13,7 @@
 
 #include "xnnpack.h"
 #include "xnnpack/config-types.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
@@ -66,7 +67,7 @@ void rbinaryc_ukernel_unquantized(size_t batch_size_bytes, const T* a,
 
 template <typename Operator, typename T>
 const xnn_binary_elementwise_config* get_config(T) {
-  static_assert(!xnnpack::is_quantized<T>::value);
+  static_assert(!xnnpack::is_quantized<T>::value, "");
   static xnn_binary_elementwise_config config = {
       (xnn_vbinary_ukernel_fn)binary_ukernel_unquantized<T, Operator>,
       (xnn_vbinary_ukernel_fn)binaryc_ukernel_unquantized<T, Operator>,
