@@ -1052,7 +1052,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qdu8_f32_qc8w(
                                                   output_padding_bottom, output_padding_left,
                                                   kernel_height, kernel_width,
                                                   stride_height, stride_width,
-                                                  dilation_height, dilation_height,
+                                                  dilation_height, dilation_width,
                                                   groups, group_input_channels, group_output_channels,
                                                   input_pixel_stride, output_pixel_stride,
                                                   kernel_scale, kernel, bias, output_min, output_max,
