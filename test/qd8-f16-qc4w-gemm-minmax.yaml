@@ -167,6 +167,7 @@
   init: xnn_init_f16_qc4w_minmax_scalar_params
   pack: xnn_pack_qs8_qc4uw_gemm_goi_w
   k-block: 16
+  unsigned-inputs: True
 
 
 # ARM NEONI8MM

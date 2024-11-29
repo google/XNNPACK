@@ -470,7 +470,7 @@ std::vector<GemmTestParams> CreateTests1(
           /*adj_k_block=*/16,
           /*mr=*/14, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/false,
-          /*unsigned_inputs=*/false,
+          /*unsigned_inputs=*/true,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f16_qc4w_gemm_minmax_ukernel_14x8c8__avx256skx_madd_prfm,
                         xnn_init_f16_qc4w_minmax_scalar_params,
