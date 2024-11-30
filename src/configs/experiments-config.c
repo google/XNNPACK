@@ -3,7 +3,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <experiments-config.h>
+#include "experiments-config.h"
 
 static struct xnn_experiment_config experiment_config = {0};
 
