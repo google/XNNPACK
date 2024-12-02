@@ -1130,6 +1130,10 @@ TEST_F(DepthwiseConvolutionTestF32, reshape_output)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
+  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+  std::generate(filter.begin(), filter.end(), [&]() { return f32dist(rng); });
+  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+
   // Call subgraph API.
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
