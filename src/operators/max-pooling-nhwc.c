@@ -501,7 +501,16 @@ static enum xnn_status reshape_max_pooling2d_nhwc(
     // Set a dummy input first, the actual input offset is calculated in setup when we have the input pointer.
     max_pooling_op->input = NULL;
 
-    xnn_indirection_init_maxpool2d(max_pooling_op, step_height, step_width, log2_input_element_size);
+    xnn_indirection_init_maxpool2d(
+      max_pooling_op->indirection_buffer, max_pooling_op->input,
+      max_pooling_op->input_pixel_stride << log2_input_element_size,
+      max_pooling_op->input_height, max_pooling_op->input_width,
+      max_pooling_op->output_height, max_pooling_op->output_width,
+      max_pooling_op->kernel_height, max_pooling_op->kernel_width,
+      max_pooling_op->stride_height, max_pooling_op->stride_width,
+      max_pooling_op->dilation_height, max_pooling_op->dilation_width,
+      max_pooling_op->padding_top, max_pooling_op->padding_left,
+      step_height, step_width);
 
     max_pooling_op->last_input = max_pooling_op->input;
     max_pooling_op->last_input_height = input_height;
