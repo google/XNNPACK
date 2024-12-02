@@ -20,7 +20,6 @@
 #include "xnnpack/pack.h"
 #include "xnnpack/unaligned.h"
 #include "pthreadpool.h"
-#include <stdio.h>
 
 struct packw_gemm_goi_bl_context {
   // Number of input channels.
@@ -95,7 +94,6 @@ void xnn_compute_packw_gemm_goi_bl(
       /*extra_bytes=*/context->extra_bytes_bl, 
       /*extra_bytes_n=*/context->extra_bytes_n,
       /*params=*/context->params);
-    
 }
 
 void xnn_multithread_qb4_weights_and_biases(

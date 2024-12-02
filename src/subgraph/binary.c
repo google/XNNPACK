@@ -28,7 +28,8 @@ static enum xnn_status create_binary_operator(
   size_t num_values,
   struct xnn_operator_data* opdata,
   struct xnn_code_cache* code_cache,
-  xnn_weights_cache_t weights_cache)
+  xnn_weights_cache_t weights_cache,
+  pthreadpool_t threadpool)
 {
   const uint32_t input1_id = opdata->inputs[0];
   assert(input1_id < num_values);

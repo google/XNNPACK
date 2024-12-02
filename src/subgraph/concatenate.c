@@ -46,7 +46,8 @@ static enum xnn_status create_concatenate_n_operator(
   size_t num_inputs,
   struct xnn_operator_data* opdata,
   struct xnn_code_cache* code_cache,
-  xnn_weights_cache_t weights_cache)
+  xnn_weights_cache_t weights_cache,
+  pthreadpool_t threadpool)
 {
   enum xnn_status status;
   const int32_t axis = node->params.concatenate.axis;
@@ -70,9 +71,10 @@ static enum xnn_status create_concatenate2_operator(
   size_t num_values,
   struct xnn_operator_data* opdata,
   struct xnn_code_cache* code_cache,
-  xnn_weights_cache_t weights_cache)
+  xnn_weights_cache_t weights_cache,
+  pthreadpool_t threadpool)
 {
-  return create_concatenate_n_operator(node, values, num_values, /*num_inputs=*/2, opdata, code_cache, weights_cache);
+  return create_concatenate_n_operator(node, values, num_values, /*num_inputs=*/2, opdata, code_cache, weights_cache, threadpool);
 }
 
 static enum xnn_status create_concatenate3_operator(
@@ -81,9 +83,10 @@ static enum xnn_status create_concatenate3_operator(
   size_t num_values,
   struct xnn_operator_data* opdata,
   struct xnn_code_cache* code_cache,
-  xnn_weights_cache_t weights_cache)
+  xnn_weights_cache_t weights_cache,
+  pthreadpool_t threadpool)
 {
-  return create_concatenate_n_operator(node, values, num_values, /*num_inputs=*/3, opdata, code_cache, weights_cache);
+  return create_concatenate_n_operator(node, values, num_values, /*num_inputs=*/3, opdata, code_cache, weights_cache, threadpool);
 }
 
 static enum xnn_status create_concatenate4_operator(
@@ -92,9 +95,10 @@ static enum xnn_status create_concatenate4_operator(
   size_t num_values,
   struct xnn_operator_data* opdata,
   struct xnn_code_cache* code_cache,
-  xnn_weights_cache_t weights_cache)
+  xnn_weights_cache_t weights_cache,
+  pthreadpool_t threadpool)
 {
-  return create_concatenate_n_operator(node, values, num_values, /*num_inputs=*/4, opdata, code_cache, weights_cache);
+  return create_concatenate_n_operator(node, values, num_values, /*num_inputs=*/4, opdata, code_cache, weights_cache, threadpool);
 }
 
 static enum xnn_status create_concatenate5_operator(
@@ -103,9 +107,10 @@ static enum xnn_status create_concatenate5_operator(
   size_t num_values,
   struct xnn_operator_data* opdata,
   struct xnn_code_cache* code_cache,
-  xnn_weights_cache_t weights_cache)
+  xnn_weights_cache_t weights_cache,
+  pthreadpool_t threadpool)
 {
-  return create_concatenate_n_operator(node, values, num_values, /*num_inputs=*/5, opdata, code_cache, weights_cache);
+  return create_concatenate_n_operator(node, values, num_values, /*num_inputs=*/5, opdata, code_cache, weights_cache, threadpool);
 }
 
 static enum xnn_status reshape_concatenate_operator_helper(

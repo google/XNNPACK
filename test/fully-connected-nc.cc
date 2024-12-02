@@ -1375,8 +1375,8 @@ TEST(FULLY_CONNECTED_NC_QD8_F32_QC4W, weights_cache_unit_batch_transpose_weights
 }
 
 TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, bl) {
-  // for (size_t ic=32; ic<=256; ic*=2){
-  //   for (size_t bs=32; bs<=ic; bs=bs*2) {
+  for (size_t ic=32; ic<=256; ic*=2){
+    for (size_t bs=32; bs<=ic; bs=bs*2) {
       FullyConnectedOperatorTester()
         .has_bias(false)
         .batch_size(1)
@@ -1386,8 +1386,23 @@ TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, bl) {
         .kernel_zero_point(8)
         .iterations(3)
         .TestQD8F32QB4W();
-  //   }
-  // }
+    }
+  }
+}
+
+TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, odd_nc) {
+  for (size_t ic=32; ic<=256; ic*=2){
+    for (size_t bs=32; bs<=ic; bs=bs*2) {
+      FullyConnectedOperatorTester()
+        .batch_size(12)
+        .output_channels(19)
+        .input_channels(ic)
+        .block_size(bs)
+        .kernel_zero_point(8)
+        .iterations(3)
+        .TestQD8F32QB4W();
+    }
+  }
 }
 
 TEST(FULLY_CONNECTED_NC_QD8_F32_QB4W, multithreaded) {
