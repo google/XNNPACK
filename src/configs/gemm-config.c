@@ -1772,6 +1772,8 @@ static void init_qdu8_f32_qb4w_gemm_config(void) {
         qdu8_f32_qb4w_gemm_config.log2_kr = 3;
         qdu8_f32_qb4w_gemm_config.planes = 2;
       }
+    #else
+      {}
     #endif
   #endif //XNN_ARCH_X86 || XNN_ARCH_X86_64
 }
@@ -2255,6 +2257,8 @@ static void init_qdu8_f16_qc8w_gemm_config(void) {
         qdu8_f16_qc8w_gemm_config.nr = 8;
         qdu8_f16_qc8w_gemm_config.log2_kr = 3;
       }
+    #else
+      {}
     #endif
   #endif //XNN_ARCH_X86 || XNN_ARCH_X86_64
 }
