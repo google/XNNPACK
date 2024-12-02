@@ -13,7 +13,7 @@ load(
 )
 load(
     "//:build_params.bzl",
-    "xnnpack_select_if",
+    # "xnnpack_select_if",
     "xnnpack_simd_copts_for_arch",
     "xnnpack_simd_f16_archs",
     "xnnpack_simd_f32_archs",
