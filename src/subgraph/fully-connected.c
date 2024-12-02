@@ -196,7 +196,8 @@ enum fully_connected_op_type get_fully_connected_op_type(
 static enum xnn_status create_fully_connected_operator(
     const struct xnn_node* node, const struct xnn_value* values,
     size_t num_values, struct xnn_operator_data* opdata,
-    struct xnn_code_cache* code_cache, xnn_weights_cache_t weights_cache) {
+    struct xnn_code_cache* code_cache, xnn_weights_cache_t weights_cache,
+    pthreadpool_t threadpool) {
   assert(node->num_inputs >= 2);
   assert(node->num_inputs <= 3);
   const uint32_t input_id = node->inputs[0];
@@ -300,7 +301,7 @@ static enum xnn_status create_fully_connected_operator(
           (const uint16_t*)values[filter_id].quantization.blockwise_scale,
           kernel_data, bias_data, node->activation.output_min,
           node->activation.output_max, node->flags, code_cache, weights_cache,
-          &opdata->operator_objects[0], NULL);
+          &opdata->operator_objects[0], threadpool);
       break;
     case fc_type_qd8_f16_qc8w:
       status = xnn_create_fully_connected_nc_qd8_f16_qc8w(
@@ -353,7 +354,7 @@ static enum xnn_status create_fully_connected_operator(
           (const uint16_t*)values[filter_id].quantization.blockwise_scale,
           kernel_data, bias_data, node->activation.output_min,
           node->activation.output_max, node->flags, code_cache, weights_cache,
-          &opdata->operator_objects[0], NULL);
+          &opdata->operator_objects[0], threadpool);
       break;
     case fc_type_qdu8_f32_qb4w:
       status = xnn_create_fully_connected_nc_qdu8_f32_qb4w(
@@ -365,7 +366,7 @@ static enum xnn_status create_fully_connected_operator(
           (const uint16_t*)values[filter_id].quantization.blockwise_scale,
           kernel_data, bias_data, node->activation.output_min,
           node->activation.output_max, node->flags, code_cache, weights_cache,
-          &opdata->operator_objects[0], NULL);
+          &opdata->operator_objects[0], threadpool);
       break;
     case fc_type_f32_f16_f32: {
       uint32_t flags = node->flags;

@@ -55,7 +55,8 @@ static enum xnn_status create_even_split_n_operator(
   struct xnn_operator_data* opdata,
   struct xnn_code_cache* code_cache,
   size_t num_splits,
-  xnn_weights_cache_t weights_cache)
+  xnn_weights_cache_t weights_cache,
+  pthreadpool_t threadpool)
 {
   assert(node->num_inputs == 1);
   assert(node->num_outputs == num_splits);
@@ -84,9 +85,10 @@ static enum xnn_status create_even_split2_operator(
   size_t num_values,
   struct xnn_operator_data* opdata,
   struct xnn_code_cache* code_cache,
-  xnn_weights_cache_t weights_cache)
+  xnn_weights_cache_t weights_cache,
+  pthreadpool_t threadpool)
 {
-  return create_even_split_n_operator(node, values, num_values, opdata, code_cache, /*num_splits=*/2, weights_cache);
+  return create_even_split_n_operator(node, values, num_values, opdata, code_cache, /*num_splits=*/2, weights_cache, threadpool);
 }
 
 static enum xnn_status create_even_split3_operator(
@@ -95,9 +97,10 @@ static enum xnn_status create_even_split3_operator(
   size_t num_values,
   struct xnn_operator_data* opdata,
   struct xnn_code_cache* code_cache,
-  xnn_weights_cache_t weights_cache)
+  xnn_weights_cache_t weights_cache,
+  pthreadpool_t threadpool)
 {
-  return create_even_split_n_operator(node, values, num_values, opdata, code_cache, /*num_splits=*/3, weights_cache);
+  return create_even_split_n_operator(node, values, num_values, opdata, code_cache, /*num_splits=*/3, weights_cache, threadpool);
 }
 
 static enum xnn_status create_even_split4_operator(
@@ -106,9 +109,10 @@ static enum xnn_status create_even_split4_operator(
   size_t num_values,
   struct xnn_operator_data* opdata,
   struct xnn_code_cache* code_cache,
-  xnn_weights_cache_t weights_cache)
+  xnn_weights_cache_t weights_cache,
+  pthreadpool_t threadpool)
 {
-  return create_even_split_n_operator(node, values, num_values, opdata, code_cache, /*num_splits=*/4, weights_cache);
+  return create_even_split_n_operator(node, values, num_values, opdata, code_cache, /*num_splits=*/4, weights_cache, threadpool);
 }
 
 static enum xnn_status reshape_even_split_operator_helper(
