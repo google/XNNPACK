@@ -111,6 +111,7 @@ MICROKERNEL_DEFS = [
     "src/f32-pavgpool/f32-pavgpool-minmax.h",
     "src/f32-qs8-vcvt/f32-qs8-vcvt.h",
     "src/f32-qu8-vcvt/f32-qu8-vcvt.h",
+    "src/f32-raddextexp/f32-raddextexp.h",
     "src/f32-vabs/f32-vabs.h",
     "src/f32-vbinary/f32-vadd.h",
     "src/f32-vbinary/f32-vaddc.h",

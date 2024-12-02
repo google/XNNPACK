@@ -246,9 +246,6 @@ tools/generate-ibilinear-chw-test.py --spec test/f32-ibilinear-chw.yaml --output
 ### Tests for RAddExpMinusMax micro-kernels
 tools/generate-raddexpminusmax-test.py --spec test/f32-raddexpminusmax.yaml --output test/f32-raddexpminusmax.cc &
 
-### Tests for RAddExtExp micro-kernels
-tools/generate-raddextexp-test.py --spec test/f32-raddextexp.yaml --output test/f32-raddextexp.cc &
-
 ### Tests for RAddStoreExpMinusMax micro-kernels
 tools/generate-raddstoreexpminusmax-test.py --spec test/f16-raddstoreexpminusmax.yaml --output test/f16-raddstoreexpminusmax.cc &
 tools/generate-raddstoreexpminusmax-test.py --spec test/f32-raddstoreexpminusmax.yaml --output test/f32-raddstoreexpminusmax.cc &
