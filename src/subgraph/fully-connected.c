@@ -300,7 +300,7 @@ static enum xnn_status create_fully_connected_operator(
           (const uint16_t*)values[filter_id].quantization.blockwise_scale,
           kernel_data, bias_data, node->activation.output_min,
           node->activation.output_max, node->flags, code_cache, weights_cache,
-          &opdata->operator_objects[0]);
+          &opdata->operator_objects[0], NULL);
       break;
     case fc_type_qd8_f16_qc8w:
       status = xnn_create_fully_connected_nc_qd8_f16_qc8w(
@@ -353,7 +353,7 @@ static enum xnn_status create_fully_connected_operator(
           (const uint16_t*)values[filter_id].quantization.blockwise_scale,
           kernel_data, bias_data, node->activation.output_min,
           node->activation.output_max, node->flags, code_cache, weights_cache,
-          &opdata->operator_objects[0]);
+          &opdata->operator_objects[0], NULL);
       break;
     case fc_type_qdu8_f32_qb4w:
       status = xnn_create_fully_connected_nc_qdu8_f32_qb4w(
@@ -365,7 +365,7 @@ static enum xnn_status create_fully_connected_operator(
           (const uint16_t*)values[filter_id].quantization.blockwise_scale,
           kernel_data, bias_data, node->activation.output_min,
           node->activation.output_max, node->flags, code_cache, weights_cache,
-          &opdata->operator_objects[0]);
+          &opdata->operator_objects[0], NULL);
       break;
     case fc_type_f32_f16_f32: {
       uint32_t flags = node->flags;
