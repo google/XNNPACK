@@ -1623,9 +1623,9 @@ static void init_qd8_f32_qc4w_gemm_config(void) {
       qd8_f32_qc4w_gemm_config.planes = 2;
     }
   #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
     #if XNN_ENABLE_AVX512AMX
+      const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+      assert(hardware_config != NULL);
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512amx) {
         qd8_f32_qc4w_gemm_config.arch = xnn_arch_x86_avx512amx;
         qd8_f32_qc4w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc4w_gemm_minmax_ukernel_1x64c4__avx512amx);
