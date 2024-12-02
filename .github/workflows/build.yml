@@ -474,14 +474,16 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
-      - name: Install gcc-13
-        # Pull in gcc-13 from the ubuntu-23.10 repository since it is not available
-        # for ubuntu-22.04.
+      - name: Add repository ppa:ubuntu-toolchain-r/test for gcc-13 and g++-13
         working-directory: ${{ github.workspace }}
         run: |
           sudo add-apt-repository ppa:ubuntu-toolchain-r/test
           sudo apt update
-          sudo apt install gcc-13 g++-13
+      - name: Install gcc-13 (cached)
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: gcc-13 g++-13
+          version: 1.0
       - name: Restore bazel cache
         uses: actions/cache/restore@v4
         with:
