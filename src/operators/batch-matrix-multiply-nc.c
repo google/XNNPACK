@@ -193,7 +193,8 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_f32_const_weights(
                                            /*extra_data1=*/NULL,
                                            /*extra_data1_size=*/0,
                                            /*packed_weights_ptr=*/packed_data,
-                                           /*packing_params=*/NULL);
+                                           /*packing_params=*/NULL,
+                                           /*pthreadpool=*/NULL);
     } else {
       if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
         batch_matrix_multiply_op->ukernel.gemm.packw_gemm_goi(
@@ -360,7 +361,9 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
           (xnn_init_scale_params_fn)xnn_init_qs8_qc8w_scale_fp32_params,
           /*extra_data1=*/scale_b,
           /*extra_data1_size=*/sizeof(float),
-          /*packed_weights_ptr=*/packed_data, &pack_gemm_params);
+          /*packed_weights_ptr=*/packed_data, 
+          /*params=*/&pack_gemm_params,
+          /*pthreadpool=*/NULL);
     } else {
       if (batch_matrix_multiply_op->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
         batch_matrix_multiply_op->ukernel.gemm.packw_gemm_goi(

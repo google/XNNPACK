@@ -260,7 +260,7 @@ enum xnn_status xnn_create_fully_connected_nc_qdu8_f32_qb4w(
     const uint16_t* kernel_scale, const void* kernel, const float* bias,
     float output_min, float output_max, uint32_t flags,
     xnn_code_cache_t code_cache, xnn_weights_cache_t weights_cache,
-    xnn_operator_t* fully_connected_op_out);
+    xnn_operator_t* fully_connected_op_out, pthreadpool_t threadpool);
 
 enum xnn_status xnn_reshape_fully_connected_nc_qdu8_f32_qb4w(
     xnn_operator_t fully_connected_op, size_t batch_size,

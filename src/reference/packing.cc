@@ -22,6 +22,7 @@
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pack.h"
 #include "xnnpack/unaligned.h"
+#include "pthreadpool.h"
 
 #if XNN_ENABLE_KLEIDIAI
   #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme.h"
@@ -1429,7 +1430,7 @@ void xnn_pack_qs8_weights_and_biases(
     size_t extra_data0_element_size,
     xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
     size_t extra_data1_element_size, void* packed_weights_ptr,
-    const void* params) {
+    const void* params, pthreadpool_t threadpool) {
   const size_t extra_bytes =
       extra_data0_element_size + extra_data1_element_size;
   const size_t weights_stride = xnn_packed_stride_qs8_weights_and_biases(
@@ -1460,7 +1461,7 @@ void xnn_pack_qs4_weights_and_biases(
     size_t extra_data0_element_size,
     xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
     size_t extra_data1_element_size, void* packed_weights_ptr,
-    const void* params) {
+    const void* params, pthreadpool_t threadpool) {
   const size_t extra_bytes = extra_data0_element_size + extra_data1_element_size;
   const size_t weights_stride = xnn_packed_stride_qs8_weights_and_biases(
       gemm_config, input_channels, unused_block_size, k_stride, extra_bytes);
@@ -1506,7 +1507,7 @@ void xnn_pack_qb4_weights_and_biases(
     size_t extra_data0_element_size,
     xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
     size_t extra_data1_element_size, void* packed_weights_ptr,
-    const void* params) {
+    const void* params, pthreadpool_t threadpool) {
 
   const uint32_t nr = gemm_config->nr;
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
@@ -1593,7 +1594,7 @@ void xnn_pack_qu8_weights_and_biases(
     size_t extra_data0_element_size,
     xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
     size_t extra_data1_element_size, void* packed_weights_ptr,
-    const void* params) {
+    const void* params, pthreadpool_t threadpool) {
   const size_t extra_bytes =
       extra_data0_element_size + extra_data1_element_size;
   const size_t weights_stride = xnn_packed_stride_qs8_weights_and_biases(
@@ -1625,7 +1626,7 @@ void xnn_pack_kai_qs4_weights_and_biases(
     size_t extra_data0_element_size,
     xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
     size_t extra_data1_element_size, void* packed_weights_ptr,
-    const void* params) {
+    const void* params, pthreadpool_t threadpool) {
   const uint32_t nr = gemm_config->nr;
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
@@ -1688,7 +1689,7 @@ void xnn_pack_kai_f32_weights_and_biases(
     size_t extra_data0_element_size,
     xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
     size_t extra_data1_element_size, void* packed_weights_ptr,
-    const void* params) {
+    const void* params, pthreadpool_t threadpool) {
   assert(extra_data0 == nullptr);
   assert(extra_data1 == nullptr);
   const uint32_t nr = gemm_config->nr;
@@ -1755,7 +1756,7 @@ void xnn_pack_kai_qb4_weights_and_biases(
     size_t extra_data0_element_size,
     xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
     size_t extra_data1_element_size, void* packed_weights_ptr,
-    const void* params) {
+    const void* params, pthreadpool_t threadpool) {
   const uint32_t nr = gemm_config->nr;
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;

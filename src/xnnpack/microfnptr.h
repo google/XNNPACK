@@ -13,6 +13,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microparams.h"
+#include "pthreadpool.h"
 
 /****************** Microkernel pointers for dense inference *****************/
 
@@ -2263,7 +2264,8 @@ typedef void (*xnn_pack_weights_and_biases_fn)(
     const void* extra_data1,                       //
     size_t extra_data1_element_size,               //
     void* packed_weights_ptr,                      //
-    const void* params);
+    const void* params,                            //
+    pthreadpool_t threadpool);
 
 // Computes the stride of the packing used by a corresponding
 // `xnn_pack_weights_and_biases_fn`. The `k_stride` parameter is provided for

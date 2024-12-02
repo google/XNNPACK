@@ -31,6 +31,7 @@
 #include "xnnpack/internal.h"
 #include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
+#include "pthreadpool.h"
 
 static int8_t sign_extend_int4(int8_t value) {
   int8_t mask = 0x08;
@@ -207,6 +208,20 @@ class FullyConnectedOperatorTester {
 
   size_t iterations() const {
     return this->iterations_;
+  }
+
+  FullyConnectedOperatorTester& multithreaded(size_t multithreaded) {
+    this->multithreaded_ = multithreaded;
+    return *this;
+  }
+
+  size_t multithreaded() const {
+    return this->multithreaded_;
+  }
+
+  size_t num_threads() const {
+    // Do not spin up excessive number of threads for tests.
+    return multithreaded() ? 5 : 1;
   }
 
   size_t calc_kernel_stride() const {
@@ -442,6 +457,16 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<xnn_bfloat16> kernel_scale2d(output_channels() * num_blocks);
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)>
+          auto_threadpool{nullptr, pthreadpool_destroy};
+      if (multithreaded()) {
+        const pthreadpool_t threadpool = pthreadpool_create(num_threads());
+        if (pthreadpool_get_threads_count(threadpool) <= 1) {
+          GTEST_SKIP();
+        } else {
+          auto_threadpool.reset(threadpool);
+        }
+      }
       std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
@@ -528,7 +553,8 @@ class FullyConnectedOperatorTester {
           output_min, output_max,
           transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
           nullptr, auto_weights_cache.get(),
-          &fully_connected_op);
+          &fully_connected_op,
+          auto_threadpool.get());
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -576,7 +602,8 @@ class FullyConnectedOperatorTester {
             output_min, output_max,
             transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
             nullptr, auto_weights_cache.get(),
-            &fully_connected_op2));
+            &fully_connected_op2,
+            auto_threadpool.get()));
         ASSERT_NE(nullptr, fully_connected_op2);
 
         // Smart pointer to automatically delete fully_connected_op.
@@ -824,6 +851,16 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<xnn_bfloat16> kernel_scale2d(output_channels() * num_blocks);
 
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)>
+          auto_threadpool{nullptr, pthreadpool_destroy};
+      if (multithreaded()) {
+        const pthreadpool_t threadpool = pthreadpool_create(num_threads());
+        if (pthreadpool_get_threads_count(threadpool) <= 1) {
+          GTEST_SKIP();
+        } else {
+          auto_threadpool.reset(threadpool);
+        }
+      }
       std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
@@ -834,6 +871,7 @@ class FullyConnectedOperatorTester {
         quantization_params[i].zero_point = quantization_params[batch_size() - 1].zero_point;
         quantization_params[i].inv_scale = quantization_params[batch_size() - 1].inv_scale;
       }
+      
 
       // Compute reference results, without renormalization.
       std::fill(output_ref.begin(), output_ref.end(), 0);
@@ -907,7 +945,8 @@ class FullyConnectedOperatorTester {
           output_min, output_max,
           transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
           nullptr, auto_weights_cache.get(),
-          &fully_connected_op);
+          &fully_connected_op,
+          auto_threadpool.get());
       if (status == xnn_status_unsupported_hardware) {
         GTEST_SKIP();
       }
@@ -955,7 +994,8 @@ class FullyConnectedOperatorTester {
             output_min, output_max,
             transpose_weights() ? XNN_FLAG_TRANSPOSE_WEIGHTS : 0,
             nullptr, auto_weights_cache.get(),
-            &fully_connected_op2));
+            &fully_connected_op2,
+            auto_threadpool.get()));
         ASSERT_NE(nullptr, fully_connected_op2);
 
         // Smart pointer to automatically delete fully_connected_op.
@@ -3225,6 +3265,7 @@ class FullyConnectedOperatorTester {
   size_t output_stride_{0};
   size_t batch_size_{1};
   size_t block_size_{1};
+  bool multithreaded_{false};
   uint8_t input_zero_point_{127};
   uint8_t output_zero_point_{127};
   uint8_t kernel_zero_point_{127};  // set qc4w kernel zero point to invalid
