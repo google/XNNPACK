@@ -1013,6 +1013,7 @@ NON_PROD_WASMSIMD_MICROKERNEL_SRCS = [
     "src/x16-transposec/gen/x16-transposec-8x8-multi-switch-wasmsimd.c",
     "src/x16-transposec/gen/x16-transposec-8x8-reuse-multi-wasmsimd.c",
     "src/x16-transposec/gen/x16-transposec-8x8-reuse-switch-wasmsimd.c",
+    "src/x32-packw/gen/x32-packw-gio-wasmsimd-u2.c",
     "src/x32-packw/gen/x32-packw-x8s4-gemm-goi-wasmsimd-u4.c",
     "src/x32-packx/x32-packx-4x-wasmsimd.c",
     "src/x32-transposec/gen/x32-transposec-4x4-multi-mov-wasmsimd.c",

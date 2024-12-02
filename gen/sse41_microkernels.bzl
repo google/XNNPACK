@@ -349,6 +349,7 @@ NON_PROD_SSE41_MICROKERNEL_SRCS = [
     "src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-sse41-mul16-ld64-u8.c",
     "src/s8-ibilinear/gen/s8-ibilinear-sse41-c8.c",
     "src/u8-ibilinear/gen/u8-ibilinear-sse41-c8.c",
+    "src/x32-packw/gen/x32-packw-gio-sse41-u2.c",
 ]
 
 ALL_SSE41_MICROKERNEL_SRCS = PROD_SSE41_MICROKERNEL_SRCS + NON_PROD_SSE41_MICROKERNEL_SRCS
