@@ -44,7 +44,6 @@ static enum xnn_status create_fully_connected_nc(
     const void* bias,
     uint32_t flags,
     size_t block_size,
-    size_t extra_bl_bytes,
     const uint16_t* blockwise_kernel_scale_params,
     uint32_t log2_input_element_size,
     uint32_t log2_filter_element_size,
@@ -52,7 +51,6 @@ static enum xnn_status create_fully_connected_nc(
     uint32_t bias_element_size,
     xnn_packw_gemm_gio_ukernel_fn pack_gemm_gio_w,
     xnn_packw_gemm_goi_ukernel_fn pack_gemm_goi_w,
-    xnn_packw_gemm_goi_bl_ukernel_fn pack_gemm_goi_bl_w,
     const void* packing_params,
     int packed_weights_padding_byte,
     size_t extra_weights_bytes,
@@ -155,7 +153,7 @@ static enum xnn_status create_fully_connected_nc(
   const size_t weights_stride =
       gemm_config->packed_stride_weights_and_biases
           ? gemm_config->packed_stride_weights_and_biases(
-                gemm_config, input_channels, block_wise ? block_size : k_stride, extra_weights_bytes)
+                gemm_config, input_channels, block_size, k_stride, extra_weights_bytes)
           : (k_stride << log2_filter_element_size) + bias_element_size +
                 extra_weights_bytes + block_scale_bytes;
   const size_t packed_weights_size = n_stride * weights_stride;
@@ -192,7 +190,8 @@ static enum xnn_status create_fully_connected_nc(
       gemm_config->pack_weights_and_biases(
           flags, gemm_config, input_channels, output_channels,
           /*groups=*/1,
-          block_wise ? block_size : k_stride,
+          /*block_wise=*/block_size,
+          /*kstride=*/k_stride,
           /*accumulator_init=*/bias,
           /*weights=*/kernel,
           /*int_extra_data0_fn=*/(xnn_init_scale_params_fn)init_scale_params,
@@ -204,16 +203,6 @@ static enum xnn_status create_fully_connected_nc(
           /*extra_data1_size=*/init_kernel_scale_params != NULL ? sizeof(float)
                                                                 : 0,
           /*packed_weights_ptr=*/weights_ptr, packing_params);
-
-      if (block_wise && bias != NULL) {
-        void* weights_start = (void*) ((uintptr_t) weights_ptr +
-          gemm_config->nr * (sizeof(float) + (block_size * sizeof(int8_t) / 2)));
-        weights_start = (void*) ((uintptr_t) weights_ptr + gemm_config->nr * (weights_stride - sizeof(float))) ;
-        xnn_init_qs8_qc8w_scale_fp32_params(
-              output_channels, gemm_config->nr, gemm_config->nr,
-              gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
-              bias, weights_start);
-      }
     } else {
       if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
         pack_gemm_gio_w(
@@ -225,24 +214,13 @@ static enum xnn_status create_fully_connected_nc(
           gemm_config->nr * extra_weights_bytes,
           packing_params);
       } else {
-        if (block_wise) {
-          pack_gemm_goi_bl_w(
-            /*groups=*/1, output_channels, input_channels,
-            nr, kr, sr, block_size,
-            kernel, /*bias=*/NULL, /*scale=*/blockwise_kernel_scale_params,
-            weights_ptr,
-            gemm_config->nr * extra_bl_bytes,
-            gemm_config->nr * extra_weights_bytes,
-            packing_params);
-        } else {
-          pack_gemm_goi_w(
-            /*groups=*/1, output_channels, input_channels,
-            nr, kr, sr,
-            kernel, bias, /*scale=*/NULL,
-            weights_ptr,
-            gemm_config->nr * extra_weights_bytes,
-            packing_params);
-        }
+        pack_gemm_goi_w(
+          /*groups=*/1, output_channels, input_channels,
+          nr, kr, sr,
+          kernel, bias, /*scale=*/NULL,
+          weights_ptr,
+          gemm_config->nr * extra_weights_bytes,
+          packing_params);
       }
       if (kernel_scale_params != NULL) {
         assert(init_kernel_scale_params != NULL);
@@ -266,32 +244,6 @@ static enum xnn_status create_fully_connected_nc(
             output_channels, gemm_config->nr, gemm_config->nr,
             gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
             scale_params, weights);
-      }
-
-      if (block_wise) {
-        // Fill in kernel scale.
-        void* weights_start = (void*) ((uintptr_t) weights_ptr +
-          gemm_config->nr * (sizeof(float) + (block_size * sizeof(int8_t) / 2)));
-
-        const size_t block_stride = /*weights*/block_size / 2 + sizeof(uint16_t);
-
-        xnn_init_blockwise_scale_bf16_params(
-            output_channels, gemm_config->nr, gemm_config->nr,
-            gemm_config->nr * weights_stride,
-            gemm_config->nr * weights_stride,
-            /*num_blocks=*/num_blocks,
-            /*block_stride=*/gemm_config->nr * block_stride,
-            0,
-            (const xnn_bfloat16*)blockwise_kernel_scale_params, weights_start);
-
-        // Fill in bias.
-        if (bias != NULL) {
-          weights_start = (void*) ((uintptr_t) weights_ptr + gemm_config->nr * (weights_stride - sizeof(float))) ;
-          xnn_init_qs8_qc8w_scale_fp32_params(
-                output_channels, gemm_config->nr, gemm_config->nr,
-                gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
-                bias, weights_start);
-        }
       }
     }
 
@@ -397,7 +349,6 @@ enum xnn_status create_fully_connected_nc_f16(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/0,
-    /*extra_bl_bytes=*/0,
     /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
@@ -405,7 +356,6 @@ enum xnn_status create_fully_connected_nc_f16(
     /*bias_element_size=*/sizeof(uint16_t),
     pack_gemm_gio_w,
     pack_gemm_goi_w,
-    /*pack_gemm_goi_bl_w=*/NULL,
     /*packing_params=*/NULL,
     /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/0,
@@ -533,7 +483,6 @@ enum xnn_status create_fully_connected_nc_qx8_f16_qc4w(
     input_stride, output_stride,
     kernel, /*bias=*/NULL, flags,
     /*block_size=*/0,
-    /*extra_bl_bytes=*/0,
     /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
@@ -541,7 +490,6 @@ enum xnn_status create_fully_connected_nc_qx8_f16_qc4w(
     /*bias_element_size=*/sizeof(float),
     (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
-    /*pack_gemm_goi_bl_w=*/NULL,
     &packing_params,
     /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float) * 2,
@@ -708,7 +656,6 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/block_size,
-    /*extra_bl_bytes=*/sizeof(uint16_t),
     /*blockwise_kernel_scale_params=*/kernel_scale,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
@@ -716,7 +663,6 @@ enum xnn_status xnn_create_fully_connected_nc_qd8_f16_qb4w(
     /*bias_element_size=*/sizeof(float),
     /*pack_gemm_gio_w,=*/ NULL,
     /*pack_gemm_goi_w=*/ NULL,
-    /*pack_gemm_goi_bl_w=*/gemm_config->pack_gemm_goi_bl,
     /*packing_params=*/&packing_params,
     /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float),
@@ -801,7 +747,6 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qc4w(
     input_stride, output_stride,
     kernel, /*bias=*/NULL, flags,
     /*block_size=*/0,
-    /*extra_bl_bytes=*/0,
     /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
@@ -809,7 +754,6 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qc4w(
     /*bias_element_size=*/sizeof(float),
     (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
-    /*pack_gemm_goi_bl_w=*/NULL,
     &packing_params,
     /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float) * 2,
@@ -1119,7 +1063,6 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/block_size,
-    /*extra_bl_bytes=*/sizeof(uint16_t),
     /*blockwise_kernel_scale_params=*/kernel_scale,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
@@ -1127,7 +1070,6 @@ enum xnn_status xnn_create_fully_connected_nc_qp8_f32_qb4w(
     /*bias_element_size=*/sizeof(float),
     /*pack_gemm_gio_w,=*/ NULL,
     /*pack_gemm_goi_w=*/ NULL,
-    /*pack_gemm_goi_bl_w=*/gemm_config->pack_gemm_goi_bl,
     &packing_params,
     /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/0,
@@ -1244,7 +1186,6 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/block_size,
-    /*extra_bl_bytes=*/sizeof(uint16_t),
     /*blockwise_kernel_scale_params=*/kernel_scale,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
@@ -1252,7 +1193,6 @@ enum xnn_status create_fully_connected_nc_qx8_f32_qb4w(
     /*bias_element_size=*/sizeof(float),
     /*pack_gemm_gio_w,=*/ NULL,
     /*pack_gemm_goi_w=*/ NULL,
-    /*pack_gemm_goi_bl_w=*/gemm_config->pack_gemm_goi_bl,
     &packing_params,
     /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float),
@@ -1375,7 +1315,6 @@ enum xnn_status create_fully_connected_nc_qdx8_f32_qc8w(
     input_stride, output_stride,
     kernel, NULL, flags,
     /*block_size=*/0,
-    /*extra_bl_bytes=*/0,
     /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
@@ -1383,7 +1322,6 @@ enum xnn_status create_fully_connected_nc_qdx8_f32_qc8w(
     /*bias_element_size=*/sizeof(float),
     (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
-    /*pack_gemm_goi_bl_w=*/NULL,
     &packing_params,
     /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float) * 2,
@@ -1506,7 +1444,6 @@ enum xnn_status create_fully_connected_nc_qx8_f16_qc8w(
     input_stride, output_stride,
     kernel, NULL, flags,
     /*block_size=*/0,
-    /*extra_bl_bytes=*/0,
     /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
@@ -1514,7 +1451,6 @@ enum xnn_status create_fully_connected_nc_qx8_f16_qc8w(
     /*bias_element_size=*/sizeof(float),
     (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
-    /*pack_gemm_goi_bl_w=*/NULL,
     &packing_params,
     /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float) * 2,
@@ -1662,7 +1598,6 @@ enum xnn_status create_fully_connected_nc_f32(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/0,
-    /*extra_bl_bytes=*/0,
     /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
@@ -1670,7 +1605,6 @@ enum xnn_status create_fully_connected_nc_f32(
     /*bias_element_size=*/sizeof(float),
     (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
-    /*pack_gemm_goi_bl_w=*/NULL,
     /*packing_params=*/NULL,
     /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/0,
@@ -1807,7 +1741,6 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc4w(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/0,
-    /*extra_bl_bytes=*/0,
     /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     // Pass 1 byte even though it is half byte, we handle the division via filter_is_nibble == true.
@@ -1816,7 +1749,6 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc4w(
     /*bias_element_size=*/sizeof(float),
     (xnn_packw_gemm_gio_ukernel_fn) NULL,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
-    /*pack_gemm_goi_bl_w=*/NULL,
     /*packing_params=*/NULL,
     /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float),
@@ -1900,7 +1832,6 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc8w(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/0,
-    /*extra_bl_bytes=*/0,
     /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
@@ -1908,7 +1839,6 @@ enum xnn_status xnn_create_fully_connected_nc_f32_qc8w(
     /*bias_element_size=*/sizeof(float),
     (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
-    /*pack_gemm_goi_bl_w=*/NULL,
     /*packing_params=*/NULL,
     /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float),
@@ -2000,7 +1930,6 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/0,
-    /*extra_bl_bytes=*/0,
     /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
@@ -2008,7 +1937,6 @@ enum xnn_status xnn_create_fully_connected_nc_qs8(
     /*bias_element_size=*/sizeof(int32_t),
     (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
-    /*pack_gemm_goi_bl_w=*/NULL,
     &packing_params,
     /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float),
@@ -2107,7 +2035,6 @@ enum xnn_status xnn_create_fully_connected_nc_qs8_qc8w(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/0,
-    /*extra_bl_bytes=*/0,
     /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_INT8_T,
@@ -2115,7 +2042,6 @@ enum xnn_status xnn_create_fully_connected_nc_qs8_qc8w(
     /*bias_element_size=*/sizeof(int32_t),
     (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
-    /*pack_gemm_goi_bl_w=*/NULL,
     &packing_params,
     /*packed_weights_padding_byte=*/0,
     /*extra_weights_bytes=*/sizeof(float),
@@ -2207,7 +2133,6 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     input_stride, output_stride,
     kernel, bias, flags,
     /*block_size=*/0,
-    /*extra_bl_bytes=*/0,
     /*blockwise_kernel_scale_params=*/NULL,
     /*log2_input_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
     /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
@@ -2215,7 +2140,6 @@ enum xnn_status xnn_create_fully_connected_nc_qu8(
     /*bias_element_size=*/sizeof(int32_t),
     (xnn_packw_gemm_gio_ukernel_fn) gemm_config->pack_gemm_gio,
     (xnn_packw_gemm_goi_ukernel_fn) gemm_config->pack_gemm_goi,
-    /*pack_gemm_goi_bl_w=*/NULL,
     &packing_params,
     /*packed_weights_padding_byte=*/kernel_zero_point,
     /*extra_weights_bytes=*/0,
