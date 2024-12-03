@@ -8,6 +8,11 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#if defined(__has_feature)
+  #if __has_feature(memory_sanitizer)
+    #include <sanitizer/msan_interface.h>
+  #endif
+#endif
 
 #include <immintrin.h>
 
@@ -44,10 +49,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x64c4__avx512amx(
 // Update if amxintrin changes
 #if defined(__x86_64__)
   __attribute__((aligned(64))) int32_t vintile[16 * 16];
-  __attribute__((aligned(64))) int32_t res0[16 * 16];
-  __attribute__((aligned(64))) int32_t res1[16 * 16];
-  __attribute__((aligned(64))) int32_t res2[16 * 16];
-  __attribute__((aligned(64))) int32_t res3[16 * 16];
+  __attribute__((aligned(64))) int32_t res[4][16 * 16];
 
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
   const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
@@ -67,19 +69,19 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x64c4__avx512amx(
   // Load tile configuration
   __attribute__((aligned(64))) struct __tile_config tile_data = {0};
   tile_data.palette_id = 1;
-  tile_data.rows[0] = mr;              // tmm0 = res 0
-  tile_data.rows[1] = mr;              // tmm1 = res 1
-  tile_data.rows[2] = mr;              // tmm2 = res 2
-  tile_data.rows[3] = mr;              // tmm3 = res 3
+  tile_data.rows[0] = mr;              // tmm0 = res[0]
+  tile_data.rows[1] = mr;              // tmm1 = res[1]
+  tile_data.rows[2] = mr;              // tmm2 = res[2]
+  tile_data.rows[3] = mr;              // tmm3 = res[3]
   tile_data.rows[4] = mr;              // tmm4 = input
   tile_data.rows[5] = 16;              // tmm5 = weights
   tile_data.rows[6] = mr;              // tmm6 = input remainder
   tile_data.rows[7] = kremainder >> 2; // tmm7 = weights remainder
 
-  tile_data.colsb[0] = 64;          // tmm0 = res 0
-  tile_data.colsb[1] = 64;          // tmm1 = res 1
-  tile_data.colsb[2] = 64;          // tmm2 = res 1
-  tile_data.colsb[3] = 64;          // tmm3 = res 1
+  tile_data.colsb[0] = 64;          // tmm0 = res[0]
+  tile_data.colsb[1] = 64;          // tmm1 = res[1]
+  tile_data.colsb[2] = 64;          // tmm2 = res[2]
+  tile_data.colsb[3] = 64;          // tmm3 = res[3]
   tile_data.colsb[4] = 64;          // tmm4 = input
   tile_data.colsb[5] = 64;          // tmm5 = weights
   tile_data.colsb[6] = kremainder;  // tmm6 = input remainder
@@ -390,76 +392,87 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x64c4__avx512amx(
       p -= 16 * sizeof(void*);
     } while (p != 0);
 
-    // Add tile to bias
-    _tile_stored(0, res0, 64);
-    _tile_stored(1, res1, 64);
-    _tile_stored(2, res2, 64);
-    _tile_stored(3, res3, 64);
+    // TODO: Instead of processing up to 4 tiles (16x64) consider
+    // quantizing 1 tile at a time (16 registers)
+    _tile_stored(0, &res[0][0], 64);
+    _tile_stored(1, &res[1][0], 64);
+    _tile_stored(2, &res[2][0], 64);
+    _tile_stored(3, &res[3][0], 64);
 
-    __m512i vacc0x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 0));
-    __m512i vacc0xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(res1 + 0));
-    __m512i vacc0xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(res2 + 0));
-    __m512i vacc0xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(res3 + 0));
-    __m512i vacc1x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 16));
-    __m512i vacc1xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(res1 + 16));
-    __m512i vacc1xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(res2 + 16));
-    __m512i vacc1xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(res3 + 16));
-    __m512i vacc2x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 32));
-    __m512i vacc2xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(res1 + 32));
-    __m512i vacc2xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(res2 + 32));
-    __m512i vacc2xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(res3 + 32));
-    __m512i vacc3x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 48));
-    __m512i vacc3xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(res1 + 48));
-    __m512i vacc3xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(res2 + 48));
-    __m512i vacc3xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(res3 + 48));
-    __m512i vacc4x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 64));
-    __m512i vacc4xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(res1 + 64));
-    __m512i vacc4xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(res2 + 64));
-    __m512i vacc4xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(res3 + 64));
-    __m512i vacc5x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 80));
-    __m512i vacc5xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(res1 + 80));
-    __m512i vacc5xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(res2 + 80));
-    __m512i vacc5xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(res3 + 80));
-    __m512i vacc6x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 96));
-    __m512i vacc6xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(res1 + 96));
-    __m512i vacc6xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(res2 + 96));
-    __m512i vacc6xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(res3 + 96));
-    __m512i vacc7x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 112));
-    __m512i vacc7xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(res1 + 112));
-    __m512i vacc7xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(res2 + 112));
-    __m512i vacc7xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(res3 + 112));
-    __m512i vacc8x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 128));
-    __m512i vacc8xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(res1 + 128));
-    __m512i vacc8xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(res2 + 128));
-    __m512i vacc8xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(res3 + 128));
-    __m512i vacc9x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 144));
-    __m512i vacc9xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(res1 + 144));
-    __m512i vacc9xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(res2 + 144));
-    __m512i vacc9xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(res3 + 144));
-    __m512i vacc10x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 160));
-    __m512i vacc10xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(res1 + 160));
-    __m512i vacc10xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(res2 + 160));
-    __m512i vacc10xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(res3 + 160));
-    __m512i vacc11x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 176));
-    __m512i vacc11xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(res1 + 176));
-    __m512i vacc11xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(res2 + 176));
-    __m512i vacc11xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(res3 + 176));
-    __m512i vacc12x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 192));
-    __m512i vacc12xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(res1 + 192));
-    __m512i vacc12xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(res2 + 192));
-    __m512i vacc12xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(res3 + 192));
-    __m512i vacc13x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 208));
-    __m512i vacc13xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(res1 + 208));
-    __m512i vacc13xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(res2 + 208));
-    __m512i vacc13xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(res3 + 208));
-    __m512i vacc14x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 224));
-    __m512i vacc14xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(res1 + 224));
-    __m512i vacc14xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(res2 + 224));
-    __m512i vacc14xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(res3 + 224));
-    __m512i vacc15x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 240));
-    __m512i vacc15xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(res1 + 240));
-    __m512i vacc15xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(res2 + 240));
-    __m512i vacc15xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(res3 + 240));
+    // TODO: Fix msan for AMX
+    #if defined(__has_feature)
+      #if __has_feature(memory_sanitizer)
+        __msan_unpoison(res, sizeof(res));
+      #endif
+    #endif
+
+    // TODO: Instead of processing up to 4 tiles (16x64) consider
+    // quantizing 1 row at a time.
+    // Add tile to bias
+    __m512i vacc0x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 0));
+    __m512i vacc0xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(&res[1][0] + 0));
+    __m512i vacc0xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(&res[2][0] + 0));
+    __m512i vacc0xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(&res[3][0] + 0));
+    __m512i vacc1x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 16));
+    __m512i vacc1xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(&res[1][0] + 16));
+    __m512i vacc1xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(&res[2][0] + 16));
+    __m512i vacc1xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(&res[3][0] + 16));
+    __m512i vacc2x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 32));
+    __m512i vacc2xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(&res[1][0] + 32));
+    __m512i vacc2xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(&res[2][0] + 32));
+    __m512i vacc2xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(&res[3][0] + 32));
+    __m512i vacc3x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 48));
+    __m512i vacc3xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(&res[1][0] + 48));
+    __m512i vacc3xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(&res[2][0] + 48));
+    __m512i vacc3xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(&res[3][0] + 48));
+    __m512i vacc4x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 64));
+    __m512i vacc4xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(&res[1][0] + 64));
+    __m512i vacc4xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(&res[2][0] + 64));
+    __m512i vacc4xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(&res[3][0] + 64));
+    __m512i vacc5x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 80));
+    __m512i vacc5xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(&res[1][0] + 80));
+    __m512i vacc5xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(&res[2][0] + 80));
+    __m512i vacc5xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(&res[3][0] + 80));
+    __m512i vacc6x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 96));
+    __m512i vacc6xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(&res[1][0] + 96));
+    __m512i vacc6xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(&res[2][0] + 96));
+    __m512i vacc6xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(&res[3][0] + 96));
+    __m512i vacc7x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 112));
+    __m512i vacc7xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(&res[1][0] + 112));
+    __m512i vacc7xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(&res[2][0] + 112));
+    __m512i vacc7xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(&res[3][0] + 112));
+    __m512i vacc8x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 128));
+    __m512i vacc8xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(&res[1][0] + 128));
+    __m512i vacc8xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(&res[2][0] + 128));
+    __m512i vacc8xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(&res[3][0] + 128));
+    __m512i vacc9x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 144));
+    __m512i vacc9xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(&res[1][0] + 144));
+    __m512i vacc9xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(&res[2][0] + 144));
+    __m512i vacc9xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(&res[3][0] + 144));
+    __m512i vacc10x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 160));
+    __m512i vacc10xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(&res[1][0] + 160));
+    __m512i vacc10xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(&res[2][0] + 160));
+    __m512i vacc10xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(&res[3][0] + 160));
+    __m512i vacc11x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 176));
+    __m512i vacc11xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(&res[1][0] + 176));
+    __m512i vacc11xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(&res[2][0] + 176));
+    __m512i vacc11xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(&res[3][0] + 176));
+    __m512i vacc12x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 192));
+    __m512i vacc12xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(&res[1][0] + 192));
+    __m512i vacc12xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(&res[2][0] + 192));
+    __m512i vacc12xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(&res[3][0] + 192));
+    __m512i vacc13x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 208));
+    __m512i vacc13xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(&res[1][0] + 208));
+    __m512i vacc13xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(&res[2][0] + 208));
+    __m512i vacc13xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(&res[3][0] + 208));
+    __m512i vacc14x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 224));
+    __m512i vacc14xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(&res[1][0] + 224));
+    __m512i vacc14xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(&res[2][0] + 224));
+    __m512i vacc14xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(&res[3][0] + 224));
+    __m512i vacc15x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 240));
+    __m512i vacc15xGHIJKLMNOPQRSTUV = _mm512_add_epi32(vksumGHIJKLMNOPQRSTUV, _mm512_load_epi32(&res[1][0] + 240));
+    __m512i vacc15xWXYZabcdefghijkl = _mm512_add_epi32(vksumWXYZabcdefghijkl, _mm512_load_epi32(&res[2][0] + 240));
+    __m512i vacc15xmnopqrstuvwxyz01 = _mm512_add_epi32(vksummnopqrstuvwxyz01, _mm512_load_epi32(&res[3][0] + 240));
 
     __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
     __m512 vscaled0xGHIJKLMNOPQRSTUV = _mm512_cvtepi32_ps(vacc0xGHIJKLMNOPQRSTUV);
