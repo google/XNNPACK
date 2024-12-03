@@ -50,7 +50,7 @@ void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_uk
   const void* scale,
   ${WTYPE}* packed_weights,
   size_t extra_bytes,
-  const void* params) XNN_OOB_READS
+  const void* params)
 {
   assert(g != 0);
   assert(nc != 0);
