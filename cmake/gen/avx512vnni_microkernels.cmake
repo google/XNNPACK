@@ -203,4 +203,37 @@ SET(NON_PROD_AVX512VNNI_MICROKERNEL_SRCS
   src/qs8-rsum/gen/qs8-rsum-avx512vnni-u256-acc2.c
   src/qs8-rsum/gen/qs8-rsum-avx512vnni-u256-acc4.c)
 
+SET(PROD_AVX512VNNI_ASM_MICROKERNEL_SRCS)
+
+SET(NON_PROD_AVX512VNNI_ASM_MICROKERNEL_SRCS
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x16-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x32-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x64-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x16-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x32-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-2x64-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x16-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x32-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-3x64-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x16-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x32-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-4x64-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-5x16-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-5x32-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-5x64-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x16-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-6x32-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x16-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-7x32-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x16-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-8x32-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-9x16-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-9x32-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-10x16-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-10x32-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-11x16-minmax-asm-avx512vnni.S
+  src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-11x32-minmax-asm-avx512vnni.S)
+
 SET(ALL_AVX512VNNI_MICROKERNEL_SRCS ${PROD_AVX512VNNI_MICROKERNEL_SRCS} + ${NON_PROD_AVX512VNNI_MICROKERNEL_SRCS})
+
+SET(ALL_AVX512VNNI_ASM_MICROKERNEL_SRCS ${PROD_AVX512VNNI_ASM_MICROKERNEL_SRCS} + ${NON_PROD_AVX512VNNI_ASM_MICROKERNEL_SRCS})
