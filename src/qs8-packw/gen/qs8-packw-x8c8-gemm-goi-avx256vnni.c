@@ -64,6 +64,14 @@ void xnn_qs8_packw_gemm_goi_ukernel_x8c8__avx256vnni(
     const int8_t* w0 = (const int8_t*) weights;
     size_t n = nc;
     for (;n >= 8; n -= 8) {
+      const int8_t* w1 = w0 + kc;
+      const int8_t* w2 = w1 + kc;
+      const int8_t* w3 = w2 + kc;
+      const int8_t* w4 = w3 + kc;
+      const int8_t* w5 = w4 + kc;
+      const int8_t* w6 = w5 + kc;
+      const int8_t* w7 = w6 + kc;
+
       int32_t* packed_b = (int32_t*) out;
       if XNN_LIKELY(b != NULL) {
         const __m256i vb0 = _mm256_loadu_si256((const __m256i*) (b + 0));
@@ -74,13 +82,6 @@ void xnn_qs8_packw_gemm_goi_ukernel_x8c8__avx256vnni(
       }
       out += 8 * sizeof(int32_t);
 
-      const int8_t* w1 = w0 + kc;
-      const int8_t* w2 = w1 + kc;
-      const int8_t* w3 = w2 + kc;
-      const int8_t* w4 = w3 + kc;
-      const int8_t* w5 = w4 + kc;
-      const int8_t* w6 = w5 + kc;
-      const int8_t* w7 = w6 + kc;
 
       __m256i vacc0 = _mm256_setzero_si256();
       __m256i vacc4 = _mm256_setzero_si256();
@@ -215,25 +216,10 @@ void xnn_qs8_packw_gemm_goi_ukernel_x8c8__avx256vnni(
     }
 
     // NC remainder (1..7)
+    // Same as main loop except bias is copied and w pointers are clamped
     if XNN_UNLIKELY(n != 0) {
       assert(n >= 1 && n <= 7);
-
-      int32_t* packed_b = (int32_t*) out;
-      if XNN_LIKELY(b != NULL) {
-        size_t nb = n;
-        do {
-          *((int32_t*) out) = *b++;
-          out += sizeof(int32_t);
-        } while (--nb != 0);
-      } else {
-        size_t nb = n;
-        do {
-          *((int32_t*) out) = 0;
-          out += sizeof(int32_t);
-        } while (--nb != 0);
-      }
-      out += (8 - n) * sizeof(int32_t);
-
+      // Clamp weight pointers for NC remainder
       const int8_t* w1 = w0 + kc;
       if XNN_UNPREDICTABLE(n < 2) {
         w1 = w0;
@@ -263,11 +249,83 @@ void xnn_qs8_packw_gemm_goi_ukernel_x8c8__avx256vnni(
         w7 = w6;
       }
 
+      int32_t* packed_b = (int32_t*) out;
+      if XNN_LIKELY(b != NULL) {
+        size_t nb = n;
+        for (nb = 0; nb < n; ++nb) {
+          ((int32_t*) out)[nb] = b[nb];
+        } while (--nb != 0);
+        b += n;
+      } else {
+        _mm256_storeu_si256((__m256i*) (out + 0), _mm256_setzero_si256());
+      }
+      out += 8 * sizeof(int32_t);
+
+
       __m256i vacc0 = _mm256_setzero_si256();
       __m256i vacc4 = _mm256_setzero_si256();
 
-      // KC main loop multiple of 8x8
       size_t k = kc;
+      // KC main loop multiple of 8x32
+      for (; k >= 32; k -= 32) {
+        const __m256i v0_0123 = _mm256_loadu_si256((const __m256i*) w0);
+        const __m256i v1_0123 = _mm256_loadu_si256((const __m256i*) w1);
+        const __m256i v2_0123 = _mm256_loadu_si256((const __m256i*) w2);
+        const __m256i v3_0123 = _mm256_loadu_si256((const __m256i*) w3);
+        const __m256i v4_0123 = _mm256_loadu_si256((const __m256i*) w4);
+        const __m256i v5_0123 = _mm256_loadu_si256((const __m256i*) w5);
+        const __m256i v6_0123 = _mm256_loadu_si256((const __m256i*) w6);
+        const __m256i v7_0123 = _mm256_loadu_si256((const __m256i*) w7);
+
+        const __m256i v01_02 = _mm256_unpacklo_epi64(v0_0123, v1_0123);
+        const __m256i v01_13 = _mm256_unpackhi_epi64(v0_0123, v1_0123);
+        const __m256i v23_02 = _mm256_unpacklo_epi64(v2_0123, v3_0123);
+        const __m256i v23_13 = _mm256_unpackhi_epi64(v2_0123, v3_0123);
+        const __m256i v45_02 = _mm256_unpacklo_epi64(v4_0123, v5_0123);
+        const __m256i v45_13 = _mm256_unpackhi_epi64(v4_0123, v5_0123);
+        const __m256i v67_02 = _mm256_unpacklo_epi64(v6_0123, v7_0123);
+        const __m256i v67_13 = _mm256_unpackhi_epi64(v6_0123, v7_0123);
+
+
+        __m256i v0_0 = _mm256_permute2f128_si256(v01_02, v23_02, _MM_SHUFFLE(0, 2, 0, 0));
+        __m256i v0_1 = _mm256_permute2f128_si256(v01_13, v23_13, _MM_SHUFFLE(0, 2, 0, 0));
+        __m256i v0_2 = _mm256_permute2f128_si256(v01_02, v23_02, _MM_SHUFFLE(0, 3, 0, 1));
+        __m256i v0_3 = _mm256_permute2f128_si256(v01_13, v23_13, _MM_SHUFFLE(0, 3, 0, 1));
+        __m256i v4_0 = _mm256_permute2f128_si256(v45_02, v67_02, _MM_SHUFFLE(0, 2, 0, 0));
+        __m256i v4_1 = _mm256_permute2f128_si256(v45_13, v67_13, _MM_SHUFFLE(0, 2, 0, 0));
+        __m256i v4_2 = _mm256_permute2f128_si256(v45_02, v67_02, _MM_SHUFFLE(0, 3, 0, 1));
+        __m256i v4_3 = _mm256_permute2f128_si256(v45_13, v67_13, _MM_SHUFFLE(0, 3, 0, 1));
+
+        vacc0 = _mm256_dpbusd_epi32(vacc0, vone, v0_0);
+        vacc0 = _mm256_dpbusd_epi32(vacc0, vone, v0_1);
+        vacc0 = _mm256_dpbusd_epi32(vacc0, vone, v0_2);
+        vacc0 = _mm256_dpbusd_epi32(vacc0, vone, v0_3);
+        vacc4 = _mm256_dpbusd_epi32(vacc4, vone, v4_0);
+        vacc4 = _mm256_dpbusd_epi32(vacc4, vone, v4_1);
+        vacc4 = _mm256_dpbusd_epi32(vacc4, vone, v4_2);
+        vacc4 = _mm256_dpbusd_epi32(vacc4, vone, v4_3);
+
+        _mm256_storeu_si256((__m256i *)&out[0],  v0_0);
+        _mm256_storeu_si256((__m256i *)&out[32],  v4_0);
+        _mm256_storeu_si256((__m256i *)&out[64],  v0_1);
+        _mm256_storeu_si256((__m256i *)&out[96],  v4_1);
+        _mm256_storeu_si256((__m256i *)&out[128],  v0_2);
+        _mm256_storeu_si256((__m256i *)&out[160],  v4_2);
+        _mm256_storeu_si256((__m256i *)&out[192],  v0_3);
+        _mm256_storeu_si256((__m256i *)&out[224],  v4_3);
+
+        w0 += 32;
+        w1 += 32;
+        w2 += 32;
+        w3 += 32;
+        w4 += 32;
+        w5 += 32;
+        w6 += 32;
+        w7 += 32;
+        out += 256;
+      }
+
+      // KC main loop multiple of 8x8
       for (; k >= 8; k -= 8) {
         __m256i v0 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w0));
         v0 = _mm256_blend_epi32(v0, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w1)), 0x0C);

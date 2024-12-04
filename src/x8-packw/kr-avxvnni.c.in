@@ -78,13 +78,13 @@ void xnn_${NAMETYPE}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" if VAR
 
   $if DATATYPE == "QS4":
     // Use scalar pack if not an even block size
-    // TODO: Support NC remainder
-    if ((kc & 1) || (nc & 7)) {
+    if (kc & 1) {
       xnn_${NAMETYPE}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
         g, nc, kc, nr, kr, sr,
         weights, bias, scale, packed_weights, extra_bytes, params);
       return;
     }
+    // KR=8 4 bit with 2 planes is 8 bytes
     kc = (kc + 1) / 2;
 
   ${TYPE}* out = (${TYPE}*) packed_weights;
@@ -132,6 +132,9 @@ void xnn_${NAMETYPE}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" if VAR
     const ${TYPE}* w0 = (const ${TYPE}*) weights;
     size_t n = nc;
     for (;n >= ${NR}; n -= ${NR}) {
+      $for N in range(1, NR):
+        const ${TYPE}* w${N} = w${N-1} + kc;
+
       $if DATATYPE in ["QS8", "QS4"]:
         ${BTYPE}* packed_b = (${BTYPE}*) out;
       if XNN_LIKELY(b != NULL) {
@@ -146,8 +149,6 @@ void xnn_${NAMETYPE}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" if VAR
       }
       out += ${NR} * sizeof(${BTYPE});
 
-      $for N in range(1, NR):
-        const ${TYPE}* w${N} = w${N-1} + kc;
       $if PREFETCH:
         $for N in range(0, NR):
           $for OFFSET in range(0, 448, 64):
@@ -301,26 +302,10 @@ void xnn_${NAMETYPE}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" if VAR
     }
 
     // NC remainder (1..${NR-1})
+    // Same as main loop except bias is copied and w pointers are clamped
     if XNN_UNLIKELY(n != 0) {
       assert(n >= 1 && n <= ${NR-1});
-
-      $if DATATYPE in ["QS8", "QS4"]:
-        ${BTYPE}* packed_b = (${BTYPE}*) out;
-      if XNN_LIKELY(b != NULL) {
-        size_t nb = n;
-        do {
-          *((${BTYPE}*) out) = *b++;
-          out += sizeof(${BTYPE});
-        } while (--nb != 0);
-      } else {
-        size_t nb = n;
-        do {
-          *((${BTYPE}*) out) = 0;
-          out += sizeof(${BTYPE});
-        } while (--nb != 0);
-      }
-      out += (${NR} - n) * sizeof(${BTYPE});
-
+      // Clamp weight pointers for NC remainder
       $for N in range(1, NR):
         const ${TYPE}* w${N} = w${N-1} + kc;
         $if N % 2 == 0:
@@ -331,17 +316,80 @@ void xnn_${NAMETYPE}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" if VAR
           if XNN_UNPREDICTABLE(n < ${N+1}) {
             w${N} = w${N-1};
           }
+
+      $if DATATYPE in ["QS8", "QS4"]:
+        ${BTYPE}* packed_b = (${BTYPE}*) out;
+      if XNN_LIKELY(b != NULL) {
+        size_t nb = n;
+        for (nb = 0; nb < n; ++nb) {
+          ((${BTYPE}*) out)[nb] = b[nb];
+        } while (--nb != 0);
+        b += n;
+      } else {
+        $for N in range(0, NR, 8):
+          _mm256_storeu_si256((__m256i*) (out + ${N*4}), _mm256_setzero_si256());
+      }
+      out += ${NR} * sizeof(${BTYPE});
+
       $if PREFETCH:
         $for N in range(0, NR):
-          xnn_prefetch_to_l1((const int8_t*) w${N});
-          xnn_prefetch_to_l1((const int8_t*) w${N} + 64);
+          $for OFFSET in range(0, 448, 64):
+            xnn_prefetch_to_l1((const int8_t*) w${N} + ${OFFSET});
 
       $if DATATYPE in ["QS8", "QS4"]:
         $for N in range(0, NR, 4):
           __m256i vacc${N} = _mm256_setzero_si256();
 
-      // KC main loop multiple of ${NR}x${KR}
       size_t k = kc;
+      // KC main loop multiple of ${NR}x${4 * KR}
+      for (; k >= ${4 * KR}; k -= ${4 * KR}) {
+        $for N in range(NR):
+          const __m256i v${N}_0123 = _mm256_loadu_si256((const __m256i*) w${N});
+
+        $for N in range(0, NR, 2):
+          const __m256i v${N}${N+1}_02 = _mm256_unpacklo_epi64(v${N}_0123, v${N+1}_0123);
+          const __m256i v${N}${N+1}_13 = _mm256_unpackhi_epi64(v${N}_0123, v${N+1}_0123);
+
+        $if PREFETCH:
+          $for N in range(0, NR):
+            xnn_prefetch_to_l1((const int8_t*) w${N} + 448);
+
+        $for N in range(0, NR, 4):
+          $for I in range(0, 4):
+            __m256i v${N}_${I} = _mm256_permute2f128_si256(v${N}${N+1}_${I%2}${I%2+2}, v${N+2}${N+3}_${I%2}${I%2+2}, _MM_SHUFFLE(0, ${I//2+2}, 0, ${I//2}));
+
+        $if DATATYPE in ["QS8"]:
+          $for N in range(0, NR, 4):
+            $for I in range(0, 4):
+              vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, v${N}_${I});
+        $elif DATATYPE in ["QS4"]:
+          $for N in range(0, NR, 4):
+            $for I in range(0, 4):
+              v${N}_${I} = _mm256_xor_si256(v${N}_${I}, vkernel_zero_point);    // uint4 -> int4
+              const __m256i vt${N}_${I} = _mm256_slli_epi32(v${N}_${I}, 4);     // isolate lower int4
+              const __m256i vh${N}_${I} = _mm256_and_si256(v${N}_${I}, vmask);  // isolate upper int4
+              const __m256i vl${N}_${I} = _mm256_and_si256(vt${N}_${I}, vmask);
+              vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, vh${N}_${I});
+              vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, vl${N}_${I});
+              const __m256i v0x${N}_${I} = _mm256_shuffle_epi8(vl${N}_${I}, vperm0);  // 0,2,4,6
+              const __m256i v1x${N}_${I} = _mm256_shuffle_epi8(vh${N}_${I}, vperm1);  // 1,3,5,7
+              const __m256i v01x${N}_${I} = _mm256_or_si256(v0x${N}_${I}, v1x${N}_${I});
+              const __m256i v2x${N}_${I} = _mm256_shuffle_epi8(vl${N}_${I}, vperm2);  // 8,A,C,E
+              const __m256i v3x${N}_${I} = _mm256_shuffle_epi8(vh${N}_${I}, vperm3);  // 9,B,D,F
+              const __m256i v23x${N}_${I} = _mm256_or_si256(v2x${N}_${I}, v3x${N}_${I});
+              const __m256i vt01${N}_${I} = _mm256_srli_epi32(v01x${N}_${I}, 4);  // first plane 0-7
+              v${N}_${I} = _mm256_or_si256(vt01${N}_${I}, v23x${N}_${I});            // + second plane 8-F
+
+        $for I in range(0, 4):
+          $for N in range(0, NR, 4):
+            _mm256_storeu_si256((__m256i *)&out[${(I*NR + N)*KR}],  v${N}_${I});
+
+        $for N in range(NR):
+          w${N} += ${4 * KR};
+        out += ${4*NR*KR};
+      }
+
+      // KC main loop multiple of ${NR}x${KR}
       for (; k >= ${KR}; k -= ${KR}) {
         $for N in range(0, NR, 4):
           __m256i v${N} = _mm256_set1_epi64x((int64_t) unaligned_load_u64(w${N}));
@@ -352,9 +400,25 @@ void xnn_${NAMETYPE}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" if VAR
           $for N in range(0, NR):
             xnn_prefetch_to_l1((const int8_t*) w${N} + 448);
 
-        $if DATATYPE in ["QS8", "QS4"]:
+        $if DATATYPE in ["QS8"]:
           $for N in range(0, NR, 4):
             vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, v${N});
+        $elif DATATYPE in ["QS4"]:
+          $for N in range(0, NR, 4):
+            v${N} = _mm256_xor_si256(v${N}, vkernel_zero_point);    // uint4 -> int4
+            const __m256i vt${N} = _mm256_slli_epi32(v${N}, 4);     // isolate lower int4
+            const __m256i vh${N} = _mm256_and_si256(v${N}, vmask);  // isolate upper int4
+            const __m256i vl${N} = _mm256_and_si256(vt${N}, vmask);
+            vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, vh${N});
+            vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, vl${N});
+            const __m256i v0x${N} = _mm256_shuffle_epi8(vl${N}, vperm0);  // 0,2,4,6
+            const __m256i v1x${N} = _mm256_shuffle_epi8(vh${N}, vperm1);  // 1,3,5,7
+            const __m256i v01x${N} = _mm256_or_si256(v0x${N}, v1x${N});
+            const __m256i v2x${N} = _mm256_shuffle_epi8(vl${N}, vperm2);  // 8,A,C,E
+            const __m256i v3x${N} = _mm256_shuffle_epi8(vh${N}, vperm3);  // 9,B,D,F
+            const __m256i v23x${N} = _mm256_or_si256(v2x${N}, v3x${N});
+            const __m256i vt01${N} = _mm256_srli_epi32(v01x${N}, 4);  // first plane 0-7
+            v${N} = _mm256_or_si256(vt01${N}, v23x${N});            // + second plane 8-F
 
         $for N in range(0, NR, 4):
           _mm256_storeu_si256((__m256i *)&out[${N * KR}],  v${N});
@@ -377,9 +441,25 @@ void xnn_${NAMETYPE}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" if VAR
         $for N in range(NR):
           w${N} += k;
 
-        $if DATATYPE in ["QS8", "QS4"]:
+        $if DATATYPE in ["QS8"]:
           $for N in range(0, NR, 4):
             vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, v${N});
+        $elif DATATYPE in ["QS4"]:
+          $for N in range(0, NR, 4):
+            v${N} = _mm256_xor_si256(v${N}, vkernel_zero_point);    // uint4 -> int4
+            const __m256i vt${N} = _mm256_slli_epi32(v${N}, 4);     // isolate lower int4
+            const __m256i vh${N} = _mm256_and_si256(v${N}, vmask);  // isolate upper int4
+            const __m256i vl${N} = _mm256_and_si256(vt${N}, vmask);
+            vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, vh${N});
+            vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, vl${N});
+            const __m256i v0x${N} = _mm256_shuffle_epi8(vl${N}, vperm0);  // 0,2,4,6
+            const __m256i v1x${N} = _mm256_shuffle_epi8(vh${N}, vperm1);  // 1,3,5,7
+            const __m256i v01x${N} = _mm256_or_si256(v0x${N}, v1x${N});
+            const __m256i v2x${N} = _mm256_shuffle_epi8(vl${N}, vperm2);  // 8,A,C,E
+            const __m256i v3x${N} = _mm256_shuffle_epi8(vh${N}, vperm3);  // 9,B,D,F
+            const __m256i v23x${N} = _mm256_or_si256(v2x${N}, v3x${N});
+            const __m256i vt01${N} = _mm256_srli_epi32(v01x${N}, 4);  // first plane 0-7
+            v${N} = _mm256_or_si256(vt01${N}, v23x${N});            // + second plane 8-F
 
         $for N in range(0, NR, 4):
           _mm256_storeu_si256((__m256i *)&out[${N * KR}],  v${N});
