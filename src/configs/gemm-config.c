@@ -2222,7 +2222,7 @@ static void init_qdu8_f16_qc8w_gemm_config(void) {
   qdu8_f16_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    (void) hardware_config; // in case neither of the ifs are  compiled.
+    (void) hardware_config;  // In case neither of the ifs are compiled.
     #if XNN_ENABLE_AVX256VNNI
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx256vnni) {
         qdu8_f16_qc8w_gemm_config.arch = xnn_arch_x86_avx256vnni;
@@ -2274,7 +2274,7 @@ static void init_qdu8_f32_qc8w_gemm_config(void) {
   qdu8_f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
   #if XNN_ARCH_X86 || XNN_ARCH_X86_64
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    (void) hardware_config; // in case neither of the ifs are  compiled.
+    (void) hardware_config;  // In case neither of the ifs are compiled.
     #if XNN_ENABLE_AVX512VNNI
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512vnni) {
         qdu8_f32_qc8w_gemm_config.arch = xnn_arch_x86_avx512vnni;
