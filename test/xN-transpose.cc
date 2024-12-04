@@ -41,6 +41,25 @@ void TestTranspose(transpose_ukernel ukernel, size_t input_stride,
           output_stride * output_element_stride, input_element_stride,
           output_element_stride, element_size, width, height);
 
+  std::cout << "---------------------------------\n";
+  std::cout << "input_stride: " << input_stride << "\n";
+  std::cout << "input_element_stride: " << input_element_stride << "\n";
+  std::cout << "output_stride: " << output_stride << "\n";
+  std::cout << "output_element_stride: " << output_element_stride << "\n";
+  std::cout << "Input: \n";
+  for (size_t c = 0; c < width; c++) {
+    for (size_t r = 0; r < height; r++) {
+      std::cout << input[input_element_stride * (c + r * input_stride)] << ", ";
+    }
+    std::cout << "\n";
+  }  
+  std::cout << "Output: \n";
+  for (size_t c = 0; c < width; c++) {
+    for (size_t r = 0; r < height; r++) {
+      std::cout << output[output_element_stride * (r + c * output_stride)] << ", ";
+    }
+    std::cout << "\n";
+  }  
   // Verify results.
   for (size_t c = 0; c < width; c++) {
     for (size_t r = 0; r < height; r++) {
