@@ -864,7 +864,7 @@ protected:
   }
 };
 
-class FullyConnectedTestF32QC4W : public FullyConnectedTestBase<float, uint8_t, float> {
+class FullyConnectedTestF32QC4W : public FullyConnectedTestBase<float, uint8_t, float, float, true> {
 };
 
 class FullyConnectedTestF32QC8W : public FullyConnectedTestBase<float, int8_t, float> {
