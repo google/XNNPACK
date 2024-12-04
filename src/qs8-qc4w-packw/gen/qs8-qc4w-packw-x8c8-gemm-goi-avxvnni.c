@@ -128,14 +128,14 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
       size_t k = kc;
       // KC main loop multiple of 8x32
       for (; k >= 32; k -= 32) {
-        const __m256i v0_0123 = _mm256_loadu_si256((const __m256i*) w0);
-        const __m256i v1_0123 = _mm256_loadu_si256((const __m256i*) w1);
-        const __m256i v2_0123 = _mm256_loadu_si256((const __m256i*) w2);
-        const __m256i v3_0123 = _mm256_loadu_si256((const __m256i*) w3);
-        const __m256i v4_0123 = _mm256_loadu_si256((const __m256i*) w4);
-        const __m256i v5_0123 = _mm256_loadu_si256((const __m256i*) w5);
-        const __m256i v6_0123 = _mm256_loadu_si256((const __m256i*) w6);
-        const __m256i v7_0123 = _mm256_loadu_si256((const __m256i*) w7);
+        const __m256i v0_0123 = _mm256_xor_si256(_mm256_loadu_si256((const __m256i*) w0), vkernel_zero_point);  // uint4 -> int4
+        const __m256i v1_0123 = _mm256_xor_si256(_mm256_loadu_si256((const __m256i*) w1), vkernel_zero_point);  // uint4 -> int4
+        const __m256i v2_0123 = _mm256_xor_si256(_mm256_loadu_si256((const __m256i*) w2), vkernel_zero_point);  // uint4 -> int4
+        const __m256i v3_0123 = _mm256_xor_si256(_mm256_loadu_si256((const __m256i*) w3), vkernel_zero_point);  // uint4 -> int4
+        const __m256i v4_0123 = _mm256_xor_si256(_mm256_loadu_si256((const __m256i*) w4), vkernel_zero_point);  // uint4 -> int4
+        const __m256i v5_0123 = _mm256_xor_si256(_mm256_loadu_si256((const __m256i*) w5), vkernel_zero_point);  // uint4 -> int4
+        const __m256i v6_0123 = _mm256_xor_si256(_mm256_loadu_si256((const __m256i*) w6), vkernel_zero_point);  // uint4 -> int4
+        const __m256i v7_0123 = _mm256_xor_si256(_mm256_loadu_si256((const __m256i*) w7), vkernel_zero_point);  // uint4 -> int4
 
         const __m256i v01_02 = _mm256_unpacklo_epi64(v0_0123, v1_0123);
         const __m256i v01_13 = _mm256_unpackhi_epi64(v0_0123, v1_0123);
@@ -156,7 +156,6 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
         __m256i v4_2 = _mm256_permute2f128_si256(v45_02, v67_02, _MM_SHUFFLE(0, 3, 0, 1));
         __m256i v4_3 = _mm256_permute2f128_si256(v45_13, v67_13, _MM_SHUFFLE(0, 3, 0, 1));
 
-        v0_0 = _mm256_xor_si256(v0_0, vkernel_zero_point);    // uint4 -> int4
         const __m256i vt0_0 = _mm256_slli_epi32(v0_0, 4);     // isolate lower int4
         const __m256i vh0_0 = _mm256_and_si256(v0_0, vmask);  // isolate upper int4
         const __m256i vl0_0 = _mm256_and_si256(vt0_0, vmask);
@@ -170,7 +169,6 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
         const __m256i v23x0_0 = _mm256_or_si256(v2x0_0, v3x0_0);
         const __m256i vt010_0 = _mm256_srli_epi32(v01x0_0, 4);  // first plane 0-7
         v0_0 = _mm256_or_si256(vt010_0, v23x0_0);            // + second plane 8-F
-        v0_1 = _mm256_xor_si256(v0_1, vkernel_zero_point);    // uint4 -> int4
         const __m256i vt0_1 = _mm256_slli_epi32(v0_1, 4);     // isolate lower int4
         const __m256i vh0_1 = _mm256_and_si256(v0_1, vmask);  // isolate upper int4
         const __m256i vl0_1 = _mm256_and_si256(vt0_1, vmask);
@@ -184,7 +182,6 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
         const __m256i v23x0_1 = _mm256_or_si256(v2x0_1, v3x0_1);
         const __m256i vt010_1 = _mm256_srli_epi32(v01x0_1, 4);  // first plane 0-7
         v0_1 = _mm256_or_si256(vt010_1, v23x0_1);            // + second plane 8-F
-        v0_2 = _mm256_xor_si256(v0_2, vkernel_zero_point);    // uint4 -> int4
         const __m256i vt0_2 = _mm256_slli_epi32(v0_2, 4);     // isolate lower int4
         const __m256i vh0_2 = _mm256_and_si256(v0_2, vmask);  // isolate upper int4
         const __m256i vl0_2 = _mm256_and_si256(vt0_2, vmask);
@@ -198,7 +195,6 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
         const __m256i v23x0_2 = _mm256_or_si256(v2x0_2, v3x0_2);
         const __m256i vt010_2 = _mm256_srli_epi32(v01x0_2, 4);  // first plane 0-7
         v0_2 = _mm256_or_si256(vt010_2, v23x0_2);            // + second plane 8-F
-        v0_3 = _mm256_xor_si256(v0_3, vkernel_zero_point);    // uint4 -> int4
         const __m256i vt0_3 = _mm256_slli_epi32(v0_3, 4);     // isolate lower int4
         const __m256i vh0_3 = _mm256_and_si256(v0_3, vmask);  // isolate upper int4
         const __m256i vl0_3 = _mm256_and_si256(vt0_3, vmask);
@@ -212,7 +208,6 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
         const __m256i v23x0_3 = _mm256_or_si256(v2x0_3, v3x0_3);
         const __m256i vt010_3 = _mm256_srli_epi32(v01x0_3, 4);  // first plane 0-7
         v0_3 = _mm256_or_si256(vt010_3, v23x0_3);            // + second plane 8-F
-        v4_0 = _mm256_xor_si256(v4_0, vkernel_zero_point);    // uint4 -> int4
         const __m256i vt4_0 = _mm256_slli_epi32(v4_0, 4);     // isolate lower int4
         const __m256i vh4_0 = _mm256_and_si256(v4_0, vmask);  // isolate upper int4
         const __m256i vl4_0 = _mm256_and_si256(vt4_0, vmask);
@@ -226,7 +221,6 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
         const __m256i v23x4_0 = _mm256_or_si256(v2x4_0, v3x4_0);
         const __m256i vt014_0 = _mm256_srli_epi32(v01x4_0, 4);  // first plane 0-7
         v4_0 = _mm256_or_si256(vt014_0, v23x4_0);            // + second plane 8-F
-        v4_1 = _mm256_xor_si256(v4_1, vkernel_zero_point);    // uint4 -> int4
         const __m256i vt4_1 = _mm256_slli_epi32(v4_1, 4);     // isolate lower int4
         const __m256i vh4_1 = _mm256_and_si256(v4_1, vmask);  // isolate upper int4
         const __m256i vl4_1 = _mm256_and_si256(vt4_1, vmask);
@@ -240,7 +234,6 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
         const __m256i v23x4_1 = _mm256_or_si256(v2x4_1, v3x4_1);
         const __m256i vt014_1 = _mm256_srli_epi32(v01x4_1, 4);  // first plane 0-7
         v4_1 = _mm256_or_si256(vt014_1, v23x4_1);            // + second plane 8-F
-        v4_2 = _mm256_xor_si256(v4_2, vkernel_zero_point);    // uint4 -> int4
         const __m256i vt4_2 = _mm256_slli_epi32(v4_2, 4);     // isolate lower int4
         const __m256i vh4_2 = _mm256_and_si256(v4_2, vmask);  // isolate upper int4
         const __m256i vl4_2 = _mm256_and_si256(vt4_2, vmask);
@@ -254,7 +247,6 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
         const __m256i v23x4_2 = _mm256_or_si256(v2x4_2, v3x4_2);
         const __m256i vt014_2 = _mm256_srli_epi32(v01x4_2, 4);  // first plane 0-7
         v4_2 = _mm256_or_si256(vt014_2, v23x4_2);            // + second plane 8-F
-        v4_3 = _mm256_xor_si256(v4_3, vkernel_zero_point);    // uint4 -> int4
         const __m256i vt4_3 = _mm256_slli_epi32(v4_3, 4);     // isolate lower int4
         const __m256i vh4_3 = _mm256_and_si256(v4_3, vmask);  // isolate upper int4
         const __m256i vl4_3 = _mm256_and_si256(vt4_3, vmask);

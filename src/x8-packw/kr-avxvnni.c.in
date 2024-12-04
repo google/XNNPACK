@@ -50,9 +50,9 @@ $if DATATYPE in ["QS8", "QS4"]:
   $ISA = "avx2" if VARIANT == "MADD" else "avxvnni" if AVX == 2 else "avx256vnni"
 $else:
   $ISA = "avx2" if AVX == 2 else "avx256skx"
-$NAMETYPE = "qs8_to_qu8" if IZP == 128 else {"QS8": "qs8", "QS4": "qs8_qc4w", "X8": "x8"}[DATATYPE]
+$DATATYPE_SPEC = "qs8_to_qu8" if IZP == 128 else {"QS8": "qs8", "QS4": "qs8_qc4w", "X8": "x8"}[DATATYPE]
 
-void xnn_${NAMETYPE}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" if VARIANT == "MADD" else ""}${"_prfm" if PREFETCH else ""}(
+void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" if VARIANT == "MADD" else ""}${"_prfm" if PREFETCH else ""}(
   size_t g,
   size_t nc,
   size_t kc,
@@ -79,7 +79,7 @@ void xnn_${NAMETYPE}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" if VAR
   $if DATATYPE == "QS4":
     // Use scalar pack if not an even block size
     if (kc & 1) {
-      xnn_${NAMETYPE}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
+      xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__scalar(
         g, nc, kc, nr, kr, sr,
         weights, bias, scale, packed_weights, extra_bytes, params);
       return;
@@ -162,7 +162,10 @@ void xnn_${NAMETYPE}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" if VAR
       // KC main loop multiple of ${NR}x${4 * KR}
       for (; k >= ${4 * KR}; k -= ${4 * KR}) {
         $for N in range(NR):
-          const __m256i v${N}_0123 = _mm256_loadu_si256((const __m256i*) w${N});
+          $if DATATYPE in ["QS4"]:
+            const __m256i v${N}_0123 = _mm256_xor_si256(_mm256_loadu_si256((const __m256i*) w${N}), vkernel_zero_point);  // uint4 -> int4
+          $else:
+            const __m256i v${N}_0123 = _mm256_loadu_si256((const __m256i*) w${N});
 
         $for N in range(0, NR, 2):
           const __m256i v${N}${N+1}_02 = _mm256_unpacklo_epi64(v${N}_0123, v${N+1}_0123);
@@ -183,7 +186,6 @@ void xnn_${NAMETYPE}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" if VAR
         $elif DATATYPE in ["QS4"]:
           $for N in range(0, NR, 4):
             $for I in range(0, 4):
-              v${N}_${I} = _mm256_xor_si256(v${N}_${I}, vkernel_zero_point);    // uint4 -> int4
               const __m256i vt${N}_${I} = _mm256_slli_epi32(v${N}_${I}, 4);     // isolate lower int4
               const __m256i vh${N}_${I} = _mm256_and_si256(v${N}_${I}, vmask);  // isolate upper int4
               const __m256i vl${N}_${I} = _mm256_and_si256(vt${N}_${I}, vmask);
