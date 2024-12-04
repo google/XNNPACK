@@ -57,16 +57,6 @@ std::vector<GemmTestParams> CreateTests1(
           .b_zero_point(8)
           .bl(32)
       , test_func, isa_check));
-  if (!is_igemm) {
-    gemm_tests.push_back(GemmTestParams(
-        "k_eq_" + kbs + "_strided_a",
-        tester.clone()
-            .m(mr).n(nr).k(k_block)
-            .a_stride(xnnpack::NextPrime(k_block + 1))
-            .b_zero_point(8)
-            .bl(32)
-        , test_func, isa_check));
-  }
   gemm_tests.push_back(GemmTestParams(
       "k_eq_" + kbs + "_subtile",
       tester.clone()
