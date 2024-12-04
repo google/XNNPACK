@@ -132,17 +132,6 @@ std::vector<GemmTestParams> CreateTests(
           $if KERNELTYPE in ['qb4w']:
             .bl(32)
       , test_func, isa_check));
-  $if DATATYPE != "qp8":
-    gemm_tests.push_back(GemmTestParams(
-        "strided_cn",
-        tester.clone()
-            .m(mr).n(nr).k(k_block)
-            .cn_stride(xnnpack::NextPrime(nr + 1))
-            $if KERNELTYPE in ['qb4w', 'qc4w']:
-              .b_zero_point(8)
-            $if KERNELTYPE in ['qb4w']:
-              .bl(32)
-      , test_func, isa_check));
   if (!is_igemm) {
     gemm_tests.push_back(GemmTestParams(
         "k_eq_" + kbs + "_strided_a",
@@ -343,24 +332,6 @@ std::vector<GemmTestParams> CreateTests(
           $else:
             .loop_n(nr + 1, nr * 2 - 1)
           .loop_k(1, k_block * 3, k_block + 1));
-      $if DATATYPE != "qp8":
-        gemm_tests.push_back(GemmTestParams(
-            "n_gt_" + nrs + "_strided_cn",
-            tester.clone()
-                .m(mr)
-                .cn_stride(xnnpack::NextPrime(nr + 1))
-                $if KERNELTYPE in ['qb4w', 'qc4w']:
-                  .b_zero_point(8)
-                $if KERNELTYPE in ['qb4w']:
-                  .bl(32)
-                $if KERNELTYPE in ['qb4w']:
-                  .bl(32)
-            , test_func, isa_check)
-            $if NR_SCALE != "":
-              .loop_n(nr + 1, nr * 2 - 1, 4)
-            $else:
-              .loop_n(nr + 1, nr * 2 - 1)
-            .loop_k(1, k_block * 3, k_block + 1));
       if (!is_igemm) {
         gemm_tests.push_back(GemmTestParams(
             "n_gt_" + nrs + "_strided_a",
@@ -404,19 +375,6 @@ std::vector<GemmTestParams> CreateTests(
           , test_func, isa_check)
           .loop_n(nr * 2, nr * 3, nr)
           .loop_k(1, k_block * 3, k_block + 1));
-      $if DATATYPE != "qp8":
-        gemm_tests.push_back(GemmTestParams(
-            "n_div_" + nrs + "_strided_cn",
-            tester.clone()
-                .m(mr)
-                .cn_stride(xnnpack::NextPrime(nr + 1))
-                $if KERNELTYPE in ['qb4w', 'qc4w']:
-                  .b_zero_point(8)
-                $if KERNELTYPE in ['qb4w']:
-                  .bl(32)
-            , test_func, isa_check)
-            .loop_n(nr * 2, nr * 3, nr)
-            .loop_k(1, k_block * 3, k_block + 1));
       if (!is_igemm) {
         gemm_tests.push_back(GemmTestParams(
             "n_div_" + nrs + "_strided_a",

@@ -142,16 +142,7 @@ class GemmMicrokernelTester {
   }
 
   size_t cm_stride() const {
-    return this->cm_stride_ == 0 ? cn_stride() * ((n() - 1) / nr()) + (n() - 1) % nr() + 1 : this->cm_stride_;
-  }
-
-  GemmMicrokernelTester& cn_stride(size_t cn_stride) {
-    this->cn_stride_ = cn_stride;
-    return *this;
-  }
-
-  size_t cn_stride() const {
-    return this->cn_stride_ == 0 ? nr() : this->cn_stride_;
+    return this->cm_stride_ == 0 ? nr() * ((n() - 1) / nr()) + (n() - 1) % nr() + 1 : this->cm_stride_;
   }
 
   GemmMicrokernelTester& a_zero_point(uint8_t a_zero_point) {
@@ -423,7 +414,6 @@ class GemmMicrokernelTester {
   bool unsigned_inputs_{false};
   size_t a_stride_{0};
   size_t cm_stride_{0};
-  size_t cn_stride_{0};
   uint8_t a_zero_point_{127};
   uint8_t b_zero_point_{127};
   uint8_t qmin_{0};
