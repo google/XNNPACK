@@ -5,7 +5,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -17,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/allocation-type.h"
+#include "xnnpack/common.h"
 #include "xnnpack/math.h"
 #include "xnnpack/subgraph.h"
 #include "xnnpack/buffer.h"
@@ -874,9 +874,15 @@ TEST(WORKSPACE, internally_allocated_dynamic_quantization_parameters)
   size_t dq_tensors = 0;
   for (size_t i = 0; i < runtime->num_values; i++) {
     const xnn_value* value = &runtime->values[i];
-    if (value->datatype == xnn_datatype_qdint8) {
-      ++dq_tensors;
-      ASSERT_NE(value->quantization.dynamic_params, nullptr);
+    switch (value->datatype) {
+      case xnn_datatype_qdint8:
+        ASSERT_NE(value->quantization.dynamic_params, nullptr);
+        XNN_FALLTHROUGH;
+      case xnn_datatype_qpint8:
+        ++dq_tensors;
+        break;
+      default:
+        break;
     }
   }
   ASSERT_EQ(dq_tensors, 1);

@@ -47,9 +47,9 @@ http_archive(
 # Google Test framework, used by most unit-tests.
 http_archive(
     name = "com_google_googletest",
-    sha256 = "648b9430fca63acc68c59ee98f624dcbcd9c24ea6b278c306ab6b7f49f62034a",
-    strip_prefix = "googletest-d144031940543e15423a25ae5a8a74141044862f",
-    urls = ["https://github.com/google/googletest/archive/d144031940543e15423a25ae5a8a74141044862f.zip"],
+    sha256 = "307ccaebc77e0acd19d1d09fe856278a66d1936269a999d40accdb46ec3ab6a4",
+    strip_prefix = "googletest-35d0c365609296fa4730d62057c487e3cfa030ff",
+    urls = ["https://github.com/google/googletest/archive/35d0c365609296fa4730d62057c487e3cfa030ff.zip"],
 )
 # LINT.ThenChange(cmake/DownloadGoogleTest.cmake)
 
@@ -99,10 +99,10 @@ http_archive(
 # KleidiAI library, used for ARM microkernels.
 http_archive(
     name = "KleidiAI",
-    sha256 = "ad37707084a6d4ff41be10cbe8540c75bea057ba79d0de6c367c1bfac6ba0852",
-    strip_prefix = "kleidiai-40a926833857fb64786e02f97703e42b1537cb57",
+    sha256 = "8ba8cdb9f945941174d34d10eb4ad158ad1cbc1aef259de5ad992b0bbe85861f",
+    strip_prefix = "kleidiai-7e8c4baf953227fa447a2f345e5d6491a504aa56",
     urls = [
-        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/40a926833857fb64786e02f97703e42b1537cb57/kleidiai-40a926833857fb64786e02f97703e42b1537cb57.zip"
+        "https://gitlab.arm.com/kleidi/kleidiai/-/archive/7e8c4baf953227fa447a2f345e5d6491a504aa56/kleidiai-7e8c4baf953227fa447a2f345e5d6491a504aa56.zip"
     ],
 )
 # LINT.ThenChange(cmake/DownloadKleidiAI.cmake)
