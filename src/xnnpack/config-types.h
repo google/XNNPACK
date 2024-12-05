@@ -194,6 +194,8 @@ struct xnn_gemm_config {
   xnn_packw_gemm_gio_ukernel_fn pack_gemm_gio;
   // Deprecated. Use pack_weights_and_biases instead.
   xnn_packw_gemm_goi_ukernel_fn pack_gemm_goi;
+  // TODO(b/346765736): Use pack_weights_and_biases instead.
+  xnn_packw_gemm_goi_bl_ukernel_fn pack_gemm_goi_bl;
   xnn_pack_conv_goki_w_fn pack_igemm_goki;
   xnn_pack_conv_kgo_w_fn pack_igemm_kgo;
   xnn_pack_deconv_goki_w_fn pack_deconv_goki;
