@@ -22,6 +22,7 @@
 #include "pthreadpool.h"
 
 int FLAGS_num_threads = 1;
+uint32_t FLAGS_xnn_runtime_flags = 0;
 
 struct ModelRuntime {
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> model;
@@ -85,7 +86,7 @@ struct ModelRuntime {
 
 static void BenchmarkInvoke(benchmark::State& state,
                             std::function<xnn_subgraph_t()> model_factory,
-                            uint32_t flags = 0) {
+                            uint32_t extra_flags = 0) {
   if (xnn_initialize(nullptr /* allocator */) != xnn_status_success) {
     state.SkipWithError("failed to initialize XNNPACK");
     return;
@@ -98,7 +99,7 @@ static void BenchmarkInvoke(benchmark::State& state,
   }
 
   // TODO(dsharlet): We should have benchmarks of these steps too.
-  if (!model_runtime.CreateRuntime(flags)) {
+  if (!model_runtime.CreateRuntime(FLAGS_xnn_runtime_flags | extra_flags)) {
     state.SkipWithError("failed to create runtime");
     return;
   }
@@ -188,8 +189,7 @@ static void QD8Attention(benchmark::State& state) {
         return models::QD8Attention(state.range(0), state.range(1),
                                     state.range(2), state.range(3),
                                     state.range(4), weights);
-      },
-      0);
+      });
 }
 
 static void QS8MobileNetV2(benchmark::State& state) {
@@ -244,6 +244,15 @@ int main(int argc, char** argv) {
       if (FLAGS_num_threads <= 0) {
         std::cerr << "Invalid --num_threads: " << FLAGS_num_threads << "\n";
         return 1;
+      }
+      std::copy(argv + i + 1, argv + argc, argv + i);
+      argc -= 1;
+    } else if (strncmp(argv[i], "--xnn_runtime_flags=", 20) == 0) {
+      const char* v = argv[i] + 20;
+      if (strlen(v) > 2 && strncmp(v, "0x", 2) == 0) {
+        FLAGS_xnn_runtime_flags = strtoul(v + 2, nullptr, 16);
+      } else {
+        FLAGS_xnn_runtime_flags = strtoul(v, nullptr, 10);
       }
       std::copy(argv + i + 1, argv + argc, argv + i);
       argc -= 1;
