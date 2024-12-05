@@ -27,32 +27,33 @@
 // Format is input_type, weights type, output type, (dynamic)?
 enum fully_connected_op_type {
   fc_type_invalid = 0,
-  fc_type_f16_f16_f16 = 1,
-  fc_type_f16_f16_f16_dynamic = 2,
-  fc_type_f16_f32_f16 = 3,
-  fc_type_f16_f32_f16_dynamic = 4,
-  fc_type_qd8_f16_qc4w = 5,
-  fc_type_qd8_f16_qb4w = 6,
-  fc_type_qd8_f16_qc8w = 7,
-  fc_type_f32_f32_f32 = 8,
-  fc_type_f32_f32_f32_dynamic = 9,
-  fc_type_qd8_f32_qb4w = 10,
-  fc_type_f32_f32_qc4w = 11,
-  fc_type_qd8_f32_qc4w = 12,
-  fc_type_qp8_f32_qc4w = 13,
-  fc_type_f32_f32_qc8w = 14,
-  fc_type_qd8_f32_qc8w = 15,
-  fc_type_qs8_qs8_qc8w = 16,
-  fc_type_qs8_qs8_qs8 = 17,
-  fc_type_qu8_qu8_qu8 = 18,
-  fc_type_qp8_f32_qb4w = 19,
-  fc_type_pf32_f32_f32 = 20,
-  fc_type_f32_f16_f32 = 21,
-  fc_type_qdu8_f16_qc8w = 22,
-  fc_type_qdu8_f32_qc8w = 23,
-  fc_type_qdu8_f32_qc4w = 24,
-  fc_type_qdu8_f32_qb4w = 26,
-  fc_type_qdu8_f16_qc4w = 27,
+  fc_type_f16_f16_f16,
+  fc_type_f16_f16_f16_dynamic,
+  fc_type_f16_f32_f16,
+  fc_type_f16_f32_f16_dynamic,
+  fc_type_f32_f16_f32,
+  fc_type_f32_f32_f32,
+  fc_type_f32_f32_f32_dynamic,
+  fc_type_f32_f32_qc4w,
+  fc_type_f32_f32_qc8w,
+  fc_type_pf32_f32_f32,
+  fc_type_qd8_f16_qb4w,
+  fc_type_qd8_f16_qc4w,
+  fc_type_qd8_f16_qc8w,
+  fc_type_qd8_f32_qb4w,
+  fc_type_qd8_f32_qc4w,
+  fc_type_qd8_f32_qc8w,
+  fc_type_qdu8_f16_qc4w,
+  fc_type_qdu8_f16_qc8w,
+  fc_type_qdu8_f32_qb4w,
+  fc_type_qdu8_f32_qc4w,
+  fc_type_qdu8_f32_qc8w,
+  fc_type_qp8_f32_qb4w,
+  fc_type_qp8_f32_qc4w,
+  fc_type_qp8_f32_qc8w,
+  fc_type_qs8_qs8_qc8w,
+  fc_type_qs8_qs8_qs8,
+  fc_type_qu8_qu8_qu8,
 };
 
 enum fully_connected_op_type get_fully_connected_op_type(
@@ -166,6 +167,8 @@ enum fully_connected_op_type get_fully_connected_op_type(
               return fc_type_f32_f32_qc8w;
             case xnn_datatype_qdint8:
               return fc_type_qd8_f32_qc8w;
+            case xnn_datatype_qpint8:
+              return fc_type_qp8_f32_qc8w;
             case xnn_datatype_qduint8:
               return fc_type_qdu8_f32_qc8w;
             default:
@@ -433,6 +436,15 @@ static enum xnn_status create_fully_connected_operator(
           bias_data, node->activation.output_min, node->activation.output_max,
           node->flags, code_cache, weights_cache, &opdata->operator_objects[0]);
       break;
+    case fc_type_qp8_f32_qc8w:
+      status = xnn_create_fully_connected_nc_qp8_f32_qc8w(
+          input_channels, output_channels,
+          /*input_stride=*/input_channels,
+          /*output_stride=*/output_channels,
+          values[filter_id].quantization.channelwise_scale, kernel_data,
+          bias_data, node->activation.output_min, node->activation.output_max,
+          node->flags, code_cache, weights_cache, &opdata->operator_objects[0]);
+      break;
     case fc_type_f32_f32_qc8w:
       status = xnn_create_fully_connected_nc_f32_qc8w(
           input_channels, output_channels,
@@ -680,6 +692,10 @@ static enum xnn_status reshape_fully_connected_operator(
       status = xnn_reshape_fully_connected_nc_qp8_f32_qc4w(
           opdata->operator_objects[0], batch_size, threadpool);
       break;
+    case xnn_operator_type_fully_connected_nc_qp8_f32_qc8w:
+      status = xnn_reshape_fully_connected_nc_qp8_f32_qc8w(
+          opdata->operator_objects[0], batch_size, threadpool);
+      break;
     case xnn_operator_type_fully_connected_nc_qp8_f32_qb4w:
       status = xnn_reshape_fully_connected_nc_qp8_f32_qb4w(
         opdata->operator_objects[0],
@@ -900,6 +916,12 @@ static enum xnn_status setup_fully_connected_operator(
       assert(kernel_data == NULL);
       assert(bias_data == NULL);
       return xnn_setup_fully_connected_nc_qp8_f32_qc4w(
+          opdata->operator_objects[0], input_data, output_data);
+    }
+    case xnn_operator_type_fully_connected_nc_qp8_f32_qc8w: {
+      assert(kernel_data == NULL);
+      assert(bias_data == NULL);
+      return xnn_setup_fully_connected_nc_qp8_f32_qc8w(
           opdata->operator_objects[0], input_data, output_data);
     }
     case xnn_operator_type_fully_connected_nc_qp8_f32_qb4w:
