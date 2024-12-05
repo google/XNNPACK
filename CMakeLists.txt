@@ -1219,6 +1219,8 @@ IF(XNNPACK_BUILD_TESTS)
 
   # Helper libraries
   ADD_LIBRARY(next-prime STATIC test/next_prime.cc)
+  ADD_LIBRARY(runtime-flags STATIC test/runtime-flags.cc)
+  TARGET_LINK_LIBRARIES(runtime-flags PRIVATE GTest::gtest)
 
   ADD_LIBRARY(gemm-microkernel-tester STATIC test/gemm-microkernel-tester.cc)
   TARGET_INCLUDE_DIRECTORIES(gemm-microkernel-tester PRIVATE include src test)
@@ -1279,6 +1281,7 @@ IF(XNNPACK_BUILD_TESTS)
       microparams-init
       next-prime
       pthreadpool
+      runtime-flags
       XNNPACK)
     ADD_SHARDED_TEST(${TEST}-test 10)
   ENDFOREACH()
@@ -1300,6 +1303,7 @@ IF(XNNPACK_BUILD_TESTS)
         GTest::gmock
         GTest::gtest
         GTest::gtest_main
+        runtime-flags
         XNNPACK)
       ADD_SHARDED_TEST(${TEST}-test 10)
     ENDFOREACH()
@@ -1315,6 +1319,7 @@ IF(XNNPACK_BUILD_TESTS)
       GTest::gtest
       GTest::gtest_main
       datatype
+      runtime-flags
       unary-ops
       XNNPACK)
     ADD_TEST(NAME unary-elementwise-nc-test COMMAND unary-elementwise-nc-test)
@@ -1335,6 +1340,7 @@ IF(XNNPACK_BUILD_TESTS)
         GTest::gmock
         GTest::gtest
         GTest::gtest_main
+        runtime-flags
         XNNPACK)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     ENDFOREACH()
@@ -1381,6 +1387,7 @@ IF(XNNPACK_BUILD_TESTS)
         datatype
         subgraph
         logging
+        runtime-flags
         unary-ops
         XNNPACK)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
@@ -1399,6 +1406,7 @@ IF(XNNPACK_BUILD_TESTS)
         GTest::gmock
         GTest::gtest
         GTest::gtest_main
+        runtime-flags
         subgraph
         XNNPACK)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)

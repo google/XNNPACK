@@ -22,6 +22,7 @@
 #include "xnnpack/subgraph.h"
 #include "replicable_random_device.h"
 #include "subgraph-unary-tester.h"
+#include "runtime-flags.h"
 
 template <typename InputType, typename OutputType = InputType,
           size_t min_dim = 0, size_t max_dim = XNN_MAX_TENSOR_DIMS,
@@ -260,7 +261,7 @@ TEST_F(StaticReshapeTestInt8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_define_static_reshape(subgraph, new_dims_hint.size(), new_dims_hint.data(), input_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
 
@@ -321,7 +322,7 @@ TEST_F(StaticReshapeTestUint8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_define_static_reshape(subgraph, new_dims_hint.size(), new_dims_hint.data(), input_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
 
@@ -378,7 +379,7 @@ TEST_F(StaticReshapeTestF16, matches_operator_api)
     xnn_status_success,
     xnn_define_static_reshape(subgraph, output_dims.size(), output_dims.data(), input_id, output_id, /*flags=*/0));
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 2> external = {
@@ -435,7 +436,7 @@ TEST_F(StaticReshapeTestF32, matches_operator_api)
     xnn_status_success,
     xnn_define_static_reshape(subgraph, new_dims_hint.size(), new_dims_hint.data(), input_id, output_id, /*flags=*/0));
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 2> external = {
@@ -482,7 +483,7 @@ TEST_F(StaticReshapeTestF32, reshape_output) {
                                       /*flags=*/0));
   ASSERT_EQ(
       xnn_status_success,
-      xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+      xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
       runtime, xnn_delete_runtime);

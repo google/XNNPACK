@@ -28,6 +28,7 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
 #include "replicable_random_device.h"
+#include "runtime-flags.h"
 
 struct Param {
   using TupleT = std::tuple<xnn_datatype, xnn_reduce_operator, bool, bool>;
@@ -421,7 +422,7 @@ TEST_P(ReduceTest, matches_operator_api) {
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(
       xnn_status_success,
-      xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+      xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
       runtime, xnn_delete_runtime);
@@ -493,7 +494,7 @@ TEST_P(ReduceTest, reshape) {
 
   xnn_runtime_t runtime = nullptr;
   xnn_status status =
-      xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime);
+      xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }

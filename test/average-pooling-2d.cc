@@ -22,6 +22,7 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
 #include "replicable_random_device.h"
+#include "runtime-flags.h"
 
 template <
   typename InputType,
@@ -255,7 +256,7 @@ TEST_F(AveragePoolingTestF16, matches_operator_api)
       subgraph, input_padding_top, input_padding_right, input_padding_bottom, input_padding_left, pooling_height,
       pooling_width, stride_height, stride_width, output_min, output_max, input_id, output_id,
       /*flags=*/0));
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 2> external = {
@@ -329,7 +330,7 @@ TEST_F(AveragePoolingTestF32, matches_operator_api)
       subgraph, input_padding_top, input_padding_right, input_padding_bottom, input_padding_left, pooling_height,
       pooling_width, stride_height, stride_width, output_min, output_max, input_id, output_id,
       /*flags=*/0));
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 2> external = {

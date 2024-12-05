@@ -368,7 +368,7 @@ TEST(SUBGRAPH_FP16, external_inputs_allocation_type_remains_external) {
 
   xnn_runtime_t runtime = tester.Runtime();
   xnn_status status = xnn_create_runtime_v3(tester.Subgraph(), nullptr, nullptr,
-                                            /*flags=*/0, &runtime);
+                                            xnn_test_runtime_flags(), &runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
       runtime, xnn_delete_runtime);
 
@@ -644,7 +644,8 @@ TEST(SUBGRAPH_FP16, fully_connected_qd8_f16_qc8w) {
   ASSERT_EQ(tester.NumNodes(), 4);
 
   xnn_runtime_t fp16_runtime_ptr = nullptr;
-  xnn_status status = xnn_create_runtime(tester.Subgraph(), &fp16_runtime_ptr);
+  xnn_status status = xnn_create_runtime_v2(tester.Subgraph(), /*threadpool*/nullptr,
+                                            xnn_test_runtime_flags(), &fp16_runtime_ptr);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -652,7 +653,8 @@ TEST(SUBGRAPH_FP16, fully_connected_qd8_f16_qc8w) {
       fp16_runtime_ptr, xnn_delete_runtime);
   ASSERT_EQ(xnn_status_success, status);
   xnn_runtime_t fp32_runtime_ptr = nullptr;
-  status = xnn_create_runtime(reference_tester.Subgraph(), &fp32_runtime_ptr);
+  status = xnn_create_runtime_v2(reference_tester.Subgraph(), /*threadpool*/nullptr,
+                                 xnn_test_runtime_flags(), &fp32_runtime_ptr);
   ASSERT_EQ(xnn_status_success, status);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_fp32_runtime(
       fp32_runtime_ptr, xnn_delete_runtime);

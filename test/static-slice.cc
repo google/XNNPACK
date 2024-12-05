@@ -22,6 +22,7 @@
 #include "xnnpack/subgraph.h"
 #include "replicable_random_device.h"
 #include "subgraph-unary-tester.h"
+#include "runtime-flags.h"
 
 template <typename T> class StaticSliceTest : public UnaryTest<T, T, /*min_dim=*/1> {
 public:
@@ -286,7 +287,7 @@ TEST_F(StaticSliceTestQS8, matches_operator_api)
     xnn_status_success,
     xnn_define_static_slice(subgraph, dims.size(), offsets.data(), inferrable_sizes.data(), input_id, output_id, /*flags=*/0));
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 2> external = {
@@ -345,7 +346,7 @@ TEST_F(StaticSliceTestQU8, matches_operator_api)
     xnn_status_success,
     xnn_define_static_slice(subgraph, dims.size(), offsets.data(), inferrable_sizes.data(), input_id, output_id, /*flags=*/0));
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 2> external = {
@@ -400,7 +401,7 @@ TEST_F(StaticSliceTestF16, matches_operator_api)
     xnn_status_success,
     xnn_define_static_slice(subgraph, dims.size(), offsets.data(), sizes.data(), input_id, output_id, /*flags=*/0));
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 2> external = {
@@ -455,7 +456,7 @@ TEST_F(StaticSliceTestF32, matches_operator_api)
     xnn_status_success,
     xnn_define_static_slice(subgraph, dims.size(), offsets.data(), inferrable_sizes.data(), input_id, output_id, /*flags=*/0));
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 2> external = {
@@ -493,7 +494,7 @@ TEST_F(StaticSliceTestF32, reshape_output)
     xnn_status_success,
     xnn_define_static_slice(subgraph, dims.size(), offsets.data(), inferrable_sizes.data(), input_id, output_id, /*flags=*/0));
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 2> external = {

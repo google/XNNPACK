@@ -21,6 +21,7 @@
 #include "xnnpack/subgraph.h"
 #include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
+#include "runtime-flags.h"
 
 xnn_runtime_t SetupUnary(const std::vector<size_t> &dims) {
   if (xnn_initialize(/*allocator=*/nullptr) != xnn_status_success) {
@@ -63,7 +64,7 @@ xnn_runtime_t SetupUnary(const std::vector<size_t> &dims) {
   }
 
   xnn_runtime_t runtime = nullptr;
-  if (xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0,
+  if (xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(),
                             &runtime) != xnn_status_success) {
     return nullptr;
   }
@@ -124,7 +125,7 @@ xnn_runtime_t SetupBinary(const std::vector<size_t> &input0_dims,
   }
 
   xnn_runtime_t runtime = nullptr;
-  if (xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0,
+  if (xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(),
                             &runtime) != xnn_status_success) {
     return nullptr;
   }

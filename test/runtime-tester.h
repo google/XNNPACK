@@ -11,12 +11,14 @@
 #include <cstdlib>
 #include <cstring>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/subgraph.h"
 #include "subgraph-tester.h"
+#include "runtime-flags.h"
 
 namespace xnnpack {
 
@@ -35,7 +37,7 @@ class RuntimeTester : public SubgraphTester {
 
   template<typename T>
   xnnpack::Buffer<T> RunWithoutFusion() {
-    Run(XNN_FLAG_NO_OPERATOR_FUSION);
+    Run(XNN_FLAG_NO_OPERATOR_FUSION | xnn_test_runtime_flags());
     xnnpack::Buffer<char>& tensor = this->external_tensors_.at(this->output_id_);
     xnnpack::Buffer<float> output = xnnpack::Buffer<float>(tensor.size() / sizeof(float));
     memcpy(output.data(), tensor.data(), tensor.size());
@@ -51,7 +53,7 @@ class RuntimeTester : public SubgraphTester {
     return output;
   }
 
-  void CreateRuntime(uint32_t flags = 0) {
+  void CreateRuntime(uint32_t flags) {
     xnn_runtime_t runtime = nullptr;
     ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(this->subgraph_.get(), nullptr, nullptr, flags, &runtime));
     ASSERT_NE(nullptr, runtime);
@@ -121,7 +123,7 @@ class RuntimeTester : public SubgraphTester {
   }
 
  private:
-  void Run(uint32_t flags = 0) {
+  void Run(uint32_t flags = xnn_test_runtime_flags()) {
     CreateRuntime(flags);
     SetupRuntime();
 

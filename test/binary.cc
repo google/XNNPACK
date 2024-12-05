@@ -31,6 +31,7 @@
 #include "xnnpack/subgraph.h"
 #include "operator-test-utils.h"
 #include "replicable_random_device.h"
+#include "runtime-flags.h"
 
 using ::testing::Combine;
 using ::testing::ValuesIn;
@@ -258,7 +259,7 @@ void MatchesOperatorApi(xnn_datatype datatype, xnn_binary_operator binary_op) {
 
   xnn_runtime_t runtime = nullptr;
   xnn_status status =
-      xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime);
+      xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime);
   if (status == xnn_status_unsupported_parameter) {
     GTEST_SKIP();
   }
@@ -365,7 +366,7 @@ void Reshape(xnn_datatype datatype, xnn_binary_operator binary_op) {
 
   xnn_runtime_t runtime = nullptr;
   xnn_status status =
-      xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime);
+      xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime);
   if (status == xnn_status_unsupported_parameter) {
     GTEST_SKIP();
   }
@@ -449,7 +450,7 @@ void ReshapeBroadcastDim0(xnn_datatype datatype,
 
   xnn_runtime_t runtime = nullptr;
   xnn_status status =
-      xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime);
+      xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime);
   if (status == xnn_status_unsupported_parameter) {
     GTEST_SKIP();
   }
@@ -532,7 +533,7 @@ void ReshapeBroadcast1D(xnn_datatype datatype, xnn_binary_operator binary_op) {
 
   xnn_runtime_t runtime = nullptr;
   xnn_status status =
-      xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime);
+      xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime);
   if (status == xnn_status_unsupported_parameter) {
     GTEST_SKIP();
   }
@@ -615,7 +616,7 @@ void ReshapeBroadcast2D(xnn_datatype datatype, xnn_binary_operator binary_op) {
 
   xnn_runtime_t runtime = nullptr;
   xnn_status status =
-      xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime);
+      xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime);
   if (status == xnn_status_unsupported_parameter) {
     GTEST_SKIP();
   }
@@ -698,7 +699,7 @@ void DegenerateDimension(xnn_datatype datatype, xnn_binary_operator binary_op) {
 
   xnn_runtime_t runtime = nullptr;
   xnn_status status =
-      xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime);
+      xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime);
   if (status == xnn_status_unsupported_parameter) {
     GTEST_SKIP();
   }

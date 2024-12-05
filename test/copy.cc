@@ -17,6 +17,7 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
 #include "subgraph-unary-tester.h"
+#include "runtime-flags.h"
 
 using CopyTestQS8 = UnaryTest<int8_t>;
 using CopyTestQU8 = UnaryTest<uint8_t>;
@@ -208,7 +209,7 @@ TEST_F(CopyTestQS8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_define_copy(subgraph, input_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
 
@@ -265,7 +266,7 @@ TEST_F(CopyTestQU8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_define_copy(subgraph, input_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
 
@@ -319,7 +320,7 @@ TEST_F(CopyTestF16, matches_operator_api)
     xnn_status_success,
     xnn_define_copy(subgraph, input_id, output_id, /*flags=*/0));
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 2> external = {
@@ -372,7 +373,7 @@ TEST_F(CopyTestF32, matches_operator_api)
     xnn_status_success,
     xnn_define_copy(subgraph, input_id, output_id, /*flags=*/0));
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 2> external = {
