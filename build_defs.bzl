@@ -2,6 +2,8 @@
 
 load("//:emscripten.bzl", "xnnpack_emscripten_benchmark_linkopts", "xnnpack_emscripten_deps", "xnnpack_emscripten_minimal_linkopts", "xnnpack_emscripten_test_linkopts")
 
+load("@emsdk//emscripten_toolchain:wasm_rules.bzl", "wasm_cc_binary")
+
 def xnnpack_visibility():
     """Visibility of :XNNPACK target.
 
@@ -337,7 +339,7 @@ def xnnpack_binary(name, srcs, copts = [], deps = [], linkopts = []):
         deps = deps,
     )
 
-def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = [], defines = []):
+def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = [], defines = [], wasm = False):
     """Microbenchmark binary based on Google Benchmark
 
     Args:
@@ -382,6 +384,15 @@ def xnnpack_benchmark(name, srcs, copts = [], deps = [], tags = [], defines = []
         defines = defines,
         args = ["--benchmark_min_time=1x"],
     )
+    if wasm:
+        wasm_cc_binary(
+            name = "%s_wasm" % name,
+            cc_target = ":%s" % name,
+            simd = True,
+            threads = "emscripten",
+            exit_runtime = True,
+            testonly = True
+        )
 
 SrcListInfo = provider("A list of source files.", fields = {"srcs": "sources"})
 
