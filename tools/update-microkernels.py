@@ -297,6 +297,14 @@ def main(args):
       content = config_file.read()
       microkernels = re.findall(_MICROKERNEL_NAME_REGEX, content)
       prod_microkernels.update(microkernels)
+  # Also check prod packing ukernels in packw.c
+  with open(
+    os.path.join(src_dir, 'packw.c'), 'r', encoding='utf-8'
+  ) as packw_file:
+    content = packw_file.read()
+    microkernels = re.findall(_MICROKERNEL_NAME_REGEX, content)
+    prod_microkernels.update(microkernels)
+
   prod_microkernels = set(
       map(microkernel_name_to_filename.get, prod_microkernels)
   )

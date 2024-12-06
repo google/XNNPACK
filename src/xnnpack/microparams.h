@@ -625,4 +625,3 @@ struct subconvolution_params {
   // scaled_kernel_size := kernel_size * mr * sizeof(void*).
   size_t scaled_kernel_size;
 };
-

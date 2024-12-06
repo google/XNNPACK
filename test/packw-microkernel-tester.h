@@ -21,6 +21,7 @@
 #include "xnnpack/pack.h"
 #include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
+#include "xnnpack/microparams-init.h"
 
 class PackWMicrokernelTester {
  public:
@@ -95,6 +96,15 @@ class PackWMicrokernelTester {
 
   size_t k() const {
     return this->k_;
+  }
+
+  PackWMicrokernelTester& bl(size_t bl) {
+    this->bl_ = bl;
+    return *this;
+  }
+
+  size_t bl() const {
+    return this->bl_;
   }
 
   PackWMicrokernelTester& nullbias(bool nullbias) {
@@ -493,6 +503,133 @@ class PackWMicrokernelTester {
     }
   }
 
+  void Test(xnn_qb4_packw_gemm_goi_ukernel_fn packw) const {
+    xnnpack::Buffer<uint8_t> weights(XNN_EXTRA_BYTES / sizeof(int8_t) + n() * k());
+    xnnpack::Buffer<int32_t> bias(n());
+    xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w(
+        packed_n() * packed_k() + packed_n() * sizeof(uint32_t));
+    xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w_ref(
+        packed_n() * packed_k() + packed_n() * sizeof(uint32_t));
+    xnnpack::Buffer<xnn_bfloat16, XNN_ALLOCATION_ALIGNMENT> bf16_scales(
+      n() * (k() / bl())
+    );
+
+    std::iota(weights.begin(), weights.end(), 0);
+    std::iota(bias.begin(), bias.end(), UINT32_C(15));
+    std::fill(packed_w.begin(), packed_w.end(), INT8_C(0));
+    std::fill(packed_w_ref.begin(), packed_w_ref.end(), INT8_C(0));
+    std::iota(bf16_scales.begin(), bf16_scales.end(), 3.75);
+
+    const int32_t* bias_data = nullbias() ? nullptr : bias.data();
+    const xnn_bfloat16* scale_data = bf16_scales.data();
+    const xnn_qs8_qc4w_packing_params packing_params = { 1, 8 };
+
+    // Compute reference results.
+    xnn_pack_qs8_qb4w_gemm_goi_w(/*g=*/1, n(), k(), nr(), kr(), sr(), bl(),
+      weights.data(),
+      nullptr,
+      /*scale=*/scale_data,
+      packed_w_ref.data(),
+      sizeof(uint16_t) * nr(),
+      /*extra_bytes=*/sizeof(float) * nr(), &packing_params);
+    
+    // fill in scale as second step (reference)
+    size_t k_stride = round_up_po2(k(), kr() * sr() * 2 /* planes */);
+    k_stride = round_up_po2(k_stride, 2) >> 1;
+    size_t k_num_blocks = k() / bl();
+    size_t k_bytes = sizeof(int8_t) * k_stride * nr();
+    size_t bias_bytes = sizeof(float) * nr();
+    size_t ksum_bytes = sizeof(float) * nr();
+    size_t block_bytes = sizeof(uint16_t) * k_num_blocks * nr();
+
+    size_t start_offset = ksum_bytes + k_bytes / k_num_blocks;
+    size_t stride = ksum_bytes + k_bytes + block_bytes + bias_bytes;
+    size_t block_stride = (bl() * nr()) / 2 + (sizeof(uint16_t) * nr());
+
+    xnn_init_blockwise_scale_bf16_params(
+      /*channels=*/n(),
+      /*channels_tile=*/nr(),
+      /*channel_subtile=*/nr(),
+      /*stride=*/stride,
+      /*substride=*/stride,
+      /*num_blocks=*/k_num_blocks,
+      /*block_stride=*/block_stride,
+      /*stride_offset=*/0,
+      /*scale=*/scale_data,
+      /*packed_w=*/packed_w_ref.data() + start_offset);
+    
+    void* bias_start = (void*) ((uintptr_t) packed_w_ref.data() + stride - nr() * sizeof(float));
+    
+    if (!nullbias()){
+      xnn_init_qs8_qc8w_scale_fp32_params(
+        n(), nr(), nr(), stride, stride, 0, (float*) bias_data, bias_start
+      );
+    }
+
+    // Call optimized micro-kernel.
+    packw(/*g=*/1, n(), k(), nr(), kr(), sr(), bl(),
+      weights.data(), bias_data, /*scale=*/scale_data, packed_w.data(), sizeof(uint16_t) * nr(), /*extra_bytes=*/sizeof(float) * nr(), &packing_params);
+    
+    const uint8_t* packed_data = (uint8_t*)packed_w.data();
+    const uint8_t* packed_ref_data = (uint8_t*)packed_w_ref.data();
+
+
+    // Compare Packed Tensors.
+    for(size_t n_block_start = 0; n_block_start < packed_n(); n_block_start+=nr()){
+      // Number of output channels in this block
+      size_t n_remainder = min(nr(), n() - n_block_start);
+      // Check KScaledSums
+      float* kscale_sum_start = (float*) packed_data;
+      float* kscale_sum_ref_start = (float*) packed_ref_data;
+      for(size_t ni = 0; ni < n_remainder; ni++){
+        EXPECT_EQ((float) kscale_sum_start[ni], (float)kscale_sum_ref_start[ni])
+        << "kscaled sum at index: " << ni <<  " of n_block_start: " << n_block_start << "\n";
+      }
+
+      packed_data += nr() * sizeof(float);
+      packed_ref_data += nr() * sizeof(float);
+
+      for (size_t bl_start = 0; bl_start < k(); bl_start+=bl()){
+        // Check nibbles
+        size_t num_planes_block = bl() / (2 * kr());
+        for (size_t pi = 0; pi < num_planes_block; pi += 1) {
+          for(size_t ni = 0; ni < n_remainder; ni++) {
+            for(size_t ki = 0; ki < 2*kr(); ki++) {
+              size_t i = (2 * kr()) * (nr() * pi + ni) + ki;
+              uint8_t val_ref =  ((i & 1) ? (uint8_t)packed_ref_data[i>>1] >> 4 : packed_ref_data[i>>1] &0xF);
+              uint8_t val =  ((i & 1) ? (uint8_t)packed_data[i>>1] >> 4 : packed_data[i>>1] &0xF);
+              EXPECT_EQ(val_ref, val) << " nibbles do not match location at \n"
+                  << "nr_block_start: " << n_block_start << ", plane: " << pi << "\n"
+                  << " ni: " << ni << " ki: " << ki << " i: " << i << "\n";
+            }
+          }
+        }
+        packed_data += ((bl() * nr()) >> 1) * sizeof(uint8_t);
+        packed_ref_data += ((bl() * nr()) >> 1) * sizeof(uint8_t);
+        // check scales
+        uint16_t* scales_start = (uint16_t*) packed_data;
+        uint16_t* scales_ref_start = (uint16_t*) packed_ref_data;
+        for(size_t ni = 0; ni < n_remainder; ni++){
+          // Packing divides the scales by 16, multiplying back is a bit easier for readability
+          EXPECT_EQ(math_cvt_fp32_bf16(scales_start[ni]) * 16, math_cvt_fp32_bf16(scales_ref_start[ni]) * 16)
+              << "n_block_start " << n_block_start <<  " ni " << ni;
+        }
+
+        packed_data += nr() * sizeof(uint16_t);
+        packed_ref_data += nr() * sizeof(uint16_t);
+      }
+      // check bias
+      uint32_t* bias_start = (uint32_t*) packed_data;
+      uint32_t* bias_ref_start = (uint32_t*) packed_ref_data;
+      for(size_t ni = 0; ni < n_remainder; ni++){
+        EXPECT_EQ(bias_start[ni], bias_ref_start[ni]) 
+            << "n_block_start " << n_block_start <<  " ni " << ni;
+      }
+      packed_ref_data += nr() * sizeof(uint32_t);
+      packed_data += nr() * sizeof(uint32_t);
+    }
+  }
+
  private:
   size_t g_{1};
   size_t n_{1};
@@ -500,6 +637,7 @@ class PackWMicrokernelTester {
   size_t kr_{1};
   size_t sr_{1};
   size_t k_{1};
+  size_t bl_{1};
   bool nullbias_{false};
   size_t izp_{0};
 };
