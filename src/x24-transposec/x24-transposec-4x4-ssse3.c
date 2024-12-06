@@ -20,12 +20,12 @@ void xnn_x24_transposec_ukernel__4x4_ssse3(
     size_t block_width,
     size_t block_height) XNN_OOB_READS
 { 
-  static const uint8_t pos0[16] = {0, 4, 8, 2, 6, 10, 1, 5, 9, 3, 7, 11, -1, -1, -1, -1};
-  static const uint8_t pos1[16] = {4, 8, 12, 6, 10, 14, 5, 9, 13, 7, 11, 15, -1, -1, -1, -1};
-  static const uint8_t pos2[16] = {12, -1, -1, 14, -1, -1, 13, -1, -1, 15, -1, -1, -1, -1, -1, -1};
-  static const uint8_t pos3[16] = {-1, 0, 4, -1, 2, 6, -1, 1, 5, -1, 3, 7, -1, -1, -1, -1};
-  static const uint8_t pos4[16] = {8, 12, -1, 10, 14, -1, 9, 13, -1, 11, 15, -1, -1, -1, -1, -1};
-  static const uint8_t pos5[16] = {-1, -1, 0, -1, -1, 2, -1, -1, 1, -1, -1, 3, -1, -1, -1, -1};
+  XNN_ALIGN(16) static const uint8_t pos0[16] = {0, 4, 8, 2, 6, 10, 1, 5, 9, 3, 7, 11, -1, -1, -1, -1};
+  XNN_ALIGN(16) static const uint8_t pos1[16] = {4, 8, 12, 6, 10, 14, 5, 9, 13, 7, 11, 15, -1, -1, -1, -1};
+  XNN_ALIGN(16) static const uint8_t pos2[16] = {12, -1, -1, 14, -1, -1, 13, -1, -1, 15, -1, -1, -1, -1, -1, -1};
+  XNN_ALIGN(16) static const uint8_t pos3[16] = {-1, 0, 4, -1, 2, 6, -1, 1, 5, -1, 3, 7, -1, -1, -1, -1};
+  XNN_ALIGN(16) static const uint8_t pos4[16] = {8, 12, -1, 10, 14, -1, 9, 13, -1, 11, 15, -1, -1, -1, -1, -1};
+  XNN_ALIGN(16) static const uint8_t pos5[16] = {-1, -1, 0, -1, -1, 2, -1, -1, 1, -1, -1, 3, -1, -1, -1, -1};
 
   assert(output_stride >= block_height * 3);
   assert(input_stride >= block_width * 3);
