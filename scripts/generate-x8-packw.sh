@@ -82,9 +82,18 @@ tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=X8  -D TYP
 
 tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS8 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT=MADD -D PREFETCH=0 -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-avx2-madd.c &
 
-# QS4/QU4 in QS4 out
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT=  -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-avxvnni.c &
-tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT=  -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-avx256vnni.c &
+# QC4W
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT=     -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-avxvnni.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT=     -D PREFETCH=1 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-avxvnni-prfm.c &
+
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT=     -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-avx256vnni.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=8  -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT=     -D PREFETCH=1 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x8c8-gemm-goi-avx256vnni-prfm.c &
+
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT=     -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-avxvnni.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=2  -D VARIANT=     -D PREFETCH=1 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-avxvnni-prfm.c &
+
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT=     -D PREFETCH=0 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-avx256vnni.c &
+tools/xngen src/x8-packw/kr-avxvnni.c.in -D NR=16 -D KR=8 -D DATATYPE=QS4 -D TYPE=int8_t -D IZP=0   -D AVX=10 -D VARIANT=     -D PREFETCH=1 -o src/qs8-qc4w-packw/gen/qs8-qc4w-packw-x16c8-gemm-goi-avx256vnni-prfm.c &
 
 ### WAsm Relaxed SIMD
 ### C8 packing

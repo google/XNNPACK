@@ -497,3 +497,4 @@ void xnn_x8_packw_gemm_goi_ukernel_x8c8__avx2_prfm(
     weights = (const int8_t*)((intptr_t) weights + nc * kc);
   } while (--g != 0);
 }
+

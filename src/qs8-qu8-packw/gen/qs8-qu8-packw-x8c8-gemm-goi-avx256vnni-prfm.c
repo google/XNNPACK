@@ -541,3 +541,4 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x8c8__avx256vnni_prfm(
     weights = (const int8_t*)((intptr_t) weights + nc * kc);
   } while (--g != 0);
 }
+
