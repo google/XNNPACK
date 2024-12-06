@@ -628,6 +628,21 @@ tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=14 -D NR=32 -D INC=0 -D DAT
 tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=15 -D NR=32 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-15x32-minmax-avx512f-broadcast.c &
 tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=16 -D NR=32 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-16x32-minmax-avx512f-broadcast.c &
 
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=1  -D NR=48 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=4  -D NR=48 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=5  -D NR=48 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-5x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=6  -D NR=48 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=7  -D NR=48 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-7x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=8  -D NR=48 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-8x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=9  -D NR=48 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-9x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=10 -D NR=48 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-10x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=11 -D NR=48 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-11x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=12 -D NR=48 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-12x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=13 -D NR=48 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-13x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=14 -D NR=48 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-14x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=15 -D NR=48 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-15x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=16 -D NR=48 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-16x48-minmax-avx512f-broadcast.c &
+
 tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=1  -D NR=64 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-1x64-minmax-avx512f-broadcast.c &
 tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=4  -D NR=64 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x64-minmax-avx512f-broadcast.c &
 tools/xngen src/f32-gemm/avx512-broadcast.c.in -D MR=5  -D NR=64 -D INC=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-5x64-minmax-avx512f-broadcast.c &

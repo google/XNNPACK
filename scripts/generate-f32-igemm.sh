@@ -354,19 +354,65 @@ tools/xngen src/f32-igemm/avx-shuffle4.c.in -D MR=6 -D NR=16 -D FMA=3 -o src/f32
 
 ################################# x86 AVX-512 #################################
 ### AVX512F+BROADCAST micro-kernels
-tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=1 -D NR=16 -o src/f32-igemm/gen/f32-igemm-1x16-minmax-avx512f-broadcast.c &
-tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=4 -D NR=16 -o src/f32-igemm/gen/f32-igemm-4x16-minmax-avx512f-broadcast.c &
-tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=5 -D NR=16 -o src/f32-igemm/gen/f32-igemm-5x16-minmax-avx512f-broadcast.c &
-tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=6 -D NR=16 -o src/f32-igemm/gen/f32-igemm-6x16-minmax-avx512f-broadcast.c &
-tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=7 -D NR=16 -o src/f32-igemm/gen/f32-igemm-7x16-minmax-avx512f-broadcast.c &
-tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=8 -D NR=16 -o src/f32-igemm/gen/f32-igemm-8x16-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=1  -D NR=16 -o src/f32-igemm/gen/f32-igemm-1x16-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=4  -D NR=16 -o src/f32-igemm/gen/f32-igemm-4x16-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=5  -D NR=16 -o src/f32-igemm/gen/f32-igemm-5x16-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=6  -D NR=16 -o src/f32-igemm/gen/f32-igemm-6x16-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=7  -D NR=16 -o src/f32-igemm/gen/f32-igemm-7x16-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=8  -D NR=16 -o src/f32-igemm/gen/f32-igemm-8x16-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=9  -D NR=16 -o src/f32-igemm/gen/f32-igemm-9x16-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=10 -D NR=16 -o src/f32-igemm/gen/f32-igemm-10x16-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=11 -D NR=16 -o src/f32-igemm/gen/f32-igemm-11x16-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=12 -D NR=16 -o src/f32-igemm/gen/f32-igemm-12x16-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=13 -D NR=16 -o src/f32-igemm/gen/f32-igemm-13x16-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=14 -D NR=16 -o src/f32-igemm/gen/f32-igemm-14x16-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=15 -D NR=16 -o src/f32-igemm/gen/f32-igemm-15x16-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=16 -D NR=16 -o src/f32-igemm/gen/f32-igemm-16x16-minmax-avx512f-broadcast.c &
 
-tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=1 -D NR=32 -o src/f32-igemm/gen/f32-igemm-1x32-minmax-avx512f-broadcast.c &
-tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=4 -D NR=32 -o src/f32-igemm/gen/f32-igemm-4x32-minmax-avx512f-broadcast.c &
-tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=5 -D NR=32 -o src/f32-igemm/gen/f32-igemm-5x32-minmax-avx512f-broadcast.c &
-tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=6 -D NR=32 -o src/f32-igemm/gen/f32-igemm-6x32-minmax-avx512f-broadcast.c &
-tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=7 -D NR=32 -o src/f32-igemm/gen/f32-igemm-7x32-minmax-avx512f-broadcast.c &
-tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=8 -D NR=32 -o src/f32-igemm/gen/f32-igemm-8x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=1  -D NR=32 -o src/f32-igemm/gen/f32-igemm-1x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=4  -D NR=32 -o src/f32-igemm/gen/f32-igemm-4x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=5  -D NR=32 -o src/f32-igemm/gen/f32-igemm-5x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=6  -D NR=32 -o src/f32-igemm/gen/f32-igemm-6x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=7  -D NR=32 -o src/f32-igemm/gen/f32-igemm-7x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=8  -D NR=32 -o src/f32-igemm/gen/f32-igemm-8x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=9  -D NR=32 -o src/f32-igemm/gen/f32-igemm-9x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=10 -D NR=32 -o src/f32-igemm/gen/f32-igemm-10x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=11 -D NR=32 -o src/f32-igemm/gen/f32-igemm-11x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=12 -D NR=32 -o src/f32-igemm/gen/f32-igemm-12x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=13 -D NR=32 -o src/f32-igemm/gen/f32-igemm-13x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=14 -D NR=32 -o src/f32-igemm/gen/f32-igemm-14x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=15 -D NR=32 -o src/f32-igemm/gen/f32-igemm-15x32-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=16 -D NR=32 -o src/f32-igemm/gen/f32-igemm-16x32-minmax-avx512f-broadcast.c &
+
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=1  -D NR=48 -o src/f32-igemm/gen/f32-igemm-1x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=4  -D NR=48 -o src/f32-igemm/gen/f32-igemm-4x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=5  -D NR=48 -o src/f32-igemm/gen/f32-igemm-5x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=6  -D NR=48 -o src/f32-igemm/gen/f32-igemm-6x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=7  -D NR=48 -o src/f32-igemm/gen/f32-igemm-7x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=8  -D NR=48 -o src/f32-igemm/gen/f32-igemm-8x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=9  -D NR=48 -o src/f32-igemm/gen/f32-igemm-9x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=10 -D NR=48 -o src/f32-igemm/gen/f32-igemm-10x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=11 -D NR=48 -o src/f32-igemm/gen/f32-igemm-11x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=12 -D NR=48 -o src/f32-igemm/gen/f32-igemm-12x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=13 -D NR=48 -o src/f32-igemm/gen/f32-igemm-13x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=14 -D NR=48 -o src/f32-igemm/gen/f32-igemm-14x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=15 -D NR=48 -o src/f32-igemm/gen/f32-igemm-15x48-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=16 -D NR=48 -o src/f32-igemm/gen/f32-igemm-16x48-minmax-avx512f-broadcast.c &
+
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=1  -D NR=64 -o src/f32-igemm/gen/f32-igemm-1x64-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=4  -D NR=64 -o src/f32-igemm/gen/f32-igemm-4x64-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=5  -D NR=64 -o src/f32-igemm/gen/f32-igemm-5x64-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=6  -D NR=64 -o src/f32-igemm/gen/f32-igemm-6x64-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=7  -D NR=64 -o src/f32-igemm/gen/f32-igemm-7x64-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=8  -D NR=64 -o src/f32-igemm/gen/f32-igemm-8x64-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=9  -D NR=64 -o src/f32-igemm/gen/f32-igemm-9x64-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=10 -D NR=64 -o src/f32-igemm/gen/f32-igemm-10x64-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=11 -D NR=64 -o src/f32-igemm/gen/f32-igemm-11x64-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=12 -D NR=64 -o src/f32-igemm/gen/f32-igemm-12x64-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=13 -D NR=64 -o src/f32-igemm/gen/f32-igemm-13x64-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=14 -D NR=64 -o src/f32-igemm/gen/f32-igemm-14x64-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=15 -D NR=64 -o src/f32-igemm/gen/f32-igemm-15x64-minmax-avx512f-broadcast.c &
+tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=16 -D NR=64 -o src/f32-igemm/gen/f32-igemm-16x64-minmax-avx512f-broadcast.c &
 
 ################################ RISC-V Vector ################################
 tools/xngen src/f32-igemm/MRxNRv-rvv.c.in -D MR=1 -D NR=m4 -D ACTIVATION=LINEAR -o src/f32-igemm/gen/f32-igemm-1x4v-rvv.c &
