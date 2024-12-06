@@ -196,6 +196,7 @@ MICROKERNEL_DEFS = [
     "src/xx-fill/xx-fill.h",
     "src/xx-pad/xx-pad.h",
     "src/xx-transposev/xx-transposev.h",
+    "src/x8-lut/x8-lut.h",
     "src/x8-packq/x8-packq.h",
     "src/x8-packw/x8-packw.h",
     "src/x8-transposec/x8-transposec.h",
