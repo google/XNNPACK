@@ -670,10 +670,10 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
         (pthreadpool_task_3d_tile_2d_t)xnn_compute_grouped_gemm;
 #endif
     gemm_compute->range[0] = batch_size_c;
-    gemm_compute->range[1] = m;
-    gemm_compute->range[2] = n;
-    gemm_compute->tile[0] = mr;
-    gemm_compute->tile[1] = nc;
+    gemm_compute->range[2] = m;
+    gemm_compute->range[1] = n;
+    gemm_compute->tile[1] = mr;
+    gemm_compute->tile[0] = nc;
     batch_matrix_multiply_op->state = xnn_run_state_needs_setup;
 
     return xnn_status_success;
