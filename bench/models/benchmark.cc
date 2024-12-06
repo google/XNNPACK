@@ -236,8 +236,7 @@ BENCHMARK(QD8Attention)
 
 BENCHMARK(QS8MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 
-int main(int argc, char** argv) {
-  ::benchmark::Initialize(&argc, argv);
+int ProcessArgs(int& argc, char**& argv) {
   for (int i = 1; i < argc;) {
     if (strncmp(argv[i], "--num_threads=", 14) == 0) {
       FLAGS_num_threads = atoi(argv[i] + 14);
@@ -260,7 +259,23 @@ int main(int argc, char** argv) {
       ++i;
     }
   }
+  return 0;
+}
+
+#ifdef BENCHMARK_ARGS_BOTTLENECK
+// We are provided with a main that will call this function
+extern "C" {
+int BenchmarkArgBottleneck(int& argc, char**& argv) {
+  return ProcessArgs(argc, argv);
+}
+}
+#else
+int main(int argc, char** argv) {
+  ::benchmark::Initialize(&argc, argv);
+  int status = ProcessArgs(argc, argv);
+  if (status != 0) return status;
   if (::benchmark::ReportUnrecognizedArguments(argc, argv)) return 1;
   ::benchmark::RunSpecifiedBenchmarks();
 }
+#endif
 
