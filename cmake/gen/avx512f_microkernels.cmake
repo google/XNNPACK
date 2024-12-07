@@ -284,4 +284,37 @@ SET(NON_PROD_AVX512F_MICROKERNEL_SRCS
   src/x32-packw/gen/x32-packw-x32-gemm-gio-avx512f-u8-prfm.c
   src/x32-packw/gen/x32-packw-x32-gemm-goi-avx512f-u4.c)
 
+SET(PROD_AVX512F_ASM_MICROKERNEL_SRCS)
+
+SET(NON_PROD_AVX512F_ASM_MICROKERNEL_SRCS
+  src/f32-gemm/gen/f32-gemm-1x16-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-1x32-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-1x64-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-2x16-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-2x32-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-2x64-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-3x16-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-3x32-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-3x64-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-4x16-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-4x32-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-4x64-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-5x16-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-5x32-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-5x64-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-6x16-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-6x32-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-7x16-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-7x32-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-8x16-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-8x32-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-9x16-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-9x32-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-10x16-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-10x32-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-11x16-minmax-asm-avx512f-broadcast.S
+  src/f32-gemm/gen/f32-gemm-11x32-minmax-asm-avx512f-broadcast.S)
+
 SET(ALL_AVX512F_MICROKERNEL_SRCS ${PROD_AVX512F_MICROKERNEL_SRCS} + ${NON_PROD_AVX512F_MICROKERNEL_SRCS})
+
+SET(ALL_AVX512F_ASM_MICROKERNEL_SRCS ${PROD_AVX512F_ASM_MICROKERNEL_SRCS} + ${NON_PROD_AVX512F_ASM_MICROKERNEL_SRCS})
