@@ -48,33 +48,53 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__scalar(
 
     for (; n >= 8; n -= 8) {
       if XNN_LIKELY(b != NULL) {
-        const uint64_t v0 = ((const uint64_t*)b)[0];
-        const uint64_t v1 = ((const uint64_t*)b)[1];
-        const uint64_t v2 = ((const uint64_t*)b)[2];
-        const uint64_t v3 = ((const uint64_t*)b)[3];
-        ((uint64_t*)packed_w)[0] = v0;
-        ((uint64_t*)packed_w)[1] = v1;
-        ((uint64_t*)packed_w)[2] = v2;
-        ((uint64_t*)packed_w)[3] = v3;
+        const uint32_t v0 = ((const uint32_t*)b)[0];
+        const uint32_t v1 = ((const uint32_t*)b)[1];
+        const uint32_t v2 = ((const uint32_t*)b)[2];
+        const uint32_t v3 = ((const uint32_t*)b)[3];
+        const uint32_t v4 = ((const uint32_t*)b)[4];
+        const uint32_t v5 = ((const uint32_t*)b)[5];
+        const uint32_t v6 = ((const uint32_t*)b)[6];
+        const uint32_t v7 = ((const uint32_t*)b)[7];
+        ((uint32_t*)packed_w)[0] = v0;
+        ((uint32_t*)packed_w)[1] = v1;
+        ((uint32_t*)packed_w)[2] = v2;
+        ((uint32_t*)packed_w)[3] = v3;
+        ((uint32_t*)packed_w)[4] = v4;
+        ((uint32_t*)packed_w)[5] = v5;
+        ((uint32_t*)packed_w)[6] = v6;
+        ((uint32_t*)packed_w)[7] = v7;
         b += 8;
       } else {
-        ((uint64_t*)packed_w)[0] = 0;
-        ((uint64_t*)packed_w)[1] = 0;
-        ((uint64_t*)packed_w)[2] = 0;
-        ((uint64_t*)packed_w)[3] = 0;
+        ((uint32_t*)packed_w)[0] = 0;
+        ((uint32_t*)packed_w)[1] = 0;
+        ((uint32_t*)packed_w)[2] = 0;
+        ((uint32_t*)packed_w)[3] = 0;
+        ((uint32_t*)packed_w)[4] = 0;
+        ((uint32_t*)packed_w)[5] = 0;
+        ((uint32_t*)packed_w)[6] = 0;
+        ((uint32_t*)packed_w)[7] = 0;
       }
       packed_w += 8;
 
       // KC main loop
       for (size_t k = kc; k > 0; --k) {
-        const uint64_t v0 = ((const uint64_t*)w)[0];
-        const uint64_t v1 = ((const uint64_t*)w)[1];
-        const uint64_t v2 = ((const uint64_t*)w)[2];
-        const uint64_t v3 = ((const uint64_t*)w)[3];
-        ((uint64_t*)packed_w)[0] = v0;
-        ((uint64_t*)packed_w)[1] = v1;
-        ((uint64_t*)packed_w)[2] = v2;
-        ((uint64_t*)packed_w)[3] = v3;
+        const uint32_t v0 = ((const uint32_t*)w)[0];
+        const uint32_t v1 = ((const uint32_t*)w)[1];
+        const uint32_t v2 = ((const uint32_t*)w)[2];
+        const uint32_t v3 = ((const uint32_t*)w)[3];
+        const uint32_t v4 = ((const uint32_t*)w)[4];
+        const uint32_t v5 = ((const uint32_t*)w)[5];
+        const uint32_t v6 = ((const uint32_t*)w)[6];
+        const uint32_t v7 = ((const uint32_t*)w)[7];
+        ((uint32_t*)packed_w)[0] = v0;
+        ((uint32_t*)packed_w)[1] = v1;
+        ((uint32_t*)packed_w)[2] = v2;
+        ((uint32_t*)packed_w)[3] = v3;
+        ((uint32_t*)packed_w)[4] = v4;
+        ((uint32_t*)packed_w)[5] = v5;
+        ((uint32_t*)packed_w)[6] = v6;
+        ((uint32_t*)packed_w)[7] = v7;
         w += k_stride;
         packed_w += 8;
       }
@@ -92,10 +112,14 @@ void xnn_x32_packw_gemm_gio_ukernel_x8__scalar(
         }
         b += n;
       } else {
-        ((uint64_t*)packed_w)[0] = 0;
-        ((uint64_t*)packed_w)[1] = 0;
-        ((uint64_t*)packed_w)[2] = 0;
-        ((uint64_t*)packed_w)[3] = 0;
+        ((uint32_t*)packed_w)[0] = 0;
+        ((uint32_t*)packed_w)[1] = 0;
+        ((uint32_t*)packed_w)[2] = 0;
+        ((uint32_t*)packed_w)[3] = 0;
+        ((uint32_t*)packed_w)[4] = 0;
+        ((uint32_t*)packed_w)[5] = 0;
+        ((uint32_t*)packed_w)[6] = 0;
+        ((uint32_t*)packed_w)[7] = 0;
       }
       packed_w += 8;
 
