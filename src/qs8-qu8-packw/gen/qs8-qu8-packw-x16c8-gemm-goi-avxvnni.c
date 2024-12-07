@@ -52,7 +52,6 @@ void xnn_qs8_to_qu8_packw_gemm_goi_ukernel_x16c8__avxvnni(
   assert(packed_weights != NULL);
   assert(params != NULL);
 
-
   int8_t* out = (int8_t*) packed_weights;
   const int32_t* b = (const int32_t*) bias;
 

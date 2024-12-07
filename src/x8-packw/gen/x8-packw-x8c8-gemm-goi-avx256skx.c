@@ -52,7 +52,6 @@ void xnn_x8_packw_gemm_goi_ukernel_x8c8__avx256skx(
   assert(packed_weights != NULL);
   assert(params != NULL);
 
-
   int8_t* out = (int8_t*) packed_weights;
   const uint32_t* b = (const uint32_t*) bias;
 

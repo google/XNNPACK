@@ -65,16 +65,8 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avx256vnni(
   assert(weights != NULL);
   assert(packed_weights != NULL);
   assert(params != NULL);
-
-  // Use scalar pack if not an even block size
-  if (kc & 1) {
-    xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__scalar(
-      g, nc, kc, nr, kr, sr,
-      weights, bias, scale, packed_weights, extra_bytes, params);
-    return;
-  }
-  // KR=8 4 bit with 2 planes is 8 bytes
-  kc = (kc + 1) / 2;
+  assert(kc % 2 == 0);  // This kernel does not support odd KC
+  kc >>= 1;  // KR=8 4 bit with 2 planes is 8 bytes.  Measure in bytes
 
   int8_t* out = (int8_t*) packed_weights;
   const int32_t* b = (const int32_t*) bias;
