@@ -180,7 +180,9 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_f32_const_weights(
     // Pack the weights.
     if (gemm_config->pack_weights_and_biases) {
       gemm_config->pack_weights_and_biases(flags, gemm_config, k, n,
-                                           /*groups=*/batch_size_b, k_stride,
+                                           /*groups=*/batch_size_b, 
+                                           /*unused_block_size=*/0,
+                                           /*kstride=*/k_stride,
                                            /*accumulator_init=*/NULL,
                                            /*weights=*/data_b,
                                            /*int_extra_data0_fn=*/NULL,
@@ -191,7 +193,8 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_f32_const_weights(
                                            /*extra_data1=*/NULL,
                                            /*extra_data1_size=*/0,
                                            /*packed_weights_ptr=*/packed_data,
-                                           /*packing_params=*/NULL);
+                                           /*packing_params=*/NULL,
+                                           /*pthreadpool=*/NULL);
     } else {
       if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
         batch_matrix_multiply_op->ukernel.gemm.packw_gemm_goi(
@@ -313,7 +316,7 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
     const size_t weights_stride =
         gemm_config->packed_stride_weights_and_biases
             ? gemm_config->packed_stride_weights_and_biases(
-                  gemm_config, k, k_stride, extra_bytes)
+                  gemm_config, k,/*unused_blocksize=*/0, k_stride, extra_bytes)
             : (k_stride << XNN_LOG2_SIZEOF_INT8_T) + extra_bytes +
                   sizeof(int32_t);
     assert(weights_stride == (k_stride << XNN_LOG2_SIZEOF_INT8_T) +
@@ -345,7 +348,9 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
           batch_matrix_multiply_op->flags ^ XNN_FLAG_TRANSPOSE_WEIGHTS,
           gemm_config, /*input_channels=*/k,
           /*output_channels=*/n,
-          /*groups=*/batch_size_b, k_stride,
+          /*groups=*/batch_size_b, 
+          /*unused_block_size=*/0,
+          /*k_stride=*/k_stride,
           /*accumulator_init=*/NULL,
           /*weights=*/data_b,
           /*int_extra_data0_fn=*/
@@ -356,7 +361,9 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
           (xnn_init_scale_params_fn)xnn_init_qs8_qc8w_scale_fp32_params,
           /*extra_data1=*/scale_b,
           /*extra_data1_size=*/sizeof(float),
-          /*packed_weights_ptr=*/packed_data, &pack_gemm_params);
+          /*packed_weights_ptr=*/packed_data, 
+          /*params=*/&pack_gemm_params,
+          /*pthreadpool=*/NULL);
     } else {
       if (batch_matrix_multiply_op->flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
         batch_matrix_multiply_op->ukernel.gemm.packw_gemm_goi(

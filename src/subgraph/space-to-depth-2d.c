@@ -25,7 +25,8 @@ static enum xnn_status create_space_to_depth_operator(
   size_t num_values,
   struct xnn_operator_data* opdata,
   struct xnn_code_cache* code_cache,
-  xnn_weights_cache_t weights_cache)
+  xnn_weights_cache_t weights_cache,
+  pthreadpool_t threadpool)
 {
   assert(node->num_inputs == 1);
   assert(node->num_outputs == 1);
@@ -272,4 +273,3 @@ enum xnn_status xnn_define_space_to_depth_2d(
 
   return xnn_status_success;
 }
-

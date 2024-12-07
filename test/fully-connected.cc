@@ -3062,7 +3062,7 @@ TEST_F(FullyConnectedTestQD8F16QB4W, internally_allocated_dynamic_quantization_p
   status = xnn_create_fully_connected_nc_qd8_f16_qb4w(
     input_channels, output_channels, input_channels, output_channels, block_size, kernel_zero_point, reinterpret_cast<const uint16_t*>(kernel_scale.data()),
     kernel.data(), bias.data(), output_min, output_max,
-    /*flags=*/0, nullptr, nullptr, &fc_op);
+    /*flags=*/0, nullptr, nullptr, &fc_op, nullptr);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fc_op(fc_op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -4012,7 +4012,7 @@ TEST_F(FullyConnectedTestQD8F32QB4W, internally_allocated_dynamic_quantization_p
   status = xnn_create_fully_connected_nc_qd8_f32_qb4w(
     input_channels, output_channels, input_channels, output_channels, block_size, kernel_zero_point, reinterpret_cast<const uint16_t*>(kernel_scale.data()),
     kernel.data(), bias.data(), output_min, output_max,
-    /*flags=*/0, nullptr, nullptr, &fc_op);
+    /*flags=*/0, nullptr, nullptr, &fc_op, nullptr);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_fc_op(fc_op, xnn_delete_operator);
 
   if (status == xnn_status_unsupported_hardware) {
@@ -4475,7 +4475,7 @@ TEST_F(FullyConnectedTestQP8F32QB4W, matches_qd8_f32_qb4w)
       input_channels, output_channels, input_channels, output_channels, block_size,
       kernel_zero_point, reinterpret_cast<const uint16_t*>(kernel_scale.data()), kernel.data(), bias.data(),
       output_min, output_max,
-      /*flags=*/0, nullptr, nullptr, &qd8_fc_op);
+      /*flags=*/0, nullptr, nullptr, &qd8_fc_op, nullptr);
   std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_qd8_fc_op(
       qd8_fc_op, xnn_delete_operator);
 

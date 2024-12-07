@@ -372,6 +372,7 @@ static enum xnn_status create_gemm_or_igemm(
           gemm_config->pack_weights_and_biases(
               flags, gemm_config, group_input_channels, group_output_channels,
               groups,
+              /*unused_block_size*/0,
               k_stride,
               /*accumulator_init=*/bias,
               /*weights=*/kernel,
@@ -383,7 +384,9 @@ static enum xnn_status create_gemm_or_igemm(
               /*extra_data1=*/(const void *) kernel_scale_params,
               /*extra_data1_size=*/init_kernel_scale_params != NULL ? sizeof(float)
               : 0,
-              /*packed_weights_ptr=*/weights_ptr, packing_params);
+              /*packed_weights_ptr=*/weights_ptr, 
+              /*params=*/packing_params,
+              /*pthreadpool=*/NULL);
           // Kernel and bias have already been packed so prevent them from being
           // packed again below.
           weights_already_cached = true;
