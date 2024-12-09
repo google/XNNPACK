@@ -1,3 +1,6 @@
+# Common settings
+common --enable_workspace
+
 # Basic build settings
 build --jobs 128
 build --cxxopt='-std=gnu++14'
