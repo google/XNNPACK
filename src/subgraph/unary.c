@@ -9,11 +9,8 @@
 #include <stdint.h>
 
 #include "xnnpack.h"
-#include "xnnpack/common.h"
-#include "xnnpack/config.h"
 #include "xnnpack/internal.h"
 #include "xnnpack/log.h"
-#include "xnnpack/microparams.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator-type.h"
 #include "xnnpack/operator-utils.h"
@@ -60,8 +57,9 @@ static enum xnn_status create_convert_operator(
               &opdata->operator_objects[0]);
           break;
         case xnn_datatype_qpint8:
-          status = xnn_create_convert_nc_f32_qp8(node->flags,
-                                                 &opdata->operator_objects[0]);
+          status = xnn_create_convert_nc_f32_qp8(
+              node->flags, node->params.lhs_packing.gemm_config,
+              &opdata->operator_objects[0]);
           break;
         default:
           break;

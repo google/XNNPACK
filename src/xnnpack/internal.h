@@ -12,6 +12,7 @@
 #include <stdint.h>
 
 #include "xnnpack.h"
+#include "xnnpack/config-types.h"
 #include "pthreadpool.h"
 
 #ifdef __cplusplus
@@ -44,8 +45,10 @@ enum xnn_status xnn_reshape_fully_connected_nc_qp8_f32_qc4w(
     size_t batch_size,                  //
     pthreadpool_t threadpool);
 
-enum xnn_status xnn_create_convert_nc_f32_qp8(uint32_t flags,  //
-                                              xnn_operator_t* convert_op_out);
+enum xnn_status xnn_create_convert_nc_f32_qp8(
+    uint32_t flags,                             //
+    const struct xnn_gemm_config* gemm_config,  //
+    xnn_operator_t* convert_op_out);
 
 enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,  //
                                                size_t batch_size,          //

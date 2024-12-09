@@ -311,7 +311,10 @@ struct xnn_operator {
     const struct xnn_binary_elementwise_config* binary_elementwise_config;
     struct {
       const struct xnn_unary_elementwise_config* unary_elementwise_config;
-      const struct xnn_reduce_config* rminmax_config;  // For dynamic quantization convert operator.
+      const struct xnn_reduce_config*
+          rminmax_config;  // For dynamic quantization convert operator.
+      const struct xnn_gemm_config*
+          gemm_config;  // For dynamic quantization convert operator.
     };  // For unary elementwise operators.
     struct {
       const struct xnn_rmax_config* rmax_config;

@@ -1438,7 +1438,6 @@ void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
         case xnn_datatype_qcint8:
           weights_type = xnn_weights_type_qc8w;
           break;
-          break;
         default:
           XNN_UNREACHABLE;
       }
@@ -1464,6 +1463,19 @@ void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
                         xnn_datatype_to_string(output->datatype),
                         xnn_datatype_to_string(xnn_datatype_qpint8));
           subgraph->values[output_id].datatype = xnn_datatype_qpint8;
+          switch (weights_type) {
+            case xnn_weights_type_qb4w:
+              subgraph->nodes[output->producer].params.lhs_packing.gemm_config =
+                  xnn_init_qp8_f32_qb4w_gemm_config();
+              break;
+            case xnn_weights_type_qc4w:
+              subgraph->nodes[output->producer].params.lhs_packing.gemm_config =
+                  xnn_init_qp8_f32_qc4w_gemm_config();
+              break;
+            case xnn_weights_type_qc8w:
+            default:
+              XNN_UNREACHABLE;
+          }
         }
       }
 

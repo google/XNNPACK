@@ -787,8 +787,9 @@ enum xnn_status xnn_create_convert_nc_f32_qdu8(
   return create_convert_nc_f32_qx8(flags, xnn_init_f32_to_qu8_cvt_config(), xnn_operator_type_convert_nc_f32_qdu8, convert_op_out);
 }
 
-enum xnn_status xnn_create_convert_nc_f32_qp8(uint32_t flags,
-                                              xnn_operator_t* convert_op_out) {
+enum xnn_status xnn_create_convert_nc_f32_qp8(
+    uint32_t flags, const struct xnn_gemm_config* gemm_config,
+    xnn_operator_t* convert_op_out) {
   const struct xnn_reduce_config* f32_rminmax_config =
       xnn_init_f32_rminmax_config();
   if (f32_rminmax_config == NULL) {
@@ -806,6 +807,7 @@ enum xnn_status xnn_create_convert_nc_f32_qp8(uint32_t flags,
     xnn_operator_type_convert_nc_f32_qp8, convert_op_out);
   if (status == xnn_status_success) {
     (*convert_op_out)->rminmax_config = f32_rminmax_config;
+    (*convert_op_out)->gemm_config = gemm_config;
   }
   return status;
 }
@@ -1021,8 +1023,13 @@ enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,
 
   convert_op->batch_size = batch_size;
 
-  const struct xnn_gemm_config* gemm_config =
-      xnn_init_qp8_f32_qc4w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = convert_op->gemm_config;
+  if (gemm_config == NULL) {
+    xnn_log_error(
+        "failed to setup operator %s: missing GEMM config",
+        xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qp8));
+    return xnn_status_invalid_parameter;
+  }
   const uint32_t mr_packed = batch_size == 1 ? 1 : gemm_config->mr_packed;
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;

@@ -12,6 +12,7 @@
 #include "xnnpack/allocation-type.h"
 #include "xnnpack/cache.h"
 #include "xnnpack/common.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
 #include "pthreadpool.h"
@@ -321,6 +322,9 @@ struct xnn_node {
       struct xnn_attention_logits_cap_tanh_params cap_tanh_params;
     } scaled_dot_product_attention;
     union xnn_unary_params unary;
+    struct {
+      const struct xnn_gemm_config* gemm_config;
+    } lhs_packing;
   } params;
   struct {
     float output_min;
@@ -336,11 +340,15 @@ struct xnn_node {
   uint32_t layout_flags;
   uint32_t cluster_leader;
   // Number of filter parameters in all 1x1 Convolutions of the sparse cluster.
-  // This value is properly initialized only in sparse inference analysis of 1x1 Convolutions.
+  // This value is properly initialized only in sparse inference analysis of 1x1
+  // Convolutions.
   size_t num_params;
-  // Number of zero filter parameters in all 1x1 Convolutions of the sparse cluster.
-  // This value is properly initialized only in sparse inference analysis of 1x1 Convolutions.
+  // Number of zero filter parameters in all 1x1 Convolutions of the sparse
+  // cluster. This value is properly initialized only in sparse inference
+  // analysis of 1x1 Convolutions.
   size_t num_zeroes;
+  // Pointer to the runtime operator corresponding to this node.
+  struct xnn_operator *op;
   // Factory function to create an operator object from the node.
   xnn_create_operator_fn create;
   // Function to reshape an operator using opdata.
