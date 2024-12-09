@@ -20,7 +20,7 @@ void xnn_f32_qu8_vcvt_ukernel__avx_u8(
     size_t batch,
     const float* input,
     uint8_t* output,
-    const struct xnn_f32_qu8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
