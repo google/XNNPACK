@@ -24,6 +24,7 @@ PROD_NEONI8MM_MICROKERNEL_SRCS = [
     "src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x16c8-minmax-neoni8mm.c",
     "src/qp8-f32-qb4w-gemm/qp8-f32-qb4w-gemm-minmax-16x4c16s2-mstep4-neoni8mm.c",
     "src/qp8-f32-qc4w-gemm/qp8-f32-qc4w-gemm-minmax-8x8c16s2-mstep2-neoni8mm.c",
+    "src/qp8-f32-qc8w-gemm/qp8-f32-qc8w-gemm-minmax-16x4c8-mstep4-neoni8mm.c",
     "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-1x16c8-minmax-fp32-neoni8mm.c",
     "src/qs8-qc8w-gemm/gen/qs8-qc8w-gemm-4x16c8-minmax-fp32-neoni8mm.c",
     "src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x16c8-minmax-fp32-neoni8mm.c",

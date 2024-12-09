@@ -17,11 +17,13 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/allocation-type.h"
+#include "xnnpack/buffer.h"
 #include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/subgraph.h"
 #include "mock-allocator.h"
 #include "replicable_random_device.h"
+#include "runtime-flags.h"
 #include "runtime-tester.h"
 #include "subgraph-tester.h"
 
@@ -644,8 +646,9 @@ TEST(SUBGRAPH_FP16, fully_connected_qd8_f16_qc8w) {
   ASSERT_EQ(tester.NumNodes(), 4);
 
   xnn_runtime_t fp16_runtime_ptr = nullptr;
-  xnn_status status = xnn_create_runtime_v2(tester.Subgraph(), /*threadpool*/nullptr,
-                                            xnn_test_runtime_flags(), &fp16_runtime_ptr);
+  xnn_status status =
+      xnn_create_runtime_v2(tester.Subgraph(), /*threadpool*/ nullptr,
+                            xnn_test_runtime_flags(), &fp16_runtime_ptr);
   if (status == xnn_status_unsupported_hardware) {
     GTEST_SKIP();
   }
@@ -653,8 +656,9 @@ TEST(SUBGRAPH_FP16, fully_connected_qd8_f16_qc8w) {
       fp16_runtime_ptr, xnn_delete_runtime);
   ASSERT_EQ(xnn_status_success, status);
   xnn_runtime_t fp32_runtime_ptr = nullptr;
-  status = xnn_create_runtime_v2(reference_tester.Subgraph(), /*threadpool*/nullptr,
-                                 xnn_test_runtime_flags(), &fp32_runtime_ptr);
+  status =
+      xnn_create_runtime_v2(reference_tester.Subgraph(), /*threadpool*/ nullptr,
+                            xnn_test_runtime_flags(), &fp32_runtime_ptr);
   ASSERT_EQ(xnn_status_success, status);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_fp32_runtime(
       fp32_runtime_ptr, xnn_delete_runtime);

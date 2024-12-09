@@ -2258,3 +2258,182 @@ TEST(FULLY_CONNECTED_NC_QP8_F32_QB4W, small_batch_with_output_stride) {
     .iterations(3)
     .TestQP8F32QB4W();
 }
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC8W, unit_batch) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQP8F32QC8W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC8W, unit_batch_with_qmin) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .qmin(128)
+    .iterations(3)
+    .TestQP8F32QC8W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC8W, unit_batch_with_qmax) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .qmax(128)
+    .iterations(3)
+    .TestQP8F32QC8W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC8W, unit_batch_with_input_stride) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(22)
+    .input_stride(28)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQP8F32QC8W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC8W, unit_batch_with_output_stride) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .output_stride(29)
+    .iterations(3)
+    .TestQP8F32QC8W();
+}
+
+// TODO(b/355416339): Re-enable once we can handle strides again
+TEST(DISABLED_FULLY_CONNECTED_NC_QP8_F32_QC8W, unit_batch_transpose_weights) {
+  FullyConnectedOperatorTester()
+    .transpose_weights(true)
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(20)  // legacy requires even number
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQP8F32QC8W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC8W, unit_batch_without_bias) {
+  FullyConnectedOperatorTester()
+    .has_bias(false)
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQP8F32QC8W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC8W, small_batch) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(22)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQP8F32QC8W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC8W, small_batch_with_qmin) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(22)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .qmin(128)
+    .iterations(3)
+    .TestQP8F32QC8W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC8W, small_batch_with_qmax) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(22)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .qmax(128)
+    .iterations(3)
+    .TestQP8F32QC8W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC8W, small_batch_with_input_stride) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(22)
+    .input_stride(29)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQP8F32QC8W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC8W, small_batch_with_output_stride) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(22)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .output_stride(29)
+    .iterations(3)
+    .TestQP8F32QC8W();
+}
+
+// TODO(b/355416339): Re-enable once we can handle strides again
+TEST(DISABLED_FULLY_CONNECTED_NC_QP8_F32_QC8W, small_batch_transpose_weights) {
+  FullyConnectedOperatorTester()
+    .transpose_weights(true)
+    .batch_size(12)
+    .input_channels(22)
+    .output_channels(20)  // legacy doesn't support odd nc
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQP8F32QC8W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC8W, small_batch_without_bias) {
+  FullyConnectedOperatorTester()
+    .has_bias(false)
+    .batch_size(12)
+    .input_channels(22)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .iterations(3)
+    .TestQP8F32QC8W();
+}
+
+TEST(FULLY_CONNECTED_NC_QP8_F32_QC8W, weights_cache_unit_batch) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .kernel_zero_point(8)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQP8F32QC8W();
+}
+
+// TODO(b/355416339): Re-enable once we can handle strides again
+TEST(DISABLED_FULLY_CONNECTED_NC_QP8_F32_QC8W, weights_cache_unit_batch_transpose_weights) {
+  FullyConnectedOperatorTester()
+    .transpose_weights(true)
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(20)    // legacy doesn't support odd nc
+    .kernel_zero_point(8)
+    .use_weights_cache(true)
+    .iterations(3)
+    .TestQP8F32QC8W();
+}
+

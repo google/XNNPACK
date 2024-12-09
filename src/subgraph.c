@@ -17,6 +17,7 @@
 #include "xnnpack/allocation-type.h"
 #include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
 #include "xnnpack/fp16.h"
 #include "xnnpack/hardware-config.h"
@@ -640,7 +641,7 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
   if (!update) {
     return;
   }
-  // Propagate the cluster leader to other nodes in the graph untill all the
+  // Propagate the cluster leader to other nodes in the graph until all the
   // nodes in the cluster is not updated
   while (update) {
     update = false;
@@ -914,7 +915,10 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         }
         break;
       case xnn_node_type_fully_connected:
-        if (subgraph->values[node->inputs[0]].datatype == xnn_datatype_qdint8) {
+        if (subgraph->values[node->inputs[0]].datatype == xnn_datatype_qdint8 ||
+            subgraph->values[node->inputs[0]].datatype == xnn_datatype_qpint8) {
+          // Coerce any `qpint8` values back to `qdint8` for conversion to fp16.
+          subgraph->values[node->inputs[0]].datatype = xnn_datatype_qdint8;
           subgraph->values[node->outputs[0]].fp16_compatible = true;
         } else if (subgraph->values[node->inputs[0]].datatype ==
                        xnn_datatype_fp32 &&
@@ -1450,9 +1454,14 @@ void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
         // have full qp8 support.
 
         if (consumer_type == xnn_consumer_type_fully_connected) {
-          if ((weights_type == xnn_weights_type_qc4w) && xnn_init_qp8_f32_qc4w_gemm_config() != NULL) {
+          if ((weights_type == xnn_weights_type_qc4w) &&
+              xnn_init_qp8_f32_qc4w_gemm_config() != NULL) {
             pack_activations = true;
-          } else if ((weights_type == xnn_weights_type_qb4w) && xnn_init_qp8_f32_qc4w_gemm_config() != NULL) {
+          } else if ((weights_type == xnn_weights_type_qc8w) &&
+                     xnn_init_qp8_f32_qc8w_gemm_config() != NULL) {
+            pack_activations = true;
+          } else if ((weights_type == xnn_weights_type_qb4w) &&
+                     xnn_init_qp8_f32_qb4w_gemm_config() != NULL) {
             pack_activations = true;
           }
         }
@@ -1473,6 +1482,9 @@ void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
                   xnn_init_qp8_f32_qc4w_gemm_config();
               break;
             case xnn_weights_type_qc8w:
+              subgraph->nodes[output->producer].params.lhs_packing.gemm_config =
+                  xnn_init_qp8_f32_qc8w_gemm_config();
+              break;
             default:
               XNN_UNREACHABLE;
           }

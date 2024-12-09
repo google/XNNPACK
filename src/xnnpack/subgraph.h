@@ -124,7 +124,8 @@ struct xnn_value {
   uint32_t flags;
   /// Static initialization data. Must be null for non-static values.
   void* data;
-  /// Index of the Subgraph node that produced the value, or XNN_INVALID_NODE_ID is the Value is an external input.
+  /// Index of the Subgraph node that produced the value, or XNN_INVALID_NODE_ID
+  /// is the Value is an external input.
   uint32_t producer;
   /// Index of the first Node that consume the value, or XNN_INVALID_NODE_ID if the Value has no consumers within the
   /// graph (e.g. Value is an external output).
