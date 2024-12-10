@@ -41,7 +41,7 @@ class BatchMatrixMultiplyTestBase : public ::testing::Test {
         -std::numeric_limits<uint8_t>::max(),
         std::numeric_limits<uint8_t>::max());
     auto shape_dist =
-        std::uniform_int_distribution<size_t>(4, XNN_MAX_TENSOR_DIMS);
+        std::uniform_int_distribution<size_t>(2, XNN_MAX_TENSOR_DIMS);
     auto broadcast_dist =
         std::uniform_int_distribution<size_t>(0, 4);
     dim_dist = std::uniform_int_distribution<size_t>(5, 15);
@@ -52,7 +52,6 @@ class BatchMatrixMultiplyTestBase : public ::testing::Test {
     // where G is an integer multiple of H.
     size_t num_input_dims = shape_dist(rng);
     input1_dims = RandomShape(num_input_dims);
-    assert(input1_dims.size() >= 3);
     m = input1_dims[num_input_dims - 2];
 
     k = input1_dims.back();

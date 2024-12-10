@@ -318,6 +318,7 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
                   sizeof(int32_t);
     assert(weights_stride == (k_stride << XNN_LOG2_SIZEOF_INT8_T) +
                                  extra_bytes + sizeof(int32_t));
+    batch_matrix_multiply_op->weights_stride = weights_stride;
     const size_t packed_size = batch_size_b * n_stride * weights_stride;
     const size_t aligned_size =
         round_up_po2(packed_size, XNN_ALLOCATION_ALIGNMENT);

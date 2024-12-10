@@ -12,16 +12,16 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/params.h"
 
-static inline void* packed_weights(struct xnn_operator* op) {
-  if (op->weights_cache == NULL) {
-    return op->packed_weights.pointer;
-  } else {
-    return op->weights_cache->offset_to_addr(op->weights_cache->context, op->packed_weights.offset);
-  }
-}
-
 static inline bool use_weights_cache(struct xnn_operator* op) {
   return op->weights_cache != NULL;
+}
+
+static inline void* packed_weights(struct xnn_operator* op) {
+  if (use_weights_cache(op)) {
+    return op->weights_cache->offset_to_addr(op->weights_cache->context, op->packed_weights.offset);
+  } else {
+    return op->packed_weights.pointer;
+  }
 }
 
 // Get a pointer to a region to pack weights into. If weights cache is available, use it, returning to a pointer to the
