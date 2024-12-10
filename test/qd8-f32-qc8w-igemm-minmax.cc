@@ -1420,7 +1420,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*adj_k_block=*/16,
           /*mr=*/8, /*nr=*/8, /*kr=*/8, /*sr=*/1,
           /*is_igemm=*/true,
-          /*unsigned_inputs=*/false,
+          /*unsigned_inputs=*/true,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_qd8_f32_qc8w_igemm_minmax_ukernel_8x8c8__avxvnni_prfm,
                         xnn_init_f32_minmax_scalar_params,
