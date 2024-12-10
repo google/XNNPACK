@@ -1,0 +1,317 @@
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert NR in [8, 16]
+$assert KR == 8
+$assert DATATYPE in ["QS8", "X8"]
+$assert TYPE in ["int8_t"]
+$assert IZP in [0, 128]
+$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <immintrin.h>
+
+#include "xnnpack/packw.h"
+#include "xnnpack/unaligned.h"
+$if PREFETCH:
+  #include "xnnpack/prefetch.h"
+
+XNN_INLINE static uint64_t safe_load_u64(const void* src, size_t n) {
+  uint64_t value = 0;
+  const uint8_t* bytes = (const uint8_t*)src;
+  for (size_t i = 0; i < n; ++i) {
+    value |= (uint64_t)bytes[i] << (i * 8);
+  }
+  return value;
+}
+
+$BTYPE = {"QS8": "int32_t", "X8": "uint32_t"}[DATATYPE]
+$WTYPE = "int8_t"
+$if DATATYPE in ["QS8"]:
+  $_MM256_DPBUSD_EPI32 = "_mm256_dpbusd_avx_epi32" if AVX == 2 else "_mm256_dpbusd_epi32"
+  $ISA = "avxvnni" if AVX == 2 else "avx256vnni"
+$else:
+  $ISA = "avx2" if AVX == 2 else "avx256skx"
+void xnn_${DATATYPE.lower()}${"_to_qu8" if IZP == 128 else ""}_packw_gemm_gio_ukernel_x${NR}c${KR}__${ISA}${"_prfm" if PREFETCH else ""}(
+  size_t g,
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  size_t k_stride,
+  const ${WTYPE}* weights,
+  const ${BTYPE}* bias,
+  const void* scale,
+  ${WTYPE}* packed_weights,
+  size_t extra_bytes,
+  const void* params)
+{
+  assert(g != 0);
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(nr == ${NR});
+  assert(kr == ${KR});
+  assert(sr == 1);
+  assert(weights != NULL);
+  assert(packed_weights != NULL);
+
+  ${TYPE}* out = (${TYPE}*) packed_weights;
+  const ${BTYPE}* b = (const ${BTYPE}*) bias;
+
+  $if DATATYPE in ["QS8"]:
+    const __m256i vone = _mm256_set1_epi8(1);
+    const uint32_t izp = (uint32_t) (params ? (((const struct xnn_qs8_packw_params*) params)->input_zero_point + ${IZP}): ${IZP});
+    __m256i vzeropoint = _mm256_set1_epi32((int32_t) izp);
+
+  do {
+    // NC main loop multiple of ${NR}
+    const ${TYPE}* w0 = (const ${TYPE}*) weights;
+    size_t n = nc;
+    for (;n >= ${NR}; n -= ${NR}) {
+      $if DATATYPE in ["QS8"]:
+        ${BTYPE}* packed_b = (${BTYPE}*) out;
+      if XNN_LIKELY(b != NULL) {
+        $for N in range(0, NR, 8):
+          const __m256i vb${N} = _mm256_loadu_si256((const __m256i*) (b + ${N}));
+        $for N in range(0, NR, 8):
+          _mm256_storeu_si256((__m256i*) (out + ${N*4}), vb${N});
+        b += ${NR};
+      } else {
+        $for N in range(0, NR, 8):
+          _mm256_storeu_si256((__m256i*) (out + ${N*4}), _mm256_setzero_si256());
+      }
+      out += ${NR} * sizeof(${BTYPE});
+
+      $for N in range(1, NR):
+        const ${TYPE}* w${N} = w${N-1} + k_stride;
+      $if PREFETCH:
+        $for N in range(0, NR):
+          $for OFFSET in range(0, 448, 64):
+            xnn_prefetch_to_l1((const int8_t*) w${N} + ${OFFSET});
+
+      $if DATATYPE in ["QS8"]:
+        $for N in range(0, NR, 4):
+          __m256i vacc${N} = _mm256_setzero_si256();
+
+      size_t k = kc;
+
+      // KC main loop multiple of ${NR}x${KR}
+      for (; k >= ${KR}; k -= ${KR}) {
+        $for K in range(KR):
+          __m128i v${K}x${ABC[0:NR]} = _mm_loadu_si64(w${K});
+        $if PREFETCH:
+          $for K in range(0, KR):
+            xnn_prefetch_to_l1((const int8_t*) w${K} + 448);
+
+        $for K in range(0, KR, 2):
+          __m128i v${ABC[K:K+2]}x${ABC[0:NR]} = _mm_unpacklo_epi8(v${K}x${ABC[0:NR]}, v${K+1}x${ABC[0:NR]});
+
+        $for K in range(0, KR, 4):
+          __m128i v${ABC[K:K+4]}x${ABC[0:4]} = _mm_unpacklo_epi16(v${ABC[K:K+2]}x${ABC[0:NR]}, v${ABC[K+2:K+4]}x${ABC[0:NR]});
+          __m128i v${ABC[K:K+4]}x${ABC[4:8]} = _mm_unpackhi_epi16(v${ABC[K:K+2]}x${ABC[0:NR]}, v${ABC[K+2:K+4]}x${ABC[0:NR]});
+
+        $for K in range(0, KR, 4):
+          __m128i v${ABC[0:NR]}x${ABC[K:K+2]} = _mm_unpacklo_epi32(v0123x${ABC[(K//4)*4:(K//4)*4 + 4]}, v4567x${ABC[(K//4)*4:(K//4)*4 + 4]});
+          __m128i v${ABC[0:NR]}x${ABC[K+2:K+4]} = _mm_unpackhi_epi32(v0123x${ABC[(K//4)*4:(K//4)*4 + 4]}, v4567x${ABC[(K//4)*4:(K//4)*4 + 4]});
+
+        $for N in range(0, NR, 4):
+          __m256i v${N} = _mm256_inserti128_si256(_mm256_castsi128_si256(v${ABC[0:NR]}x${ABC[N:N+2]}), v${ABC[0:NR]}x${ABC[N+2:N+4]}, 1);
+
+        $if DATATYPE in ["QS8"]:
+          $for N in range(0, NR, 4):
+            vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, v${N});
+
+        $for N in range(0, NR, 4):
+          _mm256_storeu_si256((__m256i *)&out[${N * KR}],  v${N});
+
+        $for N in range(NR):
+          w${N} += ${KR} * k_stride;
+        out += ${NR*KR};
+      }
+
+      // KC remainder of 1..${KR-1}
+      if (k != 0) {
+        assert(k >= 1 && k <= ${KR-1});
+
+        __m128i vzero = _mm_setzero_si128();
+        __m128i v0x${ABC[0:NR]} = _mm_loadu_si64(w0);
+        $for K in range(1, KR):
+          __m128i v${K}x${ABC[0:NR]} = vzero;
+          if (${K} < k) {
+            v${K}x${ABC[0:NR]} = _mm_loadu_si64(w${K});
+          }
+
+        $for K in range(0, KR, 2):
+          __m128i v${ABC[K:K+2]}x${ABC[0:NR]} = _mm_unpacklo_epi8(v${K}x${ABC[0:NR]}, v${K+1}x${ABC[0:NR]});
+
+        $for K in range(0, KR, 4):
+          __m128i v${ABC[K:K+4]}x${ABC[0:4]} = _mm_unpacklo_epi16(v${ABC[K:K+2]}x${ABC[0:NR]}, v${ABC[K+2:K+4]}x${ABC[0:NR]});
+          __m128i v${ABC[K:K+4]}x${ABC[4:8]} = _mm_unpackhi_epi16(v${ABC[K:K+2]}x${ABC[0:NR]}, v${ABC[K+2:K+4]}x${ABC[0:NR]});
+
+        $for K in range(0, KR, 4):
+          __m128i v${ABC[0:NR]}x${ABC[K:K+2]} = _mm_unpacklo_epi32(v0123x${ABC[(K//4)*4:(K//4)*4 + 4]}, v4567x${ABC[(K//4)*4:(K//4)*4 + 4]});
+          __m128i v${ABC[0:NR]}x${ABC[K+2:K+4]} = _mm_unpackhi_epi32(v0123x${ABC[(K//4)*4:(K//4)*4 + 4]}, v4567x${ABC[(K//4)*4:(K//4)*4 + 4]});
+
+        $for N in range(0, NR, 4):
+          __m256i v${N} = _mm256_inserti128_si256(_mm256_castsi128_si256(v${ABC[0:NR]}x${ABC[N:N+2]}), v${ABC[0:NR]}x${ABC[N+2:N+4]}, 1);
+
+        $if DATATYPE in ["QS8"]:
+          $for N in range(0, NR, 4):
+            vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, v${N});
+
+        $for N in range(0, NR, 4):
+          _mm256_storeu_si256((__m256i *)&out[${N * KR}],  v${N});
+
+        $for N in range(NR):
+          w${N} += k * k_stride;
+        out += ${NR*KR};
+      }
+
+      $if DATATYPE in ["QS8"]:
+        $for N in range(0, NR, 8):
+          __m256i vksum${N} = _mm256_hadd_epi32(vacc${N}, vacc${N+4});
+          vksum${N} = _mm256_permute4x64_epi64(vksum${N}, _MM_SHUFFLE(3, 1, 2, 0));
+        $for N in range(0, NR, 8):
+          vksum${N} = _mm256_mullo_epi32(vksum${N}, vzeropoint);
+        $for N in range(0, NR, 8):
+          __m256i vpack${N} =  _mm256_loadu_si256((const __m256i*) (packed_b + ${N}));
+        $for N in range(0, NR, 8):
+          vpack${N} = _mm256_sub_epi32(vpack${N}, vksum${N});
+        $for N in range(0, NR, 8):
+          _mm256_storeu_si256((__m256i *) (packed_b + ${N}), vpack${N});
+      out = (${TYPE}*) ((uintptr_t) out + extra_bytes);
+      w0 = w0 - kc * k_stride + ${NR};
+    }
+
+    // NC remainder (1..${NR-1})
+    if XNN_UNLIKELY(n != 0) {
+      $if DATATYPE in ["QS8"]:
+        int32_t* packed_b = (int32_t*) out;
+      if XNN_LIKELY(b != NULL) {
+        size_t nb = n;
+        do {
+          $if BTYPE == TYPE:
+            *out++ = *b++;
+          $else:
+            *((${BTYPE}*) out) = *b++;
+            out += sizeof(${BTYPE});
+        } while (--nb != 0);
+      } else {
+        size_t nb = n;
+        do {
+          $if BTYPE == TYPE:
+            *out++ = 0;
+          $else:
+            *((${BTYPE}*) out) = 0;
+            out += sizeof(${BTYPE});
+        } while (--nb != 0);
+      }
+      $if BTYPE == TYPE:
+        out += (${NR} - n);
+      $else:
+        out += (${NR} - n) * sizeof(${BTYPE});
+
+     $if NR > 2:
+      $for K in range(1, KR):
+        const ${TYPE}* w${K} = w${K-1} + k_stride;
+
+      $if DATATYPE in ["QS8"]:
+        $for N in range(0, NR, 4):
+          __m256i vacc${N} = _mm256_setzero_si256();
+
+      size_t k = kc;
+
+      // KC main loop multiple of ${NR}x${KR}
+      for (; k >= ${KR}; k -= ${KR}) {
+        $for K in range(KR):
+          __m128i v${K}x${ABC[0:NR]} = _mm_set1_epi64x((int64_t) safe_load_u64(w${K}, n));
+
+        $for K in range(0, KR, 2):
+          __m128i v${ABC[K:K+2]}x${ABC[0:NR]} = _mm_unpacklo_epi8(v${K}x${ABC[0:NR]}, v${K+1}x${ABC[0:NR]});
+
+        $for K in range(0, KR, 4):
+          __m128i v${ABC[K:K+4]}x${ABC[0:4]} = _mm_unpacklo_epi16(v${ABC[K:K+2]}x${ABC[0:NR]}, v${ABC[K+2:K+4]}x${ABC[0:NR]});
+          __m128i v${ABC[K:K+4]}x${ABC[4:8]} = _mm_unpackhi_epi16(v${ABC[K:K+2]}x${ABC[0:NR]}, v${ABC[K+2:K+4]}x${ABC[0:NR]});
+
+        $for K in range(0, KR, 4):
+          __m128i v${ABC[0:NR]}x${ABC[K:K+2]} = _mm_unpacklo_epi32(v0123x${ABC[(K//4)*4:(K//4)*4 + 4]}, v4567x${ABC[(K//4)*4:(K//4)*4 + 4]});
+          __m128i v${ABC[0:NR]}x${ABC[K+2:K+4]} = _mm_unpackhi_epi32(v0123x${ABC[(K//4)*4:(K//4)*4 + 4]}, v4567x${ABC[(K//4)*4:(K//4)*4 + 4]});
+
+        $for N in range(0, NR, 4):
+          __m256i v${N} = _mm256_inserti128_si256(_mm256_castsi128_si256(v${ABC[0:NR]}x${ABC[N:N+2]}), v${ABC[0:NR]}x${ABC[N+2:N+4]}, 1);
+
+        $if DATATYPE in ["QS8"]:
+          $for N in range(0, NR, 4):
+            vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, v${N});
+
+        $for N in range(0, NR, 4):
+          _mm256_storeu_si256((__m256i *)&out[${N * KR}],  v${N});
+
+        $for N in range(NR):
+          w${N} += ${KR} * k_stride;
+        out += ${NR*KR};
+      }
+
+      // KC remainder of 1..${KR-1}
+      if (k != 0) {
+        assert(k >= 1 && k <= ${KR-1});
+
+        __m128i vzero = _mm_setzero_si128();
+        __m128i v0x${ABC[0:NR]} = _mm_set1_epi64x((int64_t) safe_load_u64(w0, n));
+        $for K in range(1, KR):
+          __m128i v${K}x${ABC[0:NR]} = vzero;
+          if (${K} < k) {
+            v${K}x${ABC[0:NR]} = _mm_set1_epi64x((int64_t) safe_load_u64(w${K}, n));
+          }
+
+        $for K in range(0, KR, 2):
+          __m128i v${ABC[K:K+2]}x${ABC[0:NR]} = _mm_unpacklo_epi8(v${K}x${ABC[0:NR]}, v${K+1}x${ABC[0:NR]});
+
+        $for K in range(0, KR, 4):
+          __m128i v${ABC[K:K+4]}x${ABC[0:4]} = _mm_unpacklo_epi16(v${ABC[K:K+2]}x${ABC[0:NR]}, v${ABC[K+2:K+4]}x${ABC[0:NR]});
+          __m128i v${ABC[K:K+4]}x${ABC[4:8]} = _mm_unpackhi_epi16(v${ABC[K:K+2]}x${ABC[0:NR]}, v${ABC[K+2:K+4]}x${ABC[0:NR]});
+
+        $for K in range(0, KR, 4):
+          __m128i v${ABC[0:NR]}x${ABC[K:K+2]} = _mm_unpacklo_epi32(v0123x${ABC[(K//4)*4:(K//4)*4 + 4]}, v4567x${ABC[(K//4)*4:(K//4)*4 + 4]});
+          __m128i v${ABC[0:NR]}x${ABC[K+2:K+4]} = _mm_unpackhi_epi32(v0123x${ABC[(K//4)*4:(K//4)*4 + 4]}, v4567x${ABC[(K//4)*4:(K//4)*4 + 4]});
+
+        $for N in range(0, NR, 4):
+          __m256i v${N} = _mm256_inserti128_si256(_mm256_castsi128_si256(v${ABC[0:NR]}x${ABC[N:N+2]}), v${ABC[0:NR]}x${ABC[N+2:N+4]}, 1);
+
+        $if DATATYPE in ["QS8"]:
+          $for N in range(0, NR, 4):
+            vacc${N} = ${_MM256_DPBUSD_EPI32}(vacc${N}, vone, v${N});
+
+        $for N in range(0, NR, 4):
+          _mm256_storeu_si256((__m256i *)&out[${N * KR}],  v${N});
+
+        $for N in range(NR):
+          w${N} += k * k_stride;
+        out += ${NR*KR};
+      }
+
+      $if DATATYPE in ["QS8"]:
+        $for N in range(0, NR, 8):
+          __m256i vksum${N} = _mm256_hadd_epi32(vacc${N}, vacc${N+4});
+          vksum${N} = _mm256_permute4x64_epi64(vksum${N}, _MM_SHUFFLE(3, 1, 2, 0));
+        $for N in range(0, NR, 8):
+          vksum${N} = _mm256_mullo_epi32(vksum${N}, vzeropoint);
+        $for N in range(0, NR, 8):
+          __m256i vpack${N} =  _mm256_loadu_si256((const __m256i*) (packed_b + ${N}));
+        $for N in range(0, NR, 8):
+          vpack${N} = _mm256_sub_epi32(vpack${N}, vksum${N});
+        $for N in range(0, NR, 8):
+          _mm256_storeu_si256((__m256i *) (packed_b + ${N}), vpack${N});
+      out = (${TYPE}*) ((uintptr_t) out + extra_bytes);
+      w0 = w0 - kc * k_stride + ${NR};
+    }
+
+    weights += nc * kc;
+  } while (--g != 0);
+}
