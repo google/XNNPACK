@@ -236,6 +236,7 @@ static void init_f16_gemm_config(void) {
       f16_gemm_config.nr = 16;
     }
   #endif
+  assert(f16_gemm_config.mr <= XNN_MAX_MR);
 }
 
 #if XNN_ARCH_WASMSIMD
@@ -912,6 +913,7 @@ static void init_f32_gemm_config(void) {
     f32_gemm_config.mr = 4;
     f32_gemm_config.nr = 4;
   #endif
+  assert(f32_gemm_config.mr <= XNN_MAX_MR);
 }
 
 static void init_f32_gemm_nr2_config(void) {
@@ -1037,6 +1039,7 @@ static void init_f32_gemm_nr2_config(void) {
     f32_gemm_nr2_config.mr = 4;
     f32_gemm_nr2_config.nr = 2;
   #endif
+  assert(f32_gemm_nr2_config.mr <= XNN_MAX_MR);
 }
 
 static void init_f32_qc4w_gemm_config(void) {
@@ -1131,6 +1134,7 @@ static void init_f32_qc4w_gemm_config(void) {
     f32_qc4w_gemm_config.mr = 4;
     f32_qc4w_gemm_config.nr = 4;
   #endif
+  assert(f32_qc4w_gemm_config.mr <= XNN_MAX_MR);
 }
 
 static void init_f32_qc8w_gemm_config(void) {
@@ -1346,6 +1350,7 @@ static void init_f32_qc8w_gemm_config(void) {
     f32_qc8w_gemm_config.mr = 4;
     f32_qc8w_gemm_config.nr = 4;
   #endif
+  assert(f32_qc8w_gemm_config.mr <= XNN_MAX_MR);
 }
 
 static void init_qdu8_f16_qc4w_gemm_config(void) {
@@ -1489,6 +1494,8 @@ static void init_qd8_f16_qc4w_gemm_config(void) {
         qd8_f16_qc4w_gemm_config.planes = 2;
     }
   #endif
+  assert(qd8_f16_qc4w_gemm_config.mr <= XNN_MAX_MR);
+  assert(qd8_f16_qc4w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
 }
 
 static void init_qd8_f16_qb4w_gemm_config(void) {
@@ -1561,6 +1568,8 @@ static void init_qd8_f16_qb4w_gemm_config(void) {
       qd8_f16_qb4w_gemm_config.planes = 2;
     }
   #endif
+  assert(qd8_f16_qb4w_gemm_config.mr <= XNN_MAX_MR);
+  assert(qd8_f16_qb4w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
 }
 
 static void init_qd8_f32_qc4w_gemm_config(void) {
@@ -1677,6 +1686,8 @@ static void init_qd8_f32_qc4w_gemm_config(void) {
     qd8_f32_qc4w_gemm_config.nr = 4;
     qd8_f32_qc4w_gemm_config.planes = 2;
   #endif
+  assert(qd8_f32_qc4w_gemm_config.mr <= XNN_MAX_MR);
+  assert(qd8_f32_qc4w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
 }
 
 static void init_qp8_f32_qc4w_gemm_config(void) {
@@ -1712,6 +1723,7 @@ static void init_qp8_f32_qc4w_gemm_config(void) {
     qp8_f32_qc4w_gemm_config.mr_packed = 1;
 #endif  // XNN_ENABLE_ARM_DOTPROD
   }
+  assert(qp8_f32_qc4w_gemm_config.mr <= XNN_MAX_MR);
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 }
 
@@ -1748,6 +1760,7 @@ static void init_qp8_f32_qb4w_gemm_config(void) {
         qp8_f32_qb4w_gemm_config.mr_packed = 1;
       #endif  // XNN_ENABLE_ARM_DOTPROD
     }
+  assert(qp8_f32_qb4w_gemm_config.mr <= XNN_MAX_MR);
   #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 }
 
@@ -1899,6 +1912,8 @@ static void init_qd8_f32_qb4w_gemm_config(void) {
     qd8_f32_qb4w_gemm_config.nr = 4;
     qd8_f32_qb4w_gemm_config.planes = 2;
   #endif
+  assert(qd8_f32_qb4w_gemm_config.mr <= XNN_MAX_MR);
+  assert(qd8_f32_qb4w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
 }
 
 static void init_qd8_f16_qc8w_gemm_config(void) {
@@ -2219,6 +2234,8 @@ static void init_qd8_f16_qc8w_gemm_config(void) {
       qd8_f16_qc8w_gemm_config.log2_kr = 3;
     }
   #endif
+  assert(qd8_f16_qc8w_gemm_config.mr <= XNN_MAX_MR);
+  assert(qd8_f16_qc8w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
 }
 
 static void init_qdu8_f16_qc8w_gemm_config(void) {
@@ -2893,6 +2910,8 @@ static void init_qd8_f32_qc8w_gemm_config(void) {
     qd8_f32_qc8w_gemm_config.mr = 4;
     qd8_f32_qc8w_gemm_config.nr = 4;
   #endif
+  assert(qd8_f32_qc8w_gemm_config.mr <= XNN_MAX_MR);
+  assert(qd8_f32_qc8w_gemm_config.mr <= (XNN_EXTRA_QUANTIZATION_PARAMS + 1));
 }
 
 static void init_qs8_qc8w_gemm_config(void) {
@@ -3703,6 +3722,7 @@ static void init_qs8_qc8w_gemm_config(void) {
     qs8_qc8w_gemm_config.mr = 3;
     qs8_qc8w_gemm_config.nr = 4;
   #endif
+  assert(qs8_qc8w_gemm_config.mr <= XNN_MAX_MR);
 }
 
 static void init_qu8_gemm_config(void) {
@@ -4014,6 +4034,7 @@ static void init_qu8_gemm_config(void) {
     qu8_gemm_config.mr = 3;
     qu8_gemm_config.nr = 4;
   #endif
+  assert(qu8_gemm_config.mr <= XNN_MAX_MR);
 }
 
 const struct xnn_gemm_config* xnn_init_f16_gemm_config() {
