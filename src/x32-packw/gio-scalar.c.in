@@ -44,23 +44,23 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__scalar(
 
     for (; n >= ${NR}; n -= ${NR}) {
       if XNN_LIKELY(b != NULL) {
-        $for N in range(0,NR,2):
-          const uint64_t v${N//2} = ((const uint64_t*)b)[${N//2}];
-        $for N in range(0,NR,2):
-          ((uint64_t*)packed_w)[${N//2}] = v${N//2};
+        $for N in range(NR):
+          const uint32_t v${N} = ((const uint32_t*)b)[${N}];
+        $for N in range(NR):
+          ((uint32_t*)packed_w)[${N}] = v${N};
         b += ${NR};
       } else {
-        $for N in range(0,NR,2):
-          ((uint64_t*)packed_w)[${N//2}] = 0;
+        $for N in range(NR):
+          ((uint32_t*)packed_w)[${N}] = 0;
       }
       packed_w += ${NR};
 
       // KC main loop
       for (size_t k = kc; k > 0; --k) {
-        $for N in range(0,NR,2):
-          const uint64_t v${N//2} = ((const uint64_t*)w)[${N//2}];
-        $for N in range(0,NR,2):
-          ((uint64_t*)packed_w)[${N//2}] = v${N//2};
+        $for N in range(NR):
+          const uint32_t v${N} = ((const uint32_t*)w)[${N}];
+        $for N in range(NR):
+          ((uint32_t*)packed_w)[${N}] = v${N};
         w += k_stride;
         packed_w += ${NR};
       }
@@ -78,8 +78,8 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__scalar(
         }
         b += n;
       } else {
-        $for N in range(0,NR,2):
-          ((uint64_t*)packed_w)[${N//2}] = 0;
+        $for N in range(NR):
+          ((uint32_t*)packed_w)[${N}] = 0;
       }
       packed_w += ${NR};
 
