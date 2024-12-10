@@ -6,8 +6,6 @@
 #ifndef THIRD_PARTY_XNNPACK_TEST_UNARY_OPS_H_
 #define THIRD_PARTY_XNNPACK_TEST_UNARY_OPS_H_
 
-#pragma once
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -20,11 +18,17 @@
 
 #include "xnnpack.h"
 #include "xnnpack/buffer.h"
+#include "xnnpack/common.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/math.h"
 #include "xnnpack/reference-utils.h"
 
 static float TolExact(float) { return 0.0f; }
-static float TolExact16(float y_ref) { return std::abs(y_ref) * 1.0e-3f; }
+static float TolExact16(float y_ref) {
+  // The maximum of the relative tolerance and half the smallest positive
+  // normal.
+  return std::max(std::abs(y_ref) * 9.77e-04, 0.5 * 6.10e-5);
+}
 
 static float TolRelative(float y_ref, float rel_tol) {
   // Note that `y_ref * rel_tol`, i.e. the expected absolute difference,
@@ -214,10 +218,12 @@ struct GELU : public UnaryOpInfo {
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
     switch (datatype) {
       case xnn_datatype_fp32:
-      case xnn_datatype_fp16:
-      case xnn_datatype_bf16:
         return TolMixed(y_ref, 10 * std::numeric_limits<float>::epsilon(),
                         5 * std::numeric_limits<float>::epsilon());
+      case xnn_datatype_fp16:
+        return TolMixed(y_ref, 10 * 9.77e-04, 5 * 9.77e-04);
+      case xnn_datatype_bf16:
+        return TolMixed(y_ref, 10 * 7.8125e-3, 5 * 7.8125e-3);
       case xnn_datatype_qint8:
       case xnn_datatype_quint8:
         return 1;
@@ -599,7 +605,8 @@ void UnaryReferenceImpl(
     const xnn_quantization_params& output_quantization = {0, 1.0f},
     const xnn_unary_params& params = xnn_unary_params()) {
   for (size_t i = 0; i < n; i++) {
-    float x_i = (x[i] - input_quantization.zero_point) * input_quantization.scale;
+    float x_i =
+        (x[i] - input_quantization.zero_point) * input_quantization.scale;
     float y_i = op_info.ReferenceImpl(x_i, params);
     y_i = y_i / output_quantization.scale + output_quantization.zero_point;
     y[i] = xnnpack::round_float_to_int<Out>(y_i);
@@ -630,7 +637,8 @@ void UnaryReferenceImpl(
     const xnn_unary_params& params = xnn_unary_params()) {
   static_assert(!xnnpack::is_quantized<Out>::value, "");
   for (size_t i = 0; i < n; i++) {
-    float x_i = (x[i] - input_quantization.zero_point) * input_quantization.scale;
+    float x_i =
+        (x[i] - input_quantization.zero_point) * input_quantization.scale;
     float y_i = op_info.ReferenceImpl(x_i, params);
     if (std::is_integral<Out>::value) {
       y[i] = xnnpack::round_float_to_int<Out>(y_i);
