@@ -793,7 +793,7 @@ ADD_LIBRARY(indirection OBJECT src/indirection.c)
 ADD_LIBRARY(logging OBJECT ${LOGGING_SRCS})
 ADD_LIBRARY(microparams-init OBJECT src/microparams-init.c)
 ADD_LIBRARY(normalization OBJECT src/normalization.c)
-ADD_LIBRARY(packing OBJECT src/reference/packing.cc)
+ADD_LIBRARY(packing OBJECT src/reference/packing.cc src/packw.c)
 TARGET_LINK_LIBRARIES(hardware-config PRIVATE xnnpack-base logging)
 TARGET_LINK_LIBRARIES(indirection PRIVATE xnnpack-base)
 TARGET_LINK_LIBRARIES(logging PRIVATE xnnpack-base)
@@ -1477,6 +1477,7 @@ IF(XNNPACK_BUILD_TESTS)
       x8-packw
       qs8-packw
       qs8-qc4w-packw
+      qb4-packw
       x8-zip
       xN-transpose
       xx-fill
@@ -1954,6 +1955,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       qu8-gemm
       qu8-gemm-fp32
       qu8-gemm-rndnu
+      qb4-packw
       x16-packw
       x32-packw
       x8-lut

@@ -131,6 +131,8 @@ PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/f32-vunary/gen/f32-vabs-scalar.c",
     "src/f32-vunary/gen/f32-vneg-scalar.c",
     "src/f32-vunary/gen/f32-vsqr-scalar.c",
+    "src/qb4-packw/gen/qb4-packw-x16c4-gemm-goi-scalar.c",
+    "src/qb4-packw/gen/qb4-packw-x16c8-gemm-goi-scalar.c",
     "src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x4-minmax-scalar.c",
     "src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-4x4-minmax-scalar.c",
     "src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x4-minmax-scalar.c",

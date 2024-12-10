@@ -1376,6 +1376,22 @@ typedef void (*xnn_qs8_qc4w_packw_gemm_goi_ukernel_fn)(
     size_t extra_bytes,
     const struct xnn_qs8_qc4w_packing_params* params);
 
+typedef void (*xnn_qb4_packw_gemm_goi_ukernel_fn)(
+    size_t g,
+    size_t nc,
+    size_t kc,
+    size_t nr,
+    size_t kr,
+    size_t sr,
+    size_t bl,
+    const uint8_t* k,
+    const int32_t* b,
+    const void* scale,
+    int8_t* packed_weights,
+    size_t extra_bytes_bl,
+    size_t extra_bytes,
+    const void* params);
+
 typedef void (*xnn_x16_packw_gemm_goi_ukernel_fn)(
     size_t g,
     size_t nc,
@@ -2229,6 +2245,7 @@ typedef void (*xnn_pack_weights_and_biases_fn)(
     size_t input_channels,                      //
     size_t output_channels,                     //
     size_t groups,                              //
+    size_t block_size,                          //
     // We tile packing by output channels, in GIO layout, the k (row) index
     // needs to be able to skip by the actual number of output channels, and not
     // just the argument nc. E.g. if weights is 1x3x5, and nr is 2, we tile the
@@ -2255,6 +2272,7 @@ typedef void (*xnn_pack_weights_and_biases_fn)(
 typedef size_t (*xnn_packed_stride_weights_and_biases_fn)(
     const struct xnn_gemm_config* gemm_config,  //
     size_t k,                                   //
+    size_t block_size,                          //
     size_t k_stride,                            //
     size_t extra_bytes);
 
