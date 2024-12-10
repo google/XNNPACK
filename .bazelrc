@@ -1,5 +1,6 @@
 # Common settings
-common --enable_workspace
+common --enable_bzlmod
+build --enable_bzlmod
 
 # Basic build settings
 build --jobs 128
