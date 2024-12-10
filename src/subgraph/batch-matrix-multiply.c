@@ -103,6 +103,19 @@ static enum xnn_status create_batch_matrix_multiply_operator(
       }
       break;
     }
+    case xnn_datatype_qpint8: {
+      switch (inputb_datatype) {
+        case xnn_datatype_qcint8:
+          status = xnn_create_batch_matrix_multiply_nc_qp8_f32_qc8w(
+              batch_size_b, k, n, input_b->data,
+              input_b->quantization.channelwise_scale, node->flags,
+              &opdata->operator_objects[0]);
+          break;
+        default:
+          XNN_UNREACHABLE;
+      }
+      break;
+    }
     case xnn_datatype_qduint8: {
       switch (inputb_datatype) {
         case xnn_datatype_qcint8:
@@ -234,6 +247,11 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
           opdata->operator_objects[0], num_batch_dims, padded_dims_a,
           padded_dims_b, m, k, n, threadpool);
       break;
+    case xnn_operator_type_batch_matrix_multiply_nc_qp8_f32_qc8w:
+      status = xnn_reshape_batch_matrix_multiply_nc_qp8_f32_qc8w(
+          opdata->operator_objects[0], num_batch_dims, padded_dims_a,
+          padded_dims_b, m, k, n, threadpool);
+      break;
     case xnn_operator_type_batch_matrix_multiply_nc_qdu8_f32_qc8w:
       status = xnn_reshape_batch_matrix_multiply_nc_qdu8_f32_qc8w(
           opdata->operator_objects[0], num_batch_dims, padded_dims_a,
@@ -304,6 +322,9 @@ static enum xnn_status setup_batch_matrix_multiply_operator(
       return xnn_setup_batch_matrix_multiply_nc_qd8_f32_qc8w(
           opdata->operator_objects[0], input_a_data,
           input_a->quantization.dynamic_params, output_data);
+    case xnn_operator_type_batch_matrix_multiply_nc_qp8_f32_qc8w:
+      return xnn_setup_batch_matrix_multiply_nc_qp8_f32_qc8w(
+          opdata->operator_objects[0], input_a_data, output_data);
     case xnn_operator_type_batch_matrix_multiply_nc_qdu8_f32_qc8w:
       return xnn_setup_batch_matrix_multiply_nc_qdu8_f32_qc8w(
           opdata->operator_objects[0], input_a_data,
