@@ -35,36 +35,36 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__scalar(
   assert(weights != NULL);
   assert(packed_weights != NULL);
 
-  const float* b = (const float*) bias;
-  float* packed_w = (float*) packed_weights;
+  const uint32_t* b = bias;
+  uint32_t* packed_w = packed_weights;
   do {
     // NC main loop multiple of ${NR}
-    const float* w = (const float*) weights;
+    const uint32_t* w = weights;
     size_t n = nc;
 
     for (; n >= ${NR}; n -= ${NR}) {
       if XNN_LIKELY(b != NULL) {
-        $for N in range(0,NR,2):
-          const uint64_t v${N//2} = ((const uint64_t*)b)[${N//2}];
-        $for N in range(0,NR,2):
-          ((uint64_t*)packed_w)[${N//2}] = v${N//2};
+        $for N in range(NR):
+          const uint32_t v${N} = b[${N}];
+        $for N in range(NR):
+          packed_w[${N}] = v${N};
         b += ${NR};
       } else {
-        $for N in range(0,NR,2):
-          ((uint64_t*)packed_w)[${N//2}] = 0;
+        $for N in range(NR):
+          packed_w[${N}] = 0;
       }
       packed_w += ${NR};
 
       // KC main loop
       for (size_t k = kc; k > 0; --k) {
-        $for N in range(0,NR,2):
-          const uint64_t v${N//2} = ((const uint64_t*)w)[${N//2}];
-        $for N in range(0,NR,2):
-          ((uint64_t*)packed_w)[${N//2}] = v${N//2};
+        $for N in range(NR):
+          const uint32_t v${N} = w[${N}];
+        $for N in range(NR):
+          packed_w[${N}] = v${N};
         w += k_stride;
         packed_w += ${NR};
       }
-      w = w - kc * k_stride + ${NR};  // Advance to next column of ${NR} floats
+      w = w - kc * k_stride + ${NR};  // Advance to next column of ${NR} uint32_t
     }
 
     // NC remainder (1..${NR-1})
@@ -78,8 +78,8 @@ void xnn_x32_packw_gemm_gio_ukernel_x${NR}__scalar(
         }
         b += n;
       } else {
-        $for N in range(0,NR,2):
-          ((uint64_t*)packed_w)[${N//2}] = 0;
+        $for N in range(NR):
+          packed_w[${N}] = 0;
       }
       packed_w += ${NR};
 
