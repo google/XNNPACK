@@ -17,6 +17,7 @@
 #include "xnnpack/allocation-type.h"
 #include "xnnpack/allocator.h"
 #include "xnnpack/common.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
 #include "xnnpack/fp16.h"
 #include "xnnpack/hardware-config.h"
@@ -201,6 +202,7 @@ void xnn_value_copy(
   dst_value->fp32_id = src_value->fp32_id;
   dst_value->fp16_temp_data = src_value->fp16_temp_data;
   dst_value->fp32_data = src_value->fp32_data;
+  dst_value->gemm_config = src_value->gemm_config;
 }
 
 struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph)
@@ -640,7 +642,7 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
   if (!update) {
     return;
   }
-  // Propagate the cluster leader to other nodes in the graph untill all the
+  // Propagate the cluster leader to other nodes in the graph until all the
   // nodes in the cluster is not updated
   while (update) {
     update = false;
@@ -914,7 +916,11 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         }
         break;
       case xnn_node_type_fully_connected:
-        if (subgraph->values[node->inputs[0]].datatype == xnn_datatype_qdint8) {
+        if (subgraph->values[node->inputs[0]].datatype == xnn_datatype_qdint8 ||
+            subgraph->values[node->inputs[0]].datatype == xnn_datatype_qpint8) {
+          // TODO(b/340399245) - Coerce any `qpint8` values back to `qdint8` for
+          // conversion to fp16.
+          subgraph->values[node->inputs[0]].datatype = xnn_datatype_qdint8;
           subgraph->values[node->outputs[0]].fp16_compatible = true;
         } else if (subgraph->values[node->inputs[0]].datatype ==
                        xnn_datatype_fp32 &&
@@ -1406,7 +1412,7 @@ void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
     const uint32_t input_id = node->inputs[0];
     const uint32_t output_id = node->outputs[0];
     const struct xnn_value* input = &subgraph->values[input_id];
-    const struct xnn_value* output = &subgraph->values[output_id];
+    struct xnn_value* output = &subgraph->values[output_id];
     // Only replace nodes for which all consumer are of the same type.
     if (!output->all_consumers_types_same) continue;
     if (output->datatype == xnn_datatype_qdint8) {
@@ -1450,29 +1456,35 @@ void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
         // have full qp8 support.
 
         if (consumer_type == xnn_consumer_type_fully_connected) {
-          if ((weights_type == xnn_weights_type_qc4w) && xnn_init_qp8_f32_qc4w_gemm_config() != NULL) {
+          if ((weights_type == xnn_weights_type_qc4w) &&
+              xnn_init_qp8_f32_qc4w_gemm_config() != NULL) {
             pack_activations = true;
-          } else if ((weights_type == xnn_weights_type_qb4w) && xnn_init_qp8_f32_qc4w_gemm_config() != NULL) {
+          } else if ((weights_type == xnn_weights_type_qc8w) &&
+                     xnn_init_qp8_f32_qc8w_gemm_config() != NULL) {
+            pack_activations = true;
+          } else if ((weights_type == xnn_weights_type_qb4w) &&
+                     xnn_init_qp8_f32_qb4w_gemm_config() != NULL) {
             pack_activations = true;
           }
         }
         if (pack_activations) {
           xnn_log_debug("Coercing type of output ID #%" PRIu32
                         " of %s operator from `%s` to `%s`.",
-                        output_id, xnn_node_type_to_string(xnn_node_type_convert),
+                        output_id,
+                        xnn_node_type_to_string(xnn_node_type_convert),
                         xnn_datatype_to_string(output->datatype),
                         xnn_datatype_to_string(xnn_datatype_qpint8));
           subgraph->values[output_id].datatype = xnn_datatype_qpint8;
           switch (weights_type) {
             case xnn_weights_type_qb4w:
-              subgraph->nodes[output->producer].params.lhs_packing.gemm_config =
-                  xnn_init_qp8_f32_qb4w_gemm_config();
+              output->gemm_config = xnn_init_qp8_f32_qb4w_gemm_config();
               break;
             case xnn_weights_type_qc4w:
-              subgraph->nodes[output->producer].params.lhs_packing.gemm_config =
-                  xnn_init_qp8_f32_qc4w_gemm_config();
+              output->gemm_config = xnn_init_qp8_f32_qc4w_gemm_config();
               break;
             case xnn_weights_type_qc8w:
+              output->gemm_config = xnn_init_qp8_f32_qc8w_gemm_config();
+              break;
             default:
               XNN_UNREACHABLE;
           }

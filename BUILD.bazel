@@ -990,6 +990,7 @@ xnnpack_cc_library(
         ":datatype",
         ":fp16",
         ":indirection",
+        ":internal",
         ":logging",
         ":math",
         ":microkernel_configs",

@@ -57,9 +57,9 @@ static enum xnn_status create_convert_operator(
               &opdata->operator_objects[0]);
           break;
         case xnn_datatype_qpint8:
-          status = xnn_create_convert_nc_f32_qp8(
-              node->flags, node->params.lhs_packing.gemm_config,
-              &opdata->operator_objects[0]);
+          status = xnn_create_convert_nc_f32_qp8(node->flags,
+                                                 output_value->gemm_config,
+                                                 &opdata->operator_objects[0]);
           break;
         default:
           break;
@@ -149,15 +149,13 @@ static enum xnn_status reshape_convert_operator(
       break;
     }
     case xnn_operator_type_convert_nc_f32_qp8: {
-      num_nonbatch_dims = 1;
-      dq_batch_size =
-          xnn_shape_multiply_batch_dims(&input_value->shape, num_nonbatch_dims);
-      dq_channel_stride = xnn_shape_multiply_trailing_dims(
-          &input_value->shape, num_input_dims - num_nonbatch_dims);
+      const size_t num_groups =
+          xnn_shape_multiply_batch_dims(&input_value->shape, 2);
+      const size_t batch_size = input_value->shape.dim[num_input_dims - 2];
+      const size_t channels = input_value->shape.dim[num_input_dims - 1];
       status = xnn_reshape_convert_nc_f32_qp8(
-          opdata->operator_objects[0], dq_batch_size,
-          /*channels=*/dq_channel_stride, /*input_stride=*/dq_channel_stride,
-          threadpool);
+          opdata->operator_objects[0], num_groups, batch_size, channels,
+          /*input_stride=*/channels, threadpool);
       break;
     }
     default:

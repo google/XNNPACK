@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
-#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -17,11 +16,10 @@
 #include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
 #include "xnnpack/datatype.h"
+#include "xnnpack/internal.h"
 #include "xnnpack/log.h"
-#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
-#include "xnnpack/node-type.h"
 #include "xnnpack/operator-type.h"
 #include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
@@ -90,6 +88,8 @@ static const struct xnn_unary_elementwise_config* get_config(
         return xnn_init_f32_to_qs8_cvt_config();
       } else if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_quint8) {
         return xnn_init_f32_to_qu8_cvt_config();
+      } else if (input_datatype == xnn_datatype_fp32 && output_datatype == xnn_datatype_qpint8) {
+        return xnn_init_f32_to_qp8_cvt_config();
       } else if (input_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_fp32) {
         return xnn_init_f16_to_f32_cvt_config();
       } else if (input_datatype == xnn_datatype_fp16 && output_datatype == xnn_datatype_qint8) {
@@ -1001,10 +1001,11 @@ enum xnn_status xnn_reshape_convert_nc_f32_qdu8(
   return reshape_convert_nc_f32_qx8(convert_op, batch_size, channels, input_stride, output_stride, xnn_operator_type_convert_nc_f32_qdu8, threadpool);
 }
 
-enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,
-                                               size_t batch_size,
-                                               size_t channels,
-                                               size_t input_stride,
+enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,  //
+                                               size_t num_groups,          //
+                                               size_t batch_size,          //
+                                               size_t channels,            //
+                                               size_t input_stride,        //
                                                pthreadpool_t threadpool) {
   if (convert_op->type != xnn_operator_type_convert_nc_f32_qp8) {
     xnn_log_error(
@@ -1025,9 +1026,8 @@ enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,
 
   const struct xnn_gemm_config* gemm_config = convert_op->gemm_config;
   if (gemm_config == NULL) {
-    xnn_log_error(
-        "failed to setup operator %s: missing GEMM config",
-        xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qp8));
+    xnn_log_error("failed to setup %s operator: No GEMM config provided.",
+                  xnn_operator_type_to_string(convert_op->type));
     return xnn_status_invalid_parameter;
   }
   const uint32_t mr_packed = batch_size == 1 ? 1 : gemm_config->mr_packed;
@@ -1035,7 +1035,7 @@ enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
 
   convert_op->context.f32_qp8_convert = (struct f32_qp8_convert_context){
-      .m = batch_size,
+      .m = num_groups * batch_size,
       .k = channels,
       .mr = mr_packed,
       .kr = kr,
@@ -1050,7 +1050,7 @@ enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,
   convert_op->compute[0].type = xnn_parallelization_type_1d;
   convert_op->compute[0].task_1d =
       (pthreadpool_task_1d_t)xnn_compute_f32_qp8_convert;
-  convert_op->compute[0].range[0] = batch_size;
+  convert_op->compute[0].range[0] = num_groups * batch_size;
 
   convert_op->state = xnn_run_state_needs_setup;
 

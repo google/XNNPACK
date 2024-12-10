@@ -124,7 +124,8 @@ struct xnn_value {
   uint32_t flags;
   /// Static initialization data. Must be null for non-static values.
   void* data;
-  /// Index of the Subgraph node that produced the value, or XNN_INVALID_NODE_ID is the Value is an external input.
+  /// Index of the Subgraph node that produced the value, or XNN_INVALID_NODE_ID
+  /// is the Value is an external input.
   uint32_t producer;
   /// Index of the first Node that consume the value, or XNN_INVALID_NODE_ID if the Value has no consumers within the
   /// graph (e.g. Value is an external output).
@@ -148,6 +149,8 @@ struct xnn_value {
   /// Used during analysis in xnn_subgraph_rewrite_for_fp16.
   /// Temporary buffer to convert static data to FP16.
   void* fp16_temp_data;
+  // Pointer to a `xnn_gemm_config` if this value is packed for a specific GEMM.
+  const struct xnn_gemm_config *gemm_config;
   // Pointer to original fp32 data if this value was converted from fp32 to fp16 (only for static values). This is used
   // for nodes like Convolution, where the filter is expected to be kept as fp32, but could have been converted to fp16
   // if another node (like Subtraction) also consumed the weights.
@@ -322,9 +325,6 @@ struct xnn_node {
       struct xnn_attention_logits_cap_tanh_params cap_tanh_params;
     } scaled_dot_product_attention;
     union xnn_unary_params unary;
-    struct {
-      const struct xnn_gemm_config* gemm_config;
-    } lhs_packing;
   } params;
   struct {
     float output_min;

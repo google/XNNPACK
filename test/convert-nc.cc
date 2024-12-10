@@ -347,8 +347,9 @@ class ConvertOperatorTester {
           auto_convert_op(convert_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-                xnn_reshape_convert_nc_f32_qp8(convert_op, batch_size(),
-                                               channels(), input_stride(),
+                xnn_reshape_convert_nc_f32_qp8(convert_op, /*num_groups=*/1,
+                                               batch_size(), channels(),
+                                               input_stride(),
                                                /*threadpool=*/nullptr));
       ASSERT_EQ(xnn_status_success,
                 xnn_setup_convert_nc_f32_qp8(convert_op, input.data(),

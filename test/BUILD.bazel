@@ -925,6 +925,18 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "qp8_f32_qc8w_gemm_minmax_test",
+    timeout = "moderate",
+    srcs = [
+        "qp8-f32-qc8w-gemm-minmax.cc",
+    ],
+    defines = xnnpack_kleidiai_defines(),
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "qs8_qc8w_gemm_minmax_fp32_test",
     timeout = "moderate",
     srcs = [
@@ -1622,6 +1634,7 @@ xnnpack_unit_test(
         "//:XNNPACK",
         "//:allocation_type",
         "//:buffer",
+        "//:common",
         "//:math",
         "//:subgraph",
     ],
