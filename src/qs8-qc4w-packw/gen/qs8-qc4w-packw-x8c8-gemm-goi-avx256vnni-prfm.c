@@ -28,17 +28,17 @@ XNN_INLINE static uint64_t safe_load_u64(const void* address, size_t n) {
   return value;
 }
 
-// convert a vector from packed nibbles to planar, and accumulate sum
+// Convert a vector from packed nibbles to planar, and accumulate sum
 static XNN_INTRINSIC
 __m256i xnn_packed2planar(__m256i* vacc, const __m256i v, const __m256i vmask, const __m256i vone) {
    const __m256i v0213 = _mm256_shuffle_epi32(v, _MM_SHUFFLE(3, 1, 2, 0));
    const __m256i vt = _mm256_slli_epi32(v0213, 4);     // isolate lower int4
    const __m256i vh = _mm256_and_si256(v0213, vmask);  // isolate upper int4
    const __m256i vl = _mm256_and_si256(vt, vmask);
-   *vacc = _mm256_dpbusd_epi32(*vacc, vone, vh);
-   *vacc = _mm256_dpbusd_epi32(*vacc, vone, vl);
    const __m256i v01 = _mm256_unpacklo_epi8(vl, vh);
    const __m256i v23 = _mm256_unpackhi_epi8(vl, vh);
+   *vacc = _mm256_dpbusd_epi32(*vacc, vone, v01);
+   *vacc = _mm256_dpbusd_epi32(*vacc, vone, v23);
    const __m256i vl01 = _mm256_srli_epi32(v01, 4);
    return _mm256_or_si256(vl01, v23);
 }
