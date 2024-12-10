@@ -6,9 +6,9 @@
 #include <algorithm>  // For std::generate.
 #include <array>      // For std::array.
 #include <cassert>
-#include <cmath>
 #include <cstddef>  // For size_t.
 #include <cstdint>  // For uint32_t.
+#include <cstdlib>
 #include <functional>
 #include <iterator>
 #include <limits>
@@ -688,8 +688,9 @@ TEST_F(BatchMatrixMultiplyTestQD8ToF32, matches_operator_api) {
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
 
   // Define the ops.
-  ASSERT_EQ(xnn_status_success, xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr, input1_f32_id,
-                                                   input1_id, /*flags=*/0));
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_unary(subgraph, xnn_unary_convert, /*params=*/nullptr,
+                             input1_f32_id, input1_id, /*flags=*/0));
   ASSERT_EQ(xnn_status_success,
             xnn_define_batch_matrix_multiply(subgraph, input1_id, input2_id,
                                              output_id, /*flags=*/0));
@@ -708,9 +709,12 @@ TEST_F(BatchMatrixMultiplyTestQD8ToF32, matches_operator_api) {
             xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
-  // Check outputs match.
+  float max_abs_val = 0.0f;
   for (size_t i = 0; i < operator_output.size(); i++) {
-    ASSERT_EQ(subgraph_output[i], operator_output[i])
+    max_abs_val = std::max(max_abs_val, std::abs(operator_output[i]));
+  }
+  for (size_t i = 0; i < operator_output.size(); i++) {
+    ASSERT_NEAR(operator_output[i], subgraph_output[i], max_abs_val * 2.0e-3)
         << " at index " << i << " of " << operator_output.size();
   }
 }

@@ -63,6 +63,7 @@ struct xnn_ukernel_gemm {
   xnn_packw_gemm_goi_ukernel_fn packw_gemm_goi;
   xnn_packw_gemm_gio_ukernel_fn packw_gemm_gio;
   uint8_t mr;
+  uint8_t mr_packed;
   uint8_t nr;
   uint8_t kr;
   uint8_t sr;
