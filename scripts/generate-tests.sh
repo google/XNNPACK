@@ -5,7 +5,8 @@
 # LICENSE file in the root directory of this source tree.
 
 ### Tests for ArgMaxPool micro-kernels
-tools/generate-argmaxpool-test.py --spec test/f32-argmaxpool.yaml --output test/f32-argmaxpool.cc &
+tools/generate-argmaxpool-unipass-test.py --tester ArgMaxPoolMicrokernelTester --ukernel f32-argmaxpool-unipass --output test/f32-argmaxpool-unipass.cc &
+tools/generate-argmaxpool-multipass-test.py --tester ArgMaxPoolMicrokernelTester --ukernel f32-argmaxpool-multipass --output test/f32-argmaxpool-multipass.cc &
 
 ### Tests for GEMM micro-kernels
 tools/generate-gemm-test.py --spec test/bf16-f32-gemm-minmax.yaml --output-test test/bf16-f32-gemm-minmax.cc &

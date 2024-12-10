@@ -555,14 +555,19 @@ xnnpack_unit_test(
     deps = MICROKERNEL_TEST_DEPS,
 )
 
-xnnpack_unit_test(
-    name = "f32_argmaxpool_test",
+[xnnpack_unit_test(
+    name = "%s_test" % kernel,
+    timeout = "moderate",
     srcs = [
         "argmaxpool-microkernel-tester.h",
-        "f32-argmaxpool.cc",
+        "%s.cc" % kernel.replace("_", "-"),
+        
     ],
     deps = MICROKERNEL_TEST_DEPS,
-)
+) for kernel in [
+    "f32_argmaxpool_unipass",
+    "f32_argmaxpool_multipass",
+]]
 
 xnnpack_unit_test(
     name = "f32_igemm_test",
