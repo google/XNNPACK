@@ -23,7 +23,7 @@ $if VARIANT == "MADD":
   // AVXVNNI replacement that uses vpmaddubsw.
   // u7 is vone.  s8 is int8 weights.
   static XNN_INTRINSIC
-  __m256i _mm256_dpbusd_epi32_madd(__m256i i32, const __m256i u7, const __m256i s8) {
+  __m256i mm256_dpbusd_epi32_madd(__m256i i32, const __m256i u7, const __m256i s8) {
     const __m256i vone = _mm256_set1_epi16(1);
     const __m256i i16 = _mm256_maddubs_epi16(u7, s8);  // u7 * s8 = s16
     const __m256i v = _mm256_madd_epi16(i16, vone);  // convert 16 bits to 32 bits
@@ -46,7 +46,7 @@ $PACKEDWTYPE = {"QS8": "int8_t", "QS4": "void", "X8": "int8_t"}[DATATYPE]
 $SCALETYPE = {"QS8": "void", "QS4": "float", "X8": "void"}[DATATYPE]
 $PARAMTYPE = {"QS8": "void", "QS4": "struct xnn_qs8_qc4w_packing_params", "X8": "void"}[DATATYPE]
 $if DATATYPE in ["QS8", "QS4"]:
-  $_MM256_DPBUSD_EPI32 = "_mm256_dpbusd_epi32_madd" if VARIANT == "MADD" else "_mm256_dpbusd_avx_epi32" if AVX == 2 else "_mm256_dpbusd_epi32"
+  $_MM256_DPBUSD_EPI32 = "mm256_dpbusd_epi32_madd" if VARIANT == "MADD" else "_mm256_dpbusd_avx_epi32" if AVX == 2 else "_mm256_dpbusd_epi32"
   $ISA = "avx2" if VARIANT == "MADD" else "avxvnni" if AVX == 2 else "avx256vnni"
 $else:
   $ISA = "avx2" if AVX == 2 else "avx256skx"
@@ -54,7 +54,7 @@ $DATATYPE_SPEC = "qs8_to_qu8" if IZP == 128 else {"QS8": "qs8", "QS4": "qs8_qc4w
 $if DATATYPE in ["QS4"]:
   // convert a vector from packed nibbles to planar, and accumulate sum
   static XNN_INTRINSIC
-  __m256i _mm256_packed2planar(__m256i* vacc, const __m256i v, const __m256i vmask, const __m256i vone) {
+  __m256i xnn_packed2planar(__m256i* vacc, const __m256i v, const __m256i vmask, const __m256i vone) {
      const __m256i v0213 = _mm256_shuffle_epi32(v, _MM_SHUFFLE(3, 1, 2, 0));
      const __m256i vt = _mm256_slli_epi32(v0213, 4);     // isolate lower int4
      const __m256i vh = _mm256_and_si256(v0213, vmask);  // isolate upper int4
@@ -166,7 +166,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" i
         $elif DATATYPE in ["QS4"]:
           $for N in range(0, NR, 4):
             $for I in range(0, 4):
-              v${N}_${I} = _mm256_packed2planar(&vacc${N}, v${N}_${I}, vmask, vone);
+              v${N}_${I} = xnn_packed2planar(&vacc${N}, v${N}_${I}, vmask, vone);
 
         $for I in range(0, 4):
           $for N in range(0, NR, 4):
@@ -194,7 +194,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" i
         $elif DATATYPE in ["QS4"]:
           $for N in range(0, NR, 4):
             v${N} = _mm256_xor_si256(v${N}, vkernel_zero_point);    // uint4 -> int4
-            v${N} = _mm256_packed2planar(&vacc${N}, v${N}, vmask, vone);
+            v${N} = xnn_packed2planar(&vacc${N}, v${N}, vmask, vone);
 
         $for N in range(0, NR, 4):
           _mm256_storeu_si256((__m256i *)&out[${N * KR}],  v${N});
@@ -223,7 +223,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" i
         $elif DATATYPE in ["QS4"]:
           $for N in range(0, NR, 4):
             v${N} = _mm256_xor_si256(v${N}, vkernel_zero_point);    // uint4 -> int4
-            v${N} = _mm256_packed2planar(&vacc${N}, v${N}, vmask, vone);
+            v${N} = xnn_packed2planar(&vacc${N}, v${N}, vmask, vone);
 
         $for N in range(0, NR, 4):
           _mm256_storeu_si256((__m256i *)&out[${N * KR}],  v${N});
@@ -314,7 +314,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" i
         $elif DATATYPE in ["QS4"]:
           $for N in range(0, NR, 4):
             $for I in range(0, 4):
-              v${N}_${I} = _mm256_packed2planar(&vacc${N}, v${N}_${I}, vmask, vone);
+              v${N}_${I} = xnn_packed2planar(&vacc${N}, v${N}_${I}, vmask, vone);
 
         $for I in range(0, 4):
           $for N in range(0, NR, 4):
@@ -342,7 +342,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" i
         $elif DATATYPE in ["QS4"]:
           $for N in range(0, NR, 4):
             v${N} = _mm256_xor_si256(v${N}, vkernel_zero_point);    // uint4 -> int4
-            v${N} = _mm256_packed2planar(&vacc${N}, v${N}, vmask, vone);
+            v${N} = xnn_packed2planar(&vacc${N}, v${N}, vmask, vone);
 
         $for N in range(0, NR, 4):
           _mm256_storeu_si256((__m256i *)&out[${N * KR}],  v${N});
@@ -371,7 +371,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" i
         $elif DATATYPE in ["QS4"]:
           $for N in range(0, NR, 4):
             v${N} = _mm256_xor_si256(v${N}, vkernel_zero_point);    // uint4 -> int4
-            v${N} = _mm256_packed2planar(&vacc${N}, v${N}, vmask, vone);
+            v${N} = xnn_packed2planar(&vacc${N}, v${N}, vmask, vone);
 
         $for N in range(0, NR, 4):
           _mm256_storeu_si256((__m256i *)&out[${N * KR}],  v${N});

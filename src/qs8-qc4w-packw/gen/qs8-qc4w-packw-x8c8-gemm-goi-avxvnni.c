@@ -29,7 +29,7 @@ XNN_INLINE static uint64_t safe_load_u64(const void* address, size_t n) {
 
 // convert a vector from packed nibbles to planar, and accumulate sum
 static XNN_INTRINSIC
-__m256i _mm256_packed2planar(__m256i* vacc, const __m256i v, const __m256i vmask, const __m256i vone) {
+__m256i xnn_packed2planar(__m256i* vacc, const __m256i v, const __m256i vmask, const __m256i vone) {
    const __m256i v0213 = _mm256_shuffle_epi32(v, _MM_SHUFFLE(3, 1, 2, 0));
    const __m256i vt = _mm256_slli_epi32(v0213, 4);     // isolate lower int4
    const __m256i vh = _mm256_and_si256(v0213, vmask);  // isolate upper int4
@@ -135,14 +135,14 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
         __m256i v4_2 = _mm256_permute2f128_si256(v45_02, v67_02, _MM_SHUFFLE(0, 3, 0, 1));
         __m256i v4_3 = _mm256_permute2f128_si256(v45_13, v67_13, _MM_SHUFFLE(0, 3, 0, 1));
 
-        v0_0 = _mm256_packed2planar(&vacc0, v0_0, vmask, vone);
-        v0_1 = _mm256_packed2planar(&vacc0, v0_1, vmask, vone);
-        v0_2 = _mm256_packed2planar(&vacc0, v0_2, vmask, vone);
-        v0_3 = _mm256_packed2planar(&vacc0, v0_3, vmask, vone);
-        v4_0 = _mm256_packed2planar(&vacc4, v4_0, vmask, vone);
-        v4_1 = _mm256_packed2planar(&vacc4, v4_1, vmask, vone);
-        v4_2 = _mm256_packed2planar(&vacc4, v4_2, vmask, vone);
-        v4_3 = _mm256_packed2planar(&vacc4, v4_3, vmask, vone);
+        v0_0 = xnn_packed2planar(&vacc0, v0_0, vmask, vone);
+        v0_1 = xnn_packed2planar(&vacc0, v0_1, vmask, vone);
+        v0_2 = xnn_packed2planar(&vacc0, v0_2, vmask, vone);
+        v0_3 = xnn_packed2planar(&vacc0, v0_3, vmask, vone);
+        v4_0 = xnn_packed2planar(&vacc4, v4_0, vmask, vone);
+        v4_1 = xnn_packed2planar(&vacc4, v4_1, vmask, vone);
+        v4_2 = xnn_packed2planar(&vacc4, v4_2, vmask, vone);
+        v4_3 = xnn_packed2planar(&vacc4, v4_3, vmask, vone);
 
         _mm256_storeu_si256((__m256i *)&out[0],  v0_0);
         _mm256_storeu_si256((__m256i *)&out[32],  v4_0);
@@ -176,9 +176,9 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
         v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w7)), 0xC0);
 
         v0 = _mm256_xor_si256(v0, vkernel_zero_point);    // uint4 -> int4
-        v0 = _mm256_packed2planar(&vacc0, v0, vmask, vone);
+        v0 = xnn_packed2planar(&vacc0, v0, vmask, vone);
         v4 = _mm256_xor_si256(v4, vkernel_zero_point);    // uint4 -> int4
-        v4 = _mm256_packed2planar(&vacc4, v4, vmask, vone);
+        v4 = xnn_packed2planar(&vacc4, v4, vmask, vone);
 
         _mm256_storeu_si256((__m256i *)&out[0],  v0);
         _mm256_storeu_si256((__m256i *)&out[32],  v4);
@@ -217,9 +217,9 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
         w7 += k;
 
         v0 = _mm256_xor_si256(v0, vkernel_zero_point);    // uint4 -> int4
-        v0 = _mm256_packed2planar(&vacc0, v0, vmask, vone);
+        v0 = xnn_packed2planar(&vacc0, v0, vmask, vone);
         v4 = _mm256_xor_si256(v4, vkernel_zero_point);    // uint4 -> int4
-        v4 = _mm256_packed2planar(&vacc4, v4, vmask, vone);
+        v4 = xnn_packed2planar(&vacc4, v4, vmask, vone);
 
         _mm256_storeu_si256((__m256i *)&out[0],  v0);
         _mm256_storeu_si256((__m256i *)&out[32],  v4);
@@ -318,14 +318,14 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
         __m256i v4_2 = _mm256_permute2f128_si256(v45_02, v67_02, _MM_SHUFFLE(0, 3, 0, 1));
         __m256i v4_3 = _mm256_permute2f128_si256(v45_13, v67_13, _MM_SHUFFLE(0, 3, 0, 1));
 
-        v0_0 = _mm256_packed2planar(&vacc0, v0_0, vmask, vone);
-        v0_1 = _mm256_packed2planar(&vacc0, v0_1, vmask, vone);
-        v0_2 = _mm256_packed2planar(&vacc0, v0_2, vmask, vone);
-        v0_3 = _mm256_packed2planar(&vacc0, v0_3, vmask, vone);
-        v4_0 = _mm256_packed2planar(&vacc4, v4_0, vmask, vone);
-        v4_1 = _mm256_packed2planar(&vacc4, v4_1, vmask, vone);
-        v4_2 = _mm256_packed2planar(&vacc4, v4_2, vmask, vone);
-        v4_3 = _mm256_packed2planar(&vacc4, v4_3, vmask, vone);
+        v0_0 = xnn_packed2planar(&vacc0, v0_0, vmask, vone);
+        v0_1 = xnn_packed2planar(&vacc0, v0_1, vmask, vone);
+        v0_2 = xnn_packed2planar(&vacc0, v0_2, vmask, vone);
+        v0_3 = xnn_packed2planar(&vacc0, v0_3, vmask, vone);
+        v4_0 = xnn_packed2planar(&vacc4, v4_0, vmask, vone);
+        v4_1 = xnn_packed2planar(&vacc4, v4_1, vmask, vone);
+        v4_2 = xnn_packed2planar(&vacc4, v4_2, vmask, vone);
+        v4_3 = xnn_packed2planar(&vacc4, v4_3, vmask, vone);
 
         _mm256_storeu_si256((__m256i *)&out[0],  v0_0);
         _mm256_storeu_si256((__m256i *)&out[32],  v4_0);
@@ -359,9 +359,9 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
         v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w7)), 0xC0);
 
         v0 = _mm256_xor_si256(v0, vkernel_zero_point);    // uint4 -> int4
-        v0 = _mm256_packed2planar(&vacc0, v0, vmask, vone);
+        v0 = xnn_packed2planar(&vacc0, v0, vmask, vone);
         v4 = _mm256_xor_si256(v4, vkernel_zero_point);    // uint4 -> int4
-        v4 = _mm256_packed2planar(&vacc4, v4, vmask, vone);
+        v4 = xnn_packed2planar(&vacc4, v4, vmask, vone);
 
         _mm256_storeu_si256((__m256i *)&out[0],  v0);
         _mm256_storeu_si256((__m256i *)&out[32],  v4);
@@ -400,9 +400,9 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avxvnni(
         w7 += k;
 
         v0 = _mm256_xor_si256(v0, vkernel_zero_point);    // uint4 -> int4
-        v0 = _mm256_packed2planar(&vacc0, v0, vmask, vone);
+        v0 = xnn_packed2planar(&vacc0, v0, vmask, vone);
         v4 = _mm256_xor_si256(v4, vkernel_zero_point);    // uint4 -> int4
-        v4 = _mm256_packed2planar(&vacc4, v4, vmask, vone);
+        v4 = xnn_packed2planar(&vacc4, v4, vmask, vone);
 
         _mm256_storeu_si256((__m256i *)&out[0],  v0);
         _mm256_storeu_si256((__m256i *)&out[32],  v4);

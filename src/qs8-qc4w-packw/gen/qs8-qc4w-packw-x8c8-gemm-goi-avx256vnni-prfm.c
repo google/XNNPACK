@@ -16,6 +16,7 @@
 
 #include "xnnpack/packw.h"
 #include "xnnpack/unaligned.h"
+#include "xnnpack/prefetch.h"
 
 XNN_INLINE static uint64_t safe_load_u64(const void* address, size_t n) {
   uint64_t value = 0;
@@ -42,7 +43,7 @@ __m256i xnn_packed2planar(__m256i* vacc, const __m256i v, const __m256i vmask, c
    return _mm256_or_si256(vl01, v23);
 }
 
-void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avx256vnni(
+void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avx256vnni_prfm(
   size_t g,
   size_t nc,
   size_t kc,
@@ -100,6 +101,62 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avx256vnni(
       }
       out += 8 * sizeof(int32_t);
 
+      xnn_prefetch_to_l1((const int8_t*) w0 + 0);
+      xnn_prefetch_to_l1((const int8_t*) w0 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w0 + 128);
+      xnn_prefetch_to_l1((const int8_t*) w0 + 192);
+      xnn_prefetch_to_l1((const int8_t*) w0 + 256);
+      xnn_prefetch_to_l1((const int8_t*) w0 + 320);
+      xnn_prefetch_to_l1((const int8_t*) w0 + 384);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 0);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 128);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 192);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 256);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 320);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 384);
+      xnn_prefetch_to_l1((const int8_t*) w2 + 0);
+      xnn_prefetch_to_l1((const int8_t*) w2 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w2 + 128);
+      xnn_prefetch_to_l1((const int8_t*) w2 + 192);
+      xnn_prefetch_to_l1((const int8_t*) w2 + 256);
+      xnn_prefetch_to_l1((const int8_t*) w2 + 320);
+      xnn_prefetch_to_l1((const int8_t*) w2 + 384);
+      xnn_prefetch_to_l1((const int8_t*) w3 + 0);
+      xnn_prefetch_to_l1((const int8_t*) w3 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w3 + 128);
+      xnn_prefetch_to_l1((const int8_t*) w3 + 192);
+      xnn_prefetch_to_l1((const int8_t*) w3 + 256);
+      xnn_prefetch_to_l1((const int8_t*) w3 + 320);
+      xnn_prefetch_to_l1((const int8_t*) w3 + 384);
+      xnn_prefetch_to_l1((const int8_t*) w4 + 0);
+      xnn_prefetch_to_l1((const int8_t*) w4 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w4 + 128);
+      xnn_prefetch_to_l1((const int8_t*) w4 + 192);
+      xnn_prefetch_to_l1((const int8_t*) w4 + 256);
+      xnn_prefetch_to_l1((const int8_t*) w4 + 320);
+      xnn_prefetch_to_l1((const int8_t*) w4 + 384);
+      xnn_prefetch_to_l1((const int8_t*) w5 + 0);
+      xnn_prefetch_to_l1((const int8_t*) w5 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w5 + 128);
+      xnn_prefetch_to_l1((const int8_t*) w5 + 192);
+      xnn_prefetch_to_l1((const int8_t*) w5 + 256);
+      xnn_prefetch_to_l1((const int8_t*) w5 + 320);
+      xnn_prefetch_to_l1((const int8_t*) w5 + 384);
+      xnn_prefetch_to_l1((const int8_t*) w6 + 0);
+      xnn_prefetch_to_l1((const int8_t*) w6 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w6 + 128);
+      xnn_prefetch_to_l1((const int8_t*) w6 + 192);
+      xnn_prefetch_to_l1((const int8_t*) w6 + 256);
+      xnn_prefetch_to_l1((const int8_t*) w6 + 320);
+      xnn_prefetch_to_l1((const int8_t*) w6 + 384);
+      xnn_prefetch_to_l1((const int8_t*) w7 + 0);
+      xnn_prefetch_to_l1((const int8_t*) w7 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w7 + 128);
+      xnn_prefetch_to_l1((const int8_t*) w7 + 192);
+      xnn_prefetch_to_l1((const int8_t*) w7 + 256);
+      xnn_prefetch_to_l1((const int8_t*) w7 + 320);
+      xnn_prefetch_to_l1((const int8_t*) w7 + 384);
 
       __m256i vacc0 = _mm256_setzero_si256();
       __m256i vacc4 = _mm256_setzero_si256();
@@ -125,6 +182,14 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avx256vnni(
         const __m256i v67_02 = _mm256_unpacklo_epi64(v6_0123, v7_0123);
         const __m256i v67_13 = _mm256_unpackhi_epi64(v6_0123, v7_0123);
 
+        xnn_prefetch_to_l1((const int8_t*) w0 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w1 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w2 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w3 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w4 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w5 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w6 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w7 + 448);
 
         __m256i v0_0 = _mm256_permute2f128_si256(v01_02, v23_02, _MM_SHUFFLE(0, 2, 0, 0));
         __m256i v0_1 = _mm256_permute2f128_si256(v01_13, v23_13, _MM_SHUFFLE(0, 2, 0, 0));
@@ -174,6 +239,14 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avx256vnni(
         v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w5)), 0x0C);
         v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w6)), 0x30);
         v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w7)), 0xC0);
+        xnn_prefetch_to_l1((const int8_t*) w0 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w1 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w2 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w3 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w4 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w5 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w6 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w7 + 448);
 
         v0 = _mm256_xor_si256(v0, vkernel_zero_point);    // uint4 -> int4
         v0 = xnn_packed2planar(&vacc0, v0, vmask, vone);
@@ -283,6 +356,62 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avx256vnni(
       }
       out += 8 * sizeof(int32_t);
 
+      xnn_prefetch_to_l1((const int8_t*) w0 + 0);
+      xnn_prefetch_to_l1((const int8_t*) w0 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w0 + 128);
+      xnn_prefetch_to_l1((const int8_t*) w0 + 192);
+      xnn_prefetch_to_l1((const int8_t*) w0 + 256);
+      xnn_prefetch_to_l1((const int8_t*) w0 + 320);
+      xnn_prefetch_to_l1((const int8_t*) w0 + 384);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 0);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 128);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 192);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 256);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 320);
+      xnn_prefetch_to_l1((const int8_t*) w1 + 384);
+      xnn_prefetch_to_l1((const int8_t*) w2 + 0);
+      xnn_prefetch_to_l1((const int8_t*) w2 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w2 + 128);
+      xnn_prefetch_to_l1((const int8_t*) w2 + 192);
+      xnn_prefetch_to_l1((const int8_t*) w2 + 256);
+      xnn_prefetch_to_l1((const int8_t*) w2 + 320);
+      xnn_prefetch_to_l1((const int8_t*) w2 + 384);
+      xnn_prefetch_to_l1((const int8_t*) w3 + 0);
+      xnn_prefetch_to_l1((const int8_t*) w3 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w3 + 128);
+      xnn_prefetch_to_l1((const int8_t*) w3 + 192);
+      xnn_prefetch_to_l1((const int8_t*) w3 + 256);
+      xnn_prefetch_to_l1((const int8_t*) w3 + 320);
+      xnn_prefetch_to_l1((const int8_t*) w3 + 384);
+      xnn_prefetch_to_l1((const int8_t*) w4 + 0);
+      xnn_prefetch_to_l1((const int8_t*) w4 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w4 + 128);
+      xnn_prefetch_to_l1((const int8_t*) w4 + 192);
+      xnn_prefetch_to_l1((const int8_t*) w4 + 256);
+      xnn_prefetch_to_l1((const int8_t*) w4 + 320);
+      xnn_prefetch_to_l1((const int8_t*) w4 + 384);
+      xnn_prefetch_to_l1((const int8_t*) w5 + 0);
+      xnn_prefetch_to_l1((const int8_t*) w5 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w5 + 128);
+      xnn_prefetch_to_l1((const int8_t*) w5 + 192);
+      xnn_prefetch_to_l1((const int8_t*) w5 + 256);
+      xnn_prefetch_to_l1((const int8_t*) w5 + 320);
+      xnn_prefetch_to_l1((const int8_t*) w5 + 384);
+      xnn_prefetch_to_l1((const int8_t*) w6 + 0);
+      xnn_prefetch_to_l1((const int8_t*) w6 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w6 + 128);
+      xnn_prefetch_to_l1((const int8_t*) w6 + 192);
+      xnn_prefetch_to_l1((const int8_t*) w6 + 256);
+      xnn_prefetch_to_l1((const int8_t*) w6 + 320);
+      xnn_prefetch_to_l1((const int8_t*) w6 + 384);
+      xnn_prefetch_to_l1((const int8_t*) w7 + 0);
+      xnn_prefetch_to_l1((const int8_t*) w7 + 64);
+      xnn_prefetch_to_l1((const int8_t*) w7 + 128);
+      xnn_prefetch_to_l1((const int8_t*) w7 + 192);
+      xnn_prefetch_to_l1((const int8_t*) w7 + 256);
+      xnn_prefetch_to_l1((const int8_t*) w7 + 320);
+      xnn_prefetch_to_l1((const int8_t*) w7 + 384);
 
       __m256i vacc0 = _mm256_setzero_si256();
       __m256i vacc4 = _mm256_setzero_si256();
@@ -308,6 +437,14 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avx256vnni(
         const __m256i v67_02 = _mm256_unpacklo_epi64(v6_0123, v7_0123);
         const __m256i v67_13 = _mm256_unpackhi_epi64(v6_0123, v7_0123);
 
+        xnn_prefetch_to_l1((const int8_t*) w0 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w1 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w2 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w3 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w4 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w5 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w6 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w7 + 448);
 
         __m256i v0_0 = _mm256_permute2f128_si256(v01_02, v23_02, _MM_SHUFFLE(0, 2, 0, 0));
         __m256i v0_1 = _mm256_permute2f128_si256(v01_13, v23_13, _MM_SHUFFLE(0, 2, 0, 0));
@@ -357,6 +494,14 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x8c8__avx256vnni(
         v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w5)), 0x0C);
         v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w6)), 0x30);
         v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w7)), 0xC0);
+        xnn_prefetch_to_l1((const int8_t*) w0 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w1 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w2 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w3 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w4 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w5 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w6 + 448);
+        xnn_prefetch_to_l1((const int8_t*) w7 + 448);
 
         v0 = _mm256_xor_si256(v0, vkernel_zero_point);    // uint4 -> int4
         v0 = xnn_packed2planar(&vacc0, v0, vmask, vone);

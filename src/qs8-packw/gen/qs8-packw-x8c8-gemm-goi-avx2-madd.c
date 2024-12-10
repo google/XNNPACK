@@ -19,7 +19,7 @@
 // AVXVNNI replacement that uses vpmaddubsw.
 // u7 is vone.  s8 is int8 weights.
 static XNN_INTRINSIC
-__m256i _mm256_dpbusd_epi32_madd(__m256i i32, const __m256i u7, const __m256i s8) {
+__m256i mm256_dpbusd_epi32_madd(__m256i i32, const __m256i u7, const __m256i s8) {
   const __m256i vone = _mm256_set1_epi16(1);
   const __m256i i16 = _mm256_maddubs_epi16(u7, s8);  // u7 * s8 = s16
   const __m256i v = _mm256_madd_epi16(i16, vone);  // convert 16 bits to 32 bits
@@ -125,14 +125,14 @@ void xnn_qs8_packw_gemm_goi_ukernel_x8c8__avx2_madd(
         __m256i v4_2 = _mm256_permute2f128_si256(v45_02, v67_02, _MM_SHUFFLE(0, 3, 0, 1));
         __m256i v4_3 = _mm256_permute2f128_si256(v45_13, v67_13, _MM_SHUFFLE(0, 3, 0, 1));
 
-        vacc0 = _mm256_dpbusd_epi32_madd(vacc0, vone, v0_0);
-        vacc0 = _mm256_dpbusd_epi32_madd(vacc0, vone, v0_1);
-        vacc0 = _mm256_dpbusd_epi32_madd(vacc0, vone, v0_2);
-        vacc0 = _mm256_dpbusd_epi32_madd(vacc0, vone, v0_3);
-        vacc4 = _mm256_dpbusd_epi32_madd(vacc4, vone, v4_0);
-        vacc4 = _mm256_dpbusd_epi32_madd(vacc4, vone, v4_1);
-        vacc4 = _mm256_dpbusd_epi32_madd(vacc4, vone, v4_2);
-        vacc4 = _mm256_dpbusd_epi32_madd(vacc4, vone, v4_3);
+        vacc0 = mm256_dpbusd_epi32_madd(vacc0, vone, v0_0);
+        vacc0 = mm256_dpbusd_epi32_madd(vacc0, vone, v0_1);
+        vacc0 = mm256_dpbusd_epi32_madd(vacc0, vone, v0_2);
+        vacc0 = mm256_dpbusd_epi32_madd(vacc0, vone, v0_3);
+        vacc4 = mm256_dpbusd_epi32_madd(vacc4, vone, v4_0);
+        vacc4 = mm256_dpbusd_epi32_madd(vacc4, vone, v4_1);
+        vacc4 = mm256_dpbusd_epi32_madd(vacc4, vone, v4_2);
+        vacc4 = mm256_dpbusd_epi32_madd(vacc4, vone, v4_3);
 
         _mm256_storeu_si256((__m256i *)&out[0],  v0_0);
         _mm256_storeu_si256((__m256i *)&out[32],  v4_0);
@@ -165,8 +165,8 @@ void xnn_qs8_packw_gemm_goi_ukernel_x8c8__avx2_madd(
         v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w6)), 0x30);
         v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w7)), 0xC0);
 
-        vacc0 = _mm256_dpbusd_epi32_madd(vacc0, vone, v0);
-        vacc4 = _mm256_dpbusd_epi32_madd(vacc4, vone, v4);
+        vacc0 = mm256_dpbusd_epi32_madd(vacc0, vone, v0);
+        vacc4 = mm256_dpbusd_epi32_madd(vacc4, vone, v4);
 
         _mm256_storeu_si256((__m256i *)&out[0],  v0);
         _mm256_storeu_si256((__m256i *)&out[32],  v4);
@@ -204,8 +204,8 @@ void xnn_qs8_packw_gemm_goi_ukernel_x8c8__avx2_madd(
         w6 += k;
         w7 += k;
 
-        vacc0 = _mm256_dpbusd_epi32_madd(vacc0, vone, v0);
-        vacc4 = _mm256_dpbusd_epi32_madd(vacc4, vone, v4);
+        vacc0 = mm256_dpbusd_epi32_madd(vacc0, vone, v0);
+        vacc4 = mm256_dpbusd_epi32_madd(vacc4, vone, v4);
 
         _mm256_storeu_si256((__m256i *)&out[0],  v0);
         _mm256_storeu_si256((__m256i *)&out[32],  v4);
@@ -304,14 +304,14 @@ void xnn_qs8_packw_gemm_goi_ukernel_x8c8__avx2_madd(
         __m256i v4_2 = _mm256_permute2f128_si256(v45_02, v67_02, _MM_SHUFFLE(0, 3, 0, 1));
         __m256i v4_3 = _mm256_permute2f128_si256(v45_13, v67_13, _MM_SHUFFLE(0, 3, 0, 1));
 
-        vacc0 = _mm256_dpbusd_epi32_madd(vacc0, vone, v0_0);
-        vacc0 = _mm256_dpbusd_epi32_madd(vacc0, vone, v0_1);
-        vacc0 = _mm256_dpbusd_epi32_madd(vacc0, vone, v0_2);
-        vacc0 = _mm256_dpbusd_epi32_madd(vacc0, vone, v0_3);
-        vacc4 = _mm256_dpbusd_epi32_madd(vacc4, vone, v4_0);
-        vacc4 = _mm256_dpbusd_epi32_madd(vacc4, vone, v4_1);
-        vacc4 = _mm256_dpbusd_epi32_madd(vacc4, vone, v4_2);
-        vacc4 = _mm256_dpbusd_epi32_madd(vacc4, vone, v4_3);
+        vacc0 = mm256_dpbusd_epi32_madd(vacc0, vone, v0_0);
+        vacc0 = mm256_dpbusd_epi32_madd(vacc0, vone, v0_1);
+        vacc0 = mm256_dpbusd_epi32_madd(vacc0, vone, v0_2);
+        vacc0 = mm256_dpbusd_epi32_madd(vacc0, vone, v0_3);
+        vacc4 = mm256_dpbusd_epi32_madd(vacc4, vone, v4_0);
+        vacc4 = mm256_dpbusd_epi32_madd(vacc4, vone, v4_1);
+        vacc4 = mm256_dpbusd_epi32_madd(vacc4, vone, v4_2);
+        vacc4 = mm256_dpbusd_epi32_madd(vacc4, vone, v4_3);
 
         _mm256_storeu_si256((__m256i *)&out[0],  v0_0);
         _mm256_storeu_si256((__m256i *)&out[32],  v4_0);
@@ -344,8 +344,8 @@ void xnn_qs8_packw_gemm_goi_ukernel_x8c8__avx2_madd(
         v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w6)), 0x30);
         v4 = _mm256_blend_epi32(v4, _mm256_set1_epi64x((int64_t) unaligned_load_u64(w7)), 0xC0);
 
-        vacc0 = _mm256_dpbusd_epi32_madd(vacc0, vone, v0);
-        vacc4 = _mm256_dpbusd_epi32_madd(vacc4, vone, v4);
+        vacc0 = mm256_dpbusd_epi32_madd(vacc0, vone, v0);
+        vacc4 = mm256_dpbusd_epi32_madd(vacc4, vone, v4);
 
         _mm256_storeu_si256((__m256i *)&out[0],  v0);
         _mm256_storeu_si256((__m256i *)&out[32],  v4);
@@ -383,8 +383,8 @@ void xnn_qs8_packw_gemm_goi_ukernel_x8c8__avx2_madd(
         w6 += k;
         w7 += k;
 
-        vacc0 = _mm256_dpbusd_epi32_madd(vacc0, vone, v0);
-        vacc4 = _mm256_dpbusd_epi32_madd(vacc4, vone, v4);
+        vacc0 = mm256_dpbusd_epi32_madd(vacc0, vone, v0);
+        vacc4 = mm256_dpbusd_epi32_madd(vacc4, vone, v4);
 
         _mm256_storeu_si256((__m256i *)&out[0],  v0);
         _mm256_storeu_si256((__m256i *)&out[32],  v4);
