@@ -125,10 +125,10 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
       const float32x2_t vscale = vreinterpret_f32_u8(vld1_u8(w)); w = (const float*) w + 2;
       $for M in range(MR):
         vacc${M}x01 = vmul_f32(vacc${M}x01, vscale);
-    const float32x2_t vmax = vld1_dup_f32(&params->scalar.max);
+    const float32x2_t vmax = vdup_n_f32(params->scalar.max);
     $for M in range(MR):
       vacc${M}x01 = vmin_f32(vacc${M}x01, vmax);
-    const float32x2_t vmin = vld1_dup_f32(&params->scalar.min);
+    const float32x2_t vmin = vdup_n_f32(params->scalar.min);
     $for M in range(MR):
       vacc${M}x01 = vmax_f32(vacc${M}x01, vmin);
 

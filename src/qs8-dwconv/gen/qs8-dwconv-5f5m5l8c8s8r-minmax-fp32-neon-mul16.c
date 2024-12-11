@@ -34,11 +34,11 @@ void xnn_qs8_dwconv_minmax_fp32_ukernel_5f5m5l8c8s8r__neon_mul16(
   assert(output_width != 0);
   assert(kernel_size > 5);
 
-  const float32x4_t vscale = vld1q_dup_f32(&params->fp32_neon.scale);
-  const float32x4_t vmagic_bias = vld1q_dup_f32(&params->fp32_neon.magic_bias);
-  const int32x4_t vmagic_bias_less_output_zero_point = vld1q_dup_s32(&params->fp32_neon.magic_bias_less_output_zero_point);
-  const int8x8_t voutput_min = vld1_dup_s8(&params->fp32_neon.output_min);
-  const int8x8_t voutput_max = vld1_dup_s8(&params->fp32_neon.output_max);
+  const float32x4_t vscale = vdupq_n_f32(params->fp32_neon.scale);
+  const float32x4_t vmagic_bias = vdupq_n_f32(params->fp32_neon.magic_bias);
+  const int32x4_t vmagic_bias_less_output_zero_point = vdupq_n_s32(params->fp32_neon.magic_bias_less_output_zero_point);
+  const int8x8_t voutput_min = vdup_n_s8(params->fp32_neon.output_min);
+  const int8x8_t voutput_max = vdup_n_s8(params->fp32_neon.output_max);
 
   do {
     const void* w = weights;

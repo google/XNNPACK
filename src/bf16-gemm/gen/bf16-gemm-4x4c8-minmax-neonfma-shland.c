@@ -293,13 +293,13 @@ void xnn_bf16_gemm_minmax_ukernel_4x4c8__neonfma_shland(
     float32x4_t vacc3x0123 = vcombine_f32(vpadd_f32(vsum3x0, vsum3x1), vpadd_f32(vsum3x2, vsum3x3));
 #endif
 
-    const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+    const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
     vacc0x0123 = vminq_f32(vacc0x0123, vmax);
     vacc1x0123 = vminq_f32(vacc1x0123, vmax);
     vacc2x0123 = vminq_f32(vacc2x0123, vmax);
     vacc3x0123 = vminq_f32(vacc3x0123, vmax);
 
-    const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+    const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
     vacc0x0123 = vmaxq_f32(vacc0x0123, vmin);
     vacc1x0123 = vmaxq_f32(vacc1x0123, vmin);
     vacc2x0123 = vmaxq_f32(vacc2x0123, vmin);
