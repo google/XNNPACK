@@ -109,7 +109,7 @@ xnn_runtime_t SetupBinary(const std::vector<size_t> &input0_dims,
   uint32_t output_id = XNN_INVALID_NODE_ID;
   if (xnn_define_tensor_value(subgraph, xnn_datatype_fp32, 0,
                               input1_dims.data(), nullptr, 2,
-                              /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
+                              /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT,
                               &output_id) != xnn_status_success) {
     return nullptr;
   }
