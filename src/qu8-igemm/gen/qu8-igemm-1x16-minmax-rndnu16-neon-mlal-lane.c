@@ -43,7 +43,7 @@ void xnn_qu8_igemm_minmax_rndnu16_ukernel_1x16__neon_mlal_lane(
 
   uint8_t* c0 = c;
 
-  const uint8x8_t vb_zero_point = vld1_dup_u8(&params->rndnu16_scalar.kernel_zero_point);
+  const uint8x8_t vb_zero_point = vdup_n_u8(params->rndnu16_scalar.kernel_zero_point);
   do {
     int32x4_t vacc0x0123 = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
     int32x4_t vacc0x4567 = vld1q_s32(w); w = (const void*) ((const int32_t*) w + 4);
@@ -238,8 +238,8 @@ void xnn_qu8_igemm_minmax_rndnu16_ukernel_1x16__neon_mlal_lane(
     } while (p != 0);
 
     // Post-accumulation work
-    const int32x4_t vleft_pre_shift = vld1q_dup_s32(&params->rndnu16_scalar.left_pre_shift);
-    const int16x8_t vmultiplier = vld1q_dup_s16(&params->rndnu16_scalar.multiplier);
+    const int32x4_t vleft_pre_shift = vdupq_n_s32(params->rndnu16_scalar.left_pre_shift);
+    const int16x8_t vmultiplier = vdupq_n_s16(params->rndnu16_scalar.multiplier);
     vacc0x0123 = vqrshlq_s32(vacc0x0123, vleft_pre_shift);
     vacc0x4567 = vqrshlq_s32(vacc0x4567, vleft_pre_shift);
     vacc0x89AB = vqrshlq_s32(vacc0x89AB, vleft_pre_shift);
@@ -250,7 +250,7 @@ void xnn_qu8_igemm_minmax_rndnu16_ukernel_1x16__neon_mlal_lane(
     int16x8_t vacc_preshifted0x89ABCDEF = vcombine_s16(vqmovn_s32(vacc0x89AB), vqmovn_s32(vacc0xCDEF));
     int16x8_t vacc0x89ABCDEF = vqrdmulhq_s16(vacc_preshifted0x89ABCDEF, vmultiplier);
 
-    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->rndnu16_scalar.output_zero_point);
+    const int16x8_t voutput_zero_point = vdupq_n_s16(params->rndnu16_scalar.output_zero_point);
     #if XNN_ARCH_ARM64
 
       vacc0x01234567 = vqaddq_s16(vacc0x01234567, voutput_zero_point);
@@ -265,10 +265,10 @@ void xnn_qu8_igemm_minmax_rndnu16_ukernel_1x16__neon_mlal_lane(
       uint8x16_t vout0x0123456789ABCDEF = vcombine_u8(vqmovun_s16(vacc0x01234567), vqmovun_s16(vacc0x89ABCDEF));
     #endif
 
-    const uint8x16_t voutput_min = vld1q_dup_u8(&params->rndnu16_scalar.output_min);
+    const uint8x16_t voutput_min = vdupq_n_u8(params->rndnu16_scalar.output_min);
     vout0x0123456789ABCDEF = vmaxq_u8(vout0x0123456789ABCDEF, voutput_min);
 
-    const uint8x16_t voutput_max = vld1q_dup_u8(&params->rndnu16_scalar.output_max);
+    const uint8x16_t voutput_max = vdupq_n_u8(params->rndnu16_scalar.output_max);
     vout0x0123456789ABCDEF = vminq_u8(vout0x0123456789ABCDEF, voutput_max);
 
     if (nc >= 16) {

@@ -105,9 +105,9 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_${MR}x${NR}c16__neon_mlal(
         int32x4_t vacc${M}x${ABC[N:N+4]} = vcombine_s32(vsum${M}x${ABC[N:N+2]}, vsum${M}x${ABC[N+2:N+4]} );
 #endif
 
-    const int32x4_t vright_pre_shift = vld1q_dup_s32(&params->rndnu_neon.right_pre_shift);
-    const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
-    const int32x4_t vright_post_shift = vld1q_dup_s32(&params->rndnu_neon.right_post_shift);
+    const int32x4_t vright_pre_shift = vdupq_n_s32(params->rndnu_neon.right_pre_shift);
+    const int32x4_t vmultiplier = vdupq_n_s32(params->rndnu_neon.multiplier);
+    const int32x4_t vright_post_shift = vdupq_n_s32(params->rndnu_neon.right_post_shift);
 
     $for M in range(MR):
       $for N in range(0, NR, 4):
@@ -121,7 +121,7 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_${MR}x${NR}c16__neon_mlal(
       $for N in range(0, NR, 4):
         vacc${M}x${ABC[N:N+4]} = vrshlq_s32(vacc${M}x${ABC[N:N+4]}, vright_post_shift);
 
-    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->rndnu_neon.output_zero_point);
+    const int16x8_t voutput_zero_point = vdupq_n_s16(params->rndnu_neon.output_zero_point);
 #if XNN_ARCH_ARM64
     $for M in range(MR):
       $for N in range(0, NR, 8):
@@ -149,11 +149,11 @@ void xnn_qs8_gemm_minmax_rndnu_ukernel_${MR}x${NR}c16__neon_mlal(
           int8x8_t vout${M}x${ABC[N:N+8]} = vqmovn_s16(vacc${M}x${ABC[N:N+8]});
 #endif
     $if NR == 8 and MR == 1:
-      const int8x8_t voutput_min = vld1_dup_s8(&params->rndnu_neon.output_min);
-      const int8x8_t voutput_max = vld1_dup_s8(&params->rndnu_neon.output_max);
+      const int8x8_t voutput_min = vdup_n_s8(params->rndnu_neon.output_min);
+      const int8x8_t voutput_max = vdup_n_s8(params->rndnu_neon.output_max);
     $else:
-      const int8x16_t voutput_min = vld1q_dup_s8(&params->rndnu_neon.output_min);
-      const int8x16_t voutput_max = vld1q_dup_s8(&params->rndnu_neon.output_max);
+      const int8x16_t voutput_min = vdupq_n_s8(params->rndnu_neon.output_min);
+      const int8x16_t voutput_max = vdupq_n_s8(params->rndnu_neon.output_max);
 
     $for M in range(MR):
       $for N in range(0, NR, 16):

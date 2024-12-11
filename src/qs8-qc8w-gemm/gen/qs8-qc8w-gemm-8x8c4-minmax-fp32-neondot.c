@@ -248,7 +248,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x8c4__neondot(
     vacc7x0123 = vcvtnq_s32_f32(vfpacc7x0123);
     vacc7x4567 = vcvtnq_s32_f32(vfpacc7x4567);
 
-    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->fp32_neonv8.output_zero_point);
+    const int16x8_t voutput_zero_point = vdupq_n_s16(params->fp32_neonv8.output_zero_point);
     #if XNN_ARCH_ARM64
       const int16x8_t vacc0x01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc0x0123), vacc0x4567), voutput_zero_point);
       const int16x8_t vacc1x01234567 = vqaddq_s16(vqmovn_high_s32(vqmovn_s32(vacc1x0123), vacc1x4567), voutput_zero_point);
@@ -278,8 +278,8 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_8x8c4__neondot(
       int8x16_t vout4x01234567_5x01234567 = vcombine_s8(vqmovn_s16(vacc4x01234567), vqmovn_s16(vacc5x01234567));
       int8x16_t vout6x01234567_7x01234567 = vcombine_s8(vqmovn_s16(vacc6x01234567), vqmovn_s16(vacc7x01234567));
     #endif
-    const int8x16_t voutput_min = vld1q_dup_s8(&params->fp32_neonv8.output_min);
-    const int8x16_t voutput_max = vld1q_dup_s8(&params->fp32_neonv8.output_max);
+    const int8x16_t voutput_min = vdupq_n_s8(params->fp32_neonv8.output_min);
+    const int8x16_t voutput_max = vdupq_n_s8(params->fp32_neonv8.output_max);
 
     vout0x01234567_1x01234567 = vmaxq_s8(vout0x01234567_1x01234567, voutput_min);
     vout2x01234567_3x01234567 = vmaxq_s8(vout2x01234567_3x01234567, voutput_min);

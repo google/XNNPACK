@@ -27,7 +27,7 @@ void xnn_f32_qs8_vcvt_ukernel__neon_u16(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vscale = vld1q_dup_f32(&params->scalar.scale);
+  const float32x4_t vscale = vdupq_n_f32(params->scalar.scale);
   const float32x4_t vmagic_bias = vdupq_n_f32(12582912.0f);
   const int32x4_t vmagic_bias_less_zero_point = vdupq_n_s32(INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point);
   XNN_FORCE_REALIZATION(vmagic_bias);

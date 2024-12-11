@@ -106,12 +106,12 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}__${"aarch64_neonfma" if FMA else "
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
 
-    const float32x2_t vmax = vld1_dup_f32(&params->scalar.max);
+    const float32x2_t vmax = vdup_n_f32(params->scalar.max);
     $for N in range(0, NR, 4):
       $for M in range(MR):
         vacc${M}x01 = vmin_f32(vacc${M}x01, vmax);
 
-    const float32x2_t vmin = vld1_dup_f32(&params->scalar.min);
+    const float32x2_t vmin = vdup_n_f32(params->scalar.min);
     $for N in range(0, NR, 4):
       $for M in range(MR):
         vacc${M}x01 = vmax_f32(vacc${M}x01, vmin);

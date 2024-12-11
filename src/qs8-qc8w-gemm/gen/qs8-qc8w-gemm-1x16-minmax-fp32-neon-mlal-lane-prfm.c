@@ -226,13 +226,13 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16__neon_mlal_lane_prfm(
     const float32x4_t vscaleCDEF = vld1q_f32((const float*) w); w = (const float*) w + 4;
     vfpacc0xCDEF = vmulq_f32(vfpacc0xCDEF, vscaleCDEF);
 
-    const float32x4_t vmagic_bias = vld1q_dup_f32(&params->fp32_neon.magic_bias);
+    const float32x4_t vmagic_bias = vdupq_n_f32(params->fp32_neon.magic_bias);
     vacc0x0123 = vreinterpretq_s32_f32(vaddq_f32(vfpacc0x0123, vmagic_bias));
     vacc0x4567 = vreinterpretq_s32_f32(vaddq_f32(vfpacc0x4567, vmagic_bias));
     vacc0x89AB = vreinterpretq_s32_f32(vaddq_f32(vfpacc0x89AB, vmagic_bias));
     vacc0xCDEF = vreinterpretq_s32_f32(vaddq_f32(vfpacc0xCDEF, vmagic_bias));
 
-    const int32x4_t vmagic_bias_less_output_zero_point = vld1q_dup_s32(&params->fp32_neon.magic_bias_less_output_zero_point);
+    const int32x4_t vmagic_bias_less_output_zero_point = vdupq_n_s32(params->fp32_neon.magic_bias_less_output_zero_point);
     vacc0x0123 = vqsubq_s32(vacc0x0123, vmagic_bias_less_output_zero_point);
     vacc0x4567 = vqsubq_s32(vacc0x4567, vmagic_bias_less_output_zero_point);
     vacc0x89AB = vqsubq_s32(vacc0x89AB, vmagic_bias_less_output_zero_point);
@@ -252,10 +252,10 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x16__neon_mlal_lane_prfm(
       int8x16_t vout0x0123456789ABCDEF = vcombine_s8(vqmovn_s16(vacc0x01234567), vqmovn_s16(vacc0x89ABCDEF));
     #endif
 
-    const int8x16_t voutput_min = vld1q_dup_s8(&params->fp32_neon.output_min);
+    const int8x16_t voutput_min = vdupq_n_s8(params->fp32_neon.output_min);
     vout0x0123456789ABCDEF = vmaxq_s8(vout0x0123456789ABCDEF, voutput_min);
 
-    const int8x16_t voutput_max = vld1q_dup_s8(&params->fp32_neon.output_max);
+    const int8x16_t voutput_max = vdupq_n_s8(params->fp32_neon.output_max);
     vout0x0123456789ABCDEF = vminq_s8(vout0x0123456789ABCDEF, voutput_max);
 
     if (nc >= 16) {
