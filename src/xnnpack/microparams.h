@@ -589,9 +589,9 @@ struct xnn_x32_packb_params {
 
 struct xnn_unary_reference_params {
   float x_scale;
-  int32_t x_zero_point;
+  float x_zero_point;
   float inv_y_scale;
-  int32_t y_zero_point;
+  float y_zero_point;
   union xnn_unary_params params;
 };
 

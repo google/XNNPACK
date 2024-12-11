@@ -42,12 +42,12 @@ Result round_float_to_int(float x) {
 }
 
 template <typename T>
-float dequantize(T x, float scale, int32_t zero_point) {
-  return (static_cast<float>(x) - static_cast<float>(zero_point)) * scale;
+float dequantize(T x, float scale, float zero_point) {
+  return (static_cast<float>(x) - zero_point) * scale;
 }
 
 template <typename T>
-T quantize(float x, float inv_scale, int32_t zero_point) {
+T quantize(float x, float inv_scale, float zero_point) {
   return round_float_to_int<T>(x * inv_scale + zero_point);
 }
 
