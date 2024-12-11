@@ -38,7 +38,7 @@ struct FullyConnectedTestParam {
 
 template <class InputType, class KernelType = InputType,
           class BiasType = InputType, class OutputType = InputType,
-          bool even_channels = false>
+          int WeightsPerElement = 1>
 class FullyConnectedTestBase
     : public ::testing::TestWithParam<FullyConnectedTestParam> {
  protected:
@@ -62,12 +62,8 @@ class FullyConnectedTestBase
     assert(input_dims.size() >= 2);
     output_channels = dim_dist(rng);
     input_channels = input_dims.back();
-    // Adjust number of kernel elements for QC4W. input_channels should be
-    // padded to byte boundary, hence even.
-    if (even_channels) {
-      input_channels = round_up_po2(input_channels, 2);
-      input_dims.back() = input_channels;
-    }
+    input_channels = round_up_po2(input_channels, WeightsPerElement);
+    input_dims.back() = input_channels;
     kernel_dims = {output_channels, input_channels};
     kernel_dims_tranposed = {input_channels, output_channels};
     bias_dims = {output_channels};
@@ -78,7 +74,8 @@ class FullyConnectedTestBase
 
     input = xnnpack::Buffer<InputType>(XNN_EXTRA_BYTES / sizeof(InputType) +
                                        NumElements(input_dims));
-    kernel = xnnpack::Buffer<KernelType>(input_channels * output_channels);
+    kernel = xnnpack::Buffer<KernelType>(input_channels * output_channels /
+                                         WeightsPerElement);
     kernel_fp16 =
         xnnpack::Buffer<xnn_float16>(input_channels * output_channels);
     bias = xnnpack::Buffer<BiasType>(output_channels);
@@ -145,7 +142,7 @@ class QuantizedFullyConnectedTestBase
 };
 
 class FullyConnectedTestF32QC4W
-    : public FullyConnectedTestBase<float, uint8_t, float, float, true> {};
+    : public FullyConnectedTestBase<float, uint8_t, float, float, 2> {};
 
 class FullyConnectedTestF32QC8W
     : public FullyConnectedTestBase<float, int8_t, float> {};
@@ -1397,10 +1394,6 @@ TEST_F(FullyConnectedTestF32QC4W, matches_operator_api) {
   xnn_operator_t op = nullptr;
 
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  // Adjust number of kernel elements for QC4W. input_channels should be padded
-  // to byte boundary, hence even.
-  const size_t rounded_input_channels = round_up_po2(input_channels, 2);
-  kernel = xnnpack::Buffer<uint8_t>(output_channels * rounded_input_channels);
   std::generate(kernel.begin(), kernel.end(), [&]() { return i8dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
   xnnpack::Buffer<float> requantization_scales(output_channels);
@@ -1495,10 +1488,6 @@ TEST_F(FullyConnectedTestF32QC4W, matches_operator_api_without_bias) {
   xnn_operator_t op = nullptr;
 
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  // Adjust number of kernel elements for QC4W. input_channels should be padded
-  // to byte boundary, hence even.
-  const size_t rounded_input_channels = round_up_po2(input_channels, 2);
-  kernel = xnnpack::Buffer<uint8_t>(output_channels * rounded_input_channels);
   std::generate(kernel.begin(), kernel.end(), [&]() { return i8dist(rng); });
   xnnpack::Buffer<float> requantization_scales(output_channels);
   std::generate(requantization_scales.begin(), requantization_scales.end(),
@@ -2346,8 +2335,7 @@ TEST_F(FullyConnectedTestF32QC8W,
 }
 
 class FullyConnectedTestQD8F16QC4W
-    : public FullyConnectedTestBase<int8_t, int8_t, float, xnn_float16, true> {
-};
+    : public FullyConnectedTestBase<int8_t, int8_t, float, xnn_float16, 2> {};
 
 TEST_F(FullyConnectedTestQD8F16QC4W, define) {
   xnnpack::Buffer<float> requantization_scales(output_channels, 1.0f);
@@ -2553,7 +2541,7 @@ TEST_F(FullyConnectedTestQD8F16QC4W,
 }
 
 class FullyConnectedTestQD8F16QB4W
-    : public FullyConnectedTestBase<int8_t, uint8_t, float, xnn_float16, true> {
+    : public FullyConnectedTestBase<int8_t, uint8_t, float, xnn_float16, 2> {
 };
 
 TEST_F(FullyConnectedTestQD8F16QB4W, define) {
@@ -2578,10 +2566,8 @@ TEST_F(FullyConnectedTestQD8F16QB4W, define) {
                 /*external_id=*/0, /*flags=*/0, &input_id));
   ASSERT_NE(input_id, XNN_INVALID_VALUE_ID);
 
-  // Adjust number of kernel elements for QB4W. input_channels should be padded
-  // to byte boundary, hence even.
-  const size_t rounded_input_channels = round_up_po2(input_channels, 2);
-  kernel = xnnpack::Buffer<uint8_t>(output_channels * rounded_input_channels);
+  // We adjusted input_channels above, reallocate the kernel.
+  kernel = xnnpack::Buffer<uint8_t>(output_channels * input_channels);
   const uint8_t kernel_zero_point = 8;
   xnnpack::Buffer<xnn_bfloat16> kernel_scale(output_channels * block_size);
   std::generate(kernel_scale.begin(), kernel_scale.end(),
@@ -2664,10 +2650,8 @@ TEST_F(FullyConnectedTestQD8F16QB4W,
     return xnn_quantization_params{w8dist(rng), f32dist(rng)};
   });
 
-  // Adjust number of kernel elements for QC4W. input_channels should be padded
-  // to byte boundary, hence even.
-  const size_t rounded_input_channels = round_up_po2(input_channels, 2);
-  kernel = xnnpack::Buffer<uint8_t>(output_channels * rounded_input_channels);
+  // We adjusted input_channels above, reallocate the kernel.
+  kernel = xnnpack::Buffer<uint8_t>(output_channels * input_channels);
 
   const float output_min = -std::numeric_limits<float>::infinity();
   const float output_max = std::numeric_limits<float>::infinity();
@@ -3194,7 +3178,7 @@ TEST_F(FullyConnectedTestQD8F32QC8W,
 }
 
 class FullyConnectedTestQD8F32QC4W
-    : public FullyConnectedTestBase<int8_t, uint8_t, float, float, true> {};
+    : public FullyConnectedTestBase<int8_t, uint8_t, float, float, 2> {};
 
 TEST_F(FullyConnectedTestQD8F32QC4W, define) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
@@ -3214,10 +3198,6 @@ TEST_F(FullyConnectedTestQD8F32QC4W, define) {
                 /*external_id=*/0, /*flags=*/0, &input_id));
   ASSERT_NE(input_id, XNN_INVALID_VALUE_ID);
 
-  // Adjust number of kernel elements for QC4W. input_channels should be padded
-  // to byte boundary, hence even.
-  const size_t rounded_input_channels = round_up_po2(input_channels, 2);
-  kernel = xnnpack::Buffer<uint8_t>(output_channels * rounded_input_channels);
   const uint8_t kernel_zero_point = 8;
   xnnpack::Buffer<float> kernel_scale(output_channels);
   std::generate(kernel_scale.begin(), kernel_scale.end(),
@@ -3281,11 +3261,6 @@ TEST_F(FullyConnectedTestQD8F32QC4W,
   xnnpack::Buffer<float> operator_output(batch_size * output_channels);
   xnnpack::Buffer<xnn_quantization_params> quantization_params(
       batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
-
-  // Adjust number of kernel elements for QC4W. input_channels should be padded
-  // to byte boundary, hence even.
-  const size_t rounded_input_channels = round_up_po2(input_channels, 2);
-  kernel = xnnpack::Buffer<uint8_t>(output_channels * rounded_input_channels);
 
   xnnpack::Buffer<float> kernel_scale(output_channels);
   std::generate(kernel_scale.begin(), kernel_scale.end(),
@@ -3434,11 +3409,6 @@ TEST_F(FullyConnectedTestQD8F32QC4W,
   xnnpack::Buffer<float> operator_output(batch_size * output_channels);
   xnnpack::Buffer<xnn_quantization_params> quantization_params(
       batch_size + XNN_EXTRA_QUANTIZATION_PARAMS);
-
-  // Adjust number of kernel elements for QC4W. input_channels should be padded
-  // to byte boundary, hence even.
-  const size_t rounded_input_channels = round_up_po2(input_channels, 2);
-  kernel = xnnpack::Buffer<uint8_t>(output_channels * rounded_input_channels);
 
   xnnpack::Buffer<float> kernel_scale(output_channels);
   std::generate(kernel_scale.begin(), kernel_scale.end(),
@@ -3785,7 +3755,7 @@ TEST_F(
 }
 
 class FullyConnectedTestQD8F32QB4W
-    : public FullyConnectedTestBase<int8_t, uint8_t, float, float> {};
+    : public FullyConnectedTestBase<int8_t, uint8_t, float, float, 2> {};
 
 TEST_F(FullyConnectedTestQD8F32QB4W, define) {
   size_t block_size = 32;
@@ -3809,10 +3779,8 @@ TEST_F(FullyConnectedTestQD8F32QB4W, define) {
                 /*external_id=*/0, /*flags=*/0, &input_id));
   ASSERT_NE(input_id, XNN_INVALID_VALUE_ID);
 
-  // Adjust number of kernel elements for QB4W. input_channels should be padded
-  // to byte boundary, hence even.
-  const size_t rounded_input_channels = round_up_po2(input_channels, 2);
-  kernel = xnnpack::Buffer<uint8_t>(output_channels * rounded_input_channels);
+  // We adjusted input_channels above, reallocate the kernel.
+  kernel = xnnpack::Buffer<uint8_t>(output_channels * input_channels);
   const uint8_t kernel_zero_point = 8;
   xnnpack::Buffer<xnn_bfloat16> kernel_scale(output_channels * block_size);
   std::generate(kernel_scale.begin(), kernel_scale.end(),
@@ -3895,10 +3863,8 @@ TEST_F(FullyConnectedTestQD8F32QB4W,
     return xnn_quantization_params{w8dist(rng), f32dist(rng)};
   });
 
-  // Adjust number of kernel elements for QC4W. input_channels should be padded
-  // to byte boundary, hence even.
-  const size_t rounded_input_channels = round_up_po2(input_channels, 2);
-  kernel = xnnpack::Buffer<uint8_t>(output_channels * rounded_input_channels);
+  // We adjusted input_channels above, reallocate the kernel.
+  kernel = xnnpack::Buffer<uint8_t>(output_channels * input_channels);
 
   const float output_min = -std::numeric_limits<float>::infinity();
   const float output_max = std::numeric_limits<float>::infinity();
