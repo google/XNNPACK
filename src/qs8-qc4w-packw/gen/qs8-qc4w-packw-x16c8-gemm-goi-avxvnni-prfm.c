@@ -564,7 +564,7 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__avxvnni_prfm(
         size_t nb = n;
         for (nb = 0; nb < n; ++nb) {
           ((int32_t*) out)[nb] = b[nb];
-        } while (--nb != 0);
+        }
         b += n;
       } else {
         _mm256_storeu_si256((__m256i*) (out + 0), _mm256_setzero_si256());
@@ -949,6 +949,7 @@ void xnn_qs8_qc4w_packw_gemm_goi_ukernel_x16c8__avxvnni_prfm(
       vpack8 = _mm256_sub_epi32(vpack8, vksum8);
       _mm256_storeu_si256((__m256i *) (packed_b + 0), vpack0);
       _mm256_storeu_si256((__m256i *) (packed_b + 8), vpack8);
+
       out = (int8_t*) ((uintptr_t) out + extra_bytes);
     }
 

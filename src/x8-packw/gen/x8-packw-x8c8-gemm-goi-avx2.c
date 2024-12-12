@@ -229,7 +229,7 @@ void xnn_x8_packw_gemm_goi_ukernel_x8c8__avx2(
         size_t nb = n;
         for (nb = 0; nb < n; ++nb) {
           ((uint32_t*) out)[nb] = b[nb];
-        } while (--nb != 0);
+        }
         b += n;
       } else {
         _mm256_storeu_si256((__m256i*) (out + 0), _mm256_setzero_si256());
@@ -344,6 +344,7 @@ void xnn_x8_packw_gemm_goi_ukernel_x8c8__avx2(
 
         out += 64;
       }
+
 
       out = (int8_t*) ((uintptr_t) out + extra_bytes);
     }

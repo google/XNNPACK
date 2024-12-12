@@ -1097,16 +1097,21 @@ void xnn_qs8_packw_gemm_goi_ukernel_x64c4__avx256vnni_prfm(
       int32_t* packed_b = (int32_t*) out;
       if XNN_LIKELY(b != NULL) {
         size_t nb = n;
-        do {
-          *((int32_t*) out) = *b++;
-          out += sizeof(int32_t);
-        } while (--nb != 0);
+        for (nb = 0; nb < n; ++nb) {
+          ((int32_t*) out)[nb] = b[nb];
+        }
+        b += n;
       } else {
-        size_t nb = n;
         _mm256_storeu_si256((__m256i*) (out + 0), _mm256_setzero_si256());
-        out += nb * sizeof(int32_t);
+        _mm256_storeu_si256((__m256i*) (out + 32), _mm256_setzero_si256());
+        _mm256_storeu_si256((__m256i*) (out + 64), _mm256_setzero_si256());
+        _mm256_storeu_si256((__m256i*) (out + 96), _mm256_setzero_si256());
+        _mm256_storeu_si256((__m256i*) (out + 128), _mm256_setzero_si256());
+        _mm256_storeu_si256((__m256i*) (out + 160), _mm256_setzero_si256());
+        _mm256_storeu_si256((__m256i*) (out + 192), _mm256_setzero_si256());
+        _mm256_storeu_si256((__m256i*) (out + 224), _mm256_setzero_si256());
       }
-      out += (64 - n) * sizeof(int32_t);
+      out += 64 * sizeof(int32_t);
 
       const int8_t* w1 = w0 + kc;
       if XNN_UNPREDICTABLE(n < 2) {

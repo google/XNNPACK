@@ -253,20 +253,19 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_prfm" i
     if XNN_UNLIKELY(n != 0) {
       assert(n >= 1 && n <= ${NR-1});
 
-      $if DATATYPE in ["QS8"]:
+      $if DATATYPE in ["QS8", "QS4"]:
         ${BTYPE}* packed_b = (${BTYPE}*) out;
       if XNN_LIKELY(b != NULL) {
         size_t nb = n;
-        do {
-          *((${BTYPE}*) out) = *b++;
-          out += sizeof(${BTYPE});
-        } while (--nb != 0);
+        for (nb = 0; nb < n; ++nb) {
+          ((${BTYPE}*) out)[nb] = b[nb];
+        }
+        b += n;
       } else {
-        size_t nb = n;
-        _mm256_storeu_si256((__m256i*) (out + 0), _mm256_setzero_si256());
-        out += nb * sizeof(${BTYPE});
+        $for N in range(0, NR, 8):
+          _mm256_storeu_si256((__m256i*) (out + ${N*4}), _mm256_setzero_si256());
       }
-      out += (${NR} - n) * sizeof(${BTYPE});
+      out += ${NR} * sizeof(${BTYPE});
 
       $for N in range(1, NR):
         const ${TYPE}* w${N} = w${N-1} + kc;

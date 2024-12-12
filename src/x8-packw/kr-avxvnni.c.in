@@ -269,7 +269,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" i
         size_t nb = n;
         for (nb = 0; nb < n; ++nb) {
           ((${BTYPE}*) out)[nb] = b[nb];
-        } while (--nb != 0);
+        }
         b += n;
       } else {
         $for N in range(0, NR, 8):
@@ -391,6 +391,7 @@ void xnn_${DATATYPE_SPEC}_packw_gemm_goi_ukernel_x${NR}c${KR}__${ISA}${"_madd" i
           vpack${N} = _mm256_sub_epi32(vpack${N}, vksum${N});
         $for N in range(0, NR, 8):
           _mm256_storeu_si256((__m256i *) (packed_b + ${N}), vpack${N});
+
       out = (${TYPE}*) ((uintptr_t) out + extra_bytes);
     }
 
