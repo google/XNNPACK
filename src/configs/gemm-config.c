@@ -268,6 +268,7 @@ static void init_pf32_gemm_config(void) {
     #if XNN_ENABLE_ARM_SME2
       const size_t mr = xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2_get_mr();
       const size_t nr = xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2_get_nr();
+      pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_pf32_gemm_minmax_ukernel_1x32__neonsme2);
       pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(nr)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2);
       pf32_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
       pf32_gemm_config.pack_weights_and_biases = xnn_pack_kai_f32_weights_and_biases;
