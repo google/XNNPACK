@@ -1302,9 +1302,8 @@ struct reduce_context {
     xnn_rdsum_ukernel_fn rdsum;
   } ukernel;
   xnn_vunary_ukernel_fn cvt_ukernel;
-  xnn_vunary_ukernel_fn s32_f32_cvt_ukernel;
-  xnn_vunary_ukernel_fn u32_f32_cvt_ukernel;
   struct xnn_reduce_params params;
+  union xnn_unary_uparams cvt_params;
 };
 
 #ifndef __cplusplus

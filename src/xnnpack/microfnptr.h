@@ -2043,8 +2043,7 @@ typedef size_t (*xnn_init_reduce_params_fn)(
 
 typedef size_t (*xnn_update_reduce_params_fn)(
   struct xnn_reduce_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int32_t num_elements);
+  float scale);
 
 typedef size_t (*xnn_init_qs8_qc8w_conv_minmax_params_fn)(
   union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],

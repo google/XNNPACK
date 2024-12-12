@@ -408,7 +408,6 @@ struct xnn_f32_reduce_params {
 };
 
 struct xnn_qs8_reduce_params {
-  int32_t num_elements;
   float scale;
   float input_output_scale;
   int8_t input_zero_point;
@@ -416,7 +415,6 @@ struct xnn_qs8_reduce_params {
 };
 
 struct xnn_qu8_reduce_params {
-  int32_t num_elements;
   float scale;
   float input_output_scale;
   uint8_t input_zero_point;

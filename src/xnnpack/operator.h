@@ -255,6 +255,7 @@ struct xnn_operator {
   // but params need to be swapped for commutative ops with per-operand params.
   union {
     union xnn_binary_uparams binary;
+    union xnn_unary_uparams unary;
     struct xnn_f16_default_params f16_default;
     union xnn_f32_minmax_params f32_minmax;
     struct xnn_f32_default_params f32_default;
@@ -281,8 +282,6 @@ struct xnn_operator {
       const struct xnn_reduce_config* rdsum_config;
       const struct xnn_reduce_config* rsum_config;
       const struct xnn_unary_elementwise_config* cvt_config;
-      const struct xnn_unary_elementwise_config* s32_f32_cvt_config;
-      const struct xnn_unary_elementwise_config* u32_f32_cvt_config;
     };
     const struct xnn_ibilinear_chw_config* ibilinear_chw_config;
     const struct xnn_ibilinear_config* ibilinear_config;

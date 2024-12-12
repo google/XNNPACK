@@ -163,8 +163,7 @@ DECLARE_INIT_REDUCE_PARAMS_FUNCTION(xnn_init_qu8_reduce_scalar_params);
 #define DECLARE_UPDATE_REDUCE_PARAMS_FUNCTION(fn_name)          \
   XNN_INTERNAL size_t fn_name(                                  \
       struct xnn_reduce_params params[XNN_MIN_ELEMENTS(1)],     \
-      float scale,                                              \
-      int32_t num_elements);
+      float scale);
 
 DECLARE_UPDATE_REDUCE_PARAMS_FUNCTION(xnn_update_f32_reduce_scalar_params);
 DECLARE_UPDATE_REDUCE_PARAMS_FUNCTION(xnn_update_qs8_reduce_scalar_params);
