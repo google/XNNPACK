@@ -29,6 +29,7 @@ _ARCH_TO_MACRO_MAP = {
   "aarch64": "XNN_ARCH_ARM64",
   "x86-32": "XNN_ARCH_X86",
   "x86-64": "XNN_ARCH_X86_64",
+  "amd64": "XNN_ARCH_X86_64",
   "hexagon": "XNN_ARCH_HEXAGON",
   "riscv": "XNN_ARCH_RISCV",
   "wasm": "XNN_ARCH_WASM",
@@ -204,7 +205,9 @@ def parse_target_name(target_name):
   arch = list()
   isa = None
   assembly = False
+  print("target_name", target_name)
   for target_part in target_name.split("_"):
+    print("target_part", target_part)
     if target_part in _ARCH_TO_MACRO_MAP:
       if target_part in _ISA_TO_ARCH_MAP:
         arch = _ISA_TO_ARCH_MAP[target_part]

@@ -93,7 +93,11 @@ _ARCH_LIST = frozenset({
     'wasm32',
     'wasmsimd32',
     'wasmrelaxedsimd32',
+    'amd64',
 })
+
+# x86 kernels do not have the arch listed in the name, only the ISA.
+_ASM_ARCH_LIST = _ARCH_LIST #.union({'fma3'}, {'avx512f'}, {'avx512vnni'})
 
 _MICROKERNEL_NAME_REGEX = re.compile(
     r'\bxnn_(?:[a-z0-9]+(?:_[a-z0-9]+)*)_ukernel(?:_[a-z0-9]+)*__(?:[a-z0-9]+(?:_[a-z0-9]+)*)\b'
@@ -185,7 +189,8 @@ def main(args):
   c_microkernels_per_isa['neonfp16arith_aarch64'] = list()
   c_microkernels_per_isa['neonsme'] = list()
   c_microkernels_per_isa['neonsme2'] = list()
-  asm_microkernels_per_arch = {arch: [] for arch in _ARCH_LIST}
+  asm_microkernels_per_arch = {arch: [] for arch in _ASM_ARCH_LIST}
+  print("QQQARCH ", asm_microkernels_per_arch)
   microkernel_name_to_filename = dict()
   for root, _, files in os.walk(src_dir, topdown=False):
     if root in ignore_roots:
@@ -273,16 +278,22 @@ def main(args):
         for component in basename.split('-'):
           if component in _ARCH_LIST:
             arch = component
-          elif component in _ISA_LIST:
+          if component in _ISA_LIST:
             isa = _ISA_MAP.get(component, component)
             key = isa if arch is None else f'{isa}_{arch}'
+            if 'amd64' in basename:
+              print("basename ", basename, " component ", component, " isa ", isa, " arch ", arch)
             c_microkernels_per_isa[key].append(filepath)
             break
         else:
           print('Unknown ISA for C microkernel %s' % filepath)
       elif ext == '.S':
         for component in basename.split('-'):
-          if component in _ARCH_LIST:
+          if 'amd64' in basename:
+            print("YES", basename, component)
+          if component in _ASM_ARCH_LIST:
+            if 'amd64' in basename:
+              print("YYYYYYYYES", basename, component)
             asm_microkernels_per_arch[component].append(filepath)
             break
         else:

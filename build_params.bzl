@@ -795,4 +795,22 @@ XNNPACK_PARAMS_FOR_ARCH = {
         ],
         extra_deps = [],  # Extra deps for hexagon.
     ),
+    "amd64": _create_params(
+        #cond = ["//:avx512vnnigfni_enabled",
+        cond = "//build_config:linux_x86_64",
+        gcc_x86_copts = [
+            "-mf16c",
+            "-mfma",
+            "-mavx512f",
+            "-mavx512cd",
+            "-mavx512bw",
+            "-mavx512dq",
+            "-mavx512vl",
+            "-mavx512vnni",
+            "-mgfni",
+        ],
+        msvc_x86_64_copts = ["/arch:AVX512"],
+        mingw_copts = ["-fno-asynchronous-unwind-tables"],
+        msys_copts = ["-fno-asynchronous-unwind-tables"],
+    ),
 }
