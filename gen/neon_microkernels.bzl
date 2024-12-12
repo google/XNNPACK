@@ -141,7 +141,6 @@ PROD_NEON_MICROKERNEL_SRCS = [
     "src/s8-ibilinear/gen/s8-ibilinear-neon-c16.c",
     "src/s8-maxpool/s8-maxpool-9p8x-minmax-neon-c16.c",
     "src/s8-vclamp/s8-vclamp-neon-u64.c",
-    "src/s32-f32-vcvt/gen/s32-f32-vcvt-neon.c",
     "src/u8-ibilinear/gen/u8-ibilinear-neon-c8.c",
     "src/u8-ibilinear/gen/u8-ibilinear-neon-c16.c",
     "src/u8-maxpool/u8-maxpool-9p8x-minmax-neon-c16.c",

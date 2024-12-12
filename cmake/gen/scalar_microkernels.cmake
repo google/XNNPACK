@@ -219,7 +219,6 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/s8-ibilinear/gen/s8-ibilinear-scalar-c1.c
   src/s8-maxpool/s8-maxpool-9p8x-minmax-scalar-c1.c
   src/s8-vclamp/s8-vclamp-scalar-u4.c
-  src/s32-f32-vcvt/gen/s32-f32-vcvt-scalar.c
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c1.c
   src/u8-lut32norm/u8-lut32norm-scalar.c
   src/u8-maxpool/u8-maxpool-9p8x-minmax-scalar-c1.c

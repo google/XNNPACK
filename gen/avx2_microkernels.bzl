@@ -71,7 +71,6 @@ PROD_AVX2_MICROKERNEL_SRCS = [
     "src/qu8-vcvt/gen/qu8-vcvt-avx2-u32.c",
     "src/qu8-vlrelu/gen/qu8-vlrelu-avx2-u32.c",
     "src/s8-vclamp/s8-vclamp-avx2-u128.c",
-    "src/s32-f32-vcvt/gen/s32-f32-vcvt-avx2.c",
     "src/u8-vclamp/u8-vclamp-avx2-u128.c",
     "src/x8-lut/gen/x8-lut-avx2-u128.c",
     "src/x8-transposec/gen/x8-transposec-32x32-reuse-switch-avx2.c",

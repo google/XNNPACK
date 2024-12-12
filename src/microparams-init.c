@@ -1251,16 +1251,6 @@ size_t xnn_init_f32_qu8_cvt_scalar_params(
   return sizeof(params->f32_qu8_cvt);
 }
 
-size_t xnn_init_s32_f32_cvt_scalar_params(
-  union xnn_unary_uparams* params,
-  const union xnn_unary_params* op_params,
-  const struct xnn_quantization_params* input_quantization,
-  const struct xnn_quantization_params* output_quantization)
-{
-  params->s32_f32_cvt.scalar.zero_point = input_quantization->zero_point;
-  return sizeof(params->s32_f32_cvt);
-}
-
 size_t xnn_init_qs8_cvt_scalar_params(
   union xnn_unary_uparams* params,
   const union xnn_unary_params* op_params,

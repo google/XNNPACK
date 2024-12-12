@@ -190,7 +190,6 @@ MICROKERNEL_DEFS = [
     "src/qu8-vmulc/qu8-vmulc-minmax-rndnu.h",
     "src/s8-maxpool/s8-maxpool-minmax.h",
     "src/s8-vclamp/s8-vclamp.h",
-    "src/s32-f32-vcvt/s32-f32-vcvt.h",
     "src/u8-maxpool/u8-maxpool-minmax.h",
     "src/u8-vclamp/u8-vclamp.h",
     "src/xx-fill/xx-fill.h",
