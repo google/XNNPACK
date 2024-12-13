@@ -757,10 +757,24 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
       const size_t num_params = filter->shape.dim[0] * filter->shape.dim[3];
       subgraph->nodes[node->cluster_leader].num_params += num_params;
 
-      const float* data = (const float*) filter->data;
       size_t num_zeroes = 0;
-      for (size_t i = 0; i < num_params; i++) {
-        num_zeroes += (size_t) (data[i] == 0.0f);
+      switch (filter->datatype) {
+        case xnn_datatype_fp32: {
+          const float* data = (const float*)filter->data;
+          for (size_t i = 0; i < num_params; i++) {
+            num_zeroes += (size_t)(data[i] == 0.0f);
+          }
+          break;
+        }
+        case xnn_datatype_fp16: {
+          const xnn_float16* data = (const xnn_float16*)filter->data;
+          for (size_t i = 0; i < num_params; i++) {
+            num_zeroes += (size_t)(xnn_float16_is_zero(data[i]));
+          }
+          break;
+        }
+        default:
+          XNN_UNREACHABLE;
       }
       xnn_log_debug("1x1 Convolution 2D Node #%" PRIu32 ": %zu / %zu sparsity", n, num_zeroes, num_params);
       subgraph->nodes[node->cluster_leader].num_zeroes += num_zeroes;
