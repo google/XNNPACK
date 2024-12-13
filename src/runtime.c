@@ -636,6 +636,8 @@ enum xnn_status xnn_create_runtime_v4(
     }
   }
 
+  runtime->threadpool = threadpool;
+
 #ifdef XNN_SLINKY_ENABLED
   // If compiling with XNN_SLINKY_ENABLED defined, assume we always
   // want Slinky enabled, regardless of the runtime flag
@@ -674,8 +676,6 @@ enum xnn_status xnn_create_runtime_v4(
   if (flags & XNN_FLAG_BASIC_PROFILING) {
     runtime->profiling = true;
   }
-
-  runtime->threadpool = threadpool;
 
   *runtime_out = runtime;
   return xnn_status_success;
