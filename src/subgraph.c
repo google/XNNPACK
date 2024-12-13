@@ -1459,9 +1459,11 @@ void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
           if ((weights_type == xnn_weights_type_qc4w) &&
               xnn_init_qp8_f32_qc4w_gemm_config() != NULL) {
             pack_activations = true;
-          } else if ((weights_type == xnn_weights_type_qc8w) &&
-                     xnn_init_qp8_f32_qc8w_gemm_config() != NULL) {
-            pack_activations = true;
+          // TODO(b/340399245) - Temporarily deactivate `qd8`->`qp8` for `qc8w`
+          // weights while we investigate breakages.
+          // } else if ((weights_type == xnn_weights_type_qc8w) &&
+          //            xnn_init_qp8_f32_qc8w_gemm_config() != NULL) {
+          //   pack_activations = true;
           } else if ((weights_type == xnn_weights_type_qb4w) &&
                      xnn_init_qp8_f32_qb4w_gemm_config() != NULL) {
             pack_activations = true;
