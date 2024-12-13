@@ -16,6 +16,7 @@
 
 #include <gtest/gtest.h>
 
+#include "next_prime.h"
 #include "replicable_random_device.h"
 #include "xnnpack.h"
 #include "xnnpack/buffer.h"
