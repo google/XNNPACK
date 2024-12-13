@@ -34,13 +34,13 @@ void xnn_qu8_dwconv_minmax_rndnu_ukernel_8f8m9l16c8s8r__neon_mul16(
   assert(output_width != 0);
   assert(kernel_size > 8);
 
-  const uint8x8_t vkernel_zero_point = vld1_dup_u8(&params->rndnu_neon.kernel_zero_point);
-  const int32x4_t vright_pre_shift = vld1q_dup_s32(&params->rndnu_neon.right_pre_shift);
-  const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
-  const int32x4_t vright_post_shift = vld1q_dup_s32(&params->rndnu_neon.right_post_shift);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->rndnu_neon.output_zero_point);
-  const uint8x16_t voutput_min = vld1q_dup_u8(&params->rndnu_neon.output_min);
-  const uint8x16_t voutput_max = vld1q_dup_u8(&params->rndnu_neon.output_max);
+  const uint8x8_t vkernel_zero_point = vdup_n_u8(params->rndnu_neon.kernel_zero_point);
+  const int32x4_t vright_pre_shift = vdupq_n_s32(params->rndnu_neon.right_pre_shift);
+  const int32x4_t vmultiplier = vdupq_n_s32(params->rndnu_neon.multiplier);
+  const int32x4_t vright_post_shift = vdupq_n_s32(params->rndnu_neon.right_post_shift);
+  const int16x8_t voutput_zero_point = vdupq_n_s16(params->rndnu_neon.output_zero_point);
+  const uint8x16_t voutput_min = vdupq_n_u8(params->rndnu_neon.output_min);
+  const uint8x16_t voutput_max = vdupq_n_u8(params->rndnu_neon.output_max);
 
   do {
     const void* w = weights;

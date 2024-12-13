@@ -51,23 +51,23 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${FIRS
   assert(kernel_size > ${FIRST_PASS_TILE});
 
   $if REQUANTIZATION == "RNDNU":
-    const int32x4_t vright_pre_shift = vld1q_dup_s32(&params->${PARAMS_STRUCT}.right_pre_shift);
-    const int32x4_t vmultiplier = vld1q_dup_s32(&params->${PARAMS_STRUCT}.multiplier);
-    const int32x4_t vright_post_shift = vld1q_dup_s32(&params->${PARAMS_STRUCT}.right_post_shift);
+    const int32x4_t vright_pre_shift = vdupq_n_s32(params->${PARAMS_STRUCT}.right_pre_shift);
+    const int32x4_t vmultiplier = vdupq_n_s32(params->${PARAMS_STRUCT}.multiplier);
+    const int32x4_t vright_post_shift = vdupq_n_s32(params->${PARAMS_STRUCT}.right_post_shift);
   $elif REQUANTIZATION == "FP32":
     $if DATATYPE != "QC8":
-      const float32x4_t vscale = vld1q_dup_f32(&params->${PARAMS_STRUCT}.scale);
+      const float32x4_t vscale = vdupq_n_f32(params->${PARAMS_STRUCT}.scale);
     $if not ARMV8:
-      const float32x4_t vmagic_bias = vld1q_dup_f32(&params->${PARAMS_STRUCT}.magic_bias);
-      const int32x4_t vmagic_bias_less_output_zero_point = vld1q_dup_s32(&params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
+      const float32x4_t vmagic_bias = vdupq_n_f32(params->${PARAMS_STRUCT}.magic_bias);
+      const int32x4_t vmagic_bias_less_output_zero_point = vdupq_n_s32(params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
   $if REQUANTIZATION != "FP32" or ARMV8:
-    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->${PARAMS_STRUCT}.output_zero_point);
+    const int16x8_t voutput_zero_point = vdupq_n_s16(params->${PARAMS_STRUCT}.output_zero_point);
   $if CHANNEL_TILE == 8:
-    const int8x8_t voutput_min = vld1_dup_s8(&params->${PARAMS_STRUCT}.output_min);
-    const int8x8_t voutput_max = vld1_dup_s8(&params->${PARAMS_STRUCT}.output_max);
+    const int8x8_t voutput_min = vdup_n_s8(params->${PARAMS_STRUCT}.output_min);
+    const int8x8_t voutput_max = vdup_n_s8(params->${PARAMS_STRUCT}.output_max);
   $else:
-    const int8x16_t voutput_min = vld1q_dup_s8(&params->${PARAMS_STRUCT}.output_min);
-    const int8x16_t voutput_max = vld1q_dup_s8(&params->${PARAMS_STRUCT}.output_max);
+    const int8x16_t voutput_min = vdupq_n_s8(params->${PARAMS_STRUCT}.output_min);
+    const int8x16_t voutput_max = vdupq_n_s8(params->${PARAMS_STRUCT}.output_max);
   do {
     const void* w = weights;
 

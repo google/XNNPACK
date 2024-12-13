@@ -35,8 +35,8 @@ void xnn_f32_dwconv_minmax_ukernel_5f5m5l4c4s4r__neon(
   assert(output_width != 0);
   assert(kernel_size > 5);
 
-  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
-  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+  const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
+  const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
   do {
     const float* w = weights;
 

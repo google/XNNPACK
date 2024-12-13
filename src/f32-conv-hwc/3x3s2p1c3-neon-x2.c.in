@@ -56,8 +56,8 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x${CHANNEL_TILE}__${"aarch64_neonfma" if 
   }
 
   $if FMA:
-    const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
-    const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+    const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
+    const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
 
   for (size_t output_y = output_y_start; output_y < output_y_end; output_y += 2) {
     const size_t input_y2 = output_y * 2 + 2 - input_padding_top;
@@ -410,8 +410,8 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x${CHANNEL_TILE}__${"aarch64_neonfma" if 
           vi${Y}x0 = vi${Y}x3;
 
         $if not FMA:
-          const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
-          const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+          const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
+          const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
 
         $for C in range(0, CHANNEL_TILE, 4):
           $for Y in range(HEIGHT_TILE):
@@ -691,8 +691,8 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x${CHANNEL_TILE}__${"aarch64_neonfma" if 
           vi${Y}x0 = vcombine_f32(vget_high_f32(vi${Y}x1), vi${Y}x2);
 
         $if not FMA:
-          const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
-          const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+          const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
+          const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
 
         $for C in range(0, CHANNEL_TILE, 4):
           $for Y in range(HEIGHT_TILE):
@@ -874,8 +874,8 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x${CHANNEL_TILE}__${"aarch64_neonfma" if 
             vo${Y}c${ABC[C:C+4]} = ${VMULADDQ_LANE_F32}(vo${Y}c${ABC[C:C+4]}, vk21c2x${ABC[C:C+4]}, vget_high_f32(vi${Y*2+2}x1), 0);
 
         $if not FMA:
-          const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
-          const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+          const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
+          const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
 
         $for C in range(0, CHANNEL_TILE, 4):
           $for Y in range(HEIGHT_TILE):

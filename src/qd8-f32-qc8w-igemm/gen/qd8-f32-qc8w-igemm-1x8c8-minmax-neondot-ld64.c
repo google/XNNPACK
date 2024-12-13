@@ -115,11 +115,11 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x8c8__neondot_ld64(
       vout0x4567 = vmlaq_f32(vbias4567, vout0x4567, vfilter_output_scale4567);
     #endif
 
-    const float32x4_t voutput_min = vld1q_dup_f32(&params->scalar.min);
+    const float32x4_t voutput_min = vdupq_n_f32(params->scalar.min);
     vout0x0123 = vmaxq_f32(vout0x0123, voutput_min);
     vout0x4567 = vmaxq_f32(vout0x4567, voutput_min);
 
-    const float32x4_t voutput_max = vld1q_dup_f32(&params->scalar.max);
+    const float32x4_t voutput_max = vdupq_n_f32(params->scalar.max);
     vout0x0123 = vminq_f32(vout0x0123, voutput_max);
     vout0x4567 = vminq_f32(vout0x4567, voutput_max);
 

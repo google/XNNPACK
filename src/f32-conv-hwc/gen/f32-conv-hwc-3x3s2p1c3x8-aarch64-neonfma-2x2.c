@@ -56,8 +56,8 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x8__aarch64_neonfma_2x2(
     i0 = zero;
   }
 
-  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
-  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+  const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
+  const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
 
   for (size_t output_y = output_y_start; output_y < output_y_end; output_y += 2) {
     const size_t input_y2 = output_y * 2 + 2 - input_padding_top;
