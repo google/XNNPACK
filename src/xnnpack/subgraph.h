@@ -483,9 +483,6 @@ size_t xnn_tensor_get_size(const struct xnn_value* value);
 
 size_t xnn_tensor_get_size_by_id(xnn_subgraph_t subgraph, uint32_t value_id);
 
-// Checks if a tensor shape is completely known.
-bool xnn_tensor_shape_is_static(const struct xnn_value* value);
-
 XNN_INLINE static size_t xnn_get_rounded_size(size_t size)
 {
   // We round it to XNN_EXTRA_BYTES to ensure that we can read more than the actual size of the tensor, and round it
