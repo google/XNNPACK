@@ -147,6 +147,17 @@ struct xnn_hardware_config {
 #if XNN_ARCH_HEXAGON
   bool use_hvx;
 #endif  // XNN_ARCH_HEXAGON
+  // Size in bytes of the L1 data cache.
+  size_t l1_data_cache_bytes;
+  size_t l1_data_cache_line_size;
+  size_t l1_data_cache_associativity;
+  size_t l1_data_cache_num_sets;
+
+  // Size in bytes of the L2 data cache.
+  size_t l2_data_cache_bytes;
+  size_t l2_data_cache_line_size;
+  size_t l2_data_cache_associativity;
+  size_t l2_data_cache_num_sets;
 };
 
 XNN_INTERNAL const struct xnn_hardware_config* xnn_init_hardware_config();
