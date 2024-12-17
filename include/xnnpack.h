@@ -294,6 +294,8 @@ enum xnn_datatype {
   /// Dynamically quantized 8-bit unsigned integer with per-batch quantization
   /// parameters.
   xnn_datatype_qduint8 = 15,
+  /// IEEE754 half-precision packed floating-point.
+  xnn_datatype_pfp16 = 16,
 };
 
 /// Define a tensor-type Value and add it to a Subgraph.

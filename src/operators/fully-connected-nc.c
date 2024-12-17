@@ -336,7 +336,7 @@ error:
   return status;
 }
 
-enum xnn_status xnn_create_fully_connected_nc_f16(
+enum xnn_status create_fully_connected_nc_f16(
     size_t input_channels,
     size_t output_channels,
     size_t input_stride,
@@ -348,6 +348,7 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
     uint32_t flags,
     xnn_code_cache_t code_cache,
     xnn_weights_cache_t weights_cache,
+    const struct xnn_gemm_config* gemm_config,
     xnn_operator_t* fully_connected_op_out)
 {
   if (isnan(output_min)) {
@@ -375,7 +376,6 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
     return xnn_status_invalid_parameter;
   }
 
-  const struct xnn_gemm_config* gemm_config = xnn_init_f16_gemm_config();
   if (gemm_config == NULL) {
     xnn_log_error("failed to create %s operator: unsupported hardware configuration",
                   xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_f16));
@@ -416,6 +416,45 @@ enum xnn_status xnn_create_fully_connected_nc_f16(
     xnn_operator_type_fully_connected_nc_f16,
     /*weights_cache=*/weights_cache,
     fully_connected_op_out);
+}
+
+enum xnn_status xnn_create_fully_connected_nc_f16(
+    size_t input_channels,
+    size_t output_channels,
+    size_t input_stride,
+    size_t output_stride,
+    const void* kernel,
+    const void* bias,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
+    xnn_operator_t* fully_connected_op_out) {
+  const struct xnn_gemm_config* gemm_config = xnn_init_f16_gemm_config();
+  return create_fully_connected_nc_f16(input_channels, output_channels, input_stride,
+          output_stride, kernel, bias, output_min, output_max, flags, code_cache,
+          weights_cache, gemm_config,
+          fully_connected_op_out);
+}
+
+enum xnn_status xnn_create_fully_connected_nc_pf16(
+    size_t input_channels,
+    size_t output_channels,
+    size_t input_stride,
+    size_t output_stride,
+    const void* kernel,
+    const void* bias,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
+    xnn_operator_t* fully_connected_op_out) {
+  const struct xnn_gemm_config* gemm_config = xnn_init_pf16_gemm_config();
+  return create_fully_connected_nc_f16(input_channels, output_channels, input_stride,
+          output_stride, kernel, bias, output_min, output_max, flags, code_cache,
+          weights_cache, gemm_config, fully_connected_op_out);
 }
 
 enum xnn_status create_fully_connected_nc_qx8_f16_qc4w(
