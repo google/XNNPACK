@@ -162,6 +162,27 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_HEIGHT}x${TILE_WIDTH}_${IN_PTRS.low
     $if OUT_PTRS in ["MOV", "DEC"]:
       o = (uint${SIZE}_t*) ((uintptr_t) o + tile_hbytes);
 
+    if (bh != 0){
+      // Let's try scalar implementation here.
+      $if TILE_HEIGHT > 2:
+      const ${TYPE}* i = i0;
+      if (bh & 2) {
+        $for M in reversed(range(TILE_WIDTH)):
+          o${M}[0] = i0[${M}];
+          o${M}[1] = i1[${M}];
+          o${M} += 2;
+        i = i2;
+      }
+      if (bh & 1) {
+        $for M in reversed(range(TILE_WIDTH)):
+          o${M}[0] = i[${M}];
+      }
+      $elif TILE_HEIGHT > 1:
+        if (bh & 1) {
+          $for M in reversed(range(TILE_WIDTH)):
+            o${M}[0] = i0[${M}];
+        }
+    }
 
     $if IN_PTRS == "MULTI":
       i0 = (const uint${SIZE}_t*) ((uintptr_t) i0 + input_reset);
