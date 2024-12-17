@@ -175,6 +175,8 @@ DECLARE_F16_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_f16_gemm_minmax_ukernel_8x64__avx51
       const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_PF32_GEMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_pf32_gemm_minmax_ukernel_1x32__neonsme2)
+DECLARE_PF32_GEMM_MINMAX_UKERNEL_FUNCTION(
     xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2)
 
 #define DECLARE_F32_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name) \

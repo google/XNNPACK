@@ -30,8 +30,12 @@ void xnn_x32_pack_lh_ukernel__neonsme2(size_t m, size_t k, size_t mr,
                                           size_t lhs_stride,
                                           void* XNN_RESTRICT lhs_packed) {
 #if XNN_ENABLE_KLEIDIAI
-  kai_run_lhs_pack_f32p2vlx1_f32_sme(m, k, mr, kr, sr, m_idx_start, lhs,
-                                     lhs_stride, lhs_packed);
+  if (m == 1) {
+    memcpy(lhs_packed, lhs, sizeof(float) * k);
+  } else {
+    kai_run_lhs_pack_f32p2vlx1_f32_sme(m, k, mr, kr, sr, m_idx_start, lhs,
+                                       lhs_stride, lhs_packed);
+  }
 #else
   assert("Not compiled with XNN_ENABLE_KLEIDIAI" && 0);
 #endif  // XNN_ENABLE_KLEIDIAI
