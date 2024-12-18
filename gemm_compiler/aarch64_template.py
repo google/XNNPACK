@@ -165,7 +165,7 @@ class Aarch64(base_architecture.BaseArchitecture):
             w_step=self.register_bytes() * N_COUNT,
         )
     for l in self.weights_asm()['loop']:
-      if N_COUNT % 2 == 0:
+      if N_COUNT % 2 != 0:
         asm_string += l.format(
             W_ptr=self.w_ptr_register(),
             W=self.w_registers()[nr],

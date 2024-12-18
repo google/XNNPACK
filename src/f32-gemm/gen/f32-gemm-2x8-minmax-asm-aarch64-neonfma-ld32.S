@@ -39,7 +39,6 @@ inner_loop:
       ldr d2, [x3, x20]
       ldr d3, [x9, x20]
       ldp q7, q8, [x5, 0]
-      ldr  q7, [x5, 0]
       add x5, x5, 32
       fmla  v11.4s, v7.4s, v2.s[0]
       fmla  v12.4s, v7.4s, v3.s[0]

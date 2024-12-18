@@ -41,7 +41,6 @@ inner_loop:
       ldr d2, [x3, x20]
       ldp  q6, q7, [x5, 0]
       ldp  q8, q9, [x5, 32]
-      ldr  q8, [x5, 32]
       add x5, x5, 64
       sdot  v12.4s, v6.16b, v2.4b[0]
       sdot  v13.4s, v7.16b, v2.4b[0]
