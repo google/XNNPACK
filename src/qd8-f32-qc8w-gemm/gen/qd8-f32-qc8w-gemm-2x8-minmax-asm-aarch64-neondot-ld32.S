@@ -46,8 +46,7 @@ outer_loop:
 inner_loop:
       ldr d2, [x3, x20]
       ldr d3, [x9, x20]
-      ldp  q6, q7, [x5, 0]
-      add x5, x5, 32
+      ldp q6, q7, [x5], 32
       sdot  v12.4s, v6.16b, v2.4b[0]
       sdot  v13.4s, v6.16b, v3.4b[0]
       sdot  v14.4s, v7.16b, v2.4b[0]
@@ -95,10 +94,8 @@ inner_loop:
       # Check whether full or partial store.
       cmp x1, 8
       b.lo tail_4
-      stp  q12, q14, [x6]
-      stp  q13, q15, [x13]
-      add x6, x6, 32
-      add x13, x13, 32
+      stp  q12, q14, [x6], 32
+      stp  q13, q15, [x13], 32
 
       sub x1, x1, 8
       b.ne outer_loop
@@ -106,20 +103,16 @@ inner_loop:
 
 tail_4:
       tbz x1, 2, tail_2
-      str  q12, [x6]
-      str  q13, [x13]
+      str  q12, [x6], 16
+      str  q13, [x13], 16
       mov  v12.16b, v14.16b
       mov  v13.16b, v15.16b
-      add x6, x6, 16
-      add x13, x13, 16
 
 
 tail_2:
       tbz x1, 1, tail_1
-      str  d12, [x6]
-      str  d13, [x13]
-      add  x6, x6, 8
-      add  x13, x13, 8
+      str  d12, [x6], 8
+      str  d13, [x13], 8
       dup d12, v12.d[1]
       dup d13, v13.d[1]
 

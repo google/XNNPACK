@@ -29,9 +29,8 @@ outer_loop:
 
 inner_loop:
       ldr d2, [x3, x20]
-      ldp q7, q8, [x5, 0]
-      ldp q9, q10, [x5, 32]
-      add x5, x5, 64
+      ldp q7, q8, [x5], 32
+      ldp q9, q10, [x5], 32
       fmla  v11.4s, v7.4s, v2.s[0]
       fmla  v12.4s, v8.4s, v2.s[0]
       fmla  v13.4s, v9.4s, v2.s[0]
@@ -52,9 +51,8 @@ inner_loop:
       # Check whether full or partial store.
       cmp x1, 16
       b.lo tail_8
-      stp  q11, q12, [x6]
-      stp  q13, q14, [x6, 32]
-      add x6, x6, 64
+      stp  q11, q12, [x6], 32
+      stp  q13, q14, [x6], 32
 
       sub x1, x1, 16
       b.ne outer_loop
@@ -62,23 +60,20 @@ inner_loop:
 
 tail_8:
       tbz x1, 3, tail_4
-      stp  q11, q12, [x6]
+      stp  q11, q12, [x6], 32
       mov  v11.16b, v13.16b
       mov  v12.16b, v14.16b
-      add x6, x6, 32
 
 
 tail_4:
       tbz x1, 2, tail_2
-      str  q11, [x6]
+      str  q11, [x6], 16
       mov  v11.16b, v12.16b
-      add x6, x6, 16
 
 
 tail_2:
       tbz x1, 1, tail_1
-      str  d11, [x6]
-      add  x6, x6, 8
+      str  d11, [x6], 8
       dup d11, v11.d[1]
 
 

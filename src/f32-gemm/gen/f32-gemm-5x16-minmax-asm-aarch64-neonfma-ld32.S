@@ -70,9 +70,8 @@ inner_loop:
       ldr d4, [x10, x20]
       ldr d5, [x11, x20]
       ldr d6, [x12, x20]
-      ldp q7, q8, [x5, 0]
-      ldp q9, q10, [x5, 32]
-      add x5, x5, 64
+      ldp q7, q8, [x5], 32
+      ldp q9, q10, [x5], 32
       fmla  v11.4s, v7.4s, v2.s[0]
       fmla  v12.4s, v7.4s, v3.s[0]
       fmla  v13.4s, v7.4s, v4.s[0]
@@ -141,21 +140,16 @@ inner_loop:
       # Check whether full or partial store.
       cmp x1, 16
       b.lo tail_8
-      stp  q11, q16, [x6]
-      stp  q21, q26, [x6, 32]
-      stp  q12, q17, [x13]
-      stp  q22, q27, [x13, 32]
-      stp  q13, q18, [x14]
-      stp  q23, q28, [x14, 32]
-      stp  q14, q19, [x15]
-      stp  q24, q29, [x15, 32]
-      stp  q15, q20, [x19]
-      stp  q25, q30, [x19, 32]
-      add x6, x6, 64
-      add x13, x13, 64
-      add x14, x14, 64
-      add x15, x15, 64
-      add x19, x19, 64
+      stp  q11, q16, [x6], 32
+      stp  q21, q26, [x6], 32
+      stp  q12, q17, [x13], 32
+      stp  q22, q27, [x13], 32
+      stp  q13, q18, [x14], 32
+      stp  q23, q28, [x14], 32
+      stp  q14, q19, [x15], 32
+      stp  q24, q29, [x15], 32
+      stp  q15, q20, [x19], 32
+      stp  q25, q30, [x19], 32
 
       sub x1, x1, 16
       b.ne outer_loop
@@ -163,11 +157,11 @@ inner_loop:
 
 tail_8:
       tbz x1, 3, tail_4
-      stp  q11, q16, [x6]
-      stp  q12, q17, [x13]
-      stp  q13, q18, [x14]
-      stp  q14, q19, [x15]
-      stp  q15, q20, [x19]
+      stp  q11, q16, [x6], 32
+      stp  q12, q17, [x13], 32
+      stp  q13, q18, [x14], 32
+      stp  q14, q19, [x15], 32
+      stp  q15, q20, [x19], 32
       mov  v11.16b, v21.16b
       mov  v16.16b, v26.16b
       mov  v12.16b, v22.16b
@@ -178,44 +172,29 @@ tail_8:
       mov  v19.16b, v29.16b
       mov  v15.16b, v25.16b
       mov  v20.16b, v30.16b
-      add x6, x6, 32
-      add x13, x13, 32
-      add x14, x14, 32
-      add x15, x15, 32
-      add x19, x19, 32
 
 
 tail_4:
       tbz x1, 2, tail_2
-      str  q11, [x6]
-      str  q12, [x13]
-      str  q13, [x14]
-      str  q14, [x15]
-      str  q15, [x19]
+      str  q11, [x6], 16
+      str  q12, [x13], 16
+      str  q13, [x14], 16
+      str  q14, [x15], 16
+      str  q15, [x19], 16
       mov  v11.16b, v16.16b
       mov  v12.16b, v17.16b
       mov  v13.16b, v18.16b
       mov  v14.16b, v19.16b
       mov  v15.16b, v20.16b
-      add x6, x6, 16
-      add x13, x13, 16
-      add x14, x14, 16
-      add x15, x15, 16
-      add x19, x19, 16
 
 
 tail_2:
       tbz x1, 1, tail_1
-      str  d11, [x6]
-      str  d12, [x13]
-      str  d13, [x14]
-      str  d14, [x15]
-      str  d15, [x19]
-      add  x6, x6, 8
-      add  x13, x13, 8
-      add  x14, x14, 8
-      add  x15, x15, 8
-      add  x19, x19, 8
+      str  d11, [x6], 8
+      str  d12, [x13], 8
+      str  d13, [x14], 8
+      str  d14, [x15], 8
+      str  d15, [x19], 8
       dup d11, v11.d[1]
       dup d12, v12.d[1]
       dup d13, v13.d[1]

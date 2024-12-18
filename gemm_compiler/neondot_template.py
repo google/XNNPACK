@@ -74,26 +74,6 @@ class NeonDot(isa.NeonFma):
   def quantization_params_register(self):
     return 'x24'
 
-  def input_asm(self):
-    in_asm = {
-        'loop': [
-            'ldr d{AM}, [{AM_ptr}, {a_offset}]\n',
-        ]
-    }
-    return in_asm
-
-  def weights_asm(self):
-    w_asm = {
-        'loop': [
-            'ldr  q{W}, [{W_ptr}, {offset}]\n',
-        ],
-        'loop_2': [
-            'ldp  q{W}, q{W_1}, [{W_ptr}, {offset}]\n',
-        ],
-        'after': 'add {W}, {W}, {w_step}\n',
-    }
-    return w_asm
-
   def compute_asm(self):
     c_asm = {
         'loop': ['sdot  v{ACC}.4s, v{W}.16b, v{A}.4b[0]\n'],
