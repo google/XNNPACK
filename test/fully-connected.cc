@@ -3395,15 +3395,23 @@ TEST_F(FullyConnectedTestQD8F32QC4W,
 TEST_F(FullyConnectedTestQD8F32QC4W,
        internally_allocated_dynamic_quantization_parameters_with_reshape) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  std::vector<size_t> subgraph_input_dims(input_dims);
+  std::vector<size_t> subgraph_output_dims(output_dims);
+  subgraph_input_dims[0] += 4;
+  subgraph_output_dims[0] += 4;
+  const size_t subgraph_batch_size =
+      NumElements(subgraph_input_dims) / input_channels;
+
   xnn_subgraph_t subgraph = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/4,
                                                     /*flags=*/0, &subgraph));
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
       subgraph, xnn_delete_subgraph);
   uint32_t input_id = XNN_INVALID_NODE_ID;
-  xnnpack::Buffer<float> convert_input(batch_size * input_channels +
+  xnnpack::Buffer<float> convert_input(subgraph_batch_size * input_channels +
                                        XNN_EXTRA_BYTES / sizeof(float));
-  xnnpack::Buffer<float> subgraph_output(batch_size * output_channels);
+  xnnpack::Buffer<float> subgraph_output(subgraph_batch_size * output_channels);
   xnnpack::Buffer<int8_t> operator_dq_data(batch_size * input_channels +
                                            XNN_EXTRA_BYTES);
   xnnpack::Buffer<float> operator_output(batch_size * output_channels);
@@ -3481,11 +3489,6 @@ TEST_F(FullyConnectedTestQD8F32QC4W,
   //     Input2..'      |       |
   //     Subgraph.......'       |
   //     Input3.................'
-
-  std::vector<size_t> subgraph_input_dims(input_dims);
-  std::vector<size_t> subgraph_output_dims(output_dims);
-  subgraph_input_dims[0] += 3;
-  subgraph_output_dims[0] += 3;
 
   ASSERT_EQ(xnn_status_success,
             xnn_define_tensor_value(

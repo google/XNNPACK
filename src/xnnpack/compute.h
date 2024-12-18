@@ -350,6 +350,11 @@ struct gemm_context {
       size_t mr_block_size,
       size_t nr_block_size);
 
+  XNN_PRIVATE void xnn_compute_grouped_qp8gemm(
+      const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t group_index, size_t mr_block_start, size_t nr_block_start,
+      size_t mr_block_size, size_t nr_block_size);
+
   XNN_PRIVATE void xnn_compute_dqgemm(
       const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t mr_block_start,
@@ -377,6 +382,11 @@ struct gemm_context {
         size_t nr_block_start,
         size_t mr_block_size,
         size_t nr_block_size);
+
+    XNN_PRIVATE void xnn_compute_hmp_grouped_qp8gemm(
+        const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+        uint32_t uarch_index, size_t group_index, size_t mr_block_start,
+        size_t nr_block_start, size_t mr_block_size, size_t nr_block_size);
 
     XNN_PRIVATE void xnn_compute_hmp_gemm(
         const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
@@ -1456,6 +1466,7 @@ struct f32_qd8_convert_context {
     size_t mr;
     size_t kr;
     size_t sr;
+    size_t group_stride;
     const float* XNN_RESTRICT lhs;
     size_t lhs_stride;
     int8_t* XNN_RESTRICT lhs_packed;
@@ -1466,7 +1477,7 @@ struct f32_qd8_convert_context {
   XNN_PRIVATE void xnn_compute_f32_qp8_convert(
       const struct f32_qp8_convert_context
           context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t m_idx_start);
+      size_t group_idx, size_t m_idx_start, size_t m_tile);
 #endif
 
   struct u8_softmax_context {

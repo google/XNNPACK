@@ -15,19 +15,22 @@
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/compute.h"
-#include "xnnpack/config-types.h"
 #include "xnnpack/indirection.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microkernel-type.h"
 #include "xnnpack/microparams.h"
-#include "xnnpack/microparams-init.h"
 #include "xnnpack/operator-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/packq.h"
 #include "xnnpack/quantization.h"
 #include "pthreadpool.h"
+
+#if XNN_MAX_UARCH_TYPES > 1
+#include "xnnpack/config-types.h"
+#include "xnnpack/microparams-init.h"
+#endif  // XNN_MAX_UARCH_TYPES > 1
 
 void xnn_compute_transposec_2d(
     const struct transpose_context* context,
@@ -500,6 +503,54 @@ void xnn_compute_dqgemm(
       context->cn_stride,
       context->fused_params,
       (const void*) ((uintptr_t) &context->quantization_params[mr_block_start]));
+}
+
+void xnn_compute_hmp_grouped_qp8gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    uint32_t uarch_index, size_t group_index, size_t mr_block_start,
+    size_t nr_block_start, size_t mr_block_size, size_t nr_block_size) {
+  const size_t a_offset = xnn_x8_packq_f32qp8_packed_offset(
+      mr_block_start, context->k_scaled, context->mr, context->kr, context->sr);
+  const size_t cm_stride = context->cm_stride;
+  const size_t num_batch_dims = context->num_batch_dims;
+
+  // Compute the group index offsets into A and B.
+  const size_t group_index_c = group_index;
+  size_t group_index_a = 0;
+  size_t group_index_b = 0;
+  for (int k = 0; k < num_batch_dims; k++) {
+    // Extract the kth batch index from the group_index.
+    const size_t index = group_index / context->batch_strides_c[k];
+    group_index %= context->batch_strides_c[k];
+
+    // Compute the corresponding kth group index offsets into A and B.
+    group_index_a = (index % context->batch_dims_a[k]) +
+                    context->batch_dims_a[k] * group_index_a;
+    group_index_b = (index % context->batch_dims_b[k]) +
+                    context->batch_dims_b[k] * group_index_b;
+  }
+
+  context->qp8_ukernel.function[uarch_index](
+      mr_block_size, nr_block_size, context->k_scaled,
+      (const void*)((uintptr_t)context->a + group_index_a * context->ga_stride +
+                    a_offset),
+      (const void*)((uintptr_t)context->packed_w +
+                    group_index_b * context->gw_stride +
+                    nr_block_start * context->w_stride),
+      (void*)((uintptr_t)context->c + group_index_c * context->gc_stride +
+              mr_block_start * cm_stride +
+              (nr_block_start << context->log2_csize)),
+      cm_stride,
+      /*dst_stride_col=*/sizeof(float), context->fused_params);
+}
+
+void xnn_compute_grouped_qp8gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t group_index, size_t mr_block_start, size_t nr_block_start,
+    size_t mr_block_size, size_t nr_block_size) {
+  xnn_compute_hmp_grouped_qp8gemm(context, XNN_UARCH_DEFAULT, group_index,
+                                  mr_block_start, nr_block_start, mr_block_size,
+                                  nr_block_size);
 }
 
 void xnn_compute_hmp_qp8gemm(
@@ -2237,15 +2288,17 @@ void xnn_compute_x32_pack_lh(
 
 void xnn_compute_f32_qp8_convert(
     const struct f32_qp8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t m_idx_start) {
+    size_t group_idx, size_t m_idx_start, size_t m_tile) {
   const float* lhs = (const float*)((const char*)context->lhs +
-                                    m_idx_start * context->lhs_stride);
-  int8_t* lhs_packed =
-      context->lhs_packed +
-      xnn_x8_packq_f32qp8_packed_offset(m_idx_start, context->k, context->mr,
-                                        context->kr, context->sr);
+                                    (group_idx * context->m + m_idx_start) *
+                                        context->lhs_stride);
+  int8_t* lhs_packed = (int8_t*)((uintptr_t)context->lhs_packed +
+                                 group_idx * context->group_stride +
+                                 xnn_x8_packq_f32qp8_packed_offset(
+                                     m_idx_start, context->k, context->mr,
+                                     context->kr, context->sr));
 
-  context->packq_ukernel(/*m=*/1, context->k, context->mr, context->kr,
+  context->packq_ukernel(/*m=*/m_tile, context->k, context->mr, context->kr,
                          context->sr, m_idx_start, lhs, context->lhs_stride,
                          lhs_packed);
 }

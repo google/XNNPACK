@@ -203,6 +203,7 @@ void xnn_value_copy(
   dst_value->fp16_temp_data = src_value->fp16_temp_data;
   dst_value->fp32_data = src_value->fp32_data;
   dst_value->gemm_config = src_value->gemm_config;
+  dst_value->squash_groups = src_value->squash_groups;
 }
 
 struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph)
@@ -1425,7 +1426,7 @@ void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
     struct xnn_node* node = &subgraph->nodes[n];
     const uint32_t input_id = node->inputs[0];
     const uint32_t output_id = node->outputs[0];
-    const struct xnn_value* input = &subgraph->values[input_id];
+    struct xnn_value* input = &subgraph->values[input_id];
     struct xnn_value* output = &subgraph->values[output_id];
     // Only replace nodes for which all consumer are of the same type.
     if (!output->all_consumers_types_same) continue;
@@ -1469,7 +1470,8 @@ void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
         // TODO(b/340399245) - Remove xnn_init_qp8_f32_qc4w_gemm_config check once we
         // have full qp8 support.
 
-        if (consumer_type == xnn_consumer_type_fully_connected) {
+        if (consumer_type == xnn_consumer_type_fully_connected ||
+            consumer_type == xnn_consumer_type_batch_mat_mul) {
           if ((weights_type == xnn_weights_type_qc4w) &&
               xnn_init_qp8_f32_qc4w_gemm_config() != NULL) {
             pack_activations = true;
@@ -1501,6 +1503,11 @@ void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
               break;
             default:
               XNN_UNREACHABLE;
+          }
+          // To prevent issues with packing, coerce the shape of the inputs from
+          // `[B, M, K]` to `[B * M, K]` for the fully-connected op.
+          if (consumer_type == xnn_consumer_type_fully_connected) {
+            output->squash_groups = true;
           }
         }
       }

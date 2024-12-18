@@ -23,6 +23,7 @@
 #include "xnnpack/operator-type.h"
 #include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
+#include "xnnpack/packq.h"
 #include "xnnpack/params.h"
 #include "xnnpack/reference-config.h"
 #include "pthreadpool.h"
@@ -1030,27 +1031,31 @@ enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,  //
                   xnn_operator_type_to_string(convert_op->type));
     return xnn_status_invalid_parameter;
   }
-  const uint32_t mr_packed = batch_size == 1 ? 1 : gemm_config->mr_packed;
+  const uint32_t mr_packed = batch_size == 1          ? 1
+                             : gemm_config->mr_packed ? gemm_config->mr_packed
+                                                      : gemm_config->mr;
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
 
   convert_op->context.f32_qp8_convert = (struct f32_qp8_convert_context){
-      .m = num_groups * batch_size,
+      .m = batch_size,
       .k = channels,
       .mr = mr_packed,
       .kr = kr,
       .sr = sr,
       .lhs_stride = input_stride * sizeof(float),
+      .group_stride = xnn_x8_packq_f32qp8_packed_size(batch_size, channels,
+                                                      mr_packed, kr, sr),
       .packq_ukernel = (xnn_x8_packq_f32qp8_ukernel_fn)
                            convert_op->unary_elementwise_config->ukernel,
   };
 
-  // TODO(b/340399245) - Ideally, this should parallelize along `batch` in
-  // groups of `mr`.
-  convert_op->compute[0].type = xnn_parallelization_type_1d;
-  convert_op->compute[0].task_1d =
-      (pthreadpool_task_1d_t)xnn_compute_f32_qp8_convert;
-  convert_op->compute[0].range[0] = num_groups * batch_size;
+  convert_op->compute[0].type = xnn_parallelization_type_2d_tile_1d;
+  convert_op->compute[0].task_2d_tile_1d =
+      (pthreadpool_task_2d_tile_1d_t)xnn_compute_f32_qp8_convert;
+  convert_op->compute[0].range[0] = num_groups;
+  convert_op->compute[0].range[1] = batch_size;
+  convert_op->compute[0].tile[0] = mr_packed;
 
   convert_op->state = xnn_run_state_needs_setup;
 

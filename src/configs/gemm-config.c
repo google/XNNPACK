@@ -1754,7 +1754,7 @@ static void init_qp8_f32_qc8w_gemm_config(void) {
   const struct xnn_hardware_config* hardware_config =
       xnn_init_hardware_config();
   assert(hardware_config != NULL);
-  if (0 && XNN_ENABLE_ARM_I8MM && hardware_config->use_arm_neon_i8mm) {
+  if (XNN_ENABLE_ARM_I8MM && hardware_config->use_arm_neon_i8mm) {
 #if XNN_ENABLE_ARM_I8MM
     qp8_f32_qc8w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_qp8gemm_ukernel(xnn_qp8_f32_qc8w_gemm_minmax_ukernel_1x4c8__aarch64_neondot);
     qp8_f32_qc8w_gemm_config.minmax.qp8gemm[XNN_MR_TO_INDEX(16)] = xnn_init_hmp_qp8gemm_ukernel(xnn_qp8_f32_qc8w_gemm_minmax_ukernel_16x4c8__neoni8mm_mstep4);

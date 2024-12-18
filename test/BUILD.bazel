@@ -1216,7 +1216,7 @@ xnnpack_unit_test(
         "batch-matrix-multiply-operator-tester.h",
     ],
     shard_count = 2,
-    deps = OPERATOR_TEST_DEPS,
+    deps = OPERATOR_TEST_DEPS + ["//:microkernels_h"],
 )
 
 xnnpack_unit_test(

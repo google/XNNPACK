@@ -150,6 +150,8 @@ struct xnn_value {
   void* fp16_temp_data;
   // Pointer to a `xnn_gemm_config` if this value is packed for a specific GEMM.
   const struct xnn_gemm_config *gemm_config;
+  // If true, assume dimensions > 2 will be squashed to 2 dimensions.
+  bool squash_groups;
   // Pointer to original fp32 data if this value was converted from fp32 to fp16 (only for static values). This is used
   // for nodes like Convolution, where the filter is expected to be kept as fp32, but could have been converted to fp16
   // if another node (like Subtraction) also consumed the weights.

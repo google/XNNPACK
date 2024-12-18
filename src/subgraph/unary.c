@@ -149,11 +149,16 @@ static enum xnn_status reshape_convert_operator(
       break;
     }
     case xnn_operator_type_convert_nc_f32_qp8: {
+      size_t num_groups = xnn_shape_multiply_batch_dims(&input_value->shape, 2);
+      size_t batch_size = input_value->shape.dim[num_input_dims - 2];
+      const size_t channels = input_value->shape.dim[num_input_dims - 1];
+      if (output_value->squash_groups) {
+        batch_size *= num_groups;
+        num_groups = 1;
+      }
       status = xnn_reshape_convert_nc_f32_qp8(
-          opdata->operator_objects[0], /*num_groups=*/1,
-          /*batch_size=*/dq_batch_size,
-          /*channels=*/dq_channel_stride,
-          /*input_stride=*/dq_channel_stride, threadpool);
+          opdata->operator_objects[0], num_groups, batch_size, channels,
+          /*input_stride=*/channels, threadpool);
       break;
     }
     default:
