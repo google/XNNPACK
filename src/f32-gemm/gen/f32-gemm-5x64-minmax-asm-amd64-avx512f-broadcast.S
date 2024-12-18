@@ -64,7 +64,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_5x64__asm_amd64_avx512f_broadcast
       cmovle r8, rbp
 
 outer_loop:
-      # Zero k counter.
+      # Initialize k counter.
       mov r11, 0
       # Initialize accumulators with the biases.
       vmovaps  zmm7, [r9 + 0]
@@ -125,6 +125,7 @@ inner_loop:
       cmp rdx, r11
       jne inner_loop
       # Min/max clamping..
+clamping:
       vminps  zmm7, zmm1, zmm7
       vminps  zmm8, zmm1, zmm8
       vminps  zmm9, zmm1, zmm9

@@ -47,10 +47,11 @@ class NeonFma(arch.Aarch64):
         '28',
         '29',
         '30',
+        '10',
     ]
 
   def a_registers(self, idx):
-    registers = ['2', '3', '4', '5', '6']
+    registers = ['2', '3', '4', '5', '6', '31', '29', '30']
     assert idx < len(registers)
     return registers[idx]
 
@@ -60,26 +61,31 @@ class NeonFma(arch.Aarch64):
   def input_asm(self):
     in_asm = {
         'loop': [
-            'ldr d{AM}, [{AM_ptr}, {a_offset}]\n',
+            'ldr s{AM}, [{AM_ptr}], 4\n',
         ]
+    }
+    return in_asm
+
+  def base_input_asm(self):
+    in_asm = {
+        'loop': ['']
     }
     return in_asm
 
   def weights_asm(self):
     w_asm = {
         'loop': [
-            'ldr  q{W}, [{W_ptr}, {offset}]\n',
+            'ldr  q{W}, [{W_ptr}], 16\n',
         ],
         'loop_2': [
-            'ldp q{W}, q{W_1}, [{W_ptr}, {offset}]\n',
+            'ldp q{W}, q{W_1}, [{W_ptr}], 32\n',
         ],
-        'after': 'add {W}, {W}, {w_step}\n',
     }
     return w_asm
 
   def compute_asm(self):
     c_asm = {
-        'loop': ['fmla  v{ACC}.4s, v{W}.4s, v{A}.s[0]\n'],
+        'loop': ['fmla  v{ACC}.4s, v{W}.4s, v{A}.s[{POS}]\n'],
     }
     return c_asm
 
@@ -139,22 +145,27 @@ class NeonFma(arch.Aarch64):
       cmp {nc}, {n_step}
       b.lo tail_{N_2}\n""".format(n_step=N, N_2=N // 2, nc=nc_reg)
     for mr in range(0, M):
-      asm_string += 'stp  q{ACC}, q{ACC_1}, [{c_reg}]\n'.format(
+      asm_string += 'stp  q{ACC}, q{ACC_1}, [{c_reg}], 32\n'.format(
           ACC=accumulators[mr],
           ACC_1=accumulators[M + mr],
           c_reg=cm_registers[mr],
       )
-      for nr in range(2, N_COUNT, 2):
-        asm_string += 'stp  q{ACC}, q{ACC_1}, [{c_reg}, {offset}]\n'.format(
+      for nr in range(2, N_COUNT - 1, 2):
+        asm_string += 'stp  q{ACC}, q{ACC_1}, [{c_reg}], 32\n'.format(
             ACC=accumulators[M * 2 + mr],
             ACC_1=accumulators[M * 3 + mr],
             c_reg=cm_registers[mr],
-            offset=self.register_bytes() * nr,
         )
+      if N_COUNT % 2 != 0:
+        asm_string += 'str  q{ACC}, [{c_reg}], 16\n'.format(
+            ACC=accumulators[M * 2 + mr],
+            c_reg=cm_registers[mr],
+        )
+
     for mr in range(0, M):
-      asm_string += 'add {cm}, {cm}, {cn_stride}\n'.format(
-          cn_stride=N_COUNT * 16, cm=cm_registers[mr]
-      )
+      AM_PTR = self.am_registers()[mr]
+      kc_register = self.kc_register()
+      asm_string += f'sub {AM_PTR}, {AM_PTR}, {kc_register}\n'
     CHECK = """
       sub {nc}, {nc}, {n_step}
       b.ne outer_loop
@@ -167,7 +178,7 @@ class NeonFma(arch.Aarch64):
 \ntail_8:
       tbz {nc_lo}, 3, tail_4\n""".format(nc_lo=nc_lo)
         for mr in range(0, M):
-          asm_string += 'stp  q{ACC}, q{ACC_1}, [{c_reg}]\n'.format(
+          asm_string += 'stp  q{ACC}, q{ACC_1}, [{c_reg}], 32\n'.format(
               ACC=accumulators[mr],
               ACC_1=accumulators[mr + M],
               c_reg=cm_registers[mr],
@@ -179,30 +190,24 @@ class NeonFma(arch.Aarch64):
           asm_string += 'mov  v{ACC0}.16b, v{ACC1}.16b\n'.format(
               ACC0=accumulators[mr + M], ACC1=accumulators[mr + 3 * M]
           )
-        for mr in range(0, M):
-          asm_string += 'add {cm}, {cm}, 32\n'.format(cm=cm_registers[mr])
       asm_string += """
 \ntail_4:
       tbz {nc_lo}, 2, tail_2\n""".format(nc_lo=nc_lo)
       for mr in range(0, M):
-        asm_string += 'str  q{ACC}, [{c_reg}]\n'.format(
+        asm_string += 'str  q{ACC}, [{c_reg}], 16\n'.format(
             ACC=accumulators[mr], c_reg=cm_registers[mr]
         )
       for mr in range(0, M):
         asm_string += 'mov  v{ACC0}.16b, v{ACC1}.16b\n'.format(
             ACC0=accumulators[mr], ACC1=accumulators[mr + M]
         )
-      for mr in range(0, M):
-        asm_string += 'add {cm}, {cm}, 16\n'.format(cm=cm_registers[mr])
     asm_string += """
 \ntail_2:
       tbz {nc_lo}, 1, tail_1\n""".format(nc_lo=nc_lo)
     for mr in range(0, M):
-      asm_string += 'str  d{ACC}, [{c_reg}]\n'.format(
+      asm_string += 'str  d{ACC}, [{c_reg}], 8\n'.format(
           ACC=accumulators[mr], c_reg=cm_registers[mr]
       )
-    for mr in range(0, M):
-      asm_string += 'add  {c_reg}, {c_reg}, 8\n'.format(c_reg=cm_registers[mr])
     for mr in range(0, M):
       asm_string += 'dup d{ACC}, v{ACC}.d[1]\n'.format(ACC=accumulators[mr])
     asm_string += """
@@ -214,3 +219,36 @@ class NeonFma(arch.Aarch64):
       )
 
     return asm_string
+
+class NeonFmaUnolled(NeonFma):
+  def __init__(self, unroll_factor):
+    self.unroll_factor = unroll_factor
+    self.decrement = 4 * unroll_factor
+
+  def function_name(self, M, N, isa):
+    LD = self.unroll_factor * 32
+    return f'xnn_f32_gemm_minmax_ukernel_{M}x{N}__asm_aarch64_{isa}_ld{LD}_2\n'
+
+  def input_asm(self):
+    match self.unroll_factor:
+      case 1:
+        return {
+            'loop': ['']
+        }
+      case 2:
+        return {
+            'loop': [
+                'ldr d{AM}, [{AM_ptr}], 8\n',
+            ]
+        }
+      case 4:
+        return {
+            'loop': [
+                'ldr q{AM}, [{AM_ptr}], 16\n',
+            ]
+        }
+      case _:
+        raise NotImplementedError
+
+  def base_input_asm(self):
+    return super().input_asm()

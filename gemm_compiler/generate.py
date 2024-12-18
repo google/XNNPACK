@@ -36,8 +36,8 @@ def generate_gemm_microkernel(
 
   # the outer loop label
   asm_string += '\nouter_loop:\n'
-  asm_string += '# Zero k counter.\n'
-  asm_string += isa.zero_gp_register(k_register)
+  asm_string += '# Initialize k counter.\n'
+  asm_string += isa.initialize_k_register(k_register)
 
   # Read a registers from the stack if required
   asm_string += isa.read_a_registers(M=M)
@@ -54,13 +54,11 @@ def generate_gemm_microkernel(
   # inner loop
   asm_string += isa.inner_loop(M, N)
 
-  # loop counter
-  asm_string += isa.cmp_k_and_jump_if_less(label='inner_loop')
-
   asm_string += isa.dequantize(M=M, N=num_horizontal_registers, W=w_ptr_reg)
 
   # min/max clamping
   asm_string += '# Min/max clamping..\n'
+  asm_string += 'clamping:\n'
   for nr in range(0, num_horizontal_registers):
     for mr in range(0, M):
       asm_string += isa.clamp_min(

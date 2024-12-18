@@ -38,7 +38,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__asm_amd64_avx512vnni
       vmovups zmmword ptr [rsp + 464], zmm6
 
 outer_loop:
-      # Zero k counter.
+      # Initialize k counter.
       mov r11, 0
       # Initialize accumulators with k_sum * input zero point.
       vmovaps  zmm6, [r9 + 0]
@@ -66,6 +66,7 @@ inner_loop:
       add r9, 64
       vfmadd213ps zmm5, zmm10, zmm6
       # Min/max clamping..
+clamping:
       vminps  zmm5, zmm1, zmm5
       vmaxps  zmm5, zmm0, zmm5
 
