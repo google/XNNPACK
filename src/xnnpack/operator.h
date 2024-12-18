@@ -331,7 +331,6 @@ struct xnn_operator {
   union {
     struct argmax_pooling_context argmax_pooling;
     struct average_pooling_context average_pooling;
-    struct channel_shuffle_context channel_shuffle;
     struct conv2d_context conv2d;
     struct dwconv2d_context dwconv2d;
     struct {

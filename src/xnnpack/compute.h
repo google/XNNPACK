@@ -1198,29 +1198,6 @@ struct elementwise_binary_context {
       size_t i, size_t j, size_t k, size_t l, size_t m);
 #endif
 
-struct channel_shuffle_context {
-  const void* x;
-  size_t x_stride;
-  void* y;
-  size_t y_stride;
-  size_t n;
-  size_t m;
-  union {
-    xnn_zipc_ukernel_fn fixed_ukernel;
-    xnn_zipv_ukernel_fn variable_ukernel;
-  };
-};
-
-#ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_channel_shuffle_fixed(
-      const struct channel_shuffle_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t index);
-
-  XNN_PRIVATE void xnn_compute_channel_shuffle_variable(
-      const struct channel_shuffle_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t index);
-#endif
-
 struct lut_strided_context {
   size_t n;
   const void* x;

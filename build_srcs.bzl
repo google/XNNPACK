@@ -13,7 +13,6 @@ OPERATOR_SRCS = [
     "src/operators/average-pooling-nhwc.c",
     "src/operators/batch-matrix-multiply-nc.c",
     "src/operators/binary-elementwise-nd.c",
-    "src/operators/channel-shuffle-nc.c",
     "src/operators/constant-pad-nd.c",
     "src/operators/convolution-nchw.c",
     "src/operators/convolution-nhwc.c",
@@ -108,7 +107,6 @@ XNNPACK_SRCS = [
     "src/configs/x8-lut-config.c",
     "src/configs/xx-fill-config.c",
     "src/configs/xx-pad-config.c",
-    "src/configs/zip-config.c",
 ]
 
 LOGGING_SRCS = [

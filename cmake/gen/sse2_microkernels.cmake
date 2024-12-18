@@ -86,18 +86,10 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/u8-rmax/u8-rmax-sse2-u16.c
   src/u8-vclamp/u8-vclamp-sse2-u64.c
   src/x8-transposec/gen/x8-transposec-16x16-reuse-mov-sse2.c
-  src/x8-zip/x8-zip-x2-sse2.c
-  src/x8-zip/x8-zip-x3-sse2.c
-  src/x8-zip/x8-zip-x4-sse2.c
-  src/x8-zip/x8-zip-xm-sse2.c
   src/x16-transposec/gen/x16-transposec-8x8-reuse-multi-sse2.c
   src/x32-packw/gen/x32-packw-x2c4-gemm-goi-sse2-u4.c
   src/x32-packw/gen/x32-packw-x8-gemm-goi-sse2-u4.c
   src/x32-unpool/x32-unpool-sse2.c
-  src/x32-zip/x32-zip-x2-sse2.c
-  src/x32-zip/x32-zip-x3-sse2.c
-  src/x32-zip/x32-zip-x4-sse2.c
-  src/x32-zip/x32-zip-xm-sse2.c
   src/x64-transposec/gen/x64-transposec-2x2-multi-mov-sse2.c
   src/xx-fill/xx-fill-sse2-u64.c
   src/xx-pad/xx-pad-p16-sse2-u16.c)

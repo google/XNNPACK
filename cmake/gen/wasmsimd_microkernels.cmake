@@ -216,10 +216,6 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/x32-packw/gen/x32-packw-x8-gemm-goi-wasmsimd-u4.c
   src/x32-transposec/gen/x32-transposec-4x4-reuse-mov-wasmsimd.c
   src/x32-unpool/x32-unpool-wasmsimd.c
-  src/x32-zip/x32-zip-x2-wasmsimd.c
-  src/x32-zip/x32-zip-x3-wasmsimd.c
-  src/x32-zip/x32-zip-x4-wasmsimd.c
-  src/x32-zip/x32-zip-xm-wasmsimd.c
   src/xx-fill/xx-fill-wasmsimd-u64.c
   src/xx-pad/xx-pad-p16-wasmsimd-u16.c)
 

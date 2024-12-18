@@ -609,12 +609,6 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
-    name = "channel_shuffle_bench",
-    srcs = ["channel-shuffle.cc"],
-    deps = OPERATOR_BENCHMARK_DEPS,
-)
-
-xnnpack_benchmark(
     name = "convolution_bench",
     srcs = ["convolution.cc"],
     copts = xnnpack_optional_tflite_copts(),

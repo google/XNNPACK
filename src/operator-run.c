@@ -1958,26 +1958,6 @@ void xnn_compute_elementwise_binary_5d(
   context->ukernel(context->elements, a, b, y, &context->params);
 }
 
-void xnn_compute_channel_shuffle_fixed(
-    const struct channel_shuffle_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t index)
-{
-  const void* x = (const void*) ((uintptr_t) context->x + index * context->x_stride);
-  void* y = (void*) ((uintptr_t) context->y + index * context->y_stride);
-
-  context->fixed_ukernel(context->n, x, y);
-}
-
-void xnn_compute_channel_shuffle_variable(
-    const struct channel_shuffle_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t index)
-{
-  const void* x = (const void*) ((uintptr_t) context->x + index * context->x_stride);
-  void* y = (void*) ((uintptr_t) context->y + index * context->y_stride);
-
-  context->variable_ukernel(context->n, context->m, x, y);
-}
-
 void xnn_compute_lut_strided(
     const struct lut_strided_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index)

@@ -1085,15 +1085,6 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
-    name = "x8_zip_test",
-    srcs = [
-        "x8-zip.cc",
-        "zip-microkernel-tester.h",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
     name = "x32_packb_test",
     srcs = [
         "packb-microkernel-tester.h",
@@ -1147,15 +1138,6 @@ xnnpack_unit_test(
     srcs = [
         "unpool-microkernel-tester.h",
         "x32-unpool.cc",
-    ],
-    deps = MICROKERNEL_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "x32_zip_test",
-    srcs = [
-        "x32-zip.cc",
-        "zip-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -1234,15 +1216,6 @@ xnnpack_unit_test(
         "batch-matrix-multiply-operator-tester.h",
     ],
     shard_count = 2,
-    deps = OPERATOR_TEST_DEPS,
-)
-
-xnnpack_unit_test(
-    name = "channel_shuffle_nc_test",
-    srcs = [
-        "channel-shuffle-nc.cc",
-        "channel-shuffle-operator-tester.h",
-    ],
     deps = OPERATOR_TEST_DEPS,
 )
 

@@ -430,7 +430,6 @@ SET(OPERATOR_SRCS
   src/operators/average-pooling-nhwc.c
   src/operators/batch-matrix-multiply-nc.c
   src/operators/binary-elementwise-nd.c
-  src/operators/channel-shuffle-nc.c
   src/operators/constant-pad-nd.c
   src/operators/convolution-nchw.c
   src/operators/convolution-nhwc.c
@@ -523,7 +522,6 @@ SET(XNNPACK_SRCS
   src/configs/xx-fill-config.c
   src/configs/xx-pad-config.c
   src/configs/x8-lut-config.c
-  src/configs/zip-config.c
   src/init.c
   src/params.c
   "${PROJECT_BINARY_DIR}/build_identifier.c")
@@ -1472,12 +1470,10 @@ IF(XNNPACK_BUILD_TESTS)
       x32-packw
       x32-packx
       x32-unpool
-      x32-zip
       x8-lut
       x8-packw
       qs8-packw
       qs8-qc4w-packw
-      x8-zip
       xN-transpose
       xx-fill
       xx-pad)
@@ -1875,7 +1871,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     # ---[ Build operator-level microbenchmarks
     SET(LIBRARY_OPERATOR_BENCHMARKS
         average-pooling
-        channel-shuffle
         convolution
         deconvolution
         max-pooling
