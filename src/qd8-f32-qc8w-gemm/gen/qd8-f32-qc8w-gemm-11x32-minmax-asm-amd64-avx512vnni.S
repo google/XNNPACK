@@ -31,9 +31,9 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_11x32c4__asm_amd64_avx512vnn
       and rdx, -4
       sub rsp, 1168
       # Write rsi (a pointer) to the stack as we need the register.
-      mov [rsp + 128], rsi
+      mov [rsp - 128], rsi
       # Write r10 (c pointer) to the stack as we need the register.
-      mov [rsp + 136], r10
+      mov [rsp - 136], r10
 
       # Clamp a & c pointers if mr <= 1
       mov rax, rsi
@@ -44,8 +44,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_11x32c4__asm_amd64_avx512vnn
       cmovle rax, rsi
       cmovle r13, r10
 
-      mov [rsp + 144], rax
-      mov [rsp + 152], r13
+      mov [rsp - 144], rax
+      mov [rsp - 152], r13
 
       # Clamp a & c pointers if mr <= 2
       mov rsi, rax
@@ -56,8 +56,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_11x32c4__asm_amd64_avx512vnn
       cmovle rsi, rax
       cmovle r10, r13
 
-      mov [rsp + 160], rsi
-      mov [rsp + 168], r10
+      mov [rsp - 160], rsi
+      mov [rsp - 168], r10
 
       # Clamp a & c pointers if mr <= 3
       mov rax, rsi
@@ -68,8 +68,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_11x32c4__asm_amd64_avx512vnn
       cmovle rax, rsi
       cmovle r13, r10
 
-      mov [rsp + 176], rax
-      mov [rsp + 184], r13
+      mov [rsp - 176], rax
+      mov [rsp - 184], r13
 
       # Clamp a & c pointers if mr <= 4
       mov rsi, rax
@@ -80,8 +80,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_11x32c4__asm_amd64_avx512vnn
       cmovle rsi, rax
       cmovle r10, r13
 
-      mov [rsp + 192], rsi
-      mov [rsp + 200], r10
+      mov [rsp - 192], rsi
+      mov [rsp - 200], r10
 
       # Clamp a & c pointers if mr <= 5
       mov rax, rsi
@@ -92,8 +92,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_11x32c4__asm_amd64_avx512vnn
       cmovle rax, rsi
       cmovle r13, r10
 
-      mov [rsp + 208], rax
-      mov [rsp + 216], r13
+      mov [rsp - 208], rax
+      mov [rsp - 216], r13
 
       # Clamp a & c pointers if mr <= 6
       mov rsi, rax
@@ -104,8 +104,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_11x32c4__asm_amd64_avx512vnn
       cmovle rsi, rax
       cmovle r10, r13
 
-      mov [rsp + 224], rsi
-      mov [rsp + 232], r10
+      mov [rsp - 224], rsi
+      mov [rsp - 232], r10
 
       # Clamp a & c pointers if mr <= 7
       mov rax, rsi
@@ -116,8 +116,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_11x32c4__asm_amd64_avx512vnn
       cmovle rax, rsi
       cmovle r13, r10
 
-      mov [rsp + 240], rax
-      mov [rsp + 248], r13
+      mov [rsp - 240], rax
+      mov [rsp - 248], r13
 
       # Clamp a & c pointers if mr <= 8
       mov rsi, rax
@@ -128,8 +128,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_11x32c4__asm_amd64_avx512vnn
       cmovle rsi, rax
       cmovle r10, r13
 
-      mov [rsp + 256], rsi
-      mov [rsp + 264], r10
+      mov [rsp - 256], rsi
+      mov [rsp - 264], r10
 
       # Clamp a & c pointers if mr <= 9
       mov rax, rsi
@@ -140,8 +140,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_11x32c4__asm_amd64_avx512vnn
       cmovle rax, rsi
       cmovle r13, r10
 
-      mov [rsp + 272], rax
-      mov [rsp + 280], r13
+      mov [rsp - 272], rax
+      mov [rsp - 280], r13
 
       # Clamp a & c pointers if mr <= 10
       mov rsi, rax
@@ -152,8 +152,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_11x32c4__asm_amd64_avx512vnn
       cmovle rsi, rax
       cmovle r10, r13
 
-      mov [rsp + 288], rsi
-      mov [rsp + 296], r10
+      mov [rsp - 288], rsi
+      mov [rsp - 296], r10
 
       # Load quantization params pointer from stack
       mov r11, [rsp + 1256]
@@ -195,17 +195,17 @@ outer_loop:
       # Zero k counter.
       mov r11, 0
       # Read a pointers from stack into GP registers.
-      mov rsi, [rsp + 128]
-      mov rax, [rsp + 144]
-      mov r15, [rsp + 160]
-      mov r14, [rsp + 176]
-      mov r12, [rsp + 192]
-      mov r10, [rsp + 208]
-      mov r13, [rsp + 224]
-      mov rbx, [rsp + 240]
-      mov rbp, [rsp + 256]
-      mov r8, [rsp + 272]
-      mov rdi, [rsp + 288]
+      mov rsi, [rsp - 128]
+      mov rax, [rsp - 144]
+      mov r15, [rsp - 160]
+      mov r14, [rsp - 176]
+      mov r12, [rsp - 192]
+      mov r10, [rsp - 208]
+      mov r13, [rsp - 224]
+      mov rbx, [rsp - 240]
+      mov rbp, [rsp - 256]
+      mov r8, [rsp - 272]
+      mov rdi, [rsp - 288]
 
       # Initialize accumulators with k_sum * input zero point.
       vmovaps  zmm6, [r9 + 0]
@@ -398,17 +398,17 @@ inner_loop:
       vmaxps  zmm9, zmm0, zmm9
 
       # Pop output pointers from the stack.
-      mov rsi, [rsp + 136]
-      mov rax, [rsp + 152]
-      mov r15, [rsp + 168]
-      mov r14, [rsp + 184]
-      mov r12, [rsp + 200]
-      mov r10, [rsp + 216]
-      mov r13, [rsp + 232]
-      mov rbx, [rsp + 248]
-      mov rbp, [rsp + 264]
-      mov r8, [rsp + 280]
-      mov rdi, [rsp + 296]
+      mov rsi, [rsp - 136]
+      mov rax, [rsp - 152]
+      mov r15, [rsp - 168]
+      mov r14, [rsp - 184]
+      mov r12, [rsp - 200]
+      mov r10, [rsp - 216]
+      mov r13, [rsp - 232]
+      mov rbx, [rsp - 248]
+      mov rbp, [rsp - 264]
+      mov r8, [rsp - 280]
+      mov rdi, [rsp - 296]
 
       # Check whether full or partial store.
       cmp rcx, 32
@@ -449,17 +449,17 @@ inner_loop:
       add rdi, 128
 
       # Write output pointers to the stack.
-      mov [rsp + 136], rsi
-      mov [rsp + 152], rax
-      mov [rsp + 168], r15
-      mov [rsp + 184], r14
-      mov [rsp + 200], r12
-      mov [rsp + 216], r10
-      mov [rsp + 232], r13
-      mov [rsp + 248], rbx
-      mov [rsp + 264], rbp
-      mov [rsp + 280], r8
-      mov [rsp + 296], rdi
+      mov [rsp - 136], rsi
+      mov [rsp - 152], rax
+      mov [rsp - 168], r15
+      mov [rsp - 184], r14
+      mov [rsp - 200], r12
+      mov [rsp - 216], r10
+      mov [rsp - 232], r13
+      mov [rsp - 248], rbx
+      mov [rsp - 264], rbp
+      mov [rsp - 280], r8
+      mov [rsp - 296], rdi
 
       sub rcx, 32
       jne outer_loop

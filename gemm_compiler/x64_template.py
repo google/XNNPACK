@@ -196,8 +196,8 @@ class X64(base_architecture.BaseArchitecture):
       cmovle {aM}, {aM_1}
       cmovle {cM}, {cM_1}\n"""
     INPUT_OUTPUT_REGISTER_PUSH = """
-      mov [rsp + {a_rsp_offset}], {aM}
-      mov [rsp + {c_rsp_offset}], {cM}\n"""
+      mov [rsp - {a_rsp_offset}], {aM}
+      mov [rsp - {c_rsp_offset}], {cM}\n"""
     ret = ''
     if self.stack_size(M) != 0:
       ret += """sub rsp, {stack_size}\n""".format(
@@ -208,11 +208,11 @@ class X64(base_architecture.BaseArchitecture):
       ret += (
           '# Write rsi (a pointer) to the stack as we need the register.\n'
       )
-      ret += 'mov [rsp + 128], rsi\n'
+      ret += 'mov [rsp - 128], rsi\n'
       ret += (
           '# Write r10 (c pointer) to the stack as we need the register.\n'
       )
-      ret += 'mov [rsp + 136], r10\n'
+      ret += 'mov [rsp - 136], r10\n'
     for mr in range(1, M):
       # cycle size of 2 if required
       if M > self.max_M_before_spilling():
@@ -262,7 +262,7 @@ class X64(base_architecture.BaseArchitecture):
     if M <= self.max_M_before_spilling():
       return ''
     ret = '# Read a pointers from stack into GP registers.\n'
-    POP_A = 'mov {aM}, [rsp + {a_rsp_offset}]\n'
+    POP_A = 'mov {aM}, [rsp - {a_rsp_offset}]\n'
     for mr in range(0, M):
       a_rsp_offset = 128 + mr * 16
       ret += POP_A.format(aM=registers[mr], a_rsp_offset=a_rsp_offset)
@@ -287,7 +287,7 @@ class X64(base_architecture.BaseArchitecture):
 
   def load_from_stack(self, reg, offset):
     """Load 8 bytes from the given offset from the stack pointer to reg."""
-    return f'mov {reg}, [rsp + {offset}]\n'
+    return f'mov {reg}, [rsp - {offset}]\n'
 
   def epilogue(self, M, N, isa):
     restore_stack = '\nreturn:\n'
