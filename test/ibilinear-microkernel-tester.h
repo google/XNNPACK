@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "next_prime.h"
 #include "xnnpack.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
@@ -423,3 +424,98 @@ class IBilinearMicrokernelTester {
   uint32_t input_offset_{0};
   size_t iterations_{3};
 };
+
+#define XNN_TEST_IBILINEAR_CHW_PIXELS_EQ(ukernel, arch_flags, pixel_tile, channel_tile, ...)                           \
+  TEST(ukernel, pixels_eq)                                                                                             \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    IBilinearMicrokernelTester().pixels(pixel_tile).channels(channel_tile).TestCHW(ukernel);                           \
+  }
+
+#define XNN_TEST_IBILINEAR_CHW_PIXELS_DIV(ukernel, arch_flags, pixel_tile, channel_tile, ...)                          \
+  TEST(ukernel, pixels_div)                                                                                            \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    for (size_t pixel = pixel_tile * 2; pixel < pixel_tile * 10; pixel += pixel_tile) {                                \
+      IBilinearMicrokernelTester().pixels(pixel).channels(channel_tile).TestCHW(ukernel);                              \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_IBILINEAR_CHW_PIXELS_LT(ukernel, arch_flags, pixel_tile, channel_tile, ...)                           \
+  TEST(ukernel, pixels_lt)                                                                                             \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    for (size_t pixel = 1; pixel < pixel_tile; pixel++) {                                                              \
+      IBilinearMicrokernelTester().pixels(pixel).channels(channel_tile).TestCHW(ukernel);                              \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_IBILINEAR_CHW_PIXELS_GT(ukernel, arch_flags, pixel_tile, channel_tile, ...)                           \
+  TEST(ukernel, pixels_gt)                                                                                             \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    for (size_t pixel = pixel_tile + 1; pixel < ((pixel_tile == 1) ? 10 : pixel_tile * 2); pixel++) {                  \
+      IBilinearMicrokernelTester().pixels(pixel).channels(channel_tile).TestCHW(ukernel);                              \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_IBILINEAR_CHW_CHANNELS_DIV(ukernel, arch_flags, pixel_tile, channel_tile, ...)                        \
+  TEST(ukernel, channels_div)                                                                                          \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    for (size_t channel = channel_tile * 2; channel < channel_tile * 10; channel += channel_tile) {                    \
+      for (size_t pixel = 1; pixel <= pixel_tile * 5; pixel += max(1, (pixel_tile - 1))) {                             \
+        IBilinearMicrokernelTester().pixels(pixel).channels(channel).TestCHW(ukernel);                                 \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_IBILINEAR_CHW_CHANNELS_EQ(ukernel, arch_flags, pixel_tile, channel_tile, ...)                         \
+  TEST(ukernel, channels_eq)                                                                                           \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    for (size_t pixel = 1; pixel <= pixel_tile * 5; pixel += max(1, (pixel_tile - 1))) {                               \
+      IBilinearMicrokernelTester().pixels(pixel).channels(channel_tile).TestCHW(ukernel);                              \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_IBILINEAR_CHW_CHANNELS_GT(ukernel, arch_flags, pixel_tile, channel_tile, ...)                         \
+  TEST(ukernel, channels_gt)                                                                                           \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    for (size_t channel = channel_tile + 1; channel < max((channel_tile * 2), 3); channel++) {                         \
+      for (size_t pixel = 1; pixel <= pixel_tile * 5; pixel += max(1, (pixel_tile - 1))) {                             \
+        IBilinearMicrokernelTester().pixels(pixel).channels(channel).TestCHW(ukernel);                                 \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_IBILINEAR_CHW_INPUT_OFFSET(ukernel, arch_flags, pixel_tile, channel_tile, ...)                        \
+  TEST(ukernel, input_offset)                                                                                          \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    for (size_t pixel = 1; pixel < pixel_tile * 5; pixel += max(1, (pixel_tile - 1))) {                                \
+      for (size_t channel = 1; channel <= channel_tile * 5; channel += max(1, (channel_tile - 1))) {                   \
+        IBilinearMicrokernelTester()                                                                                   \
+          .pixels(pixel)                                                                                               \
+          .channels(channel)                                                                                           \
+          .input_offset(xnnpack::NextPrime(channel_tile * 5 + 1))                                                      \
+          .TestCHW(ukernel);                                                                                           \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_IBILINEAR_CHW_INPUT_STRIDE(ukernel, arch_flags, pixel_tile, channel_tile, ...)                        \
+  TEST(ukernel, input_stride)                                                                                          \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    for (size_t pixel = 1; pixel < pixel_tile * 5; pixel += max(1, (pixel_tile - 1))) {                                \
+      for (size_t channel = 1; channel <= channel_tile * 5; channel += max(1, (channel_tile - 1))) {                   \
+        IBilinearMicrokernelTester()                                                                                   \
+          .pixels(pixel)                                                                                               \
+          .channels(channel)                                                                                           \
+          .input_stride(xnnpack::NextPrime(4 * (channel_tile * 5 + 1)))                                                \
+          .TestCHW(ukernel);                                                                                           \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
