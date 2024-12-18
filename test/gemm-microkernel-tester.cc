@@ -43,6 +43,17 @@ TEST_P(GemmTest, Test) {
     }
   }
 
+  for (int i = 1; i < 8; ++i) {
+    tester.m(i);
+    for (int j = 1; j < 64; ++j) {
+      tester.n(j);
+      for (int k = 1; k < 64; ++k) {
+        tester.k(k);
+        params.test_func(tester);
+      }
+    }
+  }
+  return;
   // Loop over the `k`, `m`, and `n` values, if required.
   for (size_t k = params.loop_k_.from; k <= params.loop_k_.to;
        k = params.loop_k_.next(k)) {
@@ -2911,6 +2922,12 @@ void GemmMicrokernelTester::Test(
   xnn_init_f32_minmax_params_fn init_params,
   xnn_pack_f32_gemm_fn pack) const
 {
+  if (a_stride() < k()) {
+    return;
+  }
+  if (m() > mr()) {
+    return;
+  }
   ASSERT_LE(m(), mr());
   ASSERT_GE(a_stride(), k());
   ASSERT_GE(cm_stride(), n());

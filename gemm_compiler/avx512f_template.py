@@ -181,7 +181,7 @@ class Avx512F(isa.Fma3):
     if pop_c:
       asm_string += '\n' + '# Pop output pointers from the stack.\n'
       c_reg_offset = 0
-      POP_C = 'mov {C_REG}, [rsp + {offset}]\n'
+      POP_C = 'mov {C_REG}, [rsp - {offset}]\n'
       for mr in range(0, M):
         sp_offset = 128 + (mr) * 16 + 8
         asm_string += POP_C.format(C_REG=cm_registers[mr], offset=sp_offset)
@@ -208,7 +208,7 @@ class Avx512F(isa.Fma3):
       )
     if pop_c:
       asm_string += '\n' + '# Write output pointers to the stack.\n'
-      POP_C = 'mov [rsp + {offset}], {C_REG}\n'
+      POP_C = 'mov [rsp - {offset}], {C_REG}\n'
       for mr in range(0, M):
         sp_offset = 128 + (mr) * 16 + 8
         asm_string += POP_C.format(C_REG=cm_registers[mr], offset=sp_offset)
