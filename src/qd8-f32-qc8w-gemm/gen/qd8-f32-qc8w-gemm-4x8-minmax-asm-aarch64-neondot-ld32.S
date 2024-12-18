@@ -42,8 +42,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x8c4__asm_aarch64_neondot_l
       csel  x15, x14, x15, LO
 
 outer_loop:
-      # Zero k counter.
-      eor x20, x20, x20
+      # Initialize k counter.
+      mov x20, x2
       # Initialize accumulators with k_sum * input zero point.
       ldp q10, q11, [x24]
       ldp  q2, q3, [x5, 0]
@@ -58,13 +58,11 @@ outer_loop:
       add x5, x5, 32
 
 inner_loop:
-      ldr d2, [x3, x20]
-      ldr d3, [x9, x20]
-      ldr d4, [x10, x20]
-      ldr d5, [x11, x20]
-      ldp  q6, q7, [x5, 0]
-      ldr  q6, [x5, 0]
-      add x5, x5, 32
+      ldr s2, [x3], 4
+      ldr s3, [x9], 4
+      ldr s4, [x10], 4
+      ldr s5, [x11], 4
+      ldp q6, q7, [x5], 32
       sdot  v12.4s, v6.16b, v2.4b[0]
       sdot  v13.4s, v6.16b, v3.4b[0]
       sdot  v14.4s, v6.16b, v4.4b[0]
@@ -73,8 +71,7 @@ inner_loop:
       sdot  v17.4s, v7.16b, v3.4b[0]
       sdot  v18.4s, v7.16b, v4.4b[0]
       sdot  v19.4s, v7.16b, v5.4b[0]
-      add x20, x20, 4
-      cmp x2, x20
+      subs x20, x20, 4
       bne inner_loop
 
       # Convert from int32 to float.
@@ -140,14 +137,14 @@ inner_loop:
       # Check whether full or partial store.
       cmp x1, 8
       b.lo tail_4
-      stp  q12, q16, [x6]
-      stp  q13, q17, [x13]
-      stp  q14, q18, [x14]
-      stp  q15, q19, [x15]
-      add x6, x6, 32
-      add x13, x13, 32
-      add x14, x14, 32
-      add x15, x15, 32
+      stp  q12, q16, [x6], 32
+      stp  q13, q17, [x13], 32
+      stp  q14, q18, [x14], 32
+      stp  q15, q19, [x15], 32
+      sub x3, x3, x2
+      sub x9, x9, x2
+      sub x10, x10, x2
+      sub x11, x11, x2
 
       sub x1, x1, 8
       b.ne outer_loop
@@ -155,30 +152,22 @@ inner_loop:
 
 tail_4:
       tbz x1, 2, tail_2
-      str  q12, [x6]
-      str  q13, [x13]
-      str  q14, [x14]
-      str  q15, [x15]
+      str  q12, [x6], 16
+      str  q13, [x13], 16
+      str  q14, [x14], 16
+      str  q15, [x15], 16
       mov  v12.16b, v16.16b
       mov  v13.16b, v17.16b
       mov  v14.16b, v18.16b
       mov  v15.16b, v19.16b
-      add x6, x6, 16
-      add x13, x13, 16
-      add x14, x14, 16
-      add x15, x15, 16
 
 
 tail_2:
       tbz x1, 1, tail_1
-      str  d12, [x6]
-      str  d13, [x13]
-      str  d14, [x14]
-      str  d15, [x15]
-      add  x6, x6, 8
-      add  x13, x13, 8
-      add  x14, x14, 8
-      add  x15, x15, 8
+      str  d12, [x6], 8
+      str  d13, [x13], 8
+      str  d14, [x14], 8
+      str  d15, [x15], 8
       dup d12, v12.d[1]
       dup d13, v13.d[1]
       dup d14, v14.d[1]

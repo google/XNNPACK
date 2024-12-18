@@ -36,8 +36,8 @@ def generate_gemm_microkernel(
 
   # the outer loop label
   asm_string += '\nouter_loop:\n'
-  asm_string += '# Zero k counter.\n'
-  asm_string += isa.zero_gp_register(k_register)
+  asm_string += '# Initialize k counter.\n'
+  asm_string += isa.initialize_k_register(k_register)
 
   # Read a registers from the stack if required
   asm_string += isa.read_a_registers(M=M)
