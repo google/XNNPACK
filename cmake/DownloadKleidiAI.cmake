@@ -15,6 +15,7 @@ IF(POLICY CMP0135)
   CMAKE_POLICY(SET CMP0135 NEW)
 ENDIF()
 
+# LINT.IfChange
 INCLUDE(ExternalProject)
 ExternalProject_Add(kleidiai
   URL https://gitlab.arm.com/kleidi/kleidiai/-/archive/7e8c4baf953227fa447a2f345e5d6491a504aa56/kleidiai-7e8c4baf953227fa447a2f345e5d6491a504aa56.zip
@@ -27,3 +28,4 @@ ExternalProject_Add(kleidiai
   INSTALL_COMMAND ""
   TEST_COMMAND ""
 )
+# LINT.ThenChange(../MODULE.bazel:kleidiai)

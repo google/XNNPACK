@@ -27,4 +27,4 @@ ExternalProject_Add(googletest
   INSTALL_COMMAND ""
   TEST_COMMAND ""
 )
-# LINT.ThenChange(../WORKSPACE.bazel)
+# LINT.ThenChange(../MODULE.bazel:googletest)

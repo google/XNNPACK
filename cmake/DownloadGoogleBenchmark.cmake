@@ -15,6 +15,7 @@ IF(POLICY CMP0135)
   CMAKE_POLICY(SET CMP0135 NEW)
 ENDIF()
 
+# LINT.IfChange
 INCLUDE(ExternalProject)
 ExternalProject_Add(googlebenchmark
   URL https://github.com/google/benchmark/archive/d2a8a4ee41b923876c034afb939c4fc03598e622.zip
@@ -26,3 +27,4 @@ ExternalProject_Add(googlebenchmark
   INSTALL_COMMAND ""
   TEST_COMMAND ""
 )
+# LINT.ThenChange(../MODULE.bazel:benchmark)

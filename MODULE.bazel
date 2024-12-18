@@ -29,7 +29,7 @@ bazel_dep(name = "platforms", version = "0.0.10")
 
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-# LINT.IfChange
+# LINT.IfChange(googletest)
 # Google Test framework, used by most unit-tests.
 http_archive(
     name = "com_google_googletest",
@@ -39,7 +39,7 @@ http_archive(
 )
 # LINT.ThenChange(cmake/DownloadGoogleTest.cmake)
 
-# LINT.IfChange
+# LINT.IfChange(benchmark)
 # Google Benchmark library, used in micro-benchmarks.
 http_archive(
     name = "com_google_benchmark",
@@ -49,7 +49,7 @@ http_archive(
 )
 # LINT.ThenChange(cmake/DownloadGoogleBenchmark.cmake)
 
-# LINT.IfChange
+# LINT.IfChange(FXdiv)
 # FXdiv library, used for repeated integer division by the same factor
 http_archive(
     name = "FXdiv",
@@ -59,17 +59,17 @@ http_archive(
 )
 # LINT.ThenChange(cmake/DownloadFXdiv.cmake)
 
-# LINT.IfChange
+# LINT.IfChange(pthreadpool)
 # pthreadpool library, used for parallelization
 http_archive(
     name = "pthreadpool",
-    sha256 = "a4cf06de57bfdf8d7b537c61f1c3071bce74e57524fe053e0bbd2332feca7f95",
-    strip_prefix = "pthreadpool-4fe0e1e183925bf8cfa6aae24237e724a96479b8",
-    urls = ["https://github.com/Maratyszcza/pthreadpool/archive/4fe0e1e183925bf8cfa6aae24237e724a96479b8.zip"],
+    sha256 = "9f1baba9e97df8abc792eeaa2a8f0e0d29e507db1b4c1a8210868c889eb449b5",
+    strip_prefix = "pthreadpool-39df650e19d4f6382e246c29d6819b1ce6ee0b24",
+    urls = ["https://github.com/google/pthreadpool/archive/39df650e19d4f6382e246c29d6819b1ce6ee0b24.zip"],
 )
 # LINT.ThenChange(cmake/DownloadPThreadPool.cmake)
 
-# LINT.IfChange
+# LINT.IfChange(cpuinfo)
 # cpuinfo library, used for detecting processor characteristics
 http_archive(
     name = "cpuinfo",
@@ -81,7 +81,7 @@ http_archive(
 )
 # LINT.ThenChange(cmake/DownloadCpuinfo.cmake)
 
-# LINT.IfChange
+# LINT.IfChange(kleidiai)
 # KleidiAI library, used for ARM microkernels.
 http_archive(
     name = "KleidiAI",
