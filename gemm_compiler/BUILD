@@ -1,0 +1,80 @@
+# Copyright 2024 Google LLC
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+load("@rules_python//python:py_binary.bzl", "py_binary")
+load("@rules_python//python:py_library.bzl", "py_library")
+
+py_binary(
+    name = "generate_gemm_microkernels_main",
+    srcs = [
+        "generate_gemm_microkernels_main.py",
+    ],
+    main = "generate_gemm_microkernels_main.py",
+    tags = [
+        "notap",
+    ],
+    deps = [
+        ":generate_gemm_microkernels",
+    ],
+)
+
+py_library(
+    name = "generate_gemm_microkernels",
+    srcs = [
+        "generate.py",
+        "generate_f32_gemm_microkernels.py",
+        "generate_qd8_f32_qc8w_gemm_microkernels.py",
+    ],
+    deps = [
+        ":aarch64_arch_template",
+        ":aarch64_isa_templates",
+        ":x64_arch_template",
+        ":x64_isa_templates",
+    ],
+)
+
+py_library(
+    name = "x64_isa_templates",
+    srcs = [
+        "avx512f_template.py",
+        "avx512vnni_template.py",
+        "fma3_template.py",
+    ],
+)
+
+py_library(
+    name = "x64_arch_template",
+    srcs = [
+        "x64_template.py",
+    ],
+    deps = [
+        ":base_architecture",
+    ],
+)
+
+py_library(
+    name = "aarch64_isa_templates",
+    srcs = [
+        "neondot_template.py",
+        "neonfma_template.py",
+    ],
+)
+
+py_library(
+    name = "aarch64_arch_template",
+    srcs = [
+        "aarch64_template.py",
+    ],
+    deps = [
+        ":base_architecture",
+    ],
+)
+
+py_library(
+    name = "base_architecture",
+    srcs = [
+        "base_architecture.py",
+    ],
+)

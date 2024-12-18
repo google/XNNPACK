@@ -10,6 +10,7 @@
 
 INCLUDE(cmake/gen/aarch32_microkernels.cmake)
 INCLUDE(cmake/gen/aarch64_microkernels.cmake)
+INCLUDE(cmake/gen/amd64_microkernels.cmake)
 INCLUDE(cmake/gen/armsimd32_microkernels.cmake)
 INCLUDE(cmake/gen/avx_microkernels.cmake)
 INCLUDE(cmake/gen/avx2_microkernels.cmake)
