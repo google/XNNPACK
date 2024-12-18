@@ -613,11 +613,10 @@ size_t xnn_tensor_get_size(const struct xnn_value* value)
   // Special handling for packed quantized types.
   if (value->datatype == xnn_datatype_qpint8) {
     assert(value->gemm_config != NULL);
-    const size_t num_groups = xnn_shape_multiply_batch_dims(&value->shape, 2);
-    const size_t m = value->shape.dim[value->shape.num_dims - 2];
+    const size_t batch_dims = xnn_shape_multiply_batch_dims(&value->shape, 1);
     const size_t k = value->shape.dim[value->shape.num_dims - 1];
-    return num_groups *
-           xnn_x8_packq_f32qp8_gemm_packed_size(value->gemm_config, m, k);
+    return xnn_x8_packq_f32qp8_gemm_packed_size(value->gemm_config, batch_dims,
+                                                k);
   }
 
   uint64_t size_bits = xnn_datatype_size_bits(value->datatype);
