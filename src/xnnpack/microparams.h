@@ -451,13 +451,6 @@ struct xnn_f16_qs8_cvt_params {
   } scalar;
 };
 
-struct xnn_f16_qu8_cvt_params {
-  struct {
-    xnn_float16 scale;
-    int16_t output_zero_point;
-  } scalar;
-};
-
 struct xnn_f32_qs8_cvt_params {
   struct {
     float scale;
@@ -589,7 +582,6 @@ struct xnn_unary_reference_params {
 
 union xnn_unary_uparams {
   struct xnn_f32_qs8_cvt_params f32_qs8_cvt;
-  struct xnn_f32_qu8_cvt_params f32_qu8_cvt;
   struct xnn_f16_qs8_cvt_params f16_qs8_cvt;
   struct xnn_qs8_f32_cvt_params qs8_f32_cvt;
   struct xnn_qu8_f32_cvt_params qu8_f32_cvt;

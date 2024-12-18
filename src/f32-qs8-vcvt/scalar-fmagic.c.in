@@ -23,7 +23,7 @@ void xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_vcvt_ukernel__${"wasm" if WAS
     size_t batch,
     const ${INPUT_T}* input,
     ${XINT8_T}* output,
-    const struct xnn_${IDATATYPE.lower()}_${ODATATYPE.lower()}_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_${IDATATYPE.lower()}_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(batch != 0);
   assert(batch % sizeof(${INPUT_T}) == 0);

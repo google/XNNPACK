@@ -33,7 +33,7 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neonv8_u${BATCH_TILE}(
     size_t batch,
     const float* input,
     ${XINT8_T}* output,
-    const struct xnn_f32_${DATATYPE.lower()}_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f32_qs8_cvt_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(float) == 0);
