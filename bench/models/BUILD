@@ -32,7 +32,6 @@ xnnpack_cxx_library(
 xnnpack_benchmark(
     name = "benchmark",
     srcs = ["benchmark.cc"],
-    features = ["-layering_check"],
     tags = xnnpack_slow_benchmark_tags(),
     deps = [
         ":models",
