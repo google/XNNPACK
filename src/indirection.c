@@ -928,31 +928,29 @@ void xnn_indirection_init_resize_bilinear2d_chw_f32(
 }
 
 void xnn_indirection_init_unpool2d(
-  xnn_operator_t op,
-  size_t batch_start,
-  uint32_t log2_element_size)
+  const void** indirection_buffer,
+  const void* output,
+  const size_t output_pixel_stride,
+  const size_t batch_size,
+  const size_t input_height,
+  const size_t input_width,
+  const size_t output_height,
+  const size_t output_width,
+  const size_t kernel_height,
+  const size_t kernel_width,
+  const size_t output_padding_top,
+  const size_t output_padding_left,
+  size_t batch_start)
 {
-  const void** indirection_buffer  = op->indirection_buffer;
-  const void* output               = op->output;
-  const size_t output_pixel_stride = op->output_pixel_stride << log2_element_size;
-  const size_t batch_size          = op->batch_size;
-  const size_t input_height        = op->input_height;
-  const size_t input_width         = op->input_width;
-  const size_t output_height       = op->output_height;
-  const size_t output_width        = op->output_width;
-  const size_t pooling_height      = op->kernel_height;
-  const size_t pooling_width       = op->kernel_width;
-  const size_t output_padding_top  = op->padding_top;
-  const size_t output_padding_left = op->padding_left;
-
   for (size_t image = batch_start; image < batch_size; image++) {
     for (size_t input_y = 0; input_y < input_height; input_y++) {
-      for (size_t pooling_y = 0; pooling_y < pooling_height; pooling_y++) {
-        const size_t output_y = min(doz(input_y * pooling_height + pooling_y, output_padding_top), output_height - 1);
+      for (size_t pooling_y = 0; pooling_y < kernel_height; pooling_y++) {
+        const size_t output_y = min(doz(input_y * kernel_height + pooling_y, output_padding_top), output_height - 1);
         for (size_t input_x = 0; input_x < input_width; input_x++) {
-          for (size_t pooling_x = 0; pooling_x < pooling_width; pooling_x++) {
-            const size_t output_x = min(doz(input_x * pooling_width + pooling_x, output_padding_left), output_width - 1);
-            indirection_buffer[(((image * input_height + input_y) * input_width + input_x) * pooling_width + pooling_x) * pooling_height + pooling_y] =
+          for (size_t pooling_x = 0; pooling_x < kernel_width; pooling_x++) {
+            const size_t output_x = min(doz(input_x * kernel_width + pooling_x, output_padding_left), output_width - 1);
+            const size_t index = (((image * input_height + input_y) * input_width + input_x) * kernel_width + pooling_x) * kernel_height + pooling_y;
+            indirection_buffer[index] =
               (const void*) ((uintptr_t) output + ((image * output_height + output_y) * output_width + output_x) * output_pixel_stride);
           }
         }
