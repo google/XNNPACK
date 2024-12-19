@@ -291,6 +291,9 @@ enum xnn_datatype {
   xnn_datatype_pfp32 = 13,
   /// BFloat16, i.e. the upper 16 bits of a float32.
   xnn_datatype_bf16 = 14,
+  /// Dynamically quantized 8-bit unsigned integer with per-batch quantization
+  /// parameters.
+  xnn_datatype_qduint8 = 15,
 };
 
 /// Define a tensor-type Value and add it to a Subgraph.
@@ -2676,42 +2679,6 @@ enum xnn_status xnn_setup_batch_matrix_multiply_nc_qd8_f32_qc8w(
     xnn_operator_t batch_matrix_multiply_op, const int8_t* input_a,
     const struct xnn_quantization_params* quantization_params,
     float* output);
-
-enum xnn_status xnn_create_channel_shuffle_nc_x8(
-  size_t groups,
-  size_t group_channels,
-  size_t input_stride,
-  size_t output_stride,
-  uint32_t flags,
-  xnn_operator_t* channel_shuffle_op_out);
-
-enum xnn_status xnn_reshape_channel_shuffle_nc_x8(
-  xnn_operator_t channel_shuffle_op,
-  size_t batch_size,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_channel_shuffle_nc_x8(
-  xnn_operator_t channel_shuffle_op,
-  const void* input,
-  void* output);
-
-enum xnn_status xnn_create_channel_shuffle_nc_x32(
-  size_t groups,
-  size_t group_channels,
-  size_t input_stride,
-  size_t output_stride,
-  uint32_t flags,
-  xnn_operator_t* channel_shuffle_op_out);
-
-enum xnn_status xnn_reshape_channel_shuffle_nc_x32(
-  xnn_operator_t channel_shuffle_op,
-  size_t batch_size,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_channel_shuffle_nc_x32(
-  xnn_operator_t channel_shuffle_op,
-  const void* input,
-  void* output);
 
 enum xnn_status xnn_create_constant_pad_nd_x8(
   const void* padding_value,

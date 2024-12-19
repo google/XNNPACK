@@ -23,6 +23,7 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
 #include "replicable_random_device.h"
+#include "runtime-flags.h"
 
 template <typename T> class EvenSplit2Test : public ::testing::Test {
  protected:
@@ -354,7 +355,7 @@ TEST_F(EvenSplit2TestQS8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_define_even_split2(subgraph, axis, input_id, output1_id, output2_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 3> external = {
@@ -429,7 +430,7 @@ TEST_F(EvenSplit2TestQU8, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_define_even_split2(subgraph, axis, input_id, output1_id, output2_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 3> external = {
@@ -501,7 +502,7 @@ TEST_F(EvenSplit2TestF16, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_define_even_split2(subgraph, axis, input_id, output1_id, output2_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 3> external = {
@@ -573,7 +574,7 @@ TEST_F(EvenSplit2TestF32, matches_operator_api)
   ASSERT_EQ(xnn_status_success, xnn_define_even_split2(subgraph, axis, input_id, output1_id, output2_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 3> external = {
@@ -623,7 +624,7 @@ TEST_F(EvenSplit2TestF32, reshape_output)
     xnn_define_even_split2(subgraph, axis, input_id, output1_id, output2_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 3> external = {

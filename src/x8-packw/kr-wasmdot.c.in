@@ -14,6 +14,16 @@ $assert IZP in [0, 128]
 
 #include "xnnpack/packw.h"
 
+XNN_INLINE static v128_t safe_v128_load64_splat(const void* address, size_t n) {
+  assert(n >= 1 && n <= sizeof(uint64_t));
+  const uint8_t* bytes = (const uint8_t*) address;
+  uint64_t value = (uint64_t) bytes[0];
+  for (size_t i = 1; i < n; ++i) {
+    value |= (uint64_t) bytes[i] << (i * 8);
+  }
+
+  return wasm_u64x2_splat(value);
+}
 
 $ABC = "012345678"
 $BTYPE = {"int8_t": "uint32_t"}[TYPE]
@@ -30,7 +40,7 @@ void xnn_qs8${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${K
   const void* scale,
   ${WTYPE}* packed_weights,
   size_t extra_bytes,
-  const void* params) XNN_OOB_READS
+  const void* params)
 {
   assert(g != 0);
   assert(nc != 0);
@@ -115,17 +125,18 @@ void xnn_qs8${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${K
         out += ${NR*KR};
       }
 
+      // Load ealier to avoid unexpected rescheduling.
+      v128_t vpack0123 = wasm_v128_load(packed_b);
+      v128_t vpack4567 = wasm_v128_load(packed_b + 4);
+
       // KC remainder 1..KR-1
       if (k != 0) {
         assert(k >= 1 && k <= ${KR-1});
 
-        const v128_t vmask = wasm_u64x2_shr(wasm_i32x4_splat(-1), (${KR} - k) * sizeof(${WTYPE}) * 8);
-
         $for N in range(0, NR, 2):
-          const v128_t v${N} = wasm_v128_load64_splat(w${N});
-          const v128_t v${N+1} = wasm_v128_load64_splat(w${N+1});
-          v128_t v${ABC[N:N+2]} = wasm_i64x2_shuffle(v${N}, v${N+1}, 0, 3);
-          v${ABC[N:N+2]} = wasm_v128_and(v${ABC[N:N+2]}, vmask);
+          const v128_t v${N} = safe_v128_load64_splat(w${N}, k);
+          const v128_t v${N+1} = safe_v128_load64_splat(w${N+1}, k);
+          const v128_t v${ABC[N:N+2]} = wasm_i64x2_shuffle(v${N}, v${N+1}, 0, 3);
 
         $for N in range(0, NR, 2):
           vacc${ABC[N:N+2]} = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(v${ABC[N:N+2]}, vone, vacc${ABC[N:N+2]});
@@ -143,9 +154,6 @@ void xnn_qs8${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${K
 
       vksum0123 = wasm_i32x4_mul(vksum0123, vzeropoint);
       vksum4567 = wasm_i32x4_mul(vksum4567, vzeropoint);
-
-      v128_t vpack0123 = wasm_v128_load(packed_b);
-      v128_t vpack4567 = wasm_v128_load(packed_b + 4);
 
       wasm_v128_store(packed_b, wasm_i32x4_sub(vpack0123, vksum0123));
       wasm_v128_store(packed_b + 4, wasm_i32x4_sub(vpack4567, vksum4567));
@@ -207,17 +215,18 @@ void xnn_qs8${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${K
         out += ${NR*KR};
       }
 
+      // Load ealier to avoid unexpected rescheduling.
+      v128_t vpack0123 = wasm_v128_load(packed_b);
+      v128_t vpack4567 = wasm_v128_load(packed_b + 4);
+
       // KC remainder of 1..${KR-1}
       if (k != 0) {
         assert(k >= 1 && k <= ${KR-1});
 
-        const v128_t vmask = wasm_u64x2_shr(wasm_i32x4_splat(-1), (${KR} - k) * sizeof(${WTYPE}) * 8);
-
         $for N in range(0, NR, 2):
-          const v128_t v${N} = wasm_v128_load64_splat(w${N});
-          const v128_t v${N+1} = wasm_v128_load64_splat(w${N+1});
-          v128_t v${ABC[N:N+2]} = wasm_i64x2_shuffle(v${N}, v${N+1}, 0, 3);
-          v${ABC[N:N+2]} = wasm_v128_and(v${ABC[N:N+2]}, vmask);
+          const v128_t v${N} = safe_v128_load64_splat(w${N}, k);
+          const v128_t v${N+1} = safe_v128_load64_splat(w${N+1}, k);
+          const v128_t v${ABC[N:N+2]} = wasm_i64x2_shuffle(v${N}, v${N+1}, 0, 3);
 
         $for N in range(0, NR, 2):
           vacc${ABC[N:N+2]} = wasm_i32x4_relaxed_dot_i8x16_i7x16_add(v${ABC[N:N+2]}, vone, vacc${ABC[N:N+2]});
@@ -233,9 +242,6 @@ void xnn_qs8${"_to_qu8" if IZP == 128 else ""}_packw_gemm_goi_ukernel_x${NR}c${K
 
       vksum0123 = wasm_i32x4_mul(vksum0123, vzeropoint);
       vksum4567 = wasm_i32x4_mul(vksum4567, vzeropoint);
-
-      v128_t vpack0123 = wasm_v128_load(packed_b);
-      v128_t vpack4567 = wasm_v128_load(packed_b + 4);
 
       wasm_v128_store(packed_b, wasm_i32x4_sub(vpack0123, vksum0123));
       wasm_v128_store(packed_b + 4, wasm_i32x4_sub(vpack4567, vksum4567));

@@ -51,12 +51,10 @@ TEST(GEMM_BEST_NC, min_tiles_per_thread) {
             << ", num_threads=" << num_threads;
       }
 
-      // Verify that the next-largest `nc` would indeed be too large.
-      if (nc < nr) {
-        const size_t num_tiles_n = divide_round_up(n, nc + nr);
-        const size_t num_tiles = num_groups * num_tiles_m * num_tiles_n;
-        EXPECT_GT(min_num_tiles, num_tiles)
-            << "Computed `nc` is too conservative, num_groups=" << num_groups
+      // Verify that the next-smallest `nc` would increase the number of tiles.
+      if (nr < nc && nc < n) {
+        EXPECT_NE(divide_round_up(n, nc), divide_round_up(n, nc - nr))
+            << "Failed to get minimal `nc` for num_groups=" << num_groups
             << ", m=" << m << ", n=" << n << ", " << "mr=" << mr << " , "
             << "nr=" << nr << " , " << "nc=" << nc
             << ", num_threads=" << num_threads;

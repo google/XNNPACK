@@ -35,6 +35,10 @@
 #include "tensorflow/lite/version.h"
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
+namespace {
+static const size_t kMinIterations = 10;
+}  // namespace
+
 // Pthreadpool-compatible function to wipe the cache in each thread.
 void PthreadpoolClearL2Cache(void* context, size_t id) {
 #if XNN_ENABLE_CPUINFO
@@ -122,16 +126,18 @@ void xnnpack_batch_matrix_multiply_f32(benchmark::State& state,
     return;
   }
 
-  for (auto _ : state) {
-    state.PauseTiming();
-    pthreadpool_parallelize_1d(threadpool, PthreadpoolClearL2Cache, nullptr,
-                               num_threads, 0);
-    state.ResumeTiming();
+  while (state.KeepRunningBatch(kMinIterations)) {
+    for (int iter = 0; iter < kMinIterations; iter++) {
+      state.PauseTiming();
+      pthreadpool_parallelize_1d(threadpool, PthreadpoolClearL2Cache, nullptr,
+                                 num_threads, 0);
+      state.ResumeTiming();
 
-    status = xnn_run_operator(op, threadpool);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to run FP32 BatchMatrixMultiply operator");
-      return;
+      status = xnn_run_operator(op, threadpool);
+      if (status != xnn_status_success) {
+        state.SkipWithError("failed to run FP32 BatchMatrixMultiply operator");
+        return;
+      }
     }
   }
 
@@ -231,17 +237,19 @@ void xnnpack_batch_matrix_multiply_qd8_f32_qc8w(benchmark::State& state,
     return;
   }
 
-  for (auto _ : state) {
-    state.PauseTiming();
-    pthreadpool_parallelize_1d(threadpool, PthreadpoolClearL2Cache, nullptr,
-                               num_threads, 0);
-    state.ResumeTiming();
+  while (state.KeepRunningBatch(kMinIterations)) {
+    for (int iter = 0; iter < kMinIterations; iter++) {
+      state.PauseTiming();
+      pthreadpool_parallelize_1d(threadpool, PthreadpoolClearL2Cache, nullptr,
+                                 num_threads, 0);
+      state.ResumeTiming();
 
-    status = xnn_run_operator(op, threadpool);
-    if (status != xnn_status_success) {
-      state.SkipWithError(
-          "failed to run QD8_F32_QC8W BatchMatrixMultiply operator");
-      return;
+      status = xnn_run_operator(op, threadpool);
+      if (status != xnn_status_success) {
+        state.SkipWithError(
+            "failed to run QD8_F32_QC8W BatchMatrixMultiply operator");
+        return;
+      }
     }
   }
 
@@ -378,10 +386,12 @@ void tflite_batch_matrix_multiply_f32(benchmark::State& state,
                 interpreter->typed_tensor<float>(1) + batch_size * k * n,
                 std::ref(f32rng));
 
-  for (auto _ : state) {
-    if (interpreter->Invoke() != kTfLiteOk) {
-      state.SkipWithError("failed to invoke TFLite interpreter");
-      return;
+  while (state.KeepRunningBatch(kMinIterations)) {
+    for (int iter = 0; iter < kMinIterations; iter++) {
+      if (interpreter->Invoke() != kTfLiteOk) {
+        state.SkipWithError("failed to invoke TFLite interpreter");
+        return;
+      }
     }
   }
 

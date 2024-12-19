@@ -66,9 +66,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_6x8c8__avxvnni(
     c5 = c4;
   }
 
-  const __m256i vsign_mask = _mm256_set1_epi8(0x80);
-  XNN_FORCE_REALIZATION(vsign_mask);
-  const __m256i vinput_zero_point = _mm256_set1_epi32((int) quantization_params->zero_point + 128);
+  const __m256i vinput_zero_point = _mm256_set1_epi32((int) quantization_params->zero_point);
   const __m256 vinput_inv_scale = _mm256_set1_ps(quantization_params->inv_scale);
   const __m256 voutput_min = _mm256_set1_ps(params->scalar.min);
   const __m256 voutput_max = _mm256_set1_ps(params->scalar.max);
@@ -135,23 +133,23 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_6x8c8__avxvnni(
 
       size_t k = kc;
       while (k >= 16 * sizeof(int8_t)) {
-        const __m256i va0x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a0)), vsign_mask);
-        const __m256i va0x89ABCDEF = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a0 + 8)), vsign_mask);
+        const __m256i va0x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a0));
+        const __m256i va0x89ABCDEF = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a0 + 8));
         a0 += 16;
-        const __m256i va1x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a1)), vsign_mask);
-        const __m256i va1x89ABCDEF = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a1 + 8)), vsign_mask);
+        const __m256i va1x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a1));
+        const __m256i va1x89ABCDEF = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a1 + 8));
         a1 += 16;
-        const __m256i va2x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a2)), vsign_mask);
-        const __m256i va2x89ABCDEF = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a2 + 8)), vsign_mask);
+        const __m256i va2x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a2));
+        const __m256i va2x89ABCDEF = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a2 + 8));
         a2 += 16;
-        const __m256i va3x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a3)), vsign_mask);
-        const __m256i va3x89ABCDEF = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a3 + 8)), vsign_mask);
+        const __m256i va3x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a3));
+        const __m256i va3x89ABCDEF = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a3 + 8));
         a3 += 16;
-        const __m256i va4x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a4)), vsign_mask);
-        const __m256i va4x89ABCDEF = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a4 + 8)), vsign_mask);
+        const __m256i va4x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a4));
+        const __m256i va4x89ABCDEF = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a4 + 8));
         a4 += 16;
-        const __m256i va5x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a5)), vsign_mask);
-        const __m256i va5x89ABCDEF = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a5 + 8)), vsign_mask);
+        const __m256i va5x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a5));
+        const __m256i va5x89ABCDEF = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a5 + 8));
         a5 += 16;
 
         const __m256i vb01234567x0123 = _mm256_load_si256(w);
@@ -189,17 +187,17 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_6x8c8__avxvnni(
       }
 
       if (k != 0) {
-        const __m256i va0x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a0)), vsign_mask);
+        const __m256i va0x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a0));
         a0 += 8;
-        const __m256i va1x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a1)), vsign_mask);
+        const __m256i va1x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a1));
         a1 += 8;
-        const __m256i va2x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a2)), vsign_mask);
+        const __m256i va2x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a2));
         a2 += 8;
-        const __m256i va3x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a3)), vsign_mask);
+        const __m256i va3x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a3));
         a3 += 8;
-        const __m256i va4x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a4)), vsign_mask);
+        const __m256i va4x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a4));
         a4 += 8;
-        const __m256i va5x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a5)), vsign_mask);
+        const __m256i va5x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a5));
         a5 += 8;
 
         const __m256i vb01234567x0123 = _mm256_load_si256(w);

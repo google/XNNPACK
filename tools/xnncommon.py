@@ -29,6 +29,7 @@ _ARCH_TO_MACRO_MAP = {
   "aarch64": "XNN_ARCH_ARM64",
   "x86-32": "XNN_ARCH_X86",
   "x86-64": "XNN_ARCH_X86_64",
+  "amd64": "XNN_ARCH_X86_64",
   "hexagon": "XNN_ARCH_HEXAGON",
   "riscv": "XNN_ARCH_RISCV",
   "wasm": "XNN_ARCH_WASM",

@@ -251,7 +251,14 @@ XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f32_qb4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f32_qc4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f32_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qp8_f32_qc4w_gemm_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qp8_f32_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qp8_f32_qb4w_gemm_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f32_qc4w_gemm_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f16_qc8w_gemm_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f32_qc8w_gemm_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f32_qb4w_gemm_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qdu8_f16_qc4w_gemm_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f16_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qs8_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qu8_gemm_config();
 
@@ -259,9 +266,6 @@ XNN_INTERNAL const struct xnn_maxpool_config* xnn_init_f16_maxpool_config();
 XNN_INTERNAL const struct xnn_maxpool_config* xnn_init_f32_maxpool_config();
 XNN_INTERNAL const struct xnn_maxpool_config* xnn_init_s8_maxpool_config();
 XNN_INTERNAL const struct xnn_maxpool_config* xnn_init_u8_maxpool_config();
-
-XNN_INTERNAL const struct xnn_zip_config* xnn_init_x8_zip_config();
-XNN_INTERNAL const struct xnn_zip_config* xnn_init_x32_zip_config();
 
 XNN_INTERNAL const struct xnn_rmax_config* xnn_init_f16_rmax_config();
 XNN_INTERNAL const struct xnn_rmax_config* xnn_init_f32_rmax_config();

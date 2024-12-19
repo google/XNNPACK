@@ -18,8 +18,8 @@ ENDIF()
 # LINT.IfChange
 INCLUDE(ExternalProject)
 ExternalProject_Add(googletest
-  URL https://github.com/google/googletest/archive/d144031940543e15423a25ae5a8a74141044862f.zip
-  URL_HASH SHA256=648b9430fca63acc68c59ee98f624dcbcd9c24ea6b278c306ab6b7f49f62034a
+  URL https://github.com/google/googletest/archive/35d0c365609296fa4730d62057c487e3cfa030ff.zip
+  URL_HASH SHA256=307ccaebc77e0acd19d1d09fe856278a66d1936269a999d40accdb46ec3ab6a4
   SOURCE_DIR "${CMAKE_BINARY_DIR}/googletest-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/googletest"
   CONFIGURE_COMMAND ""
@@ -27,4 +27,4 @@ ExternalProject_Add(googletest
   INSTALL_COMMAND ""
   TEST_COMMAND ""
 )
-# LINT.ThenChange(../WORKSPACE.bazel)
+# LINT.ThenChange(../MODULE.bazel:googletest)

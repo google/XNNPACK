@@ -19,6 +19,7 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
 #include "subgraph-unary-tester.h"
+#include "runtime-flags.h"
 
 using SpaceToDepth2DTestQS8 = UnaryTest<int8_t, int8_t, /*min_dim=*/4, /*max_dim=*/4>;
 using SpaceToDepth2DTestQU8 = UnaryTest<uint8_t, uint8_t, /*min_dim=*/4, /*max_dim=*/4>;
@@ -268,7 +269,7 @@ TEST_F(SpaceToDepth2DTestQS8, matches_operator_api)
     xnn_define_space_to_depth_2d(subgraph, block_size, input_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
 
@@ -345,7 +346,7 @@ TEST_F(SpaceToDepth2DTestQU8, matches_operator_api)
     xnn_define_space_to_depth_2d(subgraph, block_size, input_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
 
@@ -416,7 +417,7 @@ TEST_F(SpaceToDepth2DTestF16, matches_operator_api)
     xnn_define_space_to_depth_2d(subgraph, block_size, input_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
 
@@ -487,7 +488,7 @@ TEST_F(SpaceToDepth2DTestF32, matches_operator_api)
     xnn_define_space_to_depth_2d(subgraph, block_size, input_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
 
@@ -531,7 +532,7 @@ TEST_F(SpaceToDepth2DTestF32, reshape_output)
     xnn_define_space_to_depth_2d(subgraph, block_size, input_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
 

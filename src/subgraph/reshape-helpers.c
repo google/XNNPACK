@@ -31,7 +31,7 @@ enum xnn_status resize_unary_elementwise_output_tensor(
   const size_t new_size = xnn_tensor_get_size(output);
   if (new_size > output->size || opdata->workspace_size > old_workspace_size) {
     output->size = new_size;
-    if (output->datatype == xnn_datatype_qdint8) {
+    if (output->datatype == xnn_datatype_qdint8 || output->datatype == xnn_datatype_qduint8) {
       // reallocation will use this to adjust memory needed for dynamic quant params
       output->quantization.dynamic_params_size = xnn_tensor_get_dynamic_quant_param_size(output);
     }

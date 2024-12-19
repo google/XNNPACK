@@ -44,7 +44,12 @@ SET(CMAKE_CXX_EXTENSIONS NO)
 # ---[ Options.
 SET(XNNPACK_LIBRARY_TYPE "default" CACHE STRING "Type of library (shared, static, or default) to build")
 SET_PROPERTY(CACHE XNNPACK_LIBRARY_TYPE PROPERTY STRINGS default static shared)
-OPTION(XNNPACK_ENABLE_ASSEMBLY "Build XNNPACK with assembly micro-kernels" ON)
+IF(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+  # Disable assembly when using MSVC until support is added.
+  OPTION(XNNPACK_ENABLE_ASSEMBLY "Build XNNPACK with assembly micro-kernels" OFF)
+ELSE()
+  OPTION(XNNPACK_ENABLE_ASSEMBLY "Build XNNPACK with assembly micro-kernels" ON)
+ENDIF()
 OPTION(XNNPACK_ENABLE_MEMOPT "Build XNNPACK with optimized memory allocation scheme" ON)
 OPTION(XNNPACK_ENABLE_SPARSE "Build XNNPACK with graph rewriting for sparse inference" ON)
 OPTION(XNNPACK_ENABLE_GEMM_M_SPECIALIZATION "Build XNNPACK with support for selecting microkernel with different MR" ON)
@@ -430,7 +435,6 @@ SET(OPERATOR_SRCS
   src/operators/average-pooling-nhwc.c
   src/operators/batch-matrix-multiply-nc.c
   src/operators/binary-elementwise-nd.c
-  src/operators/channel-shuffle-nc.c
   src/operators/constant-pad-nd.c
   src/operators/convolution-nchw.c
   src/operators/convolution-nhwc.c
@@ -523,7 +527,6 @@ SET(XNNPACK_SRCS
   src/configs/xx-fill-config.c
   src/configs/xx-pad-config.c
   src/configs/x8-lut-config.c
-  src/configs/zip-config.c
   src/init.c
   src/params.c
   "${PROJECT_BINARY_DIR}/build_identifier.c")
@@ -660,6 +663,9 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^x86(_64)?$")
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_F16C_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_FMA3_MICROKERNEL_SRCS})
   LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_AVX2_MICROKERNEL_SRCS})
+  IF(XNNPACK_ENABLE_ASSEMBLY AND XNNPACK_TARGET_PROCESSOR MATCHES "x86_64")
+    LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_AMD64_ASM_MICROKERNEL_SRCS})
+  ENDIF()
   IF(XNNPACK_ENABLE_AVX512AMX)
     LIST(APPEND PROD_MICROKERNEL_SRCS ${PROD_AVX512AMX_MICROKERNEL_SRCS})
   ENDIF()
@@ -707,6 +713,9 @@ IF(XNNPACK_TARGET_PROCESSOR MATCHES "^x86(_64)?$")
   LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_F16C_MICROKERNEL_SRCS})
   LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_FMA3_MICROKERNEL_SRCS})
   LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_AVX2_MICROKERNEL_SRCS})
+  IF(XNNPACK_ENABLE_ASSEMBLY AND XNNPACK_TARGET_PROCESSOR MATCHES "x86_64")
+    LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_AMD64_ASM_MICROKERNEL_SRCS})
+  ENDIF()
   IF(XNNPACK_ENABLE_AVX512AMX)
     LIST(APPEND NON_PROD_MICROKERNEL_SRCS ${NON_PROD_AVX512AMX_MICROKERNEL_SRCS})
   ENDIF()
@@ -1219,6 +1228,8 @@ IF(XNNPACK_BUILD_TESTS)
 
   # Helper libraries
   ADD_LIBRARY(next-prime STATIC test/next_prime.cc)
+  ADD_LIBRARY(runtime-flags STATIC test/runtime-flags.cc)
+  TARGET_LINK_LIBRARIES(runtime-flags PRIVATE GTest::gtest)
 
   ADD_LIBRARY(gemm-microkernel-tester STATIC test/gemm-microkernel-tester.cc)
   TARGET_INCLUDE_DIRECTORIES(gemm-microkernel-tester PRIVATE include src test)
@@ -1279,6 +1290,7 @@ IF(XNNPACK_BUILD_TESTS)
       microparams-init
       next-prime
       pthreadpool
+      runtime-flags
       XNNPACK)
     ADD_SHARDED_TEST(${TEST}-test 10)
   ENDFOREACH()
@@ -1300,6 +1312,7 @@ IF(XNNPACK_BUILD_TESTS)
         GTest::gmock
         GTest::gtest
         GTest::gtest_main
+        runtime-flags
         XNNPACK)
       ADD_SHARDED_TEST(${TEST}-test 10)
     ENDFOREACH()
@@ -1315,6 +1328,7 @@ IF(XNNPACK_BUILD_TESTS)
       GTest::gtest
       GTest::gtest_main
       datatype
+      runtime-flags
       unary-ops
       XNNPACK)
     ADD_TEST(NAME unary-elementwise-nc-test COMMAND unary-elementwise-nc-test)
@@ -1335,6 +1349,7 @@ IF(XNNPACK_BUILD_TESTS)
         GTest::gmock
         GTest::gtest
         GTest::gtest_main
+        runtime-flags
         XNNPACK)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     ENDFOREACH()
@@ -1381,6 +1396,7 @@ IF(XNNPACK_BUILD_TESTS)
         datatype
         subgraph
         logging
+        runtime-flags
         unary-ops
         XNNPACK)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
@@ -1399,6 +1415,7 @@ IF(XNNPACK_BUILD_TESTS)
         GTest::gmock
         GTest::gtest
         GTest::gtest_main
+        runtime-flags
         subgraph
         XNNPACK)
       ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
@@ -1464,12 +1481,10 @@ IF(XNNPACK_BUILD_TESTS)
       x32-packw
       x32-packx
       x32-unpool
-      x32-zip
       x8-lut
       x8-packw
       qs8-packw
       qs8-qc4w-packw
-      x8-zip
       xN-transpose
       xx-fill
       xx-pad)
@@ -1557,6 +1572,7 @@ IF(XNNPACK_BUILD_TESTS)
       qd8-f32-qc4w-gemm-minmax
       qd8-f32-qc8w-igemm-minmax
       qp8-f32-qc4w-gemm-minmax
+      qp8-f32-qc8w-gemm-minmax
       qp8-f32-qb4w-gemm-minmax
       qs8-qc8w-gemm-minmax-fp32
       qs8-qc8w-igemm-minmax-fp32
@@ -1681,7 +1697,6 @@ IF(XNNPACK_BUILD_TESTS)
       f32-f16-vcvt
       f32-qs8-vcvt
       f32-qu8-vcvt
-      s32-f32-vcvt
       qs8-f16-vcvt
       qs8-f32-vcvt
       qs8-vcvt
@@ -1857,7 +1872,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     TARGET_LINK_LIBRARIES(models PRIVATE XNNPACK)
 
     ADD_EXECUTABLE(bench-models bench/models/benchmark.cc)
-    TARGET_INCLUDE_DIRECTORIES(bench-models PRIVATE bench)
+    TARGET_INCLUDE_DIRECTORIES(bench-models PRIVATE bench ${GOOGLEBENCHMARK_SOURCE_DIR})
     TARGET_LINK_LIBRARIES(bench-models PRIVATE
       bench-utils
       benchmark::benchmark
@@ -1867,7 +1882,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     # ---[ Build operator-level microbenchmarks
     SET(LIBRARY_OPERATOR_BENCHMARKS
         average-pooling
-        channel-shuffle
         convolution
         deconvolution
         max-pooling
@@ -1936,6 +1950,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       qd8-f32-qc4w-gemm
       qd8-f32-qc8w-gemm
       qp8-f32-qc4w-gemm
+      qp8-f32-qc8w-gemm
       qp8-f32-qb4w-gemm
       qs8-dwconv
       qs8-gemm

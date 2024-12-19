@@ -1,3 +1,7 @@
+# Common settings
+common --enable_bzlmod
+build --enable_bzlmod
+
 # Basic build settings
 build --jobs 128
 build --cxxopt='-std=gnu++14'

@@ -10,6 +10,7 @@
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
+#include "xnnpack/internal.h"
 #include "xnnpack/log.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator-type.h"
@@ -44,8 +45,9 @@ static enum xnn_status create_fully_connected_operator(
   assert(kernel_data != NULL);
 
   const void* bias_data = NULL;
+  uint32_t bias_id = XNN_INVALID_VALUE_ID;
   if (node->num_inputs > 2) {
-    const uint32_t bias_id = node->inputs[2];
+    bias_id = node->inputs[2];
     assert(bias_id != XNN_INVALID_VALUE_ID);
     assert(bias_id < num_values);
 
@@ -55,6 +57,10 @@ static enum xnn_status create_fully_connected_operator(
 
   enum xnn_status status;
   enum xnn_datatype input_datatype = values[input_id].datatype;
+  const enum xnn_datatype filter_datatype = values[filter_id].datatype;
+  const enum xnn_datatype bias_datatype = bias_id != XNN_INVALID_VALUE_ID
+                                              ? values[filter_id].datatype
+                                              : xnn_datatype_invalid;
   switch (input_datatype) {
     case xnn_datatype_fp16:
     {
@@ -85,34 +91,57 @@ static enum xnn_status create_fully_connected_operator(
       break;
     }
     case xnn_datatype_fp32:
-    {
-      assert(values[filter_id].datatype == xnn_datatype_fp32);
-      status = xnn_create_convolution2d_nchw_f32(
-        /*input_padding_top=*/0,
-        /*input_padding_right=*/0,
-        /*input_padding_bottom=*/0,
-        /*input_padding_left=*/0,
-        /*kernel_height=*/1,
-        /*kernel_width=*/1,
-        /*subsampling_height=*/1,
-        /*subsampling_width=*/1,
-        /*dilation_height=*/1,
-        /*dilation_width=*/1,
-        /*groups=*/1,
-        /*group_input_channels=*/input_channels,
-        /*group_output_channels=*/output_channels,
-        /*input_channel_stride=*/input_channels,
-        /*output_channel_stride=*/output_channels,
-        kernel_data,
-        bias_data,
-        node->activation.output_min,
-        node->activation.output_max,
-        node->flags,
-        code_cache,
-        weights_cache,
-        &opdata->operator_objects[0]);
-      break;
-    }
+      switch (filter_datatype) {
+        case xnn_datatype_fp32:
+          status = xnn_create_convolution2d_nchw_f32(
+              /*input_padding_top=*/0,
+              /*input_padding_right=*/0,
+              /*input_padding_bottom=*/0,
+              /*input_padding_left=*/0,
+              /*kernel_height=*/1,
+              /*kernel_width=*/1,
+              /*subsampling_height=*/1,
+              /*subsampling_width=*/1,
+              /*dilation_height=*/1,
+              /*dilation_width=*/1,
+              /*groups=*/1,
+              /*group_input_channels=*/input_channels,
+              /*group_output_channels=*/output_channels,
+              /*input_channel_stride=*/input_channels,
+              /*output_channel_stride=*/output_channels, kernel_data, bias_data,
+              node->activation.output_min, node->activation.output_max,
+              node->flags, code_cache, weights_cache,
+              &opdata->operator_objects[0]);
+          break;
+        case xnn_datatype_fp16: {
+          uint32_t flags = node->flags;
+          if (bias_datatype == xnn_datatype_fp32) {
+            flags |= XNN_FLAG_FP32_STATIC_BIASES;
+          }
+          status = xnn_create_convolution2d_nchw_f32_f16(
+              /*input_padding_top=*/0,
+              /*input_padding_right=*/0,
+              /*input_padding_bottom=*/0,
+              /*input_padding_left=*/0,
+              /*kernel_height=*/1,
+              /*kernel_width=*/1,
+              /*subsampling_height=*/1,
+              /*subsampling_width=*/1,
+              /*dilation_height=*/1,
+              /*dilation_width=*/1,
+              /*groups=*/1,
+              /*group_input_channels=*/input_channels,
+              /*group_output_channels=*/output_channels,
+              /*input_channel_stride=*/input_channels,
+              /*output_channel_stride=*/output_channels, kernel_data, bias_data,
+              node->activation.output_min, node->activation.output_max,
+              flags, code_cache, weights_cache,
+              &opdata->operator_objects[0]);
+          break;
+        }
+        default:
+          XNN_UNREACHABLE;
+      }
     default:
       XNN_UNREACHABLE;
   }

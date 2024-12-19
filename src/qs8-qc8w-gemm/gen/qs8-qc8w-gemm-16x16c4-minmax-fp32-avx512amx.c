@@ -8,6 +8,11 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <assert.h>
+#if defined(__has_feature)
+  #if __has_feature(memory_sanitizer)
+    #include <sanitizer/msan_interface.h>
+  #endif
+#endif
 
 #include <immintrin.h>
 
@@ -42,7 +47,7 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_16x16c4__avx512amx(
 // TODO: amxintrin.h only provide intrinsics for __x86_64__
 // Update if amxintrin changes
 #if defined(__x86_64__)
-  __attribute__((aligned(64))) int32_t res0[16 * 16];
+  __attribute__((aligned(64))) int32_t res[1][16 * 16];
 
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
   const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
@@ -61,19 +66,19 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_16x16c4__avx512amx(
   // Load tile configuration
   __attribute__((aligned(64))) struct __tile_config tile_data = {0};
   tile_data.palette_id = 1;
-  tile_data.rows[0] = mr;              // tmm0 = res 0
-  tile_data.rows[1] = mr;              // tmm1 = res 1
-  tile_data.rows[2] = mr;              // tmm2 = res 2
-  tile_data.rows[3] = mr;              // tmm3 = res 3
+  tile_data.rows[0] = mr;              // tmm0 = res[0]
+  tile_data.rows[1] = mr;              // tmm1 = res[1]
+  tile_data.rows[2] = mr;              // tmm2 = res[2]
+  tile_data.rows[3] = mr;              // tmm3 = res[3]
   tile_data.rows[4] = mr;              // tmm4 = input
   tile_data.rows[5] = 16;              // tmm5 = weights
   tile_data.rows[6] = mr;              // tmm6 = input remainder
   tile_data.rows[7] = kremainder >> 2; // tmm7 = weights remainder
 
-  tile_data.colsb[0] = 64;          // tmm0 = res 0
-  tile_data.colsb[1] = 64;          // tmm1 = res 1
-  tile_data.colsb[2] = 64;          // tmm2 = res 1
-  tile_data.colsb[3] = 64;          // tmm3 = res 1
+  tile_data.colsb[0] = 64;          // tmm0 = res[0]
+  tile_data.colsb[1] = 64;          // tmm1 = res[1]
+  tile_data.colsb[2] = 64;          // tmm2 = res[2]
+  tile_data.colsb[3] = 64;          // tmm3 = res[3]
   tile_data.colsb[4] = 64;          // tmm4 = input
   tile_data.colsb[5] = 64;          // tmm5 = weights
   tile_data.colsb[6] = kremainder;  // tmm6 = input remainder
@@ -181,25 +186,36 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_16x16c4__avx512amx(
       k -= kremainder * sizeof(int8_t);
     }
 
-    // Add tile to bias
-    _tile_stored(0, res0, 64);
+    // TODO: Instead of processing up to 4 tiles (16x64) consider
+    // quantizing 1 tile at a time (16 registers)
+    _tile_stored(0, &res[0][0], 64);
 
-    __m512i vacc0x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 0));
-    __m512i vacc1x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 16));
-    __m512i vacc2x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 32));
-    __m512i vacc3x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 48));
-    __m512i vacc4x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 64));
-    __m512i vacc5x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 80));
-    __m512i vacc6x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 96));
-    __m512i vacc7x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 112));
-    __m512i vacc8x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 128));
-    __m512i vacc9x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 144));
-    __m512i vacc10x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 160));
-    __m512i vacc11x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 176));
-    __m512i vacc12x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 192));
-    __m512i vacc13x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 208));
-    __m512i vacc14x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 224));
-    __m512i vacc15x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(res0 + 240));
+    // TODO: Fix msan for AMX
+    #if defined(__has_feature)
+      #if __has_feature(memory_sanitizer)
+        __msan_unpoison(res, sizeof(res));
+      #endif
+    #endif
+
+    // TODO: Instead of processing up to 4 tiles (16x64) consider
+    // quantizing 1 row at a time.
+    // Add tile to bias
+    __m512i vacc0x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 0));
+    __m512i vacc1x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 16));
+    __m512i vacc2x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 32));
+    __m512i vacc3x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 48));
+    __m512i vacc4x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 64));
+    __m512i vacc5x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 80));
+    __m512i vacc6x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 96));
+    __m512i vacc7x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 112));
+    __m512i vacc8x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 128));
+    __m512i vacc9x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 144));
+    __m512i vacc10x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 160));
+    __m512i vacc11x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 176));
+    __m512i vacc12x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 192));
+    __m512i vacc13x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 208));
+    __m512i vacc14x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 224));
+    __m512i vacc15x0123456789ABCDEF = _mm512_add_epi32(vksum0123456789ABCDEF, _mm512_load_epi32(&res[0][0] + 240));
 
     __m512 vscaled0x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc0x0123456789ABCDEF);
     __m512 vscaled1x0123456789ABCDEF = _mm512_cvtepi32_ps(vacc1x0123456789ABCDEF);

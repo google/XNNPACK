@@ -340,6 +340,18 @@ typedef void (*xnn_qp8_f32_qc4w_gemm_minmax_ukernel_fn)(
     union xnn_f32_minmax_params
         minmax_params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
+typedef void (*xnn_qp8_f32_qc8w_gemm_minmax_ukernel_fn)(
+    size_t m,
+    size_t n,
+    size_t k,
+    const void* lhs_packed,
+    const void* rhs_packed,
+    float* dst,
+    size_t dst_stride_row,
+    size_t dst_stride_col,
+    union xnn_f32_minmax_params
+        minmax_params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 typedef void (*xnn_qp8_f32_qb4w_gemm_minmax_ukernel_fn)(
     size_t m,
     size_t n,
@@ -2031,8 +2043,7 @@ typedef size_t (*xnn_init_reduce_params_fn)(
 
 typedef size_t (*xnn_update_reduce_params_fn)(
   struct xnn_reduce_params params[XNN_MIN_ELEMENTS(1)],
-  float scale,
-  int32_t num_elements);
+  float scale);
 
 typedef size_t (*xnn_init_qs8_qc8w_conv_minmax_params_fn)(
   union xnn_qs8_qc8w_conv_minmax_params params[XNN_MIN_ELEMENTS(1)],
@@ -2301,8 +2312,11 @@ struct xnn_hmp_qp8gemm_bl_ukernel {
 };
 
 // Largest GEMM/IGEMM MR used in init.c is 16 (x86 AVX512AMX).
-// Largest GEMM/IGEMM MR is 8 in e2e benchmarks.
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 #define XNN_MAX_MR 32
+#else
+#define XNN_MAX_MR 16
+#endif
 
 struct gemm_fused_ukernels {
   union {

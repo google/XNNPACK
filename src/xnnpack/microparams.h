@@ -408,7 +408,6 @@ struct xnn_f32_reduce_params {
 };
 
 struct xnn_qs8_reduce_params {
-  int32_t num_elements;
   float scale;
   float input_output_scale;
   int8_t input_zero_point;
@@ -416,7 +415,6 @@ struct xnn_qs8_reduce_params {
 };
 
 struct xnn_qu8_reduce_params {
-  int32_t num_elements;
   float scale;
   float input_output_scale;
   uint8_t input_zero_point;
@@ -471,12 +469,6 @@ struct xnn_f32_qu8_cvt_params {
   struct {
     float scale;
     int16_t output_zero_point;
-  } scalar;
-};
-
-struct xnn_s32_f32_cvt_params {
-  struct {
-    int32_t zero_point;
   } scalar;
 };
 
@@ -578,15 +570,20 @@ struct xnn_qs8_qc4w_packing_params {
   uint8_t kernel_zero_point;
 };
 
+struct xnn_qs8_qc8w_packing_params {
+  int8_t input_zero_point;
+  float scale_multiplier;
+};
+
 struct xnn_x32_packb_params {
   char _;  // Dummy member variable to comply with the C standard
 };
 
 struct xnn_unary_reference_params {
   float x_scale;
-  int32_t x_zero_point;
+  float x_zero_point;
   float inv_y_scale;
-  int32_t y_zero_point;
+  float y_zero_point;
   union xnn_unary_params params;
 };
 
@@ -597,7 +594,6 @@ union xnn_unary_uparams {
   struct xnn_qs8_f32_cvt_params qs8_f32_cvt;
   struct xnn_qu8_f32_cvt_params qu8_f32_cvt;
   struct xnn_qs8_f16_cvt_params qs8_f16_cvt;
-  struct xnn_s32_f32_cvt_params s32_f32_cvt;
   struct xnn_qs8_cvt_params qs8_cvt;
   struct xnn_qu8_cvt_params qu8_cvt;
   struct xnn_f16_elu_params f16_elu;
