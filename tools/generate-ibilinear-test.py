@@ -64,7 +64,7 @@ parser.set_defaults(defines=list())
 
 >>>>>>> c2bcc7bd5 (Replace ibilinear yaml with table header)
 IBILINEAR_TEST_TEMPLATE = """\
-#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, channel_tile, pixel_tile, datatype, params_type, init_params) \
+#define XNN_UKERNEL_WITH_PARAMS(arch_flags, ukernel, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params) \
 XNN_TEST_IBILINEAR_CHANNELS_EQ(ukernel, arch_flags, ${", ".join(TEST_ARGS)});
 XNN_TEST_IBILINEAR_CHANNELS_DIV(ukernel, arch_flags, ${", ".join(TEST_ARGS)});
 XNN_TEST_IBILINEAR_CHANNELS_LT(ukernel, arch_flags, ${", ".join(TEST_ARGS)});
@@ -163,6 +163,7 @@ def main(args):
   test_args = ["channel_tile"]
   test_args.append("pixel_tile")
   test_args.append("datatype")
+  test_args.append("weight_type")
   test_args.append("params_type")
   test_args.append("init_params")
   tests += xnncommon.make_multiline_macro(xngen.preprocess(

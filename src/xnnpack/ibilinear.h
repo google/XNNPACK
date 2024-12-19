@@ -16,28 +16,17 @@ extern "C" {
 #endif
 
 
-#define XNN_UKERNEL(arch_flags, fn_name, channel_tile, pixel_tile, datatype, params_type, init_params) \
+#define XNN_UKERNEL(arch_flags, fn_name, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params) \
   XNN_INTERNAL void fn_name(                           \
       size_t output_pixels,                            \
       size_t channels,                                 \
       const datatype** input,                          \
       size_t input_offset,                             \
-      const datatype* weights,                         \
+      const weight_type* weights,                      \
       datatype* output,                                \
       size_t output_increment);
 #include "f16-ibilinear/f16-ibilinear.h"
 #include "f32-ibilinear/f32-ibilinear.h"
-#undef XNN_UKERNEL
-
-#define XNN_UKERNEL(arch_flags, fn_name, channel_tile, pixel_tile, datatype, params_type, init_params) \
-  XNN_INTERNAL void fn_name(                           \
-      size_t output_pixels,                            \
-      size_t channels,                                 \
-      const datatype** input,                          \
-      size_t input_offset,                             \
-      const int16_t* weights,                          \
-      datatype* output,                                \
-      size_t output_increment);
 #include "s8-ibilinear/s8-ibilinear.h"
 #include "u8-ibilinear/u8-ibilinear.h"
 #undef XNN_UKERNEL

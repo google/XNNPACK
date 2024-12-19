@@ -426,7 +426,7 @@ class IBilinearMicrokernelTester {
 };
 
 #define XNN_TEST_IBILINEAR_CHANNELS_EQ(                                                                                \
-  ukernel, arch_flags, channel_tile, pixel_tile, datatype, params_type, init_params)                                   \
+  ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params)                      \
   TEST(ukernel, channels_eq)                                                                                           \
   {                                                                                                                    \
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
@@ -434,7 +434,7 @@ class IBilinearMicrokernelTester {
   }
 
 #define XNN_TEST_IBILINEAR_CHANNELS_DIV(                                                                               \
-  ukernel, arch_flags, channel_tile, pixel_tile, datatype, params_type, init_params)                                   \
+  ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params)                      \
   TEST(ukernel, channels_div)                                                                                          \
   {                                                                                                                    \
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
@@ -444,7 +444,7 @@ class IBilinearMicrokernelTester {
   }
 
 #define XNN_TEST_IBILINEAR_CHANNELS_LT(                                                                                \
-  ukernel, arch_flags, channel_tile, pixel_tile, datatype, params_type, init_params)                                   \
+  ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params)                      \
   TEST(ukernel, channels_lt)                                                                                           \
   {                                                                                                                    \
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
@@ -454,7 +454,7 @@ class IBilinearMicrokernelTester {
   }
 
 #define XNN_TEST_IBILINEAR_CHANNELS_GT(                                                                                \
-  ukernel, arch_flags, channel_tile, pixel_tile, datatype, params_type, init_params)                                   \
+  ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params)                      \
   TEST(ukernel, channels_gt)                                                                                           \
   {                                                                                                                    \
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
@@ -464,7 +464,7 @@ class IBilinearMicrokernelTester {
   }
 
 #define XNN_TEST_IBILINEAR_PIXELS_DIV(                                                                                 \
-  ukernel, arch_flags, channel_tile, pixel_tile, datatype, params_type, init_params)                                   \
+  ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params)                      \
   TEST(ukernel, pixels_div)                                                                                            \
   {                                                                                                                    \
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
@@ -476,7 +476,7 @@ class IBilinearMicrokernelTester {
   }
 
 #define XNN_TEST_IBILINEAR_PIXELS_LT(                                                                                  \
-  ukernel, arch_flags, channel_tile, pixel_tile, datatype, params_type, init_params)                                   \
+  ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params)                      \
   TEST(ukernel, pixels_lt)                                                                                             \
   {                                                                                                                    \
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
@@ -488,7 +488,7 @@ class IBilinearMicrokernelTester {
   }
 
 #define XNN_TEST_IBILINEAR_PIXELS_GT(                                                                                  \
-  ukernel, arch_flags, channel_tile, pixel_tile, datatype, params_type, init_params)                                   \
+  ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params)                      \
   TEST(ukernel, pixels_gt)                                                                                             \
   {                                                                                                                    \
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
@@ -500,7 +500,7 @@ class IBilinearMicrokernelTester {
   }
 
 #define XNN_TEST_IBILINEAR_INPUT_OFFSET(                                                                               \
-  ukernel, arch_flags, channel_tile, pixel_tile, datatype, params_type, init_params)                                   \
+  ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params)                      \
   TEST(ukernel, input_offset)                                                                                          \
   {                                                                                                                    \
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
@@ -514,9 +514,9 @@ class IBilinearMicrokernelTester {
       }                                                                                                                \
     }                                                                                                                  \
   }
-  
+
 #define XNN_TEST_IBILINEAR_OUTPUT_STRIDE(                                                                              \
-  ukernel, arch_flags, channel_tile, pixel_tile, datatype, params_type, init_params)                                   \
+  ukernel, arch_flags, channel_tile, pixel_tile, datatype, weight_type, params_type, init_params)                      \
   TEST(ukernel, output_stride)                                                                                         \
   {                                                                                                                    \
     TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
