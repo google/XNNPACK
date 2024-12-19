@@ -98,8 +98,9 @@ struct xnn_avgpool_config {
 };
 
 struct xnn_pack_lh_config {
-  xnn_x32_pack_lh_ukernel_fn ukernel;
-  xnn_x32_pack_lh_size_fn size_fn;
+  xnn_pack_lh_ukernel_fn ukernel;
+  xnn_pack_lh_size_fn size_fn;
+  xnn_pack_lh_offset_fn offset_fn;
 };
 
 struct xnn_pavgpool_config {
