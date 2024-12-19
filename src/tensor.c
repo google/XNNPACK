@@ -126,6 +126,7 @@ enum xnn_status xnn_define_tensor_value(
     case xnn_datatype_fp16:
     case xnn_datatype_bf16:
     case xnn_datatype_int32:
+    case xnn_datatype_pfp16:  // TODO: Does this really belong here?
     case xnn_datatype_pfp32:  // TODO: Does this really belong here?
       break;
     default:

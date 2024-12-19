@@ -206,6 +206,8 @@ def main(args):
 
       # Build microkernel name -> microkernel filepath mapping
       with open(os.path.join(root_dir, filepath), 'r', encoding='utf-8') as f:
+        if filepath.endswith('.swp'): continue
+        if filepath.endswith('.orig'): continue
         content = f.read()
         microkernels = re.findall(_MICROKERNEL_NAME_REGEX, content)
         if not microkernels:
