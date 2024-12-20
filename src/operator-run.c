@@ -412,8 +412,9 @@ void xnn_compute_hmp_grouped_gemm(
                                       mr_block_start];
     struct xnn_qd8_quantization_params padded_quantization_params[XNN_MAX_MR];
     if (mr_block_size < context->mr) {
-      memcpy(padded_quantization_params, quantization_params,
-             mr_block_size * sizeof(struct xnn_qd8_quantization_params));
+      for (size_t i = 0; i < mr_block_size; i++) {
+        padded_quantization_params[i] = quantization_params[i];
+      }
       for (size_t i = mr_block_size; i < context->mr; i++) {
         padded_quantization_params[i] =
             padded_quantization_params[mr_block_size - 1];

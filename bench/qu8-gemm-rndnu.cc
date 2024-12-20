@@ -403,5 +403,5 @@ static void qu8_gemm_minmax_rndnu_ukernel_4x4__scalar(benchmark::State& state, c
 BENCHMARK_GEMM(qu8_gemm_minmax_rndnu_ukernel_4x4__scalar)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

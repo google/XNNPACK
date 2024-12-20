@@ -249,5 +249,5 @@ BENCHMARK_CAPTURE(max_pooling_u8, squeezenet_v11, "SqueezeNet v1.1")->Apply(Sque
 BENCHMARK_CAPTURE(max_pooling_u8, vgg, "VGG")->Apply(VGG);
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

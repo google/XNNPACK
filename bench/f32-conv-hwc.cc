@@ -191,5 +191,5 @@ static void f32_conv_hwc(benchmark::State& state,
 
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif
