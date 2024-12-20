@@ -109,6 +109,28 @@ enum xnn_status xnn_setup_convert_nc_f32_qp8(xnn_operator_t convert_op,  //
                                              const float* input,         //
                                              int8_t* output);
 
+enum xnn_status xnn_create_pack_lh_x8(uint32_t flags,
+                                       xnn_operator_t* pack_lh_op_out);
+
+enum xnn_status xnn_reshape_pack_lh_x8(xnn_operator_t pack_lh_op,
+                                        size_t batch_size, size_t channels,
+                                        size_t* output_size_bytes,
+                                        pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_pack_lh_x8(xnn_operator_t pack_lh_op,
+                                      const void* input, void* output);
+
+enum xnn_status xnn_create_pack_lh_x16(uint32_t flags,
+                                       xnn_operator_t* pack_lh_op_out);
+
+enum xnn_status xnn_reshape_pack_lh_x16(xnn_operator_t pack_lh_op,
+                                        size_t batch_size, size_t channels,
+                                        size_t* output_size_bytes,
+                                        pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_pack_lh_x16(xnn_operator_t pack_lh_op,
+                                      const void* input, void* output);
+
 enum xnn_status xnn_create_pack_lh_x32(uint32_t flags,
                                        xnn_operator_t* pack_lh_op_out);
 
@@ -156,6 +178,16 @@ enum xnn_status xnn_create_fully_connected_nc_pf32(
     float output_min, float output_max, uint32_t flags,
     xnn_code_cache_t code_cache, xnn_weights_cache_t weights_cache,
     xnn_operator_t* fully_connected_op_out);
+
+enum xnn_status xnn_reshape_fully_connected_nc_pf32(
+    xnn_operator_t fully_connected_op,
+    size_t batch_size,
+    pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_fully_connected_nc_pf32(
+    xnn_operator_t fully_connected_op,
+    const float* input,
+    float* output);
 
 enum xnn_status xnn_create_convolution2d_nchw_f32_f16(
     uint32_t input_padding_top, uint32_t input_padding_right,
@@ -362,6 +394,59 @@ enum xnn_status xnn_reshape_batch_matrix_multiply_nc_qdu8_f32_qc8w(
 enum xnn_status xnn_setup_batch_matrix_multiply_nc_qdu8_f32_qc8w(
     xnn_operator_t batch_matrix_multiply_op, const int8_t* input_a,
     const struct xnn_quantization_params* quantization_params, float* output);
+
+enum xnn_status xnn_create_fully_connected_nc_pf16(
+  size_t input_channels,
+  size_t output_channels,
+  size_t input_stride,
+  size_t output_stride,
+  const void* kernel,
+  const void* bias,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* fully_connected_op_out);
+
+enum xnn_status xnn_reshape_fully_connected_nc_pf16(
+    xnn_operator_t fully_connected_op,
+    size_t batch_size,
+    pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_fully_connected_nc_pf16(
+    xnn_operator_t fully_connected_op,
+    const void* input,
+    void* output);
+
+enum xnn_status xnn_create_fully_connected_nc_pqs8_qc8w(
+  size_t input_channels,
+  size_t output_channels,
+  size_t input_stride,
+  size_t output_stride,
+  int8_t input_zero_point,
+  float input_scale,
+  const float* kernel_scale,
+  const int8_t* kernel,
+  const int32_t* bias,
+  int8_t output_zero_point,
+  float output_scale,
+  int8_t output_min,
+  int8_t output_max,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* fully_connected_op_out);
+
+enum xnn_status xnn_reshape_fully_connected_nc_pqs8_qc8w(
+    xnn_operator_t fully_connected_op,
+    size_t batch_size,
+    pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_fully_connected_nc_pqs8_qc8w(
+    xnn_operator_t fully_connected_op,
+    const int8_t* input,
+    int8_t* output);
 
 #ifdef __cplusplus
 }  // extern "C"

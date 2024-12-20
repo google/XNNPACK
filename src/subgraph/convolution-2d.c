@@ -234,32 +234,6 @@ static enum xnn_status create_convolution_operator(
                   weights_cache,
                   &opdata->operator_objects[0]);
                 break;
-              case xnn_datatype_pfp32:
-                status = xnn_create_convolution2d_nhwc_pf32(
-                  node->params.convolution_2d.input_padding_top,
-                  node->params.convolution_2d.input_padding_right,
-                  node->params.convolution_2d.input_padding_bottom,
-                  node->params.convolution_2d.input_padding_left,
-                  node->params.convolution_2d.kernel_height,
-                  node->params.convolution_2d.kernel_width,
-                  node->params.convolution_2d.subsampling_height,
-                  node->params.convolution_2d.subsampling_width,
-                  node->params.convolution_2d.dilation_height,
-                  node->params.convolution_2d.dilation_width,
-                  node->params.convolution_2d.groups,
-                  node->params.convolution_2d.group_input_channels,
-                  node->params.convolution_2d.group_output_channels,
-                  node->params.convolution_2d.group_input_channels * node->params.convolution_2d.groups /* input_pixel_stride */,
-                  node->params.convolution_2d.group_output_channels * node->params.convolution_2d.groups /* output_pixel_stride */,
-                  filter_data,
-                  bias_data,
-                  node->activation.output_min,
-                  node->activation.output_max,
-                  node->flags,
-                  code_cache,
-                  weights_cache,
-                  &opdata->operator_objects[0]);
-                break;
               default:
                 XNN_UNREACHABLE;
             }
@@ -1262,19 +1236,17 @@ enum xnn_status xnn_define_convolution_2d(
     }
   }
 
-  if (input_value->datatype == xnn_datatype_fp32 && output_value->datatype == xnn_datatype_fp32 && (!bias_value || bias_value->datatype == xnn_datatype_fp32)) {
-    const bool unit_subsampling = (subsampling_width | subsampling_height) == 1;
-    const size_t kernel_size = kernel_height * kernel_width;
-    if (groups == 1 && kernel_size == 1 && unit_subsampling && !any_padding) {
-      const struct xnn_gemm_config* gemm_config = xnn_init_pf32_gemm_config();
-      if (gemm_config != NULL && gemm_config->init.f32 != NULL) {
-        // Insert a node to pack the LHS.
-        uint32_t new_id = XNN_INVALID_VALUE_ID;
-        status = xnn_insert_pack_lh_node(subgraph, input_value, input_id, &new_id);
-        if (status != xnn_status_success) {
-          return status;
-        }
-        input_id = new_id;
+  const enum xnn_datatype input_datatype = input_value->datatype;
+  const enum xnn_datatype output_datatype = output_value->datatype;
+  if (input_datatype == xnn_datatype_fp32
+      || input_datatype == xnn_datatype_fp16
+      || input_datatype == xnn_datatype_qint8) {
+    if (input_value->datatype == output_datatype) {
+      const bool unit_subsampling = (subsampling_width | subsampling_height) == 1;
+      const size_t kernel_size = kernel_height * kernel_width;
+      if (groups == 1 && kernel_size == 1 && unit_subsampling && !any_padding) {
+        return xnn_define_fully_connected(subgraph, output_min, output_max,
+                                          input_id, filter_id, bias_id, output_id, /*flags=*/0);
       }
     }
   }
