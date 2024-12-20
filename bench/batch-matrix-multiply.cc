@@ -20,10 +20,6 @@
 #include <benchmark/benchmark.h>
 #include "pthreadpool.h"
 
-#if XNN_ENABLE_CPUINFO
-#include <cpuinfo.h>
-#endif  // XNN_ENABLE_CPUINFO
-
 #ifdef BENCHMARK_TENSORFLOW_LITE
 #include "flatbuffers/include/flatbuffers/buffer.h"
 #include "flatbuffers/include/flatbuffers/flatbuffer_builder.h"
@@ -38,29 +34,6 @@
 namespace {
 static const size_t kMinIterations = 10;
 }  // namespace
-
-// Pthreadpool-compatible function to wipe the cache in each thread.
-void PthreadpoolClearL2Cache(void* context, size_t id) {
-#if XNN_ENABLE_CPUINFO
-  static const size_t wipe_buffer_size = []() {
-    const auto* l2_cache = cpuinfo_get_l2_cache(0);
-    return l2_cache == nullptr ? 0 : l2_cache->size;
-  }();
-  static const char* wipe_buffer = wipe_buffer_size ? [&]() -> char* {
-    char* const buff = (char*)malloc(wipe_buffer_size);
-    memset(buff, 0xA5, wipe_buffer_size);
-    return buff;
-  }()
-      : nullptr;
-  if (wipe_buffer_size) {
-    benchmark::utils::PrefetchToL1(wipe_buffer, wipe_buffer_size);
-  } else {
-    benchmark::utils::WipeCache();
-  }
-#else
-  benchmark::utils::WipeCache();
-#endif  // XNN_ENABLE_CPUINFO
-}
 
 void xnnpack_batch_matrix_multiply_f32(benchmark::State& state,
                                        const char* net) {
@@ -128,10 +101,7 @@ void xnnpack_batch_matrix_multiply_f32(benchmark::State& state,
 
   while (state.KeepRunningBatch(kMinIterations)) {
     for (int iter = 0; iter < kMinIterations; iter++) {
-      state.PauseTiming();
-      pthreadpool_parallelize_1d(threadpool, PthreadpoolClearL2Cache, nullptr,
-                                 num_threads, 0);
-      state.ResumeTiming();
+      benchmark::utils::WipePthreadpoolL2Caches(state, threadpool);
 
       status = xnn_run_operator(op, threadpool);
       if (status != xnn_status_success) {
@@ -239,10 +209,7 @@ void xnnpack_batch_matrix_multiply_qd8_f32_qc8w(benchmark::State& state,
 
   while (state.KeepRunningBatch(kMinIterations)) {
     for (int iter = 0; iter < kMinIterations; iter++) {
-      state.PauseTiming();
-      pthreadpool_parallelize_1d(threadpool, PthreadpoolClearL2Cache, nullptr,
-                                 num_threads, 0);
-      state.ResumeTiming();
+      benchmark::utils::WipePthreadpoolL2Caches(state, threadpool);
 
       status = xnn_run_operator(op, threadpool);
       if (status != xnn_status_success) {

@@ -9,6 +9,8 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
+#include <cstring>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -115,6 +117,7 @@ static void BenchmarkInvoke(benchmark::State& state,
   }
 
   for (auto _ : state) {
+    benchmark::utils::WipePthreadpoolL2Caches(state, model_runtime.threadpool);
     if (!model_runtime.Invoke()) {
       state.SkipWithError("failed to invoke runtime");
       return;

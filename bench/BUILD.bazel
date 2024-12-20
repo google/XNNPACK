@@ -72,6 +72,7 @@ xnnpack_cxx_library(
         "//:params",
         "//:xnnpack_h",
         "@com_google_benchmark//:benchmark",
+        "@pthreadpool",
     ] + xnnpack_select_if(
         "//:cpuinfo_enabled",
         ["@cpuinfo"],

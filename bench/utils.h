@@ -9,16 +9,19 @@
 #include <cstdint>
 #include <functional>
 
-#include "xnnpack.h"
 #include "xnnpack/common.h"
-#include "xnnpack/memory.h"
 #include <benchmark/benchmark.h>
+#include "pthreadpool.h"
 
 namespace benchmark {
 namespace utils {
 
 uint32_t WipeCache();
 uint32_t PrefetchToL1(const void* ptr, size_t size);
+
+// Clear the L2 cache in each thread of the given `threadpool`, calls
+// `state.PauseTiming()` while doing so.
+void WipePthreadpoolL2Caches(benchmark::State& state, pthreadpool_t threadpool);
 
 // Disable support for denormalized numbers in floating-point units.
 void DisableDenormals();

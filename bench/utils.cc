@@ -3,12 +3,15 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <mutex>
 
 #include "xnnpack/common.h"
+#include <benchmark/benchmark.h>
+#include "pthreadpool.h"
 
 #ifdef __linux__
   #include <sched.h>
@@ -24,11 +27,13 @@
   #include <cpuinfo.h>
 #endif  // XNN_ENABLE_CPUINFO
 
-#include "xnnpack.h"
-#include "xnnpack/allocator.h"
 #include "xnnpack/hardware-config.h"
 
 #include "utils.h"
+
+namespace benchmark {
+namespace utils {
+namespace {
 
 static void* wipe_buffer = nullptr;
 static size_t wipe_buffer_size = 0;
@@ -40,14 +45,15 @@ static void InitWipeBuffer() {
   wipe_buffer_size = 128 * 1024 * 1024;
   #if XNN_ENABLE_CPUINFO
     if (cpuinfo_initialize()) {
-      wipe_buffer_size = benchmark::utils::GetMaxCacheSize();
+      wipe_buffer_size = GetMaxCacheSize();
     }
   #endif  // XNN_ENABLE_CPUINFO
 
 #if defined(_WIN32)
   wipe_buffer = _aligned_malloc(wipe_buffer_size, 128);
 #elif defined(__ANDROID__) || defined(__CYGWIN__)
-  // memalign is obsolete, but it is the only option on Android until API level 17.
+  // memalign is obsolete, but it is the only option on Android until API
+  // level 17.
   wipe_buffer = memalign(128, wipe_buffer_size);
 #else
   (void) posix_memalign((void**) &wipe_buffer, 128, wipe_buffer_size);
@@ -57,8 +63,30 @@ static void InitWipeBuffer() {
   }
 }
 
-namespace benchmark {
-namespace utils {
+// Pthreadpool-compatible function to wipe the cache in each thread.
+void PthreadpoolClearL2Cache(void* context, size_t id) {
+#if XNN_ENABLE_CPUINFO
+  static const size_t wipe_buffer_size = []() {
+    const auto* l2_cache = cpuinfo_get_l2_cache(0);
+    return l2_cache == nullptr ? 0 : l2_cache->size;
+  }();
+  static const char* wipe_buffer = wipe_buffer_size ? [&]() -> char* {
+    char* const buff = (char*)malloc(wipe_buffer_size);
+    memset(buff, 0xA5, wipe_buffer_size);
+    return buff;
+  }()
+      : nullptr;
+  if (wipe_buffer_size) {
+    PrefetchToL1(wipe_buffer, wipe_buffer_size);
+  } else {
+    WipeCache();
+  }
+#else
+  WipeCache();
+#endif  // XNN_ENABLE_CPUINFO
+}
+
+};  // namespace
 
 uint32_t PrefetchToL1(const void* ptr, size_t size) {
   uint32_t step = 16;
@@ -80,6 +108,14 @@ uint32_t PrefetchToL1(const void* ptr, size_t size) {
     size -= step;
   }
   return sum;
+}
+
+void WipePthreadpoolL2Caches(benchmark::State& state,
+                             pthreadpool_t threadpool) {
+  state.PauseTiming();
+  pthreadpool_parallelize_1d(threadpool, PthreadpoolClearL2Cache, nullptr,
+                             pthreadpool_get_threads_count(threadpool), 0);
+  state.ResumeTiming();
 }
 
 uint32_t WipeCache() {
@@ -576,6 +612,5 @@ bool CheckArchFlags(benchmark::State& state, uint64_t arch_flags) {
   }
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
 
-
-}  // namespace utils
-}  // namespace benchmark
+  }  // namespace utils
+  }  // namespace benchmark
