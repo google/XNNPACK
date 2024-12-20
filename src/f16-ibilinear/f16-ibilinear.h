@@ -16,8 +16,8 @@
 #endif
 
 #if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm, xnn_f16_ibilinear_ukernel__neonfp16arith_c8, 8, 1, xnn_float16, xnn_float16, struct xnn_f16_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm, xnn_f16_ibilinear_ukernel__neonfp16arith_c16, 16, 1, xnn_float16, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_fp16_arith, xnn_f16_ibilinear_ukernel__neonfp16arith_c8, 8, 1, xnn_float16, xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_fp16_arith, xnn_f16_ibilinear_ukernel__neonfp16arith_c16, 16, 1, xnn_float16, xnn_float16, struct xnn_f16_default_params, NULL)
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64

@@ -22,20 +22,20 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_ibilinear_ukernel__scalar_c4, 4, 1, float, fl
 #if (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_ibilinear_ukernel__neon_c4, 4, 1, float, float, struct xnn_f32_default_params, NULL)
 XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_ibilinear_ukernel__neon_c8, 8, 1, float, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_ibilinear_ukernel__neonfma_c4, 4, 1, float, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_ibilinear_ukernel__neonfma_c8, 8, 1, float, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon_fma, xnn_f32_ibilinear_ukernel__neonfma_c4, 4, 1, float, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon_fma, xnn_f32_ibilinear_ukernel__neonfma_c8, 8, 1, float, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
-XNN_UKERNEL_WITH_PARAMS(XNN_ARCH_X86, xnn_f32_ibilinear_ukernel__sse_c4, 4, 1, float, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(XNN_ARCH_X86, xnn_f32_ibilinear_ukernel__sse_c8, 8, 1, float, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_ibilinear_ukernel__sse_c4, 4, 1, float, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_ibilinear_ukernel__sse_c8, 8, 1, float, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
 
 #if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
-XNN_UKERNEL_WITH_PARAMS(XNN_ARCH_WASMSIMD, xnn_f32_ibilinear_ukernel__wasmsimd_c4, 4, 1, float, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(XNN_ARCH_WASMSIMD, xnn_f32_ibilinear_ukernel__wasmsimd_c8, 8, 1, float, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(XNN_ARCH_WASMSIMD, xnn_f32_ibilinear_ukernel__wasmrelaxedsimd_c4, 4, 1, float, float, struct xnn_f32_default_params, NULL)
-XNN_UKERNEL_WITH_PARAMS(XNN_ARCH_WASMSIMD, xnn_f32_ibilinear_ukernel__wasmrelaxedsimd_c8, 8, 1, float, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_ibilinear_ukernel__wasmsimd_c4, 4, 1, float, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_ibilinear_ukernel__wasmsimd_c8, 8, 1, float, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_ibilinear_ukernel__wasmrelaxedsimd_c4, 4, 1, float, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_ibilinear_ukernel__wasmrelaxedsimd_c8, 8, 1, float, float, struct xnn_f32_default_params, NULL)
 #endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS
