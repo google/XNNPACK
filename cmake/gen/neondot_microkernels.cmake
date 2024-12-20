@@ -10,6 +10,8 @@
 
 
 SET(PROD_NEONDOT_MICROKERNEL_SRCS
+  src/qb4-packw/gen/qb4-packw-x16c4-gemm-goi-neondot.c
+  src/qb4-packw/gen/qb4-packw-x16c8-gemm-goi-neondot.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x16c4-minmax-neondot.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-4x16c4-minmax-neondot.c
   src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x16c4-minmax-neondot.c
@@ -33,7 +35,6 @@ SET(PROD_NEONDOT_MICROKERNEL_SRCS
   src/qs8-rsum/gen/qs8-rsum-neondot-u32-acc2.c)
 
 SET(NON_PROD_NEONDOT_MICROKERNEL_SRCS
-  src/qb4-packw/gen/qb4-packw-x16c4-gemm-goi-neondot.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-1x8c4-minmax-neondot.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-2x8c4-minmax-neondot.c
   src/qd8-f32-qb4w-gemm/gen/qd8-f32-qb4w-gemm-2x16c4-minmax-neondot.c
