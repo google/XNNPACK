@@ -1513,10 +1513,12 @@ IF(XNNPACK_BUILD_TESTS)
   SET(MICROKERNEL_DWCONV_UNIT_TESTS
       f16-dwconv-minmax-multipass
       f16-dwconv-minmax-unipass
+      f16-dwconv2d-chw
       f32-dwconv-multipass
       f32-dwconv-minmax-multipass
       f32-dwconv-unipass
       f32-dwconv-minmax-unipass
+      f32-dwconv2d-chw
       qs8-qc8w-dwconv-minmax-multipass-fp32
       qs8-qc8w-dwconv-minmax-unipass-fp32
       qs8-dwconv-minmax-multipass-fp32
