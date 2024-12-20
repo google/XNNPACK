@@ -1,0 +1,268 @@
+// Copyright 2023 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+
+$assert NR > 1
+$assert KR > 1
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <math.h>
+#include <arm_neon.h>
+
+#include "src/xnnpack/packw.h"
+
+// convert a vector from packed nibbles to planar, and accumulate sum
+static XNN_INTRINSIC
+int8x16_t xnn_packed2planar(
+  int32x4_t *vacc,
+  const uint8x16_t v,
+  const int8x16_t vmask,
+  const int8x16_t veor_mask,
+  const int32x4_t neg_zp,
+  const int8x16_t vones)
+{
+  const uint8x16_t vl = vshrq_n_u8(v, 4);  // isolate lower int 4
+  const uint8x16_t vh = vandq_u8(v, vmask);  // isolate upper int 4
+  *vacc = vdotq_u32(*vacc, vh, vones);
+  *vacc = vdotq_u32(*vacc, vl, vones);
+  *vacc = vaddq_s32(*vacc, neg_zp);
+  const int8x16_t v01 = vzip1q_s8(vh, vl);
+  const int8x16_t v23 = vzip2q_s8(vh, vl);
+  const int8x16_t v02 = vreinterpretq_s8_u64(vuzp1q_s64(vreinterpretq_s64_s8(v01), vreinterpretq_s64_s8(v23)));
+  const int8x16_t v13 = vreinterpretq_s8_u64(vuzp2q_s64(vreinterpretq_s64_s8(v01), vreinterpretq_s64_s8(v23)));
+  const int8x16_t vl13 = vshlq_n_s8(v13, 4);
+  const int8x16_t v0123 = vorrq_s8(v02, vl13);
+  return veorq_s8(v0123, veor_mask);
+}
+
+void xnn_qb4_packw_gemm_goi_ukernel_x${NR}c${KR}__neondot(
+  size_t g,
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  size_t bl,
+  const uint8_t* weights,
+  const int32_t* bias,
+  const void* scale,
+  int8_t* packed_weights,
+  size_t extra_bytes_bl,
+  size_t extra_bytes_n,
+  const void* params)
+{
+  assert(g != 0);
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(nr == ${NR});
+  assert(kr == ${KR});
+  assert(sr == 1);
+  assert(weights != NULL);
+  assert(packed_weights != NULL);
+  assert(extra_bytes_bl == nr * sizeof(uint16_t));
+  assert(extra_bytes_n == nr * sizeof(float));
+  assert(params != NULL);
+  assert(kc % bl == 0);
+  size_t num_blocks = kc / bl;
+  size_t weight_stride = (kc >> 1);
+  const int8x16_t vmask = vmovq_n_s8(INT8_C(0x0F));
+  const uint8x16_t veor_mask = vmovq_n_u8(UINT8_C(0x88));
+  const int32x4_t neg_zp = vmovq_n_s32(-64);
+  const int8x16_t vones = vmovq_n_u8(UINT8_C(0x01));
+  const uint8x8_t vzeros = vmov_n_u8(0);
+
+  uint8_t* out = (uint8_t*) packed_weights;
+  const int32_t* b = (const int32_t*) bias;
+  const float32x4_t vzeropoint = vmovq_n_f32((float) (((const struct xnn_qs8_qc4w_packing_params*) params)->input_zero_point + 0));
+  const float32x4_t vrecip_sixteen = vmovq_n_f32(1.0f/ 16.0f);
+
+  do {
+    // NC main loop multiple of ${NR}
+    const uint8_t* w0 = (const uint8_t*) weights;
+    const uint16_t* s0 = (const uint16_t*) scale;
+    size_t n = nc;
+    for (;n >= ${NR}; n -= ${NR}) {
+      float* packed_k_scaled_sum = (float*) out;
+      $for N in range(0, NR, 4):
+        float32x4_t packed_k_scaled_sums${N//4} = vdupq_n_f32(0.0f);
+      out += ${NR} * sizeof(float);
+
+      // KC/2 bytes is KC Nibbles
+      $for N in range(1, NR):
+        const uint8_t* w${N} = w${N-1} + weight_stride;
+
+      // scales
+      $for N in range(1, NR):
+        const uint16_t* s${N} = s${N-1} + num_blocks;
+
+      size_t kb = kc;
+      // Process k by blocks (bl)
+      for (; kb >= bl; kb-=bl) {
+        // Initialize KSum as subtracting bl zero points (8)
+        $for N in range(0, NR, 2):
+          int32x4_t ksum${N//2} = vdupq_n_s32(0);
+        size_t k = bl;
+
+        // KC Main loop multiple of 16x32
+        for(; k >= 32; k-=32) {
+          $for N in range(0, NR):
+            const int64x2_t w${N}x01 = vld1q_s64((int64_t*) w${N}); w${N} += ${2 * KR};
+
+          $for N in range(0, NR, 2):
+            int64x2_t v${N}${N+1}_0 = vzip1q_s64(w${N}x01, w${N+1}x01);
+            int64x2_t v${N}${N+1}_1 = vzip2q_s64(w${N}x01, w${N+1}x01);
+
+          $for I in range(0, 2):
+            $for N in range(0, NR, 4):
+              v${N}${N+1}_${I} = xnn_packed2planar(&ksum${N//2}, v${N}${N+1}_${I}, vmask, veor_mask, neg_zp, vones);
+              v${N+2}${N+3}_${I} = xnn_packed2planar(&ksum${(N+2)//2}, v${N+2}${N+3}_${I}, vmask, veor_mask, neg_zp, vones);
+
+          $for I in range(0, 2):
+            $for N in range(0, NR, 2):
+              vst1q_s8((int8_t*) &out[${(I*NR + N)*KR}], v${N}${N+1}_${I});
+
+          out += ${NR*16};
+        }
+
+        $for N in range(0, NR, 8):
+          uint16x8_t bf_scales${N//8} = {
+            $for N_I in range(N, N+8):
+              s${N_I}[0],
+          };
+
+        $for N in range(0, NR, 8):
+          float32x4_t f_scales${N//4} = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(bf_scales${N//8}), 16));
+          float32x4_t f_scales${(N+4)//4} = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(bf_scales${N//8}), 16));
+
+        $for N in range(0, NR):
+          s${N} += 1;
+
+        $for N in range(0, NR, 4):
+          float32x4_t f_ksum${N//4} = vcvtq_f32_s32(vpaddq_s32(ksum${N//2}, ksum${(N+2)//2}));
+          f_ksum${N//4} = vmulq_f32(f_ksum${N//4}, vzeropoint);
+          packed_k_scaled_sums${N//4} = vfmsq_f32(packed_k_scaled_sums${N//4}, f_ksum${N//4}, f_scales${N//4});
+
+        $for N in range(0, NR, 4):
+          vst1q_f32(&packed_k_scaled_sum[${N}], packed_k_scaled_sums${N//4});
+
+        $for N in range(0, NR, 4):
+          f_scales${N//4} = vmulq_f32(f_scales${N//4}, vrecip_sixteen);
+
+        $for N in range(0, NR, 4):
+          vst1_u16((uint16_t*)out+${N}, vshrn_n_s32(vreinterpretq_s32_f32(f_scales${N//4}), 16));
+
+        out += ${NR} * sizeof(uint16_t);
+      }
+
+
+      if XNN_LIKELY(b != NULL){
+        $for N in range(0, NR, 4):
+          const int32x4_t b${N//4} = vld1q_s32(&b[${N}]);
+          vst1q_s32((int32_t*)out + ${N}, b${N//4});
+        b += ${NR};
+      } else {
+        $for N in range(0, NR, 4):
+          vst1q_s32((int32_t*)out + ${N}, vdupq_n_s32(0));
+      }
+      out += ${NR} * sizeof(uint32_t);
+      w0 = w15;
+      s0 = s15;
+    }
+
+    if XNN_UNLIKELY(n != 0){
+      assert(n >= 1 && n < ${NR});
+      float* packed_k_scaled_sum = (float*) out;
+      $for N in range(0, NR, 4):
+        float32x4_t packed_k_scaled_sums${N//4} = vdupq_n_f32(0.0f);
+      out += ${NR} * sizeof(float);
+      $if NR > 2:
+        $for N in range(1, NR):
+          const uint8_t* w${N} = w${N-1} + (kc >> 1);
+          const uint16_t* s${N} = s${N-1} + num_blocks;
+          $if $N % 2 == 0:
+            if XNN_UNPREDICTABLE(n <= ${N}) {
+              w${N} = w${N-1};
+              s${N} = s${N-1};
+            }
+          $else:
+            if XNN_UNPREDICTABLE(n < ${N+1}) {
+              w${N} = w${N-1};
+              s${N} = s${N-1};
+            }
+
+      size_t kb = kc;
+      // Process k by blocks (bl)
+      for (; kb >= bl; kb-=bl) {
+        // Initialize KSum as subtracting bl zero points (8)
+        $for N in range(0, NR, 2):
+          int32x4_t ksum${N//2} = vdupq_n_s32(0);
+        size_t k = bl;
+
+        // KC Main loop multiple of 16x32
+        for(; k >= 32; k-=32) {
+          $for N in range(0, NR):
+            uint64x2_t w${N}x01 = vld1q_u64((uint64_t*) w${N}); w${N} += ${2 * KR};
+
+          $for N in range(0, NR, 2):
+            uint64x2_t v${N}${N+1}_0 = vzip1q_u64(w${N}x01, w${N+1}x01);
+            uint64x2_t v${N}${N+1}_1 = vzip2q_u64(w${N}x01, w${N+1}x01);
+
+          $for I in range(0, 2):
+            $for N in range(0, NR, 4):
+              v${N}${N+1}_${I} = xnn_packed2planar(&ksum${N//2}, v${N}${N+1}_${I}, vmask, veor_mask, neg_zp, vones);
+              v${N+2}${N+3}_${I} = xnn_packed2planar(&ksum${(N+2)//2}, v${N+2}${N+3}_${I}, vmask, veor_mask, neg_zp, vones);
+
+          $for I in range(0, 2):
+            $for N in range(0, NR, 2):
+              vst1q_u8(&out[${(I*NR + N)*KR}], v${N}${N+1}_${I});
+
+          out += ${NR*16};
+        }
+
+        $for N in range(0, NR, 8):
+          uint16x8_t bf_scales${N//8} = {
+            $for N_I in range(N, N+8):
+              s${N_I}[0],
+          };
+
+        $for N in range(0, NR, 8):
+          float32x4_t f_scales${N//4} = vreinterpretq_f32_u32(vshll_n_u16(vget_low_u16(bf_scales${N//8}), 16));
+          float32x4_t f_scales${(N+4)//4} = vreinterpretq_f32_u32(vshll_n_u16(vget_high_u16(bf_scales${N//8}), 16));
+
+        $for N in range(0, NR):
+          s${N} += 1;
+
+        $for N in range(0, NR, 4):
+          float32x4_t f_ksum${N//4} = vcvtq_f32_s32(vpaddq_s32(ksum${N//2}, ksum${(N+2)//2}));
+          f_ksum${N//4} = vmulq_f32(f_ksum${N//4}, vzeropoint);
+          packed_k_scaled_sums${N//4} = vfmsq_f32(packed_k_scaled_sums${N//4}, f_ksum${N//4}, f_scales${N//4});
+
+        $for N in range(0, NR, 4):
+          vst1q_f32(&packed_k_scaled_sum[${N}], packed_k_scaled_sums${N//4});
+
+        $for N in range(0, NR, 4):
+          f_scales${N//4} = vmulq_f32(f_scales${N//4}, vrecip_sixteen);
+
+        $for N in range(0, NR, 4):
+          vst1_u16((uint16_t*)out+${N}, vshrn_n_s32(vreinterpretq_s32_f32(f_scales${N//4}), 16));
+
+        out += ${NR} * sizeof(uint16_t);
+      }
+
+      if XNN_LIKELY(b != NULL){
+        $for N in range(0, NR, 4):
+          const int32x4_t b${N//4} = vld1q_s32(&b[${N}]);
+          vst1q_s32((int32_t*)out + ${N}, b${N//4});
+        b += ${NR};
+      } else {
+        $for N in range(0, NR, 4):
+          vst1q_s32((int32_t*)out + ${N}, vdupq_n_s32(0));
+      }
+      out += ${NR} * sizeof(uint32_t);
+
+    }
+  } while (--g != 0);
+}
