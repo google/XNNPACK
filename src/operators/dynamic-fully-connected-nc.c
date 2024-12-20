@@ -376,13 +376,15 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
   }
 
   dynamic_fully_connected_op->context.gemm.gemm.gemm = (struct gemm_context){
-    .k_scaled = input_channels << log2_input_element_size,
-    .w_stride = bias_element_size + (round_up_po2(input_channels, kr * sr) << log2_input_element_size),
-    .a_stride = input_stride << log2_input_element_size,
-    .cm_stride = output_stride << log2_output_element_size,
-    .cn_stride = nr << log2_output_element_size,
-    .log2_csize = log2_output_element_size,
-    .ukernel = gemm_ukernel,
+      .k_scaled = input_channels << log2_input_element_size,
+      .w_stride = bias_element_size + (round_up_po2(input_channels, kr * sr)
+                                       << log2_input_element_size),
+      .a_stride = input_stride << log2_input_element_size,
+      .cm_stride = output_stride << log2_output_element_size,
+      .cn_stride = nr << log2_output_element_size,
+      .log2_csize = log2_output_element_size,
+      .ukernel = gemm_ukernel,
+      .mr = mr,
   };
   memcpy(&dynamic_fully_connected_op->context.gemm.gemm.gemm.params, params, params_size);
   dynamic_fully_connected_op->context.gemm.gemm.gemm.fused_params = &dynamic_fully_connected_op->context.gemm.gemm.gemm.params;
@@ -391,26 +393,40 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
   }
   dynamic_fully_connected_op->context.gemm.gemm.gemm.fused_params = &dynamic_fully_connected_op->context.gemm.gemm.gemm.params;
 
-  size_t nc =
-      xnn_gemm_best_nc(/*num_groups=*/1, batch_size, output_channels, mr, nr,
-                       pthreadpool_get_threads_count(threadpool));
+  // Compute the optimal tile size for this GEMM.
+  size_t mc;
+  size_t nc;
+  xnn_gemm_best_tile_size(
+      /*num_groups=*/1, /*m=*/batch_size, /*n=*/output_channels,
+      /*m_stride=*/dynamic_fully_connected_op->context.gemm.gemm.gemm.a_stride,
+      /*n_stride=*/dynamic_fully_connected_op->context.gemm.gemm.gemm.w_stride,
+      /*cm_stride=*/
+      dynamic_fully_connected_op->context.gemm.gemm.gemm.cm_stride,
+      /*cn_stride=*/1 << log2_output_element_size, mr, nr,
+      /*num_threads=*/pthreadpool_get_threads_count(threadpool), &mc, &nc);
 
 #if XNN_MAX_UARCH_TYPES > 1
-    if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
-      dynamic_fully_connected_op->compute[1].type = xnn_parallelization_type_2d_tile_2d_with_uarch;
-      dynamic_fully_connected_op->compute[1].task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_gemm;
-    } else {
-      dynamic_fully_connected_op->compute[1].type = xnn_parallelization_type_2d_tile_2d;
-      dynamic_fully_connected_op->compute[1].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
-    }
-  #else
-    dynamic_fully_connected_op->compute[1].type = xnn_parallelization_type_2d_tile_2d;
-    dynamic_fully_connected_op->compute[1].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
-  #endif
-  dynamic_fully_connected_op->compute[1].range[0] = batch_size;
-  dynamic_fully_connected_op->compute[1].range[1] = output_channels;
-  dynamic_fully_connected_op->compute[1].tile[0] = mr;
-  dynamic_fully_connected_op->compute[1].tile[1] = nc;
+  if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
+    dynamic_fully_connected_op->compute[1].type =
+        xnn_parallelization_type_2d_tile_2d_with_uarch;
+    dynamic_fully_connected_op->compute[1].task_2d_tile_2d_with_id =
+        (pthreadpool_task_2d_tile_2d_with_id_t)xnn_compute_hmp_gemm;
+  } else {
+    dynamic_fully_connected_op->compute[1].type =
+        xnn_parallelization_type_2d_tile_2d;
+    dynamic_fully_connected_op->compute[1].task_2d_tile_2d =
+        (pthreadpool_task_2d_tile_2d_t)xnn_compute_gemm;
+  }
+#else
+  dynamic_fully_connected_op->compute[1].type =
+      xnn_parallelization_type_2d_tile_2d;
+  dynamic_fully_connected_op->compute[1].task_2d_tile_2d =
+      (pthreadpool_task_2d_tile_2d_t)xnn_compute_gemm;
+#endif
+  dynamic_fully_connected_op->compute[1].range[1] = batch_size;
+  dynamic_fully_connected_op->compute[1].range[0] = output_channels;
+  dynamic_fully_connected_op->compute[1].tile[1] = mc;
+  dynamic_fully_connected_op->compute[1].tile[0] = nc;
   dynamic_fully_connected_op->state = xnn_run_state_needs_setup;
 
   return xnn_status_success;

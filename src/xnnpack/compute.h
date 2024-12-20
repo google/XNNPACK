@@ -342,73 +342,56 @@ struct gemm_context {
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_grouped_gemm(
-      const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t group_index,
-      size_t mr_block_start,
-      size_t nr_block_start,
-      size_t mr_block_size,
-      size_t nr_block_size);
+XNN_PRIVATE void xnn_compute_grouped_gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t group_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size);
 
-  XNN_PRIVATE void xnn_compute_grouped_qp8gemm(
-      const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t group_index, size_t mr_block_start, size_t nr_block_start,
-      size_t mr_block_size, size_t nr_block_size);
+XNN_PRIVATE void xnn_compute_grouped_qp8gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t group_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size);
 
-  XNN_PRIVATE void xnn_compute_dqgemm(
-      const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t mr_block_start,
-      size_t nr_block_start,
-      size_t mr_block_size,
-      size_t nr_block_size);
+XNN_PRIVATE void xnn_compute_dqgemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
+    size_t mr_block_size);
 
-  XNN_PRIVATE void xnn_compute_gemm(
-      const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t mr_block_start,
-      size_t nr_block_start,
-      size_t mr_block_size,
-      size_t nr_block_size);
+XNN_PRIVATE void xnn_compute_gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
+    size_t mr_block_size);
 
-  XNN_PRIVATE void xnn_compute_qp8gemm(
-      const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t mr_block_start, size_t nr_block_start, size_t mr_block_size,
-      size_t nr_block_size);
+XNN_PRIVATE void xnn_compute_qp8gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
+    size_t mr_block_size);
 #if XNN_MAX_UARCH_TYPES > 1
-    XNN_PRIVATE void xnn_compute_hmp_grouped_gemm(
-        const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-        uint32_t uarch_index,
-        size_t group_index,
-        size_t mr_block_start,
-        size_t nr_block_start,
-        size_t mr_block_size,
-        size_t nr_block_size);
+XNN_PRIVATE void xnn_compute_hmp_grouped_gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    uint32_t uarch_index, size_t group_index, size_t nr_block_start,
+    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size);
 
-    XNN_PRIVATE void xnn_compute_hmp_grouped_qp8gemm(
-        const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-        uint32_t uarch_index, size_t group_index, size_t mr_block_start,
-        size_t nr_block_start, size_t mr_block_size, size_t nr_block_size);
+XNN_PRIVATE void xnn_compute_hmp_grouped_qp8gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    uint32_t uarch_index, size_t group_index, size_t mr_block_start,
+    size_t nr_block_start, size_t mr_block_size, size_t nr_block_size);
 
-    XNN_PRIVATE void xnn_compute_hmp_gemm(
-        const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-        uint32_t uarch_index,
-        size_t mr_block_start,
-        size_t nr_block_start,
-        size_t mr_block_size,
-        size_t nr_block_size);
+XNN_PRIVATE void xnn_compute_hmp_gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    uint32_t uarch_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size);
 
-    XNN_PRIVATE void xnn_compute_hmp_dqgemm(
-        const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-        uint32_t uarch_index,
-        size_t mr_block_start,
-        size_t nr_block_start,
-        size_t mr_block_size,
-        size_t nr_block_size);
+XNN_PRIVATE void xnn_compute_hmp_dqgemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    uint32_t uarch_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size);
 
-    XNN_PRIVATE void xnn_compute_hmp_qp8gemm(
-        const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-        uint32_t uarch_index, size_t mr_block_start, size_t nr_block_start,
-        size_t mr_block_size, size_t nr_block_size);
-  #endif  // XNN_MAX_UARCH_TYPES > 1
+XNN_PRIVATE void xnn_compute_hmp_qp8gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    uint32_t uarch_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size);
+#endif  // XNN_MAX_UARCH_TYPES > 1
 #endif
 
     // Context for Sparse Matrix-Dense Matrix Multiplication.

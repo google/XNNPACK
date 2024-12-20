@@ -17,10 +17,13 @@ extern "C" {
 // least this many tiles per thread.
 #define XNN_GEMM_TILES_PER_THREAD 5
 
-// Computes the largest `nc`, the largest multiple of `nr` such that there are
-// at least five tiles per thread (if `num_threads > 1`).
-size_t xnn_gemm_best_nc(size_t num_groups, size_t m, size_t n, size_t mr,
-                        size_t nr, size_t num_threads);
+// Compute the optimal tile size (integer multiples of `mr` and `nr`) for a GEMM
+// such that the number of tiles is minimized, but at least `min_num_tiles` and
+// such that the data needed for each tile fits in either the L1 or L2 cache.
+void xnn_gemm_best_tile_size(size_t num_groups, size_t m, size_t n,
+                             size_t m_stride, size_t n_stride, size_t cm_stride,
+                             size_t cn_stride, size_t mr, size_t nr,
+                             size_t num_threads, size_t *mc, size_t *nc);
 
 // The total tile size needed to cover kernel_size.
 XNN_INTERNAL size_t xnn_dwconv_multipass_tile_size(

@@ -26,6 +26,10 @@
 int FLAGS_num_threads = 1;
 uint32_t FLAGS_xnn_runtime_flags = 0;
 
+namespace {
+static const size_t kMinIterations = 10;
+}  // namespace
+
 struct ModelRuntime {
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> model;
   pthreadpool_t threadpool = nullptr;
@@ -116,11 +120,15 @@ static void BenchmarkInvoke(benchmark::State& state,
     return;
   }
 
-  for (auto _ : state) {
-    benchmark::utils::WipePthreadpoolL2Caches(state, model_runtime.threadpool);
-    if (!model_runtime.Invoke()) {
-      state.SkipWithError("failed to invoke runtime");
-      return;
+  while (state.KeepRunningBatch(kMinIterations)) {
+    for (int iter = 0; iter < kMinIterations; iter++) {
+      benchmark::utils::WipePthreadpoolL2Caches(state,
+                                                model_runtime.threadpool);
+
+      if (!model_runtime.Invoke()) {
+        state.SkipWithError("failed to invoke runtime");
+        return;
+      }
     }
   }
 
