@@ -152,7 +152,7 @@ static enum xnn_status reshape_convert_operator(
       size_t num_groups = xnn_shape_multiply_batch_dims(&input_value->shape, 2);
       size_t batch_size = input_value->shape.dim[num_input_dims - 2];
       const size_t channels = input_value->shape.dim[num_input_dims - 1];
-      if (output_value->squash_groups) {
+      if (output_value->flags & XNN_FLAG_SQUASH_GROUPS) {
         batch_size *= num_groups;
         num_groups = 1;
       }

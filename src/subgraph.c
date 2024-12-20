@@ -203,7 +203,6 @@ void xnn_value_copy(
   dst_value->fp16_temp_data = src_value->fp16_temp_data;
   dst_value->fp32_data = src_value->fp32_data;
   dst_value->gemm_config = src_value->gemm_config;
-  dst_value->squash_groups = src_value->squash_groups;
 }
 
 struct xnn_node* xnn_subgraph_new_node(xnn_subgraph_t subgraph)
@@ -1507,7 +1506,7 @@ void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
           // To prevent issues with packing, coerce the shape of the inputs from
           // `[B, M, K]` to `[B * M, K]` for the fully-connected op.
           if (consumer_type == xnn_consumer_type_fully_connected) {
-            output->squash_groups = true;
+            output->flags |= XNN_FLAG_SQUASH_GROUPS;
           }
         }
       }

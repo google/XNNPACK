@@ -616,7 +616,7 @@ size_t xnn_tensor_get_size(const struct xnn_value* value)
     size_t num_groups = xnn_shape_multiply_batch_dims(&value->shape, 2);
     size_t m = value->shape.dim[value->shape.num_dims - 2];
     const size_t k = value->shape.dim[value->shape.num_dims - 1];
-    if (value->squash_groups) {
+    if (value->flags & XNN_FLAG_SQUASH_GROUPS) {
       m *= num_groups;
       num_groups = 1;
     }
