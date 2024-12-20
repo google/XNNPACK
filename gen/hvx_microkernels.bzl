@@ -104,6 +104,7 @@ NON_PROD_HVX_MICROKERNEL_SRCS = [
     "src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u64.c",
     "src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u96.c",
     "src/qs8-vadd/gen/qs8-vadd-minmax-hvx-u128.c",
+    "src/x32-packw/gen/x32-packw-gio-hvx-u2.c",
 ]
 
 ALL_HVX_MICROKERNEL_SRCS = PROD_HVX_MICROKERNEL_SRCS + NON_PROD_HVX_MICROKERNEL_SRCS

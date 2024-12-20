@@ -82,9 +82,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_10x16c4__avx512vnni(
     c9 = c8;
   }
 
-  const __m512i vsign_mask = _mm512_set1_epi8(0x80);
-  XNN_FORCE_REALIZATION(vsign_mask);
-  const __m512i vinput_zero_point = _mm512_set1_epi32((int) quantization_params->zero_point + 128);
+  const __m512i vinput_zero_point = _mm512_set1_epi32((int) quantization_params->zero_point);
   const __m512 vinput_inv_scale = _mm512_set1_ps(quantization_params->inv_scale);
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
@@ -182,35 +180,35 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_10x16c4__avx512vnni(
 
       size_t k = kc;
       while (k >= 8 * sizeof(int8_t)) {
-        const __m512i va0x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a0)), vsign_mask);
-        const __m512i va0x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a0 + 4)), vsign_mask);
+        const __m512i va0x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a0));
+        const __m512i va0x4567 = _mm512_set1_epi32((int) unaligned_load_u32(a0 + 4));
         a0 += 8;
-        const __m512i va1x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a1)), vsign_mask);
-        const __m512i va1x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a1 + 4)), vsign_mask);
+        const __m512i va1x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a1));
+        const __m512i va1x4567 = _mm512_set1_epi32((int) unaligned_load_u32(a1 + 4));
         a1 += 8;
-        const __m512i va2x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a2)), vsign_mask);
-        const __m512i va2x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a2 + 4)), vsign_mask);
+        const __m512i va2x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a2));
+        const __m512i va2x4567 = _mm512_set1_epi32((int) unaligned_load_u32(a2 + 4));
         a2 += 8;
-        const __m512i va3x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a3)), vsign_mask);
-        const __m512i va3x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a3 + 4)), vsign_mask);
+        const __m512i va3x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a3));
+        const __m512i va3x4567 = _mm512_set1_epi32((int) unaligned_load_u32(a3 + 4));
         a3 += 8;
-        const __m512i va4x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a4)), vsign_mask);
-        const __m512i va4x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a4 + 4)), vsign_mask);
+        const __m512i va4x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a4));
+        const __m512i va4x4567 = _mm512_set1_epi32((int) unaligned_load_u32(a4 + 4));
         a4 += 8;
-        const __m512i va5x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a5)), vsign_mask);
-        const __m512i va5x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a5 + 4)), vsign_mask);
+        const __m512i va5x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a5));
+        const __m512i va5x4567 = _mm512_set1_epi32((int) unaligned_load_u32(a5 + 4));
         a5 += 8;
-        const __m512i va6x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a6)), vsign_mask);
-        const __m512i va6x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a6 + 4)), vsign_mask);
+        const __m512i va6x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a6));
+        const __m512i va6x4567 = _mm512_set1_epi32((int) unaligned_load_u32(a6 + 4));
         a6 += 8;
-        const __m512i va7x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a7)), vsign_mask);
-        const __m512i va7x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a7 + 4)), vsign_mask);
+        const __m512i va7x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a7));
+        const __m512i va7x4567 = _mm512_set1_epi32((int) unaligned_load_u32(a7 + 4));
         a7 += 8;
-        const __m512i va8x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a8)), vsign_mask);
-        const __m512i va8x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a8 + 4)), vsign_mask);
+        const __m512i va8x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a8));
+        const __m512i va8x4567 = _mm512_set1_epi32((int) unaligned_load_u32(a8 + 4));
         a8 += 8;
-        const __m512i va9x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a9)), vsign_mask);
-        const __m512i va9x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a9 + 4)), vsign_mask);
+        const __m512i va9x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a9));
+        const __m512i va9x4567 = _mm512_set1_epi32((int) unaligned_load_u32(a9 + 4));
         a9 += 8;
 
         const __m512i vb0123456789ABCDEFx0123 = _mm512_load_si512(w);
@@ -242,25 +240,25 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_10x16c4__avx512vnni(
       }
 
       if (k != 0) {
-        const __m512i va0x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a0)), vsign_mask);
+        const __m512i va0x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a0));
         a0 += 4;
-        const __m512i va1x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a1)), vsign_mask);
+        const __m512i va1x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a1));
         a1 += 4;
-        const __m512i va2x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a2)), vsign_mask);
+        const __m512i va2x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a2));
         a2 += 4;
-        const __m512i va3x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a3)), vsign_mask);
+        const __m512i va3x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a3));
         a3 += 4;
-        const __m512i va4x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a4)), vsign_mask);
+        const __m512i va4x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a4));
         a4 += 4;
-        const __m512i va5x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a5)), vsign_mask);
+        const __m512i va5x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a5));
         a5 += 4;
-        const __m512i va6x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a6)), vsign_mask);
+        const __m512i va6x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a6));
         a6 += 4;
-        const __m512i va7x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a7)), vsign_mask);
+        const __m512i va7x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a7));
         a7 += 4;
-        const __m512i va8x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a8)), vsign_mask);
+        const __m512i va8x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a8));
         a8 += 4;
-        const __m512i va9x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a9)), vsign_mask);
+        const __m512i va9x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a9));
         a9 += 4;
 
         const __m512i vb0123456789ABCDEF = _mm512_load_si512(w);

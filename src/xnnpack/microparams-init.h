@@ -163,8 +163,7 @@ DECLARE_INIT_REDUCE_PARAMS_FUNCTION(xnn_init_qu8_reduce_scalar_params);
 #define DECLARE_UPDATE_REDUCE_PARAMS_FUNCTION(fn_name)          \
   XNN_INTERNAL size_t fn_name(                                  \
       struct xnn_reduce_params params[XNN_MIN_ELEMENTS(1)],     \
-      float scale,                                              \
-      int32_t num_elements);
+      float scale);
 
 DECLARE_UPDATE_REDUCE_PARAMS_FUNCTION(xnn_update_f32_reduce_scalar_params);
 DECLARE_UPDATE_REDUCE_PARAMS_FUNCTION(xnn_update_qs8_reduce_scalar_params);
@@ -271,7 +270,6 @@ DECLARE_INIT_UNARY_MICROPARAMS_FUNCTION(xnn_init_qs8_f16_cvt_scalar_params);
 DECLARE_INIT_UNARY_MICROPARAMS_FUNCTION(xnn_init_qs8_f32_cvt_scalar_params);
 DECLARE_INIT_UNARY_MICROPARAMS_FUNCTION(xnn_init_qu8_cvt_scalar_params);
 DECLARE_INIT_UNARY_MICROPARAMS_FUNCTION(xnn_init_qu8_f32_cvt_scalar_params);
-DECLARE_INIT_UNARY_MICROPARAMS_FUNCTION(xnn_init_s32_f32_cvt_scalar_params);
 
 XNN_INTERNAL size_t xnn_init_qs8_add_minmax_scalar_params(
     struct xnn_qs8_add_minmax_params uparams[XNN_MIN_ELEMENTS(1)],

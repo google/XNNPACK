@@ -25,6 +25,7 @@
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/buffer.h"
+#include "xnnpack/common.h"
 #include "xnnpack/datatype.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
@@ -357,8 +358,8 @@ class BinaryElementwiseOperatorTester {
     xnnpack::Buffer<T> input2(XNN_EXTRA_BYTES + num_input2_elements());
     xnnpack::Buffer<T> output(num_output_elements);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      randomize_buffer(datatype(), rng, dist, input1);
-      randomize_buffer(datatype(), rng, dist, input2);
+      xnnpack::randomize_buffer(datatype(), rng, dist, input1);
+      xnnpack::randomize_buffer(datatype(), rng, dist, input2);
 
       if (mode == RunMode::kCreateReshapeRun) {
         // Create, setup, run, and destroy a binary elementwise operator.
@@ -486,8 +487,8 @@ class BinaryElementwiseOperatorTester {
   }
 
   // ValidateResults for integral (but non-quantized) types.
-  template <typename T,
-            typename std::enable_if<std::is_integral<T>::value>::type* = nullptr>
+  template <typename T, typename std::enable_if<
+                            std::is_integral<T>::value>::type* = nullptr>
   void ValidateResults(
       const xnnpack::Buffer<T>& input1,
       const std::array<size_t, XNN_MAX_TENSOR_DIMS>& input1_strides,
@@ -497,7 +498,7 @@ class BinaryElementwiseOperatorTester {
       const std::array<size_t, XNN_MAX_TENSOR_DIMS>& output_strides,
       const std::array<size_t, XNN_MAX_TENSOR_DIMS>& output_dims) {
     // Verify results.
-    static_assert(!xnnpack::is_quantized<T>::value);
+    static_assert(!xnnpack::is_quantized<T>::value, "");
     MinMaxLow limits = DatatypeMinMaxLow(datatype());
     for (size_t i = 0; i < output_dims[0]; i++) {
       for (size_t j = 0; j < output_dims[1]; j++) {
@@ -546,8 +547,8 @@ class BinaryElementwiseOperatorTester {
   }
 
   // ValidateResults for all other types (float variants).
-  template <typename T,
-            typename std::enable_if<!std::is_integral<T>::value>::type* = nullptr>
+  template <typename T, typename std::enable_if<
+                            !std::is_integral<T>::value>::type* = nullptr>
   void ValidateResults(
       const xnnpack::Buffer<T>& input1,
       const std::array<size_t, XNN_MAX_TENSOR_DIMS>& input1_strides,
@@ -557,7 +558,7 @@ class BinaryElementwiseOperatorTester {
       const std::array<size_t, XNN_MAX_TENSOR_DIMS>& output_strides,
       const std::array<size_t, XNN_MAX_TENSOR_DIMS>& output_dims) {
     // Verify results.
-    static_assert(!xnnpack::is_quantized<T>::value);
+    static_assert(!xnnpack::is_quantized<T>::value, "");
     MinMaxLow limits = DatatypeMinMaxLow(datatype());
     for (size_t i = 0; i < output_dims[0]; i++) {
       for (size_t j = 0; j < output_dims[1]; j++) {

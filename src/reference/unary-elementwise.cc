@@ -128,7 +128,7 @@ struct ConvertOp {
   }
 };
 
-#ifdef XNN_HAVE_FLOAT16
+#if XNN_HAVE_FLOAT16
 template <>
 struct ConvertOp<xnn_bfloat16, _Float16> {
   explicit ConvertOp(const xnn_unary_uparams*) {}

@@ -25,6 +25,7 @@
 #include "xnnpack/buffer.h"
 #include "xnnpack/cache.h"
 #include "xnnpack/common.h"
+#include "xnnpack/config.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microparams.h"
 #include "convolution-test-helpers.h"

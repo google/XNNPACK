@@ -350,6 +350,11 @@ struct gemm_context {
       size_t mr_block_size,
       size_t nr_block_size);
 
+  XNN_PRIVATE void xnn_compute_grouped_qp8gemm(
+      const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t group_index, size_t mr_block_start, size_t nr_block_start,
+      size_t mr_block_size, size_t nr_block_size);
+
   XNN_PRIVATE void xnn_compute_dqgemm(
       const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t mr_block_start,
@@ -377,6 +382,11 @@ struct gemm_context {
         size_t nr_block_start,
         size_t mr_block_size,
         size_t nr_block_size);
+
+    XNN_PRIVATE void xnn_compute_hmp_grouped_qp8gemm(
+        const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+        uint32_t uarch_index, size_t group_index, size_t mr_block_start,
+        size_t nr_block_start, size_t mr_block_size, size_t nr_block_size);
 
     XNN_PRIVATE void xnn_compute_hmp_gemm(
         const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
@@ -1198,29 +1208,6 @@ struct elementwise_binary_context {
       size_t i, size_t j, size_t k, size_t l, size_t m);
 #endif
 
-struct channel_shuffle_context {
-  const void* x;
-  size_t x_stride;
-  void* y;
-  size_t y_stride;
-  size_t n;
-  size_t m;
-  union {
-    xnn_zipc_ukernel_fn fixed_ukernel;
-    xnn_zipv_ukernel_fn variable_ukernel;
-  };
-};
-
-#ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_channel_shuffle_fixed(
-      const struct channel_shuffle_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t index);
-
-  XNN_PRIVATE void xnn_compute_channel_shuffle_variable(
-      const struct channel_shuffle_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t index);
-#endif
-
 struct lut_strided_context {
   size_t n;
   const void* x;
@@ -1302,9 +1289,8 @@ struct reduce_context {
     xnn_rdsum_ukernel_fn rdsum;
   } ukernel;
   xnn_vunary_ukernel_fn cvt_ukernel;
-  xnn_vunary_ukernel_fn s32_f32_cvt_ukernel;
-  xnn_vunary_ukernel_fn u32_f32_cvt_ukernel;
   struct xnn_reduce_params params;
+  union xnn_unary_uparams cvt_params;
 };
 
 #ifndef __cplusplus
@@ -1438,8 +1424,17 @@ struct f32_qd8_convert_context {
       const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index);
 
+  XNN_PRIVATE void xnn_compute_f16_qdu8_convert(
+      const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index);
+
   XNN_PRIVATE void xnn_compute_f32_qd8_convert(
       const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_index);
+
+  XNN_PRIVATE void xnn_compute_f32_qdu8_convert(
+      const struct f32_qd8_convert_context
+          context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index);
 
   XNN_PRIVATE void xnn_compute_pad_qd8_params(
@@ -1471,6 +1466,7 @@ struct f32_qd8_convert_context {
     size_t mr;
     size_t kr;
     size_t sr;
+    size_t group_stride;
     const float* XNN_RESTRICT lhs;
     size_t lhs_stride;
     int8_t* XNN_RESTRICT lhs_packed;
@@ -1481,7 +1477,7 @@ struct f32_qd8_convert_context {
   XNN_PRIVATE void xnn_compute_f32_qp8_convert(
       const struct f32_qp8_convert_context
           context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t m_idx_start);
+      size_t group_idx, size_t m_idx_start, size_t m_tile);
 #endif
 
   struct u8_softmax_context {

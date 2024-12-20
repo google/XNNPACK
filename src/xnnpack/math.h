@@ -510,9 +510,13 @@ XNN_INLINE static uint16_t math_cvt_bf16_fp32(float x) {
 #define XNN_HAVE_FLOAT16 1
 #endif
 
+#ifndef XNN_HAVE_FLOAT16
+#define XNN_HAVE_FLOAT16 0
+#endif
+
 #endif  // XNN_HAVE_FLOAT16
 
-#ifdef XNN_HAVE_FLOAT16
+#if XNN_HAVE_FLOAT16
 typedef _Float16 xnn_float16;
 #else
 // We want float16s to be a distinct type from uint16_t, to avoid accidental
@@ -550,7 +554,7 @@ extern "C" {
 #endif
 
 XNN_INLINE static xnn_float16 xnn_float16_from_float(float f) {
-#ifdef XNN_HAVE_FLOAT16
+#if XNN_HAVE_FLOAT16
   return (xnn_float16) f;
 #else
   struct xnn_float16 result;
@@ -560,7 +564,7 @@ XNN_INLINE static xnn_float16 xnn_float16_from_float(float f) {
 }
 
 XNN_INLINE static float xnn_float16_to_float(xnn_float16 fp16) {
-#ifdef XNN_HAVE_FLOAT16
+#if XNN_HAVE_FLOAT16
   return (float) fp16;
 #else
   return fp16_ieee_to_fp32_value(fp16.value);
@@ -602,7 +606,7 @@ XNN_INLINE static xnn_bfloat16 xnn_bfloat16_from_bits(uint16_t x) {
 }
 
 XNN_INLINE static xnn_float16 xnn_float16_zero() {
-#ifdef XNN_HAVE_FLOAT16
+#if XNN_HAVE_FLOAT16
   return (xnn_float16) 0.0f;
 #else
   struct xnn_float16 result;

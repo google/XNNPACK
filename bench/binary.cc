@@ -33,7 +33,7 @@ void init_params(xnn_binary_operator op_type, xnn_datatype datatype,
                  xnn_binary_params& params,
                  xnn_quantization_params& input_quantization,
                  xnn_quantization_params& output_quantization) {
-  switch (op_type) {
+  switch (datatype) {
     case xnn_datatype_qint8:
       input_quantization = {0, 1.0f / 128.0f};
       output_quantization = {128, 1.0f / 128.0f};

@@ -316,6 +316,21 @@ selects.config_setting_group(
 )
 
 selects.config_setting_group(
+    name = "x86_64",
+    match_any = [
+        ":android_x86_64",
+        ":ios_x86_64",
+        ":linux_k8",
+        ":macos_x86_64",
+        ":macos_x86_64_legacy",
+        ":tvos_x86_64",
+        ":watchos_x86_64",
+        ":windows_x86_64_clang",
+        ":windows_x86_64_mingw",
+    ],
+)
+
+selects.config_setting_group(
     name = "riscv",
     match_any = [":linux_riscv64"],
 )

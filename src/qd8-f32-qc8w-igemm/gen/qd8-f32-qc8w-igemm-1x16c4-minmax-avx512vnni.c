@@ -46,9 +46,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512vnni(
   kc = round_up_po2(kc, 4 * sizeof(int8_t));
   float* c0 = c;
 
-  const __m512i vsign_mask = _mm512_set1_epi8(0x80);
-  XNN_FORCE_REALIZATION(vsign_mask);
-  const __m512i vinput_zero_point = _mm512_set1_epi32((int) quantization_params->zero_point + 128);
+  const __m512i vinput_zero_point = _mm512_set1_epi32((int) quantization_params->zero_point);
   const __m512 vinput_inv_scale = _mm512_set1_ps(quantization_params->inv_scale);
   const __m512 voutput_min = _mm512_set1_ps(params->scalar.min);
   const __m512 voutput_max = _mm512_set1_ps(params->scalar.max);
@@ -74,8 +72,8 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512vnni(
 
       size_t k = kc;
       while (k >= 8 * sizeof(int8_t)) {
-        const __m512i va0x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a0)), vsign_mask);
-        const __m512i va0x4567 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a0 + 4)), vsign_mask);
+        const __m512i va0x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a0));
+        const __m512i va0x4567 = _mm512_set1_epi32((int) unaligned_load_u32(a0 + 4));
         a0 += 8;
 
         const __m512i vb0123456789ABCDEFx0123 = _mm512_load_si512(w);
@@ -89,7 +87,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x16c4__avx512vnni(
       }
 
       if (k != 0) {
-        const __m512i va0x0123 = _mm512_xor_epi32(_mm512_set1_epi32((int) unaligned_load_u32(a0)), vsign_mask);
+        const __m512i va0x0123 = _mm512_set1_epi32((int) unaligned_load_u32(a0));
         a0 += 4;
 
         const __m512i vb0123456789ABCDEF = _mm512_load_si512(w);

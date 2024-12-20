@@ -88,4 +88,5 @@ const UnaryOpInfo* GetUnaryOpInfo(xnn_unary_operator op) {
     case xnn_unary_invalid:
       return nullptr;
   }
+  return nullptr;
 }

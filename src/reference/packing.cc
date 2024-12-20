@@ -23,11 +23,13 @@
 #include "xnnpack/unaligned.h"
 
 #if XNN_ENABLE_KLEIDIAI
-  #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme.h"
-  #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0.h"
-  #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4cxp_qs4cxs1s0.h"
-  #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0.h"
-  #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qs4cxs1s0.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4cxp_qs4cxs1s0.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi8cxp_qsi8cx_neon.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qs4cxs1s0.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi8cxp_qsi8cx_neon.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
 
@@ -1553,6 +1555,86 @@ void xnn_pack_kai_qs4_weights_and_biases(
         /*rhs_packed=*/packed_weights_ptr,
         /*extra_bytes=*/0,
         &kai_params);
+  }
+}
+
+size_t xnn_packed_stride_kai_qs8_weights_and_biases(
+    const struct xnn_gemm_config* gemm_config, size_t k, size_t unused_k_stride,
+    size_t extra_bytes) {
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  return kai_get_rhs_packed_stride_rhs_pack_kxn_qsi8cxp_qsi8cx_neon(k, /*nr=*/1,
+                                                                    kr, sr);
+}
+
+void xnn_pack_kai_qs8_weights_and_biases(
+    uint32_t flags, const struct xnn_gemm_config* gemm_config,
+    size_t input_channels, size_t output_channels, size_t groups,
+    size_t k_stride, const void* accumulator_init, const void* weights,
+    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
+    size_t extra_data0_element_size,
+    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
+    size_t extra_data1_element_size, void* packed_weights_ptr,
+    const void* params) {
+  const uint32_t nr = gemm_config->nr;
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  const struct xnn_qs8_qc8w_packing_params* xnn_params =
+      reinterpret_cast<const struct xnn_qs8_qc8w_packing_params*>(params);
+
+  // Repack the packing params.
+  struct kai_rhs_pack_qsi8cx_params kai_params;
+  kai_params.lhs_zero_point = xnn_params->input_zero_point;
+  kai_params.scale_multiplier = xnn_params->scale_multiplier;
+
+  const size_t weights_group_stride =
+      sizeof(int8_t) * input_channels * output_channels;
+  const size_t n_stride = round_up(output_channels, nr);
+  const size_t packed_weights_group_stride =
+      n_stride * xnn_packed_stride_kai_qs8_weights_and_biases(
+                     gemm_config, input_channels, k_stride,
+                     extra_data0_element_size + extra_data1_element_size);
+
+  if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    for (size_t group = 0; group < groups; group++) {
+      kai_run_rhs_pack_kxn_qsi8cxp_qsi8cx_neon(
+          /*groups=*/1, output_channels, input_channels, nr, kr, sr,
+          /*rhs=*/
+          reinterpret_cast<const int8_t*>((uintptr_t)weights +
+                                          group * weights_group_stride),
+          /*bias=*/
+          extra_data0 ? reinterpret_cast<const float*>(extra_data0) +
+                            group * output_channels
+                      : NULL,
+          /*scale=*/
+          extra_data1 ? reinterpret_cast<const float*>(extra_data1) +
+                            group * output_channels
+                      : NULL,
+          /*rhs_packed=*/
+          (void*)((uintptr_t)packed_weights_ptr +
+                  group * packed_weights_group_stride),
+          /*extra_bytes=*/0, &kai_params);
+    }
+  } else {
+    for (size_t group = 0; group < groups; group++) {
+      kai_run_rhs_pack_nxk_qsi8cxp_qsi8cx_neon(
+          /*groups=*/1, output_channels, input_channels, nr, kr, sr,
+          /*rhs=*/
+          reinterpret_cast<const int8_t*>((uintptr_t)weights +
+                                          group * weights_group_stride),
+          /*bias=*/
+          extra_data0 ? reinterpret_cast<const float*>(extra_data0) +
+                            group * output_channels
+                      : NULL,
+          /*scale=*/
+          extra_data1 ? reinterpret_cast<const float*>(extra_data1) +
+                            group * output_channels
+                      : NULL,
+          /*rhs_packed=*/
+          (void*)((uintptr_t)packed_weights_ptr +
+                  group * packed_weights_group_stride),
+          /*extra_bytes=*/0, &kai_params);
+    }
   }
 }
 

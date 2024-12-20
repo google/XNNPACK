@@ -11,6 +11,7 @@
 #include "xnnpack/memory-planner.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/subgraph.h"
+#include "runtime-flags.h"
 #include "runtime-tester.h"
 #include "subgraph-tester.h"
 
@@ -212,7 +213,7 @@ TEST(MemoryPlanner, LeakyReluInPlaceAfterConv) {
         input_id, filter_id, bias_id, conv_out)
     .AddLeakyRelu(1.0f, conv_out, leaky_relu_out)
     .AddClamp(0.0f, 1.0f, leaky_relu_out, output_id);
-  tester.CreateRuntime();
+  tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
 
   xnn_runtime_t runtime = tester.Runtime();
@@ -256,7 +257,7 @@ TEST(MemoryPlanner, LeakyReluWithTwoConsumersCannotBeInPlace) {
     .AddLeakyRelu(1.0f, conv_out, leaky_relu_out)
     .AddClamp(0.0f, 1.0f, leaky_relu_out, output_id)
     .AddClamp(1.0f, 2.0f, leaky_relu_out, output_id2);
-  tester.CreateRuntime();
+  tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
 
   xnn_runtime_t runtime = tester.Runtime();
@@ -302,7 +303,7 @@ TEST(MemoryPlanner, HardSwishAndLeakyReluInPlaceAfterConv) {
     .AddLeakyRelu(1.0f, conv_out, leaky_relu_out)
     .AddHardSwish(leaky_relu_out, hard_swish_out)
     .AddClamp(0.0f, 1.0f, hard_swish_out, output_id);
-  tester.CreateRuntime();
+  tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
 
   xnn_runtime_t runtime = tester.Runtime();
@@ -327,7 +328,7 @@ TEST(MemoryPlanner, ExternalInputsCannotBeInPlace) {
       .AddOutputTensorF32({1, 3, 3, 3}, output_id)
       .AddLeakyRelu(1.0f, input_id, leaky_relu_out)
       .AddClamp(0.0f, 1.0f, leaky_relu_out, output_id);
-  tester.CreateRuntime();
+  tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
 
   xnn_runtime_t runtime = tester.Runtime();
@@ -353,7 +354,7 @@ TEST(MemoryPlanner, PersistentValuesCannotReuseInternalValues) {
       .AddClamp(0.0f, 1.0f, input_id, clamp_out_id)
       .AddLeakyRelu(1.0f, clamp_out_id, leaky_relu_out_id)
       .AddClamp(0.0f, 1.0f, leaky_relu_out_id, output_id);
-  tester.CreateRuntime();
+  tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
 
   xnn_runtime_t runtime = tester.Runtime();
@@ -379,7 +380,7 @@ TEST(MemoryPlanner, CannotReuseStaticValues) {
       .AddOutputTensorF32({1, 3, 3, 3}, output_id)
       .AddClamp(0.0f, 1.0f, static_id, clamp_out_id)
       .AddLeakyRelu(1.0f, clamp_out_id, output_id);
-  tester.CreateRuntime();
+  tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
 
   xnn_runtime_t runtime = tester.Runtime();
@@ -420,7 +421,7 @@ TEST(MemoryPlanner, Add2WithLHSConstantInPlace) {
         input_id, filter_id, bias_id, conv_out)
     .AddAddition(add_constant_input_id, conv_out, add_out_id)
     .AddLeakyRelu(1.0f, add_out_id, output_id);
-  tester.CreateRuntime();
+  tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
@@ -462,7 +463,7 @@ TEST(MemoryPlanner, Add2WithLHSConstant) {
         input_id, filter_id, bias_id, conv_out)
     .AddAddition(add_constant_input_id, conv_out, add_out_id)
     .AddLeakyRelu(1.0f, add_out_id, output_id);
-  tester.CreateRuntime();
+  tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
@@ -504,7 +505,7 @@ TEST(MemoryPlanner, Add2WithRHSConstantInPlace) {
         input_id, filter_id, bias_id, conv_out)
     .AddAddition(conv_out, add_constant_input_id, add_out_id)
     .AddLeakyRelu(1.0f, add_out_id, output_id);
-  tester.CreateRuntime();
+  tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
@@ -545,7 +546,7 @@ TEST(MemoryPlanner, Mul2WithLHSConstant) {
         input_id, filter_id, bias_id, conv_out)
     .AddMultiply(mul_constant_input_id, conv_out, mul_out_id)
     .AddLeakyRelu(1.0f, mul_out_id, output_id);
-  tester.CreateRuntime();
+  tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
@@ -586,7 +587,7 @@ TEST(MemoryPlanner, Mul2WithRHSConstant) {
         input_id, filter_id, bias_id, conv_out)
     .AddMultiply(conv_out, mul_constant_input_id, mul_out_id)
     .AddLeakyRelu(1.0f, mul_out_id, output_id);
-  tester.CreateRuntime();
+  tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
@@ -639,7 +640,7 @@ TEST(MemoryPlanner, Add2WithImplicitBroadcast) {
         input2_id, filter_id, bias_id, conv_out)
     .AddAddition(hard_swish_out, conv_out, add_out)
     .AddLeakyRelu(1.0f, add_out, output_id);
-  tester.CreateRuntime();
+  tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
@@ -707,7 +708,7 @@ TEST(MemoryPlanner, Add2WithInputMultipleConsumers) {
         /*output_id=*/max_pooling_2d_out)
     .AddAddition(conv_out, max_pooling_2d_out, add_out)
     .AddLeakyRelu(1.0f, add_out, output_id);
-  tester.CreateRuntime();
+  tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
 
@@ -749,7 +750,7 @@ TEST(MemoryPlanner, FullyConnectedDynamicFilterDynamicBias) {
       .AddConstantPad({1}, {0}, 0.0f, input3_id, bias_id)
       .AddFullyConnected(input1_id, filter_id, bias_id, output_id);
 
-  tester.CreateRuntime();
+  tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
   xnn_operator_data* fc_opdata = &runtime->opdata[2];
@@ -787,7 +788,7 @@ TEST(MemoryPlanner, FullyConnectedDynamicFilterStaticBias) {
       .AddConstantPad({0, 0, 0, 1}, {0, 0, 0, 0}, 0.0f, input2_id, filter_id)
       .AddFullyConnected(input1_id, filter_id, bias_id, output_id);
 
-  tester.CreateRuntime();
+  tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
   xnn_operator_data* fc_opdata = &runtime->opdata[1];
@@ -823,7 +824,7 @@ TEST(MemoryPlanner, FullyConnectedDynamicFilterNoBias) {
       .AddConstantPad({0, 0, 0, 1}, {0, 0, 0, 0}, 0.0f, input2_id, filter_id)
       .AddFullyConnected(input1_id, filter_id, bias_id, output_id);
 
-  tester.CreateRuntime();
+  tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
   xnn_operator_data* fc_opdata = &runtime->opdata[1];
@@ -860,7 +861,7 @@ TEST(MemoryPlanner, FullyConnectedStaticFilterDynamicBias) {
       .AddConstantPad({1}, {0}, 0.0f, input3_id, bias_id)
       .AddFullyConnected(input1_id, filter_id, bias_id, output_id);
 
-  tester.CreateRuntime();
+  tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
   xnn_operator_data* fc_opdata = &runtime->opdata[1];
@@ -891,7 +892,7 @@ TEST(MemoryPlanner, FullyConnectedExternalFilterExternalBias) {
       .AddOutputTensorF32({2, 3, 3, 2}, output_id)
       .AddFullyConnected(input_id, filter_id, bias_id, output_id);
 
-  tester.CreateRuntime();
+  tester.CreateRuntime(xnn_test_runtime_flags());
   tester.SetupRuntime();
   xnn_runtime_t runtime = tester.Runtime();
   xnn_operator_data* fc_opdata = &runtime->opdata[0];

@@ -82,15 +82,9 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
         c${M} = c${M-1};
       }
 
-  $if VARIANT != "AVXVNNIINT8":
-    const __m256i vsign_mask = _mm256_set1_epi8(0x80);
-    XNN_FORCE_REALIZATION(vsign_mask);
   $if DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
     $for M in range(MR):
-      $if VARIANT == "AVXVNNIINT8":
-        const __m256i vinput_zero_point${M} = _mm256_set1_epi32((int) quantization_params[${M}].zero_point);
-      $else:
-        const __m256i vinput_zero_point${M} = _mm256_set1_epi32((int) quantization_params[${M}].zero_point + 128);
+      const __m256i vinput_zero_point${M} = _mm256_set1_epi32((int) quantization_params[${M}].zero_point);
     $if "F16" in DATATYPE:
       const __m256 voutput_min = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.min));
       const __m256 voutput_max = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
@@ -109,6 +103,9 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
         const __m256i vshl4 = _mm256_set1_epi64x(0x01020408);
         XNN_FORCE_REALIZATION(vshl4);
   $else:
+    $if VARIANT != "AVXVNNIINT8":
+      const __m256i vsign_mask = _mm256_set1_epi8(0x80);
+      XNN_FORCE_REALIZATION(vsign_mask);
     const __m256 voutput_max_less_zero_point = _mm256_set1_ps((int32_t) params->${PARAMS_STRUCT}.output_max - (int32_t) params->${PARAMS_STRUCT}.output_zero_point);
     const __m256i voutput_zero_point = _mm256_set1_epi32(params->${PARAMS_STRUCT}.output_zero_point);
     const __m128i voutput_min = _mm_set1_epi8(params->${PARAMS_STRUCT}.output_min);
@@ -137,7 +134,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
     size_t k = kc;
     while (k >= 16 * sizeof(int8_t)) {
       $for M in range(MR):
-        $if VARIANT == "AVXVNNIINT8":
+        $if VARIANT == "AVXVNNIINT8" or DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
           const __m256i va${M}x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M}));
           const __m256i va${M}x89ABCDEF = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M} + 8));
         $else:
@@ -197,7 +194,7 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x8c8__$
 
     if (k != 0) {
       $for M in range(MR):
-        $if VARIANT == "AVXVNNIINT8":
+        $if VARIANT == "AVXVNNIINT8" or DATATYPE in ["QD8_F16", "QD8_F32", "QC4_F16", "QC4_F32"]:
           const __m256i va${M}x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M}));
         $else:
           const __m256i va${M}x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a${M})), vsign_mask);

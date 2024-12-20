@@ -20,6 +20,7 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
 #include "subgraph-unary-tester.h"
+#include "runtime-flags.h"
 
 using StaticTransposeTestQS8 = UnaryTest<int8_t, int8_t, /*min_dim=*/1>;
 using StaticTransposeTestQU8 = UnaryTest<uint8_t, uint8_t, /*min_dim=*/1>;
@@ -273,7 +274,7 @@ TEST_F(StaticTransposeTestQS8, matches_operator_api)
     xnn_define_static_transpose(subgraph, perm.size(), perm.data(), input_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
 
@@ -335,7 +336,7 @@ TEST_F(StaticTransposeTestQU8, matches_operator_api)
     xnn_define_static_transpose(subgraph, perm.size(), perm.data(), input_id, output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
 
@@ -395,7 +396,7 @@ TEST_F(StaticTransposeTestF16, matches_operator_api)
   ASSERT_EQ(
     xnn_status_success,
     xnn_define_static_transpose(subgraph, perm.size(), perm.data(), input_id, output_id, /*flags=*/0));
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 2> external = {
@@ -454,7 +455,7 @@ TEST_F(StaticTransposeTestF32, matches_operator_api)
   ASSERT_EQ(
     xnn_status_success,
     xnn_define_static_transpose(subgraph, perm.size(), perm.data(), input_id, output_id, /*flags=*/0));
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
+  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
   std::array<xnn_external_value, 2> external = {
