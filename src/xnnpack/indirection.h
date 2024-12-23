@@ -211,9 +211,19 @@ XNN_INTERNAL void xnn_indirection_init_resize_bilinear2d_chw_f32(
   bool tensorflow_legacy);
 
 XNN_INTERNAL void xnn_indirection_init_unpool2d(
-  xnn_operator_t op,
-  size_t batch_start,
-  uint32_t log2_element_size);
+  const void** indirection_buffer,
+  const void* output,
+  const size_t output_pixel_stride,
+  const size_t batch_size,
+  const size_t input_height,
+  const size_t input_width,
+  const size_t output_height,
+  const size_t output_width,
+  const size_t kernel_height,
+  const size_t kernel_width,
+  const size_t output_padding_top,
+  const size_t output_padding_left,
+  size_t batch_start);
 
 typedef void (*xnn_indirection_init_pavgpool2d_fn)(
   size_t input_height,

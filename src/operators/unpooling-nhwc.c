@@ -216,7 +216,20 @@ enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
   xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
     indirection_buffer_size, xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32));
 
-  xnn_indirection_init_unpool2d(unpooling_op, valid_batch_size, /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT);
+  xnn_indirection_init_unpool2d(
+    unpooling_op->indirection_buffer,
+    unpooling_op->output,
+    unpooling_op->output_pixel_stride << XNN_LOG2_SIZEOF_FLOAT,
+    unpooling_op->batch_size,
+    unpooling_op->input_height,
+    unpooling_op->input_width,
+    unpooling_op->output_height,
+    unpooling_op->output_width,
+    unpooling_op->kernel_height,
+    unpooling_op->kernel_width,
+    unpooling_op->padding_top,
+    unpooling_op->padding_left,
+    valid_batch_size);
 
   const size_t channels = unpooling_op->channels;
   const size_t input_pixel_stride_in_bytes = unpooling_op->input_pixel_stride * sizeof(float);
