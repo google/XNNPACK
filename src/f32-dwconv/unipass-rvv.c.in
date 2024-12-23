@@ -8,7 +8,6 @@ $assert CHANNEL_TILE in ["m1", "m2", "m4", "m8"]
 $LMUL = int(CHANNEL_TILE[1])
 $assert KERNEL_TILE >= 2
 $assert ACTIVATION in ["LINEAR", "MINMAX"]
-$ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include <assert.h>
 #include <riscv_vector.h>
 #include "xnnpack/dwconv.h"
