@@ -76,7 +76,7 @@ DECLARE_X8_LUT_UKERNEL_FUNCTION(xnn_x8_lut_ukernel__wasmsimd_u64)
       const uint8_t* x,                            \
       const uint32_t* t,                           \
       uint8_t* y);
-#include "u8-lut32norm/u8-lut32norm.h"
+#include "src/u8-lut32norm/u8-lut32norm.h"
 #undef XNN_UKERNEL
 
 

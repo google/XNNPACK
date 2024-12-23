@@ -17,11 +17,10 @@
 
 #include <gtest/gtest.h>
 #include "src/xnnpack/lut.h"
-#include "test/lut-norm-microkernel-tester.h"
-#include "xnnpack/lut.h"
-#include "xnnpack/microfnptr.h"
-#include "xnnpack/buffer.h"
-#include "replicable_random_device.h"
+#include "src/xnnpack/lut.h"
+#include "src/xnnpack/microfnptr.h"
+#include "src/xnnpack/buffer.h"
+#include "test/replicable_random_device.h"
 
 class LUTNormMicrokernelTester {
  public:
@@ -145,5 +144,5 @@ class LUTNormMicrokernelTester {
   XNN_TEST_LUTNORM_N_EQ_1_INPLACE(ukernel, arch_flags, init_params);                                                   \
   XNN_TEST_LUTNORM_SMALL_N_INPLACE(ukernel, arch_flags, init_params);                                                  \
   XNN_TEST_LUTNORM_LARGE_N_INPLACE(ukernel, arch_flags, init_params);
-#include "u8-lut32norm/u8-lut32norm.h"
+#include "src/u8-lut32norm/u8-lut32norm.h"
 #undef XNN_UKERNEL_WITH_PARAMS
