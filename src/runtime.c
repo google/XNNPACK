@@ -482,6 +482,7 @@ void propagate_rank(
       case xnn_node_type_even_split2:
       case xnn_node_type_even_split3:
       case xnn_node_type_even_split4:
+      case xnn_node_type_even_split:
       case xnn_node_type_unary_elementwise:
       case xnn_node_type_convert:
       case xnn_node_type_pack_lh:

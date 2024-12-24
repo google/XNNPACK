@@ -1638,6 +1638,31 @@ enum xnn_status xnn_define_copy(
   uint32_t output_id,
   uint32_t flags);
 
+/// Define a n-Output Split Node and add it to a Subgraph.
+///
+/// The n-Output Split Node splits an input tensor into n output tensors along a specified axis evenly.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param split_dim - the dimension to split the input tensor along. If this is less than zero, the number of
+///                    dimensions is added to it.
+/// @param input_id - Value ID for the input tensor. The input tensor must be an N-dimensional tensor defined in the @a
+///                   subgraph.
+/// @param num_outputs - The number of output tensors to generate. The input tensor will be evenly split into 
+///                      this number of output tensors along the `split_dim`. Each output tensor will have 
+///                      the same dimensions as the input tensor, except for the `split_dim`, which will be 
+///                      divided evenly between the outputs.
+/// @param outputs - An array of Value IDs for the output tensors. Each output tensor must be an N-dimensional 
+///                  tensor defined in the @a subgraph with the same shape as the input tensor, except along the
+///                  `split_dim` dimension, which will be split evenly among the output tensors. The number of
+///                  output tensors corresponds to the value of `num_outputs`.
+enum xnn_status xnn_define_even_split(
+  xnn_subgraph_t subgraph,
+  int32_t split_dim,
+  uint32_t input_id,
+  uint32_t num_outputs,
+  const uint32_t* outputs,
+  uint32_t flags);
+
 /// Define a 2-Output Split Node and add it to a Subgraph.
 ///
 /// The 2-Output Split Node splits an input tensor into two output tensors along a specified axis evenly.
@@ -1654,7 +1679,7 @@ enum xnn_status xnn_define_copy(
 ///                     defined in the @a subgraph with each dimension, except the axis, equal to the corresponding
 ///                     dimension of the first output. The split_dim dimension is half of the input's split_dim.
 /// @param flags - binary features of the Split Node. No supported flags are currently defined.
-enum xnn_status xnn_define_even_split2(
+XNN_DEPRECATED enum xnn_status xnn_define_even_split2(
   xnn_subgraph_t subgraph,
   int32_t split_dim,
   uint32_t input_id,
@@ -1683,7 +1708,7 @@ enum xnn_status xnn_define_even_split2(
 ///                     dimension of the second and third output. The split_dim dimension is one third of the input's
 ///                     split_dim.
 /// @param flags - binary features of the Split Node. No supported flags are currently defined.
-enum xnn_status xnn_define_even_split3(
+XNN_DEPRECATED enum xnn_status xnn_define_even_split3(
   xnn_subgraph_t subgraph,
   int32_t split_dim,
   uint32_t input_id,
@@ -1717,7 +1742,7 @@ enum xnn_status xnn_define_even_split3(
 ///                     dimension of the other output tensors. The split_dim dimension is one fourth of the input's
 ///                     split_dim.
 /// @param flags - binary features of the Split Node. No supported flags are currently defined.
-enum xnn_status xnn_define_even_split4(
+XNN_DEPRECATED enum xnn_status xnn_define_even_split4(
   xnn_subgraph_t subgraph,
   int32_t split_dim,
   uint32_t input_id,
