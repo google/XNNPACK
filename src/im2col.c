@@ -20,6 +20,7 @@ void xnn_im2col_conv2d(
   size_t dilation_height,
   size_t dilation_width,
   size_t input_width,
+  size_t input_height,
   size_t input_padding_top,
   size_t input_padding_left,
   size_t group_input_channels_in_bytes,
@@ -31,10 +32,10 @@ void xnn_im2col_conv2d(
     for (size_t output_x = 0; output_x < output_width; output_x++) {
       for (size_t kernel_y = 0; kernel_y < kernel_height; kernel_y++) {
         const size_t input_y = output_y * subsampling_height + kernel_y * dilation_height - input_padding_top;
-        if (input_y < output_height) {
+        if (input_y < input_height) {
           for (size_t kernel_x = 0; kernel_x < kernel_width; kernel_x++) {
             const size_t input_x = output_x * subsampling_width + kernel_x * dilation_width - input_padding_left;
-            if (input_x < output_width) {
+            if (input_x < input_width) {
               memcpy(output,
                 (const void*) ((uintptr_t) input + (input_y * input_width + input_x) * input_pixel_stride_in_bytes),
                 group_input_channels_in_bytes);

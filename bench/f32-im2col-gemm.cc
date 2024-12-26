@@ -103,7 +103,7 @@ static void Im2ColGEMMBenchmark(benchmark::State& state,
         kernel_height, kernel_width,
         subsampling, subsampling,
         dilation, dilation,
-        input_width, padding_top, padding_left,
+        input_width, input_height, padding_top, padding_left,
         group_input_channels * sizeof(float) /* input channels */,
         group_input_channels * sizeof(float) /* input stride */,
         a.data(), im2col_buffer.data());
