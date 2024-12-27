@@ -478,6 +478,7 @@ void propagate_rank(
       case xnn_node_type_concatenate3:
       case xnn_node_type_concatenate4:
       case xnn_node_type_concatenate5:
+      case xnn_node_type_concatenate_n:
       case xnn_node_type_copy:
       case xnn_node_type_even_split2:
       case xnn_node_type_even_split3:

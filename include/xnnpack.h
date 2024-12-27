@@ -1479,6 +1479,38 @@ enum xnn_status xnn_define_static_reduce_v2(        //
     uint32_t output_id,                             //
     uint32_t flags);
 
+enum xnn_concatenate {
+  xnn_concatenate_invalid = -1,
+  xnn_concatenate2,
+  xnn_concatenate3,
+  xnn_concatenate4,
+  xnn_concatenate5,
+  xnn_concatenaten, 
+};
+
+/// Define a n-Input Concatenate Node and add it to a Subgraph.
+///
+/// The n-Input Concatenate Node concatenates 'n' tensors along a specified axis.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param axis - the axis to concatenate the two input tensors along. If this is less than zero, the number of
+///               dimensions is added to it.
+/// @param num_inputs - The number of input tensors to concatenate. Must be greater than or equal to 2.
+/// @param inputs - An array of Value IDs representing the input tensors. Each tensor must be an N-dimensional tensor defined in the @a subgraph.
+///                 All input tensors must have identical dimensions, except for the concatenation axis.
+/// @param output_id - Value ID for the output tensor. The output tensor must be a N-dimensional tensor defined
+///                    in the @a subgraph with each dimension equal to the dimension of both inputs, except the axis
+///                    dimension, where it is the sum of the corresponding dimensions of both inputs.
+/// @param flags - binary features of the Concatenate Node. No supported flags are currently defined.
+enum xnn_status xnn_define_concatenate(
+  xnn_subgraph_t subgraph,
+  enum xnn_concatenate type,
+  int32_t axis,
+  uint32_t num_inputs,
+  const uint32_t* inputs,
+  uint32_t output_id,
+  uint32_t flags);
+
 /// Define a 2-Input Concatenate Node and add it to a Subgraph.
 ///
 /// The 2-Input Concatenate Node concatenates two tensors along a specified axis.
@@ -1496,7 +1528,7 @@ enum xnn_status xnn_define_static_reduce_v2(        //
 ///                    in the @a subgraph with each dimension equal to the dimension of both inputs, except the axis
 ///                    dimension, where it is the sum of the corresponding dimensions of both inputs.
 /// @param flags - binary features of the Concatenate Node. No supported flags are currently defined.
-enum xnn_status xnn_define_concatenate2(
+XNN_DEPRECATED enum xnn_status xnn_define_concatenate2(
   xnn_subgraph_t subgraph,
   int32_t axis,
   uint32_t input1_id,
@@ -1524,7 +1556,7 @@ enum xnn_status xnn_define_concatenate2(
 ///                    in the @a subgraph with each dimension equal to the dimension of all inputs, except the axis
 ///                    dimension, where it is the sum of the corresponding dimensions of all inputs.
 /// @param flags - binary features of the Concatenate Node. No supported flags are currently defined.
-enum xnn_status xnn_define_concatenate3(
+XNN_DEPRECATED enum xnn_status xnn_define_concatenate3(
   xnn_subgraph_t subgraph,
   int32_t axis,
   uint32_t input1_id,
@@ -1556,7 +1588,7 @@ enum xnn_status xnn_define_concatenate3(
 ///                    in the @a subgraph with each dimension equal to the dimension of all inputs, except the axis
 ///                    dimension, where it is the sum of the corresponding dimensions of all inputs.
 /// @param flags - binary features of the Concatenate Node. No supported flags are currently defined.
-enum xnn_status xnn_define_concatenate4(
+XNN_DEPRECATED enum xnn_status xnn_define_concatenate4(
   xnn_subgraph_t subgraph,
   int32_t axis,
   uint32_t input1_id,
@@ -1591,7 +1623,7 @@ enum xnn_status xnn_define_concatenate4(
 /// @param output_id - Value ID for the output tensor. The output tensor must be a N-dimensional tensor defined
 ///                    in the @a subgraph with each dimension equal to the dimension of all inputs, except the axis
 ///                    dimension, where it is the sum of the corresponding dimensions of all inputs.
-enum xnn_status xnn_define_concatenate5(
+XNN_DEPRECATED enum xnn_status xnn_define_concatenate5(
   xnn_subgraph_t subgraph,
   int32_t axis,
   uint32_t input1_id,

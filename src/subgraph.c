@@ -878,6 +878,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_concatenate3:
       case xnn_node_type_concatenate4:
       case xnn_node_type_concatenate5:
+      case xnn_node_type_concatenate_n:
       case xnn_node_type_convert:
       case xnn_node_type_average_pooling_2d:
       case xnn_node_type_copy:

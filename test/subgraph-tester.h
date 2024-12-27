@@ -274,9 +274,10 @@ class SubgraphTester {
     return *this;
   }
 
-  SubgraphTester& AddConcatenate2(size_t axis, uint32_t input1_id, uint32_t input2_id, uint32_t output_id) {
-    const xnn_status status = xnn_define_concatenate2(
-        subgraph_.get(), axis, input1_id, input2_id, output_id, 0 /* flags */);
+ SubgraphTester& AddConcatenate2(size_t axis, uint32_t input1_id, uint32_t input2_id, uint32_t output_id) {
+    const uint32_t input_ids[] = {input1_id, input2_id}; // Create an array of input IDs
+    const xnn_status status = xnn_define_concatenate(
+        subgraph_.get(), xnn_concatenate2, axis, 2 /* num_inputs */, input_ids, output_id, 0 /* flags */);
     EXPECT_EQ(status, xnn_status_success);
     return *this;
   }
