@@ -147,6 +147,10 @@ def xnnpack_configurable_defines():
         ":arm_sme2_enabled",
         ["XNN_ENABLE_ARM_SME2=1"],
         ["XNN_ENABLE_ARM_SME2=0"],
+    ) + xnnpack_select_if(
+        ":wasm_revectorize_enabled",
+        ["XNN_ENABLE_WASM_REVECTORIZE=1"],
+        ["XNN_ENABLE_WASM_REVECTORIZE=0"],
     ) + xnnpack_slinky_defines()
 
 def _create_params(
