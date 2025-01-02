@@ -3690,6 +3690,9 @@ INSTANTIATE_TEST_SUITE_P(
                       xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
                       xnn_pack_qs8_gemm_goi_w,
                       xnn_qs8_requantize_fp32);
+        },
+        []() {
+          TEST_REQUIRES_RISCV_VECTOR;
         })),
     [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
       return info.param.test_name;
@@ -3708,6 +3711,9 @@ INSTANTIATE_TEST_SUITE_P(
                       xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
                       xnn_pack_qs8_gemm_goi_w,
                       xnn_qs8_requantize_fp32);
+        },
+        []() {
+          TEST_REQUIRES_RISCV_VECTOR;
         })),
     [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
       return info.param.test_name;

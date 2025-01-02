@@ -169,7 +169,7 @@ std::vector<GemmTestParams> CreateTests1(
             .a_stride(xnnpack::NextPrime(k_block * 3 + 1))
         , test_func, isa_check)
         .loop_n(nr + 1, nr * 2 - 1)
-        .loop_k(1, k_block * 3, k_block));
+        .loop_k(1, k_block * 3, k_block));  // +1
   }
   gemm_tests.push_back(GemmTestParams(
       "n_gt_" + nrs + "_subtile",
@@ -194,7 +194,7 @@ std::vector<GemmTestParams> CreateTests1(
             .a_stride(xnnpack::NextPrime(k_block * 3 + 1))
         , test_func, isa_check)
         .loop_n(nr * 2, nr * 3, nr)
-        .loop_k(1, k_block * 3, k_block));
+        .loop_k(1, k_block * 3, k_block)); // +1
   }
   gemm_tests.push_back(GemmTestParams(
       "n_div_" + nrs + "_subtile",
@@ -3190,13 +3190,16 @@ INSTANTIATE_TEST_SUITE_P(
         /*k_block=*/1,
         /*adj_k_block=*/1,
         /*mr=*/1, /*nr=*/4 * xnn_init_hardware_config()->vlenb / sizeof(int32_t), /*kr=*/1, /*sr=*/1,
-        /*is_igemm=*/false,
+        /*is_igemm=*/true,
         /*unsigned_inputs=*/false,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4v__rvv,
                       xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
                       xnn_pack_qs8_conv_goki_w,
                       xnn_qs8_requantize_fp32);
+        },
+        []() {
+          TEST_REQUIRES_RISCV_VECTOR;
         })),
     [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
       return info.param.test_name;
@@ -3208,13 +3211,16 @@ INSTANTIATE_TEST_SUITE_P(
         /*k_block=*/1,
         /*adj_k_block=*/1,
         /*mr=*/4, /*nr=*/4 * xnn_init_hardware_config()->vlenb / sizeof(int32_t), /*kr=*/1, /*sr=*/1,
-        /*is_igemm=*/false,
+        /*is_igemm=*/true,
         /*unsigned_inputs=*/false,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4v__rvv,
                       xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
                       xnn_pack_qs8_conv_goki_w,
                       xnn_qs8_requantize_fp32);
+        },
+        []() {
+          TEST_REQUIRES_RISCV_VECTOR;
         })),
     [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
       return info.param.test_name;

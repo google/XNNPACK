@@ -138,17 +138,15 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4v__rvv(
     vfpacc1 = __riscv_vfmin_vf_f32m4(vfpacc1, output_max_less_zero_point, vl);
     vfpacc2 = __riscv_vfmin_vf_f32m4(vfpacc2, output_max_less_zero_point, vl);
     vfpacc3 = __riscv_vfmin_vf_f32m4(vfpacc3, output_max_less_zero_point, vl);
+    vfpacc0 = __riscv_vfadd_vf_f32m4(vfpacc0, output_zero_point, vl);
+    vfpacc1 = __riscv_vfadd_vf_f32m4(vfpacc1, output_zero_point, vl);
+    vfpacc2 = __riscv_vfadd_vf_f32m4(vfpacc2, output_zero_point, vl);
+    vfpacc3 = __riscv_vfadd_vf_f32m4(vfpacc3, output_zero_point, vl);
 
     vint16m2_t vout0 = __riscv_vfncvt_x(vfpacc0, vl);
     vint16m2_t vout1 = __riscv_vfncvt_x(vfpacc1, vl);
     vint16m2_t vout2 = __riscv_vfncvt_x(vfpacc2, vl);
     vint16m2_t vout3 = __riscv_vfncvt_x(vfpacc3, vl);
-
-    vout0 = __riscv_vadd_vx_i16m2(vout0, (int16_t) output_zero_point, vl);
-    vout1 = __riscv_vadd_vx_i16m2(vout1, (int16_t) output_zero_point, vl);
-    vout2 = __riscv_vadd_vx_i16m2(vout2, (int16_t) output_zero_point, vl);
-    vout3 = __riscv_vadd_vx_i16m2(vout3, (int16_t) output_zero_point, vl);
-
     vint8m1_t vout80 = __riscv_vncvt_x_x_w_i8m1(vout0, vl);
     vint8m1_t vout81 = __riscv_vncvt_x_x_w_i8m1(vout1, vl);
     vint8m1_t vout82 = __riscv_vncvt_x_x_w_i8m1(vout2, vl);

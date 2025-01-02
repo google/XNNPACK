@@ -7,9 +7,6 @@ $assert DATATYPE in ["QD8", "QC4"] or REQUANTIZATION in ["FP32"]
 $assert DATATYPE in ["QC8", "QD8", "QC4", "QU8", "QS8"] 
 $assert MR >= 1
 $assert NR in ["m4", "m8"]
-$OUT_LMUL = NR
-$IN_LMUL = {"m4": "m1", "m8": "m2"}[OUT_LMUL]
-$INTER_LMUL = {"m4": "m2", "m8": "m4"}[OUT_LMUL]
 #include <assert.h>
 
 #include <riscv_vector.h>
@@ -17,6 +14,9 @@ $INTER_LMUL = {"m4": "m2", "m8": "m4"}[OUT_LMUL]
 #include "xnnpack/math.h"
 #include "xnnpack/igemm.h"
 
+$OUT_LMUL = NR
+$IN_LMUL = {"m4": "m1", "m8": "m2"}[OUT_LMUL]
+$INTER_LMUL = {"m4": "m2", "m8": "m4"}[OUT_LMUL]
 $DATATYPE_SPEC = {"QC8": "qs8_qc8w", "QD8": "qd8_f32_qc8w", "QC8": "qs8_qc8w", "QS8": "qs8", "QU8": "qu8"}[DATATYPE]
 $PARAMS_TYPE = {"QC8": "union xnn_qs8_qc8w_conv_minmax_params", "QD8": "union xnn_f32_minmax_params", "QS8": "union xnn_qs8_conv_minmax_params", "QU8": "union xnn_qu8_conv_minmax_params"}[DATATYPE]
 $if DATATYPE in ["QC8", "QS8", "QU8"]:
@@ -26,7 +26,7 @@ $else:
   $REQUANTIZATION_SPEC = ""
   $PARAMS_STRUCT = ""
 $XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
-$OUT_T = XINT8_T if REQUANTIZATION else "float"
+$OUT_T = {"QC8": "int8_t", "QD8": "float", "QC4": "float", "QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT_LMUL[1]}v__rvv(
     size_t mr,
     size_t nc,
@@ -43,7 +43,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT
       const int8_t* zero_data,
     $if DATATYPE in ["QD8", "QC4"]:
       const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)],
-      const struct ${SCALING_PARAMS} quantization_params[restrict XNN_MIN_ELEMENTS(1)])
+      const struct xnn_qd8_quantization_params quantization_params[restrict XNN_MIN_ELEMENTS(1)])
     $else:
       const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)])
 {
@@ -95,7 +95,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT
     $if DATATYPE == "QD8":
       vint32${OUT_LMUL}_t vksum = __riscv_vle32_v_i32${OUT_LMUL}((const int32_t*)w, vl);
       w = (const int32_t*) w + nr;
-      const int32_t vinput_zero_point = quantization_params.zero_point;
+      const int32_t vinput_zero_point = quantization_params->zero_point;
       $for M in range(MR):
         vint32${OUT_LMUL}_t vacc${M} = __riscv_vmul_vx_i32${OUT_LMUL}(vksum, vinput_zero_point, vl);
     $else:
@@ -145,6 +145,38 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT
     $if DATATYPE == "QD8":
       $for M in range(MR):
         vfloat32${OUT_LMUL}_t vfpacc${M} = __riscv_vfcvt_f_x_v_f32${OUT_LMUL}(vacc${M}, vl);
+
+      const float vinput_scale = quantization_params->inv_scale;
+      $for M in range(MR):
+        vfpacc${M} = __riscv_vfmul_vf_f32${OUT_LMUL}(vfpacc${M}, vinput_scale, vl);
+
+      const vfloat32${OUT_LMUL}_t vscale = __riscv_vle32_v_f32${OUT_LMUL}((const float*) w, vl);
+      $for M in range(MR):
+        vfpacc${M} = __riscv_vfmul_vv_f32${OUT_LMUL}(vfpacc${M}, vscale, vl);
+
+      w = (const void*) ((const float*) w + nr);
+
+      const vfloat32${OUT_LMUL}_t vbias = __riscv_vle32_v_f32${OUT_LMUL}((const float*) w, vl);
+      $for M in range(MR):
+        vfpacc${M} = __riscv_vfmul_vv_f32${OUT_LMUL}(vfpacc${M}, vbias, vl);
+
+      w = (const void*) ((const float*) w + nr);
+
+      const float voutput_min = params->scalar.min;
+      $for M in range(MR):
+        vfpacc${M} = __riscv_vfmax_vf_f32${OUT_LMUL}(vfpacc${M}, voutput_min, vl);
+
+      const float voutput_max = params->scalar.max;
+      $for M in range(MR):
+        vfpacc${M} = __riscv_vfmin_vf_f32${OUT_LMUL}(vfpacc${M}, voutput_max, vl);
+
+      $for M in range(MR):
+        __riscv_vse32_v_f32${OUT_LMUL}(c${M}, vfpacc${M}, vl);
+
+      $for M in reversed(range(MR)):
+        c${M} = (float*) ((uintptr_t) c${M} + cn_stride);
+
+      a = (const ${XINT8_T}**restrict) ((uintptr_t) a - ks);
     $else:
       $if REQUANTIZATION == "FP32":
         $for M in range(MR):
@@ -164,14 +196,12 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT
           vfpacc${M} = __riscv_vfmax_vf_f32${OUT_LMUL}(vfpacc${M}, output_min_less_zero_point, vl);
         $for M in range(MR):
           vfpacc${M} = __riscv_vfmin_vf_f32${OUT_LMUL}(vfpacc${M}, output_max_less_zero_point, vl);
+        $for M in range(MR):
+          vfpacc${M} = __riscv_vfadd_vf_f32${OUT_LMUL}(vfpacc${M}, output_zero_point, vl);
 
         $if DATATYPE == "QU8":
           $for M in range(MR):
             vuint16${INTER_LMUL}_t vout16${M} = __riscv_vfncvt_xu(vfpacc${M}, vl);
-
-          $for M in range(MR):
-            vout${M} = __riscv_vadd_vx_u16${INTER_LMUL}(vout${M}, (uint16_t) output_zero_point, vl);
-
           $for M in range(MR):
             vuint8${IN_LMUL}_t vout8${M} = __riscv_vnclipu_wx_u8${IN_LMUL}(vout16${M}, 0, vl);
 
@@ -180,10 +210,6 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT
         $else:
           $for M in range(MR):
             vint16${INTER_LMUL}_t vout${M} = __riscv_vfncvt_x(vfpacc${M}, vl);
-
-          $for M in range(MR):
-            vout${M} = __riscv_vadd_vx_i16${INTER_LMUL}(vout${M}, (int16_t) output_zero_point, vl);
-
           $for M in range(MR):
             vint8${IN_LMUL}_t vout8${M} = __riscv_vncvt_x_x_w_i8${IN_LMUL}(vout${M}, vl);
 
