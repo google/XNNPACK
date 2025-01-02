@@ -1366,9 +1366,7 @@ IF(XNNPACK_BUILD_TESTS)
         concatenate5
         copy
         depth-to-space-2d
-        even-split2
-        even-split3
-        even-split4
+        even-splitN
         global-average-pooling-1d
         global-average-pooling-2d
         global-sum-pooling-1d
