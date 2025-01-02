@@ -169,7 +169,7 @@ std::vector<GemmTestParams> CreateTests1(
             .a_stride(xnnpack::NextPrime(k_block * 3 + 1))
         , test_func, isa_check)
         .loop_n(nr + 1, nr * 2 - 1)
-        .loop_k(1, k_block * 3, k_block));  // +1
+        .loop_k(1, k_block * 3, k_block));
   }
   gemm_tests.push_back(GemmTestParams(
       "n_gt_" + nrs + "_subtile",
@@ -194,7 +194,7 @@ std::vector<GemmTestParams> CreateTests1(
             .a_stride(xnnpack::NextPrime(k_block * 3 + 1))
         , test_func, isa_check)
         .loop_n(nr * 2, nr * 3, nr)
-        .loop_k(1, k_block * 3, k_block)); // +1
+        .loop_k(1, k_block * 3, k_block));
   }
   gemm_tests.push_back(GemmTestParams(
       "n_div_" + nrs + "_subtile",
