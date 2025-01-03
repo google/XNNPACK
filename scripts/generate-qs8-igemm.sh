@@ -1152,4 +1152,9 @@ tools/xngen src/qs8-igemm/c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=0 -D MR=7  -D 
 tools/xngen src/qs8-igemm/c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=0 -D MR=16 -D NR=64 -D DATATYPE=QD8_F16 -D REQUANTIZATION= -o src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-16x64c4-minmax-avx512amx.c &
 tools/xngen src/qs8-igemm/c4-avx512amx.c.in -D GFNI=0 -D PREFETCH=1 -D MR=16 -D NR=64 -D DATATYPE=QD8_F16 -D REQUANTIZATION= -o src/qd8-f16-qc8w-igemm/gen/qd8-f16-qc8w-igemm-16x64c4-minmax-avx512amx-prfm.c &
 
+################################ RISC-V Vector ################################
+tools/xngen src/qs8-igemm/rvv.c.in -D MR=1 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-1x4v-minmax-fp32-rvv.c &
+tools/xngen src/qs8-igemm/rvv.c.in -D MR=4 -D NR=m4 -D REQUANTIZATION=FP32 -D DATATYPE=QC8 -o src/qs8-qc8w-igemm/gen/qs8-qc8w-igemm-4x4v-minmax-fp32-rvv.c &
+
+
 wait
