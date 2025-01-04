@@ -77,6 +77,10 @@ enum xnn_arch_flags {
 #if XNN_ARCH_HEXAGON
   xnn_arch_hvx = 1 << 0,
 #endif  // XNN_ARCH_HEXAGON
+#if XNN_ARCH_LOONGARCH
+  xnn_arch_loongarch_sx = 1 << 0,
+  xnn_arch_loongarch_asx = 1 << 1,
+#endif
 };
 
 struct xnn_hardware_config {
@@ -133,6 +137,10 @@ struct xnn_hardware_config {
   bool use_vsx;
   bool use_vsx3;
   bool use_mma;
+#endif
+#if XNN_ARCH_LOONGARCH
+  bool use_lsx;
+  bool use_lasx;
 #endif
 #if XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
   bool is_x86;
