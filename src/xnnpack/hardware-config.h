@@ -79,6 +79,10 @@ enum xnn_arch_flags {
 #if XNN_ARCH_HEXAGON
   xnn_arch_hvx = 1 << 0,
 #endif  // XNN_ARCH_HEXAGON
+#if XNN_ARCH_LOONGARCH
+  xnn_arch_loongarch_sx = 1 << 0,
+  xnn_arch_loongarch_asx = 1 << 1,
+#endif
 };
 
 struct xnn_hardware_config {
