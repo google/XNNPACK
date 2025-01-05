@@ -30,9 +30,10 @@
 #endif  // XNN_ENABLE_CPUINFO
 
 #if XNN_ARCH_RISCV
-  #include <sys/auxv.h>
+#include <inttypes.h>
+#include <sys/auxv.h>
 
-  #define COMPAT_HWCAP_ISA_V (1 << ('V' - 'A'))
+#define COMPAT_HWCAP_ISA_V (1 << ('V' - 'A'))
 #endif
 
 #if XNN_ARCH_PPC64
