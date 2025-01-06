@@ -235,5 +235,5 @@ BENCHMARK_CAPTURE(x8_lut, scalar_u16,
   ->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

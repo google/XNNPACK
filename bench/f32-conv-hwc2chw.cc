@@ -171,5 +171,5 @@ BENCHMARK_DCONV(f32_conv_hwc2chw_3x3s2p1c3x4__scalar_1x1);
 
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

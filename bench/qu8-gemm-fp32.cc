@@ -1636,5 +1636,5 @@ static void qu8_gemm_minmax_fp32_ukernel_4x4__scalar_lrintf(benchmark::State& st
 BENCHMARK_GEMM(qu8_gemm_minmax_fp32_ukernel_4x4__scalar_lrintf)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

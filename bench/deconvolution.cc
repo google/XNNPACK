@@ -569,5 +569,5 @@ BENCHMARK_CAPTURE(xnnpack_deconvolution_qu8, espnet, "ESPNet")
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

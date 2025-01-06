@@ -232,5 +232,5 @@ static void f16_spmm(benchmark::State& state,
 #endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif
