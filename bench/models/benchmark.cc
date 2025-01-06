@@ -5,14 +5,12 @@
 
 #include <benchmark/benchmark.h>
 
-#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <functional>
-#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -23,8 +21,6 @@
 #include "xnnpack/subgraph.h"
 #include "pthreadpool.h"
 
-int FLAGS_num_threads = 1;
-uint32_t FLAGS_xnn_runtime_flags = 0;
 
 struct ModelRuntime {
   std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> model;
@@ -239,46 +235,4 @@ BENCHMARK(QD8Attention)
 
 BENCHMARK(QS8MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 
-int ProcessArgs(int& argc, char**& argv) {
-  for (int i = 1; i < argc;) {
-    if (strncmp(argv[i], "--num_threads=", 14) == 0) {
-      FLAGS_num_threads = atoi(argv[i] + 14);
-      if (FLAGS_num_threads <= 0) {
-        std::cerr << "Invalid --num_threads: " << FLAGS_num_threads << "\n";
-        return 1;
-      }
-      std::copy(argv + i + 1, argv + argc, argv + i);
-      argc -= 1;
-    } else if (strncmp(argv[i], "--xnn_runtime_flags=", 20) == 0) {
-      const char* v = argv[i] + 20;
-      if (strlen(v) > 2 && strncmp(v, "0x", 2) == 0) {
-        FLAGS_xnn_runtime_flags = strtoul(v + 2, nullptr, 16);
-      } else {
-        FLAGS_xnn_runtime_flags = strtoul(v, nullptr, 10);
-      }
-      std::copy(argv + i + 1, argv + argc, argv + i);
-      argc -= 1;
-    } else {
-      ++i;
-    }
-  }
-  return 0;
-}
-
-#ifdef BENCHMARK_ARGS_BOTTLENECK
-// We are provided with a main that will call this function
-extern "C" {
-int BenchmarkArgBottleneck(int& argc, char**& argv) {
-  return ProcessArgs(argc, argv);
-}
-}
-#else
-int main(int argc, char** argv) {
-  ::benchmark::Initialize(&argc, argv);
-  int status = ProcessArgs(argc, argv);
-  if (status != 0) return status;
-  if (::benchmark::ReportUnrecognizedArguments(argc, argv)) return 1;
-  ::benchmark::RunSpecifiedBenchmarks();
-}
-#endif
-
+XNN_BENCHMARK_MAIN();

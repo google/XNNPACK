@@ -931,9 +931,11 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         break;
       case xnn_node_type_fully_connected:
         if (subgraph->values[node->inputs[0]].datatype == xnn_datatype_qdint8 ||
+            subgraph->values[node->inputs[0]].datatype ==
+                xnn_datatype_qduint8 ||
             subgraph->values[node->inputs[0]].datatype == xnn_datatype_qpint8) {
-          // TODO(b/340399245) - Coerce any `qpint8` values back to `qdint8` for
-          // conversion to fp16.
+          // TODO(b/340399245) - Coerce any `qpint8` or `qduint8` values back to
+          // `qdint8` for conversion to fp16.
           subgraph->values[node->inputs[0]].datatype = xnn_datatype_qdint8;
           subgraph->values[node->outputs[0]].fp16_compatible = true;
         } else if (subgraph->values[node->inputs[0]].datatype ==
@@ -952,8 +954,16 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
           subgraph->values[node->inputs[0]].fp16_compatible = true;
           subgraph->values[node->outputs[0]].fp16_compatible = true;
         } else {
-          xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s). Invalid compute type",
-            n, xnn_node_type_to_string(node->type));
+          xnn_log_warning(
+              "FP16 rewrite aborted: node #%" PRIu32
+              " (%s). Invalid compute type (input=%s, weights=%s, output=%s)",
+              n, xnn_node_type_to_string(node->type),
+              xnn_datatype_to_string(
+                  subgraph->values[node->inputs[0]].datatype),
+              xnn_datatype_to_string(
+                  subgraph->values[node->inputs[1]].datatype),
+              xnn_datatype_to_string(
+                  subgraph->values[node->outputs[0]].datatype));
           return false;
         }
         break;
