@@ -434,5 +434,5 @@ BENCHMARK_CAPTURE(xnnpack_average_pooling_qu8, shufflenet_v1_g4, "ShuffleNet v1 
 BENCHMARK_CAPTURE(xnnpack_average_pooling_qu8, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)")->Apply(ShuffleNetV1G8)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

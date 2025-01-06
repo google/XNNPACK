@@ -2606,5 +2606,5 @@ BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__scalar_2x1_acc3)
 BENCHMARK_DWCONV(dwconv2d_chw_5x5s2p2__scalar_3x1_acc2)
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

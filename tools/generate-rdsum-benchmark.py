@@ -130,7 +130,7 @@ def main(args):
     # Footer with `main` function.
     benches += "\n\n" + """\
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif
 """
 
