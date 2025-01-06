@@ -9,6 +9,9 @@ PROD_RVVFP16ARITH_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_RVVFP16ARITH_MICROKERNEL_SRCS = [
+    "src/f16-f32-vcvt/gen/f16-f32-vcvt-rvvfp16arith-u1v.c",
+    "src/f16-f32-vcvt/gen/f16-f32-vcvt-rvvfp16arith-u2v.c",
+    "src/f16-f32-vcvt/gen/f16-f32-vcvt-rvvfp16arith-u4v.c",
     "src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u1v.c",
     "src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u2v.c",
     "src/f16-vclamp/gen/f16-vclamp-rvvfp16arith-u4v.c",
