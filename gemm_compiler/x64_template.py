@@ -315,6 +315,10 @@ END_FUNCTION {function_name}""".format(
 
   def inner_loop(self, M, N):
     if M > self.max_M_before_spilling():
-      return self.inner_loop_spill_gp(M, N)
+      asm_string = self.inner_loop_spill_gp(M, N)
     else:
-      return self.inner_loop_small_M_N(M, N)
+      asm_string = self.inner_loop_small_M_N(M, N)
+    # loop counter
+    asm_string += self.cmp_k_and_jump_if_less(label='inner_loop')
+
+    return asm_string

@@ -54,13 +54,11 @@ def generate_gemm_microkernel(
   # inner loop
   asm_string += isa.inner_loop(M, N)
 
-  # loop counter
-  asm_string += isa.cmp_k_and_jump_if_less(label='inner_loop')
-
+  asm_string += 'inner_loop_end:\n'
   asm_string += isa.dequantize(M=M, N=num_horizontal_registers, W=w_ptr_reg)
 
   # min/max clamping
-  asm_string += '# Min/max clamping..\n'
+  asm_string += '# Min/max clamping.\n'
   for nr in range(0, num_horizontal_registers):
     for mr in range(0, M):
       asm_string += isa.clamp_min(

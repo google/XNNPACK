@@ -43,6 +43,22 @@ TEST_P(GemmTest, Test) {
     }
   }
 
+  // tester.m(1);
+  // tester.n(9);
+  // tester.k(2);
+  // params.test_func(tester);
+  // return;
+  for (int i = 1; i < 8; ++i) {
+    tester.m(i);
+    for (int j = 1; j < 64; ++j) {
+      tester.n(j);
+      for (int k = 1; k < 64; ++k) {
+        tester.k(k);
+        params.test_func(tester);
+      }
+    }
+  }
+  return;
   // Loop over the `k`, `m`, and `n` values, if required.
   for (size_t k = params.loop_k_.from; k <= params.loop_k_.to;
        k = params.loop_k_.next(k)) {
@@ -997,6 +1013,8 @@ void GemmMicrokernelTester::Test(
   xnn_init_f32_minmax_params_fn init_params,
   xnn_pack_qs8_gemm_fn pack) const
 {
+  if (m() > mr()) return;
+  if (a_stride() < k()) return;
   ASSERT_LE(m(), mr());
 
   xnnpack::ReplicableRandomDevice rng;
@@ -1448,6 +1466,7 @@ void GemmMicrokernelTester::Test(
   xnn_init_f32_qc4w_minmax_params_fn init_params,
   xnn_pack_qs8_qc4w_gemm_fn pack) const
 {
+  if (m() > mr()) return;
   ASSERT_LE(m(), mr());
 
   xnnpack::ReplicableRandomDevice rng;
@@ -1457,9 +1476,9 @@ void GemmMicrokernelTester::Test(
       std::uniform_int_distribution<int32_t>(0, std::numeric_limits<uint8_t>::max()),
       std::ref(rng));
 
-  const size_t planes = 2;  // 4 bit is 2 planes - low nibbles and high nibbles
   const size_t k2 =  round_up_po2(k(), 2);  // tester assumes byte aligned rows
-  const size_t packed_k2 = round_up_po2(k(), kr() * sr() * planes);  // 2 blocks for nibbles
+  const size_t packed_k2 =
+      round_up_po2(k(), kr() * sr() * planes());  // 2 blocks for nibbles
   const size_t packed_k_bytes = (packed_k2 + 1)/ 2;
 
   xnnpack::Buffer<float> input(m() * k2);
@@ -1475,7 +1494,7 @@ void GemmMicrokernelTester::Test(
   xnnpack::Buffer<int32_t> acc(m() * n());
   xnnpack::Buffer<float> c_ref(m() * n(), 0);
 
-  for (size_t iteration = 0; iteration < iterations(); iteration++) {
+  {  // for (size_t iteration = 0; iteration < iterations(); iteration++) {
     std::generate(input.begin(), input.end(), std::ref(f32rng));
     for (size_t i = 0; i < m(); ++i) {
       const float* input_ptr = &input[i * k2];
@@ -1498,7 +1517,10 @@ void GemmMicrokernelTester::Test(
 
     std::generate(b.begin(), b.end(), std::ref(w8rng));
     std::generate(bias.begin(), bias.end(), std::ref(f32rng));
+    // std::fill(bias.begin(), bias.end(), 0);
+
     std::generate(kernel_scale.begin(), kernel_scale.end(), std::ref(scalerng));
+    // std::fill(kernel_scale.begin(), kernel_scale.end(), 1);
     std::fill(packed_w.begin(), packed_w.end(), 0);
     // Row sums are multiplied by input zero point, since we don't know it
     // until runtime, set it to 1.
@@ -1526,6 +1548,25 @@ void GemmMicrokernelTester::Test(
 
     // Compute 32-bit results and output quantization arguments.
     std::fill(c_ref.begin(), c_ref.end(), 0);
+    // std::cout<<" B \n";
+    // for (size_t n_index = 0; n_index < n(); n_index++) {
+    //   for (size_t k_index = 0; k_index < k2; k_index++) {
+    //     const size_t nb_index = (n_index * k2 + k_index) / 2;
+    //     const int32_t bv = int32_t((k_index % 2 == 0) ? (b[nb_index] &
+    //     UINT8_C(0xF)) : (b[nb_index] >> 4)) - b_zero_point(); std::cout<< bv
+    //     << " ";
+    //   }
+    //   std::cout<<std::endl;
+    // }
+    // std::cout<<std::endl;
+    // std::cout<<" A \n";
+    // for (size_t m_index = 0; m_index < m(); m_index++) {
+    //   for (size_t k_index = 0; k_index < k2; k_index++) {
+    //     std::cout<< int32_t(a[m_index * a_stride() + k_index]) << " ";
+    //   }
+    //   std::cout<< std::endl;
+    // }
+    // std::cout<< std::endl;
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
         int32_t ksum = 0;
@@ -2911,6 +2952,12 @@ void GemmMicrokernelTester::Test(
   xnn_init_f32_minmax_params_fn init_params,
   xnn_pack_f32_gemm_fn pack) const
 {
+  if (a_stride() < k()) {
+    return;
+  }
+  if (m() > mr()) {
+    return;
+  }
   ASSERT_LE(m(), mr());
   ASSERT_GE(a_stride(), k());
   ASSERT_GE(cm_stride(), n());

@@ -46,7 +46,7 @@ class NeonDot(isa.NeonFma):
     ]
 
   def function_name(self, M, N, isa):
-    return f'xnn_qd8_f32_qc8w_gemm_minmax_ukernel_{M}x{N}c4__asm_aarch64_{isa}_lane\n'
+    return f'xnn_qd8_f32_qc8w_gemm_minmax_ukernel_{M}x{N}c4__asm_aarch64_{isa}_ld32_2\n'
 
   def zp_scale(self, pos):
     regs = ['10', '11']
@@ -76,15 +76,18 @@ class NeonDot(isa.NeonFma):
 
   def compute_asm(self):
     c_asm = {
-        'loop': ['sdot  v{ACC}.4s, v{W}.16b, v{A}.4b[0]\n'],
+        'loop': ['sdot  v{ACC}.4s, v{W}.16b, v{A}.4b[{POS}]\n'],
     }
     return c_asm
+
+  def cvtf(self):
+    return 'scvtf v{ACC}.4s, v{ACC}.4s\n'
 
   def dequantize(self, M, N, W):
     accumulators = self.acc_registers()
     ret = '\n# Convert from int32 to float.\n'
     for nr in range(0, N * M):
-      ret += 'scvtf v{ACC}.4s, v{ACC}.4s\n'.format(ACC=accumulators[nr])
+      ret += self.cvtf().format(ACC=accumulators[nr])
     ret += '# Multiply by input scale.\n'
     for nr in range(0, N):
       for mr in range(0, M):
@@ -179,3 +182,83 @@ class NeonDot(isa.NeonFma):
         )
 
     return ret
+
+
+class NeonDotUnrolled(NeonDot):
+
+  def __init__(self, unroll_factor):
+    self.unroll_factor = unroll_factor
+    self.decrement = 4 * unroll_factor
+
+  def function_name(self, M, N, isa):
+    LD = self.unroll_factor * 32
+    return f'xnn_qd8_f32_qc8w_gemm_minmax_ukernel_{M}x{N}c4__asm_aarch64_{isa}_ld{LD}_2\n'
+
+  def input_asm(self):
+    match self.unroll_factor:
+      case 1:
+        return {
+            'loop': [
+                'ldr s{AM}, [{AM_ptr}], 4\n',
+            ]
+        }
+      case 2:
+        return {
+            'loop': [
+                'ldr d{AM}, [{AM_ptr}], 8\n',
+            ]
+        }
+      case 4:
+        return {
+            'loop': [
+                'ldr q{AM}, [{AM_ptr}], 16\n',
+            ]
+        }
+      case _:
+        raise NotImplementedError
+
+  def base_input_asm(self):
+    return super().input_asm()
+
+
+class NeonDotQC4WUnrolled(NeonDotUnrolled):
+
+  def __init__(self, unroll_factor):
+    self.unroll_factor = unroll_factor
+    self.decrement = 4 * unroll_factor
+
+  def weights_register_bytes(self):
+    return 8
+
+  def weights_asm(self):
+    w_asm = {
+        'loop': ["""ldr q{tmp_W}, [{W_ptr}], 32
+            shl v{W}.16b, v{tmp_W}.16b, #4
+            and v{W_1}.16b, v{tmp_W}.16b, v{mask}.16b\n"""],
+        'loop_2': ["""ldr q{tmp_W}, [{W_ptr}], 16
+            shl v{W}.16b, v{tmp_W}.16b, #4
+            and v{W_1}.16b, v{tmp_W}.16b, v{mask}.16b\n"""],
+    }
+    return w_asm
+
+  def mask_register(self):
+    return '28'
+
+  def tmp_w_register(self):
+    return '29'
+
+  def quantization_params(self):
+    return """# Load 0xF0 for masking the weights
+  ldr {quantization_params_reg}, [sp, 16]
+  movi v{mask}.16b, #240
+  """.format(
+        quantization_params_reg=self.quantization_params_register(),
+        mask=self.mask_register(),
+    )
+
+  def function_name(self, M, N, isa):
+    LD = self.unroll_factor * 32
+    return f'xnn_qd8_f32_qc4w_gemm_minmax_ukernel_{M}x{N}c4__asm_aarch64_{isa}_ld{LD}_2\n'
+
+  def cvtf(self):
+    return 'scvtf v{ACC}.4s, v{ACC}.4s, #4\n'
