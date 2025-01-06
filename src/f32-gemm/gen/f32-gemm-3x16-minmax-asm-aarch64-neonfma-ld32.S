@@ -31,8 +31,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_3x16__asm_aarch64_neonfma_lane
       csel  x14, x13, x14, LS
 
 outer_loop:
-      # Zero k counter.
-      eor x20, x20, x20
+      # Initialize k counter.
+      mov x20, x2
       # Initialize accumulators with the biases.
       ldp q11, q14, [x5, 0]
       ldp q17, q20, [x5, 32]
@@ -47,9 +47,9 @@ outer_loop:
       add x5, x5, 64
 
 inner_loop:
-      ldr d2, [x3, x20]
-      ldr d3, [x9, x20]
-      ldr d4, [x10, x20]
+      ldr s2, [x3], 4
+      ldr s3, [x9], 4
+      ldr s4, [x10], 4
       ldp q7, q8, [x5], 32
       ldp q9, q10, [x5], 32
       fmla  v11.4s, v7.4s, v2.s[0]
@@ -64,8 +64,7 @@ inner_loop:
       fmla  v20.4s, v10.4s, v2.s[0]
       fmla  v21.4s, v10.4s, v3.s[0]
       fmla  v22.4s, v10.4s, v4.s[0]
-      add x20, x20, 4
-      cmp x2, x20
+      subs x20, x20, 4
       bne inner_loop
       # Min/max clamping..
       fmin  v11.4s, v1.4s, v11.4s
@@ -102,6 +101,9 @@ inner_loop:
       stp  q18, q21, [x13], 32
       stp  q13, q16, [x14], 32
       stp  q19, q22, [x14], 32
+      sub x3, x3, x2
+      sub x9, x9, x2
+      sub x10, x10, x2
 
       sub x1, x1, 16
       b.ne outer_loop
