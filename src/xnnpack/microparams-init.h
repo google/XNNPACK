@@ -250,6 +250,25 @@ DECLARE_INIT_QU8_MUL_MINMAX_PARAMS_FUNCTION(
     xnn_init_qu8_mul_minmax_rndnu_neon_params)
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
 
+#define DECLARE_INIT_QS8_VPRELU_PARAMS_FUNCTION(fn_name)        \
+  XNN_INTERNAL size_t fn_name(                                      \
+      union xnn_qs8_vprelu_scalar_params uparams[XNN_MIN_ELEMENTS(1)], \
+      const struct xnn_quantization_params* a_quantization,         \
+      const struct xnn_quantization_params* b_quantization,         \
+      const struct xnn_quantization_params* output_quantization);
+
+DECLARE_INIT_QS8_VPRELU_PARAMS_FUNCTION(xnn_init_qs8_vprelu_scalar_params)
+
+#define DECLARE_INIT_QU8_VPRELU_PARAMS_FUNCTION(fn_name)        \
+  XNN_INTERNAL size_t fn_name(                                      \
+      union xnn_qs8_vprelu_scalar_params uparams[XNN_MIN_ELEMENTS(1)], \
+      const struct xnn_quantization_params* a_quantization,         \
+      const struct xnn_quantization_params* b_quantization,         \
+      const struct xnn_quantization_params* output_quantization);
+
+DECLARE_INIT_QU8_VPRELU_PARAMS_FUNCTION(xnn_init_qu8_vprelu_scalar_params)
+
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

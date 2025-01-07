@@ -1,0 +1,129 @@
+// Copyright (C) 2024 Intel Corporation
+//  
+// Redistribution and use in source and binary forms, with or without modification,
+// are permitted provided that the following conditions are met:
+//  
+// 1. Redistributions of source code must retain the above copyright notice,
+//    this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+// 3. Neither the name of the copyright holder nor the names of its contributors
+//    may be used to endorse or promote products derived from this software
+//    without specific prior written permission.
+//  
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+// THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
+// BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+// OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+// OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+// OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+// WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+// OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+// EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  
+//  
+// SPDX-License-Identifier: BSD-3-Clause
+
+$assert DATATYPE in ["QS8", "QU8"]
+$assert BATCH_TILE >= 1
+
+#include <assert.h>
+#include "src/xnnpack/math.h"
+#include "src/xnnpack/vbinary.h"
+
+$XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
+void xnn_${DATATYPE.lower()}_vpreluc_ukernel__scalar_u${BATCH_TILE}(
+    size_t batch,
+    const ${XINT8_T}* input_a,
+    const ${XINT8_T}* input_b,
+    ${XINT8_T}* output,
+    const union xnn_qs8_vprelu_scalar_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(batch != 0);
+  assert(batch % sizeof(${XINT8_T}) == 0);
+  assert(input_a != NULL);
+  assert(input_b != NULL);
+  assert(output != NULL);
+
+  const int32_t input_zero_point = params->scalar.input_zero_point;
+  const float vpositive_multiplier = params->scalar.positive_multiplier;
+  const float vnegative_multiplier = params->scalar.negative_multiplier;                                
+  const float voutput_min_less_zero_point = (int32_t) params->scalar.output_min - (int32_t) params->scalar.output_zero_point;
+  const float voutput_max_less_zero_point = (int32_t) params->scalar.output_max - (int32_t) params->scalar.output_zero_point;
+  const float vmagic_bias = 12582912.0f;
+  const int32_t vmagic_bias_less_output_zero_point = INT32_C(0x4B400000) - (int32_t) params->scalar.output_zero_point;
+  const int32_t slope = (int32_t) *input_b - params->scalar.slope_zero_point;
+  $if BATCH_TILE == 1:
+    do {
+      const int32_t va = (int32_t) *input_a++ - input_zero_point;
+      int32_t vacc = XNN_UNPREDICTABLE(va < 0) ? va * slope : va;
+      float vscale = XNN_UNPREDICTABLE(va < 0) ? vnegative_multiplier : vpositive_multiplier;
+      float vfpacc = (float) vacc * vscale;
+      vfpacc = math_max_f32(vfpacc, voutput_min_less_zero_point);
+      vfpacc = math_min_f32(vfpacc, voutput_max_less_zero_point);
+      vfpacc += vmagic_bias;
+      const int32_t vout = (int32_t) float_as_uint32(vfpacc) - vmagic_bias_less_output_zero_point;
+      *output++ = (${XINT8_T}) vout;
+      batch -= sizeof(${XINT8_T});
+    } while (batch != 0);
+  $else:
+    for (; batch >= ${BATCH_TILE} * sizeof(${XINT8_T}); batch -= ${BATCH_TILE} * sizeof(${XINT8_T})) {
+      $for N in range(BATCH_TILE):
+        const int32_t va${N} = input_a[${N}] - input_zero_point;
+      input_a += ${BATCH_TILE};
+
+      $for N in range(BATCH_TILE):
+        int32_t vacc${N} = XNN_UNPREDICTABLE(va${N} < 0) ? va${N} * slope : va${N};
+
+      $for N in range(BATCH_TILE):
+        float vscale${N} = XNN_UNPREDICTABLE(va${N} < 0) ? vnegative_multiplier : vpositive_multiplier;
+
+      $for N in range(BATCH_TILE):
+        float vfpacc${N} = (float) vacc${N} * vscale${N};
+
+      $for N in range(BATCH_TILE):
+        vfpacc${N} = math_max_f32(vfpacc${N}, voutput_min_less_zero_point);
+
+      $for N in range(BATCH_TILE):
+        vfpacc${N} = math_min_f32(vfpacc${N}, voutput_max_less_zero_point);
+
+      $for N in range(BATCH_TILE):
+        vfpacc${N} += vmagic_bias;
+
+      $for N in range(BATCH_TILE):
+        const int32_t vout${N} = (int32_t) float_as_uint32(vfpacc${N}) - vmagic_bias_less_output_zero_point;
+
+      $for N in range(BATCH_TILE):
+        output[${N}] = (${XINT8_T}) vout${N};
+      output += ${BATCH_TILE};
+    }
+
+    if XNN_UNLIKELY(batch != 0) {
+      $if BATCH_TILE == 2:
+        const int32_t va = (int32_t) *input_a - input_zero_point;
+        int32_t vacc = XNN_UNPREDICTABLE(va < 0) ? va * slope : va;
+        float vscale = XNN_UNPREDICTABLE(va >= 0) ? vpositive_multiplier : vnegative_multiplier;
+        float vfpacc = (float) vacc * vscale;
+        vfpacc = math_max_f32(vfpacc, voutput_min_less_zero_point);
+        vfpacc = math_min_f32(vfpacc, voutput_max_less_zero_point);
+        vfpacc += vmagic_bias;
+        const int32_t vout = (int32_t) float_as_uint32(vfpacc) - vmagic_bias_less_output_zero_point;
+        *output = (${XINT8_T}) vout;
+      $else:
+        do {
+          const int32_t va = (int32_t) *input_a++ - input_zero_point;
+          int32_t vacc = XNN_UNPREDICTABLE(va < 0) ? va * slope : va;
+          float vscale = XNN_UNPREDICTABLE(va < 0) ? vnegative_multiplier : vpositive_multiplier;
+          float vfpacc = (float) vacc * vscale;
+          vfpacc = math_max_f32(vfpacc, voutput_min_less_zero_point);
+          vfpacc = math_min_f32(vfpacc, voutput_max_less_zero_point);
+          vfpacc += vmagic_bias;
+          const int32_t vout = (int32_t) float_as_uint32(vfpacc) - vmagic_bias_less_output_zero_point;
+          *output++ = (${XINT8_T}) vout;
+          batch -= sizeof(${XINT8_T});
+        } while (batch != 0);
+    }
+}

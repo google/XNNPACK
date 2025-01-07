@@ -145,8 +145,22 @@ struct xnn_u8_minmax_params {
   } scalar;
 };
 
-// Conv w. Min+Max: used by quantized GEMM/IGEMM/DWCONV microkernels with MINMAX
-// activation.
+// VPReLU: used by VPRELU microkernels.
+
+union xnn_qs8_vprelu_scalar_params {
+  struct {
+    int32_t input_zero_point;
+    int32_t slope_zero_point;
+    int32_t output_zero_point;
+    float positive_multiplier;
+    float rprelu_positive_multiplier;
+    float negative_multiplier;
+    int32_t output_min;
+    int32_t output_max;
+  } scalar;
+};
+
+// Conv w. Min+Max: used by quantized GEMM/IGEMM/DWCONV microkernels with MINMAX activation.
 struct xnn_qd8_quantization_params {
   int32_t zero_point;
   float inv_scale;
@@ -392,6 +406,8 @@ union xnn_binary_uparams {
   struct xnn_qu8_add_minmax_params qu8_addsub;
   union xnn_qs8_mul_minmax_params qs8_mul;
   union xnn_qu8_mul_minmax_params qu8_mul;
+  union xnn_qs8_vprelu_scalar_params qs8_vprelu;
+  union xnn_qs8_vprelu_scalar_params qu8_vprelu;
   struct xnn_f16_minmax_params f16;
   struct xnn_f32_minmax_params f32;
   struct xnn_binary_reference_params reference;
