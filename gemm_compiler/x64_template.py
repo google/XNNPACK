@@ -272,7 +272,7 @@ class X64(base_architecture.BaseArchitecture):
   def increment_ptr(self, ptr, step):
     return f'add {ptr}, {step}\n'
 
-  def zero_gp_register(self, reg):
+  def initialize_k_register(self, reg):
     return f'mov {reg}, 0\n'
 
   def cmp_k_and_jump_if_less(self, label):

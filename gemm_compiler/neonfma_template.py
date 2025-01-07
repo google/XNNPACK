@@ -60,7 +60,7 @@ class NeonFma(arch.Aarch64):
   def input_asm(self):
     in_asm = {
         'loop': [
-            'ldr d{AM}, [{AM_ptr}, {a_offset}]\n',
+            'ldr s{AM}, [{AM_ptr}], 4\n',
         ]
     }
     return in_asm
@@ -149,6 +149,10 @@ class NeonFma(arch.Aarch64):
             ACC_1=accumulators[M * 3 + mr],
             c_reg=cm_registers[mr],
         )
+    for mr in range(0, M):
+      AM_PTR = self.am_registers()[mr]
+      kc_register = self.kc_register()
+      asm_string += f'sub {AM_PTR}, {AM_PTR}, {kc_register}\n'
     CHECK = """
       sub {nc}, {nc}, {n_step}
       b.ne outer_loop

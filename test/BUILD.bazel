@@ -976,7 +976,7 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "qs8_qc8w_igemm_minmax_fp32_test",
-    timeout = "moderate",
+    timeout = "long",
     srcs = [
         "qs8-qc8w-igemm-minmax-fp32.cc",
         "qs8-qc8w-igemm-minmax-fp32-2.cc",

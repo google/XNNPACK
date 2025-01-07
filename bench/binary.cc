@@ -11,22 +11,56 @@
 #include <limits>
 #include <memory>
 #include <random>
+#include <string>
 #include <vector>
 
 #include "utils.h"
 #include "xnnpack.h"
-#include "xnnpack/datatype.h"
 #include "xnnpack/buffer.h"
+#include "xnnpack/common.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/math.h"
 #include <benchmark/benchmark.h>
 #ifdef BENCHMARK_TENSORFLOW_LITE
-#include "flatbuffers/include/flatbuffers/flatbuffers.h"
+#include "flatbuffers/include/flatbuffers/buffer.h"
+#include "flatbuffers/include/flatbuffers/flatbuffer_builder.h"
+#include "tensorflow/lite/core/interpreter_builder.h"
 #include "tensorflow/lite/interpreter.h"
 #include "tensorflow/lite/kernels/register.h"
-#include "tensorflow/lite/kernels/test_util.h"
-#include "tensorflow/lite/model.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
+#endif  // BENCHMARK_TENSORFLOW_LITE
+
+#ifdef BENCHMARK_TENSORFLOW_LITE
+namespace tflite {
+// Maps the native C++ types to the corresponding TFLite tensor type enum
+// values.
+template <class T>
+struct TensorTypeFor;
+
+#define TFLITE_TENSOR_TYPE_ASSOC(CPP_TYPE, TENSORTYPE_VALUE) \
+  template <>                                                \
+  struct TensorTypeFor<CPP_TYPE> {                           \
+    static constexpr TensorType value = TENSORTYPE_VALUE;    \
+  };
+
+TFLITE_TENSOR_TYPE_ASSOC(bool, TensorType_BOOL);
+TFLITE_TENSOR_TYPE_ASSOC(int8_t, TensorType_INT8);
+TFLITE_TENSOR_TYPE_ASSOC(int16_t, TensorType_INT16);
+TFLITE_TENSOR_TYPE_ASSOC(int32_t, TensorType_INT32);
+TFLITE_TENSOR_TYPE_ASSOC(int64_t, TensorType_INT64);
+TFLITE_TENSOR_TYPE_ASSOC(uint8_t, TensorType_UINT8);
+TFLITE_TENSOR_TYPE_ASSOC(uint16_t, TensorType_UINT16);
+TFLITE_TENSOR_TYPE_ASSOC(uint32_t, TensorType_UINT32);
+TFLITE_TENSOR_TYPE_ASSOC(uint64_t, TensorType_UINT64);
+TFLITE_TENSOR_TYPE_ASSOC(TfLiteFloat16, TensorType_FLOAT16);
+TFLITE_TENSOR_TYPE_ASSOC(TfLiteBFloat16, TensorType_BFLOAT16);
+TFLITE_TENSOR_TYPE_ASSOC(float, TensorType_FLOAT32);
+TFLITE_TENSOR_TYPE_ASSOC(double, TensorType_FLOAT64);
+TFLITE_TENSOR_TYPE_ASSOC(std::string, TensorType_STRING);
+
+#undef TFLITE_TENSOR_TYPE_ASSOC
+};  // namespace tflite
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 void init_params(xnn_binary_operator op_type, xnn_datatype datatype,
@@ -280,13 +314,14 @@ static void benchmark_tflite_binary_operator(
     state.counters["cpufreq"] = cpu_frequency;
   }
 
-  state.counters["elements"] = benchmark::Counter(
-      uint64_t(state.iterations()) * batch_size, benchmark::Counter::kIsRate);
+  state.counters["elements"] =
+      benchmark::Counter(static_cast<uint64_t>(state.iterations()) * batch_size,
+                         benchmark::Counter::kIsRate);
 
   const size_t bytes_per_iteration = 2 * batch_size * sizeof(float);
-  state.counters["bytes"] =
-      benchmark::Counter(uint64_t(state.iterations()) * bytes_per_iteration,
-                         benchmark::Counter::kIsRate);
+  state.counters["bytes"] = benchmark::Counter(
+      static_cast<uint64_t>(state.iterations()) * bytes_per_iteration,
+      benchmark::Counter::kIsRate);
 
   interpreter.reset();
 }
@@ -393,5 +428,5 @@ BENCHMARK_OP_INTEGRAL(shift_right_logical);
 BENCHMARK_OP_INTEGRAL(shift_right_arithmetic);
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

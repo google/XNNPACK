@@ -1266,18 +1266,31 @@ IF(XNNPACK_BUILD_TESTS)
   ENDIF()
 
   # ---[ Launch heavy tests first.
+  # Tests added to this list will be automatically removed from other lists.
   SET(SHARDED_TESTS
     fully-connected-nc
     avgpool-minmax
-    maxpool-minmax
-    f32-vclamp
-    f32-vlrelu
-    f32-rdsum
-    f32-velu
-    f32-argmaxpool
-    s8-vclamp
-    u8-vclamp
-  )
+    maxpool-minmax)
+  IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
+    LIST(APPEND SHARDED_TESTS
+      f16-qs8-vcvt
+      f16-qu8-vcvt
+      f32-argmaxpool
+      f32-qs8-vcvt
+      f32-qu8-vcvt
+      f32-rdsum
+      f32-vclamp
+      f32-velu
+      f32-vlrelu
+      qs8-f32-vcvt
+      qs8-vcvt
+      qs8-vlrelu
+      qu8-f32-vcvt
+      qu8-vcvt
+      qu8-vlrelu
+      s8-vclamp
+      u8-vclamp)
+  ENDIF()
   FOREACH(TEST ${SHARDED_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
@@ -1297,6 +1310,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   IF(XNNPACK_BUILD_LIBRARY)
     # ---[ Launch heavy tests first.
+    # Tests added to this list will be automatically removed from other lists.
     SET(LIBRARY_SHARDED_TESTS
       batch-matrix-multiply-nc
       batch-matrix-multiply
@@ -1342,6 +1356,7 @@ IF(XNNPACK_BUILD_TESTS)
         runtime
         subgraph-nchw
         workspace)
+    LIST(REMOVE_ITEM LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS ${LIBRARY_SHARDED_TESTS})
     FOREACH(TEST ${LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
       TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
@@ -1386,6 +1401,7 @@ IF(XNNPACK_BUILD_TESTS)
         transpose-reshape
         unary
         unpooling-2d)
+    LIST(REMOVE_ITEM LIBRARY_SUBGRAPH_UNIT_TESTS ${LIBRARY_SHARDED_TESTS})
     FOREACH(TEST ${LIBRARY_SUBGRAPH_UNIT_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
       TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
@@ -1407,6 +1423,7 @@ IF(XNNPACK_BUILD_TESTS)
         convolution-2d
         deconvolution-2d
         depthwise-convolution-2d)
+    LIST(REMOVE_ITEM LIBRARY_SUBGRAPH_CONVOLUTION_UNIT_TESTS ${LIBRARY_SHARDED_TESTS})
     FOREACH(TEST ${LIBRARY_SUBGRAPH_CONVOLUTION_UNIT_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
       TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
@@ -1440,21 +1457,23 @@ IF(XNNPACK_BUILD_TESTS)
       f16-conv-hwc2chw
       f16-f32acc-rdsum
       f16-f32acc-rsum
-      f16-ibilinear-chw
       f16-ibilinear
+      f16-ibilinear-chw
       f16-raddstoreexpminusmax
       f16-rmax
       f16-rsum
       f16-spmm-minmax
       f16-vcmul
       f16-vmulcaddc-minmax
+      f32-argmaxpool
       f32-conv-hwc
       f32-conv-hwc2chw
-      f32-ibilinear-chw
       f32-ibilinear
+      f32-ibilinear-chw
       f32-raddexpminusmax
       f32-raddextexp
       f32-raddstoreexpminusmax
+      f32-rdsum
       f32-rmax
       f32-rmin
       f32-rminmax
@@ -1466,11 +1485,12 @@ IF(XNNPACK_BUILD_TESTS)
       f32-vscaleextexp
       indirection
       packing
+      qs8-packw
+      qs8-qc4w-packw
       qs8-rdsum-minmax-fp32
-      qu8-rdsum
       qs8-rsum
+      qu8-rdsum
       qu8-rsum
-      qs8-vlrelu
       qu8-vlrelu
       s8-ibilinear
       u8-ibilinear
@@ -1483,11 +1503,10 @@ IF(XNNPACK_BUILD_TESTS)
       x32-unpool
       x8-lut
       x8-packw
-      qs8-packw
-      qs8-qc4w-packw
       xN-transpose
       xx-fill
       xx-pad)
+  LIST(REMOVE_ITEM MICROKERNEL_UNIT_TESTS ${SHARDED_TESTS})
   FOREACH(TEST ${MICROKERNEL_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
@@ -1514,21 +1533,22 @@ IF(XNNPACK_BUILD_TESTS)
       f16-dwconv-minmax-multipass
       f16-dwconv-minmax-unipass
       f16-dwconv2d-chw
-      f32-dwconv-multipass
       f32-dwconv-minmax-multipass
-      f32-dwconv-unipass
       f32-dwconv-minmax-unipass
+      f32-dwconv-multipass
+      f32-dwconv-unipass
       f32-dwconv2d-chw
-      qs8-qc8w-dwconv-minmax-multipass-fp32
-      qs8-qc8w-dwconv-minmax-unipass-fp32
       qs8-dwconv-minmax-multipass-fp32
       qs8-dwconv-minmax-multipass-rndnu
       qs8-dwconv-minmax-unipass-fp32
       qs8-dwconv-minmax-unipass-rndnu
+      qs8-qc8w-dwconv-minmax-multipass-fp32
+      qs8-qc8w-dwconv-minmax-unipass-fp32
       qu8-dwconv-minmax-multipass-fp32
       qu8-dwconv-minmax-multipass-rndnu
       qu8-dwconv-minmax-unipass-fp32
       qu8-dwconv-minmax-unipass-rndnu)
+  LIST(REMOVE_ITEM MICROKERNEL_DWCONV_UNIT_TESTS ${SHARDED_TESTS})
   FOREACH(TEST ${MICROKERNEL_DWCONV_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
@@ -1550,38 +1570,39 @@ IF(XNNPACK_BUILD_TESTS)
   SET(MICROKERNEL_GEMM_UNIT_TESTS
       bf16-gemm-minmax
       f16-f32acc-gemm-minmax
-      f16-gemm-minmax
       f16-f32acc-igemm-minmax
+      f16-gemm-minmax
       f16-igemm-minmax
-      qd8-f16-qc8w-gemm-minmax
       f32-gemm
-      f32-gemm-relu
-      f32-gemm-minmax
       f32-gemm-goi-minmax
-      f32-qc8w-gemm
-      f32-qc8w-gemm-relu
-      f32-qc8w-gemm-minmax
-      f32-qc4w-gemm-minmax
+      f32-gemm-minmax
+      f32-gemm-relu
       f32-gemminc-minmax
       f32-igemm
-      f32-igemm-relu
       f32-igemm-minmax
+      f32-igemm-relu
       f32-ppmm-minmax
-      qd8-f32-qc8w-gemm-minmax
+      f32-qc4w-gemm-minmax
+      f32-qc8w-gemm
+      f32-qc8w-gemm-minmax
+      f32-qc8w-gemm-relu
       qd8-f16-qb4w-gemm-minmax
       qd8-f16-qc4w-gemm-minmax
+      qd8-f16-qc8w-gemm-minmax
       qd8-f32-qb4w-gemm-minmax
       qd8-f32-qc4w-gemm-minmax
+      qd8-f32-qc8w-gemm-minmax
       qd8-f32-qc8w-igemm-minmax
+      qp8-f32-qb4w-gemm-minmax
       qp8-f32-qc4w-gemm-minmax
       qp8-f32-qc8w-gemm-minmax
-      qp8-f32-qb4w-gemm-minmax
       qs8-qc8w-gemm-minmax-fp32
       qs8-qc8w-igemm-minmax-fp32
       qu8-gemm-minmax-fp32
       qu8-gemm-minmax-rndnu
       qu8-igemm-minmax-fp32
       qu8-igemm-minmax-rndnu)
+  LIST(REMOVE_ITEM MICROKERNEL_GEMM_UNIT_TESTS ${SHARDED_TESTS})
   FOREACH(TEST ${MICROKERNEL_GEMM_UNIT_TESTS})
     FILE(GLOB TEST_SOURCES "test/${TEST}*.cc")
     IF(TEST_SOURCES)
@@ -1605,6 +1626,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   SET(MICROKERNEL_PACKQ_UNIT_TESTS
       x8-packq)
+  LIST(REMOVE_ITEM MICROKERNEL_PACKQ_UNIT_TESTS ${SHARDED_TESTS})
   FOREACH(TEST ${MICROKERNEL_PACKQ_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
@@ -1675,6 +1697,7 @@ IF(XNNPACK_BUILD_TESTS)
       qu8-vmul-minmax-rndnu
       qu8-vmulc-minmax-fp32
       qu8-vmulc-minmax-rndnu)
+  LIST(REMOVE_ITEM MICROKERNEL_VBINARY_UNIT_TESTS ${SHARDED_TESTS})
   FOREACH(TEST ${MICROKERNEL_VBINARY_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
@@ -1696,6 +1719,7 @@ IF(XNNPACK_BUILD_TESTS)
   SET(MICROKERNEL_VCVT_TESTS
       f16-f32-vcvt
       f16-qs8-vcvt
+      f16-qu8-vcvt
       f32-f16-vcvt
       f32-qs8-vcvt
       f32-qu8-vcvt
@@ -1704,6 +1728,7 @@ IF(XNNPACK_BUILD_TESTS)
       qs8-vcvt
       qu8-f32-vcvt
       qu8-vcvt)
+  LIST(REMOVE_ITEM MICROKERNEL_VCVT_TESTS ${SHARDED_TESTS})
   FOREACH(TEST ${MICROKERNEL_VCVT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
@@ -1728,31 +1753,38 @@ IF(XNNPACK_BUILD_TESTS)
       f16-vhswish
       f16-vlrelu
       f16-vneg
-      f16-vrndne
-      f16-vrndz
-      f16-vrndu
       f16-vrndd
+      f16-vrndne
+      f16-vrndu
+      f16-vrndz
       f16-vrsqrt
       f16-vsigmoid
       f16-vsqr
       f16-vsqrt
       f16-vtanh
       f32-vabs
-      f32-vhswish
-      f32-vgelu
+      f32-vclamp
+      f32-velu
       f32-vexp
+      f32-vgelu
+      f32-vhswish
       f32-vlog
+      f32-vlrelu
       f32-vneg
       f32-vrelu
-      f32-vrndne
-      f32-vrndz
-      f32-vrndu
       f32-vrndd
+      f32-vrndne
+      f32-vrndu
+      f32-vrndz
+      f32-vrsqrt
       f32-vsigmoid
       f32-vsqr
       f32-vsqrt
-      f32-vrsqrt
-      f32-vtanh)
+      f32-vtanh
+      qs8-vlrelu
+      s8-vclamp
+      u8-vclamp)
+  LIST(REMOVE_ITEM MICROKERNEL_VUNARY_TESTS ${SHARDED_TESTS})
   FOREACH(TEST ${MICROKERNEL_VUNARY_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
