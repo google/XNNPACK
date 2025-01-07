@@ -1679,12 +1679,16 @@ IF(XNNPACK_BUILD_TESTS)
       qs8-vaddc-minmax
       qs8-vmul-minmax-fp32
       qs8-vmulc-minmax-fp32
+      qs8-vprelu
+      qs8-vpreluc
       qu8-vadd-minmax
       qu8-vaddc-minmax
       qu8-vmul-minmax-fp32
       qu8-vmul-minmax-rndnu
       qu8-vmulc-minmax-fp32
-      qu8-vmulc-minmax-rndnu)
+      qu8-vmulc-minmax-rndnu
+      qu8-vprelu
+      qu8-vpreluc)
   FOREACH(TEST ${MICROKERNEL_VBINARY_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
