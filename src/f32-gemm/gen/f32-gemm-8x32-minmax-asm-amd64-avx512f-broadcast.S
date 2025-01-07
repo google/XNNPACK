@@ -116,7 +116,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_8x32__asm_amd64_avx512f_broadcast
       mov [rsp - 248], r13
 
 outer_loop:
-      # Zero k counter.
+      # Initialize k counter.
       mov r11, 0
       # Read a pointers from stack into GP registers.
       mov rsi, [rsp - 128]

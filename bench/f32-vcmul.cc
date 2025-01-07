@@ -75,5 +75,5 @@ static void f32_vcmul(benchmark::State& state, uint64_t arch_flags,
 #undef XNN_UKERNEL_WITH_PARAMS
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif
