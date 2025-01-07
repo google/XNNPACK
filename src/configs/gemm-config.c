@@ -4055,7 +4055,7 @@ static void init_qu8_gemm_config(void) {
       qu8_gemm_config.log2_kr = 3;
     } else if (hardware_config->use_x86_sse4_1) {
       qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_fp32_ukernel_1x4c8__sse41_ld64);
-      qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(3)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_fp32_ukernel_3x4c8__sse41_ld64);
+      qu8_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(3)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_qu8_gemm_minmax_fp32_ukernel_2x4c8__sse41_ld64);
       qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_fp32_ukernel_1x4c8__sse41_ld64);
       qu8_gemm_config.minmax.igemm[XNN_MR_TO_INDEX(3)] = xnn_init_hmp_igemm_ukernel((xnn_igemm_ukernel_fn) xnn_qu8_igemm_minmax_fp32_ukernel_3x4c8__sse41_ld64);
       qu8_gemm_config.init.qu8 = xnn_init_qu8_conv_minmax_fp32_scalar_params;

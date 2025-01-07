@@ -50,7 +50,7 @@ SET(PROD_SSE41_MICROKERNEL_SRCS
   src/qu8-dwconv/gen/qu8-dwconv-25p8c-minmax-fp32-sse41-mul16.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-sse41-u16.c
   src/qu8-gemm/gen/qu8-gemm-1x4c8-minmax-fp32-sse41-ld64.c
-  src/qu8-gemm/gen/qu8-gemm-3x4c8-minmax-fp32-sse41-ld64.c
+  src/qu8-gemm/gen/qu8-gemm-2x4c8-minmax-fp32-sse41-ld64.c
   src/qu8-igemm/gen/qu8-igemm-1x4c8-minmax-fp32-sse41-ld64.c
   src/qu8-igemm/gen/qu8-igemm-3x4c8-minmax-fp32-sse41-ld64.c
   src/qu8-vadd/gen/qu8-vadd-minmax-sse41-mul16-ld64-u8.c
@@ -307,12 +307,12 @@ SET(NON_PROD_SSE41_MICROKERNEL_SRCS
   src/qu8-gemm/gen/qu8-gemm-2x4c2-minmax-fp32-sse41-ld128.c
   src/qu8-gemm/gen/qu8-gemm-2x4c2s4-minmax-fp32-sse41-ld64.c
   src/qu8-gemm/gen/qu8-gemm-2x4c2s4-minmax-fp32-sse41-ld128.c
-  src/qu8-gemm/gen/qu8-gemm-2x4c8-minmax-fp32-sse41-ld64.c
   src/qu8-gemm/gen/qu8-gemm-2x4c8-minmax-fp32-sse41-ld128.c
   src/qu8-gemm/gen/qu8-gemm-3x4c2-minmax-fp32-sse41-ld64.c
   src/qu8-gemm/gen/qu8-gemm-3x4c2-minmax-fp32-sse41-ld128.c
   src/qu8-gemm/gen/qu8-gemm-3x4c2s4-minmax-fp32-sse41-ld64.c
   src/qu8-gemm/gen/qu8-gemm-3x4c2s4-minmax-fp32-sse41-ld128.c
+  src/qu8-gemm/gen/qu8-gemm-3x4c8-minmax-fp32-sse41-ld64.c
   src/qu8-gemm/gen/qu8-gemm-3x4c8-minmax-fp32-sse41-ld128.c
   src/qu8-gemm/gen/qu8-gemm-4x4c2-minmax-fp32-sse41-ld64.c
   src/qu8-gemm/gen/qu8-gemm-4x4c2-minmax-fp32-sse41-ld128.c
