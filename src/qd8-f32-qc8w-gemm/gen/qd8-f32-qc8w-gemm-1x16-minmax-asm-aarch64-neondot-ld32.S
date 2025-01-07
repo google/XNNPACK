@@ -25,8 +25,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x16c4__asm_aarch64_neondot_
 
 
 outer_loop:
-      # Zero k counter.
-      eor x20, x20, x20
+      # Initialize k counter.
+      mov x20, x2
       # Initialize accumulators with k_sum * input zero point.
       ldr q10, [x24]
       ldp  q2, q3, [x5, 0]
@@ -38,15 +38,14 @@ outer_loop:
       add x5, x5, 64
 
 inner_loop:
-      ldr d2, [x3, x20]
+      ldr s2, [x3], 4
       ldp q6, q7, [x5], 32
       ldp q8, q9, [x5], 32
       sdot  v12.4s, v6.16b, v2.4b[0]
       sdot  v13.4s, v7.16b, v2.4b[0]
       sdot  v14.4s, v8.16b, v2.4b[0]
       sdot  v15.4s, v9.16b, v2.4b[0]
-      add x20, x20, 4
-      cmp x2, x20
+      subs x20, x20, 4
       bne inner_loop
 
       # Convert from int32 to float.
@@ -92,6 +91,7 @@ inner_loop:
       b.lo tail_8
       stp  q12, q13, [x6], 32
       stp  q14, q15, [x6], 32
+      sub x3, x3, x2
 
       sub x1, x1, 16
       b.ne outer_loop

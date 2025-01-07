@@ -398,7 +398,6 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
     y_stride *= compressed_output_shape[i];
   }
 
-  const size_t num_threads = pthreadpool_get_threads_count(threadpool);
   const size_t element_tile = op->binary_elementwise_config->element_tile;
   if (compressed_output_shape[5] == 1) {
     if (compressed_output_shape[4] == 1) {
@@ -412,20 +411,19 @@ enum xnn_status xnn_reshape_binary_elementwise_nd(xnn_operator_t op,
             op->context.elementwise_binary.y_stride[4] =
                 (1 << log2_element_size);
             op->context.elementwise_binary.elements = (1 << log2_element_size);
-            op->compute[0].type = xnn_parallelization_type_1d_tile_1d;
-            op->compute[0].task_1d_tile_1d = (pthreadpool_task_1d_tile_1d_t)
+            op->compute[0].type = xnn_parallelization_type_1d_dynamic;
+            op->compute[0].task_1d_dynamic = (pthreadpool_task_1d_dynamic_t)
                 xnn_compute_elementwise_binary_1d_tile;
             op->compute[0].range[0] =
                 compressed_output_shape[0] * (1 << log2_element_size);
             op->compute[0].tile[0] =
-                max(element_tile,
-                    round_up_po2(op->compute[0].range[0] / num_threads,
-                                 (element_tile << log2_element_size)));
+                max(element_tile << log2_element_size, 4096);
           } else {
-            op->compute[0].type = xnn_parallelization_type_1d;
-            op->compute[0].task_1d =
-                (pthreadpool_task_1d_t)xnn_compute_elementwise_binary_1d;
+            op->compute[0].type = xnn_parallelization_type_1d_dynamic;
+            op->compute[0].task_1d_dynamic = (pthreadpool_task_1d_dynamic_t)
+                xnn_compute_elementwise_binary_1d;
             op->compute[0].range[0] = compressed_output_shape[1];
+            op->compute[0].tile[0] = 1;
           }
         } else {
           op->compute[0].type = xnn_parallelization_type_2d;

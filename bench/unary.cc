@@ -526,5 +526,5 @@ BENCHMARK_CONVERT(f32_bf16, float, xnn_bfloat16);
 // BENCHMARK_CONVERT(f32_f32, float, float);
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

@@ -227,5 +227,5 @@ void xnnpack_dynamic_fully_connected_f32(benchmark::State& state, const char* ne
 }
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

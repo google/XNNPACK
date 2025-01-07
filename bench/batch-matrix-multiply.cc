@@ -32,7 +32,7 @@
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 namespace {
-static const size_t kMinIterations = 10;
+static const size_t kMinIterations = 100;
 }  // namespace
 
 void xnnpack_batch_matrix_multiply_f32(benchmark::State& state,
@@ -376,5 +376,5 @@ void tflite_batch_matrix_multiply_f32(benchmark::State& state,
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

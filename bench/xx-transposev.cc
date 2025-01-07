@@ -62,5 +62,5 @@ BENCHMARK_CAPTURE(transpose, 1x1_scalar_memcpy, xnn_xx_transposev_ukernel__1x1_s
     ->Apply(BenchmarkKernelSize)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

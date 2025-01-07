@@ -21,14 +21,18 @@ enum xnn_parallelization_type {
   xnn_parallelization_type_1d,
   xnn_parallelization_type_1d_with_thread,
   xnn_parallelization_type_1d_tile_1d,
+  xnn_parallelization_type_1d_dynamic,
   xnn_parallelization_type_2d,
   xnn_parallelization_type_2d_with_thread,
   xnn_parallelization_type_2d_tile_1d,
   xnn_parallelization_type_2d_tile_2d,
+  xnn_parallelization_type_2d_dynamic,
+  xnn_parallelization_type_2d_tile_1d_dynamic,
   xnn_parallelization_type_3d,
   xnn_parallelization_type_3d_tile_1d,
   xnn_parallelization_type_3d_tile_1d_with_thread,
   xnn_parallelization_type_3d_tile_2d,
+  xnn_parallelization_type_3d_tile_2d_dynamic,
   xnn_parallelization_type_4d,
   xnn_parallelization_type_4d_tile_2d,
   xnn_parallelization_type_5d,
@@ -50,14 +54,18 @@ struct compute_parameters {
     pthreadpool_task_1d_t task_1d;
     pthreadpool_task_1d_with_thread_t task_1d_with_thread;
     pthreadpool_task_1d_tile_1d_t task_1d_tile_1d;
+    pthreadpool_task_1d_dynamic_t task_1d_dynamic;
     pthreadpool_task_2d_t task_2d;
     pthreadpool_task_2d_with_thread_t task_2d_with_thread;
     pthreadpool_task_2d_tile_1d_t task_2d_tile_1d;
     pthreadpool_task_2d_tile_2d_t task_2d_tile_2d;
+    pthreadpool_task_2d_dynamic_t task_2d_dynamic;
+    pthreadpool_task_2d_tile_1d_dynamic_t task_2d_tile_1d_dynamic;
     pthreadpool_task_3d_t task_3d;
     pthreadpool_task_3d_tile_1d_t task_3d_tile_1d;
     pthreadpool_task_3d_tile_1d_with_thread_t task_3d_tile_1d_with_thread;
     pthreadpool_task_3d_tile_2d_t task_3d_tile_2d;
+    pthreadpool_task_3d_tile_2d_dynamic_t task_3d_tile_2d_dynamic;
     pthreadpool_task_4d_t task_4d;
     pthreadpool_task_4d_tile_2d_t task_4d_tile_2d;
     pthreadpool_task_5d_t task_5d;
@@ -1192,8 +1200,9 @@ struct elementwise_binary_context {
       const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t offset, size_t tile);
   XNN_PRIVATE void xnn_compute_elementwise_binary_1d(
-      const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t i);
+      const struct elementwise_binary_context
+          context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t batch_start, size_t batch_size);
   XNN_PRIVATE void xnn_compute_elementwise_binary_2d(
       const struct elementwise_binary_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t i, size_t j);
@@ -1420,26 +1429,25 @@ struct f32_qd8_convert_context {
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_f16_qd8_convert(
-      const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index);
+XNN_PRIVATE void xnn_compute_f16_qd8_convert(
+    const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_start, size_t batch_size);
 
-  XNN_PRIVATE void xnn_compute_f16_qdu8_convert(
-      const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index);
+XNN_PRIVATE void xnn_compute_f16_qdu8_convert(
+    const struct f16_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_start, size_t batch_size);
 
-  XNN_PRIVATE void xnn_compute_f32_qd8_convert(
-      const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index);
+XNN_PRIVATE void xnn_compute_f32_qd8_convert(
+    const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_start, size_t batch_size);
 
-  XNN_PRIVATE void xnn_compute_f32_qdu8_convert(
-      const struct f32_qd8_convert_context
-          context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index);
+XNN_PRIVATE void xnn_compute_f32_qdu8_convert(
+    const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_start, size_t batch_size);
 
-  XNN_PRIVATE void xnn_compute_pad_qd8_params(
-      const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index);
+XNN_PRIVATE void xnn_compute_pad_qd8_params(
+    const struct f32_qd8_convert_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_index);
 #endif
 
   struct x32_pack_lh_context {
@@ -1474,7 +1482,7 @@ struct f32_qd8_convert_context {
   };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_f32_qp8_convert(
+XNN_PRIVATE void xnn_compute_f32_qp8_convert(
       const struct f32_qp8_convert_context
           context[restrict XNN_MIN_ELEMENTS(1)],
       size_t group_idx, size_t m_idx_start, size_t m_tile);
@@ -1494,7 +1502,7 @@ struct f32_qd8_convert_context {
 #ifndef __cplusplus
   XNN_PRIVATE void xnn_compute_u8_softmax(
       const struct u8_softmax_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index);
+      size_t batch_start, size_t batch_size);
 #endif
 
 typedef void (*xnn_compute_reciprocal_fn)(const void* input, void* output);
@@ -1524,9 +1532,10 @@ struct floating_point_softmax_context {
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_floating_point_softmax(
-      const struct floating_point_softmax_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index);
+XNN_PRIVATE void xnn_compute_floating_point_softmax(
+    const struct floating_point_softmax_context
+        context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t batch_start, size_t batch_size);
 #endif
 
 struct rope_context {

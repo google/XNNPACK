@@ -876,6 +876,7 @@ TEST(WORKSPACE, internally_allocated_dynamic_quantization_parameters)
     const xnn_value* value = &runtime->values[i];
     switch (value->datatype) {
       case xnn_datatype_qdint8:
+      case xnn_datatype_qduint8:
         ASSERT_NE(value->quantization.dynamic_params, nullptr);
         XNN_FALLTHROUGH;
       case xnn_datatype_qpint8:
