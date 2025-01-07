@@ -297,5 +297,5 @@ void vlrelu(benchmark::State& state, uint64_t arch_flags,
 #undef XNN_CVT_UKERNEL_WITH_PARAMS
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif
