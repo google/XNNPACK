@@ -192,5 +192,5 @@ void xnn_f16_raddstoreexpminusmax_ukernel__neonfp16arith_rr2_p2_u32_acc4(
   }
   vacc_lo = vpadd_f16(vacc_lo, vacc_lo);
   vacc_lo = vpadd_f16(vacc_lo, vacc_lo);
-  vst1_lane_u16(sum, vreinterpret_u16_f16(vacc_lo), 0);
+  vst1_lane_u16((uint16_t*) sum, vreinterpret_u16_f16(vacc_lo), 0);
 }

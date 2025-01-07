@@ -55,7 +55,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x64__asm_amd64_avx512f_broadcast
       cmovle rbp, rbx
 
 outer_loop:
-      # Zero k counter.
+      # Initialize k counter.
       mov r11, 0
       # Initialize accumulators with the biases.
       vmovaps  zmm7, [r9 + 0]

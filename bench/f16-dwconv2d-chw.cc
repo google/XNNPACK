@@ -486,5 +486,5 @@ static void f16_dwconv2d_chw(benchmark::State& state,
 
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif
