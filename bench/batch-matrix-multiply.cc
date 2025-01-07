@@ -31,10 +31,6 @@
 #include "tensorflow/lite/version.h"
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
-namespace {
-static const size_t kMinIterations = 10;
-}  // namespace
-
 void xnnpack_batch_matrix_multiply_f32(benchmark::State& state,
                                        const char* net) {
   const size_t batch_size = state.range(0);
@@ -99,8 +95,9 @@ void xnnpack_batch_matrix_multiply_f32(benchmark::State& state,
     return;
   }
 
-  while (state.KeepRunningBatch(kMinIterations)) {
-    for (int iter = 0; iter < kMinIterations; iter++) {
+  int num_iters = FLAGS_benchmark_min_iters;
+  while (state.KeepRunningBatch(num_iters)) {
+    for (int iter = 0; iter < num_iters; iter++) {
       benchmark::utils::WipePthreadpoolL2Caches(state, threadpool);
 
       status = xnn_run_operator(op, threadpool);
@@ -109,6 +106,7 @@ void xnnpack_batch_matrix_multiply_f32(benchmark::State& state,
         return;
       }
     }
+    num_iters = 1;
   }
 
   status = xnn_delete_operator(op);
@@ -207,8 +205,9 @@ void xnnpack_batch_matrix_multiply_qd8_f32_qc8w(benchmark::State& state,
     return;
   }
 
-  while (state.KeepRunningBatch(kMinIterations)) {
-    for (int iter = 0; iter < kMinIterations; iter++) {
+  int num_iters = FLAGS_benchmark_min_iters;
+  while (state.KeepRunningBatch(num_iters)) {
+    for (int iter = 0; iter < num_iters; iter++) {
       benchmark::utils::WipePthreadpoolL2Caches(state, threadpool);
 
       status = xnn_run_operator(op, threadpool);
@@ -218,6 +217,7 @@ void xnnpack_batch_matrix_multiply_qd8_f32_qc8w(benchmark::State& state,
         return;
       }
     }
+    num_iters = 1;
   }
 
   status = xnn_delete_operator(op);
@@ -353,13 +353,15 @@ void tflite_batch_matrix_multiply_f32(benchmark::State& state,
                 interpreter->typed_tensor<float>(1) + batch_size * k * n,
                 std::ref(f32rng));
 
-  while (state.KeepRunningBatch(kMinIterations)) {
-    for (int iter = 0; iter < kMinIterations; iter++) {
+  int num_iters = FLAGS_benchmark_min_iters;
+  while (state.KeepRunningBatch(num_iters)) {
+    for (int iter = 0; iter < num_iters; iter++) {
       if (interpreter->Invoke() != kTfLiteOk) {
         state.SkipWithError("failed to invoke TFLite interpreter");
         return;
       }
     }
+    num_iters = 1;
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -376,5 +378,5 @@ void tflite_batch_matrix_multiply_f32(benchmark::State& state,
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

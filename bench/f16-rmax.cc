@@ -192,5 +192,5 @@ BENCHMARK_CAPTURE(f16_rmax, scalar_u4_acc4,
   ->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

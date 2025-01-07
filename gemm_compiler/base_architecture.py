@@ -143,8 +143,8 @@ class BaseArchitecture:
     raise NotImplementedError
 
   @abstractmethod
-  def zero_gp_register(self, reg):
-    """Zero the given general purpose register."""
+  def initialize_k_register(self, reg):
+    """Initialized the given general purpose register for inner loop control."""
     raise NotImplementedError
 
   @abstractmethod

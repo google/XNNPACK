@@ -256,5 +256,5 @@ BENCHMARK_CAPTURE(xnnpack_prelu_f32, imagenet, "ImageNet 224x224")->Apply(ImageN
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

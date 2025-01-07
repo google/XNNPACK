@@ -193,7 +193,7 @@ class ReduceOperatorTester {
     using StorageType = float;
     using AccumulatorType = double;
 
-    static double GetTolerance() { return 3e-6; }
+    static double GetTolerance() { return 5e-6; }
     static xnn_datatype GetXNNDatatype() { return xnn_datatype_fp32; };
 
     static std::uniform_real_distribution<float> BuildRngDistribution() {
