@@ -324,6 +324,7 @@ struct xnn_operator {
       const struct xnn_binary_elementwise_config* vadd_config;
       const struct xnn_binary_elementwise_config* vmul_config;
       const struct xnn_unary_elementwise_config* vtanh_config;
+      const struct xnn_binary_elementwise_config* vprelu_config;
       enum xnn_attention_logits_cap_type cap_type;
       struct xnn_attention_logits_cap_tanh_params cap_params;
     } attention;  // For attention operator.
