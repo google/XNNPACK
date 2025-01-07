@@ -201,6 +201,12 @@ class VBinaryMicrokernelTester {
 
   void Test(xnn_qs8_vmul_minmax_ukernel_fn vmul_minmax,
             xnn_init_qs8_mul_minmax_params_fn init_params) const;
+  
+  void Test(xnn_qs8_vprelu_ukernel_fn vprelu, OpType op_type,
+           xnn_init_qs8_vprelu_params_fn init_params) const;
+
+  void Test(xnn_qu8_vprelu_ukernel_fn vprelu, OpType op_type,
+            xnn_init_qu8_vprelu_params_fn init_params) const;
 
  private:
   size_t batch_size_{1};
