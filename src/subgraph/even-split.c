@@ -48,7 +48,7 @@ static enum xnn_status create_even_split_operator_helper(
   }
 }
 
-static enum xnn_status create_even_split_n_operator(
+static enum xnn_status create_even_split_n_operator_impl(
   const struct xnn_node* node,
   const struct xnn_value* values,
   size_t num_values,
@@ -78,7 +78,7 @@ static enum xnn_status create_even_split_n_operator(
   return status;
 }
 
-static enum xnn_status create_even_split2_operator(
+static enum xnn_status create_even_split_n_operator(
   const struct xnn_node* node,
   const struct xnn_value* values,
   size_t num_values,
@@ -86,29 +86,9 @@ static enum xnn_status create_even_split2_operator(
   struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
-  return create_even_split_n_operator(node, values, num_values, opdata, code_cache, /*num_splits=*/2, weights_cache);
-}
-
-static enum xnn_status create_even_split3_operator(
-  const struct xnn_node* node,
-  const struct xnn_value* values,
-  size_t num_values,
-  struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
-  xnn_weights_cache_t weights_cache)
-{
-  return create_even_split_n_operator(node, values, num_values, opdata, code_cache, /*num_splits=*/3, weights_cache);
-}
-
-static enum xnn_status create_even_split4_operator(
-  const struct xnn_node* node,
-  const struct xnn_value* values,
-  size_t num_values,
-  struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
-  xnn_weights_cache_t weights_cache)
-{
-  return create_even_split_n_operator(node, values, num_values, opdata, code_cache, /*num_splits=*/4, weights_cache);
+  opdata->num_outputs = node->num_outputs;
+  return create_even_split_n_operator_impl(
+    node, values, num_values, opdata, code_cache, node->num_outputs, weights_cache);
 }
 
 static enum xnn_status reshape_even_split_operator_helper(
@@ -215,31 +195,13 @@ static enum xnn_status reshape_even_split_n_operator(
   return status;
 }
 
-static enum xnn_status reshape_even_split2_operator(
+static enum xnn_status reshape_even_split_operator(
   struct xnn_operator_data* opdata,
   struct xnn_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
-  return reshape_even_split_n_operator(opdata, values, num_values, /*num_splits=*/2, threadpool);
-}
-
-static enum xnn_status reshape_even_split3_operator(
-  struct xnn_operator_data* opdata,
-  struct xnn_value* values,
-  size_t num_values,
-  pthreadpool_t threadpool)
-{
-  return reshape_even_split_n_operator(opdata, values, num_values, /*num_splits=*/3, threadpool);
-}
-
-static enum xnn_status reshape_even_split4_operator(
-  struct xnn_operator_data* opdata,
-  struct xnn_value* values,
-  size_t num_values,
-  pthreadpool_t threadpool)
-{
-  return reshape_even_split_n_operator(opdata, values, num_values, /*num_splits=*/4, threadpool);
+  return reshape_even_split_n_operator(opdata, values, num_values, /*num_splits=*/opdata->num_outputs, threadpool);
 }
 
 static enum xnn_status setup_even_split_operator_helper(
@@ -315,31 +277,13 @@ static enum xnn_status setup_even_split_n_operator(
   return status;
 }
 
-static enum xnn_status setup_even_split2_operator(
+static enum xnn_status setup_even_split_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
   size_t num_values,
   pthreadpool_t threadpool)
 {
-  return setup_even_split_n_operator(opdata, values, num_values, /*num_splits=*/2, threadpool);;
-}
-
-static enum xnn_status setup_even_split3_operator(
-  const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
-  size_t num_values,
-  pthreadpool_t threadpool)
-{
-  return setup_even_split_n_operator(opdata, values, num_values, /*num_splits=*/3, threadpool);;
-}
-
-static enum xnn_status setup_even_split4_operator(
-  const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
-  size_t num_values,
-  pthreadpool_t threadpool)
-{
-  return setup_even_split_n_operator(opdata, values, num_values, /*num_splits=*/4, threadpool);;
+  return setup_even_split_n_operator(opdata, values, num_values, /*num_splits=*/opdata->num_outputs, threadpool);
 }
 
 enum xnn_status check_output_value(
@@ -392,6 +336,7 @@ static enum xnn_status check_datatype_copyable(
 enum xnn_status xnn_define_even_split_n(
   enum xnn_node_type node_type,
   xnn_subgraph_t subgraph,
+  enum xnn_even_splitN split_type,
   int32_t split_dim,
   uint32_t input_id,
   size_t num_outputs,
@@ -416,35 +361,15 @@ enum xnn_status xnn_define_even_split_n(
     return status;
   }
 
-  status = check_output_value(subgraph, split_dim, input_id, output_ids[0], "first", node_type);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  status = check_output_value(subgraph, split_dim, input_id, output_ids[1], "second", node_type);
-  if (status != xnn_status_success) {
-    return status;
-  }
-
-  if (num_outputs > 2) {
-    status = check_output_value(subgraph, split_dim, input_id, output_ids[2], "third", node_type);
-    if (status != xnn_status_success) {
-      return status;
-    }
-  }
-  if (num_outputs > 3) {
-    status = check_output_value(subgraph, split_dim, input_id, output_ids[3], "fourth", node_type);
+  for (int i = 0; i < num_outputs; ++i) {
+    status = check_output_value(subgraph, split_dim, input_id, output_ids[i], "Nth", node_type);
     if (status != xnn_status_success) {
       return status;
     }
   }
 
-  check_datatype_copyable(subgraph, input_id, output_ids[0], "first", node_type);
-  check_datatype_copyable(subgraph, input_id, output_ids[1], "second", node_type);
-  if (num_outputs > 2) {
-    check_datatype_copyable(subgraph, input_id, output_ids[2], "third", node_type);
-  }
-  if (num_outputs > 3) {
-    check_datatype_copyable(subgraph, input_id, output_ids[3], "fourth", node_type);
+  for(int i = 0; i < num_outputs; ++i){
+  check_datatype_copyable(subgraph, input_id, output_ids[i], "Nth", node_type);
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
@@ -457,73 +382,26 @@ enum xnn_status xnn_define_even_split_n(
   node->num_inputs = 1;
   node->inputs[0] = input_id;
   node->num_outputs = num_outputs;
-  node->outputs[0] = output_ids[0];
-  node->outputs[1] = output_ids[1];
-  switch (num_outputs) {
-    case 2:
-      node->create = create_even_split2_operator;
-      node->reshape = reshape_even_split2_operator;
-      node->setup = setup_even_split2_operator;
-      break;
-    case 3:
-      node->outputs[2] = output_ids[2];
-      node->create = create_even_split3_operator;
-      node->reshape = reshape_even_split3_operator;
-      node->setup = setup_even_split3_operator;
-      break;
-    case 4:
-      node->outputs[2] = output_ids[2];
-      node->outputs[3] = output_ids[3];
-      node->create = create_even_split4_operator;
-      node->reshape = reshape_even_split4_operator;
-      node->setup = setup_even_split4_operator;
-      break;
-    default:
-      XNN_UNREACHABLE;
+  for(int i=0;i<num_outputs;++i){
+    node->outputs[i]=output_ids[i];
   }
+  node->create = create_even_split_n_operator;
+  node->reshape = reshape_even_split_operator;
+  node->setup = setup_even_split_operator;
   node->flags = flags;
 
   return xnn_status_success;
 };
 
-enum xnn_status xnn_define_even_split2(
+enum xnn_status xnn_define_even_split(
   xnn_subgraph_t subgraph,
+  enum xnn_even_splitN split_type,
   int32_t split_dim,
   uint32_t input_id,
-  uint32_t output1_id,
-  uint32_t output2_id,
+  uint32_t num_outputs,
+  const uint32_t* output_ids,
   uint32_t flags)
 {
-  const uint32_t output_ids[2] = { output1_id, output2_id };
   return xnn_define_even_split_n(
-    xnn_node_type_even_split2, subgraph, split_dim, input_id, XNN_COUNT_OF(output_ids), output_ids, flags);
-}
-
-enum xnn_status xnn_define_even_split3(
-  xnn_subgraph_t subgraph,
-  int32_t split_dim,
-  uint32_t input_id,
-  uint32_t output1_id,
-  uint32_t output2_id,
-  uint32_t output3_id,
-  uint32_t flags)
-{
-  const uint32_t output_ids[3] = { output1_id, output2_id, output3_id };
-  return xnn_define_even_split_n(
-    xnn_node_type_even_split3, subgraph, split_dim, input_id, XNN_COUNT_OF(output_ids), output_ids, flags);
-}
-
-enum xnn_status xnn_define_even_split4(
-  xnn_subgraph_t subgraph,
-  int32_t split_dim,
-  uint32_t input_id,
-  uint32_t output1_id,
-  uint32_t output2_id,
-  uint32_t output3_id,
-  uint32_t output4_id,
-  uint32_t flags)
-{
-  const uint32_t output_ids[4] = { output1_id, output2_id, output3_id, output4_id };
-  return xnn_define_even_split_n(
-    xnn_node_type_even_split4, subgraph, split_dim, input_id, XNN_COUNT_OF(output_ids), output_ids, flags);
+    xnn_node_type_even_split_n, subgraph, split_type, split_dim, input_id, num_outputs, output_ids, flags);
 }
