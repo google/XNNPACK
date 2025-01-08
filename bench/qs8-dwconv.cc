@@ -1660,15 +1660,8 @@ static void DWConvBenchmark(benchmark::State& state,
       xnn_init_qs8_conv_minmax_fp32_scalar_params,
        8 * (xnn_init_hardware_config()->vlenb / sizeof(int32_t)) /* channel tile */, 9 /* primary tile */, benchmark::utils::CheckRVV);
   }
-  static void qs8_dwconv_25p8vc__rvv(benchmark::State& state, const char* net) {
-    DWConvBenchmark(state,
-      xnn_qs8_dwconv_minmax_fp32_ukernel_25p8vc__rvv,
-      xnn_init_qs8_conv_minmax_fp32_scalar_params,
-       8 * (xnn_init_hardware_config()->vlenb / sizeof(int32_t)) /* channel tile */, 25 /* primary tile */, benchmark::utils::CheckRVV);
-  }
 
   BENCHMARK_DWCONV(qs8_dwconv_9p8vc__rvv);
-  BENCHMARK_DWCONV(qs8_dwconv_25p8vc__rvv);
 #endif // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 static void qs8_dwconv_9p1c__scalar_fmagic(benchmark::State& state, const char* net) {

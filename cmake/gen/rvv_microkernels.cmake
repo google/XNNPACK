@@ -61,6 +61,8 @@ SET(PROD_RVV_MICROKERNEL_SRCS
   src/qs8-vlrelu/gen/qs8-vlrelu-rvv-u2v.c
   src/qs8-vmul/gen/qs8-vmul-minmax-f32-rvv-u2v.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-f32-rvv-u2v.c
+  src/qu8-dwconv/gen/qu8-dwconv-9p8vc-minmax-fp32-rvv.c
+  src/qu8-dwconv/gen/qu8-dwconv-25p8vc-minmax-fp32-rvv.c
   src/qu8-f32-vcvt/gen/qu8-f32-vcvt-rvv-u2v.c
   src/qu8-vlrelu/gen/qu8-vlrelu-rvv-u2v.c
   src/qu8-vmul/gen/qu8-vmul-minmax-f32-rvv-u2v.c

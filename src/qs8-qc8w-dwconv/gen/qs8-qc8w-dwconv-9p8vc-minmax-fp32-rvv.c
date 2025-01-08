@@ -91,7 +91,7 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_9p8vc__rvv(
       vint32m8_t vacc = __riscv_vle32_v_i32m8(w, vl);
       w = (const void*) ((uintptr_t) w + vlmax * sizeof(int32_t));
 
-      for (int k=0; k<9; k++) {
+      for (size_t k = 0; k < 9; ++k) {
         vint8m2_t vi = __riscv_vle8_v_i8m2(i[k], vl);
         vint8m2_t vk = __riscv_vle8_v_i8m2(w, vl);
         w = (const void*) ((uintptr_t) w + vlmax * sizeof(int8_t));

@@ -64,13 +64,23 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERN
       vint32m${LMUL}_t vacc = __riscv_vle32_v_i32m${LMUL}(w, vl);
       w = (const void*) ((uintptr_t) w + vlmax * sizeof(int32_t));
 
-      for (int k=0; k<${KERNEL_TILE}; k++) {
-        vint8m${LMUL4}_t vi = __riscv_vle8_v_i8m${LMUL4}(i[k], vl);
-        vint8m${LMUL4}_t vk = __riscv_vle8_v_i8m${LMUL4}(w, vl);
-        w = (const void*) ((uintptr_t) w + vlmax * sizeof(int8_t));
+      for (size_t k = 0; k < ${KERNEL_TILE}; ++k) {
+        $if DATATYPE != "QU8":
+          vint8m${LMUL4}_t vi = __riscv_vle8_v_i8m${LMUL4}(i[k], vl);
+          vint8m${LMUL4}_t vk = __riscv_vle8_v_i8m${LMUL4}(w, vl);
+        $else:
+          vuint8m${LMUL4}_t vi = __riscv_vle8_v_u8m${LMUL4}(i[k], vl);
+          vuint8m${LMUL4}_t vk = __riscv_vle8_v_u8m${LMUL4}(w, vl);
+        w = (const void*) ((uintptr_t) w + vlmax * sizeof(${XINT8_T}));
 
         i[k] += vlmax;
-        vacc = __riscv_vwmacc_vv_i32m${LMUL}(vacc, __riscv_vwcvt_x_x_v_i16m${LMUL2}(vi, vl), __riscv_vwcvt_x_x_v_i16m${LMUL2}(vk, vl), vl);
+        $if DATATYPE != "QU8":
+          vacc = __riscv_vwmacc_vv_i32m${LMUL}(vacc, __riscv_vwcvt_x_x_v_i16m${LMUL2}(vi, vl), __riscv_vwcvt_x_x_v_i16m${LMUL2}(vk, vl), vl);
+        $else:
+          vint32m${LMUL}_t vk32 = __riscv_vreinterpret_v_u32m${LMUL}_i32m${LMUL}(__riscv_vzext_vf4_u32m${LMUL}(vk, vl));
+          vint32m${LMUL}_t vi32 = __riscv_vreinterpret_v_u32m${LMUL}_i32m${LMUL}(__riscv_vzext_vf4_u32m${LMUL}(vi, vl));
+          vk32 = __riscv_vsub_vx_i32m${LMUL}(vk32, vkernel_zero_point, vl);
+          vacc = __riscv_vmacc_vv_i32m${LMUL}(vacc, vi32, vk32, vl);
       }
 
       $if REQUANTIZATION == "FP32":
@@ -89,7 +99,10 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERN
         vint16m${LMUL2}_t vout16 = __riscv_vfncvt_x(vfpacc, vl);
         vout16 = __riscv_vadd_vx_i16m${LMUL2}(vout16, voutput_zero_point, vl);
         vint8m${LMUL4}_t vout8 = __riscv_vncvt_x_x_w_i8m${LMUL4}(vout16, vl);
-        __riscv_vse8_v_i8m${LMUL4}(output, vout8, vl);
+        $if DATATYPE != "QU8":
+          __riscv_vse8_v_i8m${LMUL4}(output, vout8, vl);
+        $else:
+          __riscv_vse8_v_u8m${LMUL4}(output, __riscv_vreinterpret_v_i8m${LMUL4}_u8m${LMUL4}(vout8), vl);
 
       output += vl;
       c -= vl;
