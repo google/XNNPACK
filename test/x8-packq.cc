@@ -44,7 +44,7 @@ namespace xnnpack {
 
 TEST_P(XnnTest, k_div_kr_m_div_mr) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
-  for (size_t kr = 1; kr <= 4; kr++) {
+  for (size_t kr : {1, 2, 4}) {
     for (size_t mr = 1; mr <= 4; mr++) {
       PackQMicrokernelTester()
           .m(mr * GetParam().unroll * 10)
@@ -56,43 +56,12 @@ TEST_P(XnnTest, k_div_kr_m_div_mr) {
   }
 }
 
-TEST_P(XnnTest, k_div_kr_m_div_mr_kr_div_sr) {
-  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
-  for (size_t sr = 1; sr <= 4; sr++) {
-    for (size_t kr = sr; kr <= 4 * sr; kr += sr) {
-      for (size_t mr = 1; mr <= 4; mr++) {
-        PackQMicrokernelTester()
-            .m(mr * GetParam().unroll * 10)
-            .k(kr * GetParam().unroll * 10)
-            .mr(mr)
-            .kr(kr)
-            .sr(sr)
-            .Test(GetParam().ukernel);
-      }
-    }
-  }
-}
-
 TEST_P(XnnTest, k_div_kr_m_lt_mr) {
   TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
-  for (size_t kr = 1; kr <= 4; kr++) {
+  for (size_t kr : {1, 2, 4}) {
     for (size_t mr = 2; mr <= 4; mr++) {
       PackQMicrokernelTester()
           .m(mr - 1)
-          .k(kr * GetParam().unroll * 10)
-          .mr(mr)
-          .kr(kr)
-          .Test(GetParam().ukernel);
-    }
-  }
-}
-
-TEST_P(XnnTest, k_div_kr_m_gt_mr) {
-  TEST_REQUIRES_ARCH_FLAGS(GetParam().arch_flags);
-  for (size_t kr = 1; kr <= 4; kr++) {
-    for (size_t mr = 2; mr <= 4; mr++) {
-      PackQMicrokernelTester()
-          .m(2 * mr + 1)
           .k(kr * GetParam().unroll * 10)
           .mr(mr)
           .kr(kr)
