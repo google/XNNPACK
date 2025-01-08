@@ -128,8 +128,8 @@ jobs:
         run: sudo apt install ninja-build
       - name: Download and Install riscv64 cross-toolchain tarball
         run: |
-          wget -nv https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2024.04.12/riscv64-glibc-ubuntu-22.04-llvm-nightly-2024.04.12-nightly.tar.gz
-          tar zxf riscv64-glibc-ubuntu-22.04-llvm-nightly-2024.04.12-nightly.tar.gz
+          wget -nv https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2024.09.03/riscv64-glibc-ubuntu-22.04-llvm-nightly-2024.09.03-nightly.tar.gz
+          tar xzf riscv64-glibc-ubuntu-22.04-llvm-nightly-2024.09.03-nightly.tar.gz
         working-directory: ${{ github.workspace }}
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
