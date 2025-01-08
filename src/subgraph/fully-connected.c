@@ -53,6 +53,7 @@ enum fully_connected_op_type {
   fc_type_qdu8_f32_qb4w = 26,
   fc_type_qdu8_f16_qc4w = 27,
   fc_type_qp8_f32_qc8w = 28,
+  fc_type_pf16_f16_f16 = 29,
 };
 
 enum fully_connected_op_type get_fully_connected_op_type(
@@ -79,8 +80,15 @@ enum fully_connected_op_type get_fully_connected_op_type(
           if (has_non_static_weights) {
             return fc_type_f16_f16_f16_dynamic;
           } else {
-            return fc_type_f16_f16_f16;
+            switch (input_datatype) {
+              case xnn_datatype_fp16:
+                return fc_type_f16_f16_f16;
+              case xnn_datatype_pfp16:
+                return fc_type_pf16_f16_f16;
+            default:
+              XNN_UNREACHABLE;
           }
+        }
         case xnn_datatype_fp32:
           if (has_non_static_weights) {
             return fc_type_f16_f32_f16_dynamic;
@@ -329,6 +337,15 @@ static enum xnn_status create_fully_connected_operator(
       break;
     case fc_type_f32_f32_f32:
       status = xnn_create_fully_connected_nc_f32(
+          input_channels, output_channels,
+          /*input_stride=*/input_channels,
+          /*output_stride=*/output_channels, kernel_data, bias_data,
+          node->activation.output_min, node->activation.output_max,
+          /*flags=*/node->flags, code_cache, weights_cache,
+          &opdata->operator_objects[0]);
+      break;
+    case fc_type_pf16_f16_f16:
+      status = xnn_create_fully_connected_nc_pf16(
           input_channels, output_channels,
           /*input_stride=*/input_channels,
           /*output_stride=*/output_channels, kernel_data, bias_data,
@@ -1444,16 +1461,28 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
     }
   }
 
-  if (input_value->datatype == xnn_datatype_fp32 && output_value->datatype == xnn_datatype_fp32 && (!bias_value || bias_value->datatype == xnn_datatype_fp32)) {
-    const struct xnn_gemm_config* gemm_config = xnn_init_pf32_gemm_config();
-    if (gemm_config != NULL && gemm_config->init.f32 != NULL) {
-      // Insert a node to pack the LHS.
-      uint32_t new_id = XNN_INVALID_VALUE_ID;
-      status = xnn_insert_pack_lh_node(subgraph, input_value, input_id, &new_id);
-      if (status != xnn_status_success) {
-        return status;
+  if (input_value->datatype == xnn_datatype_fp32 || input_value->datatype == xnn_datatype_fp16) {
+    if (input_value->datatype == output_value->datatype && (!bias_value || bias_value->datatype == input_value->datatype)) {
+      const struct xnn_gemm_config* gemm_config = NULL;
+      switch (input_value->datatype) {
+        case xnn_datatype_fp16:
+          gemm_config = xnn_init_pf16_gemm_config();
+          break;
+        case xnn_datatype_fp32:
+          gemm_config = xnn_init_pf32_gemm_config();
+          break;
+        default:
+          XNN_UNREACHABLE;
       }
-      input_id = new_id;
+      if (gemm_config != NULL && gemm_config->init.f32 != NULL) {
+        // Insert a node to pack the LHS.
+        uint32_t new_id = XNN_INVALID_VALUE_ID;
+        status = xnn_insert_pack_lh_node(subgraph, input_value, input_id, &new_id);
+        if (status != xnn_status_success) {
+          return status;
+        }
+        input_id = new_id;
+      }
     }
   }
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);

@@ -38,6 +38,11 @@ static enum xnn_status create_pack_lh_operator(
   const struct xnn_value *input_value = &values[input_id];
   enum xnn_status status;
   switch (input_value->datatype) {
+    case xnn_datatype_fp16:
+      status = xnn_create_pack_lh_x16(
+        node->flags,
+        &opdata->operator_objects[0]);
+      break;
     case xnn_datatype_fp32:
       status = xnn_create_pack_lh_x32(
         node->flags,
@@ -69,6 +74,14 @@ static enum xnn_status reshape_pack_lh_operator(
   size_t output_size_bytes = 0;
 
   switch (opdata->operator_objects[0]->type) {
+    case xnn_operator_type_pack_lh_x16:
+      status = xnn_reshape_pack_lh_x16(
+        opdata->operator_objects[0],
+        batch_size,
+        channels,
+        &output_size_bytes,
+        threadpool);
+      break;
     case xnn_operator_type_pack_lh_x32:
       status = xnn_reshape_pack_lh_x32(
         opdata->operator_objects[0],
@@ -123,6 +136,11 @@ static enum xnn_status setup_pack_lh_operator(
         opdata->operator_objects[0],
         input_data,
         output_data);
+    case xnn_operator_type_pack_lh_x16:
+      return xnn_setup_pack_lh_x16(
+        opdata->operator_objects[0],
+        input_data,
+        output_data);
     default:
       XNN_UNREACHABLE;
   }
@@ -151,6 +169,7 @@ enum xnn_status xnn_define_pack_lh(
   }
 
   switch (input_value->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;
     default:
@@ -173,6 +192,11 @@ enum xnn_status xnn_define_pack_lh(
   }
 
   switch (output_value->datatype) {
+    case xnn_datatype_fp16:
+      // Coerce the output from `xnn_datatype_fp16` to `xnn_datatype_pfp16` so
+      // that the correct GEMM path is taken.
+      output_value->datatype = xnn_datatype_pfp16;
+      break;
     case xnn_datatype_fp32:
       // Coerce the output from `xnn_datatype_fp32` to `xnn_datatype_pfp32` so
       // that the correct GEMM path is taken.

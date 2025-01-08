@@ -81,16 +81,16 @@ enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min,
 }
 
 enum xnn_status xnn_insert_pack_lh_node(xnn_subgraph_t subgraph, const struct xnn_value* input, uint32_t input_id, uint32_t *new_id) {
-  enum xnn_status status;
   switch (input->datatype) {
+    case xnn_datatype_fp16:
     case xnn_datatype_fp32:
-      status = xnn_define_tensor_value(
-          subgraph, xnn_datatype_fp32, 0, NULL, NULL,
-          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, new_id);
       break;
     default:
       XNN_UNREACHABLE;
   }
+  enum xnn_status status = xnn_define_tensor_value(
+          subgraph, input->datatype, 0, NULL, NULL,
+          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, new_id);
   if (status != xnn_status_success) {
     return status;
   }

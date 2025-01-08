@@ -1523,12 +1523,16 @@ typedef void (*xnn_x32_packx_ukernel_fn)(
 
 // PACKLH: PACK LH (input) tensor according to the parameters from the gemm
 // config.
-typedef void (*xnn_x32_pack_lh_ukernel_fn)(
+typedef void (*xnn_pack_lh_ukernel_fn)(
     size_t m, size_t k, size_t mr, size_t kr, size_t sr, size_t m_idx_start,
-    const uint32_t* lhs, size_t lhs_stride, uint32_t* lhs_packed);
+    const void* lhs, size_t lhs_stride, void* lhs_packed);
 
 // PACKLH Size: Size of packed buffer required.
-typedef size_t (*xnn_x32_pack_lh_size_fn)(size_t m, size_t k, size_t mr,
+typedef size_t (*xnn_pack_lh_size_fn)(size_t m, size_t k, size_t mr,
+                                          size_t kr, size_t sr);
+
+// PACKLH Offset: Offset into the packed buffer.
+typedef size_t (*xnn_pack_lh_offset_fn)(size_t m, size_t k, size_t mr,
                                           size_t kr, size_t sr);
 
 // FILL: FILL array with value

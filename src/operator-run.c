@@ -2274,17 +2274,17 @@ void xnn_compute_f32_qdu8_convert(
   return xnn_compute_f32_qx8_convert(context, xnn_f32_qdu8_asymmetric_quantization_params, batch_index);
 }
 
-void xnn_compute_x32_pack_lh(
-    const struct x32_pack_lh_context context[restrict XNN_MIN_ELEMENTS(1)],
+void xnn_compute_pack_lh(
+    const struct pack_lh_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t m_idx_start, size_t tile) {
-  const float* lhs = (const float*)((const char*)context->lhs +
+  const void* lhs = (const void*)((const char*)context->lhs +
                                     m_idx_start * context->lhs_stride);
-  const size_t offset = context->k * m_idx_start;
-  float* lhs_packed = context->lhs_packed + offset;
+  const size_t offset = context->packed_offset_fn(m_idx_start, context->k, context->mr, context->kr, context->sr);
+  void* lhs_packed = context->lhs_packed + offset;
 
   context->pack_lh_ukernel(/*m=*/tile, context->k, context->mr, context->kr,
-                         context->sr, 0, (const uint32_t*) lhs, context->lhs_stride,
-                         (uint32_t*) lhs_packed);
+                         context->sr, /*m_idx_start=*/0, lhs, context->lhs_stride,
+                         lhs_packed);
 }
 
 void xnn_compute_f32_qp8_convert(

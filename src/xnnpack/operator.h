@@ -379,7 +379,7 @@ struct xnn_operator {
     struct unpooling_context unpooling;
     struct vmulcaddc_context vmulcaddc;
     struct rope_context rope;
-    struct x32_pack_lh_context x32_pack_lh;
+    struct pack_lh_context pack_lh;
   } context;
 
   struct xnn_code_cache* code_cache;

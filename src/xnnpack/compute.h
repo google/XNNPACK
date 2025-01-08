@@ -1442,7 +1442,7 @@ struct f32_qd8_convert_context {
       size_t batch_index);
 #endif
 
-  struct x32_pack_lh_context {
+  struct pack_lh_context {
     size_t m;
     size_t k;
     size_t mr;
@@ -1451,12 +1451,13 @@ struct f32_qd8_convert_context {
     const float* XNN_RESTRICT lhs;
     size_t lhs_stride;
     float* XNN_RESTRICT lhs_packed;
-    xnn_x32_pack_lh_ukernel_fn pack_lh_ukernel;
+    xnn_pack_lh_ukernel_fn pack_lh_ukernel;
+    xnn_pack_lh_offset_fn packed_offset_fn;
   };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_x32_pack_lh(
-      const struct x32_pack_lh_context context[restrict XNN_MIN_ELEMENTS(1)],
+  XNN_PRIVATE void xnn_compute_pack_lh(
+      const struct pack_lh_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t m_idx_start, size_t tile);
 #endif
 
