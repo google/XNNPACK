@@ -118,7 +118,7 @@ jobs:
         run: ctest --output-on-failure --parallel $(nproc)
         working-directory: ${{ github.workspace }}/build/linux/riscv64
   cmake-linux-riscv64-rvv:
-    runs-on: ubuntu-22.04-8core
+    runs-on: ubuntu-22.04-16core
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
