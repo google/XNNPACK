@@ -307,6 +307,30 @@ DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_spmm_minmax_ukernel_128x1__hvx_x2)
 DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(
     xnn_f32_spmm_minmax_ukernel_128x1__hvx_x4)
+DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_spmm_minmax_ukernel_1vx1__rvv)
+DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_spmm_minmax_ukernel_1vx2__rvv)
+DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_spmm_minmax_ukernel_1vx4__rvv)
+DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_spmm_minmax_ukernel_2vx1__rvv)
+DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_spmm_minmax_ukernel_2vx2__rvv)
+DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_spmm_minmax_ukernel_2vx4__rvv)
+DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_spmm_minmax_ukernel_4vx1__rvv)
+DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_spmm_minmax_ukernel_4vx2__rvv)
+DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_spmm_minmax_ukernel_4vx4__rvv)
+DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_spmm_minmax_ukernel_8vx1__rvv)
+DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_spmm_minmax_ukernel_8vx2__rvv)
+DECLARE_F32_SPMM_MINMAX_UKERNEL_FUNCTION(
+    xnn_f32_spmm_minmax_ukernel_8vx4__rvv)
 
 #define DECLARE_F16_SPMM_MINMAX_UKERNEL_FUNCTION(fn_name)                     \
   XNN_INTERNAL void fn_name(                                                  \
