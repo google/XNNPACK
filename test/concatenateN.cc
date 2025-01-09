@@ -78,28 +78,6 @@ protected:
     for (int i = 0; i < num_inputs; i++) {
       output_stride += channels[i];
     }
-
-    switch (num_inputs) {
-      case 2:
-        concat_type = xnn_concatenate2;
-        break;
-      case 3:
-        concat_type = xnn_concatenate3;
-        break;
-      case 4:
-        concat_type = xnn_concatenate4;
-        break;
-      case 5:
-        concat_type = xnn_concatenate5;
-        break;
-      default:
-        if (num_inputs > 5) {
-          concat_type = xnn_concatenaten;
-        } else {
-          concat_type = xnn_concatenate_invalid;  // Handle invalid cases
-        }
-        break;
-    }
   }
 
   std::vector<size_t> RandomShape()
@@ -123,7 +101,7 @@ protected:
 
   size_t RandomNumInputs()
   {
-    return std::uniform_int_distribution<size_t>(1, 500)(rng);  // You can adjust the range
+    return std::uniform_int_distribution<size_t>(2, 5)(rng);  // You can adjust the range
   }
 
 
@@ -158,7 +136,6 @@ protected:
   std::vector<std::vector<T>> inputs;
   std::vector<T> operator_output;
   std::vector<T> subgraph_output;
-  enum xnn_concatenate concat_type;
 };
 
 using ConcatenateNTestQS8 = ConcatenateNTest<int8_t>;
@@ -195,7 +172,7 @@ TEST_F(ConcatenateNTestQS8, define)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_concatenate(subgraph, concat_type, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
+    xnn_define_concatenate(subgraph, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
@@ -241,7 +218,7 @@ TEST_F(ConcatenateNTestQU8, define)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_concatenate(subgraph, concat_type, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
+    xnn_define_concatenate(subgraph, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
 
   const struct xnn_node* node = &subgraph->nodes[0];
   ASSERT_EQ(node->type, xnn_node_type_concatenate_n);
@@ -278,7 +255,7 @@ TEST_F(ConcatenateNTestF16, define)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_concatenate(subgraph, concat_type, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
+    xnn_define_concatenate(subgraph, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
@@ -317,7 +294,7 @@ TEST_F(ConcatenateNTestF32, define)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_concatenate(subgraph, concat_type, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
+    xnn_define_concatenate(subgraph, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
@@ -385,7 +362,7 @@ TEST_F(ConcatenateNTestQS8, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_concatenate(subgraph, concat_type, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
+    xnn_define_concatenate(subgraph, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -458,7 +435,7 @@ TEST_F(ConcatenateNTestQU8, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_concatenate(subgraph, concat_type, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
+    xnn_define_concatenate(subgraph, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -531,7 +508,7 @@ TEST_F(ConcatenateNTestF16, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_concatenate(subgraph, concat_type, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
+    xnn_define_concatenate(subgraph, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -604,7 +581,7 @@ TEST_F(ConcatenateNTestF32, matches_operator_api)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_concatenate(subgraph, concat_type, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
+    xnn_define_concatenate(subgraph, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, /*flags=*/0, &runtime));
@@ -648,7 +625,7 @@ TEST_F(ConcatenateNTestF32, Reshape)
 
   ASSERT_EQ(
     xnn_status_success,
-    xnn_define_concatenate(subgraph, concat_type, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
+    xnn_define_concatenate(subgraph, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   struct xnn_node* node = &subgraph->nodes[0];

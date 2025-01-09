@@ -25,12 +25,12 @@
 #include <time.h>
 #endif
 
-#define XNN_MAX_INPUTS 500
+#define XNN_MAX_INPUTS 5
 #define XNN_MAX_OUTPUTS 4
 
 #define XNN_INVALID_NODE_ID UINT32_MAX
 
-#define XNN_MAX_OPERATOR_OBJECTS 500
+#define XNN_MAX_OPERATOR_OBJECTS 5
 
 /// Disable fusion of nodes in subgraph. Fusion is enabled by default, set this flag to turn it off.
 #define XNN_FLAG_NO_OPERATOR_FUSION 0x80000000

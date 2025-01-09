@@ -339,7 +339,7 @@ enum xnn_status xnn_define_tanh(xnn_subgraph_t subgraph, uint32_t input_id,
 enum xnn_status xnn_define_concatenate2(xnn_subgraph_t subgraph, int32_t axis, uint32_t input1_id,
                                   uint32_t input2_id, uint32_t output_id, uint32_t flags) {
   const uint32_t inputs_id[2] = {input1_id, input2_id};
-  return xnn_define_concatenate(subgraph, xnn_concatenate2, axis, /*num_inputs=*/2, 
+  return xnn_define_concatenate(subgraph, axis, /*num_inputs=*/2, 
                                 inputs_id, output_id, flags);
 }
 
@@ -347,7 +347,7 @@ enum xnn_status xnn_define_concatenate3(xnn_subgraph_t subgraph, int32_t axis, u
                                   uint32_t input2_id, uint32_t input3_id, uint32_t output_id, 
                                   uint32_t flags) {
   const uint32_t inputs_id[3] = {input1_id, input2_id, input3_id};
-  return xnn_define_concatenate(subgraph, xnn_concatenate3, axis, /*num_inputs=*/3, 
+  return xnn_define_concatenate(subgraph, axis, /*num_inputs=*/3, 
                                 inputs_id, output_id, flags);
 }
 
@@ -355,7 +355,7 @@ enum xnn_status xnn_define_concatenate4(xnn_subgraph_t subgraph, int32_t axis, u
                                   uint32_t input2_id, uint32_t input3_id, uint32_t input4_id, 
                                   uint32_t output_id, uint32_t flags) {
   const uint32_t inputs_id[4] = {input1_id, input2_id, input3_id, input4_id};
-  return xnn_define_concatenate(subgraph, xnn_concatenate4, axis, /*num_inputs=*/4, 
+  return xnn_define_concatenate(subgraph, axis, /*num_inputs=*/4, 
                                 inputs_id, output_id, flags);
 }
 
@@ -363,6 +363,6 @@ enum xnn_status xnn_define_concatenate5(xnn_subgraph_t subgraph, int32_t axis, u
                                   uint32_t input2_id, uint32_t input3_id, uint32_t input4_id, 
                                   uint32_t input5_id, uint32_t output_id, uint32_t flags) {
   const uint32_t inputs_id[5] = {input1_id, input2_id, input3_id, input4_id, input5_id};
-  return xnn_define_concatenate(subgraph, xnn_concatenate5, axis, /*num_inputs=*/5, 
+  return xnn_define_concatenate(subgraph, axis, /*num_inputs=*/5, 
                                 inputs_id, output_id, flags);
 }

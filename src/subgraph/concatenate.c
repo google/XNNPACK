@@ -39,7 +39,7 @@ static enum xnn_status create_concatenate_operator_helper(
   }
 }
 
-static enum xnn_status create_concatenate_n_operator_impl(
+static enum xnn_status create_concatenate_n_operator(
   const struct xnn_node* node,
   const struct xnn_value* values,
   size_t num_values,
@@ -64,18 +64,6 @@ static enum xnn_status create_concatenate_n_operator_impl(
   return status;
 }
 
-static enum xnn_status create_concatenate_n_operator(
-  const struct xnn_node* node,
-  const struct xnn_value* values,
-  size_t num_values,
-  struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
-  xnn_weights_cache_t weights_cache)
-{
-  return create_concatenate_n_operator_impl(
-    node, values, num_values, node->num_inputs, opdata, code_cache, weights_cache);
-}
-
 static enum xnn_status create_concatenaten_operator(
   const struct xnn_node* node,
   const struct xnn_value* values,
@@ -84,7 +72,7 @@ static enum xnn_status create_concatenaten_operator(
   struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
-  return create_concatenate_n_operator(node, values, num_values, opdata, code_cache, weights_cache);
+  return create_concatenate_n_operator(node, values, num_values, node->num_inputs, opdata, code_cache, weights_cache);
 }
 
 static enum xnn_status reshape_concatenate_operator_helper(
@@ -337,7 +325,6 @@ static enum xnn_status setup_concatenaten_operator(
 enum xnn_status xnn_define_concatenate_n(
   enum xnn_node_type node_type,
   xnn_subgraph_t subgraph,
-  enum xnn_concatenate concat_type,
   int32_t axis,
   size_t num_inputs,
   const uint32_t* input_ids,
@@ -420,7 +407,6 @@ enum xnn_status xnn_define_concatenate_n(
 
 enum xnn_status xnn_define_concatenate(
   xnn_subgraph_t subgraph,
-  enum xnn_concatenate concat_type,
   int32_t axis,
   uint32_t num_inputs,
   const uint32_t* inputs,
@@ -428,5 +414,5 @@ enum xnn_status xnn_define_concatenate(
   uint32_t flags)
   {
     return xnn_define_concatenate_n(
-      xnn_node_type_concatenate_n, subgraph, concat_type, axis, num_inputs, inputs, output_id, flags);
+      xnn_node_type_concatenate_n, subgraph, axis, num_inputs, inputs, output_id, flags);
   }

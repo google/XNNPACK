@@ -1479,15 +1479,6 @@ enum xnn_status xnn_define_static_reduce_v2(        //
     uint32_t output_id,                             //
     uint32_t flags);
 
-enum xnn_concatenate {
-  xnn_concatenate_invalid = -1,
-  xnn_concatenate2,
-  xnn_concatenate3,
-  xnn_concatenate4,
-  xnn_concatenate5,
-  xnn_concatenaten, 
-};
-
 /// Define a n-Input Concatenate Node and add it to a Subgraph.
 ///
 /// The n-Input Concatenate Node concatenates 'n' tensors along a specified axis.
@@ -1504,7 +1495,6 @@ enum xnn_concatenate {
 /// @param flags - binary features of the Concatenate Node. No supported flags are currently defined.
 enum xnn_status xnn_define_concatenate(
   xnn_subgraph_t subgraph,
-  enum xnn_concatenate type,
   int32_t axis,
   uint32_t num_inputs,
   const uint32_t* inputs,
