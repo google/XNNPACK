@@ -74,7 +74,8 @@ inner_loop:
       add r11, 4
       cmp rdx, r11
       jne inner_loop
-      # Min/max clamping..
+inner_loop_end:
+      # Min/max clamping.
       vminps  zmm7, zmm1, zmm7
       vminps  zmm8, zmm1, zmm8
       vminps  zmm9, zmm1, zmm9
