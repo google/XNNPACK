@@ -790,10 +790,6 @@ enum xnn_status xnn_setup_runtime(
     }
   }
 
-  #ifdef XNN_SLINKY_AVAILABLE
-  // slinky_setup_inputs_and_outputs(runtime);
-  #endif
-
   // Apply runtime state changes.
   for (size_t i = 0; i < num_external_values; i++) {
     const struct xnn_external_value* external_value = &external_values[i];
@@ -838,6 +834,10 @@ enum xnn_status xnn_setup_runtime(
       }
     }
   }
+
+  #ifdef XNN_SLINKY_AVAILABLE
+  // slinky_setup_inputs_and_outputs(runtime);
+  #endif
 
   runtime->has_been_setup = true;
 
