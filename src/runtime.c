@@ -647,7 +647,7 @@ enum xnn_status xnn_create_runtime_v4(
 #endif
   if (use_slinky) {
     #ifdef XNN_SLINKY_AVAILABLE
-    // slinky_init_pipeline(runtime);
+    // slinky_init_pipeline(runtime, flags);
     #else
     xnn_log_warning("Slinky requested but not available");
     #endif

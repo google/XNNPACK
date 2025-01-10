@@ -38,6 +38,9 @@
 /// Enable Slinky (if available).
 #define XNN_FLAG_SLINKY_ENABLED 0x40000000
 
+/// If Slinky is enabled, disable any scheduling.
+#define XNN_FLAG_SLINKY_SCHEDULE_DISABLED 0x20000000
+
 /// Assume tensors of rank > 2 will be squashed to 2 dimensions.
 #define XNN_FLAG_SQUASH_GROUPS 0x00000100
 
@@ -50,7 +53,7 @@ extern "C" {
 struct slinky_pipeline;
 typedef struct slinky_pipeline* slinky_pipeline_t;
 
-void slinky_init_pipeline(xnn_runtime_t runtime);
+void slinky_init_pipeline(xnn_runtime_t runtime, uint32_t flags);
 void slinky_setup_inputs_and_outputs(xnn_runtime_t runtime);
 void slinky_destroy_pipeline(xnn_runtime_t runtime);
 bool slinky_evaluate(xnn_runtime_t runtime, enum xnn_status* status);
