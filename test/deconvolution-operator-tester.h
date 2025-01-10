@@ -670,15 +670,35 @@ class DeconvolutionOperatorTester {
         for (size_t x = 0; x < output_width(); x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
-              EXPECT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), int32_t(qmax() - 0x80))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_NEAR(
-                  output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
-                  double(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]),
+              ASSERT_LE(
+                  int32_t(
+                      output[((i * output_height() + y) * output_width() + x) *
+                                 output_pixel_stride() +
+                             g * group_output_channels() + c]),
+                  int32_t(qmax() - 0x80))
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
+              ASSERT_GE(
+                  int32_t(
+                      output[((i * output_height() + y) * output_width() + x) *
+                                 output_pixel_stride() +
+                             g * group_output_channels() + c]),
+                  int32_t(qmin() - 0x80))
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
+              ASSERT_NEAR(
+                  output_ref[(((i * output_height() + y) * output_width() + x) *
+                                  groups() +
+                              g) *
+                                 group_output_channels() +
+                             c],
+                  double(
+                      output[((i * output_height() + y) * output_width() + x) *
+                                 output_pixel_stride() +
+                             g * group_output_channels() + c]),
                   0.9)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
             }
           }
         }
@@ -884,15 +904,36 @@ class DeconvolutionOperatorTester {
         for (size_t x = 0; x < output_width(); x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
-              EXPECT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), int32_t(qmax()))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), int32_t(qmin()))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_NEAR(
-                  output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
-                  double(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
+              ASSERT_LE(
+                  int32_t(
+                      output[((i * output_height() + y) * output_width() + x) *
+                                 output_pixel_stride() +
+                             g * group_output_channels() + c]),
+                  int32_t(qmax()))
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
+              ASSERT_GE(
+                  int32_t(
+                      output[((i * output_height() + y) * output_width() + x) *
+                                 output_pixel_stride() +
+                             g * group_output_channels() + c]),
+                  int32_t(qmin()))
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
+              ASSERT_NEAR(
+                  output_ref[(((i * output_height() + y) * output_width() + x) *
+                                  groups() +
+                              g) *
+                                 group_output_channels() +
+                             c],
+                  double(
+                      output[((i * output_height() + y) * output_width() + x) *
+                                 output_pixel_stride() +
+                             g * group_output_channels() + c]) -
+                      double(output_zero_point),
                   0.9)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
             }
           }
         }
@@ -1115,15 +1156,38 @@ class DeconvolutionOperatorTester {
         for (size_t x = 0; x < output_width(); x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
-              EXPECT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c], output_min)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c], output_max)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_NEAR(
-                  output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c],
-                  output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
-                  1.0e-2f * std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+              ASSERT_GE(
+                  output[((i * output_height() + y) * output_width() + x) *
+                             output_pixel_stride() +
+                         g * group_output_channels() + c],
+                  output_min)
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
+              ASSERT_LE(
+                  output[((i * output_height() + y) * output_width() + x) *
+                             output_pixel_stride() +
+                         g * group_output_channels() + c],
+                  output_max)
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
+              ASSERT_NEAR(
+                  output[((i * output_height() + y) * output_width() + x) *
+                             output_pixel_stride() +
+                         g * group_output_channels() + c],
+                  output_ref[(((i * output_height() + y) * output_width() + x) *
+                                  groups() +
+                              g) *
+                                 group_output_channels() +
+                             c],
+                  1.0e-2f * std::abs(output_ref[(((i * output_height() + y) *
+                                                      output_width() +
+                                                  x) *
+                                                     groups() +
+                                                 g) *
+                                                    group_output_channels() +
+                                                c]))
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
             }
           }
         }
@@ -1734,15 +1798,40 @@ class DeconvolutionOperatorTester {
         for (size_t x = 0; x < output_width(); x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
-              EXPECT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c], output_min)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c], output_max)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_NEAR(
-                  output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
-                  output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c],
-                  std::max(1.0e-4, 1.0e-4 * std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c])))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+              ASSERT_GE(
+                  output[((i * output_height() + y) * output_width() + x) *
+                             output_pixel_stride() +
+                         g * group_output_channels() + c],
+                  output_min)
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
+              ASSERT_LE(
+                  output[((i * output_height() + y) * output_width() + x) *
+                             output_pixel_stride() +
+                         g * group_output_channels() + c],
+                  output_max)
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
+              ASSERT_NEAR(
+                  output_ref[(((i * output_height() + y) * output_width() + x) *
+                                  groups() +
+                              g) *
+                                 group_output_channels() +
+                             c],
+                  output[((i * output_height() + y) * output_width() + x) *
+                             output_pixel_stride() +
+                         g * group_output_channels() + c],
+                  std::max(
+                      1.0e-4,
+                      1.0e-4 * std::abs(output_ref[(((i * output_height() + y) *
+                                                         output_width() +
+                                                     x) *
+                                                        groups() +
+                                                    g) *
+                                                       group_output_channels() +
+                                                   c])))
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
             }
           }
         }
