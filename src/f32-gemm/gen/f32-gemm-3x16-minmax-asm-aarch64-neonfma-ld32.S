@@ -1,17 +1,18 @@
 #include "xnnpack/assembly.h"
 
-BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_3x16__asm_aarch64_neonfma_lane
+BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_3x16__asm_aarch64_neonfma_ld32_2
 
       # Free up GP registers.
-      stp x19, x20, [sp, -48]
-      stp x21, x22, [sp, -32]
-      stp x23, x24, [sp, -16]
+      stp x19, x20, [sp, -64]
+      stp x21, x22, [sp, -48]
+      stp x23, x24, [sp, -32]
+      stp x25, x26, [sp, -16]
 
       # Preserve callee saved q8-q15 registers.
-      stp q8, q9, [sp, -176]
-      stp q10, q11, [sp, -144]
-      stp q12, q13, [sp, -112]
-      stp q14, q15, [sp, -80]
+      stp d8, d9, [sp, -128]
+      stp d10, d11, [sp, -112]
+      stp d12, d13, [sp, -96]
+      stp d14, d15, [sp, -80]
 
       # Load params.
       ldr x13, [sp, 8]
@@ -33,6 +34,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_3x16__asm_aarch64_neonfma_lane
 outer_loop:
       # Initialize k counter.
       mov x20, x2
+
       # Initialize accumulators with the biases.
       ldp q11, q14, [x5, 0]
       ldp q17, q20, [x5, 32]
@@ -66,7 +68,9 @@ inner_loop:
       fmla  v22.4s, v10.4s, v4.s[0]
       subs x20, x20, 4
       bne inner_loop
-      # Min/max clamping..
+
+inner_loop_end:
+      # Min/max clamping.
       fmin  v11.4s, v1.4s, v11.4s
       fmin  v12.4s, v1.4s, v12.4s
       fmin  v13.4s, v1.4s, v13.4s
@@ -150,14 +154,15 @@ tail_1:
 
 return:
       # Restore the callee saved GP registers.
-      ldp x19, x20, [sp, -48]
-      ldp x21, x22, [sp, -32]
-      ldp x23, x24, [sp, -16]
+      ldp x19, x20, [sp, -64]
+      ldp x21, x22, [sp, -48]
+      ldp x23, x24, [sp, -32]
+      ldp x25, x26, [sp, -16]
 
       # Restore callee saved q8-q15 registers.
-      ldp q8, q9, [sp, -176]
-      ldp q10, q11, [sp, -144]
-      ldp q12, q13, [sp, -112]
-      ldp q14, q15, [sp, -80]
+      ldp d8, d9, [sp, -128]
+      ldp d10, d11, [sp, -112]
+      ldp d12, d13, [sp, -96]
+      ldp d14, d15, [sp, -80]
       ret
-END_FUNCTION xnn_f32_gemm_minmax_ukernel_3x16__asm_aarch64_neonfma_lane
+END_FUNCTION xnn_f32_gemm_minmax_ukernel_3x16__asm_aarch64_neonfma_ld32_2

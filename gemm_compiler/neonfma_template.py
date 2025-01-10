@@ -47,10 +47,11 @@ class NeonFma(arch.Aarch64):
         '28',
         '29',
         '30',
+        '10',
     ]
 
   def a_registers(self, idx):
-    registers = ['2', '3', '4', '5', '6']
+    registers = ['2', '3', '4', '5', '6', '31', '29', '30']
     assert idx < len(registers)
     return registers[idx]
 
@@ -63,6 +64,10 @@ class NeonFma(arch.Aarch64):
             'ldr s{AM}, [{AM_ptr}], 4\n',
         ]
     }
+    return in_asm
+
+  def base_input_asm(self):
+    in_asm = {'loop': ['']}
     return in_asm
 
   def weights_asm(self):
@@ -78,12 +83,12 @@ class NeonFma(arch.Aarch64):
 
   def compute_asm(self):
     c_asm = {
-        'loop': ['fmla  v{ACC}.4s, v{W}.4s, v{A}.s[0]\n'],
+        'loop': ['fmla  v{ACC}.4s, v{W}.4s, v{A}.s[{POS}]\n'],
     }
     return c_asm
 
   def init_accumulators(self, M, N):
-    ret = '# Initialize accumulators with the biases.\n'
+    ret = '\n# Initialize accumulators with the biases.\n'
     accumulators = self.acc_registers()
     W = self.w_ptr_register()
     single_bias = 'ldr q{ACC}, [{W}, {offset}]\n'
@@ -143,12 +148,18 @@ class NeonFma(arch.Aarch64):
           ACC_1=accumulators[M + mr],
           c_reg=cm_registers[mr],
       )
-      for nr in range(2, N_COUNT, 2):
+      for nr in range(2, N_COUNT - 1, 2):
         asm_string += 'stp  q{ACC}, q{ACC_1}, [{c_reg}], 32\n'.format(
             ACC=accumulators[M * 2 + mr],
             ACC_1=accumulators[M * 3 + mr],
             c_reg=cm_registers[mr],
         )
+      if N_COUNT % 2 != 0:
+        asm_string += 'str  q{ACC}, [{c_reg}], 16\n'.format(
+            ACC=accumulators[M * 2 + mr],
+            c_reg=cm_registers[mr],
+        )
+
     for mr in range(0, M):
       AM_PTR = self.am_registers()[mr]
       kc_register = self.kc_register()
@@ -206,3 +217,36 @@ class NeonFma(arch.Aarch64):
       )
 
     return asm_string
+
+
+class NeonFmaUnolled(NeonFma):
+
+  def __init__(self, unroll_factor):
+    self.unroll_factor = unroll_factor
+    self.decrement = 4 * unroll_factor
+
+  def function_name(self, M, N, isa):
+    LD = self.unroll_factor * 32
+    return f'xnn_f32_gemm_minmax_ukernel_{M}x{N}__asm_aarch64_{isa}_ld{LD}_2\n'
+
+  def input_asm(self):
+    match self.unroll_factor:
+      case 1:
+        return {'loop': ['']}
+      case 2:
+        return {
+            'loop': [
+                'ldr d{AM}, [{AM_ptr}], 8\n',
+            ]
+        }
+      case 4:
+        return {
+            'loop': [
+                'ldr q{AM}, [{AM_ptr}], 16\n',
+            ]
+        }
+      case _:
+        raise NotImplementedError
+
+  def base_input_asm(self):
+    return super().input_asm()

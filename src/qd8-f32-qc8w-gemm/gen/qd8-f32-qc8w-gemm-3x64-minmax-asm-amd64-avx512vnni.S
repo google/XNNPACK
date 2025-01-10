@@ -108,6 +108,7 @@ inner_loop:
       add r11, 4
       cmp rdx, r11
       jne inner_loop
+inner_loop_end:
 
       # Convert from int32 to float.
       vcvtdq2ps zmm5, zmm5
@@ -158,7 +159,7 @@ inner_loop:
       vfmadd213ps zmm21, zmm3, zmm9
       vfmadd213ps zmm22, zmm3, zmm9
       vfmadd213ps zmm23, zmm3, zmm9
-      # Min/max clamping..
+      # Min/max clamping.
       vminps  zmm5, zmm1, zmm5
       vminps  zmm12, zmm1, zmm12
       vminps  zmm14, zmm1, zmm14

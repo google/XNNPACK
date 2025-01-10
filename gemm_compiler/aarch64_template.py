@@ -11,6 +11,10 @@ from gemm_compiler import base_architecture as base_architecture
 
 class Aarch64(base_architecture.BaseArchitecture):
 
+  def __init__(self):
+    self.decrement = 4
+    self.unroll_factor = 1
+
   def astride_register(self):
     return 'x4'
 
@@ -24,7 +28,15 @@ class Aarch64(base_architecture.BaseArchitecture):
     return 'x7'
 
   def am_registers(self):
-    return [self.a_ptr_register()] + ['x9', 'x10', 'x11', 'x12', 'x21', 'x22']
+    return [self.a_ptr_register()] + [
+        'x9',
+        'x10',
+        'x11',
+        'x12',
+        'x21',
+        'x22',
+        'x25',
+    ]
 
   def a_ptr_register(self):
     return 'x3'
@@ -33,7 +45,15 @@ class Aarch64(base_architecture.BaseArchitecture):
     return 'x6'
 
   def cm_registers(self):
-    return [self.c_ptr_register()] + ['x13', 'x14', 'x15', 'x19', 'x23', 'x24']
+    return [self.c_ptr_register()] + [
+        'x13',
+        'x14',
+        'x15',
+        'x19',
+        'x23',
+        'x24',
+        'x26',
+    ]
 
   def w_ptr_register(self):
     return 'x5'
@@ -102,7 +122,7 @@ class Aarch64(base_architecture.BaseArchitecture):
     return map[reg]
 
   def function_name(self, M, N, isa):
-    return f'xnn_f32_gemm_minmax_ukernel_{M}x{N}__asm_aarch64_{isa}_lane\n'
+    return f'xnn_f32_gemm_minmax_ukernel_{M}x{N}__asm_aarch64_{isa}_ld32\n'
 
   def quantization_params(self):
     return ''
@@ -113,15 +133,16 @@ class Aarch64(base_architecture.BaseArchitecture):
     HEADER += 'BEGIN_FUNCTION ' + self.function_name(M, N, isa)
     HEADER += """
       # Free up GP registers.
-      stp x19, x20, [sp, -48]
-      stp x21, x22, [sp, -32]
-      stp x23, x24, [sp, -16]
+      stp x19, x20, [sp, -64]
+      stp x21, x22, [sp, -48]
+      stp x23, x24, [sp, -32]
+      stp x25, x26, [sp, -16]
 
       # Preserve callee saved q8-q15 registers.
-      stp q8, q9, [sp, -176]
-      stp q10, q11, [sp, -144]
-      stp q12, q13, [sp, -112]
-      stp q14, q15, [sp, -80]
+      stp d8, d9, [sp, -128]
+      stp d10, d11, [sp, -112]
+      stp d12, d13, [sp, -96]
+      stp d14, d15, [sp, -80]
 
       # Load params.
       ldr x13, [sp, 8]
@@ -137,26 +158,11 @@ class Aarch64(base_architecture.BaseArchitecture):
   def read_a_registers(self, M):
     return ''
 
-  def inner_loop(self, M, N):
+  def do_loop(self, M, N, i):
     N_COUNT = N // self.n_step()
-    asm_string = '\ninner_loop:\n'
-    if 'before' in self.input_asm():
-      asm_string += self.input_asm()['before']
-    for mr in range(0, M):
-      for l in self.input_asm()['loop']:
-        asm_string += l.format(
-            AM_ptr=self.am_registers()[mr],
-            AM=self.a_registers(mr),
-            a_offset=self.k_register(),
-        )
-    if 'after' in self.input_asm():
-      asm_string += self.input_asm()['after']
-
-    # weights
-    if 'before' in self.weights_asm():
-      asm_string += self.weights_asm()['before']
+    asm_string = ''
     for l in self.weights_asm()['loop_2']:
-      for nr in range(0, N_COUNT, 2):
+      for nr in range(0, N_COUNT - 1, 2):
         asm_string += l.format(
             W_ptr=self.w_ptr_register(),
             W=self.w_registers()[nr],
@@ -184,7 +190,67 @@ class Aarch64(base_architecture.BaseArchitecture):
               W=self.w_registers()[nr],
               A=self.a_registers(mr),
               ACC=self.acc_registers()[M * nr + mr],
+              POS=i,
           )
+    return asm_string
+
+  def inner_loop(self, M, N):
+    asm_string = ''
+    if self.unroll_factor > 1:
+      DECREMENT = self.unroll_factor * 4
+      k_register = self.k_register()
+      asm_string += f'\n# Are there at least {DECREMENT} bytes?\n'
+      asm_string += f'cmp {k_register}, {DECREMENT}\n'
+      asm_string += f'blt inner_loop_tail\n'
+      asm_string += f'sub {k_register}, {k_register}, {DECREMENT}\n'
+
+    asm_string += '\ninner_loop:\n'
+    decrement = 4 * self.unroll_factor
+    if 'before' in self.input_asm():
+      asm_string += self.input_asm()['before']
+    for mr in range(0, M):
+      for l in self.input_asm()['loop']:
+        asm_string += l.format(
+            AM_ptr=self.am_registers()[mr],
+            AM=self.a_registers(mr),
+            a_offset=self.k_register(),
+        )
+    if 'after' in self.input_asm():
+      asm_string += self.input_asm()['after']
+
+    # weights
+    if 'before' in self.weights_asm():
+      asm_string += self.weights_asm()['before']
+    inner_loop_label = 'inner_loop'
+    if self.unroll_factor > 1:
+      for u in range(self.unroll_factor):
+        asm_string += self.do_loop(M, N, u)
+      # loop counter
+      asm_string += self.cmp_k_and_jump_if_less(
+          label=inner_loop_label, decrement=decrement, cond='bhs'
+      )
+
+      asm_string += f"""
+      add x20, x20, {decrement}
+      cmp x20, 4
+      blt inner_loop_end
+      \ninner_loop_tail:\n"""
+      inner_loop_label = 'inner_loop_tail'
+
+    for mr in range(0, M):
+      for l in self.base_input_asm()['loop']:
+        asm_string += l.format(
+            AM_ptr=self.am_registers()[mr],
+            AM=self.a_registers(mr),
+            a_offset=self.k_register(),
+        )
+    asm_string += self.do_loop(M, N, 0)
+    # loop counter
+    asm_string += self.cmp_k_and_jump_if_less(
+        label=inner_loop_label, decrement=4, cond='bne'
+    )
+    asm_string += '\n'
+
     return asm_string
 
   def outer_loop_prepare(self, M, N):
@@ -280,25 +346,26 @@ class Aarch64(base_architecture.BaseArchitecture):
     kc_register = self.kc_register()
     return f'mov {reg}, {kc_register}\n'
 
-  def cmp_k_and_jump_if_less(self, label):
+  def cmp_k_and_jump_if_less(self, label, decrement, cond):
     kc_register = self.kc_register()
     k_register = self.k_register()
-    return f"""subs {k_register}, {k_register}, 4
-      bne {label}\n"""
+    return f"""subs {k_register}, {k_register}, {decrement}
+      {cond} {label}\n"""
 
   def epilogue(self, M, N, isa):
     restore_stack = """
 return:
       # Restore the callee saved GP registers.
-      ldp x19, x20, [sp, -48]
-      ldp x21, x22, [sp, -32]
-      ldp x23, x24, [sp, -16]
+      ldp x19, x20, [sp, -64]
+      ldp x21, x22, [sp, -48]
+      ldp x23, x24, [sp, -32]
+      ldp x25, x26, [sp, -16]
 
       # Restore callee saved q8-q15 registers.
-      ldp q8, q9, [sp, -176]
-      ldp q10, q11, [sp, -144]
-      ldp q12, q13, [sp, -112]
-      ldp q14, q15, [sp, -80]
+      ldp d8, d9, [sp, -128]
+      ldp d10, d11, [sp, -112]
+      ldp d12, d13, [sp, -96]
+      ldp d14, d15, [sp, -80]
       ret
 END_FUNCTION {function_name}""".format(
         M=M, N=N, function_name=isa.function_name(M, N, isa.isa())

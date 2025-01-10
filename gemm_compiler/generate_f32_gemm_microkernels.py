@@ -46,14 +46,28 @@ def generate_f32_gemm_microkernels():
         ),
     )
 
-  for nr in range(8, 17, 8):
+  for unroll in {1, 2, 4}:
+    decrement = 32 * unroll
     for mr in range(1, 6):
       generate.generate_gemm_microkernel(
           M=mr,
-          N=nr,
-          isa=neonfma_template.NeonFma(),
+          N=16,
+          isa=neonfma_template.NeonFmaUnolled(unroll),
           output_file=os.path.join(
               output_base,
-              f'f32-gemm-{mr}x{nr}-minmax-asm-aarch64-neonfma-ld32.S',
+              f'f32-gemm-{mr}x16-minmax-asm-aarch64-neonfma-ld{decrement}.S',
+          ),
+      )
+
+  for unroll in {1, 2, 4}:
+    decrement = 32 * unroll
+    for mr in range(1, 9):
+      generate.generate_gemm_microkernel(
+          M=mr,
+          N=8,
+          isa=neonfma_template.NeonFmaUnolled(unroll),
+          output_file=os.path.join(
+              output_base,
+              f'f32-gemm-{mr}x8-minmax-asm-aarch64-neonfma-ld{decrement}-2.S',
           ),
       )

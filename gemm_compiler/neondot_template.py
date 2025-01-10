@@ -46,7 +46,7 @@ class NeonDot(isa.NeonFma):
     ]
 
   def function_name(self, M, N, isa):
-    return f'xnn_qd8_f32_qc8w_gemm_minmax_ukernel_{M}x{N}c4__asm_aarch64_{isa}_lane\n'
+    return f'xnn_qd8_f32_qc8w_gemm_minmax_ukernel_{M}x{N}c4__asm_aarch64_{isa}_ld32_2\n'
 
   def zp_scale(self, pos):
     regs = ['10', '11']
@@ -76,7 +76,7 @@ class NeonDot(isa.NeonFma):
 
   def compute_asm(self):
     c_asm = {
-        'loop': ['sdot  v{ACC}.4s, v{W}.16b, v{A}.4b[0]\n'],
+        'loop': ['sdot  v{ACC}.4s, v{W}.16b, v{A}.4b[{POS}]\n'],
     }
     return c_asm
 
@@ -179,3 +179,36 @@ class NeonDot(isa.NeonFma):
         )
 
     return ret
+
+
+class NeonDotUnolled(NeonDot):
+
+  def __init__(self, unroll_factor):
+    self.unroll_factor = unroll_factor
+    self.decrement = 4 * unroll_factor
+
+  def function_name(self, M, N, isa):
+    LD = self.unroll_factor * 32
+    return f'xnn_qd8_f32_qc8w_gemm_minmax_ukernel_{M}x{N}c4__asm_aarch64_{isa}_ld{LD}_2\n'
+
+  def input_asm(self):
+    match self.unroll_factor:
+      case 1:
+        return {'loop': ['']}
+      case 2:
+        return {
+            'loop': [
+                'ldr d{AM}, [{AM_ptr}], 8\n',
+            ]
+        }
+      case 4:
+        return {
+            'loop': [
+                'ldr q{AM}, [{AM_ptr}], 16\n',
+            ]
+        }
+      case _:
+        raise NotImplementedError
+
+  def base_input_asm(self):
+    return super().input_asm()

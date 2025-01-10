@@ -1,17 +1,18 @@
 #include "xnnpack/assembly.h"
 
-BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_lane
+BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_ld32_2
 
       # Free up GP registers.
-      stp x19, x20, [sp, -48]
-      stp x21, x22, [sp, -32]
-      stp x23, x24, [sp, -16]
+      stp x19, x20, [sp, -64]
+      stp x21, x22, [sp, -48]
+      stp x23, x24, [sp, -32]
+      stp x25, x26, [sp, -16]
 
       # Preserve callee saved q8-q15 registers.
-      stp q8, q9, [sp, -176]
-      stp q10, q11, [sp, -144]
-      stp q12, q13, [sp, -112]
-      stp q14, q15, [sp, -80]
+      stp d8, d9, [sp, -128]
+      stp d10, d11, [sp, -112]
+      stp d12, d13, [sp, -96]
+      stp d14, d15, [sp, -80]
 
       # Load params.
       ldr x13, [sp, 8]
@@ -92,6 +93,8 @@ inner_loop:
       subs x20, x20, 4
       bne inner_loop
 
+inner_loop_end:
+
       # Convert from int32 to float.
       scvtf v12.4s, v12.4s
       scvtf v13.4s, v13.4s
@@ -168,7 +171,7 @@ inner_loop:
       fadd v25.4s, v25.4s, v9.4s
       fadd v26.4s, v26.4s, v9.4s
       fadd v27.4s, v27.4s, v9.4s
-      # Min/max clamping..
+      # Min/max clamping.
       fmin  v12.4s, v1.4s, v12.4s
       fmin  v13.4s, v1.4s, v13.4s
       fmin  v14.4s, v1.4s, v14.4s
@@ -271,14 +274,15 @@ tail_1:
 
 return:
       # Restore the callee saved GP registers.
-      ldp x19, x20, [sp, -48]
-      ldp x21, x22, [sp, -32]
-      ldp x23, x24, [sp, -16]
+      ldp x19, x20, [sp, -64]
+      ldp x21, x22, [sp, -48]
+      ldp x23, x24, [sp, -32]
+      ldp x25, x26, [sp, -16]
 
       # Restore callee saved q8-q15 registers.
-      ldp q8, q9, [sp, -176]
-      ldp q10, q11, [sp, -144]
-      ldp q12, q13, [sp, -112]
-      ldp q14, q15, [sp, -80]
+      ldp d8, d9, [sp, -128]
+      ldp d10, d11, [sp, -112]
+      ldp d12, d13, [sp, -96]
+      ldp d14, d15, [sp, -80]
       ret
-END_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_lane
+END_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_ld32_2
