@@ -1104,7 +1104,7 @@ static void init_qs8_dwconv_config(void) {
       const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
       qs8_dwconv_config[0].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_qs8_dwconv_minmax_fp32_ukernel_9p8vc__rvv;
       qs8_dwconv_config[0].init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
-      qs8_dwconv_config[0].channel_tile = 8* hardware_config->vlenb / sizeof(int32_t);
+      qs8_dwconv_config[0].channel_tile = 8 * hardware_config->vlenb / sizeof(int32_t);
       qs8_dwconv_config[0].channel_subtile = 8 * hardware_config->vlenb / sizeof(int32_t);
       qs8_dwconv_config[0].channel_round = 1;
       qs8_dwconv_config[0].primary_tile = 9;

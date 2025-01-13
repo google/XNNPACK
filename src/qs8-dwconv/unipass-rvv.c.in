@@ -1,4 +1,4 @@
-// Copyright 2024 Microchip
+// Copyright 2025 Microchip
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -67,15 +67,16 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERN
       for (size_t k = 0; k < ${KERNEL_TILE}; ++k) {
         $if DATATYPE != "QU8":
           vint8m${LMUL4}_t vi = __riscv_vle8_v_i8m${LMUL4}(i[k], vl);
-          vint8m${LMUL4}_t vk = __riscv_vle8_v_i8m${LMUL4}(w, vl);
+          vint8m${LMUL4}_t vk = __riscv_vle8_v_i8m${LMUL4}((const int8_t*) w, vl);
         $else:
           vuint8m${LMUL4}_t vi = __riscv_vle8_v_u8m${LMUL4}(i[k], vl);
-          vuint8m${LMUL4}_t vk = __riscv_vle8_v_u8m${LMUL4}(w, vl);
+          vuint8m${LMUL4}_t vk = __riscv_vle8_v_u8m${LMUL4}((const uint8_t*) w, vl);
         w = (const void*) ((uintptr_t) w + vlmax * sizeof(${XINT8_T}));
 
         i[k] += vlmax;
         $if DATATYPE != "QU8":
-          vacc = __riscv_vwmacc_vv_i32m${LMUL}(vacc, __riscv_vwcvt_x_x_v_i16m${LMUL2}(vi, vl), __riscv_vwcvt_x_x_v_i16m${LMUL2}(vk, vl), vl);
+          vint16m${LMUL2}_t vtmp16 =  __riscv_vwmul_vv_i16m${LMUL2}(vi, vk, vl);
+          vacc =  __riscv_vwadd_wv_i32m${LMUL}(vacc, vtmp16, vl);
         $else:
           vint32m${LMUL}_t vk32 = __riscv_vreinterpret_v_u32m${LMUL}_i32m${LMUL}(__riscv_vzext_vf4_u32m${LMUL}(vk, vl));
           vint32m${LMUL}_t vi32 = __riscv_vreinterpret_v_u32m${LMUL}_i32m${LMUL}(__riscv_vzext_vf4_u32m${LMUL}(vi, vl));

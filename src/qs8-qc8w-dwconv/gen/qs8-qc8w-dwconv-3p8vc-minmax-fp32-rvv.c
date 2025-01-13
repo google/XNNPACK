@@ -2,7 +2,7 @@
 //   Template: src/qs8-dwconv/unipass-rvv.c.in
 //   Generator: tools/xngen
 //
-// Copyright 2024 Microchip
+// Copyright 2025 Microchip
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -63,11 +63,12 @@ void xnn_qs8_qc8w_dwconv_minmax_fp32_ukernel_3p8vc__rvv(
 
       for (size_t k = 0; k < 3; ++k) {
         vint8m2_t vi = __riscv_vle8_v_i8m2(i[k], vl);
-        vint8m2_t vk = __riscv_vle8_v_i8m2(w, vl);
+        vint8m2_t vk = __riscv_vle8_v_i8m2((const int8_t*) w, vl);
         w = (const void*) ((uintptr_t) w + vlmax * sizeof(int8_t));
 
         i[k] += vlmax;
-        vacc = __riscv_vwmacc_vv_i32m8(vacc, __riscv_vwcvt_x_x_v_i16m4(vi, vl), __riscv_vwcvt_x_x_v_i16m4(vk, vl), vl);
+        vint16m4_t vtmp16 =  __riscv_vwmul_vv_i16m4(vi, vk, vl);
+        vacc =  __riscv_vwadd_wv_i32m8(vacc, vtmp16, vl);
       }
 
       vfloat32m8_t vfpacc = __riscv_vfcvt_f_x_v_f32m8(vacc, vl);
