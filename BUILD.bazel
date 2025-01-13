@@ -797,6 +797,7 @@ xnnpack_cxx_library(
         ":logging",
         ":math",
         ":microparams",
+        ":microparams_init",
         ":params",
         ":unaligned",
         ":xnnpack_h",
