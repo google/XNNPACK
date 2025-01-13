@@ -80,17 +80,26 @@ enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min,
                           /*flags=*/0);
 }
 
-enum xnn_status xnn_insert_pack_lh_node(xnn_subgraph_t subgraph, const struct xnn_value* input, uint32_t input_id, uint32_t *new_id) {
+enum xnn_status xnn_insert_pack_lh_node(xnn_subgraph_t subgraph, uint32_t input_id, uint32_t *new_id) {
+  const struct xnn_value *input = &subgraph->values[input_id];
+  enum xnn_status status = xnn_status_uninitialized;
   switch (input->datatype) {
+    case xnn_datatype_qint8:
+      status = xnn_define_quantized_tensor_value(
+          subgraph, input->datatype, input->quantization.zero_point, input->quantization.scale,
+          input->shape.num_dims,
+          input->shape.dim, /*data=*/input->data,
+          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, new_id);
+      break;
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
+      status = xnn_define_tensor_value(
+          subgraph, input->datatype, 0, NULL, NULL,
+          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, new_id);
       break;
     default:
       XNN_UNREACHABLE;
   }
-  enum xnn_status status = xnn_define_tensor_value(
-          subgraph, input->datatype, 0, NULL, NULL,
-          /*external_id=*/XNN_INVALID_VALUE_ID, /*flags=*/0, new_id);
   if (status != xnn_status_success) {
     return status;
   }
@@ -341,6 +350,8 @@ uint32_t xnn_check_nchw_compatibility(xnn_subgraph_t subgraph, struct xnn_node* 
   }
 
   switch (node->type) {
+    case xnn_node_type_fully_connected:
+      return XNN_LAYOUT_FLAG_COMPATIBLE_NCHW;
     case xnn_node_type_convolution_2d:
       // Supported cases:
       // - 1x1 convolution (no stride, no dilation, no padding, no groups)
@@ -745,16 +756,16 @@ void xnn_subgraph_rewrite_for_nchw(xnn_subgraph_t subgraph)
       continue;
     }
 
-    if (node->type == xnn_node_type_convolution_2d &&
+    if ((node->type == xnn_node_type_convolution_2d &&
         max(node->params.convolution_2d.kernel_height, node->params.convolution_2d.kernel_width) == 1)
+        || node->type == xnn_node_type_fully_connected)
     {
       assert(node->num_inputs >= 2);
 
       const struct xnn_value* filter = &subgraph->values[node->inputs[1]];
       assert(filter->data != NULL);
-      assert(filter->shape.num_dims == 4);
 
-      const size_t num_params = filter->shape.dim[0] * filter->shape.dim[3];
+      const size_t num_params = filter->shape.dim[0] * filter->shape.dim[filter->shape.num_dims - 1];
       subgraph->nodes[node->cluster_leader].num_params += num_params;
 
       size_t num_zeroes = 0;

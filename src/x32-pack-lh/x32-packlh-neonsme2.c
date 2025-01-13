@@ -51,7 +51,7 @@ size_t xnn_x32_pack_lh_size__neonsme2(size_t m, size_t k, size_t mr, size_t kr, 
 
 size_t xnn_x32_pack_lh_offset__neonsme2(size_t m, size_t k, size_t mr, size_t kr, size_t sr) {
 #if XNN_ENABLE_KLEIDIAI
-  return kai_get_lhs_packed_offset_lhs_pack_f32p2vlx1_f32_sme(m, k, mr, kr, sr);
+  return kai_get_lhs_packed_offset_lhs_pack_f32p2vlx1_f32_sme(m, k / sizeof(float), mr, kr, sr);
 #else
   assert("Not compiled with XNN_ENABLE_KLEIDIAI" && 0);
 #endif  // XNN_ENABLE_KLEIDIAI

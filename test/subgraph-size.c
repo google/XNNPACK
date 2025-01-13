@@ -92,6 +92,9 @@ int main(int argc, char** argv) {
     case 18:
       xnn_define_depth_to_space(NULL, 0, 0, 0, 0);
       break;
+    case 19:
+      xnn_define_fully_connected(NULL, 0, 0, 0, 0, 0, 0, 0);
+      break;
   }
 
   xnn_deinitialize();

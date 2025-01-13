@@ -35,6 +35,7 @@ static struct xnn_gemm_config f32_qc4w_gemm_config = {0};
 static struct xnn_gemm_config f32_qc8w_gemm_config = {0};
 static struct xnn_gemm_config pf16_gemm_config = {0};
 static struct xnn_gemm_config pf32_gemm_config = {0};
+static struct xnn_gemm_config pqs8_qc8w_gemm_config = {0};
 static struct xnn_gemm_config qd8_f16_qb4w_gemm_config = {0};
 static struct xnn_gemm_config qd8_f16_qc4w_gemm_config = {0};
 static struct xnn_gemm_config qd8_f16_qc8w_gemm_config = {0};
@@ -59,6 +60,7 @@ XNN_INIT_ONCE_GUARD(f32_qc4w_gemm);
 XNN_INIT_ONCE_GUARD(f32_qc8w_gemm);
 XNN_INIT_ONCE_GUARD(pf16_gemm);
 XNN_INIT_ONCE_GUARD(pf32_gemm);
+XNN_INIT_ONCE_GUARD(pqs8_qc8w_gemm);
 XNN_INIT_ONCE_GUARD(qd8_f16_qb4w_gemm);
 XNN_INIT_ONCE_GUARD(qd8_f16_qc4w_gemm);
 XNN_INIT_ONCE_GUARD(qd8_f16_qc8w_gemm);
@@ -293,7 +295,7 @@ static void init_pf32_gemm_config(void) {
       const size_t mr = xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2_get_mr();
       const size_t nr = xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2_get_nr();
       pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_pf32_gemm_minmax_ukernel_1x32__neonsme2);
-      pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(nr)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2);
+      pf32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2);
       pf32_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
       pf32_gemm_config.pack_weights_and_biases = xnn_pack_kai_f32_weights_and_biases;
       pf32_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_f32_weights_and_biases;
@@ -303,6 +305,30 @@ static void init_pf32_gemm_config(void) {
     #endif  // XNN_ENABLE_ARM_SME2
   }
   assert(pf32_gemm_config.mr <= XNN_MAX_MR);
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+}
+
+static void init_pqs8_qc8w_gemm_config(void) {
+#if XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+  const struct xnn_hardware_config* hardware_config =
+      xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  (void) hardware_config;  // May be unused.
+  if (XNN_ENABLE_ARM_SME2 && hardware_config->use_arm_sme2) {
+    #if XNN_ENABLE_ARM_SME2
+      const size_t mr = xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32__neonsme2_get_mr();
+      const size_t nr = xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32__neonsme2_get_nr();
+      pqs8_qc8w_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(mr)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_pqs8_qc8w_gemm_minmax_ukernel_32x32__neonsme2);
+      pqs8_qc8w_gemm_config.init.qs8_qc8w = xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params;
+      pqs8_qc8w_gemm_config.pack_weights_and_biases = xnn_pack_kai_qs8_qc8w_weights_and_biases_sme2;
+      pqs8_qc8w_gemm_config.packed_stride_weights_and_biases = xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme2;
+      pqs8_qc8w_gemm_config.mr = mr;
+      pqs8_qc8w_gemm_config.mr_packed = mr;
+      pqs8_qc8w_gemm_config.nr = nr;
+      pqs8_qc8w_gemm_config.log2_kr = 2;
+    #endif  // XNN_ENABLE_ARM_SME2
+  }
+  assert(pqs8_qc8w_gemm_config.mr <= XNN_MAX_MR);
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 }
 
@@ -4195,6 +4221,14 @@ const struct xnn_gemm_config* xnn_init_pf32_gemm_config() {
   }
   XNN_INIT_ONCE(pf32_gemm);
   return &pf32_gemm_config;
+}
+
+const struct xnn_gemm_config* xnn_init_pqs8_qc8w_gemm_config() {
+  if (xnn_init_hardware_config() == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(pqs8_qc8w_gemm);
+  return &pqs8_qc8w_gemm_config;
 }
 
 const struct xnn_gemm_config* xnn_init_f32_gemm_config() {

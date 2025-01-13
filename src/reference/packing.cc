@@ -6,6 +6,9 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <stddef.h>
+#include <stdint.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -26,6 +29,7 @@
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4cxp_qs4cxs1s0.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi8cxp_qsi8cx_neon.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_x16p2vlx2b_x16_x16_sme.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0.h"
@@ -1559,6 +1563,81 @@ void xnn_pack_kai_qs4_weights_and_biases(
         /*extra_bytes=*/0, &kai_params);
   }
 }
+
+#if XNN_ENABLE_KLEIDIAI
+size_t xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme2(
+    const struct xnn_gemm_config* gemm_config, size_t k, size_t unused_k_stride,
+    size_t extra_bytes) {
+  size_t ret_val =
+      kai_get_rhs_packed_stride_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
+          k) /
+      kai_get_n_step_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme();
+  return ret_val;
+}
+
+void transpose_weights_x8(const int8_t* in, int8_t* out, size_t height,
+                          size_t width) {
+  for (size_t i = 0; i < height; ++i) {
+    for (size_t j = 0; j < width; ++j) {
+      out[j * height + i] = in[i * width + j];
+    }
+  }
+}
+
+void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme2(
+    uint32_t flags, const struct xnn_gemm_config* gemm_config,
+    size_t input_channels, size_t output_channels, size_t groups,
+    size_t k_stride, const void* accumulator_init, const void* weights,
+    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
+    size_t extra_data0_element_size,
+    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
+    size_t extra_data1_element_size, void* packed_weights_ptr,
+    const void* params) {
+  const uint32_t nr = gemm_config->nr;
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  const size_t rhs_stride = output_channels * sizeof(int8_t);
+
+  // Some packing kernels assume that the bias is non-null. Allocate a zero
+  // initialized array as a workaround if bias is null.
+  bool free_accumulator_init = false;
+  if (accumulator_init == NULL) {
+    accumulator_init = calloc(output_channels, sizeof(int32_t));
+    free_accumulator_init = true;
+  }
+  const struct xnn_qs8_packing_params* xnn_params =
+      reinterpret_cast<const struct xnn_qs8_packing_params*>(params);
+  struct kai_rhs_pack_qsi8cx_params kai_params;
+  kai_params.lhs_zero_point = xnn_params->input_zero_point;
+  kai_params.scale_multiplier = 1.f;
+  if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    kai_run_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
+        groups, output_channels, input_channels, nr, kr, sr, rhs_stride,
+        /*rhs=*/weights,
+        /*bias=*/accumulator_init,
+        /*scale=*/extra_data1,
+        /*rhs_packed=*/packed_weights_ptr,
+        /*extra_bytes=*/0, &kai_params);
+  } else {
+    // Transpose the weights until the transpose packing function is ready.
+    int8_t* tmp_data =
+        (int8_t*)malloc(input_channels * output_channels * sizeof(int8_t));
+    transpose_weights_x8((const int8_t*)weights, tmp_data, output_channels,
+                         input_channels);
+    kai_run_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
+        groups, output_channels, input_channels, nr, kr, sr, rhs_stride,
+        /*rhs=*/tmp_data,
+        /*bias=*/accumulator_init,
+        /*scale=*/extra_data0,
+        /*rhs_packed=*/packed_weights_ptr,
+        /*extra_bytes=*/0, &kai_params);
+    free(tmp_data);
+  }
+  if (free_accumulator_init) {
+    free((void*)accumulator_init);
+  }
+}
+#endif  // XNN_ENABLE_KLEIDIAI
 
 size_t xnn_packed_stride_kai_f16_weights_and_biases(
     const struct xnn_gemm_config* gemm_config, size_t k, size_t unused_k_stride,

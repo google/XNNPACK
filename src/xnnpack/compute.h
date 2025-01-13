@@ -339,6 +339,7 @@ struct gemm_context {
     struct xnn_f16_scaleminmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
+  xnn_pack_lh_offset_fn packed_offset_fn;
 };
 
 #ifndef __cplusplus

@@ -459,6 +459,7 @@ void xnn_compute_grouped_gemm(
                                nr_block_size);
 }
 
+size_t xnn_x32_pack_lh_offset__neonsme2(size_t m, size_t k, size_t mr, size_t kr, size_t sr);
 void xnn_compute_gemm(
     const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t mr_block_start,
@@ -558,8 +559,7 @@ void xnn_compute_hmp_qp8gemm(
     const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
     uint32_t uarch_index, size_t mr_block_start, size_t nr_block_start,
     size_t mr_block_size, size_t nr_block_size) {
-  const size_t a_offset = xnn_x8_packq_f32qp8_packed_offset(
-      mr_block_start, context->k_scaled, context->mr, context->kr, context->sr);
+  size_t a_offset =  context->packed_offset_fn(mr_block_start, context->k_scaled, context->mr, context->kr, context->sr);
   const size_t cm_stride = context->cm_stride;
 
   context->qp8_ukernel.function[uarch_index](
