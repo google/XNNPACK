@@ -107,16 +107,16 @@ static enum xnn_status reshape_concatenate_operator_helper(
   }
 }
 
-static enum xnn_status reshape_concatenate_n_operator(
+static enum xnn_status reshape_concatenate_operator(
   struct xnn_operator_data* opdata,
   struct xnn_value* values,
   size_t num_values,
-  size_t num_inputs,
   pthreadpool_t threadpool)
 {
   enum xnn_status status;
 
-  num_inputs = opdata->num_inputs;
+  size_t num_inputs = opdata->num_inputs;
+  assert(num_inputs <= XNN_MAX_OPERATOR_OBJECTS);
   uint32_t input_id[XNN_MAX_OPERATOR_OBJECTS];
   for (size_t i = 0; i < num_inputs; ++i) {
     input_id[i] = opdata->inputs[i];
@@ -217,15 +217,6 @@ static enum xnn_status setup_concatenate_operator_helper(
   }
 }
 
-static enum xnn_status reshape_concatenaten_operator(
-  struct xnn_operator_data* opdata,
-  struct xnn_value* values,
-  size_t num_values,
-  pthreadpool_t threadpool)
-{
-  return reshape_concatenate_n_operator(opdata, values, num_values, opdata->num_inputs, threadpool);
-}
-
 static enum xnn_status setup_concatenate_n_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
@@ -322,7 +313,7 @@ static enum xnn_status setup_concatenaten_operator(
   return setup_concatenate_n_operator(opdata, values, num_values, opdata->num_inputs, threadpool);
 }
 
-enum xnn_status xnn_define_concatenate_n(
+enum xnn_status xnn_define_concatenate_impl(
   enum xnn_node_type node_type,
   xnn_subgraph_t subgraph,
   int32_t axis,
@@ -355,29 +346,9 @@ enum xnn_status xnn_define_concatenate_n(
     }
   }
 
-  status = check_datatype_copyable(subgraph, input_ids[0], output_id, "first", node_type);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  status = check_datatype_copyable(subgraph, input_ids[1], output_id, "second", node_type);
-  if (status != xnn_status_success) {
-    return status;
-  }
-  if (num_inputs > 2) {
-    status = check_datatype_copyable(subgraph, input_ids[2], output_id, "third", node_type);
+  for (size_t i = 0; i < num_inputs; i++) {
+    status = check_datatype_copyable(subgraph, input_ids[i], output_id, "ith", node_type);
     if (status != xnn_status_success) {
-      return status;
-    }
-  }
-  if (num_inputs > 3) {
-    status = check_datatype_copyable(subgraph, input_ids[3], output_id, "fourth", node_type);
-    if (status !=  xnn_status_success) {
-      return status;
-    }
-  }
-  if (num_inputs > 4) {
-    status = check_datatype_copyable(subgraph, input_ids[4], output_id, "fifth", node_type);
-    if (status !=  xnn_status_success) {
       return status;
     }
   }
@@ -395,7 +366,7 @@ enum xnn_status xnn_define_concatenate_n(
   node->flags = flags;
 
   node->create = create_concatenaten_operator;
-  node->reshape = reshape_concatenaten_operator;
+  node->reshape = reshape_concatenate_operator;
   node->setup = setup_concatenaten_operator;
 
   for (size_t i = 0; i < num_inputs; ++i) {
@@ -413,6 +384,6 @@ enum xnn_status xnn_define_concatenate(
   uint32_t output_id,
   uint32_t flags)
   {
-    return xnn_define_concatenate_n(
-      xnn_node_type_concatenate_n, subgraph, axis, num_inputs, inputs, output_id, flags);
+    return xnn_define_concatenate_impl(
+      xnn_node_type_concatenate, subgraph, axis, num_inputs, inputs, output_id, flags);
   }

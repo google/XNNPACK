@@ -1360,7 +1360,7 @@ IF(XNNPACK_BUILD_TESTS)
         average-pooling-2d
         average-pooling-2d-reshape
         binary
-        concatenateN
+        concatenate
         copy
         depth-to-space-2d
         even-split2

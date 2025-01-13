@@ -1698,9 +1698,9 @@ xnnpack_unit_test(
 )
 
 [xnnpack_unit_test(
-    name = "concatenate%d_test" % n,
+    name = ""concatenate_test" if n == None else "concatenate%d_test" % n,
     srcs = [
-        "concatenate%d.cc" % n,
+        "concatenate.cc" if n == None else "concatenate%d.cc" % n,
     ],
     deps = [
         ":replicable_random_device",
@@ -1717,6 +1717,7 @@ xnnpack_unit_test(
     3,
     4,
     5,
+    None,
 ]]
 
 xnnpack_unit_test(

@@ -101,7 +101,7 @@ protected:
 
   size_t RandomNumInputs()
   {
-    return std::uniform_int_distribution<size_t>(2, 5)(rng);  // You can adjust the range
+    return std::uniform_int_distribution<size_t>(2, XNN_MAX_OPERATOR_OBJECTS)(rng);  // You can adjust the range
   }
 
 
@@ -176,7 +176,7 @@ TEST_F(ConcatenateNTestQS8, define)
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_concatenate_n);
+  ASSERT_EQ(node->type, xnn_node_type_concatenate);
   ASSERT_EQ(node->params.concatenate.axis, axis);
   ASSERT_EQ(node->num_inputs, num_inputs);
 
@@ -221,7 +221,7 @@ TEST_F(ConcatenateNTestQU8, define)
     xnn_define_concatenate(subgraph, axis,num_inputs, input_ids.data(), output_id, /*flags=*/0));
 
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_concatenate_n);
+  ASSERT_EQ(node->type, xnn_node_type_concatenate);
   ASSERT_EQ(node->params.concatenate.axis, axis);
   ASSERT_EQ(node->num_inputs, num_inputs);
   ASSERT_EQ(node->num_outputs, 1);
@@ -259,7 +259,7 @@ TEST_F(ConcatenateNTestF16, define)
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_concatenate_n);
+  ASSERT_EQ(node->type, xnn_node_type_concatenate);
   ASSERT_EQ(node->params.concatenate.axis, axis);
   ASSERT_EQ(node->num_inputs, num_inputs);
   ASSERT_EQ(node->num_outputs, 1);
@@ -298,7 +298,7 @@ TEST_F(ConcatenateNTestF32, define)
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_concatenate_n);
+  ASSERT_EQ(node->type, xnn_node_type_concatenate);
   ASSERT_EQ(node->params.concatenate.axis, axis);
   ASSERT_EQ(node->num_inputs, num_inputs);
   ASSERT_EQ(node->num_outputs, 1);
@@ -629,7 +629,7 @@ TEST_F(ConcatenateNTestF32, Reshape)
 
   ASSERT_EQ(subgraph->num_nodes, 1);
   struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_concatenate_n);
+  ASSERT_EQ(node->type, xnn_node_type_concatenate);
   ASSERT_EQ(node->num_inputs, num_inputs);
   for (int i = 0; i < num_inputs; i++) {
     ASSERT_EQ(node->inputs[i], input_ids[i]);
