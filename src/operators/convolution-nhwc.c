@@ -1897,7 +1897,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f32(
   if (gemm_config->nr > group_output_channels) {
     // Default micro-kernel is suboptimal. Try to find a better micro-kernel.
 
-    if (gemm_nr2_config->minmax.igemm[gemm_config->mr].function[XNN_UARCH_DEFAULT] != NULL) {
+    if (gemm_nr2_config->minmax.igemm[gemm_nr2_config->mr-1].function[XNN_UARCH_DEFAULT] != NULL) {
       gemm_config = gemm_nr2_config;
     }
   }
