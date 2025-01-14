@@ -6,12 +6,14 @@
 #include "utils.h"
 
 #include <algorithm>
+#include <atomic>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <mutex>
+#include <thread>
 
 #ifdef __linux__
 #include <sched.h>
@@ -71,7 +73,7 @@ static void InitWipeBuffer() {
 }
 
 // Pthreadpool-compatible function to wipe the cache in each thread.
-void PthreadpoolClearL2Cache(void* context, size_t id) {
+void PthreadpoolClearL2Cache(std::atomic<size_t>* counter, size_t id) {
 #if XNN_ENABLE_CPUINFO
   static const size_t wipe_buffer_size = []() {
     const auto* l2_cache = cpuinfo_get_l2_cache(0);
@@ -91,6 +93,12 @@ void PthreadpoolClearL2Cache(void* context, size_t id) {
 #else
   WipeCache();
 #endif  // XNN_ENABLE_CPUINFO
+  // Spin until all threads are done. This ensures that each thread calls this
+  // function only once.
+  counter->fetch_sub(1, std::memory_order_acquire);
+  while (counter->load(std::memory_order_acquire) > 0) {
+    std::this_thread::yield();
+  }
 }
 
 };  // namespace
@@ -163,8 +171,10 @@ uint32_t PrefetchToL1(const void* ptr, size_t size) {
 void WipePthreadpoolL2Caches(benchmark::State& state,
                              pthreadpool_t threadpool) {
   state.PauseTiming();
-  pthreadpool_parallelize_1d(threadpool, PthreadpoolClearL2Cache, nullptr,
-                             pthreadpool_get_threads_count(threadpool), 0);
+  std::atomic<size_t> counter(pthreadpool_get_threads_count(threadpool));
+  pthreadpool_parallelize_1d(
+      threadpool, (pthreadpool_task_1d_t)PthreadpoolClearL2Cache, &counter,
+      pthreadpool_get_threads_count(threadpool), 0);
   state.ResumeTiming();
 }
 
