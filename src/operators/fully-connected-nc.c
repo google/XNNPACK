@@ -1714,7 +1714,11 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
     }
   }
 
-  return create_fully_connected_nc_f32(input_channels, output_channels, input_stride, output_stride, kernel, bias, output_min, output_max, flags, code_cache, weights_cache, gemm_config, xnn_operator_type_fully_connected_nc_f32, fully_connected_op_out);
+  return create_fully_connected_nc_f32(
+      input_channels, output_channels, input_stride, output_stride, kernel,
+      bias, output_min, output_max, flags, code_cache, weights_cache,
+      gemm_config, xnn_operator_type_fully_connected_nc_f32,
+      fully_connected_op_out);
 }
 
 enum xnn_status xnn_create_fully_connected_nc_pf32(
@@ -1737,7 +1741,11 @@ enum xnn_status xnn_create_fully_connected_nc_pf32(
     return xnn_status_unsupported_hardware;
   }
 
-  return create_fully_connected_nc_f32(input_channels, output_channels, input_stride, output_stride, kernel, bias, output_min, output_max, flags, code_cache, weights_cache, gemm_config, xnn_operator_type_fully_connected_nc_pf32, fully_connected_op_out);
+  return create_fully_connected_nc_f32(
+      input_channels, output_channels, input_stride, output_stride, kernel,
+      bias, output_min, output_max, flags, code_cache, weights_cache,
+      gemm_config, xnn_operator_type_fully_connected_nc_pf32,
+      fully_connected_op_out);
 }
 
 enum xnn_status xnn_create_fully_connected_nc_f32_qc4w(

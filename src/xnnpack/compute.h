@@ -215,6 +215,9 @@ struct packw_gemm_goi_context {
 
   // Microkernel to preform packing.
   xnn_packw_gemm_goi_ukernel_fn packw_gemm_goi;
+
+  // Optional wrapped packing function.
+  xnn_pack_weights_and_biases_fn pack_weights_and_biases;
 };
 
 #ifndef __cplusplus
@@ -263,6 +266,9 @@ struct packw_gemm_gio_context {
 
   // Microkernel to preform packing.
   xnn_packw_gemm_gio_ukernel_fn packw_gemm_gio;
+
+  // Optional wrapped packing function.
+  xnn_pack_weights_and_biases_fn pack_weights_and_biases;
 };
 
 #ifndef __cplusplus
