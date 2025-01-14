@@ -1573,7 +1573,7 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
   const enum xnn_datatype input_datatype = input_value->datatype;
   const enum xnn_datatype output_datatype = output_value->datatype;
   if (datatype_is_packable(input_datatype)) {
-    if (input_value->datatype == output_datatype) {
+    if (input_datatype == output_datatype) {
       const struct xnn_gemm_config* gemm_config = NULL;
       switch (input_datatype) {
         case xnn_datatype_fp16:
