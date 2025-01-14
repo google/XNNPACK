@@ -85,6 +85,12 @@ XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f16_f32_vcvt_ukernel__wasmrelaxedsimd_int32_u
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f16_f32_vcvt_ukernel__wasmrelaxedsimd_int32_u32, 32, false, xnn_float16, float, void, NULL)
 #endif  // XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_FP16_VECTOR
+XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector_fp16_arith, xnn_f16_f32_vcvt_ukernel__rvvfp16arith_u1v, 1, true, xnn_float16, float, void, NULL)
+XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector_fp16_arith, xnn_f16_f32_vcvt_ukernel__rvvfp16arith_u2v, 2, true, xnn_float16, float, void, NULL)
+XNN_CVT_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector_fp16_arith, xnn_f16_f32_vcvt_ukernel__rvvfp16arith_u4v, 4, true, xnn_float16, float, void, NULL)
+#endif
+
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f16_f32_vcvt_ukernel__scalar_u1, 1, false, xnn_float16, float, void, NULL)
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f16_f32_vcvt_ukernel__scalar_u2, 2, false, xnn_float16, float, void, NULL)
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f16_f32_vcvt_ukernel__scalar_u3, 3, false, xnn_float16, float, void, NULL)
