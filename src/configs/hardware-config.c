@@ -176,19 +176,16 @@ static void init_hardware_config(void) {
     hardware_config.use_x86_avxvnniint8 = 0;
 #endif
 #if XNN_ENABLE_AVX256SKX
-    // Using cpuinfo_has_x86_amx_int8 as placeholder for cpuinfo_has_x86_avx10
-    hardware_config.use_x86_avx256skx = hardware_config.use_x86_avx512skx || cpuinfo_has_x86_amx_int8();
+    hardware_config.use_x86_avx256skx = hardware_config.use_x86_avx512skx || cpuinfo_has_x86_avx10_1();
 #else
     hardware_config.use_x86_avx256skx = 0;
 #endif
 #if XNN_ENABLE_AVX256VNNI
-    // Using cpuinfo_has_x86_amx_int8 as placeholder for cpuinfo_has_x86_avx10
-    hardware_config.use_x86_avx256vnni = (hardware_config.use_x86_avx512skx && cpuinfo_has_x86_avx512vnni()) || cpuinfo_has_x86_amx_int8();
+    hardware_config.use_x86_avx256vnni = (hardware_config.use_x86_avx512skx && cpuinfo_has_x86_avx512vnni()) || cpuinfo_has_x86_avx10_1();
 #else
     hardware_config.use_x86_avx256vnni = 0;
 #endif
 #if XNN_ENABLE_AVX256VNNIGFNI
-    // Using cpuinfo_has_x86_amx_int8 as placeholder for cpuinfo_has_x86_avx10
     hardware_config.use_x86_avx256vnnigfni = hardware_config.use_x86_avx256vnni && cpuinfo_has_x86_gfni();
 #else
     hardware_config.use_x86_avx256vnnigfni = 0;
