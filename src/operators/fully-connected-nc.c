@@ -2423,7 +2423,6 @@ static enum xnn_status reshape_fully_connected_nc(
       fully_connected_op->compute[0].task_2d_tile_2d =
           (pthreadpool_task_2d_tile_2d_t)xnn_compute_qp8gemm;
     } else {
-      fully_connected_op->compute[0].task_2d_tile_2d =
       fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
     }
 #endif
