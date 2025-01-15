@@ -28,20 +28,20 @@
 
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f16_qu8_vcvt_ukernel__scalar_imagic_u1, 1,
                             false, xnn_float16, XNN_QUANTIZED(uint8_t),
-                            struct xnn_f16_qu8_cvt_params,
-                            xnn_init_f16_qu8_cvt_scalar_params)
+                            struct xnn_f16_qs8_cvt_params,
+                            xnn_init_f16_qs8_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f16_qu8_vcvt_ukernel__scalar_imagic_u2, 2,
                             false, xnn_float16, XNN_QUANTIZED(uint8_t),
-                            struct xnn_f16_qu8_cvt_params,
-                            xnn_init_f16_qu8_cvt_scalar_params)
+                            struct xnn_f16_qs8_cvt_params,
+                            xnn_init_f16_qs8_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f16_qu8_vcvt_ukernel__scalar_imagic_u3, 3,
                             false, xnn_float16, XNN_QUANTIZED(uint8_t),
-                            struct xnn_f16_qu8_cvt_params,
-                            xnn_init_f16_qu8_cvt_scalar_params)
+                            struct xnn_f16_qs8_cvt_params,
+                            xnn_init_f16_qs8_cvt_scalar_params)
 XNN_CVT_UKERNEL_WITH_PARAMS(0, xnn_f16_qu8_vcvt_ukernel__scalar_imagic_u4, 4,
                             false, xnn_float16, XNN_QUANTIZED(uint8_t),
-                            struct xnn_f16_qu8_cvt_params,
-                            xnn_init_f16_qu8_cvt_scalar_params)
+                            struct xnn_f16_qs8_cvt_params,
+                            xnn_init_f16_qs8_cvt_scalar_params)
 
 #ifdef XNN_DEFINED_CVT_UKERNEL_WITH_PARAMS
 #undef XNN_DEFINED_CVT_UKERNEL_WITH_PARAMS
