@@ -2312,50 +2312,62 @@ static enum xnn_status reshape_fully_connected_nc(
   memcpy(&fully_connected_op->context.gemm.gemm.gemm.params, params, params_size);
   fully_connected_op->context.gemm.gemm.gemm.fused_params = &fully_connected_op->context.gemm.gemm.gemm.params;
 
-  size_t nc =
-      xnn_gemm_best_nc(/*num_groups=*/1, batch_size, output_channels, mr, nr,
-                       pthreadpool_get_threads_count(threadpool));
+  // Compute the optimal tile size for this GEMM.
+  const size_t nc = xnn_gemm_best_tile_size(
+      /*num_groups=*/1, /*m=*/batch_size, /*n=*/output_channels,
+      /*m_stride=*/fully_connected_op->context.gemm.gemm.gemm.a_stride,
+      /*n_stride=*/fully_connected_op->context.gemm.gemm.gemm.w_stride,
+      /*cm_stride=*/fully_connected_op->context.gemm.gemm.gemm.cm_stride,
+      /*cn_stride=*/1 << log2_output_element_size, mr, nr,
+      /*num_threads=*/pthreadpool_get_threads_count(threadpool));
 
 #if XNN_MAX_UARCH_TYPES > 1
-    if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
-      fully_connected_op->compute[0].type = xnn_parallelization_type_2d_tile_2d_with_uarch;
-      if (dynamic_quantization) {
-        fully_connected_op->compute[0].task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_dqgemm;
-      } else if (is_qp8_ukernel) {
-        fully_connected_op->compute[0].task_2d_tile_2d_with_id =
-            (pthreadpool_task_2d_tile_2d_with_id_t)xnn_compute_hmp_qp8gemm;
-      } else {
-        fully_connected_op->compute[0].task_2d_tile_2d_with_id = (pthreadpool_task_2d_tile_2d_with_id_t) xnn_compute_hmp_gemm;
-      }
+  if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
+    fully_connected_op->compute[0].type =
+        xnn_parallelization_type_2d_tile_2d_with_uarch;
+    if (dynamic_quantization) {
+      fully_connected_op->compute[0].task_2d_tile_2d_with_id =
+          (pthreadpool_task_2d_tile_2d_with_id_t)xnn_compute_hmp_dqgemm;
+    } else if (is_qp8_ukernel) {
+      fully_connected_op->compute[0].task_2d_tile_2d_with_id =
+          (pthreadpool_task_2d_tile_2d_with_id_t)xnn_compute_hmp_qp8gemm;
     } else {
-      fully_connected_op->compute[0].type = xnn_parallelization_type_2d_tile_2d;
-      if (dynamic_quantization) {
-        fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_dqgemm;
-      } else if (is_qp8_ukernel) {
-        fully_connected_op->compute[0].task_2d_tile_2d =
-            (pthreadpool_task_2d_tile_2d_t)xnn_compute_qp8gemm;
-      } else {
-        fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
-      }
+      fully_connected_op->compute[0].task_2d_tile_2d_with_id =
+          (pthreadpool_task_2d_tile_2d_with_id_t)xnn_compute_hmp_gemm;
     }
-  #else
+  } else {
     fully_connected_op->compute[0].type = xnn_parallelization_type_2d_tile_2d;
     if (dynamic_quantization) {
-      fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_dqgemm;
+      fully_connected_op->compute[0].task_2d_tile_2d =
+          (pthreadpool_task_2d_tile_2d_t)xnn_compute_dqgemm;
     } else if (is_qp8_ukernel) {
       fully_connected_op->compute[0].task_2d_tile_2d =
           (pthreadpool_task_2d_tile_2d_t)xnn_compute_qp8gemm;
     } else {
-      fully_connected_op->compute[0].task_2d_tile_2d = (pthreadpool_task_2d_tile_2d_t) xnn_compute_gemm;
+      fully_connected_op->compute[0].task_2d_tile_2d =
+          (pthreadpool_task_2d_tile_2d_t)xnn_compute_gemm;
     }
-#endif
-    fully_connected_op->compute[0].range[0] = batch_size;
-    fully_connected_op->compute[0].range[1] = output_channels;
-    fully_connected_op->compute[0].tile[0] = mr;
-    fully_connected_op->compute[0].tile[1] = nc;
-    fully_connected_op->state = xnn_run_state_needs_setup;
+  }
+#else
+  fully_connected_op->compute[0].type = xnn_parallelization_type_2d_tile_2d;
+  if (dynamic_quantization) {
+    fully_connected_op->compute[0].task_2d_tile_2d =
+        (pthreadpool_task_2d_tile_2d_t)xnn_compute_dqgemm;
+  } else if (is_qp8_ukernel) {
+    fully_connected_op->compute[0].task_2d_tile_2d =
+        (pthreadpool_task_2d_tile_2d_t)xnn_compute_qp8gemm;
+  } else {
+    fully_connected_op->compute[0].task_2d_tile_2d =
+        (pthreadpool_task_2d_tile_2d_t)xnn_compute_gemm;
+  }
+#endif  // XNN_MAX_UARCH_TYPES > 1
+  fully_connected_op->compute[0].range[1] = batch_size;
+  fully_connected_op->compute[0].range[0] = output_channels;
+  fully_connected_op->compute[0].tile[1] = mr;
+  fully_connected_op->compute[0].tile[0] = nc;
+  fully_connected_op->state = xnn_run_state_needs_setup;
 
-    return xnn_status_success;
+  return xnn_status_success;
 }
 
 enum xnn_status xnn_reshape_fully_connected_nc_f16(

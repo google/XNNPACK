@@ -390,9 +390,9 @@ static void init_hardware_config(void) {
           hardware_config.l1_data_cache_associativity =
               l1_data_cache->associativity;
           hardware_config.l1_data_cache_num_sets = l1_data_cache->sets;
-          xnn_log_debug(
+          xnn_log_info(
               "l1_data_cache_bytes=%zu, l1_data_cache_line_size=%zu, "
-              "l1_data_cache_associativity=%zu, l1_data_cache_num_sets=%zu.\n",
+              "l1_data_cache_associativity=%zu, l1_data_cache_num_sets=%zu.",
               hardware_config.l1_data_cache_bytes,
               hardware_config.l1_data_cache_line_size,
               hardware_config.l1_data_cache_associativity,
@@ -409,9 +409,9 @@ static void init_hardware_config(void) {
           hardware_config.l2_data_cache_associativity =
               l2_data_cache->associativity;
           hardware_config.l2_data_cache_num_sets = l2_data_cache->sets;
-          xnn_log_debug(
+          xnn_log_info(
               "l2_data_cache_bytes=%zu, l2_data_cache_line_size=%zu, "
-              "l2_data_cache_associativity=%zu, l2_data_cache_num_sets=%zu.\n",
+              "l2_data_cache_associativity=%zu, l2_data_cache_num_sets=%zu.",
               hardware_config.l2_data_cache_bytes,
               hardware_config.l2_data_cache_line_size,
               hardware_config.l2_data_cache_associativity,

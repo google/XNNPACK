@@ -688,7 +688,13 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
   memcpy(&batch_matrix_multiply_op->context.gemm.gemm.gemm.params, params, params_size);
   batch_matrix_multiply_op->context.gemm.gemm.gemm.fused_params = &batch_matrix_multiply_op->context.gemm.gemm.gemm.params;
 
-  size_t nc = xnn_gemm_best_nc(batch_size_c, m, n, mr, nr, num_threads);
+  // Compute the optimal tile size for this GEMM.
+  const size_t nc = xnn_gemm_best_tile_size(
+      /*num_groups=*/batch_size_c, m, n,
+      /*m_stride=*/batch_matrix_multiply_op->context.gemm.gemm.gemm.a_stride,
+      /*n_stride=*/batch_matrix_multiply_op->context.gemm.gemm.gemm.w_stride,
+      /*cm_stride=*/batch_matrix_multiply_op->context.gemm.gemm.gemm.cm_stride,
+      /*cn_stride=*/1 << log2_output_element_size, mr, nr, num_threads);
 
 #if XNN_MAX_UARCH_TYPES > 1
   if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
@@ -722,10 +728,10 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
     }
 #endif
     gemm_compute->range[0] = batch_size_c;
-    gemm_compute->range[1] = m;
-    gemm_compute->range[2] = n;
-    gemm_compute->tile[0] = mr;
-    gemm_compute->tile[1] = nc;
+    gemm_compute->range[2] = m;
+    gemm_compute->range[1] = n;
+    gemm_compute->tile[1] = mr;
+    gemm_compute->tile[0] = nc;
     batch_matrix_multiply_op->state = xnn_run_state_needs_setup;
 
     return xnn_status_success;
