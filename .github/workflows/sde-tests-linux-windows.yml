@@ -3,7 +3,7 @@ name: Run Linux and Windows (x86, x64) Tests with Intel SDE Processors
 env:
   SDE_WINDOWS_URL: https://downloadmirror.intel.com/831748/sde-external-9.44.0-2024-08-22-win.tar.xz
   SDE_LINUX_URL: https://downloadmirror.intel.com/831748/sde-external-9.44.0-2024-08-22-lin.tar.xz
-  
+
 on:
   workflow_dispatch:
 
@@ -95,13 +95,13 @@ jobs:
         if: matrix.arch == 'linux-x86_64'
         run: |
           chmod +x ./*
-          "${{ env.SDE_PATH }}" -${{ matrix.sde-processor }} -- ctest -C Release --parallel $(nproc)
+          "${{ env.SDE_PATH }}" -${{ matrix.sde-processor }} -- ctest -C Release --output-on-failure --parallel $(nproc)
         working-directory: ${{ env.BUILD_PATH }}
         shell: bash
 
       - name: Run SDE tests (Windows-x86 and Windows-x64)
         if: matrix.arch == 'windows-x86' || matrix.arch == 'windows-x64'
         run: |
-          & "$env:SDE_PATH" -${{ matrix.sde-processor }} -- ctest -C Release --parallel $env:NUMBER_OF_PROCESSORS
+          & "$env:SDE_PATH" -${{ matrix.sde-processor }} -- ctest -C Release --output-on-failure --parallel $env:NUMBER_OF_PROCESSORS
         working-directory: ${{ env.BUILD_PATH }}
         shell: pwsh
