@@ -2108,6 +2108,36 @@ enum xnn_status xnn_define_static_slice_v2(  //
     uint32_t output_id,                      //
     uint32_t flags);
 
+/// Define a Static Slice Node add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param num_dims - number of shape dimensions in the input and output tensor.
+/// @param offsets - offsets to the start in each dimension of the input tensor. This array must have @a num_dims elements.
+///                 Can be negative meaning that the offset is relative to the end of the dimension.
+/// @param sizes - The sizes of each dimension in output tensor. This array must have @a num_dims elements.
+///                Can be negative meaning that the offset is relative to the end of the dimension.
+/// @param begin_mask - Bit mask that used to to override the values specified in @a begins: if bit i is set
+///                     in this mask, then the offsets to the start of dimension i of the input tensor
+///                     is set to zero and the value in @a begins is ignored.
+/// @param end_mask - Bit mask that used to to override the values specified in @a ends: if bit i is set
+///                   in this mask, then the offsets to the end of dimension i of the input tensor
+///                   is set to the number required to create the largest open interval in that dimension,
+///                   and the value in @a ends is ignored.
+/// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
+///                    dimensions must match @a sizes.
+/// @param flags - binary features of the Static Slice Node. No supported flags are currently defined.
+enum xnn_status xnn_define_static_slice_v3(  //
+    xnn_subgraph_t subgraph,                 //
+    size_t num_dims,                         //
+    const int64_t* offsets,                  //
+    const int64_t* sizes,                    //
+    int32_t begin_mask,                      //
+    int32_t end_mask,                        //
+    uint32_t input_id,                       //
+    uint32_t output_id,                      //
+    uint32_t flags);
+
 /// Define a Static Transpose Node and add it to a Subgraph.
 ///
 /// The Static Transpose Node applies a generalized transpose to the input tensor using the permuation in perm.
