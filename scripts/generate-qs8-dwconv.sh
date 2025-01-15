@@ -1033,4 +1033,15 @@ tools/xngen src/qs8-dwconv/multipass-avx512skx-mul32.c.in -D CHANNEL_TILE=32  -D
 tools/xngen src/qs8-dwconv/multipass-avx512skx-mul32.c.in -D CHANNEL_TILE=16  -D FIRST_PASS_TILE=8  -D MIDDLE_PASS_TILE=8  -D LAST_PASS_TILE=9 -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-8f8m9l16c16s1r-minmax-fp32-avx512skx-mul32.c &
 tools/xngen src/qs8-dwconv/multipass-avx512skx-mul32.c.in -D CHANNEL_TILE=32  -D FIRST_PASS_TILE=8  -D MIDDLE_PASS_TILE=8  -D LAST_PASS_TILE=9 -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-8f8m9l32c16s1r-minmax-fp32-avx512skx-mul32.c &
 
+################################ RISC-V Vector ################################
+tools/xngen src/qs8-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=3  -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-3p8vc-minmax-fp32-rvv.c &
+tools/xngen src/qs8-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=9  -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-9p8vc-minmax-fp32-rvv.c &
+tools/xngen src/qs8-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=25 -D DATATYPE=QC8 -D REQUANTIZATION=FP32     -o src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-25p8vc-minmax-fp32-rvv.c &
+
+tools/xngen src/qs8-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=9  -D DATATYPE=QS8 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/qs8-dwconv-9p8vc-minmax-fp32-rvv.c &
+tools/xngen src/qs8-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=25 -D DATATYPE=QS8 -D REQUANTIZATION=FP32     -o src/qs8-dwconv/gen/qs8-dwconv-25p8vc-minmax-fp32-rvv.c &
+
+tools/xngen src/qs8-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=9  -D DATATYPE=QU8 -D REQUANTIZATION=FP32     -o src/qu8-dwconv/gen/qu8-dwconv-9p8vc-minmax-fp32-rvv.c &
+tools/xngen src/qs8-dwconv/unipass-rvv.c.in -D CHANNEL_TILE=m8 -D KERNEL_TILE=25 -D DATATYPE=QU8 -D REQUANTIZATION=FP32     -o src/qu8-dwconv/gen/qu8-dwconv-25p8vc-minmax-fp32-rvv.c &
+
 wait
