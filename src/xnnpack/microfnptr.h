@@ -2244,6 +2244,7 @@ typedef void (*xnn_pack_weights_and_biases_fn)(
     size_t input_channels,                      //
     size_t output_channels,                     //
     size_t groups,                              //
+    size_t block_size,                          //
     // We tile packing by output channels, in GIO layout, the k (row) index
     // needs to be able to skip by the actual number of output channels, and not
     // just the argument nc. E.g. if weights is 1x3x5, and nr is 2, we tile the
@@ -2270,6 +2271,7 @@ typedef void (*xnn_pack_weights_and_biases_fn)(
 typedef size_t (*xnn_packed_stride_weights_and_biases_fn)(
     const struct xnn_gemm_config* gemm_config,  //
     size_t k,                                   //
+    size_t block_size,                          //
     size_t k_stride,                            //
     size_t extra_bytes);
 

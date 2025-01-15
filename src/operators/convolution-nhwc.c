@@ -372,6 +372,7 @@ static enum xnn_status create_gemm_or_igemm(
           gemm_config->pack_weights_and_biases(
               flags, gemm_config, group_input_channels, group_output_channels,
               groups,
+              /*unused_block_size*/0,
               k_stride,
               /*accumulator_init=*/bias,
               /*weights=*/kernel,

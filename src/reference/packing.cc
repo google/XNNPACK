@@ -21,6 +21,7 @@
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
+#include "xnnpack/microparams-init.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/pack.h"
 #include "xnnpack/unaligned.h"
@@ -1353,6 +1354,7 @@ void pack_weights_and_biases(uint32_t flags,                                 //
                              size_t input_channels,                          //
                              size_t output_channels,                         //
                              size_t groups,                                  //
+                             size_t unused_block_size,                       //
                              size_t weights_stride,                          //
                              xnn_packw_gemm_gio_ukernel_fn pack_gemm_gio_w,  //
                              xnn_packw_gemm_goi_ukernel_fn pack_gemm_goi_w,  //
@@ -1417,8 +1419,8 @@ void pack_weights_and_biases(uint32_t flags,                                 //
 }
 
 size_t xnn_packed_stride_qs8_weights_and_biases(
-    const struct xnn_gemm_config* gemm_config, size_t unused_k, size_t k_stride,
-    size_t extra_bytes) {
+    const struct xnn_gemm_config* gemm_config, size_t unused_k,
+    size_t unused_block_size, size_t k_stride, size_t extra_bytes) {
   const size_t bias_element_size = sizeof(int32_t);
   const size_t log2_filter_element_size = XNN_LOG2_SIZEOF_INT8_T;
   return (k_stride << log2_filter_element_size) + bias_element_size +
@@ -1428,19 +1430,20 @@ size_t xnn_packed_stride_qs8_weights_and_biases(
 void xnn_pack_qs8_weights_and_biases(
     uint32_t flags, const struct xnn_gemm_config* gemm_config,
     size_t input_channels, size_t output_channels, size_t groups,
-    size_t k_stride, const void* accumulator_init, const void* weights,
-    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
-    size_t extra_data0_element_size,
+    size_t unused_block_size, size_t k_stride, const void* accumulator_init,
+    const void* weights, xnn_init_scale_params_fn init_extra_data0_fn,
+    const void* extra_data0, size_t extra_data0_element_size,
     xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
     size_t extra_data1_element_size, void* packed_weights_ptr,
     const void* params) {
   const size_t extra_bytes =
       extra_data0_element_size + extra_data1_element_size;
   const size_t weights_stride = xnn_packed_stride_qs8_weights_and_biases(
-      gemm_config, input_channels, k_stride, extra_bytes);
+      gemm_config, input_channels, unused_block_size, k_stride, extra_bytes);
   return pack_weights_and_biases(
       flags, gemm_config, input_channels, output_channels, groups,
-      weights_stride, (xnn_packw_gemm_gio_ukernel_fn)xnn_pack_qs8_gemm_gio_w,
+      unused_block_size, weights_stride,
+      (xnn_packw_gemm_gio_ukernel_fn)xnn_pack_qs8_gemm_gio_w,
       (xnn_packw_gemm_goi_ukernel_fn)xnn_pack_qs8_gemm_goi_w, accumulator_init,
       weights, init_extra_data0_fn, extra_data0, extra_data0_element_size,
       init_extra_data1_fn, extra_data1, extra_data1_element_size,
@@ -1448,8 +1451,8 @@ void xnn_pack_qs8_weights_and_biases(
 }
 
 size_t xnn_packed_stride_qs4_weights_and_biases(
-    const struct xnn_gemm_config* gemm_config, size_t unused_k, size_t k_stride,
-    size_t extra_bytes) {
+    const struct xnn_gemm_config* gemm_config, size_t unused_k,
+    size_t unused_block_size, size_t k_stride, size_t extra_bytes) {
   const size_t bias_element_size = sizeof(int32_t);
   const size_t log2_filter_element_size = XNN_LOG2_SIZEOF_INT8_T;
   return (k_stride << log2_filter_element_size) + bias_element_size +
@@ -1459,19 +1462,19 @@ size_t xnn_packed_stride_qs4_weights_and_biases(
 void xnn_pack_qs4_weights_and_biases(
     uint32_t flags, const struct xnn_gemm_config* gemm_config,
     size_t input_channels, size_t output_channels, size_t groups,
-    size_t k_stride, const void* accumulator_init, const void* weights,
-    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
-    size_t extra_data0_element_size,
+    size_t unused_block_size, size_t k_stride, const void* accumulator_init,
+    const void* weights, xnn_init_scale_params_fn init_extra_data0_fn,
+    const void* extra_data0, size_t extra_data0_element_size,
     xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
     size_t extra_data1_element_size, void* packed_weights_ptr,
     const void* params) {
   const size_t extra_bytes =
       extra_data0_element_size + extra_data1_element_size;
   const size_t weights_stride = xnn_packed_stride_qs8_weights_and_biases(
-      gemm_config, input_channels, k_stride, extra_bytes);
+      gemm_config, input_channels, unused_block_size, k_stride, extra_bytes);
   return pack_weights_and_biases(
       flags, gemm_config, input_channels, output_channels, groups,
-      weights_stride,
+      unused_block_size, weights_stride,
       (xnn_packw_gemm_gio_ukernel_fn)xnn_pack_qs8_qc4w_gemm_gio_w,
       (xnn_packw_gemm_goi_ukernel_fn)xnn_pack_qs8_qc4w_gemm_goi_w,
       accumulator_init, weights, init_extra_data0_fn, extra_data0,
@@ -1479,9 +1482,105 @@ void xnn_pack_qs4_weights_and_biases(
       extra_data1_element_size, packed_weights_ptr, extra_bytes, params);
 }
 
+size_t xnn_packed_stride_qb4_weights_and_biases(
+    const struct xnn_gemm_config* gemm_config, size_t k, size_t block_size,
+    size_t k_stride, size_t extra_bytes) {
+  const size_t planes = gemm_config->planes;
+  size_t input_channels = round_up_po2(k, planes);
+
+  size_t block_scale_bytes = 0;
+  size_t num_blocks = 0;
+  const bool block_wise = (block_size != 0);
+  if (block_wise) {
+    num_blocks = input_channels / block_size;
+    block_scale_bytes += num_blocks * sizeof(uint16_t);
+  }
+
+  const size_t bias_element_size = sizeof(int32_t);
+  const size_t log2_filter_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  return (k_stride << log2_filter_element_size) + bias_element_size +
+         extra_bytes + block_scale_bytes;
+}
+
+void xnn_pack_qb4_weights_and_biases(
+    uint32_t flags, const struct xnn_gemm_config* gemm_config,
+    size_t input_channels, size_t output_channels, size_t groups,
+    size_t block_size, size_t k_stride, const void* accumulator_init,
+    const void* weights, xnn_init_scale_params_fn init_extra_data0_fn,
+    const void* extra_data0, size_t extra_data0_element_size,
+    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
+    size_t extra_data1_element_size, void* packed_weights_ptr,
+    const void* params) {
+  const uint32_t nr = gemm_config->nr;
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+
+  const size_t extra_bytes_bl = sizeof(uint16_t);
+  const size_t extra_bytes_n = sizeof(uint32_t);
+  if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    xnn_pack_qs8_qb4w_gemm_gio_w(
+        /*g=*/groups,
+        /*nc=*/output_channels,
+        /*kc=*/input_channels,
+        /*nr=*/nr,
+        /*kr=*/kr,
+        /*sr=*/sr,
+        /*k_stride=*/k_stride,
+        /*bl=*/block_size,
+        /*kernel=*/(const uint8_t*)weights,
+        /*bias=*/nullptr,
+        /*scale=*/(const xnn_bfloat16*)extra_data1,
+        /*packed_weights=*/packed_weights_ptr,
+        /*extra_bytes_bl=*/nr * extra_bytes_bl,
+        /*extra_bytes_n=*/nr * extra_bytes_n,
+        /*params*/ (const struct xnn_qs8_qc4w_packing_params*)params);
+  } else {
+    xnn_pack_qs8_qb4w_gemm_goi_w(
+        /*g=*/groups,
+        /*nc=*/output_channels,
+        /*kc=*/input_channels,
+        /*nr=*/nr,
+        /*kr=*/kr,
+        /*sr=*/sr,
+        /*bl=*/block_size,
+        /*kernel=*/(const uint8_t*)weights,
+        /*bias=*/nullptr,
+        /*scale=*/(const xnn_bfloat16*)extra_data1,
+        /*packed_weights=*/packed_weights_ptr,
+        /*extra_bytes_bl=*/nr * extra_bytes_bl,
+        /*extra_bytes_n=*/nr * extra_bytes_n,
+        /*params*/ (const struct xnn_qs8_qc4w_packing_params*)params);
+  }
+
+  // fill in kernel scales
+  const size_t num_blocks = input_channels / block_size;
+  const size_t weights_stride = xnn_packed_stride_qb4_weights_and_biases(
+      gemm_config, input_channels, block_size, k_stride, extra_bytes_n);
+  void* weights_start =
+      (void*)((uintptr_t)packed_weights_ptr +
+              nr * (sizeof(float) + (block_size * sizeof(int8_t) / 2)));
+
+  const size_t block_stride = /*weights*/ block_size / 2 + sizeof(uint16_t);
+  xnn_init_blockwise_scale_bf16_params(
+      output_channels, nr, nr, nr * weights_stride, nr * weights_stride,
+      /*num_blocks=*/num_blocks,
+      /*block_stride=*/gemm_config->nr * block_stride, 0,
+      (const xnn_bfloat16*)extra_data1, weights_start);
+
+  // fill in bias if not null
+  if (accumulator_init != nullptr) {
+    weights_start = (void*)((uintptr_t)packed_weights_ptr +
+                            gemm_config->nr * (weights_stride - sizeof(float)));
+    xnn_init_qs8_qc8w_scale_fp32_params(
+        output_channels, gemm_config->nr, gemm_config->nr,
+        gemm_config->nr * weights_stride, gemm_config->nr * weights_stride, 0,
+        (const float*)accumulator_init, weights_start);
+  }
+}
+
 size_t xnn_packed_stride_qu8_weights_and_biases(
-    const struct xnn_gemm_config* gemm_config, size_t unused_k, size_t k_stride,
-    size_t extra_bytes) {
+    const struct xnn_gemm_config* gemm_config, size_t unused_k,
+    size_t unused_block_size, size_t k_stride, size_t extra_bytes) {
   const size_t bias_element_size = sizeof(int32_t);
   const size_t log2_filter_element_size = XNN_LOG2_SIZEOF_INT8_T;
   return (k_stride << log2_filter_element_size) + bias_element_size +
@@ -1491,19 +1590,20 @@ size_t xnn_packed_stride_qu8_weights_and_biases(
 void xnn_pack_qu8_weights_and_biases(
     uint32_t flags, const struct xnn_gemm_config* gemm_config,
     size_t input_channels, size_t output_channels, size_t groups,
-    size_t k_stride, const void* accumulator_init, const void* weights,
-    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
-    size_t extra_data0_element_size,
+    size_t unused_block_size, size_t k_stride, const void* accumulator_init,
+    const void* weights, xnn_init_scale_params_fn init_extra_data0_fn,
+    const void* extra_data0, size_t extra_data0_element_size,
     xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
     size_t extra_data1_element_size, void* packed_weights_ptr,
     const void* params) {
   const size_t extra_bytes =
       extra_data0_element_size + extra_data1_element_size;
   const size_t weights_stride = xnn_packed_stride_qs8_weights_and_biases(
-      gemm_config, input_channels, k_stride, extra_bytes);
+      gemm_config, input_channels, unused_block_size, k_stride, extra_bytes);
   return pack_weights_and_biases(
       flags, gemm_config, input_channels, output_channels, groups,
-      weights_stride, (xnn_packw_gemm_gio_ukernel_fn)xnn_pack_qu8_gemm_gio_w,
+      unused_block_size, weights_stride,
+      (xnn_packw_gemm_gio_ukernel_fn)xnn_pack_qu8_gemm_gio_w,
       (xnn_packw_gemm_goi_ukernel_fn)xnn_pack_qu8_gemm_goi_w, accumulator_init,
       weights, init_extra_data0_fn, extra_data0, extra_data0_element_size,
       init_extra_data1_fn, extra_data1, extra_data1_element_size,
@@ -1512,8 +1612,8 @@ void xnn_pack_qu8_weights_and_biases(
 
 #if XNN_ENABLE_KLEIDIAI
 size_t xnn_packed_stride_kai_qs4_weights_and_biases(
-    const struct xnn_gemm_config* gemm_config, size_t k, size_t unused_k_stride,
-    size_t extra_bytes) {
+    const struct xnn_gemm_config* gemm_config, size_t k,
+    size_t unused_block_size, size_t unused_k_stride, size_t extra_bytes) {
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
   return kai_get_rhs_packed_stride_rhs_pack_kxn_qsi4cxp_qs4cxs1s0(k, /*nr=*/1,
@@ -1523,9 +1623,9 @@ size_t xnn_packed_stride_kai_qs4_weights_and_biases(
 void xnn_pack_kai_qs4_weights_and_biases(
     uint32_t flags, const struct xnn_gemm_config* gemm_config,
     size_t input_channels, size_t output_channels, size_t groups,
-    size_t k_stride, const void* accumulator_init, const void* weights,
-    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
-    size_t extra_data0_element_size,
+    size_t unused_block_size, size_t k_stride, const void* accumulator_init,
+    const void* weights, xnn_init_scale_params_fn init_extra_data0_fn,
+    const void* extra_data0, size_t extra_data0_element_size,
     xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
     size_t extra_data1_element_size, void* packed_weights_ptr,
     const void* params) {
@@ -1566,8 +1666,8 @@ void xnn_pack_kai_qs4_weights_and_biases(
 
 #if XNN_ENABLE_KLEIDIAI
 size_t xnn_packed_stride_kai_qs8_qc8w_weights_and_biases_sme2(
-    const struct xnn_gemm_config* gemm_config, size_t k, size_t unused_k_stride,
-    size_t extra_bytes) {
+    const struct xnn_gemm_config* gemm_config, size_t k,
+    size_t unused_block_size, size_t unused_k_stride, size_t extra_bytes) {
   size_t ret_val =
       kai_get_rhs_packed_stride_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme(
           k) /
@@ -1587,9 +1687,9 @@ void transpose_weights_x8(const int8_t* in, int8_t* out, size_t height,
 void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme2(
     uint32_t flags, const struct xnn_gemm_config* gemm_config,
     size_t input_channels, size_t output_channels, size_t groups,
-    size_t k_stride, const void* accumulator_init, const void* weights,
-    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
-    size_t extra_data0_element_size,
+    size_t unused_block_size, size_t k_stride, const void* accumulator_init,
+    const void* weights, xnn_init_scale_params_fn init_extra_data0_fn,
+    const void* extra_data0, size_t extra_data0_element_size,
     xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
     size_t extra_data1_element_size, void* packed_weights_ptr,
     const void* params) {
@@ -1640,8 +1740,8 @@ void xnn_pack_kai_qs8_qc8w_weights_and_biases_sme2(
 #endif  // XNN_ENABLE_KLEIDIAI
 
 size_t xnn_packed_stride_kai_f16_weights_and_biases(
-    const struct xnn_gemm_config* gemm_config, size_t k, size_t unused_k_stride,
-    size_t extra_bytes) {
+    const struct xnn_gemm_config* gemm_config, size_t k,
+    size_t unused_block_size, size_t unused_k_stride, size_t extra_bytes) {
   size_t ret_val =
       kai_get_rhs_packed_stride_rhs_pack_kxn_x16p2vlx2b_x16_x16_sme(k) /
       kai_get_n_step_rhs_pack_kxn_x16p2vlx2b_x16_x16_sme();
@@ -1658,8 +1758,8 @@ void transpose_weights_x16(const xnn_float16* in, xnn_float16* out,
 }
 
 size_t xnn_packed_stride_kai_qs8_weights_and_biases(
-    const struct xnn_gemm_config* gemm_config, size_t k, size_t unused_k_stride,
-    size_t extra_bytes) {
+    const struct xnn_gemm_config* gemm_config, size_t k,
+    size_t unused_block_size, size_t unused_k_stride, size_t extra_bytes) {
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
   return kai_get_rhs_packed_stride_rhs_pack_kxn_qsi8cxp_qsi8cx_neon(k, /*nr=*/1,
@@ -1669,9 +1769,9 @@ size_t xnn_packed_stride_kai_qs8_weights_and_biases(
 void xnn_pack_kai_qs8_weights_and_biases(
     uint32_t flags, const struct xnn_gemm_config* gemm_config,
     size_t input_channels, size_t output_channels, size_t groups,
-    size_t k_stride, const void* accumulator_init, const void* weights,
-    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
-    size_t extra_data0_element_size,
+    size_t unused_block_size, size_t k_stride, const void* accumulator_init,
+    const void* weights, xnn_init_scale_params_fn init_extra_data0_fn,
+    const void* extra_data0, size_t extra_data0_element_size,
     xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
     size_t extra_data1_element_size, void* packed_weights_ptr,
     const void* params) {
@@ -1691,7 +1791,7 @@ void xnn_pack_kai_qs8_weights_and_biases(
   const size_t n_stride = round_up(output_channels, nr);
   const size_t packed_weights_group_stride =
       n_stride * xnn_packed_stride_kai_qs8_weights_and_biases(
-                     gemm_config, input_channels, k_stride,
+                     gemm_config, input_channels, unused_block_size, k_stride,
                      extra_data0_element_size + extra_data1_element_size);
 
   if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
@@ -1738,8 +1838,8 @@ void xnn_pack_kai_qs8_weights_and_biases(
 }
 
 size_t xnn_packed_stride_kai_f32_weights_and_biases(
-    const struct xnn_gemm_config* gemm_config, size_t k, size_t unused_k_stride,
-    size_t extra_bytes) {
+    const struct xnn_gemm_config* gemm_config, size_t k,
+    size_t unused_block_size, size_t unused_k_stride, size_t extra_bytes) {
   size_t ret_val =
       kai_get_rhs_packed_stride_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme(k) /
       kai_get_n_step_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme();
@@ -1749,9 +1849,9 @@ size_t xnn_packed_stride_kai_f32_weights_and_biases(
 void xnn_pack_kai_f16_weights_and_biases(
     uint32_t flags, const struct xnn_gemm_config* gemm_config,
     size_t input_channels, size_t output_channels, size_t groups,
-    size_t k_stride, const void* accumulator_init, const void* weights,
-    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
-    size_t extra_data0_element_size,
+    size_t unused_block_size, size_t k_stride, const void* accumulator_init,
+    const void* weights, xnn_init_scale_params_fn init_extra_data0_fn,
+    const void* extra_data0, size_t extra_data0_element_size,
     xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
     size_t extra_data1_element_size, void* packed_weights_ptr,
     const void* params) {
@@ -1811,9 +1911,9 @@ void transpose_weights(const float* in, float* out, size_t height,
 void xnn_pack_kai_f32_weights_and_biases(
     uint32_t flags, const struct xnn_gemm_config* gemm_config,
     size_t input_channels, size_t output_channels, size_t groups,
-    size_t k_stride, const void* accumulator_init, const void* weights,
-    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
-    size_t extra_data0_element_size,
+    size_t unused_block_size, size_t k_stride, const void* accumulator_init,
+    const void* weights, xnn_init_scale_params_fn init_extra_data0_fn,
+    const void* extra_data0, size_t extra_data0_element_size,
     xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
     size_t extra_data1_element_size, void* packed_weights_ptr,
     const void* params) {
@@ -1863,7 +1963,7 @@ void xnn_pack_kai_f32_weights_and_biases(
 
 size_t xnn_packed_stride_kai_qb4_weights_and_biases(
     const struct xnn_gemm_config* gemm_config, size_t k, size_t block_size,
-    size_t extra_bytes) {
+    size_t unused_k_stride, size_t extra_bytes) {
   const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
   const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
   const uint32_t nr = gemm_config->nr;
@@ -1881,9 +1981,9 @@ size_t xnn_packed_stride_kai_qb4_weights_and_biases(
 void xnn_pack_kai_qb4_weights_and_biases(
     uint32_t flags, const struct xnn_gemm_config* gemm_config,
     size_t input_channels, size_t output_channels, size_t groups,
-    size_t block_size, const void* accumulator_init, const void* weights,
-    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
-    size_t extra_data0_element_size,
+    size_t block_size, size_t unused_k_stride, const void* accumulator_init,
+    const void* weights, xnn_init_scale_params_fn init_extra_data0_fn,
+    const void* extra_data0, size_t extra_data0_element_size,
     xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
     size_t extra_data1_element_size, void* packed_weights_ptr,
     const void* params) {
@@ -1928,6 +2028,20 @@ void xnn_pack_kai_qb4_weights_and_biases(
         /*scale_stride=*/blocks_per_row * sizeof(uint16_t),
         /*rhs_packed*/ packed_weights_ptr,
         /*extra_bytes=*/0, &kai_params);
+  }
+
+  // init bias
+  const size_t weights_stride = xnn_packed_stride_kai_qb4_weights_and_biases(
+      gemm_config, input_channels, block_size, unused_k_stride, 0);
+  if (accumulator_init != NULL) {
+    void* weights_start =
+        (void*)((uintptr_t)packed_weights_ptr +
+                nr * (sizeof(float) + (block_size * sizeof(int8_t) / 2)));
+    weights_start = (void*)((uintptr_t)packed_weights_ptr +
+                            nr * (weights_stride - sizeof(float)));
+    xnn_init_qs8_qc8w_scale_fp32_params(
+        output_channels, nr, nr, nr * weights_stride, nr * weights_stride, 0,
+        (const float*)accumulator_init, weights_start);
   }
 }
 #endif  // XNN_ENABLE_KLEIDIAI
