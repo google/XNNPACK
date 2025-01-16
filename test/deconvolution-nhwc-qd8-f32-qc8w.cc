@@ -26,7 +26,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_1x1) {
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -39,7 +38,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_1x1_varying_input_width) {
       .kernel_size(1, 1)
       .group_input_channels(23)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -53,7 +51,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_1x1_varying_input_height) {
       .kernel_size(1, 1)
       .group_input_channels(23)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -67,7 +64,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_1x1_varying_input_channels) {
       .kernel_size(1, 1)
       .group_input_channels(input_channels)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -81,7 +77,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_1x1_varying_output_channels) {
       .kernel_size(1, 1)
       .group_input_channels(23)
       .group_output_channels(output_channels)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -95,7 +90,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_1x1_with_input_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .input_pixel_stride(28)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -108,7 +102,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_1x1_with_output_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .output_pixel_stride(gemm_config->nr * 2 + 13)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -121,7 +114,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_1x1_with_qmin) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmin(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -134,7 +126,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_1x1_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmax(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -147,7 +138,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_1x1_without_bias) {
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -162,7 +152,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_1x1) {
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -176,7 +165,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_1x1_varying_input_width) {
       .groups(2)
       .group_input_channels(23)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -191,7 +179,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_1x1_varying_input_height) {
       .groups(2)
       .group_input_channels(23)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -206,7 +193,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_1x1_varying_input_channels) {
       .groups(2)
       .group_input_channels(input_channels)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -221,7 +207,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_1x1_varying_output_channels) {
       .groups(2)
       .group_input_channels(23)
       .group_output_channels(output_channels)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -236,7 +221,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_1x1_with_input_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .input_pixel_stride(47)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -250,7 +234,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_1x1_with_output_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr + 3)
     .output_pixel_stride(gemm_config->nr * 2 + 13)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -264,7 +247,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_1x1_with_qmin) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmin(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -278,7 +260,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_1x1_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmax(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -292,7 +273,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_1x1_without_bias) {
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -307,7 +287,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_1x1) {
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -321,7 +300,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_1x1_varying_input_width) {
       .kernel_size(1, 1)
       .group_input_channels(23)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -336,7 +314,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_1x1_varying_input_height) {
       .kernel_size(1, 1)
       .group_input_channels(23)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -351,7 +328,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_1x1_varying_input_channels) {
       .kernel_size(1, 1)
       .group_input_channels(input_channels)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -366,7 +342,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_1x1_varying_output_channels) {
       .kernel_size(1, 1)
       .group_input_channels(23)
       .group_output_channels(output_channels)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -381,7 +356,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_1x1_with_input_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .input_pixel_stride(28)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -395,7 +369,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_1x1_with_output_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .output_pixel_stride(gemm_config->nr * 2 + 13)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -409,7 +382,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_1x1_with_qmin) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmin(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -423,7 +395,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_1x1_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmax(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -437,7 +408,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_1x1_without_bias) {
     .kernel_size(1, 1)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -453,7 +423,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_1x1) {
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -468,7 +437,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_1x1_varying_input_width) {
       .groups(2)
       .group_input_channels(23)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -484,7 +452,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_1x1_varying_input_height) 
       .groups(2)
       .group_input_channels(23)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -500,7 +467,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_1x1_varying_input_channels
       .groups(2)
       .group_input_channels(input_channels)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -516,7 +482,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_1x1_varying_output_channel
       .groups(2)
       .group_input_channels(23)
       .group_output_channels(output_channels)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -532,7 +497,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_1x1_with_input_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .input_pixel_stride(47)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -547,7 +511,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_1x1_with_output_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr + 3)
     .output_pixel_stride(gemm_config->nr * 2 + 13)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -562,7 +525,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_1x1_with_qmin) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmin(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -577,7 +539,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_1x1_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmax(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -592,7 +553,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_1x1_without_bias) {
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -607,7 +567,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3) {
     .kernel_size(3, 3)
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -621,7 +580,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, Kx3) {
       .kernel_size(kernel_height, 3)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -636,7 +594,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3xK) {
       .kernel_size(3, kernel_width)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -654,7 +611,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3_varying_height_padding) {
         .kernel_size(3, 3)
         .group_input_channels(15)
         .group_output_channels(gemm_config->nr * 2 + 3)
-        .iterations(1)
         .TestQD8F32QC8W();
     }
   }
@@ -673,7 +629,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3_varying_width_padding) {
         .kernel_size(3, 3)
         .group_input_channels(15)
         .group_output_channels(gemm_config->nr * 2 + 3)
-        .iterations(1)
         .TestQD8F32QC8W();
     }
   }
@@ -691,7 +646,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3_varying_height_adjustment) {
       .kernel_size(3, 3)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -708,7 +662,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3_varying_width_adjustment) {
       .kernel_size(3, 3)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -723,7 +676,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3_varying_input_height) {
       .kernel_size(3, 3)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -738,7 +690,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3_varying_input_width) {
       .kernel_size(3, 3)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -753,7 +704,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3_varying_input_channels) {
       .kernel_size(3, 3)
       .group_input_channels(input_channels)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -768,7 +718,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3_varying_output_channels) {
       .kernel_size(3, 3)
       .group_input_channels(23)
       .group_output_channels(output_channels)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -784,7 +733,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3_with_height_dilation) {
       .dilation_height(dilation_height)
       .group_input_channels(23)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -800,7 +748,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3_with_width_dilation) {
       .dilation_width(dilation_width)
       .group_input_channels(23)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -816,7 +763,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3_with_height_dilation_and_stride
     .stride_height(2)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -831,7 +777,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3_with_width_dilation_and_stride)
     .stride_width(2)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -845,7 +790,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3_with_input_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .input_pixel_stride(28)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -859,7 +803,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3_with_output_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .output_pixel_stride(gemm_config->nr * 2 + 13)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -873,7 +816,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3_with_qmin) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmin(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -887,7 +829,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmax(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -901,7 +842,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3_without_bias) {
     .kernel_size(3, 3)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -915,7 +855,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, weights_cache_3x3) {
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .use_weights_cache(true)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -931,7 +870,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3) {
     .groups(2)
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -946,7 +884,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_Kx3) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -962,7 +899,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3xK) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -981,7 +917,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3_varying_height_padding) {
         .groups(2)
         .group_input_channels(15)
         .group_output_channels(gemm_config->nr * 2 + 3)
-        .iterations(1)
         .TestQD8F32QC8W();
     }
   }
@@ -1001,7 +936,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3_varying_width_padding) {
         .groups(2)
         .group_input_channels(15)
         .group_output_channels(gemm_config->nr * 2 + 3)
-        .iterations(1)
         .TestQD8F32QC8W();
     }
   }
@@ -1020,7 +954,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3_varying_height_adjustment) {
       .groups(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -1038,7 +971,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3_varying_width_adjustment) {
       .groups(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -1054,7 +986,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3_varying_input_height) {
       .groups(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -1070,7 +1001,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3_varying_input_width) {
       .groups(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -1086,7 +1016,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3_varying_input_channels) {
       .groups(2)
       .group_input_channels(input_channels)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -1102,7 +1031,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3_varying_output_channels) {
       .groups(2)
       .group_input_channels(23)
       .group_output_channels(output_channels)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -1119,7 +1047,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3_with_height_dilation) {
       .groups(2)
       .group_input_channels(23)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -1136,7 +1063,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3_with_width_dilation) {
       .groups(2)
       .group_input_channels(23)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -1153,7 +1079,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3_with_height_dilation_and_strid
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1169,7 +1094,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3_with_width_dilation_and_stride
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1184,7 +1108,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3_with_input_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .input_pixel_stride(47)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1199,7 +1122,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3_with_output_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr + 3)
     .output_pixel_stride(gemm_config->nr * 2 + 13)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1214,7 +1136,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3_with_qmin) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmin(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1229,7 +1150,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmax(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1244,7 +1164,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3_without_bias) {
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1259,7 +1178,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, weights_cache_grouped_3x3) {
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .use_weights_cache(true)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1275,7 +1193,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3) {
     .kernel_size(3, 3)
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1290,7 +1207,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_Kx3) {
       .kernel_size(kernel_height, 3)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -1306,7 +1222,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3xK) {
       .kernel_size(3, kernel_width)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -1325,7 +1240,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3_varying_height_padding) {
         .kernel_size(3, 3)
         .group_input_channels(15)
         .group_output_channels(gemm_config->nr * 2 + 3)
-        .iterations(1)
         .TestQD8F32QC8W();
     }
   }
@@ -1345,7 +1259,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3_varying_width_padding) {
         .kernel_size(3, 3)
         .group_input_channels(15)
         .group_output_channels(gemm_config->nr * 2 + 3)
-        .iterations(1)
         .TestQD8F32QC8W();
     }
   }
@@ -1364,7 +1277,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3_varying_height_adjustment) {
       .kernel_size(3, 3)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -1382,7 +1294,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3_varying_width_adjustment) {
       .kernel_size(3, 3)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -1398,7 +1309,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3_varying_input_height) {
       .kernel_size(3, 3)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -1414,7 +1324,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3_varying_input_width) {
       .kernel_size(3, 3)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -1430,7 +1339,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3_varying_input_channels) {
       .kernel_size(3, 3)
       .group_input_channels(input_channels)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -1446,7 +1354,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3_varying_output_channels) {
       .kernel_size(3, 3)
       .group_input_channels(23)
       .group_output_channels(output_channels)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -1463,7 +1370,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3_with_height_dilation) {
       .dilation_height(dilation_height)
       .group_input_channels(23)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -1480,7 +1386,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3_with_width_dilation) {
       .dilation_width(dilation_width)
       .group_input_channels(23)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -1497,7 +1402,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3_with_height_dilation_and_strid
     .stride_height(2)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1513,7 +1417,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3_with_width_dilation_and_stride
     .stride_width(2)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1528,7 +1431,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3_with_input_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .input_pixel_stride(28)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1543,7 +1445,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3_with_output_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .output_pixel_stride(gemm_config->nr * 2 + 13)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1558,7 +1459,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3_with_qmin) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmin(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1573,7 +1473,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmax(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1588,7 +1487,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3_without_bias) {
     .kernel_size(3, 3)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1603,7 +1501,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, weights_cache_batched_3x3) {
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .use_weights_cache(true)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1620,7 +1517,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3) {
     .groups(2)
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1636,7 +1532,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_Kx3) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -1653,7 +1548,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3xK) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -1673,7 +1567,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3_varying_height_padding
         .groups(2)
         .group_input_channels(15)
         .group_output_channels(gemm_config->nr * 2 + 3)
-        .iterations(1)
         .TestQD8F32QC8W();
     }
   }
@@ -1694,7 +1587,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3_varying_width_padding)
         .groups(2)
         .group_input_channels(15)
         .group_output_channels(gemm_config->nr * 2 + 3)
-        .iterations(1)
         .TestQD8F32QC8W();
     }
   }
@@ -1714,7 +1606,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3_varying_height_adjustm
       .groups(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -1733,7 +1624,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3_varying_width_adjustme
       .groups(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -1750,7 +1640,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3_varying_input_height) 
       .groups(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -1767,7 +1656,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3_varying_input_width) {
       .groups(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -1784,7 +1672,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3_varying_input_channels
       .groups(2)
       .group_input_channels(input_channels)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -1801,7 +1688,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3_varying_output_channel
       .groups(2)
       .group_input_channels(23)
       .group_output_channels(output_channels)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -1819,7 +1705,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3_with_height_dilation) 
       .groups(2)
       .group_input_channels(23)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -1837,7 +1722,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3_with_width_dilation) {
       .groups(2)
       .group_input_channels(23)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -1855,7 +1739,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3_with_height_dilation_a
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1872,7 +1755,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3_with_width_dilation_an
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1888,7 +1770,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3_with_input_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .input_pixel_stride(47)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1904,7 +1785,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3_with_output_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr + 3)
     .output_pixel_stride(gemm_config->nr * 2 + 13)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1920,7 +1800,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3_with_qmin) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmin(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1936,7 +1815,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmax(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1952,7 +1830,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3_without_bias) {
     .groups(2)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1968,7 +1845,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, weights_cache_batched_grouped_3x3) {
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .use_weights_cache(true)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1984,7 +1860,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3s2) {
     .stride(2)
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -1999,7 +1874,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, Kx3s2) {
       .stride(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -2015,7 +1889,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3xKs2) {
       .stride(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -2032,7 +1905,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3sSx1) {
       .stride_height(stride_height)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -2049,7 +1921,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3s1xS) {
       .stride_width(stride_width)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -2068,7 +1939,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3s2_varying_height_padding) {
         .stride(2)
         .group_input_channels(15)
         .group_output_channels(gemm_config->nr * 2 + 3)
-        .iterations(1)
         .TestQD8F32QC8W();
     }
   }
@@ -2088,7 +1958,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3s2_varying_width_padding) {
         .stride(2)
         .group_input_channels(15)
         .group_output_channels(gemm_config->nr * 2 + 3)
-        .iterations(1)
         .TestQD8F32QC8W();
     }
   }
@@ -2106,7 +1975,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3s2_varying_height_adjustment) {
       .stride(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -2123,7 +1991,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3s2_varying_width_adjustment) {
       .stride(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -2139,7 +2006,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3s2_varying_input_height) {
       .stride(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -2155,7 +2021,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3s2_varying_input_width) {
       .stride(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -2171,7 +2036,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3s2_varying_input_channels) {
       .stride(2)
       .group_input_channels(input_channels)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -2187,7 +2051,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3s2_varying_output_channels) {
       .stride(2)
       .group_input_channels(23)
       .group_output_channels(output_channels)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -2203,7 +2066,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3s2_with_input_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .input_pixel_stride(28)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2218,7 +2080,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3s2_with_output_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .output_pixel_stride(gemm_config->nr * 2 + 13)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2233,7 +2094,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3s2_with_qmin) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmin(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2248,7 +2108,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3s2_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmax(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2263,7 +2122,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_3x3s2_without_bias) {
     .stride(2)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2278,7 +2136,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, weights_cache_3x3s2) {
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .use_weights_cache(true)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2295,7 +2152,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3s2) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2311,7 +2167,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_Kx3s2) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -2328,7 +2183,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3xKs2) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -2346,7 +2200,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3sSx1) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -2364,7 +2217,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3s1xS) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -2384,7 +2236,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3s2_varying_height_padding) {
         .groups(2)
         .group_input_channels(17)
         .group_output_channels(gemm_config->nr * 2 + 3)
-        .iterations(1)
         .TestQD8F32QC8W();
     }
   }
@@ -2405,7 +2256,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3s2_varying_width_padding) {
         .groups(2)
         .group_input_channels(17)
         .group_output_channels(gemm_config->nr * 2 + 3)
-        .iterations(1)
         .TestQD8F32QC8W();
     }
   }
@@ -2424,7 +2274,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3s2_varying_height_adjustment) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -2442,7 +2291,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3s2_varying_width_adjustment) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -2459,7 +2307,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3s2_varying_input_height) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -2476,7 +2323,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3s2_varying_input_width) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -2493,7 +2339,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3s2_varying_input_channels) {
       .groups(2)
       .group_input_channels(input_channels)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -2510,7 +2355,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3s2_varying_output_channels) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(output_channels)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -2527,7 +2371,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3s2_with_input_stride) {
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .input_pixel_stride(37)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2543,7 +2386,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3s2_with_output_stride) {
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr + 3)
     .output_pixel_stride(gemm_config->nr * 2 + 13)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2559,7 +2401,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3s2_with_qmin) {
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmin(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2575,7 +2416,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3s2_with_qmax) {
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmax(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2591,7 +2431,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_3x3s2_without_bias) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2607,7 +2446,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, weights_cache_grouped_3x3s2) {
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .use_weights_cache(true)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2624,7 +2462,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3s2) {
     .stride(2)
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2640,7 +2477,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_Kx3s2) {
       .stride(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -2657,7 +2493,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3xKs2) {
       .stride(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -2675,7 +2510,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3sSx1) {
       .stride_height(stride_height)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -2693,7 +2527,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3s1xS) {
       .stride_width(stride_width)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -2713,7 +2546,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3s2_varying_height_padding) {
         .stride(2)
         .group_input_channels(15)
         .group_output_channels(gemm_config->nr * 2 + 3)
-        .iterations(1)
         .TestQD8F32QC8W();
     }
   }
@@ -2734,7 +2566,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3s2_varying_width_padding) {
         .stride(2)
         .group_input_channels(15)
         .group_output_channels(gemm_config->nr * 2 + 3)
-        .iterations(1)
         .TestQD8F32QC8W();
     }
   }
@@ -2753,7 +2584,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3s2_varying_height_adjustment) {
       .stride(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -2771,7 +2601,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3s2_varying_width_adjustment) {
       .stride(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -2788,7 +2617,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3s2_varying_input_height) {
       .stride(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -2805,7 +2633,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3s2_varying_input_width) {
       .stride(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -2822,7 +2649,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3s2_varying_input_channels) {
       .stride(2)
       .group_input_channels(input_channels)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -2839,7 +2665,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3s2_varying_output_channels) {
       .stride(2)
       .group_input_channels(23)
       .group_output_channels(output_channels)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -2856,7 +2681,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3s2_with_input_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .input_pixel_stride(28)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2872,7 +2696,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3s2_with_output_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .output_pixel_stride(gemm_config->nr * 2 + 13)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2888,7 +2711,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3s2_with_qmin) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmin(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2904,7 +2726,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3s2_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmax(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2920,7 +2741,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_3x3s2_without_bias) {
     .stride(2)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2936,7 +2756,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, weights_cache_batched_3x3s2) {
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .use_weights_cache(true)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2954,7 +2773,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3s2) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -2971,7 +2789,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_Kx3s2) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -2989,7 +2806,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3xKs2) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -3008,7 +2824,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3sSx1) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -3027,7 +2842,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3s1xS) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -3048,7 +2862,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3s2_varying_height_paddi
         .groups(2)
         .group_input_channels(17)
         .group_output_channels(gemm_config->nr * 2 + 3)
-        .iterations(1)
         .TestQD8F32QC8W();
     }
   }
@@ -3070,7 +2883,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3s2_varying_width_paddin
         .groups(2)
         .group_input_channels(17)
         .group_output_channels(gemm_config->nr * 2 + 3)
-        .iterations(1)
         .TestQD8F32QC8W();
     }
   }
@@ -3090,7 +2902,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3s2_varying_height_adjus
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -3109,7 +2920,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3s2_varying_width_adjust
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -3127,7 +2937,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3s2_varying_input_height
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -3145,7 +2954,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3s2_varying_input_width)
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -3163,7 +2971,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3s2_varying_input_channe
       .groups(2)
       .group_input_channels(input_channels)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -3181,7 +2988,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3s2_varying_output_chann
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(output_channels)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -3199,7 +3005,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3s2_with_input_stride) {
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .input_pixel_stride(37)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3216,7 +3021,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3s2_with_output_stride) 
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr + 3)
     .output_pixel_stride(gemm_config->nr * 2 + 13)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3233,7 +3037,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3s2_with_qmin) {
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmin(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3250,7 +3053,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3s2_with_qmax) {
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmax(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3267,7 +3069,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_3x3s2_without_bias) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3284,7 +3085,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, weights_cache_batched_grouped_3x3s2) {
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .use_weights_cache(true)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3299,7 +3099,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_2x2s2) {
     .stride(2)
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3313,7 +3112,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, Kx2sKx2) {
       .stride(kernel_height, 2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -3328,7 +3126,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_2xKs2xK) {
       .stride(2, kernel_width)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -3343,7 +3140,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_2x2s2_height_adjustment) {
     .stride(2)
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(1)
     .TestQD8F32QC8W();
 }
 
@@ -3357,7 +3153,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_2x2s2_width_adjustment) {
     .stride(2)
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(1)
     .TestQD8F32QC8W();
 }
 
@@ -3371,7 +3166,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_2x2s2_varying_input_height) {
       .stride(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -3386,7 +3180,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_2x2s2_varying_input_width) {
       .stride(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -3401,7 +3194,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_2x2s2_varying_input_channels) {
       .stride(2)
       .group_input_channels(input_channels)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -3416,7 +3208,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_2x2s2_varying_output_channels) {
       .stride(2)
       .group_input_channels(23)
       .group_output_channels(output_channels)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -3431,7 +3222,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_2x2s2_with_input_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .input_pixel_stride(28)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3445,7 +3235,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_2x2s2_with_output_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .output_pixel_stride(gemm_config->nr * 2 + 13)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3459,7 +3248,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_2x2s2_with_qmin) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmin(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3473,7 +3261,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_2x2s2_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmax(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3487,7 +3274,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, kernel_2x2s2_without_bias) {
     .stride(2)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3501,7 +3287,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, weights_cache_2x2s2) {
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .use_weights_cache(true)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3517,7 +3302,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_2x2s2) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3532,7 +3316,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_Kx2sKx2) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -3548,7 +3331,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_2xKs2xK) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -3564,7 +3346,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_2x2s2_height_adjustment) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(1)
     .TestQD8F32QC8W();
 }
 
@@ -3579,7 +3360,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_2x2s2_width_adjustment) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(1)
     .TestQD8F32QC8W();
 }
 
@@ -3594,7 +3374,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_2x2s2_varying_input_height) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -3610,7 +3389,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_2x2s2_varying_input_width) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -3626,7 +3404,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_2x2s2_varying_input_channels) {
       .groups(2)
       .group_input_channels(input_channels)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -3642,7 +3419,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_2x2s2_varying_output_channels) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(output_channels)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -3658,7 +3434,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_2x2s2_with_input_stride) {
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .input_pixel_stride(37)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3673,7 +3448,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_2x2s2_with_output_stride) {
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr + 3)
     .output_pixel_stride(gemm_config->nr * 2 + 13)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3688,7 +3462,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_2x2s2_with_qmin) {
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmin(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3703,7 +3476,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_2x2s2_with_qmax) {
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmax(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3718,7 +3490,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, grouped_2x2s2_without_bias) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3733,7 +3504,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, weights_cache_grouped_2x2s2) {
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .use_weights_cache(true)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3749,7 +3519,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_2x2s2) {
     .stride(2)
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3764,7 +3533,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_Kx2sKx2) {
       .stride(kernel_height, 2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -3780,7 +3548,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_2xKs2xK) {
       .stride(2, kernel_width)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -3796,7 +3563,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_2x2s2_height_adjustment) {
     .stride(2)
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(1)
     .TestQD8F32QC8W();
 }
 
@@ -3811,7 +3577,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_2x2s2_width_adjustment) {
     .stride(2)
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(1)
     .TestQD8F32QC8W();
 }
 
@@ -3826,7 +3591,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_2x2s2_varying_input_height) {
       .stride(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -3842,7 +3606,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_2x2s2_varying_input_width) {
       .stride(2)
       .group_input_channels(15)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -3858,7 +3621,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_2x2s2_varying_input_channels) {
       .stride(2)
       .group_input_channels(input_channels)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -3874,7 +3636,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_2x2s2_varying_output_channels) {
       .stride(2)
       .group_input_channels(23)
       .group_output_channels(output_channels)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -3890,7 +3651,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_2x2s2_with_input_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .input_pixel_stride(28)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3905,7 +3665,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_2x2s2_with_output_stride) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .output_pixel_stride(gemm_config->nr * 2 + 13)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3920,7 +3679,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_2x2s2_with_qmin) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmin(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3935,7 +3693,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_2x2s2_with_qmax) {
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmax(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3950,7 +3707,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_2x2s2_without_bias) {
     .stride(2)
     .group_input_channels(23)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3965,7 +3721,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, weights_cache_batched_2x2s2) {
     .group_input_channels(15)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .use_weights_cache(true)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3982,7 +3737,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_2x2s2) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -3998,7 +3752,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_Kx2sKx2) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -4015,7 +3768,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_2xKs2xK) {
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(3)
       .TestQD8F32QC8W();
   }
 }
@@ -4032,7 +3784,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_2x2s2_height_adjustment) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(1)
     .TestQD8F32QC8W();
 }
 
@@ -4048,7 +3799,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_2x2s2_width_adjustment) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(1)
     .TestQD8F32QC8W();
 }
 
@@ -4064,7 +3814,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_2x2s2_varying_input_height
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -4081,7 +3830,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_2x2s2_varying_input_width)
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -4098,7 +3846,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_2x2s2_varying_input_channe
       .groups(2)
       .group_input_channels(input_channels)
       .group_output_channels(gemm_config->nr * 2 + 3)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -4115,7 +3862,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_2x2s2_varying_output_chann
       .groups(2)
       .group_input_channels(17)
       .group_output_channels(output_channels)
-      .iterations(1)
       .TestQD8F32QC8W();
   }
 }
@@ -4132,7 +3878,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_2x2s2_with_input_stride) {
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .input_pixel_stride(37)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -4148,7 +3893,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_2x2s2_with_output_stride) 
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr + 3)
     .output_pixel_stride(gemm_config->nr * 2 + 13)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -4164,7 +3908,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_2x2s2_with_qmin) {
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmin(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -4180,7 +3923,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_2x2s2_with_qmax) {
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .qmax(128)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -4196,7 +3938,6 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, batched_grouped_2x2s2_without_bias) {
     .groups(2)
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
-    .iterations(3)
     .TestQD8F32QC8W();
 }
 
@@ -4212,6 +3953,5 @@ TEST(DECONVOLUTION_NHWC_QD8_F32_QC8W, weights_cache_batched_grouped_2x2s2) {
     .group_input_channels(17)
     .group_output_channels(gemm_config->nr * 2 + 3)
     .use_weights_cache(true)
-    .iterations(3)
     .TestQD8F32QC8W();
 }

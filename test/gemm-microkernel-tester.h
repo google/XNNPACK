@@ -163,13 +163,6 @@ class GemmMicrokernelTester {
 
   size_t zero_index() const { return this->zero_index_; }
 
-  GemmMicrokernelTester& iterations(size_t iterations) {
-    this->iterations_ = iterations;
-    return *this;
-  }
-
-  size_t iterations() const { return this->iterations_; }
-
   GemmMicrokernelTester& known_nc_mod_nr(bool known_nc_mod_nr) {
     this->known_nc_mod_nr_ = known_nc_mod_nr;
     return *this;
@@ -343,7 +336,6 @@ class GemmMicrokernelTester {
   uint8_t qmax_{255};
   size_t a_offset_{0};
   size_t zero_index_{SIZE_MAX};
-  size_t iterations_{15};
   bool known_nc_mod_nr_{true};
   bool relu_{false};
   size_t mr_packed_{0};

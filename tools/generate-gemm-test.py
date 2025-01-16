@@ -148,7 +148,7 @@ std::vector<GemmTestParams> CreateTests(
   gemm_tests.push_back(GemmTestParams(
       "k_eq_" + kbs + "_subtile",
       tester.clone()
-          .k(k_block).iterations(1)
+          .k(k_block)
           $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
           $if KERNELTYPE in ['qb4w']:
@@ -159,7 +159,7 @@ std::vector<GemmTestParams> CreateTests(
   gemm_tests.push_back(GemmTestParams(
       "k_eq_" + kbs + "_subtile_m",
       tester.clone()
-          .n(nr).k(k_block).iterations(1)
+          .n(nr).k(k_block)
           $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
           $if KERNELTYPE in ['qb4w']:
@@ -169,7 +169,7 @@ std::vector<GemmTestParams> CreateTests(
   gemm_tests.push_back(GemmTestParams(
       "k_eq_" + kbs + "_subtile_n",
       tester.clone()
-          .m(mr).k(k_block).iterations(1)
+          .m(mr).k(k_block)
           $if KERNELTYPE in ['qb4w', 'qc4w']:
             .b_zero_point(8)
           $if KERNELTYPE in ['qb4w']:
@@ -202,7 +202,7 @@ std::vector<GemmTestParams> CreateTests(
     gemm_tests.push_back(GemmTestParams(
         "k_eq_" + kb2s + "_subtile",
         tester.clone()
-            .k(k_block * 2).iterations(1)
+            .k(k_block * 2)
             $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
             $if KERNELTYPE in ['qb4w']:
@@ -239,7 +239,6 @@ std::vector<GemmTestParams> CreateTests(
         gemm_tests.push_back(GemmTestParams(
             "k_lt_" + akbs + "_subtile",
             tester.clone()
-                .iterations(1)
                 $if KERNELTYPE in ['qb4w', 'qc4w']:
                   .b_zero_point(8)
                 $if KERNELTYPE in ['qb4w']:
@@ -276,7 +275,6 @@ std::vector<GemmTestParams> CreateTests(
       gemm_tests.push_back(GemmTestParams(
           "k_gt_" + akbs + "_subtile",
           tester.clone()
-              .iterations(1)
               $if KERNELTYPE in ['qb4w', 'qc4w']:
                 .b_zero_point(8)
               $if KERNELTYPE in ['qb4w']:
@@ -313,7 +311,6 @@ std::vector<GemmTestParams> CreateTests(
         gemm_tests.push_back(GemmTestParams(
             "k_div_" + kbs + "_subtile",
             tester.clone()
-                .iterations(1)
                 $if KERNELTYPE in ['qb4w', 'qc4w']:
                   .b_zero_point(8)
                 $if KERNELTYPE in ['qb4w']:
@@ -358,7 +355,6 @@ std::vector<GemmTestParams> CreateTests(
       gemm_tests.push_back(GemmTestParams(
           "n_gt_" + nrs + "_subtile",
           tester.clone()
-              .iterations(1)
               $if KERNELTYPE in ['qb4w', 'qc4w']:
                 .b_zero_point(8)
               $if KERNELTYPE in ['qb4w']:
@@ -399,7 +395,6 @@ std::vector<GemmTestParams> CreateTests(
       gemm_tests.push_back(GemmTestParams(
           "n_div_" + nrs + "_subtile",
           tester.clone()
-              .iterations(1)
               $if KERNELTYPE in ['qb4w', 'qc4w']:
                 .b_zero_point(8)
               $if KERNELTYPE in ['qb4w']:
@@ -422,7 +417,7 @@ std::vector<GemmTestParams> CreateTests(
         gemm_tests.push_back(GemmTestParams(
             "small_kernel_subtile",
             tester.clone()
-                .ks(3).iterations(1)
+                .ks(3)
                 $if KERNELTYPE in ['qb4w', 'qc4w']:
                   .b_zero_point(8)
                 $if KERNELTYPE in ['qb4w']:
@@ -462,7 +457,6 @@ std::vector<GemmTestParams> CreateTests(
           tester.clone()
               .mr(mr).nr(nr).kr(kr).sr(sr)
               .cm_stride(xnnpack::NextPrime(nr + 1))
-              .iterations(1)
               $if KERNELTYPE in ['qb4w', 'qc4w']:
                 .b_zero_point(8)
               $if KERNELTYPE in ['qb4w']:
@@ -612,7 +606,6 @@ $if TEST_NAME.startswith('GENERATE') and DATATYPE in ['f32', 'f16']:
             $if NR > 1:
               .n(${NR})
             .k(k)
-            .iterations(1)
             $if KERNELTYPE in ['qb4w', 'qc4w']:
               .b_zero_point(8)
             .${TEST_FUN}(${", ".join(TEST_ARGS)});

@@ -60,7 +60,7 @@ std::vector<GemmTestParams> CreateTests1(
   gemm_tests.push_back(GemmTestParams(
       "k_eq_" + kbs + "_subtile",
       tester.clone()
-          .k(k_block).iterations(1)
+          .k(k_block)
           .b_zero_point(8)
           .bl(32)
       , test_func, isa_check)
@@ -69,7 +69,7 @@ std::vector<GemmTestParams> CreateTests1(
   gemm_tests.push_back(GemmTestParams(
       "k_eq_" + kbs + "_subtile_m",
       tester.clone()
-          .n(nr).k(k_block).iterations(1)
+          .n(nr).k(k_block)
           .b_zero_point(8)
           .bl(32)
       , test_func, isa_check)
@@ -77,7 +77,7 @@ std::vector<GemmTestParams> CreateTests1(
   gemm_tests.push_back(GemmTestParams(
       "k_eq_" + kbs + "_subtile_n",
       tester.clone()
-          .m(mr).k(k_block).iterations(1)
+          .m(mr).k(k_block)
           .b_zero_point(8)
           .bl(32)
       , test_func, isa_check)

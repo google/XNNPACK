@@ -65,20 +65,20 @@ std::vector<GemmTestParams> CreateTests1(
   gemm_tests.push_back(GemmTestParams(
       "k_eq_" + kbs + "_subtile",
       tester.clone()
-          .k(k_block).iterations(1)
+          .k(k_block)
       , test_func, isa_check)
       .loop_n(1, nr)
       .loop_m(1, mr));
   gemm_tests.push_back(GemmTestParams(
       "k_eq_" + kbs + "_subtile_m",
       tester.clone()
-          .n(nr).k(k_block).iterations(1)
+          .n(nr).k(k_block)
       , test_func, isa_check)
       .loop_m(1, mr));
   gemm_tests.push_back(GemmTestParams(
       "k_eq_" + kbs + "_subtile_n",
       tester.clone()
-          .m(mr).k(k_block).iterations(1)
+          .m(mr).k(k_block)
       , test_func, isa_check)
       .loop_n(1, nr));
   if (k_block > 1) {
@@ -100,7 +100,6 @@ std::vector<GemmTestParams> CreateTests1(
     gemm_tests.push_back(GemmTestParams(
         "k_lt_" + akbs + "_subtile",
         tester.clone()
-            .iterations(1)
         , test_func, isa_check)
         .loop_k(1, adj_k_block - 1)
         .loop_n(1, nr)
@@ -124,7 +123,6 @@ std::vector<GemmTestParams> CreateTests1(
   gemm_tests.push_back(GemmTestParams(
       "k_gt_" + akbs + "_subtile",
       tester.clone()
-          .iterations(1)
       , test_func, isa_check)
       .loop_k(adj_k_block + 1, adj_k_block * 2 - 1, k_block)
       .loop_n(1, nr)
@@ -148,7 +146,6 @@ std::vector<GemmTestParams> CreateTests1(
     gemm_tests.push_back(GemmTestParams(
         "k_div_" + kbs + "_subtile",
         tester.clone()
-            .iterations(1)
         , test_func, isa_check)
         .loop_k(adj_k_block + k_block, k_block * 5, k_block)
         .loop_n(1, nr)
@@ -174,7 +171,6 @@ std::vector<GemmTestParams> CreateTests1(
   gemm_tests.push_back(GemmTestParams(
       "n_gt_" + nrs + "_subtile",
       tester.clone()
-          .iterations(1)
       , test_func, isa_check)
       .loop_n(nr + 1, nr * 2 - 1)
       .loop_k(1, k_block * 3, k_block + 1)
@@ -199,7 +195,6 @@ std::vector<GemmTestParams> CreateTests1(
   gemm_tests.push_back(GemmTestParams(
       "n_div_" + nrs + "_subtile",
       tester.clone()
-          .iterations(1)
       , test_func, isa_check)
       .loop_n(nr * 2, nr * 3, nr)
       .loop_k(1, k_block * 3, k_block + 1)
@@ -214,7 +209,7 @@ std::vector<GemmTestParams> CreateTests1(
     gemm_tests.push_back(GemmTestParams(
         "small_kernel_subtile",
         tester.clone()
-            .ks(3).iterations(1)
+            .ks(3)
         , test_func, isa_check)
         .loop_k(1, k_block * 3, k_block + 1)
         .loop_n(1, nr)
@@ -239,7 +234,6 @@ std::vector<GemmTestParams> CreateTests1(
       tester.clone()
           .mr(mr).nr(nr).kr(kr).sr(sr)
           .cm_stride(xnnpack::NextPrime(nr + 1))
-          .iterations(1)
       , test_func, isa_check)
       .loop_k(1, k_block * 3, k_block + 1)
       .loop_n(1, nr)
@@ -315,20 +309,20 @@ std::vector<GemmTestParams> CreateTests2(
   gemm_tests.push_back(GemmTestParams(
       "k_eq_" + kbs + "_subtile",
       tester.clone()
-          .k(k_block).iterations(1)
+          .k(k_block)
       , test_func, isa_check)
       .loop_n(1, nr)
       .loop_m(1, mr));
   gemm_tests.push_back(GemmTestParams(
       "k_eq_" + kbs + "_subtile_m",
       tester.clone()
-          .n(nr).k(k_block).iterations(1)
+          .n(nr).k(k_block)
       , test_func, isa_check)
       .loop_m(1, mr));
   gemm_tests.push_back(GemmTestParams(
       "k_eq_" + kbs + "_subtile_n",
       tester.clone()
-          .m(mr).k(k_block).iterations(1)
+          .m(mr).k(k_block)
       , test_func, isa_check)
       .loop_n(1, nr));
   gemm_tests.push_back(GemmTestParams(
@@ -347,7 +341,7 @@ std::vector<GemmTestParams> CreateTests2(
   gemm_tests.push_back(GemmTestParams(
       "k_eq_" + kb2s + "_subtile",
       tester.clone()
-          .k(k_block * 2).iterations(1)
+          .k(k_block * 2)
       , test_func, isa_check)
       .loop_n(1, nr)
       .loop_m(1, mr));
@@ -370,7 +364,6 @@ std::vector<GemmTestParams> CreateTests2(
     gemm_tests.push_back(GemmTestParams(
         "k_lt_" + akbs + "_subtile",
         tester.clone()
-            .iterations(1)
         , test_func, isa_check)
         .loop_k(1, adj_k_block - 1)
         .loop_n(1, nr)
@@ -394,7 +387,6 @@ std::vector<GemmTestParams> CreateTests2(
   gemm_tests.push_back(GemmTestParams(
       "k_gt_" + akbs + "_subtile",
       tester.clone()
-          .iterations(1)
       , test_func, isa_check)
       .loop_k(adj_k_block + 1, adj_k_block * 2 - 1, k_block)
       .loop_n(1, nr)
@@ -418,7 +410,6 @@ std::vector<GemmTestParams> CreateTests2(
     gemm_tests.push_back(GemmTestParams(
         "k_div_" + kbs + "_subtile",
         tester.clone()
-            .iterations(1)
         , test_func, isa_check)
         .loop_k(adj_k_block + k_block, k_block * 5, k_block)
         .loop_n(1, nr)
@@ -444,7 +435,6 @@ std::vector<GemmTestParams> CreateTests2(
   gemm_tests.push_back(GemmTestParams(
       "n_gt_" + nrs + "_subtile",
       tester.clone()
-          .iterations(1)
       , test_func, isa_check)
       .loop_n(nr + 1, nr * 2 - 1)
       .loop_k(1, k_block * 3, k_block + 1)
@@ -469,7 +459,6 @@ std::vector<GemmTestParams> CreateTests2(
   gemm_tests.push_back(GemmTestParams(
       "n_div_" + nrs + "_subtile",
       tester.clone()
-          .iterations(1)
       , test_func, isa_check)
       .loop_n(nr * 2, nr * 3, nr)
       .loop_k(1, k_block * 3, k_block + 1)
@@ -484,7 +473,7 @@ std::vector<GemmTestParams> CreateTests2(
     gemm_tests.push_back(GemmTestParams(
         "small_kernel_subtile",
         tester.clone()
-            .ks(3).iterations(1)
+            .ks(3)
         , test_func, isa_check)
         .loop_k(1, k_block * 3, k_block + 1)
         .loop_n(1, nr)
@@ -509,7 +498,6 @@ std::vector<GemmTestParams> CreateTests2(
       tester.clone()
           .mr(mr).nr(nr).kr(kr).sr(sr)
           .cm_stride(xnnpack::NextPrime(nr + 1))
-          .iterations(1)
       , test_func, isa_check)
       .loop_k(1, k_block * 3, k_block + 1)
       .loop_n(1, nr)
@@ -587,20 +575,20 @@ std::vector<GemmTestParams> CreateTests2(
     gemm_tests.push_back(GemmTestParams(
         "k_eq_" + kbs + "_subtile",
         tester.clone()
-            .k(k_block).iterations(1)
+            .k(k_block)
         , test_func, isa_check)
         .loop_n(1, nr)
         .loop_m(1, mr));
     gemm_tests.push_back(GemmTestParams(
         "k_eq_" + kbs + "_subtile_m",
         tester.clone()
-            .n(nr).k(k_block).iterations(1)
+            .n(nr).k(k_block)
         , test_func, isa_check)
         .loop_m(1, mr));
     gemm_tests.push_back(GemmTestParams(
         "k_eq_" + kbs + "_subtile_n",
         tester.clone()
-            .m(mr).k(k_block).iterations(1)
+            .m(mr).k(k_block)
         , test_func, isa_check)
         .loop_n(1, nr));
     if (k_block > 1) {
@@ -622,7 +610,6 @@ std::vector<GemmTestParams> CreateTests2(
       gemm_tests.push_back(GemmTestParams(
           "k_lt_" + akbs + "_subtile",
           tester.clone()
-              .iterations(1)
           , test_func, isa_check)
           .loop_k(1, adj_k_block - 1)
           .loop_n(1, nr)
@@ -646,7 +633,6 @@ std::vector<GemmTestParams> CreateTests2(
     gemm_tests.push_back(GemmTestParams(
         "k_gt_" + akbs + "_subtile",
         tester.clone()
-            .iterations(1)
         , test_func, isa_check)
         .loop_k(adj_k_block + 1, adj_k_block * 2 - 1, k_block)
         .loop_n(1, nr)
@@ -670,7 +656,6 @@ std::vector<GemmTestParams> CreateTests2(
       gemm_tests.push_back(GemmTestParams(
           "k_div_" + kbs + "_subtile",
           tester.clone()
-              .iterations(1)
           , test_func, isa_check)
           .loop_k(adj_k_block + k_block, k_block * 5, k_block)
           .loop_n(1, nr)
@@ -696,7 +681,6 @@ std::vector<GemmTestParams> CreateTests2(
     gemm_tests.push_back(GemmTestParams(
         "n_gt_" + nrs + "_subtile",
         tester.clone()
-            .iterations(1)
         , test_func, isa_check)
         .loop_n(nr + 1, nr * 2 - 1, 4)
         .loop_k(1, k_block * 3, k_block + 1)
@@ -721,7 +705,6 @@ std::vector<GemmTestParams> CreateTests2(
     gemm_tests.push_back(GemmTestParams(
         "n_div_" + nrs + "_subtile",
         tester.clone()
-            .iterations(1)
         , test_func, isa_check)
         .loop_n(nr * 2, nr * 3, nr)
         .loop_k(1, k_block * 3, k_block + 1)
@@ -736,7 +719,7 @@ std::vector<GemmTestParams> CreateTests2(
       gemm_tests.push_back(GemmTestParams(
           "small_kernel_subtile",
           tester.clone()
-              .ks(3).iterations(1)
+              .ks(3)
           , test_func, isa_check)
           .loop_k(1, k_block * 3, k_block + 1)
           .loop_n(1, nr)
@@ -761,7 +744,6 @@ std::vector<GemmTestParams> CreateTests2(
         tester.clone()
             .mr(mr).nr(nr).kr(kr).sr(sr)
             .cm_stride(xnnpack::NextPrime(nr + 1))
-            .iterations(1)
         , test_func, isa_check)
         .loop_k(1, k_block * 3, k_block + 1)
         .loop_n(1, nr)

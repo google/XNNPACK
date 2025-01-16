@@ -28,6 +28,8 @@
 #include "xnnpack/packq.h"
 #include "replicable_random_device.h"
 
+constexpr int kIterations = 1;
+
 class BatchMatMulOperatorTester {
  public:
   BatchMatMulOperatorTester& m(size_t m) {
@@ -86,13 +88,6 @@ class BatchMatMulOperatorTester {
   }
 
   bool transpose_b() const { return this->transpose_b_; }
-
-  BatchMatMulOperatorTester& iterations(size_t iterations) {
-    this->iterations_ = iterations;
-    return *this;
-  }
-
-  size_t iterations() const { return this->iterations_; }
 
   uint32_t flags() const {
     if (transpose_b()) {
@@ -271,7 +266,7 @@ class BatchMatMulOperatorTester {
     xnnpack::Buffer<xnn_float16> output(batch_size_output * m() * n());
     xnnpack::Buffer<float> output_ref(batch_size_output * m() * n());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input_a.begin(), input_a.end(),
                     [&]() { return f32dist(rng); });
       std::generate(input_b.begin(), input_b.end(),
@@ -357,7 +352,7 @@ class BatchMatMulOperatorTester {
     xnnpack::Buffer<float> output_ref(batch_size_output * m() * n());
 
     for (bool const_weights : {true, false}) {
-      for (size_t iteration = 0; iteration < iterations(); iteration++) {
+      for (size_t iteration = 0; iteration < kIterations; iteration++) {
         std::generate(input_a.begin(), input_a.end(),
                       [&]() { return f32dist(rng); });
         std::generate(input_b.begin(), input_b.end(),
@@ -502,7 +497,7 @@ class BatchMatMulOperatorTester {
     xnnpack::Buffer<float> output(batch_size_output * m() * n());
     xnnpack::Buffer<float> output_ref(batch_size_output * m() * n());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input_a.begin(), input_a.end(),
                     [&]() { return f32dist(rng); });
       std::generate(input_b.begin(), input_b.end(),
@@ -621,7 +616,7 @@ class BatchMatMulOperatorTester {
     xnnpack::Buffer<float> output(batch_size_output * m() * n());
     xnnpack::Buffer<float> output_ref(batch_size_output * m() * n());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input_a.begin(), input_a.end(),
                     [&]() { return f32dist(rng); });
       std::generate(input_b.begin(), input_b.end(),

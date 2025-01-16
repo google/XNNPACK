@@ -32,6 +32,8 @@
 #include "replicable_random_device.h"
 #include "pthreadpool.h"
 
+constexpr int kIterations = 1;
+
 class ConvolutionOperatorTester {
  public:
   enum class WeightsType {
@@ -541,15 +543,6 @@ class ConvolutionOperatorTester {
     return multithreaded() ? 5 : 1;
   }
 
-  ConvolutionOperatorTester& iterations(size_t iterations) {
-    this->iterations_ = iterations;
-    return *this;
-  }
-
-  size_t iterations() const {
-    return this->iterations_;
-  }
-
   ConvolutionOperatorTester& use_weights_cache(bool use_weights_cache) {
     this->use_weights_cache_ = use_weights_cache;
     return *this;
@@ -581,7 +574,7 @@ class ConvolutionOperatorTester {
     const int8_t input_zero_point = -1;
     const int8_t output_zero_point = -1;
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
         const pthreadpool_t threadpool = pthreadpool_create(num_threads());
@@ -875,7 +868,7 @@ class ConvolutionOperatorTester {
     xnnpack::Buffer<xnn_qd8_quantization_params> quantization_params(batch_size());
     xnnpack::Buffer<float> kernel_scale(groups() * group_output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)>
           auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
@@ -1098,7 +1091,7 @@ class ConvolutionOperatorTester {
     xnnpack::Buffer<xnn_qd8_quantization_params> quantization_params(batch_size());
     xnnpack::Buffer<float> kernel_scale(groups() * group_output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)>
           auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
@@ -1307,7 +1300,7 @@ class ConvolutionOperatorTester {
 
     const int8_t input_zero_point = -1;
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
         const pthreadpool_t threadpool = pthreadpool_create(num_threads());
@@ -1572,7 +1565,7 @@ class ConvolutionOperatorTester {
     const uint8_t input_zero_point = 127;
     const uint8_t kernel_zero_point = 127;
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
         const pthreadpool_t threadpool = pthreadpool_create(num_threads());
@@ -1852,7 +1845,7 @@ class ConvolutionOperatorTester {
     xnnpack::Buffer<float> output(batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()));
     xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
         const pthreadpool_t threadpool = pthreadpool_create(num_threads());
@@ -2130,7 +2123,7 @@ class ConvolutionOperatorTester {
     xnnpack::Buffer<xnn_float16> output(batch_size() * ((output_height() * output_width() - 1) * output_channel_stride() + groups() * group_output_channels()));
     xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
         const pthreadpool_t threadpool = pthreadpool_create(num_threads());
@@ -2420,7 +2413,7 @@ class ConvolutionOperatorTester {
       ((batch_size() - 1) * output_channel_stride() + groups() * group_output_channels()) * output_height() * output_width());
     xnnpack::Buffer<float> output_ref(batch_size() * groups() * group_output_channels() * output_height() * output_width());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
         const pthreadpool_t threadpool = pthreadpool_create(num_threads());
@@ -2690,7 +2683,7 @@ class ConvolutionOperatorTester {
       ((batch_size() - 1) * output_channel_stride() + groups() * group_output_channels()) * output_height() * output_width());
     xnnpack::Buffer<float> output_ref(batch_size() * groups() * group_output_channels() * output_height() * output_width());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
         const pthreadpool_t threadpool = pthreadpool_create(num_threads());
@@ -2982,7 +2975,7 @@ class ConvolutionOperatorTester {
     const int8_t input_zero_point = -1;
     const int8_t output_zero_point = -1;
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
         const pthreadpool_t threadpool = pthreadpool_create(num_threads());
@@ -3255,7 +3248,7 @@ class ConvolutionOperatorTester {
 
     const int8_t input_zero_point = -1;
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
         const pthreadpool_t threadpool = pthreadpool_create(num_threads());
@@ -3501,7 +3494,7 @@ class ConvolutionOperatorTester {
     const uint8_t input_zero_point = 127;
     const uint8_t kernel_zero_point = 127;
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
         const pthreadpool_t threadpool = pthreadpool_create(num_threads());
@@ -3741,7 +3734,7 @@ class ConvolutionOperatorTester {
     xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
     xnnpack::Buffer<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * groups() * group_output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
         const pthreadpool_t threadpool = pthreadpool_create(num_threads());
@@ -3940,7 +3933,7 @@ class ConvolutionOperatorTester {
     xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
     xnnpack::Buffer<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * groups() * group_output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::unique_ptr<pthreadpool, decltype(&pthreadpool_destroy)> auto_threadpool{nullptr, pthreadpool_destroy};
       if (multithreaded()) {
         const pthreadpool_t threadpool = pthreadpool_create(num_threads());

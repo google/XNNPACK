@@ -32,6 +32,8 @@
 #include "xnnpack/buffer.h"
 #include "replicable_random_device.h"
 
+constexpr int kIterations = 1;
+
 static int8_t sign_extend_int4(int8_t value) {
   int8_t mask = 0x08;
   if (value & mask) {
@@ -200,15 +202,6 @@ class FullyConnectedOperatorTester {
     return this->use_weights_cache_;
   }
 
-  FullyConnectedOperatorTester& iterations(size_t iterations) {
-    this->iterations_ = iterations;
-    return *this;
-  }
-
-  size_t iterations() const {
-    return this->iterations_;
-  }
-
   size_t calc_kernel_stride() const {
     if (transpose_weights()) {
       return (output_channels() + 1) / 2;
@@ -243,7 +236,7 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<xnn_qd8_quantization_params> quantization_params(batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
     xnnpack::Buffer<float> kernel_scale(output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return (int8_t) normal_dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
@@ -441,7 +434,7 @@ class FullyConnectedOperatorTester {
     size_t num_blocks = k2 / block_size();
     xnnpack::Buffer<xnn_bfloat16> kernel_scale2d(output_channels() * num_blocks);
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
@@ -628,7 +621,7 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<xnn_qd8_quantization_params> quantization_params(batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
     xnnpack::Buffer<float> kernel_scale(output_channels());
 
-    {  // for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    {  // for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
@@ -823,7 +816,7 @@ class FullyConnectedOperatorTester {
     size_t num_blocks = k2 / block_size();
     xnnpack::Buffer<xnn_bfloat16> kernel_scale2d(output_channels() * num_blocks);
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
@@ -1024,7 +1017,7 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<float> output_ref(batch_size() * output_channels());
     xnnpack::Buffer<float> kernel_scale(output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(),
                     [&]() { return w8dist(rng); });
@@ -1246,7 +1239,7 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<float> output_ref(batch_size() * output_channels());
     xnnpack::Buffer<float> kernel_scale(output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(),
                     [&]() { return w8dist(rng); });
@@ -1456,7 +1449,7 @@ class FullyConnectedOperatorTester {
     size_t num_blocks = k2 / block_size();
     xnnpack::Buffer<uint16_t> kernel_scale2d(output_channels() * num_blocks);
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(),
                     [&]() { return w8dist(rng); });
@@ -1653,7 +1646,7 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<xnn_qd8_quantization_params> quantization_params(batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
     xnnpack::Buffer<float> kernel_scale(output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return (int8_t) normal_dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
@@ -1830,7 +1823,7 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<xnn_qd8_quantization_params> quantization_params(batch_size() + XNN_EXTRA_QUANTIZATION_PARAMS);
     xnnpack::Buffer<float> kernel_scale(output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
@@ -2006,7 +1999,7 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<int32_t> accumulators(batch_size() * output_channels());
     xnnpack::Buffer<double> output_ref(batch_size() * output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
@@ -2196,7 +2189,7 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<double> output_ref(batch_size() * output_channels());
     xnnpack::Buffer<float> requantization_scales(output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
@@ -2413,7 +2406,7 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<int32_t> accumulators(batch_size() * output_channels());
     xnnpack::Buffer<double> output_ref(batch_size() * output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return u8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
@@ -2606,7 +2599,7 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<float> output((batch_size() - 1) * output_stride() + output_channels());
     xnnpack::Buffer<float> output_ref(batch_size() * output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
       std::copy(kernel.cbegin(), kernel.cend(), kernel_as_float.begin());
@@ -2875,7 +2868,7 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<float> output_ref(batch_size() * output_channels());
     xnnpack::Buffer<float> scale(output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32idist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return i8wdist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32wdist(rng); });
@@ -3045,7 +3038,7 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<float> output_ref(batch_size() * output_channels());
     xnnpack::Buffer<float> scale(output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32idist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return i8wdist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32wdist(rng); });
@@ -3234,7 +3227,7 @@ class FullyConnectedOperatorTester {
     xnnpack::Buffer<xnn_float16> output((batch_size() - 1) * output_stride() + output_channels());
     xnnpack::Buffer<float> output_ref(batch_size() * output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
       std::copy(kernel.cbegin(), kernel.cend(), kernel_as_float.begin());
