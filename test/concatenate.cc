@@ -24,9 +24,9 @@
 #include "xnnpack/operator.h"
 #include "xnnpack/subgraph.h"
 
-template <typename T> class ConcatenateNTest : public ::testing::Test {
+template <typename T> class ConcatenateTest : public ::testing::Test {
 protected:
-  ConcatenateNTest()
+  ConcatenateTest()
   {
     shape_dist = std::uniform_int_distribution<size_t>(1, XNN_MAX_TENSOR_DIMS);
     dim_dist = std::uniform_int_distribution<size_t>(1, 9);
@@ -138,13 +138,13 @@ protected:
   std::vector<T> subgraph_output;
 };
 
-using ConcatenateNTestQS8 = ConcatenateNTest<int8_t>;
-using ConcatenateNTestQU8 = ConcatenateNTest<uint8_t>;
-using ConcatenateNTestF16 = ConcatenateNTest<xnn_float16>;
-using ConcatenateNTestF32 = ConcatenateNTest<float>;
+using ConcatenateTestQS8 = ConcatenateTest<int8_t>;
+using ConcatenateTestQU8 = ConcatenateTest<uint8_t>;
+using ConcatenateTestF16 = ConcatenateTest<xnn_float16>;
+using ConcatenateTestF32 = ConcatenateTest<float>;
 
 
-TEST_F(ConcatenateNTestQS8, define)
+TEST_F(ConcatenateTestQS8, define)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -189,7 +189,7 @@ TEST_F(ConcatenateNTestQS8, define)
   ASSERT_EQ(node->flags, 0);
 }
 
-TEST_F(ConcatenateNTestQU8, define)
+TEST_F(ConcatenateTestQU8, define)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -229,7 +229,7 @@ TEST_F(ConcatenateNTestQU8, define)
   ASSERT_EQ(node->flags, 0);
 }
 
-TEST_F(ConcatenateNTestF16, define)
+TEST_F(ConcatenateTestF16, define)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -267,7 +267,7 @@ TEST_F(ConcatenateNTestF16, define)
   ASSERT_EQ(node->flags, 0);
 }
 
-TEST_F(ConcatenateNTestF32, define)
+TEST_F(ConcatenateTestF32, define)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
@@ -306,7 +306,7 @@ TEST_F(ConcatenateNTestF32, define)
   ASSERT_EQ(node->flags, 0);
 }
 
-TEST_F(ConcatenateNTestQS8, matches_operator_api)
+TEST_F(ConcatenateTestQS8, matches_operator_api)
 {
   inputs.resize(num_inputs);
   for (size_t i = 0; i < num_inputs; ++i) {
@@ -379,7 +379,7 @@ TEST_F(ConcatenateNTestQS8, matches_operator_api)
   ASSERT_EQ(subgraph_output, operator_output);
 }
 
-TEST_F(ConcatenateNTestQU8, matches_operator_api)
+TEST_F(ConcatenateTestQU8, matches_operator_api)
 {
   inputs.resize(num_inputs);
   for (size_t i = 0; i < num_inputs; ++i) {
@@ -453,7 +453,7 @@ TEST_F(ConcatenateNTestQU8, matches_operator_api)
   ASSERT_EQ(subgraph_output, operator_output);
 }
 
-TEST_F(ConcatenateNTestF16, matches_operator_api)
+TEST_F(ConcatenateTestF16, matches_operator_api)
 {
   inputs.resize(num_inputs);
   for (size_t i = 0; i < num_inputs; ++i) {
@@ -527,7 +527,7 @@ TEST_F(ConcatenateNTestF16, matches_operator_api)
 }
 
 
-TEST_F(ConcatenateNTestF32, matches_operator_api)
+TEST_F(ConcatenateTestF32, matches_operator_api)
 {
   inputs.resize(num_inputs);
   for (size_t i = 0; i < num_inputs; ++i) {
@@ -599,7 +599,7 @@ TEST_F(ConcatenateNTestF32, matches_operator_api)
   ASSERT_EQ(subgraph_output, operator_output);
 }
 
-TEST_F(ConcatenateNTestF32, Reshape)
+TEST_F(ConcatenateTestF32, Reshape)
 {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

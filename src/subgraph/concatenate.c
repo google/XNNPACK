@@ -39,15 +39,15 @@ static enum xnn_status create_concatenate_operator_helper(
   }
 }
 
-static enum xnn_status create_concatenate_n_operator(
+static enum xnn_status create_concatenate_operator(
   const struct xnn_node* node,
   const struct xnn_value* values,
   size_t num_values,
-  size_t num_inputs,
   struct xnn_operator_data* opdata,
   struct xnn_code_cache* code_cache,
   xnn_weights_cache_t weights_cache)
 {
+  size_t num_inputs = opdata->num_inputs;
   enum xnn_status status;
   const int32_t axis = node->params.concatenate.axis;
   opdata->axis = axis;
@@ -62,17 +62,6 @@ static enum xnn_status create_concatenate_n_operator(
   }
 
   return status;
-}
-
-static enum xnn_status create_concatenaten_operator(
-  const struct xnn_node* node,
-  const struct xnn_value* values,
-  size_t num_values,
-  struct xnn_operator_data* opdata,
-  struct xnn_code_cache* code_cache,
-  xnn_weights_cache_t weights_cache)
-{
-  return create_concatenate_n_operator(node, values, num_values, node->num_inputs, opdata, code_cache, weights_cache);
 }
 
 static enum xnn_status reshape_concatenate_operator_helper(
@@ -217,14 +206,13 @@ static enum xnn_status setup_concatenate_operator_helper(
   }
 }
 
-static enum xnn_status setup_concatenate_n_operator(
+static enum xnn_status setup_concatenate_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
   size_t num_values,
-  size_t num_inputs,
   pthreadpool_t threadpool)
 {
-  num_inputs = opdata->num_inputs;
+  size_t num_inputs = opdata->num_inputs;
   uint32_t input_id[XNN_MAX_OPERATOR_OBJECTS];
   for (size_t i = 0; i < num_inputs; ++i) {
     input_id[i] = opdata->inputs[i];
@@ -304,15 +292,6 @@ static enum xnn_status check_datatype_copyable(
   return xnn_subgraph_check_quantization_parameter_matches(node_type, input_id, input_value, output_id, output_value);
 }
 
-static enum xnn_status setup_concatenaten_operator(
-  const struct xnn_operator_data* opdata,
-  const struct xnn_value* values,
-  size_t num_values,
-  pthreadpool_t threadpool)
-{
-  return setup_concatenate_n_operator(opdata, values, num_values, opdata->num_inputs, threadpool);
-}
-
 enum xnn_status xnn_define_concatenate_impl(
   enum xnn_node_type node_type,
   xnn_subgraph_t subgraph,
@@ -365,9 +344,9 @@ enum xnn_status xnn_define_concatenate_impl(
   node->outputs[0] = output_id;
   node->flags = flags;
 
-  node->create = create_concatenaten_operator;
+  node->create = create_concatenate_operator;
   node->reshape = reshape_concatenate_operator;
-  node->setup = setup_concatenaten_operator;
+  node->setup = setup_concatenate_operator;
 
   for (size_t i = 0; i < num_inputs; ++i) {
     node->inputs[i] = input_ids[i];
