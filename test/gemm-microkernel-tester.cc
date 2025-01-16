@@ -246,7 +246,7 @@ void GemmMicrokernelTester::Test(
       for (size_t j = 0; j < n(); j++) {
         // Extract tolerance into variable to workaround test failures on Linux AArch64.
         const float tolerance = std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f);
-        EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], tolerance)
+        ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << "), optimized = " << (float)c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
             << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
@@ -410,7 +410,7 @@ void GemmMicrokernelTester::Test(
       for (size_t j = 0; j < n(); j++) {
         // Extract tolerance into variable to workaround test failures on Linux AArch64.
         const float tolerance = std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f);
-        EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], tolerance)
+        ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << "), optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
             << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
@@ -490,9 +490,9 @@ void GemmMicrokernelTester::Test(
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_LE(uint32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), uint32_t(qmax()));
-        EXPECT_GE(uint32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), uint32_t(qmin()));
-        EXPECT_EQ(uint32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), uint32_t(c_ref[i * n() + j]))
+        ASSERT_LE(uint32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), uint32_t(qmax()));
+        ASSERT_GE(uint32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), uint32_t(qmin()));
+        ASSERT_EQ(uint32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), uint32_t(c_ref[i * n() + j]))
             << "at " << i << ", " << j << ": reference = " << (uint32_t) c_ref[i * n() + j]
             << " (accumulator = " << acc[i * n() + j]
             << "), optimized = " << (uint32_t) c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
@@ -605,9 +605,9 @@ void GemmMicrokernelTester::Test(
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_LE(uint32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), uint32_t(qmax()));
-        EXPECT_GE(uint32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), uint32_t(qmin()));
-        EXPECT_EQ(uint32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), uint32_t(c_ref[i * n() + j]))
+        ASSERT_LE(uint32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), uint32_t(qmax()));
+        ASSERT_GE(uint32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), uint32_t(qmin()));
+        ASSERT_EQ(uint32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), uint32_t(c_ref[i * n() + j]))
             << "at " << i << ", " << j << ": reference = " << uint32_t(c_ref[i * n() + j])
             << " (accumulator = " << acc[i * n() + j]
             << "), optimized = " << (uint32_t) c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
@@ -709,9 +709,9 @@ void GemmMicrokernelTester::Test(
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_LE(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(qmax()) - 0x80);
-        EXPECT_GE(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(qmin()) - 0x80);
-        EXPECT_EQ(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(c_ref[i * n() + j]))
+        ASSERT_LE(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(qmax()) - 0x80);
+        ASSERT_GE(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(qmin()) - 0x80);
+        ASSERT_EQ(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(c_ref[i * n() + j]))
             << "at " << i << ", " << j << ": reference = " << int32_t(c_ref[i * n() + j])
             << " (accumulator = " << acc[i * n() + j]
             << "), optimized = " << int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]) << ", Mr x Nr x Kr = " << mr() << " x "
@@ -841,9 +841,9 @@ void GemmMicrokernelTester::Test(
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_LE(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(qmax()) - 0x80);
-        EXPECT_GE(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(qmin()) - 0x80);
-        EXPECT_EQ(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(c_ref[i * n() + j]))
+        ASSERT_LE(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(qmax()) - 0x80);
+        ASSERT_GE(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(qmin()) - 0x80);
+        ASSERT_EQ(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(c_ref[i * n() + j]))
             << "at " << i << ", " << j << ": reference = " << uint32_t(c_ref[i * n() + j])
             << " (accumulator = " << acc[i * n() + j]
             << "), optimized = " << (uint32_t) c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
@@ -985,7 +985,7 @@ void GemmMicrokernelTester::Test(
       for (size_t j = 0; j < n(); j++) {
         // Extract tolerance into variable to workaround test failures on Linux AArch64.
         const float tolerance = std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f);
-        EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], tolerance)
+        ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << "), optimized = " << (float)c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
             << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
@@ -1128,7 +1128,7 @@ void GemmMicrokernelTester::Test(
       for (size_t j = 0; j < n(); j++) {
         // Extract tolerance into variable to workaround test failures on Linux AArch64.
         const float tolerance = std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f);
-        EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], tolerance)
+        ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << " (accumulator = " << acc[i * n() + j]
             << "), optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
@@ -1275,7 +1275,7 @@ void GemmMicrokernelTester::Test(
       for (size_t j = 0; j < n(); j++) {
         // Extract tolerance into variable to workaround test failures on Linux AArch64.
         const float tolerance = std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f);
-        EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], tolerance)
+        ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << " (accumulator = " << acc[i * n() + j]
             << "), optimized = " << (float)c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
@@ -1438,7 +1438,7 @@ void GemmMicrokernelTester::Test(
       for (size_t j = 0; j < n(); j++) {
         // Extract tolerance into variable to workaround test failures on Linux AArch64.
         const float tolerance = std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-3f);
-        EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], tolerance)
+        ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << (float)c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
             << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k2;
@@ -1584,7 +1584,7 @@ void GemmMicrokernelTester::Test(
       for (size_t j = 0; j < n(); j++) {
         // Extract tolerance into variable to workaround test failures on Linux AArch64.
         const float tolerance = std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f);
-        EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], tolerance)
+        ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << " (accumulator = " << acc[i * n() + j]
             << "), optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
@@ -1753,7 +1753,7 @@ void GemmMicrokernelTester::Test(
         // Extract tolerance into variable to workaround test failures on Linux AArch64.
         const float tolerance =
             std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-5f);
-        EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], tolerance)
+        ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
             << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k2;
@@ -2297,9 +2297,9 @@ void GemmMicrokernelTester::Test(
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_LE(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(qmax()) - 0x80);
-        EXPECT_GE(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(qmin()) - 0x80);
-        EXPECT_EQ(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(c_ref[i * n() + j]))
+        ASSERT_LE(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(qmax()) - 0x80);
+        ASSERT_GE(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(qmin()) - 0x80);
+        ASSERT_EQ(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(c_ref[i * n() + j]))
             << "at " << i << ", " << j << ": reference = " << int32_t(c_ref[i * n() + j])
             << " (accumulator = " << acc[i * n() + j]
             << "), optimized = " << int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]) << ", Mr x Nr x Kr = " << mr() << " x "
@@ -2415,9 +2415,9 @@ void GemmMicrokernelTester::Test(
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_LE(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(qmax()) - 0x80);
-        EXPECT_GE(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(qmin()) - 0x80);
-        EXPECT_EQ(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(c_ref[i * n() + j]))
+        ASSERT_LE(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(qmax()) - 0x80);
+        ASSERT_GE(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(qmin()) - 0x80);
+        ASSERT_EQ(int32_t(c[i * cm_stride() + (j / nr()) * nr() + j % nr()]), int32_t(c_ref[i * n() + j]))
             << "at " << i << ", " << j << ": reference = " << uint32_t(c_ref[i * n() + j])
             << " (accumulator = " << acc[i * n() + j]
             << "), optimized = " << (uint32_t) c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
@@ -2465,9 +2465,9 @@ void GemmMicrokernelTester::Test(
       for (size_t n_index = 0; n_index < n(); n_index++) {
         c_ref[m_index * n() + n_index] = bias[n_index];
         for (size_t k_index = 0; k_index < k(); k_index++) {
-          EXPECT_LE(n(), packed_n());
-          EXPECT_LT(m_index * n() + n_index, c_ref.size());
-          EXPECT_LT(m_index * k() + k_index, a.size());
+          ASSERT_LE(n(), packed_n());
+          ASSERT_LT(m_index * n() + n_index, c_ref.size());
+          ASSERT_LT(m_index * k() + k_index, a.size());
           c_ref[m_index * n() + n_index] +=
             a[m_index * a_stride() + k_index] *
             b[n_index * k() + k_index];
@@ -2497,7 +2497,7 @@ void GemmMicrokernelTester::Test(
     // Validate micro-kernel outputs.
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_NEAR(
+        ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
             c_ref[i * n() + j],
             std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 3.0e-2f))
@@ -2545,9 +2545,9 @@ void GemmMicrokernelTester::Test(
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
         for (size_t k_index = 0; k_index < k(); k_index++) {
-          EXPECT_LE(n(), packed_n());
-          EXPECT_LT(m_index * n() + n_index, c_ref.size());
-          EXPECT_LT(m_index * k() + k_index, a.size());
+          ASSERT_LE(n(), packed_n());
+          ASSERT_LT(m_index * n() + n_index, c_ref.size());
+          ASSERT_LT(m_index * k() + k_index, a.size());
           c_ref[m_index * n() + n_index] +=
             a[m_index * a_stride() + k_index] *
             b[n_index * k() + k_index];
@@ -2578,7 +2578,7 @@ void GemmMicrokernelTester::Test(
     // Validate micro-kernel outputs.
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f))
+        ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f))
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << (float)c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
@@ -2642,9 +2642,9 @@ void GemmMicrokernelTester::Test(
       for (size_t n_index = 0; n_index < n(); n_index++) {
         for (size_t ks_index = 0; ks_index < ks(); ks_index++) {
           for (size_t k_index = 0; k_index < k(); k_index++) {
-            EXPECT_LT(ks_index * mr() + m_index, im2col.size());
-            EXPECT_LT(k_index, k());
-            EXPECT_LT(k_index, a_stride());
+            ASSERT_LT(ks_index * mr() + m_index, im2col.size());
+            ASSERT_LT(k_index, k());
+            ASSERT_LT(k_index, a_stride());
             if (im2col[ks_index * mr() + m_index] == a.data()) {
               c_ref[m_index * n() + n_index] +=
                 im2col[ks_index * mr() + m_index][k_index] *
@@ -2690,15 +2690,15 @@ void GemmMicrokernelTester::Test(
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_LE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_max)
+        ASSERT_LE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_max)
             << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << (float)c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
-        EXPECT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_min)
+        ASSERT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_min)
             << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << (float)c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
-        EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f))
+        ASSERT_NEAR(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_ref[i * n() + j], std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 1.0e-2f))
             << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << (float)c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
@@ -2774,7 +2774,7 @@ void GemmMicrokernelTester::Test(
     // Validate micro-kernel outputs.
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_NEAR(
+        ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
             c_ref[i * n() + j],
             std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
@@ -2837,7 +2837,7 @@ void GemmMicrokernelTester::Test(
     // Validate micro-kernel outputs.
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_NEAR(
+        ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
             c_ref[i * n() + j],
             std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
@@ -2900,11 +2900,11 @@ void GemmMicrokernelTester::Test(
     // Validate micro-kernel outputs.
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], 0.0f)
+        ASSERT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], 0.0f)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
-        EXPECT_NEAR(
+        ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
             c_ref[i * n() + j],
             std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
@@ -2993,15 +2993,15 @@ void GemmMicrokernelTester::Test(
     // Validate micro-kernel outputs.
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_LE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_max)
+        ASSERT_LE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_max)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
-        EXPECT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_min)
+        ASSERT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_min)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
-        EXPECT_NEAR(
+        ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
             c_ref[i * n() + j],
             std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
@@ -3073,17 +3073,17 @@ void GemmMicrokernelTester::Test(
     // Validate micro-kernel outputs.
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_LE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_max)
+        ASSERT_LE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_max)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()]
             << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
-        EXPECT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_min)
+        ASSERT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_min)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()]
             << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
-        EXPECT_NEAR(
+        ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
             c_ref[i * n() + j],
             std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
@@ -3194,15 +3194,15 @@ void GemmMicrokernelTester::Test(
     // Validate micro-kernel outputs.
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_LE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_max)
+        ASSERT_LE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_max)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
-        EXPECT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_min)
+        ASSERT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_min)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
-        EXPECT_NEAR(
+        ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
             c_ref[i * n() + j],
             std::max(1.0e-5, std::abs(c_ref[i * n() + j]) * 1.0e-6))
@@ -3278,7 +3278,7 @@ void GemmMicrokernelTester::Test(
     // Validate micro-kernel outputs.
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_NEAR(
+        ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
             c_ref[i * n() + j],
             0.1f);
@@ -3288,7 +3288,7 @@ void GemmMicrokernelTester::Test(
     // Validate micro-kernel outputs.
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_NEAR(
+        ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
             c_ref[i * n() + j],
             std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
@@ -3363,11 +3363,11 @@ void GemmMicrokernelTester::Test(
     // Validate micro-kernel outputs.
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], 0.0f)
+        ASSERT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], 0.0f)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
-        EXPECT_NEAR(
+        ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
             c_ref[i * n() + j],
             std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
@@ -3462,15 +3462,15 @@ void GemmMicrokernelTester::Test(
     // Validate micro-kernel outputs.
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_LE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_max)
+        ASSERT_LE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_max)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
-        EXPECT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_min)
+        ASSERT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_min)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
-        EXPECT_NEAR(
+        ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
             c_ref[i * n() + j],
             std::max(1.0e-5, std::abs(c_ref[i * n() + j]) * 1.0e-6))
@@ -3551,15 +3551,15 @@ void GemmMicrokernelTester::Test(
     // Validate micro-kernel outputs.
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_LE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_max)
+        ASSERT_LE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_max)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
-        EXPECT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_min)
+        ASSERT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_min)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
-        EXPECT_NEAR(
+        ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
             c_ref[i * n() + j],
             std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
@@ -3651,7 +3651,7 @@ void GemmMicrokernelTester::Test(
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_NEAR(
+        ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
             c_ref[i * n() + j],
             std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
@@ -3743,11 +3743,11 @@ void GemmMicrokernelTester::Test(
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], 0.0f)
+        ASSERT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], 0.0f)
             << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
-        EXPECT_NEAR(
+        ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
             c_ref[i * n() + j],
             std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
@@ -3855,15 +3855,15 @@ void GemmMicrokernelTester::Test(
 
     for (size_t i = 0; i < m(); i++) {
       for (size_t j = 0; j < n(); j++) {
-        EXPECT_LE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_max)
+        ASSERT_LE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_max)
             << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
-        EXPECT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_min)
+        ASSERT_GE(c[i * cm_stride() + (j / nr()) * nr() + j % nr()], c_min)
             << "at " << i << ", " << i << ": reference = " << c_ref[i * n() + j]
             << ", optimized = " << c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x " << nr()
             << " x " << kr() << ", M x N x KC x KS = " << m() << " x " << n() << " x " << k() << " x " << ks();
-        EXPECT_NEAR(
+        ASSERT_NEAR(
             c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
             c_ref[i * n() + j],
             std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f))
