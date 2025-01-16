@@ -89,6 +89,8 @@ jobs:
           fi
           SDE_PATH="${{ github.workspace }}/${SDE_DIR}/sde"
           echo "SDE_PATH=$SDE_PATH" >> $GITHUB_ENV
+          CTEST_OUTPUT_ON_FAILURE=1
+          echo "CTEST_OUTPUT_ON_FAILURE=$CTEST_OUTPUT_ON_FAILURE" >> $GITHUB_ENV
         shell: bash
 
       - name: Run SDE tests (Linux-x86_64)
