@@ -16,10 +16,10 @@
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 64
-#- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x16c4__avx512amx_prfm
-#  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-#  pack: xnn_pack_qs8_conv_goki_w
-#  k-block: 64
+- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x16c4__avx512amx_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 64
 
 - name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x32c4__avx512amx
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
@@ -33,10 +33,10 @@
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 64
-#- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x32c4__avx512amx_prfm
-#  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-#  pack: xnn_pack_qs8_conv_goki_w
-#  k-block: 64
+- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x32c4__avx512amx_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 64
 
 - name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x64c4__avx512amx
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
@@ -50,10 +50,10 @@
   init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
   pack: xnn_pack_qs8_conv_goki_w
   k-block: 64
-#- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x64c4__avx512amx_prfm
-#  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
-#  pack: xnn_pack_qs8_conv_goki_w
-#  k-block: 64
+- name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_16x64c4__avx512amx_prfm
+  init: xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params
+  pack: xnn_pack_qs8_conv_goki_w
+  k-block: 64
 
 # AArch32 assembly
 - name: xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x8__asm_aarch32_neon_mlal_lane_cortex_a7
