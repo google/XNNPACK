@@ -174,7 +174,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${NR}
       {
         while (k >= 64 * sizeof(int8_t)) {
           _tile_loadd(4, a0, 64);   // Directly load input for mr=1
-          a${M} += 64;
+          a0 += 64;
           $for N in range(0, NR, 16):
             _tile_loadd(5, (const int8_t*) w + ${N * 4}, ${NR * 4});
             _tile_dpbssd(${N // 16}, 4, 5);

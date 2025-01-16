@@ -274,7 +274,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_16x16c4__avx512amx_prfm(
       {
         while (k >= 64 * sizeof(int8_t)) {
           _tile_loadd(4, a0, 64);   // Directly load input for mr=1
-          a15 += 64;
+          a0 += 64;
           _tile_loadd(5, (const int8_t*) w + 0, 64);
           _tile_dpbssd(0, 4, 5);
           xnn_prefetch_to_l1((const int8_t*) w + 4096);
