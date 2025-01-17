@@ -325,6 +325,13 @@ enum xnn_status xnn_define_concatenate_impl(
     }
   }
 
+  if (num_inputs > XNN_MAX_OPERATOR_OBJECTS) {
+    xnn_log_error(
+      "failed to define %s operator with %zu inputs: number of inputs (%zu) exceeds the supported maximum (%zu)",
+      xnn_node_type_to_string(node_type), num_inputs, num_inputs, (size_t) XNN_MAX_OPERATOR_OBJECTS);
+    return xnn_status_invalid_parameter;
+  }
+
   for (size_t i = 0; i < num_inputs; i++) {
     status = check_datatype_copyable(subgraph, input_ids[i], output_id, "ith", node_type);
     if (status != xnn_status_success) {
@@ -355,7 +362,7 @@ enum xnn_status xnn_define_concatenate_impl(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_define_concatenate(
+inline enum xnn_status xnn_define_concatenate(
   xnn_subgraph_t subgraph,
   int32_t axis,
   uint32_t num_inputs,
