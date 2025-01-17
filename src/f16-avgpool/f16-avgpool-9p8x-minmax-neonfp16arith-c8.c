@@ -27,9 +27,9 @@ void xnn_f16_avgpool_minmax_ukernel_9p8x__neonfp16arith_c8(
   assert(kernel_elements > 9);
   assert(channels != 0);
 
-  const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.scale));
-  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.min));
-  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16(&params->scalar.max));
+  const float16x8_t vscale = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.scale));
+  const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.min));
+  const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.max));
 
   do {
     {
@@ -297,7 +297,7 @@ void xnn_f16_avgpool_minmax_ukernel_9p8x__neonfp16arith_c8(
           vout_lo = vget_high_f16(vout);
         }
         if (c & 2) {
-          vst1_lane_u32((uint16_t*) output, vreinterpret_u32_f16(vout_lo), 0); output = (xnn_float16*) output + 2;
+          vst1_lane_u32((uint32_t*) output, vreinterpret_u32_f16(vout_lo), 0); output = (xnn_float16*) output + 2;
           vout_lo = vext_f16(vout_lo, vout_lo, 2);
         }
         if (c & 1) {

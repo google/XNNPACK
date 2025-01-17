@@ -37,7 +37,7 @@ void binary_ukernel_unquantized(size_t batch_size_bytes, const T* a, const T* b,
   const size_t batch_size = batch_size_bytes / sizeof(T);
   Operator op;
   for (size_t i = 0; i < batch_size; ++i) {
-    output[i] = op(a[i], b[i]);
+    output[i] = static_cast<T>(op(a[i], b[i]));
   }
 }
 
@@ -49,7 +49,7 @@ void binaryc_ukernel_unquantized(size_t batch_size_bytes, const T* a,
   const T b_0 = *b;
   Operator op;
   for (size_t i = 0; i < batch_size; ++i) {
-    output[i] = op(a[i], b_0);
+    output[i] = static_cast<T>(op(a[i], b_0));
   }
 }
 
@@ -61,7 +61,7 @@ void rbinaryc_ukernel_unquantized(size_t batch_size_bytes, const T* a,
   const T b_0 = *b;
   Operator op;
   for (size_t i = 0; i < batch_size; ++i) {
-    output[i] = op(b_0, a[i]);
+    output[i] = static_cast<T>(op(b_0, a[i]));
   }
 }
 
