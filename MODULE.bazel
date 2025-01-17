@@ -4,7 +4,7 @@ module(
 )
 
 # Bazel rule definitions
-bazel_dep(name = "rules_cc", version = "0.1.0")
+bazel_dep(name = "rules_cc", version = "0.0.15")
 bazel_dep(name = "rules_python", version = "1.0.0")
 
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
