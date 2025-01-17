@@ -12,8 +12,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <mutex>
-#include <thread>
+#include <mutex>  // NOLINT
 
 #ifdef __linux__
 #include <sched.h>
@@ -52,11 +51,11 @@ static std::once_flag wipe_buffer_guard;
 static void InitWipeBuffer() {
   // Default: the largest known cache size (128 MB Intel Crystalwell L4 cache).
   wipe_buffer_size = 128 * 1024 * 1024;
-  #if XNN_ENABLE_CPUINFO
-    if (cpuinfo_initialize()) {
-      wipe_buffer_size = GetMaxCacheSize();
-    }
-  #endif  // XNN_ENABLE_CPUINFO
+#if XNN_ENABLE_CPUINFO
+  if (cpuinfo_initialize()) {
+    wipe_buffer_size = GetMaxCacheSize();
+  }
+#endif  // XNN_ENABLE_CPUINFO
 
 #if defined(_WIN32)
   wipe_buffer = _aligned_malloc(wipe_buffer_size, 128);
@@ -65,7 +64,7 @@ static void InitWipeBuffer() {
   // level 17.
   wipe_buffer = memalign(128, wipe_buffer_size);
 #else
-  (void) posix_memalign((void**) &wipe_buffer, 128, wipe_buffer_size);
+  (void)posix_memalign((void**)&wipe_buffer, 128, wipe_buffer_size);
 #endif
   if (wipe_buffer != nullptr) {
     memset(wipe_buffer, 0xA5, wipe_buffer_size);
@@ -94,10 +93,10 @@ void PthreadpoolClearL2Cache(std::atomic<size_t>* counter, size_t id) {
   WipeCache();
 #endif  // XNN_ENABLE_CPUINFO
   // Spin until all threads are done. This ensures that each thread calls this
-  // function only once.
+  // function exactly once.
   counter->fetch_sub(1, std::memory_order_acquire);
   while (counter->load(std::memory_order_acquire) > 0) {
-    std::this_thread::yield();
+    std::atomic_thread_fence(std::memory_order_acquire);
   }
 }
 
@@ -133,7 +132,8 @@ int ProcessArgs(int& argc, char**& argv) {
     } else if (strncmp(argv[i], "--benchmark_min_iters=", 22) == 0) {
       FLAGS_benchmark_min_iters = atoi(argv[i] + 22);
       if (FLAGS_benchmark_min_iters <= 0) {
-        std::cerr << "Invalid --benchmark_min_iters: " << FLAGS_benchmark_min_iters << "\n";
+        std::cerr << "Invalid --benchmark_min_iters: "
+                  << FLAGS_benchmark_min_iters << "\n";
         return 1;
       }
       std::copy(argv + i + 1, argv + argc, argv + i);
@@ -148,17 +148,18 @@ int ProcessArgs(int& argc, char**& argv) {
 
 uint32_t PrefetchToL1(const void* ptr, size_t size) {
   uint32_t step = 16;
-  #if XNN_ENABLE_CPUINFO
-    if (cpuinfo_initialize()) {
-      const struct cpuinfo_cache* cpuinfo_cache_info = cpuinfo_get_l1d_cache(0);
-      if (cpuinfo_cache_info) {
-        step = cpuinfo_cache_info->line_size;
-      }
+#if XNN_ENABLE_CPUINFO
+  if (cpuinfo_initialize()) {
+    const struct cpuinfo_cache* cpuinfo_cache_info = cpuinfo_get_l1d_cache(0);
+    if (cpuinfo_cache_info) {
+      step = cpuinfo_cache_info->line_size;
     }
-  #endif  // XNN_ENABLE_CPUINFO
+  }
+#endif  // XNN_ENABLE_CPUINFO
 
   const uint8_t* u8_ptr = static_cast<const uint8_t*>(ptr);
-  // Compute and return sum of data to prevent compiler from removing data reads.
+  // Compute and return sum of data to prevent compiler from removing data
+  // reads.
   uint32_t sum = 0;
   while (size >= step) {
     sum += uint32_t(*u8_ptr);
@@ -227,7 +228,7 @@ uint64_t GetCurrentCpuFrequency() {
   if (f != nullptr) {
     if (fscanf(f, "%d", &freq) != 0) {
       fclose(f);
-      return uint64_t(freq) * 1000;
+      return static_cast<uint64_t>(freq) * 1000;
     }
     fclose(f);
   }
