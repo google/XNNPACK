@@ -176,16 +176,19 @@ static void init_hardware_config(void) {
     hardware_config.use_x86_avxvnniint8 = 0;
 #endif
 #if XNN_ENABLE_AVX256SKX
-    hardware_config.use_x86_avx256skx = hardware_config.use_x86_avx512skx || cpuinfo_has_x86_avx10_1();
+    // TODO: Enable for avx10 when Visual C has a way to avoid evex512
+    hardware_config.use_x86_avx256skx = hardware_config.use_x86_avx512skx;
 #else
     hardware_config.use_x86_avx256skx = 0;
 #endif
 #if XNN_ENABLE_AVX256VNNI
-    hardware_config.use_x86_avx256vnni = (hardware_config.use_x86_avx512skx && cpuinfo_has_x86_avx512vnni()) || cpuinfo_has_x86_avx10_1();
+    // TODO: Enable for avx10 when Visual C has a way to avoid evex512
+    hardware_config.use_x86_avx256vnni = hardware_config.use_x86_avx512skx && cpuinfo_has_x86_avx512vnni();
 #else
     hardware_config.use_x86_avx256vnni = 0;
 #endif
 #if XNN_ENABLE_AVX256VNNIGFNI
+    // TODO: Enable for avx10 when Visual C has a way to avoid evex512
     hardware_config.use_x86_avx256vnnigfni = hardware_config.use_x86_avx256vnni && cpuinfo_has_x86_gfni();
 #else
     hardware_config.use_x86_avx256vnnigfni = 0;
