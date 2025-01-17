@@ -6,36 +6,50 @@
 # Description:
 #   XNNPACK - optimized floating-point neural network operators library
 
-## MODULE.bazel
-module(
-    name = "xnnpack",
-)
+workspace(name = "xnnpack")
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # Bazel rule definitions
-bazel_dep(name = "rules_cc", version = "0.0.15")
-bazel_dep(name = "rules_python", version = "1.0.0")
-
-pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
-pip.parse(
-    hub_name = "pip",
-    python_version = "3.11",
-    requirements_lock = "//:requirements_lock.txt",
+http_archive(
+    name = "rules_cc",
+    sha256 = "3868eab488bd5be37a6acedbd222a196bea14408a2857916f33cce7b4780897d",
+    strip_prefix = "rules_cc-5e848c1434d3458018734238dbc4781f43992ea5",
+    urls = [
+        "https://github.com/bazelbuild/rules_cc/archive/5e848c1434d3458018734238dbc4781f43992ea5.zip",
+    ],
 )
-use_repo(pip, "pip")
+
+# Bazel Python rule definitions.
+http_archive(
+    name = "rules_python",
+    sha256 = "4912ced70dc1a2a8e4b86cec233b192ca053e82bc72d877b98e126156e8f228d",
+    strip_prefix = "rules_python-0.32.2",
+    urls = [
+        "https://github.com/bazelbuild/rules_python/releases/download/0.32.2/rules_python-0.32.2.tar.gz",
+    ],
+)
+
+load("@rules_python//python:repositories.bzl", "py_repositories")
+
+py_repositories()
 
 # Bazel Skylib.
-bazel_dep(name = "bazel_skylib", version = "1.7.1")
+http_archive(
+    name = "bazel_skylib",
+    sha256 = "f7be3474d42aae265405a592bb7da8e171919d74c16f082a5457840f06054728",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.2.1/bazel-skylib-1.2.1.tar.gz",
+        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.2.1/bazel-skylib-1.2.1.tar.gz",
+    ],
+)
 
 # Bazel Platforms
-bazel_dep(name = "platforms", version = "0.0.10")
-
-# TODO: some (most? all?) of the http_archive() calls below could become bazel_dep() calls,
-# but it would require verifying that the semver provided by the Bazel registry matches the hash
-# that we expect in CMake; it's not clear that it is a big win to do so given the modest
-# complexity of our deps, so I'm leaving it like this for now to ensure that the Bazel and CMake
-# builds are using identical dependencies.
-
-http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+http_archive(
+    name = "platforms",
+    sha256 = "5308fc1d8865406a49427ba24a9ab53087f17f5266a7aabbfc28823f3916e1ca",
+    urls = ["https://github.com/bazelbuild/platforms/releases/download/0.0.6/platforms-0.0.6.tar.gz"],
+)
 
 # LINT.IfChange(googletest)
 # Google Test framework, used by most unit-tests.
@@ -45,7 +59,7 @@ http_archive(
     strip_prefix = "googletest-d144031940543e15423a25ae5a8a74141044862f",
     urls = ["https://github.com/google/googletest/archive/d144031940543e15423a25ae5a8a74141044862f.zip"],
 )
-# LINT.ThenChange(cmake/DownloadGoogleTest.cmake,WORKSPACE:googletest)
+# LINT.ThenChange(cmake/DownloadGoogleTest.cmake,MODULE.bazel:googletest)
 
 # LINT.IfChange(benchmark)
 # Google Benchmark library, used in micro-benchmarks.
@@ -55,7 +69,7 @@ http_archive(
     strip_prefix = "benchmark-d2a8a4ee41b923876c034afb939c4fc03598e622",
     urls = ["https://github.com/google/benchmark/archive/d2a8a4ee41b923876c034afb939c4fc03598e622.zip"],
 )
-# LINT.ThenChange(cmake/DownloadGoogleBenchmark.cmake,WORKSPACE:benchmark)
+# LINT.ThenChange(cmake/DownloadGoogleBenchmark.cmake,MODULE.bazel:benchmark)
 
 # LINT.IfChange(FXdiv)
 # FXdiv library, used for repeated integer division by the same factor
@@ -65,7 +79,7 @@ http_archive(
     strip_prefix = "FXdiv-b408327ac2a15ec3e43352421954f5b1967701d1",
     urls = ["https://github.com/Maratyszcza/FXdiv/archive/b408327ac2a15ec3e43352421954f5b1967701d1.zip"],
 )
-# LINT.ThenChange(cmake/DownloadFXdiv.cmake,WORKSPACE:FXdiv)
+# LINT.ThenChange(cmake/DownloadFXdiv.cmake,MODULE.bazel:FXdiv)
 
 # LINT.IfChange(pthreadpool)
 # pthreadpool library, used for parallelization
@@ -75,7 +89,7 @@ http_archive(
     strip_prefix = "pthreadpool-39df650e19d4f6382e246c29d6819b1ce6ee0b24",
     urls = ["https://github.com/google/pthreadpool/archive/39df650e19d4f6382e246c29d6819b1ce6ee0b24.zip"],
 )
-# LINT.ThenChange(cmake/DownloadPThreadPool.cmake,WORKSPACE:pthreadpool)
+# LINT.ThenChange(cmake/DownloadPThreadPool.cmake,MODULE.bazel:pthreadpool)
 
 # LINT.IfChange(cpuinfo)
 # cpuinfo library, used for detecting processor characteristics
@@ -87,7 +101,7 @@ http_archive(
         "https://github.com/pytorch/cpuinfo/archive/8a1772a0c5c447df2d18edf33ec4603a8c9c04a6.zip",
     ],
 )
-# LINT.ThenChange(cmake/DownloadCpuinfo.cmake,WORKSPACE:cpuinfo)
+# LINT.ThenChange(cmake/DownloadCpuinfo.cmake,MODULE.bazel:cpuinfo)
 
 # LINT.IfChange(kleidiai)
 # KleidiAI library, used for ARM microkernels.
@@ -99,7 +113,7 @@ http_archive(
         "https://gitlab.arm.com/kleidi/kleidiai/-/archive/d15722976120710080ca098fe8ddabf4556cb40f/kleidiai-d15722976120710080ca098fe8ddabf4556cb40f.zip",
     ],
 )
-# LINT.ThenChange(cmake/DownloadKleidiAI.cmake,WORKSPACE:kleidiai)
+# LINT.ThenChange(cmake/DownloadKleidiAI.cmake,MODULE.bazel:kleidiai)
 
 # Ruy library, used to benchmark against
 http_archive(
@@ -109,4 +123,3 @@ http_archive(
     urls = [
         "https://github.com/google/ruy/archive/9f53ba413e6fc879236dcaa3e008915973d67a4f.zip",
     ],
-)
