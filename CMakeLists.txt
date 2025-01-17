@@ -1204,9 +1204,14 @@ ENDIF()
 # ---[ XNNPACK unit tests
 IF(XNNPACK_BUILD_TESTS)
   # ---[ Macro to shard a test.
-  MACRO(ADD_SHARDED_TEST TEST_NAME NUM_SHARDS)
+  MACRO(SHARD_TEST TEST_NAME NUM_SHARDS)
+    SET_PROPERTY(
+        TEST ${TEST_NAME}
+          APPEND
+          PROPERTY ENVIRONMENT "GTEST_TOTAL_SHARDS=${NUM_SHARDS};"
+                  "GTEST_SHARD_INDEX=0")
     math(EXPR NUM_SHARDS_MINUS_ONE "${NUM_SHARDS} - 1")
-    FOREACH(SHARD RANGE 0 ${NUM_SHARDS_MINUS_ONE})
+    FOREACH(SHARD RANGE 1 ${NUM_SHARDS_MINUS_ONE})
       ADD_TEST(NAME ${TEST_NAME}-${SHARD} COMMAND ${TEST_NAME})
       SET_PROPERTY(
           TEST ${TEST_NAME}-${SHARD}
@@ -1267,87 +1272,41 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(packq-microkernel-tester PRIVATE kleidiai)
   ENDIF()
 
-  # ---[ Launch heavy tests first.
-  # Tests added to this list will be automatically removed from other lists.
-  SET(SHARDED_TESTS
-    fully-connected-nc
-    avgpool-minmax
-    maxpool-minmax)
-  IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
-    LIST(APPEND SHARDED_TESTS
-      f16-qs8-vcvt
-      f16-qu8-vcvt
-      f32-argmaxpool
-      f32-qs8-vcvt
-      f32-qu8-vcvt
-      f32-rdsum
-      f32-vclamp
-      f32-velu
-      f32-vlrelu
-      qs8-f32-vcvt
-      qs8-vcvt
-      qs8-vlrelu
-      qu8-f32-vcvt
-      qu8-vcvt
-      qu8-vlrelu
-      s8-vclamp
-      u8-vclamp)
-  ENDIF()
-  FOREACH(TEST ${SHARDED_TESTS})
-    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
-    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
-    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
-      GTest::gtest
-      GTest::gtest_main
-      hardware-config
-      logging
-      microkernels-all
-      microparams-init
-      next-prime
-      pthreadpool
-      runtime-flags
-      XNNPACK)
-    ADD_SHARDED_TEST(${TEST}-test 10)
-  ENDFOREACH()
-
   IF(XNNPACK_BUILD_LIBRARY)
-    # ---[ Launch heavy tests first.
-    # Tests added to this list will be automatically removed from other lists.
-    SET(LIBRARY_SHARDED_TESTS
+    # ---[ Build size tests
+    ADD_EXECUTABLE(subgraph-size-test test/subgraph-size.c)
+    TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE XNNPACK)
+
+    # ---[ Build operator-level unit tests
+    SET(LIBRARY_OPERATOR_TESTS
       batch-matrix-multiply-nc
-      batch-matrix-multiply
       deconvolution-nhwc
-      fully-connected
-      scaled-dot-product-attention
+      fully-connected-nc
       binary-elementwise-nd
+      unary-elementwise-nc
     )
-    FOREACH(TEST ${LIBRARY_SHARDED_TESTS})
+    FOREACH(TEST ${LIBRARY_OPERATOR_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
       TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
       TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
         GTest::gmock
         GTest::gtest
         GTest::gtest_main
+        hardware-config
+        logging
+        microkernels-all
+        microparams-init
+        next-prime
+        pthreadpool
         runtime-flags
+        unary-ops
         XNNPACK)
-      ADD_SHARDED_TEST(${TEST}-test 10)
+      ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     ENDFOREACH()
-
-    # ---[ Build size tests
-    ADD_EXECUTABLE(subgraph-size-test test/subgraph-size.c)
-    TARGET_LINK_LIBRARIES(subgraph-size-test PRIVATE XNNPACK)
-
-    # ---[ Build operator-level unit tests
-    ADD_EXECUTABLE(unary-elementwise-nc-test test/unary-elementwise-nc.cc)
-    TARGET_INCLUDE_DIRECTORIES(unary-elementwise-nc-test PRIVATE src test)
-    TARGET_LINK_LIBRARIES(unary-elementwise-nc-test PRIVATE
-      GTest::gtest
-      GTest::gtest_main
-      datatype
-      runtime-flags
-      unary-ops
-      XNNPACK)
-    ADD_TEST(NAME unary-elementwise-nc-test COMMAND unary-elementwise-nc-test)
+    SHARD_TEST(batch-matrix-multiply-nc-test 10)
+    SHARD_TEST(deconvolution-nhwc-test 10)
+    SHARD_TEST(fully-connected-nc-test 10)
+    SHARD_TEST(binary-elementwise-nd-test 30)
 
     # ---[ Build subgraph optimizations unit tests
     SET(LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS
@@ -1358,7 +1317,6 @@ IF(XNNPACK_BUILD_TESTS)
         runtime
         subgraph-nchw
         workspace)
-    LIST(REMOVE_ITEM LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS ${LIBRARY_SHARDED_TESTS})
     FOREACH(TEST ${LIBRARY_SUBGRAPH_OPTIMIZATION_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
       TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
@@ -1376,6 +1334,7 @@ IF(XNNPACK_BUILD_TESTS)
         argmax-pooling-2d
         average-pooling-2d
         average-pooling-2d-reshape
+        batch-matrix-multiply
         binary
         concatenate2
         concatenate3
@@ -1386,12 +1345,14 @@ IF(XNNPACK_BUILD_TESTS)
         even-split2
         even-split3
         even-split4
+        fully-connected
         global-average-pooling-1d
         global-average-pooling-2d
         global-sum-pooling-1d
         global-sum-pooling-2d
         max-pooling-2d
         reshape-helpers
+        scaled-dot-product-attention
         static-slice
         softmax
         space-to-depth-2d
@@ -1403,7 +1364,6 @@ IF(XNNPACK_BUILD_TESTS)
         transpose-reshape
         unary
         unpooling-2d)
-    LIST(REMOVE_ITEM LIBRARY_SUBGRAPH_UNIT_TESTS ${LIBRARY_SHARDED_TESTS})
     FOREACH(TEST ${LIBRARY_SUBGRAPH_UNIT_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
       TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
@@ -1425,7 +1385,6 @@ IF(XNNPACK_BUILD_TESTS)
         convolution-2d
         deconvolution-2d
         depthwise-convolution-2d)
-    LIST(REMOVE_ITEM LIBRARY_SUBGRAPH_CONVOLUTION_UNIT_TESTS ${LIBRARY_SHARDED_TESTS})
     FOREACH(TEST ${LIBRARY_SUBGRAPH_CONVOLUTION_UNIT_TESTS})
       ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
       TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE src test)
@@ -1456,6 +1415,8 @@ IF(XNNPACK_BUILD_TESTS)
 
   # ---[ Build microkernel-level unit tests
   SET(MICROKERNEL_UNIT_TESTS
+      avgpool-minmax
+      maxpool-minmax
       f16-conv-hwc2chw
       f16-f32acc-rdsum
       f16-f32acc-rsum
@@ -1508,7 +1469,6 @@ IF(XNNPACK_BUILD_TESTS)
       xN-transpose
       xx-fill
       xx-pad)
-  LIST(REMOVE_ITEM MICROKERNEL_UNIT_TESTS ${SHARDED_TESTS})
   FOREACH(TEST ${MICROKERNEL_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
@@ -1530,6 +1490,12 @@ IF(XNNPACK_BUILD_TESTS)
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
   ENDFOREACH()
+  SHARD_TEST(avgpool-minmax-test 10)
+  SHARD_TEST(maxpool-minmax-test 10)
+  IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
+    SHARD_TEST(f32-argmaxpool-test 10)
+    SHARD_TEST(f32-rdsum-test 10)
+  ENDIF()
 
   SET(MICROKERNEL_DWCONV_UNIT_TESTS
       f16-dwconv-minmax-multipass
@@ -1550,7 +1516,6 @@ IF(XNNPACK_BUILD_TESTS)
       qu8-dwconv-minmax-multipass-rndnu
       qu8-dwconv-minmax-unipass-fp32
       qu8-dwconv-minmax-unipass-rndnu)
-  LIST(REMOVE_ITEM MICROKERNEL_DWCONV_UNIT_TESTS ${SHARDED_TESTS})
   FOREACH(TEST ${MICROKERNEL_DWCONV_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
@@ -1568,6 +1533,12 @@ IF(XNNPACK_BUILD_TESTS)
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
   ENDFOREACH()
+  SHARD_TEST(f16-dwconv-minmax-multipass-test 10)
+  SHARD_TEST(qs8-dwconv-minmax-unipass-fp32-test 10)
+  SHARD_TEST(qs8-qc8w-dwconv-minmax-unipass-fp32-test 10)
+  SHARD_TEST(qu8-dwconv-minmax-multipass-fp32-test 10)
+  SHARD_TEST(qs8-dwconv-minmax-multipass-fp32-test 10)
+  SHARD_TEST(qs8-qc8w-dwconv-minmax-multipass-fp32-test 10)
 
   SET(MICROKERNEL_GEMM_UNIT_TESTS
       bf16-gemm-minmax
@@ -1604,7 +1575,6 @@ IF(XNNPACK_BUILD_TESTS)
       qu8-gemm-minmax-rndnu
       qu8-igemm-minmax-fp32
       qu8-igemm-minmax-rndnu)
-  LIST(REMOVE_ITEM MICROKERNEL_GEMM_UNIT_TESTS ${SHARDED_TESTS})
   FOREACH(TEST ${MICROKERNEL_GEMM_UNIT_TESTS})
     FILE(GLOB TEST_SOURCES "test/${TEST}*.cc")
     IF(TEST_SOURCES)
@@ -1625,10 +1595,15 @@ IF(XNNPACK_BUILD_TESTS)
         SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
     ENDIF()
   ENDFOREACH()
+  SHARD_TEST(qd8-f16-qc8w-gemm-minmax-test 10)
+  SHARD_TEST(qd8-f32-qc4w-gemm-minmax-test 10)
+  SHARD_TEST(qd8-f32-qc8w-gemm-minmax-test 10)
+  SHARD_TEST(qd8-f32-qc8w-igemm-minmax-test 10)
+  SHARD_TEST(qs8-qc8w-gemm-minmax-fp32-test 10)
+  SHARD_TEST(qs8-qc8w-igemm-minmax-fp32-test 10)
 
   SET(MICROKERNEL_PACKQ_UNIT_TESTS
       x8-packq)
-  LIST(REMOVE_ITEM MICROKERNEL_PACKQ_UNIT_TESTS ${SHARDED_TESTS})
   FOREACH(TEST ${MICROKERNEL_PACKQ_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
@@ -1699,7 +1674,6 @@ IF(XNNPACK_BUILD_TESTS)
       qu8-vmul-minmax-rndnu
       qu8-vmulc-minmax-fp32
       qu8-vmulc-minmax-rndnu)
-  LIST(REMOVE_ITEM MICROKERNEL_VBINARY_UNIT_TESTS ${SHARDED_TESTS})
   FOREACH(TEST ${MICROKERNEL_VBINARY_UNIT_TESTS})
     ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
     TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
@@ -1747,6 +1721,16 @@ IF(XNNPACK_BUILD_TESTS)
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
   ENDFOREACH()
+  IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
+    SHARD_TEST(f16-qs8-vcvt-test 10)
+    SHARD_TEST(f16-qu8-vcvt-test 10)
+    SHARD_TEST(f32-qs8-vcvt-test 10)
+    SHARD_TEST(f32-qu8-vcvt-test 10)
+    SHARD_TEST(qs8-f32-vcvt-test 10)
+    SHARD_TEST(qu8-f32-vcvt-test 10)
+    SHARD_TEST(qs8-vcvt-test 10)
+    SHARD_TEST(qu8-vcvt-test 10)
+  ENDIF()
 
   SET(MICROKERNEL_VUNARY_TESTS
       f16-vabs
@@ -1804,6 +1788,15 @@ IF(XNNPACK_BUILD_TESTS)
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
   ENDFOREACH()
+  IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
+    SHARD_TEST(f32-vclamp-test 10)
+    SHARD_TEST(f32-velu-test 10)
+    SHARD_TEST(f32-vlrelu-test 10)
+    SHARD_TEST(qs8-vlrelu-test 10)
+    SHARD_TEST(qu8-vlrelu-test 10)
+    SHARD_TEST(s8-vclamp-test 10)
+    SHARD_TEST(u8-vclamp-test 10)
+  ENDIF()
 
   # Special-case
   IF(XNNPACK_ENABLE_KLEIDIAI)
