@@ -236,7 +236,7 @@ class ConvertOperatorTester {
               static_cast<float>(static_cast<int>(quantized_val) -
                                  quantization_params[i].zero_point) *
               quantization_params[i].scale;
-          EXPECT_NEAR(expected, dequantized_val, max_acceptable_error)
+          ASSERT_NEAR(expected, dequantized_val, max_acceptable_error)
               << "at batch " << i << " / " << batch_size() << ", channel " << c
               << " / " << channels() << " scale "
               << quantization_params[i].scale << " zp "
@@ -305,7 +305,7 @@ class ConvertOperatorTester {
               static_cast<float>(quantized_val -
                                  quantization_params[i].zero_point) *
               quantization_params[i].scale;
-          EXPECT_NEAR(expected, dequantized_val, max_acceptable_error)
+          ASSERT_NEAR(expected, dequantized_val, max_acceptable_error)
               << "at batch " << i << " / " << batch_size() << ", channel " << c
               << " / " << channels();
         }

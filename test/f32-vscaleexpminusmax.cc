@@ -79,7 +79,7 @@ public:
 
       // Verify results.
       for (size_t i = 0; i < elements(); i++) {
-        EXPECT_NEAR(y_ref[i], y[i], std::abs(y_ref[i]) * 1.0e-6)
+        ASSERT_NEAR(y_ref[i], y[i], std::abs(y_ref[i]) * 1.0e-6)
           << "elements = " << elements() << ", scale = " << scale() << ", x_max = " << x_max;
       }
     }

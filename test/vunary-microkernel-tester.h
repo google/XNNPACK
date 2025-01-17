@@ -184,7 +184,7 @@ class VUnaryMicrokernelTester {
             (UKernelParamsType*)&uparams);
     for (size_t i = 0; i < outputs.size(); i++) {
       if (std::isfinite(expected[i])) {
-        EXPECT_NEAR(expected[i], outputs[i],
+        ASSERT_NEAR(expected[i], outputs[i],
                     tolerance_ulp * std::abs(expected[i]) *
                         std::numeric_limits<float>::epsilon())
             << "for input " << inputs[i];

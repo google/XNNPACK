@@ -286,7 +286,7 @@ class AvgPoolMicrokernelTester {
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          EXPECT_NEAR(
+          ASSERT_NEAR(
               output[x * output_stride() + c],
               output_ref[x * channels() + c],
               std::max(1.0e-4f, std::abs(output_ref[x * channels() + c]) * 3.0e-3f))
@@ -379,7 +379,7 @@ class AvgPoolMicrokernelTester {
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          EXPECT_NEAR(
+          ASSERT_NEAR(
               output[x * output_stride() + c],
               output_ref[x * channels() + c],
               std::max(1.0e-4f, std::abs(output_ref[x * channels() + c]) * 3.0e-3f))
@@ -466,7 +466,7 @@ class AvgPoolMicrokernelTester {
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          EXPECT_NEAR(
+          ASSERT_NEAR(
               output[x * output_stride() + c],
               output_ref[x * channels() + c],
               std::abs(output_ref[x * channels() + c]) * 1.0e-6f)
@@ -555,7 +555,7 @@ class AvgPoolMicrokernelTester {
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          EXPECT_NEAR(
+          ASSERT_NEAR(
               output[x * output_stride() + c],
               output_ref[x * channels() + c],
               std::abs(output_ref[x * channels() + c]) * 1.0e-6f)
@@ -649,7 +649,7 @@ class AvgPoolMicrokernelTester {
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          EXPECT_NEAR(float(int32_t(output[x * output_stride() + c])), output_real[x * channels() + c], 0.5f)
+          ASSERT_NEAR(float(int32_t(output[x * output_stride() + c])), output_real[x * channels() + c], 0.5f)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset() << ", accumulator = " << accumulator[x * channels() + c];
@@ -746,7 +746,7 @@ class AvgPoolMicrokernelTester {
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          EXPECT_NEAR(float(int32_t(output[x * output_stride() + c])), output_real[x * channels() + c], 0.5f)
+          ASSERT_NEAR(float(int32_t(output[x * output_stride() + c])), output_real[x * channels() + c], 0.5f)
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset() << ", accumulator = " << accumulator[x * channels() + c];
@@ -841,7 +841,7 @@ class AvgPoolMicrokernelTester {
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          EXPECT_NEAR(
+          ASSERT_NEAR(
               output[x * output_stride() + c],
               output_ref[x * channels() + c],
               std::max(1.0e-4f, std::abs(output_ref[x * channels() + c]) * 3.0e-3f))
@@ -937,7 +937,7 @@ class AvgPoolMicrokernelTester {
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          EXPECT_NEAR(
+          ASSERT_NEAR(
               output[x * output_stride() + c],
               output_ref[x * channels() + c],
               std::max(1.0e-4f, std::abs(output_ref[x * channels() + c]) * 3.0e-3f))
@@ -1027,7 +1027,7 @@ class AvgPoolMicrokernelTester {
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          EXPECT_NEAR(
+          ASSERT_NEAR(
               output[x * output_stride() + c],
               output_ref[x * channels() + c],
               std::abs(output_ref[x * channels() + c]) * 1.0e-6f)
@@ -1119,7 +1119,7 @@ class AvgPoolMicrokernelTester {
             << "at pixel " << x << " / " << output_pixels() << ", channel " << c << " / " << channels()
             << ", pooling elements = " << pooling_elements() << ", step = " << step()
             << ", input offset = " << input_offset();
-          EXPECT_NEAR(
+          ASSERT_NEAR(
               output[x * output_stride() + c],
               output_ref[x * channels() + c],
               std::abs(output_ref[x * channels() + c]) * 1.0e-6f)

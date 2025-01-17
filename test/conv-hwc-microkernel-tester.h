@@ -371,7 +371,7 @@ class ConvHWCMicrokernelTester {
                 << "(x, y) = (" << x << ", " << y << "), channel = " << c;
               EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max)
                 << "(x, y) = (" << x << ", " << y << "), channel = " << c;
-              EXPECT_NEAR(
+              ASSERT_NEAR(
                   output_ref[((i * output_height() + y) * output_width() + x) * output_channels() + c],
                   output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c],
                   1.0e-4 * std::abs(output_ref[((i * output_height() + y) * output_width() + x) * output_channels() + c]))

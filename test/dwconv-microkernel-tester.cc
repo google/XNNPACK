@@ -1056,7 +1056,7 @@ void DWConvMicrokernelTester::Test(
         EXPECT_LE(output[x * output_stride() + c],
                   output_max)
             << "x = " << x << ", channel = " << c;
-        EXPECT_NEAR(output_ref[x * channels() + c],
+        ASSERT_NEAR(output_ref[x * channels() + c],
                     output[x * output_stride() + c],
                     std::max(1.0e-4f, std::abs(output_ref[x * channels() + c]) *
                                           1.0e-2f))
@@ -1181,7 +1181,7 @@ void DWConvMicrokernelTester::Test(
         EXPECT_LE(output[x * output_stride() + c],
                   output_max)
             << "x = " << x << ", channel = " << c;
-        EXPECT_NEAR(output_ref[x * channels() + c],
+        ASSERT_NEAR(output_ref[x * channels() + c],
                     output[x * output_stride() + c],
                     std::max(1.0e-4f, std::abs(output_ref[x * channels() + c]) *
                                           1.0e-2f))
@@ -1257,7 +1257,7 @@ void DWConvMicrokernelTester::Test(
     // Verify results.
     for (size_t x = 0; x < width(); x++) {
       for (size_t c = 0; c < channels(); c++) {
-        EXPECT_NEAR(output_ref[x * channels() + c],
+        ASSERT_NEAR(output_ref[x * channels() + c],
                     output[x * output_stride() + c],
                     std::abs(output_ref[x * channels() + c]) * 1.0e-5)
             << "x = " << x << ", channel = " << c;
@@ -1353,7 +1353,7 @@ void DWConvMicrokernelTester::Test(
             << "x = " << x << ", channel = " << c;
         EXPECT_LE(output[x * output_stride() + c], output_max)
             << "x = " << x << ", channel = " << c;
-        EXPECT_NEAR(output_ref[x * channels() + c],
+        ASSERT_NEAR(output_ref[x * channels() + c],
                     output[x * output_stride() + c],
                     std::abs(output_ref[x * channels() + c]) * 1.0e-5)
             << "x = " << x << ", channel = " << c;
@@ -1440,7 +1440,7 @@ void DWConvMicrokernelTester::Test(
     // Verify results.
     for (size_t x = 0; x < width(); x++) {
       for (size_t c = 0; c < channels(); c++) {
-        EXPECT_NEAR(output_ref[x * channels() + c],
+        ASSERT_NEAR(output_ref[x * channels() + c],
                     output[x * output_stride() + c],
                     std::abs(output_ref[x * channels() + c]) * 1.0e-5)
             << "x = " << x << ", channel = " << c
@@ -1559,7 +1559,7 @@ void DWConvMicrokernelTester::Test(
             << "x = " << x << ", channel = " << c;
         EXPECT_LE(output[x * output_stride() + c], output_max)
             << "x = " << x << ", channel = " << c;
-        EXPECT_NEAR(output_ref[x * channels() + c],
+        ASSERT_NEAR(output_ref[x * channels() + c],
                     output[x * output_stride() + c],
                     std::abs(output_ref[x * channels() + c]) * 1.0e-5)
             << "x = " << x << ", channel = " << c
