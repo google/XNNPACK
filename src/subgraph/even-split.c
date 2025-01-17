@@ -32,16 +32,15 @@ static enum xnn_status create_even_split_operator_helper(
     return xnn_status_success;
   }
 
-  switch (datatype) {
-    case xnn_datatype_fp16:
+  switch (xnn_datatype_size_bits(datatype)) {
+    case 8:
+      return xnn_create_copy_nc_x8(
+          node->flags, &opdata->operator_objects[index]);
+    case 16:
       return xnn_create_copy_nc_x16(
           node->flags, &opdata->operator_objects[index]);
-    case xnn_datatype_fp32:
+    case 32:
       return xnn_create_copy_nc_x32(
-          node->flags, &opdata->operator_objects[index]);
-    case xnn_datatype_qint8:
-    case xnn_datatype_quint8:
-      return xnn_create_copy_nc_x8(
           node->flags, &opdata->operator_objects[index]);
     default:
       XNN_UNREACHABLE;

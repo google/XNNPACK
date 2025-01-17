@@ -26,14 +26,13 @@ static enum xnn_status create_concatenate_operator_helper(
   const enum xnn_datatype datatype,
   size_t index)
 {
-  switch (datatype) {
-    case xnn_datatype_fp16:
-      return xnn_create_copy_nc_x16(node->flags, &opdata->operator_objects[index]);
-    case xnn_datatype_fp32:
-      return xnn_create_copy_nc_x32(node->flags, &opdata->operator_objects[index]);
-    case xnn_datatype_qint8:
-    case xnn_datatype_quint8:
+  switch (xnn_datatype_size_bits(datatype)) {
+    case 8:
       return xnn_create_copy_nc_x8(node->flags, &opdata->operator_objects[index]);
+    case 16:
+      return xnn_create_copy_nc_x16(node->flags, &opdata->operator_objects[index]);
+    case 32:
+      return xnn_create_copy_nc_x32(node->flags, &opdata->operator_objects[index]);
     default:
       XNN_UNREACHABLE;
   }

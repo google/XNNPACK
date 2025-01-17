@@ -36,16 +36,15 @@ static enum xnn_status create_slice_operator(
   assert(input_id != XNN_INVALID_VALUE_ID);
   assert(input_id < num_values);
   const struct xnn_value *input_value = &values[input_id];
-  switch (input_value->datatype) {
-    case xnn_datatype_fp16:
+  switch (xnn_datatype_size_bits(input_value->datatype)) {
+    case 8:
+      status = xnn_create_slice_nd_x8(/*flags=*/0, &opdata->operator_objects[0]);
+      break;
+    case 16:
       status = xnn_create_slice_nd_x16(/*flags=*/0, &opdata->operator_objects[0]);
       break;
-    case xnn_datatype_fp32:
+    case 32:
       status = xnn_create_slice_nd_x32(/*flags=*/0, &opdata->operator_objects[0]);
-      break;
-    case xnn_datatype_qint8:
-    case xnn_datatype_quint8:
-      status = xnn_create_slice_nd_x8(/*flags=*/0, &opdata->operator_objects[0]);
       break;
     default:
       XNN_UNREACHABLE;
@@ -191,18 +190,12 @@ enum xnn_status xnn_define_static_slice_v2(xnn_subgraph_t subgraph,
     return status;
   }
 
-  switch (input_value->datatype) {
-    case xnn_datatype_fp16:
-    case xnn_datatype_fp32:
-    case xnn_datatype_qint8:
-    case xnn_datatype_quint8:
-      break;
-    default:
-      xnn_log_error(
-        "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
-        xnn_node_type_to_string(xnn_node_type_static_slice), input_id,
-        xnn_datatype_to_string(input_value->datatype), input_value->datatype);
-      return xnn_status_invalid_parameter;
+  if (!xnn_datatype_is_byte_addressable(input_value->datatype)) {
+    xnn_log_error(
+      "failed to define %s operator with input ID #%" PRIu32 ": unsupported Value datatype %s (%d)",
+      xnn_node_type_to_string(xnn_node_type_static_slice), input_id,
+      xnn_datatype_to_string(input_value->datatype), input_value->datatype);
+    return xnn_status_invalid_parameter;
   }
 
   status = xnn_subgraph_check_output_node_id(xnn_node_type_static_slice, output_id, subgraph->num_values);
