@@ -17,7 +17,7 @@ $VMULSUBQ_F32 = "vfmsq_f32" if FMA else "vmlsq_f32"
 #include "xnnpack/vunary.h"
 
 
-extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_64[64];
+extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_64[64];
 
 $ISA = ("aarch64_" if DIV_ALGO == "div" else "") + ("neonfma" if FMA else "neon")
 void xnn_f32_vsigmoid_ukernel__${ISA}_rr${1 if FMA else 2}_lut64_p2_${DIV_ALGO}_u${BATCH_TILE}(
@@ -75,12 +75,12 @@ void xnn_f32_vsigmoid_ukernel__${ISA}_rr${1 if FMA else 2}_lut64_p2_${DIV_ALGO}_
       $for N in range(0, BATCH_TILE, 4):
         const uint64_t vidx${ABC[N:N+2]} = vgetq_lane_u64(vidx${ABC[N:N+4]}, 0);
         const uint64_t vidx${ABC[N+2:N+4]} = vgetq_lane_u64(vidx${ABC[N:N+4]}, 1);
-        float32x2_t vl${ABC[N:N+2]} = vld1_dup_f32(&xnn_table_exp2minus_k_over_64[(uint32_t) vidx${ABC[N:N+2]}]);
-        float32x2_t vl${ABC[N+2:N+4]} = vld1_dup_f32(&xnn_table_exp2minus_k_over_64[(uint32_t) vidx${ABC[N+2:N+4]}]);
+        float32x2_t vl${ABC[N:N+2]} = vld1_dup_f32((const float*) &xnn_table_exp2minus_k_over_64[(uint32_t) vidx${ABC[N:N+2]}]);
+        float32x2_t vl${ABC[N+2:N+4]} = vld1_dup_f32((const float*) &xnn_table_exp2minus_k_over_64[(uint32_t) vidx${ABC[N+2:N+4]}]);
 
       $for N in range(0, BATCH_TILE, 4):
-        vl${ABC[N:N+2]} = vld1_lane_f32(&xnn_table_exp2minus_k_over_64[(uint32_t) (vidx${ABC[N:N+2]} >> 32)], vl${ABC[N:N+2]}, 1);
-        vl${ABC[N+2:N+4]} = vld1_lane_f32(&xnn_table_exp2minus_k_over_64[(uint32_t) (vidx${ABC[N+2:N+4]} >> 32)], vl${ABC[N+2:N+4]}, 1);
+        vl${ABC[N:N+2]} = vld1_lane_f32((const float*) &xnn_table_exp2minus_k_over_64[(uint32_t) (vidx${ABC[N:N+2]} >> 32)], vl${ABC[N:N+2]}, 1);
+        vl${ABC[N+2:N+4]} = vld1_lane_f32((const float*) &xnn_table_exp2minus_k_over_64[(uint32_t) (vidx${ABC[N+2:N+4]} >> 32)], vl${ABC[N+2:N+4]}, 1);
         const float32x4_t vl${ABC[N:N+4]} = vcombine_f32(vl${ABC[N:N+2]}, vl${ABC[N+2:N+4]});
 
       $for N in range(0, BATCH_TILE, 4):
@@ -158,10 +158,10 @@ void xnn_f32_vsigmoid_ukernel__${ISA}_rr${1 if FMA else 2}_lut64_p2_${DIV_ALGO}_
     const uint64x2_t vidx = vreinterpretq_u64_s32(vandq_s32(vreinterpretq_s32_f32(vn), vindex_mask));
     const uint64_t vidx_lo = vgetq_lane_u64(vidx, 0);
     const uint64_t vidx_hi = vgetq_lane_u64(vidx, 1);
-    float32x2_t vl_lo = vld1_dup_f32(&xnn_table_exp2minus_k_over_64[(uint32_t) vidx_lo]);
-    float32x2_t vl_hi = vld1_dup_f32(&xnn_table_exp2minus_k_over_64[(uint32_t) vidx_hi]);
-    vl_lo = vld1_lane_f32(&xnn_table_exp2minus_k_over_64[(uint32_t) (vidx_lo >> 32)], vl_lo, 1);
-    vl_hi = vld1_lane_f32(&xnn_table_exp2minus_k_over_64[(uint32_t) (vidx_hi >> 32)], vl_hi, 1);
+    float32x2_t vl_lo = vld1_dup_f32((const float*) &xnn_table_exp2minus_k_over_64[(uint32_t) vidx_lo]);
+    float32x2_t vl_hi = vld1_dup_f32((const float*) &xnn_table_exp2minus_k_over_64[(uint32_t) vidx_hi]);
+    vl_lo = vld1_lane_f32((const float*) &xnn_table_exp2minus_k_over_64[(uint32_t) (vidx_lo >> 32)], vl_lo, 1);
+    vl_hi = vld1_lane_f32((const float*) &xnn_table_exp2minus_k_over_64[(uint32_t) (vidx_hi >> 32)], vl_hi, 1);
     const float32x4_t vl = vcombine_f32(vl_lo, vl_hi);
 
     const float32x4_t vs = vreinterpretq_f32_s32(vaddq_s32(vreinterpretq_s32_f32(vl), ve));
@@ -209,10 +209,10 @@ void xnn_f32_vsigmoid_ukernel__${ISA}_rr${1 if FMA else 2}_lut64_p2_${DIV_ALGO}_
     const uint64x2_t vidx = vreinterpretq_u64_s32(vandq_s32(vreinterpretq_s32_f32(vn), vindex_mask));
     const uint64_t vidx_lo = vgetq_lane_u64(vidx, 0);
     const uint64_t vidx_hi = vgetq_lane_u64(vidx, 1);
-    float32x2_t vl_lo = vld1_dup_f32(&xnn_table_exp2minus_k_over_64[(uint32_t) vidx_lo]);
-    float32x2_t vl_hi = vld1_dup_f32(&xnn_table_exp2minus_k_over_64[(uint32_t) vidx_hi]);
-    vl_lo = vld1_lane_f32(&xnn_table_exp2minus_k_over_64[(uint32_t) (vidx_lo >> 32)], vl_lo, 1);
-    vl_hi = vld1_lane_f32(&xnn_table_exp2minus_k_over_64[(uint32_t) (vidx_hi >> 32)], vl_hi, 1);
+    float32x2_t vl_lo = vld1_dup_f32((const float*) &xnn_table_exp2minus_k_over_64[(uint32_t) vidx_lo]);
+    float32x2_t vl_hi = vld1_dup_f32((const float*) &xnn_table_exp2minus_k_over_64[(uint32_t) vidx_hi]);
+    vl_lo = vld1_lane_f32((const float*) &xnn_table_exp2minus_k_over_64[(uint32_t) (vidx_lo >> 32)], vl_lo, 1);
+    vl_hi = vld1_lane_f32((const float*) &xnn_table_exp2minus_k_over_64[(uint32_t) (vidx_hi >> 32)], vl_hi, 1);
     const float32x4_t vl = vcombine_f32(vl_lo, vl_hi);
 
     const float32x4_t vs = vreinterpretq_f32_s32(vaddq_s32(vreinterpretq_s32_f32(vl), ve));

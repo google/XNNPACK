@@ -16,7 +16,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include "xnnpack/common.h"
 
 
-extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_16[16];
+extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_16[16];
 
 $WASM_F32X4_MAX={"ARM": "wasm_f32x4_max", "X86": "wasm_f32x4_pmax", "RELAXED": "wasm_f32x4_relaxed_max"}[ARCH]
 $WASM_V32X4_LANESELECT="wasm_i32x4_relaxed_laneselect" if ARCH == "RELAXED" else "wasm_v128_bitselect"
