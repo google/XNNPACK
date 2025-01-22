@@ -1804,7 +1804,7 @@ xnnpack_unit_test(
 [xnnpack_unit_test(
     name = "even_split_test" if n == None else "even_split%d_test" % n,
     srcs = [
-        "even_split" if n == None else "even-split%s.cc" % n,
+        "even-split.cc" if n == None else "even-split%s.cc" % n,
     ],
     deps = [
         ":replicable_random_device",
