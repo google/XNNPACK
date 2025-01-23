@@ -20,7 +20,7 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1, 9, 8, 1, 
 
 
 #if (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_argmaxpool_ukernel_9p8x__neon_c4, 9, 8, 4,false, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_arm_neon, xnn_f32_argmaxpool_ukernel_9p8x__neon_c4, 9, 8, 4, false, float, struct xnn_f32_default_params, NULL)
 
 
 #endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
@@ -36,7 +36,7 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_f32_argmaxpool_ukernel_9p8x__wasmsimd_c4, 9, 8, 4
 
 #if XNN_ARCH_RISCV && (XNN_ENABLE_RISCV_VECTOR)
 
-XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v,  9, 8, 1, true, float, struct xnn_f32_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(xnn_arch_riscv_vector, xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v, 9, 8, 1, true, float, struct xnn_f32_default_params, NULL)
 #endif // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
 
 #ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS
