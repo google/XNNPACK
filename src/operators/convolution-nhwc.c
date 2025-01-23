@@ -424,9 +424,9 @@ static enum xnn_status create_gemm_or_igemm(
       }
       convolution_op->ukernel.igemm = (struct xnn_ukernel_igemm) {
         .mr = mr,
-            .nr = nr,
-            .kr = kr,
-            .sr = sr,
+        .nr = nr,
+        .kr = kr,
+        .sr = sr,
       };
 
       assert(XNN_MAX_MR >= mr);
