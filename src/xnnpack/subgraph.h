@@ -311,8 +311,8 @@ struct xnn_node {
     } static_resize;
     struct {
       size_t num_dims;
-      int64_t offsets[XNN_MAX_TENSOR_DIMS];
-      size_t sizes[XNN_MAX_TENSOR_DIMS];
+      int64_t begins[XNN_MAX_TENSOR_DIMS];
+      int64_t ends[XNN_MAX_TENSOR_DIMS];
     } slice;
     struct {
       uint32_t block_size;
@@ -409,8 +409,8 @@ struct xnn_operator_data {
     };
     // Used for static slice.
     struct {
-      int64_t offsets[XNN_MAX_TENSOR_DIMS];
-      size_t sizes[XNN_MAX_TENSOR_DIMS];
+      int64_t begins[XNN_MAX_TENSOR_DIMS];
+      int64_t ends[XNN_MAX_TENSOR_DIMS];
     };
   };
   uint32_t adjustment_height;
