@@ -534,8 +534,10 @@ tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=6 -D NR=8 -D INC=0 -D SSE=1 -D D
 tools/xngen src/f32-gemm/sse-shuffle.c.in -D MR=6 -D NR=8 -D INC=1 -D SSE=1 -D DATATYPE=F32 -o src/f32-gemminc/gen/f32-gemminc-6x8s4-minmax-sse.c &
 
 ### MRx2 micro-kernels
-tools/xngen src/f32-gemm/MRx2c4-sse.c.in -D MR=4 -D NR=2 -D SSE=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2c4-minmax-sse.c &
-tools/xngen src/f32-gemm/MRx2c4-sse.c.in -D MR=6 -D NR=2 -D SSE=1 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x2c4-minmax-sse.c &
+tools/xngen src/f32-gemm/MRx2c4-sse.c.in -D MR=4 -D NR=2 -D SSE=1 -D FMA=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2c4-minmax-sse.c &
+tools/xngen src/f32-gemm/MRx2c4-sse.c.in -D MR=6 -D NR=2 -D SSE=1 -D FMA=0 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x2c4-minmax-sse.c &
+tools/xngen src/f32-gemm/MRx2c4-sse.c.in -D MR=4 -D NR=2 -D SSE=1 -D FMA=3 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-4x2c4-minmax-fma3.c &
+tools/xngen src/f32-gemm/MRx2c4-sse.c.in -D MR=6 -D NR=2 -D SSE=1 -D FMA=3 -D DATATYPE=F32 -o src/f32-gemm/gen/f32-gemm-6x2c4-minmax-fma3.c &
 
 ################################### x86 AVX ###################################
 ### AVX+BROADCAST micro-kernels

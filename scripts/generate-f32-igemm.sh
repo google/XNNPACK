@@ -315,8 +315,10 @@ tools/xngen src/f32-igemm/sse-shuffle.c.in -D MR=5 -D NR=8 -o src/f32-igemm/gen/
 tools/xngen src/f32-igemm/sse-shuffle.c.in -D MR=6 -D NR=8 -o src/f32-igemm/gen/f32-igemm-6x8s4-minmax-sse.c &
 
 ### MRx2 micro-kernels
-tools/xngen src/f32-igemm/MRx2c4-sse.c.in -D MR=4 -D NR=2 -o src/f32-igemm/gen/f32-igemm-4x2c4-minmax-sse.c &
-tools/xngen src/f32-igemm/MRx2c4-sse.c.in -D MR=6 -D NR=2 -o src/f32-igemm/gen/f32-igemm-6x2c4-minmax-sse.c &
+tools/xngen src/f32-igemm/MRx2c4-sse.c.in -D MR=4 -D NR=2 -D FMA=0 -o src/f32-igemm/gen/f32-igemm-4x2c4-minmax-sse.c &
+tools/xngen src/f32-igemm/MRx2c4-sse.c.in -D MR=6 -D NR=2 -D FMA=0 -o src/f32-igemm/gen/f32-igemm-6x2c4-minmax-sse.c &
+tools/xngen src/f32-igemm/MRx2c4-sse.c.in -D MR=4 -D NR=2 -D FMA=3 -o src/f32-igemm/gen/f32-igemm-4x2c4-minmax-fma3.c &
+tools/xngen src/f32-igemm/MRx2c4-sse.c.in -D MR=6 -D NR=2 -D FMA=3 -o src/f32-igemm/gen/f32-igemm-6x2c4-minmax-fma3.c &
 
 ################################### x86 AVX ###################################
 ### AVX+BROADCAST micro-kernels
