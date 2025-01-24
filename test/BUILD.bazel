@@ -841,6 +841,7 @@ xnnpack_unit_test(
         "qd8-f16-qc8w-gemm-minmax-3.cc",
         "qd8-f16-qc8w-gemm-minmax-4.cc",
     ],
+    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
@@ -944,6 +945,7 @@ xnnpack_unit_test(
         "qs8-qc8w-gemm-minmax-fp32-2.cc",
         "qs8-qc8w-gemm-minmax-fp32-3.cc",
     ],
+    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],
