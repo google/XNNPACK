@@ -3421,6 +3421,17 @@
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_4x2c4__sse)
 
+  static void f32_gemm_minmax_ukernel_6x2c4__sse(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_f32_gemm_minmax_ukernel_6x2c4__sse,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_f32_gemm_goi_w,
+      /*mr=*/6, /*nr=*/2, /*kr=*/4, /*sr=*/1,
+      /*isa_check=*/nullptr);
+  }
+
+  BENCHMARK_GEMM(f32_gemm_minmax_ukernel_6x2c4__sse)
+
   static void f32_gemm_minmax_ukernel_4x8__sse_dup(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_gemm_minmax_ukernel_4x8__sse_dup,
@@ -3487,17 +3498,6 @@
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_5x8s4__sse)
 
-  static void f32_gemm_minmax_ukernel_6x2c4__sse(benchmark::State& state, const char* net) {
-    GEMMBenchmark(state,
-      xnn_f32_gemm_minmax_ukernel_6x2c4__sse,
-      xnn_init_f32_minmax_scalar_params,
-      xnn_pack_f32_gemm_goi_w,
-      /*mr=*/6, /*nr=*/2, /*kr=*/4, /*sr=*/1,
-      /*isa_check=*/nullptr);
-  }
-
-  BENCHMARK_GEMM(f32_gemm_minmax_ukernel_6x2c4__sse)
-
   static void f32_gemm_minmax_ukernel_6x8__sse_dup(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_gemm_minmax_ukernel_6x8__sse_dup,
@@ -3530,6 +3530,28 @@
   }
 
   BENCHMARK_GEMM(f32_gemm_minmax_ukernel_6x8s4__sse)
+
+  static void f32_gemm_minmax_ukernel_4x2c4__fma3(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_f32_gemm_minmax_ukernel_4x2c4__fma3,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_f32_gemm_goi_w,
+      /*mr=*/4, /*nr=*/2, /*kr=*/4, /*sr=*/1,
+      benchmark::utils::CheckFMA3);
+  }
+
+  BENCHMARK_GEMM(f32_gemm_minmax_ukernel_4x2c4__fma3)
+
+  static void f32_gemm_minmax_ukernel_6x2c4__fma3(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_f32_gemm_minmax_ukernel_6x2c4__fma3,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_f32_gemm_goi_w,
+      /*mr=*/6, /*nr=*/2, /*kr=*/4, /*sr=*/1,
+      benchmark::utils::CheckFMA3);
+  }
+
+  BENCHMARK_GEMM(f32_gemm_minmax_ukernel_6x2c4__fma3)
 
   static void f32_gemm_minmax_ukernel_1x8__fma3_broadcast(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,

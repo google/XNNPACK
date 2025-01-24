@@ -8,7 +8,9 @@ $assert NR == 2
 $assert MR % 2 == 0
 #include <assert.h>
 
-$if DATATYPE in ["QC8", "QC4"]:
+$if FMA:
+  #include <immintrin.h>
+$elif DATATYPE in ["QC8", "QC4"]:
   #include <smmintrin.h>
 $else:
   #include <xmmintrin.h>
@@ -20,9 +22,9 @@ $if DATATYPE == "QC8":
 
 $RANGE_MRX2 = list(range(0, MR, 2))
 $if DATATYPE in ["QC8", "QC4"]:
-  $ISA = {2: "sse2", 4: "sse41"}[SSE]
+  $ISA = "fma3" if FMA else {2: "sse2", 4: "sse41"}[SSE]
 $else:
-  $ISA = "sse"
+  $ISA = "fma3" if FMA else "sse"
 $DATATYPE_SPEC = {"F32": "f32", "QC8": "f32_qc8w", "QC4": "f32_qc4w"}[DATATYPE]
 void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}c4__${ISA}(
     size_t mr,
@@ -121,7 +123,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}c4__${ISA}(
 
       $for M in range(MR):
         $for N in range(NR):
-          vacc${M}x${N}c4 = _mm_add_ps(vacc${M}x${N}c4, _mm_mul_ps(va${M}, vb${N}));
+          $if FMA == 3:
+            vacc${M}x${N}c4 = _mm_fmadd_ps(va${M}, vb${N}, vacc${M}x${N}c4);
+          $else:
+            vacc${M}x${N}c4 = _mm_add_ps(vacc${M}x${N}c4, _mm_mul_ps(va${M}, vb${N}));
     }
     if XNN_UNLIKELY(k != 0) {
       $for M in range(MR):
@@ -154,7 +159,10 @@ void xnn_${DATATYPE_SPEC}_gemm_minmax_ukernel_${MR}x${NR}c4__${ISA}(
 
       $for M in range(MR):
         $for N in range(NR):
-          vacc${M}x${N}c4 = _mm_add_ps(vacc${M}x${N}c4, _mm_mul_ps(_mm_andnot_ps(vmask${N}, va${M}), vb${N}));
+          $if FMA == 3:
+            vacc${M}x${N}c4 = _mm_fmadd_ps(_mm_andnot_ps(vmask${N}, va${M}), vb${N}, vacc${M}x${N}c4);
+          $else:
+            vacc${M}x${N}c4 = _mm_add_ps(vacc${M}x${N}c4, _mm_mul_ps(_mm_andnot_ps(vmask${N}, va${M}), vb${N}));
     }
 
     $for M in range(MR):

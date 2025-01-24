@@ -7,12 +7,15 @@ $assert NR == 2
 $assert MR % 2 == 0
 #include <assert.h>
 
-#include <xmmintrin.h>
+$if FMA:
+  #include <immintrin.h>
+$else:
+  #include <xmmintrin.h>
 
 #include "xnnpack/igemm.h"
 
 
-void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}c4__sse(
+void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}c4__${"fma3" if FMA else "sse"}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -91,7 +94,10 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}c4__sse(
 
         $for M in range(MR):
           $for N in range(NR):
-            vacc${M}x${N}c4 = _mm_add_ps(vacc${M}x${N}c4, _mm_mul_ps(va${M}, vb${N}));
+            $if FMA == 3:
+              vacc${M}x${N}c4 = _mm_fmadd_ps(va${M}, vb${N}, vacc${M}x${N}c4);
+            $else:
+              vacc${M}x${N}c4 = _mm_add_ps(vacc${M}x${N}c4, _mm_mul_ps(va${M}, vb${N}));
       }
       if XNN_UNLIKELY(k != 0) {
         $for M in range(MR):
@@ -107,7 +113,10 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}c4__sse(
 
         $for M in range(MR):
           $for N in range(NR):
-            vacc${M}x${N}c4 = _mm_add_ps(vacc${M}x${N}c4, _mm_mul_ps(_mm_andnot_ps(vmask${N}, va${M}), vb${N}));
+            $if FMA == 3:
+              vacc${M}x${N}c4 = _mm_fmadd_ps(_mm_andnot_ps(vmask${N}, va${M}), vb${N}, vacc${M}x${N}c4);
+            $else:
+              vacc${M}x${N}c4 = _mm_add_ps(vacc${M}x${N}c4, _mm_mul_ps(_mm_andnot_ps(vmask${N}, va${M}), vb${N}));
       }
       p -= ${MR} * sizeof(void*);
     } while (p != 0);
