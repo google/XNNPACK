@@ -4655,7 +4655,7 @@ static void qs8_qc8w_gemm_minmax_fp32_ukernel_1x4v__rvv(benchmark::State& state,
     xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x4v__rvv,
     xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
     xnn_pack_qs8_gemm_goi_w,
-    /*mr=*/4, /*nr=*/4 * xnn_init_hardware_config()->vlenb / sizeof(int32_t), /*kr=*/1, /*sr=*/1,
+    /*mr=*/1, /*nr=*/4 * xnn_init_hardware_config()->vlenb / sizeof(int32_t), /*kr=*/1, /*sr=*/1,
     /*isa_check=*/nullptr);
 }
 
