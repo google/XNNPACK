@@ -216,6 +216,7 @@ def xnnpack_cc_library_for_arch(arch, name, deps = None, **kwargs):
             val_false = ["@platforms//:incompatible"],
             val_true = [],
         ),
+        optimized_copts = ["-O3"],
         deps = deps,
         **kwargs
     )
