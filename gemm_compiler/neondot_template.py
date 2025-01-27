@@ -11,6 +11,10 @@ from gemm_compiler import neonfma_template as isa
 
 class NeonDot(isa.NeonFma):
 
+  def __init__(self, unroll_factor):
+    self.unroll_factor = unroll_factor
+    self.decrement = 4 * unroll_factor
+
   def isa(self):
     return 'neondot'
 
@@ -46,7 +50,8 @@ class NeonDot(isa.NeonFma):
     ]
 
   def function_name(self, M, N, isa):
-    return f'xnn_qd8_f32_qc8w_gemm_minmax_ukernel_{M}x{N}c4__asm_aarch64_{isa}_ld32_2\n'
+    LD = self.unroll_factor * 32
+    return f'xnn_qd8_f32_qc8w_gemm_minmax_ukernel_{M}x{N}c4__asm_aarch64_{isa}_ld{LD}_2\n'
 
   def zp_scale(self, pos):
     regs = ['10', '11']
@@ -82,6 +87,29 @@ class NeonDot(isa.NeonFma):
 
   def cvtf(self):
     return 'scvtf v{ACC}.4s, v{ACC}.4s\n'
+
+  def input_asm(self):
+    match self.unroll_factor:
+      case 1:
+        return {
+            'loop': [
+                'ldr s{AM}, [{AM_ptr}], 4\n',
+            ]
+        }
+      case 2:
+        return {
+            'loop': [
+                'ldr d{AM}, [{AM_ptr}], 8\n',
+            ]
+        }
+      case 4:
+        return {
+            'loop': [
+                'ldr q{AM}, [{AM_ptr}], 16\n',
+            ]
+        }
+      case _:
+        raise NotImplementedError
 
   def dequantize(self, M, N, W):
     accumulators = self.acc_registers()
@@ -184,51 +212,7 @@ class NeonDot(isa.NeonFma):
     return ret
 
 
-class NeonDotUnrolled(NeonDot):
-
-  def __init__(self, unroll_factor):
-    self.unroll_factor = unroll_factor
-    self.decrement = 4 * unroll_factor
-
-  def function_name(self, M, N, isa):
-    LD = self.unroll_factor * 32
-    return f'xnn_qd8_f32_qc8w_gemm_minmax_ukernel_{M}x{N}c4__asm_aarch64_{isa}_ld{LD}_2\n'
-
-  def input_asm(self):
-    match self.unroll_factor:
-      case 1:
-        return {
-            'loop': [
-                'ldr s{AM}, [{AM_ptr}], 4\n',
-            ]
-        }
-      case 2:
-        return {
-            'loop': [
-                'ldr d{AM}, [{AM_ptr}], 8\n',
-            ]
-        }
-      case 4:
-        return {
-            'loop': [
-                'ldr q{AM}, [{AM_ptr}], 16\n',
-            ]
-        }
-      case _:
-        raise NotImplementedError
-
-  def base_input_asm(self):
-    return super().input_asm()
-
-
-class NeonDotQC4WUnrolled(NeonDotUnrolled):
-
-  def __init__(self, unroll_factor):
-    self.unroll_factor = unroll_factor
-    self.decrement = 4 * unroll_factor
-
-  def weights_register_bytes(self):
-    return 8
+class NeonDotQC4W(NeonDot):
 
   def weights_asm(self):
     w_asm = {

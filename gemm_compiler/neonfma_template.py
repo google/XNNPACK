@@ -13,6 +13,10 @@ from gemm_compiler import aarch64_template as arch
 
 class NeonFma(arch.Aarch64):
 
+  def __init__(self, unroll_factor):
+    self.unroll_factor = unroll_factor
+    self.decrement = 4 * unroll_factor
+
   def n_step(self):
     return 4
 
@@ -62,16 +66,34 @@ class NeonFma(arch.Aarch64):
     return ['7', '8', '9', '10']
 
   def input_asm(self):
-    in_asm = {
+    match self.unroll_factor:
+      case 1:
+        return {
+            'loop': [
+                'ldr s{AM}, [{AM_ptr}], 4\n',
+            ]
+        }
+      case 2:
+        return {
+            'loop': [
+                'ldr d{AM}, [{AM_ptr}], 8\n',
+            ]
+        }
+      case 4:
+        return {
+            'loop': [
+                'ldr q{AM}, [{AM_ptr}], 16\n',
+            ]
+        }
+      case _:
+        raise NotImplementedError
+
+  def base_input_asm(self):
+    return {
         'loop': [
             'ldr s{AM}, [{AM_ptr}], 4\n',
         ]
     }
-    return in_asm
-
-  def base_input_asm(self):
-    in_asm = {'loop': ['']}
-    return in_asm
 
   def weights_asm(self):
     w_asm = {
@@ -223,36 +245,3 @@ class NeonFma(arch.Aarch64):
       )
 
     return asm_string
-
-
-class NeonFmaUnrolled(NeonFma):
-
-  def __init__(self, unroll_factor):
-    self.unroll_factor = unroll_factor
-    self.decrement = 4 * unroll_factor
-
-  def function_name(self, M, N, isa):
-    LD = self.unroll_factor * 32
-    return f'xnn_f32_gemm_minmax_ukernel_{M}x{N}__asm_aarch64_{isa}_ld{LD}_2\n'
-
-  def input_asm(self):
-    match self.unroll_factor:
-      case 1:
-        return {'loop': ['']}
-      case 2:
-        return {
-            'loop': [
-                'ldr d{AM}, [{AM_ptr}], 8\n',
-            ]
-        }
-      case 4:
-        return {
-            'loop': [
-                'ldr q{AM}, [{AM_ptr}], 16\n',
-            ]
-        }
-      case _:
-        raise NotImplementedError
-
-  def base_input_asm(self):
-    return super().input_asm()

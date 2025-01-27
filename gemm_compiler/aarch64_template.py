@@ -92,7 +92,8 @@ class Aarch64(base_architecture.BaseArchitecture):
     return reg.replace('x', 'q')
 
   def function_name(self, M, N, isa):
-    return f'xnn_f32_gemm_minmax_ukernel_{M}x{N}__asm_aarch64_{isa}_ld32\n'
+    LD = self.unroll_factor * 32
+    return f'xnn_f32_gemm_minmax_ukernel_{M}x{N}__asm_aarch64_{isa}_ld{LD}_2\n'
 
   def quantization_params(self):
     return ''

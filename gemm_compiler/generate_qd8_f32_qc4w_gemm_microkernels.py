@@ -27,7 +27,7 @@ def generate_qd8_f32_qc4w_gemm_microkernels():
         generate.generate_gemm_microkernel(
             M=mr,
             N=nr,
-            isa=neondot_template.NeonDotQC4WUnrolled(unroll),
+            isa=neondot_template.NeonDotQC4W(unroll),
             output_file=os.path.join(
                 output_base,
                 f'qd8-f32-qc4w-gemm-{mr}x{nr}-minmax-asm-aarch64-neondot-ld{decrement}.S',
