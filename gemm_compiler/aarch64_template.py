@@ -99,7 +99,12 @@ class Aarch64(base_architecture.BaseArchitecture):
     return ''
 
   def header(self, M, N, prefix, isa):
-    HEADER = '#include "xnnpack/assembly.h"\n\n'
+    HEADER = """// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include "xnnpack/assembly.h"\n\n"""
 
     HEADER += 'BEGIN_FUNCTION ' + self.function_name(M, N, isa)
     HEADER += """

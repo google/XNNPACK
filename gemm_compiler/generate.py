@@ -90,6 +90,11 @@ def generate_gemm_microkernel(
   ]
   # Strip indentation from empty lines.
   stripped_lines = ['' if line.isspace() else line for line in stripped_lines]
+  # Strip indentation from header.
+  stripped_lines = [
+      line.lstrip() if line.startswith('      //') else line
+      for line in stripped_lines
+  ]
   asm_string = '\n'.join(stripped_lines)
 
   with open(output_file, 'w') as f:
