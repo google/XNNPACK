@@ -159,7 +159,7 @@ void xnn_f32_igemm_minmax_ukernel_2x16__neon_lane_ld128(
       p -= 2 * sizeof(void*);
     } while (p != 0);
 
-    const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+    const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
     vacc0x0 = vminq_f32(vacc0x0, vmax);
     vacc1x0 = vminq_f32(vacc1x0, vmax);
     vacc0x1 = vminq_f32(vacc0x1, vmax);
@@ -169,7 +169,7 @@ void xnn_f32_igemm_minmax_ukernel_2x16__neon_lane_ld128(
     vacc0x3 = vminq_f32(vacc0x3, vmax);
     vacc1x3 = vminq_f32(vacc1x3, vmax);
 
-    const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+    const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
     vacc0x0 = vmaxq_f32(vacc0x0, vmin);
     vacc1x0 = vmaxq_f32(vacc1x0, vmin);
     vacc0x1 = vmaxq_f32(vacc0x1, vmin);

@@ -540,7 +540,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_8x16c8__neoni8mm(
     vout6xCDEF = vaddq_f32(vbiasCDEF, vout6xCDEF);
     vout7xCDEF = vaddq_f32(vbiasCDEF, vout7xCDEF);
 
-    const float32x4_t voutput_min = vld1q_dup_f32(&params->scalar.min);
+    const float32x4_t voutput_min = vdupq_n_f32(params->scalar.min);
     vout0x0123 = vmaxq_f32(vout0x0123, voutput_min);
     vout0x4567 = vmaxq_f32(vout0x4567, voutput_min);
     vout0x89AB = vmaxq_f32(vout0x89AB, voutput_min);
@@ -574,7 +574,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_8x16c8__neoni8mm(
     vout7x89AB = vmaxq_f32(vout7x89AB, voutput_min);
     vout7xCDEF = vmaxq_f32(vout7xCDEF, voutput_min);
 
-    const float32x4_t voutput_max = vld1q_dup_f32(&params->scalar.max);
+    const float32x4_t voutput_max = vdupq_n_f32(params->scalar.max);
     vout0x0123 = vminq_f32(vout0x0123, voutput_max);
     vout0x4567 = vminq_f32(vout0x4567, voutput_max);
     vout0x89AB = vminq_f32(vout0x89AB, voutput_max);

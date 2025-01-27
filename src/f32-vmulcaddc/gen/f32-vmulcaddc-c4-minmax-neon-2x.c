@@ -37,8 +37,8 @@ void xnn_f32_vmulcaddc_minmax_ukernel_c4__neon_2x(
   const size_t input_increment = input_stride * 2 - channels;
   const size_t output_increment = output_stride * 2 - channels;
 
-  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
-  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+  const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
+  const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
   do {
     if XNN_UNPREDICTABLE(rows < 2) {
       i1 = i0;

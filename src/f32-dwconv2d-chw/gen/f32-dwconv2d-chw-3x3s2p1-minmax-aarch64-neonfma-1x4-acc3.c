@@ -31,8 +31,8 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3s2p1__aarch64_neonfma_1x4_acc3(
   assert(padding_top >= 0);
   assert(padding_top <= 1);
 
-  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
-  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+  const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
+  const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
 
   static const int32_t mask_table[8] = {-1, -1, -1, -1, 0, 0, 0, 0};
   const uint32x4_t vmask_even = vld1q_u32((const uint32_t*) &mask_table[4 - (((input_width & 31) + 4) >> 3)]);

@@ -28,14 +28,14 @@ void xnn_qu8_vmulc_minmax_fp32_ukernel__neonv8_ld64_u8(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const uint8x8_t va_zero_point = vld1_dup_u8(&params->scalar.a_zero_point);
-  const float32x4_t vscale = vld1q_dup_f32(&params->scalar.scale);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
-  const uint8x8_t voutput_min = vld1_dup_u8(&params->scalar.output_min);
-  const uint8x8_t voutput_max = vld1_dup_u8(&params->scalar.output_max);
+  const uint8x8_t va_zero_point = vdup_n_u8(params->scalar.a_zero_point);
+  const float32x4_t vscale = vdupq_n_f32(params->scalar.scale);
+  const int16x8_t voutput_zero_point = vdupq_n_s16(params->scalar.output_zero_point);
+  const uint8x8_t voutput_min = vdup_n_u8(params->scalar.output_min);
+  const uint8x8_t voutput_max = vdup_n_u8(params->scalar.output_max);
 
-  const uint8x8_t vb = vld1_dup_u8(input_b);
-  const uint8x8_t vb_zero_point = vld1_dup_u8(&params->scalar.b_zero_point);
+  const uint8x8_t vb = vdup_n_u8(*input_b);
+  const uint8x8_t vb_zero_point = vdup_n_u8(params->scalar.b_zero_point);
   const int16x8_t vxb = vreinterpretq_s16_u16(vsubl_u8(vb, vb_zero_point));
   for (; batch >= 8 * sizeof(uint8_t); batch -= 8 * sizeof(uint8_t)) {
     const uint8x8_t va01234567 = vld1_u8(input_a); input_a += 8;

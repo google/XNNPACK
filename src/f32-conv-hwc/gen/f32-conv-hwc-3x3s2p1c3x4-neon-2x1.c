@@ -246,8 +246,8 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1(
         vi3x0 = vcombine_f32(vget_high_f32(vi3x1), vi3x2);
         vi4x0 = vcombine_f32(vget_high_f32(vi4x1), vi4x2);
 
-        const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
-        const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+        const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
+        const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
 
         vo0c0123 = vmaxq_f32(vo0c0123, vmin);
         vo1c0123 = vmaxq_f32(vo1c0123, vmin);
@@ -382,8 +382,8 @@ void xnn_f32_conv_hwc_ukernel_3x3s2p1c3x4__neon_2x1(
         vo0c0123 = vmlaq_lane_f32(vo0c0123, vk21c2x0123, vget_high_f32(vi2x1), 0);
         vo1c0123 = vmlaq_lane_f32(vo1c0123, vk21c2x0123, vget_high_f32(vi4x1), 0);
 
-        const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
-        const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+        const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
+        const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
 
         vo0c0123 = vmaxq_f32(vo0c0123, vmin);
         vo1c0123 = vmaxq_f32(vo1c0123, vmin);

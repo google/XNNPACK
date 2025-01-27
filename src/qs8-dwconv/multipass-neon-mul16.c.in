@@ -37,8 +37,8 @@ $VGET_LOW_X8 = "vget_low_u8" if DATATYPE == "QU8" else "vget_low_s8"
 $VCOMBINE_X8 = "vcombine_u8" if DATATYPE == "QU8" else "vcombine_s8"
 $VREINTERPRET_U32_X8 = "vreinterpret_u32_u8" if DATATYPE == "QU8" else "vreinterpret_u32_s8"
 $VREINTERPRET_U16_X8 = "vreinterpret_u16_u8" if DATATYPE == "QU8" else "vreinterpret_u16_s8"
-$VLD1_DUP_X8 = "vld1_dup_u8" if DATATYPE == "QU8" else "vld1_dup_s8"
-$VLD1Q_DUP_X8 = "vld1q_dup_u8" if DATATYPE == "QU8" else "vld1q_dup_s8"
+$VDUP_N_X8 = "vdup_n_u8" if DATATYPE == "QU8" else "vdup_n_s8"
+$VDUPQ_N_X8 = "vdupq_n_u8" if DATATYPE == "QU8" else "vdupq_n_s8"
 $VST1_X8 = "vst1_u8" if DATATYPE == "QU8" else "vst1_s8"
 $VST1Q_X8 = "vst1q_u8" if DATATYPE == "QU8" else "vst1q_s8"
 $VST1_LANE_X8 = "vst1_lane_u8" if DATATYPE == "QU8" else "vst1_lane_s8"
@@ -69,25 +69,25 @@ void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${FIRS
   assert(kernel_size > ${FIRST_PASS_TILE});
 
   $if DATATYPE == "QU8":
-    const uint8x8_t vkernel_zero_point = vld1_dup_u8(&params->${PARAMS_STRUCT}.kernel_zero_point);
+    const uint8x8_t vkernel_zero_point = vdup_n_u8(params->${PARAMS_STRUCT}.kernel_zero_point);
   $if REQUANTIZATION == "RNDNU":
-    const int32x4_t vright_pre_shift = vld1q_dup_s32(&params->${PARAMS_STRUCT}.right_pre_shift);
-    const int32x4_t vmultiplier = vld1q_dup_s32(&params->${PARAMS_STRUCT}.multiplier);
-    const int32x4_t vright_post_shift = vld1q_dup_s32(&params->${PARAMS_STRUCT}.right_post_shift);
+    const int32x4_t vright_pre_shift = vdupq_n_s32(params->${PARAMS_STRUCT}.right_pre_shift);
+    const int32x4_t vmultiplier = vdupq_n_s32(params->${PARAMS_STRUCT}.multiplier);
+    const int32x4_t vright_post_shift = vdupq_n_s32(params->${PARAMS_STRUCT}.right_post_shift);
   $elif REQUANTIZATION == "FP32":
     $if DATATYPE != "QC8":
-      const float32x4_t vscale = vld1q_dup_f32(&params->${PARAMS_STRUCT}.scale);
+      const float32x4_t vscale = vdupq_n_f32(params->${PARAMS_STRUCT}.scale);
     $if not ARMV8:
-      const float32x4_t vmagic_bias = vld1q_dup_f32(&params->${PARAMS_STRUCT}.magic_bias);
-      const int32x4_t vmagic_bias_less_output_zero_point = vld1q_dup_s32(&params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
+      const float32x4_t vmagic_bias = vdupq_n_f32(params->${PARAMS_STRUCT}.magic_bias);
+      const int32x4_t vmagic_bias_less_output_zero_point = vdupq_n_s32(params->${PARAMS_STRUCT}.magic_bias_less_output_zero_point);
   $if REQUANTIZATION != "FP32" or ARMV8:
-    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->${PARAMS_STRUCT}.output_zero_point);
+    const int16x8_t voutput_zero_point = vdupq_n_s16(params->${PARAMS_STRUCT}.output_zero_point);
   $if CHANNEL_TILE == 8:
-    const ${XINT8X8_T} voutput_min = ${VLD1_DUP_X8}(&params->${PARAMS_STRUCT}.output_min);
-    const ${XINT8X8_T} voutput_max = ${VLD1_DUP_X8}(&params->${PARAMS_STRUCT}.output_max);
+    const ${XINT8X8_T} voutput_min = ${VDUP_N_X8}(params->${PARAMS_STRUCT}.output_min);
+    const ${XINT8X8_T} voutput_max = ${VDUP_N_X8}(params->${PARAMS_STRUCT}.output_max);
   $else:
-    const ${XINT8X16_T} voutput_min = ${VLD1Q_DUP_X8}(&params->${PARAMS_STRUCT}.output_min);
-    const ${XINT8X16_T} voutput_max = ${VLD1Q_DUP_X8}(&params->${PARAMS_STRUCT}.output_max);
+    const ${XINT8X16_T} voutput_min = ${VDUPQ_N_X8}(params->${PARAMS_STRUCT}.output_min);
+    const ${XINT8X16_T} voutput_max = ${VDUPQ_N_X8}(params->${PARAMS_STRUCT}.output_max);
 
   do {
     const void* w = weights;

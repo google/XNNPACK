@@ -123,12 +123,12 @@ void xnn_bf16_gemm_minmax_ukernel_${MR}x${NR}c8__neonbf16_${BFOPT.lower()}(
         float32x4_t vacc${M}x${ABC[N:N+4]} = vcombine_f32(vpadd_f32(vsum${M}x${ABC[N]}, vsum${M}x${ABC[N+1]}), vpadd_f32(vsum${M}x${ABC[N+2]}, vsum${M}x${ABC[N+3]}));
 #endif
 
-    const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+    const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
     $for N in range(0, NR, 4):
       $for M in range(MR):
         vacc${M}x${ABC[N:N+4]} = vminq_f32(vacc${M}x${ABC[N:N+4]}, vmax);
 
-    const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+    const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
     $for N in range(0, NR, 4):
       $for M in range(MR):
         vacc${M}x${ABC[N:N+4]} = vmaxq_f32(vacc${M}x${ABC[N:N+4]}, vmin);

@@ -27,14 +27,14 @@ void xnn_qu8_vmul_minmax_rndnu_ukernel__neon_ld64_u16(
   assert(input_b != NULL);
   assert(output != NULL);
 
-  const uint8x8_t va_zero_point = vld1_dup_u8(&params->rndnu_neon.a_zero_point);
-  const uint8x8_t vb_zero_point = vld1_dup_u8(&params->rndnu_neon.b_zero_point);
-  const int32x4_t vleft_pre_shift = vld1q_dup_s32(&params->rndnu_neon.left_pre_shift);
-  const int32x4_t vmultiplier = vld1q_dup_s32(&params->rndnu_neon.multiplier);
-  const int32x4_t vleft_post_shift = vld1q_dup_s32(&params->rndnu_neon.left_post_shift);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->rndnu_neon.output_zero_point);
-  const uint8x16_t voutput_min = vld1q_dup_u8(&params->rndnu_neon.output_min);
-  const uint8x16_t voutput_max = vld1q_dup_u8(&params->rndnu_neon.output_max);
+  const uint8x8_t va_zero_point = vdup_n_u8(params->rndnu_neon.a_zero_point);
+  const uint8x8_t vb_zero_point = vdup_n_u8(params->rndnu_neon.b_zero_point);
+  const int32x4_t vleft_pre_shift = vdupq_n_s32(params->rndnu_neon.left_pre_shift);
+  const int32x4_t vmultiplier = vdupq_n_s32(params->rndnu_neon.multiplier);
+  const int32x4_t vleft_post_shift = vdupq_n_s32(params->rndnu_neon.left_post_shift);
+  const int16x8_t voutput_zero_point = vdupq_n_s16(params->rndnu_neon.output_zero_point);
+  const uint8x16_t voutput_min = vdupq_n_u8(params->rndnu_neon.output_min);
+  const uint8x16_t voutput_max = vdupq_n_u8(params->rndnu_neon.output_max);
 
   for (; batch >= 16 * sizeof(uint8_t); batch -= 16 * sizeof(uint8_t)) {
     const uint8x8_t va01234567 = vld1_u8(input_a); input_a += 8;
