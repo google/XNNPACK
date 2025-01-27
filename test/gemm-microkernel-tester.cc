@@ -1461,9 +1461,9 @@ void GemmMicrokernelTester::Test(
       std::uniform_int_distribution<int32_t>(0, std::numeric_limits<uint8_t>::max()),
       std::ref(rng));
 
-  const size_t planes = 2;  // 4 bit is 2 planes - low nibbles and high nibbles
   const size_t k2 =  round_up_po2(k(), 2);  // tester assumes byte aligned rows
-  const size_t packed_k2 = round_up_po2(k(), kr() * sr() * planes);  // 2 blocks for nibbles
+  const size_t packed_k2 =
+      round_up_po2(k(), kr() * sr() * planes());  // 2 blocks for nibbles
   const size_t packed_k_bytes = (packed_k2 + 1)/ 2;
 
   xnnpack::Buffer<float> input(m() * k2);
@@ -1502,6 +1502,7 @@ void GemmMicrokernelTester::Test(
 
     std::generate(b.begin(), b.end(), std::ref(w8rng));
     std::generate(bias.begin(), bias.end(), std::ref(f32rng));
+
     std::generate(kernel_scale.begin(), kernel_scale.end(), std::ref(scalerng));
     std::fill(packed_w.begin(), packed_w.end(), 0);
     // Row sums are multiplied by input zero point, since we don't know it

@@ -22,6 +22,9 @@ class NeonFma(arch.Aarch64):
   def register_bytes(self):
     return 16
 
+  def weights_register_bytes(self):
+    return self.register_bytes()
+
   def prefix(self):
     return 'v'
 
@@ -72,8 +75,11 @@ class NeonFma(arch.Aarch64):
 
   def weights_asm(self):
     w_asm = {
+        'loop__': [
+            'ldr q{W}, [{W_ptr}], {w_step}\n',
+        ],
         'loop': [
-            'ldr  q{W}, [{W_ptr}], 16\n',
+            'ldp q{W}, q{W_1}, [{W_ptr}], 16\n',
         ],
         'loop_2': [
             'ldp q{W}, q{W_1}, [{W_ptr}], 32\n',
@@ -219,7 +225,7 @@ class NeonFma(arch.Aarch64):
     return asm_string
 
 
-class NeonFmaUnolled(NeonFma):
+class NeonFmaUnrolled(NeonFma):
 
   def __init__(self, unroll_factor):
     self.unroll_factor = unroll_factor

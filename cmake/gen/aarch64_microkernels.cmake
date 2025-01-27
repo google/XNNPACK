@@ -267,6 +267,30 @@ SET(NON_PROD_AARCH64_ASM_MICROKERNEL_SRCS
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-asm-aarch64-neonfma-ld64.S
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-4x8-minmax-asm-aarch64-neonfma-ld128.S
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-6x8-minmax-asm-aarch64-neonfma-ld64.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8-minmax-asm-aarch64-neondot-ld32.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8-minmax-asm-aarch64-neondot-ld64.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x8-minmax-asm-aarch64-neondot-ld128.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x16-minmax-asm-aarch64-neondot-ld32.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x16-minmax-asm-aarch64-neondot-ld64.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-1x16-minmax-asm-aarch64-neondot-ld128.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8-minmax-asm-aarch64-neondot-ld32.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8-minmax-asm-aarch64-neondot-ld64.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x8-minmax-asm-aarch64-neondot-ld128.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x16-minmax-asm-aarch64-neondot-ld32.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x16-minmax-asm-aarch64-neondot-ld64.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-2x16-minmax-asm-aarch64-neondot-ld128.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8-minmax-asm-aarch64-neondot-ld32.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8-minmax-asm-aarch64-neondot-ld64.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x8-minmax-asm-aarch64-neondot-ld128.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x16-minmax-asm-aarch64-neondot-ld32.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x16-minmax-asm-aarch64-neondot-ld64.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-3x16-minmax-asm-aarch64-neondot-ld128.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8-minmax-asm-aarch64-neondot-ld32.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8-minmax-asm-aarch64-neondot-ld64.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x8-minmax-asm-aarch64-neondot-ld128.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x16-minmax-asm-aarch64-neondot-ld32.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x16-minmax-asm-aarch64-neondot-ld64.S
+  src/qd8-f32-qc4w-gemm/gen/qd8-f32-qc4w-gemm-4x16-minmax-asm-aarch64-neondot-ld128.S
   src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8-minmax-asm-aarch64-neondot-ld32.S
   src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8-minmax-asm-aarch64-neondot-ld64.S
   src/qd8-f32-qc8w-gemm/gen/qd8-f32-qc8w-gemm-1x8-minmax-asm-aarch64-neondot-ld128.S

@@ -446,6 +446,123 @@ void xnn_pack_qs8_qc4w_gemm_goi_w(
   } while (--g != 0);
 }
 
+// Packs the weights so as to minimize register usage in kernels.
+// For example:
+// 0 1
+// 2 3
+// 4 5
+// 6 7
+// 8 9
+// A B
+// C D
+// E F
+//
+// is packed for a Mx8c4 microkernel as:
+// (row sums) 1 5 9 13 17 21 2 29 | (packed weights) 08 19 00 00 | 2A 3B 00 00 | 4C 5D 00 | 6E 7F 00 00
+// The row sums are packed first.
+// In contrast to planar packing which packs the weights from the same channel
+// side by side, so position + kr.
+// The register bytes parameter is needed so that we know the offset between
+// each weight's load.
+void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    size_t register_bytes, const uint8_t* k, const int32_t* b,
+    const float* scale, void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc4w_packing_params* params) {
+  assert(g != 0);
+  assert(nc != 0);
+  assert(kc != 0);
+  assert(nr >= sr);
+  assert(kr >= 1 && kr <= 16);
+  assert(sr >= 1 && sr <= 16);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
+  assert(params != nullptr);
+  assert(params->kernel_zero_point == 8 || params->kernel_zero_point == 0);
+
+  const size_t skr = sr * kr;
+  const uint32_t izp = (uint32_t)params->input_zero_point;
+  const uint32_t kernel_zero_point = (uint32_t)params->kernel_zero_point;
+  int row_offset = register_bytes / kr;
+  do {
+    size_t nr_block_start = 0;
+    do {
+      size_t nr_block_size = min(nc - nr_block_start, nr);
+      unaligned_int32_t* packed_b = (unaligned_int32_t*)packed_weights;
+      copy_bias(b, nr_block_start, nr_block_size, packed_b);
+      packed_weights = (int32_t*)packed_weights + nr;
+
+      size_t num_k_blocks = round_up_po2(kc, skr * 1);
+      for (size_t kr_block_start = 0; kr_block_start < num_k_blocks;
+           kr_block_start += kr * 1) {
+        void* pw = packed_weights;
+        for (size_t nr_block_offset_ = 0; nr_block_offset_ < nr_block_size;
+             nr_block_offset_ += row_offset * 2) {
+          for (size_t inner_nr_block_offset = 0;
+               inner_nr_block_offset < row_offset; inner_nr_block_offset += 1) {
+            size_t actual_nr_block_offset =
+                inner_nr_block_offset + nr_block_offset_;
+            int32_t ksum_lo = 0;
+            int32_t ksum_hi = 0;
+            const size_t kc_begin =
+                round_down_po2(kr_block_start, skr) +
+                ((kr_block_start + actual_nr_block_offset * kr) & (skr - 1));
+            for (size_t kr_block_offset = 0; kr_block_offset < kr;
+                 kr_block_offset++) {
+              const size_t kc_idx = kc_begin + kr_block_offset;
+              const size_t k_offset =
+                  (nr_block_start + actual_nr_block_offset) * kc + kc_idx;
+              const size_t kh_offset = k_offset + kc * row_offset;
+              uint8_t kv_lo = kernel_zero_point;
+              if (kc_idx < kc) {
+                kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4)
+                                        : (k[k_offset >> 1] & 0xF));
+              }
+              uint8_t kv_hi = kernel_zero_point;
+              if ((nr_block_start + actual_nr_block_offset + row_offset) < nc) {
+                if (kc_idx < kc) {
+                  kv_hi = ((kh_offset & 1) ? (k[kh_offset >> 1] >> 4)
+                                           : (k[kh_offset >> 1] & 0xF));
+                }
+              }
+              // Pack and flip the sign bit.
+              const uint8_t kv = (kv_lo | (kv_hi << 4)) ^ 0x88;
+              ksum_lo += kv_lo - kernel_zero_point;
+              ksum_hi += kv_hi - kernel_zero_point;
+              ((uint8_t*)pw)[kr_block_offset] = kv;
+            }
+            packed_b[actual_nr_block_offset] =
+                packed_b[actual_nr_block_offset] - ksum_lo * izp * 16;
+            packed_b[actual_nr_block_offset + row_offset] =
+                packed_b[actual_nr_block_offset + row_offset] -
+                ksum_hi * izp * 16;
+            pw = (uint8_t*)pw + kr;  // kr * 2 nibbles
+          }
+        }
+        packed_weights =
+            (uint8_t*)packed_weights + (nr)*kr / 2;  // skip NR remainder
+      }
+      packed_weights =
+          reinterpret_cast<void*>((uintptr_t)packed_weights + extra_bytes);
+      nr_block_start += nr;
+    } while (nr_block_start < nc);
+    k += nc * kc;  // kc * 2 nibbles
+    if XNN_UNPREDICTABLE (b != nullptr) {
+      b += nc;
+    }
+  } while (--g != 0);
+}
+
+void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar_aarch64(
+    size_t g, size_t nc, size_t kc, size_t nr, size_t kr, size_t sr,
+    const uint8_t* k, const int32_t* b, const float* scale,
+    void* packed_weights, size_t extra_bytes,
+    const struct xnn_qs8_qc4w_packing_params* params) {
+  xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(g, nc, kc, nr, kr, sr,
+                                          /*register_bytes=*/16, k, b, scale,
+                                          packed_weights, extra_bytes, params);
+}
+
 // Same as qc4w but unsigned 4 bit output
 // Applies kv ^ 0x88 to convert int4 to uint4
 // Does not multiply bias by 16

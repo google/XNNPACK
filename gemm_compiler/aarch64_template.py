@@ -70,6 +70,12 @@ class Aarch64(base_architecture.BaseArchitecture):
   def mr_register(self):
     return 'x0'
 
+  def mask_register(self):
+    return ''
+
+  def tmp_w_register(self):
+    return ''
+
   def tmp_gp_registers(self):
     return ['x22', 'x23']
 
@@ -80,46 +86,10 @@ class Aarch64(base_architecture.BaseArchitecture):
     return ''
 
   def register_map_byte(self, reg):
-    map = {
-        'x0': 'x0',
-        'x1': 'x1',
-        'x2': 'x2',
-        'x3': 'x3',
-        'x4': 'x4',
-        'x5': 'x5',
-        'x6': 'x6',
-        'x7': 'x7',
-        'x8': 'x8',
-        'x9': 'x9',
-        'x10': 'x10',
-        'x11': 'x11',
-        'x12': 'x12',
-        'x13': 'x13',
-        'x14': 'x10',
-        'x15': 'x15',
-    }
-    return map[reg]
+    return reg.replace('x', 'w')
 
   def register_map_dword(self, reg):
-    map = {
-        'x0': 'q0',
-        'x1': 'q1',
-        'x2': 'q2',
-        'x3': 'q3',
-        'x4': 'q4',
-        'x5': 'q5',
-        'x6': 'q6',
-        'x7': 'q7',
-        'x8': 'q8',
-        'x9': 'q9',
-        'x10': 'q10',
-        'x11': 'q11',
-        'x12': 'q12',
-        'x13': 'q13',
-        'x14': 'q10',
-        'x15': 'q15',
-    }
-    return map[reg]
+    return reg.replace('x', 'q')
 
   def function_name(self, M, N, isa):
     return f'xnn_f32_gemm_minmax_ukernel_{M}x{N}__asm_aarch64_{isa}_ld32\n'
@@ -158,7 +128,7 @@ class Aarch64(base_architecture.BaseArchitecture):
   def read_a_registers(self, M):
     return ''
 
-  def do_loop(self, M, N, i):
+  def do_loop(self, M, N, pos):
     N_COUNT = N // self.n_step()
     asm_string = ''
     for l in self.weights_asm()['loop_2']:
@@ -169,14 +139,8 @@ class Aarch64(base_architecture.BaseArchitecture):
             W_1=self.w_registers()[nr + 1],
             offset=self.register_bytes() * nr,
             w_step=self.register_bytes() * N_COUNT,
-        )
-    for l in self.weights_asm()['loop']:
-      if N_COUNT % 2 != 0:
-        asm_string += l.format(
-            W_ptr=self.w_ptr_register(),
-            W=self.w_registers()[nr],
-            offset=self.register_bytes() * nr,
-            w_step=self.register_bytes() * N_COUNT,
+            mask=self.mask_register(),
+            tmp_W=self.tmp_w_register(),
         )
     if 'after' in self.weights_asm():
       asm_string += self.weights_asm()['after'].format(
@@ -190,7 +154,7 @@ class Aarch64(base_architecture.BaseArchitecture):
               W=self.w_registers()[nr],
               A=self.a_registers(mr),
               ACC=self.acc_registers()[M * nr + mr],
-              POS=i,
+              POS=pos,
           )
     return asm_string
 
@@ -208,13 +172,14 @@ class Aarch64(base_architecture.BaseArchitecture):
     decrement = 4 * self.unroll_factor
     if 'before' in self.input_asm():
       asm_string += self.input_asm()['before']
-    for mr in range(0, M):
-      for l in self.input_asm()['loop']:
-        asm_string += l.format(
-            AM_ptr=self.am_registers()[mr],
-            AM=self.a_registers(mr),
-            a_offset=self.k_register(),
-        )
+    if self.unroll_factor > 1:
+      for mr in range(0, M):
+        for l in self.input_asm()['loop']:
+          asm_string += l.format(
+              AM_ptr=self.am_registers()[mr],
+              AM=self.a_registers(mr),
+              a_offset=self.k_register(),
+          )
     if 'after' in self.input_asm():
       asm_string += self.input_asm()['after']
 

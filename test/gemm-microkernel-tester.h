@@ -101,6 +101,13 @@ class GemmMicrokernelTester {
     return *this;
   }
 
+  uint8_t planes() const { return this->planes_; }
+
+  GemmMicrokernelTester& planes(uint8_t planes) {
+    this->planes_ = planes;
+    return *this;
+  }
+
   GemmMicrokernelTester& a_stride(size_t a_stride) {
     this->a_stride_ = a_stride;
     return *this;
@@ -328,6 +335,7 @@ class GemmMicrokernelTester {
   size_t ks_{1};
   size_t bl_{SIZE_MAX};
   bool unsigned_inputs_{false};
+  uint8_t planes_{1};
   size_t a_stride_{0};
   size_t cm_stride_{0};
   uint8_t a_zero_point_{127};

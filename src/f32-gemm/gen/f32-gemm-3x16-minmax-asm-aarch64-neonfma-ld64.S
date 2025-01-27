@@ -158,7 +158,7 @@ inner_loop_end:
       b return
 
 tail_8:
-      tbz x1, 3, tail_4
+      tbz w1, 3, tail_4
       stp  q11, q14, [x6], 32
       stp  q12, q15, [x13], 32
       stp  q13, q16, [x14], 32
@@ -171,7 +171,7 @@ tail_8:
 
 
 tail_4:
-      tbz x1, 2, tail_2
+      tbz w1, 2, tail_2
       str  q11, [x6], 16
       str  q12, [x13], 16
       str  q13, [x14], 16
@@ -181,7 +181,7 @@ tail_4:
 
 
 tail_2:
-      tbz x1, 1, tail_1
+      tbz w1, 1, tail_1
       str  d11, [x6], 8
       str  d12, [x13], 8
       str  d13, [x14], 8
@@ -191,7 +191,7 @@ tail_2:
 
 
 tail_1:
-      tbz x1, 0, return
+      tbz w1, 0, return
       str  s11, [x6]
       str  s12, [x13]
       str  s13, [x14]

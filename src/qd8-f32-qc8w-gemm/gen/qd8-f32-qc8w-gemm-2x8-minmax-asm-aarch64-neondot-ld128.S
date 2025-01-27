@@ -141,7 +141,7 @@ inner_loop_end:
       b return
 
 tail_4:
-      tbz x1, 2, tail_2
+      tbz w1, 2, tail_2
       str  q12, [x6], 16
       str  q13, [x13], 16
       mov  v12.16b, v14.16b
@@ -149,7 +149,7 @@ tail_4:
 
 
 tail_2:
-      tbz x1, 1, tail_1
+      tbz w1, 1, tail_1
       str  d12, [x6], 8
       str  d13, [x13], 8
       dup d12, v12.d[1]
@@ -157,7 +157,7 @@ tail_2:
 
 
 tail_1:
-      tbz x1, 0, return
+      tbz w1, 0, return
       str  s12, [x6]
       str  s13, [x13]
 

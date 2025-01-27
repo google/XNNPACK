@@ -25,6 +25,7 @@ py_library(
     srcs = [
         "generate.py",
         "generate_f32_gemm_microkernels.py",
+        "generate_qd8_f32_qc4w_gemm_microkernels.py",
         "generate_qd8_f32_qc8w_gemm_microkernels.py",
     ],
     deps = [
