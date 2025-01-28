@@ -1109,21 +1109,23 @@ xnnpack_cc_library(
     visibility = xnnpack_visibility(),
     deps = [
         ":allocator",
-        ":build_identifier",
-        ":common",
-        ":config_hdrs",
+        ":build_identifier",  # build_cleaner: keep
+        ":common",  # build_cleaner: keep
+        ":config_hdrs",  # build_cleaner: keep
         ":hardware_config",
         ":init_once",
         ":logging",
-        ":math",
-        ":microkernels_h",
-        ":microparams",
-        ":microparams_init",
-        ":operators",
+        ":math",  # build_cleaner: keep
+        ":microkernels_h",  # build_cleaner: keep
+        ":microparams",  # build_cleaner: keep
+        ":microparams_init",  # build_cleaner: keep
+        ":operators",  # build_cleaner: keep
         ":params",
-        ":subgraph",
+        ":subgraph",  # build_cleaner: keep
         "@pthreadpool",
-    ],
+    ] + xnnpack_if_kleidiai_enabled([
+        "@KleidiAI//:common",
+    ]),
 )
 
 # Specialized XNNPACK version for TensorFlow Lite. Excludes operators currently
