@@ -1350,6 +1350,18 @@ config_setting(
     define_values = {"xnn_enable_avx512fp16": "false"},
 )
 
+# Enables usage of Intel AVX512-BF16 (bf16 arithmetic) kernels.
+config_setting(
+    name = "xnn_enable_avx512bf16_explicit_true",
+    define_values = {"xnn_enable_avx512bf16": "true"},
+)
+
+# Disables usage of Intel AVX512-BF16 (bf16 arithmetic) kernels.
+config_setting(
+    name = "xnn_enable_avx512bf16_explicit_false",
+    define_values = {"xnn_enable_avx512bf16": "false"},
+)
+
 # Enables usage of Intel AVX-VNNI (integer dot product) kernels.
 config_setting(
     name = "xnn_enable_avxvnni_explicit_true",
@@ -1662,6 +1674,22 @@ selects.config_setting_group(
         ":arm_fp16_vector_enabled",
         "//build_config:aarch64",
     ],
+)
+
+selects.config_setting_group(
+    name = "avx512bf16_enabled_by_default",
+    match_any = [
+        "//build_config:x86_64",
+    ],
+)
+
+alias(
+    name = "avx512bf16_enabled",
+    actual = select({
+        ":xnn_enable_avx512bf16_explicit_true": ":xnn_enable_avx512bf16_explicit_true",
+        ":xnn_enable_avx512bf16_explicit_false": ":xnn_enable_avx512bf16_explicit_true",
+        "//conditions:default": ":avx512bf16_enabled_by_default",
+    }),
 )
 
 selects.config_setting_group(

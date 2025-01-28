@@ -24,6 +24,7 @@ py_library(
     name = "generate_gemm_microkernels",
     srcs = [
         "generate.py",
+        "generate_bf16_f32_gemm_microkernels.py",
         "generate_f32_gemm_microkernels.py",
         "generate_qd8_f32_qc4w_gemm_microkernels.py",
         "generate_qd8_f32_qc8w_gemm_microkernels.py",
@@ -39,6 +40,7 @@ py_library(
 py_library(
     name = "x64_isa_templates",
     srcs = [
+        "avx512bf16_template.py",
         "avx512f_template.py",
         "avx512vnni_template.py",
         "fma3_template.py",

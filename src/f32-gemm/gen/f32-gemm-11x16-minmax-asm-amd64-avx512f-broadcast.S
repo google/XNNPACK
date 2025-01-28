@@ -17,11 +17,6 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_11x16__asm_amd64_avx512f_broadcast
       push r13
       push r12
 
-      # Swap rsi & rcx because sal can only use cl.
-      mov r15, rsi
-      mov rsi, rcx
-      mov rcx, r15
-
       # load params to free up a GP registers
       mov r13, [rsp + 80] # params
       vbroadcastss zmm0, DWORD PTR [r13]
@@ -31,146 +26,149 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_11x16__asm_amd64_avx512f_broadcast
       mov r10, [rsp + 56]
       # Load cm_stride.
       mov r11, [rsp + 64]
+
+      # Allocate some space on the stack.
+      sub rsp, 208
       # Write rsi (a pointer) to the stack as we need the register.
-      mov [rsp - 128], rsi
+      mov [rsp], rcx
       # Write r10 (c pointer) to the stack as we need the register.
-      mov [rsp - 136], r10
+      mov [rsp + 8], r10
 
       # Clamp a & c pointers if mr <= 1
-      mov rax, rsi
+      mov rax, rcx
       add rax, r8
       mov r13, r10
       add r13, r11
       cmp rdi, 1
-      cmovle rax, rsi
+      cmovle rax, rcx
       cmovle r13, r10
 
-      mov [rsp - 144], rax
-      mov [rsp - 152], r13
+      mov [rsp + 16], rax
+      mov [rsp + 24], r13
 
       # Clamp a & c pointers if mr <= 2
-      mov rsi, rax
-      add rsi, r8
+      mov rcx, rax
+      add rcx, r8
       mov r10, r13
       add r10, r11
       cmp rdi, 2
-      cmovle rsi, rax
+      cmovle rcx, rax
       cmovle r10, r13
 
-      mov [rsp - 160], rsi
-      mov [rsp - 168], r10
+      mov [rsp + 32], rcx
+      mov [rsp + 40], r10
 
       # Clamp a & c pointers if mr <= 3
-      mov rax, rsi
+      mov rax, rcx
       add rax, r8
       mov r13, r10
       add r13, r11
       cmp rdi, 3
-      cmovle rax, rsi
+      cmovle rax, rcx
       cmovle r13, r10
 
-      mov [rsp - 176], rax
-      mov [rsp - 184], r13
+      mov [rsp + 48], rax
+      mov [rsp + 56], r13
 
       # Clamp a & c pointers if mr <= 4
-      mov rsi, rax
-      add rsi, r8
+      mov rcx, rax
+      add rcx, r8
       mov r10, r13
       add r10, r11
       cmp rdi, 4
-      cmovle rsi, rax
+      cmovle rcx, rax
       cmovle r10, r13
 
-      mov [rsp - 192], rsi
-      mov [rsp - 200], r10
+      mov [rsp + 64], rcx
+      mov [rsp + 72], r10
 
       # Clamp a & c pointers if mr <= 5
-      mov rax, rsi
+      mov rax, rcx
       add rax, r8
       mov r13, r10
       add r13, r11
       cmp rdi, 5
-      cmovle rax, rsi
+      cmovle rax, rcx
       cmovle r13, r10
 
-      mov [rsp - 208], rax
-      mov [rsp - 216], r13
+      mov [rsp + 80], rax
+      mov [rsp + 88], r13
 
       # Clamp a & c pointers if mr <= 6
-      mov rsi, rax
-      add rsi, r8
+      mov rcx, rax
+      add rcx, r8
       mov r10, r13
       add r10, r11
       cmp rdi, 6
-      cmovle rsi, rax
+      cmovle rcx, rax
       cmovle r10, r13
 
-      mov [rsp - 224], rsi
-      mov [rsp - 232], r10
+      mov [rsp + 96], rcx
+      mov [rsp + 104], r10
 
       # Clamp a & c pointers if mr <= 7
-      mov rax, rsi
+      mov rax, rcx
       add rax, r8
       mov r13, r10
       add r13, r11
       cmp rdi, 7
-      cmovle rax, rsi
+      cmovle rax, rcx
       cmovle r13, r10
 
-      mov [rsp - 240], rax
-      mov [rsp - 248], r13
+      mov [rsp + 112], rax
+      mov [rsp + 120], r13
 
       # Clamp a & c pointers if mr <= 8
-      mov rsi, rax
-      add rsi, r8
+      mov rcx, rax
+      add rcx, r8
       mov r10, r13
       add r10, r11
       cmp rdi, 8
-      cmovle rsi, rax
+      cmovle rcx, rax
       cmovle r10, r13
 
-      mov [rsp - 256], rsi
-      mov [rsp - 264], r10
+      mov [rsp + 128], rcx
+      mov [rsp + 136], r10
 
       # Clamp a & c pointers if mr <= 9
-      mov rax, rsi
+      mov rax, rcx
       add rax, r8
       mov r13, r10
       add r13, r11
       cmp rdi, 9
-      cmovle rax, rsi
+      cmovle rax, rcx
       cmovle r13, r10
 
-      mov [rsp - 272], rax
-      mov [rsp - 280], r13
+      mov [rsp + 144], rax
+      mov [rsp + 152], r13
 
       # Clamp a & c pointers if mr <= 10
-      mov rsi, rax
-      add rsi, r8
+      mov rcx, rax
+      add rcx, r8
       mov r10, r13
       add r10, r11
       cmp rdi, 10
-      cmovle rsi, rax
+      cmovle rcx, rax
       cmovle r10, r13
 
-      mov [rsp - 288], rsi
-      mov [rsp - 296], r10
+      mov [rsp + 160], rcx
+      mov [rsp + 168], r10
 
 outer_loop:
       # Initialize k counter.
       mov r11, 0
       # Read a pointers from stack into GP registers.
-      mov rsi, [rsp - 128]
-      mov rax, [rsp - 144]
-      mov r15, [rsp - 160]
-      mov r14, [rsp - 176]
-      mov r12, [rsp - 192]
-      mov r10, [rsp - 208]
-      mov r13, [rsp - 224]
-      mov rbx, [rsp - 240]
-      mov rbp, [rsp - 256]
-      mov r8, [rsp - 272]
-      mov rdi, [rsp - 288]
+      mov rcx, [rsp + 0]
+      mov rax, [rsp + 16]
+      mov r15, [rsp + 32]
+      mov r14, [rsp + 48]
+      mov r12, [rsp + 64]
+      mov r10, [rsp + 80]
+      mov r13, [rsp + 96]
+      mov rbx, [rsp + 112]
+      mov rbp, [rsp + 128]
+      mov r8, [rsp + 144]
+      mov rdi, [rsp + 160]
 
       # Initialize accumulators with the biases.
       vmovaps  zmm7, [r9 + 0]
@@ -189,7 +187,7 @@ outer_loop:
 inner_loop:
       vmovaps  zmm10, [r9 + 0]
       add r9, 64
-      vbroadcastss zmm2, DWORD PTR [rsi + r11]
+      vbroadcastss zmm2, DWORD PTR [rcx + r11]
       vfmadd231ps  zmm7, zmm2, zmm10
       vbroadcastss zmm2, DWORD PTR [rax + r11]
       vfmadd231ps  zmm8, zmm2, zmm10
@@ -241,23 +239,23 @@ inner_loop_end:
       vmaxps  zmm21, zmm0, zmm21
 
       # Pop output pointers from the stack.
-      mov rsi, [rsp - 136]
-      mov rax, [rsp - 152]
-      mov r15, [rsp - 168]
-      mov r14, [rsp - 184]
-      mov r12, [rsp - 200]
-      mov r10, [rsp - 216]
-      mov r13, [rsp - 232]
-      mov rbx, [rsp - 248]
-      mov rbp, [rsp - 264]
-      mov r8, [rsp - 280]
-      mov rdi, [rsp - 296]
+      mov rcx, [rsp + 8]
+      mov rax, [rsp + 24]
+      mov r15, [rsp + 40]
+      mov r14, [rsp + 56]
+      mov r12, [rsp + 72]
+      mov r10, [rsp + 88]
+      mov r13, [rsp + 104]
+      mov rbx, [rsp + 120]
+      mov rbp, [rsp + 136]
+      mov r8, [rsp + 152]
+      mov rdi, [rsp + 168]
 
       # Check whether full or partial store.
-      cmp rcx, 16
+      cmp rsi, 16
       jl tail
 
-      vmovups  [rsi], zmm7
+      vmovups  [rcx], zmm7
       vmovups  [rax], zmm8
       vmovups  [r15], zmm9
       vmovups  [r14], zmm14
@@ -268,7 +266,7 @@ inner_loop_end:
       vmovups  [rbp], zmm19
       vmovups  [r8], zmm20
       vmovups  [rdi], zmm21
-      add rsi, 64
+      add rcx, 64
       add rax, 64
       add r15, 64
       add r14, 64
@@ -281,28 +279,28 @@ inner_loop_end:
       add rdi, 64
 
       # Write output pointers to the stack.
-      mov [rsp - 136], rsi
-      mov [rsp - 152], rax
-      mov [rsp - 168], r15
-      mov [rsp - 184], r14
-      mov [rsp - 200], r12
-      mov [rsp - 216], r10
-      mov [rsp - 232], r13
-      mov [rsp - 248], rbx
-      mov [rsp - 264], rbp
-      mov [rsp - 280], r8
-      mov [rsp - 296], rdi
+      mov [rsp + 8], rcx
+      mov [rsp + 24], rax
+      mov [rsp + 40], r15
+      mov [rsp + 56], r14
+      mov [rsp + 72], r12
+      mov [rsp + 88], r10
+      mov [rsp + 104], r13
+      mov [rsp + 120], rbx
+      mov [rsp + 136], rbp
+      mov [rsp + 152], r8
+      mov [rsp + 168], rdi
 
-      sub rcx, 16
+      sub rsi, 16
       jne outer_loop
       jmp return
 
 tail:
-      mov r11d, -1
-      sal r11d, cl
-      not r11d
+      mov r11, -1
+      shlx r11, r11, rsi
+      not r11
       kmovw k1, r11d
-      vmovups  ZMMWORD PTR [rsi]{k1}, zmm7
+      vmovups  ZMMWORD PTR [rcx]{k1}, zmm7
       vmovups  ZMMWORD PTR [rax]{k1}, zmm8
       vmovups  ZMMWORD PTR [r15]{k1}, zmm9
       vmovups  ZMMWORD PTR [r14]{k1}, zmm14
@@ -315,6 +313,7 @@ tail:
       vmovups  ZMMWORD PTR [rdi]{k1}, zmm21
 
 return:
+      add rsp, 208
 
       # Restore the callee saved registers.
       pop r12

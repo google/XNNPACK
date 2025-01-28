@@ -209,6 +209,8 @@ class NeonDot(isa.NeonFma):
             pos=int((mr % 2) * 2),
         )
 
+    num_horizontal_registers = int(N / self.n_step())
+    ret += self.increment_ptr(ptr=W, step=self.register_bytes() * N)
     return ret
 
 

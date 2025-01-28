@@ -17,11 +17,6 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x64c4__asm_amd64_avx512vnni
       push r13
       push r12
 
-      # Swap rsi & rcx because sal can only use cl.
-      mov r15, rsi
-      mov rsi, rcx
-      mov rcx, r15
-
       # load params to free up a GP registers
       mov r13, [rsp + 80] # params
       vbroadcastss zmm0, DWORD PTR [r13]
@@ -34,15 +29,17 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x64c4__asm_amd64_avx512vnni
 
       add rdx, 3
       and rdx, -4
+
+      # Allocate some space on the stack.
       sub rsp, 656
 
       # Clamp a & c pointers if mr <= 1
-      mov rax, rsi
+      mov rax, rcx
       add rax, r8
       mov r13, r10
       add r13, r11
       cmp rdi, 1
-      cmovle rax, rsi
+      cmovle rax, rcx
       cmovle r13, r10
 
       # Clamp a & c pointers if mr <= 2
@@ -94,17 +91,17 @@ inner_loop:
       vmovaps  zmm8, [r9 + 128]
       vmovaps  zmm9, [r9 + 192]
       add r9, 256
-      vpbroadcastd zmm2, [rsi + r11]
+      vpbroadcastd zmm2, [rcx + r11]
+      vpbroadcastd zmm2, [rax + r11]
+      vpbroadcastd zmm2, [r15 + r11]
       vpdpbusd  zmm5, zmm2, zmm6
       vpdpbusd  zmm15, zmm2, zmm7
       vpdpbusd  zmm18, zmm2, zmm8
       vpdpbusd  zmm21, zmm2, zmm9
-      vpbroadcastd zmm2, [rax + r11]
       vpdpbusd  zmm12, zmm2, zmm6
       vpdpbusd  zmm16, zmm2, zmm7
       vpdpbusd  zmm19, zmm2, zmm8
       vpdpbusd  zmm22, zmm2, zmm9
-      vpbroadcastd zmm2, [r15 + r11]
       vpdpbusd  zmm14, zmm2, zmm6
       vpdpbusd  zmm17, zmm2, zmm7
       vpdpbusd  zmm20, zmm2, zmm8
@@ -191,7 +188,7 @@ inner_loop_end:
       vmaxps  zmm23, zmm0, zmm23
 
       # Check whether full or partial store.
-      cmp rcx, 64
+      cmp rsi, 64
       jl tail
 
       vmovups  [r10], zmm5
@@ -210,13 +207,13 @@ inner_loop_end:
       add r13, 256
       add rbx, 256
 
-      sub rcx, 64
+      sub rsi, 64
       jne outer_loop
       jmp return
 
 tail:
       mov r11, -1
-      sal r11, cl
+      shlx r11, r11, rsi
       not r11
       kmovw k1, r11d
       shr r11, 16

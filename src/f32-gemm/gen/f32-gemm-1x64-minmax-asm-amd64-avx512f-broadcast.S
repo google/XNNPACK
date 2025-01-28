@@ -17,11 +17,6 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x64__asm_amd64_avx512f_broadcast
       push r13
       push r12
 
-      # Swap rsi & rcx because sal can only use cl.
-      mov r15, rsi
-      mov rsi, rcx
-      mov rcx, r15
-
       # load params to free up a GP registers
       mov r13, [rsp + 80] # params
       vbroadcastss zmm0, DWORD PTR [r13]
@@ -31,6 +26,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x64__asm_amd64_avx512f_broadcast
       mov r10, [rsp + 56]
       # Load cm_stride.
       mov r11, [rsp + 64]
+
+      # Allocate some space on the stack.
+      sub rsp, 48
 
 outer_loop:
       # Initialize k counter.
@@ -48,7 +46,7 @@ inner_loop:
       vmovaps  zmm12, [r9 + 128]
       vmovaps  zmm13, [r9 + 192]
       add r9, 256
-      vbroadcastss zmm2, DWORD PTR [rsi + r11]
+      vbroadcastss zmm2, DWORD PTR [rcx + r11]
       vfmadd231ps  zmm7, zmm2, zmm10
       vfmadd231ps  zmm8, zmm2, zmm11
       vfmadd231ps  zmm9, zmm2, zmm12
@@ -69,7 +67,7 @@ inner_loop_end:
       vmaxps  zmm14, zmm0, zmm14
 
       # Check whether full or partial store.
-      cmp rcx, 64
+      cmp rsi, 64
       jl tail
 
       vmovups  [r10], zmm7
@@ -78,13 +76,13 @@ inner_loop_end:
       vmovups  [r10 + 192], zmm14
       add r10, 256
 
-      sub rcx, 64
+      sub rsi, 64
       jne outer_loop
       jmp return
 
 tail:
       mov r11, -1
-      sal r11, cl
+      shlx r11, r11, rsi
       not r11
       kmovw k1, r11d
       shr r11, 16
@@ -100,6 +98,7 @@ tail:
       vmovups  ZMMWORD PTR [r10 + 192]{k4}, zmm14
 
 return:
+      add rsp, 48
 
       # Restore the callee saved registers.
       pop r12

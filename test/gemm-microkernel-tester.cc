@@ -44,7 +44,6 @@ TEST_P(GemmTest, Test) {
       return;
     }
   }
-
   // Loop over the `k`, `m`, and `n` values, if required.
   for (size_t k = params.loop_k_.from; k <= params.loop_k_.to;
        k = params.loop_k_.next(k)) {
@@ -2424,6 +2423,92 @@ void GemmMicrokernelTester::Test(
             << "), optimized = " << (uint32_t) c[i * cm_stride() + (j / nr()) * nr() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
             << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k()
             << ", requantization scale = " << requantization_scale << ", output zero point = " << int32_t(c_zero_point);
+      }
+    }
+  }
+}
+
+void GemmMicrokernelTester::Test(
+  xnn_bf16_f32_gemm_minmax_ukernel_fn gemm_minmax,
+  xnn_init_bf16_minmax_params_fn init_params,
+  xnn_pack_bf16_f32_gemm_fn pack) const
+{
+  if (a_stride() < k()) {
+    return;
+  }
+  if (m() > mr()) {
+    return;
+  }
+  ASSERT_LE(m(), mr());
+  ASSERT_GE(a_stride(), k());
+  ASSERT_GE(cm_stride(), n());
+
+  xnnpack::ReplicableRandomDevice rng;
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(0.5f, 1.0f), std::ref(rng));
+
+  xnnpack::Buffer<xnn_bfloat16> a((m() - 1) * a_stride() + k() + XNN_EXTRA_BYTES / sizeof(xnn_bfloat16));
+  xnnpack::Buffer<xnn_bfloat16> b(n() * k());
+  xnnpack::Buffer<xnn_bfloat16, XNN_ALLOCATION_ALIGNMENT> packed_w(
+      packed_n() * packed_k() + packed_n() * 2);
+  xnnpack::Buffer<float> bias(n());
+  xnnpack::Buffer<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * nr() + (n() - 1) % nr() + 1);
+  xnnpack::Buffer<float> c_ref(m() * n());
+
+  for (size_t iteration = 0; iteration < kIterations; iteration++) {
+    std::generate(a.begin(), a.end(), [&] { return f32rng(rng); });
+    std::generate(b.begin(), b.end(), [&] { return f32rng(rng); });
+    std::generate(bias.begin(), bias.end(), [&] { return f32rng(rng); });
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
+
+    std::fill(packed_w.begin(), packed_w.end(), 0);
+    pack(/*g=*/1, n(), k(), nr(), kr(), sr(),
+         b.data(),
+         bias.data(), /*scale=*/nullptr,
+         packed_w.data(),
+         /*extra_bytes=*/0, /*params=*/nullptr);
+
+    for (size_t m_index = 0; m_index < m(); m_index++) {
+      for (size_t n_index = 0; n_index < n(); n_index++) {
+        c_ref[m_index * n() + n_index] = bias[n_index];
+        for (size_t k_index = 0; k_index < k(); k_index++) {
+          ASSERT_LE(n(), packed_n());
+          ASSERT_LT(m_index * n() + n_index, c_ref.size());
+          ASSERT_LT(m_index * k() + k_index, a.size());
+          c_ref[m_index * n() + n_index] +=
+            a[m_index * a_stride() + k_index] *
+            b[n_index * k() + k_index];
+        }
+      }
+    }
+
+    const float accumulated_min = *std::min_element(c_ref.cbegin(), c_ref.cend());
+    const float accumulated_max = *std::max_element(c_ref.cbegin(), c_ref.cend());
+    const float c_min = xnn_bfloat16(accumulated_min + (accumulated_max - accumulated_min) / 255.0f * float(qmin()));
+    const float c_max = xnn_bfloat16(accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax()));
+
+    // Prepare parameters.
+    xnn_bf16_minmax_params params;
+    init_params(&params, c_min, c_max);
+
+    for (float& c_value : c_ref) {
+      c_value = std::max(std::min(c_value, c_max), c_min);
+    }
+
+    gemm_minmax(m(), n(), k() * sizeof(xnn_bfloat16),
+      reinterpret_cast<const uint16_t*>(a.data()), a_stride() * sizeof(xnn_bfloat16),
+      packed_w.data(),
+      c.data(), cm_stride() * sizeof(float),
+      &params);
+
+    // Validate micro-kernel outputs.
+    for (size_t i = 0; i < m(); i++) {
+      for (size_t j = 0; j < n(); j++) {
+        ASSERT_NEAR(
+            c[i * cm_stride() + (j / nr()) * nr() + j % nr()],
+            c_ref[i * n() + j],
+            std::max(1.0e-4f, std::abs(c_ref[i * n() + j]) * 3.0e-2f))
+          << "at " << i << ", " << j << ": Mr x Nr x Kr = " << mr() << " x " << nr()
+          << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
       }
     }
   }

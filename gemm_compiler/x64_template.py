@@ -38,24 +38,13 @@ class X64(base_architecture.BaseArchitecture):
     ]
 
   def a_ptr_register(self):
-    return 'rsi'
+    return 'rcx'
 
   def c_ptr_register(self):
-    return 'rsi'
+    return 'rcx'
 
   def cm_registers(self):
-    return [self.c_ptr_register()] + [
-        'rax',
-        'r15',
-        'r14',
-        'r12',
-        'r10',
-        'r13',
-        'rbx',
-        'rbp',
-        'r8',
-        'rdi',
-    ]
+    return self.am_registers()
 
   def acc_registers(self):
     return [
@@ -93,7 +82,7 @@ class X64(base_architecture.BaseArchitecture):
     return 'mm1'
 
   def nc_register(self):
-    return 'rcx'
+    return 'rsi'
 
   def mr_register(self):
     return 'rdi'
@@ -151,6 +140,9 @@ class X64(base_architecture.BaseArchitecture):
   def function_name(self, M, N, isa):
     return f'xnn_f32_gemm_minmax_ukernel_{M}x{N}__asm_amd64_{isa}_broadcast\n'
 
+  def params_offset(self):
+    return 80
+
   def header(self, M, N, prefix, isa):
     HEADER = """// Copyright 2025 Google LLC
 //
@@ -171,20 +163,17 @@ class X64(base_architecture.BaseArchitecture):
       push r13
       push r12
 
-      # Swap rsi & rcx because sal can only use cl.
-      mov r15, rsi
-      mov rsi, rcx
-      mov rcx, r15
-
       # load params to free up a GP registers
-      mov r13, [rsp + 80] # params
+      mov r13, [rsp + {params_offset}] # params
       vbroadcastss {prefix}mm0, DWORD PTR [r13]
       vbroadcastss {prefix}mm1, DWORD PTR [r13 + 4]
 
       # Load c pointer.
       mov r10, [rsp + 56]
       # Load cm_stride.
-      mov r11, [rsp + 64]\n""".format(M=M, N=N, prefix=prefix, isa=isa)
+      mov r11, [rsp + 64]\n""".format(
+        M=M, N=N, prefix=prefix, isa=isa, params_offset=self.params_offset()
+    )
     return HEADER
 
   def input_output_register_setup(self, M):
@@ -201,10 +190,11 @@ class X64(base_architecture.BaseArchitecture):
       cmovle {aM}, {aM_1}
       cmovle {cM}, {cM_1}\n"""
     INPUT_OUTPUT_REGISTER_PUSH = """
-      mov [rsp - {a_rsp_offset}], {aM}
-      mov [rsp - {c_rsp_offset}], {cM}\n"""
+      mov [rsp + {a_rsp_offset}], {aM}
+      mov [rsp + {c_rsp_offset}], {cM}\n"""
     ret = ''
     if self.stack_size(M) != 0:
+      ret += '\n# Allocate some space on the stack.\n'
       ret += """sub rsp, {stack_size}\n""".format(
           stack_size=self.stack_size(M)
       )
@@ -213,11 +203,11 @@ class X64(base_architecture.BaseArchitecture):
       ret += (
           '# Write rsi (a pointer) to the stack as we need the register.\n'
       )
-      ret += 'mov [rsp - 128], rsi\n'
+      ret += 'mov [rsp], rcx\n'
       ret += (
           '# Write r10 (c pointer) to the stack as we need the register.\n'
       )
-      ret += 'mov [rsp - 136], r10\n'
+      ret += 'mov [rsp + 8], r10\n'
     for mr in range(1, M):
       # cycle size of 2 if required
       if M > self.max_M_before_spilling():
@@ -230,7 +220,7 @@ class X64(base_architecture.BaseArchitecture):
         c_pos = mr + self.max_M_before_spilling()
         a_pos_1 = a_pos - 1
         c_pos_1 = c_pos - 1
-      a_rsp_offset = 144 + (mr - 1) * 16
+      a_rsp_offset = 16 + (mr - 1) * 16
       ret += INPUT_OUTPUT_REGISTER_SETUP.format(
           M=mr,
           aM=registers[a_pos],
@@ -267,9 +257,9 @@ class X64(base_architecture.BaseArchitecture):
     if M <= self.max_M_before_spilling():
       return ''
     ret = '# Read a pointers from stack into GP registers.\n'
-    POP_A = 'mov {aM}, [rsp - {a_rsp_offset}]\n'
+    POP_A = 'mov {aM}, [rsp + {a_rsp_offset}]\n'
     for mr in range(0, M):
-      a_rsp_offset = 128 + mr * 16
+      a_rsp_offset = mr * 16
       ret += POP_A.format(aM=registers[mr], a_rsp_offset=a_rsp_offset)
     ret += '\n'
     return ret
@@ -280,19 +270,21 @@ class X64(base_architecture.BaseArchitecture):
   def initialize_k_register(self, reg):
     return f'mov {reg}, 0\n'
 
+  def inner_loop_increment(self):
+    return 4
+
   def cmp_k_and_jump_if_less(self, label):
     kc_register = self.kc_register()
     k_register = self.k_register()
-    return """
-      add {k_register}, 4
+    increment_bytes = self.inner_loop_increment()
+    return f"""
+      add {k_register}, {increment_bytes}
       cmp {kc_register}, {k_register}
-      jne {label}\n""".format(
-        label=label, k_register=k_register, kc_register=kc_register
-    )
+      jne {label}\n"""
 
   def load_from_stack(self, reg, offset):
     """Load 8 bytes from the given offset from the stack pointer to reg."""
-    return f'mov {reg}, [rsp - {offset}]\n'
+    return f'mov {reg}, [rsp + {offset}]\n'
 
   def epilogue(self, M, N, isa):
     restore_stack = '\nreturn:\n'
@@ -318,12 +310,17 @@ END_FUNCTION {function_name}""".format(
     """Returns the required stack storage space."""
     return 0
 
+  def inner_loop_tail(self, M, N):
+    return ''
+
   def inner_loop(self, M, N):
+    asm_string = '\ninner_loop:\n'
     if M > self.max_M_before_spilling():
-      asm_string = self.inner_loop_spill_gp(M, N)
+      asm_string += self.inner_loop_spill_gp(M, N)
     else:
-      asm_string = self.inner_loop_small_M_N(M, N)
+      asm_string += self.inner_loop_small_M_N(M, N)
     # loop counter
     asm_string += self.cmp_k_and_jump_if_less(label='inner_loop')
+    asm_string += self.inner_loop_tail(M, N)
 
     return asm_string

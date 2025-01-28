@@ -15,8 +15,7 @@ from gemm_compiler import base_architecture
 def generate_gemm_microkernel(
     M: int, N: int, isa: base_architecture.BaseArchitecture, output_file: str
 ):
-  elements_per_register = isa.n_step()
-  num_horizontal_registers = int(N / elements_per_register)
+  num_horizontal_registers = int(N / isa.n_step())
   asm_string = isa.header(M, N, isa.prefix(), isa.isa())
 
   k_register = isa.k_register()
@@ -27,6 +26,10 @@ def generate_gemm_microkernel(
   asm_string += isa.adjust_kc()
 
   # setup a{1}->a{M-1} & c{1]->c{M-1}registers
+  if isa.isa() == 'avx512fp16':
+    res = isa.input_output_register_setup(
+        M=M,
+    )
   asm_string += isa.input_output_register_setup(
       M=M,
   )
@@ -46,9 +49,6 @@ def generate_gemm_microkernel(
   asm_string += isa.init_accumulators(
       M=M,
       N=num_horizontal_registers,
-  )
-  asm_string += isa.increment_ptr(
-      ptr=w_ptr_reg, step=isa.register_bytes() * num_horizontal_registers
   )
 
   # inner loop

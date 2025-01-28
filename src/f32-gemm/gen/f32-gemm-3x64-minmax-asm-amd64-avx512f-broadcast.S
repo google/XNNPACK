@@ -17,11 +17,6 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_3x64__asm_amd64_avx512f_broadcast
       push r13
       push r12
 
-      # Swap rsi & rcx because sal can only use cl.
-      mov r15, rsi
-      mov rsi, rcx
-      mov rcx, r15
-
       # load params to free up a GP registers
       mov r13, [rsp + 80] # params
       vbroadcastss zmm0, DWORD PTR [r13]
@@ -32,13 +27,16 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_3x64__asm_amd64_avx512f_broadcast
       # Load cm_stride.
       mov r11, [rsp + 64]
 
+      # Allocate some space on the stack.
+      sub rsp, 80
+
       # Clamp a & c pointers if mr <= 1
-      mov rax, rsi
+      mov rax, rcx
       add rax, r8
       mov r13, r10
       add r13, r11
       cmp rdi, 1
-      cmovle rax, rsi
+      cmovle rax, rcx
       cmovle r13, r10
 
       # Clamp a & c pointers if mr <= 2
@@ -74,17 +72,17 @@ inner_loop:
       vmovaps  zmm12, [r9 + 128]
       vmovaps  zmm13, [r9 + 192]
       add r9, 256
-      vbroadcastss zmm2, DWORD PTR [rsi + r11]
+      vbroadcastss zmm2, DWORD PTR [rcx + r11]
+      vbroadcastss zmm3, DWORD PTR [rax + r11]
+      vbroadcastss zmm4, DWORD PTR [r15 + r11]
       vfmadd231ps  zmm7, zmm2, zmm10
       vfmadd231ps  zmm14, zmm2, zmm11
       vfmadd231ps  zmm17, zmm2, zmm12
       vfmadd231ps  zmm20, zmm2, zmm13
-      vbroadcastss zmm3, DWORD PTR [rax + r11]
       vfmadd231ps  zmm8, zmm3, zmm10
       vfmadd231ps  zmm15, zmm3, zmm11
       vfmadd231ps  zmm18, zmm3, zmm12
       vfmadd231ps  zmm21, zmm3, zmm13
-      vbroadcastss zmm4, DWORD PTR [r15 + r11]
       vfmadd231ps  zmm9, zmm4, zmm10
       vfmadd231ps  zmm16, zmm4, zmm11
       vfmadd231ps  zmm19, zmm4, zmm12
@@ -121,7 +119,7 @@ inner_loop_end:
       vmaxps  zmm22, zmm0, zmm22
 
       # Check whether full or partial store.
-      cmp rcx, 64
+      cmp rsi, 64
       jl tail
 
       vmovups  [r10], zmm7
@@ -140,13 +138,13 @@ inner_loop_end:
       add r13, 256
       add rbx, 256
 
-      sub rcx, 64
+      sub rsi, 64
       jne outer_loop
       jmp return
 
 tail:
       mov r11, -1
-      sal r11, cl
+      shlx r11, r11, rsi
       not r11
       kmovw k1, r11d
       shr r11, 16
@@ -170,6 +168,7 @@ tail:
       vmovups  ZMMWORD PTR [rbx + 192]{k4}, zmm22
 
 return:
+      add rsp, 80
 
       # Restore the callee saved registers.
       pop r12

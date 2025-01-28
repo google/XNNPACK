@@ -468,6 +468,16 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "bf16_f32_gemm_minmax_test",
+    srcs = [
+        "bf16-f32-gemm-minmax.cc",
+    ],
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "avgpool_minmax_test",
     srcs = [
         "avgpool-microkernel-tester.h",

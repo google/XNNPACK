@@ -14,6 +14,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <iostream>
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
@@ -122,6 +123,51 @@ void xnn_pack_f32_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
     k += nc * kc;
     if XNN_UNPREDICTABLE (b != nullptr) {
       b += nc;
+    }
+  } while (--g != 0);
+}
+
+void xnn_pack_bf16_f32_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
+                             size_t kr, size_t sr, const xnn_bfloat16* k,
+                             const float* bias, const void* scale,
+                             void* packed_weights, size_t extra_bytes,
+                             const void* params) {
+  assert(g != 0);
+  assert(nr >= sr);
+  assert(k != nullptr);
+  assert(packed_weights != nullptr);
+
+  const size_t skr = sr * kr;
+  do {
+    for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
+      const size_t nr_block_size = min(nc - nr_block_start, nr);
+      float* packed_weights_float = (float*) packed_weights;
+      for (size_t i = 0; i < nr_block_size; ++i) {
+        packed_weights_float[i] = bias[nr_block_start + i];
+      }
+      packed_weights = (void*)((uintptr_t) packed_weights + nr * sizeof(float));
+
+      for (size_t kr_block_start = 0; kr_block_start < round_up_po2(kc, skr);
+           kr_block_start += kr) {
+        for (size_t nr_block_offset = 0; nr_block_offset < nr_block_size;
+             nr_block_offset++) {
+          const size_t kc_begin =
+              round_down_po2(kr_block_start, skr) +
+              ((kr_block_start + nr_block_offset * kr) & (skr - 1));
+          const size_t kc_end = std::min(kc, kc_begin + kr);
+          if (kc_begin < kc_end) {
+            std::copy_n(&k[(nr_block_start + nr_block_offset) * kc + kc_begin],
+                        kc_end - kc_begin, (xnn_bfloat16*) packed_weights);
+          }
+          packed_weights = (void*) ((uintptr_t) packed_weights + kr * sizeof(uint16_t));
+        }
+        packed_weights = (void*) ((uintptr_t) packed_weights + (nr - nr_block_size) * kr * sizeof(uint16_t));
+      }
+      packed_weights = (void*) ((uintptr_t)packed_weights + extra_bytes);
+    }
+    k += nc * kc;
+    if XNN_UNPREDICTABLE (bias != nullptr) {
+      bias += nc;
     }
   } while (--g != 0);
 }

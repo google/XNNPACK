@@ -17,11 +17,6 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x32c4__asm_amd64_avx512vnni
       push r13
       push r12
 
-      # Swap rsi & rcx because sal can only use cl.
-      mov r15, rsi
-      mov rsi, rcx
-      mov rcx, r15
-
       # load params to free up a GP registers
       mov r13, [rsp + 80] # params
       vbroadcastss zmm0, DWORD PTR [r13]
@@ -34,15 +29,17 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x32c4__asm_amd64_avx512vnni
 
       add rdx, 3
       and rdx, -4
+
+      # Allocate some space on the stack.
       sub rsp, 784
 
       # Clamp a & c pointers if mr <= 1
-      mov rax, rsi
+      mov rax, rcx
       add rax, r8
       mov r13, r10
       add r13, r11
       cmp rdi, 1
-      cmovle rax, rsi
+      cmovle rax, rcx
       cmovle r13, r10
 
       # Clamp a & c pointers if mr <= 2
@@ -112,19 +109,19 @@ inner_loop:
       vmovaps  zmm6, [r9 + 0]
       vmovaps  zmm7, [r9 + 64]
       add r9, 128
-      vpbroadcastd zmm2, [rsi + r11]
+      vpbroadcastd zmm2, [rcx + r11]
+      vpbroadcastd zmm2, [rax + r11]
+      vpbroadcastd zmm2, [r15 + r11]
+      vpbroadcastd zmm2, [r14 + r11]
+      vpbroadcastd zmm2, [r12 + r11]
       vpdpbusd  zmm5, zmm2, zmm6
       vpdpbusd  zmm17, zmm2, zmm7
-      vpbroadcastd zmm2, [rax + r11]
       vpdpbusd  zmm12, zmm2, zmm6
       vpdpbusd  zmm18, zmm2, zmm7
-      vpbroadcastd zmm2, [r15 + r11]
       vpdpbusd  zmm14, zmm2, zmm6
       vpdpbusd  zmm19, zmm2, zmm7
-      vpbroadcastd zmm2, [r14 + r11]
       vpdpbusd  zmm15, zmm2, zmm6
       vpdpbusd  zmm20, zmm2, zmm7
-      vpbroadcastd zmm2, [r12 + r11]
       vpdpbusd  zmm16, zmm2, zmm6
       vpdpbusd  zmm21, zmm2, zmm7
 
@@ -195,7 +192,7 @@ inner_loop_end:
       vmaxps  zmm21, zmm0, zmm21
 
       # Check whether full or partial store.
-      cmp rcx, 32
+      cmp rsi, 32
       jl tail
 
       vmovups  [r10], zmm5
@@ -214,14 +211,14 @@ inner_loop_end:
       add rbp, 128
       add r8, 128
 
-      sub rcx, 32
+      sub rsi, 32
       jne outer_loop
       jmp return
 
 tail:
-      mov r11d, -1
-      sal r11d, cl
-      not r11d
+      mov r11, -1
+      shlx r11, r11, rsi
+      not r11
       kmovw k1, r11d
       shr r11d, 16
       kmovw k2, r11d

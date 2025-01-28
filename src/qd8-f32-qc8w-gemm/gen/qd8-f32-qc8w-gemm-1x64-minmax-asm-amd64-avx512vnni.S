@@ -17,11 +17,6 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x64c4__asm_amd64_avx512vnni
       push r13
       push r12
 
-      # Swap rsi & rcx because sal can only use cl.
-      mov r15, rsi
-      mov rsi, rcx
-      mov rcx, r15
-
       # load params to free up a GP registers
       mov r13, [rsp + 80] # params
       vbroadcastss zmm0, DWORD PTR [r13]
@@ -34,6 +29,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x64c4__asm_amd64_avx512vnni
 
       add rdx, 3
       and rdx, -4
+
+      # Allocate some space on the stack.
       sub rsp, 528
 
       # Load quantization params pointer from stack
@@ -62,7 +59,7 @@ inner_loop:
       vmovaps  zmm8, [r9 + 128]
       vmovaps  zmm9, [r9 + 192]
       add r9, 256
-      vpbroadcastd zmm2, [rsi + r11]
+      vpbroadcastd zmm2, [rcx + r11]
       vpdpbusd  zmm5, zmm2, zmm6
       vpdpbusd  zmm12, zmm2, zmm7
       vpdpbusd  zmm14, zmm2, zmm8
@@ -109,7 +106,7 @@ inner_loop_end:
       vmaxps  zmm15, zmm0, zmm15
 
       # Check whether full or partial store.
-      cmp rcx, 64
+      cmp rsi, 64
       jl tail
 
       vmovups  [r10], zmm5
@@ -118,13 +115,13 @@ inner_loop_end:
       vmovups  [r10 + 192], zmm15
       add r10, 256
 
-      sub rcx, 64
+      sub rsi, 64
       jne outer_loop
       jmp return
 
 tail:
       mov r11, -1
-      sal r11, cl
+      shlx r11, r11, rsi
       not r11
       kmovw k1, r11d
       shr r11, 16

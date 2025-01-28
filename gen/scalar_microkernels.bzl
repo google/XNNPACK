@@ -241,6 +241,7 @@ PROD_SCALAR_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_SCALAR_MICROKERNEL_SRCS = [
+    "src/bf16-f32-gemm/bf16-f32-gemm-1x4c2-minmax-scalar.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-u2.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-u3.c",
     "src/f16-qs8-vcvt/gen/f16-qs8-vcvt-scalar-fmagic-u1.c",

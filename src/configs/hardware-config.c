@@ -151,6 +151,11 @@ static void init_hardware_config(void) {
 #else
     hardware_config.use_x86_avx512fp16 = 0;
 #endif
+#if XNN_ENABLE_AVX512BF16
+    hardware_config.use_x86_avx512bf16 = cpuinfo_has_x86_avx512bf16();
+#else
+    hardware_config.use_x86_avx512bf16 = 0;
+#endif
 #if XNN_ENABLE_AVX512AMX
     hardware_config.use_x86_avx512amx = hardware_config.use_x86_avx512vnnigfni && cpuinfo_has_x86_amx_int8();
 #if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)

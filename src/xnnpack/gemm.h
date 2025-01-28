@@ -19,15 +19,56 @@ extern "C" {
 #endif
 
 
+#define DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
+  void fn_name(                                                \
+      size_t mr,                                               \
+      size_t nc,                                               \
+      size_t kc,                                               \
+      const uint16_t* a,                                       \
+      size_t a_stride,                                         \
+      const void* w,                                           \
+      float* c,                                                \
+      size_t cm_stride,                                        \
+      const struct xnn_bf16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_1x4c2__scalar)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_1x16c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_2x16c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_3x16c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_4x16c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_5x16c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_6x16c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_7x16c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_8x16c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_9x16c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_10x16c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_11x16c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_1x32c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_2x32c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_3x32c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_4x32c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_5x32c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_6x32c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_7x32c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_8x32c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_9x32c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_10x32c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_11x32c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_1x64c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_2x64c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_3x64c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_4x64c2__asm_amd64_avx512bf16_broadcast)
+DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_5x64c2__asm_amd64_avx512bf16_broadcast)
+
 #define DECLARE_BF16_GEMM_MINMAX_UKERNEL_FUNCTION(fn_name) \
   void fn_name(                                            \
       size_t mr,                                           \
       size_t nc,                                           \
       size_t kc,                                           \
-      const xnn_bfloat16* a,                                       \
+      const xnn_bfloat16* a,                               \
       size_t a_stride,                                     \
-      const xnn_bfloat16* w,                                       \
-      xnn_bfloat16* c,                                             \
+      const xnn_bfloat16* w,                               \
+      xnn_bfloat16* c,                                            \
       size_t cm_stride,                                    \
       size_t cn_stride,                                    \
       const struct xnn_bf16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);

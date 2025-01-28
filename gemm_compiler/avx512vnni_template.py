@@ -191,6 +191,7 @@ class Avx512Vnni(isa.Avx512F):
             offset=464 + mr * 64,
         )
 
+    ret += self.increment_ptr(ptr=W, step=self.register_bytes() * N)
     return ret
 
   def stack_size(self, M):

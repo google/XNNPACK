@@ -35,11 +35,6 @@ class Avx512F(isa.Fma3):
   def n_step(self):
     return 16
 
-  def input_asm(self):
-    res = super().input_asm()
-    res['compute'] = self.compute_asm()['loop']
-    return res
-
   def dequantize(self, M, N, W):
     return ''
 
@@ -55,10 +50,10 @@ class Avx512F(isa.Fma3):
   def outer_loop_prepare(self, M, N):
     return ''
 
-  def inner_loop_spill_gp(self, M, N):
-    asm_string = '\ninner_loop:\n'
+  def inner_loop_spill_gp(self, M, N, tail=False):
     N_COUNT = N // self.n_step()
     # weights
+    asm_string = ''
     if 'before' in self.weights_asm():
       asm_string += self.weights_asm()['before']
     for l in self.weights_asm()['loop']:
@@ -90,7 +85,8 @@ class Avx512F(isa.Fma3):
             A=self.a_registers(0),
             ACC=self.acc_registers()[M * nr + mr],
         )
-        for m in self.input_asm()['compute']:
+        loop = 'loop_tail' if tail else 'loop'
+        for m in self.compute_asm()[loop]:
           for nr in range(0, N_COUNT):
             asm_string += m.format(
                 W=self.w_registers()[nr],
@@ -99,10 +95,10 @@ class Avx512F(isa.Fma3):
             )
     return asm_string
 
-  def inner_loop_small_M_N(self, M, N):
+  def inner_loop_small_M_N(self, M, N, tail=False):
     N_COUNT = N // self.n_step()
-    asm_string = '\ninner_loop:\n'
     # input
+    asm_string = ''
     if 'before' in self.input_asm():
       asm_string += self.input_asm()['before']
     if 'after' in self.input_asm():
@@ -134,13 +130,16 @@ class Avx512F(isa.Fma3):
             A=self.a_registers(mr),
             ACC=self.acc_registers()[M * nr + mr],
         )
-        for m in self.input_asm()['compute']:
-          for nr in range(0, N_COUNT):
-            asm_string += m.format(
-                W=self.w_registers()[nr],
-                A=self.a_registers(mr),
-                ACC=self.acc_registers()[M * nr + mr],
-            )
+      loop = 'loop_tail' if tail else 'loop'
+
+    for mr in range(0, M):
+      for m in self.compute_asm()[loop]:
+        for nr in range(0, N_COUNT):
+          asm_string += m.format(
+              W=self.w_registers()[nr],
+              A=self.a_registers(mr),
+              ACC=self.acc_registers()[M * nr + mr],
+          )
     return asm_string
 
   def init_accumulators(self, M, N):
@@ -159,6 +158,7 @@ class Avx512F(isa.Fma3):
             src=accumulators[M * nr],
             dst=accumulators[M * nr + mr],
         )
+    ret += self.increment_ptr(ptr=W, step=self.register_bytes() * N)
     return ret
 
   def copy_simd_register(self, prefix, src, dst):
@@ -173,7 +173,6 @@ class Avx512F(isa.Fma3):
     accumulators = self.acc_registers()
     cm_registers = self.cm_registers()
     nc_reg = self.nc_register()
-    nc_lo = self.register_map_byte(nc_reg)
     pop_c = M > self.max_M_before_spilling()
     N_COUNT = N // self.n_step()
     asm_string = ''
@@ -181,9 +180,9 @@ class Avx512F(isa.Fma3):
     if pop_c:
       asm_string += '\n' + '# Pop output pointers from the stack.\n'
       c_reg_offset = 0
-      POP_C = 'mov {C_REG}, [rsp - {offset}]\n'
+      POP_C = 'mov {C_REG}, [rsp + {offset}]\n'
       for mr in range(0, M):
-        sp_offset = 128 + (mr) * 16 + 8
+        sp_offset = (mr) * 16 + 8
         asm_string += POP_C.format(C_REG=cm_registers[mr], offset=sp_offset)
     asm_string += """
       # Check whether full or partial store.
@@ -208,9 +207,9 @@ class Avx512F(isa.Fma3):
       )
     if pop_c:
       asm_string += '\n' + '# Write output pointers to the stack.\n'
-      POP_C = 'mov [rsp - {offset}], {C_REG}\n'
+      POP_C = 'mov [rsp + {offset}], {C_REG}\n'
       for mr in range(0, M):
-        sp_offset = 128 + (mr) * 16 + 8
+        sp_offset = (mr) * 16 + 8
         asm_string += POP_C.format(C_REG=cm_registers[mr], offset=sp_offset)
     CHECK = """
       sub {nc}, {n_step}
@@ -222,7 +221,7 @@ class Avx512F(isa.Fma3):
     if N == 64:
       asm_string += """
       mov {tmp1}, -1
-      sal {tmp1}, {nc_lo}
+      shlx {tmp1}, {tmp1}, {nc_reg}
       not {tmp1}
       kmovw k1, {tmp1_lo}
       shr {tmp1}, 16
@@ -235,7 +234,6 @@ class Avx512F(isa.Fma3):
           nc_reg=nc_reg,
           tmp1=tmp_gp_regs[1],
           tmp1_lo=self.register_map_dword(tmp_gp_regs[1]),
-          nc_lo='cl',
           ACC=accumulators[0],
           c_reg=cm_registers[0],
       )
@@ -262,15 +260,15 @@ class Avx512F(isa.Fma3):
         )
     elif N == 32:
       asm_string += """
-      mov {tmp1_lo}, -1
-      sal {tmp1_lo}, {nc_lo}
-      not {tmp1_lo}
+      mov {tmp1}, -1
+      shlx {tmp1}, {tmp1}, {nc_reg}
+      not {tmp1}
       kmovw k1, {tmp1_lo}
       shr {tmp1_lo}, 16
       kmovw k2, {tmp1_lo}\n""".format(
           nc_reg=nc_reg,
           tmp1_lo=self.register_map_dword(tmp_gp_regs[1]),
-          nc_lo='cl',
+          tmp1=tmp_gp_regs[1],
           ACC=accumulators[0],
           c_reg=cm_registers[0],
       )
@@ -285,13 +283,13 @@ class Avx512F(isa.Fma3):
         )
     else:
       asm_string += """
-      mov {tmp1_lo}, -1
-      sal {tmp1_lo}, {nc_lo}
-      not {tmp1_lo}
+      mov {tmp1}, -1
+      shlx {tmp1}, {tmp1}, {nc_reg}
+      not {tmp1}
       kmovw k1, {tmp1_lo}\n""".format(
           nc_reg=nc_reg,
+          tmp1=tmp_gp_regs[1],
           tmp1_lo=self.register_map_dword(tmp_gp_regs[1]),
-          nc_lo='cl',
           ACC=accumulators[0],
           c_reg=cm_registers[0 + c_reg_offset],
       )
@@ -301,3 +299,6 @@ class Avx512F(isa.Fma3):
         )
 
     return asm_string
+
+  def stack_size(self, M):
+    return M * 16 + 32

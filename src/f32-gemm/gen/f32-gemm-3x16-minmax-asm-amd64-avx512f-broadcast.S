@@ -17,11 +17,6 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_3x16__asm_amd64_avx512f_broadcast
       push r13
       push r12
 
-      # Swap rsi & rcx because sal can only use cl.
-      mov r15, rsi
-      mov rsi, rcx
-      mov rcx, r15
-
       # load params to free up a GP registers
       mov r13, [rsp + 80] # params
       vbroadcastss zmm0, DWORD PTR [r13]
@@ -32,13 +27,16 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_3x16__asm_amd64_avx512f_broadcast
       # Load cm_stride.
       mov r11, [rsp + 64]
 
+      # Allocate some space on the stack.
+      sub rsp, 80
+
       # Clamp a & c pointers if mr <= 1
-      mov rax, rsi
+      mov rax, rcx
       add rax, r8
       mov r13, r10
       add r13, r11
       cmp rdi, 1
-      cmovle rax, rsi
+      cmovle rax, rcx
       cmovle r13, r10
 
       # Clamp a & c pointers if mr <= 2
@@ -62,11 +60,11 @@ outer_loop:
 inner_loop:
       vmovaps  zmm10, [r9 + 0]
       add r9, 64
-      vbroadcastss zmm2, DWORD PTR [rsi + r11]
-      vfmadd231ps  zmm7, zmm2, zmm10
+      vbroadcastss zmm2, DWORD PTR [rcx + r11]
       vbroadcastss zmm3, DWORD PTR [rax + r11]
-      vfmadd231ps  zmm8, zmm3, zmm10
       vbroadcastss zmm4, DWORD PTR [r15 + r11]
+      vfmadd231ps  zmm7, zmm2, zmm10
+      vfmadd231ps  zmm8, zmm3, zmm10
       vfmadd231ps  zmm9, zmm4, zmm10
 
       add r11, 4
@@ -82,7 +80,7 @@ inner_loop_end:
       vmaxps  zmm9, zmm0, zmm9
 
       # Check whether full or partial store.
-      cmp rcx, 16
+      cmp rsi, 16
       jl tail
 
       vmovups  [r10], zmm7
@@ -92,20 +90,21 @@ inner_loop_end:
       add r13, 64
       add rbx, 64
 
-      sub rcx, 16
+      sub rsi, 16
       jne outer_loop
       jmp return
 
 tail:
-      mov r11d, -1
-      sal r11d, cl
-      not r11d
+      mov r11, -1
+      shlx r11, r11, rsi
+      not r11
       kmovw k1, r11d
       vmovups  ZMMWORD PTR [r10]{k1}, zmm7
       vmovups  ZMMWORD PTR [r13]{k1}, zmm8
       vmovups  ZMMWORD PTR [rbx]{k1}, zmm9
 
 return:
+      add rsp, 80
 
       # Restore the callee saved registers.
       pop r12

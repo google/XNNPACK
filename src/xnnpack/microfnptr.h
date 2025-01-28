@@ -140,6 +140,17 @@ typedef void (*xnn_f32_qc8w_gemm_relu_ukernel_fn)(
 
 // GEMM: GEneral Matrix Multiplication with Min+Max activation
 
+typedef void (*xnn_bf16_f32_gemm_minmax_ukernel_fn)(
+    size_t mr,
+    size_t nr,
+    size_t k,
+    const uint16_t* a,
+    size_t a_stride,
+    const void* w,
+    float* c,
+    size_t cm_stride,
+    const struct xnn_bf16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+
 typedef void (*xnn_bf16_gemm_minmax_ukernel_fn)(
     size_t mr,
     size_t nr,
