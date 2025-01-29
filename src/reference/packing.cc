@@ -562,9 +562,11 @@ void xnn_pack_qs8_qc4w_gemm_goi_w_non_planar(
                   (nr_block_start + actual_nr_block_offset) * kc + kc_idx;
               const size_t kh_offset = k_offset + kc * row_offset;
               uint8_t kv_lo = kernel_zero_point;
-              if (kc_idx < kc) {
-                kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4)
-                                        : (k[k_offset >> 1] & 0xF));
+              if ((nr_block_start + actual_nr_block_offset) < nc) {
+                if (kc_idx < kc) {
+                  kv_lo = ((k_offset & 1) ? (k[k_offset >> 1] >> 4)
+                                          : (k[k_offset >> 1] & 0xF));
+                }
               }
               uint8_t kv_hi = kernel_zero_point;
               if ((nr_block_start + actual_nr_block_offset + row_offset) < nc) {
