@@ -1852,7 +1852,7 @@ IF(XNNPACK_BUILD_TESTS)
 
     ADD_EXECUTABLE(microkernel-utils-test test/microkernel-utils.cc)
     TARGET_INCLUDE_DIRECTORIES(microkernel-utils-test PRIVATE include src)
-    TARGET_LINK_LIBRARIES(microkernel-utils-test PRIVATE microkernel-utils hardware-config GTest::gtest GTest::gtest_main pthreadpool)
+    TARGET_LINK_LIBRARIES(microkernel-utils-test PRIVATE microkernel-utils hardware-config logging GTest::gtest GTest::gtest_main pthreadpool)
 
     ADD_EXECUTABLE(operator-utils-test test/operator-utils.cc)
     TARGET_INCLUDE_DIRECTORIES(operator-utils-test PRIVATE include src)

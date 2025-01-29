@@ -4294,7 +4294,7 @@ const struct xnn_gemm_config* xnn_init_pf16_gemm_config() {
     return NULL;
   }
   XNN_INIT_ONCE(pf16_gemm);
-  return &pf16_gemm_config;
+  return pf16_gemm_config.mr ? &pf16_gemm_config : NULL;
 }
 
 const struct xnn_gemm_config* xnn_init_bf16_f32_gemm_config() {
@@ -4311,7 +4311,7 @@ const struct xnn_gemm_config* xnn_init_pf32_gemm_config() {
     return NULL;
   }
   XNN_INIT_ONCE(pf32_gemm);
-  return &pf32_gemm_config;
+  return pf32_gemm_config.mr ? &pf32_gemm_config : NULL;
 }
 
 const struct xnn_gemm_config* xnn_init_pqs8_qc8w_gemm_config() {
@@ -4319,7 +4319,7 @@ const struct xnn_gemm_config* xnn_init_pqs8_qc8w_gemm_config() {
     return NULL;
   }
   XNN_INIT_ONCE(pqs8_qc8w_gemm);
-  return &pqs8_qc8w_gemm_config;
+  return pqs8_qc8w_gemm_config.mr ? &pqs8_qc8w_gemm_config : NULL;
 }
 
 const struct xnn_gemm_config* xnn_init_f32_gemm_config() {

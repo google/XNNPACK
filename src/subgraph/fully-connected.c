@@ -56,6 +56,8 @@ enum fully_connected_op_type {
   fc_type_pf16_f16_f16 = 29,
   fc_type_pqs8_qs8_qc8w = 30,
   fc_type_bf16_bf16_f32 = 31,
+  fc_type_pf16_f16_f16_dynamic = 32,
+  fc_type_pf32_f32_f32_dynamic = 33,
 };
 
 enum fully_connected_op_type get_fully_connected_op_type(
@@ -80,17 +82,24 @@ enum fully_connected_op_type get_fully_connected_op_type(
       switch (filter_datatype) {
         case xnn_datatype_fp16:
           if (has_non_static_weights) {
-            return fc_type_f16_f16_f16_dynamic;
+            switch (input_datatype) {
+              case xnn_datatype_fp16:
+                return fc_type_f16_f16_f16_dynamic;
+              case xnn_datatype_pfp16:
+                return fc_type_pf16_f16_f16_dynamic;
+              default:
+                XNN_UNREACHABLE;
+            }
           } else {
             switch (input_datatype) {
               case xnn_datatype_fp16:
                 return fc_type_f16_f16_f16;
               case xnn_datatype_pfp16:
                 return fc_type_pf16_f16_f16;
-            default:
-              XNN_UNREACHABLE;
+              default:
+                XNN_UNREACHABLE;
+            }
           }
-        }
         case xnn_datatype_fp32:
           if (has_non_static_weights) {
             return fc_type_f16_f32_f16_dynamic;
@@ -141,7 +150,14 @@ enum fully_connected_op_type get_fully_connected_op_type(
           }
         case xnn_datatype_fp32:
           if (has_non_static_weights) {
-            return fc_type_f32_f32_f32_dynamic;
+            switch (input_datatype) {
+              case xnn_datatype_fp32:
+                return fc_type_f32_f32_f32_dynamic;
+              case xnn_datatype_pfp32:
+                return fc_type_pf32_f32_f32_dynamic;
+              default:
+                XNN_UNREACHABLE;
+            }
           } else {
             switch (input_datatype) {
               case xnn_datatype_fp32:
@@ -275,31 +291,22 @@ static enum xnn_status create_fully_connected_operator(
 
   if (output_value->layout == xnn_layout_type_nchw) {
     return create_nchw_convolution(
-      /*input_padding_top=*/0,
-      /*input_padding_right=*/0,
-      /*input_padding_bottom=*/0,
-      /*input_padding_left=*/0,
-      /*kernel_height=*/1,
-      /*kernel_width=*/1,
-      /*subsampling_height=*/1,
-      /*subsampling_width=*/1,
-      /*dilation_height=*/1,
-      /*dilation_width=*/1,
-      /*groups=*/1,
-      /*group_input_channels=*/input_channels,
-      /*group_output_channels=*/output_channels,
-      node->activation.output_min, node->activation.output_max,
-      node->flags,
-      input_id,
-      filter_id,
-      bias_id,
-      output_id,
-      values,
-      kernel_data,
-      bias_data,
-      code_cache,
-      weights_cache,
-      opdata);
+        /*input_padding_top=*/0,
+        /*input_padding_right=*/0,
+        /*input_padding_bottom=*/0,
+        /*input_padding_left=*/0,
+        /*kernel_height=*/1,
+        /*kernel_width=*/1,
+        /*subsampling_height=*/1,
+        /*subsampling_width=*/1,
+        /*dilation_height=*/1,
+        /*dilation_width=*/1,
+        /*groups=*/1,
+        /*group_input_channels=*/input_channels,
+        /*group_output_channels=*/output_channels, node->activation.output_min,
+        node->activation.output_max, node->flags, input_id, filter_id, bias_id,
+        output_id, values, kernel_data, bias_data, code_cache, weights_cache,
+        opdata);
   }
   enum xnn_status status;
   enum fully_connected_op_type op_type = get_fully_connected_op_type(
@@ -414,6 +421,11 @@ static enum xnn_status create_fully_connected_operator(
           /*flags=*/node->flags, code_cache, weights_cache,
           fully_connected_op_ptr);
       break;
+    case fc_type_pf16_f16_f16_dynamic:
+      status = xnn_create_dynamic_fully_connected_nc_pf16(
+          node->activation.output_min, node->activation.output_max,
+          /*flags=*/node->flags, fully_connected_op_ptr);
+      break;
     case fc_type_pf32_f32_f32:
       status = xnn_create_fully_connected_nc_pf32(
           input_channels, output_channels,
@@ -422,6 +434,11 @@ static enum xnn_status create_fully_connected_operator(
           node->activation.output_min, node->activation.output_max,
           /*flags=*/node->flags, code_cache, weights_cache,
           fully_connected_op_ptr);
+      break;
+    case fc_type_pf32_f32_f32_dynamic:
+      status = xnn_create_dynamic_fully_connected_nc_pf32(
+          node->activation.output_min, node->activation.output_max,
+          /*flags=*/node->flags, fully_connected_op_ptr);
       break;
     case fc_type_qd8_f32_qb4w:
       status = xnn_create_fully_connected_nc_qd8_f32_qb4w(
@@ -738,8 +755,20 @@ static enum xnn_status reshape_fully_connected_operator(
           input_channels, output_channels, &opdata->workspace_size,
           &opdata->workspace_alignment, threadpool);
       break;
+    case xnn_operator_type_dynamic_fully_connected_nc_pf16:
+      status = xnn_reshape_dynamic_fully_connected_nc_pf16(
+          fully_connected_op, batch_size, input_channels, output_channels,
+          input_channels, output_channels, &opdata->workspace_size,
+          &opdata->workspace_alignment, threadpool);
+      break;
     case xnn_operator_type_dynamic_fully_connected_nc_f32:
       status = xnn_reshape_dynamic_fully_connected_nc_f32(
+          fully_connected_op, batch_size, input_channels, output_channels,
+          input_channels, output_channels, &opdata->workspace_size,
+          &opdata->workspace_alignment, threadpool);
+      break;
+    case xnn_operator_type_dynamic_fully_connected_nc_pf32:
+      status = xnn_reshape_dynamic_fully_connected_nc_pf32(
           fully_connected_op, batch_size, input_channels, output_channels,
           input_channels, output_channels, &opdata->workspace_size,
           &opdata->workspace_alignment, threadpool);
@@ -912,9 +941,19 @@ static enum xnn_status setup_fully_connected_operator(
       return xnn_setup_dynamic_fully_connected_nc_f16(
           fully_connected_op, opdata->workspace, input_data, kernel_data,
           bias_data, output_data);
+    case xnn_operator_type_dynamic_fully_connected_nc_pf16:
+      assert(kernel_data != NULL);
+      return xnn_setup_dynamic_fully_connected_nc_pf16(
+          fully_connected_op, opdata->workspace, input_data, kernel_data,
+          bias_data, output_data);
     case xnn_operator_type_dynamic_fully_connected_nc_f32:
       assert(kernel_data != NULL);
       return xnn_setup_dynamic_fully_connected_nc_f32(
+          fully_connected_op, opdata->workspace, input_data, kernel_data,
+          bias_data, output_data);
+    case xnn_operator_type_dynamic_fully_connected_nc_pf32:
+      assert(kernel_data != NULL);
+      return xnn_setup_dynamic_fully_connected_nc_pf32(
           fully_connected_op, opdata->workspace, input_data, kernel_data,
           bias_data, output_data);
     case xnn_operator_type_fully_connected_nc_f16:
@@ -1058,8 +1097,7 @@ static enum xnn_status setup_fully_connected_operator(
       return xnn_setup_fully_connected_nc_qp8_f32_qc8w(fully_connected_op,
                                                        input_data, output_data);
     }
-    case xnn_operator_type_fully_connected_nc_qp8_f32_qb4w:
-    {
+    case xnn_operator_type_fully_connected_nc_qp8_f32_qb4w: {
       assert(kernel_data == NULL);
       assert(bias_data == NULL);
       return xnn_setup_fully_connected_nc_qp8_f32_qb4w(fully_connected_op,
@@ -1159,9 +1197,8 @@ static inline bool validate_datatypes_with_bias(
                  output_datatype == xnn_datatype_fp16) {
         return true;
       } else if (input_datatype == xnn_datatype_qpint8 &&
-          bias_datatype == xnn_datatype_fp32 &&
-          output_datatype == xnn_datatype_fp32)
-      {
+                 bias_datatype == xnn_datatype_fp32 &&
+                 output_datatype == xnn_datatype_fp32) {
         return true;
       }
       break;
@@ -1260,7 +1297,8 @@ static inline bool validate_datatypes_without_bias(
       } else if (input_datatype == xnn_datatype_qdint8 &&
                  output_datatype == xnn_datatype_fp16) {
         return true;
-      } else if (input_datatype == xnn_datatype_qpint8 && output_datatype == xnn_datatype_fp32) {
+      } else if (input_datatype == xnn_datatype_qpint8 &&
+                 output_datatype == xnn_datatype_fp32) {
         return true;
       }
       break;
@@ -1579,8 +1617,8 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
 
   if (bias_value != NULL) {
     if (!validate_datatypes_with_bias(
-        input_value->datatype, kernel_value->datatype, bias_value->datatype,
-        output_value->datatype)) {
+            input_value->datatype, kernel_value->datatype, bias_value->datatype,
+            output_value->datatype)) {
       xnn_log_error("failed to define %s operator with input ID #%" PRIu32
                     ", filter ID #%" PRIu32 ", bias ID #%" PRIu32
                     ", and output ID #%" PRIu32
@@ -1595,8 +1633,9 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
       return xnn_status_invalid_parameter;
     }
   } else {
-    if (!validate_datatypes_without_bias(
-        input_value->datatype, kernel_value->datatype, output_value->datatype)) {
+    if (!validate_datatypes_without_bias(input_value->datatype,
+                                         kernel_value->datatype,
+                                         output_value->datatype)) {
       xnn_log_error("failed to define %s operator with input ID #%" PRIu32
                     ", filter ID #%" PRIu32 ", and output ID #%" PRIu32
                     ": mismatching datatypes across input (%s), filter (%s), "
@@ -1611,24 +1650,31 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
   }
 
   const enum xnn_datatype input_datatype = input_value->datatype;
+  const enum xnn_datatype kernel_datatype = kernel_value->datatype;
   const enum xnn_datatype output_datatype = output_value->datatype;
   if (datatype_is_packable(input_datatype)) {
-    if (input_value->datatype == output_datatype) {
+    if (input_datatype == output_datatype) {
       const struct xnn_gemm_config* gemm_config = NULL;
       switch (input_datatype) {
         case xnn_datatype_fp16:
-          gemm_config = xnn_init_pf16_gemm_config();
+          if (kernel_datatype == xnn_datatype_fp16) {
+            gemm_config = xnn_init_pf16_gemm_config();
+          }
           break;
         case xnn_datatype_fp32:
-          gemm_config = xnn_init_pf32_gemm_config();
+          if (kernel_datatype == xnn_datatype_fp32) {
+            gemm_config = xnn_init_pf32_gemm_config();
+          }
           break;
         case xnn_datatype_qint8:
-          gemm_config = xnn_init_pqs8_qc8w_gemm_config();
+          if (kernel_datatype == xnn_datatype_qcint8) {
+            gemm_config = xnn_init_pqs8_qc8w_gemm_config();
+          }
           break;
         default:
           XNN_UNREACHABLE;
       }
-      if (gemm_config != NULL && gemm_config->init.f32 != NULL) {
+      if (gemm_config != NULL) {
         // Insert a node to pack the LHS.
         uint32_t new_id = XNN_INVALID_VALUE_ID;
         status = xnn_insert_pack_lh_node(subgraph, input_id, &new_id);

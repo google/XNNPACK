@@ -1673,7 +1673,11 @@ enum xnn_status xnn_create_fully_connected_nc_f32(
     }
   }
 
-  return create_fully_connected_nc_f32(input_channels, output_channels, input_stride, output_stride, kernel, bias, output_min, output_max, flags, code_cache, weights_cache, gemm_config, xnn_operator_type_fully_connected_nc_f32, fully_connected_op_out);
+  return create_fully_connected_nc_f32(
+      input_channels, output_channels, input_stride, output_stride, kernel,
+      bias, output_min, output_max, flags, code_cache, weights_cache,
+      gemm_config, xnn_operator_type_fully_connected_nc_f32,
+      fully_connected_op_out);
 }
 
 enum xnn_status xnn_create_fully_connected_nc_pf32(
@@ -1696,7 +1700,11 @@ enum xnn_status xnn_create_fully_connected_nc_pf32(
     return xnn_status_unsupported_hardware;
   }
 
-  return create_fully_connected_nc_f32(input_channels, output_channels, input_stride, output_stride, kernel, bias, output_min, output_max, flags, code_cache, weights_cache, gemm_config, xnn_operator_type_fully_connected_nc_pf32, fully_connected_op_out);
+  return create_fully_connected_nc_f32(
+      input_channels, output_channels, input_stride, output_stride, kernel,
+      bias, output_min, output_max, flags, code_cache, weights_cache,
+      gemm_config, xnn_operator_type_fully_connected_nc_pf32,
+      fully_connected_op_out);
 }
 
 enum xnn_status xnn_create_fully_connected_nc_f32_qc4w(
@@ -2287,7 +2295,7 @@ static enum xnn_status reshape_fully_connected_nc(
     input_channels = round_up_po2(input_channels, planes);
   }
 
-  const bool is_qp8_ukernel =
+  const bool packed_lhs =
       (fully_connected_op->type ==
        xnn_operator_type_fully_connected_nc_qp8_f32_qc4w) ||
       (fully_connected_op->type ==
@@ -2315,21 +2323,22 @@ static enum xnn_status reshape_fully_connected_nc(
       .kr = fully_connected_op->ukernel.gemm.kr,
       .sr = fully_connected_op->ukernel.gemm.sr,
   };
-  if (is_qp8_ukernel) {
+
+  if (packed_lhs) {
     switch (fully_connected_op->type) {
       case xnn_operator_type_fully_connected_nc_qp8_f32_qb4w:
       case xnn_operator_type_fully_connected_nc_qp8_f32_qc4w:
       case xnn_operator_type_fully_connected_nc_qp8_f32_qc8w:
-        fully_connected_op->context.gemm.gemm.gemm.packed_offset_fn = xnn_x8_packq_f32qp8_packed_offset;
+        fully_connected_op->context.gemm.gemm.gemm.packed_lh_offset_fn = xnn_x8_packq_f32qp8_packed_offset;
         break;
       case xnn_operator_type_fully_connected_nc_pf16:
-        fully_connected_op->context.gemm.gemm.gemm.packed_offset_fn = xnn_init_x16_pack_lh_config()->offset_fn;
+        fully_connected_op->context.gemm.gemm.gemm.packed_lh_offset_fn = xnn_init_x16_pack_lh_config()->offset_fn;
         break;
       case xnn_operator_type_fully_connected_nc_pf32:
-        fully_connected_op->context.gemm.gemm.gemm.packed_offset_fn = xnn_init_x32_pack_lh_config()->offset_fn;
+        fully_connected_op->context.gemm.gemm.gemm.packed_lh_offset_fn = xnn_init_x32_pack_lh_config()->offset_fn;
         break;
       case xnn_operator_type_fully_connected_nc_pqs8_qc8w:
-        fully_connected_op->context.gemm.gemm.gemm.packed_offset_fn = xnn_init_x8_pack_lh_config()->offset_fn;
+        fully_connected_op->context.gemm.gemm.gemm.packed_lh_offset_fn = xnn_init_x8_pack_lh_config()->offset_fn;
         break;
       default:
         XNN_UNREACHABLE;
@@ -2354,7 +2363,7 @@ static enum xnn_status reshape_fully_connected_nc(
     if (dynamic_quantization) {
       fully_connected_op->compute[0].task_2d_tile_2d_with_id =
           (pthreadpool_task_2d_tile_2d_with_id_t)xnn_compute_hmp_dqgemm;
-    } else if (is_qp8_ukernel) {
+    } else if (packed_lhs) {
       fully_connected_op->compute[0].task_2d_tile_2d_with_id =
           (pthreadpool_task_2d_tile_2d_with_id_t)xnn_compute_hmp_qp8gemm;
     } else {
@@ -2366,7 +2375,7 @@ static enum xnn_status reshape_fully_connected_nc(
     if (dynamic_quantization) {
       fully_connected_op->compute[0].task_2d_tile_2d =
           (pthreadpool_task_2d_tile_2d_t)xnn_compute_dqgemm;
-    } else if (is_qp8_ukernel) {
+    } else if (packed_lhs) {
       fully_connected_op->compute[0].task_2d_tile_2d =
           (pthreadpool_task_2d_tile_2d_t)xnn_compute_qp8gemm;
     } else {
@@ -2379,7 +2388,7 @@ static enum xnn_status reshape_fully_connected_nc(
   if (dynamic_quantization) {
     fully_connected_op->compute[0].task_2d_tile_2d =
         (pthreadpool_task_2d_tile_2d_t)xnn_compute_dqgemm;
-  } else if (is_qp8_ukernel) {
+  } else if (packed_lhs) {
     fully_connected_op->compute[0].task_2d_tile_2d =
         (pthreadpool_task_2d_tile_2d_t)xnn_compute_qp8gemm;
   } else {

@@ -1849,6 +1849,7 @@ xnnpack_unit_test(
         "//:math",
         "//:node_type",
         "//:operators",
+        "//:params",
         "//:requantization",
         "//:subgraph",
     ],

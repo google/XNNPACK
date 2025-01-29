@@ -10,10 +10,10 @@
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
-
 #include "pthreadpool.h"
 
 enum xnn_parallelization_type {
@@ -215,6 +215,12 @@ struct packw_gemm_goi_context {
 
   // Microkernel to preform packing.
   xnn_packw_gemm_goi_ukernel_fn packw_gemm_goi;
+
+  // Optional wrapped packing function.
+  xnn_pack_weights_and_biases_fn pack_weights_and_biases;
+
+  // A pointer to the underlying `xnn_gemm_config`.
+  const struct xnn_gemm_config* gemm_config;
 };
 
 #ifndef __cplusplus
@@ -263,6 +269,12 @@ struct packw_gemm_gio_context {
 
   // Microkernel to preform packing.
   xnn_packw_gemm_gio_ukernel_fn packw_gemm_gio;
+
+  // Optional wrapped packing function.
+  xnn_pack_weights_and_biases_fn pack_weights_and_biases;
+
+  // A pointer to the underlying `xnn_gemm_config`.
+  const struct xnn_gemm_config* gemm_config;
 };
 
 #ifndef __cplusplus
@@ -339,7 +351,7 @@ struct gemm_context {
     struct xnn_f16_scaleminmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
-  xnn_pack_lh_offset_fn packed_offset_fn;
+  xnn_pack_lh_offset_fn packed_lh_offset_fn;
 };
 
 #ifndef __cplusplus
@@ -1432,9 +1444,11 @@ struct f32_qd8_convert_context {
     size_t mr;
     size_t kr;
     size_t sr;
-    const float* XNN_RESTRICT lhs;
+    const void* XNN_RESTRICT lhs;
     size_t lhs_stride;
-    float* XNN_RESTRICT lhs_packed;
+    size_t gi_stride;
+    size_t gp_stride;
+    void* XNN_RESTRICT lhs_packed;
     xnn_pack_lh_ukernel_fn pack_lh_ukernel;
     xnn_pack_lh_offset_fn packed_offset_fn;
   };
@@ -1442,7 +1456,7 @@ struct f32_qd8_convert_context {
 #ifndef __cplusplus
   XNN_PRIVATE void xnn_compute_pack_lh(
       const struct pack_lh_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t m_idx_start, size_t tile);
+      size_t group_idx, size_t m_idx_start, size_t tile);
 #endif
 
   struct f32_qp8_convert_context {

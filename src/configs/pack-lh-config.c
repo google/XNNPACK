@@ -7,6 +7,7 @@
 #include <stddef.h>
 
 #include "xnnpack/common.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
 #include "xnnpack/hardware-config.h"
 #include "xnnpack/init-once.h"

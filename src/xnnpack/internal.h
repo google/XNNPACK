@@ -114,7 +114,8 @@ enum xnn_status xnn_create_pack_lh_x8(uint32_t flags,
                                       xnn_operator_t* pack_lh_op_out);
 
 enum xnn_status xnn_reshape_pack_lh_x8(xnn_operator_t pack_lh_op,
-                                       size_t batch_size, size_t channels,
+                                       size_t num_groups, size_t batch_size,
+                                       size_t channels,
                                        size_t* output_size_bytes,
                                        pthreadpool_t threadpool);
 
@@ -125,7 +126,8 @@ enum xnn_status xnn_create_pack_lh_x16(uint32_t flags,
                                        xnn_operator_t* pack_lh_op_out);
 
 enum xnn_status xnn_reshape_pack_lh_x16(xnn_operator_t pack_lh_op,
-                                        size_t batch_size, size_t channels,
+                                        size_t num_groups, size_t batch_size,
+                                        size_t channels,
                                         size_t* output_size_bytes,
                                         pthreadpool_t threadpool);
 
@@ -136,7 +138,8 @@ enum xnn_status xnn_create_pack_lh_x32(uint32_t flags,
                                        xnn_operator_t* pack_lh_op_out);
 
 enum xnn_status xnn_reshape_pack_lh_x32(xnn_operator_t pack_lh_op,
-                                        size_t batch_size, size_t channels,
+                                        size_t num_groups, size_t batch_size,
+                                        size_t channels,
                                         size_t* output_size_bytes,
                                         pthreadpool_t threadpool);
 
@@ -186,6 +189,68 @@ enum xnn_status xnn_reshape_fully_connected_nc_pf32(
 
 enum xnn_status xnn_setup_fully_connected_nc_pf32(
     xnn_operator_t fully_connected_op, const float* input, float* output);
+
+enum xnn_status xnn_create_dynamic_fully_connected_nc_pf16(
+    float output_min, float output_max, uint32_t flags,
+    xnn_operator_t* dynamic_fully_connected_op_out);
+
+enum xnn_status xnn_reshape_dynamic_fully_connected_nc_pf16(
+    xnn_operator_t dynamic_fully_connected_op, size_t batch_size,
+    size_t input_channels, size_t output_channels, size_t input_stride,
+    size_t output_stride, size_t* workspace_size, size_t* workspace_alignment,
+    pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_dynamic_fully_connected_nc_pf16(
+    xnn_operator_t dynamic_fully_connected_op, void* workspace,
+    const void* input, const void* kernel, const void* bias, void* output);
+
+enum xnn_status xnn_create_dynamic_fully_connected_nc_pf32(
+    float output_min, float output_max, uint32_t flags,
+    xnn_operator_t* dynamic_fully_connected_op_out);
+
+enum xnn_status xnn_reshape_dynamic_fully_connected_nc_pf32(
+    xnn_operator_t dynamic_fully_connected_op, size_t batch_size,
+    size_t input_channels, size_t output_channels, size_t input_stride,
+    size_t output_stride, size_t* workspace_size, size_t* workspace_alignment,
+    pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_dynamic_fully_connected_nc_pf32(
+    xnn_operator_t dynamic_fully_connected_op, void* workspace,
+    const float* input, const float* kernel, const float* bias, void* output);
+
+enum xnn_status xnn_create_batch_matrix_multiply_nc_pf32(
+    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out);
+
+enum xnn_status xnn_create_batch_matrix_multiply_nc_pf32_const_weights(
+    size_t batch_size_b, size_t k, size_t n, const float* data_b,
+    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out);
+
+enum xnn_status xnn_reshape_batch_matrix_multiply_nc_pf32(
+    xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
+    const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
+    size_t n, size_t* workspace_size, size_t* workspace_alignment,
+    pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_batch_matrix_multiply_nc_pf32(
+    xnn_operator_t batch_matrix_multiply_op, void* workspace,
+    const float* input_a, const float* input_b, float* output);
+
+enum xnn_status xnn_create_batch_matrix_multiply_nc_pf16(
+    uint32_t flags, xnn_operator_t* batch_matrix_multiply_op_out);
+
+enum xnn_status xnn_create_batch_matrix_multiply_nc_pf16_const_weights(
+    size_t batch_size_b, size_t k, size_t n, const void* data_b, uint32_t flags,
+    xnn_operator_t* batch_matrix_multiply_op_out);
+
+enum xnn_status xnn_reshape_batch_matrix_multiply_nc_pf16(
+    xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
+    const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
+    size_t n, size_t* workspace_size, size_t* workspace_alignment,
+    pthreadpool_t threadpool);
+
+enum xnn_status xnn_setup_batch_matrix_multiply_nc_pf16(
+    xnn_operator_t batch_matrix_multiply_op, void* workspace,
+    const void* input_a, const void* input_b, void* output);
 
 enum xnn_status xnn_create_convolution2d_nchw_f32_f16(
     uint32_t input_padding_top, uint32_t input_padding_right,
@@ -394,18 +459,11 @@ enum xnn_status xnn_setup_batch_matrix_multiply_nc_qdu8_f32_qc8w(
     const struct xnn_quantization_params* quantization_params, float* output);
 
 enum xnn_status xnn_create_fully_connected_nc_pf16(
-  size_t input_channels,
-  size_t output_channels,
-  size_t input_stride,
-  size_t output_stride,
-  const void* kernel,
-  const void* bias,
-  float output_min,
-  float output_max,
-  uint32_t flags,
-  xnn_code_cache_t code_cache,
-  xnn_weights_cache_t weights_cache,
-  xnn_operator_t* fully_connected_op_out);
+    size_t input_channels, size_t output_channels, size_t input_stride,
+    size_t output_stride, const void* kernel, const void* bias,
+    float output_min, float output_max, uint32_t flags,
+    xnn_code_cache_t code_cache, xnn_weights_cache_t weights_cache,
+    xnn_operator_t* fully_connected_op_out);
 
 enum xnn_status xnn_reshape_fully_connected_nc_pf16(
     xnn_operator_t fully_connected_op, size_t batch_size,

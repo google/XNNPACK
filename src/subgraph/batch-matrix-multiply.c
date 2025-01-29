@@ -12,6 +12,8 @@
 #include "xnnpack.h"
 #include "xnnpack/allocation-type.h"
 #include "xnnpack/common.h"
+#include "xnnpack/config-types.h"
+#include "xnnpack/config.h"
 #include "xnnpack/internal.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
@@ -44,9 +46,6 @@ static enum xnn_status create_batch_matrix_multiply_operator(
   const enum xnn_datatype inputa_datatype = values[input_a_id].datatype;
   const enum xnn_datatype inputb_datatype = values[input_b_id].datatype;
 
-  if (inputa_datatype == inputb_datatype && inputa_datatype == xnn_datatype_fp16) {
-    return xnn_create_batch_matrix_multiply_nc_f16(node->flags, &opdata->operator_objects[0]);
-  }
   const struct xnn_value* input_b = values + input_b_id;
   // Get the shape and size of the second input.
   size_t batch_size_b = 1;
@@ -73,6 +72,40 @@ static enum xnn_status create_batch_matrix_multiply_operator(
 
   }
   switch (inputa_datatype) {
+    case xnn_datatype_fp16:
+      switch (inputb_datatype) {
+        case xnn_datatype_fp16: {
+          // Get the shape and size of the second input.
+          if (xnn_value_is_static(input_b)) {
+            return xnn_create_batch_matrix_multiply_nc_f16_const_weights(
+                batch_size_b, k, n, input_b->data, node->flags,
+                &opdata->operator_objects[0]);
+          } else {
+            return xnn_create_batch_matrix_multiply_nc_f16(
+                node->flags, &opdata->operator_objects[0]);
+          }
+        }
+        default:
+          XNN_UNREACHABLE;
+      }
+      break;
+    case xnn_datatype_pfp16:
+      switch (inputb_datatype) {
+        case xnn_datatype_fp16: {
+          // Get the shape and size of the second input.
+          if (xnn_value_is_static(input_b)) {
+            return xnn_create_batch_matrix_multiply_nc_pf16_const_weights(
+                batch_size_b, k, n, input_b->data, node->flags,
+                &opdata->operator_objects[0]);
+          } else {
+            return xnn_create_batch_matrix_multiply_nc_pf16(
+                node->flags, &opdata->operator_objects[0]);
+          }
+        }
+        default:
+          XNN_UNREACHABLE;
+      }
+      break;
     case xnn_datatype_fp32:
       switch (inputb_datatype) {
         case xnn_datatype_fp32: {
@@ -83,6 +116,23 @@ static enum xnn_status create_batch_matrix_multiply_operator(
                 &opdata->operator_objects[0]);
           } else {
             return xnn_create_batch_matrix_multiply_nc_f32(
+                node->flags, &opdata->operator_objects[0]);
+          }
+        }
+        default:
+          XNN_UNREACHABLE;
+      }
+      break;
+    case xnn_datatype_pfp32:
+      switch (inputb_datatype) {
+        case xnn_datatype_fp32: {
+          // Get the shape and size of the second input.
+          if (xnn_value_is_static(input_b)) {
+            return xnn_create_batch_matrix_multiply_nc_pf32_const_weights(
+                batch_size_b, k, n, input_b->data, node->flags,
+                &opdata->operator_objects[0]);
+          } else {
+            return xnn_create_batch_matrix_multiply_nc_pf32(
                 node->flags, &opdata->operator_objects[0]);
           }
         }
@@ -242,6 +292,18 @@ static enum xnn_status reshape_batch_matrix_multiply_operator(
           padded_dims_b, m, k, n, &opdata->workspace_size,
           &opdata->workspace_alignment, threadpool);
       break;
+    case xnn_operator_type_batch_matrix_multiply_nc_pf16:
+      status = xnn_reshape_batch_matrix_multiply_nc_pf16(
+          opdata->operator_objects[0], num_batch_dims, padded_dims_a,
+          padded_dims_b, m, k, n, &opdata->workspace_size,
+          &opdata->workspace_alignment, threadpool);
+      break;
+    case xnn_operator_type_batch_matrix_multiply_nc_pf32:
+      status = xnn_reshape_batch_matrix_multiply_nc_pf32(
+          opdata->operator_objects[0], num_batch_dims, padded_dims_a,
+          padded_dims_b, m, k, n, &opdata->workspace_size,
+          &opdata->workspace_alignment, threadpool);
+      break;
     case xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w:
       status = xnn_reshape_batch_matrix_multiply_nc_qd8_f32_qc8w(
           opdata->operator_objects[0], num_batch_dims, padded_dims_a,
@@ -318,6 +380,14 @@ static enum xnn_status setup_batch_matrix_multiply_operator(
       return xnn_setup_batch_matrix_multiply_nc_f32(
           opdata->operator_objects[0], opdata->workspace, input_a_data,
           input_b_data, output_data);
+    case xnn_operator_type_batch_matrix_multiply_nc_pf16:
+      return xnn_setup_batch_matrix_multiply_nc_pf16(
+          opdata->operator_objects[0], opdata->workspace, input_a_data,
+          input_b_data, output_data);
+    case xnn_operator_type_batch_matrix_multiply_nc_pf32:
+      return xnn_setup_batch_matrix_multiply_nc_pf32(
+          opdata->operator_objects[0], opdata->workspace, input_a_data,
+          input_b_data, output_data);
     case xnn_operator_type_batch_matrix_multiply_nc_qd8_f32_qc8w:
       return xnn_setup_batch_matrix_multiply_nc_qd8_f32_qc8w(
           opdata->operator_objects[0], input_a_data,
@@ -360,6 +430,16 @@ static inline bool validate_datatypes(
       XNN_UNREACHABLE;
   }
   return false;
+}
+
+static bool datatype_is_packable(enum xnn_datatype datatype) {
+  switch (datatype) {
+    case xnn_datatype_fp16:
+    case xnn_datatype_fp32:
+      return true;
+    default:
+      return false;
+  }
 }
 
 enum xnn_status xnn_define_batch_matrix_multiply(
@@ -479,6 +559,34 @@ enum xnn_status xnn_define_batch_matrix_multiply(
       xnn_datatype_to_string(input2_value->datatype),
       xnn_datatype_to_string(output_value->datatype));
     return xnn_status_invalid_parameter;
+  }
+
+  // If supported, convert the input to a packed datatype.
+  const enum xnn_datatype input_datatype = input1_value->datatype;
+  const enum xnn_datatype output_datatype = output_value->datatype;
+  if (datatype_is_packable(input_datatype)) {
+    if (input_datatype == output_datatype) {
+      const struct xnn_gemm_config* gemm_config = NULL;
+      switch (input_datatype) {
+        case xnn_datatype_fp16:
+          gemm_config = xnn_init_pf16_gemm_config();
+          break;
+        case xnn_datatype_fp32:
+          gemm_config = xnn_init_pf32_gemm_config();
+          break;
+        default:
+          XNN_UNREACHABLE;
+      }
+      if (gemm_config != NULL) {
+        // Insert a node to pack the LHS.
+        uint32_t new_id = XNN_INVALID_VALUE_ID;
+        status = xnn_insert_pack_lh_node(subgraph, input1_id, &new_id);
+        if (status != xnn_status_success) {
+          return status;
+        }
+        input1_id = new_id;
+      }
+    }
   }
 
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);

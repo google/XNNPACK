@@ -2670,6 +2670,10 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_f16(
   uint32_t flags,
   xnn_operator_t* batch_matrix_multiply_op);
 
+enum xnn_status xnn_create_batch_matrix_multiply_nc_f16_const_weights(
+    size_t batch_size_b, size_t k, size_t n, const void* data_b, uint32_t flags,
+    xnn_operator_t* batch_matrix_multiply_op);
+
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f16(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
     const size_t* batch_dims_a, const size_t* batch_dims_b, size_t m, size_t k,
