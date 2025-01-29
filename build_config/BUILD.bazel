@@ -262,27 +262,6 @@ config_setting(
     },
 )
 
-config_setting(
-    name = "clang",
-    flag_values = {
-        "@bazel_tools//tools/cpp:compiler": "clang",
-    },
-)
-
-config_setting(
-    name = "llvm",
-    flag_values = {
-        "@bazel_tools//tools/cpp:compiler": "llvm",
-    },
-)
-
-config_setting(
-    name = "gcc",
-    flag_values = {
-        "@bazel_tools//tools/cpp:compiler": "gcc",
-    },
-)
-
 ######################## Composite build configurations #######################
 
 selects.config_setting_group(
@@ -354,12 +333,4 @@ selects.config_setting_group(
 selects.config_setting_group(
     name = "riscv",
     match_any = [":linux_riscv64"],
-)
-
-selects.config_setting_group(
-    name = "clang_or_llvm",
-    match_any = [
-        ":clang",
-        ":llvm",
-    ],
 )
