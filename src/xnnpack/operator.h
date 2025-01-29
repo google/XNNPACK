@@ -237,6 +237,7 @@ struct xnn_operator {
       union xnn_f32_minmax_params f32_minmax;
       struct xnn_f32_scaleminmax_params f32_scaleminmax;
     };
+    struct xnn_bf16_minmax_params bf16_minmax;
     struct xnn_f32_scale_params f32_scale;
     union xnn_f16_minmax_params f16_chw;
     union xnn_f32_minmax_params f32_chw;

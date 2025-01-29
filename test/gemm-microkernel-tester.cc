@@ -2430,7 +2430,7 @@ void GemmMicrokernelTester::Test(
 
 void GemmMicrokernelTester::Test(
   xnn_bf16_f32_gemm_minmax_ukernel_fn gemm_minmax,
-  xnn_init_bf16_minmax_params_fn init_params,
+  xnn_init_f32_minmax_params_fn init_params,
   xnn_pack_bf16_f32_gemm_fn pack) const
 {
   if (a_stride() < k()) {
@@ -2487,7 +2487,7 @@ void GemmMicrokernelTester::Test(
     const float c_max = xnn_bfloat16(accumulated_max - (accumulated_max - accumulated_min) / 255.0f * float(255 - qmax()));
 
     // Prepare parameters.
-    xnn_bf16_minmax_params params;
+    xnn_f32_minmax_params params;
     init_params(&params, c_min, c_max);
 
     for (float& c_value : c_ref) {
@@ -2497,7 +2497,7 @@ void GemmMicrokernelTester::Test(
     gemm_minmax(m(), n(), k() * sizeof(xnn_bfloat16),
       reinterpret_cast<const uint16_t*>(a.data()), a_stride() * sizeof(xnn_bfloat16),
       packed_w.data(),
-      c.data(), cm_stride() * sizeof(float),
+      c.data(), cm_stride() * sizeof(float), /*unused_cn_stride=*/0,
       &params);
 
     // Validate micro-kernel outputs.

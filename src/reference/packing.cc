@@ -142,8 +142,10 @@ void xnn_pack_bf16_f32_gemm_goi_w(size_t g, size_t nc, size_t kc, size_t nr,
     for (size_t nr_block_start = 0; nr_block_start < nc; nr_block_start += nr) {
       const size_t nr_block_size = min(nc - nr_block_start, nr);
       float* packed_weights_float = (float*) packed_weights;
-      for (size_t i = 0; i < nr_block_size; ++i) {
-        packed_weights_float[i] = bias[nr_block_start + i];
+      if (bias != nullptr) {
+        for (size_t i = 0; i < nr_block_size; ++i) {
+          packed_weights_float[i] = bias[nr_block_start + i];
+        }
       }
       packed_weights = (void*)((uintptr_t) packed_weights + nr * sizeof(float));
 

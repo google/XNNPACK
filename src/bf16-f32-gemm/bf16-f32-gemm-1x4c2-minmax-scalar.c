@@ -3,7 +3,6 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <stdio.h>
 #include <assert.h>
 
 #include "xnnpack/gemm.h"
@@ -19,7 +18,8 @@ void xnn_bf16_f32_gemm_minmax_ukernel_1x4c2__scalar(
     const void* restrict w,
     float* restrict c,
     size_t cm_stride,
-    const struct xnn_bf16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    size_t cn_stride,
+    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr == 1);

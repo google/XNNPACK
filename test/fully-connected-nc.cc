@@ -2209,3 +2209,156 @@ TEST(DISABLED_FULLY_CONNECTED_NC_QP8_F32_QC8W, weights_cache_unit_batch_transpos
     .TestQP8F32QC8W();
 }
 
+TEST(FULLY_CONNECTED_NC_BF16_F32, unit_batch) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .TestBF16F32();
+}
+
+TEST(FULLY_CONNECTED_NC_BF16_F32, unit_batch_with_qmin) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .qmin(128)
+    .TestBF16F32();
+}
+
+TEST(FULLY_CONNECTED_NC_BF16_F32, unit_batch_with_qmax) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .qmax(128)
+    .TestBF16F32();
+}
+
+TEST(FULLY_CONNECTED_NC_BF16_F32, unit_batch_with_input_stride) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(22)
+    .input_stride(28)
+    .output_channels(19)
+    .TestBF16F32();
+}
+
+TEST(FULLY_CONNECTED_NC_BF16_F32, unit_batch_with_output_stride) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .output_stride(29)
+    .TestBF16F32();
+}
+
+TEST(FULLY_CONNECTED_NC_BF16_F32, DISABLED_unit_batch_transpose_weights) {
+  FullyConnectedOperatorTester()
+    .transpose_weights(true)
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .TestBF16F32();
+}
+
+TEST(FULLY_CONNECTED_NC_BF16_F32, unit_batch_without_bias) {
+  FullyConnectedOperatorTester()
+    .has_bias(false)
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .TestBF16F32();
+}
+
+TEST(FULLY_CONNECTED_NC_BF16_F32, small_batch) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(22)
+    .output_channels(19)
+    .TestBF16F32();
+}
+
+TEST(FULLY_CONNECTED_NC_BF16_F32, small_batch_fp32_weights) {
+  FullyConnectedOperatorTester()
+    .weights_type(FullyConnectedOperatorTester::WeightsType::FP32)
+    .batch_size(12)
+    .input_channels(22)
+    .output_channels(19)
+    .TestBF16F32();
+}
+
+TEST(FULLY_CONNECTED_NC_BF16_F32, small_batch_with_qmin) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(22)
+    .output_channels(19)
+    .qmin(128)
+    .TestBF16F32();
+}
+
+TEST(FULLY_CONNECTED_NC_BF16_F32, small_batch_with_qmax) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(22)
+    .output_channels(19)
+    .qmax(128)
+    .TestBF16F32();
+}
+
+TEST(FULLY_CONNECTED_NC_BF16_F32, small_batch_with_input_stride) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(22)
+    .input_stride(28)
+    .output_channels(19)
+    .TestBF16F32();
+}
+
+TEST(FULLY_CONNECTED_NC_BF16_F32, small_batch_with_output_stride) {
+  FullyConnectedOperatorTester()
+    .batch_size(12)
+    .input_channels(22)
+    .output_channels(19)
+    .output_stride(29)
+    .TestBF16F32();
+}
+
+TEST(FULLY_CONNECTED_NC_BF16_F32, DISABLED_small_batch_transpose_fp32_weights) {
+  FullyConnectedOperatorTester()
+    .weights_type(FullyConnectedOperatorTester::WeightsType::FP32)
+    .transpose_weights(true)
+    .batch_size(12)
+    .input_channels(22)
+    .output_channels(19)
+    .TestBF16F32();
+}
+
+TEST(FULLY_CONNECTED_NC_BF16_F32, small_batch_without_bias) {
+  FullyConnectedOperatorTester()
+    .has_bias(false)
+    .batch_size(12)
+    .input_channels(22)
+    .output_channels(19)
+    .TestBF16F32();
+}
+
+TEST(FULLY_CONNECTED_NC_BF16_F32, weights_cache_unit_batch) {
+  FullyConnectedOperatorTester()
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .use_weights_cache(true)
+    .TestBF16F32();
+}
+
+TEST(FULLY_CONNECTED_NC_BF16_F32, DISABLED_weights_cache_unit_batch_transpose_weights) {
+  FullyConnectedOperatorTester()
+    .transpose_weights(true)
+    .batch_size(1)
+    .input_channels(22)
+    .output_channels(19)
+    .use_weights_cache(true)
+    .TestBF16F32();
+}
+

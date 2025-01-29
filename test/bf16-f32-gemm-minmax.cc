@@ -280,7 +280,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*planes=*/1,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_1x4c2__scalar,
-                      xnn_init_bf16_minmax_scalar_params,
+                      xnn_init_f32_minmax_scalar_params,
                       xnn_pack_bf16_f32_gemm_goi_w);
         })),
     [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
@@ -300,7 +300,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_1x16c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -321,7 +321,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_2x16c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -342,7 +342,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_3x16c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -363,7 +363,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_4x16c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -384,7 +384,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_5x16c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -405,7 +405,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_6x16c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -426,7 +426,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_7x16c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -447,7 +447,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_8x16c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -468,7 +468,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_9x16c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -489,7 +489,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_10x16c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -510,7 +510,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_11x16c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -531,7 +531,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_1x32c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -552,7 +552,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_2x32c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -573,7 +573,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_3x32c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -594,7 +594,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_4x32c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -615,7 +615,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_5x32c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -636,7 +636,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_6x32c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -657,7 +657,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_7x32c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -678,7 +678,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_8x32c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -699,7 +699,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_9x32c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -720,7 +720,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_10x32c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -741,7 +741,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_11x32c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -762,7 +762,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_1x64c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -783,7 +783,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_2x64c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -804,7 +804,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_3x64c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -825,7 +825,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_4x64c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {
@@ -846,7 +846,7 @@ INSTANTIATE_TEST_SUITE_P(
           /*planes=*/1,
           [](GemmMicrokernelTester& tester) {
             tester.Test(xnn_bf16_f32_gemm_minmax_ukernel_5x64c2__asm_amd64_avx512bf16_broadcast,
-                        xnn_init_bf16_minmax_scalar_params,
+                        xnn_init_f32_minmax_scalar_params,
                         xnn_pack_bf16_f32_gemm_goi_w);
           },
           []() {

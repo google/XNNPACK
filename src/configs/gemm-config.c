@@ -29,6 +29,7 @@
 #define XNN_MR_TO_INDEX(MR) (MR-1)
 
 
+static struct xnn_gemm_config bf16_f32_gemm_config = {0};
 static struct xnn_gemm_config f16_gemm_config = {0};
 static struct xnn_gemm_config f32_gemm_config = {0};
 static struct xnn_gemm_config f32_gemm_nr2_config = {0};
@@ -54,6 +55,7 @@ static struct xnn_gemm_config qdu8_f16_qc4w_gemm_config = {0};
 static struct xnn_gemm_config qs8_qc8w_gemm_config = {0};
 static struct xnn_gemm_config qu8_gemm_config = {0};
 
+XNN_INIT_ONCE_GUARD(bf16_f32_gemm);
 XNN_INIT_ONCE_GUARD(f16_gemm);
 XNN_INIT_ONCE_GUARD(f32_gemm);
 XNN_INIT_ONCE_GUARD(f32_gemm_nr2);
@@ -270,6 +272,26 @@ static void init_pf16_gemm_config(void) {
       pf16_gemm_config.log2_kr = 1;
     #endif  // XNN_ENABLE_ARM_SME2
   }
+#endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
+}
+
+static void init_bf16_f32_gemm_config(void) {
+#if XNN_ARCH_X86_64
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  (void) hardware_config;  // May be unused.
+  if (XNN_ENABLE_AVX512BF16 && hardware_config->use_x86_avx512bf16) {
+    #if XNN_ENABLE_AVX512BF16
+      bf16_f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_bf16_f32_gemm_minmax_ukernel_1x32c2__asm_amd64_avx512bf16_broadcast);
+      bf16_f32_gemm_config.minmax.gemm[XNN_MR_TO_INDEX(7)] = xnn_init_hmp_gemm_ukernel((xnn_gemm_ukernel_fn) xnn_bf16_f32_gemm_minmax_ukernel_7x32c2__asm_amd64_avx512bf16_broadcast);
+      bf16_f32_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+      bf16_f32_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_bf16_f32_gemm_goi_w;
+      bf16_f32_gemm_config.mr = 7;
+      bf16_f32_gemm_config.nr = 32;
+      bf16_f32_gemm_config.log2_kr = 1;
+    #endif  // XNN_ENABLE_AVX512BF16
+  }
+  assert(bf16_f32_gemm_config.mr <= XNN_MAX_MR);
 #endif  // XNN_ARCH_ARM64 && XNN_ENABLE_KLEIDIAI
 }
 
@@ -4273,6 +4295,15 @@ const struct xnn_gemm_config* xnn_init_pf16_gemm_config() {
   }
   XNN_INIT_ONCE(pf16_gemm);
   return &pf16_gemm_config;
+}
+
+const struct xnn_gemm_config* xnn_init_bf16_f32_gemm_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL || !xnn_is_bf16_compatible_config(hardware_config)) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(bf16_f32_gemm);
+  return &bf16_f32_gemm_config;
 }
 
 const struct xnn_gemm_config* xnn_init_pf32_gemm_config() {

@@ -6,6 +6,7 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
+#include <stdio.h>
 #include <assert.h>
 #include <inttypes.h>
 #include <math.h>
@@ -1619,6 +1620,31 @@ enum xnn_status create_fully_connected_nc_f32(
     fully_connected_op_out);
 }
 
+enum xnn_status xnn_create_fully_connected_nc_bf16_f32(
+    size_t input_channels,
+    size_t output_channels,
+    size_t input_stride,
+    size_t output_stride,
+    const void* kernel,
+    const float* bias,
+    float output_min,
+    float output_max,
+    uint32_t flags,
+    xnn_code_cache_t code_cache,
+    xnn_weights_cache_t weights_cache,
+    xnn_operator_t* fully_connected_op_out) {
+  const struct xnn_gemm_config* gemm_config = xnn_init_bf16_f32_gemm_config();
+  if (gemm_config == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_fully_connected_nc_bf16_f32));
+    return xnn_status_unsupported_hardware;
+  }
+
+  return create_fully_connected_nc_f32(input_channels, output_channels, input_stride, output_stride, kernel, bias,
+                                       output_min, output_max, flags, code_cache, weights_cache, gemm_config,
+                                       xnn_operator_type_fully_connected_nc_bf16_f32, fully_connected_op_out);
+}
+
 enum xnn_status xnn_create_fully_connected_nc_f32(
     size_t input_channels,
     size_t output_channels,
@@ -2414,6 +2440,24 @@ enum xnn_status xnn_reshape_fully_connected_nc_f32_f16(
   return xnn_reshape_fully_connected_nc_f32(fully_connected_op, batch_size, threadpool);
 }
 
+enum xnn_status xnn_reshape_fully_connected_nc_bf16_f32(
+    xnn_operator_t fully_connected_op,
+    size_t batch_size,
+    pthreadpool_t threadpool)
+{
+  return reshape_fully_connected_nc(
+    fully_connected_op, xnn_operator_type_fully_connected_nc_bf16_f32,
+    batch_size,
+    /*log2_input_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*log2_filter_element_size=*/XNN_LOG2_SIZEOF_HALF,
+    /*filter_is_nibble=*/false,
+    /*dynamic_quantization=*/false,
+    /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
+    &fully_connected_op->params.bf16_minmax,
+    sizeof(fully_connected_op->params.bf16_minmax),
+    threadpool);
+}
+
 enum xnn_status xnn_reshape_fully_connected_nc_f32(
     xnn_operator_t fully_connected_op,
     size_t batch_size,
@@ -2884,6 +2928,16 @@ enum xnn_status xnn_setup_fully_connected_nc_f32_f16(
     float* output)
 {
   return xnn_setup_fully_connected_nc_f32(fully_connected_op, input, output);
+}
+
+enum xnn_status xnn_setup_fully_connected_nc_bf16_f32(
+    xnn_operator_t fully_connected_op,
+    const void* input,
+    float* output)
+{
+  return setup_fully_connected_nc(
+    fully_connected_op, xnn_operator_type_fully_connected_nc_bf16_f32,
+    input, output, /*quantization_params=*/NULL);
 }
 
 enum xnn_status xnn_setup_fully_connected_nc_f32(

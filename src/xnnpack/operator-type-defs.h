@@ -59,6 +59,7 @@ XNN_ENUM_ITEM(xnn_operator_type_depth_to_space_nhwc_x16, "Depth To Space (NHWC, 
 XNN_ENUM_ITEM(xnn_operator_type_depth_to_space_nhwc_x32, "Depth To Space (NHWC, X32)")
 XNN_ENUM_ITEM(xnn_operator_type_dynamic_fully_connected_nc_f16, "Dynamic Fully Connected (NC, F16)")
 XNN_ENUM_ITEM(xnn_operator_type_dynamic_fully_connected_nc_f32, "Dynamic Fully Connected (NC, F32)")
+XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_bf16_f32, "Fully Connected (NC, BF16, F32)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_f16, "Fully Connected (NC, F16)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_pf16, "Fully Connected (NC, PF16)")
 XNN_ENUM_ITEM(xnn_operator_type_fully_connected_nc_f32, "Fully Connected (NC, F32)")

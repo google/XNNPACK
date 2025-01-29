@@ -29,7 +29,8 @@ extern "C" {
       const void* w,                                           \
       float* c,                                                \
       size_t cm_stride,                                        \
-      const struct xnn_bf16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      size_t cn_stride,                                        \
+      const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_1x4c2__scalar)
 DECLARE_BF16_F32_GEMM_MINMAX_UKERNEL_FUNCTION(xnn_bf16_f32_gemm_minmax_ukernel_1x16c2__asm_amd64_avx512bf16_broadcast)

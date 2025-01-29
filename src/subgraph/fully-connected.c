@@ -55,6 +55,7 @@ enum fully_connected_op_type {
   fc_type_qp8_f32_qc8w = 28,
   fc_type_pf16_f16_f16 = 29,
   fc_type_pqs8_qs8_qc8w = 30,
+  fc_type_bf16_bf16_f32 = 31,
 };
 
 enum fully_connected_op_type get_fully_connected_op_type(
@@ -124,6 +125,13 @@ enum fully_connected_op_type get_fully_connected_op_type(
       break;
     case xnn_datatype_fp32:
       switch (filter_datatype) {
+        case xnn_datatype_bf16:
+          switch (input_datatype) {
+            case xnn_datatype_bf16:
+              return fc_type_bf16_bf16_f32;
+            default:
+              XNN_UNREACHABLE;
+          }
         case xnn_datatype_fp16:
           switch (input_datatype) {
             case xnn_datatype_fp32:
@@ -298,6 +306,14 @@ static enum xnn_status create_fully_connected_operator(
       input_value, filter_value, bias_value, output_value);
   xnn_operator_t* fully_connected_op_ptr = &opdata->operator_objects[0];
   switch (op_type) {
+    case fc_type_bf16_bf16_f32:
+      status = xnn_create_fully_connected_nc_bf16_f32(
+          input_channels, output_channels,
+          /*input_stride=*/input_channels,
+          /*output_stride=*/output_channels, kernel_data, bias_data,
+          node->activation.output_min, node->activation.output_max, node->flags,
+          code_cache, weights_cache, fully_connected_op_ptr);
+      break;
     case fc_type_f16_f16_f16_dynamic:
       status = xnn_create_dynamic_fully_connected_nc_f16(
           node->activation.output_min, node->activation.output_max,
@@ -712,6 +728,10 @@ static enum xnn_status reshape_fully_connected_operator(
 
   xnn_operator_t fully_connected_op = opdata->operator_objects[0];
   switch (fully_connected_op->type) {
+    case xnn_operator_type_fully_connected_nc_bf16_f32:
+      status = xnn_reshape_fully_connected_nc_bf16_f32(fully_connected_op,
+                                                  batch_size, threadpool);
+      break;
     case xnn_operator_type_dynamic_fully_connected_nc_f16:
       status = xnn_reshape_dynamic_fully_connected_nc_f16(
           fully_connected_op, batch_size, input_channels, output_channels,
@@ -882,6 +902,11 @@ static enum xnn_status setup_fully_connected_operator(
 
   xnn_operator_t fully_connected_op = opdata->operator_objects[0];
   switch (fully_connected_op->type) {
+    case xnn_operator_type_fully_connected_nc_bf16_f32:
+      assert(kernel_data == NULL);
+      assert(bias_data == NULL);
+      return xnn_setup_fully_connected_nc_bf16_f32(fully_connected_op, input_data,
+                                              output_data);
     case xnn_operator_type_dynamic_fully_connected_nc_f16:
       assert(kernel_data != NULL);
       return xnn_setup_dynamic_fully_connected_nc_f16(
@@ -1069,6 +1094,14 @@ static inline bool validate_datatypes_with_bias(
     enum xnn_datatype input_datatype, enum xnn_datatype kernel_datatype,
     enum xnn_datatype bias_datatype, enum xnn_datatype output_datatype) {
   switch (kernel_datatype) {
+    case xnn_datatype_bf16:
+      if (input_datatype == xnn_datatype_bf16 &&
+          bias_datatype == xnn_datatype_fp32 &&
+          output_datatype == xnn_datatype_fp32) {
+        return true;
+      } else {
+        return false;
+      }
     case xnn_datatype_fp32:
       if (input_datatype == xnn_datatype_fp32 &&
           bias_datatype == xnn_datatype_fp32 &&
@@ -1179,6 +1212,13 @@ static inline bool validate_datatypes_without_bias(
     enum xnn_datatype input_datatype, enum xnn_datatype kernel_datatype,
     enum xnn_datatype output_datatype) {
   switch (kernel_datatype) {
+    case xnn_datatype_bf16:
+      if (input_datatype == xnn_datatype_bf16 &&
+          output_datatype == xnn_datatype_fp32) {
+        return true;
+      } else {
+        return false;
+      }
     case xnn_datatype_fp32:
       if (input_datatype == xnn_datatype_fp32 &&
           output_datatype == xnn_datatype_fp32) {
@@ -1302,6 +1342,7 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
   }
 
   switch (input_value->datatype) {
+    case xnn_datatype_bf16:
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
     case xnn_datatype_qint8:
@@ -1363,6 +1404,7 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
 
   // Non-static kernel is supported, but only for some data types
   switch (kernel_value->datatype) {
+    case xnn_datatype_bf16:
     case xnn_datatype_fp16:
     case xnn_datatype_fp32:
       break;

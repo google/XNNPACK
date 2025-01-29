@@ -33,9 +33,6 @@ class Avx512Bf16(isa.Avx512F):
   def function_name(self, M, N, isa):
     return f'xnn_bf16_f32_gemm_minmax_ukernel_{M}x{N}c2__asm_amd64_{isa}_broadcast\n'
 
-  def params_offset(self):
-    return 72
-
   def outer_loop_prepare(self, M, N):
     k_register = self.k_register()
     kc_register = self.kc_register()
