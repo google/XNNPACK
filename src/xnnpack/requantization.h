@@ -121,7 +121,7 @@ static inline uint8_t xnn_qu8_requantize_rndnu16(int32_t input, float scale,
                                                  uint8_t zero_point,
                                                  uint8_t min, uint8_t max) {
   assert(scale < 256.0f);
-  assert(scale >= 0x1.0p-32f);
+  assert(scale >= 1.0f / 4294967296.0f /* 0x1.0p-32f */);
 
   struct ExpMul f32 = parse_f32(scale);
 
