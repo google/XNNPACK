@@ -304,6 +304,7 @@ def _x86_align_stack(alignment):
             "-mincoming-stack-boundary=4",
         ],
         "//build_config:fuchsia_clang": [],
+        "//build_config:ios_clang": [],
         "//conditions:default": [],
     })
 

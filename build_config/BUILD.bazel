@@ -363,3 +363,11 @@ selects.config_setting_group(
         ":clang"
     ],
 )
+
+selects.config_setting_group(
+    name = "ios_clang",
+    match_all = [
+        ":ios",
+        ":clang"
+    ],
+)
