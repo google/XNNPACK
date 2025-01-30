@@ -198,6 +198,12 @@ static void QS8MobileNetV2(benchmark::State& state) {
   BenchmarkInvoke(state, models::QS8MobileNetV2);
 }
 
+static void FP32Elementwise(benchmark::State& state) {
+  BenchmarkInvoke(state, [&state]() {
+    return models::FP32Elementwise(FLAGS_batch_size, state.range(0));
+  });
+}
+
 static void AttentionArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"T", "H", "N", "S"});
   b->Args({16, 25, 24, 4});
@@ -237,5 +243,10 @@ BENCHMARK(QD8Attention)
     ->Apply(AttentionArguments);
 
 BENCHMARK(QS8MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
+
+BENCHMARK(FP32Elementwise)
+    ->Unit(benchmark::kMicrosecond)
+    ->UseRealTime()
+    ->Arg(6)->Arg(10)->Arg(18)->Arg(34);
 
 XNN_BENCHMARK_MAIN();

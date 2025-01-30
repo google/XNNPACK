@@ -30,4 +30,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
                             size_t head_dim, QD8AttentionWeights &weights);
 xnn_subgraph_t QS8MobileNetV2();
 
+// This is a sequence of {add, multiply} x `reps` ops, on `size` x `size` values.
+xnn_subgraph_t FP32Elementwise(size_t size, size_t reps);
+
 }  // namespace models

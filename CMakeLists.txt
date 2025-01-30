@@ -1928,6 +1928,7 @@ IF(XNNPACK_BUILD_BENCHMARKS)
     # ---[ Build end-to-end microbenchmarks
     ADD_LIBRARY(models STATIC
       bench/models/fp32-attention.cc
+      bench/models/fp32-elementwise.cc
       bench/models/fp32-mobilenet-v1.cc
       bench/models/fp32-mobilenet-v2.cc
       bench/models/fp32-mobilenet-v3-large.cc
