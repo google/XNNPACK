@@ -99,23 +99,24 @@
   pack: xnn_pack_bf16_f32_gemm_goi_w
   init: xnn_init_f32_minmax_scalar_params
   k-block: 4
-- name: xnn_bf16_f32_gemm_minmax_ukernel_1x64c2__asm_amd64_avx512bf16_broadcast
-  pack: xnn_pack_bf16_f32_gemm_goi_w
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 4
-- name: xnn_bf16_f32_gemm_minmax_ukernel_2x64c2__asm_amd64_avx512bf16_broadcast
-  pack: xnn_pack_bf16_f32_gemm_goi_w
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 4
-- name: xnn_bf16_f32_gemm_minmax_ukernel_3x64c2__asm_amd64_avx512bf16_broadcast
-  pack: xnn_pack_bf16_f32_gemm_goi_w
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 4
-- name: xnn_bf16_f32_gemm_minmax_ukernel_4x64c2__asm_amd64_avx512bf16_broadcast
-  pack: xnn_pack_bf16_f32_gemm_goi_w
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 4
-- name: xnn_bf16_f32_gemm_minmax_ukernel_5x64c2__asm_amd64_avx512bf16_broadcast
-  pack: xnn_pack_bf16_f32_gemm_goi_w
-  init: xnn_init_f32_minmax_scalar_params
-  k-block: 4
+  # TODO b/393267671: Re-enable once fixed.
+#- name: xnn_bf16_f32_gemm_minmax_ukernel_1x64c2__asm_amd64_avx512bf16_broadcast
+#  pack: xnn_pack_bf16_f32_gemm_goi_w
+#  init: xnn_init_f32_minmax_scalar_params
+#  k-block: 4
+#- name: xnn_bf16_f32_gemm_minmax_ukernel_2x64c2__asm_amd64_avx512bf16_broadcast
+#  pack: xnn_pack_bf16_f32_gemm_goi_w
+#  init: xnn_init_f32_minmax_scalar_params
+#  k-block: 4
+#- name: xnn_bf16_f32_gemm_minmax_ukernel_3x64c2__asm_amd64_avx512bf16_broadcast
+#  pack: xnn_pack_bf16_f32_gemm_goi_w
+#  init: xnn_init_f32_minmax_scalar_params
+#  k-block: 4
+#- name: xnn_bf16_f32_gemm_minmax_ukernel_4x64c2__asm_amd64_avx512bf16_broadcast
+#  pack: xnn_pack_bf16_f32_gemm_goi_w
+#  init: xnn_init_f32_minmax_scalar_params
+#  k-block: 4
+#- name: xnn_bf16_f32_gemm_minmax_ukernel_5x64c2__asm_amd64_avx512bf16_broadcast
+#  pack: xnn_pack_bf16_f32_gemm_goi_w
+#  init: xnn_init_f32_minmax_scalar_params
+#  k-block: 4
