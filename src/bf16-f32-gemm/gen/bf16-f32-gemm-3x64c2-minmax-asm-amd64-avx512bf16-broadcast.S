@@ -18,7 +18,7 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_3x64c2__asm_amd64_avx512bf16_bro
       push r12
 
       # load params to free up a GP registers
-      mov r13, [rsp + 72] # params
+      mov r13, [rsp + 80] # params
       vbroadcastss zmm0, DWORD PTR [r13]
       vbroadcastss zmm1, DWORD PTR [r13 + 4]
 
@@ -83,16 +83,16 @@ inner_loop:
       vmovaps  zmm13, [r9 + 192]
       add r9, 256
       vbroadcastss zmm2, DWORD PTR [rcx + r11]
-      vbroadcastss zmm3, DWORD PTR [rax + r11]
-      vbroadcastss zmm4, DWORD PTR [r15 + r11]
       vdpbf16ps  zmm7, zmm2, zmm10
       vdpbf16ps  zmm14, zmm2, zmm11
       vdpbf16ps  zmm17, zmm2, zmm12
       vdpbf16ps  zmm20, zmm2, zmm13
+      vbroadcastss zmm3, DWORD PTR [rax + r11]
       vdpbf16ps  zmm8, zmm3, zmm10
       vdpbf16ps  zmm15, zmm3, zmm11
       vdpbf16ps  zmm18, zmm3, zmm12
       vdpbf16ps  zmm21, zmm3, zmm13
+      vbroadcastss zmm4, DWORD PTR [r15 + r11]
       vdpbf16ps  zmm9, zmm4, zmm10
       vdpbf16ps  zmm16, zmm4, zmm11
       vdpbf16ps  zmm19, zmm4, zmm12
@@ -115,8 +115,6 @@ inner_loop_tail:
       vmovaps  zmm13, [r9 + 192]
       add r9, 256
       vbroadcastss zmm2, DWORD PTR [rcx + r11]
-      vbroadcastss zmm3, DWORD PTR [rax + r11]
-      vbroadcastss zmm4, DWORD PTR [r15 + r11]
       vpslld zmm2, zmm2, 16
       vpsrad zmm2, zmm2, 16
       vdpbf16ps  zmm7, zmm2, zmm10
@@ -133,6 +131,7 @@ inner_loop_tail:
       vpsrad zmm2, zmm2, 16
       vdpbf16ps  zmm20, zmm2, zmm13
 
+      vbroadcastss zmm3, DWORD PTR [rax + r11]
       vpslld zmm3, zmm3, 16
       vpsrad zmm3, zmm3, 16
       vdpbf16ps  zmm8, zmm3, zmm10
@@ -149,6 +148,7 @@ inner_loop_tail:
       vpsrad zmm3, zmm3, 16
       vdpbf16ps  zmm21, zmm3, zmm13
 
+      vbroadcastss zmm4, DWORD PTR [r15 + r11]
       vpslld zmm4, zmm4, 16
       vpsrad zmm4, zmm4, 16
       vdpbf16ps  zmm9, zmm4, zmm10

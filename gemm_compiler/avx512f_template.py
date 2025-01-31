@@ -81,9 +81,7 @@ class Avx512F(isa.Fma3):
             AM_ptr=self.am_registers()[mr],
             AM=self.a_registers(0),
             a_offset=self.k_register(),
-            W=self.w_registers()[nr],
             A=self.a_registers(0),
-            ACC=self.acc_registers()[M * nr + mr],
         )
         loop = 'loop_tail' if tail else 'loop'
         for m in self.compute_asm()[loop]:
@@ -120,19 +118,15 @@ class Avx512F(isa.Fma3):
           W=self.w_ptr_register(), w_step=self.register_bytes() * N_COUNT
       )
 
+    loop = 'loop_tail' if tail else 'loop'
     for mr in range(0, M):
       for l in self.input_asm()['loop']:
         asm_string += l.format(
             AM_ptr=self.am_registers()[mr],
             AM=self.a_registers(mr),
             a_offset=self.k_register(),
-            W=self.w_registers()[nr],
             A=self.a_registers(mr),
-            ACC=self.acc_registers()[M * nr + mr],
         )
-      loop = 'loop_tail' if tail else 'loop'
-
-    for mr in range(0, M):
       for m in self.compute_asm()[loop]:
         for nr in range(0, N_COUNT):
           asm_string += m.format(

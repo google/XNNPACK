@@ -91,14 +91,14 @@ inner_loop:
       vmovaps  zmm10, [r9 + 0]
       add r9, 64
       vbroadcastss zmm2, DWORD PTR [rcx + r11]
-      vbroadcastss zmm3, DWORD PTR [rax + r11]
-      vbroadcastss zmm4, DWORD PTR [r15 + r11]
-      vbroadcastss zmm5, DWORD PTR [r14 + r11]
-      vbroadcastss zmm6, DWORD PTR [r12 + r11]
       vdpbf16ps  zmm7, zmm2, zmm10
+      vbroadcastss zmm3, DWORD PTR [rax + r11]
       vdpbf16ps  zmm8, zmm3, zmm10
+      vbroadcastss zmm4, DWORD PTR [r15 + r11]
       vdpbf16ps  zmm9, zmm4, zmm10
+      vbroadcastss zmm5, DWORD PTR [r14 + r11]
       vdpbf16ps  zmm14, zmm5, zmm10
+      vbroadcastss zmm6, DWORD PTR [r12 + r11]
       vdpbf16ps  zmm15, zmm6, zmm10
 
       add r11, 4
@@ -115,26 +115,26 @@ inner_loop_tail:
       vmovaps  zmm10, [r9 + 0]
       add r9, 64
       vbroadcastss zmm2, DWORD PTR [rcx + r11]
-      vbroadcastss zmm3, DWORD PTR [rax + r11]
-      vbroadcastss zmm4, DWORD PTR [r15 + r11]
-      vbroadcastss zmm5, DWORD PTR [r14 + r11]
-      vbroadcastss zmm6, DWORD PTR [r12 + r11]
       vpslld zmm2, zmm2, 16
       vpsrad zmm2, zmm2, 16
       vdpbf16ps  zmm7, zmm2, zmm10
 
+      vbroadcastss zmm3, DWORD PTR [rax + r11]
       vpslld zmm3, zmm3, 16
       vpsrad zmm3, zmm3, 16
       vdpbf16ps  zmm8, zmm3, zmm10
 
+      vbroadcastss zmm4, DWORD PTR [r15 + r11]
       vpslld zmm4, zmm4, 16
       vpsrad zmm4, zmm4, 16
       vdpbf16ps  zmm9, zmm4, zmm10
 
+      vbroadcastss zmm5, DWORD PTR [r14 + r11]
       vpslld zmm5, zmm5, 16
       vpsrad zmm5, zmm5, 16
       vdpbf16ps  zmm14, zmm5, zmm10
 
+      vbroadcastss zmm6, DWORD PTR [r12 + r11]
       vpslld zmm6, zmm6, 16
       vpsrad zmm6, zmm6, 16
       vdpbf16ps  zmm15, zmm6, zmm10

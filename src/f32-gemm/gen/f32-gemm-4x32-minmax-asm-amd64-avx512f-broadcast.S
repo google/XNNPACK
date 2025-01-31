@@ -76,15 +76,15 @@ inner_loop:
       vmovaps  zmm11, [r9 + 64]
       add r9, 128
       vbroadcastss zmm2, DWORD PTR [rcx + r11]
-      vbroadcastss zmm3, DWORD PTR [rax + r11]
-      vbroadcastss zmm4, DWORD PTR [r15 + r11]
-      vbroadcastss zmm5, DWORD PTR [r14 + r11]
       vfmadd231ps  zmm7, zmm2, zmm10
       vfmadd231ps  zmm15, zmm2, zmm11
+      vbroadcastss zmm3, DWORD PTR [rax + r11]
       vfmadd231ps  zmm8, zmm3, zmm10
       vfmadd231ps  zmm16, zmm3, zmm11
+      vbroadcastss zmm4, DWORD PTR [r15 + r11]
       vfmadd231ps  zmm9, zmm4, zmm10
       vfmadd231ps  zmm17, zmm4, zmm11
+      vbroadcastss zmm5, DWORD PTR [r14 + r11]
       vfmadd231ps  zmm14, zmm5, zmm10
       vfmadd231ps  zmm18, zmm5, zmm11
 

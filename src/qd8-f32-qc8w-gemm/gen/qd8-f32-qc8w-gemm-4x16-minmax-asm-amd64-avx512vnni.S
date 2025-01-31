@@ -90,12 +90,12 @@ inner_loop:
       vmovaps  zmm6, [r9 + 0]
       add r9, 64
       vpbroadcastd zmm2, [rcx + r11]
-      vpbroadcastd zmm2, [rax + r11]
-      vpbroadcastd zmm2, [r15 + r11]
-      vpbroadcastd zmm2, [r14 + r11]
       vpdpbusd  zmm5, zmm2, zmm6
+      vpbroadcastd zmm2, [rax + r11]
       vpdpbusd  zmm12, zmm2, zmm6
+      vpbroadcastd zmm2, [r15 + r11]
       vpdpbusd  zmm14, zmm2, zmm6
+      vpbroadcastd zmm2, [r14 + r11]
       vpdpbusd  zmm15, zmm2, zmm6
 
       add r11, 4
