@@ -8,8 +8,6 @@
 tools/generate-argmaxpool-test.py --spec test/f32-argmaxpool.yaml --output test/f32-argmaxpool.cc &
 
 ### Tests for GEMM micro-kernels
-tools/generate-gemm-test.py --spec test/bf16-f32-gemm-minmax.yaml --output-test test/bf16-f32-gemm-minmax.cc &
-
 tools/generate-gemm-test.py --spec test/bf16-gemm-minmax.yaml --output-test test/bf16-gemm-minmax.cc &
 
 tools/generate-gemm-test.py --spec test/f16-gemm-minmax.yaml        --output-test test/f16-gemm-minmax.cc --output-bench bench/f16-gemm-minmax.cc &
@@ -251,8 +249,8 @@ tools/generate-ibilinear-chw-test.py --spec test/f32-ibilinear-chw.yaml --output
 tools/generate-raddexpminusmax-test.py --spec test/f32-raddexpminusmax.yaml --output test/f32-raddexpminusmax.cc &
 
 ### Tests for RAddStoreExpMinusMax micro-kernels
-tools/generate-raddstoreexpminusmax-test.py --spec test/f16-raddstoreexpminusmax.yaml --output test/f16-raddstoreexpminusmax.cc &
-tools/generate-raddstoreexpminusmax-test.py --spec test/f32-raddstoreexpminusmax.yaml --output test/f32-raddstoreexpminusmax.cc &
+tools/generate-raddstoreexpminusmax-test.py --tester RAddStoreExpMinusMaxMicrokernelTester --ukernel f16-raddstoreexpminusmax --output test/f16-raddstoreexpminusmax.cc &
+tools/generate-raddstoreexpminusmax-test.py --tester RAddStoreExpMinusMaxMicrokernelTester --ukernel f32-raddstoreexpminusmax --output test/f32-raddstoreexpminusmax.cc &
 
 ### Tests for the portable SIMD wrappers.
 tools/xngen test/f32-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/f32-simd-scalar.cc &
