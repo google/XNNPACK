@@ -65,9 +65,9 @@ http_archive(
 # Google Benchmark library, used in micro-benchmarks.
 http_archive(
     name = "com_google_benchmark",
-    sha256 = "1ba14374fddcd9623f126b1a60945e4deac4cdc4fb25a5f25e7f779e36f2db52",
-    strip_prefix = "benchmark-d2a8a4ee41b923876c034afb939c4fc03598e622",
-    urls = ["https://github.com/google/benchmark/archive/d2a8a4ee41b923876c034afb939c4fc03598e622.zip"],
+    sha256 = "a3f2e783628cee5b75166cb02af43fd1220479553c397ba4a35abd1d19d19ad3",
+    strip_prefix = "benchmark-4a805f9f0f468bd4d499d060a1a1c6bd5d6b6b73",
+    urls = ["https://github.com/google/benchmark/archive/4a805f9f0f468bd4d499d060a1a1c6bd5d6b6b73.zip"],
 )
 # LINT.ThenChange(cmake/DownloadGoogleBenchmark.cmake,MODULE.bazel:benchmark)
 
