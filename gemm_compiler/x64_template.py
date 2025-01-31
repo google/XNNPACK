@@ -138,7 +138,7 @@ class X64(base_architecture.BaseArchitecture):
     return f'jmp {label}'
 
   def function_name(self, M, N, isa):
-    return f'xnn_f32_gemm_minmax_ukernel_{M}x{N}__asm_amd64_{isa}_broadcast\n'
+    return f'xnn_f32_gemm_minmax_ukernel_{M}x{N}__asm_amd64_{isa}_broadcast'
 
   def params_offset(self):
     return 80
@@ -149,10 +149,10 @@ class X64(base_architecture.BaseArchitecture):
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/assembly.h"\n\n"""
+#include "xnnpack/assembly.h"
 
-    HEADER += 'BEGIN_FUNCTION ' + self.function_name(M, N, isa)
-    HEADER += """
+BEGIN_FUNCTION {function_name}
+
       .intel_syntax noprefix
 
       # Free up GP registers.
@@ -171,7 +171,9 @@ class X64(base_architecture.BaseArchitecture):
       # Load c pointer.
       mov r10, [rsp + 56]
       # Load cm_stride.
-      mov r11, [rsp + 64]\n""".format(
+      mov r11, [rsp + 64]
+""".format(
+        function_name=self.function_name(M, N, isa),
         M=M, N=N, prefix=prefix, isa=isa, params_offset=self.params_offset()
     )
     return HEADER
@@ -301,7 +303,20 @@ class X64(base_architecture.BaseArchitecture):
       pop rbp
       pop rbx
       ret
-END_FUNCTION {function_name}""".format(
+END_FUNCTION {function_name}
+
+#ifdef __has_feature
+#if __has_feature(dataflow_sanitizer)
+BEGIN_FUNCTION {function_name}.dfsan
+      .intel_syntax noprefix
+      # We could implement this by calling a function that implements the dfsan instrumentation.
+      # For now, just break, so if someone tries to use this, they'll know where the problem is.
+      int 3
+      ret
+END_FUNCTION {function_name}.dfsan
+#endif
+#endif
+""".format(
         M=M, N=N, function_name=isa.function_name(M, N, isa.isa())
     )
     return restore_stack

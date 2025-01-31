@@ -50,7 +50,7 @@ class Avx512Vnni(isa.Avx512F):
     ]
 
   def function_name(self, M, N, isa):
-    return f'xnn_qd8_f32_qc8w_gemm_minmax_ukernel_{M}x{N}c4__asm_amd64_{isa}\n'
+    return f'xnn_qd8_f32_qc8w_gemm_minmax_ukernel_{M}x{N}c4__asm_amd64_{isa}'
 
   def zp_scale(self, pos):
     regs = ['10', '11']

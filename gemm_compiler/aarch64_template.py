@@ -93,7 +93,7 @@ class Aarch64(base_architecture.BaseArchitecture):
 
   def function_name(self, M, N, isa):
     LD = self.unroll_factor * 32
-    return f'xnn_f32_gemm_minmax_ukernel_{M}x{N}__asm_aarch64_{isa}_ld{LD}_2\n'
+    return f'xnn_f32_gemm_minmax_ukernel_{M}x{N}__asm_aarch64_{isa}_ld{LD}_2'
 
   def quantization_params(self):
     return ''
@@ -104,10 +104,10 @@ class Aarch64(base_architecture.BaseArchitecture):
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include "xnnpack/assembly.h"\n\n"""
+#include "xnnpack/assembly.h"
 
-    HEADER += 'BEGIN_FUNCTION ' + self.function_name(M, N, isa)
-    HEADER += """
+BEGIN_FUNCTION {function_name}
+
       # Free up GP registers.
       stp x19, x20, [sp, -64]
       stp x21, x22, [sp, -48]
@@ -124,7 +124,10 @@ class Aarch64(base_architecture.BaseArchitecture):
       ldr x13, [sp, 8]
 
       # Load min/max values.
-      ld2r {v0.4s, v1.4s}, [x13]\n"""
+      ld2r {{v0.4s, v1.4s}}, [x13]
+""".format(
+        function_name=self.function_name(M, N, isa)
+    )
     HEADER += self.quantization_params()
     return HEADER
 
@@ -338,7 +341,8 @@ return:
       ldp d12, d13, [sp, -96]
       ldp d14, d15, [sp, -80]
       ret
-END_FUNCTION {function_name}""".format(
+END_FUNCTION {function_name}
+""".format(
         M=M, N=N, function_name=isa.function_name(M, N, isa.isa())
     )
     return restore_stack

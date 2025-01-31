@@ -51,7 +51,7 @@ class NeonDot(isa.NeonFma):
 
   def function_name(self, M, N, isa):
     LD = self.unroll_factor * 32
-    return f'xnn_qd8_f32_qc8w_gemm_minmax_ukernel_{M}x{N}c4__asm_aarch64_{isa}_ld{LD}_2\n'
+    return f'xnn_qd8_f32_qc8w_gemm_minmax_ukernel_{M}x{N}c4__asm_aarch64_{isa}_ld{LD}_2'
 
   def zp_scale(self, pos):
     regs = ['10', '11']
@@ -244,7 +244,7 @@ class NeonDotQC4W(NeonDot):
 
   def function_name(self, M, N, isa):
     LD = self.unroll_factor * 32
-    return f'xnn_qd8_f32_qc4w_gemm_minmax_ukernel_{M}x{N}c4__asm_aarch64_{isa}_ld{LD}_2\n'
+    return f'xnn_qd8_f32_qc4w_gemm_minmax_ukernel_{M}x{N}c4__asm_aarch64_{isa}_ld{LD}_2'
 
   def cvtf(self):
     return 'scvtf v{ACC}.4s, v{ACC}.4s, #4\n'

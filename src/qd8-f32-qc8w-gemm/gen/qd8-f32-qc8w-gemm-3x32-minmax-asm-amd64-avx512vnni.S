@@ -181,3 +181,15 @@ return:
       pop rbx
       ret
 END_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x32c4__asm_amd64_avx512vnni
+
+      #ifdef __has_feature
+      #if __has_feature(dataflow_sanitizer)
+BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x32c4__asm_amd64_avx512vnni.dfsan
+      .intel_syntax noprefix
+      # We could implement this by calling a function that implements the dfsan instrumentation.
+      # For now, just break, so if someone tries to use this, they'll know where the problem is.
+      int 3
+      ret
+END_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x32c4__asm_amd64_avx512vnni.dfsan
+      #endif
+      #endif
