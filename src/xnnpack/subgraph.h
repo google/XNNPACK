@@ -42,6 +42,13 @@
 /// If Slinky is enabled, disable any scheduling.
 #define XNN_FLAG_SLINKY_SCHEDULE_DISABLED 0x20000000
 
+/// If Slinky is enabled, assume shapes are concrete (and rebuild pipeline in reshape).
+/// This makes reshaping more expensive, but may reduce overhead in some cases.
+#define XNN_FLAG_SLINKY_CONCRETE_BOUNDS 0x10000000
+
+/// If Slinky is enabled, disable asserts in Slinky pipelines.
+#define XNN_FLAG_SLINKY_NO_CHECKS 0x08000000
+
 /// Assume tensors of rank > 2 will be squashed to 2 dimensions.
 #define XNN_FLAG_SQUASH_GROUPS 0x00000100
 
@@ -54,7 +61,7 @@ extern "C" {
 struct slinky_pipeline;
 typedef struct slinky_pipeline* slinky_pipeline_t;
 
-void slinky_init_pipeline(xnn_runtime_t runtime, uint32_t flags);
+void slinky_init_pipeline(xnn_runtime_t runtime);
 void slinky_setup_inputs_and_outputs(xnn_runtime_t runtime);
 void slinky_destroy_pipeline(xnn_runtime_t runtime);
 bool slinky_evaluate(xnn_runtime_t runtime, enum xnn_status* status);
@@ -444,6 +451,7 @@ struct xnn_subgraph {
 /// Runtime is a combination of an execution plan for subgraph Nodes and a memory manager for subgraph Values.
 struct xnn_runtime {
   uint32_t num_external_values;
+  uint32_t flags;
 
   /// List of operators in the execution plan, in execution order.
   struct xnn_operator_data* opdata;

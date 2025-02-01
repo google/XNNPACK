@@ -550,6 +550,8 @@ enum xnn_status xnn_create_runtime_v4(
     goto error;
   }
 
+  runtime->flags = flags;
+
   runtime->opdata = xnn_allocate_zero_memory(sizeof(struct xnn_operator_data) * subgraph->num_nodes);
   if (runtime->opdata == NULL) {
     xnn_log_error("failed to allocate %zu bytes for opdata descriptors",
@@ -647,7 +649,7 @@ enum xnn_status xnn_create_runtime_v4(
 #endif
   if (use_slinky) {
     #ifdef XNN_SLINKY_AVAILABLE
-    // slinky_init_pipeline(runtime, flags);
+    // slinky_init_pipeline(runtime);
     #else
     xnn_log_warning("Slinky requested but not available");
     #endif
@@ -741,6 +743,22 @@ error:
 enum xnn_status xnn_reshape_runtime(
   xnn_runtime_t runtime)
 {
+#ifdef XNN_SLINKY_ENABLED
+  // If compiling with XNN_SLINKY_ENABLED defined, assume we always
+  // want Slinky enabled, regardless of the runtime flag
+  const bool use_slinky = true;
+#else
+  const bool use_slinky = (runtime->flags & XNN_FLAG_SLINKY_ENABLED) != 0;
+#endif
+  if (use_slinky) {
+    #ifdef XNN_SLINKY_AVAILABLE
+    if ((runtime->flags & XNN_FLAG_SLINKY_CONCRETE_BOUNDS) != 0) {
+      // slinky_init_pipeline(runtime);
+    }
+    // TODO: Reshape should not necessary when using slinky with symbolic (not concrete) bounds.
+    #endif
+  }
+
   bool reallocation_required = false;
 
   for (uint32_t opdata_id = 0; opdata_id < runtime->num_ops; opdata_id++) {
