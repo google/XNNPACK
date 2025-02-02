@@ -292,7 +292,7 @@ def _x86_align_stack(alignment):
         log2_alignment += 1
         temp = temp // 2
     return select({
-        "//build_config:clang": [
+        "//build_config:clang_and_not_fuchsia_or_ios": [
             "-mstack-alignment=" + str(alignment),
             "-fomit-frame-pointer",
             "-mstackrealign",
@@ -303,8 +303,6 @@ def _x86_align_stack(alignment):
             "-mstackrealign",
             "-mincoming-stack-boundary=4",
         ],
-        "//build_config:fuchsia_clang": [],
-        "//build_config:ios_clang": [],
         "//conditions:default": [],
     })
 
