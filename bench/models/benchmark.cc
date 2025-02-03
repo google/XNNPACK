@@ -204,6 +204,13 @@ static void FP32Elementwise(benchmark::State& state) {
   });
 }
 
+static void FP32LayerNorm(benchmark::State& state) {
+  BenchmarkInvoke(state, [&state]() {
+    return models::FP32LayerNorm(state.range(0), state.range(1),
+                                 state.range(2), state.range(3));
+  });
+}
+
 static void AttentionArguments(benchmark::internal::Benchmark* b) {
   b->ArgNames({"T", "H", "N", "S"});
   b->Args({16, 25, 24, 4});
@@ -215,6 +222,13 @@ static void AttentionArguments(benchmark::internal::Benchmark* b) {
   b->Args({3072, 256, 16, 28});
   b->Args({2304, 256, 8, 26});
   b->Args({2048, 64, 32, 24});
+}
+
+static void LayerNormArguments(benchmark::internal::Benchmark* b) {
+  b->ArgNames({"M", "N", "K", "NormRank"});
+  for (int norm_rank = 1; norm_rank <= 3; ++norm_rank) {
+    b->Args({128, 256, 512, norm_rank});
+  }
 }
 
 BENCHMARK(FP32Attention)
@@ -248,5 +262,10 @@ BENCHMARK(FP32Elementwise)
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
     ->Arg(6)->Arg(10)->Arg(18)->Arg(34);
+
+BENCHMARK(FP32LayerNorm)
+    ->Unit(benchmark::kMicrosecond)
+    ->UseRealTime()
+    ->Apply(LayerNormArguments);
 
 XNN_BENCHMARK_MAIN();
