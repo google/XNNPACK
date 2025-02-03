@@ -278,7 +278,7 @@ jobs:
         id: setup-ndk
         uses: nttld/setup-ndk@v1
         with:
-          ndk-version: r23b
+          ndk-version: r26d
           add-to-path: false
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
