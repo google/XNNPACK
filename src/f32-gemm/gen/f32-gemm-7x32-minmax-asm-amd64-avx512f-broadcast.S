@@ -27,12 +27,19 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_7x32__asm_amd64_avx512f_broadcast
       # Load cm_stride.
       mov r11, [rsp + 64]
 
+      # Align the stack pointer.
+      mov r13, rsp
+      sub rsp, 64
+      and rsp, 0xFFFFFFFFFFFFFFC0
+      # Store the old stack pointer containing the return address
+      mov [rsp], r13
+
       # Allocate some space on the stack.
-      sub rsp, 144
+      sub rsp, 192
       # Write rsi (a pointer) to the stack as we need the register.
-      mov [rsp], rcx
+      mov [rsp + 16], rcx
       # Write r10 (c pointer) to the stack as we need the register.
-      mov [rsp + 8], r10
+      mov [rsp + 24], r10
 
       # Clamp a & c pointers if mr <= 1
       mov rax, rcx
@@ -43,8 +50,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_7x32__asm_amd64_avx512f_broadcast
       cmovle rax, rcx
       cmovle r13, r10
 
-      mov [rsp + 16], rax
-      mov [rsp + 24], r13
+      mov [rsp + 32], rax
+      mov [rsp + 40], r13
 
       # Clamp a & c pointers if mr <= 2
       mov rcx, rax
@@ -55,8 +62,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_7x32__asm_amd64_avx512f_broadcast
       cmovle rcx, rax
       cmovle r10, r13
 
-      mov [rsp + 32], rcx
-      mov [rsp + 40], r10
+      mov [rsp + 48], rcx
+      mov [rsp + 56], r10
 
       # Clamp a & c pointers if mr <= 3
       mov rax, rcx
@@ -67,8 +74,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_7x32__asm_amd64_avx512f_broadcast
       cmovle rax, rcx
       cmovle r13, r10
 
-      mov [rsp + 48], rax
-      mov [rsp + 56], r13
+      mov [rsp + 64], rax
+      mov [rsp + 72], r13
 
       # Clamp a & c pointers if mr <= 4
       mov rcx, rax
@@ -79,8 +86,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_7x32__asm_amd64_avx512f_broadcast
       cmovle rcx, rax
       cmovle r10, r13
 
-      mov [rsp + 64], rcx
-      mov [rsp + 72], r10
+      mov [rsp + 80], rcx
+      mov [rsp + 88], r10
 
       # Clamp a & c pointers if mr <= 5
       mov rax, rcx
@@ -91,8 +98,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_7x32__asm_amd64_avx512f_broadcast
       cmovle rax, rcx
       cmovle r13, r10
 
-      mov [rsp + 80], rax
-      mov [rsp + 88], r13
+      mov [rsp + 96], rax
+      mov [rsp + 104], r13
 
       # Clamp a & c pointers if mr <= 6
       mov rcx, rax
@@ -103,20 +110,20 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_7x32__asm_amd64_avx512f_broadcast
       cmovle rcx, rax
       cmovle r10, r13
 
-      mov [rsp + 96], rcx
-      mov [rsp + 104], r10
+      mov [rsp + 112], rcx
+      mov [rsp + 120], r10
 
 outer_loop:
       # Initialize k counter.
       mov r11, 0
       # Read a pointers from stack into GP registers.
-      mov rcx, [rsp + 0]
-      mov rax, [rsp + 16]
-      mov r15, [rsp + 32]
-      mov r14, [rsp + 48]
-      mov r12, [rsp + 64]
-      mov r10, [rsp + 80]
-      mov r13, [rsp + 96]
+      mov rcx, [rsp + 16]
+      mov rax, [rsp + 32]
+      mov r15, [rsp + 48]
+      mov r14, [rsp + 64]
+      mov r12, [rsp + 80]
+      mov r10, [rsp + 96]
+      mov r13, [rsp + 112]
 
       # Initialize accumulators with the biases.
       vmovaps  zmm7, [r9 + 0]
@@ -196,13 +203,13 @@ inner_loop_end:
       vmaxps  zmm24, zmm0, zmm24
 
       # Pop output pointers from the stack.
-      mov rcx, [rsp + 8]
-      mov rax, [rsp + 24]
-      mov r15, [rsp + 40]
-      mov r14, [rsp + 56]
-      mov r12, [rsp + 72]
-      mov r10, [rsp + 88]
-      mov r13, [rsp + 104]
+      mov rcx, [rsp + 24]
+      mov rax, [rsp + 40]
+      mov r15, [rsp + 56]
+      mov r14, [rsp + 72]
+      mov r12, [rsp + 88]
+      mov r10, [rsp + 104]
+      mov r13, [rsp + 120]
 
       # Check whether full or partial store.
       cmp rsi, 32
@@ -231,13 +238,13 @@ inner_loop_end:
       add r13, 128
 
       # Write output pointers to the stack.
-      mov [rsp + 8], rcx
-      mov [rsp + 24], rax
-      mov [rsp + 40], r15
-      mov [rsp + 56], r14
-      mov [rsp + 72], r12
-      mov [rsp + 88], r10
-      mov [rsp + 104], r13
+      mov [rsp + 24], rcx
+      mov [rsp + 40], rax
+      mov [rsp + 56], r15
+      mov [rsp + 72], r14
+      mov [rsp + 88], r12
+      mov [rsp + 104], r10
+      mov [rsp + 120], r13
 
       sub rsi, 32
       jne outer_loop
@@ -266,8 +273,9 @@ tail:
       vmovups  ZMMWORD PTR [r13 + 64]{k2}, zmm24
 
 return:
-      add rsp, 144
-
+      add rsp, 192
+      mov r13, [rsp]
+      mov rsp, r13
       # Restore the callee saved registers.
       pop r12
       pop r13

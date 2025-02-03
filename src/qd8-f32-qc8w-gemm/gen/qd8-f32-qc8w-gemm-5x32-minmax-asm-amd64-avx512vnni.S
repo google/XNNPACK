@@ -30,8 +30,20 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x32c4__asm_amd64_avx512vnni
       add rdx, 3
       and rdx, -4
 
+      # Move stack parameters which have not yet been loaded
+      mov r12, [rsp + 88]
+
+      # Align the stack pointer.
+      mov r13, rsp
+      sub rsp, 64
+      and rsp, 0xFFFFFFFFFFFFFFC0
+      # Store the old stack pointer containing the return address
+      mov [rsp], r13
+      # Push additional stack parameters to the new stack
+      mov [rsp + 8], r12
+
       # Allocate some space on the stack.
-      sub rsp, 784
+      sub rsp, 448
 
       # Clamp a & c pointers if mr <= 1
       mov rax, rcx
@@ -69,23 +81,23 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x32c4__asm_amd64_avx512vnni
       cmovle r12, r14
       cmovle r8, rbp
 
-      # Load quantization params pointer from stack
-      mov r11, [rsp + 872]
+      # Load quantization_params pointer from stack
+      mov r11, [rsp + 456]
       mov edi, [r11 + 0]
       vpbroadcastd zmm6, edi
-      vmovups zmmword ptr [rsp + 464], zmm6
+      vmovaps zmmword ptr [rsp + 128], zmm6
       mov edi, [r11 + 8]
       vpbroadcastd zmm6, edi
-      vmovups zmmword ptr [rsp + 528], zmm6
+      vmovaps zmmword ptr [rsp + 192], zmm6
       mov edi, [r11 + 16]
       vpbroadcastd zmm6, edi
-      vmovups zmmword ptr [rsp + 592], zmm6
+      vmovaps zmmword ptr [rsp + 256], zmm6
       mov edi, [r11 + 24]
       vpbroadcastd zmm6, edi
-      vmovups zmmword ptr [rsp + 656], zmm6
+      vmovaps zmmword ptr [rsp + 320], zmm6
       mov edi, [r11 + 32]
       vpbroadcastd zmm6, edi
-      vmovups zmmword ptr [rsp + 720], zmm6
+      vmovaps zmmword ptr [rsp + 384], zmm6
 
 outer_loop:
       # Initialize k counter.
@@ -93,16 +105,16 @@ outer_loop:
       # Initialize accumulators with k_sum * input zero point.
       vmovaps  zmm6, [r9 + 0]
       vmovaps  zmm7, [r9 + 64]
-      vpmulld zmm5, zmm6, ZMMWORD PTR [rsp + 464]
-      vpmulld zmm12, zmm6, ZMMWORD PTR [rsp + 528]
-      vpmulld zmm14, zmm6, ZMMWORD PTR [rsp + 592]
-      vpmulld zmm15, zmm6, ZMMWORD PTR [rsp + 656]
-      vpmulld zmm16, zmm6, ZMMWORD PTR [rsp + 720]
-      vpmulld zmm17, zmm7, ZMMWORD PTR [rsp + 464]
-      vpmulld zmm18, zmm7, ZMMWORD PTR [rsp + 528]
-      vpmulld zmm19, zmm7, ZMMWORD PTR [rsp + 592]
-      vpmulld zmm20, zmm7, ZMMWORD PTR [rsp + 656]
-      vpmulld zmm21, zmm7, ZMMWORD PTR [rsp + 720]
+      vpmulld zmm5, zmm6, ZMMWORD PTR [rsp + 128]
+      vpmulld zmm12, zmm6, ZMMWORD PTR [rsp + 192]
+      vpmulld zmm14, zmm6, ZMMWORD PTR [rsp + 256]
+      vpmulld zmm15, zmm6, ZMMWORD PTR [rsp + 320]
+      vpmulld zmm16, zmm6, ZMMWORD PTR [rsp + 384]
+      vpmulld zmm17, zmm7, ZMMWORD PTR [rsp + 128]
+      vpmulld zmm18, zmm7, ZMMWORD PTR [rsp + 192]
+      vpmulld zmm19, zmm7, ZMMWORD PTR [rsp + 256]
+      vpmulld zmm20, zmm7, ZMMWORD PTR [rsp + 320]
+      vpmulld zmm21, zmm7, ZMMWORD PTR [rsp + 384]
       add r9, 128
 
 inner_loop:
@@ -142,7 +154,7 @@ inner_loop_end:
       vcvtdq2ps zmm20, zmm20
       vcvtdq2ps zmm21, zmm21
       # Load quantization_params pointer from stack
-      mov r11, [rsp + 872]
+      mov r11, [rsp + 456]
       vmulps zmm5, zmm5, DWORD PTR [r11 + 4]{1to16}
       vmulps zmm12, zmm12, DWORD PTR [r11 + 12]{1to16}
       vmulps zmm14, zmm14, DWORD PTR [r11 + 20]{1to16}
@@ -234,8 +246,9 @@ tail:
       vmovups  ZMMWORD PTR [r8 + 64]{k2}, zmm21
 
 return:
-      add rsp, 784
-
+      add rsp, 448
+      mov r13, [rsp]
+      mov rsp, r13
       # Restore the callee saved registers.
       pop r12
       pop r13

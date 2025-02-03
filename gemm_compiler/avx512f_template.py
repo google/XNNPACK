@@ -4,6 +4,7 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+import math
 from gemm_compiler import fma3_template as isa
 from gemm_compiler import x64_template as arch
 
@@ -176,7 +177,7 @@ class Avx512F(isa.Fma3):
       c_reg_offset = 0
       POP_C = 'mov {C_REG}, [rsp + {offset}]\n'
       for mr in range(0, M):
-        sp_offset = (mr) * 16 + 8
+        sp_offset = (mr) * 16 + self.c_ptr_stack_offset()
         asm_string += POP_C.format(C_REG=cm_registers[mr], offset=sp_offset)
     asm_string += """
       # Check whether full or partial store.
@@ -203,7 +204,7 @@ class Avx512F(isa.Fma3):
       asm_string += '\n' + '# Write output pointers to the stack.\n'
       POP_C = 'mov [rsp + {offset}], {C_REG}\n'
       for mr in range(0, M):
-        sp_offset = (mr) * 16 + 8
+        sp_offset = (mr) * 16 + self.c_ptr_stack_offset()
         asm_string += POP_C.format(C_REG=cm_registers[mr], offset=sp_offset)
     CHECK = """
       sub {nc}, {n_step}
@@ -295,4 +296,6 @@ class Avx512F(isa.Fma3):
     return asm_string
 
   def stack_size(self, M):
-    return M * 16 + 32
+    size = M * 16 + 32
+    # round up to multiple of 64.
+    return math.ceil(size / 64) * 64

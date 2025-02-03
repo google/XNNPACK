@@ -27,6 +27,13 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_2x16c2__asm_amd64_avx512bf16_bro
       # Load cm_stride.
       mov r11, [rsp + 64]
 
+      # Align the stack pointer.
+      mov r13, rsp
+      sub rsp, 64
+      and rsp, 0xFFFFFFFFFFFFFFC0
+      # Store the old stack pointer containing the return address
+      mov [rsp], r13
+
       # Allocate some space on the stack.
       sub rsp, 64
 
@@ -118,7 +125,8 @@ tail:
 
 return:
       add rsp, 64
-
+      mov r13, [rsp]
+      mov rsp, r13
       # Restore the callee saved registers.
       pop r12
       pop r13

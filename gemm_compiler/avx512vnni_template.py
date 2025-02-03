@@ -4,6 +4,7 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+import math
 from gemm_compiler import avx512f_template as isa
 
 """All SIMD features for avx512vnni."""
@@ -98,6 +99,10 @@ class Avx512Vnni(isa.Avx512F):
     }
     return c_asm
 
+  # Quantization parameters are pushed to the stack at this offset.
+  def quantization_params_offset(self):
+    return 8
+
   def dequantize(self, M, N, W):
     accumulators = self.acc_registers()
     ret = ''
@@ -107,7 +112,7 @@ class Avx512Vnni(isa.Avx512F):
     ret += '# Load quantization_params pointer from stack\n'
     ret += 'mov {quantization_params_reg}, [rsp + {offset}]\n'.format(
         quantization_params_reg=self.quantization_params_register(),
-        offset=self.stack_size(M) + 88,
+        offset=self.stack_size(M) + self.quantization_params_offset(),
     )
     for nr in range(0, N):
       for mr in range(0, M):
@@ -153,19 +158,19 @@ class Avx512Vnni(isa.Avx512F):
     zp_scale_load_push = (
         """mov {tmp_reg}, [{quantization_params_reg} + {zp_offset}]
       vpbroadcastd {tmp_s_reg}, {tmp_reg}
-      vmovups zmmword ptr [rsp + {offset}], {tmp_s_reg}\n"""
+      vmovaps zmmword ptr [rsp + {offset}], {tmp_s_reg}\n"""
     )
-    ret = '\n# Load quantization params pointer from stack\n'
+    ret = '\n# Load quantization_params pointer from stack\n'
     ret += 'mov {quantization_params_reg}, [rsp + {offset}]\n'.format(
         quantization_params_reg=self.quantization_params_register(),
-        offset=self.stack_size(M) + 88,
+        offset=self.stack_size(M) + self.quantization_params_offset(),
     )
     for mr in range(0, M, 1):
       ret += zp_scale_load_push.format(
           tmp_reg=self.register_map_dword(self.tmp_gp_registers()[0]),
           quantization_params_reg=self.quantization_params_register(),
           tmp_s_reg=self.w_registers()[0],
-          offset=464 + mr * 64,
+          offset=self.stupid_offset(M) + mr * 64,
           zp_offset=mr * 8,
       )
     return ret
@@ -188,11 +193,17 @@ class Avx512Vnni(isa.Avx512F):
             ACC=accumulators[nr * M + mr],
             KSUM=self.w_registers()[nr],
             pos=int((mr % 2) * 2),
-            offset=464 + mr * 64,
+            offset=self.stupid_offset(M) + mr * 64,
         )
 
     ret += self.increment_ptr(ptr=W, step=self.register_bytes() * N)
     return ret
 
+  def stupid_offset(self, M):
+    size = M * 16 + self.c_ptr_stack_offset()
+    return math.ceil(size / 64) * 64
+
   def stack_size(self, M):
-    return 464 + M * 64
+    size = self.stupid_offset(M) + M * 64
+    # round up to multiple of 64.
+    return math.ceil(size / 64) * 64

@@ -27,8 +27,15 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x64__asm_amd64_avx512f_broadcast
       # Load cm_stride.
       mov r11, [rsp + 64]
 
+      # Align the stack pointer.
+      mov r13, rsp
+      sub rsp, 64
+      and rsp, 0xFFFFFFFFFFFFFFC0
+      # Store the old stack pointer containing the return address
+      mov [rsp], r13
+
       # Allocate some space on the stack.
-      sub rsp, 48
+      sub rsp, 64
 
 outer_loop:
       # Initialize k counter.
@@ -98,8 +105,9 @@ tail:
       vmovups  ZMMWORD PTR [r10 + 192]{k4}, zmm14
 
 return:
-      add rsp, 48
-
+      add rsp, 64
+      mov r13, [rsp]
+      mov rsp, r13
       # Restore the callee saved registers.
       pop r12
       pop r13

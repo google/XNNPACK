@@ -30,14 +30,26 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x64c4__asm_amd64_avx512vnni
       add rdx, 3
       and rdx, -4
 
-      # Allocate some space on the stack.
-      sub rsp, 528
+      # Move stack parameters which have not yet been loaded
+      mov r12, [rsp + 88]
 
-      # Load quantization params pointer from stack
-      mov r11, [rsp + 616]
+      # Align the stack pointer.
+      mov r13, rsp
+      sub rsp, 64
+      and rsp, 0xFFFFFFFFFFFFFFC0
+      # Store the old stack pointer containing the return address
+      mov [rsp], r13
+      # Push additional stack parameters to the new stack
+      mov [rsp + 8], r12
+
+      # Allocate some space on the stack.
+      sub rsp, 128
+
+      # Load quantization_params pointer from stack
+      mov r11, [rsp + 136]
       mov edi, [r11 + 0]
       vpbroadcastd zmm6, edi
-      vmovups zmmword ptr [rsp + 464], zmm6
+      vmovaps zmmword ptr [rsp + 64], zmm6
 
 outer_loop:
       # Initialize k counter.
@@ -47,10 +59,10 @@ outer_loop:
       vmovaps  zmm7, [r9 + 64]
       vmovaps  zmm8, [r9 + 128]
       vmovaps  zmm9, [r9 + 192]
-      vpmulld zmm5, zmm6, ZMMWORD PTR [rsp + 464]
-      vpmulld zmm12, zmm7, ZMMWORD PTR [rsp + 464]
-      vpmulld zmm14, zmm8, ZMMWORD PTR [rsp + 464]
-      vpmulld zmm15, zmm9, ZMMWORD PTR [rsp + 464]
+      vpmulld zmm5, zmm6, ZMMWORD PTR [rsp + 64]
+      vpmulld zmm12, zmm7, ZMMWORD PTR [rsp + 64]
+      vpmulld zmm14, zmm8, ZMMWORD PTR [rsp + 64]
+      vpmulld zmm15, zmm9, ZMMWORD PTR [rsp + 64]
       add r9, 256
 
 inner_loop:
@@ -76,7 +88,7 @@ inner_loop_end:
       vcvtdq2ps zmm14, zmm14
       vcvtdq2ps zmm15, zmm15
       # Load quantization_params pointer from stack
-      mov r11, [rsp + 616]
+      mov r11, [rsp + 136]
       vmulps zmm5, zmm5, DWORD PTR [r11 + 4]{1to16}
       vmulps zmm12, zmm12, DWORD PTR [r11 + 4]{1to16}
       vmulps zmm14, zmm14, DWORD PTR [r11 + 4]{1to16}
@@ -137,8 +149,9 @@ tail:
       vmovups  ZMMWORD PTR [r10 + 192]{k4}, zmm15
 
 return:
-      add rsp, 528
-
+      add rsp, 128
+      mov r13, [rsp]
+      mov rsp, r13
       # Restore the callee saved registers.
       pop r12
       pop r13

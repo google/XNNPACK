@@ -178,6 +178,16 @@ BEGIN_FUNCTION {function_name}
     )
     return HEADER
 
+  # Quantization parameters are pushed to the stack at this offset.
+  def quantization_params_offset(self):
+    return 0
+
+  def a_ptr_stack_offset(self):
+    return 16
+
+  def c_ptr_stack_offset(self):
+    return self.a_ptr_stack_offset() + 8
+
   def input_output_register_setup(self, M):
     registers = self.am_registers()
     a_stride = self.astride_register()
@@ -195,6 +205,19 @@ BEGIN_FUNCTION {function_name}
       mov [rsp + {a_rsp_offset}], {aM}
       mov [rsp + {c_rsp_offset}], {cM}\n"""
     ret = ''
+    if self.quantization_params_offset() != 0:
+      ret += '\n# Move stack parameters which have not yet been loaded\n'
+      ret += 'mov r12, [rsp + 88]\n'
+    ret += '\n# Align the stack pointer.\n'
+    ret += 'mov r13, rsp\n'
+    ret += 'sub rsp, 64\n'
+    ret += 'and rsp, 0xFFFFFFFFFFFFFFC0\n'
+    ret += '# Store the old stack pointer containing the return address\n'
+    ret += 'mov [rsp], r13\n'
+    if self.quantization_params_offset() != 0:
+      ret += '# Push additional stack parameters to the new stack\n'
+      offset = self.quantization_params_offset()
+      ret += f'mov [rsp + {offset}], r12\n'
     if self.stack_size(M) != 0:
       ret += '\n# Allocate some space on the stack.\n'
       ret += """sub rsp, {stack_size}\n""".format(
@@ -202,14 +225,16 @@ BEGIN_FUNCTION {function_name}
       )
     # Write rsi & r10 if required to the stack.
     if M > self.max_M_before_spilling():
+      offset = self.a_ptr_stack_offset()
       ret += (
-          '# Write rsi (a pointer) to the stack as we need the register.\n'
+          f'# Write rsi (a pointer) to the stack as we need the register.\n'
       )
-      ret += 'mov [rsp], rcx\n'
+      ret += f'mov [rsp + {offset}], rcx\n'
+      offset = self.c_ptr_stack_offset()
       ret += (
           '# Write r10 (c pointer) to the stack as we need the register.\n'
       )
-      ret += 'mov [rsp + 8], r10\n'
+      ret += f'mov [rsp + {offset}], r10\n'
     for mr in range(1, M):
       # cycle size of 2 if required
       if M > self.max_M_before_spilling():
@@ -222,7 +247,7 @@ BEGIN_FUNCTION {function_name}
         c_pos = mr + self.max_M_before_spilling()
         a_pos_1 = a_pos - 1
         c_pos_1 = c_pos - 1
-      a_rsp_offset = 16 + (mr - 1) * 16
+      a_rsp_offset = 32 + (mr - 1) * 16
       ret += INPUT_OUTPUT_REGISTER_SETUP.format(
           M=mr,
           aM=registers[a_pos],
@@ -261,7 +286,7 @@ BEGIN_FUNCTION {function_name}
     ret = '# Read a pointers from stack into GP registers.\n'
     POP_A = 'mov {aM}, [rsp + {a_rsp_offset}]\n'
     for mr in range(0, M):
-      a_rsp_offset = mr * 16
+      a_rsp_offset = mr * 16 + self.a_ptr_stack_offset()
       ret += POP_A.format(aM=registers[mr], a_rsp_offset=a_rsp_offset)
     ret += '\n'
     return ret
@@ -294,6 +319,8 @@ BEGIN_FUNCTION {function_name}
       restore_stack += 'add rsp, {stack_ptr_sub}\n'.format(
           stack_ptr_sub=isa.stack_size(M)
       )
+    restore_stack += """mov r13, [rsp]
+    mov rsp, r13"""
     restore_stack += """
       # Restore the callee saved registers.
       pop r12
