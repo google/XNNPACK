@@ -214,6 +214,7 @@ struct xnn_operator {
       uint32_t log2_element_size;
     } binary_elementwise;
     struct {
+      size_t num_nonbatch_dims;
       uint32_t log2_input_size;
       uint32_t log2_output_size;
     } unary_elementwise;

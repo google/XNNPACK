@@ -84,6 +84,12 @@ static enum xnn_status create_convert_operator(
     default:
       break;
   }
+
+  if (opdata->operator_objects[0] != NULL) {
+    opdata->operator_objects[0]->unary_elementwise.num_nonbatch_dims =
+        output_value->quantization.num_nonbatch_dims;
+  }
+
   if (status == xnn_status_uninitialized) {
     status = xnn_create_unary_elementwise_nc(xnn_unary_convert, input_datatype,
                                              output_datatype, NULL, NULL, NULL,
