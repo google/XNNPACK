@@ -2462,8 +2462,8 @@ enum xnn_status xnn_reshape_fully_connected_nc_bf16_f32(
     /*filter_is_nibble=*/false,
     /*dynamic_quantization=*/false,
     /*log2_output_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    &fully_connected_op->params.bf16_minmax,
-    sizeof(fully_connected_op->params.bf16_minmax),
+    &fully_connected_op->params.f32_minmax,
+    sizeof(fully_connected_op->params.f32_minmax),
     threadpool);
 }
 
