@@ -29,6 +29,8 @@
 #include "xnnpack/params.h"
 
 #if XNN_ENABLE_KLEIDIAI
+#include <stdio.h>
+
 #include "kai/kai_common.h"
 #endif  // XNN_ENABLE_KLEIDIAI
 
@@ -66,10 +68,14 @@ enum xnn_status xnn_initialize(const struct xnn_allocator* allocator) {
 
 #if XNN_ENABLE_KLEIDIAI
   /* If we're using KleidiAI, log their version string. */
-  xnn_log_info(
-      "XNNPACK built with KleidiAI v%s (see "
-      "https://gitlab.arm.com/kleidi/kleidiai).",
-      kai_get_version());
+  static bool first = true;
+  if (first) {
+    first = false;
+    fprintf(stderr,
+            "XNNPACK built with KleidiAI v%s (see "
+            "https://gitlab.arm.com/kleidi/kleidiai).\n",
+            kai_get_version());
+  }
 #endif  // XNN_ENABLE_KLEIDIAI
 }
 
