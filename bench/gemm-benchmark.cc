@@ -141,7 +141,7 @@ void GEMMBenchmark(benchmark::State& state,
   std::generate(b.begin(), b.end(), std::ref(i32rng));
 
   const size_t w_element_size = sizeof(int8_t);
-  const size_t w_size = nc_stride * sizeof(int32_t) + kc_stride * nc_stride * w_element_size;
+  const size_t w_size = nc_stride * (sizeof(float) + sizeof(int32_t)) + kc_stride * nc_stride * w_element_size;
   const size_t c_elements = mc * nc;
   const size_t num_buffers = 1 + benchmark::utils::DivideRoundUp<size_t>(
                                      benchmark::utils::GetMaxCacheSize(),
@@ -152,6 +152,7 @@ void GEMMBenchmark(benchmark::State& state,
   const xnn_qs8_packing_params packing_params = {int8_t(127 - 0x80)};
   pack(/*g=*/1, nc, kc, nr, kr, sr, k.data(), b.data(), /*scale=*/nullptr,
        w.data(), nr * sizeof(float), &packing_params);
+
   xnnpack::Buffer<int8_t> c(c_elements * num_buffers);
 
   union xnn_qs8_qc8w_conv_minmax_params quantization_params;
