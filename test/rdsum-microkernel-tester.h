@@ -16,6 +16,7 @@
 #include <vector>
 
 #include <gtest/gtest.h>
+#include "next_prime.h"
 #include "xnnpack.h"
 #include "xnnpack/buffer.h"
 #include "xnnpack/math.h"
@@ -296,3 +297,375 @@ class RDSumMicrokernelTester {
   uint8_t qmin_{0};
   uint8_t qmax_{255};
 };
+
+#define XNN_TEST_RDSUM_CHANNELS_EQ(                                                                                    \
+  ukernel, arch_flags, primary_tile, incremental_tile, channel_tile, datatype, output_type, params_type, init_fn)      \
+  TEST(ukernel, channels_eq_##channel_tile##_2pass_fulltile)                                                           \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    RDSumMicrokernelTester tester;                                                                                     \
+    tester.rows(primary_tile + incremental_tile);                                                                      \
+    tester.channels(channel_scaled_tile);                                                                              \
+    tester.Test(ukernel, init_fn);                                                                                     \
+  }                                                                                                                    \
+  TEST(ukernel, channels_eq_##channel_tile##_2pass_fulltile_with_input_stride)                                         \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    RDSumMicrokernelTester tester;                                                                                     \
+    tester.rows(primary_tile + incremental_tile);                                                                      \
+    tester.channels(channel_scaled_tile);                                                                              \
+    if (channel_scaled_tile == channel_tile)                                                                           \
+      tester.input_stride(xnnpack::NextPrime(channel_tile + 1));                                                       \
+    else                                                                                                               \
+      tester.input_stride(channel_scaled_tile + 1);                                                                    \
+    tester.Test(ukernel, init_fn);                                                                                     \
+  }                                                                                                                    \
+  TEST(ukernel, channels_eq_##channel_tile##_2pass_subtile)                                                            \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    for (size_t rows_ = 1; rows_ < (primary_tile + incremental_tile); rows_++) {                                       \
+      RDSumMicrokernelTester tester;                                                                                   \
+      tester.rows(rows_);                                                                                              \
+      tester.channels(channel_scaled_tile);                                                                            \
+      tester.Test(ukernel, init_fn);                                                                                   \
+    }                                                                                                                  \
+  }                                                                                                                    \
+  TEST(ukernel, channels_eq_##channel_tile##_2pass_subtile_with_input_stride)                                          \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    for (size_t rows_ = 1; rows_ < (primary_tile + incremental_tile); rows_++) {                                       \
+      RDSumMicrokernelTester tester;                                                                                   \
+      tester.rows(rows_);                                                                                              \
+      tester.channels(channel_scaled_tile);                                                                            \
+      if (channel_scaled_tile == channel_tile)                                                                         \
+        tester.input_stride(xnnpack::NextPrime(channel_tile + 1));                                                     \
+      else                                                                                                             \
+        tester.input_stride(channel_scaled_tile + 1);                                                                  \
+      tester.Test(ukernel, init_fn);                                                                                   \
+    }                                                                                                                  \
+  }                                                                                                                    \
+  TEST(ukernel, channels_eq_##channel_tile##_multipass_fulltile)                                                       \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    for (size_t rows_ = 1; rows_ <= (incremental_tile * 5); rows_ += incremental_tile) {                               \
+      RDSumMicrokernelTester tester;                                                                                   \
+      tester.rows(rows_);                                                                                              \
+      tester.channels(channel_scaled_tile);                                                                            \
+      tester.Test(ukernel, init_fn);                                                                                   \
+    }                                                                                                                  \
+  }                                                                                                                    \
+  TEST(ukernel, channels_eq_##channel_tile##_multipass_fulltile_with_input_stride)                                     \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    for (size_t rows_ = 1; rows_ <= (incremental_tile * 5); rows_ += incremental_tile) {                               \
+      RDSumMicrokernelTester tester;                                                                                   \
+      tester.rows(rows_);                                                                                              \
+      tester.channels(channel_scaled_tile);                                                                            \
+      if (channel_scaled_tile == channel_tile)                                                                         \
+        tester.input_stride(xnnpack::NextPrime(channel_tile + 1));                                                     \
+      else                                                                                                             \
+        tester.input_stride(channel_scaled_tile + 1);                                                                  \
+      tester.Test(ukernel, init_fn);                                                                                   \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_RDSUM_CHANNELS_DIV(                                                                                   \
+  ukernel, arch_flags, primary_tile, incremental_tile, channel_tile, datatype, output_type, params_type, init_fn)      \
+  TEST(ukernel, channels_div_##channel_tile##_2pass_fulltile)                                                          \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    if (channel_scaled_tile == channel_tile) {                                                                         \
+      for (size_t channels_ = (channel_tile * 2); channels_ < (channel_tile * 8); channels_ += channel_tile) {         \
+        RDSumMicrokernelTester tester;                                                                                 \
+        tester.rows(primary_tile + incremental_tile);                                                                  \
+        tester.channels(channels_);                                                                                    \
+        tester.Test(ukernel, init_fn);                                                                                 \
+      }                                                                                                                \
+    }                                                                                                                  \
+    else {                                                                                                             \
+      for (size_t channels_ = (channel_scaled_tile * 2); channels_ < (channel_scaled_tile * 8);                        \
+           channels_ += channel_scaled_tile) {                                                                         \
+        RDSumMicrokernelTester tester;                                                                                 \
+        tester.rows(primary_tile + incremental_tile);                                                                  \
+        tester.channels(channels_);                                                                                    \
+        tester.Test(ukernel, init_fn);                                                                                 \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }                                                                                                                    \
+  TEST(ukernel, channels_div_##channel_tile##_2pass_subtile)                                                           \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    if (channel_scaled_tile == channel_tile) {                                                                         \
+      for (size_t channels_ = (channel_tile * 2); channels_ < (channel_tile * 8); channels_ += channel_tile) {         \
+        for (size_t rows_ = 1; rows_ < (primary_tile + incremental_tile); rows_++) {                                   \
+          RDSumMicrokernelTester tester;                                                                               \
+          tester.rows(rows_);                                                                                          \
+          tester.channels(channels_);                                                                                  \
+          tester.Test(ukernel, init_fn);                                                                               \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+    else {                                                                                                             \
+      for (size_t channels_ = (channel_scaled_tile * 2); channels_ < (channel_scaled_tile * 8);                        \
+           channels_ += channel_scaled_tile) {                                                                         \
+        for (size_t rows_ = 1; rows_ < (primary_tile + incremental_tile); rows_++) {                                   \
+          RDSumMicrokernelTester tester;                                                                               \
+          tester.rows(rows_);                                                                                          \
+          tester.channels(channels_);                                                                                  \
+          tester.Test(ukernel, init_fn);                                                                               \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }                                                                                                                    \
+  TEST(ukernel, channels_div_##channel_tile##_multipass_fulltile)                                                      \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    if (channel_scaled_tile == channel_tile) {                                                                         \
+      for (size_t channels_ = (channel_tile * 2); channels_ < (channel_tile * 8); channels_ += channel_tile) {         \
+        for (size_t rows_ = 1; rows_ <= (incremental_tile * 5); rows_ += incremental_tile) {                           \
+          RDSumMicrokernelTester tester;                                                                               \
+          tester.rows(rows_);                                                                                          \
+          tester.channels(channels_);                                                                                  \
+          tester.Test(ukernel, init_fn);                                                                               \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+    else {                                                                                                             \
+      for (size_t channels_ = channel_scaled_tile * 2; channels_ < (channel_scaled_tile * 8);                          \
+           channels_ += channel_scaled_tile) {                                                                         \
+        for (size_t rows_ = 1; rows_ <= (incremental_tile * 5); rows_ += incremental_tile) {                           \
+          RDSumMicrokernelTester tester;                                                                               \
+          tester.rows(rows_);                                                                                          \
+          tester.channels(channels_);                                                                                  \
+          tester.Test(ukernel, init_fn);                                                                               \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }                                                                                                                    \
+  TEST(ukernel, channels_div_##channel_tile##_multipass_fulltile_with_input_stride)                                    \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    if (channel_scaled_tile == channel_tile) {                                                                         \
+      for (size_t channels_ = (channel_tile * 2); channels_ < (channel_tile * 8); channels_ += channel_tile) {         \
+        for (size_t rows_ = 1; rows_ <= (incremental_tile * 5); rows_ += incremental_tile) {                           \
+          RDSumMicrokernelTester tester;                                                                               \
+          tester.rows(rows_);                                                                                          \
+          tester.channels(channels_);                                                                                  \
+          tester.input_stride(xnnpack::NextPrime(channel_tile * 16 + 1));                                              \
+          tester.Test(ukernel, init_fn);                                                                               \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+    else {                                                                                                             \
+      for (size_t channels_ = (channel_scaled_tile * 2); channels_ < (channel_scaled_tile * 8);                        \
+           channels_ += channel_scaled_tile) {                                                                         \
+        for (size_t rows_ = 1; rows_ <= (incremental_tile * 5); rows_ += incremental_tile) {                           \
+          RDSumMicrokernelTester tester;                                                                               \
+          tester.rows(rows_);                                                                                          \
+          tester.channels(channels_);                                                                                  \
+          tester.input_stride(channel_scaled_tile * 16 + 1);                                                           \
+          tester.Test(ukernel, init_fn);                                                                               \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_RDSUM_CHANNELS_LT(                                                                                    \
+  ukernel, arch_flags, primary_tile, incremental_tile, channel_tile, datatype, output_type, params_type, init_fn)      \
+  TEST(ukernel, channels_lt_##channel_tile##_2pass_fulltile)                                                           \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    if (channel_tile <= 1 && channel_scaled_tile == channel_tile) {                                                    \
+      GTEST_SKIP();                                                                                                    \
+    }                                                                                                                  \
+    for (size_t channels_ = 1; channels_ < channel_scaled_tile; channels_++) {                                         \
+      RDSumMicrokernelTester tester;                                                                                   \
+      tester.rows(primary_tile + incremental_tile);                                                                    \
+      tester.channels(channels_);                                                                                      \
+      tester.Test(ukernel, init_fn);                                                                                   \
+    }                                                                                                                  \
+  }                                                                                                                    \
+  TEST(ukernel, channels_lt_##channel_tile##_2pass_subtile)                                                            \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    if (channel_tile <= 1 && channel_scaled_tile == channel_tile) {                                                    \
+      GTEST_SKIP();                                                                                                    \
+    }                                                                                                                  \
+    for (size_t channels_ = 1; channels_ < channel_scaled_tile; channels_++) {                                         \
+      for (size_t rows_ = 1; rows_ < (primary_tile + incremental_tile); rows_++) {                                     \
+        RDSumMicrokernelTester tester;                                                                                 \
+        tester.rows(rows_);                                                                                            \
+        tester.channels(channels_);                                                                                    \
+        tester.Test(ukernel, init_fn);                                                                                 \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }                                                                                                                    \
+  TEST(ukernel, channels_lt_##channel_tile##_multipass_fulltile)                                                       \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    if (channel_tile <= 1 && channel_scaled_tile == channel_tile) {                                                    \
+      GTEST_SKIP();                                                                                                    \
+    }                                                                                                                  \
+    for (size_t channels_ = 1; channels_ < channel_scaled_tile; channels_++) {                                         \
+      for (size_t rows_ = 1; rows_ <= (incremental_tile * 5); rows_ += incremental_tile) {                             \
+        RDSumMicrokernelTester tester;                                                                                 \
+        tester.rows(rows_);                                                                                            \
+        tester.channels(channels_);                                                                                    \
+        tester.Test(ukernel, init_fn);                                                                                 \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }                                                                                                                    \
+  TEST(ukernel, channels_lt_##channel_tile##_multipass_fulltile_with_input_stride)                                     \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    if (channel_tile <= 1 && channel_scaled_tile == channel_tile) {                                                    \
+      GTEST_SKIP();                                                                                                    \
+    }                                                                                                                  \
+    for (size_t channels_ = 1; channels_ < channel_scaled_tile; channels_++) {                                         \
+      for (size_t rows_ = 1; rows_ <= (incremental_tile * 5); rows_ += incremental_tile) {                             \
+        RDSumMicrokernelTester tester;                                                                                 \
+        tester.rows(rows_);                                                                                            \
+        tester.channels(channels_);                                                                                    \
+        if (channel_scaled_tile == channel_tile) {                                                                     \
+          tester.input_stride(xnnpack::NextPrime(channel_tile + 1));                                                   \
+        }                                                                                                              \
+        else {                                                                                                         \
+          tester.input_stride(channel_scaled_tile + 1);                                                                \
+        }                                                                                                              \
+        tester.Test(ukernel, init_fn);                                                                                 \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_RDSUM_CHANNELS_GT(                                                                                    \
+  ukernel, arch_flags, primary_tile, incremental_tile, channel_tile, datatype, output_type, params_type, init_fn)      \
+  TEST(ukernel, channels_gt_##channel_tile##_2pass_fulltile)                                                           \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    if (channel_scaled_tile == channel_tile) {                                                                         \
+      for (size_t channels_ = (channel_tile + 1); channels_ < ((channel_tile == 1) ? 10 : channel_tile * 2);           \
+           channels_++) {                                                                                              \
+        RDSumMicrokernelTester tester;                                                                                 \
+        tester.rows(primary_tile + incremental_tile);                                                                  \
+        tester.channels(channels_);                                                                                    \
+        tester.Test(ukernel, init_fn);                                                                                 \
+      }                                                                                                                \
+    }                                                                                                                  \
+    else {                                                                                                             \
+      for (size_t channels_ = (channel_scaled_tile + 1); channels_ < (channel_scaled_tile * 2); channels_++) {         \
+        RDSumMicrokernelTester tester;                                                                                 \
+        tester.rows(primary_tile + incremental_tile);                                                                  \
+        tester.channels(channels_);                                                                                    \
+        tester.Test(ukernel, init_fn);                                                                                 \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }                                                                                                                    \
+  TEST(ukernel, channels_gt_##channel_tile##_2pass_subtile)                                                            \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    if (channel_scaled_tile == channel_tile) {                                                                         \
+      for (size_t channels_ = (channel_tile + 1); channels_ < ((channel_tile == 1) ? 10 : channel_tile * 2);           \
+           channels_++) {                                                                                              \
+        for (size_t rows_ = 1; rows_ < (primary_tile + incremental_tile); rows_++) {                                   \
+          RDSumMicrokernelTester tester;                                                                               \
+          tester.rows(rows_);                                                                                          \
+          tester.channels(channels_);                                                                                  \
+          tester.Test(ukernel, init_fn);                                                                               \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+    else {                                                                                                             \
+      for (size_t channels_ = (channel_scaled_tile + 1); channels_ < (channel_scaled_tile * 2); channels_++) {         \
+        for (size_t rows_ = 1; rows_ < (primary_tile + incremental_tile); rows_++) {                                   \
+          RDSumMicrokernelTester tester;                                                                               \
+          tester.rows(rows_);                                                                                          \
+          tester.channels(channels_);                                                                                  \
+          tester.Test(ukernel, init_fn);                                                                               \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }                                                                                                                    \
+  TEST(ukernel, channels_gt_##channel_tile##_multipass_fulltile)                                                       \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    if (channel_scaled_tile == channel_tile) {                                                                         \
+      for (size_t channels_ = (channel_tile + 1); channels_ < ((channel_tile == 1) ? 10 : channel_tile * 2);           \
+           channels_++) {                                                                                              \
+        for (size_t rows_ = 1; rows_ < (incremental_tile * 5); rows_ += (primary_tile + incremental_tile)) {           \
+          RDSumMicrokernelTester tester;                                                                               \
+          tester.rows(rows_);                                                                                          \
+          tester.channels(channels_);                                                                                  \
+          tester.Test(ukernel, init_fn);                                                                               \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+    else {                                                                                                             \
+      for (size_t channels_ = (channel_scaled_tile + 1); channels_ < (channel_scaled_tile * 2); channels_++) {         \
+        for (size_t rows_ = 1; rows_ < (incremental_tile * 5); rows_ += primary_tile + incremental_tile) {             \
+          RDSumMicrokernelTester tester;                                                                               \
+          tester.rows(rows_);                                                                                          \
+          tester.channels(channels_);                                                                                  \
+          tester.Test(ukernel, init_fn);                                                                               \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }                                                                                                                    \
+  TEST(ukernel, channels_gt_##channel_tile##_multipass_fulltile_with_input_stride)                                     \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    if (channel_scaled_tile == channel_tile) {                                                                         \
+      for (size_t channels_ = (channel_tile + 1); channels_ < ((channel_tile == 1) ? 10 : channel_tile * 2);           \
+           channels_++) {                                                                                              \
+        for (size_t rows_ = 1; rows_ < (incremental_tile * 5); rows_ += (primary_tile + incremental_tile)) {           \
+          RDSumMicrokernelTester tester;                                                                               \
+          tester.rows(rows_);                                                                                          \
+          tester.channels(channels_);                                                                                  \
+          tester.input_stride(xnnpack::NextPrime(channel_tile * 2 + 11));                                              \
+          tester.Test(ukernel, init_fn);                                                                               \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+    else {                                                                                                             \
+      for (size_t channels_ = channel_scaled_tile + 1; channels_ < (channel_scaled_tile * 2); channels_++) {           \
+        for (size_t rows_ = 1; rows_ < (incremental_tile * 5); rows_ += (primary_tile + incremental_tile)) {           \
+          RDSumMicrokernelTester tester;                                                                               \
+          tester.rows(rows_);                                                                                          \
+          tester.channels(channels_);                                                                                  \
+          tester.input_stride(channel_scaled_tile * 2 + 11);                                                           \
+          tester.Test(ukernel, init_fn);                                                                               \
+        }                                                                                                              \
+      }                                                                                                                \
+    }                                                                                                                  \
+  }
+
+#define XNN_TEST_RDSUM_OVERFLOW_ACCUMULATOR(                                                                           \
+  ukernel, arch_flags, primary_tile, incremental_tile, channel_tile, datatype, output_type, params_type, init_fn)      \
+  TEST(ukernel, overflow_accumulator_##channel_tile)                                                                   \
+  {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    const size_t channel_scaled_tile = channel_tile * get_batch_scale<datatype>();                                     \
+    for (size_t channels_ = 1; channels_ < (channel_scaled_tile * 2); ++channels_) {                                   \
+      RDSumMicrokernelTester tester;                                                                                   \
+      tester.rows(257 + incremental_tile);                                                                             \
+      tester.channels(channels_);                                                                                      \
+      tester.Test(ukernel, init_fn);                                                                                   \
+    }                                                                                                                  \
+  }
