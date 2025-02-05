@@ -847,14 +847,17 @@ static bool any_values_fp32(xnn_subgraph_t subgraph, const struct xnn_node* node
   return false;
 }
 
-static bool all_values_fp32(xnn_subgraph_t subgraph, const struct xnn_node* node) {
+static bool all_values_fp32_or_pfp32(xnn_subgraph_t subgraph,
+                                     const struct xnn_node* node) {
   for (uint32_t i = 0; i < node->num_inputs; i++) {
-    if (subgraph->values[node->inputs[i]].datatype != xnn_datatype_fp32) {
+    if (subgraph->values[node->inputs[i]].datatype != xnn_datatype_fp32 &&
+        subgraph->values[node->inputs[i]].datatype != xnn_datatype_pfp32) {
       return false;
     }
   }
   for (uint32_t i = 0; i < node->num_outputs; i++) {
-    if (subgraph->values[node->outputs[i]].datatype != xnn_datatype_fp32) {
+    if (subgraph->values[node->outputs[i]].datatype != xnn_datatype_fp32 &&
+        subgraph->values[node->outputs[i]].datatype != xnn_datatype_pfp32) {
       return false;
     }
   }
@@ -918,6 +921,10 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
       case xnn_node_type_static_transpose:
       case xnn_node_type_rope:
         break;
+      case xnn_node_type_pack_lh:
+        if (xnn_init_x16_pack_lh_config() != NULL) {
+          break;
+        }
       default:
         xnn_log_warning("FP16 rewrite aborted: node #%" PRIu32 " (%s) is not supported for FP16 inference",
           n, xnn_node_type_to_string(node->type));
@@ -953,8 +960,10 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
           // `qdint8` for conversion to fp16.
           subgraph->values[node->inputs[0]].datatype = xnn_datatype_qdint8;
           subgraph->values[node->outputs[0]].fp16_compatible = true;
-        } else if (subgraph->values[node->inputs[0]].datatype ==
-                       xnn_datatype_fp32 &&
+        } else if ((subgraph->values[node->inputs[0]].datatype ==
+                        xnn_datatype_fp32 ||
+                    subgraph->values[node->inputs[0]].datatype ==
+                        xnn_datatype_pfp32) &&
                    subgraph->values[node->inputs[1]].datatype ==
                        xnn_datatype_fp16 &&
                    subgraph->values[node->outputs[0]].datatype ==
@@ -965,7 +974,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
               subgraph->values[node->inputs[2]].datatype == xnn_datatype_fp32) {
             subgraph->values[node->inputs[2]].fp16_compatible = true;
           }
-        } else if (all_values_fp32(subgraph, node)) {
+        } else if (all_values_fp32_or_pfp32(subgraph, node)) {
           subgraph->values[node->inputs[0]].fp16_compatible = true;
           subgraph->values[node->outputs[0]].fp16_compatible = true;
         } else {
@@ -988,6 +997,11 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         }
         if (subgraph->values[node->outputs[0]].datatype == xnn_datatype_fp32) {
           subgraph->values[node->outputs[0]].fp16_compatible = true;
+        }
+        break;
+      case xnn_node_type_pack_lh:
+        if (subgraph->values[node->inputs[0]].datatype == xnn_datatype_fp32) {
+          subgraph->values[node->inputs[0]].fp16_compatible = true;
         }
         break;
       default:

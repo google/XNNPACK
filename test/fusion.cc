@@ -10,6 +10,7 @@
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
+#include "xnnpack/buffer.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/subgraph.h"
 #include "runtime-tester.h"
@@ -214,14 +215,39 @@ TEST(FULLY_CONNECTED_2D_THEN_CLAMP, fusion) {
     .AddClamp(output_min, output_max, intermediate_id, output_id);
 
   xnnpack::Buffer<float> unoptimized_output = tester.RunWithoutFusion<float>();
-  ASSERT_EQ(tester.NumOperators(), 2);
+  switch (tester.NumOperators()) {
+    case 2:
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_fully_connected);
+      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_unary_elementwise);
+      break;
+    case 3:
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_pack_lh);
+      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_fully_connected);
+      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_unary_elementwise);
+      break;
+    default:
+      GTEST_FAIL() << "Unexpected number of operators ("
+                   << tester.NumOperators() << ") in subgraph.";
+  }
 
   xnnpack::Buffer<float> optimized_output = tester.RunWithFusion<float>();
 
-  ASSERT_EQ(tester.NumOperators(), 1);
-  ASSERT_EQ(tester.Node(0)->activation.output_min, output_min);
-  ASSERT_EQ(tester.Node(0)->activation.output_max, output_max);
-  ASSERT_EQ(tester.Node(0)->outputs[0], output_id);
+  const struct xnn_node* fc_node = nullptr;
+  switch (tester.NumOperators()) {
+    case 1:
+      fc_node = tester.Node(0);
+      break;
+    case 2:
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_pack_lh);
+      fc_node = tester.Node(1);
+      break;
+    default:
+      GTEST_FAIL() << "Unexpected number of operators ("
+                   << tester.NumOperators() << ") in subgraph.";
+  }
+  ASSERT_EQ(fc_node->activation.output_min, output_min);
+  ASSERT_EQ(fc_node->activation.output_max, output_max);
+  ASSERT_EQ(fc_node->outputs[0], output_id);
 
   ASSERT_EQ(unoptimized_output, optimized_output);
 }
@@ -250,13 +276,41 @@ TEST(FULLY_CONNECTED_2D_THEN_COPY_THEN_FULLY_CONNECTED, fusion) {
     .AddFullyConnected(reshape_output_id, fc2_filter_id, fc2_bias_id, output_id);
 
   xnnpack::Buffer<float> unoptimized_output = tester.RunWithoutFusion<float>();
-  ASSERT_EQ(tester.NumOperators(), 3);
+  switch (tester.NumOperators()) {
+    case 3:
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_fully_connected);
+      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_copy);
+      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_fully_connected);
+      break;
+    case 5:
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_pack_lh);
+      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_fully_connected);
+      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_copy);
+      ASSERT_EQ(tester.Node(3)->type, xnn_node_type_pack_lh);
+      ASSERT_EQ(tester.Node(4)->type, xnn_node_type_fully_connected);
+      break;
+    default:
+      GTEST_FAIL() << "Unexpected number of operators ("
+                   << tester.NumOperators() << ") in subgraph.";
+  }
 
   xnnpack::Buffer<float> optimized_output = tester.RunWithFusion<float>();
 
-  ASSERT_EQ(tester.NumOperators(), 2);
+  const struct xnn_node* fc_node = nullptr;
+  switch (tester.NumOperators()) {
+    case 2:
+      fc_node = tester.Node(0);
+      break;
+    case 4:
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_pack_lh);
+      fc_node = tester.Node(1);
+      break;
+    default:
+      GTEST_FAIL() << "Unexpected number of operators ("
+                   << tester.NumOperators() << ") in subgraph.";
+  }
   // Copy is optimized away.
-  ASSERT_EQ(tester.Node(0)->outputs[0], reshape_output_id);
+  ASSERT_EQ(fc_node->outputs[0], reshape_output_id);
 
   ASSERT_EQ(unoptimized_output, optimized_output);
 }

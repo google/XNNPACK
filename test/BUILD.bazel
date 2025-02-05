@@ -2147,6 +2147,7 @@ xnnpack_unit_test(
         ":replicable_random_device",
         "//:XNNPACK",
         "//:buffer",
+        "//:node_type",
         "//:subgraph",
     ],
 )
