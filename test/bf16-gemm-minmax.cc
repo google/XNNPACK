@@ -787,3 +787,4 @@ std::vector<GemmTestParams> CreateTests1(
         return info.param.test_name;
       });
 #endif  // XNN_ENABLE_ARM_BF16 && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+

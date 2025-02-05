@@ -685,6 +685,17 @@ xnnpack_unit_test(
 )
 
 xnnpack_unit_test(
+    name = "pf32_gemm_minmax_test",
+    srcs = [
+        "pf32-gemm-minmax.cc",
+    ],
+    defines = xnnpack_kleidiai_defines(),
+    deps = MICROKERNEL_TEST_DEPS + [
+        ":gemm_microkernel_tester",
+    ],
+)
+
+xnnpack_unit_test(
     name = "f32_qc8w_gemm_test",
     srcs = [
         "f32-qc8w-gemm.cc",

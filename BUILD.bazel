@@ -1749,13 +1749,27 @@ alias(
     }),
 )
 
+selects.config_setting_group(
+    name = "arm_sme_enabled_by_default",
+    match_any = [
+        "//build_config:aarch64",
+    ],
+)
+
 alias(
     name = "arm_sme_enabled",
     actual = select({
         ":xnn_enable_arm_sme_explicit_true": ":xnn_enable_arm_sme_explicit_true",
         ":xnn_enable_arm_sme_explicit_false": ":xnn_enable_arm_sme_explicit_true",
-        "//conditions:default": ":xnn_enable_arm_sme_explicit_true",
+        "//conditions:default": ":arm_sme_enabled_by_default",
     }),
+)
+
+selects.config_setting_group(
+    name = "arm_sme2_enabled_by_default",
+    match_any = [
+        "//build_config:aarch64",
+    ],
 )
 
 alias(
@@ -1763,7 +1777,7 @@ alias(
     actual = select({
         ":xnn_enable_arm_sme2_explicit_true": ":xnn_enable_arm_sme2_explicit_true",
         ":xnn_enable_arm_sme2_explicit_false": ":xnn_enable_arm_sme2_explicit_true",
-        "//conditions:default": ":xnn_enable_arm_sme2_explicit_true",
+        "//conditions:default": ":arm_sme2_enabled_by_default",
     }),
 )
 

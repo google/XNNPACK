@@ -2648,3 +2648,4 @@ INSTANTIATE_TEST_SUITE_P(
         return info.param.test_name;
       });
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+

@@ -226,3 +226,4 @@ std::vector<GemmTestParams> CreateTests1(
 
   #endif  // XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
+

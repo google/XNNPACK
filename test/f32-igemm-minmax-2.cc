@@ -3256,3 +3256,4 @@ INSTANTIATE_TEST_SUITE_P(
         return info.param.test_name;
       });
 #endif  // XNN_ENABLE_HVX && XNN_ARCH_HEXAGON
+
