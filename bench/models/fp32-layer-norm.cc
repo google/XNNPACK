@@ -8,24 +8,27 @@
 #include <cstdint>
 #include <iostream>
 #include <limits>
+#include <vector>
 
 #include "xnnpack.h"
 
 namespace models {
 
-xnn_subgraph_t FP32LayerNorm(size_t m, size_t n, size_t k, size_t norm_rank) {
+xnn_subgraph_t FP32LayerNorm(size_t m, size_t n, size_t k, uint32_t norm_mask) {
   xnn_status status;
   xnn_subgraph_t subgraph = nullptr;
   status = xnn_create_subgraph(/*num_external_values=*/2, 0, &subgraph);
   if (status != xnn_status_success) {
-    std::cerr << "failed to create subgrpah" << std::endl;
+    std::cerr << "failed to create subgraph" << std::endl;
     return nullptr;
   }
 
   std::array<size_t, 3> dims = {{m, n, k}};
-  std::array<size_t, 3> reduction_dims = {{1, 1, 1}};
-  for (size_t i = norm_rank; i > 0; --i) {
-    reduction_dims[dims.size() - i] = dims[dims.size() - i];
+  std::array<size_t, 3> reduction_dims = dims;
+  for (size_t i = 0; i < reduction_dims.size(); ++i) {
+    if ((norm_mask & (1 << i)) != 0) {
+      reduction_dims[i] = 1;
+    }
   }
 
   uint32_t input = XNN_INVALID_VALUE_ID;
@@ -55,10 +58,17 @@ xnn_subgraph_t FP32LayerNorm(size_t m, size_t n, size_t k, size_t norm_rank) {
     return nullptr;
   }
 
-  std::array<size_t, 3> reduction_axes = {{2, 1, 0}};
-  status = xnn_define_static_reduce(subgraph, xnn_reduce_mean, norm_rank,
-                                    reduction_axes.data(), input, mean,
-                                    /*flags=*/XNN_FLAG_KEEP_DIMS);
+  std::vector<size_t> reduction_axes;
+  reduction_axes.reserve(reduction_dims.size());
+  for (size_t i = 0; i < reduction_dims.size(); ++i) {
+    if ((norm_mask & (1 << i)) != 0) {
+      reduction_axes.push_back(i);
+    }
+  }
+  status =
+      xnn_define_static_reduce(subgraph, xnn_reduce_mean, reduction_axes.size(),
+                               reduction_axes.data(), input, mean,
+                               /*flags=*/XNN_FLAG_KEEP_DIMS);
   if (status != xnn_status_success) {
     std::cerr << "failed to create reduce mean" << std::endl;
     return nullptr;
@@ -109,9 +119,10 @@ xnn_subgraph_t FP32LayerNorm(size_t m, size_t n, size_t k, size_t norm_rank) {
     return nullptr;
   }
 
-  status = xnn_define_static_reduce(subgraph, xnn_reduce_mean, norm_rank,
-                                    reduction_axes.data(), sqr_diff, variance,
-                                    /*flags=*/XNN_FLAG_KEEP_DIMS);
+  status =
+      xnn_define_static_reduce(subgraph, xnn_reduce_mean, reduction_axes.size(),
+                               reduction_axes.data(), sqr_diff, variance,
+                               /*flags=*/XNN_FLAG_KEEP_DIMS);
   if (status != xnn_status_success) {
     std::cerr << "failed to create reduce mean" << std::endl;
     return nullptr;

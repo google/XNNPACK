@@ -34,13 +34,13 @@ xnn_subgraph_t QS8MobileNetV2();
 xnn_subgraph_t FP32Elementwise(size_t size, size_t reps);
 
 // Compute the layer norm of [m x n x k] tensors, where the mean and variance
-// are computed over the last `norm_rank` dimensions. This computation is
-// equivalent to: input_mean = mean(input, norm_rank) (input - input_mean) /
-// sqrt(mean(squared_difference(input, input_mean), norm_rank) + epsilon) *
+// are computed over the dimensions in `norm_mask`. This computation is
+// equivalent to: input_mean = mean(input, norm_mask) (input - input_mean) /
+// sqrt(mean(squared_difference(input, input_mean), norm_mask) + epsilon) *
 // weight + bias
 //
-// Where mean(x, norm_rank) means computing the mean of the last norm_rank
-// dimensions of x.
-xnn_subgraph_t FP32LayerNorm(size_t m, size_t n, size_t k, size_t norm_rank);
+// Where `mean(x, norm_mask)` means computing the mean of the dimensions in the
+// `norm_mask`.
+xnn_subgraph_t FP32LayerNorm(size_t m, size_t n, size_t k, uint32_t norm_mask);
 
 }  // namespace models

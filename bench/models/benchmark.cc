@@ -225,9 +225,9 @@ static void AttentionArguments(benchmark::internal::Benchmark* b) {
 }
 
 static void LayerNormArguments(benchmark::internal::Benchmark* b) {
-  b->ArgNames({"M", "N", "K", "NormRank"});
-  for (int norm_rank = 1; norm_rank <= 3; ++norm_rank) {
-    b->Args({128, 256, 512, norm_rank});
+  b->ArgNames({"M", "N", "K", "NormMask"});
+  for (int norm_mask : {1, 3, 7, 2, 5}) {
+    b->Args({128, 256, 512, norm_mask});
   }
 }
 
