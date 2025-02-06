@@ -30,8 +30,8 @@ py_library(
         "generate_qd8_f32_qc8w_gemm_microkernels.py",
     ],
     deps = [
-        ":aarch64_arch_template",
-        ":aarch64_isa_templates",
+        ":arm_arch_template",
+        ":arm_isa_templates",
         ":x64_arch_template",
         ":x64_isa_templates",
     ],
@@ -58,17 +58,20 @@ py_library(
 )
 
 py_library(
-    name = "aarch64_isa_templates",
+    name = "arm_isa_templates",
     srcs = [
         "neondot_template.py",
         "neonfma_template.py",
+        "neonmlal_aarch32_template.py",
     ],
 )
 
 py_library(
-    name = "aarch64_arch_template",
+    name = "arm_arch_template",
     srcs = [
+        "aarch32_template.py",
         "aarch64_template.py",
+        "arm_template.py",
     ],
     deps = [
         ":base_architecture",

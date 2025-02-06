@@ -4,12 +4,11 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-from gemm_compiler import base_architecture as base_architecture
-
-"""All non SIMD features for aarch64."""
+from gemm_compiler import arm_template as arm
 
 
-class Aarch64(base_architecture.BaseArchitecture):
+class Aarch64(arm.Arm):
+  """All non SIMD features for aarch64."""
 
   def __init__(self):
     self.decrement = 4
@@ -70,20 +69,8 @@ class Aarch64(base_architecture.BaseArchitecture):
   def mr_register(self):
     return 'x0'
 
-  def mask_register(self):
-    return ''
-
-  def tmp_w_register(self):
-    return ''
-
   def tmp_gp_registers(self):
     return ['x22', 'x23']
-
-  def dequantize(self, M, N, W):
-    return ''
-
-  def adjust_kc(self):
-    return ''
 
   def register_map_byte(self, reg):
     return reg.replace('x', 'w')
@@ -94,9 +81,6 @@ class Aarch64(base_architecture.BaseArchitecture):
   def function_name(self, M, N, isa):
     LD = self.unroll_factor * 32
     return f'xnn_f32_gemm_minmax_ukernel_{M}x{N}__asm_aarch64_{isa}_ld{LD}_2'
-
-  def quantization_params(self):
-    return ''
 
   def header(self, M, N, prefix, isa):
     HEADER = """// Copyright 2025 Google LLC
@@ -128,7 +112,7 @@ BEGIN_FUNCTION {function_name}
 """.format(
         function_name=self.function_name(M, N, isa)
     )
-    HEADER += self.quantization_params()
+    HEADER += self.quantization_params(M)
     return HEADER
 
   def jump_to_label(self, label):
@@ -227,51 +211,6 @@ BEGIN_FUNCTION {function_name}
 
     return asm_string
 
-  def outer_loop_prepare(self, M, N):
-    return ''
-
-  def input_output_register_setup(self, M):
-    registers = self.am_registers()
-    a_stride = self.astride_register()
-    c_stride = self.cm_stride_register()
-    a_base_ptr = self.a_ptr_register()
-    c_base_ptr = self.c_ptr_register()
-    # setup a{0}->a{M-1} registers
-    if M == 1:
-      return ''
-    asm_string = '# Setup and alias a & c pointers.\n'
-    asm_string += self.input_output_strides(
-        M=M, registers=self.am_registers(), stride=self.astride_register()
-    )
-
-    # setup c{0}->c{M-1} registers
-    asm_string += self.input_output_strides(
-        M=M, registers=self.cm_registers(), stride=self.cm_stride_register()
-    )
-
-    # Pre outer loop preparation
-    # asm_string += isa.outer_loop_prepare(M=M, N=N_COUNT, W=w_ptr_reg, accumulators=acc_registers)
-
-    # if mr < MR
-    clamp_string, outer = self.clamp_inputs_and_outputs(
-        M, self.labels(), self.am_registers(), self.cm_registers()
-    )
-    asm_string += clamp_string
-    return asm_string
-
-  def input_output_strides(self, M, registers, stride):
-    INPUT_OUTPUT_REGISTER_SETUP = """add {aM}, {aM_1}, {STRIDE}\n"""
-    ret = ''
-    for mr in range(1, M):
-      ret += INPUT_OUTPUT_REGISTER_SETUP.format(
-          M=mr,
-          M_1=mr - 1,
-          aM=registers[mr],
-          aM_1=registers[mr - 1],
-          STRIDE=stride,
-      )
-    return ret
-
   def clamp_inputs_and_outputs(
       self, M, labels, input_registers, output_registers
   ):
@@ -313,18 +252,9 @@ BEGIN_FUNCTION {function_name}
 
     return ret, outer
 
-  def increment_ptr(self, ptr, step):
-    return f'add {ptr}, {ptr}, {step}\n'
-
   def initialize_k_register(self, reg):
     kc_register = self.kc_register()
     return f'mov {reg}, {kc_register}\n'
-
-  def cmp_k_and_jump_if_less(self, label, decrement, cond):
-    kc_register = self.kc_register()
-    k_register = self.k_register()
-    return f"""subs {k_register}, {k_register}, {decrement}
-      {cond} {label}\n"""
 
   def epilogue(self, M, N, isa):
     restore_stack = """

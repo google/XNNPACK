@@ -10,6 +10,7 @@ import sys
 from gemm_compiler import avx512vnni_template
 from gemm_compiler import generate
 from gemm_compiler import neondot_template
+from gemm_compiler import neonmlal_aarch32_template
 
 """Generates qd8-f32-qc8w assembly gemm microkernels."""
 
@@ -58,3 +59,17 @@ def generate_qd8_f32_qc8w_gemm_microkernels():
                 f'qd8-f32-qc8w-gemm-{mr}x{nr}-minmax-asm-aarch64-neondot-ld{decrement}.S',
             ),
         )
+
+  nr = 8
+  unroll = 2
+  decrement = 32 * unroll
+  for mr in range(1, 5):
+    generate.generate_gemm_microkernel(
+        M=mr,
+        N=nr,
+        isa=neonmlal_aarch32_template.NeonMlal(unroll),
+        output_file=os.path.join(
+            output_base,
+            f'qd8-f32-qc8w-gemm-{mr}x{nr}-minmax-asm-aarch32-neonmlal-ld{decrement}.S',
+        ),
+    )

@@ -34,30 +34,30 @@ def generate_gemm_microkernel(
       M=M,
   )
 
-  # Pre outer loop preparation
+  ## Pre outer loop preparation
   asm_string += isa.outer_loop_prepare(M=M, N=num_horizontal_registers)
 
-  # the outer loop label
+  ## the outer loop label
   asm_string += '\nouter_loop:\n'
   asm_string += '# Initialize k counter.\n'
   asm_string += isa.initialize_k_register(k_register)
 
-  # Read a registers from the stack if required
+  ## Read a registers from the stack if required
   asm_string += isa.read_a_registers(M=M)
 
-  # Initialize accumulators
+  ## Initialize accumulators
   asm_string += isa.init_accumulators(
       M=M,
       N=num_horizontal_registers,
   )
 
-  # inner loop
+  ## inner loop
   asm_string += isa.inner_loop(M, N)
 
   asm_string += 'inner_loop_end:\n'
   asm_string += isa.dequantize(M=M, N=num_horizontal_registers, W=w_ptr_reg)
 
-  # min/max clamping
+  ## min/max clamping
   asm_string += '# Min/max clamping.\n'
   for nr in range(0, num_horizontal_registers):
     for mr in range(0, M):
@@ -70,7 +70,7 @@ def generate_gemm_microkernel(
           reg=acc_registers[M * nr + mr], prefix=isa.prefix()
       )
 
-  # store
+  ## store
   asm_string += isa.store(
       M=M,
       N=N,

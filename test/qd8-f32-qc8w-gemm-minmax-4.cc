@@ -701,6 +701,27 @@ std::vector<GemmTestParams> CreateTests1(
 #endif  // XNN_ENABLE_AVX512VNNI && XNN_ARCH_X86_64 && XNN_ENABLE_ASSEMBLY
 
 
+#if XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
+  INSTANTIATE_TEST_SUITE_P(
+      QD8_F32_QC8W_GEMM_MINMAX_3X8__ASM_AARCH32_NEONMLAL_LD64_2, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/8,
+          /*adj_k_block=*/8,
+          /*mr=*/3, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x8__asm_aarch32_neonmlal_ld64_2,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_qs8_gemm_goi_w);
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+#endif  // XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
+
+
 #if XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64 && XNN_ENABLE_ASSEMBLY
   INSTANTIATE_TEST_SUITE_P(
       QD8_F32_QC8W_GEMM_MINMAX_4X8C4__ASM_AARCH64_NEONDOT_LD32_2, GemmTest,
