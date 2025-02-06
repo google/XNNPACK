@@ -402,28 +402,6 @@ bool CheckArchFlags(benchmark::State& state, uint64_t arch_flags) {
   }
 #endif  // XNN_ARCH_ARM64
 
-#if XNN_ARCH_ARM64
-  bool CheckNEONSME(benchmark::State& state) {
-    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    if (hardware_config == nullptr || !hardware_config->use_arm_sme) {
-      state.SkipWithError("no NEON-SME extension");
-      return false;
-    }
-    return true;
-  }
-#endif  // XNN_ARCH_ARM64
-
-#if XNN_ARCH_ARM64
-  bool CheckNEONSME2(benchmark::State& state) {
-    const xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    if (hardware_config == nullptr || !hardware_config->use_arm_sme2) {
-      state.SkipWithError("no NEON-SME2 extension");
-      return false;
-    }
-    return true;
-  }
-#endif  // XNN_ARCH_ARM64
-
 #if XNN_ARCH_RISCV
   bool CheckRVV(benchmark::State& state) {
     const xnn_hardware_config* hardware_config = xnn_init_hardware_config();

@@ -1907,4 +1907,3 @@ INSTANTIATE_TEST_SUITE_P(
         return info.param.test_name;
       });
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
-

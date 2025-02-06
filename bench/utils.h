@@ -174,14 +174,6 @@ bool CheckNEONDOT(benchmark::State& state);
 // If I8MM is unsupported, report error in benchmark state, and return false.
 bool CheckNEONI8MM(benchmark::State& state);
 
-// Check if ARM SME extension is supported.
-// If SME is unsupported, report error in benchmark state, and return false.
-bool CheckNEONSME(benchmark::State& state);
-
-// Check if ARM SME2 extension is supported.
-// If SME2 is unsupported, report error in benchmark state, and return false.
-bool CheckNEONSME2(benchmark::State& state);
-
 // Check if RISC-V V (vector) extension is supported.
 // If V is unsupported, report error in benchmark state, and return false.
 bool CheckRVV(benchmark::State& state);
