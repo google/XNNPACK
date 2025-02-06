@@ -81,7 +81,7 @@ static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
     $if PACKED_STRIDE_FN is not None:
       ${PACKED_STRIDE_FN},
     /*mr=*/${MR}, /*nr=*/${NR}${NR_SCALE}, /*kr=*/${KR}, /*sr=*/${SR},
-    $if DATATYPE in {'qp8', 'pf32'}:
+    $if DATATYPE in ('qp8',):
       /*mr_packed=*/${MR_PACKED},
     $if ISA_CHECK:
       benchmark::utils::${ISA_CHECK});
@@ -100,7 +100,7 @@ GEMM_CREATE_TESTS_CODE = """\
 std::vector<GemmTestParams> CreateTests(
     size_t k_block, size_t adj_k_block,
     size_t mr, size_t nr, size_t kr, size_t sr,
-    $if DATATYPE in {'qp8', 'pf32'}:
+    $if DATATYPE in ('qp8'):
       size_t mr_packed,
     bool is_igemm,
     bool unsigned_inputs,
@@ -114,7 +114,7 @@ std::vector<GemmTestParams> CreateTests(
     nr = nr${NR_SCALE};
   std::string nrs = std::to_string(nr);
 
-  $if DATATYPE in {'qp8', 'pf32'}:
+  $if DATATYPE in ('qp8',):
     const GemmMicrokernelTester tester = GemmMicrokernelTester()
         .mr(mr).nr(nr).kr(kr).sr(sr).mr_packed(mr_packed).unsigned_inputs(unsigned_inputs).planes(planes);
   $else:
@@ -571,7 +571,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*k_block=*/${KBLOCK},
         /*adj_k_block=*/${ADJKBLOCK},
         /*mr=*/${MR}, /*nr=*/${NR}, /*kr=*/${KR}, /*sr=*/${SR},
-        $if DATATYPE in {'qp8', 'pf32'}:
+        $if DATATYPE in ('qp8',):
           /*mr_packed=*/${MR_PACKED},
         /*is_igemm=*/${"true" if UKERNEL_TYPE.startswith("IGEMM") else "false"},
         /*unsigned_inputs=*/${"true" if UNSIGNED_INPUTS else "false"},
@@ -749,8 +749,6 @@ def generate_test_cases(
   test_fun_name = "".join(ukernel.split("_")[1:4]).upper()
   if test_fun_name in {"QP8F32QC8W"}:
     test_fun_name = "_".join(["Test", test_fun_name])
-  elif datatype in {"pf32"}:
-    test_fun_name = "_".join(["Test", datatype.upper()])
   else:
     test_fun_name = "Test"
   test_args = {
@@ -910,7 +908,6 @@ def main(args):
           isa,
           assembly,
       ) = split_ukernel_name(name)
-      mr_packed = int(ukernel_spec.get("mr-packed", mr_packed))
 
       create_tests, test_case, bench_case = generate_test_cases(
           name,
@@ -988,8 +985,7 @@ XNN_BENCHMARK_MAIN();
         + "\n}  // namespace\n"
     )
     test_outputs = {
-        k: tests + "\n" + create_tests + v + "\n"
-        for k, v in test_outputs.items()
+        k: tests + "\n" + create_tests + v for k, v in test_outputs.items()
     }
 
     # Strip out consecutive preprocessor `endif`/`if` pairs.

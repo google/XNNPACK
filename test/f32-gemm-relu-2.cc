@@ -932,4 +932,3 @@ INSTANTIATE_TEST_SUITE_P(
         return info.param.test_name;
       });
 #endif  // XNN_ENABLE_RISCV_VECTOR && XNN_ARCH_RISCV
-

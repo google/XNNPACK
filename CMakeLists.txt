@@ -1275,12 +1275,12 @@ IF(XNNPACK_BUILD_TESTS)
 
   ADD_LIBRARY(gemm-microkernel-tester STATIC test/gemm-microkernel-tester.cc)
   TARGET_INCLUDE_DIRECTORIES(gemm-microkernel-tester PRIVATE include src test)
-  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE XNNPACK packing)
-  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE pthreadpool GTest::gtest)
-  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PUBLIC next-prime)
+  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE xnnpack-base pthreadpool GTest::gtest)
+  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE packing)
   IF(XNNPACK_ENABLE_KLEIDIAI)
     TARGET_LINK_LIBRARIES(gemm-microkernel-tester PRIVATE kleidiai)
   ENDIF()
+  TARGET_LINK_LIBRARIES(gemm-microkernel-tester PUBLIC next-prime)
 
   ADD_LIBRARY(dwconv-microkernel-tester STATIC test/dwconv-microkernel-tester.cc)
   TARGET_INCLUDE_DIRECTORIES(dwconv-microkernel-tester PRIVATE include src test)
@@ -1598,7 +1598,6 @@ IF(XNNPACK_BUILD_TESTS)
       f32-qc8w-gemm
       f32-qc8w-gemm-minmax
       f32-qc8w-gemm-relu
-      pf32-gemm-minmax
       qd8-f16-qb4w-gemm-minmax
       qd8-f16-qc4w-gemm-minmax
       qd8-f16-qc8w-gemm-minmax
@@ -2014,7 +2013,6 @@ IF(XNNPACK_BUILD_BENCHMARKS)
       f32-vcmul
       f32-vscaleexpminusmax
       f32-vscaleextexp
-      pf32-gemm-minmax
       qd8-f16-qb4w-gemm
       qd8-f16-qc4w-gemm
       qd8-f16-qc8w-gemm
