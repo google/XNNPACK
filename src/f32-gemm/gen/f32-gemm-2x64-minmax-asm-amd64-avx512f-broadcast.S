@@ -35,7 +35,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_2x64__asm_amd64_avx512f_broadcast
       mov [rsp], r13
 
       # Allocate some space on the stack.
-      sub rsp, 64
+      sub rsp, 128
 
       # Clamp a & c pointers if mr <= 1
       mov rax, rcx
@@ -140,7 +140,7 @@ tail:
       vmovups  ZMMWORD PTR [r13 + 192]{k4}, zmm18
 
 return:
-      add rsp, 64
+      add rsp, 128
       mov r13, [rsp]
       mov rsp, r13
       # Restore the callee saved registers.

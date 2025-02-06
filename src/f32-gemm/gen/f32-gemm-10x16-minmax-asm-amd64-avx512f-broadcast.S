@@ -35,7 +35,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_10x16__asm_amd64_avx512f_broadcast
       mov [rsp], r13
 
       # Allocate some space on the stack.
-      sub rsp, 192
+      sub rsp, 256
       # Write rsi (a pointer) to the stack as we need the register.
       mov [rsp + 16], rcx
       # Write r10 (c pointer) to the stack as we need the register.
@@ -297,7 +297,7 @@ tail:
       vmovups  ZMMWORD PTR [r8]{k1}, zmm20
 
 return:
-      add rsp, 192
+      add rsp, 256
       mov r13, [rsp]
       mov rsp, r13
       # Restore the callee saved registers.

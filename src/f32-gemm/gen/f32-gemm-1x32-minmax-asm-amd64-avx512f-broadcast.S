@@ -35,7 +35,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x32__asm_amd64_avx512f_broadcast
       mov [rsp], r13
 
       # Allocate some space on the stack.
-      sub rsp, 64
+      sub rsp, 128
 
 outer_loop:
       # Initialize k counter.
@@ -86,7 +86,7 @@ tail:
       vmovups  ZMMWORD PTR [r10 + 64]{k2}, zmm8
 
 return:
-      add rsp, 64
+      add rsp, 128
       mov r13, [rsp]
       mov rsp, r13
       # Restore the callee saved registers.

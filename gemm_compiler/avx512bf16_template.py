@@ -36,7 +36,7 @@ class Avx512Bf16(isa.Avx512F):
   def outer_loop_prepare(self, M, N):
     k_register = self.k_register()
     kc_register = self.kc_register()
-    offset = M * 16
+    offset = M * 16 + self.c_ptr_stack_offset()
     asm_string = f"""
       # Copy k and flip bit.
       mov {k_register}, rdx
@@ -57,11 +57,14 @@ class Avx512Bf16(isa.Avx512F):
   def inner_loop_tail(self, M, N):
     k_register = self.k_register()
     nc_register = self.nc_register()
-    offset = M * 16
+    offset = M * 16 + self.c_ptr_stack_offset()
     nc_offset = offset + 8
     asm_string = f"""
+      # Store nc_register.
       mov [rsp + {nc_offset}], {nc_register}
+      # Load odd k bit.
       mov {nc_register}, [rsp + {offset}]
+      # Check if channels are odd.
       test {nc_register}, {nc_register}
       mov {nc_register}, [rsp + {nc_offset}]
       jz inner_loop_end

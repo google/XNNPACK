@@ -296,6 +296,8 @@ class Avx512F(isa.Fma3):
     return asm_string
 
   def stack_size(self, M):
-    size = M * 16 + 32
+    # Increase the stack size to allow for storing the original stack pointer,
+    # nc, odd bits of k and other registers as required.
+    size = M * 16 + 64
     # round up to multiple of 64.
     return math.ceil(size / 64) * 64

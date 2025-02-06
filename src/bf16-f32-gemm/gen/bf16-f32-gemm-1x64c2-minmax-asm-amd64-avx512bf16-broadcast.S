@@ -35,13 +35,13 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_1x64c2__asm_amd64_avx512bf16_bro
       mov [rsp], r13
 
       # Allocate some space on the stack.
-      sub rsp, 64
+      sub rsp, 128
 
       # Copy k and flip bit.
       mov r11, rdx
       and r11, 0x2
       and rdx, 0xFFFFFFFFFFFFFFFD
-      mov [rsp + 16], r11
+      mov [rsp + 40], r11
 
 outer_loop:
       # Initialize k counter.
@@ -73,10 +73,13 @@ inner_loop:
       cmp rdx, r11
       jne inner_loop
 
-      mov [rsp + 24], rsi
-      mov rsi, [rsp + 16]
+      # Store nc_register.
+      mov [rsp + 48], rsi
+      # Load odd k bit.
+      mov rsi, [rsp + 40]
+      # Check if channels are odd.
       test rsi, rsi
-      mov rsi, [rsp + 24]
+      mov rsi, [rsp + 48]
       jz inner_loop_end
 
 inner_loop_tail:
@@ -145,7 +148,7 @@ tail:
       vmovups  ZMMWORD PTR [r10 + 192]{k4}, zmm14
 
 return:
-      add rsp, 64
+      add rsp, 128
       mov r13, [rsp]
       mov rsp, r13
       # Restore the callee saved registers.

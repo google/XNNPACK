@@ -129,7 +129,7 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_8x16c2__asm_amd64_avx512bf16_bro
       mov r11, rdx
       and r11, 0x2
       and rdx, 0xFFFFFFFFFFFFFFFD
-      mov [rsp + 128], r11
+      mov [rsp + 152], r11
 
 outer_loop:
       # Initialize k counter.
@@ -183,10 +183,13 @@ inner_loop:
       cmp rdx, r11
       jne inner_loop
 
-      mov [rsp + 136], rsi
-      mov rsi, [rsp + 128]
+      # Store nc_register.
+      mov [rsp + 160], rsi
+      # Load odd k bit.
+      mov rsi, [rsp + 152]
+      # Check if channels are odd.
       test rsi, rsi
-      mov rsi, [rsp + 136]
+      mov rsi, [rsp + 160]
       jz inner_loop_end
 
 inner_loop_tail:
