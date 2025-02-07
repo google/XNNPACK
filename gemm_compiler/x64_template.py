@@ -141,7 +141,7 @@ class X64(base_architecture.BaseArchitecture):
     return f'xnn_f32_gemm_minmax_ukernel_{M}x{N}__asm_amd64_{isa}_broadcast'
 
   def params_offset(self):
-    return 80
+    return 96
 
   def header(self, M, N, prefix, isa):
     HEADER = """// Copyright 2025 Google LLC
@@ -154,8 +154,10 @@ class X64(base_architecture.BaseArchitecture):
 BEGIN_FUNCTION {function_name}
 
       .intel_syntax noprefix
-
       # Free up GP registers.
+      # Save register arguments for tail call to msan annotation helper.
+      push rdi
+      push rsi
       push rbx
       push rbp
       push r15
@@ -169,9 +171,9 @@ BEGIN_FUNCTION {function_name}
       vbroadcastss {prefix}mm1, DWORD PTR [r13 + 4]
 
       # Load c pointer.
-      mov r10, [rsp + 56]
+      mov r10, [rsp + 72]
       # Load cm_stride.
-      mov r11, [rsp + 64]
+      mov r11, [rsp + 80]
 """.format(
         function_name=self.function_name(M, N, isa),
         M=M, N=N, prefix=prefix, isa=isa, params_offset=self.params_offset()
@@ -207,7 +209,9 @@ BEGIN_FUNCTION {function_name}
     ret = ''
     if self.quantization_params_offset() != 0:
       ret += '\n# Move stack parameters which have not yet been loaded\n'
-      ret += 'mov r12, [rsp + 88]\n'
+      ret += 'mov r12, [rsp + {stack_params_offset}]\n'.format(
+          stack_params_offset=self.params_offset() + 8
+      )
     ret += '\n# Align the stack pointer.\n'
     ret += 'mov r13, rsp\n'
     ret += 'sub rsp, 64\n'
@@ -329,11 +333,16 @@ BEGIN_FUNCTION {function_name}
       pop r15
       pop rbp
       pop rbx
+      pop rsi
+      pop rdi
+#if XNN_HAS_FEATURE(memory_sanitizer)
+      jmp xnn_gemm_ukernel_msan_sizeof_c_{sizeof_c}
+#else
       ret
+#endif
 END_FUNCTION {function_name}
 
-#ifdef __has_feature
-#if __has_feature(dataflow_sanitizer)
+#if XNN_HAS_FEATURE(dataflow_sanitizer)
 BEGIN_FUNCTION {function_name}.dfsan
       .intel_syntax noprefix
       # We could implement this by calling a function that implements the dfsan instrumentation.
@@ -342,9 +351,8 @@ BEGIN_FUNCTION {function_name}.dfsan
       ret
 END_FUNCTION {function_name}.dfsan
 #endif
-#endif
 """.format(
-        M=M, N=N, function_name=isa.function_name(M, N, isa.isa())
+        M=M, N=N, function_name=isa.function_name(M, N, isa.isa()), sizeof_c=4
     )
     return restore_stack
 

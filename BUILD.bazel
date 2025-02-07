@@ -259,6 +259,7 @@ MICROKERNEL_DEPS = [
     ":microkernels_h",
     ":microparams",
     ":prefetch",
+    ":sanitizers",
     ":tables",
     ":unaligned",
 ]
@@ -1016,6 +1017,14 @@ xnnpack_cc_library(
         ":xnnpack_h",
         "@pthreadpool",
     ],
+)
+
+xnnpack_cc_library(
+    name = "sanitizers",
+    srcs = [
+        "src/sanitizers.c",
+    ],
+    compatible_with = [],
 )
 
 xnnpack_cc_library(
