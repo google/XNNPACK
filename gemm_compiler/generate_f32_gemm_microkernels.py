@@ -71,3 +71,28 @@ def generate_f32_gemm_microkernels():
               f'f32-gemm-{mr}x8-minmax-asm-aarch64-neonfma-ld{decrement}-2.S',
           ),
       )
+
+  # Generate C2 variants.
+  for mr in range(1, 12):
+    generate.generate_gemm_microkernel(
+        M=mr,
+        N=16,
+        isa=avx512f_template.Avx512FC(c=2),
+        output_file=os.path.join(
+            output_base,
+            f'f32-gemm-{mr}x16c2-minmax-asm-amd64-avx512f-broadcast.S',
+        ),
+    )
+
+  # not enough SIMD registers to go above 5x32
+  for mr in range(1, 6):
+    generate.generate_gemm_microkernel(
+        M=mr,
+        N=32,
+        isa=avx512f_template.Avx512FC(c=2),
+        output_file=os.path.join(
+            output_base,
+            f'f32-gemm-{mr}x32c2-minmax-asm-amd64-avx512f-broadcast.S',
+        ),
+    )
+

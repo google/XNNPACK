@@ -58,8 +58,8 @@ outer_loop:
       # Initialize k counter.
       mov r11, 0
       # Initialize accumulators with the biases.
-      vmovaps  zmm7, [r9 + 0]
-      vmovaps zmm8, zmm7
+      vmovaps  zmm11, [r9 + 0]
+      vmovaps zmm12, zmm11
       add r9, 64
 
       # Are there at least 4 bytes?
@@ -67,12 +67,12 @@ outer_loop:
       js inner_loop_tail
 
 inner_loop:
-      vmovaps  zmm10, [r9 + 0]
+      vmovaps  zmm7, [r9 + 0]
       add r9, 64
       vbroadcastss zmm2, DWORD PTR [rcx + r11]
-      vdpbf16ps  zmm7, zmm2, zmm10
+      vdpbf16ps  zmm11, zmm2, zmm7
       vbroadcastss zmm3, DWORD PTR [rax + r11]
-      vdpbf16ps  zmm8, zmm3, zmm10
+      vdpbf16ps  zmm12, zmm3, zmm7
 
       add r11, 4
       cmp rdx, r11
@@ -88,31 +88,31 @@ inner_loop:
       jz inner_loop_end
 
 inner_loop_tail:
-      vmovaps  zmm10, [r9 + 0]
+      vmovaps  zmm7, [r9 + 0]
       add r9, 64
       vbroadcastss zmm2, DWORD PTR [rcx + r11]
       vpslld zmm2, zmm2, 16
       vpsrad zmm2, zmm2, 16
-      vdpbf16ps  zmm7, zmm2, zmm10
+      vdpbf16ps  zmm11, zmm2, zmm7
 
       vbroadcastss zmm3, DWORD PTR [rax + r11]
       vpslld zmm3, zmm3, 16
       vpsrad zmm3, zmm3, 16
-      vdpbf16ps  zmm8, zmm3, zmm10
+      vdpbf16ps  zmm12, zmm3, zmm7
 
 inner_loop_end:
       # Min/max clamping.
-      vminps  zmm7, zmm1, zmm7
-      vminps  zmm8, zmm1, zmm8
-      vmaxps  zmm7, zmm0, zmm7
-      vmaxps  zmm8, zmm0, zmm8
+      vminps  zmm11, zmm1, zmm11
+      vminps  zmm12, zmm1, zmm12
+      vmaxps  zmm11, zmm0, zmm11
+      vmaxps  zmm12, zmm0, zmm12
 
       # Check whether full or partial store.
       cmp rsi, 16
       jl tail
 
-      vmovups  [r10], zmm7
-      vmovups  [r13], zmm8
+      vmovups  [r10], zmm11
+      vmovups  [r13], zmm12
       add r10, 64
       add r13, 64
 
@@ -125,8 +125,8 @@ tail:
       shlx r11, r11, rsi
       not r11
       kmovw k1, r11d
-      vmovups  ZMMWORD PTR [r10]{k1}, zmm7
-      vmovups  ZMMWORD PTR [r13]{k1}, zmm8
+      vmovups  ZMMWORD PTR [r10]{k1}, zmm11
+      vmovups  ZMMWORD PTR [r13]{k1}, zmm12
 
 return:
       add rsp, 128

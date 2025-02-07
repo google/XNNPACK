@@ -43,28 +43,28 @@ outer_loop:
       # Initialize k counter.
       mov r11, 0
       # Initialize accumulators with the biases.
-      vmovaps  zmm7, [r9 + 0]
+      vmovaps  zmm11, [r9 + 0]
       add r9, 64
 
 inner_loop:
-      vmovaps  zmm10, [r9 + 0]
+      vmovaps  zmm7, [r9 + 0]
       add r9, 64
       vbroadcastss zmm2, DWORD PTR [rcx + r11]
-      vfmadd231ps  zmm7, zmm2, zmm10
+      vfmadd231ps  zmm11, zmm2, zmm7
 
       add r11, 4
       cmp rdx, r11
       jne inner_loop
 inner_loop_end:
       # Min/max clamping.
-      vminps  zmm7, zmm1, zmm7
-      vmaxps  zmm7, zmm0, zmm7
+      vminps  zmm11, zmm1, zmm11
+      vmaxps  zmm11, zmm0, zmm11
 
       # Check whether full or partial store.
       cmp rsi, 16
       jl tail
 
-      vmovups  [r10], zmm7
+      vmovups  [r10], zmm11
       add r10, 64
 
       sub rsi, 16
@@ -76,7 +76,7 @@ tail:
       shlx r11, r11, rsi
       not r11
       kmovw k1, r11d
-      vmovups  ZMMWORD PTR [r10]{k1}, zmm7
+      vmovups  ZMMWORD PTR [r10]{k1}, zmm11
 
 return:
       add rsp, 128

@@ -11,6 +11,18 @@ from gemm_compiler import base_architecture as base_architecture
 
 class X64(base_architecture.BaseArchitecture):
 
+  def __init__(self):
+    self.c = 1
+
+  def element_size(self):
+    return 4
+
+  def mask(self):
+    return ''
+
+  def outer_loop_prepare(self, M, N):
+    return ''
+
   def astride_register(self):
     return 'r8'
 
@@ -48,9 +60,9 @@ class X64(base_architecture.BaseArchitecture):
 
   def acc_registers(self):
     return [
-        'mm7',
-        'mm8',
-        'mm9',
+        'mm11',
+        'mm12',
+        'mm13',
         'mm14',
         'mm15',
         'mm16',
@@ -68,9 +80,12 @@ class X64(base_architecture.BaseArchitecture):
         'mm28',
         'mm29',
         'mm30',
-        'mm12',
-        'mm13',
+        'mm9',
+        'mm10',
     ]
+
+  def bias_registers(self):
+    return self.acc_registers()
 
   def w_ptr_register(self):
     return 'r9'
@@ -143,14 +158,22 @@ class X64(base_architecture.BaseArchitecture):
   def params_offset(self):
     return 96
 
-  def header(self, M, N, prefix, isa):
-    HEADER = """// Copyright 2025 Google LLC
+  def pre_header(self):
+    return ''
+
+  def copyright(self):
+    return '''// Copyright 2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
 #include "xnnpack/assembly.h"
+'''
 
+  def header(self, M, N, prefix, isa):
+    HEADER = self.copyright()
+    HEADER += self.pre_header()
+    HEADER += """
 BEGIN_FUNCTION {function_name}
 
       .intel_syntax noprefix
@@ -302,7 +325,8 @@ BEGIN_FUNCTION {function_name}
     return f'mov {reg}, 0\n'
 
   def inner_loop_increment(self):
-    return 4
+    return self.c * self.element_size()
+
 
   def cmp_k_and_jump_if_less(self, label):
     kc_register = self.kc_register()

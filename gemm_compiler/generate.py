@@ -59,16 +59,7 @@ def generate_gemm_microkernel(
 
   ## min/max clamping
   asm_string += '# Min/max clamping.\n'
-  for nr in range(0, num_horizontal_registers):
-    for mr in range(0, M):
-      asm_string += isa.clamp_min(
-          reg=acc_registers[M * nr + mr], prefix=isa.prefix()
-      )
-  for nr in range(0, num_horizontal_registers):
-    for mr in range(0, M):
-      asm_string += isa.clamp_max(
-          reg=acc_registers[M * nr + mr], prefix=isa.prefix()
-      )
+  asm_string += isa.clamp(M, N)
 
   ## store
   asm_string += isa.store(

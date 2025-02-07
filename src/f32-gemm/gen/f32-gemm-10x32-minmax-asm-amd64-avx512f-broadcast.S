@@ -167,17 +167,17 @@ outer_loop:
       mov r8, [rsp + 160]
 
       # Initialize accumulators with the biases.
-      vmovaps  zmm7, [r9 + 0]
+      vmovaps  zmm11, [r9 + 0]
       vmovaps  zmm21, [r9 + 64]
-      vmovaps zmm8, zmm7
-      vmovaps zmm9, zmm7
-      vmovaps zmm14, zmm7
-      vmovaps zmm15, zmm7
-      vmovaps zmm16, zmm7
-      vmovaps zmm17, zmm7
-      vmovaps zmm18, zmm7
-      vmovaps zmm19, zmm7
-      vmovaps zmm20, zmm7
+      vmovaps zmm12, zmm11
+      vmovaps zmm13, zmm11
+      vmovaps zmm14, zmm11
+      vmovaps zmm15, zmm11
+      vmovaps zmm16, zmm11
+      vmovaps zmm17, zmm11
+      vmovaps zmm18, zmm11
+      vmovaps zmm19, zmm11
+      vmovaps zmm20, zmm11
       vmovaps zmm22, zmm21
       vmovaps zmm23, zmm21
       vmovaps zmm24, zmm21
@@ -190,48 +190,48 @@ outer_loop:
       add r9, 128
 
 inner_loop:
-      vmovaps  zmm10, [r9 + 0]
-      vmovaps  zmm11, [r9 + 64]
+      vmovaps  zmm7, [r9 + 0]
+      vmovaps  zmm8, [r9 + 64]
       add r9, 128
       vbroadcastss zmm2, DWORD PTR [rcx + r11]
-      vfmadd231ps  zmm7, zmm2, zmm10
-      vfmadd231ps  zmm21, zmm2, zmm11
+      vfmadd231ps  zmm11, zmm2, zmm7
+      vfmadd231ps  zmm21, zmm2, zmm8
       vbroadcastss zmm2, DWORD PTR [rax + r11]
-      vfmadd231ps  zmm8, zmm2, zmm10
-      vfmadd231ps  zmm22, zmm2, zmm11
+      vfmadd231ps  zmm12, zmm2, zmm7
+      vfmadd231ps  zmm22, zmm2, zmm8
       vbroadcastss zmm2, DWORD PTR [r15 + r11]
-      vfmadd231ps  zmm9, zmm2, zmm10
-      vfmadd231ps  zmm23, zmm2, zmm11
+      vfmadd231ps  zmm13, zmm2, zmm7
+      vfmadd231ps  zmm23, zmm2, zmm8
       vbroadcastss zmm2, DWORD PTR [r14 + r11]
-      vfmadd231ps  zmm14, zmm2, zmm10
-      vfmadd231ps  zmm24, zmm2, zmm11
+      vfmadd231ps  zmm14, zmm2, zmm7
+      vfmadd231ps  zmm24, zmm2, zmm8
       vbroadcastss zmm2, DWORD PTR [r12 + r11]
-      vfmadd231ps  zmm15, zmm2, zmm10
-      vfmadd231ps  zmm25, zmm2, zmm11
+      vfmadd231ps  zmm15, zmm2, zmm7
+      vfmadd231ps  zmm25, zmm2, zmm8
       vbroadcastss zmm2, DWORD PTR [r10 + r11]
-      vfmadd231ps  zmm16, zmm2, zmm10
-      vfmadd231ps  zmm26, zmm2, zmm11
+      vfmadd231ps  zmm16, zmm2, zmm7
+      vfmadd231ps  zmm26, zmm2, zmm8
       vbroadcastss zmm2, DWORD PTR [r13 + r11]
-      vfmadd231ps  zmm17, zmm2, zmm10
-      vfmadd231ps  zmm27, zmm2, zmm11
+      vfmadd231ps  zmm17, zmm2, zmm7
+      vfmadd231ps  zmm27, zmm2, zmm8
       vbroadcastss zmm2, DWORD PTR [rbx + r11]
-      vfmadd231ps  zmm18, zmm2, zmm10
-      vfmadd231ps  zmm28, zmm2, zmm11
+      vfmadd231ps  zmm18, zmm2, zmm7
+      vfmadd231ps  zmm28, zmm2, zmm8
       vbroadcastss zmm2, DWORD PTR [rbp + r11]
-      vfmadd231ps  zmm19, zmm2, zmm10
-      vfmadd231ps  zmm29, zmm2, zmm11
+      vfmadd231ps  zmm19, zmm2, zmm7
+      vfmadd231ps  zmm29, zmm2, zmm8
       vbroadcastss zmm2, DWORD PTR [r8 + r11]
-      vfmadd231ps  zmm20, zmm2, zmm10
-      vfmadd231ps  zmm30, zmm2, zmm11
+      vfmadd231ps  zmm20, zmm2, zmm7
+      vfmadd231ps  zmm30, zmm2, zmm8
 
       add r11, 4
       cmp rdx, r11
       jne inner_loop
 inner_loop_end:
       # Min/max clamping.
-      vminps  zmm7, zmm1, zmm7
-      vminps  zmm8, zmm1, zmm8
-      vminps  zmm9, zmm1, zmm9
+      vminps  zmm11, zmm1, zmm11
+      vminps  zmm12, zmm1, zmm12
+      vminps  zmm13, zmm1, zmm13
       vminps  zmm14, zmm1, zmm14
       vminps  zmm15, zmm1, zmm15
       vminps  zmm16, zmm1, zmm16
@@ -249,9 +249,9 @@ inner_loop_end:
       vminps  zmm28, zmm1, zmm28
       vminps  zmm29, zmm1, zmm29
       vminps  zmm30, zmm1, zmm30
-      vmaxps  zmm7, zmm0, zmm7
-      vmaxps  zmm8, zmm0, zmm8
-      vmaxps  zmm9, zmm0, zmm9
+      vmaxps  zmm11, zmm0, zmm11
+      vmaxps  zmm12, zmm0, zmm12
+      vmaxps  zmm13, zmm0, zmm13
       vmaxps  zmm14, zmm0, zmm14
       vmaxps  zmm15, zmm0, zmm15
       vmaxps  zmm16, zmm0, zmm16
@@ -286,11 +286,11 @@ inner_loop_end:
       cmp rsi, 32
       jl tail
 
-      vmovups  [rcx], zmm7
+      vmovups  [rcx], zmm11
       vmovups  [rcx + 64], zmm21
-      vmovups  [rax], zmm8
+      vmovups  [rax], zmm12
       vmovups  [rax + 64], zmm22
-      vmovups  [r15], zmm9
+      vmovups  [r15], zmm13
       vmovups  [r15 + 64], zmm23
       vmovups  [r14], zmm14
       vmovups  [r14 + 64], zmm24
@@ -340,11 +340,11 @@ tail:
       kmovw k1, r11d
       shr r11d, 16
       kmovw k2, r11d
-      vmovups  ZMMWORD PTR [rcx]{k1}, zmm7
+      vmovups  ZMMWORD PTR [rcx]{k1}, zmm11
       vmovups  ZMMWORD PTR [rcx + 64]{k2}, zmm21
-      vmovups  ZMMWORD PTR [rax]{k1}, zmm8
+      vmovups  ZMMWORD PTR [rax]{k1}, zmm12
       vmovups  ZMMWORD PTR [rax + 64]{k2}, zmm22
-      vmovups  ZMMWORD PTR [r15]{k1}, zmm9
+      vmovups  ZMMWORD PTR [r15]{k1}, zmm13
       vmovups  ZMMWORD PTR [r15 + 64]{k2}, zmm23
       vmovups  ZMMWORD PTR [r14]{k1}, zmm14
       vmovups  ZMMWORD PTR [r14 + 64]{k2}, zmm24

@@ -43,45 +43,45 @@ outer_loop:
       # Initialize k counter.
       mov r11, 0
       # Initialize accumulators with the biases.
-      vmovaps  zmm7, [r9 + 0]
-      vmovaps  zmm8, [r9 + 64]
-      vmovaps  zmm9, [r9 + 128]
+      vmovaps  zmm11, [r9 + 0]
+      vmovaps  zmm12, [r9 + 64]
+      vmovaps  zmm13, [r9 + 128]
       vmovaps  zmm14, [r9 + 192]
       add r9, 256
 
 inner_loop:
-      vmovaps  zmm10, [r9 + 0]
-      vmovaps  zmm11, [r9 + 64]
-      vmovaps  zmm12, [r9 + 128]
-      vmovaps  zmm13, [r9 + 192]
+      vmovaps  zmm7, [r9 + 0]
+      vmovaps  zmm8, [r9 + 64]
+      vmovaps  zmm9, [r9 + 128]
+      vmovaps  zmm10, [r9 + 192]
       add r9, 256
       vbroadcastss zmm2, DWORD PTR [rcx + r11]
-      vfmadd231ps  zmm7, zmm2, zmm10
-      vfmadd231ps  zmm8, zmm2, zmm11
-      vfmadd231ps  zmm9, zmm2, zmm12
-      vfmadd231ps  zmm14, zmm2, zmm13
+      vfmadd231ps  zmm11, zmm2, zmm7
+      vfmadd231ps  zmm12, zmm2, zmm8
+      vfmadd231ps  zmm13, zmm2, zmm9
+      vfmadd231ps  zmm14, zmm2, zmm10
 
       add r11, 4
       cmp rdx, r11
       jne inner_loop
 inner_loop_end:
       # Min/max clamping.
-      vminps  zmm7, zmm1, zmm7
-      vminps  zmm8, zmm1, zmm8
-      vminps  zmm9, zmm1, zmm9
+      vminps  zmm11, zmm1, zmm11
+      vminps  zmm12, zmm1, zmm12
+      vminps  zmm13, zmm1, zmm13
       vminps  zmm14, zmm1, zmm14
-      vmaxps  zmm7, zmm0, zmm7
-      vmaxps  zmm8, zmm0, zmm8
-      vmaxps  zmm9, zmm0, zmm9
+      vmaxps  zmm11, zmm0, zmm11
+      vmaxps  zmm12, zmm0, zmm12
+      vmaxps  zmm13, zmm0, zmm13
       vmaxps  zmm14, zmm0, zmm14
 
       # Check whether full or partial store.
       cmp rsi, 64
       jl tail
 
-      vmovups  [r10], zmm7
-      vmovups  [r10 + 64], zmm8
-      vmovups  [r10 + 128], zmm9
+      vmovups  [r10], zmm11
+      vmovups  [r10 + 64], zmm12
+      vmovups  [r10 + 128], zmm13
       vmovups  [r10 + 192], zmm14
       add r10, 256
 
@@ -101,9 +101,9 @@ tail:
       shr r11, 16
       kmovw k4, r11d
 
-      vmovups  ZMMWORD PTR [r10]{k1}, zmm7
-      vmovups  ZMMWORD PTR [r10 + 64]{k2}, zmm8
-      vmovups  ZMMWORD PTR [r10 + 128]{k3}, zmm9
+      vmovups  ZMMWORD PTR [r10]{k1}, zmm11
+      vmovups  ZMMWORD PTR [r10 + 64]{k2}, zmm12
+      vmovups  ZMMWORD PTR [r10 + 128]{k3}, zmm13
       vmovups  ZMMWORD PTR [r10 + 192]{k4}, zmm14
 
 return:

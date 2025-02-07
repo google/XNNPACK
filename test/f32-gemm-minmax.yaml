@@ -836,6 +836,72 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_gemm_goi_w
   k-block: 1
+
+- name: xnn_f32_gemm_minmax_ukernel_1x16c2__asm_amd64_avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 2
+- name: xnn_f32_gemm_minmax_ukernel_2x16c2__asm_amd64_avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 2
+- name: xnn_f32_gemm_minmax_ukernel_3x16c2__asm_amd64_avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 2
+- name: xnn_f32_gemm_minmax_ukernel_4x16c2__asm_amd64_avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 2
+- name: xnn_f32_gemm_minmax_ukernel_5x16c2__asm_amd64_avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 2
+- name: xnn_f32_gemm_minmax_ukernel_6x16c2__asm_amd64_avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 2
+- name: xnn_f32_gemm_minmax_ukernel_7x16c2__asm_amd64_avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 2
+- name: xnn_f32_gemm_minmax_ukernel_8x16c2__asm_amd64_avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 2
+- name: xnn_f32_gemm_minmax_ukernel_9x16c2__asm_amd64_avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 2
+- name: xnn_f32_gemm_minmax_ukernel_10x16c2__asm_amd64_avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 2
+- name: xnn_f32_gemm_minmax_ukernel_11x16c2__asm_amd64_avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 2
+- name: xnn_f32_gemm_minmax_ukernel_1x32c2__asm_amd64_avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 2
+- name: xnn_f32_gemm_minmax_ukernel_2x32c2__asm_amd64_avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 2
+- name: xnn_f32_gemm_minmax_ukernel_3x32c2__asm_amd64_avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 2
+- name: xnn_f32_gemm_minmax_ukernel_4x32c2__asm_amd64_avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 2
+- name: xnn_f32_gemm_minmax_ukernel_5x32c2__asm_amd64_avx512f_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_gemm_goi_w
+  k-block: 2
+
 - name: xnn_f32_gemm_minmax_ukernel_4x8__fma3_broadcast
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_gemm_goi_w
