@@ -1299,14 +1299,15 @@ enum xnn_status xnn_define_convolution_2d(
       }
     }
   }
-
-  const bool unit_subsampling = (subsampling_width | subsampling_height) == 1;
-  const size_t kernel_size = kernel_height * kernel_width;
-  if (groups == 1 && kernel_size == 1 && unit_subsampling && !any_padding) {
-    // Check if the convolution can take the vmulcaddc path.
-    if (group_input_channels + group_output_channels > 2) {
-      return xnn_define_fully_connected(subgraph, output_min, output_max,
-                                        input_id, filter_id, bias_id, output_id, /*flags=*/0);
+  if (input_value->datatype == output_value->datatype) {
+    const bool unit_subsampling = (subsampling_width | subsampling_height) == 1;
+    const size_t kernel_size = kernel_height * kernel_width;
+    if (groups == 1 && kernel_size == 1 && unit_subsampling && !any_padding) {
+      // Check if the convolution can take the vmulcaddc path.
+      if (group_input_channels + group_output_channels > 2) {
+        return xnn_define_fully_connected(subgraph, output_min, output_max,
+                                          input_id, filter_id, bias_id, output_id, /*flags=*/0);
+      }
     }
   }
   struct xnn_node* node = xnn_subgraph_new_node(subgraph);
