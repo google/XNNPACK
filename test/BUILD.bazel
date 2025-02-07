@@ -1234,12 +1234,12 @@ xnnpack_unit_test(
 
 xnnpack_unit_test(
     name = "batch_matrix_multiply_nc_test",
-    timeout = "long",
+    timeout = "moderate",
     srcs = [
         "batch-matrix-multiply-nc.cc",
         "batch-matrix-multiply-operator-tester.h",
     ],
-    shard_count = 2,
+    shard_count = 5,
     deps = OPERATOR_TEST_DEPS + ["//:microkernels_h"],
 )
 

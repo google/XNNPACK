@@ -3,7 +3,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_COMPUTE_H_
+#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_COMPUTE_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -11,7 +12,6 @@
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/config-types.h"
-#include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
 #include "pthreadpool.h"
@@ -21,14 +21,18 @@ enum xnn_parallelization_type {
   xnn_parallelization_type_1d,
   xnn_parallelization_type_1d_with_thread,
   xnn_parallelization_type_1d_tile_1d,
+  xnn_parallelization_type_1d_tile_1d_dynamic,
   xnn_parallelization_type_2d,
   xnn_parallelization_type_2d_with_thread,
   xnn_parallelization_type_2d_tile_1d,
   xnn_parallelization_type_2d_tile_2d,
+  xnn_parallelization_type_2d_tile_1d_dynamic,
+  xnn_parallelization_type_2d_tile_2d_dynamic,
   xnn_parallelization_type_3d,
   xnn_parallelization_type_3d_tile_1d,
   xnn_parallelization_type_3d_tile_1d_with_thread,
   xnn_parallelization_type_3d_tile_2d,
+  xnn_parallelization_type_3d_tile_2d_dynamic,
   xnn_parallelization_type_4d,
   xnn_parallelization_type_4d_tile_2d,
   xnn_parallelization_type_5d,
@@ -37,9 +41,11 @@ enum xnn_parallelization_type {
 #if XNN_MAX_UARCH_TYPES > 1
   xnn_parallelization_type_2d_tile_1d_with_uarch,
   xnn_parallelization_type_2d_tile_2d_with_uarch,
+  xnn_parallelization_type_2d_tile_2d_dynamic_with_uarch,
   xnn_parallelization_type_3d_tile_1d_with_uarch,
   xnn_parallelization_type_3d_tile_1d_with_uarch_with_thread,
   xnn_parallelization_type_3d_tile_2d_with_uarch,
+  xnn_parallelization_type_3d_tile_2d_dynamic_with_uarch,
   xnn_parallelization_type_4d_tile_2d_with_uarch,
 #endif  // XNN_MAX_UARCH_TYPES > 1
 };
@@ -50,14 +56,18 @@ struct compute_parameters {
     pthreadpool_task_1d_t task_1d;
     pthreadpool_task_1d_with_thread_t task_1d_with_thread;
     pthreadpool_task_1d_tile_1d_t task_1d_tile_1d;
+    pthreadpool_task_1d_tile_1d_t task_1d_tile_1d_dynamic;
     pthreadpool_task_2d_t task_2d;
     pthreadpool_task_2d_with_thread_t task_2d_with_thread;
     pthreadpool_task_2d_tile_1d_t task_2d_tile_1d;
     pthreadpool_task_2d_tile_2d_t task_2d_tile_2d;
+    pthreadpool_task_2d_tile_1d_dynamic_t task_2d_tile_1d_dynamic;
+    pthreadpool_task_2d_tile_2d_dynamic_t task_2d_tile_2d_dynamic;
     pthreadpool_task_3d_t task_3d;
     pthreadpool_task_3d_tile_1d_t task_3d_tile_1d;
     pthreadpool_task_3d_tile_1d_with_thread_t task_3d_tile_1d_with_thread;
     pthreadpool_task_3d_tile_2d_t task_3d_tile_2d;
+    pthreadpool_task_3d_tile_2d_dynamic_t task_3d_tile_2d_dynamic;
     pthreadpool_task_4d_t task_4d;
     pthreadpool_task_4d_tile_2d_t task_4d_tile_2d;
     pthreadpool_task_5d_t task_5d;
@@ -66,14 +76,19 @@ struct compute_parameters {
 #if XNN_MAX_UARCH_TYPES > 1
     pthreadpool_task_2d_tile_1d_with_id_t task_2d_tile_1d_with_id;
     pthreadpool_task_2d_tile_2d_with_id_t task_2d_tile_2d_with_id;
+    pthreadpool_task_2d_tile_2d_dynamic_with_id_t
+        task_2d_tile_2d_dynamic_with_id;
     pthreadpool_task_3d_tile_1d_with_id_t task_3d_tile_1d_with_id;
-    pthreadpool_task_3d_tile_1d_with_id_with_thread_t task_3d_tile_1d_with_id_with_thread;
+    pthreadpool_task_3d_tile_1d_with_id_with_thread_t
+        task_3d_tile_1d_with_id_with_thread;
     pthreadpool_task_3d_tile_2d_with_id_t task_3d_tile_2d_with_id;
+    pthreadpool_task_3d_tile_2d_dynamic_with_id_t
+        task_3d_tile_2d_dynamic_with_id;
     pthreadpool_task_4d_tile_2d_with_id_t task_4d_tile_2d_with_id;
 #endif  // XNN_MAX_UARCH_TYPES > 1
   };
-  // Offset of the invocation context w.r.t. xnn_operator.context
-  // Typically 0, but can be non-zero when an operator does multiple invocations.
+  // Offset of the invocation context w.r.t. xnn_operator.context. Typically 0,
+  // but can be non-zero when an operator does multiple invocations.
   size_t context_offset;
   size_t range[6];
   size_t tile[2];
@@ -1691,3 +1706,5 @@ struct scaled_dot_product_attention_context {
       size_t tokens_start,
       size_t tokens_block_size);
 #endif
+
+#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_COMPUTE_H_

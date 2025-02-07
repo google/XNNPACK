@@ -735,8 +735,9 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
                 .pack_weights_and_biases = gemm_config->pack_weights_and_biases,
                 .gemm_config = gemm_config,
             };
-        batch_matrix_multiply_op->compute[0].task_2d_tile_1d =
-            (pthreadpool_task_2d_tile_1d_t)xnn_compute_batched_packw_gemm_goi;
+        batch_matrix_multiply_op->compute[0].task_2d_tile_1d_dynamic =
+            (pthreadpool_task_2d_tile_1d_dynamic_t)
+                xnn_compute_batched_packw_gemm_goi;
         batch_matrix_multiply_op->compute[0].context_offset =
             offsetof(struct xnn_operator, context.gemm.packw_gemm_goi) -
             offsetof(struct xnn_operator, context);
@@ -762,14 +763,15 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
                 .pack_weights_and_biases = gemm_config->pack_weights_and_biases,
                 .gemm_config = gemm_config,
             };
-        batch_matrix_multiply_op->compute[0].task_2d_tile_1d =
-            (pthreadpool_task_2d_tile_1d_t)xnn_compute_batched_packw_gemm_gio;
+        batch_matrix_multiply_op->compute[0].task_2d_tile_1d_dynamic =
+            (pthreadpool_task_2d_tile_1d_dynamic_t)
+                xnn_compute_batched_packw_gemm_gio;
         batch_matrix_multiply_op->compute[0].context_offset =
             offsetof(struct xnn_operator, context.gemm.packw_gemm_gio) -
             offsetof(struct xnn_operator, context);
       }
       batch_matrix_multiply_op->compute[0].type =
-          xnn_parallelization_type_2d_tile_1d;
+          xnn_parallelization_type_2d_tile_1d_dynamic;
       batch_matrix_multiply_op->compute[0].range[0] = batch_size_b;
       batch_matrix_multiply_op->compute[0].range[1] = n;
       batch_matrix_multiply_op->compute[0].tile[0] = nr;
@@ -859,33 +861,34 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
 
 #if XNN_MAX_UARCH_TYPES > 1
   if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
-    gemm_compute->type = xnn_parallelization_type_3d_tile_2d_with_uarch;
+    gemm_compute->type = xnn_parallelization_type_3d_tile_2d_dynamic_with_uarch;
     if (packed_lhs) {
-      gemm_compute->task_3d_tile_2d_with_id =
-          (pthreadpool_task_3d_tile_2d_with_id_t)
+      gemm_compute->task_3d_tile_2d_dynamic_with_id =
+          (pthreadpool_task_3d_tile_2d_dynamic_with_id_t)
               xnn_compute_hmp_grouped_qp8gemm;
     } else {
-      gemm_compute->task_3d_tile_2d_with_id =
-          (pthreadpool_task_3d_tile_2d_with_id_t)xnn_compute_hmp_grouped_gemm;
+      gemm_compute->task_3d_tile_2d_dynamic_with_id =
+          (pthreadpool_task_3d_tile_2d_dynamic_with_id_t)
+              xnn_compute_hmp_grouped_gemm;
     }
   } else {
-    gemm_compute->type = xnn_parallelization_type_3d_tile_2d;
+    gemm_compute->type = xnn_parallelization_type_3d_tile_2d_dynamic;
     if (packed_lhs) {
-      gemm_compute->task_3d_tile_2d =
-          (pthreadpool_task_3d_tile_2d_t)xnn_compute_grouped_qp8gemm;
+      gemm_compute->task_3d_tile_2d_dynamic =
+          (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_grouped_qp8gemm;
     } else {
-      gemm_compute->task_3d_tile_2d =
-          (pthreadpool_task_3d_tile_2d_t)xnn_compute_grouped_gemm;
+      gemm_compute->task_3d_tile_2d_dynamic =
+          (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_grouped_gemm;
     }
   }
 #else
-  gemm_compute->type = xnn_parallelization_type_3d_tile_2d;
+  gemm_compute->type = xnn_parallelization_type_3d_tile_2d_dynamic;
   if (packed_lhs) {
-    gemm_compute->task_3d_tile_2d =
-        (pthreadpool_task_3d_tile_2d_t)xnn_compute_grouped_qp8gemm;
+    gemm_compute->task_3d_tile_2d_dynamic =
+        (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_grouped_qp8gemm;
   } else {
-    gemm_compute->task_3d_tile_2d =
-        (pthreadpool_task_3d_tile_2d_t)xnn_compute_grouped_gemm;
+    gemm_compute->task_3d_tile_2d_dynamic =
+        (pthreadpool_task_3d_tile_2d_dynamic_t)xnn_compute_grouped_gemm;
   }
 #endif
   gemm_compute->range[0] = batch_size_c;

@@ -424,8 +424,8 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
                 .gemm_config = gemm_config,
         };
 
-    dynamic_fully_connected_op->compute[0].task_1d_tile_1d =
-        (pthreadpool_task_1d_tile_1d_t)xnn_compute_packw_gemm_gio;
+    dynamic_fully_connected_op->compute[0].task_1d_tile_1d_dynamic =
+        (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_packw_gemm_gio;
     dynamic_fully_connected_op->compute[0].context_offset =
         offsetof(struct xnn_operator, context.gemm.packw_gemm_gio) -
         offsetof(struct xnn_operator, context);
@@ -445,14 +445,14 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
             .gemm_config = gemm_config,
         };
 
-    dynamic_fully_connected_op->compute[0].task_1d_tile_1d =
-        (pthreadpool_task_1d_tile_1d_t)xnn_compute_packw_gemm_goi;
+    dynamic_fully_connected_op->compute[0].task_1d_tile_1d_dynamic =
+        (pthreadpool_task_1d_tile_1d_dynamic_t)xnn_compute_packw_gemm_goi;
     dynamic_fully_connected_op->compute[0].context_offset =
         offsetof(struct xnn_operator, context.gemm.packw_gemm_goi) -
         offsetof(struct xnn_operator, context);
   }
   dynamic_fully_connected_op->compute[0].type =
-      xnn_parallelization_type_1d_tile_1d;
+      xnn_parallelization_type_1d_tile_1d_dynamic;
   dynamic_fully_connected_op->compute[0].range[0] = output_channels;
   dynamic_fully_connected_op->compute[0].tile[0] = nr;
 
@@ -515,34 +515,34 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
 #if XNN_MAX_UARCH_TYPES > 1
   if (xnn_is_hmp_gemm_ukernel(gemm_ukernel)) {
     dynamic_fully_connected_op->compute[1].type =
-        xnn_parallelization_type_2d_tile_2d_with_uarch;
+        xnn_parallelization_type_2d_tile_2d_dynamic_with_uarch;
     if (packed_lhs) {
-      dynamic_fully_connected_op->compute[1].task_2d_tile_2d_with_id =
+      dynamic_fully_connected_op->compute[1].task_2d_tile_2d_dynamic_with_id =
           (pthreadpool_task_2d_tile_2d_with_id_t)xnn_compute_hmp_qp8gemm;
     } else {
-      dynamic_fully_connected_op->compute[1].task_2d_tile_2d_with_id =
-          (pthreadpool_task_2d_tile_2d_with_id_t)xnn_compute_hmp_gemm;
+      dynamic_fully_connected_op->compute[1].task_2d_tile_2d_dynamic_with_id =
+          (pthreadpool_task_2d_tile_2d_dynamic_with_id_t)xnn_compute_hmp_gemm;
     }
   } else {
     dynamic_fully_connected_op->compute[1].type =
-        xnn_parallelization_type_2d_tile_2d;
+        xnn_parallelization_type_2d_tile_2d_dynamic;
     if (packed_lhs) {
-      dynamic_fully_connected_op->compute[1].task_2d_tile_2d =
-          (pthreadpool_task_2d_tile_2d_t)xnn_compute_qp8gemm;
+      dynamic_fully_connected_op->compute[1].task_2d_tile_2d_dynamic =
+          (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_qp8gemm;
     } else {
-      dynamic_fully_connected_op->compute[1].task_2d_tile_2d =
-          (pthreadpool_task_2d_tile_2d_t)xnn_compute_gemm;
+      dynamic_fully_connected_op->compute[1].task_2d_tile_2d_dynamic =
+          (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_gemm;
     }
   }
 #else
   dynamic_fully_connected_op->compute[1].type =
-      xnn_parallelization_type_2d_tile_2d;
+      xnn_parallelization_type_2d_tile_2d_dynamic;
   if (packed_lhs) {
-    dynamic_fully_connected_op->compute[1].task_2d_tile_2d =
-        (pthreadpool_task_2d_tile_2d_t)xnn_compute_qp8gemm;
+    dynamic_fully_connected_op->compute[1].task_2d_tile_2d_dynamic =
+        (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_qp8gemm;
   } else {
-    dynamic_fully_connected_op->compute[1].task_2d_tile_2d =
-        (pthreadpool_task_2d_tile_2d_t)xnn_compute_gemm;
+    dynamic_fully_connected_op->compute[1].task_2d_tile_2d_dynamic =
+        (pthreadpool_task_2d_tile_2d_dynamic_t)xnn_compute_gemm;
   }
 #endif  // XNN_MAX_UARCH_TYPES > 1
   dynamic_fully_connected_op->compute[1].range[1] = batch_size;
