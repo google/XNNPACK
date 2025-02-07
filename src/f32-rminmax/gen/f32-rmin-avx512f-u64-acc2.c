@@ -26,7 +26,7 @@ void xnn_f32_rmin_ukernel__avx512f_u64_acc2(
   assert(input != NULL);
   assert(output != NULL);
 
-  __m512 vmin0 = _mm512_set1_ps(*input);
+  __m512 vmin0 = _mm512_set1_ps(output[0]);
   __m512 vmin1 = vmin0;
   for (; batch >= 64 * sizeof(float); batch -= 64 * sizeof(float)) {
     const __m512 vt0 = _mm512_loadu_ps(input);

@@ -25,7 +25,7 @@ void xnn_f32_rmax_ukernel__wasm_u3_acc3(
 
   const float* i = input;
 
-  float vmax0 = *i;
+  float vmax0 = output[0];
   float vmax1 = vmax0;
   float vmax2 = vmax0;
   for (; batch >= 3 * sizeof(float); batch -= 3 * sizeof(float)) {

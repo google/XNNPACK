@@ -41,6 +41,6 @@ void xnn_f32_rmax_ukernel__rvv_u8v(
     t0 = __riscv_vfmax_vv_f32m8_tu(t0, t0, vec, vl);
   }
 
-  vfloat32m1_t fmax = __riscv_vfmv_s_f_f32m1(-INFINITY, 1);
+  vfloat32m1_t fmax = __riscv_vle32_v_f32m1(output + 0, 1);
   output[0] = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredmax_vs_f32m8_f32m1(t0, fmax, N));
 }

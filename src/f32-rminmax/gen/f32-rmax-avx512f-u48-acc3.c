@@ -26,7 +26,7 @@ void xnn_f32_rmax_ukernel__avx512f_u48_acc3(
   assert(input != NULL);
   assert(output != NULL);
 
-  __m512 vmax0 = _mm512_set1_ps(*input);
+  __m512 vmax0 = _mm512_set1_ps(output[0]);
   __m512 vmax1 = vmax0;
   __m512 vmax2 = vmax0;
   for (; batch >= 48 * sizeof(float); batch -= 48 * sizeof(float)) {

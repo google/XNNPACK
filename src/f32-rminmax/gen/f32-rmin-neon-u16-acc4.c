@@ -26,7 +26,7 @@ void xnn_f32_rmin_ukernel__neon_u16_acc4(
   assert(input != NULL);
   assert(output != NULL);
 
-  float32x4_t vmin0 = vld1q_dup_f32(input);
+  float32x4_t vmin0 = vld1q_dup_f32(output);
   float32x4_t vmin1 = vmin0;
   float32x4_t vmin2 = vmin0;
   float32x4_t vmin3 = vmin0;

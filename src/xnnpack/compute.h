@@ -1520,6 +1520,10 @@ struct floating_point_softmax_context {
     struct xnn_f16_default_params f16;
     struct xnn_f32_default_params f32;
   } rmax_params;
+  union {
+    xnn_float16 f16;
+    float f32;
+  } rmax_init;
 };
 
 #ifndef __cplusplus

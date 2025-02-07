@@ -48,9 +48,9 @@ void xnn_f32_r${OP.lower()}_ukernel__rvv_u${LMUL}v(
   }
 
   $if EMIT_MIN:
-    vfloat32m1_t fmin = __riscv_vfmv_s_f_f32m1(INFINITY, 1);
+    vfloat32m1_t fmin = __riscv_vle32_v_f32m1(output, 1);
   $if EMIT_MAX:
-    vfloat32m1_t fmax = __riscv_vfmv_s_f_f32m1(-INFINITY, 1);
+    vfloat32m1_t fmax = __riscv_vle32_v_f32m1(output + ${MAX_POS}, 1);
   $if EMIT_MIN:
     output[0] = __riscv_vfmv_f_s_f32m1_f32(__riscv_vfredmin_vs_f32m${LMUL}_f32m1(t0, fmin, N));
   $if EMIT_MAX:

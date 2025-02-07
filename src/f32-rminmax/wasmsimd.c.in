@@ -35,11 +35,11 @@ void xnn_f32_r${OP.lower()}_ukernel__wasmsimd${MINMAX_SUFFIX}_u${BATCH_TILE}${AC
   assert(output != NULL);
 
   $if EMIT_MIN:
-    v128_t vmin0 = wasm_v128_load32_splat(input);
+    v128_t vmin0 = wasm_v128_load32_splat(output);
     $if EMIT_MAX:
-      v128_t vmax0 = vmin0;
+      v128_t vmax0 = wasm_v128_load32_splat(output + 1);
   $elif EMIT_MAX:
-    v128_t vmax0 = wasm_v128_load32_splat(input);
+    v128_t vmax0 = wasm_v128_load32_splat(output);
   $for A in range(1, ACCUMULATORS):
     $if EMIT_MIN:
       v128_t vmin${A} = vmin0;

@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <limits>
 #include <random>
 
 #include "utils.h"
@@ -246,7 +247,7 @@ static void ThreePassSoftMaxWithRecomputing(
     }
 
     const auto start = std::chrono::high_resolution_clock::now();
-    float x_max;
+    float x_max = -std::numeric_limits<float>::infinity();
     rmax(elements * sizeof(float), x.data(), &x_max, &rmax_params);
     float y_sum;
     raddexpminusmax(elements * sizeof(float), x.data(), &y_sum, x_max);
@@ -324,7 +325,7 @@ static void ThreePassSoftMaxWithReloading(
     }
 
     const auto start = std::chrono::high_resolution_clock::now();
-    float x_max;
+    float x_max = -std::numeric_limits<float>::infinity();
     rmax(elements * sizeof(float), x.data(), &x_max, &rmax_params);
     float y_sum;
     raddstoreexpminusmax(elements * sizeof(float), x.data(), &x_max,

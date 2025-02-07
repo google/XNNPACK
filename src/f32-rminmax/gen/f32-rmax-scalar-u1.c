@@ -26,7 +26,7 @@ void xnn_f32_rmax_ukernel__scalar_u1(
 
   const float* i = input;
 
-  float vmax0 = *i;
+  float vmax0 = output[0];
   do {
     const float vt = *i++;
     vmax0 = math_max_f32(vmax0, vt);

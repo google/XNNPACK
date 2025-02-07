@@ -26,7 +26,7 @@ void xnn_f32_rmin_ukernel__neon_u4(
   assert(input != NULL);
   assert(output != NULL);
 
-  float32x4_t vmin0 = vld1q_dup_f32(input);
+  float32x4_t vmin0 = vld1q_dup_f32(output);
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float32x4_t vt = vld1q_f32(input); input += 4;
     vmin0 = vminq_f32(vmin0, vt);

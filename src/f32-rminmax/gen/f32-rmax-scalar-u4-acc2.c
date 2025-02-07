@@ -26,7 +26,7 @@ void xnn_f32_rmax_ukernel__scalar_u4_acc2(
 
   const float* i = input;
 
-  float vmax0 = *i;
+  float vmax0 = output[0];
   float vmax1 = vmax0;
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const float vt0 = i[0];

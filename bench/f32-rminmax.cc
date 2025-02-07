@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <limits>
 #include <random>
 #include <vector>
 
@@ -42,7 +43,7 @@ static void f32_rminmax(
     init_params(&params);
   }
 
-  float output[2];
+  float output[2] = {-std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity()};
   for (auto _ : state) {
     rminmax(elements * sizeof(float), input.data(), output, &params);
   }

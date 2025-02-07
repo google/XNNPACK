@@ -359,6 +359,8 @@ static enum xnn_status reshape_softmax_nc_floating_point(
     const struct xnn_raddstoreexpminusmax_config raddstoreexpminusmax[restrict XNN_MIN_ELEMENTS(1)],
     const struct xnn_binary_elementwise_config* vmul,
     xnn_compute_reciprocal_fn compute_reciprocal,
+    const void* rmax_init,
+    size_t rmax_init_size,
     const void* rmax_params,
     size_t rmax_params_size,
     const void* expminus_params,
@@ -429,6 +431,7 @@ static enum xnn_status reshape_softmax_nc_floating_point(
   if (vmul->opc_ukernel != NULL) {
     softmax_op->context.floating_point_softmax.vmulc_ukernel = vmul->opc_ukernel;
   };
+  memcpy(&softmax_op->context.floating_point_softmax.rmax_init, rmax_init, rmax_init_size);
   memcpy(&softmax_op->context.floating_point_softmax.rmax_params, rmax_params, rmax_params_size);
   memcpy(&softmax_op->context.floating_point_softmax.expminus_params, expminus_params, expminus_params_size);
   memcpy(&softmax_op->context.floating_point_softmax.minmax_params, minmax_params, minmax_params_size);
@@ -519,6 +522,7 @@ enum xnn_status xnn_reshape_softmax_nc_f16(
 {
   const struct xnn_binary_elementwise_config* f16_vmul_config = softmax_op->vmul_config;
 
+  xnn_float16 rmax_init = xnn_float16_from_float(-INFINITY);;
   struct xnn_f16_default_params rmax_params;
   struct xnn_f16_default_params expminus_params;
   struct xnn_f16_default_params mul_params;
@@ -529,6 +533,7 @@ enum xnn_status xnn_reshape_softmax_nc_f16(
     /*log2_element_size=*/XNN_LOG2_SIZEOF_HALF,
     softmax_op->rmax_config->ukernel, softmax_op->raddstoreexpminusmax_config, f16_vmul_config,
     (xnn_compute_reciprocal_fn) compute_reciprocal_f16,
+    &rmax_init, sizeof(rmax_init),
     &rmax_params, sizeof(rmax_params),
     &expminus_params, sizeof(expminus_params),
     &mul_params, sizeof(mul_params));
@@ -544,6 +549,7 @@ enum xnn_status xnn_reshape_softmax_nc_f32(
 {
   const struct xnn_binary_elementwise_config* f32_vmul_config = softmax_op->vmul_config;
 
+  float rmax_init = -INFINITY;
   struct xnn_f32_default_params rmax_params;
   struct xnn_f32_default_params expminus_params;
   struct xnn_f32_default_params mul_params;
@@ -554,6 +560,7 @@ enum xnn_status xnn_reshape_softmax_nc_f32(
     /*log2_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
     softmax_op->rmax_config->ukernel, softmax_op->raddstoreexpminusmax_config, f32_vmul_config,
     (xnn_compute_reciprocal_fn) compute_reciprocal_f32,
+    &rmax_init, sizeof(rmax_init),
     &rmax_params, sizeof(rmax_params),
     &expminus_params, sizeof(expminus_params),
     &mul_params, sizeof(mul_params));

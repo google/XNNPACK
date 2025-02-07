@@ -26,7 +26,7 @@ void xnn_f32_rmin_ukernel__wasmsimd_minmax_u8_acc2(
   assert(input != NULL);
   assert(output != NULL);
 
-  v128_t vmin0 = wasm_v128_load32_splat(input);
+  v128_t vmin0 = wasm_v128_load32_splat(output);
   v128_t vmin1 = vmin0;
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const v128_t vt0 = wasm_v128_load(input);

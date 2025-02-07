@@ -26,8 +26,8 @@ void xnn_f32_rminmax_ukernel__neon_u8_acc2(
   assert(input != NULL);
   assert(output != NULL);
 
-  float32x4_t vmin0 = vld1q_dup_f32(input);
-  float32x4_t vmax0 = vmin0;
+  float32x4_t vmin0 = vld1q_dup_f32(output);
+  float32x4_t vmax0 = vld1q_dup_f32(output + 1);
   float32x4_t vmin1 = vmin0;
   float32x4_t vmax1 = vmax0;
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {

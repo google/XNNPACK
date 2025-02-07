@@ -31,11 +31,11 @@ void xnn_f32_r${OP.lower()}_ukernel__avx512f_u${BATCH_TILE}${ACC_SUFFIX}(
   assert(output != NULL);
 
   $if EMIT_MIN:
-    __m512 vmin0 = _mm512_set1_ps(*input);
+    __m512 vmin0 = _mm512_set1_ps(output[0]);
     $if EMIT_MAX:
-      __m512 vmax0 = vmin0;
+      __m512 vmax0 = _mm512_set1_ps(output[1]);
   $elif EMIT_MAX:
-    __m512 vmax0 = _mm512_set1_ps(*input);
+    __m512 vmax0 = _mm512_set1_ps(output[0]);
   $for A in range(1, ACCUMULATORS):
     $if EMIT_MIN:
       __m512 vmin${A} = vmin0;

@@ -26,7 +26,7 @@ void xnn_f32_rmax_ukernel__wasmsimd_pminmax_u12_acc3(
   assert(input != NULL);
   assert(output != NULL);
 
-  v128_t vmax0 = wasm_v128_load32_splat(input);
+  v128_t vmax0 = wasm_v128_load32_splat(output);
   v128_t vmax1 = vmax0;
   v128_t vmax2 = vmax0;
   for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {
