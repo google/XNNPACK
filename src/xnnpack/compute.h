@@ -658,16 +658,6 @@ struct subgemm_context {
       size_t nc_block_start,
       size_t slice_x_max,
       size_t nc_block_size);
-
-  XNN_PRIVATE void xnn_compute_subgemm2d(
-      const struct subgemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index,
-      size_t subkernel_index,
-      size_t slice_y,
-      size_t slice_x_start,
-      size_t nc_block_start,
-      size_t slice_x_max,
-      size_t nc_block_size);
 #endif
 
 struct subconv_context {

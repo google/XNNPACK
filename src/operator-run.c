@@ -885,43 +885,6 @@ void xnn_compute_grouped_subgemm2d(
       &context->params);
 }
 
-void xnn_compute_subgemm2d(
-      const struct subgemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index,
-      size_t subkernel_index,
-      size_t slice_y,
-      size_t slice_x_start,
-      size_t nc_block_start,
-      size_t slice_x_max,
-      size_t nc_block_size)
-{
-  const struct subconvolution_params* subconvolution_params = &context->subconvolution_params[subkernel_index];
-
-  if XNN_UNLIKELY(slice_y >= subconvolution_params->slice_height) {
-    return;
-  }
-
-  const size_t slice_width = subconvolution_params->slice_width;
-  if XNN_UNLIKELY(slice_x_start >= slice_width) {
-    return;
-  }
-  const size_t slice_x_size = min(slice_x_max, slice_width - slice_x_start);
-
-  const size_t ax_stride = context->ax_stride;
-  const size_t cx_stride = context->cx_stride;
-  context->ukernel.function[XNN_UARCH_DEFAULT](
-      slice_x_size,
-      nc_block_size,
-      context->kc,
-      (const void*) ((uintptr_t) context->a + slice_y * context->ay_stride + slice_x_start * ax_stride + batch_index * context->ba_stride),
-      ax_stride,
-      (const void*) ((uintptr_t) subconvolution_params->weights + nc_block_start * subconvolution_params->w_stride),
-      (void*) ((uintptr_t) subconvolution_params->output + slice_y * context->cy_stride + slice_x_start * cx_stride + batch_index * context->bc_stride + (nc_block_start << context->log2_csize)),
-      cx_stride,
-      context->cn_stride,
-      &context->params);
-}
-
 void xnn_compute_grouped_subconv2d(
       const struct subconv_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
