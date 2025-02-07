@@ -1786,7 +1786,8 @@ alias(
     actual = select({
         ":xnn_enable_arm_sme2_explicit_true": ":xnn_enable_arm_sme2_explicit_true",
         ":xnn_enable_arm_sme2_explicit_false": ":xnn_enable_arm_sme2_explicit_true",
-        "//conditions:default": ":arm_sme2_enabled_by_default",
+        # Only enable this by default once we're sure it doesn't break anything.
+        "//conditions:default": ":xnn_enable_arm_sme2_explicit_true",
     }),
 )
 
