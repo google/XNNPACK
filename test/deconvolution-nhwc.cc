@@ -13005,7 +13005,7 @@ TEST(DECONVOLUTION_NHWC_F16, kernel_2x2s2_setup_changing_width) {
 /**************************** Future GEMM path ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_1x1) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13016,7 +13016,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_1x1) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_1x1_varying_input_width) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -13029,7 +13029,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_1x1_varying_input_width) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_1x1_varying_input_height) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -13042,7 +13042,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_1x1_varying_input_height) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_1x1_varying_input_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -13055,7 +13055,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_1x1_varying_input_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_1x1_varying_output_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t output_channels = 1; output_channels <= gemm_config->nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
@@ -13068,7 +13068,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_1x1_varying_output_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_1x1_with_input_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13080,7 +13080,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_1x1_with_input_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_1x1_with_output_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13092,7 +13092,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_1x1_with_output_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_1x1_with_qmin) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13104,7 +13104,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_1x1_with_qmin) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_1x1_with_qmax) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13116,7 +13116,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_1x1_with_qmax) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_1x1_without_bias) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -13130,7 +13130,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_1x1_without_bias) {
 /**************************** Future GEMM path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_1x1) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13142,7 +13142,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_1x1) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_1x1_varying_input_width) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -13156,7 +13156,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_1x1_varying_input_width) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_1x1_varying_input_height) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -13170,7 +13170,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_1x1_varying_input_height) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_1x1_varying_input_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -13184,7 +13184,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_1x1_varying_input_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_1x1_varying_output_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t output_channels = 1; output_channels <= gemm_config->nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
@@ -13198,7 +13198,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_1x1_varying_output_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_1x1_with_input_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13211,7 +13211,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_1x1_with_input_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_1x1_with_output_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13224,7 +13224,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_1x1_with_output_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_1x1_with_qmin) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13237,7 +13237,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_1x1_with_qmin) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_1x1_with_qmax) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13250,7 +13250,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_1x1_with_qmax) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_1x1_without_bias) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -13265,7 +13265,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_1x1_without_bias) {
 /**************************** Future GEMM path, batched ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, batched_1x1) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -13277,7 +13277,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_1x1) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_1x1_varying_input_width) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -13291,7 +13291,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_1x1_varying_input_width) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_1x1_varying_input_height) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -13305,7 +13305,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_1x1_varying_input_height) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_1x1_varying_input_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -13319,7 +13319,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_1x1_varying_input_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_1x1_varying_output_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t output_channels = 1; output_channels <= gemm_config->nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
@@ -13333,7 +13333,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_1x1_varying_output_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_1x1_with_input_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -13346,7 +13346,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_1x1_with_input_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_1x1_with_output_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -13359,7 +13359,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_1x1_with_output_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_1x1_with_qmin) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -13372,7 +13372,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_1x1_with_qmin) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_1x1_with_qmax) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -13385,7 +13385,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_1x1_with_qmax) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_1x1_without_bias) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -13400,7 +13400,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_1x1_without_bias) {
 /**************************** Future GEMM path, batched, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -13413,7 +13413,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1_varying_input_width) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -13428,7 +13428,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1_varying_input_width) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1_varying_input_height) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -13443,7 +13443,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1_varying_input_height) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1_varying_input_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -13458,7 +13458,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1_varying_input_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1_varying_output_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t output_channels = 1; output_channels <= gemm_config->nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
@@ -13473,7 +13473,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1_varying_output_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1_with_input_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -13487,7 +13487,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1_with_input_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1_with_output_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -13501,7 +13501,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1_with_output_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1_with_qmin) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -13515,7 +13515,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1_with_qmin) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1_with_qmax) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -13529,7 +13529,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1_with_qmax) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1_without_bias) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -13545,7 +13545,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_1x1_without_bias) {
 /**************************** CONV path ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13557,7 +13557,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, Kx3) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_height = 1; kernel_height <= 4; kernel_height *= 2) {
     DeconvolutionOperatorTester()
@@ -13571,7 +13571,7 @@ TEST(DECONVOLUTION_NHWC_F32, Kx3) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3xK) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_width = 1; kernel_width <= 4; kernel_width *= 2) {
     DeconvolutionOperatorTester()
@@ -13585,7 +13585,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3xK) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_varying_height_padding) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t padding_top = 0; padding_top <= 2; padding_top++) {
     for (size_t padding_bottom = 0; padding_bottom <= 2; padding_bottom++) {
@@ -13603,7 +13603,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_varying_height_padding) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_varying_width_padding) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t padding_left = 0; padding_left <= 2; padding_left++) {
     for (size_t padding_right = 0; padding_right <= 2; padding_right++) {
@@ -13621,7 +13621,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_varying_width_padding) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_varying_height_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t adjustment_height = 1; adjustment_height <= 2; adjustment_height++) {
     DeconvolutionOperatorTester()
@@ -13637,7 +13637,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_varying_height_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_varying_width_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t adjustment_width = 1; adjustment_width <= 2; adjustment_width++) {
     DeconvolutionOperatorTester()
@@ -13653,7 +13653,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_varying_width_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_varying_input_height) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -13667,7 +13667,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_varying_input_height) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_varying_input_width) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -13681,7 +13681,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_varying_input_width) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_varying_input_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -13695,7 +13695,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_varying_input_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_varying_output_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t output_channels = 1; output_channels <= gemm_config->nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
@@ -13709,7 +13709,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_varying_output_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_with_height_dilation) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t dilation_height = 2; dilation_height <= 3; dilation_height++) {
     DeconvolutionOperatorTester()
@@ -13724,7 +13724,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_with_height_dilation) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_with_width_dilation) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t dilation_width = 2; dilation_width <= 3; dilation_width++) {
     DeconvolutionOperatorTester()
@@ -13739,7 +13739,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_with_width_dilation) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_with_height_dilation_and_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13753,7 +13753,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_with_height_dilation_and_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_with_width_dilation_and_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13767,7 +13767,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_with_width_dilation_and_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_with_input_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13780,7 +13780,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_with_input_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_with_output_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13793,7 +13793,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_with_output_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_with_qmin) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13806,7 +13806,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_with_qmin) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_with_qmax) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13819,7 +13819,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_with_qmax) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_without_bias) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -13832,7 +13832,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_without_bias) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, weights_cache_3x3) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13847,7 +13847,7 @@ TEST(DECONVOLUTION_NHWC_F32, weights_cache_3x3) {
 /**************************** CONV path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -13860,7 +13860,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_Kx3) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_height = 1; kernel_height <= 4; kernel_height *= 2) {
     DeconvolutionOperatorTester()
@@ -13875,7 +13875,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_Kx3) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3xK) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_width = 1; kernel_width <= 4; kernel_width *= 2) {
     DeconvolutionOperatorTester()
@@ -13890,7 +13890,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3xK) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_varying_height_padding) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t padding_top = 0; padding_top <= 2; padding_top++) {
     for (size_t padding_bottom = 0; padding_bottom <= 2; padding_bottom++) {
@@ -13909,7 +13909,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_varying_height_padding) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_varying_width_padding) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t padding_left = 0; padding_left <= 2; padding_left++) {
     for (size_t padding_right = 0; padding_right <= 2; padding_right++) {
@@ -13928,7 +13928,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_varying_width_padding) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_varying_height_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t adjustment_height = 1; adjustment_height <= 2; adjustment_height++) {
     DeconvolutionOperatorTester()
@@ -13945,7 +13945,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_varying_height_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_varying_width_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t adjustment_width = 1; adjustment_width <= 2; adjustment_width++) {
     DeconvolutionOperatorTester()
@@ -13962,7 +13962,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_varying_width_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_varying_input_height) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -13977,7 +13977,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_varying_input_height) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_varying_input_width) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -13992,7 +13992,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_varying_input_width) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_varying_input_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -14007,7 +14007,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_varying_input_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_varying_output_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t output_channels = 1; output_channels <= gemm_config->nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
@@ -14022,7 +14022,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_varying_output_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_with_height_dilation) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t dilation_height = 2; dilation_height <= 3; dilation_height++) {
     DeconvolutionOperatorTester()
@@ -14038,7 +14038,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_with_height_dilation) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_with_width_dilation) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t dilation_width = 2; dilation_width <= 3; dilation_width++) {
     DeconvolutionOperatorTester()
@@ -14054,7 +14054,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_with_width_dilation) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_with_height_dilation_and_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -14069,7 +14069,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_with_height_dilation_and_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_with_width_dilation_and_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -14084,7 +14084,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_with_width_dilation_and_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_with_input_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -14098,7 +14098,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_with_input_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_with_output_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -14112,7 +14112,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_with_output_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_with_qmin) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -14126,7 +14126,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_with_qmin) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_with_qmax) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -14140,7 +14140,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_with_qmax) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_without_bias) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -14154,7 +14154,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3_without_bias) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, weights_cache_grouped_3x3) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kUnstridedInputHeight, kUnstridedInputWidth)
@@ -14170,7 +14170,7 @@ TEST(DECONVOLUTION_NHWC_F32, weights_cache_grouped_3x3) {
 /**************************** CONV path, batched ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -14183,7 +14183,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_Kx3) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_height = 1; kernel_height <= 4; kernel_height *= 2) {
     DeconvolutionOperatorTester()
@@ -14198,7 +14198,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_Kx3) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3xK) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_width = 1; kernel_width <= 4; kernel_width *= 2) {
     DeconvolutionOperatorTester()
@@ -14213,7 +14213,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3xK) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3_varying_height_padding) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t padding_top = 0; padding_top <= 2; padding_top++) {
     for (size_t padding_bottom = 0; padding_bottom <= 2; padding_bottom++) {
@@ -14232,7 +14232,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3_varying_height_padding) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3_varying_width_padding) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t padding_left = 0; padding_left <= 2; padding_left++) {
     for (size_t padding_right = 0; padding_right <= 2; padding_right++) {
@@ -14251,7 +14251,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3_varying_width_padding) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3_varying_height_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t adjustment_height = 1; adjustment_height <= 2; adjustment_height++) {
     DeconvolutionOperatorTester()
@@ -14268,7 +14268,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3_varying_height_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3_varying_width_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t adjustment_width = 1; adjustment_width <= 2; adjustment_width++) {
     DeconvolutionOperatorTester()
@@ -14285,7 +14285,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3_varying_width_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3_varying_input_height) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -14300,7 +14300,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3_varying_input_height) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3_varying_input_width) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -14315,7 +14315,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3_varying_input_width) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3_varying_input_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -14330,7 +14330,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3_varying_input_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3_varying_output_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t output_channels = 1; output_channels <= gemm_config->nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
@@ -14345,7 +14345,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3_varying_output_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3_with_height_dilation) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t dilation_height = 2; dilation_height <= 3; dilation_height++) {
     DeconvolutionOperatorTester()
@@ -14361,7 +14361,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3_with_height_dilation) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3_with_width_dilation) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t dilation_width = 2; dilation_width <= 3; dilation_width++) {
     DeconvolutionOperatorTester()
@@ -14377,7 +14377,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3_with_width_dilation) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3_with_height_dilation_and_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -14392,7 +14392,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3_with_height_dilation_and_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3_with_width_dilation_and_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -14407,7 +14407,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3_with_width_dilation_and_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3_with_input_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -14421,7 +14421,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3_with_input_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3_with_output_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -14435,7 +14435,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3_with_output_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3_with_qmin) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -14449,7 +14449,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3_with_qmin) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3_with_qmax) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -14463,7 +14463,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3_with_qmax) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3_without_bias) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -14477,7 +14477,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3_without_bias) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, weights_cache_batched_3x3) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -14494,7 +14494,7 @@ TEST(DECONVOLUTION_NHWC_F32, weights_cache_batched_3x3) {
 /**************************** CONV path, grouped, batched ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -14508,7 +14508,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_Kx3) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_height = 1; kernel_height <= 4; kernel_height *= 2) {
     DeconvolutionOperatorTester()
@@ -14524,7 +14524,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_Kx3) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3xK) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_width = 1; kernel_width <= 4; kernel_width *= 2) {
     DeconvolutionOperatorTester()
@@ -14540,7 +14540,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3xK) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_varying_height_padding) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t padding_top = 0; padding_top <= 2; padding_top++) {
     for (size_t padding_bottom = 0; padding_bottom <= 2; padding_bottom++) {
@@ -14560,7 +14560,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_varying_height_padding) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_varying_width_padding) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t padding_left = 0; padding_left <= 2; padding_left++) {
     for (size_t padding_right = 0; padding_right <= 2; padding_right++) {
@@ -14580,7 +14580,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_varying_width_padding) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_varying_height_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t adjustment_height = 1; adjustment_height <= 2; adjustment_height++) {
     DeconvolutionOperatorTester()
@@ -14598,7 +14598,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_varying_height_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_varying_width_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t adjustment_width = 1; adjustment_width <= 2; adjustment_width++) {
     DeconvolutionOperatorTester()
@@ -14616,7 +14616,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_varying_width_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_varying_input_height) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_height = kUnstridedInputHeight - 2; input_height <= kUnstridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -14632,7 +14632,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_varying_input_height) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_varying_input_width) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_width = kUnstridedInputWidth - 2; input_width <= kUnstridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -14648,7 +14648,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_varying_input_width) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_varying_input_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -14664,7 +14664,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_varying_input_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_varying_output_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t output_channels = 1; output_channels <= gemm_config->nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
@@ -14680,7 +14680,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_varying_output_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_with_height_dilation) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t dilation_height = 2; dilation_height <= 3; dilation_height++) {
     DeconvolutionOperatorTester()
@@ -14697,7 +14697,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_with_height_dilation) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_with_width_dilation) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t dilation_width = 2; dilation_width <= 3; dilation_width++) {
     DeconvolutionOperatorTester()
@@ -14714,7 +14714,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_with_width_dilation) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_with_height_dilation_and_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -14730,7 +14730,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_with_height_dilation_and_stride
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_with_width_dilation_and_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -14746,7 +14746,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_with_width_dilation_and_stride)
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_with_input_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -14761,7 +14761,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_with_input_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_with_output_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -14776,7 +14776,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_with_output_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_with_qmin) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -14791,7 +14791,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_with_qmin) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_with_qmax) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -14806,7 +14806,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_with_qmax) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_without_bias) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -14821,7 +14821,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3_without_bias) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, weights_cache_batched_grouped_3x3) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -14882,7 +14882,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3_setup_changing_width) {
 /**************************** SUBCONV2D/IGEMM path ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -14895,7 +14895,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, Kx3s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_height = 2; kernel_height <= 5; kernel_height++) {
     DeconvolutionOperatorTester()
@@ -14910,7 +14910,7 @@ TEST(DECONVOLUTION_NHWC_F32, Kx3s2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3xKs2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_width = 2; kernel_width <= 5; kernel_width++) {
     DeconvolutionOperatorTester()
@@ -14925,7 +14925,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3xKs2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3sSx1) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t stride_height = 2; stride_height <= 3; stride_height++) {
     DeconvolutionOperatorTester()
@@ -14941,7 +14941,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3sSx1) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s1xS) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t stride_width = 2; stride_width <= 3; stride_width++) {
     DeconvolutionOperatorTester()
@@ -14957,7 +14957,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s1xS) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_varying_height_padding) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t padding_top = 0; padding_top <= 2; padding_top++) {
     for (size_t padding_bottom = 0; padding_bottom <= 2; padding_bottom++) {
@@ -14976,7 +14976,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_varying_height_padding) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_varying_width_padding) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t padding_left = 0; padding_left <= 2; padding_left++) {
     for (size_t padding_right = 0; padding_right <= 2; padding_right++) {
@@ -14995,7 +14995,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_varying_width_padding) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_varying_height_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t adjustment_height = 0; adjustment_height <= 1; adjustment_height++) {
     DeconvolutionOperatorTester()
@@ -15011,7 +15011,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_varying_height_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_varying_width_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t adjustment_width = 0; adjustment_width <= 1; adjustment_width++) {
     DeconvolutionOperatorTester()
@@ -15027,7 +15027,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_varying_width_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_varying_input_height) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -15042,7 +15042,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_varying_input_height) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_varying_input_width) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -15057,7 +15057,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_varying_input_width) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_varying_input_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -15072,7 +15072,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_varying_input_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_varying_output_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t output_channels = 1; output_channels <= gemm_config->nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
@@ -15087,7 +15087,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_varying_output_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_with_input_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -15101,7 +15101,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_with_input_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_with_output_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -15115,7 +15115,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_with_output_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_with_qmin) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -15129,7 +15129,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_with_qmin) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_with_qmax) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -15143,7 +15143,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_with_qmax) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_without_bias) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -15157,7 +15157,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_without_bias) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, weights_cache_3x3s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -15171,7 +15171,7 @@ TEST(DECONVOLUTION_NHWC_F32, weights_cache_3x3s2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, stress_weights_cache_5x5s4) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -15186,7 +15186,7 @@ TEST(DECONVOLUTION_NHWC_F32, stress_weights_cache_5x5s4) {
 /**************************** SUBCONV2D/IGEMM path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -15200,7 +15200,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_Kx3s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_height = 2; kernel_height <= 5; kernel_height++) {
     DeconvolutionOperatorTester()
@@ -15216,7 +15216,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_Kx3s2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3xKs2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_width = 2; kernel_width <= 5; kernel_width++) {
     DeconvolutionOperatorTester()
@@ -15232,7 +15232,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3xKs2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3sSx1) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t stride_height = 2; stride_height <= 3; stride_height++) {
     DeconvolutionOperatorTester()
@@ -15249,7 +15249,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3sSx1) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s1xS) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t stride_width = 2; stride_width <= 3; stride_width++) {
     DeconvolutionOperatorTester()
@@ -15266,7 +15266,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s1xS) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_varying_height_padding) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t padding_top = 0; padding_top <= 2; padding_top++) {
     for (size_t padding_bottom = 0; padding_bottom <= 2; padding_bottom++) {
@@ -15286,7 +15286,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_varying_height_padding) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_varying_width_padding) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t padding_left = 0; padding_left <= 2; padding_left++) {
     for (size_t padding_right = 0; padding_right <= 2; padding_right++) {
@@ -15306,7 +15306,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_varying_width_padding) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_varying_height_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t adjustment_height = 0; adjustment_height <= 1; adjustment_height++) {
     DeconvolutionOperatorTester()
@@ -15323,7 +15323,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_varying_height_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_varying_width_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t adjustment_width = 0; adjustment_width <= 1; adjustment_width++) {
     DeconvolutionOperatorTester()
@@ -15340,7 +15340,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_varying_width_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_varying_input_height) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -15356,7 +15356,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_varying_input_height) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_varying_input_width) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -15372,7 +15372,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_varying_input_width) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_varying_input_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_channels = 14; input_channels <= 20; input_channels++) {
     DeconvolutionOperatorTester()
@@ -15388,7 +15388,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_varying_input_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_varying_output_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t output_channels = 1; output_channels <= gemm_config->nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
@@ -15404,7 +15404,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_varying_output_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_with_input_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -15419,7 +15419,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_with_input_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_with_output_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -15434,7 +15434,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_with_output_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_with_qmin) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -15449,7 +15449,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_with_qmin) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_with_qmax) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -15464,7 +15464,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_with_qmax) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_without_bias) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -15479,7 +15479,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_3x3s2_without_bias) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, weights_cache_grouped_3x3s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -15496,7 +15496,7 @@ TEST(DECONVOLUTION_NHWC_F32, weights_cache_grouped_3x3s2) {
 /**************************** SUBCONV2D/IGEMM path, batched ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -15510,7 +15510,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_Kx3s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_height = 2; kernel_height <= 5; kernel_height++) {
     DeconvolutionOperatorTester()
@@ -15526,7 +15526,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_Kx3s2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3xKs2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_width = 2; kernel_width <= 5; kernel_width++) {
     DeconvolutionOperatorTester()
@@ -15542,7 +15542,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3xKs2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3sSx1) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t stride_height = 2; stride_height <= 3; stride_height++) {
     DeconvolutionOperatorTester()
@@ -15559,7 +15559,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3sSx1) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3s1xS) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t stride_width = 2; stride_width <= 3; stride_width++) {
     DeconvolutionOperatorTester()
@@ -15576,7 +15576,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3s1xS) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_varying_height_padding) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t padding_top = 0; padding_top <= 2; padding_top++) {
     for (size_t padding_bottom = 0; padding_bottom <= 2; padding_bottom++) {
@@ -15596,7 +15596,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_varying_height_padding) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_varying_width_padding) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t padding_left = 0; padding_left <= 2; padding_left++) {
     for (size_t padding_right = 0; padding_right <= 2; padding_right++) {
@@ -15616,7 +15616,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_varying_width_padding) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_varying_height_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t adjustment_height = 0; adjustment_height <= 1; adjustment_height++) {
     DeconvolutionOperatorTester()
@@ -15633,7 +15633,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_varying_height_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_varying_width_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t adjustment_width = 0; adjustment_width <= 1; adjustment_width++) {
     DeconvolutionOperatorTester()
@@ -15650,7 +15650,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_varying_width_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_varying_input_height) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -15666,7 +15666,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_varying_input_height) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_varying_input_width) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -15682,7 +15682,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_varying_input_width) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_varying_input_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -15698,7 +15698,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_varying_input_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_varying_output_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t output_channels = 1; output_channels <= gemm_config->nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
@@ -15714,7 +15714,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_varying_output_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_with_input_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -15729,7 +15729,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_with_input_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_with_output_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -15744,7 +15744,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_with_output_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_with_qmin) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -15759,7 +15759,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_with_qmin) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_with_qmax) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -15774,7 +15774,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_with_qmax) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_without_bias) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -15789,7 +15789,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_3x3s2_without_bias) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, weights_cache_batched_3x3s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -15806,7 +15806,7 @@ TEST(DECONVOLUTION_NHWC_F32, weights_cache_batched_3x3s2) {
 /**************************** SUBCONV2D/IGEMM path, grouped, batched ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -15821,7 +15821,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_Kx3s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_height = 2; kernel_height <= 5; kernel_height++) {
     DeconvolutionOperatorTester()
@@ -15838,7 +15838,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_Kx3s2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3xKs2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_width = 2; kernel_width <= 5; kernel_width++) {
     DeconvolutionOperatorTester()
@@ -15855,7 +15855,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3xKs2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3sSx1) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t stride_height = 2; stride_height <= 3; stride_height++) {
     DeconvolutionOperatorTester()
@@ -15873,7 +15873,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3sSx1) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s1xS) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t stride_width = 2; stride_width <= 3; stride_width++) {
     DeconvolutionOperatorTester()
@@ -15891,7 +15891,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s1xS) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_varying_height_padding) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t padding_top = 0; padding_top <= 2; padding_top++) {
     for (size_t padding_bottom = 0; padding_bottom <= 2; padding_bottom++) {
@@ -15912,7 +15912,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_varying_height_padding) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_varying_width_padding) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t padding_left = 0; padding_left <= 2; padding_left++) {
     for (size_t padding_right = 0; padding_right <= 2; padding_right++) {
@@ -15933,7 +15933,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_varying_width_padding) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_varying_height_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t adjustment_height = 0; adjustment_height <= 1; adjustment_height++) {
     DeconvolutionOperatorTester()
@@ -15951,7 +15951,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_varying_height_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_varying_width_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t adjustment_width = 0; adjustment_width <= 1; adjustment_width++) {
     DeconvolutionOperatorTester()
@@ -15969,7 +15969,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_varying_width_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_varying_input_height) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -15986,7 +15986,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_varying_input_height) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_varying_input_width) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -16003,7 +16003,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_varying_input_width) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_varying_input_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_channels = 14; input_channels <= 20; input_channels++) {
     DeconvolutionOperatorTester()
@@ -16020,7 +16020,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_varying_input_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_varying_output_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t output_channels = 1; output_channels <= gemm_config->nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
@@ -16037,7 +16037,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_varying_output_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_with_input_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -16053,7 +16053,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_with_input_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_with_output_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -16069,7 +16069,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_with_output_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_with_qmin) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -16085,7 +16085,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_with_qmin) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_with_qmax) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -16101,7 +16101,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_with_qmax) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_without_bias) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -16117,7 +16117,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_3x3s2_without_bias) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, weights_cache_batched_grouped_3x3s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -16179,7 +16179,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_3x3s2_setup_changing_width) {
 /**************************** SUBCONV2D/GEMM path ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -16191,7 +16191,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, Kx2sKx2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_height = 3; kernel_height <= 5; kernel_height++) {
     DeconvolutionOperatorTester()
@@ -16205,7 +16205,7 @@ TEST(DECONVOLUTION_NHWC_F32, Kx2sKx2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_2xKs2xK) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_width = 3; kernel_width <= 5; kernel_width++) {
     DeconvolutionOperatorTester()
@@ -16219,7 +16219,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_2xKs2xK) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_height_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -16232,7 +16232,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_height_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_width_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -16245,7 +16245,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_width_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_varying_input_height) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -16259,7 +16259,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_varying_input_height) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_varying_input_width) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -16273,7 +16273,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_varying_input_width) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_varying_input_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -16287,7 +16287,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_varying_input_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_varying_output_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t output_channels = 1; output_channels <= gemm_config->nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
@@ -16301,7 +16301,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_varying_output_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_with_input_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -16314,7 +16314,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_with_input_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_with_output_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -16327,7 +16327,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_with_output_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_with_qmin) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -16340,7 +16340,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_with_qmin) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_with_qmax) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -16353,7 +16353,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_with_qmax) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_without_bias) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -16366,7 +16366,7 @@ TEST(DECONVOLUTION_NHWC_F32, kernel_2x2s2_without_bias) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, weights_cache_2x2s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -16381,7 +16381,7 @@ TEST(DECONVOLUTION_NHWC_F32, weights_cache_2x2s2) {
 /**************************** SUBCONV2D/GEMM path, grouped ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -16394,7 +16394,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_Kx2sKx2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_height = 3; kernel_height <= 5; kernel_height++) {
     DeconvolutionOperatorTester()
@@ -16409,7 +16409,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_Kx2sKx2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_2xKs2xK) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_width = 3; kernel_width <= 5; kernel_width++) {
     DeconvolutionOperatorTester()
@@ -16424,7 +16424,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_2xKs2xK) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_height_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -16438,7 +16438,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_height_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_width_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -16452,7 +16452,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_width_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_varying_input_height) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -16467,7 +16467,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_varying_input_height) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_varying_input_width) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -16482,7 +16482,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_varying_input_width) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_varying_input_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_channels = 14; input_channels <= 20; input_channels++) {
     DeconvolutionOperatorTester()
@@ -16497,7 +16497,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_varying_input_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_varying_output_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t output_channels = 1; output_channels <= gemm_config->nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
@@ -16512,7 +16512,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_varying_output_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_with_input_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -16526,7 +16526,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_with_input_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_with_output_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -16540,7 +16540,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_with_output_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_with_qmin) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -16554,7 +16554,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_with_qmin) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_with_qmax) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -16568,7 +16568,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_with_qmax) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_without_bias) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -16582,7 +16582,7 @@ TEST(DECONVOLUTION_NHWC_F32, grouped_2x2s2_without_bias) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, weights_cache_grouped_2x2s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .input_size(kStridedInputHeight, kStridedInputWidth)
@@ -16598,7 +16598,7 @@ TEST(DECONVOLUTION_NHWC_F32, weights_cache_grouped_2x2s2) {
 /**************************** SUBCONV2D/GEMM path, batched ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -16611,7 +16611,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_Kx2sKx2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_height = 3; kernel_height <= 5; kernel_height++) {
     DeconvolutionOperatorTester()
@@ -16626,7 +16626,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_Kx2sKx2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_2xKs2xK) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_width = 3; kernel_width <= 5; kernel_width++) {
     DeconvolutionOperatorTester()
@@ -16641,7 +16641,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_2xKs2xK) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_height_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -16655,7 +16655,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_height_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_width_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -16669,7 +16669,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_width_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_varying_input_height) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -16684,7 +16684,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_varying_input_height) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_varying_input_width) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -16699,7 +16699,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_varying_input_width) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_varying_input_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_channels = 1; input_channels <= 16; input_channels *= 4) {
     DeconvolutionOperatorTester()
@@ -16714,7 +16714,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_varying_input_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_varying_output_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t output_channels = 1; output_channels <= gemm_config->nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
@@ -16729,7 +16729,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_varying_output_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_with_input_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -16743,7 +16743,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_with_input_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_with_output_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -16757,7 +16757,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_with_output_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_with_qmin) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -16771,7 +16771,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_with_qmin) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_with_qmax) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -16785,7 +16785,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_with_qmax) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_without_bias) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -16799,7 +16799,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_2x2s2_without_bias) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, weights_cache_batched_2x2s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -16815,7 +16815,7 @@ TEST(DECONVOLUTION_NHWC_F32, weights_cache_batched_2x2s2) {
 /**************************** SUBCONV2D/GEMM path, grouped, batched ****************************/
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -16829,7 +16829,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_Kx2sKx2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_height = 3; kernel_height <= 5; kernel_height++) {
     DeconvolutionOperatorTester()
@@ -16845,7 +16845,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_Kx2sKx2) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2xKs2xK) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t kernel_width = 3; kernel_width <= 5; kernel_width++) {
     DeconvolutionOperatorTester()
@@ -16861,7 +16861,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2xKs2xK) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_height_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -16876,7 +16876,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_height_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_width_adjustment) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -16891,7 +16891,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_width_adjustment) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_varying_input_height) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_height = kStridedInputHeight - 2; input_height <= kStridedInputHeight + 2; input_height++) {
     DeconvolutionOperatorTester()
@@ -16907,7 +16907,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_varying_input_height) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_varying_input_width) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_width = kStridedInputWidth - 2; input_width <= kStridedInputWidth + 2; input_width++) {
     DeconvolutionOperatorTester()
@@ -16923,7 +16923,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_varying_input_width) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_varying_input_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t input_channels = 14; input_channels <= 20; input_channels++) {
     DeconvolutionOperatorTester()
@@ -16939,7 +16939,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_varying_input_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_varying_output_channels) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   for (size_t output_channels = 1; output_channels <= gemm_config->nr * 2; output_channels *= 2) {
     DeconvolutionOperatorTester()
@@ -16955,7 +16955,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_varying_output_channels) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_with_input_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -16970,7 +16970,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_with_input_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_with_output_stride) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -16985,7 +16985,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_with_output_stride) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_with_qmin) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -17000,7 +17000,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_with_qmin) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_with_qmax) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
@@ -17015,7 +17015,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_with_qmax) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_without_bias) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .has_bias(false)
@@ -17030,7 +17030,7 @@ TEST(DECONVOLUTION_NHWC_F32, batched_grouped_2x2s2_without_bias) {
 }
 
 TEST(DECONVOLUTION_NHWC_F32, weights_cache_batched_grouped_2x2s2) {
-  const struct xnn_gemm_config* gemm_config = xnn_init_f32_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_f32_igemm_config();
   ASSERT_NE(gemm_config, nullptr);
   DeconvolutionOperatorTester()
     .batch_size(2)
