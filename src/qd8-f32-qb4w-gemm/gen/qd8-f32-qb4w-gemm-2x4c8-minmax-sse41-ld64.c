@@ -62,7 +62,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_2x4c8__sse41_ld64(
   XNN_FORCE_REALIZATION(vmask);
 
   do {
-    const __m128 vksum = _mm_load_ps((const float*) w);
+    const __m128 vksum = _mm_loadu_ps((const float*) w);
     const __m128i vinput_zero_point01 = _mm_loadu_si128((const __m128i*) &quantization_params[0]);
     const __m128i vinput_zero_point0 = _mm_shuffle_epi32(vinput_zero_point01, _MM_SHUFFLE(0, 0, 0, 0));
     const __m128i vinput_zero_point1 = _mm_shuffle_epi32(vinput_zero_point01, _MM_SHUFFLE(2, 2, 2, 2));

@@ -198,7 +198,7 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
           __m128i vacc${M}x2 = _mm_unpacklo_epi64(vksum23${M}, vzero);
           __m128i vacc${M}x3 = _mm_unpackhi_epi64(vksum23${M}, vzero);
     $elif DATATYPE == "QB4":
-      const __m128 vksum = _mm_load_ps((const float*) w);
+      const __m128 vksum = _mm_loadu_ps((const float*) w);
       $if AVX:
         $for M in range(MR):
           const __m128i vinput_zero_point${M} = _mm_castps_si128(_mm_broadcast_ss((const float*) &quantization_params[${M}].zero_point));
@@ -404,11 +404,6 @@ void xnn_${DATATYPE_SPEC}_gemm${GEMM_SUFFIX}_minmax${REQUANTIZATION_SPEC}_ukerne
               $# SSE 2 only
               $else:
                 ${_}const __m128i vxb${N} = _mm_srai_epi16(_mm_unpacklo_epi8(vb${N}, vb${N}), 8);
-          $elif VARIANT == "EXTENDED":
-            $if N == 0:
-              ${_}const __m128i vxb${N} = _mm_load_si128((const __m128i*) w);
-            $else:
-              ${_}const __m128i vxb${N} = _mm_load_si128((const __m128i*) ((const int16_t*) w + ${N * 8}));
 
           $for M in range(MR):
             ${_}vacc${M}x${N} = _mm_add_epi32(vacc${M}x${N}, _mm_madd_epi16(vxa${M}, vxb${N}));
