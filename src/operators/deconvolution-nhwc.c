@@ -1275,7 +1275,17 @@ static enum xnn_status reshape_conv_path(
     deconvolution_op->last_input_height = input_height;
     deconvolution_op->last_input_width = input_width;
 
-    xnn_indirection_init_deconv2d(deconvolution_op, mr, log2_input_element_size);
+    xnn_indirection_init_deconv2d(
+      mr, deconvolution_op->indirection_buffer, deconvolution_op->input,
+      deconvolution_op->input_pixel_stride << log2_input_element_size,
+      deconvolution_op->zero_buffer, deconvolution_op->input_height,
+      deconvolution_op->input_width, deconvolution_op->output_height,
+      deconvolution_op->output_width, deconvolution_op->kernel_height,
+      deconvolution_op->kernel_width, deconvolution_op->stride_height,
+      deconvolution_op->stride_width, deconvolution_op->dilation_height,
+      deconvolution_op->dilation_width, deconvolution_op->padding_top,
+      deconvolution_op->padding_left
+    );
   }
 
   const size_t group_input_channels = deconvolution_op->group_input_channels;
