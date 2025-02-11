@@ -810,6 +810,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
       .kr = kr,
       .sr = sr,
       .ukernel = gemm_ukernel,
+      .kc = k,
   };
 
   if (packed_lhs) {

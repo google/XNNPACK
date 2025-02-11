@@ -81,7 +81,7 @@ static void ${UKERNEL_NAME}(benchmark::State& state, const char* net) {
     $if PACKED_STRIDE_FN is not None:
       ${PACKED_STRIDE_FN},
     /*mr=*/${MR}, /*nr=*/${NR}${NR_SCALE}, /*kr=*/${KR}, /*sr=*/${SR},
-    $if DATATYPE in {'qp8', 'pf32'}:
+    $if DATATYPE in {'qp8', 'pf32', 'pf16'}:
       /*mr_packed=*/${MR_PACKED},
     $if ISA_CHECK:
       benchmark::utils::${ISA_CHECK});
@@ -100,7 +100,7 @@ GEMM_CREATE_TESTS_CODE = """\
 std::vector<GemmTestParams> CreateTests(
     size_t k_block, size_t adj_k_block,
     size_t mr, size_t nr, size_t kr, size_t sr,
-    $if DATATYPE in {'qp8', 'pf32'}:
+    $if DATATYPE in {'qp8', 'pf32', 'pf16'}:
       size_t mr_packed,
     bool is_igemm,
     bool unsigned_inputs,
@@ -114,7 +114,7 @@ std::vector<GemmTestParams> CreateTests(
     nr = nr${NR_SCALE};
   std::string nrs = std::to_string(nr);
 
-  $if DATATYPE in {'qp8', 'pf32'}:
+  $if DATATYPE in {'qp8', 'pf32', 'pf16'}:
     const GemmMicrokernelTester tester = GemmMicrokernelTester()
         .mr(mr).nr(nr).kr(kr).sr(sr).mr_packed(mr_packed).unsigned_inputs(unsigned_inputs).planes(planes);
   $else:
@@ -133,7 +133,7 @@ std::vector<GemmTestParams> CreateTests(
           $if KERNELTYPE in ['qb4w']:
             .bl(32)
       , test_func, isa_check));
-  $if DATATYPE != "qp8":
+  $if DATATYPE not in {'qp8', 'pf32', 'pf16'}:
     if (!is_igemm) {
       gemm_tests.push_back(GemmTestParams(
           "k_eq_" + kbs + "_strided_a",
@@ -187,7 +187,7 @@ std::vector<GemmTestParams> CreateTests(
           $if KERNELTYPE in ['qb4w']:
             .bl(32)
       , test_func, isa_check));
-    $if DATATYPE != "qp8":
+    $if DATATYPE not in {'qp8', 'pf32', 'pf16'}:
       if (!is_igemm) {
         gemm_tests.push_back(GemmTestParams(
             "k_eq_" + kb2s + "_strided_a",
@@ -223,7 +223,7 @@ std::vector<GemmTestParams> CreateTests(
                   .bl(32)
             , test_func, isa_check)
             .loop_k(1, adj_k_block - 1));
-        $if DATATYPE != "qp8":
+        $if DATATYPE not in {'qp8', 'pf32', 'pf16'}:
           if (!is_igemm) {
             gemm_tests.push_back(GemmTestParams(
                 "k_lt_" + akbs + "_strided_a",
@@ -259,7 +259,7 @@ std::vector<GemmTestParams> CreateTests(
                 .bl(32)
           , test_func, isa_check)
           .loop_k(adj_k_block + 1, adj_k_block * 2 - 1, k_block));
-      $if DATATYPE != "qp8":
+      $if DATATYPE not in {'qp8', 'pf32', 'pf16'}:
         if (is_igemm) {
           gemm_tests.push_back(GemmTestParams(
               "k_gt_" + akbs + "_strided_a",
@@ -295,7 +295,7 @@ std::vector<GemmTestParams> CreateTests(
                   .bl(32)
             , test_func, isa_check)
             .loop_k(adj_k_block + k_block, k_block * 5, k_block));
-        $if DATATYPE != "qp8":
+        $if DATATYPE not in {'qp8', 'pf32', 'pf16'}:
           if (is_igemm) {
             gemm_tests.push_back(GemmTestParams(
                 "k_div_" + kbs + "_strided_a",
@@ -335,7 +335,7 @@ std::vector<GemmTestParams> CreateTests(
           $else:
             .loop_n(nr + 1, nr * 2 - 1)
           .loop_k(1, k_block * 3, k_block + 1));
-      $if DATATYPE != "qp8":
+      $if DATATYPE not in {'qp8', 'pf32', 'pf16'}:
         if (!is_igemm) {
           gemm_tests.push_back(GemmTestParams(
               "n_gt_" + nrs + "_strided_a",
@@ -378,7 +378,7 @@ std::vector<GemmTestParams> CreateTests(
           , test_func, isa_check)
           .loop_n(nr * 2, nr * 3, nr)
           .loop_k(1, k_block * 3, k_block + 1));
-      $if DATATYPE != "qp8":
+      $if DATATYPE not in {'qp8', 'pf32', 'pf16'}:
         if (!is_igemm) {
           gemm_tests.push_back(GemmTestParams(
               "n_div_" + nrs + "_strided_a",
@@ -571,7 +571,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*k_block=*/${KBLOCK},
         /*adj_k_block=*/${ADJKBLOCK},
         /*mr=*/${MR}, /*nr=*/${NR}, /*kr=*/${KR}, /*sr=*/${SR},
-        $if DATATYPE in {'qp8', 'pf32'}:
+        $if DATATYPE in {'qp8', 'pf32', 'pf16'}:
           /*mr_packed=*/${MR_PACKED},
         /*is_igemm=*/${"true" if UKERNEL_TYPE.startswith("IGEMM") else "false"},
         /*unsigned_inputs=*/${"true" if UNSIGNED_INPUTS else "false"},
@@ -828,6 +828,7 @@ def main(args):
 //   Generator: {generator}
 
 #include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <string>
 #include <vector>

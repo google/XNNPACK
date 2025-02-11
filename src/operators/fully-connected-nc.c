@@ -2312,7 +2312,8 @@ static enum xnn_status reshape_fully_connected_nc(
   fully_connected_op->context.gemm.gemm.gemm = (struct gemm_context){
       .k_scaled = input_channels << log2_input_element_size,
       .w_stride = fully_connected_op->weights_stride,
-      .a_stride = fully_connected_op->input_pixel_stride  << log2_input_element_size,
+      .a_stride = fully_connected_op->input_pixel_stride
+                  << log2_input_element_size,
       .packed_w = packed_weights(fully_connected_op),
       .cm_stride = fully_connected_op->output_pixel_stride
                    << log2_output_element_size,
@@ -2322,6 +2323,7 @@ static enum xnn_status reshape_fully_connected_nc(
       .mr = mr,
       .kr = fully_connected_op->ukernel.gemm.kr,
       .sr = fully_connected_op->ukernel.gemm.sr,
+      .kc = input_channels,
   };
 
   if (packed_lhs) {

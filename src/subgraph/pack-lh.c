@@ -74,13 +74,19 @@ static enum xnn_status reshape_pack_lh_operator(
   const size_t num_input_dims = input_value->shape.num_dims;
   const size_t channels =
       num_input_dims < 1 ? 1 : input_value->shape.dim[num_input_dims - 1];
-  const size_t batch_size =
+  size_t batch_size =
       num_input_dims < 2 ? 1 : input_value->shape.dim[num_input_dims - 2];
-  const size_t num_groups =
+  size_t num_groups =
       xnn_shape_multiply_leading_dims(&input_value->shape, num_input_dims - 2);
   const size_t old_workspace_size = opdata->workspace_size;
   enum xnn_status status = xnn_status_invalid_state;
   size_t output_size_bytes = 0;
+
+  // Squash the group dimension into the batch size if requested.
+  if (output_value->flags & XNN_FLAG_SQUASH_GROUPS) {
+    batch_size *= num_groups;
+    num_groups = 1;
+  }
 
   switch (opdata->operator_objects[0]->type) {
     case xnn_operator_type_pack_lh_x8:

@@ -557,9 +557,8 @@ void xnn_compute_hmp_grouped_qp8gemm(
 
   while (mr_block_size > 0) {
     const size_t mr_step = min(mr_block_size, context->mr);
-    const size_t a_offset =
-        context->packed_lh_offset_fn(mr_block_start, context->k_scaled,
-                                     context->mr, context->kr, context->sr);
+    const size_t a_offset = context->packed_lh_offset_fn(
+        mr_block_start, context->kc, context->mr, context->kr, context->sr);
 
     context->qp8_ukernel.function[uarch_index](
         mr_step, nr_block_size, context->k_scaled,
@@ -595,9 +594,9 @@ XNN_INLINE void xnn_compute_hmp_qp8gemm(
 
   while (mr_block_size > 0) {
     const size_t mr_step = min(mr_block_size, context->mr);
-    const size_t a_offset =
-        context->packed_lh_offset_fn(mr_block_start, context->k_scaled,
-                                     context->mr, context->kr, context->sr);
+    const size_t a_offset = context->packed_lh_offset_fn(
+        mr_block_start, context->kc, context->mr, context->kr, context->sr);
+
     context->qp8_ukernel.function[uarch_index](
         mr_step, nr_block_size, context->k_scaled,
         (const void*)((uintptr_t)context->a + a_offset),

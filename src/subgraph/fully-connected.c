@@ -1682,6 +1682,9 @@ enum xnn_status xnn_define_fully_connected(xnn_subgraph_t subgraph,
           return status;
         }
         input_id = new_id;
+        // To prevent issues with packing, coerce the shape of the inputs from
+        // `[B, M, K]` to `[B * M, K]` for the fully-connected op.
+        subgraph->values[new_id].flags |= XNN_FLAG_SQUASH_GROUPS;
       }
     }
   }

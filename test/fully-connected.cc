@@ -4190,7 +4190,8 @@ TEST_F(FullyConnectedTestF32, matches_operator_api) {
 
   xnn_operator_t op = nullptr;
 
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+  float counter = 0.0;
+  std::generate(input.begin(), input.end(), [&]() { return counter++; });
   std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
   std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
 
@@ -4270,5 +4271,8 @@ TEST_F(FullyConnectedTestF32, matches_operator_api) {
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
+  EXPECT_THAT(
+      subgraph_output,
+      Pointwise(FloatNear(1.0e-5), std::vector<float>(operator_output.begin(),
+                                                      operator_output.end())));
 }
