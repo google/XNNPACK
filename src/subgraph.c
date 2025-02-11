@@ -1027,7 +1027,8 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
     value->fp16_id = XNN_INVALID_VALUE_ID;
     value->fp32_id = XNN_INVALID_VALUE_ID;
     if (value->fp16_compatible) {
-      assert(value->datatype == xnn_datatype_fp32);
+      assert(value->datatype == xnn_datatype_fp32 ||
+             value->datatype == xnn_datatype_pfp32);
       if (xnn_value_is_static(value)) {
         assert(value->producer == XNN_INVALID_NODE_ID);
         const size_t fp16_size = xnn_tensor_get_size_by_id(subgraph, n) / 2 + XNN_EXTRA_BYTES;
@@ -1045,7 +1046,16 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
           // Recompute value due to potential reallocation in xnn_subgraph_new_internal_value
           value = &subgraph->values[n];
           xnn_value_copy(fp16_value, value);
-          fp16_value->datatype = xnn_datatype_fp16;
+          switch (value->datatype) {
+            case xnn_datatype_fp32:
+              fp16_value->datatype = xnn_datatype_fp16;
+              break;
+            case xnn_datatype_pfp32:
+              fp16_value->datatype = xnn_datatype_pfp16;
+              break;
+            default:
+              XNN_UNREACHABLE;
+          }
           // Clear external input/output flags
           fp16_value->flags = 0;
           fp16_value->fp16_id = XNN_INVALID_VALUE_ID;
@@ -1107,8 +1117,8 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
   for (uint32_t n = 0; n < num_original_values; n++) {
     struct xnn_value* value = &subgraph->values[n];
     if (value->fp16_compatible) {
-      assert(value->datatype == xnn_datatype_fp32);
       if (xnn_value_is_static(value)) {
+        assert(value->datatype == xnn_datatype_fp32);
         const size_t num_elements = xnn_shape_multiply_all_dims(&value->shape);
         xnn_run_unary_elementwise_nc(
             xnn_unary_convert, xnn_datatype_fp32, xnn_datatype_fp16,
@@ -1122,6 +1132,7 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         value->datatype = xnn_datatype_fp16;
         xnn_log_debug("FP16 rewrite: converted static FP32 tensor #%" PRIu32 " to FP16 in new buffer", n);
       } else if (xnn_value_is_external(value)) {
+        assert(value->datatype == xnn_datatype_fp32);
         assert(value->fp16_id != XNN_INVALID_VALUE_ID);
         struct xnn_value* fp16_value = &subgraph->values[value->fp16_id];
         value->producer = XNN_INVALID_NODE_ID;
@@ -1130,7 +1141,16 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         xnn_log_debug("FP16 rewrite: created FP16 tensor #%" PRIu32 " for FP32 tensor #%" PRIu32, fp16_value->id, n);
       } else {
         xnn_log_debug("FP16 rewrite: converted FP32 tensor #%" PRIu32 " to FP16", n);
-        value->datatype = xnn_datatype_fp16;
+        switch (value->datatype) {
+          case xnn_datatype_fp32:
+            value->datatype = xnn_datatype_fp16;
+            break;
+          case xnn_datatype_pfp32:
+            value->datatype = xnn_datatype_pfp16;
+            break;
+          default:
+            XNN_UNREACHABLE;
+        }
       }
     }
   }

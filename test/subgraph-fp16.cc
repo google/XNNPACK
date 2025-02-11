@@ -734,7 +734,28 @@ TEST(SUBGRAPH_FP16, fully_connected_weights_used_by_another_node) {
   // We should have 6 nodes, the original fully connected and subtraction
   // node, a convert for the two external inputs, and a convert for the two
   // external outputs.
-  ASSERT_EQ(tester.NumNodes(), 6);
+  switch (tester.NumNodes()) {
+    case 6:
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_fully_connected);
+      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(3)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(4)->type, xnn_node_type_binary_elementwise);
+      ASSERT_EQ(tester.Node(3)->type, xnn_node_type_convert);
+      break;
+    case 7:
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_pack_lh);
+      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_fully_connected);
+      ASSERT_EQ(tester.Node(3)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(4)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(5)->type, xnn_node_type_binary_elementwise);
+      ASSERT_EQ(tester.Node(6)->type, xnn_node_type_convert);
+      break;
+    default:
+      GTEST_FAIL() << "Expected either 6 or 7 nodes, but got "
+                   << tester.NumNodes() << ".";
+  }
 
   // The static value should be converted to FP16
   const xnn_value* static_value = tester.Value(filter_id);
@@ -806,7 +827,28 @@ TEST(SUBGRAPH_FP16, fully_connected_bias_used_by_another_node) {
   // We should have 6 nodes, the original fully connected and subtraction
   // node, a convert for the two external inputs, and a convert for the two
   // external outputs.
-  ASSERT_EQ(tester.NumNodes(), 6);
+  switch (tester.NumNodes()) {
+    case 6:
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_fully_connected);
+      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(3)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(4)->type, xnn_node_type_binary_elementwise);
+      ASSERT_EQ(tester.Node(3)->type, xnn_node_type_convert);
+      break;
+    case 7:
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_pack_lh);
+      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_fully_connected);
+      ASSERT_EQ(tester.Node(3)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(4)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(5)->type, xnn_node_type_binary_elementwise);
+      ASSERT_EQ(tester.Node(6)->type, xnn_node_type_convert);
+      break;
+    default:
+      GTEST_FAIL() << "Expected either 6 or 7 nodes, but got "
+                   << tester.NumNodes() << ".";
+  }
 
   // The static value should be converted to FP16
   const xnn_value* static_value = tester.Value(bias_id);

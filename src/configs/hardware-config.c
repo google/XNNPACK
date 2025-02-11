@@ -434,9 +434,9 @@ static void init_hardware_config(void) {
 
 #if XNN_MAX_UARCH_TYPES > 1
     // Print what we think we know about the microarchs.
-    xnn_log_info("cpuinfo_get_uarchs_count: %u.\n", cpuinfo_get_uarchs_count());
+    xnn_log_info("cpuinfo_get_uarchs_count: %u.", cpuinfo_get_uarchs_count());
     for (int i = 0; i < cpuinfo_get_uarchs_count(); i++) {
-      xnn_log_info("cpu_get_uarch(%i): 0x%x\n", i, cpuinfo_get_uarch(i)->uarch);
+      xnn_log_info("cpu_get_uarch(%i): 0x%x", i, cpuinfo_get_uarch(i)->uarch);
     }
 #endif  // XNN_MAX_UARCH_TYPES > 1
 #else

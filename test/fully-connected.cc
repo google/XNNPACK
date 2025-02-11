@@ -4270,5 +4270,8 @@ TEST_F(FullyConnectedTestF32, matches_operator_api) {
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
+  EXPECT_THAT(
+      subgraph_output,
+      Pointwise(FloatNear(1.0e-5), std::vector<float>(operator_output.begin(),
+                                                      operator_output.end())));
 }

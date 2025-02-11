@@ -475,6 +475,7 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
       .mr = mr,
       .kr = kr,
       .sr = sr,
+      .kc = input_channels,
   };
 
   if (use_gemm_nr2) {

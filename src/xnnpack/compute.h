@@ -347,6 +347,8 @@ struct gemm_context {
   size_t kr;
   // The `sr` size of the current GEMM microkernel.
   size_t sr;
+  // The inner dimension of the matrix product.
+  size_t kc;
   // GEMM microkernels.
   union {
     struct xnn_hmp_gemm_ukernel ukernel;
