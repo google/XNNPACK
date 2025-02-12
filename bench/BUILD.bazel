@@ -627,7 +627,7 @@ xnnpack_benchmark(
     srcs = ["convolution.cc"],
     copts = xnnpack_optional_tflite_copts(),
     tags = xnnpack_slow_benchmark_tags() + ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps() + ["@pthreadpool"],
 )
 
 xnnpack_benchmark(
@@ -635,7 +635,7 @@ xnnpack_benchmark(
     srcs = ["deconvolution.cc"],
     copts = xnnpack_optional_tflite_copts(),
     tags = xnnpack_slow_benchmark_tags() + ["nowin32"],
-    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps() + ["@pthreadpool"],
 )
 
 xnnpack_benchmark(
