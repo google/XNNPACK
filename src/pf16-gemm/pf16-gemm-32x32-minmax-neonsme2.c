@@ -21,6 +21,7 @@ size_t xnn_pf16_gemm_minmax_ukernel_32x32__neonsme2_get_mr() {
   assert(
       "Calling KleidiAI kai_get_mr wrapper, but XNNPACK was compiled without "
       "`XNN_ENABLE_KLEIDIAI`." && 0);
+  return 0;
 #endif  // XNN_ENABLE_KLEIDIAI
 }
 
@@ -31,6 +32,7 @@ size_t xnn_pf16_gemm_minmax_ukernel_32x32__neonsme2_get_nr() {
   assert(
       "Calling KleidiAI kai_get_nr wrapper, but XNNPACK was compiled without "
       "`XNN_ENABLE_KLEIDIAI`." && 0);
+  return 0;
 #endif  // XNN_ENABLE_KLEIDIAI
 }
 

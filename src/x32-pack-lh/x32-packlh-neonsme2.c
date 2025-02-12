@@ -51,6 +51,7 @@ size_t xnn_x32_pack_lh_size__neonsme2(size_t m, size_t k, size_t mr_packed,
   }
 #else
   assert("Not compiled with XNN_ENABLE_KLEIDIAI" && 0);
+  return 0;
 #endif  // XNN_ENABLE_KLEIDIAI
 }
 
@@ -65,5 +66,6 @@ size_t xnn_x32_pack_lh_offset__neonsme2(size_t m, size_t k, size_t mr_packed,
   }
 #else
   assert("Not compiled with XNN_ENABLE_KLEIDIAI" && 0);
+  return 0;
 #endif  // XNN_ENABLE_KLEIDIAI
 }
