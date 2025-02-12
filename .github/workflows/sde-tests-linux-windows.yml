@@ -98,13 +98,13 @@ jobs:
         if: matrix.arch == 'linux-x86_64'
         run: |
           chmod +x ./*
-          "${{ env.SDE_PATH }}" -${{ matrix.sde-processor }} -- ctest -C Release --output-on-failure --parallel $(nproc)
+          "${{ env.SDE_PATH }}" -${{ matrix.sde-processor }} -chip_check_exe_only -- ctest -C Release --output-on-failure --parallel $(nproc)
         working-directory: ${{ env.BUILD_PATH }}
         shell: bash
 
       - name: Run SDE tests (Windows-x86 and Windows-x64)
         if: matrix.arch == 'windows-x86' || matrix.arch == 'windows-x64'
         run: |
-          & "$env:SDE_PATH" -${{ matrix.sde-processor }} -- ctest -C Release --output-on-failure --parallel $env:NUMBER_OF_PROCESSORS
+          & "$env:SDE_PATH" -${{ matrix.sde-processor }} -chip_check_exe_only -- ctest -C Release --output-on-failure --parallel $env:NUMBER_OF_PROCESSORS
         working-directory: ${{ env.BUILD_PATH }}
         shell: pwsh
