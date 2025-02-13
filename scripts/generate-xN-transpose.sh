@@ -173,7 +173,5 @@ tools/xngen src/x32-transposec/wasmsimd.c.in -D SIZE=32 IN_PTRS=MULTI OUT_PTRS=M
 
 #################################### HEXAGON HVX ###############################
 tools/xngen src/x32-transposec/hvx.c.in -D SIZE=32 IN_PTRS=MULTI OUT_PTRS=MULTI TILE_HEIGHT=32 -o src/x32-transposec/gen/x32-transposec-32x32-multi-multi-hvx.c &
-tools/xngen src/x32-transposec/hvx.c.in -D SIZE=32 IN_PTRS=MULTI OUT_PTRS=SWITCH TILE_HEIGHT=32 -o src/x32-transposec/gen/x32-transposec-32x32-multi-switch-hvx.c &
-tools/xngen src/x32-transposec/hvx.c.in -D SIZE=32 IN_PTRS=MULTI OUT_PTRS=MOV TILE_HEIGHT=32 -o src/x32-transposec/gen/x32-transposec-32x32-multi-mov-hvx.c &
 
 wait
