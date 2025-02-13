@@ -129,6 +129,7 @@ static enum xnn_status create_vmulcaddc_path(
   convolution_op->ukernel.vmulcaddc = (struct xnn_ukernel_vmulcaddc) {
     .function = vmulcaddc_config->ukernel,
     .mr = vmulcaddc_config->row_tile,
+    .channel_tile = vmulcaddc_config->channel_tile,
   };
   return xnn_status_success;
 
@@ -268,6 +269,9 @@ static enum xnn_status create_dwconv_path(
     ukernels = &dwconv_ukernel->linear;
   }
   convolution_op->ukernel.dwconv = (struct xnn_ukernel_dwconv) {
+    .channel_round = dwconv_ukernel->channel_round,
+    .channel_subtile = dwconv_ukernel->channel_subtile,
+    .channel_tile = dwconv_ukernel->channel_tile,
     .primary_tile = primary_tile,
     .middle_tile = dwconv_ukernel->middle_tile,
     .last_tile = dwconv_ukernel->last_tile,

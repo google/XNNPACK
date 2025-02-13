@@ -41,6 +41,9 @@ struct xnn_ukernel_dwconv {
     xnn_dwconv_unipass_ukernel_fn unipass_fn;
     xnn_dwconv_multipass_ukernel_fn multipass_fn;
   };
+  uint8_t channel_round;
+  uint8_t channel_subtile;
+  uint8_t channel_tile;
   uint8_t primary_tile;
   uint8_t middle_tile;
   uint8_t last_tile;
@@ -87,6 +90,7 @@ struct xnn_ukernel_spmm {
 struct xnn_ukernel_vmulcaddc {
   xnn_vmulcaddc_ukernel_fn function;
   uint8_t mr;
+  uint8_t channel_tile;
 };
 
 struct xnn_ukernel_vbinary {
