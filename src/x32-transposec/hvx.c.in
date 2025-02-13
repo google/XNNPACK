@@ -10,7 +10,7 @@ $assert TILE_HEIGHT in [2, 4, 8, 16, 32]
 $TILE_WIDTH = int(1024/SIZE)
 $NUM_ITERS = int(math.log2(TILE_HEIGHT))
 $SUFFIX = ''
-$TILE_SIZE = TILE_HEIGHT
+$TILE_SIZE = TILE_WIDTH
 $VECTOR_SIZE = int(128)
 $NUM_D_REGISTERS=int(VECTOR_SIZE/64)
 
@@ -47,7 +47,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_HEIGHT}x${TILE_WIDTH}_${IN_PTRS.low
 
   $if IN_PTRS == "MULTI":
     const uint${SIZE}_t* i0 = input;
-    $for N in range(1, TILE_HEIGHT):
+    $for N in range(1, TILE_SIZE):
       const uint${SIZE}_t* i${N} = (const uint${SIZE}_t*) ((uintptr_t) i${N-1} + input_stride);
   $else:
     const uint${SIZE}_t* i0 = input;
@@ -66,7 +66,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_HEIGHT}x${TILE_WIDTH}_${IN_PTRS.low
       if XNN_UNPREDICTABLE(block_width < 2) {
         o1 = o0;
       }
-      $for N in range(2, TILE_HEIGHT, 2):
+      $for N in range(2, TILE_SIZE, 2):
         if XNN_UNPREDICTABLE(block_width <= ${N}) {
           o${N} = o0;
         }
@@ -74,28 +74,28 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_HEIGHT}x${TILE_WIDTH}_${IN_PTRS.low
           o${N+1} = o0;
         }
     $elif OUT_PTRS in ["MOV", "DEC"]:
-      const size_t rem = min(block_width - 1, ${TILE_HEIGHT - 1});
+      const size_t rem = min(block_width - 1, ${TILE_SIZE - 1});
       const size_t oN_stride = rem * output_stride;
       const size_t oN_offset = oN_stride + tile_hbytes;
     $else:
-      const size_t rem = min(block_width - 1, ${TILE_HEIGHT - 1});
+      const size_t rem = min(block_width - 1, ${TILE_SIZE - 1});
       const size_t oN_stride = rem * output_stride;
     size_t bh = block_height;
-    for (; bh >= ${TILE_HEIGHT}; bh -= ${TILE_HEIGHT}) {
-      $for N in range(TILE_HEIGHT):
+    for (; bh >= ${TILE_SIZE}; bh -= ${TILE_SIZE}) {
+      $for N in range(TILE_SIZE):
         $if IN_PTRS == "REUSE":
           const HVX_Vector v${NUM_ITERS}_${N} = *((HVX_UVector *) i0); i0 = (uint${SIZE}_t*) ((uintptr_t) i0 + input_stride);
         $else:
           const HVX_Vector v${NUM_ITERS}_${N} = *((HVX_UVector *) i${N}); i${N} = (uint${SIZE}_t*) ((uintptr_t) i${N} + input_offset);
 
       int rt = -${int(SIZE/8)};
-      $for N in range(TILE_HEIGHT >> 1):
+      $for N in range(TILE_SIZE >> 1):
         const HVX_VectorPair v${NUM_ITERS-1}_${N} = Q6_W_vshuff_VVR(v${NUM_ITERS}_${2*N+1}, v${NUM_ITERS}_${2*N}, rt);
 
       $for M in range(1, NUM_ITERS):
         rt = rt << 1;
         $NUM_ITERS_O = int(math.pow(2, M - 1)) 
-        $for N in range(0, TILE_HEIGHT >> 1, NUM_ITERS_O*2):
+        $for N in range(0, TILE_SIZE >> 1, NUM_ITERS_O*2):
           $for O in range(NUM_ITERS_O):
             $PREV_PAIR = NUM_ITERS-M
             HVX_VectorPair v${PREV_PAIR-1}_${N+O*2} = Q6_W_vshuff_VVR(Q6_V_lo_W(v${PREV_PAIR}_${N+O+NUM_ITERS_O}), Q6_V_lo_W(v${PREV_PAIR}_${N+O}), rt);
@@ -104,7 +104,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_HEIGHT}x${TILE_WIDTH}_${IN_PTRS.low
       $if OUT_PTRS == "SWITCH":
         uint${SIZE}_t *oN = (uint${SIZE}_t*) ((uintptr_t) o + oN_stride);
         switch (rem) {
-          $for N in reversed(range(2, TILE_HEIGHT, 2)):
+          $for N in reversed(range(2, TILE_SIZE, 2)):
             case ${N+1}:
               xnn_storeu_f32(oN, Q6_V_hi_W(v0_${int(N/2)}));
               oN = (uint${SIZE}_t*) ((uintptr_t) oN + minus_output_stride);
@@ -125,7 +125,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_HEIGHT}x${TILE_WIDTH}_${IN_PTRS.low
         }
       $elif OUT_PTRS in ["MOV", "DEC"]:
         o = (uint${SIZE}_t*) ((uintptr_t) o + oN_offset);
-        xnn_storeu_f32(o, Q6_V_hi_W(v0_${(TILE_HEIGHT-1)>>1}));
+        xnn_storeu_f32(o, Q6_V_hi_W(v0_${(TILE_SIZE-1)>>1}));
         $if OUT_PTRS == "MOV":
           uint${SIZE}_t *oN = (uint${SIZE}_t*) ((uintptr_t) o + minus_output_stride);
         $for N in reversed(range(2, TILE_SIZE, 2)):
@@ -155,32 +155,77 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_HEIGHT}x${TILE_WIDTH}_${IN_PTRS.low
         }
         xnn_storeu_f32(o, Q6_V_lo_W(v0_0));
       $else:
-        $for N in reversed(range(0, TILE_HEIGHT, 2)):
+        $for N in reversed(range(0, TILE_SIZE, 2)):
           xnn_storeu_f32(o${N+1}, Q6_V_hi_W(v0_${int(N/2)})); o${N+1} = (uint${SIZE}_t*) ((uintptr_t) o${N+1} + tile_hbytes);
           xnn_storeu_f32(o${N}, Q6_V_lo_W(v0_${int(N/2)})); o${N} = (uint${SIZE}_t*) ((uintptr_t) o${N} + tile_hbytes);
     }
+
     $if OUT_PTRS in ["MOV", "DEC"]:
       o = (uint${SIZE}_t*) ((uintptr_t) o + tile_hbytes);
 
     if (bh != 0){
-      // Let's try scalar implementation here.
-      $if TILE_HEIGHT > 2:
-        const uint${SIZE}_t* i = i0;
-        if (bh & 2) {
-          $for M in reversed(range(TILE_WIDTH)):
-            o${M}[0] = i0[${M}];
-            o${M}[1] = i1[${M}];
-            o${M} += 2;
-          i = i2;
+      // This is a scalar implementation. 
+      // TODO: Add simple heuristic to choose scalar or vector implementation for tail code.
+      uint32_t* i = i0;
+
+      if (bh & 16){
+        for(size_t bw = 0; bw < block_width; bw++){
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw)) = *(i + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 1) = *((uint32_t *)((uintptr_t) i + input_stride) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 2) = *((uint32_t *)((uintptr_t) i + input_stride * 2) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 3) = *((uint32_t *)((uintptr_t) i + input_stride * 3) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 4) = *((uint32_t *)((uintptr_t) i + input_stride * 4) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 5) = *((uint32_t *)((uintptr_t) i + input_stride * 5) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 6) = *((uint32_t *)((uintptr_t) i + input_stride * 6) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 7) = *((uint32_t *)((uintptr_t) i + input_stride * 7) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 8) = *((uint32_t *)((uintptr_t) i + input_stride * 8) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 9) = *((uint32_t *)((uintptr_t) i + input_stride * 9) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 10) = *((uint32_t *)((uintptr_t) i + input_stride * 10) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 11) = *((uint32_t *)((uintptr_t) i + input_stride * 11) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 12) = *((uint32_t *)((uintptr_t) i + input_stride * 12) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 13) = *((uint32_t *)((uintptr_t) i + input_stride * 13) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 14) = *((uint32_t *)((uintptr_t) i + input_stride * 14) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 15) = *((uint32_t *)((uintptr_t) i + input_stride * 15) + bw);
         }
-        if (bh & 1) {
-          $for M in reversed(range(TILE_WIDTH)):
-            o${M}[0] = i[${M}];
+        o0 += 16;
+        i = (uint32_t *)((uintptr_t) i + input_stride * 16);
+      }
+      if (bh & 8){
+        for(size_t bw = 0; bw < block_width; bw++){
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw)) = *(i + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 1) = *((uint32_t *)((uintptr_t) i + input_stride) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 2) = *((uint32_t *)((uintptr_t) i + input_stride * 2) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 3) = *((uint32_t *)((uintptr_t) i + input_stride * 3) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 4) = *((uint32_t *)((uintptr_t) i + input_stride * 4) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 5) = *((uint32_t *)((uintptr_t) i + input_stride * 5) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 6) = *((uint32_t *)((uintptr_t) i + input_stride * 6) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 7) = *((uint32_t *)((uintptr_t) i + input_stride * 7) + bw);
         }
-      $elif TILE_HEIGHT > 1:
-        if (bh & 1) {
-          $for M in reversed(range(TILE_WIDTH)):
-            o${M}[0] = i0[${M}];
+        o0 += 8;
+        i = (uint32_t *)((uintptr_t) i + input_stride * 8);
+      }
+      if (bh & 4){
+        for(size_t bw = 0; bw < block_width; bw++){
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw)) = *(i + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 1) = *((uint32_t *)((uintptr_t) i + input_stride) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 2) = *((uint32_t *)((uintptr_t) i + input_stride * 2) + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 3) = *((uint32_t *)((uintptr_t) i + input_stride * 3) + bw);
+        }
+        o0 += 4;
+        i = (uint32_t *)((uintptr_t) i + input_stride * 4);
+      }
+      if (bh & 2){
+        for(size_t bw = 0; bw < block_width; bw++){         
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw)) = *(i + bw);
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 1) = *((uint32_t *)((uintptr_t) i + input_stride) + bw);
+        }
+        o0 += 2;
+        i = (uint32_t *)((uintptr_t) i + input_stride * 2);
+      }
+      if (bh & 1){
+        for(size_t bw = 0; bw < block_width; bw++){
+          *((uint32_t *)((uintptr_t) o0 + output_stride * bw)) = *(i + bw);
+        }
       }
     }
 
