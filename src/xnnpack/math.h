@@ -504,6 +504,9 @@ XNN_INLINE static uint16_t math_cvt_bf16_fp32(float x) {
     ((defined(__clang__) && (__clang_major__ >= 15)) || \
      (XNN_GNUC_ACTUAL >= 13))
 #define XNN_HAVE_FLOAT16 1
+#elif (XNN_ARCH_ARM || XNN_ARCH_ARM64) && \
+    (defined(__ARM_FP) && (__ARM_FP & 0x02)) && defined(__ARM_FP16_FORMAT_IEEE)
+#define XNN_HAVE_FLOAT16 1
 #endif
 
 #if defined(__riscv) && defined(__riscv_zvfh) && __clang__ >= 1600

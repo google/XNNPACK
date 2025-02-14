@@ -24,6 +24,18 @@ XNN_UKERNEL_WITH_PARAMS(0, xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u4, 4,
 XNN_UKERNEL_WITH_PARAMS(0, xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u8, 8,
                         false, xnn_float16, struct xnn_f16_default_params, NULL)
 
+#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+XNN_UKERNEL_WITH_PARAMS(
+    0, xnn_f16_vgelu_ukernel__neonfp16arith_rational_6_4_div_u8, 8, false,
+    xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(
+    0, xnn_f16_vgelu_ukernel__neonfp16arith_rational_6_4_div_u16, 16, false,
+    xnn_float16, struct xnn_f16_default_params, NULL)
+XNN_UKERNEL_WITH_PARAMS(
+    0, xnn_f16_vgelu_ukernel__neonfp16arith_rational_6_4_div_u32, 32, false,
+    xnn_float16, struct xnn_f16_default_params, NULL)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
+
 #ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS
 #undef XNN_DEFINED_UKERNEL_WITH_PARAMS
 #undef XNN_UKERNEL_WITH_PARAMS

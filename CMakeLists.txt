@@ -1775,6 +1775,7 @@ IF(XNNPACK_BUILD_TESTS)
       f16-vabs
       f16-vclamp
       f16-velu
+      f16-vgelu
       f16-vhswish
       f16-vlrelu
       f16-vneg
