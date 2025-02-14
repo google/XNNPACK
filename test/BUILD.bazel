@@ -199,8 +199,8 @@ xnnpack_cxx_library(
         ":replicable_random_device",
         "//:buffer",
         "//:common",
-        "//:fp16",
         "//:isa_checks",
+        "//:math",
         "//:microkernels_h",
     ],
 ) for arch in xnnpack_simd_f16_archs()]
@@ -262,6 +262,7 @@ xnnpack_cxx_library(
     "f16_vabs",
     "f16_vclamp",
     "f16_velu",
+    "f16_vgelu",
     "f16_vhswish",
     "f16_vlrelu",
     "f16_vneg",

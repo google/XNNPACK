@@ -137,6 +137,7 @@ tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b -
 ### Tests for VUnary micro-kernels
 tools/generate-vunary-test.py --ukernel f16-vclamp --output test/f16-vclamp.cc &
 tools/generate-vunary-test.py --ukernel f16-velu --output test/f16-velu.cc &
+tools/generate-vunary-test.py --ukernel f16-vgelu --output test/f16-vgelu.cc &
 tools/generate-vunary-test.py --ukernel f16-vabs --output test/f16-vabs.cc &
 tools/generate-vunary-test.py --ukernel f16-vneg --output test/f16-vneg.cc &
 tools/generate-vunary-test.py --ukernel f16-vsqr --output test/f16-vsqr.cc &

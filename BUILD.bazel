@@ -89,6 +89,7 @@ MICROKERNEL_DEFS = [
     "src/f16-vbinary/f16-vsubc.h",
     "src/f16-vclamp/f16-vclamp.h",
     "src/f16-velu/f16-velu.h",
+    "src/f16-vgelu/f16-vgelu.h",
     "src/f16-vhswish/f16-vhswish.h",
     "src/f16-vlrelu/f16-vlrelu.h",
     "src/f16-vmulcaddc/f16-vmulcaddc.h",
