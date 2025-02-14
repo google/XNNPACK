@@ -524,7 +524,6 @@ SET(XNNPACK_SRCS
   src/configs/conv-hwc2chw-config.c
   src/configs/dwconv-config.c
   src/configs/dwconv2d-chw-config.c
-  src/configs/experiments-config.c
   src/configs/gemm-config.c
   src/configs/ibilinear-chw-config.c
   src/configs/ibilinear-config.c
@@ -1106,7 +1105,7 @@ IF(XNNPACK_BUILD_LIBRARY)
     TARGET_COMPILE_DEFINITIONS(XNNPACK PRIVATE _WIN32_WINNT=0x0601)
     TARGET_COMPILE_DEFINITIONS(mutex PRIVATE _WIN32_WINNT=0x0601)
   ENDIF()
-  SET_PROPERTY(TARGET XNNPACK PROPERTY PUBLIC_HEADER include/xnnpack.h include/experiments-config.h)
+  SET_PROPERTY(TARGET XNNPACK PROPERTY PUBLIC_HEADER include/xnnpack.h)
 ENDIF()
 
 # ---[ Find libm

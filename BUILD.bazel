@@ -335,13 +335,6 @@ xnnpack_cc_library(
 )
 
 xnnpack_cc_library(
-    name = "experiments_config",
-    srcs = ["src/configs/experiments-config.c"],
-    hdrs = ["include/experiments-config.h"],
-    visibility = xnnpack_visibility(),
-)
-
-xnnpack_cc_library(
     name = "common",
     hdrs = ["src/xnnpack/common.h"],
 )
@@ -413,7 +406,6 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":config_hdrs",
-        ":experiments_config",
         ":hardware_config",
         ":init_once",
         ":logging",
