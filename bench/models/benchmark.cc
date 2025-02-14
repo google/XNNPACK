@@ -232,11 +232,13 @@ static void LayerNormArguments(benchmark::internal::Benchmark* b) {
 }
 
 BENCHMARK(FP32Attention)
+    ->UseRealTime()
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
     ->Apply(AttentionArguments);
 
 BENCHMARK(FP16Attention)
+    ->UseRealTime()
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
     ->Apply(AttentionArguments);
@@ -252,6 +254,7 @@ BENCHMARK(FP16MobileNetV3Large)->Unit(benchmark::kMicrosecond)->UseRealTime();
 BENCHMARK(FP16MobileNetV3Small)->Unit(benchmark::kMicrosecond)->UseRealTime();
 
 BENCHMARK(QD8Attention)
+    ->UseRealTime()
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
     ->Apply(AttentionArguments);
@@ -259,11 +262,13 @@ BENCHMARK(QD8Attention)
 BENCHMARK(QS8MobileNetV2)->Unit(benchmark::kMicrosecond)->UseRealTime();
 
 BENCHMARK(FP32Elementwise)
+    ->UseRealTime()
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
     ->Arg(6)->Arg(10)->Arg(18)->Arg(34);
 
 BENCHMARK(FP32LayerNorm)
+    ->UseRealTime()
     ->Unit(benchmark::kMicrosecond)
     ->UseRealTime()
     ->Apply(LayerNormArguments);
