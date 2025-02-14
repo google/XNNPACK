@@ -1,14 +1,16 @@
+// Auto-generated file. Do not edit!
+//   Template: test/f16-simd.cc.in
+//   Generator: tools/xngen
+//
 // Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$TESTNAME = f"F16Simd{ARCH.upper()}Test"
-$if ARCH_MACRO:
-  // This header needs to go first for the arch test macros.
-  #include "xnnpack/common.h"
+// This header needs to go first for the arch test macros.
+#include "xnnpack/common.h"
 
-  #if ${ARCH_MACRO}
+#if XNN_ARCH_ARM || XNN_ARCH_ARM64
 
 #include <algorithm>
 #include <cmath>
@@ -18,19 +20,17 @@ $if ARCH_MACRO:
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-$if TEST_REQUIRES:
-  #include "xnnpack/isa-checks.h"
+#include "xnnpack/isa-checks.h"
 #include "xnnpack/math.h"
-#include "xnnpack/simd/f16-${ARCH}.h"
+#include "xnnpack/simd/f16-neonfp16arith.h"
 #include "replicable_random_device.h"
 
 namespace xnnpack {
 
-class ${TESTNAME} : public ::testing::Test {
+class F16SimdNEONFP16ARITHTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    $if TEST_REQUIRES:
-      ${TEST_REQUIRES};
+    TEST_REQUIRES_ARM_FP16_ARITH;
     inputs_.resize(3 * xnn_simd_size_f16);
     output_.resize(xnn_simd_size_f16);
     std::uniform_real_distribution<float> f32dist(-10.0f, 10.0f);
@@ -56,7 +56,7 @@ class ${TESTNAME} : public ::testing::Test {
   std::vector<xnn_float16> output_;
 };
 
-TEST_F(${TESTNAME}, ConstF16FromFloat) {
+TEST_F(F16SimdNEONFP16ARITHTest, ConstF16FromFloat) {
   XNN_SIMD_CONST_F16_FROM_FLOAT(vone, 1.125f);
   xnn_storeu_f16(output_.data(), vone);
   for (size_t k = 0; k < xnn_simd_size_f16; k++) {
@@ -64,12 +64,12 @@ TEST_F(${TESTNAME}, ConstF16FromFloat) {
   }
 }
 
-TEST_F(${TESTNAME}, SetZero) {
+TEST_F(F16SimdNEONFP16ARITHTest, SetZero) {
   xnn_storeu_f16(output_.data(), xnn_zero_f16());
   EXPECT_THAT(ToFloat32(output_), testing::Each(testing::Eq(0.0f)));
 }
 
-TEST_F(${TESTNAME}, Add) {
+TEST_F(F16SimdNEONFP16ARITHTest, Add) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t b = xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
   const xnn_simd_f16_t res = xnn_add_f16(a, b);
@@ -82,7 +82,7 @@ TEST_F(${TESTNAME}, Add) {
   }
 }
 
-TEST_F(${TESTNAME}, Mul) {
+TEST_F(F16SimdNEONFP16ARITHTest, Mul) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t b = xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
   const xnn_simd_f16_t res = xnn_mul_f16(a, b);
@@ -95,7 +95,7 @@ TEST_F(${TESTNAME}, Mul) {
   }
 }
 
-TEST_F(${TESTNAME}, Fmadd) {
+TEST_F(F16SimdNEONFP16ARITHTest, Fmadd) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t b = xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
   const xnn_simd_f16_t c =
@@ -119,7 +119,7 @@ TEST_F(${TESTNAME}, Fmadd) {
   }
 }
 
-TEST_F(${TESTNAME}, Fmsub) {
+TEST_F(F16SimdNEONFP16ARITHTest, Fmsub) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t b = xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
   const xnn_simd_f16_t c =
@@ -143,7 +143,7 @@ TEST_F(${TESTNAME}, Fmsub) {
   }
 }
 
-TEST_F(${TESTNAME}, Fnmadd) {
+TEST_F(F16SimdNEONFP16ARITHTest, Fnmadd) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t b = xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
   const xnn_simd_f16_t c =
@@ -167,7 +167,7 @@ TEST_F(${TESTNAME}, Fnmadd) {
   }
 }
 
-TEST_F(${TESTNAME}, Sub) {
+TEST_F(F16SimdNEONFP16ARITHTest, Sub) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t b = xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
   const xnn_simd_f16_t res = xnn_sub_f16(a, b);
@@ -180,7 +180,7 @@ TEST_F(${TESTNAME}, Sub) {
   }
 }
 
-TEST_F(${TESTNAME}, Div) {
+TEST_F(F16SimdNEONFP16ARITHTest, Div) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t b = xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
   const xnn_simd_f16_t res = xnn_div_f16(a, b);
@@ -194,7 +194,7 @@ TEST_F(${TESTNAME}, Div) {
   }
 }
 
-TEST_F(${TESTNAME}, Max) {
+TEST_F(F16SimdNEONFP16ARITHTest, Max) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t b = xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
   const xnn_simd_f16_t res = xnn_max_f16(a, b);
@@ -207,7 +207,7 @@ TEST_F(${TESTNAME}, Max) {
   }
 }
 
-TEST_F(${TESTNAME}, Min) {
+TEST_F(F16SimdNEONFP16ARITHTest, Min) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t b = xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
   const xnn_simd_f16_t res = xnn_min_f16(a, b);
@@ -220,7 +220,7 @@ TEST_F(${TESTNAME}, Min) {
   }
 }
 
-TEST_F(${TESTNAME}, Abs) {
+TEST_F(F16SimdNEONFP16ARITHTest, Abs) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t res = xnn_abs_f16(a);
   xnn_storeu_f16(output_.data(), res);
@@ -231,7 +231,7 @@ TEST_F(${TESTNAME}, Abs) {
   }
 }
 
-TEST_F(${TESTNAME}, Neg) {
+TEST_F(F16SimdNEONFP16ARITHTest, Neg) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t res = xnn_neg_f16(a);
   xnn_storeu_f16(output_.data(), res);
@@ -242,7 +242,7 @@ TEST_F(${TESTNAME}, Neg) {
   }
 }
 
-TEST_F(${TESTNAME}, And) {
+TEST_F(F16SimdNEONFP16ARITHTest, And) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t b = xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
   const xnn_simd_f16_t res = xnn_and_f16(a, b);
@@ -254,7 +254,7 @@ TEST_F(${TESTNAME}, And) {
   }
 }
 
-TEST_F(${TESTNAME}, Or) {
+TEST_F(F16SimdNEONFP16ARITHTest, Or) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t b = xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
   const xnn_simd_f16_t res = xnn_or_f16(a, b);
@@ -266,7 +266,7 @@ TEST_F(${TESTNAME}, Or) {
   }
 }
 
-TEST_F(${TESTNAME}, Xor) {
+TEST_F(F16SimdNEONFP16ARITHTest, Xor) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t b = xnn_loadu_f16(inputs_.data() + xnn_simd_size_f16);
   const xnn_simd_f16_t res = xnn_xor_f16(a, b);
@@ -280,37 +280,259 @@ TEST_F(${TESTNAME}, Xor) {
   }
 }
 
-TEST_F(${TESTNAME}, ShiftLeft) {
+TEST_F(F16SimdNEONFP16ARITHTest, ShiftLeft) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   // Not using a loop since the `bits` parameter needs to be a compile-time
   // constant, e.g. for `neon`.
-  $for BITS in range(1, 16):
-    {
-      const xnn_simd_f16_t res = xnn_sll_f16(a, ${BITS});
-      xnn_storeu_f16(output_.data(), res);
-      for (size_t k = 0; k < xnn_simd_size_f16; k++) {
-        ASSERT_EQ(xnn_float16_to_bits(output_[k]),
-                  (xnn_float16_to_bits(inputs_[k]) << ${BITS}) & 0xFFFF);
-      }
+  {
+    const xnn_simd_f16_t res = xnn_sll_f16(a, 1);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                (xnn_float16_to_bits(inputs_[k]) << 1) & 0xFFFF);
     }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_sll_f16(a, 2);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                (xnn_float16_to_bits(inputs_[k]) << 2) & 0xFFFF);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_sll_f16(a, 3);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                (xnn_float16_to_bits(inputs_[k]) << 3) & 0xFFFF);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_sll_f16(a, 4);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                (xnn_float16_to_bits(inputs_[k]) << 4) & 0xFFFF);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_sll_f16(a, 5);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                (xnn_float16_to_bits(inputs_[k]) << 5) & 0xFFFF);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_sll_f16(a, 6);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                (xnn_float16_to_bits(inputs_[k]) << 6) & 0xFFFF);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_sll_f16(a, 7);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                (xnn_float16_to_bits(inputs_[k]) << 7) & 0xFFFF);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_sll_f16(a, 8);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                (xnn_float16_to_bits(inputs_[k]) << 8) & 0xFFFF);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_sll_f16(a, 9);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                (xnn_float16_to_bits(inputs_[k]) << 9) & 0xFFFF);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_sll_f16(a, 10);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                (xnn_float16_to_bits(inputs_[k]) << 10) & 0xFFFF);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_sll_f16(a, 11);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                (xnn_float16_to_bits(inputs_[k]) << 11) & 0xFFFF);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_sll_f16(a, 12);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                (xnn_float16_to_bits(inputs_[k]) << 12) & 0xFFFF);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_sll_f16(a, 13);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                (xnn_float16_to_bits(inputs_[k]) << 13) & 0xFFFF);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_sll_f16(a, 14);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                (xnn_float16_to_bits(inputs_[k]) << 14) & 0xFFFF);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_sll_f16(a, 15);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                (xnn_float16_to_bits(inputs_[k]) << 15) & 0xFFFF);
+    }
+  }
 }
 
-TEST_F(${TESTNAME}, ShiftRight) {
+TEST_F(F16SimdNEONFP16ARITHTest, ShiftRight) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   // Not using a loop since the `bits` parameter needs to be a compile-time
   // constant, e.g. for `neon`.
-  $for BITS in range(1, 16):
-    {
-      const xnn_simd_f16_t res = xnn_srl_f16(a, ${BITS});
-      xnn_storeu_f16(output_.data(), res);
-      for (size_t k = 0; k < xnn_simd_size_f16; k++) {
-        ASSERT_EQ(xnn_float16_to_bits(output_[k]),
-                  xnn_float16_to_bits(inputs_[k]) >> ${BITS});
-      }
+  {
+    const xnn_simd_f16_t res = xnn_srl_f16(a, 1);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                xnn_float16_to_bits(inputs_[k]) >> 1);
     }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_srl_f16(a, 2);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                xnn_float16_to_bits(inputs_[k]) >> 2);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_srl_f16(a, 3);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                xnn_float16_to_bits(inputs_[k]) >> 3);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_srl_f16(a, 4);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                xnn_float16_to_bits(inputs_[k]) >> 4);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_srl_f16(a, 5);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                xnn_float16_to_bits(inputs_[k]) >> 5);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_srl_f16(a, 6);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                xnn_float16_to_bits(inputs_[k]) >> 6);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_srl_f16(a, 7);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                xnn_float16_to_bits(inputs_[k]) >> 7);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_srl_f16(a, 8);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                xnn_float16_to_bits(inputs_[k]) >> 8);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_srl_f16(a, 9);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                xnn_float16_to_bits(inputs_[k]) >> 9);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_srl_f16(a, 10);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                xnn_float16_to_bits(inputs_[k]) >> 10);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_srl_f16(a, 11);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                xnn_float16_to_bits(inputs_[k]) >> 11);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_srl_f16(a, 12);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                xnn_float16_to_bits(inputs_[k]) >> 12);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_srl_f16(a, 13);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                xnn_float16_to_bits(inputs_[k]) >> 13);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_srl_f16(a, 14);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                xnn_float16_to_bits(inputs_[k]) >> 14);
+    }
+  }
+  {
+    const xnn_simd_f16_t res = xnn_srl_f16(a, 15);
+    xnn_storeu_f16(output_.data(), res);
+    for (size_t k = 0; k < xnn_simd_size_f16; k++) {
+      ASSERT_EQ(xnn_float16_to_bits(output_[k]),
+                xnn_float16_to_bits(inputs_[k]) >> 15);
+    }
+  }
 }
 
-TEST_F(${TESTNAME}, CmpEq) {
+TEST_F(F16SimdNEONFP16ARITHTest, CmpEq) {
   for (size_t k = 0; k < xnn_simd_size_f16; k++) {
     if (rng_() & 1) {
       inputs_[k + xnn_simd_size_f16] = inputs_[k];
@@ -331,7 +553,7 @@ TEST_F(${TESTNAME}, CmpEq) {
   }
 }
 
-TEST_F(${TESTNAME}, GetExp) {
+TEST_F(F16SimdNEONFP16ARITHTest, GetExp) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   const xnn_simd_f16_t res = xnn_getexp_f16(a);
   xnn_storeu_f16(output_.data(), res);
@@ -342,7 +564,7 @@ TEST_F(${TESTNAME}, GetExp) {
   }
 }
 
-TEST_F(${TESTNAME}, StoreTail) {
+TEST_F(F16SimdNEONFP16ARITHTest, StoreTail) {
   const xnn_simd_f16_t a = xnn_loadu_f16(inputs_.data());
   std::vector<float> inputs_f32 = ToFloat32(inputs_);
   for (size_t num_elements = 1; num_elements < xnn_simd_size_f16;
@@ -360,5 +582,4 @@ TEST_F(${TESTNAME}, StoreTail) {
 
 }  // namespace xnnpack
 
-$if ARCH_MACRO:
-  #endif  // ${ARCH_MACRO}
+#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
