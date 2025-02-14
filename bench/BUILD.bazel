@@ -76,6 +76,10 @@ xnnpack_cxx_library(
     ] + xnnpack_select_if(
         "//:cpuinfo_enabled",
         ["@cpuinfo"],
+    ) + xnnpack_select_if(
+        "//build_config:hexagon",
+        [],
+        [] #["//base"],
     ),
 )
 

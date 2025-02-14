@@ -142,7 +142,9 @@ int ProcessArgs(int& argc, char**& argv) {
       ++i;
     }
   }
+#if !XNN_PLATFORM_QURT
   // InitGoogle(...);
+#endif
   return 0;
 }
 
