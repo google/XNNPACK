@@ -14,53 +14,36 @@
 extern "C" {
 #endif
 
-
-#define DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(fn_name) \
+                    
+#define XNN_UKERNEL_UNIPASS(arch_flags,fn_name, primary_tile, incremental_tile, channel_tile, vector_tile, datatype) \
   XNN_INTERNAL void fn_name(                                     \
       size_t output_pixels,                                      \
       size_t kernel_elements,                                    \
       size_t channels,                                           \
-      const float** input,                                       \
+      const datatype** input,                                    \
       size_t input_offset,                                       \
-      float* output,                                             \
+      datatype* output,                                          \
       uint32_t* index,                                           \
       size_t input_increment,                                    \
       size_t output_increment);
+#include "f32-argmaxpool/f32-argmaxpool-unipass.h"
+#undef XNN_UKERNEL_UNIPASS
 
-DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_4x__neon_c4)
-DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_4x__rvv_u1v)
-DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_4x__scalar_c1)
-DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_4x__sse2_c4)
-DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_4x__wasmsimd_c4)
-
-DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9x__neon_c4)
-DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9x__rvv_u1v)
-DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9x__scalar_c1)
-DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9x__sse2_c4)
-DECLARE_F32_ARGMAXPOOL_UNIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9x__wasmsimd_c4)
-
-
-#define DECLARE_F32_ARGMAXPOOL_MULTIPASS_UKERNEL_FUNCTION(fn_name) \
+#define XNN_UKERNEL_MULTIPASS(arch_flags,fn_name, primary_tile, incremental_tile, channel_tile, vector_tile, datatype) \
   XNN_INTERNAL void fn_name(                                       \
       size_t output_pixels,                                        \
       size_t kernel_elements,                                      \
       size_t channels,                                             \
-      const float** input,                                         \
+      const datatype** input,                                      \
       size_t input_offset,                                         \
-      float* accumulation_buffer,                                  \
+      datatype* accumulation_buffer,                               \
       uint32_t* index_buffer,                                      \
-      float* output,                                               \
+      datatype* output,                                            \
       uint32_t* index,                                             \
       size_t input_increment,                                      \
       size_t output_increment);
-
-DECLARE_F32_ARGMAXPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9p8x__neon_c4)
-DECLARE_F32_ARGMAXPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9p8x__rvv_u1v)
-DECLARE_F32_ARGMAXPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1)
-DECLARE_F32_ARGMAXPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9p8x__sse2_c4)
-DECLARE_F32_ARGMAXPOOL_MULTIPASS_UKERNEL_FUNCTION(xnn_f32_argmaxpool_ukernel_9p8x__wasmsimd_c4)
-
-
+#include "f32-argmaxpool/f32-argmaxpool-multipass.h"
+#undef XNN_UKERNEL_MULTIPASS
 #ifdef __cplusplus
 }  // extern "C"
 #endif
