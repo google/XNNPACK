@@ -49,13 +49,14 @@ static size_t wipe_buffer_size = 0;
 static std::once_flag wipe_buffer_guard;
 
 static void InitWipeBuffer() {
-  // Default: the largest known cache size (128 MB Intel Crystalwell L4 cache).
-  wipe_buffer_size = 128 * 1024 * 1024;
 #if XNN_ENABLE_CPUINFO
   if (cpuinfo_initialize()) {
     wipe_buffer_size = GetMaxCacheSize();
   }
 #endif  // XNN_ENABLE_CPUINFO
+  if (wipe_buffer_size == 0) {
+    return;
+  }
 
 #if defined(_WIN32)
   wipe_buffer = _aligned_malloc(wipe_buffer_size, 128);
@@ -183,6 +184,9 @@ void WipePthreadpoolL2Caches(benchmark::State& state,
 
 uint32_t WipeCache() {
   std::call_once(wipe_buffer_guard, InitWipeBuffer);
+  if (!wipe_buffer) {
+    return 0;
+  }
   return PrefetchToL1(wipe_buffer, wipe_buffer_size);
 }
 
