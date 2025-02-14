@@ -974,6 +974,19 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
               subgraph->values[node->inputs[2]].datatype == xnn_datatype_fp32) {
             subgraph->values[node->inputs[2]].fp16_compatible = true;
           }
+        } else if (subgraph->values[node->inputs[0]].datatype ==
+                        xnn_datatype_pfp32 &&
+                   subgraph->values[node->inputs[1]].datatype ==
+                       xnn_datatype_fp32 &&
+                   subgraph->values[node->outputs[0]].datatype ==
+                       xnn_datatype_fp32) {
+          subgraph->values[node->inputs[0]].fp16_compatible = true;
+          subgraph->values[node->inputs[1]].fp16_compatible = true;
+          subgraph->values[node->outputs[0]].fp16_compatible = true;
+          if (node->num_inputs > 2 &&
+              subgraph->values[node->inputs[2]].datatype == xnn_datatype_fp32) {
+            subgraph->values[node->inputs[2]].fp16_compatible = true;
+          }
         } else if (all_values_fp32_or_pfp32(subgraph, node)) {
           subgraph->values[node->inputs[0]].fp16_compatible = true;
           subgraph->values[node->outputs[0]].fp16_compatible = true;
@@ -1006,14 +1019,23 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         break;
       default:
         for (uint32_t i = 0; i < node->num_inputs; i++) {
-          if (subgraph->values[node->inputs[i]].datatype == xnn_datatype_fp32) {
-            subgraph->values[node->inputs[i]].fp16_compatible = true;
+          switch (subgraph->values[node->inputs[i]].datatype) {
+            case xnn_datatype_fp32:
+            case xnn_datatype_pfp32:
+              subgraph->values[node->inputs[i]].fp16_compatible = true;
+              break;
+            default:
+              break;
           }
         }
         for (uint32_t o = 0; o < node->num_outputs; o++) {
-          if (subgraph->values[node->outputs[o]].datatype ==
-              xnn_datatype_fp32) {
-            subgraph->values[node->outputs[o]].fp16_compatible = true;
+          switch (subgraph->values[node->outputs[o]].datatype) {
+            case xnn_datatype_fp32:
+            case xnn_datatype_pfp32:
+              subgraph->values[node->outputs[o]].fp16_compatible = true;
+              break;
+            default:
+              break;
           }
         }
         break;
@@ -1140,12 +1162,16 @@ bool xnn_subgraph_rewrite_for_fp16(xnn_subgraph_t subgraph)
         value->first_consumer = XNN_INVALID_NODE_ID;
         xnn_log_debug("FP16 rewrite: created FP16 tensor #%" PRIu32 " for FP32 tensor #%" PRIu32, fp16_value->id, n);
       } else {
-        xnn_log_debug("FP16 rewrite: converted FP32 tensor #%" PRIu32 " to FP16", n);
         switch (value->datatype) {
           case xnn_datatype_fp32:
+            xnn_log_debug(
+                "FP16 rewrite: converted FP32 tensor #%" PRIu32 " to FP16", n);
             value->datatype = xnn_datatype_fp16;
             break;
           case xnn_datatype_pfp32:
+            xnn_log_debug("FP16 rewrite: converted PFP32 tensor #%" PRIu32
+                          " to PFP16",
+                          n);
             value->datatype = xnn_datatype_pfp16;
             break;
           default:

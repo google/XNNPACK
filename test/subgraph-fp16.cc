@@ -1066,4 +1066,141 @@ TEST(SUBGRAPH_FP16_DYNAMIC_FULLY_CONNECTED,
   ASSERT_EQ(bias_value->datatype, xnn_datatype_fp16);
 }
 
+TEST(SUBGRAPH_FP16_BATCH_MATRIX_MULTIPLY, with_static_value) {
+  SubgraphTester tester(3);
+  float static_tensor_data[3 + XNN_EXTRA_BYTES / sizeof(float)] = {1.0f, 2.0f,
+                                                                   3.0f};
+  // external input[0]   static[1]
+  //               \     /
+  //                \   /
+  //         [batch matrix multiply]
+  //                  |
+  //               external
+  //               output[2]
+  tester
+      .AddInputTensorF32({1, 2, 2, 3}, 0)
+      // Tensor #1 is both static and external
+      .AddStaticTensorF32({1, 1, 1, 3}, TensorType::kDense, 1,
+                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT,
+                          static_tensor_data)
+      .AddOutputTensorF32({1, 2, 2, 3}, 2)
+      .AddBatchMatrixMultiply(0, 1, 2, 0)
+      .Optimize()
+      .RewriteForFp16();
+
+  // After rewriting for FP16, the graph should look like this, with *
+  // indicating new operators and values created: The static tensor data has
+  // been converted into a new buffer.
+  //
+  // external input[0]
+  //        |
+  //    [convert]*
+  //        |
+  //     input[3]*   static[1]* (converted into new buffer)
+  //        \       /
+  //         \     /
+  //   [batch matrix multiply]
+  //            |
+  //       fp16 value[4]*
+  //            |
+  //        [convert]*
+  //            |
+  //         external
+  //         output[2]
+
+  // We should have 3 nodes, the original BMM node, plus one convert node for
+  // each of the external input and output.
+  switch (tester.NumNodes()) {
+    case 3:
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_batch_matrix_multiply);
+      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_convert);
+      break;
+    case 4:
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_pack_lh);
+      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_batch_matrix_multiply);
+      ASSERT_EQ(tester.Node(3)->type, xnn_node_type_convert);
+      break;
+    default:
+      GTEST_FAIL() << "Expected either 3 or 4 nodes, but got "
+                   << tester.NumNodes() << ".";
+  }
+
+  // The static value should be converted to FP16
+  const xnn_value* static_value = tester.Value(1);
+  ASSERT_EQ(static_value->datatype, xnn_datatype_fp16);
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[0], 1.0f);
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[1], 2.0f);
+  ASSERT_EQ(static_cast<const xnn_float16*>(static_value->data)[2], 3.0f);
+
+  // Check that the output of convert is allocated in workspace.
+  const xnn_value* convert_out = tester.Value(3);
+  ASSERT_EQ(convert_out->allocation_type, xnn_allocation_type_workspace);
+}
+
+TEST(SUBGRAPH_FP16_BATCH_MATRIX_MULTIPLY, with_non_static_value) {
+  SubgraphTester tester(3);
+
+  // external input[0]   input[1]
+  //               \     /
+  //                \   /
+  //         [batch matrix multiply]
+  //                  |
+  //               external
+  //               output[2]
+  tester
+      .AddInputTensorF32({1, 2, 2, 3}, 0)
+      .AddInputTensorF32({1, 1, 1, 3}, 1)
+      .AddOutputTensorF32({1, 2, 2, 3}, 2)
+      .AddBatchMatrixMultiply(0, 1, 2, 0)
+      .Optimize()
+      .RewriteForFp16();
+
+  // After rewriting for FP16, the graph should look like this, with *
+  // indicating new operators and values created: The static tensor data has
+  // been converted into a new buffer.
+  //
+  // external input[0]     external input[1]
+  //        |                     |
+  //    [convert]*            [convert]*
+  //        |                     |
+  //     input[3]*             input[4]*
+  //        \                    /
+  //         \                  /
+  //       [batch matrix multiply]
+  //               |
+  //           fp16 value[4]*
+  //               |
+  //           [convert]*
+  //               |
+  //             external
+  //             output[2]
+
+  // We should have 4 nodes, the original BMM node, plus one convert node for
+  // each of the external inputs and output.
+  switch (tester.NumNodes()) {
+    case 4:
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_batch_matrix_multiply);
+      ASSERT_EQ(tester.Node(3)->type, xnn_node_type_convert);
+      break;
+    case 5:
+      ASSERT_EQ(tester.Node(0)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(1)->type, xnn_node_type_pack_lh);
+      ASSERT_EQ(tester.Node(2)->type, xnn_node_type_convert);
+      ASSERT_EQ(tester.Node(3)->type, xnn_node_type_batch_matrix_multiply);
+      ASSERT_EQ(tester.Node(4)->type, xnn_node_type_convert);
+      break;
+    default:
+      GTEST_FAIL() << "Expected either 4 or 5 nodes, but got "
+                   << tester.NumNodes() << ".";
+  }
+
+  // Check that the output of convert is allocated in workspace.
+  const xnn_value* convert_out = tester.Value(3);
+  ASSERT_EQ(convert_out->allocation_type, xnn_allocation_type_workspace);
+}
+
 }  // namespace xnnpack

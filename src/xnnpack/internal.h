@@ -16,6 +16,10 @@
 #include "xnnpack/subgraph.h"
 #include "pthreadpool.h"
 
+// Runtime values marked with this flag should be cleaned up (i.e. deallocated)
+// by the runtime.
+#define XNN_VALUE_FLAG_NEEDS_CLEANUP 0x00000008
+
 #ifdef __cplusplus
 extern "C" {
 #endif

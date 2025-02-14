@@ -63,15 +63,11 @@ enum fully_connected_op_type {
 enum fully_connected_op_type get_fully_connected_op_type(
     const struct xnn_value* input_value, const struct xnn_value* filter_value,
     const struct xnn_value* bias_value, const struct xnn_value* output_value) {
-  const void* filter_data = filter_value->fp32_data != NULL
-                                ? filter_value->fp32_data
-                                : filter_value->data;
-  bool has_non_static_weights = (filter_data == NULL);
+  bool has_non_static_weights =
+      (filter_value->allocation_type != xnn_allocation_type_static);
   if (bias_value) {
-    const void* bias_data = bias_value->fp32_data != NULL
-                                ? bias_value->fp32_data
-                                : bias_value->data;
-    has_non_static_weights |= (bias_data == NULL);
+    has_non_static_weights |=
+        (bias_value->allocation_type != xnn_allocation_type_static);
   }
 
   const enum xnn_datatype input_datatype = input_value->datatype;

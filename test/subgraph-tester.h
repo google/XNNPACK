@@ -462,6 +462,17 @@ class SubgraphTester {
     return *this;
   }
 
+  inline SubgraphTester& AddBatchMatrixMultiply(uint32_t input_a_id,
+                                                uint32_t input_b_id,
+                                                uint32_t output_id,
+                                                uint32_t flags = 0) {
+    const xnn_status status = xnn_define_batch_matrix_multiply(
+        subgraph_.get(), input_a_id, input_b_id, output_id, flags);
+    EXPECT_EQ(status, xnn_status_success);
+
+    return *this;
+  }
+
   SubgraphTester& AddGlobalAveragePooling(uint32_t input_id, uint32_t output_id) {
     int64_t reduction_axes[2] = {1, 2};
     const xnn_status status = xnn_define_static_reduce_v2(

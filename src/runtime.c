@@ -15,11 +15,21 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(__EMSCRIPTEN__)
+#include <emscripten/emscripten.h>
+#elif XNN_PLATFORM_WINDOWS
+#include <windows.h>
+#else
+#include <errno.h>
+#include <time.h>
+#endif
+
 #include "xnnpack.h"
 #include "xnnpack/allocation-type.h"
 #include "xnnpack/allocator.h"
 #include "xnnpack/cache.h"
 #include "xnnpack/common.h"
+#include "xnnpack/internal.h"
 #include "xnnpack/log.h"
 #include "xnnpack/memory-planner.h"
 #include "xnnpack/memory.h"
@@ -30,15 +40,6 @@
 #include "xnnpack/params.h"
 #include "xnnpack/subgraph.h"
 #include "pthreadpool.h"
-
-#if defined(__EMSCRIPTEN__)
-#include <emscripten/emscripten.h>
-#elif XNN_PLATFORM_WINDOWS
-#include <windows.h>
-#else
-#include <errno.h>
-#include <time.h>
-#endif
 
 enum xnn_status xnn_reshape_external_value(
     xnn_runtime_t runtime,
@@ -663,7 +664,7 @@ enum xnn_status xnn_create_runtime_v4(
 
     if (value->fp16_compatible && xnn_value_is_static(value)) {
       // Value is static and has been converted to FP16 in a new buffer.
-      value->allocation_type = xnn_allocation_type_dynamic;
+      value->flags |= XNN_VALUE_FLAG_NEEDS_CLEANUP;
       // Runtime takes ownership of the data from subgraph.
       value->data = subgraph->values[i].data;
       subgraph->values[i].data = NULL;
@@ -1113,7 +1114,8 @@ enum xnn_status xnn_delete_runtime(
         // Release the buffers created during FP16 rewrite.
         for (size_t i = 0; i < runtime->num_values; i++) {
           struct xnn_value* value = &runtime->values[i];
-          if (value->allocation_type == xnn_allocation_type_dynamic) {
+          if (value->allocation_type == xnn_allocation_type_dynamic ||
+              value->flags & XNN_VALUE_FLAG_NEEDS_CLEANUP) {
             xnn_release_memory(value->data);
           }
         }
