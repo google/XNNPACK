@@ -156,9 +156,9 @@ static void init_hardware_config(void) {
 #else
     hardware_config.use_x86_avx512bf16 = 0;
 #endif
-#if XNN_ENABLE_AVX512AMX
+#if XNN_ENABLE_AVX512AMX && XNN_ARCH_X86_64
     hardware_config.use_x86_avx512amx = hardware_config.use_x86_avx512vnnigfni && cpuinfo_has_x86_amx_int8();
-#if XNN_ARCH_X86_64 && defined(__linux__) && !defined(CHROMIUM)
+#if defined(__linux__) && !defined(CHROMIUM)
     if (hardware_config.use_x86_avx512amx) {
       size_t status = xnn_syscall(SYS_arch_prctl, ARCH_REQ_XCOMP_PERM, XFEATURE_XTILEDATA, 0);
       if (status) {

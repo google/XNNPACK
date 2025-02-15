@@ -47,15 +47,8 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x32c4__avx512amx(
   assert(w != NULL);
   assert(c != NULL);
 
-// TODO: amxintrin.h only provide intrinsics for __x86_64__
-// Update if amxintrin changes
-#if defined(__x86_64__)
-  __attribute__((aligned(64))) int32_t vintile[1 * 16];
-  __attribute__((aligned(64))) int32_t res[2][1 * 16];
-
-  kc = round_up_po2(kc, 4 * sizeof(int8_t));
-  const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
-  const __mmask16 kremainder_mask = _cvtu32_mask16((UINT32_C(1) << (kremainder >> 2)) - 1);
+// AMX is only available for __x86_64__
+#if XNN_ARCH_X86_64
 
   // Define tile config data structure
   struct __tile_config {
@@ -68,8 +61,15 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x32c4__avx512amx(
     uint8_t reserved_2[8];
   };
 
+  XNN_ALIGN(64) struct __tile_config tile_data = {0};
+  XNN_ALIGN(64) int32_t res[2][1 * 16];
+  XNN_ALIGN(64) int32_t vintile[1 * 16];
+
+  kc = round_up_po2(kc, 4 * sizeof(int8_t));
+  const size_t kremainder = (kc & 63) ? (kc & 63) : 64;
+  const __mmask16 kremainder_mask = _cvtu32_mask16((UINT32_C(1) << (kremainder >> 2)) - 1);
+
   // Load tile configuration
-  __attribute__((aligned(64))) struct __tile_config tile_data = {0};
   tile_data.palette_id = 1;
   tile_data.rows[0] = mr;              // tmm0 = res[0]
   tile_data.rows[1] = mr;              // tmm1 = res[1]
@@ -89,8 +89,7 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x32c4__avx512amx(
   tile_data.colsb[6] = kremainder;  // tmm6 = input remainder
   tile_data.colsb[7] = 64;          // tmm7 = weights remainder
 
-  //_tile_loadconfig(&tile_data);
-  __asm__ volatile ("ldtilecfg %0" :: "m" (tile_data));
+  _tile_loadconfig(&tile_data);
 
   float* c0 = c;
 
@@ -105,10 +104,8 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x32c4__avx512amx(
     w = (const int32_t*) w + 32;
 
     // Zero tile accumulator
-    __asm__ volatile (
-      "tilezero %%tmm0\n"
-      "tilezero %%tmm1\n"
-      ::);
+    _tile_zero(0);
+    _tile_zero(1);
 
     size_t p = ks;
     do {
@@ -212,7 +209,6 @@ void xnn_qd8_f32_qc8w_igemm_minmax_ukernel_1x32c4__avx512amx(
   } while (nc != 0);
 
   // Release tile config
-  //  _tile_release();
-  __asm__ volatile ("tilerelease" ::);
+  _tile_release();
   #endif  // defined(__x86_64__)
 }
