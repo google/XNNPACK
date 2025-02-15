@@ -193,7 +193,16 @@ static void init_f16_elu_config(void) {
 }
 
 static void init_f16_gelu_config(void) {
-      f16_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u8;
+#if (XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR) || \
+    (XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR)
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  assert(hardware_config != NULL);
+  if (hardware_config->use_arm_neon_fp16_arith) {
+    f16_gelu_config.ukernel = (xnn_vunary_ukernel_fn)xnn_f16_vgelu_ukernel__neonfp16arith_rational_6_4_div_u16;
+  }
+#else
+  f16_gelu_config.ukernel = (xnn_vunary_ukernel_fn)xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u4;
+#endif
 }
 
 static void init_f16_hswish_config(void) {
