@@ -383,67 +383,71 @@ void xnn_x32_transposec_ukernel__32x32_multi_multi_hvx(
 
 
     if (bh != 0){
-      // This is a scalar implementation. 
-      // TODO: Add simple heuristic to choose scalar or vector implementation for tail code.
-      uint32_t* i = i0;
-
+      // This is a scalar implementation. This tail code is for the case where TILE_SIZE==32.
+      // TODO: 1. Add simple heuristic to choose scalar or vector implementation for tail code.
+      uint32_t* i = (uint32_t *)i0;
+      size_t tail_bw = min(block_width, tile_width);
       if (bh & 16){
-        for(size_t bw = 0; bw < block_width; bw++){
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw)) = *(i + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 1) = *((uint32_t *)((uintptr_t) i + input_stride) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 2) = *((uint32_t *)((uintptr_t) i + input_stride * 2) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 3) = *((uint32_t *)((uintptr_t) i + input_stride * 3) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 4) = *((uint32_t *)((uintptr_t) i + input_stride * 4) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 5) = *((uint32_t *)((uintptr_t) i + input_stride * 5) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 6) = *((uint32_t *)((uintptr_t) i + input_stride * 6) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 7) = *((uint32_t *)((uintptr_t) i + input_stride * 7) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 8) = *((uint32_t *)((uintptr_t) i + input_stride * 8) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 9) = *((uint32_t *)((uintptr_t) i + input_stride * 9) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 10) = *((uint32_t *)((uintptr_t) i + input_stride * 10) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 11) = *((uint32_t *)((uintptr_t) i + input_stride * 11) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 12) = *((uint32_t *)((uintptr_t) i + input_stride * 12) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 13) = *((uint32_t *)((uintptr_t) i + input_stride * 13) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 14) = *((uint32_t *)((uintptr_t) i + input_stride * 14) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 15) = *((uint32_t *)((uintptr_t) i + input_stride * 15) + bw);
+        for(size_t bw = 0; bw < tail_bw; bw++){
+          const size_t oN_offset = output_stride * bw;
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset)) = *(i + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 1) = *((uint32_t *) ((uintptr_t) i + input_stride) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 2) = *((uint32_t *) ((uintptr_t) i + input_stride * 2) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 3) = *((uint32_t *) ((uintptr_t) i + input_stride * 3) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 4) = *((uint32_t *) ((uintptr_t) i + input_stride * 4) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 5) = *((uint32_t *) ((uintptr_t) i + input_stride * 5) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 6) = *((uint32_t *) ((uintptr_t) i + input_stride * 6) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 7) = *((uint32_t *) ((uintptr_t) i + input_stride * 7) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 8) = *((uint32_t *) ((uintptr_t) i + input_stride * 8) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 9) = *((uint32_t *) ((uintptr_t) i + input_stride * 9) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 10) = *((uint32_t *) ((uintptr_t) i + input_stride * 10) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 11) = *((uint32_t *) ((uintptr_t) i + input_stride * 11) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 12) = *((uint32_t *) ((uintptr_t) i + input_stride * 12) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 13) = *((uint32_t *) ((uintptr_t) i + input_stride * 13) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 14) = *((uint32_t *) ((uintptr_t) i + input_stride * 14) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 15) = *((uint32_t *) ((uintptr_t) i + input_stride * 15) + bw);
         }
         o0 += 16;
         i = (uint32_t *)((uintptr_t) i + input_stride * 16);
       }
       if (bh & 8){
-        for(size_t bw = 0; bw < block_width; bw++){
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw)) = *(i + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 1) = *((uint32_t *)((uintptr_t) i + input_stride) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 2) = *((uint32_t *)((uintptr_t) i + input_stride * 2) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 3) = *((uint32_t *)((uintptr_t) i + input_stride * 3) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 4) = *((uint32_t *)((uintptr_t) i + input_stride * 4) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 5) = *((uint32_t *)((uintptr_t) i + input_stride * 5) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 6) = *((uint32_t *)((uintptr_t) i + input_stride * 6) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 7) = *((uint32_t *)((uintptr_t) i + input_stride * 7) + bw);
+        for(size_t bw = 0; bw < tail_bw; bw++){
+          const size_t oN_offset = output_stride * bw;
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset)) = *(i + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 1) = *((uint32_t *) ((uintptr_t) i + input_stride) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 2) = *((uint32_t *) ((uintptr_t) i + input_stride * 2) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 3) = *((uint32_t *) ((uintptr_t) i + input_stride * 3) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 4) = *((uint32_t *) ((uintptr_t) i + input_stride * 4) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 5) = *((uint32_t *) ((uintptr_t) i + input_stride * 5) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 6) = *((uint32_t *) ((uintptr_t) i + input_stride * 6) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 7) = *((uint32_t *) ((uintptr_t) i + input_stride * 7) + bw);
         }
         o0 += 8;
         i = (uint32_t *)((uintptr_t) i + input_stride * 8);
       }
       if (bh & 4){
-        for(size_t bw = 0; bw < block_width; bw++){
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw)) = *(i + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 1) = *((uint32_t *)((uintptr_t) i + input_stride) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 2) = *((uint32_t *)((uintptr_t) i + input_stride * 2) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 3) = *((uint32_t *)((uintptr_t) i + input_stride * 3) + bw);
+        for(size_t bw = 0; bw < tail_bw; bw++){
+          const size_t oN_offset = output_stride * bw;
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset)) = *(i + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 1) = *((uint32_t *) ((uintptr_t) i + input_stride) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 2) = *((uint32_t *) ((uintptr_t) i + input_stride * 2) + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 3) = *((uint32_t *) ((uintptr_t) i + input_stride * 3) + bw);
         }
         o0 += 4;
         i = (uint32_t *)((uintptr_t) i + input_stride * 4);
       }
       if (bh & 2){
-        for(size_t bw = 0; bw < block_width; bw++){         
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw)) = *(i + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 1) = *((uint32_t *)((uintptr_t) i + input_stride) + bw);
+        for(size_t bw = 0; bw < tail_bw; bw++){
+          const size_t oN_offset = output_stride * bw;
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset)) = *(i + bw);
+          *((uint32_t *) ((uintptr_t) o0 + oN_offset) + 1) = *((uint32_t *) ((uintptr_t) i + input_stride) + bw);
         }
         o0 += 2;
         i = (uint32_t *)((uintptr_t) i + input_stride * 2);
       }
       if (bh & 1){
         for(size_t bw = 0; bw < block_width; bw++){
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw)) = *(i + bw);
+          *((uint32_t *) ((uintptr_t) o0 + output_stride * bw)) = *(i + bw);
         }
       }
     }
@@ -481,37 +485,37 @@ void xnn_x32_transposec_ukernel__32x32_multi_multi_hvx(
     i30 = (const uint32_t*) ((uintptr_t) i29 + input_stride);
     i31 = (const uint32_t*) ((uintptr_t) i30 + input_stride);
     o0 = (uint32_t*) ((uintptr_t) o0 + output_reset);
-    o1 = (uint32_t*) ((uintptr_t) o1 + output_reset);
-    o2 = (uint32_t*) ((uintptr_t) o2 + output_reset);
-    o3 = (uint32_t*) ((uintptr_t) o3 + output_reset);
-    o4 = (uint32_t*) ((uintptr_t) o4 + output_reset);
-    o5 = (uint32_t*) ((uintptr_t) o5 + output_reset);
-    o6 = (uint32_t*) ((uintptr_t) o6 + output_reset);
-    o7 = (uint32_t*) ((uintptr_t) o7 + output_reset);
-    o8 = (uint32_t*) ((uintptr_t) o8 + output_reset);
-    o9 = (uint32_t*) ((uintptr_t) o9 + output_reset);
-    o10 = (uint32_t*) ((uintptr_t) o10 + output_reset);
-    o11 = (uint32_t*) ((uintptr_t) o11 + output_reset);
-    o12 = (uint32_t*) ((uintptr_t) o12 + output_reset);
-    o13 = (uint32_t*) ((uintptr_t) o13 + output_reset);
-    o14 = (uint32_t*) ((uintptr_t) o14 + output_reset);
-    o15 = (uint32_t*) ((uintptr_t) o15 + output_reset);
-    o16 = (uint32_t*) ((uintptr_t) o16 + output_reset);
-    o17 = (uint32_t*) ((uintptr_t) o17 + output_reset);
-    o18 = (uint32_t*) ((uintptr_t) o18 + output_reset);
-    o19 = (uint32_t*) ((uintptr_t) o19 + output_reset);
-    o20 = (uint32_t*) ((uintptr_t) o20 + output_reset);
-    o21 = (uint32_t*) ((uintptr_t) o21 + output_reset);
-    o22 = (uint32_t*) ((uintptr_t) o22 + output_reset);
-    o23 = (uint32_t*) ((uintptr_t) o23 + output_reset);
-    o24 = (uint32_t*) ((uintptr_t) o24 + output_reset);
-    o25 = (uint32_t*) ((uintptr_t) o25 + output_reset);
-    o26 = (uint32_t*) ((uintptr_t) o26 + output_reset);
-    o27 = (uint32_t*) ((uintptr_t) o27 + output_reset);
-    o28 = (uint32_t*) ((uintptr_t) o28 + output_reset);
-    o29 = (uint32_t*) ((uintptr_t) o29 + output_reset);
-    o30 = (uint32_t*) ((uintptr_t) o30 + output_reset);
-    o31 = (uint32_t*) ((uintptr_t) o31 + output_reset);
+    o1 = (uint32_t*) ((uintptr_t) o0 + output_stride);
+    o2 = (uint32_t*) ((uintptr_t) o1 + output_stride);
+    o3 = (uint32_t*) ((uintptr_t) o2 + output_stride);
+    o4 = (uint32_t*) ((uintptr_t) o3 + output_stride);
+    o5 = (uint32_t*) ((uintptr_t) o4 + output_stride);
+    o6 = (uint32_t*) ((uintptr_t) o5 + output_stride);
+    o7 = (uint32_t*) ((uintptr_t) o6 + output_stride);
+    o8 = (uint32_t*) ((uintptr_t) o7 + output_stride);
+    o9 = (uint32_t*) ((uintptr_t) o8 + output_stride);
+    o10 = (uint32_t*) ((uintptr_t) o9 + output_stride);
+    o11 = (uint32_t*) ((uintptr_t) o10 + output_stride);
+    o12 = (uint32_t*) ((uintptr_t) o11 + output_stride);
+    o13 = (uint32_t*) ((uintptr_t) o12 + output_stride);
+    o14 = (uint32_t*) ((uintptr_t) o13 + output_stride);
+    o15 = (uint32_t*) ((uintptr_t) o14 + output_stride);
+    o16 = (uint32_t*) ((uintptr_t) o15 + output_stride);
+    o17 = (uint32_t*) ((uintptr_t) o16 + output_stride);
+    o18 = (uint32_t*) ((uintptr_t) o17 + output_stride);
+    o19 = (uint32_t*) ((uintptr_t) o18 + output_stride);
+    o20 = (uint32_t*) ((uintptr_t) o19 + output_stride);
+    o21 = (uint32_t*) ((uintptr_t) o20 + output_stride);
+    o22 = (uint32_t*) ((uintptr_t) o21 + output_stride);
+    o23 = (uint32_t*) ((uintptr_t) o22 + output_stride);
+    o24 = (uint32_t*) ((uintptr_t) o23 + output_stride);
+    o25 = (uint32_t*) ((uintptr_t) o24 + output_stride);
+    o26 = (uint32_t*) ((uintptr_t) o25 + output_stride);
+    o27 = (uint32_t*) ((uintptr_t) o26 + output_stride);
+    o28 = (uint32_t*) ((uintptr_t) o27 + output_stride);
+    o29 = (uint32_t*) ((uintptr_t) o28 + output_stride);
+    o30 = (uint32_t*) ((uintptr_t) o29 + output_stride);
+    o31 = (uint32_t*) ((uintptr_t) o30 + output_stride);
     block_width = doz(block_width, tile_width);
   } while (block_width != 0);
 }
