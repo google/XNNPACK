@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         arch: [windows-x86, windows-x64, linux-x86_64]
-        sde-processor: [wsm, snb, ivb, hsw, bdw, skl, cnl, icl, skx, clx, cpx, icx, tgl, adl, mtl, rpl, spr, emr, gnr, gnr256, dmr, srf, arl, lnl, cwf, future]
+        sde-processor: [slm, wsm, snb, ivb, hsw, bdw, skl, cnl, icl, skx, clx, cpx, icx, tgl, adl, mtl, rpl, spr, emr, gnr, gnr256, dmr, srf, arl, lnl, cwf]
     runs-on: ${{ matrix.arch == 'linux-x86_64' && 'ubuntu-latest' || 'windows-latest' }}
     needs: build
     continue-on-error: true
@@ -24,6 +24,7 @@ jobs:
     name: >
       (${{ matrix.arch }}, ${{ matrix.sde-processor }})
       - ${{ fromJson('{
+        "slm": {"main": "Silvermont Processor - Supports SSE41"},
         "wsm": {"main": "Westmere Processor - Supports SSE41"},
         "snb": {"main": "Sandy Bridge Processor - Supports SSE41, AVX"},
         "ivb": {"main": "Ivy Bridge Processor - Supports SSE41, AVX, F16C"},
@@ -48,8 +49,7 @@ jobs:
         "srf": {"main": "Sierra Forest Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
         "arl": {"main": "Arrow Lake Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
         "lnl": {"main": "Lunar Lake Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
-        "cwf": {"main": "Clearwater Forest Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"},
-        "future": {"main": "Future Chip Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVX512F, AVX512FP16, AVX512SKX, AVX256SKX, AVX512VBMI, AVX512VNNI, AVX512VNNIGFNI, AVX256VNNI, AVX256VNNIGFNI, AVX512BF16, AVXVNNI, AVXVNNIINT8"}
+        "cwf": {"main": "Clearwater Forest Processor - Supports SSE41, AVX, F16C, FMA3, AVX2, AVXVNNI, AVXVNNIINT8"}
          }')[matrix.sde-processor].main }}
 
     steps:
