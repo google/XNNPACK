@@ -164,67 +164,55 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_HEIGHT}x${TILE_WIDTH}_${IN_PTRS.low
       o = (uint${SIZE}_t*) ((uintptr_t) o + tile_hbytes);
 
     if (bh != 0){
-      // This is a scalar implementation. 
-      // TODO: Add simple heuristic to choose scalar or vector implementation for tail code.
-      uint32_t* i = i0;
-
+      // This is a scalar implementation. This tail code is for the case where TILE_SIZE==32.
+      // TODO: 1. Add simple heuristic to choose scalar or vector implementation for tail code.
+      uint${SIZE}_t* i = (uint${SIZE}_t *)i0;
+      size_t tail_bw = min(block_width, tile_width);
       if (bh & 16){
-        for(size_t bw = 0; bw < block_width; bw++){
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw)) = *(i + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 1) = *((uint32_t *)((uintptr_t) i + input_stride) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 2) = *((uint32_t *)((uintptr_t) i + input_stride * 2) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 3) = *((uint32_t *)((uintptr_t) i + input_stride * 3) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 4) = *((uint32_t *)((uintptr_t) i + input_stride * 4) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 5) = *((uint32_t *)((uintptr_t) i + input_stride * 5) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 6) = *((uint32_t *)((uintptr_t) i + input_stride * 6) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 7) = *((uint32_t *)((uintptr_t) i + input_stride * 7) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 8) = *((uint32_t *)((uintptr_t) i + input_stride * 8) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 9) = *((uint32_t *)((uintptr_t) i + input_stride * 9) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 10) = *((uint32_t *)((uintptr_t) i + input_stride * 10) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 11) = *((uint32_t *)((uintptr_t) i + input_stride * 11) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 12) = *((uint32_t *)((uintptr_t) i + input_stride * 12) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 13) = *((uint32_t *)((uintptr_t) i + input_stride * 13) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 14) = *((uint32_t *)((uintptr_t) i + input_stride * 14) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 15) = *((uint32_t *)((uintptr_t) i + input_stride * 15) + bw);
+        for(size_t bw = 0; bw < tail_bw; bw++){
+          const size_t oN_offset = output_stride * bw;
+          *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset)) = *(i + bw);
+          *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset) + 1) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride) + bw);
+          $for N in range(2, 16):
+            *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset) + ${N}) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride * ${N}) + bw);
         }
         o0 += 16;
-        i = (uint32_t *)((uintptr_t) i + input_stride * 16);
+        i = (uint${SIZE}_t *)((uintptr_t) i + input_stride * 16);
       }
       if (bh & 8){
-        for(size_t bw = 0; bw < block_width; bw++){
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw)) = *(i + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 1) = *((uint32_t *)((uintptr_t) i + input_stride) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 2) = *((uint32_t *)((uintptr_t) i + input_stride * 2) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 3) = *((uint32_t *)((uintptr_t) i + input_stride * 3) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 4) = *((uint32_t *)((uintptr_t) i + input_stride * 4) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 5) = *((uint32_t *)((uintptr_t) i + input_stride * 5) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 6) = *((uint32_t *)((uintptr_t) i + input_stride * 6) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 7) = *((uint32_t *)((uintptr_t) i + input_stride * 7) + bw);
+        for(size_t bw = 0; bw < tail_bw; bw++){
+          const size_t oN_offset = output_stride * bw;
+          *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset)) = *(i + bw);
+          *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset) + 1) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride) + bw);
+          $for N in range(2, 8):
+            *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset) + ${N}) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride * ${N}) + bw);
         }
         o0 += 8;
-        i = (uint32_t *)((uintptr_t) i + input_stride * 8);
+        i = (uint${SIZE}_t *)((uintptr_t) i + input_stride * 8);
       }
       if (bh & 4){
-        for(size_t bw = 0; bw < block_width; bw++){
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw)) = *(i + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 1) = *((uint32_t *)((uintptr_t) i + input_stride) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 2) = *((uint32_t *)((uintptr_t) i + input_stride * 2) + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 3) = *((uint32_t *)((uintptr_t) i + input_stride * 3) + bw);
+        for(size_t bw = 0; bw < tail_bw; bw++){
+          const size_t oN_offset = output_stride * bw;
+          *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset)) = *(i + bw);
+          *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset) + 1) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride) + bw);
+          $for N in range(2, 4):
+            *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset) + ${N}) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride * ${N}) + bw);
         }
         o0 += 4;
-        i = (uint32_t *)((uintptr_t) i + input_stride * 4);
+        i = (uint${SIZE}_t *)((uintptr_t) i + input_stride * 4);
       }
       if (bh & 2){
-        for(size_t bw = 0; bw < block_width; bw++){         
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw)) = *(i + bw);
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw) + 1) = *((uint32_t *)((uintptr_t) i + input_stride) + bw);
+        for(size_t bw = 0; bw < tail_bw; bw++){
+          const size_t oN_offset = output_stride * bw;
+          *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset)) = *(i + bw);
+          *((uint${SIZE}_t *) ((uintptr_t) o0 + oN_offset) + 1) = *((uint${SIZE}_t *) ((uintptr_t) i + input_stride) + bw);
         }
         o0 += 2;
-        i = (uint32_t *)((uintptr_t) i + input_stride * 2);
+        i = (uint${SIZE}_t *)((uintptr_t) i + input_stride * 2);
       }
       if (bh & 1){
         for(size_t bw = 0; bw < block_width; bw++){
-          *((uint32_t *)((uintptr_t) o0 + output_stride * bw)) = *(i + bw);
+          *((uint${SIZE}_t *) ((uintptr_t) o0 + output_stride * bw)) = *(i + bw);
         }
       }
     }
@@ -238,7 +226,7 @@ void xnn_x${SIZE}_transposec_ukernel__${TILE_HEIGHT}x${TILE_WIDTH}_${IN_PTRS.low
     $if OUT_PTRS == "MULTI":
       o0 = (uint${SIZE}_t*) ((uintptr_t) o0 + output_reset);
       $for N in range(1, TILE_HEIGHT):
-        o${N} = (uint${SIZE}_t*) ((uintptr_t) o${N} + output_reset);
+        o${N} = (uint${SIZE}_t*) ((uintptr_t) o${N-1} + output_stride);
     $else:
       o = (uint${SIZE}_t*) ((uintptr_t) o + output_reset);
     block_width = doz(block_width, tile_width);
