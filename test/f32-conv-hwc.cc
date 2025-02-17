@@ -408,26 +408,69 @@ class ConvHWCMicrokernelTester {
   size_t iterations_{1};
 };
 
+void ConvHWCHelperFunc(
+  xnn_f32_conv_hwc_ukernel_fn ukernel,
+  uint32_t kernel_sizes,
+  uint32_t subsamplings,
+  size_t input_channel,
+  size_t output_channel_tile,
+  uint32_t output_channel,
+  uint32_t input_widths,
+  uint32_t input_heights,
+  uint32_t output_y_starts,
+  uint32_t output_y_ends,
+  uint8_t qmin_,
+  uint8_t qmax_,
+  uint32_t padding_right_,
+  uint32_t padding_left_,
+  uint32_t padding_top_,
+  uint32_t padding_bottom_,
+  xnn_init_f32_minmax_params_fn init_params)
+{
+  auto tester = ConvHWCMicrokernelTester();
+  tester.kernel_size(kernel_sizes);
+  tester.subsampling(subsamplings);
+  tester.input_channels(input_channel);
+  tester.output_channels_tile(output_channel_tile);
+  tester.output_channels(output_channel);
+  tester.input_width(input_widths);
+  tester.input_height(input_heights);
+  if (padding_left_ == 1 && padding_right_ == 1) {
+    tester.padding_width(padding_right_);
+  }
+  else if (padding_left_ == 0 && padding_right_ == 1) {
+    tester.padding_right(padding_right_);
+  }
+  if (padding_top_ != 0) {
+    tester.padding_top(padding_top_);
+  }
+  if (padding_bottom_ != 0) {
+    tester.padding_top(padding_bottom_);
+  }
+  if (output_y_starts != 0) {
+    tester.output_y_start(output_y_starts);
+  }
+  if (output_y_ends != 0) {
+    tester.output_y_end(output_y_ends);
+  }
+  if (qmin_ != 0) {
+    tester.qmin(qmin_);
+  }
+  if (qmax_ != 0) {
+    tester.qmax(qmax_);
+  }
+  tester.Test(ukernel, init_params);
+}
+
 #define XNN_TEST_CONVHWC_INPUT_WIDTH_EQ(                                                                               \
   ukernel, arch_flags, kernel_sizes, subsamplings, padding_right_, padding_left_, input_channel, output_channel_tile,  \
   input_widths, init_params, ...)                                                                                      \
   TEST(ukernel, input_width_eq)                                                                                        \
   {                                                                                                                    \
-    auto tester = ConvHWCMicrokernelTester()                                                                           \
-                    .kernel_size(kernel_sizes)                                                                         \
-                    .subsampling(subsamplings)                                                                         \
-                    .input_channels(input_channel)                                                                     \
-                    .output_channels_tile(output_channel_tile)                                                         \
-                    .output_channels(output_channel_tile)                                                              \
-                    .input_width(input_widths)                                                                         \
-                    .input_height(kernel_sizes);                                                                       \
-    if (padding_left_ == 1 && padding_right_ == 1) {                                                                   \
-      tester.padding_width(padding_right_);                                                                            \
-    }                                                                                                                  \
-    else if (padding_left_ == 0 && padding_right_ == 1) {                                                              \
-      tester.padding_right(padding_right_);                                                                            \
-    }                                                                                                                  \
-    tester.Test(ukernel, init_params);                                                                                 \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
+    ConvHWCHelperFunc(                                                                                                 \
+      ukernel, kernel_sizes, subsamplings, input_channel, output_channel_tile, output_channel_tile, input_widths,      \
+      kernel_sizes, {}, {}, {}, {}, padding_right_, padding_left_, {}, {}, init_params);                               \
   }
 
 #define XNN_TEST_CONVHWC_INPUT_WIDTH_DIV(                                                                              \
@@ -435,23 +478,12 @@ class ConvHWCMicrokernelTester {
   input_widths, init_params, ...)                                                                                      \
   TEST(ukernel, input_width_div)                                                                                       \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t input_widths_ = input_widths * 2; input_widths_ < (input_widths * 8);                                  \
          input_widths_ += input_widths * 3) {                                                                          \
-      auto tester = ConvHWCMicrokernelTester()                                                                         \
-                      .kernel_size(kernel_sizes)                                                                       \
-                      .subsampling(subsamplings)                                                                       \
-                      .input_channels(input_channel)                                                                   \
-                      .output_channels_tile(output_channel_tile)                                                       \
-                      .output_channels(output_channel_tile)                                                            \
-                      .input_width(input_widths_)                                                                      \
-                      .input_height(kernel_sizes);                                                                     \
-      if (padding_left_ == 1 && padding_right_ == 1) {                                                                 \
-        tester.padding_width(padding_right_);                                                                          \
-      }                                                                                                                \
-      else if (padding_left_ == 0 && padding_right_ == 1) {                                                            \
-        tester.padding_right(padding_right_);                                                                          \
-      }                                                                                                                \
-      tester.Test(ukernel, init_params);                                                                               \
+      ConvHWCHelperFunc(                                                                                               \
+        ukernel, kernel_sizes, subsamplings, input_channel, output_channel_tile, output_channel_tile, input_widths_,   \
+        kernel_sizes, {}, {}, {}, {}, padding_right_, padding_left_, {}, {}, init_params);                             \
     }                                                                                                                  \
   }
 
@@ -460,22 +492,11 @@ class ConvHWCMicrokernelTester {
   input_widths, init_params, ...)                                                                                      \
   TEST(ukernel, input_width_lt)                                                                                        \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths; input_widths_++) {              \
-      auto tester = ConvHWCMicrokernelTester()                                                                         \
-                      .kernel_size(kernel_sizes)                                                                       \
-                      .subsampling(subsamplings)                                                                       \
-                      .input_channels(input_channel)                                                                   \
-                      .output_channels_tile(output_channel_tile)                                                       \
-                      .output_channels(output_channel_tile)                                                            \
-                      .input_width(input_widths_)                                                                      \
-                      .input_height(kernel_sizes);                                                                     \
-      if (padding_left_ == 1 && padding_right_ == 1) {                                                                 \
-        tester.padding_width(padding_right_);                                                                          \
-      }                                                                                                                \
-      else if (padding_left_ == 0 && padding_right_ == 1) {                                                            \
-        tester.padding_right(padding_right_);                                                                          \
-      }                                                                                                                \
-      tester.Test(ukernel, init_params);                                                                               \
+      ConvHWCHelperFunc(                                                                                               \
+        ukernel, kernel_sizes, subsamplings, input_channel, output_channel_tile, output_channel_tile, input_widths_,   \
+        kernel_sizes, {}, {}, {}, {}, padding_right_, padding_left_, {}, {}, init_params);                             \
     }                                                                                                                  \
   }
 
@@ -484,22 +505,11 @@ class ConvHWCMicrokernelTester {
   input_widths, init_params, ...)                                                                                      \
   TEST(ukernel, input_width_gt)                                                                                        \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t input_widths_ = input_widths + 1; input_widths_ < input_widths * 2; input_widths_++) {                 \
-      auto tester = ConvHWCMicrokernelTester()                                                                         \
-                      .kernel_size(kernel_sizes)                                                                       \
-                      .subsampling(subsamplings)                                                                       \
-                      .input_channels(input_channel)                                                                   \
-                      .output_channels_tile(output_channel_tile)                                                       \
-                      .output_channels(output_channel_tile)                                                            \
-                      .input_width(input_widths_)                                                                      \
-                      .input_height(kernel_sizes);                                                                     \
-      if (padding_left_ == 1 && padding_right_ == 1) {                                                                 \
-        tester.padding_width(padding_right_);                                                                          \
-      }                                                                                                                \
-      else if (padding_left_ == 0 && padding_right_ == 1) {                                                            \
-        tester.padding_right(padding_right_);                                                                          \
-      }                                                                                                                \
-      tester.Test(ukernel, init_params);                                                                               \
+      ConvHWCHelperFunc(                                                                                               \
+        ukernel, kernel_sizes, subsamplings, input_channel, output_channel_tile, output_channel_tile, input_widths_,   \
+        kernel_sizes, {}, {}, {}, {}, padding_right_, padding_left_, {}, {}, init_params);                             \
     }                                                                                                                  \
   }
 
@@ -508,24 +518,13 @@ class ConvHWCMicrokernelTester {
   input_widths, init_params, ...)                                                                                      \
   TEST(ukernel, output_channels_lt)                                                                                    \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t output_channels = 1; output_channels < output_channel_tile; output_channels++) {                       \
       for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                           \
            input_widths_ += (input_widths * 2 - 1)) {                                                                  \
-        auto tester = ConvHWCMicrokernelTester()                                                                       \
-                        .kernel_size(kernel_sizes)                                                                     \
-                        .subsampling(subsamplings)                                                                     \
-                        .input_channels(input_channel)                                                                 \
-                        .output_channels_tile(output_channel_tile)                                                     \
-                        .output_channels(output_channels)                                                              \
-                        .input_width(input_widths_)                                                                    \
-                        .input_height(kernel_sizes);                                                                   \
-        if (padding_left_ == 1 && padding_right_ == 1) {                                                               \
-          tester.padding_width(padding_right_);                                                                        \
-        }                                                                                                              \
-        else if (padding_left_ == 0 && padding_right_ == 1) {                                                          \
-          tester.padding_right(padding_right_);                                                                        \
-        }                                                                                                              \
-        tester.Test(ukernel, init_params);                                                                             \
+        ConvHWCHelperFunc(                                                                                             \
+          ukernel, kernel_sizes, subsamplings, input_channel, output_channel_tile, output_channels, input_widths_,     \
+          kernel_sizes, {}, {}, {}, {}, padding_right_, padding_left_, {}, {}, init_params);                           \
       }                                                                                                                \
     }                                                                                                                  \
   }
@@ -535,25 +534,14 @@ class ConvHWCMicrokernelTester {
   input_widths, init_params, ...)                                                                                      \
   TEST(ukernel, output_channels_div)                                                                                   \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t output_channels = output_channel_tile * 2; output_channels <= output_channel_tile * 4;                 \
          output_channels += output_channel_tile) {                                                                     \
       for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                           \
            input_widths_ += (input_widths * 2 - 1)) {                                                                  \
-        auto tester = ConvHWCMicrokernelTester()                                                                       \
-                        .kernel_size(kernel_sizes)                                                                     \
-                        .subsampling(subsamplings)                                                                     \
-                        .input_channels(input_channel)                                                                 \
-                        .output_channels_tile(output_channel_tile)                                                     \
-                        .output_channels(output_channels)                                                              \
-                        .input_width(input_widths_)                                                                    \
-                        .input_height(kernel_sizes);                                                                   \
-        if (padding_left_ == 1 && padding_right_ == 1) {                                                               \
-          tester.padding_width(padding_right_);                                                                        \
-        }                                                                                                              \
-        else if (padding_left_ == 0 && padding_right_ == 1) {                                                          \
-          tester.padding_right(padding_right_);                                                                        \
-        }                                                                                                              \
-        tester.Test(ukernel, init_params);                                                                             \
+        ConvHWCHelperFunc(                                                                                             \
+          ukernel, kernel_sizes, subsamplings, input_channel, output_channel_tile, output_channels, input_widths_,     \
+          kernel_sizes, {}, {}, {}, {}, padding_right_, padding_left_, {}, {}, init_params);                           \
       }                                                                                                                \
     }                                                                                                                  \
   }
@@ -563,25 +551,14 @@ class ConvHWCMicrokernelTester {
   input_widths, init_params, ...)                                                                                      \
   TEST(ukernel, output_channels_gt)                                                                                    \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t output_channels = output_channel_tile + 1; output_channels < output_channel_tile * 2;                  \
          output_channels++) {                                                                                          \
       for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                           \
            input_widths_ += (input_widths * 2 - 1)) {                                                                  \
-        auto tester = ConvHWCMicrokernelTester()                                                                       \
-                        .kernel_size(kernel_sizes)                                                                     \
-                        .subsampling(subsamplings)                                                                     \
-                        .input_channels(input_channel)                                                                 \
-                        .output_channels_tile(output_channel_tile)                                                     \
-                        .output_channels(output_channels)                                                              \
-                        .input_width(input_widths_)                                                                    \
-                        .input_height(kernel_sizes);                                                                   \
-        if (padding_left_ == 1 && padding_right_ == 1) {                                                               \
-          tester.padding_width(padding_right_);                                                                        \
-        }                                                                                                              \
-        else if (padding_left_ == 0 && padding_right_ == 1) {                                                          \
-          tester.padding_right(padding_right_);                                                                        \
-        }                                                                                                              \
-        tester.Test(ukernel, init_params);                                                                             \
+        ConvHWCHelperFunc(                                                                                             \
+          ukernel, kernel_sizes, subsamplings, input_channel, output_channel_tile, output_channels, input_widths_,     \
+          kernel_sizes, {}, {}, {}, {}, padding_right_, padding_left_, {}, {}, init_params);                           \
       }                                                                                                                \
     }                                                                                                                  \
   }
@@ -591,6 +568,7 @@ class ConvHWCMicrokernelTester {
   input_widths, init_params, ...)                                                                                      \
   TEST(ukernel, input_height_lt)                                                                                       \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t input_heights = 1; input_heights < 3; input_heights++) {                                               \
       for (size_t output_channels = 1; output_channels < output_channel_tile * 2;                                      \
            output_channels += output_channel_tile - 1) {                                                               \
@@ -622,26 +600,15 @@ class ConvHWCMicrokernelTester {
   input_widths, init_params, ...)                                                                                      \
   TEST(ukernel, input_height_gt)                                                                                       \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t input_heights = 4; input_heights <= 9; input_heights++) {                                              \
       for (size_t output_channels = 1; output_channels < output_channel_tile * 2;                                      \
            output_channels += output_channel_tile - 1) {                                                               \
         for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                         \
              input_widths_ += (input_widths * 2 - 1)) {                                                                \
-          auto tester = ConvHWCMicrokernelTester()                                                                     \
-                          .kernel_size(kernel_sizes)                                                                   \
-                          .subsampling(subsamplings)                                                                   \
-                          .input_channels(input_channel)                                                               \
-                          .output_channels_tile(output_channel_tile)                                                   \
-                          .output_channels(output_channels)                                                            \
-                          .input_width(input_widths_)                                                                  \
-                          .input_height(input_heights);                                                                \
-          if (padding_left_ == 1 && padding_right_ == 1) {                                                             \
-            tester.padding_width(padding_right_);                                                                      \
-          }                                                                                                            \
-          else if (padding_left_ == 0 && padding_right_ == 1) {                                                        \
-            tester.padding_right(padding_right_);                                                                      \
-          }                                                                                                            \
-          tester.Test(ukernel, init_params);                                                                           \
+          ConvHWCHelperFunc(                                                                                           \
+            ukernel, kernel_sizes, subsamplings, input_channel, output_channel_tile, output_channels, input_widths_,   \
+            input_heights, {}, {}, {}, {}, padding_right_, padding_left_, {}, {}, init_params);                        \
         }                                                                                                              \
       }                                                                                                                \
     }                                                                                                                  \
@@ -652,26 +619,15 @@ class ConvHWCMicrokernelTester {
   input_widths, init_params, ...)                                                                                      \
   TEST(ukernel, padding_top)                                                                                           \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t padding_tops = 0; padding_tops <= 1; padding_tops++) {                                                 \
       for (size_t output_channels = 1; output_channels < output_channel_tile * 2;                                      \
            output_channels += output_channel_tile - 1) {                                                               \
         for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                         \
              input_widths_ += (input_widths * 2 - 1)) {                                                                \
-          auto tester = ConvHWCMicrokernelTester()                                                                     \
-                          .kernel_size(kernel_sizes)                                                                   \
-                          .subsampling(subsamplings)                                                                   \
-                          .input_channels(input_channel)                                                               \
-                          .output_channels_tile(output_channel_tile)                                                   \
-                          .output_channels(output_channels)                                                            \
-                          .input_width(input_widths_)                                                                  \
-                          .input_height(9);                                                                            \
-          if (padding_left_ == 1 && padding_right_ == 1) {                                                             \
-            tester.padding_width(padding_right_);                                                                      \
-          }                                                                                                            \
-          else if (padding_left_ == 0 && padding_right_ == 1) {                                                        \
-            tester.padding_right(padding_right_);                                                                      \
-          }                                                                                                            \
-          tester.padding_top(padding_tops).Test(ukernel, init_params);                                                 \
+          ConvHWCHelperFunc(                                                                                           \
+            ukernel, kernel_sizes, subsamplings, input_channel, output_channel_tile, output_channels, input_widths_,   \
+            9, {}, {}, {}, {}, padding_right_, padding_left_, padding_tops, {}, init_params);                          \
         }                                                                                                              \
       }                                                                                                                \
     }                                                                                                                  \
@@ -682,26 +638,15 @@ class ConvHWCMicrokernelTester {
   input_widths, init_params, ...)                                                                                      \
   TEST(ukernel, padding_bottom)                                                                                        \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t padding_bottoms = 0; padding_bottoms <= 1; padding_bottoms++) {                                        \
       for (size_t output_channels = 1; output_channels < output_channel_tile * 2;                                      \
            output_channels += output_channel_tile - 1) {                                                               \
         for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                         \
              input_widths_ += (input_widths * 2 - 1)) {                                                                \
-          auto tester = ConvHWCMicrokernelTester()                                                                     \
-                          .kernel_size(kernel_sizes)                                                                   \
-                          .subsampling(subsamplings)                                                                   \
-                          .input_channels(input_channel)                                                               \
-                          .output_channels_tile(output_channel_tile)                                                   \
-                          .output_channels(output_channels)                                                            \
-                          .input_width(input_widths_)                                                                  \
-                          .input_height(9);                                                                            \
-          if (padding_left_ == 1 && padding_right_ == 1) {                                                             \
-            tester.padding_width(padding_right_);                                                                      \
-          }                                                                                                            \
-          else if (padding_left_ == 0 && padding_right_ == 1) {                                                        \
-            tester.padding_right(padding_right_);                                                                      \
-          }                                                                                                            \
-          tester.padding_bottom(padding_bottoms).Test(ukernel, init_params);                                           \
+          ConvHWCHelperFunc(                                                                                           \
+            ukernel, kernel_sizes, subsamplings, input_channel, output_channel_tile, output_channels, input_widths_,   \
+            9, {}, {}, {}, {}, padding_right_, padding_left_, {}, padding_bottoms, init_params);                       \
         }                                                                                                              \
       }                                                                                                                \
     }                                                                                                                  \
@@ -712,27 +657,15 @@ class ConvHWCMicrokernelTester {
   input_widths, init_params, ...)                                                                                      \
   TEST(ukernel, output_y_start)                                                                                        \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t output_y_starts = 1; output_y_starts <= 3; output_y_starts++) {                                        \
       for (size_t output_channels = 1; output_channels < output_channel_tile * 2;                                      \
            output_channels += output_channel_tile - 1) {                                                               \
         for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                         \
              input_widths_ += (input_widths * 2 - 1)) {                                                                \
-          auto tester = ConvHWCMicrokernelTester()                                                                     \
-                          .kernel_size(kernel_sizes)                                                                   \
-                          .subsampling(subsamplings)                                                                   \
-                          .input_channels(input_channel)                                                               \
-                          .output_channels_tile(output_channel_tile)                                                   \
-                          .output_channels(output_channels)                                                            \
-                          .input_width(input_widths_)                                                                  \
-                          .input_height(9)                                                                             \
-                          .output_y_start(output_y_starts);                                                            \
-          if (padding_left_ == 1 && padding_right_ == 1) {                                                             \
-            tester.padding_width(padding_right_);                                                                      \
-          }                                                                                                            \
-          else if (padding_left_ == 0 && padding_right_ == 1) {                                                        \
-            tester.padding_right(padding_right_);                                                                      \
-          }                                                                                                            \
-          tester.Test(ukernel, init_params);                                                                           \
+          ConvHWCHelperFunc(                                                                                           \
+            ukernel, kernel_sizes, subsamplings, input_channel, output_channel_tile, output_channels, input_widths_,   \
+            9, output_y_starts, {}, {}, {}, padding_right_, padding_left_, {}, {}, init_params);                       \
         }                                                                                                              \
       }                                                                                                                \
     }                                                                                                                  \
@@ -743,27 +676,15 @@ class ConvHWCMicrokernelTester {
   input_widths, init_params, ...)                                                                                      \
   TEST(ukernel, output_y_end)                                                                                          \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t output_y_ends = 2; output_y_ends < 5; output_y_ends++) {                                               \
       for (size_t output_channels = 1; output_channels < output_channel_tile * 2;                                      \
            output_channels += output_channel_tile - 1) {                                                               \
         for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                         \
              input_widths_ += (input_widths * 2 - 1)) {                                                                \
-          auto tester = ConvHWCMicrokernelTester()                                                                     \
-                          .kernel_size(kernel_sizes)                                                                   \
-                          .subsampling(subsamplings)                                                                   \
-                          .input_channels(input_channel)                                                               \
-                          .output_channels_tile(output_channel_tile)                                                   \
-                          .output_channels(output_channels)                                                            \
-                          .input_width(input_widths_)                                                                  \
-                          .input_height(9)                                                                             \
-                          .output_y_end(output_y_ends);                                                                \
-          if (padding_left_ == 1 && padding_right_ == 1) {                                                             \
-            tester.padding_width(padding_right_);                                                                      \
-          }                                                                                                            \
-          else if (padding_left_ == 0 && padding_right_ == 1) {                                                        \
-            tester.padding_right(padding_right_);                                                                      \
-          }                                                                                                            \
-          tester.Test(ukernel, init_params);                                                                           \
+          ConvHWCHelperFunc(                                                                                           \
+            ukernel, kernel_sizes, subsamplings, input_channel, output_channel_tile, output_channels, input_widths_,   \
+            9, {}, output_y_ends, {}, {}, padding_right_, padding_left_, {}, {}, init_params);                         \
         }                                                                                                              \
       }                                                                                                                \
     }                                                                                                                  \
@@ -774,26 +695,14 @@ class ConvHWCMicrokernelTester {
   input_widths, init_params, ...)                                                                                      \
   TEST(ukernel, qmin)                                                                                                  \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t output_channels = 1; output_channels < output_channel_tile * 2;                                        \
          output_channels += output_channel_tile - 1) {                                                                 \
       for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                           \
            input_widths_ += (input_widths * 2 - 1)) {                                                                  \
-        auto tester = ConvHWCMicrokernelTester()                                                                       \
-                        .kernel_size(kernel_sizes)                                                                     \
-                        .subsampling(subsamplings)                                                                     \
-                        .input_channels(input_channel)                                                                 \
-                        .output_channels_tile(output_channel_tile)                                                     \
-                        .output_channels(output_channels)                                                              \
-                        .input_width(input_widths_)                                                                    \
-                        .input_height(6)                                                                               \
-                        .qmin(128);                                                                                    \
-        if (padding_left_ == 1 && padding_right_ == 1) {                                                               \
-          tester.padding_width(padding_right_);                                                                        \
-        }                                                                                                              \
-        else if (padding_left_ == 0 && padding_right_ == 1) {                                                          \
-          tester.padding_right(padding_right_);                                                                        \
-        }                                                                                                              \
-        tester.Test(ukernel, init_params);                                                                             \
+        ConvHWCHelperFunc(                                                                                             \
+          ukernel, kernel_sizes, subsamplings, input_channel, output_channel_tile, output_channels, input_widths_, 6,  \
+          {}, {}, 128, {}, padding_right_, padding_left_, {}, {}, init_params);                                        \
       }                                                                                                                \
     }                                                                                                                  \
   }
@@ -803,26 +712,14 @@ class ConvHWCMicrokernelTester {
   input_widths, init_params, ...)                                                                                      \
   TEST(ukernel, qmax)                                                                                                  \
   {                                                                                                                    \
+    TEST_REQUIRES_ARCH_FLAGS(arch_flags);                                                                              \
     for (size_t output_channels = 1; output_channels < output_channel_tile * 2;                                        \
          output_channels += output_channel_tile - 1) {                                                                 \
       for (size_t input_widths_ = (padding_left_ ? 1 : 2); input_widths_ < input_widths * 8;                           \
            input_widths_ += (input_widths * 2 - 1)) {                                                                  \
-        auto tester = ConvHWCMicrokernelTester()                                                                       \
-                        .kernel_size(kernel_sizes)                                                                     \
-                        .subsampling(subsamplings)                                                                     \
-                        .input_channels(input_channel)                                                                 \
-                        .output_channels_tile(output_channel_tile)                                                     \
-                        .output_channels(output_channels)                                                              \
-                        .input_width(input_widths_)                                                                    \
-                        .input_height(6)                                                                               \
-                        .qmax(128);                                                                                    \
-        if (padding_left_ == 1 && padding_right_ == 1) {                                                               \
-          tester.padding_width(padding_right_);                                                                        \
-        }                                                                                                              \
-        else if (padding_left_ == 0 && padding_right_ == 1) {                                                          \
-          tester.padding_right(padding_right_);                                                                        \
-        }                                                                                                              \
-        tester.Test(ukernel, init_params);                                                                             \
+        ConvHWCHelperFunc(                                                                                             \
+          ukernel, kernel_sizes, subsamplings, input_channel, output_channel_tile, output_channels, input_widths_, 6,  \
+          {}, {}, {}, 128, padding_right_, padding_left_, {}, {}, init_params);                                        \
       }                                                                                                                \
     }                                                                                                                  \
   }
