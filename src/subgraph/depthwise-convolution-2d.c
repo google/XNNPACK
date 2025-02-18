@@ -20,7 +20,7 @@
 #include "xnnpack/subgraph.h"
 #include "pthreadpool.h"
 
-static enum xnn_status create_convolution_operator(
+static enum xnn_status create_depthwise_convolution_operator(
   const struct xnn_node* node,
   const struct xnn_value* values,
   size_t num_values,
@@ -394,7 +394,7 @@ static enum xnn_status create_convolution_operator(
   return status;
 }
 
-static enum xnn_status reshape_convolution_operator(
+static enum xnn_status reshape_depthwise_convolution_operator(
   struct xnn_operator_data* opdata,
   struct xnn_value* values,
   size_t num_values,
@@ -508,7 +508,7 @@ static enum xnn_status reshape_convolution_operator(
   return xnn_status_success;
 }
 
-static enum xnn_status setup_convolution_operator(
+static enum xnn_status setup_depthwise_convolution_operator(
   const struct xnn_operator_data* opdata,
   const struct xnn_value* values,
   size_t num_values,
@@ -987,9 +987,9 @@ enum xnn_status xnn_define_depthwise_convolution_2d(
   node->outputs[0] = output_id;
   node->flags = flags;
 
-  node->create = create_convolution_operator;
-  node->reshape = reshape_convolution_operator;
-  node->setup = setup_convolution_operator;
+  node->create = create_depthwise_convolution_operator;
+  node->reshape = reshape_depthwise_convolution_operator;
+  node->setup = setup_depthwise_convolution_operator;
 
   return xnn_status_success;
 };

@@ -1105,7 +1105,7 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, channels_eq_1_unipass_fulltile) {
     .pooling_elements(4)
     .pooling_tile(4)
     .channels(channel_tile)
-    .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+    .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1);
 }
 
 TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_input_offset) {
@@ -1115,7 +1115,7 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_input_off
     .pooling_tile(4)
     .channels(channel_tile)
     .input_offset(3)
-    .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+    .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1);
 }
 
 TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, channels_eq_1_unipass_subtile) {
@@ -1125,7 +1125,7 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, channels_eq_1_unipass_subtile) {
       .pooling_elements(pooling_elements)
       .pooling_tile(4)
       .channels(channel_tile)
-      .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1);
   }
 }
 
@@ -1137,7 +1137,7 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, channels_eq_1_unipass_subtile_with_input_offs
       .pooling_tile(4)
       .channels(channel_tile)
       .input_offset(3)
-      .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1);
   }
 }
 
@@ -1147,7 +1147,7 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, channels_gt_1_unipass_fulltile) {
       .pooling_elements(4)
       .pooling_tile(4)
       .channels(channels)
-      .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1);
   }
 }
 
@@ -1158,7 +1158,7 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, channels_gt_1_unipass_fulltile_with_input_off
       .pooling_tile(4)
       .channels(channels)
       .input_offset(3)
-      .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1);
   }
 }
 
@@ -1169,7 +1169,7 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, channels_gt_1_unipass_subtile) {
         .pooling_elements(pooling_elements)
         .pooling_tile(4)
         .channels(channels)
-        .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1);
     }
   }
 }
@@ -1182,7 +1182,7 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, channels_gt_1_unipass_subtile_with_input_offs
         .pooling_tile(4)
         .channels(channels)
         .input_offset(3)
-        .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1);
     }
   }
 }
@@ -1196,7 +1196,7 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels) {
           .pooling_elements(pooling_elements)
           .pooling_tile(4)
           .channels(channels)
-          .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1);
       }
     }
   }
@@ -1212,7 +1212,7 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_input_offset) {
           .pooling_tile(4)
           .channels(channels)
           .input_offset(7)
-          .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1);
       }
     }
   }
@@ -1228,7 +1228,7 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_output_stride) {
           .pooling_tile(4)
           .channels(channels)
           .output_stride(7)
-          .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1);
       }
     }
   }
@@ -1246,7 +1246,7 @@ TEST(F32_ARGMAXPOOL_4X__SCALAR_C1, few_output_pixels_with_step) {
             .step(step)
             .channels(channels)
             .output_stride(7)
-            .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+            .Test(xnn_f32_argmaxpool_ukernel_4x__scalar_c1);
         }
       }
     }
@@ -2343,7 +2343,7 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, channels_eq_1_unipass_fulltile) {
     .pooling_elements(9)
     .pooling_tile(9)
     .channels(channel_tile)
-    .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+    .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1);
 }
 
 TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_input_offset) {
@@ -2353,7 +2353,7 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, channels_eq_1_unipass_fulltile_with_input_off
     .pooling_tile(9)
     .channels(channel_tile)
     .input_offset(3)
-    .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+    .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1);
 }
 
 TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, channels_eq_1_unipass_subtile) {
@@ -2363,7 +2363,7 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, channels_eq_1_unipass_subtile) {
       .pooling_elements(pooling_elements)
       .pooling_tile(9)
       .channels(channel_tile)
-      .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1);
   }
 }
 
@@ -2375,7 +2375,7 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, channels_eq_1_unipass_subtile_with_input_offs
       .pooling_tile(9)
       .channels(channel_tile)
       .input_offset(3)
-      .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1);
   }
 }
 
@@ -2385,7 +2385,7 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, channels_gt_1_unipass_fulltile) {
       .pooling_elements(9)
       .pooling_tile(9)
       .channels(channels)
-      .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1);
   }
 }
 
@@ -2396,7 +2396,7 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, channels_gt_1_unipass_fulltile_with_input_off
       .pooling_tile(9)
       .channels(channels)
       .input_offset(3)
-      .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1);
   }
 }
 
@@ -2407,7 +2407,7 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, channels_gt_1_unipass_subtile) {
         .pooling_elements(pooling_elements)
         .pooling_tile(9)
         .channels(channels)
-        .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1);
     }
   }
 }
@@ -2420,7 +2420,7 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, channels_gt_1_unipass_subtile_with_input_offs
         .pooling_tile(9)
         .channels(channels)
         .input_offset(3)
-        .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1);
     }
   }
 }
@@ -2434,7 +2434,7 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels) {
           .pooling_elements(pooling_elements)
           .pooling_tile(9)
           .channels(channels)
-          .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1);
       }
     }
   }
@@ -2450,7 +2450,7 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_input_offset) {
           .pooling_tile(9)
           .channels(channels)
           .input_offset(7)
-          .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1);
       }
     }
   }
@@ -2466,7 +2466,7 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_output_stride) {
           .pooling_tile(9)
           .channels(channels)
           .output_stride(7)
-          .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1);
       }
     }
   }
@@ -2484,7 +2484,7 @@ TEST(F32_ARGMAXPOOL_9X__SCALAR_C1, few_output_pixels_with_step) {
             .step(step)
             .channels(channels)
             .output_stride(7)
-            .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+            .Test(xnn_f32_argmaxpool_ukernel_9x__scalar_c1);
         }
       }
     }
@@ -4014,7 +4014,7 @@ TEST(F32_ARGMAXPOOL_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile) {
     .pooling_elements(17)
     .pooling_tile(9, 8)
     .channels(channel_tile)
-    .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+    .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1);
 }
 
 TEST(F32_ARGMAXPOOL_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile_with_input_offset) {
@@ -4024,7 +4024,7 @@ TEST(F32_ARGMAXPOOL_9P8X__SCALAR_C1, channels_eq_1_twopass_fulltile_with_input_o
     .pooling_tile(9, 8)
     .channels(channel_tile)
     .input_offset(3)
-    .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+    .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1);
 }
 
 TEST(F32_ARGMAXPOOL_9P8X__SCALAR_C1, channels_eq_1_twopass_subtile) {
@@ -4034,7 +4034,7 @@ TEST(F32_ARGMAXPOOL_9P8X__SCALAR_C1, channels_eq_1_twopass_subtile) {
       .pooling_elements(pooling_elements)
       .pooling_tile(9, 8)
       .channels(channel_tile)
-      .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1);
   }
 }
 
@@ -4046,7 +4046,7 @@ TEST(F32_ARGMAXPOOL_9P8X__SCALAR_C1, channels_eq_1_twopass_subtile_with_input_of
       .pooling_tile(9, 8)
       .channels(channel_tile)
       .input_offset(3)
-      .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1);
   }
 }
 
@@ -4056,7 +4056,7 @@ TEST(F32_ARGMAXPOOL_9P8X__SCALAR_C1, channels_gt_1_twopass_fulltile) {
       .pooling_elements(17)
       .pooling_tile(9, 8)
       .channels(channels)
-      .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1);
   }
 }
 
@@ -4067,7 +4067,7 @@ TEST(F32_ARGMAXPOOL_9P8X__SCALAR_C1, channels_gt_1_twopass_fulltile_with_input_o
       .pooling_tile(9, 8)
       .channels(channels)
       .input_offset(3)
-      .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1);
   }
 }
 
@@ -4078,7 +4078,7 @@ TEST(F32_ARGMAXPOOL_9P8X__SCALAR_C1, channels_gt_1_twopass_subtile) {
         .pooling_elements(17)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1);
     }
   }
 }
@@ -4091,7 +4091,7 @@ TEST(F32_ARGMAXPOOL_9P8X__SCALAR_C1, channels_gt_1_twopass_subtile_with_input_of
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(3)
-        .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1);
     }
   }
 }
@@ -4103,7 +4103,7 @@ TEST(F32_ARGMAXPOOL_9P8X__SCALAR_C1, channels_eq_1_multipass) {
       .pooling_elements(17)
       .pooling_tile(9, 8)
       .channels(channel_tile)
-      .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1);
   }
 }
 
@@ -4115,7 +4115,7 @@ TEST(F32_ARGMAXPOOL_9P8X__SCALAR_C1, channels_eq_1_multipass_with_input_offset) 
       .pooling_tile(9, 8)
       .channels(channel_tile)
       .input_offset(3)
-      .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+      .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1);
   }
 }
 
@@ -4126,7 +4126,7 @@ TEST(F32_ARGMAXPOOL_9P8X__SCALAR_C1, channels_gt_1_multipass) {
         .pooling_elements(17)
         .pooling_tile(9, 8)
         .channels(channels)
-        .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1);
     }
   }
 }
@@ -4139,7 +4139,7 @@ TEST(F32_ARGMAXPOOL_9P8X__SCALAR_C1, channels_gt_1_multipass_with_input_offset) 
         .pooling_tile(9, 8)
         .channels(channels)
         .input_offset(3)
-        .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+        .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1);
     }
   }
 }
@@ -4153,7 +4153,7 @@ TEST(F32_ARGMAXPOOL_9P8X__SCALAR_C1, few_output_pixels) {
           .pooling_elements(pooling_elements)
           .pooling_tile(9, 8)
           .channels(channels)
-          .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1);
       }
     }
   }
@@ -4169,7 +4169,7 @@ TEST(F32_ARGMAXPOOL_9P8X__SCALAR_C1, few_output_pixels_with_input_offset) {
           .pooling_tile(9, 8)
           .channels(channels)
           .input_offset(7)
-          .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1);
       }
     }
   }
@@ -4185,7 +4185,7 @@ TEST(F32_ARGMAXPOOL_9P8X__SCALAR_C1, few_output_pixels_with_output_stride) {
           .pooling_tile(9, 8)
           .channels(channels)
           .output_stride(7)
-          .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+          .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1);
       }
     }
   }
@@ -4203,7 +4203,7 @@ TEST(F32_ARGMAXPOOL_9P8X__SCALAR_C1, few_output_pixels_with_step) {
             .step(step)
             .channels(channels)
             .output_stride(7)
-            .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1, ArgMaxPoolMicrokernelTester::Variant::Scalar);
+            .Test(xnn_f32_argmaxpool_ukernel_9p8x__scalar_c1);
         }
       }
     }

@@ -26,8 +26,7 @@ void xnn_f32_rmin_ukernel__sse_u8_acc2(
   assert(input != NULL);
   assert(output != NULL);
 
-  __m128 vmin0 = _mm_load_ss(input);
-  vmin0 = _mm_shuffle_ps(vmin0, vmin0, _MM_SHUFFLE(0, 0, 0, 0));
+  __m128 vmin0 = _mm_set1_ps(output[0]);
   __m128 vmin1 = vmin0;
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const __m128 vt0 = _mm_loadu_ps(input);

@@ -14,8 +14,7 @@
 #include "xnnpack/raddstoreexpminusmax.h"
 
 
-// Note redefine as uint32[] to avoid redundant bitcasts.
-extern XNN_INTERNAL const uint32_t xnn_table_exp2_k_over_64[64];
+extern XNN_INTERNAL const float xnn_table_exp2_k_over_64[64];
 
 void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_u4_acc2(
     size_t batch,
@@ -91,10 +90,10 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_u4_acc2(
     const uint32_t vidx2 = float_as_uint32(vn2) & vindex_mask;
     const uint32_t vidx3 = float_as_uint32(vn3) & vindex_mask;
     // Adjust exponent of the value l fetched from the table to get the final s value.
-    const float vs0 = uint32_as_float(xnn_table_exp2_k_over_64[vidx0] + ve0);
-    const float vs1 = uint32_as_float(xnn_table_exp2_k_over_64[vidx1] + ve1);
-    const float vs2 = uint32_as_float(xnn_table_exp2_k_over_64[vidx2] + ve2);
-    const float vs3 = uint32_as_float(xnn_table_exp2_k_over_64[vidx3] + ve3);
+    const float vs0 = uint32_as_float(float_as_uint32(xnn_table_exp2_k_over_64[vidx0]) + ve0);
+    const float vs1 = uint32_as_float(float_as_uint32(xnn_table_exp2_k_over_64[vidx1]) + ve1);
+    const float vs2 = uint32_as_float(float_as_uint32(xnn_table_exp2_k_over_64[vidx2]) + ve2);
+    const float vs3 = uint32_as_float(float_as_uint32(xnn_table_exp2_k_over_64[vidx3]) + ve3);
 
     // Subtract the large number back to get final n := round(x * 64 / log(2)) as a floating-point number.
     vn0 -= vmagic_bias;
@@ -198,7 +197,7 @@ void xnn_f32_raddstoreexpminusmax_ukernel__scalar_rr2_lut64_p2_u4_acc2(
     // Use bits 0:6 bits of n, as integer, as an index for table lookup of l := 2**(n % 64).
     const uint32_t vidx = float_as_uint32(vn) & vindex_mask;
     // Adjust exponent of the value l fetched from the table to get the final s value.
-    const float vs = uint32_as_float(xnn_table_exp2_k_over_64[vidx] + ve);
+    const float vs = uint32_as_float(float_as_uint32(xnn_table_exp2_k_over_64[vidx]) + ve);
 
     // Subtract the large number back to get final n := round(x * 64 / log(2)) as a floating-point number.
     vn -= vmagic_bias;

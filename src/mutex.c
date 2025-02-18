@@ -11,6 +11,8 @@
 #include "xnnpack/mutex.h"
 
 #if XNN_PLATFORM_WINDOWS
+#include <inttypes.h>
+
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif

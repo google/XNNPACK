@@ -15,7 +15,7 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #include "xnnpack/vunary.h"
 
 
-extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_64[64];
+extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_64[64];
 
 $WASM_V32X4_LANESELECT = "wasm_i32x4_relaxed_laneselect" if RELAXED else "wasm_v128_bitselect"
 $ISA = "wasmrelaxedsimd" if RELAXED else "wasmsimd"

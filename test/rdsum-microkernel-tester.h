@@ -238,7 +238,7 @@ class RDSumMicrokernelTester {
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
-        EXPECT_NEAR(output[c], output_ref[c], std::abs(output_ref[c]) * 1.0e-5f)
+        ASSERT_NEAR(output[c], output_ref[c], std::abs(output_ref[c]) * 1.0e-5f)
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
       }
     }
@@ -276,7 +276,7 @@ class RDSumMicrokernelTester {
 
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
-        EXPECT_NEAR(output[c], output_ref[c], std::abs(output_ref[c]) * 1.0e-6f)
+        ASSERT_NEAR(output[c], output_ref[c], std::abs(output_ref[c]) * 1.0e-6f)
           << "at position " << c << ", rows = " << rows() << ", channels = " << channels();
       }
     }

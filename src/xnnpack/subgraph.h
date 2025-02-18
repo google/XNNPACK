@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -37,6 +38,16 @@
 
 /// Enable Slinky (if available).
 #define XNN_FLAG_SLINKY_ENABLED 0x40000000
+
+/// If Slinky is enabled, disable any scheduling.
+#define XNN_FLAG_SLINKY_SCHEDULE_DISABLED 0x20000000
+
+/// If Slinky is enabled, assume shapes are concrete (and rebuild pipeline in reshape).
+/// This makes reshaping more expensive, but may reduce overhead in some cases.
+#define XNN_FLAG_SLINKY_CONCRETE_BOUNDS 0x10000000
+
+/// If Slinky is enabled, disable asserts in Slinky pipelines.
+#define XNN_FLAG_SLINKY_NO_CHECKS 0x08000000
 
 /// Assume tensors of rank > 2 will be squashed to 2 dimensions.
 #define XNN_FLAG_SQUASH_GROUPS 0x00000100
@@ -308,8 +319,8 @@ struct xnn_node {
     } static_resize;
     struct {
       size_t num_dims;
-      int64_t offsets[XNN_MAX_TENSOR_DIMS];
-      size_t sizes[XNN_MAX_TENSOR_DIMS];
+      int64_t begins[XNN_MAX_TENSOR_DIMS];
+      int64_t ends[XNN_MAX_TENSOR_DIMS];
     } slice;
     struct {
       uint32_t block_size;
@@ -406,8 +417,8 @@ struct xnn_operator_data {
     };
     // Used for static slice.
     struct {
-      int64_t offsets[XNN_MAX_TENSOR_DIMS];
-      size_t sizes[XNN_MAX_TENSOR_DIMS];
+      int64_t begins[XNN_MAX_TENSOR_DIMS];
+      int64_t ends[XNN_MAX_TENSOR_DIMS];
     };
   };
   uint32_t adjustment_height;
@@ -440,6 +451,7 @@ struct xnn_subgraph {
 /// Runtime is a combination of an execution plan for subgraph Nodes and a memory manager for subgraph Values.
 struct xnn_runtime {
   uint32_t num_external_values;
+  uint32_t flags;
 
   /// List of operators in the execution plan, in execution order.
   struct xnn_operator_data* opdata;
@@ -472,7 +484,6 @@ struct xnn_runtime {
 enum xnn_status xnn_insert_clamp_node(xnn_subgraph_t subgraph, float output_min, float output_max, struct xnn_node *node);
 
 enum xnn_status xnn_insert_pack_lh_node(xnn_subgraph_t subgraph,
-                                        const struct xnn_value* input,
                                         uint32_t input_id, uint32_t* new_id);
 
 struct xnn_value* xnn_subgraph_new_internal_value(xnn_subgraph_t subgraph);

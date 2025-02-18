@@ -6,10 +6,6 @@ Auto-generated file. Do not edit!
 """
 
 PROD_AVX512FP16_MICROKERNEL_SRCS = [
-    "src/f16-gemm/gen/f16-gemm-1x64-minmax-avx512fp16-broadcast.c",
-    "src/f16-gemm/gen/f16-gemm-7x64-minmax-avx512fp16-broadcast.c",
-    "src/f16-igemm/gen/f16-igemm-1x64-minmax-avx512fp16-broadcast.c",
-    "src/f16-igemm/gen/f16-igemm-7x64-minmax-avx512fp16-broadcast.c",
     "src/f16-rminmax/gen/f16-rmax-avx512fp16-u128-acc4.c",
     "src/f16-rminmax/gen/f16-rminmax-avx512fp16-u128-acc4.c",
     "src/f16-vbinary/gen/f16-vadd-avx512fp16-u64.c",
@@ -35,6 +31,7 @@ PROD_AVX512FP16_MICROKERNEL_SRCS = [
 
 NON_PROD_AVX512FP16_MICROKERNEL_SRCS = [
     "src/f16-gemm/gen/f16-gemm-1x32-minmax-avx512fp16-broadcast.c",
+    "src/f16-gemm/gen/f16-gemm-1x64-minmax-avx512fp16-broadcast.c",
     "src/f16-gemm/gen/f16-gemm-4x32-minmax-avx512fp16-broadcast.c",
     "src/f16-gemm/gen/f16-gemm-4x64-minmax-avx512fp16-broadcast.c",
     "src/f16-gemm/gen/f16-gemm-5x32-minmax-avx512fp16-broadcast.c",
@@ -42,9 +39,11 @@ NON_PROD_AVX512FP16_MICROKERNEL_SRCS = [
     "src/f16-gemm/gen/f16-gemm-6x32-minmax-avx512fp16-broadcast.c",
     "src/f16-gemm/gen/f16-gemm-6x64-minmax-avx512fp16-broadcast.c",
     "src/f16-gemm/gen/f16-gemm-7x32-minmax-avx512fp16-broadcast.c",
+    "src/f16-gemm/gen/f16-gemm-7x64-minmax-avx512fp16-broadcast.c",
     "src/f16-gemm/gen/f16-gemm-8x32-minmax-avx512fp16-broadcast.c",
     "src/f16-gemm/gen/f16-gemm-8x64-minmax-avx512fp16-broadcast.c",
     "src/f16-igemm/gen/f16-igemm-1x32-minmax-avx512fp16-broadcast.c",
+    "src/f16-igemm/gen/f16-igemm-1x64-minmax-avx512fp16-broadcast.c",
     "src/f16-igemm/gen/f16-igemm-4x32-minmax-avx512fp16-broadcast.c",
     "src/f16-igemm/gen/f16-igemm-4x64-minmax-avx512fp16-broadcast.c",
     "src/f16-igemm/gen/f16-igemm-5x32-minmax-avx512fp16-broadcast.c",
@@ -52,6 +51,7 @@ NON_PROD_AVX512FP16_MICROKERNEL_SRCS = [
     "src/f16-igemm/gen/f16-igemm-6x32-minmax-avx512fp16-broadcast.c",
     "src/f16-igemm/gen/f16-igemm-6x64-minmax-avx512fp16-broadcast.c",
     "src/f16-igemm/gen/f16-igemm-7x32-minmax-avx512fp16-broadcast.c",
+    "src/f16-igemm/gen/f16-igemm-7x64-minmax-avx512fp16-broadcast.c",
     "src/f16-igemm/gen/f16-igemm-8x32-minmax-avx512fp16-broadcast.c",
     "src/f16-igemm/gen/f16-igemm-8x64-minmax-avx512fp16-broadcast.c",
     "src/f16-rminmax/gen/f16-rmax-avx512fp16-u32.c",

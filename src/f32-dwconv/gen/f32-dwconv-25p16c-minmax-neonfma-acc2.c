@@ -29,8 +29,8 @@ void xnn_f32_dwconv_minmax_ukernel_25p16c__neonfma_acc2(
   assert(channels != 0);
   assert(output_width != 0);
 
-  const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
-  const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+  const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
+  const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
   do {
     const float* i0 = input[0];
     assert(i0 != NULL);

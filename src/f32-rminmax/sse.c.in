@@ -31,13 +31,11 @@ void xnn_f32_r${OP.lower()}_ukernel__sse_u${BATCH_TILE}${ACC_SUFFIX}(
   assert(output != NULL);
 
   $if EMIT_MIN:
-    __m128 vmin0 = _mm_load_ss(input);
-    vmin0 = _mm_shuffle_ps(vmin0, vmin0, _MM_SHUFFLE(0, 0, 0, 0));
+    __m128 vmin0 = _mm_set1_ps(output[0]);
     $if EMIT_MAX:
-      __m128 vmax0 = vmin0;
+      __m128 vmax0 = _mm_set1_ps(output[1]);
   $elif EMIT_MAX:
-    __m128 vmax0 = _mm_load_ss(input);
-    vmax0 = _mm_shuffle_ps(vmax0, vmax0, _MM_SHUFFLE(0, 0, 0, 0));
+    __m128 vmax0 = _mm_set1_ps(output[0]);
   $for A in range(1, ACCUMULATORS):
     $if EMIT_MIN:
       __m128 vmin${A} = vmin0;

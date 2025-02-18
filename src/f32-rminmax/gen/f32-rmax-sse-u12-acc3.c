@@ -26,8 +26,7 @@ void xnn_f32_rmax_ukernel__sse_u12_acc3(
   assert(input != NULL);
   assert(output != NULL);
 
-  __m128 vmax0 = _mm_load_ss(input);
-  vmax0 = _mm_shuffle_ps(vmax0, vmax0, _MM_SHUFFLE(0, 0, 0, 0));
+  __m128 vmax0 = _mm_set1_ps(output[0]);
   __m128 vmax1 = vmax0;
   __m128 vmax2 = vmax0;
   for (; batch >= 12 * sizeof(float); batch -= 12 * sizeof(float)) {

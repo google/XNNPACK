@@ -22,6 +22,7 @@
 #include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
+#include "xnnpack/microfnptr.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/requantization.h"
@@ -29,7 +30,9 @@
 #include "replicable_random_device.h"
 #include "runtime-flags.h"
 
-using testing::ElementsAreArray;
+using ::testing::ElementsAreArray;
+using ::testing::FloatNear;
+using ::testing::Pointwise;
 
 struct FullyConnectedTestParam {
   explicit FullyConnectedTestParam(bool use_bias_) : use_bias(use_bias_) {}
@@ -152,6 +155,7 @@ using FullyConnectedTestQS8 = QuantizedFullyConnectedTestBase<int8_t>;
 using FullyConnectedTestQU8 = QuantizedFullyConnectedTestBase<uint8_t>;
 using FullyConnectedTestF16 = FullyConnectedTestBase<xnn_float16, float, float>;
 using FullyConnectedTestF32 = FullyConnectedTestBase<float>;
+using FullyConnectedTestBF16F32 = FullyConnectedTestBase<xnn_bfloat16, xnn_bfloat16, float, float>;
 using DynamicFullyConnectedTestF32 = FullyConnectedTestBase<float>;
 
 TEST_F(FullyConnectedTestQC8, define) {
@@ -198,18 +202,27 @@ TEST_F(FullyConnectedTestQC8, define) {
       xnn_define_fully_connected(subgraph, output_min, output_max, input_id,
                                  kernel_id, bias_id, output_id, /*flags=*/0));
 
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 3);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->inputs[1], kernel_id);
-  ASSERT_EQ(node->inputs[2], bias_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
+  ASSERT_LE(subgraph->num_nodes, 2);
+  const struct xnn_node* fc_node = nullptr;
+  if (subgraph->num_nodes == 1) {
+    fc_node = &subgraph->nodes[0];
+    ASSERT_EQ(fc_node->inputs[0], input_id);
+  } else {
+    const struct xnn_node* pack_lh_node = &subgraph->nodes[0];
+    fc_node = &subgraph->nodes[1];
+    ASSERT_EQ(pack_lh_node->type, xnn_node_type_pack_lh);
+    ASSERT_EQ(pack_lh_node->inputs[0], input_id);
+    ASSERT_EQ(fc_node->inputs[0], pack_lh_node->outputs[0]);
+  }
+  ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
+  ASSERT_EQ(fc_node->activation.output_min, output_min);
+  ASSERT_EQ(fc_node->activation.output_max, output_max);
+  ASSERT_EQ(fc_node->num_inputs, 3);
+  ASSERT_EQ(fc_node->inputs[1], kernel_id);
+  ASSERT_EQ(fc_node->inputs[2], bias_id);
+  ASSERT_EQ(fc_node->num_outputs, 1);
+  ASSERT_EQ(fc_node->outputs[0], output_id);
+  ASSERT_EQ(fc_node->flags, 0);
 }
 
 TEST_F(FullyConnectedTestQS8, define) {
@@ -255,18 +268,27 @@ TEST_F(FullyConnectedTestQS8, define) {
       xnn_define_fully_connected(subgraph, output_min, output_max, input_id,
                                  kernel_id, bias_id, output_id, /*flags=*/0));
 
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 3);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->inputs[1], kernel_id);
-  ASSERT_EQ(node->inputs[2], bias_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
+  ASSERT_LE(subgraph->num_nodes, 2);
+  const struct xnn_node* fc_node = nullptr;
+  if (subgraph->num_nodes == 1) {
+    fc_node = &subgraph->nodes[0];
+    ASSERT_EQ(fc_node->inputs[0], input_id);
+  } else {
+    const struct xnn_node* pack_lh_node = &subgraph->nodes[0];
+    fc_node = &subgraph->nodes[1];
+    ASSERT_EQ(pack_lh_node->type, xnn_node_type_pack_lh);
+    ASSERT_EQ(pack_lh_node->inputs[0], input_id);
+    ASSERT_EQ(fc_node->inputs[0], pack_lh_node->outputs[0]);
+  }
+  ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
+  ASSERT_EQ(fc_node->activation.output_min, output_min);
+  ASSERT_EQ(fc_node->activation.output_max, output_max);
+  ASSERT_EQ(fc_node->num_inputs, 3);
+  ASSERT_EQ(fc_node->inputs[1], kernel_id);
+  ASSERT_EQ(fc_node->inputs[2], bias_id);
+  ASSERT_EQ(fc_node->num_outputs, 1);
+  ASSERT_EQ(fc_node->outputs[0], output_id);
+  ASSERT_EQ(fc_node->flags, 0);
 }
 
 TEST_F(FullyConnectedTestQU8, define) {
@@ -312,18 +334,27 @@ TEST_F(FullyConnectedTestQU8, define) {
                                        input_id, kernel_id, bias_id, output_id,
                                        /*flags=*/0));
 
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 3);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->inputs[1], kernel_id);
-  ASSERT_EQ(node->inputs[2], bias_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
+  ASSERT_LE(subgraph->num_nodes, 2);
+  const struct xnn_node* fc_node = nullptr;
+  if (subgraph->num_nodes == 1) {
+    fc_node = &subgraph->nodes[0];
+    ASSERT_EQ(fc_node->inputs[0], input_id);
+  } else {
+    const struct xnn_node* pack_lh_node = &subgraph->nodes[0];
+    fc_node = &subgraph->nodes[1];
+    ASSERT_EQ(pack_lh_node->type, xnn_node_type_pack_lh);
+    ASSERT_EQ(pack_lh_node->inputs[0], input_id);
+    ASSERT_EQ(fc_node->inputs[0], pack_lh_node->outputs[0]);
+  }
+  ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
+  ASSERT_EQ(fc_node->activation.output_min, output_min);
+  ASSERT_EQ(fc_node->activation.output_max, output_max);
+  ASSERT_EQ(fc_node->num_inputs, 3);
+  ASSERT_EQ(fc_node->inputs[1], kernel_id);
+  ASSERT_EQ(fc_node->inputs[2], bias_id);
+  ASSERT_EQ(fc_node->num_outputs, 1);
+  ASSERT_EQ(fc_node->outputs[0], output_id);
+  ASSERT_EQ(fc_node->flags, 0);
 }
 
 TEST_P(FullyConnectedTestF16, define) {
@@ -372,18 +403,27 @@ TEST_P(FullyConnectedTestF16, define) {
       xnn_define_fully_connected(subgraph, output_min, output_max, input_id,
                                  kernel_id, bias_id, output_id, /*flags=*/0));
 
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, use_bias ? 3 : 2);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->inputs[1], kernel_id);
-  ASSERT_EQ(node->inputs[2], bias_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
+  ASSERT_LE(subgraph->num_nodes, 2);
+  const struct xnn_node* fc_node = nullptr;
+  if (subgraph->num_nodes == 1) {
+    fc_node = &subgraph->nodes[0];
+    ASSERT_EQ(fc_node->inputs[0], input_id);
+  } else {
+    const struct xnn_node* pack_lh_node = &subgraph->nodes[0];
+    fc_node = &subgraph->nodes[1];
+    ASSERT_EQ(pack_lh_node->type, xnn_node_type_pack_lh);
+    ASSERT_EQ(pack_lh_node->inputs[0], input_id);
+    ASSERT_EQ(fc_node->inputs[0], pack_lh_node->outputs[0]);
+  }
+  ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
+  ASSERT_EQ(fc_node->activation.output_min, output_min);
+  ASSERT_EQ(fc_node->activation.output_max, output_max);
+  ASSERT_EQ(fc_node->num_inputs, use_bias ? 3 : 2);
+  ASSERT_EQ(fc_node->inputs[1], kernel_id);
+  ASSERT_EQ(fc_node->inputs[2], bias_id);
+  ASSERT_EQ(fc_node->num_outputs, 1);
+  ASSERT_EQ(fc_node->outputs[0], output_id);
+  ASSERT_EQ(fc_node->flags, 0);
 }
 
 TEST_F(FullyConnectedTestF32, define) {
@@ -429,18 +469,27 @@ TEST_F(FullyConnectedTestF32, define) {
       xnn_define_fully_connected(subgraph, output_min, output_max, input_id,
                                  kernel_id, bias_id, output_id, /*flags=*/0));
 
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 3);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->inputs[1], kernel_id);
-  ASSERT_EQ(node->inputs[2], bias_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
+  ASSERT_LE(subgraph->num_nodes, 2);
+  const struct xnn_node* fc_node = nullptr;
+  if (subgraph->num_nodes == 1) {
+    fc_node = &subgraph->nodes[0];
+    ASSERT_EQ(fc_node->inputs[0], input_id);
+  } else {
+    const struct xnn_node* pack_lh_node = &subgraph->nodes[0];
+    fc_node = &subgraph->nodes[1];
+    ASSERT_EQ(pack_lh_node->type, xnn_node_type_pack_lh);
+    ASSERT_EQ(pack_lh_node->inputs[0], input_id);
+    ASSERT_EQ(fc_node->inputs[0], pack_lh_node->outputs[0]);
+  }
+  ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
+  ASSERT_EQ(fc_node->activation.output_min, output_min);
+  ASSERT_EQ(fc_node->activation.output_max, output_max);
+  ASSERT_EQ(fc_node->num_inputs, 3);
+  ASSERT_EQ(fc_node->inputs[1], kernel_id);
+  ASSERT_EQ(fc_node->inputs[2], bias_id);
+  ASSERT_EQ(fc_node->num_outputs, 1);
+  ASSERT_EQ(fc_node->outputs[0], output_id);
+  ASSERT_EQ(fc_node->flags, 0);
 }
 
 TEST_F(FullyConnectedTestF32QC4W, define) {
@@ -489,18 +538,27 @@ TEST_F(FullyConnectedTestF32QC4W, define) {
       xnn_define_fully_connected(subgraph, output_min, output_max, input_id,
                                  kernel_id, bias_id, output_id, /*flags=*/0));
 
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 3);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->inputs[1], kernel_id);
-  ASSERT_EQ(node->inputs[2], bias_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
+  ASSERT_LE(subgraph->num_nodes, 2);
+  const struct xnn_node* fc_node = nullptr;
+  if (subgraph->num_nodes == 1) {
+    fc_node = &subgraph->nodes[0];
+    ASSERT_EQ(fc_node->inputs[0], input_id);
+  } else {
+    const struct xnn_node* pack_lh_node = &subgraph->nodes[0];
+    fc_node = &subgraph->nodes[1];
+    ASSERT_EQ(pack_lh_node->type, xnn_node_type_pack_lh);
+    ASSERT_EQ(pack_lh_node->inputs[0], input_id);
+    ASSERT_EQ(fc_node->inputs[0], pack_lh_node->outputs[0]);
+  }
+  ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
+  ASSERT_EQ(fc_node->activation.output_min, output_min);
+  ASSERT_EQ(fc_node->activation.output_max, output_max);
+  ASSERT_EQ(fc_node->num_inputs, 3);
+  ASSERT_EQ(fc_node->inputs[1], kernel_id);
+  ASSERT_EQ(fc_node->inputs[2], bias_id);
+  ASSERT_EQ(fc_node->num_outputs, 1);
+  ASSERT_EQ(fc_node->outputs[0], output_id);
+  ASSERT_EQ(fc_node->flags, 0);
 }
 
 TEST_F(FullyConnectedTestF32QC4W, define_without_bias) {
@@ -542,18 +600,27 @@ TEST_F(FullyConnectedTestF32QC4W, define_without_bias) {
                 subgraph, output_min, output_max, input_id, kernel_id,
                 XNN_INVALID_VALUE_ID, output_id, /*flags=*/0));
 
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 2);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->inputs[1], kernel_id);
-  ASSERT_EQ(node->inputs[2], XNN_INVALID_VALUE_ID);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
+  ASSERT_LE(subgraph->num_nodes, 2);
+  const struct xnn_node* fc_node = nullptr;
+  if (subgraph->num_nodes == 1) {
+    fc_node = &subgraph->nodes[0];
+    ASSERT_EQ(fc_node->inputs[0], input_id);
+  } else {
+    const struct xnn_node* pack_lh_node = &subgraph->nodes[0];
+    fc_node = &subgraph->nodes[1];
+    ASSERT_EQ(pack_lh_node->type, xnn_node_type_pack_lh);
+    ASSERT_EQ(pack_lh_node->inputs[0], input_id);
+    ASSERT_EQ(fc_node->inputs[0], pack_lh_node->outputs[0]);
+  }
+  ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
+  ASSERT_EQ(fc_node->activation.output_min, output_min);
+  ASSERT_EQ(fc_node->activation.output_max, output_max);
+  ASSERT_EQ(fc_node->num_inputs, 2);
+  ASSERT_EQ(fc_node->inputs[1], kernel_id);
+  ASSERT_EQ(fc_node->inputs[2], XNN_INVALID_VALUE_ID);
+  ASSERT_EQ(fc_node->num_outputs, 1);
+  ASSERT_EQ(fc_node->outputs[0], output_id);
+  ASSERT_EQ(fc_node->flags, 0);
 }
 
 TEST_F(FullyConnectedTestF32QC8W, define) {
@@ -600,18 +667,27 @@ TEST_F(FullyConnectedTestF32QC8W, define) {
       xnn_define_fully_connected(subgraph, output_min, output_max, input_id,
                                  kernel_id, bias_id, output_id, /*flags=*/0));
 
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 3);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->inputs[1], kernel_id);
-  ASSERT_EQ(node->inputs[2], bias_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
+  ASSERT_LE(subgraph->num_nodes, 2);
+  const struct xnn_node* fc_node = nullptr;
+  if (subgraph->num_nodes == 1) {
+    fc_node = &subgraph->nodes[0];
+    ASSERT_EQ(fc_node->inputs[0], input_id);
+  } else {
+    const struct xnn_node* pack_lh_node = &subgraph->nodes[0];
+    fc_node = &subgraph->nodes[1];
+    ASSERT_EQ(pack_lh_node->type, xnn_node_type_pack_lh);
+    ASSERT_EQ(pack_lh_node->inputs[0], input_id);
+    ASSERT_EQ(fc_node->inputs[0], pack_lh_node->outputs[0]);
+  }
+  ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
+  ASSERT_EQ(fc_node->activation.output_min, output_min);
+  ASSERT_EQ(fc_node->activation.output_max, output_max);
+  ASSERT_EQ(fc_node->num_inputs, 3);
+  ASSERT_EQ(fc_node->inputs[1], kernel_id);
+  ASSERT_EQ(fc_node->inputs[2], bias_id);
+  ASSERT_EQ(fc_node->num_outputs, 1);
+  ASSERT_EQ(fc_node->outputs[0], output_id);
+  ASSERT_EQ(fc_node->flags, 0);
 }
 
 TEST_F(FullyConnectedTestF32QC8W, define_without_bias) {
@@ -651,18 +727,27 @@ TEST_F(FullyConnectedTestF32QC8W, define_without_bias) {
                 subgraph, output_min, output_max, input_id, kernel_id,
                 XNN_INVALID_VALUE_ID, output_id, /*flags=*/0));
 
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 2);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->inputs[1], kernel_id);
-  ASSERT_EQ(node->inputs[2], XNN_INVALID_VALUE_ID);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
+  ASSERT_LE(subgraph->num_nodes, 2);
+  const struct xnn_node* fc_node = nullptr;
+  if (subgraph->num_nodes == 1) {
+    fc_node = &subgraph->nodes[0];
+    ASSERT_EQ(fc_node->inputs[0], input_id);
+  } else {
+    const struct xnn_node* pack_lh_node = &subgraph->nodes[0];
+    fc_node = &subgraph->nodes[1];
+    ASSERT_EQ(pack_lh_node->type, xnn_node_type_pack_lh);
+    ASSERT_EQ(pack_lh_node->inputs[0], input_id);
+    ASSERT_EQ(fc_node->inputs[0], pack_lh_node->outputs[0]);
+  }
+  ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
+  ASSERT_EQ(fc_node->activation.output_min, output_min);
+  ASSERT_EQ(fc_node->activation.output_max, output_max);
+  ASSERT_EQ(fc_node->num_inputs, 2);
+  ASSERT_EQ(fc_node->inputs[1], kernel_id);
+  ASSERT_EQ(fc_node->inputs[2], XNN_INVALID_VALUE_ID);
+  ASSERT_EQ(fc_node->num_outputs, 1);
+  ASSERT_EQ(fc_node->outputs[0], output_id);
+  ASSERT_EQ(fc_node->flags, 0);
 }
 
 TEST_F(DynamicFullyConnectedTestF32, define) {
@@ -707,18 +792,27 @@ TEST_F(DynamicFullyConnectedTestF32, define) {
       xnn_define_fully_connected(subgraph, output_min, output_max, input_id,
                                  kernel_id, bias_id, output_id, /*flags=*/0));
 
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 3);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->inputs[1], kernel_id);
-  ASSERT_EQ(node->inputs[2], bias_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
+  ASSERT_LE(subgraph->num_nodes, 2);
+  const struct xnn_node* fc_node = nullptr;
+  if (subgraph->num_nodes == 1) {
+    fc_node = &subgraph->nodes[0];
+    ASSERT_EQ(fc_node->inputs[0], input_id);
+  } else {
+    const struct xnn_node* pack_lh_node = &subgraph->nodes[0];
+    fc_node = &subgraph->nodes[1];
+    ASSERT_EQ(pack_lh_node->type, xnn_node_type_pack_lh);
+    ASSERT_EQ(pack_lh_node->inputs[0], input_id);
+    ASSERT_EQ(fc_node->inputs[0], pack_lh_node->outputs[0]);
+  }
+  ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
+  ASSERT_EQ(fc_node->activation.output_min, output_min);
+  ASSERT_EQ(fc_node->activation.output_max, output_max);
+  ASSERT_EQ(fc_node->num_inputs, 3);
+  ASSERT_EQ(fc_node->inputs[1], kernel_id);
+  ASSERT_EQ(fc_node->inputs[2], bias_id);
+  ASSERT_EQ(fc_node->num_outputs, 1);
+  ASSERT_EQ(fc_node->outputs[0], output_id);
+  ASSERT_EQ(fc_node->flags, 0);
 }
 
 TEST_F(FullyConnectedTestQC8, matches_operator_api) {
@@ -1106,6 +1200,17 @@ TEST_F(FullyConnectedTestQU8, matches_operator_api) {
   EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
 }
 
+INSTANTIATE_TEST_SUITE_P(
+    UseBias, FullyConnectedTestF16,
+    testing::ValuesIn<FullyConnectedTestParam>({FullyConnectedTestParam(false),
+                                                FullyConnectedTestParam(true)}),
+    [](const testing::TestParamInfo<FullyConnectedTestParam>& info) {
+      if (info.param.use_bias) {
+        return "with_bias";
+      }
+      return "no_bias";
+    });
+
 TEST_P(FullyConnectedTestF16, matches_operator_api) {
   bool use_bias = GetParam().use_bias;
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
@@ -1196,13 +1301,11 @@ TEST_P(FullyConnectedTestF16, matches_operator_api) {
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
+  EXPECT_THAT(subgraph_output,
+              Pointwise(FloatNear(1.0e-2),
+                        std::vector<xnn_float16>(operator_output.begin(),
+                                                 operator_output.end())));
 }
-
-INSTANTIATE_TEST_SUITE_P(UseBias, FullyConnectedTestF16,
-                         testing::ValuesIn<FullyConnectedTestParam>(
-                             {FullyConnectedTestParam(false),
-                              FullyConnectedTestParam(true)}));
 
 TEST_P(FullyConnectedTestF16, matches_operator_api_f16_weights) {
   bool use_bias = GetParam().use_bias;
@@ -1297,20 +1400,28 @@ TEST_P(FullyConnectedTestF16, matches_operator_api_f16_weights) {
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
+  EXPECT_THAT(subgraph_output,
+              Pointwise(FloatNear(1.0e-2),
+                        std::vector<xnn_float16>(operator_output.begin(),
+                                                 operator_output.end())));
 }
 
-TEST_F(FullyConnectedTestF32, matches_operator_api) {
+TEST_F(FullyConnectedTestBF16F32, matches_operator_api) {
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 
   xnn_operator_t op = nullptr;
 
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
-  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+  // std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+  // std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng);
+  // }); std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng);
+  // });
+  int counter = 0;
+  std::generate(input.begin(), input.end(), [&]() { return counter++ % 10; });
+  std::generate(kernel.begin(), kernel.end(), [&]() { return counter++ % 10; });
+  std::generate(bias.begin(), bias.end(), [&]() { return counter++ % 10; });
 
   // Call operator API.
-  const xnn_status status = xnn_create_fully_connected_nc_f32(
+  const xnn_status status = xnn_create_fully_connected_nc_bf16_f32(
       input_channels, output_channels, input_channels, output_channels,
       kernel.data(), bias.data(), output_min, output_max,
       /*flags=*/0, nullptr, nullptr, &op);
@@ -1323,9 +1434,9 @@ TEST_F(FullyConnectedTestF32, matches_operator_api) {
 
   ASSERT_EQ(xnn_status_success, status);
   ASSERT_NE(nullptr, op);
-  ASSERT_EQ(xnn_status_success, xnn_reshape_fully_connected_nc_f32(
+  ASSERT_EQ(xnn_status_success, xnn_reshape_fully_connected_nc_bf16_f32(
                                     op, batch_size, /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_fully_connected_nc_f32(
+  ASSERT_EQ(xnn_status_success, xnn_setup_fully_connected_nc_bf16_f32(
                                     op, input.data(), operator_output.data()));
 
   ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
@@ -1339,7 +1450,7 @@ TEST_F(FullyConnectedTestF32, matches_operator_api) {
   uint32_t input_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(xnn_status_success,
             xnn_define_tensor_value(
-                subgraph, xnn_datatype_fp32, input_dims.size(),
+                subgraph, xnn_datatype_bf16, input_dims.size(),
                 input_dims.data(), nullptr,
                 /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
   ASSERT_NE(input_id, XNN_INVALID_VALUE_ID);
@@ -1347,7 +1458,7 @@ TEST_F(FullyConnectedTestF32, matches_operator_api) {
   uint32_t kernel_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(
       xnn_status_success,
-      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, kernel_dims.size(),
+      xnn_define_tensor_value(subgraph, xnn_datatype_bf16, kernel_dims.size(),
                               kernel_dims.data(), kernel.data(),
                               /*external_id=*/1, /*flags=*/0, &kernel_id));
 
@@ -1385,7 +1496,10 @@ TEST_F(FullyConnectedTestF32, matches_operator_api) {
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
+  EXPECT_THAT(
+      subgraph_output,
+      Pointwise(FloatNear(1.0e-5), std::vector<float>(operator_output.begin(),
+                                                      operator_output.end())));
 }
 
 TEST_F(FullyConnectedTestF32QC4W, matches_operator_api) {
@@ -1479,7 +1593,10 @@ TEST_F(FullyConnectedTestF32QC4W, matches_operator_api) {
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
+  EXPECT_THAT(
+      subgraph_output,
+      Pointwise(FloatNear(1.0e-5), std::vector<float>(operator_output.begin(),
+                                                      operator_output.end())));
 }
 
 TEST_F(FullyConnectedTestF32QC4W, matches_operator_api_without_bias) {
@@ -1565,7 +1682,10 @@ TEST_F(FullyConnectedTestF32QC4W, matches_operator_api_without_bias) {
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
+  EXPECT_THAT(
+      subgraph_output,
+      Pointwise(FloatNear(1.0e-5), std::vector<float>(operator_output.begin(),
+                                                      operator_output.end())));
 }
 
 TEST_F(FullyConnectedTestF32QC8W, matches_operator_api) {
@@ -1658,7 +1778,10 @@ TEST_F(FullyConnectedTestF32QC8W, matches_operator_api) {
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
+  EXPECT_THAT(
+      subgraph_output,
+      Pointwise(FloatNear(1.0e-5), std::vector<float>(operator_output.begin(),
+                                                      operator_output.end())));
 }
 
 TEST_F(FullyConnectedTestF32QC8W, matches_operator_api_without_bias) {
@@ -1743,13 +1866,22 @@ TEST_F(FullyConnectedTestF32QC8W, matches_operator_api_without_bias) {
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
+  EXPECT_THAT(
+      subgraph_output,
+      Pointwise(FloatNear(1.0e-5), std::vector<float>(operator_output.begin(),
+                                                      operator_output.end())));
 }
 
-INSTANTIATE_TEST_SUITE_P(UseBias, DynamicFullyConnectedTestF32,
-                         testing::ValuesIn<FullyConnectedTestParam>(
-                             {FullyConnectedTestParam(false),
-                              FullyConnectedTestParam(true)}));
+INSTANTIATE_TEST_SUITE_P(
+    UseBias, DynamicFullyConnectedTestF32,
+    testing::ValuesIn<FullyConnectedTestParam>({FullyConnectedTestParam(false),
+                                                FullyConnectedTestParam(true)}),
+    [](const testing::TestParamInfo<FullyConnectedTestParam>& info) {
+      if (info.param.use_bias) {
+        return "with_dynamic_bias";
+      }
+      return "no_bias";
+    });
 
 TEST_P(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel) {
   bool use_bias = GetParam().use_bias;
@@ -1815,22 +1947,23 @@ TEST_P(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel) {
                 kernel_dims.data(), nullptr,
                 /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &kernel_id));
 
-  uint32_t bias_id = XNN_INVALID_VALUE_ID;
-  if (use_bias) {
-    ASSERT_EQ(
-        xnn_status_success,
-        xnn_define_tensor_value(subgraph, xnn_datatype_fp32, bias_dims.size(),
-                                bias_dims.data(), bias.data(),
-                                /*external_id=*/2, /*flags=*/0, &bias_id));
-  }
-
   uint32_t output_id = XNN_INVALID_VALUE_ID;
   ASSERT_EQ(xnn_status_success,
             xnn_define_tensor_value(
                 subgraph, xnn_datatype_fp32, output_dims.size(),
                 output_dims.data(), nullptr,
-                /*external_id=*/3, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+                /*external_id=*/2, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
   ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
+
+  uint32_t bias_id = XNN_INVALID_VALUE_ID;
+  if (use_bias) {
+    ASSERT_EQ(xnn_status_success,
+              xnn_define_tensor_value(
+                  subgraph, xnn_datatype_fp32, bias_dims.size(),
+                  bias_dims.data(), /*data=*/nullptr,
+                  /*external_id=*/3, XNN_VALUE_FLAG_EXTERNAL_INPUT, &bias_id));
+  }
+
   ASSERT_EQ(
       xnn_status_success,
       xnn_define_fully_connected(subgraph, output_min, output_max, input_id,
@@ -1843,17 +1976,23 @@ TEST_P(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_kernel) {
   ASSERT_NE(nullptr, runtime);
   std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
       runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 3> external = {
+  std::vector<xnn_external_value> external = {
       xnn_external_value{input_id, input.data()},
       xnn_external_value{kernel_id, kernel.data()},
       xnn_external_value{output_id, subgraph_output.data()},
   };
+  if (use_bias) {
+    external.push_back(xnn_external_value{bias_id, bias.data()});
+  }
   ASSERT_EQ(xnn_status_success,
             xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
+  EXPECT_THAT(
+      subgraph_output,
+      Pointwise(FloatNear(1.0e-5), std::vector<float>(operator_output.begin(),
+                                                      operator_output.end())));
 }
 
 TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_bias) {
@@ -1863,7 +2002,8 @@ TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_bias) {
 
   std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
   std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
-  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+  std::generate(bias.begin(), bias.end(),
+                [&]() { return 1.0f + 0.0f * f32dist(rng); });
 
   // Call operator API.
   const xnn_status status = xnn_create_dynamic_fully_connected_nc_f32(
@@ -1953,109 +2093,10 @@ TEST_F(DynamicFullyConnectedTestF32, matches_operator_api_dynamic_bias) {
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
-}
-
-TEST_F(DynamicFullyConnectedTestF32,
-       matches_operator_api_dynamic_kernel_and_bias) {
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_operator_t op = nullptr;
-
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
-  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
-
-  // Call operator API.
-  const xnn_status status = xnn_create_dynamic_fully_connected_nc_f32(
-      output_min, output_max, /*flags=*/0, &op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
-      op, xnn_delete_operator);
-
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-
-  size_t workspace_size = 0;
-  size_t workspace_alignment = 0;
-  ASSERT_EQ(xnn_status_success,
-            xnn_reshape_dynamic_fully_connected_nc_f32(
-                op, batch_size, input_channels, output_channels, input_channels,
-                output_channels, &workspace_size, &workspace_alignment,
-                /*threadpool=*/nullptr));
-  ASSERT_NE(workspace_size, 0);
-  ASSERT_LE(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
-
-  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
-  ASSERT_EQ(xnn_status_success,
-            xnn_setup_dynamic_fully_connected_nc_f32(
-                op, workspace.data(), input.data(), kernel.data(), bias.data(),
-                operator_output.data()));
-
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
-      subgraph, xnn_delete_subgraph);
-
-  uint32_t input_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(
-                subgraph, xnn_datatype_fp32, input_dims.size(),
-                input_dims.data(), nullptr,
-                /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_VALUE_ID);
-
-  uint32_t kernel_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(
-                subgraph, xnn_datatype_fp32, kernel_dims.size(),
-                kernel_dims.data(), nullptr,
-                /*external_id=*/1, XNN_VALUE_FLAG_EXTERNAL_INPUT, &kernel_id));
-
-  uint32_t bias_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(subgraph, xnn_datatype_fp32,
-                                    bias_dims.size(), bias_dims.data(), nullptr,
-                                    /*external_id=*/2,
-                                    XNN_VALUE_FLAG_EXTERNAL_INPUT, &bias_id));
-
-  uint32_t output_id = XNN_INVALID_VALUE_ID;
-  ASSERT_EQ(xnn_status_success,
-            xnn_define_tensor_value(
-                subgraph, xnn_datatype_fp32, output_dims.size(),
-                output_dims.data(), nullptr,
-                /*external_id=*/3, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
-  ASSERT_EQ(
-      xnn_status_success,
-      xnn_define_fully_connected(subgraph, output_min, output_max, input_id,
-                                 kernel_id, bias_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success,
-            xnn_create_runtime_v3(subgraph, nullptr, nullptr,
-                                  xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
-      runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 4> external = {
-      xnn_external_value{input_id, input.data()},
-      xnn_external_value{kernel_id, kernel.data()},
-      xnn_external_value{bias_id, bias.data()},
-      xnn_external_value{output_id, subgraph_output.data()},
-  };
-  ASSERT_EQ(xnn_status_success,
-            xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  // Check outputs match.
-  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
+  EXPECT_THAT(
+      subgraph_output,
+      Pointwise(FloatNear(1.0e-5), std::vector<float>(operator_output.begin(),
+                                                      operator_output.end())));
 }
 
 TEST_F(FullyConnectedTestF32QC8W, matches_operator_api_transposed_weights) {
@@ -2147,7 +2188,10 @@ TEST_F(FullyConnectedTestF32QC8W, matches_operator_api_transposed_weights) {
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   // Check outputs match.
-  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
+  EXPECT_THAT(
+      subgraph_output,
+      Pointwise(FloatNear(1.0e-5), std::vector<float>(operator_output.begin(),
+                                                      operator_output.end())));
 }
 
 TEST_F(FullyConnectedTestF32QC8W, non_static_kernel_is_invalid_parameter) {
@@ -2537,12 +2581,14 @@ TEST_F(FullyConnectedTestQD8F16QC4W,
             xnn_setup_runtime(runtime, external.size(), external.data()));
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
-  EXPECT_THAT(subgraph_output, ElementsAreArray(operator_output));
+  EXPECT_THAT(subgraph_output,
+              Pointwise(FloatNear(1.0e-3),
+                        std::vector<xnn_float16>(operator_output.begin(),
+                                                 operator_output.end())));
 }
 
 class FullyConnectedTestQD8F16QB4W
-    : public FullyConnectedTestBase<int8_t, uint8_t, float, xnn_float16, 2> {
-};
+    : public FullyConnectedTestBase<int8_t, uint8_t, float, xnn_float16, 2> {};
 
 TEST_F(FullyConnectedTestQD8F16QB4W, define) {
   size_t block_size = 32;
@@ -4031,19 +4077,32 @@ TEST_F(FullyConnectedTestF32, reshape) {
       xnn_define_fully_connected(subgraph, output_min, output_max, input_id,
                                  kernel_id, bias_id, output_id, /*flags=*/0));
 
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  ASSERT_EQ(subgraph->num_values, 4);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_fully_connected);
-  ASSERT_EQ(node->activation.output_min, output_min);
-  ASSERT_EQ(node->activation.output_max, output_max);
-  ASSERT_EQ(node->num_inputs, 3);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->inputs[1], kernel_id);
-  ASSERT_EQ(node->inputs[2], bias_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
+  ASSERT_LE(subgraph->num_nodes, 2);
+  const struct xnn_node* fc_node = nullptr;
+  const struct xnn_node* pack_lh_node = nullptr;
+  int fc_offset = 0;
+  if (subgraph->num_nodes == 1) {
+    fc_node = &subgraph->nodes[0];
+    ASSERT_EQ(fc_node->inputs[0], input_id);
+    ASSERT_EQ(subgraph->num_values, 4);
+  } else {
+    pack_lh_node = &subgraph->nodes[0];
+    fc_offset = 1;
+    fc_node = &subgraph->nodes[1];
+    ASSERT_EQ(pack_lh_node->type, xnn_node_type_pack_lh);
+    ASSERT_EQ(pack_lh_node->inputs[0], input_id);
+    ASSERT_EQ(fc_node->inputs[0], pack_lh_node->outputs[0]);
+    ASSERT_EQ(subgraph->num_values, 5);
+  }
+  ASSERT_EQ(fc_node->type, xnn_node_type_fully_connected);
+  ASSERT_EQ(fc_node->activation.output_min, output_min);
+  ASSERT_EQ(fc_node->activation.output_max, output_max);
+  ASSERT_EQ(fc_node->num_inputs, 3);
+  ASSERT_EQ(fc_node->inputs[1], kernel_id);
+  ASSERT_EQ(fc_node->inputs[2], bias_id);
+  ASSERT_EQ(fc_node->num_outputs, 1);
+  ASSERT_EQ(fc_node->outputs[0], output_id);
+  ASSERT_EQ(fc_node->flags, 0);
 
   xnn_runtime_t runtime = nullptr;
   ASSERT_EQ(xnn_status_success,
@@ -4060,13 +4119,15 @@ TEST_F(FullyConnectedTestF32, reshape) {
   ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
 
   std::vector<size_t> new_input_dims(input_dims.begin(), input_dims.end());
-  const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
-  const xnn_shape* kernel_shape = &runtime->values[node->inputs[1]].shape;
+  const xnn_shape* output_shape = &runtime->values[fc_node->outputs[0]].shape;
+  const xnn_shape* kernel_shape = &runtime->values[fc_node->inputs[1]].shape;
 
   // case 1 : no change in input dims
-  ASSERT_EQ(xnn_status_success,
-            node->reshape(&runtime->opdata[0], subgraph->values,
-                          subgraph->num_values, nullptr /*threadpool*/));
+  size_t prev_workspace_size = runtime->workspace->size;
+  ASSERT_EQ(xnn_status_success, xnn_reshape_runtime(runtime));
+  if (pack_lh_node) {
+    ASSERT_EQ(runtime->workspace->size, prev_workspace_size);
+  }
 
   // case 2: Resize input to a smaller size. This should not require memory
   // planning
@@ -4078,9 +4139,11 @@ TEST_F(FullyConnectedTestF32, reshape) {
             xnn_reshape_external_value(runtime, input_id, new_input_dims.size(),
                                        new_input_dims.data()));
 
-  ASSERT_EQ(xnn_status_success,
-            node->reshape(&runtime->opdata[0], runtime->values,
-                          runtime->num_values, nullptr /*threadpool*/));
+  prev_workspace_size = runtime->workspace->size;
+  ASSERT_EQ(xnn_status_success, xnn_reshape_runtime(runtime));
+  if (pack_lh_node) {
+    ASSERT_EQ(runtime->workspace->size, prev_workspace_size);
+  }
 
   // Check that the output shape is correct
   for (size_t i = 0; i < output_shape->num_dims - 1; ++i) {
@@ -4091,16 +4154,20 @@ TEST_F(FullyConnectedTestF32, reshape) {
 
   // case 3: Resize input to a larger size. This should require memory planning
   for (size_t i = 0; i < new_input_dims.size() - 1; ++i) {
-    new_input_dims[i] = input_dims[i] + 1;
+    new_input_dims[i] = input_dims[i] + XNN_MAX_MR;
   }
 
   ASSERT_EQ(xnn_status_success,
             xnn_reshape_external_value(runtime, input_id, new_input_dims.size(),
                                        new_input_dims.data()));
 
-  ASSERT_EQ(xnn_status_reallocation_required,
-            node->reshape(&runtime->opdata[0], runtime->values,
-                          runtime->num_values, nullptr /*threadpool*/));
+  prev_workspace_size = runtime->workspace->size;
+  size_t prev_output_size = runtime->values[fc_node->outputs[0]].size;
+  ASSERT_EQ(xnn_status_success, xnn_reshape_runtime(runtime));
+  if (pack_lh_node) {
+    ASSERT_GT(runtime->workspace->size, prev_workspace_size);
+  }
+  ASSERT_GT(runtime->values[fc_node->outputs[0]].size, prev_output_size);
 
   // Check that the output shape is correct
   for (size_t i = 0; i < output_shape->num_dims - 1; ++i) {
@@ -4113,6 +4180,98 @@ TEST_F(FullyConnectedTestF32, reshape) {
       std::accumulate(new_input_dims.begin(), new_input_dims.end() - 1,
                       size_t{1}, std::multiplies<size_t>()) *
       kernel_shape->dim[0];
-  ASSERT_EQ(runtime->values[node->outputs[0]].size,
+  ASSERT_EQ(runtime->values[fc_node->outputs[0]].size,
             num_output_elements * sizeof(float));
+}
+
+
+TEST_F(FullyConnectedTestF32, matches_operator_api) {
+  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
+
+  xnn_operator_t op = nullptr;
+
+  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+  std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
+  std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
+
+  // Call operator API.
+  const xnn_status status = xnn_create_fully_connected_nc_f32(
+      input_channels, output_channels, input_channels, output_channels,
+      kernel.data(), bias.data(), output_min, output_max,
+      /*flags=*/0, nullptr, nullptr, &op);
+  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(
+      op, xnn_delete_operator);
+
+  if (status == xnn_status_unsupported_hardware) {
+    GTEST_SKIP();
+  }
+
+  ASSERT_EQ(xnn_status_success, status);
+  ASSERT_NE(nullptr, op);
+  ASSERT_EQ(xnn_status_success, xnn_reshape_fully_connected_nc_f32(
+                                    op, batch_size, /*threadpool=*/nullptr));
+  ASSERT_EQ(xnn_status_success, xnn_setup_fully_connected_nc_f32(
+                                    op, input.data(), operator_output.data()));
+
+  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
+
+  // Call subgraph API.
+  xnn_subgraph_t subgraph = nullptr;
+  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(4, /*flags=*/0, &subgraph));
+  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(
+      subgraph, xnn_delete_subgraph);
+
+  uint32_t input_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, input_dims.size(),
+                input_dims.data(), nullptr,
+                /*external_id=*/0, XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
+  ASSERT_NE(input_id, XNN_INVALID_VALUE_ID);
+
+  uint32_t kernel_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, kernel_dims.size(),
+                              kernel_dims.data(), kernel.data(),
+                              /*external_id=*/1, /*flags=*/0, &kernel_id));
+
+  uint32_t bias_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_tensor_value(subgraph, xnn_datatype_fp32, bias_dims.size(),
+                              bias_dims.data(), bias.data(),
+                              /*external_id=*/2, /*flags=*/0, &bias_id));
+
+  uint32_t output_id = XNN_INVALID_VALUE_ID;
+  ASSERT_EQ(xnn_status_success,
+            xnn_define_tensor_value(
+                subgraph, xnn_datatype_fp32, output_dims.size(),
+                output_dims.data(), nullptr,
+                /*external_id=*/3, XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
+  ASSERT_NE(output_id, XNN_INVALID_VALUE_ID);
+  ASSERT_EQ(
+      xnn_status_success,
+      xnn_define_fully_connected(subgraph, output_min, output_max, input_id,
+                                 kernel_id, bias_id, output_id, /*flags=*/0));
+
+  xnn_runtime_t runtime = nullptr;
+  ASSERT_EQ(xnn_status_success,
+            xnn_create_runtime_v3(subgraph, nullptr, nullptr,
+                                  xnn_test_runtime_flags(), &runtime));
+  ASSERT_NE(nullptr, runtime);
+  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(
+      runtime, xnn_delete_runtime);
+  std::array<xnn_external_value, 2> external = {
+      xnn_external_value{input_id, input.data()},
+      xnn_external_value{output_id, subgraph_output.data()}};
+  ASSERT_EQ(xnn_status_success,
+            xnn_setup_runtime(runtime, external.size(), external.data()));
+  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
+
+  // Check outputs match.
+  EXPECT_THAT(
+      subgraph_output,
+      Pointwise(FloatNear(1.0e-5), std::vector<float>(operator_output.begin(),
+                                                      operator_output.end())));
 }

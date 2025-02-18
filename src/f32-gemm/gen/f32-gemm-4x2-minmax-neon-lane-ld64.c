@@ -96,12 +96,12 @@ void xnn_f32_gemm_minmax_ukernel_4x2__neon_lane_ld64(
       vacc3x01 = vmla_f32(vacc3x01, va3, vb01);
     }
 
-    const float32x2_t vmax = vld1_dup_f32(&params->scalar.max);
+    const float32x2_t vmax = vdup_n_f32(params->scalar.max);
     vacc0x01 = vmin_f32(vacc0x01, vmax);
     vacc1x01 = vmin_f32(vacc1x01, vmax);
     vacc2x01 = vmin_f32(vacc2x01, vmax);
     vacc3x01 = vmin_f32(vacc3x01, vmax);
-    const float32x2_t vmin = vld1_dup_f32(&params->scalar.min);
+    const float32x2_t vmin = vdup_n_f32(params->scalar.min);
     vacc0x01 = vmax_f32(vacc0x01, vmin);
     vacc1x01 = vmax_f32(vacc1x01, vmin);
     vacc2x01 = vmax_f32(vacc2x01, vmin);

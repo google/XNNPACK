@@ -183,6 +183,7 @@ void vunary(benchmark::State& state, uint64_t arch_flags,
           benchmark::utils::UnaryElementwiseParameters<datatype, datatype>)   \
       ->UseRealTime();
 #include "f16-vabs/f16-vabs.h"
+#include "f16-vgelu/f16-vgelu.h"
 #include "f16-vhswish/f16-vhswish.h"
 #include "f16-vneg/f16-vneg.h"
 #include "f16-vrnd/f16-vrndd.h"
@@ -297,5 +298,5 @@ void vlrelu(benchmark::State& state, uint64_t arch_flags,
 #undef XNN_CVT_UKERNEL_WITH_PARAMS
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

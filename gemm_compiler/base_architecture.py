@@ -143,8 +143,8 @@ class BaseArchitecture:
     raise NotImplementedError
 
   @abstractmethod
-  def zero_gp_register(self, reg):
-    """Zero the given general purpose register."""
+  def initialize_k_register(self, reg):
+    """Initialized the given general purpose register for inner loop control."""
     raise NotImplementedError
 
   @abstractmethod
@@ -161,3 +161,19 @@ class BaseArchitecture:
   def inner_loop(self, M, N):
     """Returns the assemebly for the microkernel's inner loop."""
     raise NotImplementedError
+
+  def clamp(self, M, N):
+    num_horizontal_registers = int(N / self.n_step())
+    acc_registers = self.acc_registers()
+    asm_string = ''
+    for nr in range(0, num_horizontal_registers):
+      for mr in range(0, M):
+        asm_string += self.clamp_min(
+            reg=acc_registers[M * nr + mr], prefix=self.prefix()
+        )
+    for nr in range(0, num_horizontal_registers):
+      for mr in range(0, M):
+        asm_string += self.clamp_max(
+            reg=acc_registers[M * nr + mr], prefix=self.prefix()
+        )
+    return asm_string

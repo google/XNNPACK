@@ -27,6 +27,6 @@ BENCHMARK_CAPTURE_BGEMM(x16_packw, ukernel##_, ukernel, arch_flags, nr, kr, sr);
 #undef XNN_UKERNEL
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif
 

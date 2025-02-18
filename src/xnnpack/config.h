@@ -3,16 +3,15 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_CONFIG_H_
+#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_CONFIG_H_
 
 #include <stdbool.h>
 #include <stddef.h>
 
 #include "xnnpack/common.h"
 #include "xnnpack/config-types.h"
-#include "xnnpack/hardware-config.h"
 #include "xnnpack/microfnptr.h"
-#include "xnnpack/microparams.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,6 +24,8 @@ XNN_INTERNAL const struct xnn_transpose_config* xnn_init_transpose_config();
 XNN_INTERNAL const struct xnn_cmul_config* xnn_init_f16_cmul_config();
 XNN_INTERNAL const struct xnn_cmul_config* xnn_init_f32_cmul_config();
 
+XNN_INTERNAL const struct xnn_pack_lh_config* xnn_init_x8_pack_lh_config();
+XNN_INTERNAL const struct xnn_pack_lh_config* xnn_init_x16_pack_lh_config();
 XNN_INTERNAL const struct xnn_pack_lh_config* xnn_init_x32_pack_lh_config();
 
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_f16_vadd_config();
@@ -52,6 +53,7 @@ XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_qu8_vmul_confi
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_abs_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_clamp_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_elu_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_gelu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_hswish_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_lrelu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_neg_config();
@@ -67,8 +69,7 @@ XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_sqrt_config
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_tanh_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_to_f32_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_to_qs8_cvt_config();
-XNN_INTERNAL const struct xnn_unary_elementwise_config*
-xnn_init_f16_to_qu8_cvt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_to_qu8_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_abs_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_clamp_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_elu_config();
@@ -89,8 +90,7 @@ XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_sqr_config(
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_sqrt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_tanh_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_to_f16_cvt_config();
-XNN_INTERNAL const struct xnn_unary_elementwise_config*
-xnn_init_f32_to_qp8_cvt_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_to_qp8_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_to_qs8_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_to_qu8_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_s32_to_f32_cvt_config();
@@ -238,12 +238,16 @@ static inline bool xnn_is_hmp_igemm_ukernel(struct xnn_hmp_igemm_ukernel ukernel
 #endif
 }
 
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_bf16_f32_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f16_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_gemm_nr2_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_igemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_f32_qc4w_gemm_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pf16_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pf32_gemm_config();
+XNN_INTERNAL const struct xnn_gemm_config* xnn_init_pqs8_qc8w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f16_qb4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f16_qc4w_gemm_config();
 XNN_INTERNAL const struct xnn_gemm_config* xnn_init_qd8_f16_qc8w_gemm_config();
@@ -303,3 +307,5 @@ XNN_INTERNAL const struct xnn_unpool_config* xnn_init_x32_unpool_config();
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_CONFIG_H_

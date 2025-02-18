@@ -48,9 +48,9 @@ void xnn_f32_velu_ukernel__neon_rr2_lut16_p3_u4(
   XNN_FORCE_REALIZATION(vminus_ln2_hi);
   XNN_FORCE_REALIZATION(vminus_ln2_lo);
 
-  const float32x4_t vprescale = vld1q_dup_f32(&params->scalar.prescale);
-  const float32x4_t valpha = vld1q_dup_f32(&params->scalar.alpha);
-  const float32x4_t vbeta = vld1q_dup_f32(&params->scalar.beta);
+  const float32x4_t vprescale = vdupq_n_f32(params->scalar.prescale);
+  const float32x4_t valpha = vdupq_n_f32(params->scalar.alpha);
+  const float32x4_t vbeta = vdupq_n_f32(params->scalar.beta);
 
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     float32x4_t vx = vld1q_f32(input); input += 4;

@@ -193,7 +193,7 @@ class RSumMicrokernelTester {
       rsum(batch_size() * sizeof(xnn_float16), input.data(), &output, &params);
 
       // Verify results.
-      EXPECT_NEAR(output, output_ref, std::abs(output_ref) * 4.0e-3f)
+      ASSERT_NEAR(output, output_ref, std::abs(output_ref) * 4.0e-3f)
         << "with batch " << batch_size() << ", scale " << scale();
     }
   }
@@ -222,7 +222,7 @@ class RSumMicrokernelTester {
       rsum(batch_size() * sizeof(xnn_float16), input.data(), &output, &params);
 
       // Verify results.
-      EXPECT_NEAR(output, output_ref, std::abs(output_ref) * 1.0e-5f)
+      ASSERT_NEAR(output, output_ref, std::abs(output_ref) * 1.0e-5f)
         << "with batch " << batch_size() << ", scale " << scale();
     }
   }
@@ -249,7 +249,7 @@ class RSumMicrokernelTester {
       rsum(batch_size() * sizeof(float), input.data(), &output, &params);
 
       // Verify results.
-      EXPECT_NEAR(output, output_ref, std::abs(output_ref) * 1.0e-6f)
+      ASSERT_NEAR(output, output_ref, std::abs(output_ref) * 1.0e-6f)
         << "with batch " << batch_size() << ", scale " << scale();
     }
   }

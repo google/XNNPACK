@@ -279,7 +279,7 @@ class ScaledDotProductAttentionOperatorTester {
         for (size_t h = 0; h < query_heads(); h++) {
           for (size_t i = 0; i < query_tokens(); i++) {
             for (size_t j = 0; j < value_channels(); j++) {
-              EXPECT_NEAR(output_ref[(b * query_heads() + h) * query_tokens() * value_channels() + i * value_channels() + j],
+              ASSERT_NEAR(output_ref[(b * query_heads() + h) * query_tokens() * value_channels() + i * value_channels() + j],
                           output[(b * query_heads() + h) * query_tokens() * value_channels() + i * value_channels() + j],
                           1e-2)
                   << " batch : " << b << " / "  << batch_size()
@@ -437,7 +437,7 @@ class ScaledDotProductAttentionOperatorTester {
         for (size_t h = 0; h < query_heads(); h++) {
           for (size_t i = 0; i < query_tokens(); i++) {
             for (size_t j = 0; j < value_channels(); j++) {
-              EXPECT_NEAR(output_ref[(b * query_heads() + h) * query_tokens() * value_channels() + i * value_channels() + j],
+              ASSERT_NEAR(output_ref[(b * query_heads() + h) * query_tokens() * value_channels() + i * value_channels() + j],
                           output[(b * query_heads() + h) * query_tokens() * value_channels() + i * value_channels() + j],
                           1e-4)
                   << " batch : " << b << " / "  << batch_size()

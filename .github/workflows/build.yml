@@ -92,7 +92,7 @@ jobs:
         run: ctest --output-on-failure --parallel $(nproc)
         working-directory: ${{ github.workspace }}/build/linux/armhf
   cmake-linux-riscv64:
-    runs-on: ubuntu-22.04-8core
+    runs-on: ubuntu-22.04-16core
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -118,7 +118,7 @@ jobs:
         run: ctest --output-on-failure --parallel $(nproc)
         working-directory: ${{ github.workspace }}/build/linux/riscv64
   cmake-linux-riscv64-rvv:
-    runs-on: ubuntu-22.04-8core
+    runs-on: ubuntu-22.04-16core
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -128,8 +128,8 @@ jobs:
         run: sudo apt install ninja-build
       - name: Download and Install riscv64 cross-toolchain tarball
         run: |
-          wget -nv https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2024.04.12/riscv64-glibc-ubuntu-22.04-llvm-nightly-2024.04.12-nightly.tar.gz
-          tar zxf riscv64-glibc-ubuntu-22.04-llvm-nightly-2024.04.12-nightly.tar.gz
+          wget -nv https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2024.09.03/riscv64-glibc-ubuntu-22.04-llvm-nightly-2024.09.03-nightly.tar.gz
+          tar xzf riscv64-glibc-ubuntu-22.04-llvm-nightly-2024.09.03-nightly.tar.gz
         working-directory: ${{ github.workspace }}
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
@@ -278,7 +278,7 @@ jobs:
         id: setup-ndk
         uses: nttld/setup-ndk@v1
         with:
-          ndk-version: r23b
+          ndk-version: r26d
           add-to-path: false
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
@@ -380,7 +380,7 @@ jobs:
     env:
       CC: gcc-9
       CXX: g++-9
-      BAZEL_DEFINES: --define=xnn_enable_avxvnni=false --define=xnn_enable_avx256vnni=false --define=xnn_enable_avxvnniint8=false --define=xnn_enable_avx512amx=false --define=xnn_enable_avx512fp16=false
+      BAZEL_DEFINES: --define=xnn_enable_avxvnni=false --define=xnn_enable_avx256vnni=false --define=xnn_enable_avxvnniint8=false --define=xnn_enable_avx512amx=false --define=xnn_enable_avx512fp16=false --define=xnn_enable_avx512bf16=false
     steps:
       - uses: actions/checkout@v4
       - name: Update apt
@@ -480,7 +480,7 @@ jobs:
           sudo add-apt-repository ppa:ubuntu-toolchain-r/test
           sudo apt update
       - name: Install gcc-13 (cached)
-        uses: awalsh128/cache-apt-pkgs-action@latest
+        uses: awalsh128/cache-apt-pkgs-action@v1.4.3
         with:
           packages: gcc-13 g++-13
           version: 1.0

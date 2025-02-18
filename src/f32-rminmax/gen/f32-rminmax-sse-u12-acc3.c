@@ -26,9 +26,8 @@ void xnn_f32_rminmax_ukernel__sse_u12_acc3(
   assert(input != NULL);
   assert(output != NULL);
 
-  __m128 vmin0 = _mm_load_ss(input);
-  vmin0 = _mm_shuffle_ps(vmin0, vmin0, _MM_SHUFFLE(0, 0, 0, 0));
-  __m128 vmax0 = vmin0;
+  __m128 vmin0 = _mm_set1_ps(output[0]);
+  __m128 vmax0 = _mm_set1_ps(output[1]);
   __m128 vmin1 = vmin0;
   __m128 vmax1 = vmax0;
   __m128 vmin2 = vmin0;

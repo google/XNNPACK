@@ -26,7 +26,7 @@ void xnn_f32_rmax_ukernel__avx512f_u64_acc4(
   assert(input != NULL);
   assert(output != NULL);
 
-  __m512 vmax0 = _mm512_set1_ps(*input);
+  __m512 vmax0 = _mm512_set1_ps(output[0]);
   __m512 vmax1 = vmax0;
   __m512 vmax2 = vmax0;
   __m512 vmax3 = vmax0;

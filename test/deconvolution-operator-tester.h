@@ -31,6 +31,8 @@
 #include "xnnpack/microparams.h"
 #include "replicable_random_device.h"
 
+constexpr int kIterations = 1;
+
 class DeconvolutionOperatorTester {
  public:
   enum class WeightsType {
@@ -449,15 +451,6 @@ class DeconvolutionOperatorTester {
     return this->use_weights_cache_;
   }
 
-  DeconvolutionOperatorTester& iterations(size_t iterations) {
-    this->iterations_ = iterations;
-    return *this;
-  }
-
-  size_t iterations() const {
-    return this->iterations_;
-  }
-
   void TestQC8() const {
     ASSERT_EQ(weights_type(), WeightsType::Default);
 
@@ -480,7 +473,7 @@ class DeconvolutionOperatorTester {
 
     const int8_t input_zero_point = 1;
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
@@ -670,15 +663,35 @@ class DeconvolutionOperatorTester {
         for (size_t x = 0; x < output_width(); x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
-              EXPECT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), int32_t(qmax() - 0x80))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_NEAR(
-                  output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
-                  double(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]),
+              ASSERT_LE(
+                  int32_t(
+                      output[((i * output_height() + y) * output_width() + x) *
+                                 output_pixel_stride() +
+                             g * group_output_channels() + c]),
+                  int32_t(qmax() - 0x80))
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
+              ASSERT_GE(
+                  int32_t(
+                      output[((i * output_height() + y) * output_width() + x) *
+                                 output_pixel_stride() +
+                             g * group_output_channels() + c]),
+                  int32_t(qmin() - 0x80))
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
+              ASSERT_NEAR(
+                  output_ref[(((i * output_height() + y) * output_width() + x) *
+                                  groups() +
+                              g) *
+                                 group_output_channels() +
+                             c],
+                  double(
+                      output[((i * output_height() + y) * output_width() + x) *
+                                 output_pixel_stride() +
+                             g * group_output_channels() + c]),
                   0.9)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
             }
           }
         }
@@ -711,7 +724,7 @@ class DeconvolutionOperatorTester {
     const uint8_t input_zero_point = 127;
     const uint8_t kernel_zero_point = 127;
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return u8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
@@ -884,15 +897,36 @@ class DeconvolutionOperatorTester {
         for (size_t x = 0; x < output_width(); x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
-              EXPECT_LE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), int32_t(qmax()))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), int32_t(qmin()))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_NEAR(
-                  output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
-                  double(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
+              ASSERT_LE(
+                  int32_t(
+                      output[((i * output_height() + y) * output_width() + x) *
+                                 output_pixel_stride() +
+                             g * group_output_channels() + c]),
+                  int32_t(qmax()))
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
+              ASSERT_GE(
+                  int32_t(
+                      output[((i * output_height() + y) * output_width() + x) *
+                                 output_pixel_stride() +
+                             g * group_output_channels() + c]),
+                  int32_t(qmin()))
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
+              ASSERT_NEAR(
+                  output_ref[(((i * output_height() + y) * output_width() + x) *
+                                  groups() +
+                              g) *
+                                 group_output_channels() +
+                             c],
+                  double(
+                      output[((i * output_height() + y) * output_width() + x) *
+                                 output_pixel_stride() +
+                             g * group_output_channels() + c]) -
+                      double(output_zero_point),
                   0.9)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
             }
           }
         }
@@ -922,7 +956,7 @@ class DeconvolutionOperatorTester {
     xnnpack::Buffer<xnn_float16> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + groups() * group_output_channels());
     xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
       std::copy(kernel.cbegin(), kernel.cend(), kernel_as_float.begin());
@@ -1115,15 +1149,38 @@ class DeconvolutionOperatorTester {
         for (size_t x = 0; x < output_width(); x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
-              EXPECT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c], output_min)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c], output_max)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_NEAR(
-                  output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c],
-                  output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
-                  1.0e-2f * std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+              ASSERT_GE(
+                  output[((i * output_height() + y) * output_width() + x) *
+                             output_pixel_stride() +
+                         g * group_output_channels() + c],
+                  output_min)
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
+              ASSERT_LE(
+                  output[((i * output_height() + y) * output_width() + x) *
+                             output_pixel_stride() +
+                         g * group_output_channels() + c],
+                  output_max)
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
+              ASSERT_NEAR(
+                  output[((i * output_height() + y) * output_width() + x) *
+                             output_pixel_stride() +
+                         g * group_output_channels() + c],
+                  output_ref[(((i * output_height() + y) * output_width() + x) *
+                                  groups() +
+                              g) *
+                                 group_output_channels() +
+                             c],
+                  1.0e-2f * std::abs(output_ref[(((i * output_height() + y) *
+                                                      output_width() +
+                                                  x) *
+                                                     groups() +
+                                                 g) *
+                                                    group_output_channels() +
+                                                c]))
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
             }
           }
         }
@@ -1149,7 +1206,7 @@ class DeconvolutionOperatorTester {
     xnnpack::Buffer<xnn_qd8_quantization_params> quantization_params(batch_size());
     xnnpack::Buffer<float> kernel_scale(groups() * group_output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return w8dist(rng); });
       // Weights in the same output channel will be all positive or all negative. This ensures that no catastrophic
       // cancellation occur, but test covers both positive and negative values.
@@ -1365,7 +1422,7 @@ class DeconvolutionOperatorTester {
     xnnpack::Buffer<float> output((batch_size() * output_height() * output_width() - 1) * output_pixel_stride() + groups() * group_output_channels());
     xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       // Weights in the same output channel will be all positive or all negative. This ensures that no catastrophic
       // cancellation occur, but test covers both positive and negative values.
@@ -1580,20 +1637,23 @@ class DeconvolutionOperatorTester {
     }
     size_t old_weights_cache_size = internal_weights_cache->cache.weights.size;
 
-    std::vector<xnn_operator_t> operators;
-    operators.reserve(iterations());
-    std::vector<xnnpack::Buffer<float>> inputs;
-    inputs.reserve(iterations());
-    std::vector<xnnpack::Buffer<float>> outputs;
-    outputs.reserve(iterations());
-    std::vector<xnnpack::Buffer<float>> output_refs;
-    output_refs.reserve(iterations());
-    std::vector<float> output_mins;
-    output_mins.reserve(iterations());
-    std::vector<float> output_maxs;
-    output_maxs.reserve(iterations());
+    // Higher number of iterations to write more weights.
+    constexpr int kIterations = 60;
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    std::vector<xnn_operator_t> operators;
+    operators.reserve(kIterations);
+    std::vector<xnnpack::Buffer<float>> inputs;
+    inputs.reserve(kIterations);
+    std::vector<xnnpack::Buffer<float>> outputs;
+    outputs.reserve(kIterations);
+    std::vector<xnnpack::Buffer<float>> output_refs;
+    output_refs.reserve(kIterations);
+    std::vector<float> output_mins;
+    output_mins.reserve(kIterations);
+    std::vector<float> output_maxs;
+    output_maxs.reserve(kIterations);
+
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
                                (batch_size() * input_height() * input_width() - 1) * input_pixel_stride() + groups() * group_input_channels());
       xnnpack::Buffer<float> kernel(groups() * group_output_channels() * kernel_height() * kernel_width() * group_input_channels());
@@ -1690,7 +1750,7 @@ class DeconvolutionOperatorTester {
     ASSERT_EQ(xnn_status_success,
               xnn_finalize_weights_cache(auto_weights_cache.get(), xnn_weights_cache_finalization_kind_soft));
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       xnn_operator_t deconvolution_op = operators[iteration];
 
       ASSERT_EQ(xnn_status_success,
@@ -1720,9 +1780,9 @@ class DeconvolutionOperatorTester {
     // allocation is big enough, and future allocations can land on the old pointer).
     ASSERT_LT(old_weights_cache_size, internal_weights_cache->cache.weights.size);
     // Since the weights are randomized, it is very unlikely to have any hits.
-    ASSERT_EQ(iterations(), internal_weights_cache->cache.misses);
+    ASSERT_EQ(kIterations, internal_weights_cache->cache.misses);
     ASSERT_EQ(0, internal_weights_cache->cache.hits);
-    ASSERT_EQ(iterations(), internal_weights_cache->cache.num_entries);
+    ASSERT_EQ(kIterations, internal_weights_cache->cache.num_entries);
   }
 
   void VerifyF32(const xnnpack::Buffer<float> &output,
@@ -1734,15 +1794,40 @@ class DeconvolutionOperatorTester {
         for (size_t x = 0; x < output_width(); x++) {
           for (size_t g = 0; g < groups(); g++) {
             for (size_t c = 0; c < group_output_channels(); c++) {
-              EXPECT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c], output_min)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c], output_max)
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-              EXPECT_NEAR(
-                  output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
-                  output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c],
-                  std::max(1.0e-4, 1.0e-4 * std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c])))
-                  << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
+              ASSERT_GE(
+                  output[((i * output_height() + y) * output_width() + x) *
+                             output_pixel_stride() +
+                         g * group_output_channels() + c],
+                  output_min)
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
+              ASSERT_LE(
+                  output[((i * output_height() + y) * output_width() + x) *
+                             output_pixel_stride() +
+                         g * group_output_channels() + c],
+                  output_max)
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
+              ASSERT_NEAR(
+                  output_ref[(((i * output_height() + y) * output_width() + x) *
+                                  groups() +
+                              g) *
+                                 group_output_channels() +
+                             c],
+                  output[((i * output_height() + y) * output_width() + x) *
+                             output_pixel_stride() +
+                         g * group_output_channels() + c],
+                  std::max(
+                      1.0e-4,
+                      1.0e-4 * std::abs(output_ref[(((i * output_height() + y) *
+                                                         output_width() +
+                                                     x) *
+                                                        groups() +
+                                                    g) *
+                                                       group_output_channels() +
+                                                   c])))
+                  << "(x, y) = (" << x << ", " << y << "), group = " << g
+                  << ", channel = " << c;
             }
           }
         }
@@ -1775,7 +1860,7 @@ class DeconvolutionOperatorTester {
 
     const int8_t input_zero_point = 127;
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return i8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return w8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
@@ -1887,7 +1972,7 @@ class DeconvolutionOperatorTester {
                      << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
                 EXPECT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
                      << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                EXPECT_NEAR(
+                ASSERT_NEAR(
                     output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
                     double(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
                     0.9)
@@ -1977,7 +2062,7 @@ class DeconvolutionOperatorTester {
                      << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
                 EXPECT_GE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), int32_t(qmin() - 0x80))
                      << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                EXPECT_NEAR(
+                ASSERT_NEAR(
                     next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c],
                     double(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
                     0.9)
@@ -2014,7 +2099,7 @@ class DeconvolutionOperatorTester {
     const uint8_t input_zero_point = 127;
     const uint8_t kernel_zero_point = 127;
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return u8dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return u8dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return i32dist(rng); });
@@ -2126,7 +2211,7 @@ class DeconvolutionOperatorTester {
                      << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
                 EXPECT_GE(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), int32_t(qmin()))
                      << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                EXPECT_NEAR(
+                ASSERT_NEAR(
                     output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
                     double(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
                     0.9)
@@ -2216,7 +2301,7 @@ class DeconvolutionOperatorTester {
                      << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
                 EXPECT_GE(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]), int32_t(qmin()))
                      << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                EXPECT_NEAR(
+                ASSERT_NEAR(
                     next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c],
                     double(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + g * group_output_channels() + c]) - double(output_zero_point),
                     0.9)
@@ -2246,7 +2331,7 @@ class DeconvolutionOperatorTester {
     xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
     xnnpack::Buffer<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * groups() * group_output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
@@ -2369,7 +2454,7 @@ class DeconvolutionOperatorTester {
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
                 EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c], output_max)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                EXPECT_NEAR(
+                ASSERT_NEAR(
                     output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c],
                     output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
                     1.0e-2f * std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]))
@@ -2458,7 +2543,7 @@ class DeconvolutionOperatorTester {
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
                 EXPECT_LE(output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + g * group_output_channels() + c], output_max)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                EXPECT_NEAR(
+                ASSERT_NEAR(
                     output[((i * next_output_height() + y) * next_output_width() + x) * output_pixel_stride() + g * group_output_channels() + c],
                     next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c],
                     1.0e-2f * std::abs(next_output_ref[(((i * next_output_height() + y) * next_output_width() + x) * groups() + g) * group_output_channels() + c]))
@@ -2488,7 +2573,7 @@ class DeconvolutionOperatorTester {
     xnnpack::Buffer<float> output_ref(batch_size() * output_height() * output_width() * groups() * group_output_channels());
     xnnpack::Buffer<float> next_output_ref(next_batch_size() * next_output_height() * next_output_width() * groups() * group_output_channels());
 
-    for (size_t iteration = 0; iteration < iterations(); iteration++) {
+    for (size_t iteration = 0; iteration < kIterations; iteration++) {
       std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
       std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng); });
       std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng); });
@@ -2595,7 +2680,7 @@ class DeconvolutionOperatorTester {
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
                 EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c], output_max)
                   << "(x, y) = (" << x << ", " << y << "), group = " << g << ", channel = " << c;
-                EXPECT_NEAR(
+                ASSERT_NEAR(
                     output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c],
                     output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + g * group_output_channels() + c],
                     1.0e-4 * std::abs(output_ref[(((i * output_height() + y) * output_width() + x) * groups() + g) * group_output_channels() + c]))

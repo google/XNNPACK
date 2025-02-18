@@ -103,10 +103,36 @@
   }
 
   BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_1x8c16s2__aarch64_neondot)
+
+  static void qp8_f32_qc4w_gemm_minmax_ukernel_1x4c8s2__aarch64_neondot(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x4c8s2__aarch64_neondot,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_kai_qs4_weights_and_biases,
+      xnn_packed_stride_kai_qs4_weights_and_biases,
+      /*mr=*/1, /*nr=*/4, /*kr=*/8, /*sr=*/2,
+      /*mr_packed=*/1,
+      benchmark::utils::CheckNEONDOT);
+  }
+
+  BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_1x4c8s2__aarch64_neondot)
+
+  static void qp8_f32_qc4w_gemm_minmax_ukernel_16x4c8s2__aarch64_neondot_mstep4(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qp8_f32_qc4w_gemm_minmax_ukernel_16x4c8s2__aarch64_neondot_mstep4,
+      xnn_init_f32_minmax_scalar_params,
+      xnn_pack_kai_qs4_weights_and_biases,
+      xnn_packed_stride_kai_qs4_weights_and_biases,
+      /*mr=*/16, /*nr=*/4, /*kr=*/8, /*sr=*/2,
+      /*mr_packed=*/4,
+      benchmark::utils::CheckNEONDOT);
+  }
+
+  BENCHMARK_GEMM(qp8_f32_qc4w_gemm_minmax_ukernel_16x4c8s2__aarch64_neondot_mstep4)
   #endif  // XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ARCH_ARM64
 
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

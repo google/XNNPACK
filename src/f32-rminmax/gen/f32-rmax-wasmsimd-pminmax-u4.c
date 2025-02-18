@@ -26,7 +26,7 @@ void xnn_f32_rmax_ukernel__wasmsimd_pminmax_u4(
   assert(input != NULL);
   assert(output != NULL);
 
-  v128_t vmax0 = wasm_v128_load32_splat(input);
+  v128_t vmax0 = wasm_v128_load32_splat(output);
   for (; batch >= 4 * sizeof(float); batch -= 4 * sizeof(float)) {
     const v128_t vt = wasm_v128_load(input);
     input += 4;

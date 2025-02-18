@@ -255,7 +255,7 @@ class DynamicFullyConnectedOperatorTester {
           << "batch index = " << i << ", channel = " << c;
         ASSERT_GE(output[i * output_stride() + c], output_min)
           << "batch index = " << i << ", channel = " << c;
-        EXPECT_NEAR(
+        ASSERT_NEAR(
             output_ref[i * output_channels() + c],
             output[i * output_stride() + c],
             1.0e-2f * std::abs(output_ref[i * output_channels() + c]))
@@ -376,7 +376,7 @@ class DynamicFullyConnectedOperatorTester {
             << "batch index = " << i << ", channel = " << c;
         ASSERT_GE(output[i * output_stride() + c], output_min)
             << "batch index = " << i << ", channel = " << c;
-        EXPECT_NEAR(output_ref[i * output_channels() + c],
+        ASSERT_NEAR(output_ref[i * output_channels() + c],
                     output[i * output_stride() + c],
                     1.0e-4f * std::abs(output_ref[i * output_channels() + c]))
             << "batch index = " << i << ", channel = " << c;

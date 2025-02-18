@@ -20,7 +20,7 @@
 
 #if XNN_ENABLE_KLEIDIAI
 XNN_UKERNEL(xnn_arch_arm_sme, xnn_x32_pack_lh_ukernel__neonsme2,
-            xnn_x32_pack_lh_size__neonsme2)
+            xnn_x32_pack_lh_size__neonsme2, xnn_x32_pack_lh_offset__neonsme2)
 #endif  // XNN_ENABLE_KLEIDIAI
 
 #ifdef XNN_DEFINED_UKERNEL_WITH_PARAMS

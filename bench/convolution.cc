@@ -7,7 +7,8 @@
 // LICENSE file in the root directory of this source tree.
 
 #include <algorithm>
-#include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <limits>
 #include <memory>
@@ -15,21 +16,24 @@
 #include <string>
 #include <vector>
 
+#include "utils.h"
 #include "xnnpack.h"
+#include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
 #include "xnnpack/math.h"
-
 #include <benchmark/benchmark.h>
+#include "pthreadpool.h"
+
 #ifdef BENCHMARK_TENSORFLOW_LITE
-#include "flatbuffers/include/flatbuffers/flatbuffers.h"
+#include "flatbuffers/include/flatbuffers/buffer.h"
+#include "flatbuffers/include/flatbuffers/flatbuffer_builder.h"
+#include "flatbuffers/include/flatbuffers/string.h"
+#include "tensorflow/lite/core/interpreter_builder.h"
 #include "tensorflow/lite/interpreter.h"
 #include "tensorflow/lite/kernels/register.h"
-#include "tensorflow/lite/model.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 #endif  // BENCHMARK_TENSORFLOW_LITE
-#include "utils.h"
-#include "xnnpack/buffer.h"
 
 void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
@@ -47,7 +51,8 @@ void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
+  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
+                          std::ref(rng));
 
   const size_t output_pixel_stride = groups * group_output_channels;
   const size_t input_pixel_stride = groups * group_input_channels;
@@ -57,16 +62,24 @@ void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
   const size_t padding_top = padding_height / 2;
   const size_t padding_right = padding_width - padding_left;
   const size_t padding_bottom = padding_height - padding_top;
-  const size_t output_height = (input_height + padding_height - effective_kernel_height) / subsampling + 1;
-  const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
+  const size_t output_height =
+      (input_height + padding_height - effective_kernel_height) / subsampling +
+      1;
+  const size_t output_width =
+      (input_width + padding_width - effective_kernel_width) / subsampling + 1;
 
-  xnnpack::Buffer<uint8_t> input(batch_size * input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(uint8_t));
+  xnnpack::Buffer<uint8_t> input(batch_size * input_height * input_width *
+                                     input_pixel_stride +
+                                 XNN_EXTRA_BYTES / sizeof(uint8_t));
   xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
-  xnnpack::Buffer<uint8_t> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
+  xnnpack::Buffer<uint8_t> kernel(groups * group_output_channels *
+                                  kernel_height * kernel_width *
+                                  group_input_channels);
   xnnpack::fill_uniform_random_bits(kernel.data(), kernel.size(), rng);
   xnnpack::Buffer<int32_t> bias(groups * group_output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(i32rng));
-  const size_t output_elements = batch_size * output_height * output_width * output_pixel_stride;
+  xnnpack::Buffer<uint8_t> output(batch_size * output_height * output_width *
+                                  output_pixel_stride);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
@@ -74,87 +87,63 @@ void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
     return;
   }
 
-  const size_t num_buffers = 1 +
-    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
-      sizeof(uint8_t) * kernel.size() + sizeof(int32_t) * bias.size() + sizeof(uint8_t) * output_elements);
-  xnnpack::Buffer<uint8_t> output(output_elements * num_buffers);
-
-  xnnpack::Buffer<xnn_operator_t> convolution_operators(num_buffers);
-  for (xnn_operator_t& convolution_op : convolution_operators) {
-    status = xnn_create_convolution2d_nhwc_qu8(
-      padding_top, padding_right, padding_bottom, padding_left,
-      kernel_height, kernel_width,
-      subsampling, subsampling,
-      dilation, dilation,
-      groups, group_input_channels, group_output_channels,
-      input_pixel_stride, output_pixel_stride,
-      127, 0.5f,
-      127, 0.5f,
-      kernel.data(), bias.data(),
-      127, 0.5f, 0, 255,
-      0 /* flags */, nullptr, nullptr, &convolution_op);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to create QUINT8 Convolution operator");
-      return;
-    }
+  xnn_operator_t convolution_op;
+  status = xnn_create_convolution2d_nhwc_qu8(
+      padding_top, padding_right, padding_bottom, padding_left, kernel_height,
+      kernel_width, subsampling, subsampling, dilation, dilation, groups,
+      group_input_channels, group_output_channels, input_pixel_stride,
+      output_pixel_stride, 127, 0.5f, 127, 0.5f, kernel.data(), bias.data(),
+      127, 0.5f, 0, 255, 0 /* flags */, nullptr, nullptr, &convolution_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to create QUINT8 Convolution operator");
+    return;
   }
 
-  size_t max_workspace_size = 0;
+  pthreadpool_t threadpool = pthreadpool_create(FLAGS_num_threads);
 
-  for (size_t i = 0; i < convolution_operators.size(); i++) {
-    size_t workspace_size = 0;
-    size_t workspace_alignment = 0;
-    status = xnn_reshape_convolution2d_nhwc_qu8(
-      convolution_operators[i],
-      batch_size, input_height, input_width,
-      &workspace_size, &workspace_alignment,
+  size_t workspace_size = 0;
+  size_t workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_qu8(
+      convolution_op, batch_size, input_height, input_width, &workspace_size,
+      &workspace_alignment,
       /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-      /*threadpool=*/nullptr);
+      threadpool);
 
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to reshape QUINT8 Convolution operator");
-      return;
-    }
-
-    max_workspace_size = std::max(max_workspace_size, workspace_size);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape QUINT8 Convolution operator");
+    return;
   }
 
-  xnnpack::Buffer<char> workspace(max_workspace_size);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
-  for (size_t i = 0; i < convolution_operators.size(); i++) {
-    status = xnn_setup_convolution2d_nhwc_qu8(
-      convolution_operators[i],
-      workspace.data(),
-      input.data(), output.data() + i * output_elements);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to setup QUINT8 Convolution operator");
-      return;
-    }
+  status = xnn_setup_convolution2d_nhwc_qu8(
+      convolution_op, workspace.data(), input.data(),
+      output.data());
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to setup QUINT8 Convolution operator");
+    return;
   }
 
-  size_t buffer_index = 0;
-  for (auto _ : state) {
-    state.PauseTiming();
-    benchmark::utils::PrefetchToL1(input.data(), input.size() * sizeof(uint8_t));
-    buffer_index = (buffer_index + 1) % num_buffers;
-    state.ResumeTiming();
+  int num_iters = FLAGS_benchmark_min_iters;
+  while (state.KeepRunningBatch(num_iters)) {
+    for (int iter = 0; iter < num_iters; iter++) {
+      benchmark::utils::WipePthreadpoolL2Caches(state, threadpool);
 
-    status = xnn_run_operator(convolution_operators[buffer_index],
-      /*threadpool=*/nullptr);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to run QUINT8 Convolution operator");
-      return;
+      status = xnn_run_operator(convolution_op, threadpool);
+      if (status != xnn_status_success) {
+        state.SkipWithError("failed to run the QUINT8 Convolution operator");
+        return;
+      }
     }
+    num_iters = 1;
   }
 
-  for (xnn_operator_t& convolution_op : convolution_operators) {
-    status = xnn_delete_operator(convolution_op);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to delete QUINT8 Convolution operator");
-      return;
-    }
-    convolution_op = nullptr;
+  status = xnn_delete_operator(convolution_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to delete QUINT8 Convolution operator");
+    return;
   }
+  convolution_op = nullptr;
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
   if (cpu_frequency != 0) {
@@ -162,11 +151,12 @@ void xnnpack_convolution_qu8(benchmark::State& state, const char* net) {
   }
 
   state.counters["OPS"] = benchmark::Counter(
-    uint64_t(state.iterations()) * 2 *
-      batch_size * output_height * output_width *
-      groups * group_input_channels * group_output_channels *
-      kernel_height * kernel_width,
-    benchmark::Counter::kIsRate);
+      static_cast<uint64_t>(state.iterations()) * 2 * batch_size *
+          output_height * output_width * groups * group_input_channels *
+          group_output_channels * kernel_height * kernel_width,
+      benchmark::Counter::kIsRate);
+
+  pthreadpool_destroy(threadpool);
 }
 
 void xnnpack_convolution_qs8(benchmark::State& state, const char* net) {
@@ -185,7 +175,8 @@ void xnnpack_convolution_qs8(benchmark::State& state, const char* net) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
+  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
+                          std::ref(rng));
 
   const size_t output_pixel_stride = groups * group_output_channels;
   const size_t input_pixel_stride = groups * group_input_channels;
@@ -195,16 +186,24 @@ void xnnpack_convolution_qs8(benchmark::State& state, const char* net) {
   const size_t padding_top = padding_height / 2;
   const size_t padding_right = padding_width - padding_left;
   const size_t padding_bottom = padding_height - padding_top;
-  const size_t output_height = (input_height + padding_height - effective_kernel_height) / subsampling + 1;
-  const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
+  const size_t output_height =
+      (input_height + padding_height - effective_kernel_height) / subsampling +
+      1;
+  const size_t output_width =
+      (input_width + padding_width - effective_kernel_width) / subsampling + 1;
 
-  xnnpack::Buffer<int8_t> input(batch_size * input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(int8_t));
+  xnnpack::Buffer<int8_t> input(batch_size * input_height * input_width *
+                                    input_pixel_stride +
+                                XNN_EXTRA_BYTES / sizeof(int8_t));
   xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
-  xnnpack::Buffer<int8_t> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
+  xnnpack::Buffer<int8_t> kernel(groups * group_output_channels *
+                                 kernel_height * kernel_width *
+                                 group_input_channels);
   xnnpack::fill_uniform_random_bits(kernel.data(), kernel.size(), rng);
   xnnpack::Buffer<int32_t> bias(groups * group_output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(i32rng));
-  const size_t output_elements = batch_size * output_height * output_width * output_pixel_stride;
+  xnnpack::Buffer<int8_t> output(batch_size * output_height * output_width *
+                                 output_pixel_stride);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
@@ -212,85 +211,59 @@ void xnnpack_convolution_qs8(benchmark::State& state, const char* net) {
     return;
   }
 
-  const size_t num_buffers = 1 +
-    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
-      sizeof(int8_t) * kernel.size() + sizeof(int32_t) * bias.size() + sizeof(int8_t) * output_elements);
-  xnnpack::Buffer<int8_t> output(output_elements * num_buffers);
-
-  xnnpack::Buffer<xnn_operator_t> convolution_operators(num_buffers);
-  for (xnn_operator_t& convolution_op : convolution_operators) {
-    status = xnn_create_convolution2d_nhwc_qs8(
-      padding_top, padding_right, padding_bottom, padding_left,
-      kernel_height, kernel_width,
-      subsampling, subsampling,
-      dilation, dilation,
-      groups, group_input_channels, group_output_channels,
-      input_pixel_stride, output_pixel_stride,
-      127, 0.5f, 0.5f,
-      kernel.data(), bias.data(),
-      127, 0.5f, -128, 127,
-      0 /* flags */, nullptr, nullptr, &convolution_op);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to create QINT8 Convolution operator");
-      return;
-    }
+  xnn_operator_t convolution_op;
+  status = xnn_create_convolution2d_nhwc_qs8(
+      padding_top, padding_right, padding_bottom, padding_left, kernel_height,
+      kernel_width, subsampling, subsampling, dilation, dilation, groups,
+      group_input_channels, group_output_channels, input_pixel_stride,
+      output_pixel_stride, 127, 0.5f, 0.5f, kernel.data(), bias.data(), 127,
+      0.5f, -128, 127, 0 /* flags */, nullptr, nullptr, &convolution_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to create QINT8 Convolution operator");
+    return;
   }
 
-  size_t max_workspace_size = 0;
+  pthreadpool_t threadpool = pthreadpool_create(FLAGS_num_threads);
 
-  for (size_t i = 0; i < convolution_operators.size(); i++) {
-    size_t workspace_size = 0;
-    size_t workspace_alignment = 0;
-    status = xnn_reshape_convolution2d_nhwc_qs8(
-      convolution_operators[i],
-      batch_size, input_height, input_width,
-      &workspace_size, &workspace_alignment,
-      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-      /*threadpool=*/nullptr);
+  size_t workspace_size = 0;
+  size_t workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_qs8(
+      convolution_op, batch_size, input_height, input_width, &workspace_size,
+      &workspace_alignment,
+      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, threadpool);
 
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to reshape QINT8 Convolution operator");
-      return;
-    }
-
-    max_workspace_size = std::max(max_workspace_size, workspace_size);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape QINT8 Convolution operator");
+    return;
   }
 
-  xnnpack::Buffer<char> workspace(max_workspace_size);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
-  for (size_t i = 0; i < convolution_operators.size(); i++) {
-    status = xnn_setup_convolution2d_nhwc_qs8(
-      convolution_operators[i],
-      workspace.data(),
-      input.data(), output.data() + i * output_elements);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to setup QINT8 Convolution operator");
-      return;
-    }
+  status = xnn_setup_convolution2d_nhwc_qs8(convolution_op, workspace.data(),
+                                            input.data(), output.data());
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to setup QINT8 Convolution operator");
+    return;
   }
 
-  size_t buffer_index = 0;
-  for (auto _ : state) {
-    state.PauseTiming();
-    benchmark::utils::PrefetchToL1(input.data(), input.size() * sizeof(uint8_t));
-    buffer_index = (buffer_index + 1) % num_buffers;
-    state.ResumeTiming();
+  int num_iters = FLAGS_benchmark_min_iters;
+  while (state.KeepRunningBatch(num_iters)) {
+    for (int iter = 0; iter < num_iters; iter++) {
+      benchmark::utils::WipePthreadpoolL2Caches(state, threadpool);
 
-    status = xnn_run_operator(convolution_operators[buffer_index],
-      /*threadpool=*/nullptr);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to run QINT8 Convolution operator");
-      return;
+      status = xnn_run_operator(convolution_op, threadpool);
+      if (status != xnn_status_success) {
+        state.SkipWithError("failed to run QINT8 Convolution operator");
+        return;
+      }
     }
+    num_iters = 1;
   }
 
-  for (xnn_operator_t& convolution_op : convolution_operators) {
-    status = xnn_delete_operator(convolution_op);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to delete QINT8 Convolution operator");
-      return;
-    }
-    convolution_op = nullptr;
+  status = xnn_delete_operator(convolution_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to delete QINT8 Convolution operator");
+    return;
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -299,11 +272,12 @@ void xnnpack_convolution_qs8(benchmark::State& state, const char* net) {
   }
 
   state.counters["OPS"] = benchmark::Counter(
-    uint64_t(state.iterations()) * 2 *
-      batch_size * output_height * output_width *
-      groups * group_input_channels * group_output_channels *
-      kernel_height * kernel_width,
-    benchmark::Counter::kIsRate);
+      static_cast<uint64_t>(state.iterations()) * 2 * batch_size *
+          output_height * output_width * groups * group_input_channels *
+          group_output_channels * kernel_height * kernel_width,
+      benchmark::Counter::kIsRate);
+
+  pthreadpool_destroy(threadpool);
 }
 
 void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
@@ -322,8 +296,9 @@ void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f), std::ref(rng));
-  
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(0.1f, 1.0f),
+                          std::ref(rng));
+
   const size_t output_pixel_stride = groups * group_output_channels;
   const size_t input_pixel_stride = groups * group_input_channels;
   const size_t effective_kernel_height = (kernel_height - 1) * dilation + 1;
@@ -332,16 +307,24 @@ void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
   const size_t padding_top = padding_height / 2;
   const size_t padding_right = padding_width - padding_left;
   const size_t padding_bottom = padding_height - padding_top;
-  const size_t output_height = (input_height + padding_height - effective_kernel_height) / subsampling + 1;
-  const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
+  const size_t output_height =
+      (input_height + padding_height - effective_kernel_height) / subsampling +
+      1;
+  const size_t output_width =
+      (input_width + padding_width - effective_kernel_width) / subsampling + 1;
 
-  xnnpack::Buffer<xnn_float16> input(batch_size * input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(xnn_float16));
+  xnnpack::Buffer<xnn_float16> input(batch_size * input_height * input_width *
+                                         input_pixel_stride +
+                                     XNN_EXTRA_BYTES / sizeof(xnn_float16));
   std::generate(input.begin(), input.end(), f32rng);
-  xnnpack::Buffer<xnn_float16> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
+  xnnpack::Buffer<xnn_float16> kernel(groups * group_output_channels *
+                                      kernel_height * kernel_width *
+                                      group_input_channels);
   std::generate(kernel.begin(), kernel.end(), f32rng);
   xnnpack::Buffer<xnn_float16> bias(groups * group_output_channels);
   std::generate(bias.begin(), bias.end(), f32rng);
-  const size_t output_elements = batch_size * output_height * output_width * output_pixel_stride;
+  xnnpack::Buffer<xnn_float16> output(batch_size * output_height *
+                                      output_width * output_pixel_stride);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
@@ -349,84 +332,63 @@ void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
     return;
   }
 
-  const size_t num_buffers = 1 +
-    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
-      sizeof(xnn_float16) * (kernel.size() + bias.size() + output_elements));
-  xnnpack::Buffer<xnn_float16> output(output_elements * num_buffers);
-
-  xnnpack::Buffer<xnn_operator_t> convolution_operators(num_buffers);
-  for (xnn_operator_t& convolution_op : convolution_operators) {
-    status = xnn_create_convolution2d_nhwc_f16(
-      padding_top, padding_right, padding_bottom, padding_left,
-      kernel_height, kernel_width,
-      subsampling, subsampling,
-      dilation, dilation,
-      groups, group_input_channels, group_output_channels,
-      input_pixel_stride, output_pixel_stride,
-      kernel.data(), bias.data(),
-      -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity(),
-      0 /* flags */, nullptr, nullptr, &convolution_op);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to create FP16 Convolution operator");
-      return;
-    }
+  xnn_operator_t convolution_op;
+  status = xnn_create_convolution2d_nhwc_f16(
+      padding_top, padding_right, padding_bottom, padding_left, kernel_height,
+      kernel_width, subsampling, subsampling, dilation, dilation, groups,
+      group_input_channels, group_output_channels, input_pixel_stride,
+      output_pixel_stride, kernel.data(), bias.data(),
+      -std::numeric_limits<float>::infinity(),
+      +std::numeric_limits<float>::infinity(), 0 /* flags */, nullptr, nullptr,
+      &convolution_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to create FP16 Convolution operator");
+    return;
   }
 
-  size_t max_workspace_size = 0;
+  pthreadpool_t threadpool = pthreadpool_create(FLAGS_num_threads);
 
-  for (size_t i = 0; i < convolution_operators.size(); i++) {
-    size_t workspace_size = 0;
-    size_t workspace_alignment = 0;
-    status = xnn_reshape_convolution2d_nhwc_f16(
-      convolution_operators[i],
-      batch_size, input_height, input_width,
-      &workspace_size, &workspace_alignment,
-      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-      /*threadpool=*/nullptr);
+  size_t workspace_size = 0;
+  size_t workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f16(
+      convolution_op, batch_size, input_height, input_width, &workspace_size,
+      &workspace_alignment,
+      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, threadpool);
 
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to reshape FP16 Convolution operator");
-      return;
-    }
-
-    max_workspace_size = std::max(max_workspace_size, workspace_size);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape FP16 Convolution operator");
+    return;
   }
 
-  xnnpack::Buffer<char> workspace(max_workspace_size);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
-  for (size_t i = 0; i < convolution_operators.size(); i++) {
-    status = xnn_setup_convolution2d_nhwc_f16(
-      convolution_operators[i],
-      workspace.data(),
-      input.data(), output.data() + i * output_elements);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to setup FP16 Convolution operator");
-      return;
-    }
+  status = xnn_setup_convolution2d_nhwc_f16(convolution_op, workspace.data(),
+                                            input.data(), output.data());
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to setup FP16 Convolution operator");
+    return;
   }
 
-  size_t buffer_index = 0;
-  for (auto _ : state) {
-    state.PauseTiming();
-    benchmark::utils::PrefetchToL1(input.data(), input.size() * sizeof(xnn_float16));
-    buffer_index = (buffer_index + 1) % num_buffers;
-    state.ResumeTiming();
+  int num_iters = FLAGS_benchmark_min_iters;
+  while (state.KeepRunningBatch(num_iters)) {
+    for (int iter = 0; iter < num_iters; iter++) {
+      benchmark::utils::WipePthreadpoolL2Caches(state, threadpool);
 
-    status = xnn_run_operator(convolution_operators[buffer_index], /*threadpool=*/nullptr);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to run FP16 Convolution operator");
-      return;
+      status = xnn_run_operator(convolution_op, threadpool);
+      if (status != xnn_status_success) {
+        state.SkipWithError("failed to run FP16 Convolution operator");
+        return;
+      }
     }
+    num_iters = 1;
   }
 
-  for (xnn_operator_t& convolution_op : convolution_operators) {
-    status = xnn_delete_operator(convolution_op);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to delete FP16 Convolution operator");
-      return;
-    }
-    convolution_op = nullptr;
+  status = xnn_delete_operator(convolution_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to delete FP16 Convolution operator");
+    return;
   }
+  convolution_op = nullptr;
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
   if (cpu_frequency != 0) {
@@ -434,11 +396,12 @@ void xnnpack_convolution_f16(benchmark::State& state, const char* net) {
   }
 
   state.counters["FLOPS"] = benchmark::Counter(
-    uint64_t(state.iterations()) * 2 *
-      batch_size * output_height * output_width *
-      groups * group_input_channels * group_output_channels *
-      kernel_height * kernel_width,
-    benchmark::Counter::kIsRate);
+      static_cast<uint64_t>(state.iterations()) * 2 * batch_size *
+          output_height * output_width * groups * group_input_channels *
+          group_output_channels * kernel_height * kernel_width,
+      benchmark::Counter::kIsRate);
+
+  pthreadpool_destroy(threadpool);
 }
 
 void xnnpack_convolution_f32(benchmark::State& state, const char* net) {
@@ -457,7 +420,8 @@ void xnnpack_convolution_f32(benchmark::State& state, const char* net) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f),
+                          std::ref(rng));
 
   const size_t output_pixel_stride = groups * group_output_channels;
   const size_t input_pixel_stride = groups * group_input_channels;
@@ -467,16 +431,23 @@ void xnnpack_convolution_f32(benchmark::State& state, const char* net) {
   const size_t padding_top = padding_height / 2;
   const size_t padding_right = padding_width - padding_left;
   const size_t padding_bottom = padding_height - padding_top;
-  const size_t output_height = (input_height + padding_height - effective_kernel_height) / subsampling + 1;
-  const size_t output_width = (input_width + padding_width - effective_kernel_width) / subsampling + 1;
+  const size_t output_height =
+      (input_height + padding_height - effective_kernel_height) / subsampling +
+      1;
+  const size_t output_width =
+      (input_width + padding_width - effective_kernel_width) / subsampling + 1;
 
-  xnnpack::Buffer<float> input(batch_size * input_height * input_width * input_pixel_stride + XNN_EXTRA_BYTES / sizeof(float));
+  xnnpack::Buffer<float> input(batch_size * input_height * input_width *
+                                   input_pixel_stride +
+                               XNN_EXTRA_BYTES / sizeof(float));
   std::generate(input.begin(), input.end(), std::ref(f32rng));
-  xnnpack::Buffer<float> kernel(groups * group_output_channels * kernel_height * kernel_width * group_input_channels);
+  xnnpack::Buffer<float> kernel(groups * group_output_channels * kernel_height *
+                                kernel_width * group_input_channels);
   std::generate(kernel.begin(), kernel.end(), std::ref(f32rng));
   xnnpack::Buffer<float> bias(groups * group_output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
-  const size_t output_elements = batch_size * output_height * output_width * output_pixel_stride;
+  xnnpack::Buffer<float> output(batch_size * output_height * output_width *
+                                output_pixel_stride);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
@@ -484,84 +455,63 @@ void xnnpack_convolution_f32(benchmark::State& state, const char* net) {
     return;
   }
 
-  const size_t num_buffers = 1 +
-    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
-      sizeof(float) * (kernel.size() + bias.size() + output_elements));
-  xnnpack::Buffer<float> output(output_elements * num_buffers);
-
-  xnnpack::Buffer<xnn_operator_t> convolution_operators(num_buffers);
-  for (xnn_operator_t& convolution_op : convolution_operators) {
-    status = xnn_create_convolution2d_nhwc_f32(
-      padding_top, padding_right, padding_bottom, padding_left,
-      kernel_height, kernel_width,
-      subsampling, subsampling,
-      dilation, dilation,
-      groups, group_input_channels, group_output_channels,
-      input_pixel_stride, output_pixel_stride,
-      kernel.data(), bias.data(),
-      -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity(),
-      0 /* flags */, nullptr, nullptr, &convolution_op);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to create FP32 Convolution operator");
-      return;
-    }
+  xnn_operator_t convolution_op;
+  status = xnn_create_convolution2d_nhwc_f32(
+      padding_top, padding_right, padding_bottom, padding_left, kernel_height,
+      kernel_width, subsampling, subsampling, dilation, dilation, groups,
+      group_input_channels, group_output_channels, input_pixel_stride,
+      output_pixel_stride, kernel.data(), bias.data(),
+      -std::numeric_limits<float>::infinity(),
+      +std::numeric_limits<float>::infinity(), 0 /* flags */, nullptr, nullptr,
+      &convolution_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to create FP32 Convolution operator");
+    return;
   }
 
-  size_t max_workspace_size = 0;
+  pthreadpool_t threadpool = pthreadpool_create(FLAGS_num_threads);
 
-  for (size_t i = 0; i < convolution_operators.size(); i++) {
-    size_t workspace_size = 0;
-    size_t workspace_alignment = 0;
-    status = xnn_reshape_convolution2d_nhwc_f32(
-      convolution_operators[i],
-      batch_size, input_height, input_width,
-      &workspace_size, &workspace_alignment,
-      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-      /*threadpool=*/nullptr);
+  size_t workspace_size = 0;
+  size_t workspace_alignment = 0;
+  status = xnn_reshape_convolution2d_nhwc_f32(
+      convolution_op, batch_size, input_height, input_width, &workspace_size,
+      &workspace_alignment,
+      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, threadpool);
 
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to reshape FP32 Convolution operator");
-      return;
-    }
-
-    max_workspace_size = std::max(max_workspace_size, workspace_size);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to reshape FP32 Convolution operator");
+    return;
   }
 
-  xnnpack::Buffer<char> workspace(max_workspace_size);
+  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
 
-  for (size_t i = 0; i < convolution_operators.size(); i++) {
-    status = xnn_setup_convolution2d_nhwc_f32(
-      convolution_operators[i],
-      workspace.data(),
-      input.data(), output.data() + i * output_elements);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to setup FP32 Convolution operator");
-      return;
-    }
+  status = xnn_setup_convolution2d_nhwc_f32(convolution_op, workspace.data(),
+                                            input.data(), output.data());
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to setup FP32 Convolution operator");
+    return;
   }
 
-  size_t buffer_index = 0;
-  for (auto _ : state) {
-    state.PauseTiming();
-    benchmark::utils::PrefetchToL1(input.data(), input.size() * sizeof(float));
-    buffer_index = (buffer_index + 1) % num_buffers;
-    state.ResumeTiming();
+  int num_iters = FLAGS_benchmark_min_iters;
+  while (state.KeepRunningBatch(num_iters)) {
+    for (int iter = 0; iter < num_iters; iter++) {
+      benchmark::utils::WipePthreadpoolL2Caches(state, threadpool);
 
-    status = xnn_run_operator(convolution_operators[buffer_index], /*threadpool=*/nullptr);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to run FP32 Convolution operator");
-      return;
+      status = xnn_run_operator(convolution_op, threadpool);
+      if (status != xnn_status_success) {
+        state.SkipWithError("failed to run FP32 Convolution operator");
+        return;
+      }
     }
+    num_iters = 1;
   }
 
-  for (xnn_operator_t& convolution_op : convolution_operators) {
-    status = xnn_delete_operator(convolution_op);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to delete FP32 Convolution operator");
-      return;
-    }
-    convolution_op = nullptr;
+  status = xnn_delete_operator(convolution_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to delete FP32 Convolution operator");
+    return;
   }
+  convolution_op = nullptr;
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
   if (cpu_frequency != 0) {
@@ -569,11 +519,12 @@ void xnnpack_convolution_f32(benchmark::State& state, const char* net) {
   }
 
   state.counters["FLOPS"] = benchmark::Counter(
-    uint64_t(state.iterations()) * 2 *
-      batch_size * output_height * output_width *
-      groups * group_input_channels * group_output_channels *
-      kernel_height * kernel_width,
-    benchmark::Counter::kIsRate);
+      static_cast<uint64_t>(state.iterations()) * 2 * batch_size *
+          output_height * output_width * groups * group_input_channels *
+          group_output_channels * kernel_height * kernel_width,
+      benchmark::Counter::kIsRate);
+
+  pthreadpool_destroy(threadpool);
 }
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
@@ -748,7 +699,7 @@ void tflite_convolution_f32(benchmark::State& state, const char* net) {
     state.SkipWithError("TFLite interpreter is null");
     return;
   }
-  interpreter->SetNumThreads(1);
+  interpreter->SetNumThreads(FLAGS_num_threads);
 
   if (interpreter->AllocateTensors() != kTfLiteOk) {
     state.SkipWithError("failed to allocate tensors");
@@ -760,18 +711,19 @@ void tflite_convolution_f32(benchmark::State& state, const char* net) {
     interpreter->typed_tensor<float>(0) + batch_size * groups * group_input_channels * input_height * input_width,
     std::ref(f32rng));
 
-  for (auto _ : state) {
-    state.PauseTiming();
-    benchmark::utils::WipeCache();
-    benchmark::utils::PrefetchToL1(
-      interpreter->typed_tensor<float>(0),
-      batch_size * groups * group_input_channels * input_height * input_width * sizeof(float));
-    state.ResumeTiming();
+  int num_iters = FLAGS_benchmark_min_iters;
+  while (state.KeepRunningBatch(num_iters)) {
+    for (int iter = 0; iter < num_iters; iter++) {
+      state.PauseTiming();
+      benchmark::utils::WipeCache();
+      state.ResumeTiming();
 
-    if (interpreter->Invoke() != kTfLiteOk) {
-      state.SkipWithError("failed to invoke TFLite interpreter");
-      return;
+      if (interpreter->Invoke() != kTfLiteOk) {
+        state.SkipWithError("failed to invoke TFLite interpreter");
+        return;
+      }
     }
+    num_iters = 1;
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -1714,123 +1666,80 @@ static void SRCNN955(benchmark::internal::Benchmark* b) {
   b->Args({1, 372, 372,  5,  5,  0,  0, 1, 1, 1,   32,    1});
 }
 
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, mobilenet_v1, "MobileNet v1")->Apply(MobileNetV1)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, mobilenet_v2, "MobileNet v2")->Apply(MobileNetV2)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, mobilenet_v3_small, "MobileNet v3 Small")->Apply(MobileNetV3Small)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, mobilenet_v3_large, "MobileNet v3 Large")->Apply(MobileNetV3Large)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, shufflenet_v1_g1, "ShuffleNet v1 (1 group)")->Apply(ShuffleNetV1G1)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, shufflenet_v1_g2, "ShuffleNet v1 (2 groups)")->Apply(ShuffleNetV1G2)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, shufflenet_v1_g3, "ShuffleNet v1 (3 groups)")->Apply(ShuffleNetV1G3)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, shufflenet_v1_g4, "ShuffleNet v1 (4 groups)")->Apply(ShuffleNetV1G4)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)")->Apply(ShuffleNetV1G8)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, shufflenet_v2_x05, "ShuffleNet v2 0.5X")->Apply(ShuffleNetV2X05)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, shufflenet_v2_x10, "ShuffleNet v2 1.0X")->Apply(ShuffleNetV2X10)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, shufflenet_v2_x15, "ShuffleNet v2 1.5X")->Apply(ShuffleNetV2X15)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, shufflenet_v2_x20, "ShuffleNet v2 2.0X")->Apply(ShuffleNetV2X20)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, squeezenet_v10, "SqueezeNet 1.0")->Apply(SqueezeNetV10)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, squeezenet_v11, "SqueezeNet 1.1")->Apply(SqueezeNetV11)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, inception_v3, "Inception v3")->Apply(InceptionV3)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, resnet18, "ResNet-18")->Apply(ResNet18)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, resnet50, "ResNet-50")->Apply(ResNet50)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, vgg, "VGG")->Apply(VGG)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, srcnn915, "SRCNN (9-1-5)")->Apply(SRCNN915)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, srcnn935, "SRCNN (9-3-5)")->Apply(SRCNN935)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f16, srcnn955, "SRCNN (9-5-5)")->Apply(SRCNN955)->UseRealTime();
+#define GENERATE_CONV_BENCHMARKS(conv)                                  \
+  BENCHMARK_CAPTURE(conv, mobilenet_v1, "MobileNet v1")                 \
+      ->Apply(MobileNetV1)                                              \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, mobilenet_v2, "MobileNet v2")                 \
+      ->Apply(MobileNetV2)                                              \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, mobilenet_v3_small, "MobileNet v3 Small")     \
+      ->Apply(MobileNetV3Small)                                         \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, mobilenet_v3_large, "MobileNet v3 Large")     \
+      ->Apply(MobileNetV3Large)                                         \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, shufflenet_v1_g1, "ShuffleNet v1 (1 group)")  \
+      ->Apply(ShuffleNetV1G1)                                           \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, shufflenet_v1_g2, "ShuffleNet v1 (2 groups)") \
+      ->Apply(ShuffleNetV1G2)                                           \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, shufflenet_v1_g3, "ShuffleNet v1 (3 groups)") \
+      ->Apply(ShuffleNetV1G3)                                           \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, shufflenet_v1_g4, "ShuffleNet v1 (4 groups)") \
+      ->Apply(ShuffleNetV1G4)                                           \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)") \
+      ->Apply(ShuffleNetV1G8)                                           \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, shufflenet_v2_x05, "ShuffleNet v2 0.5X")      \
+      ->Apply(ShuffleNetV2X05)                                          \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, shufflenet_v2_x10, "ShuffleNet v2 1.0X")      \
+      ->Apply(ShuffleNetV2X10)                                          \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, shufflenet_v2_x15, "ShuffleNet v2 1.5X")      \
+      ->Apply(ShuffleNetV2X15)                                          \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, shufflenet_v2_x20, "ShuffleNet v2 2.0X")      \
+      ->Apply(ShuffleNetV2X20)                                          \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, squeezenet_v10, "SqueezeNet 1.0")             \
+      ->Apply(SqueezeNetV10)                                            \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, squeezenet_v11, "SqueezeNet 1.1")             \
+      ->Apply(SqueezeNetV11)                                            \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, inception_v3, "Inception v3")                 \
+      ->Apply(InceptionV3)                                              \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, resnet18, "ResNet-18")                        \
+      ->Apply(ResNet18)                                                 \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, resnet50, "ResNet-50")                        \
+      ->Apply(ResNet50)                                                 \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, vgg, "VGG")->Apply(VGG)->UseRealTime();       \
+  BENCHMARK_CAPTURE(conv, srcnn915, "SRCNN (9-1-5)")                    \
+      ->Apply(SRCNN915)                                                 \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, srcnn935, "SRCNN (9-3-5)")                    \
+      ->Apply(SRCNN935)                                                 \
+      ->UseRealTime();                                                  \
+  BENCHMARK_CAPTURE(conv, srcnn955, "SRCNN (9-5-5)")                    \
+      ->Apply(SRCNN955)                                                 \
+      ->UseRealTime();
 
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, mobilenet_v1, "MobileNet v1")->Apply(MobileNetV1)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, mobilenet_v2, "MobileNet v2")->Apply(MobileNetV2)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, mobilenet_v3_small, "MobileNet v3 Small")->Apply(MobileNetV3Small)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, mobilenet_v3_large, "MobileNet v3 Large")->Apply(MobileNetV3Large)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, shufflenet_v1_g1, "ShuffleNet v1 (1 group)")->Apply(ShuffleNetV1G1)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, shufflenet_v1_g2, "ShuffleNet v1 (2 groups)")->Apply(ShuffleNetV1G2)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, shufflenet_v1_g3, "ShuffleNet v1 (3 groups)")->Apply(ShuffleNetV1G3)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, shufflenet_v1_g4, "ShuffleNet v1 (4 groups)")->Apply(ShuffleNetV1G4)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)")->Apply(ShuffleNetV1G8)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, shufflenet_v2_x05, "ShuffleNet v2 0.5X")->Apply(ShuffleNetV2X05)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, shufflenet_v2_x10, "ShuffleNet v2 1.0X")->Apply(ShuffleNetV2X10)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, shufflenet_v2_x15, "ShuffleNet v2 1.5X")->Apply(ShuffleNetV2X15)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, shufflenet_v2_x20, "ShuffleNet v2 2.0X")->Apply(ShuffleNetV2X20)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, squeezenet_v10, "SqueezeNet 1.0")->Apply(SqueezeNetV10)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, squeezenet_v11, "SqueezeNet 1.1")->Apply(SqueezeNetV11)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, inception_v3, "Inception v3")->Apply(InceptionV3)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, resnet18, "ResNet-18")->Apply(ResNet18)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, resnet50, "ResNet-50")->Apply(ResNet50)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, vgg, "VGG")->Apply(VGG)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, srcnn915, "SRCNN (9-1-5)")->Apply(SRCNN915)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, srcnn935, "SRCNN (9-3-5)")->Apply(SRCNN935)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_f32, srcnn955, "SRCNN (9-5-5)")->Apply(SRCNN955)->UseRealTime();
-
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, mobilenet_v1, "MobileNet v1")->Apply(MobileNetV1)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, mobilenet_v2, "MobileNet v2")->Apply(MobileNetV2)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, mobilenet_v3_small, "MobileNet v3 Small")->Apply(MobileNetV3Small)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, mobilenet_v3_large, "MobileNet v3 Large")->Apply(MobileNetV3Large)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, shufflenet_v1_g1, "ShuffleNet v1 (1 group)")->Apply(ShuffleNetV1G1)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, shufflenet_v1_g2, "ShuffleNet v1 (2 groups)")->Apply(ShuffleNetV1G2)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, shufflenet_v1_g3, "ShuffleNet v1 (3 groups)")->Apply(ShuffleNetV1G3)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, shufflenet_v1_g4, "ShuffleNet v1 (4 groups)")->Apply(ShuffleNetV1G4)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)")->Apply(ShuffleNetV1G8)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, shufflenet_v2_x05, "ShuffleNet v2 0.5X")->Apply(ShuffleNetV2X05)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, shufflenet_v2_x10, "ShuffleNet v2 1.0X")->Apply(ShuffleNetV2X10)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, shufflenet_v2_x15, "ShuffleNet v2 1.5X")->Apply(ShuffleNetV2X15)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, shufflenet_v2_x20, "ShuffleNet v2 2.0X")->Apply(ShuffleNetV2X20)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, squeezenet_v10, "SqueezeNet 1.0")->Apply(SqueezeNetV10)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, squeezenet_v11, "SqueezeNet 1.1")->Apply(SqueezeNetV11)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, inception_v3, "Inception v3")->Apply(InceptionV3)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, resnet18, "ResNet-18")->Apply(ResNet18)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, resnet50, "ResNet-50")->Apply(ResNet50)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, vgg, "VGG")->Apply(VGG)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, srcnn915, "SRCNN (9-1-5)")->Apply(SRCNN915)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, srcnn935, "SRCNN (9-3-5)")->Apply(SRCNN935)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qs8, srcnn955, "SRCNN (9-5-5)")->Apply(SRCNN955)->UseRealTime();
-
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, mobilenet_v1, "MobileNet v1")->Apply(MobileNetV1)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, mobilenet_v2, "MobileNet v2")->Apply(MobileNetV2)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, mobilenet_v3_small, "MobileNet v3 Small")->Apply(MobileNetV3Small)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, mobilenet_v3_large, "MobileNet v3 Large")->Apply(MobileNetV3Large)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, shufflenet_v1_g1, "ShuffleNet v1 (1 group)")->Apply(ShuffleNetV1G1)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, shufflenet_v1_g2, "ShuffleNet v1 (2 groups)")->Apply(ShuffleNetV1G2)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, shufflenet_v1_g3, "ShuffleNet v1 (3 groups)")->Apply(ShuffleNetV1G3)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, shufflenet_v1_g4, "ShuffleNet v1 (4 groups)")->Apply(ShuffleNetV1G4)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)")->Apply(ShuffleNetV1G8)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, shufflenet_v2_x05, "ShuffleNet v2 0.5X")->Apply(ShuffleNetV2X05)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, shufflenet_v2_x10, "ShuffleNet v2 1.0X")->Apply(ShuffleNetV2X10)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, shufflenet_v2_x15, "ShuffleNet v2 1.5X")->Apply(ShuffleNetV2X15)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, shufflenet_v2_x20, "ShuffleNet v2 2.0X")->Apply(ShuffleNetV2X20)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, squeezenet_v10, "SqueezeNet 1.0")->Apply(SqueezeNetV10)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, squeezenet_v11, "SqueezeNet 1.1")->Apply(SqueezeNetV11)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, inception_v3, "Inception v3")->Apply(InceptionV3)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, resnet18, "ResNet-18")->Apply(ResNet18)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, resnet50, "ResNet-50")->Apply(ResNet50)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, vgg, "VGG")->Apply(VGG)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, srcnn915, "SRCNN (9-1-5)")->Apply(SRCNN915)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, srcnn935, "SRCNN (9-3-5)")->Apply(SRCNN935)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_convolution_qu8, srcnn955, "SRCNN (9-5-5)")->Apply(SRCNN955)->UseRealTime();
-
+GENERATE_CONV_BENCHMARKS(xnnpack_convolution_f16);
+GENERATE_CONV_BENCHMARKS(xnnpack_convolution_f32);
+GENERATE_CONV_BENCHMARKS(xnnpack_convolution_qs8);
+GENERATE_CONV_BENCHMARKS(xnnpack_convolution_qu8);
 #ifdef BENCHMARK_TENSORFLOW_LITE
-  BENCHMARK_CAPTURE(tflite_convolution_f32, mobilenet_v1, "MobileNet v1")->Apply(MobileNetV1)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, mobilenet_v2, "MobileNet v2")->Apply(MobileNetV2)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, mobilenet_v3_small, "MobileNet v3 Small")->Apply(MobileNetV3Small)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, mobilenet_v3_large, "MobileNet v3 Large")->Apply(MobileNetV3Large)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, shufflenet_v1_g1, "ShuffleNet v1 (1 group)")->Apply(ShuffleNetV1G1)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, shufflenet_v1_g2, "ShuffleNet v1 (2 groups)")->Apply(ShuffleNetV1G2)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, shufflenet_v1_g3, "ShuffleNet v1 (3 groups)")->Apply(ShuffleNetV1G3)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, shufflenet_v1_g4, "ShuffleNet v1 (4 groups)")->Apply(ShuffleNetV1G4)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)")->Apply(ShuffleNetV1G8)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, shufflenet_v2_x05, "ShuffleNet v2 0.5X")->Apply(ShuffleNetV2X05)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, shufflenet_v2_x10, "ShuffleNet v2 1.0X")->Apply(ShuffleNetV2X10)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, shufflenet_v2_x15, "ShuffleNet v2 1.5X")->Apply(ShuffleNetV2X15)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, shufflenet_v2_x20, "ShuffleNet v2 2.0X")->Apply(ShuffleNetV2X20)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, squeezenet_v10, "SqueezeNet 1.0")->Apply(SqueezeNetV10)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, squeezenet_v11, "SqueezeNet 1.1")->Apply(SqueezeNetV11)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, inception_v3, "Inception v3")->Apply(InceptionV3)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, resnet18, "ResNet-18")->Apply(ResNet18)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, resnet50, "ResNet-50")->Apply(ResNet50)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, vgg, "VGG")->Apply(VGG)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, srcnn915, "SRCNN (9-1-5)")->Apply(SRCNN915)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, srcnn935, "SRCNN (9-3-5)")->Apply(SRCNN935)->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_convolution_f32, srcnn955, "SRCNN (9-5-5)")->Apply(SRCNN955)->UseRealTime();
+GENERATE_CONV_BENCHMARKS(tflite_convolution_f32);
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

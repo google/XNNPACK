@@ -78,7 +78,7 @@ void xnn_qd8_f32_qb4w_gemm_minmax_ukernel_4x4c8__avx_ld64(
   XNN_FORCE_REALIZATION(vmask);
 
   do {
-    const __m128 vksum = _mm_load_ps((const float*) w);
+    const __m128 vksum = _mm_loadu_ps((const float*) w);
     const __m128i vinput_zero_point0 = _mm_castps_si128(_mm_broadcast_ss((const float*) &quantization_params[0].zero_point));
     const __m128i vinput_zero_point1 = _mm_castps_si128(_mm_broadcast_ss((const float*) &quantization_params[1].zero_point));
     const __m128i vinput_zero_point2 = _mm_castps_si128(_mm_broadcast_ss((const float*) &quantization_params[2].zero_point));

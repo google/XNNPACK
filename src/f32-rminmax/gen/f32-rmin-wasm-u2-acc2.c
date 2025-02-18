@@ -25,7 +25,7 @@ void xnn_f32_rmin_ukernel__wasm_u2_acc2(
 
   const float* i = input;
 
-  float vmin0 = *i;
+  float vmin0 = output[0];
   float vmin1 = vmin0;
   for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {
     const float vt0 = i[0];

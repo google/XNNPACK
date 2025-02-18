@@ -18,8 +18,6 @@ $ABC = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 $XINT8_T = {"QS8": "int8_t", "QU8": "uint8_t"}[DATATYPE]
 $XINT8X8_T = {"QS8": "int8x8_t", "QU8": "uint8x8_t"}[DATATYPE]
 $XINT8X16_T = {"QS8": "int8x16_t", "QU8": "uint8x16_t"}[DATATYPE]
-$VLD1Q_DUP_X8 = {"QS8": "vld1q_dup_s8", "QU8": "vld1q_dup_u8"}[DATATYPE]
-$VLD1_DUP_X8 = {"QS8": "vld1_dup_s8", "QU8": "vld1_dup_u8"}[DATATYPE]
 $VST1Q_X8 = {"QS8": "vst1q_s8", "QU8": "vst1q_u8"}[DATATYPE]
 $VST1_X8 = {"QS8": "vst1_s8", "QU8": "vst1_u8"}[DATATYPE]
 $VST1_LANE_X8 = {"QS8": "vst1_lane_s8", "QU8": "vst1_lane_u8"}[DATATYPE]
@@ -40,8 +38,8 @@ void xnn_f32_${DATATYPE.lower()}_vcvt_ukernel__neonv8_u${BATCH_TILE}(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vscale = vld1q_dup_f32(&params->scalar.scale);
-  const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->scalar.output_zero_point);
+  const float32x4_t vscale = vdupq_n_f32(params->scalar.scale);
+  const int16x8_t voutput_zero_point = vdupq_n_s16(params->scalar.output_zero_point);
   $if BATCH_TILE > 8:
     for (; batch >= ${BATCH_TILE} * sizeof(float); batch -= ${BATCH_TILE} * sizeof(float)) {
       $for N in range(0, BATCH_TILE, 4):

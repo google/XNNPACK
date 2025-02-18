@@ -6,7 +6,10 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_ISA_CHECKS_H_
+#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_ISA_CHECKS_H_
+
+#include <stddef.h>
 
 #include "xnnpack/common.h"
 #include "xnnpack/hardware-config.h"
@@ -160,6 +163,14 @@ size_t get_batch_scale() {
 #else
   #define TEST_REQUIRES_X86_AVX512AMX_VALUE (false)
   #define TEST_REQUIRES_X86_AVX512AMX do {} while (0)
+#endif
+
+#if XNN_ARCH_X86_64
+  #define TEST_REQUIRES_X86_AVX512BF16_VALUE XNN_TEST_HWCONFIG_FLAG(use_x86_avx512bf16)
+  #define TEST_REQUIRES_X86_AVX512BF16 TEST_REQUIRES_HWCONFIG_FLAG(use_x86_avx512bf16)
+#else
+  #define TEST_REQUIRES_X86_AVX512BF16_VALUE (false)
+  #define TEST_REQUIRES_X86_AVX512BF16 do {} while (0)
 #endif
 
 #if XNN_ARCH_X86 || XNN_ARCH_X86_64
@@ -324,6 +335,22 @@ size_t get_batch_scale() {
   #define TEST_REQUIRES_ARM_NEON_I8MM do {} while (0)
 #endif  // XNN_ARCH_ARM64
 
+#if XNN_ARCH_ARM64
+  #define TEST_REQUIRES_ARM_NEON_SME_VALUE XNN_TEST_HWCONFIG_FLAG(use_arm_sme)
+  #define TEST_REQUIRES_ARM_NEON_SME TEST_REQUIRES_HWCONFIG_FLAG(use_arm_sme)
+#else
+  #define TEST_REQUIRES_ARM_NEON_SME_VALUE (false)
+  #define TEST_REQUIRES_ARM_NEON_SME do {} while (0)
+#endif  // XNN_ARCH_ARM64
+
+#if XNN_ARCH_ARM64
+  #define TEST_REQUIRES_ARM_NEON_SME2_VALUE XNN_TEST_HWCONFIG_FLAG(use_arm_sme2)
+  #define TEST_REQUIRES_ARM_NEON_SME2 TEST_REQUIRES_HWCONFIG_FLAG(use_arm_sme2)
+#else
+  #define TEST_REQUIRES_ARM_NEON_SME2_VALUE (false)
+  #define TEST_REQUIRES_ARM_NEON_SME2 do {} while (0)
+#endif  // XNN_ARCH_ARM64
+
 #if XNN_ARCH_RISCV
   #define TEST_REQUIRES_RISCV_VECTOR_VALUE XNN_TEST_HWCONFIG_FLAG(use_riscv_vector)
   #define TEST_REQUIRES_RISCV_VECTOR TEST_REQUIRES_HWCONFIG_FLAG(use_riscv_vector)
@@ -371,3 +398,5 @@ size_t get_batch_scale() {
   #define TEST_REQUIRES_WASM_BLENDVPS_VALUE (false)
   #define TEST_REQUIRES_WASM_BLENDVPS do {} while (0)
 #endif
+
+#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_ISA_CHECKS_H_

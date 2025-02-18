@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 #include "xnnpack.h"
-#include "xnnpack/common.h"
 #include "unary-ops.h"
 
 const UnaryOpInfo* GetUnaryOpInfo(xnn_unary_operator op) {

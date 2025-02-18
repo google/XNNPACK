@@ -20,6 +20,7 @@
 static struct xnn_unary_elementwise_config f16_abs_config = {0};
 static struct xnn_unary_elementwise_config f16_clamp_config = {0};
 static struct xnn_unary_elementwise_config f16_elu_config = {0};
+static struct xnn_unary_elementwise_config f16_gelu_config = {0};
 static struct xnn_unary_elementwise_config f16_hswish_config = {0};
 static struct xnn_unary_elementwise_config f16_lrelu_config = {0};
 static struct xnn_unary_elementwise_config f16_neg_config = {0};
@@ -73,6 +74,7 @@ static struct xnn_unary_elementwise_config xx_copy_config = {0};
 XNN_INIT_ONCE_GUARD(f16_abs);
 XNN_INIT_ONCE_GUARD(f16_clamp);
 XNN_INIT_ONCE_GUARD(f16_elu);
+XNN_INIT_ONCE_GUARD(f16_gelu);
 XNN_INIT_ONCE_GUARD(f16_hswish);
 XNN_INIT_ONCE_GUARD(f16_lrelu);
 XNN_INIT_ONCE_GUARD(f16_neg);
@@ -188,6 +190,10 @@ static void init_f16_elu_config(void) {
       f16_elu_config.init = (xnn_init_unary_uparams_fn) xnn_init_f16_elu_scalar_params;
     }
   #endif
+}
+
+static void init_f16_gelu_config(void) {
+      f16_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f16_vgelu_ukernel__scalar_rational_6_4_div_u8;
 }
 
 static void init_f16_hswish_config(void) {
@@ -1990,6 +1996,15 @@ const struct xnn_unary_elementwise_config* xnn_init_f16_elu_config() {
   }
   XNN_INIT_ONCE(f16_elu);
   return &f16_elu_config;
+}
+
+const struct xnn_unary_elementwise_config* xnn_init_f16_gelu_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(f16_gelu);
+  return &f16_gelu_config;
 }
 
 const struct xnn_unary_elementwise_config* xnn_init_f16_hswish_config() {

@@ -20,6 +20,7 @@ size_t xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2_get_mr() {
   assert(
       "Calling KleidiAI kai_get_mr wrapper, but XNNPACK was compiled without "
       "`XNN_ENABLE_KLEIDIAI`." && 0);
+  return 0;
 #endif  // XNN_ENABLE_KLEIDIAI
 }
 
@@ -30,13 +31,14 @@ size_t xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2_get_nr() {
   assert(
       "Calling KleidiAI kai_get_nr wrapper, but XNNPACK was compiled without "
       "`XNN_ENABLE_KLEIDIAI`." && 0);
+  return 0;
 #endif  // XNN_ENABLE_KLEIDIAI
 }
 
 // Wraps the `kai_run_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa`
 // GEMM microkernel with a name that is compatible with our tooling.
 void xnn_pf32_gemm_minmax_ukernel_32x32__neonsme2(
-    size_t m, size_t n, size_t k, const void* lhs_packed, size_t lhs_stride,
+    size_t m, size_t n, size_t k, const void* lhs_packed,
     const void* rhs_packed, float* dst, size_t dst_stride_row,
     size_t dst_stride_col,
     union xnn_f32_minmax_params

@@ -377,7 +377,7 @@ class ConvHWC2CHWMicrokernelTester {
                 << "(x, y) = (" << x << ", " << y << "), channel = " << c;
               EXPECT_LE(output[((i * output_channels() + c) * output_height() + y) * output_width() + x], output_max)
                 << "(x, y) = (" << x << ", " << y << "), channel = " << c;
-              EXPECT_NEAR(
+              ASSERT_NEAR(
                   output_ref[((i * output_channels() + c) * output_height() + y) * output_width() + x],
                   output[((i * output_channels() + c) * output_height() + y) * output_width() + x],
                   1.0e-4 * std::abs(output_ref[((i * output_channels() + c) * output_height() + y) * output_width() + x]))
@@ -486,7 +486,7 @@ class ConvHWC2CHWMicrokernelTester {
                 << "(x, y) = (" << x << ", " << y << "), channel = " << c;
               EXPECT_LE(output[((i * output_channels() + c) * output_height() + y) * output_width() + x], output_max)
                 << "(x, y) = (" << x << ", " << y << "), channel = " << c;
-              EXPECT_NEAR(
+              ASSERT_NEAR(
                   output_ref[((i * output_channels() + c) * output_height() + y) * output_width() + x],
                   output[((i * output_channels() + c) * output_height() + y) * output_width() + x],
                   std::max(1.0e-4f, 1.0e-2f * std::abs(output_ref[((i * output_channels() + c) * output_height() + y) * output_width() + x])))

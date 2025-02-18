@@ -12,6 +12,7 @@ PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/f16-qu8-vcvt/gen/f16-qu8-vcvt-scalar-imagic-u4.c",
     "src/f16-rminmax/gen/f16-rmax-scalar-u2-acc2.c",
     "src/f16-rminmax/gen/f16-rminmax-scalar-u2-acc2.c",
+    "src/f16-vgelu/gen/f16-vgelu-scalar-rational-6-4-div.c",
     "src/f32-argmaxpool/f32-argmaxpool-4x-scalar-c1.c",
     "src/f32-argmaxpool/f32-argmaxpool-9p8x-scalar-c1.c",
     "src/f32-argmaxpool/f32-argmaxpool-9x-scalar-c1.c",
@@ -227,7 +228,6 @@ PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/x8-packw/gen/x8-packw-x16-gemm-goi-scalar-u2.c",
     "src/x8-packw/gen/x8-packw-x32-gemm-goi-scalar-u2.c",
     "src/x8-transposec/gen/x8-transposec-2x4-scalar-int.c",
-    "src/x16-packw/gen/x16-packw-x64-gemm-goi-scalar-int-u4.c",
     "src/x16-transposec/gen/x16-transposec-2x4-scalar-int.c",
     "src/x24-transposec/gen/x24-transposec-1x2-scalar.c",
     "src/x32-packw/gen/x32-packw-x2-gemm-goi-scalar-float-u4.c",
@@ -242,6 +242,7 @@ PROD_SCALAR_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_SCALAR_MICROKERNEL_SRCS = [
+    "src/bf16-f32-gemm/bf16-f32-gemm-1x4c2-minmax-scalar.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-u2.c",
     "src/f16-f32-vcvt/gen/f16-f32-vcvt-scalar-u3.c",
     "src/f16-qs8-vcvt/gen/f16-qs8-vcvt-scalar-fmagic-u1.c",
@@ -844,6 +845,7 @@ NON_PROD_SCALAR_MICROKERNEL_SRCS = [
     "src/x16-packw/gen/x16-packw-x8-gemm-goi-scalar-int-u4.c",
     "src/x16-packw/gen/x16-packw-x16-gemm-goi-scalar-int-u4.c",
     "src/x16-packw/gen/x16-packw-x32-gemm-goi-scalar-int-u4.c",
+    "src/x16-packw/gen/x16-packw-x64-gemm-goi-scalar-int-u4.c",
     "src/x16-transposec/gen/x16-transposec-1x2-scalar-int.c",
     "src/x16-transposec/gen/x16-transposec-1x4-scalar-int.c",
     "src/x16-transposec/gen/x16-transposec-2x1-scalar-int.c",

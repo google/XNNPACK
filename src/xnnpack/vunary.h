@@ -59,6 +59,7 @@ extern "C" {
 #include "f16-vabs/f16-vabs.h"
 #include "f16-vclamp/f16-vclamp.h"
 #include "f16-velu/f16-velu.h"
+#include "f16-vgelu/f16-vgelu.h"
 #include "f16-vhswish/f16-vhswish.h"
 #include "f16-vlrelu/f16-vlrelu.h"
 #include "f16-vneg/f16-vneg.h"

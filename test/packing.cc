@@ -617,6 +617,147 @@ TEST(PACK_F32_GEMM_GIO_W, g_gt_1_nr_gt_1_kr_gt_1) {
   EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
 }
 
+float packed_bf16(xnn_bfloat16 a, xnn_bfloat16 b) {
+  union {
+    float f;
+    xnn_bfloat16 bf[2];
+  } result;
+  result.bf[0] = a;
+  result.bf[1] = b;
+  return result.f;
+}
+
+TEST(PACK_BF16_F32_GEMM_GIO_W, g_eq_1) {
+  size_t g = 1;
+  size_t nc = 2;
+  size_t kc = 2;
+  size_t nr = 1;
+  size_t kr = 1;
+  size_t sr = 1;
+
+  std::vector<float> b(g * nc);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1]
+  std::vector<xnn_bfloat16> k(g * nc * kc);
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size())); // k = [2, 3, 4, 5]
+  std::vector<float> packed_weights(g * round_up(nc, nr) + g * round_up(nc, nr) * round_up_po2(kc, kr * sr) / 2);
+  xnn_pack_bf16_f32_gemm_gio_w(g, nc, kc, nr, kr, sr, nc,
+    k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/nullptr);
+
+  const std::vector<float> expected = {
+    0.0f,
+    packed_bf16(2.0f, 4.f),
+    1.0f,
+    packed_bf16(3.0f, 5.0f),
+  };
+  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+}
+
+TEST(PACK_BF16_F32_GEMM_GIO_W, g_eq_1_nr_gt_1_kr_gt_1) {
+  size_t g = 1;
+  size_t nc = 3;
+  size_t kc = 3;
+  size_t nr = 2;
+  size_t kr = 2;
+  size_t sr = 1;
+
+  std::vector<float> b(g * nc);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2]
+  std::vector<xnn_bfloat16> k(g * nc * kc);
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size())); // k = [3, 4, 5, 6, 7, 8, 9, 10, 11]
+  std::vector<float> packed_weights(g * round_up(nc, nr) + g * round_up(nc, nr) * round_up_po2(kc, kr * sr) / 2);
+  xnn_pack_bf16_f32_gemm_gio_w(g, nc, kc, nr, kr, sr, nc,
+    k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/nullptr);
+
+  const std::vector<float> expected = {
+    0.0f, 1.0f,
+    packed_bf16(3.0f, 6.0f), packed_bf16(4.0f, 7.0f),
+    packed_bf16(9.0f, 0.0f), packed_bf16(10.0f, 0.0f),
+    2.0f, 0.0f,
+    packed_bf16(5.0f, 8.0f), packed_bf16(0.0f, 0.0f),
+    packed_bf16(11.0f, 0.0f), packed_bf16(0.0f, 0.0f),
+  };
+  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+}
+
+TEST(PACK_BF16_F32_GEMM_GIO_W, g_gt_1) {
+  size_t g = 3;
+  size_t nc = 2;
+  size_t kc = 2;
+  size_t nr = 1;
+  size_t kr = 1;
+  size_t sr = 1;
+
+  std::vector<float> b(g * nc);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4, 5]
+  std::vector<xnn_bfloat16> k(g * nc * kc);
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size())); // k = [6,7,8,9,10,11,12,13,14,15,16,17]
+  std::vector<float> packed_weights(g * round_up(nc, nr) + g * round_up(nc, nr) * round_up_po2(kc, kr * sr) / 2);
+  xnn_pack_bf16_f32_gemm_gio_w(g, nc, kc, nr, kr, sr, nc,
+    k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/nullptr);
+
+  const std::vector<float> expected = {
+    0.0f,
+    packed_bf16(6.0f, 8.f),
+    1.0f,
+    packed_bf16(7.0f, 9.0f),
+    2.0f,
+    packed_bf16(10.0f, 12.0f),
+    3.0f,
+    packed_bf16(11.0f, 13.0f),
+    4.0f,
+    packed_bf16(14.0f, 16.0f),
+    5.0f,
+    packed_bf16(15.0f, 17.0f),
+  };
+  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+}
+
+TEST(PACK_BF16_F32_GEMM_GIO_W, g_gt_1_nr_gt_1_kr_gt_1) {
+  size_t g = 3;
+  size_t nc = 3;
+  size_t kc = 3;
+  size_t nr = 2;
+  size_t kr = 2;
+  size_t sr = 1;
+
+  std::vector<float> b(g * nc);
+  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+  std::vector<xnn_bfloat16> k(g * nc * kc);
+  std::iota(k.begin(), k.end(), static_cast<float>(b.size())); // k = [
+                                                               //   9,10,11,12,13,14,15,16,17,
+                                                               //   18,19,20,21,22,23,24,25,26,
+                                                               //   27,28,29,30,31,32,33,34,35
+                                                               // ]
+  std::vector<float> packed_weights(g * round_up(nc, nr) + g * round_up(nc, nr) * round_up_po2(kc, kr * sr) / 2);
+  xnn_pack_bf16_f32_gemm_gio_w(g, nc, kc, nr, kr, sr, nc,
+    k.data(), b.data(), /*scale=*/nullptr, packed_weights.data(), /*extra_bytes=*/0, /*params=*/nullptr);
+
+  const std::vector<float> expected = {
+    // Group 1.
+    0.0f, 1.0f,
+    packed_bf16(9.0f, 12.0f), packed_bf16(10.0f, 13.0f),
+    packed_bf16(15.0f, 0.0f), packed_bf16(16.0f, 0.0f),
+    2.0f, 0.0f,
+    packed_bf16(11.0f, 14.0f), packed_bf16(0.0f, 0.0f),
+    packed_bf16(17.0f, 0.0f), packed_bf16(0.0f, 0.0f),
+    // Group 2.
+    3.0f, 4.0f,
+    packed_bf16(18.0f, 21.0f), packed_bf16(19.0f, 22.0f),
+    packed_bf16(24.0f, 0.0f), packed_bf16(25.0f, 0.0f),
+    5.0f, 0.0f,
+    packed_bf16(20.0f, 23.0f), packed_bf16(0.0f, 0.0f),
+    packed_bf16(26.0f, 0.0f), packed_bf16(0.0f, 0.0f),
+    // Group 3.
+    6.0f, 7.0f,
+    packed_bf16(27.0f, 30.0f), packed_bf16(28.0f, 31.0f),
+    packed_bf16(33.0f, 0.0f), packed_bf16(34.0f, 0.0f),
+    8.0f, 0.0f,
+    packed_bf16(29.0f, 32.0f), packed_bf16(0.0f, 0.0f),
+    packed_bf16(35.0f, 0.0f), packed_bf16(0.0f, 0.0f),
+  };
+  EXPECT_THAT(packed_weights, testing::Pointwise(testing::Eq(), expected));
+}
+
 // DWCONV packing tests.
 
 // Calculates the size (number of elements) of packed weights required for a multi-pass dwconv.

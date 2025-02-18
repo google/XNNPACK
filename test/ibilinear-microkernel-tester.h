@@ -185,7 +185,7 @@ class IBilinearMicrokernelTester {
       // Verify results.
       for (size_t i = 0; i < pixels(); i++) {
         for (size_t c = 0; c < channels(); c++) {
-          EXPECT_NEAR(
+          ASSERT_NEAR(
               output_ref[i * channels() + c],
               output[i * output_stride() + c],
               std::abs(output_ref[i * channels() + c]) * 1.0e-4)
@@ -405,7 +405,7 @@ class IBilinearMicrokernelTester {
       // Verify results.
       for (size_t c = 0; c < channels(); c++) {
         for (size_t i = 0; i < pixels(); i++) {
-          EXPECT_NEAR(
+          ASSERT_NEAR(
               output_ref[c * pixels() + i],
               output[c * pixels() + i],
               std::abs(output_ref[c * pixels() + i]) * 1.0e-4)

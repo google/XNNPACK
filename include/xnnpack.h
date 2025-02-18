@@ -294,6 +294,11 @@ enum xnn_datatype {
   /// Dynamically quantized 8-bit unsigned integer with per-batch quantization
   /// parameters.
   xnn_datatype_qduint8 = 15,
+  /// IEEE754 half-precision packed floating-point.
+  xnn_datatype_pfp16 = 16,
+  /// Packed quantized 8-bit unsigned integer with shared per-Value quantization
+  /// parameters.
+  xnn_datatype_pqint8 = 17,
 };
 
 /// Define a tensor-type Value and add it to a Subgraph.
@@ -2103,6 +2108,33 @@ enum xnn_status xnn_define_static_slice_v2(  //
     uint32_t output_id,                      //
     uint32_t flags);
 
+/// Define a Static Slice Node add it to a Subgraph.
+///
+/// @param subgraph - a Subgraph object that will own the created Node.
+/// @param num_dims - number of shape dimensions in the input and output tensor.
+/// @param begins - offsets to the start in each dimension of the input tensor. This array must have @a num_dims elements.
+///                 Can be negative meaning that the offset is relative to the end of the dimension.
+/// @param ends - offsets to the end in each dimension of the input tensor. This array must have @a num_dims elements.
+///               Can be negative meaning that the offset is relative to the end of the dimension.
+///               An end value of 0 means "infer the largest open interval".
+/// @param strides - The stride to use for each dimension of the slice. Can be NULL, in which case
+///                  a value of 1 is assumed for all dimensions.
+///                  TODO: at present, only stride values of 1 are supported (other values will return errors);
+///                  this will be supported more fully in the future.
+/// @param input_id - Value ID for the input tensor. The input tensor must be defined in the @a subgraph.
+/// @param output_id - Value ID for the output tensor. The output tensor must be defined in the @a subgraph, and its
+///                    dimensions must match @a sizes.
+/// @param flags - binary features of the Static Slice Node. No supported flags are currently defined.
+enum xnn_status xnn_define_static_slice_v3(  //
+    xnn_subgraph_t subgraph,                 //
+    size_t num_dims,                         //
+    const int64_t* begins,                   //
+    const int64_t* ends,                     //
+    const int64_t* strides,                  //
+    uint32_t input_id,                       //
+    uint32_t output_id,                      //
+    uint32_t flags);
+
 /// Define a Static Transpose Node and add it to a Subgraph.
 ///
 /// The Static Transpose Node applies a generalized transpose to the input tensor using the permuation in perm.
@@ -2637,6 +2669,10 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_qu8(
 enum xnn_status xnn_create_batch_matrix_multiply_nc_f16(
   uint32_t flags,
   xnn_operator_t* batch_matrix_multiply_op);
+
+enum xnn_status xnn_create_batch_matrix_multiply_nc_f16_const_weights(
+    size_t batch_size_b, size_t k, size_t n, const void* data_b, uint32_t flags,
+    xnn_operator_t* batch_matrix_multiply_op);
 
 enum xnn_status xnn_reshape_batch_matrix_multiply_nc_f16(
     xnn_operator_t batch_matrix_multiply_op, size_t num_batch_dims,
@@ -3762,6 +3798,20 @@ enum xnn_status xnn_create_fully_connected_nc_f32_f16(
   xnn_weights_cache_t weights_cache,
   xnn_operator_t* fully_connected_op_out);
 
+enum xnn_status xnn_create_fully_connected_nc_bf16_f32(
+  size_t input_channels,
+  size_t output_channels,
+  size_t input_stride,
+  size_t output_stride,
+  const void* kernel,
+  const float* bias,
+  float output_min,
+  float output_max,
+  uint32_t flags,
+  xnn_code_cache_t code_cache,
+  xnn_weights_cache_t weights_cache,
+  xnn_operator_t* fully_connected_op_out);
+
 enum xnn_status xnn_create_fully_connected_nc_f32(
   size_t input_channels,
   size_t output_channels,
@@ -3781,6 +3831,11 @@ enum xnn_status xnn_reshape_fully_connected_nc_f32_f16(
   size_t batch_size,
   pthreadpool_t threadpool);
 
+enum xnn_status xnn_reshape_fully_connected_nc_bf16_f32(
+  xnn_operator_t fully_connected_op,
+  size_t batch_size,
+  pthreadpool_t threadpool);
+
 enum xnn_status xnn_reshape_fully_connected_nc_f32(
   xnn_operator_t fully_connected_op,
   size_t batch_size,
@@ -3789,6 +3844,11 @@ enum xnn_status xnn_reshape_fully_connected_nc_f32(
 enum xnn_status xnn_setup_fully_connected_nc_f32_f16(
   xnn_operator_t fully_connected_op,
   const float* input,
+  float* output);
+
+enum xnn_status xnn_setup_fully_connected_nc_bf16_f32(
+  xnn_operator_t fully_connected_op,
+  const void* input,
   float* output);
 
 enum xnn_status xnn_setup_fully_connected_nc_f32(

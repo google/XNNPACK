@@ -604,7 +604,7 @@ class AveragePoolingOperatorTester {
             for (size_t c = 0; c < channels(); c++) {
               EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max);
               EXPECT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_min);
-              EXPECT_NEAR(
+              ASSERT_NEAR(
                   output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c],
                   output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
                   std::max(1.0e-3f, std::abs(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]) * 1.0e-2f)) <<
@@ -722,7 +722,7 @@ class AveragePoolingOperatorTester {
             for (size_t c = 0; c < channels(); c++) {
               EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max);
               EXPECT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_min);
-              EXPECT_NEAR(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c],
+              ASSERT_NEAR(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c],
                   output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
                   std::abs(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]) * 1.0e-6f) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
@@ -829,7 +829,7 @@ class AveragePoolingOperatorTester {
             for (size_t c = 0; c < channels(); c++) {
               EXPECT_LE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmax()));
               EXPECT_GE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmin()));
-              EXPECT_NEAR(float(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])),
+              ASSERT_NEAR(float(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])),
                 output_ref[((i * output_height() + y) * output_width() + x) * channels() + c], 0.80f) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
@@ -958,7 +958,7 @@ class AveragePoolingOperatorTester {
             for (size_t c = 0; c < channels(); c++) {
               EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max);
               EXPECT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_min);
-              EXPECT_NEAR(
+              ASSERT_NEAR(
                   output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c],
                   output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
                   std::max(1.0e-3f, std::abs(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]) * 1.0e-2f)) <<
@@ -1032,7 +1032,7 @@ class AveragePoolingOperatorTester {
             for (size_t c = 0; c < next_channels(); c++) {
               EXPECT_LE(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c], output_max);
               EXPECT_GE(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c], output_min);
-              EXPECT_NEAR(
+              ASSERT_NEAR(
                   output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c],
                   next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * next_channels() + c],
                   std::max(1.0e-3f, std::abs(next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * next_channels() + c]) * 1.0e-2f)) <<
@@ -1152,7 +1152,7 @@ class AveragePoolingOperatorTester {
             for (size_t c = 0; c < channels(); c++) {
               EXPECT_LE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_max);
               EXPECT_GE(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c], output_min);
-              EXPECT_NEAR(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c],
+              ASSERT_NEAR(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c],
                   output_ref[((i * output_height() + y) * output_width() + x) * channels() + c],
                   std::abs(output_ref[((i * output_height() + y) * output_width() + x) * channels() + c]) * 1.0e-6f) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
@@ -1223,7 +1223,7 @@ class AveragePoolingOperatorTester {
             for (size_t c = 0; c < next_channels(); c++) {
               EXPECT_LE(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c], output_max);
               EXPECT_GE(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c], output_min);
-              EXPECT_NEAR(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c],
+              ASSERT_NEAR(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c],
                   next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * next_channels() + c],
                   std::abs(next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * next_channels() + c]) * 1.0e-6f) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
@@ -1332,7 +1332,7 @@ class AveragePoolingOperatorTester {
             for (size_t c = 0; c < channels(); c++) {
               EXPECT_LE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmax()));
               EXPECT_GE(uint32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c]), uint32_t(qmin()));
-              EXPECT_NEAR(float(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])),
+              ASSERT_NEAR(float(int32_t(output[((i * output_height() + y) * output_width() + x) * output_pixel_stride() + c])),
                 output_ref[((i * output_height() + y) * output_width() + x) * channels() + c], 0.80f) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }
@@ -1405,7 +1405,7 @@ class AveragePoolingOperatorTester {
             for (size_t c = 0; c < next_channels(); c++) {
               EXPECT_LE(uint32_t(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c]), uint32_t(qmax()));
               EXPECT_GE(uint32_t(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c]), uint32_t(qmin()));
-              EXPECT_NEAR(float(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c])),
+              ASSERT_NEAR(float(int32_t(output[((i * next_output_height() + y) * next_output_width() + x) * next_output_pixel_stride() + c])),
                 next_output_ref[((i * next_output_height() + y) * next_output_width() + x) * next_channels() + c], 0.80f) <<
                 "in batch index " << i << ", pixel (" << y << ", " << x << "), channel " << c;
             }

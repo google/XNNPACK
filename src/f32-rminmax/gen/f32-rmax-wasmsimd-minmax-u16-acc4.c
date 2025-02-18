@@ -26,7 +26,7 @@ void xnn_f32_rmax_ukernel__wasmsimd_minmax_u16_acc4(
   assert(input != NULL);
   assert(output != NULL);
 
-  v128_t vmax0 = wasm_v128_load32_splat(input);
+  v128_t vmax0 = wasm_v128_load32_splat(output);
   v128_t vmax1 = vmax0;
   v128_t vmax2 = vmax0;
   v128_t vmax3 = vmax0;

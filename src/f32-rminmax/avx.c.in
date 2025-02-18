@@ -33,11 +33,11 @@ void xnn_f32_r${OP.lower()}_ukernel__avx_u${BATCH_TILE}${ACC_SUFFIX}(
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
   $if EMIT_MIN:
-    __m256 vmin0 = _mm256_broadcast_ss(input);
+    __m256 vmin0 = _mm256_broadcast_ss(output);
     $if EMIT_MAX:
-      __m256 vmax0 = vmin0;
+      __m256 vmax0 = _mm256_broadcast_ss(output + 1);
   $elif EMIT_MAX:
-    __m256 vmax0 = _mm256_broadcast_ss(input);
+    __m256 vmax0 = _mm256_broadcast_ss(output);
   $for A in range(1, ACCUMULATORS):
     $if EMIT_MIN:
       __m256 vmin${A} = vmin0;

@@ -15,7 +15,7 @@
 #include "xnnpack/common.h"
 
 
-extern XNN_INTERNAL const float xnn_table_exp2minus_k_over_16[16];
+extern XNN_INTERNAL const uint32_t xnn_table_exp2minus_k_over_16[16];
 
 void xnn_f32_velu_ukernel__wasmrelaxedsimd_fma_rr2_lut16_p3_u4(
     size_t batch,

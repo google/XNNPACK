@@ -8,13 +8,41 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <string>
 
 #include "xnnpack/common.h"
 #include <benchmark/benchmark.h>
 #include "pthreadpool.h"
 
+#ifdef BENCHMARK_ARGS_BOTTLENECK
+#define XNN_BENCHMARK_MAIN()                            \
+  extern "C" {                                          \
+  int BenchmarkArgBottleneck(int& argc, char**& argv) { \
+    return benchmark::utils::ProcessArgs(argc, argv);   \
+  }                                                     \
+  }
+#else
+#define XNN_BENCHMARK_MAIN()                                            \
+  int main(int argc, char** argv) {                                     \
+    ::benchmark::Initialize(&argc, argv);                               \
+    int status = benchmark::utils::ProcessArgs(argc, argv);             \
+    if (status != 0) return status;                                     \
+    if (::benchmark::ReportUnrecognizedArguments(argc, argv)) return 1; \
+    ::benchmark::RunSpecifiedBenchmarks();                              \
+  }                                                                     \
+  int main(int, char**)
+#endif  // BENCHMARK_ARGS_BOTTLENECK
+
+// Common flags for all benchmarks.
+extern int FLAGS_num_threads;
+extern int FLAGS_batch_size;
+extern uint32_t FLAGS_xnn_runtime_flags;
+extern uint32_t FLAGS_benchmark_min_iters;
+
 namespace benchmark {
 namespace utils {
+
+int ProcessArgs(int& argc, char**& argv);
 
 uint32_t WipeCache();
 uint32_t PrefetchToL1(const void* ptr, size_t size);
@@ -145,6 +173,14 @@ bool CheckNEONDOT(benchmark::State& state);
 // Check if ARM I8MM extension is supported.
 // If I8MM is unsupported, report error in benchmark state, and return false.
 bool CheckNEONI8MM(benchmark::State& state);
+
+// Check if ARM SME extension is supported.
+// If SME is unsupported, report error in benchmark state, and return false.
+bool CheckNEONSME(benchmark::State& state);
+
+// Check if ARM SME2 extension is supported.
+// If SME2 is unsupported, report error in benchmark state, and return false.
+bool CheckNEONSME2(benchmark::State& state);
 
 // Check if RISC-V V (vector) extension is supported.
 // If V is unsupported, report error in benchmark state, and return false.

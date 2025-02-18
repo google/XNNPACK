@@ -25,7 +25,7 @@ void xnn_f32_rmax_ukernel__wasm_u1(
 
   const float* i = input;
 
-  float vmax0 = *i;
+  float vmax0 = output[0];
   do {
     const float vt = *i++;
     vmax0 = __builtin_wasm_max_f32(vmax0, vt);

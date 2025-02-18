@@ -126,11 +126,11 @@ void xnn_f32_gemminc_minmax_ukernel_1x8s4__neonfma(
       vacc0x1 = vfmaq_f32(vacc0x1, vmska0x4567c3, vb4567c3);
 
     }
-    const float32x4_t vmax = vld1q_dup_f32(&params->scalar.max);
+    const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
     vacc0x0 = vminq_f32(vacc0x0, vmax);
     vacc0x1 = vminq_f32(vacc0x1, vmax);
 
-    const float32x4_t vmin = vld1q_dup_f32(&params->scalar.min);
+    const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
     vacc0x0 = vmaxq_f32(vacc0x0, vmin);
     vacc0x1 = vmaxq_f32(vacc0x1, vmin);
 

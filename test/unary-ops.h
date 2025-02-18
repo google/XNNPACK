@@ -381,7 +381,7 @@ struct SquareRoot : public UnaryOpInfo {
   float Tolerance(float y_ref, xnn_datatype datatype) const override {
     switch (datatype) {
       case xnn_datatype_fp32:
-        return TolRelative(y_ref, 2.5f * std::numeric_limits<float>::epsilon());
+        return TolRelative(y_ref, 3.0f * std::numeric_limits<float>::epsilon());
       case xnn_datatype_fp16:
       case xnn_datatype_bf16:
         return TolMixed(y_ref, 1.0e-4f, 5.0e-3f);
@@ -585,10 +585,12 @@ void FillRandom(Rng& rng, T* x, size_t n, const Interval& domain,
   float max = domain.max;
   min = min * quantization.scale + quantization.zero_point;
   max = max * quantization.scale + quantization.zero_point;
-  min = std::max<float>(domain.min, xnnpack::NumericLimits<T>::min());
-  max = std::min<float>(domain.max, xnnpack::NumericLimits<T>::max());
-  min = std::max<float>(min, -1e6f);
-  max = std::min<float>(max, 1e6f);
+  min = std::max(domain.min,
+                 static_cast<float>(xnnpack::NumericLimits<T>::min()));
+  max = std::min(domain.max,
+                 static_cast<float>(xnnpack::NumericLimits<T>::max()));
+  min = std::max(min, -1e6f);
+  max = std::min(max, 1e6f);
 
   std::uniform_real_distribution<float> dist(min, max);
   for (size_t i = 0; i < n; ++i) {

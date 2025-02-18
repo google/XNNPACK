@@ -25,7 +25,7 @@ void xnn_f32_rmin_ukernel__wasm_u4_acc4(
 
   const float* i = input;
 
-  float vmin0 = *i;
+  float vmin0 = output[0];
   float vmin1 = vmin0;
   float vmin2 = vmin0;
   float vmin3 = vmin0;

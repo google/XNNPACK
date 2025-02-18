@@ -25,8 +25,8 @@ void xnn_f32_rminmax_ukernel__wasm_u2_acc2(
 
   const float* i = input;
 
-  float vmin0 = *i;
-  float vmax0 = *i;
+  float vmin0 = output[0];
+  float vmax0 = output[1];
   float vmin1 = vmin0;
   float vmax1 = vmax0;
   for (; batch >= 2 * sizeof(float); batch -= 2 * sizeof(float)) {

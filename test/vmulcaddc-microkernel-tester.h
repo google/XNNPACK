@@ -164,7 +164,7 @@ public:
       // Verify results.
       for (size_t i = 0; i < rows(); i++) {
         for (size_t j = 0; j < channels(); j++) {
-          EXPECT_NEAR(
+          ASSERT_NEAR(
             y[i * output_stride() + j], y_ref[i * channels() + j],
             std::max(1.0e-4f, std::abs(y_ref[i * channels() + j]) * 1.0e-2f))
             << "at pixel " << i << " / " << rows() << ", channel = " << j << " / " << channels();
@@ -227,7 +227,7 @@ public:
       // Verify results.
       for (size_t i = 0; i < rows(); i++) {
         for (size_t j = 0; j < channels(); j++) {
-          EXPECT_NEAR(
+          ASSERT_NEAR(
             y[i * output_stride() + j], y_ref[i * channels() + j], std::abs(y_ref[i * channels() + j]) * 1.0e-6f)
             << "at pixel " << i << " / " << rows() << ", channel = " << j << " / " << channels();
         }

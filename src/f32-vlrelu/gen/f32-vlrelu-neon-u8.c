@@ -26,7 +26,7 @@ void xnn_f32_vlrelu_ukernel__neon_u8(
   assert(input != NULL);
   assert(output != NULL);
 
-  const float32x4_t vslope = vld1q_dup_f32(&params->scalar.slope);
+  const float32x4_t vslope = vdupq_n_f32(params->scalar.slope);
 
   for (; batch >= 8 * sizeof(float); batch -= 8 * sizeof(float)) {
     const float32x4_t vx0123 = vld1q_f32(input); input += 4;

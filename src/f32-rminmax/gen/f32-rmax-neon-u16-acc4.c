@@ -26,7 +26,7 @@ void xnn_f32_rmax_ukernel__neon_u16_acc4(
   assert(input != NULL);
   assert(output != NULL);
 
-  float32x4_t vmax0 = vld1q_dup_f32(input);
+  float32x4_t vmax0 = vld1q_dup_f32(output);
   float32x4_t vmax1 = vmax0;
   float32x4_t vmax2 = vmax0;
   float32x4_t vmax3 = vmax0;

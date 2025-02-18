@@ -117,6 +117,7 @@ struct xnn_hardware_config {
   bool use_x86_avx512vnnigfni;
   bool use_x86_avx512amx;
   bool use_x86_avx512fp16;
+  bool use_x86_avx512bf16;
   bool use_x86_avxvnni;
   bool use_x86_avxvnniint8;
   bool use_x86_avx256skx;
@@ -161,6 +162,14 @@ struct xnn_hardware_config {
 };
 
 XNN_INTERNAL const struct xnn_hardware_config* xnn_init_hardware_config();
+
+static inline bool xnn_is_bf16_compatible_config(const struct xnn_hardware_config hardware_config[XNN_MIN_ELEMENTS(1)]) {
+  #if (XNN_ARCH_X86_64) && !XNN_PLATFORM_MOBILE
+    return hardware_config->use_x86_avx512bf16;
+  #else
+    return false;
+  #endif
+}
 
 static inline bool xnn_is_f16_compatible_config(const struct xnn_hardware_config hardware_config[XNN_MIN_ELEMENTS(1)]) {
   #if (XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR) || (XNN_ARCH_ARM64 && XNN_ENABLE_ARM_FP16_VECTOR)

@@ -5,8 +5,8 @@
 
 #include <algorithm>
 #include <array>
-#include <cfloat>
-#include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <limits>
 #include <memory>
@@ -14,19 +14,22 @@
 #include <string>
 #include <vector>
 
+#include "utils.h"
 #include "xnnpack.h"
-
+#include "xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
+#include "pthreadpool.h"
+
 #ifdef BENCHMARK_TENSORFLOW_LITE
-#include "flatbuffers/include/flatbuffers/flatbuffers.h"
+#include "flatbuffers/include/flatbuffers/buffer.h"
+#include "flatbuffers/include/flatbuffers/flatbuffer_builder.h"
+#include "flatbuffers/include/flatbuffers/string.h"
+#include "tensorflow/lite/core/interpreter_builder.h"
 #include "tensorflow/lite/interpreter.h"
 #include "tensorflow/lite/kernels/register.h"
-#include "tensorflow/lite/model.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "tensorflow/lite/version.h"
 #endif  // BENCHMARK_TENSORFLOW_LITE */
-#include "utils.h"
-#include "xnnpack/buffer.h"
 
 void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
@@ -45,7 +48,8 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000), std::ref(rng));
+  auto i32rng = std::bind(std::uniform_int_distribution<int32_t>(-10000, 10000),
+                          std::ref(rng));
 
   const size_t effective_kernel_height = (kernel_height - 1) * dilation + 1;
   const size_t effective_kernel_width = (kernel_width - 1) * dilation + 1;
@@ -53,16 +57,27 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
   const size_t padding_top = padding_height / 2;
   const size_t padding_right = padding_width - padding_left;
   const size_t padding_bottom = padding_height - padding_top;
-  const size_t output_height = std::max(stride_height * (input_height - 1) + adjustment + effective_kernel_height, padding_height) - padding_height;
-  const size_t output_width = std::max(stride_width * (input_width - 1) + adjustment + effective_kernel_width, padding_width) - padding_width;
+  const size_t output_height =
+      std::max(stride_height * (input_height - 1) + adjustment +
+                   effective_kernel_height,
+               padding_height) -
+      padding_height;
+  const size_t output_width = std::max(stride_width * (input_width - 1) +
+                                           adjustment + effective_kernel_width,
+                                       padding_width) -
+                              padding_width;
 
-  xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES + batch_size * input_height * input_width * input_channels);
+  xnnpack::Buffer<uint8_t> input(XNN_EXTRA_BYTES + batch_size * input_height *
+                                                       input_width *
+                                                       input_channels);
   xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
-  xnnpack::Buffer<uint8_t> kernel(output_channels * kernel_height * kernel_width * input_channels);
+  xnnpack::Buffer<uint8_t> kernel(output_channels * kernel_height *
+                                  kernel_width * input_channels);
   xnnpack::fill_uniform_random_bits(kernel.data(), kernel.size(), rng);
   xnnpack::Buffer<int32_t> bias(output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(i32rng));
-  const size_t output_elements = batch_size * output_height * output_width * output_channels;
+  xnnpack::Buffer<uint8_t> output(batch_size * output_height * output_width *
+                                  output_channels);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
@@ -70,77 +85,58 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
     return;
   }
 
-  const size_t num_buffers = 1 +
-    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
-      sizeof(float) * (kernel.size() + bias.size() + output_elements));
-  xnnpack::Buffer<uint8_t> output(output_elements * num_buffers);
-
-  xnnpack::Buffer<xnn_operator_t> deconvolution_operators(num_buffers);
-  for (xnn_operator_t& deconvolution_op : deconvolution_operators) {
-    status = xnn_create_deconvolution2d_nhwc_qu8(
-        padding_top, padding_right, padding_bottom, padding_left,
-        kernel_height, kernel_width,
-        stride_height, stride_width,
-        dilation, dilation,
-        /*groups=*/1, input_channels, output_channels,
-        /*input_pixel_stride=*/input_channels, /*output_pixel_stride=*/output_channels,
-        127, 0.5f, 127, 0.5f,
-        kernel.data(), bias.data(),
-        127, 0.5f, 0, 255,
-        0 /* flags */,
-        nullptr, nullptr,
-        &deconvolution_op);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to create QINT8 Deconvolution operator");
-      return;
-    }
+  xnn_operator_t deconvolution_op;
+  status = xnn_create_deconvolution2d_nhwc_qu8(
+      padding_top, padding_right, padding_bottom, padding_left, kernel_height,
+      kernel_width, stride_height, stride_width, dilation, dilation,
+      /*groups=*/1, input_channels, output_channels,
+      /*input_pixel_stride=*/input_channels,
+      /*output_pixel_stride=*/output_channels, 127, 0.5f, 127, 0.5f,
+      kernel.data(), bias.data(), 127, 0.5f, 0, 255, 0 /* flags */, nullptr,
+      nullptr, &deconvolution_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to create QINT8 Deconvolution operator");
+    return;
   }
 
-  for (size_t i = 0; i < deconvolution_operators.size(); i++) {
-    status = xnn_reshape_deconvolution2d_nhwc_qu8(
-        deconvolution_operators[i],
-        batch_size, input_height, input_width,
-        0 /* height adjustment */, 0 /* width adjustment */,
-	/*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-        /*threadpool=*/nullptr);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to setup QINT8 Deconvolution operator");
-      return;
-    }
+  pthreadpool_t threadpool = pthreadpool_create(FLAGS_num_threads);
+
+  status = xnn_reshape_deconvolution2d_nhwc_qu8(
+      deconvolution_op, batch_size, input_height, input_width,
+      0 /* height adjustment */, 0 /* width adjustment */,
+      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, threadpool);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to setup QINT8 Deconvolution operator");
+    return;
   }
 
-  for (size_t i = 0; i < deconvolution_operators.size(); i++) {
-    status = xnn_setup_deconvolution2d_nhwc_qu8(
-        deconvolution_operators[i],
-        input.data(), output.data() + i * output_elements);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to setup QINT8 Deconvolution operator");
-      return;
-    }
+  status = xnn_setup_deconvolution2d_nhwc_qu8(deconvolution_op, input.data(),
+                                              output.data());
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to setup QINT8 Deconvolution operator");
+    return;
   }
 
-  size_t buffer_index = 0;
-  for (auto _ : state) {
-    state.PauseTiming();
-    benchmark::utils::PrefetchToL1(input.data(), input.size() * sizeof(uint8_t));
-    buffer_index = (buffer_index + 1) % num_buffers;
-    state.ResumeTiming();
+  int num_iters = FLAGS_benchmark_min_iters;
+  while (state.KeepRunningBatch(num_iters)) {
+    for (int iter = 0; iter < num_iters; iter++) {
+      benchmark::utils::WipePthreadpoolL2Caches(state, threadpool);
 
-    status = xnn_run_operator(deconvolution_operators[buffer_index], /*threadpool=*/nullptr);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to run QINT8 Deconvolution operator");
-      return;
+      status = xnn_run_operator(deconvolution_op, threadpool);
+      if (status != xnn_status_success) {
+        state.SkipWithError("failed to run QINT8 Deconvolution operator");
+        return;
+      }
     }
+    num_iters = 1;
   }
 
-  for (xnn_operator_t& deconvolution_op : deconvolution_operators) {
-    status = xnn_delete_operator(deconvolution_op);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to delete QINT8 Deconvolution operator");
-      return;
-    }
-    deconvolution_op = nullptr;
+  status = xnn_delete_operator(deconvolution_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to delete QINT8 Deconvolution operator");
+    return;
   }
+  deconvolution_op = nullptr;
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
   if (cpu_frequency != 0) {
@@ -148,11 +144,12 @@ void xnnpack_deconvolution_qu8(benchmark::State& state, const char* net) {
   }
 
   state.counters["OPS"] = benchmark::Counter(
-  uint64_t(state.iterations()) * 2 *
-    batch_size * input_width * input_width *
-    input_channels * output_channels *
-    kernel_height * kernel_width,
-  benchmark::Counter::kIsRate);
+      static_cast<uint64_t>(state.iterations()) * 2 * batch_size * input_width *
+          input_width * input_channels * output_channels * kernel_height *
+          kernel_width,
+      benchmark::Counter::kIsRate);
+
+  pthreadpool_destroy(threadpool);
 }
 
 void xnnpack_deconvolution_f32(benchmark::State& state, const char* net) {
@@ -172,7 +169,8 @@ void xnnpack_deconvolution_f32(benchmark::State& state, const char* net) {
 
   std::random_device random_device;
   auto rng = std::mt19937(random_device());
-  auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f), std::ref(rng));
+  auto f32rng = std::bind(std::uniform_real_distribution<float>(0.0f, 1.0f),
+                          std::ref(rng));
 
   const size_t effective_kernel_height = (kernel_height - 1) * dilation + 1;
   const size_t effective_kernel_width = (kernel_width - 1) * dilation + 1;
@@ -180,17 +178,27 @@ void xnnpack_deconvolution_f32(benchmark::State& state, const char* net) {
   const size_t padding_top = padding_height / 2;
   const size_t padding_right = padding_width - padding_left;
   const size_t padding_bottom = padding_height - padding_top;
-  const size_t output_height = std::max(stride_height * (input_height - 1) + adjustment + effective_kernel_height, padding_height) - padding_height;
-  const size_t output_width = std::max(stride_width * (input_width - 1) + adjustment + effective_kernel_width, padding_width) - padding_width;
+  const size_t output_height =
+      std::max(stride_height * (input_height - 1) + adjustment +
+                   effective_kernel_height,
+               padding_height) -
+      padding_height;
+  const size_t output_width = std::max(stride_width * (input_width - 1) +
+                                           adjustment + effective_kernel_width,
+                                       padding_width) -
+                              padding_width;
 
   xnnpack::Buffer<float> input(XNN_EXTRA_BYTES / sizeof(float) +
-    batch_size * input_height * input_width * input_channels);
+                               batch_size * input_height * input_width *
+                                   input_channels);
   std::generate(input.begin(), input.end(), std::ref(f32rng));
-  xnnpack::Buffer<float> kernel(output_channels * kernel_height * kernel_width * input_channels);
+  xnnpack::Buffer<float> kernel(output_channels * kernel_height * kernel_width *
+                                input_channels);
   std::generate(kernel.begin(), kernel.end(), std::ref(f32rng));
   xnnpack::Buffer<float> bias(output_channels);
   std::generate(bias.begin(), bias.end(), std::ref(f32rng));
-  const size_t output_elements = batch_size * output_height * output_width * output_channels;
+  xnnpack::Buffer<float> output(batch_size * output_height * output_width *
+                                output_channels);
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {
@@ -198,77 +206,59 @@ void xnnpack_deconvolution_f32(benchmark::State& state, const char* net) {
     return;
   }
 
-  const size_t num_buffers = 1 +
-    benchmark::utils::DivideRoundUp<size_t>(benchmark::utils::GetMaxCacheSize(),
-      sizeof(float) * (kernel.size() + bias.size() + output_elements));
-  xnnpack::Buffer<float> output(output_elements * num_buffers);
-
-  xnnpack::Buffer<xnn_operator_t> deconvolution_operators(num_buffers);
-  for (xnn_operator_t& deconvolution_op : deconvolution_operators) {
-    status = xnn_create_deconvolution2d_nhwc_f32(
-        padding_top, padding_right, padding_bottom, padding_left,
-        kernel_height, kernel_width,
-        stride_height, stride_width,
-        dilation, dilation,
-        /*groups=*/1, input_channels, output_channels,
-        /*input_pixel_stride=*/input_channels, /*output_pixel_stride=*/output_channels,
-        kernel.data(), bias.data(),
-        -std::numeric_limits<float>::infinity(), +std::numeric_limits<float>::infinity(),
-        0 /* flags */,
-        nullptr,
-        nullptr,
-        &deconvolution_op);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to create FP32 Deconvolution operator");
-      return;
-    }
+  xnn_operator_t deconvolution_op;
+  status = xnn_create_deconvolution2d_nhwc_f32(
+      padding_top, padding_right, padding_bottom, padding_left, kernel_height,
+      kernel_width, stride_height, stride_width, dilation, dilation,
+      /*groups=*/1, input_channels, output_channels,
+      /*input_pixel_stride=*/input_channels,
+      /*output_pixel_stride=*/output_channels, kernel.data(), bias.data(),
+      -std::numeric_limits<float>::infinity(),
+      +std::numeric_limits<float>::infinity(), 0 /* flags */, nullptr, nullptr,
+      &deconvolution_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to create FP32 Deconvolution operator");
+    return;
   }
 
-  for (size_t i = 0; i < deconvolution_operators.size(); i++) {
-    status = xnn_reshape_deconvolution2d_nhwc_f32(
-        deconvolution_operators[i],
-        batch_size, input_height, input_width,
-        0 /* height adjustment */, 0 /* width adjustment */,
-	/*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-        /*threadpool=*/nullptr);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to setup QINT8 Deconvolution operator");
-      return;
-    }
+  pthreadpool_t threadpool = pthreadpool_create(FLAGS_num_threads);
+
+  status = xnn_reshape_deconvolution2d_nhwc_f32(
+      deconvolution_op, batch_size, input_height, input_width,
+      0 /* height adjustment */, 0 /* width adjustment */,
+      /*output_height_out=*/nullptr, /*output_width_out=*/nullptr, threadpool);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to setup QINT8 Deconvolution operator");
+    return;
   }
 
-  for (size_t i = 0; i < deconvolution_operators.size(); i++) {
-    status = xnn_setup_deconvolution2d_nhwc_f32(
-        deconvolution_operators[i],
-        input.data(), output.data() + i * output_elements);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to setup QINT8 Deconvolution operator");
-      return;
-    }
+  status = xnn_setup_deconvolution2d_nhwc_f32(deconvolution_op, input.data(),
+                                              output.data());
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to setup QINT8 Deconvolution operator");
+    return;
   }
 
-  size_t buffer_index = 0;
-  for (auto _ : state) {
-    state.PauseTiming();
-    benchmark::utils::PrefetchToL1(input.data(), input.size() * sizeof(float));
-    buffer_index = (buffer_index + 1) % num_buffers;
-    state.ResumeTiming();
+  int num_iters = FLAGS_benchmark_min_iters;
+  while (state.KeepRunningBatch(num_iters)) {
+    for (int iter = 0; iter < num_iters; iter++) {
+      benchmark::utils::WipePthreadpoolL2Caches(state, threadpool);
 
-    status = xnn_run_operator(deconvolution_operators[buffer_index], /*threadpool=*/nullptr);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to run FP32 Deconvolution operator");
-      return;
+      status = xnn_run_operator(deconvolution_op, threadpool);
+      if (status != xnn_status_success) {
+        state.SkipWithError("failed to run FP32 Deconvolution operator");
+        return;
+      }
     }
+    num_iters = 1;
   }
 
-  for (xnn_operator_t& deconvolution_op : deconvolution_operators) {
-    status = xnn_delete_operator(deconvolution_op);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to delete FP32 Deconvolution operator");
-      return;
-    }
-    deconvolution_op = nullptr;
+  status = xnn_delete_operator(deconvolution_op);
+  if (status != xnn_status_success) {
+    state.SkipWithError("failed to delete FP32 Deconvolution operator");
+    return;
   }
+  deconvolution_op = nullptr;
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
   if (cpu_frequency != 0) {
@@ -276,11 +266,12 @@ void xnnpack_deconvolution_f32(benchmark::State& state, const char* net) {
   }
 
   state.counters["FLOPS"] = benchmark::Counter(
-    uint64_t(state.iterations()) * 2 *
-      batch_size * input_width * input_width *
-      input_channels * output_channels *
-      kernel_height * kernel_width,
-    benchmark::Counter::kIsRate);
+      static_cast<uint64_t>(state.iterations()) * 2 * batch_size * input_width *
+          input_width * input_channels * output_channels * kernel_height *
+          kernel_width,
+      benchmark::Counter::kIsRate);
+
+  pthreadpool_destroy(threadpool);
 }
 
 #ifdef BENCHMARK_TENSORFLOW_LITE
@@ -423,7 +414,7 @@ void tflite_deconvolution_f32(benchmark::State& state, const char* net) {
     state.SkipWithError("TFLite interpreter is null");
     return;
   }
-  interpreter->SetNumThreads(1);
+  interpreter->SetNumThreads(FLAGS_num_threads);
 
   if (interpreter->AllocateTensors() != kTfLiteOk) {
     state.SkipWithError("failed to allocate tensors");
@@ -435,18 +426,19 @@ void tflite_deconvolution_f32(benchmark::State& state, const char* net) {
     interpreter->typed_tensor<float>(2) + batch_size * input_channels * input_height * input_width,
     std::ref(f32rng));
 
-  for (auto _ : state) {
-    state.PauseTiming();
-    benchmark::utils::WipeCache();
-    benchmark::utils::PrefetchToL1(
-      interpreter->typed_tensor<float>(2),
-      batch_size * input_channels * input_height * input_width * sizeof(float));
-    state.ResumeTiming();
+  int num_iters = FLAGS_benchmark_min_iters;
+  while (state.KeepRunningBatch(num_iters)) {
+    for (int iter = 0; iter < num_iters; iter++) {
+      state.PauseTiming();
+      benchmark::utils::WipeCache();
+      state.ResumeTiming();
 
-    if (interpreter->Invoke() != kTfLiteOk) {
-      state.SkipWithError("failed to invoke TFLite interpreter");
-      return;
+      if (interpreter->Invoke() != kTfLiteOk) {
+        state.SkipWithError("failed to invoke TFLite interpreter");
+        return;
+      }
     }
+    num_iters = 1;
   }
 
   const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
@@ -518,56 +510,19 @@ static void ESPNet(benchmark::internal::Benchmark* b) {
   b->Args({1, 256, 512,  2,  2,  0,  0, 0,  2,  2, 1,  20,  20});
 }
 
-BENCHMARK_CAPTURE(xnnpack_deconvolution_f32, fcn32, "FCN-32")
-  ->Apply(FCN32)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_deconvolution_f32, fcn16, "FCN-16")
-  ->Apply(FCN16)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_deconvolution_f32, fcn8, "FCN-8")
-  ->Apply(FCN8)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_deconvolution_f32, enet, "ENet")
-  ->Apply(ENet)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_deconvolution_f32, espnet, "ESPNet")
-  ->Apply(ESPNet)
-  ->UseRealTime();
+#define GENERATE_DCONV_BENCHMARKS(dconv)                                  \
+  BENCHMARK_CAPTURE(dconv, fcn32, "FCN-32")->Apply(FCN32)->UseRealTime(); \
+  BENCHMARK_CAPTURE(dconv, fcn16, "FCN-16")->Apply(FCN16)->UseRealTime(); \
+  BENCHMARK_CAPTURE(dconv, fcn8, "FCN-8")->Apply(FCN8)->UseRealTime();    \
+  BENCHMARK_CAPTURE(dconv, enet, "ENet")->Apply(ENet)->UseRealTime();     \
+  BENCHMARK_CAPTURE(dconv, espnet, "ESPNet")->Apply(ESPNet)->UseRealTime();
 
-BENCHMARK_CAPTURE(xnnpack_deconvolution_qu8, fcn32, "FCN-32")
-  ->Apply(FCN32)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_deconvolution_qu8, fcn16, "FCN-16")
-  ->Apply(FCN16)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_deconvolution_qu8, fcn8, "FCN-8")
-  ->Apply(FCN8)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_deconvolution_qu8, enet, "ENet")
-  ->Apply(ENet)
-  ->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_deconvolution_qu8, espnet, "ESPNet")
-  ->Apply(ESPNet)
-  ->UseRealTime();
-
+GENERATE_DCONV_BENCHMARKS(xnnpack_deconvolution_f32);
+GENERATE_DCONV_BENCHMARKS(xnnpack_deconvolution_qu8);
 #ifdef BENCHMARK_TENSORFLOW_LITE
-  BENCHMARK_CAPTURE(tflite_deconvolution_f32, fcn32, "FCN-32")
-    ->Apply(FCN32)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_deconvolution_f32, fcn16, "FCN-16")
-    ->Apply(FCN16)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_deconvolution_f32, fcn8, "FCN-8")
-    ->Apply(FCN8)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_deconvolution_f32, enet, "ENet")
-    ->Apply(ENet)
-    ->UseRealTime();
-  BENCHMARK_CAPTURE(tflite_deconvolution_f32, espnet, "ESPNet")
-    ->Apply(ESPNet)
-    ->UseRealTime();
+GENERATE_DCONV_BENCHMARKS(tflite_deconvolution_f32);
 #endif  // BENCHMARK_TENSORFLOW_LITE
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
-BENCHMARK_MAIN();
+XNN_BENCHMARK_MAIN();
 #endif

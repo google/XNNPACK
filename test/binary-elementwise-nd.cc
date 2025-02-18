@@ -46,7 +46,7 @@ enum class RunMode {
 double ComputeTolerance(xnn_datatype datatype, double output_ref) {
   switch (datatype) {
     case xnn_datatype_fp16:
-      return std::abs(output_ref);
+      return 1.0e-3 * std::abs(output_ref) + 1.0e-3;
     case xnn_datatype_fp32:
       return 1.0e-6 * std::abs(output_ref);
     default:

@@ -16,6 +16,18 @@
   packed-stride: xnn_packed_stride_kai_qs4_weights_and_biases
   k-block: 2
   cpp-check: XNN_ENABLE_KLEIDIAI
+- name: xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x4c8s2__aarch64_neondot
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_kai_qs4_weights_and_biases
+  packed-stride: xnn_packed_stride_kai_qs4_weights_and_biases
+  k-block: 2
+  cpp-check: XNN_ENABLE_KLEIDIAI
+- name: xnn_qp8_f32_qc4w_gemm_minmax_ukernel_16x4c8s2__aarch64_neondot_mstep4
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_kai_qs4_weights_and_biases
+  packed-stride: xnn_packed_stride_kai_qs4_weights_and_biases
+  k-block: 2
+  cpp-check: XNN_ENABLE_KLEIDIAI
 - name: xnn_qp8_f32_qc4w_gemm_minmax_ukernel_4x4c16s2__neoni8mm
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_kai_qs4_weights_and_biases

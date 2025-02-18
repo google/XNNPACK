@@ -40,7 +40,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x16__neonv8_mlal_lane(
   const uint8_t* a0 = a;
   uint8_t* c0 = c;
 
-  const uint8x8_t vb_zero_point = vld1_dup_u8(&params->fp32_neonv8.kernel_zero_point);
+  const uint8x8_t vb_zero_point = vdup_n_u8(params->fp32_neonv8.kernel_zero_point);
   do {
     int32x4_t vacc0x0123 = vld1q_s32(w); w = (const int32_t*) w + 4;
     int32x4_t vacc0x4567 = vld1q_s32(w); w = (const int32_t*) w + 4;
@@ -216,7 +216,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x16__neonv8_mlal_lane(
     float32x4_t vfpacc0x89AB = vcvtq_f32_s32(vacc0x89AB);
     float32x4_t vfpacc0xCDEF = vcvtq_f32_s32(vacc0xCDEF);
 
-    const float32x4_t vscale = vld1q_dup_f32(&params->fp32_neonv8.scale);
+    const float32x4_t vscale = vdupq_n_f32(params->fp32_neonv8.scale);
     vfpacc0x0123 = vmulq_f32(vfpacc0x0123, vscale);
     vfpacc0x4567 = vmulq_f32(vfpacc0x4567, vscale);
     vfpacc0x89AB = vmulq_f32(vfpacc0x89AB, vscale);
@@ -227,7 +227,7 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x16__neonv8_mlal_lane(
     vacc0x89AB = vcvtnq_s32_f32(vfpacc0x89AB);
     vacc0xCDEF = vcvtnq_s32_f32(vfpacc0xCDEF);
 
-    const int16x8_t voutput_zero_point = vld1q_dup_s16(&params->fp32_neonv8.output_zero_point);
+    const int16x8_t voutput_zero_point = vdupq_n_s16(params->fp32_neonv8.output_zero_point);
     #if XNN_ARCH_ARM64
       int16x8_t vacc0x01234567 = vqmovn_high_s32(vqmovn_s32(vacc0x0123), vacc0x4567);
       int16x8_t vacc0x89ABCDEF = vqmovn_high_s32(vqmovn_s32(vacc0x89AB), vacc0xCDEF);
@@ -246,10 +246,10 @@ void xnn_qu8_gemm_minmax_fp32_ukernel_1x16__neonv8_mlal_lane(
       uint8x16_t vout0x0123456789ABCDEF = vcombine_u8(vqmovun_s16(vacc0x01234567), vqmovun_s16(vacc0x89ABCDEF));
     #endif
 
-    const uint8x16_t voutput_min = vld1q_dup_u8(&params->fp32_neonv8.output_min);
+    const uint8x16_t voutput_min = vdupq_n_u8(params->fp32_neonv8.output_min);
     vout0x0123456789ABCDEF = vmaxq_u8(vout0x0123456789ABCDEF, voutput_min);
 
-    const uint8x16_t voutput_max = vld1q_dup_u8(&params->fp32_neonv8.output_max);
+    const uint8x16_t voutput_max = vdupq_n_u8(params->fp32_neonv8.output_max);
     vout0x0123456789ABCDEF = vminq_u8(vout0x0123456789ABCDEF, voutput_max);
 
     if (nc >= 16) {

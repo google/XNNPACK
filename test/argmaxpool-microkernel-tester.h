@@ -22,11 +22,6 @@
 
 class ArgMaxPoolMicrokernelTester {
  public:
-  enum class Variant {
-    Native,
-    Scalar,
-  };
-
   ArgMaxPoolMicrokernelTester& output_pixels(size_t output_pixels) {
     assert(output_pixels != 0);
     this->output_pixels_ = output_pixels;
@@ -143,7 +138,7 @@ class ArgMaxPoolMicrokernelTester {
     return this->iterations_;
   }
 
-  void Test(xnn_f32_argmaxpool_unipass_ukernel_fn argmaxpool, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_argmaxpool_unipass_ukernel_fn argmaxpool) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 
@@ -208,7 +203,7 @@ class ArgMaxPoolMicrokernelTester {
     }
   }
 
-  void Test(xnn_f32_argmaxpool_multipass_ukernel_fn argmaxpool, Variant variant = Variant::Native) const {
+  void Test(xnn_f32_argmaxpool_multipass_ukernel_fn argmaxpool) const {
     xnnpack::ReplicableRandomDevice rng;
     std::uniform_real_distribution<float> f32dist;
 

@@ -3,17 +3,17 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_COMPUTE_H_
+#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_COMPUTE_H_
 
 #include <stddef.h>
 #include <stdint.h>
 
 #include "xnnpack.h"
 #include "xnnpack/common.h"
-#include "xnnpack/math.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
-
 #include "pthreadpool.h"
 
 enum xnn_parallelization_type {
@@ -21,14 +21,18 @@ enum xnn_parallelization_type {
   xnn_parallelization_type_1d,
   xnn_parallelization_type_1d_with_thread,
   xnn_parallelization_type_1d_tile_1d,
+  xnn_parallelization_type_1d_tile_1d_dynamic,
   xnn_parallelization_type_2d,
   xnn_parallelization_type_2d_with_thread,
   xnn_parallelization_type_2d_tile_1d,
   xnn_parallelization_type_2d_tile_2d,
+  xnn_parallelization_type_2d_tile_1d_dynamic,
+  xnn_parallelization_type_2d_tile_2d_dynamic,
   xnn_parallelization_type_3d,
   xnn_parallelization_type_3d_tile_1d,
   xnn_parallelization_type_3d_tile_1d_with_thread,
   xnn_parallelization_type_3d_tile_2d,
+  xnn_parallelization_type_3d_tile_2d_dynamic,
   xnn_parallelization_type_4d,
   xnn_parallelization_type_4d_tile_2d,
   xnn_parallelization_type_5d,
@@ -37,9 +41,11 @@ enum xnn_parallelization_type {
 #if XNN_MAX_UARCH_TYPES > 1
   xnn_parallelization_type_2d_tile_1d_with_uarch,
   xnn_parallelization_type_2d_tile_2d_with_uarch,
+  xnn_parallelization_type_2d_tile_2d_dynamic_with_uarch,
   xnn_parallelization_type_3d_tile_1d_with_uarch,
   xnn_parallelization_type_3d_tile_1d_with_uarch_with_thread,
   xnn_parallelization_type_3d_tile_2d_with_uarch,
+  xnn_parallelization_type_3d_tile_2d_dynamic_with_uarch,
   xnn_parallelization_type_4d_tile_2d_with_uarch,
 #endif  // XNN_MAX_UARCH_TYPES > 1
 };
@@ -50,14 +56,18 @@ struct compute_parameters {
     pthreadpool_task_1d_t task_1d;
     pthreadpool_task_1d_with_thread_t task_1d_with_thread;
     pthreadpool_task_1d_tile_1d_t task_1d_tile_1d;
+    pthreadpool_task_1d_tile_1d_t task_1d_tile_1d_dynamic;
     pthreadpool_task_2d_t task_2d;
     pthreadpool_task_2d_with_thread_t task_2d_with_thread;
     pthreadpool_task_2d_tile_1d_t task_2d_tile_1d;
     pthreadpool_task_2d_tile_2d_t task_2d_tile_2d;
+    pthreadpool_task_2d_tile_1d_dynamic_t task_2d_tile_1d_dynamic;
+    pthreadpool_task_2d_tile_2d_dynamic_t task_2d_tile_2d_dynamic;
     pthreadpool_task_3d_t task_3d;
     pthreadpool_task_3d_tile_1d_t task_3d_tile_1d;
     pthreadpool_task_3d_tile_1d_with_thread_t task_3d_tile_1d_with_thread;
     pthreadpool_task_3d_tile_2d_t task_3d_tile_2d;
+    pthreadpool_task_3d_tile_2d_dynamic_t task_3d_tile_2d_dynamic;
     pthreadpool_task_4d_t task_4d;
     pthreadpool_task_4d_tile_2d_t task_4d_tile_2d;
     pthreadpool_task_5d_t task_5d;
@@ -66,14 +76,19 @@ struct compute_parameters {
 #if XNN_MAX_UARCH_TYPES > 1
     pthreadpool_task_2d_tile_1d_with_id_t task_2d_tile_1d_with_id;
     pthreadpool_task_2d_tile_2d_with_id_t task_2d_tile_2d_with_id;
+    pthreadpool_task_2d_tile_2d_dynamic_with_id_t
+        task_2d_tile_2d_dynamic_with_id;
     pthreadpool_task_3d_tile_1d_with_id_t task_3d_tile_1d_with_id;
-    pthreadpool_task_3d_tile_1d_with_id_with_thread_t task_3d_tile_1d_with_id_with_thread;
+    pthreadpool_task_3d_tile_1d_with_id_with_thread_t
+        task_3d_tile_1d_with_id_with_thread;
     pthreadpool_task_3d_tile_2d_with_id_t task_3d_tile_2d_with_id;
+    pthreadpool_task_3d_tile_2d_dynamic_with_id_t
+        task_3d_tile_2d_dynamic_with_id;
     pthreadpool_task_4d_tile_2d_with_id_t task_4d_tile_2d_with_id;
 #endif  // XNN_MAX_UARCH_TYPES > 1
   };
-  // Offset of the invocation context w.r.t. xnn_operator.context
-  // Typically 0, but can be non-zero when an operator does multiple invocations.
+  // Offset of the invocation context w.r.t. xnn_operator.context. Typically 0,
+  // but can be non-zero when an operator does multiple invocations.
   size_t context_offset;
   size_t range[6];
   size_t tile[2];
@@ -215,6 +230,12 @@ struct packw_gemm_goi_context {
 
   // Microkernel to preform packing.
   xnn_packw_gemm_goi_ukernel_fn packw_gemm_goi;
+
+  // Optional wrapped packing function.
+  xnn_pack_weights_and_biases_fn pack_weights_and_biases;
+
+  // A pointer to the underlying `xnn_gemm_config`.
+  const struct xnn_gemm_config* gemm_config;
 };
 
 #ifndef __cplusplus
@@ -263,6 +284,12 @@ struct packw_gemm_gio_context {
 
   // Microkernel to preform packing.
   xnn_packw_gemm_gio_ukernel_fn packw_gemm_gio;
+
+  // Optional wrapped packing function.
+  xnn_pack_weights_and_biases_fn pack_weights_and_biases;
+
+  // A pointer to the underlying `xnn_gemm_config`.
+  const struct xnn_gemm_config* gemm_config;
 };
 
 #ifndef __cplusplus
@@ -320,6 +347,8 @@ struct gemm_context {
   size_t kr;
   // The `sr` size of the current GEMM microkernel.
   size_t sr;
+  // The inner dimension of the matrix product.
+  size_t kc;
   // GEMM microkernels.
   union {
     struct xnn_hmp_gemm_ukernel ukernel;
@@ -339,76 +368,60 @@ struct gemm_context {
     struct xnn_f16_scaleminmax_params f16;
     union xnn_f32_minmax_params f32;
   } params;
+  xnn_pack_lh_offset_fn packed_lh_offset_fn;
 };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_grouped_gemm(
-      const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t group_index,
-      size_t mr_block_start,
-      size_t nr_block_start,
-      size_t mr_block_size,
-      size_t nr_block_size);
+XNN_PRIVATE void xnn_compute_grouped_gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t group_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size);
 
-  XNN_PRIVATE void xnn_compute_grouped_qp8gemm(
-      const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t group_index, size_t mr_block_start, size_t nr_block_start,
-      size_t mr_block_size, size_t nr_block_size);
+XNN_PRIVATE void xnn_compute_grouped_qp8gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t group_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size);
 
-  XNN_PRIVATE void xnn_compute_dqgemm(
-      const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t mr_block_start,
-      size_t nr_block_start,
-      size_t mr_block_size,
-      size_t nr_block_size);
+XNN_PRIVATE void xnn_compute_dqgemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
+    size_t mr_block_size);
 
-  XNN_PRIVATE void xnn_compute_gemm(
-      const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t mr_block_start,
-      size_t nr_block_start,
-      size_t mr_block_size,
-      size_t nr_block_size);
+XNN_PRIVATE void xnn_compute_gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
+    size_t mr_block_size);
 
-  XNN_PRIVATE void xnn_compute_qp8gemm(
-      const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t mr_block_start, size_t nr_block_start, size_t mr_block_size,
-      size_t nr_block_size);
+XNN_PRIVATE void xnn_compute_qp8gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
+    size_t mr_block_size);
 #if XNN_MAX_UARCH_TYPES > 1
-    XNN_PRIVATE void xnn_compute_hmp_grouped_gemm(
-        const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-        uint32_t uarch_index,
-        size_t group_index,
-        size_t mr_block_start,
-        size_t nr_block_start,
-        size_t mr_block_size,
-        size_t nr_block_size);
+XNN_PRIVATE void xnn_compute_hmp_grouped_gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    uint32_t uarch_index, size_t group_index, size_t nr_block_start,
+    size_t mr_block_start, size_t nr_block_size, size_t mr_block_size);
 
-    XNN_PRIVATE void xnn_compute_hmp_grouped_qp8gemm(
-        const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-        uint32_t uarch_index, size_t group_index, size_t mr_block_start,
-        size_t nr_block_start, size_t mr_block_size, size_t nr_block_size);
+XNN_PRIVATE void xnn_compute_hmp_grouped_qp8gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    uint32_t uarch_index, size_t group_index, size_t mr_block_start,
+    size_t nr_block_start, size_t mr_block_size, size_t nr_block_size);
 
-    XNN_PRIVATE void xnn_compute_hmp_gemm(
-        const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-        uint32_t uarch_index,
-        size_t mr_block_start,
-        size_t nr_block_start,
-        size_t mr_block_size,
-        size_t nr_block_size);
+XNN_PRIVATE void xnn_compute_hmp_gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    uint32_t uarch_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size);
 
-    XNN_PRIVATE void xnn_compute_hmp_dqgemm(
-        const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-        uint32_t uarch_index,
-        size_t mr_block_start,
-        size_t nr_block_start,
-        size_t mr_block_size,
-        size_t nr_block_size);
+XNN_PRIVATE void xnn_compute_hmp_dqgemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    uint32_t uarch_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size);
 
-    XNN_PRIVATE void xnn_compute_hmp_qp8gemm(
-        const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-        uint32_t uarch_index, size_t mr_block_start, size_t nr_block_start,
-        size_t mr_block_size, size_t nr_block_size);
-  #endif  // XNN_MAX_UARCH_TYPES > 1
+XNN_PRIVATE void xnn_compute_hmp_qp8gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    uint32_t uarch_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size);
+#endif  // XNN_MAX_UARCH_TYPES > 1
 #endif
 
     // Context for Sparse Matrix-Dense Matrix Multiplication.
@@ -656,16 +669,6 @@ struct subgemm_context {
       const struct subgemm_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
       size_t group_index,
-      size_t subkernel_index,
-      size_t slice_y,
-      size_t slice_x_start,
-      size_t nc_block_start,
-      size_t slice_x_max,
-      size_t nc_block_size);
-
-  XNN_PRIVATE void xnn_compute_subgemm2d(
-      const struct subgemm_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index,
       size_t subkernel_index,
       size_t slice_y,
       size_t slice_x_start,
@@ -1442,22 +1445,25 @@ struct f32_qd8_convert_context {
       size_t batch_index);
 #endif
 
-  struct x32_pack_lh_context {
+  struct pack_lh_context {
     size_t m;
     size_t k;
     size_t mr;
     size_t kr;
     size_t sr;
-    const float* XNN_RESTRICT lhs;
+    const void* XNN_RESTRICT lhs;
     size_t lhs_stride;
-    float* XNN_RESTRICT lhs_packed;
-    xnn_x32_pack_lh_ukernel_fn pack_lh_ukernel;
+    size_t gi_stride;
+    size_t gp_stride;
+    void* XNN_RESTRICT lhs_packed;
+    xnn_pack_lh_ukernel_fn pack_lh_ukernel;
+    xnn_pack_lh_offset_fn packed_offset_fn;
   };
 
 #ifndef __cplusplus
-  XNN_PRIVATE void xnn_compute_x32_pack_lh(
-      const struct x32_pack_lh_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t m_idx_start, size_t tile);
+  XNN_PRIVATE void xnn_compute_pack_lh(
+      const struct pack_lh_context context[restrict XNN_MIN_ELEMENTS(1)],
+      size_t group_idx, size_t m_idx_start, size_t tile);
 #endif
 
   struct f32_qp8_convert_context {
@@ -1521,6 +1527,10 @@ struct floating_point_softmax_context {
     struct xnn_f16_default_params f16;
     struct xnn_f32_default_params f32;
   } rmax_params;
+  union {
+    xnn_float16 f16;
+    float f32;
+  } rmax_init;
 };
 
 #ifndef __cplusplus
@@ -1698,3 +1708,5 @@ struct scaled_dot_product_attention_context {
       size_t tokens_start,
       size_t tokens_block_size);
 #endif
+
+#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_COMPUTE_H_

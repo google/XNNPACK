@@ -1,10 +1,17 @@
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
 #include "xnnpack/assembly.h"
 
 BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x64c4__asm_amd64_avx512vnni
 
       .intel_syntax noprefix
-
       # Free up GP registers.
+      # Save register arguments for tail call to msan annotation helper.
+      push rdi
+      push rsi
       push rbx
       push rbp
       push r15
@@ -12,59 +19,68 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x64c4__asm_amd64_avx512vnni
       push r13
       push r12
 
-      # Swap rsi & rcx because sal can only use cl.
-      mov r15, rsi
-      mov rsi, rcx
-      mov rcx, r15
-
       # load params to free up a GP registers
-      mov r13, [rsp + 80] # params
+      mov r13, [rsp + 96] # params
       vbroadcastss zmm0, DWORD PTR [r13]
       vbroadcastss zmm1, DWORD PTR [r13 + 4]
 
       # Load c pointer.
-      mov r10, [rsp + 56]
+      mov r10, [rsp + 72]
       # Load cm_stride.
-      mov r11, [rsp + 64]
+      mov r11, [rsp + 80]
 
       add rdx, 3
       and rdx, -4
-      sub rsp, 592
+
+      # Move stack parameters which have not yet been loaded
+      mov r12, [rsp + 104]
+
+      # Align the stack pointer.
+      mov r13, rsp
+      sub rsp, 64
+      and rsp, 0xFFFFFFFFFFFFFFC0
+      # Store the old stack pointer containing the return address
+      mov [rsp], r13
+      # Push additional stack parameters to the new stack
+      mov [rsp + 8], r12
+
+      # Allocate some space on the stack.
+      sub rsp, 192
 
       # Clamp a & c pointers if mr <= 1
-      mov rax, rsi
+      mov rax, rcx
       add rax, r8
       mov r13, r10
       add r13, r11
       cmp rdi, 1
-      cmovle rax, rsi
+      cmovle rax, rcx
       cmovle r13, r10
 
-      # Load quantization params pointer from stack
-      mov r11, [rsp + 680]
+      # Load quantization_params pointer from stack
+      mov r11, [rsp + 200]
       mov edi, [r11 + 0]
       vpbroadcastd zmm6, edi
-      vmovups zmmword ptr [rsp + 464], zmm6
+      vmovaps zmmword ptr [rsp + 64], zmm6
       mov edi, [r11 + 8]
       vpbroadcastd zmm6, edi
-      vmovups zmmword ptr [rsp + 528], zmm6
+      vmovaps zmmword ptr [rsp + 128], zmm6
 
 outer_loop:
-      # Zero k counter.
+      # Initialize k counter.
       mov r11, 0
       # Initialize accumulators with k_sum * input zero point.
       vmovaps  zmm6, [r9 + 0]
       vmovaps  zmm7, [r9 + 64]
       vmovaps  zmm8, [r9 + 128]
       vmovaps  zmm9, [r9 + 192]
-      vpmulld zmm5, zmm6, ZMMWORD PTR [rsp + 464]
-      vpmulld zmm12, zmm6, ZMMWORD PTR [rsp + 528]
-      vpmulld zmm14, zmm7, ZMMWORD PTR [rsp + 464]
-      vpmulld zmm15, zmm7, ZMMWORD PTR [rsp + 528]
-      vpmulld zmm16, zmm8, ZMMWORD PTR [rsp + 464]
-      vpmulld zmm17, zmm8, ZMMWORD PTR [rsp + 528]
-      vpmulld zmm18, zmm9, ZMMWORD PTR [rsp + 464]
-      vpmulld zmm19, zmm9, ZMMWORD PTR [rsp + 528]
+      vpmulld zmm5, zmm6, ZMMWORD PTR [rsp + 64]
+      vpmulld zmm12, zmm6, ZMMWORD PTR [rsp + 128]
+      vpmulld zmm14, zmm7, ZMMWORD PTR [rsp + 64]
+      vpmulld zmm15, zmm7, ZMMWORD PTR [rsp + 128]
+      vpmulld zmm16, zmm8, ZMMWORD PTR [rsp + 64]
+      vpmulld zmm17, zmm8, ZMMWORD PTR [rsp + 128]
+      vpmulld zmm18, zmm9, ZMMWORD PTR [rsp + 64]
+      vpmulld zmm19, zmm9, ZMMWORD PTR [rsp + 128]
       add r9, 256
 
 inner_loop:
@@ -73,7 +89,7 @@ inner_loop:
       vmovaps  zmm8, [r9 + 128]
       vmovaps  zmm9, [r9 + 192]
       add r9, 256
-      vpbroadcastd zmm2, [rsi + r11]
+      vpbroadcastd zmm2, [rcx + r11]
       vpdpbusd  zmm5, zmm2, zmm6
       vpdpbusd  zmm14, zmm2, zmm7
       vpdpbusd  zmm16, zmm2, zmm8
@@ -87,6 +103,7 @@ inner_loop:
       add r11, 4
       cmp rdx, r11
       jne inner_loop
+inner_loop_end:
 
       # Convert from int32 to float.
       vcvtdq2ps zmm5, zmm5
@@ -98,7 +115,7 @@ inner_loop:
       vcvtdq2ps zmm18, zmm18
       vcvtdq2ps zmm19, zmm19
       # Load quantization_params pointer from stack
-      mov r11, [rsp + 680]
+      mov r11, [rsp + 200]
       vmulps zmm5, zmm5, DWORD PTR [r11 + 4]{1to16}
       vmulps zmm12, zmm12, DWORD PTR [r11 + 12]{1to16}
       vmulps zmm14, zmm14, DWORD PTR [r11 + 4]{1to16}
@@ -125,7 +142,7 @@ inner_loop:
       vfmadd213ps zmm17, zmm2, zmm8
       vfmadd213ps zmm18, zmm3, zmm9
       vfmadd213ps zmm19, zmm3, zmm9
-      # Min/max clamping..
+      # Min/max clamping.
       vminps  zmm5, zmm1, zmm5
       vminps  zmm12, zmm1, zmm12
       vminps  zmm14, zmm1, zmm14
@@ -144,7 +161,7 @@ inner_loop:
       vmaxps  zmm19, zmm0, zmm19
 
       # Check whether full or partial store.
-      cmp rcx, 64
+      cmp rsi, 64
       jl tail
 
       vmovups  [r10], zmm5
@@ -158,13 +175,13 @@ inner_loop:
       add r10, 256
       add r13, 256
 
-      sub rcx, 64
+      sub rsi, 64
       jne outer_loop
       jmp return
 
 tail:
       mov r11, -1
-      sal r11, cl
+      shlx r11, r11, rsi
       not r11
       kmovw k1, r11d
       shr r11, 16
@@ -184,8 +201,9 @@ tail:
       vmovups  ZMMWORD PTR [r13 + 192]{k4}, zmm19
 
 return:
-      add rsp, 592
-
+      add rsp, 192
+      mov r13, [rsp]
+      mov rsp, r13
       # Restore the callee saved registers.
       pop r12
       pop r13
@@ -193,5 +211,21 @@ return:
       pop r15
       pop rbp
       pop rbx
+      pop rsi
+      pop rdi
+      #if XNN_HAS_FEATURE(memory_sanitizer)
+      jmp xnn_gemm_ukernel_msan_sizeof_c_4
+      #else
       ret
+      #endif
 END_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x64c4__asm_amd64_avx512vnni
+
+      #if XNN_HAS_FEATURE(dataflow_sanitizer)
+BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x64c4__asm_amd64_avx512vnni.dfsan
+      .intel_syntax noprefix
+      # We could implement this by calling a function that implements the dfsan instrumentation.
+      # For now, just break, so if someone tries to use this, they'll know where the problem is.
+      int 3
+      ret
+END_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_2x64c4__asm_amd64_avx512vnni.dfsan
+      #endif

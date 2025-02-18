@@ -28,8 +28,8 @@ void xnn_f32_rminmax_ukernel__avx_u16_acc2(
 
   static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
 
-  __m256 vmin0 = _mm256_broadcast_ss(input);
-  __m256 vmax0 = vmin0;
+  __m256 vmin0 = _mm256_broadcast_ss(output);
+  __m256 vmax0 = _mm256_broadcast_ss(output + 1);
   __m256 vmin1 = vmin0;
   __m256 vmax1 = vmax0;
   for (; batch >= 16 * sizeof(float); batch -= 16 * sizeof(float)) {

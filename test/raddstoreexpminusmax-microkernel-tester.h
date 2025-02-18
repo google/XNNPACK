@@ -75,7 +75,7 @@ class RAddStoreExpMinusMaxMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < elements(); i++) {
-      EXPECT_NEAR(y_ref[i], y[i], std::abs(y_ref[i]) * 5.0e-3f)
+      ASSERT_NEAR(y_ref[i], y[i], std::abs(y_ref[i]) * 5.0e-3f)
         << "element " << i << " / " << elements() << ", x_max " << x_max_as_float;
       }
       ASSERT_NEAR(sum_ref, sum, std::abs(sum_ref) * 5.0e-3f)
@@ -110,7 +110,7 @@ class RAddStoreExpMinusMaxMicrokernelTester {
 
       // Verify results.
       for (size_t i = 0; i < elements(); i++) {
-      EXPECT_NEAR(y_ref[i], double(y[i]), std::abs(y_ref[i]) * 1.0e-6)
+      ASSERT_NEAR(y_ref[i], double(y[i]), std::abs(y_ref[i]) * 1.0e-6)
         << "element " << i << " / " << elements() << ", x_max " << x_max;
       }
       ASSERT_NEAR(sum_ref, double(sum), std::abs(sum_ref) * 1.0e-6)
