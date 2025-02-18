@@ -586,7 +586,7 @@ void xnn_compute_grouped_qp8gemm(
                                   mr_block_size);
 }
 
-XNN_INLINE void xnn_compute_hmp_qp8gemm(
+XNN_INLINE static void compute_hmp_qp8gemm(
     const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
     uint32_t uarch_index, size_t nr_block_start, size_t mr_block_start,
     size_t nr_block_size, size_t mr_block_size) {
@@ -611,12 +611,20 @@ XNN_INLINE void xnn_compute_hmp_qp8gemm(
   }
 }
 
+void xnn_compute_hmp_qp8gemm(
+    const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
+    uint32_t uarch_index, size_t nr_block_start, size_t mr_block_start,
+    size_t nr_block_size, size_t mr_block_size) {
+  compute_hmp_qp8gemm(context, uarch_index, nr_block_start, mr_block_start,
+                      nr_block_size, mr_block_size);
+}
+
 void xnn_compute_qp8gemm(
     const struct gemm_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t nr_block_start, size_t mr_block_start, size_t nr_block_size,
     size_t mr_block_size) {
-  xnn_compute_hmp_qp8gemm(context, XNN_UARCH_DEFAULT, nr_block_start,
-                          mr_block_start, nr_block_size, mr_block_size);
+  compute_hmp_qp8gemm(context, XNN_UARCH_DEFAULT, nr_block_start,
+                      mr_block_start, nr_block_size, mr_block_size);
 }
 
 void xnn_compute_spmm(
