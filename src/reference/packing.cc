@@ -22,6 +22,7 @@
 #include "xnnpack/microparams.h"
 #include "xnnpack/pack.h"
 #include "xnnpack/unaligned.h"
+#include "pf32-gemm/gen/pf32-gemm-minmax-utils.h"
 
 #if XNN_ENABLE_KLEIDIAI
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme.h"
@@ -2068,6 +2069,23 @@ size_t xnn_packed_stride_kai_f32_weights_and_biases(
   return ret_val;
 }
 
+size_t xnn_pack_f32_get_rhs_packed_stride(size_t k) {
+    return xnn_pf32_gemm_minmax_nr * xnn_pf32_get_word_sme_vl__asm_aarch64_neonsme() * (sizeof(uint32_t) + k * sizeof(uint32_t));
+}
+
+size_t xnn_pack_f32_get_n_step_rhs_pack(void) {
+    return xnn_pf32_gemm_minmax_nr * xnn_pf32_get_word_sme_vl__asm_aarch64_neonsme();
+}
+
+size_t xnn_packed_stride_f32_weights_and_biases(
+    const struct xnn_gemm_config* gemm_config, size_t k,
+    size_t unused_block_size, size_t unused_k_stride, size_t extra_bytes) {
+  size_t ret_val =
+      xnn_pack_f32_get_rhs_packed_stride(k) /
+      xnn_pack_f32_get_n_step_rhs_pack();
+  return ret_val;
+}
+
 void xnn_pack_kai_f16_weights_and_biases(
     uint32_t flags, const struct xnn_gemm_config* gemm_config,
     size_t input_channels, size_t output_channels, size_t groups,
@@ -2130,6 +2148,28 @@ void transpose_weights(const float* in, float* out, size_t height,
   }
 }
 
+void xnn_pack_f32_run_pack_rhs(size_t num_groups, size_t n, size_t k, size_t nr, size_t kr,
+                  size_t sr, size_t rhs_stride, const void *rhs,
+                  const void *bias, const void *scale, void *rhs_packed,
+                  size_t extra_bytes, const void *params) {
+
+  if ((num_groups != 1) || (nr != xnn_pf32_gemm_minmax_nr * xnn_pf32_get_word_sme_vl__asm_aarch64_neonsme()) ||
+      (kr != xnn_pf32_gemm_minmax_kr) || (sr != xnn_pf32_gemm_minmax_sr) || (rhs == NULL) || (bias == NULL) ||
+      (scale != NULL) || (rhs_packed == NULL) || (extra_bytes != 0) ||
+      (params != NULL)) {
+    exit(EXIT_FAILURE);
+  }
+
+  size_t height = k;
+  const size_t width = n;
+  const void *in = rhs;
+  void *out = rhs_packed;
+  const size_t in_stride = rhs_stride;
+  size_t out_stride = xnn_pf32_gemm_minmax_nr * xnn_pf32_get_word_sme_vl__asm_aarch64_neonsme() * (sizeof(uint32_t) + height * sizeof(uint32_t));
+
+  xnn_pf32_pack_rhs__asm_aarch64_neonsme(in, out, height, in_stride, bias, out_stride, width);
+}
+
 void xnn_pack_kai_f32_weights_and_biases(
     uint32_t flags, const struct xnn_gemm_config* gemm_config,
     size_t input_channels, size_t output_channels, size_t groups,
@@ -2169,6 +2209,59 @@ void xnn_pack_kai_f32_weights_and_biases(
     transpose_weights((const float*)weights, tmp_data, output_channels,
                       input_channels);
     kai_run_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme(
+        groups, output_channels, input_channels, nr, kr, sr, rhs_stride,
+        /*rhs=*/reinterpret_cast<const uint8_t*>(tmp_data),
+        /*bias=*/reinterpret_cast<const float*>(accumulator_init),
+        /*scale=*/reinterpret_cast<const float*>(extra_data1),
+        /*rhs_packed=*/packed_weights_ptr,
+        /*extra_bytes=*/extra_data0_element_size + extra_data1_element_size,
+        NULL);
+    free(tmp_data);
+  }
+  if (free_accumulator_init) {
+    free((void*)accumulator_init);
+  }
+}
+
+void xnn_pack_f32_weights_and_biases(
+    uint32_t flags, const struct xnn_gemm_config* gemm_config,
+    size_t input_channels, size_t output_channels, size_t groups,
+    size_t unused_block_size, size_t k_stride, const void* accumulator_init,
+    const void* weights, xnn_init_scale_params_fn init_extra_data0_fn,
+    const void* extra_data0, size_t extra_data0_element_size,
+    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
+    size_t extra_data1_element_size, void* packed_weights_ptr,
+    const void* params) {
+  assert(extra_data0 == nullptr);
+  assert(extra_data1 == nullptr);
+  const uint32_t nr = gemm_config->nr;
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  const size_t rhs_stride = output_channels * sizeof(float);
+
+  // Some packing kernels assume that the bias is non-null. Allocate a zero
+  // initialized array as a workaround if bias is null.
+  bool free_accumulator_init = false;
+  if (accumulator_init == NULL) {
+    accumulator_init = calloc(output_channels, sizeof(float));
+    free_accumulator_init = true;
+  }
+  if (flags & XNN_FLAG_TRANSPOSE_WEIGHTS) {
+    xnn_pack_f32_run_pack_rhs(
+        groups, output_channels, input_channels, nr, kr, sr, rhs_stride,
+        /*rhs=*/reinterpret_cast<const uint8_t*>(weights),
+        /*bias=*/reinterpret_cast<const float*>(accumulator_init),
+        /*scale=*/reinterpret_cast<const float*>(extra_data1),
+        /*rhs_packed=*/packed_weights_ptr,
+        /*extra_bytes=*/extra_data0_element_size + extra_data1_element_size,
+        NULL);
+  } else {
+    // Transpose the weights until the transpose packing function is ready.
+    float* tmp_data =
+        (float*)malloc(input_channels * output_channels * sizeof(float));
+    transpose_weights((const float*)weights, tmp_data, output_channels,
+                      input_channels);
+    xnn_pack_f32_run_pack_rhs(
         groups, output_channels, input_channels, nr, kr, sr, rhs_stride,
         /*rhs=*/reinterpret_cast<const uint8_t*>(tmp_data),
         /*bias=*/reinterpret_cast<const float*>(accumulator_init),
