@@ -1460,6 +1460,8 @@ IF(XNNPACK_BUILD_TESTS)
       f16-ibilinear-chw
       f16-raddstoreexpminusmax
       f16-rmax
+      f16-rmin
+      f16-rminmax
       f16-rsum
       f16-spmm-minmax
       f16-vcmul
