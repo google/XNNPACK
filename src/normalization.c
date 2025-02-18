@@ -281,12 +281,6 @@ void xnn_normalize_transpose_permutation(
   *normalized_num_dims = output_dims;
 }
 
-static int cmp_value_size_t(const void* a_ptr, const void* b_ptr) {
-  const size_t a = *((const size_t*) a_ptr);
-  const size_t b = *((const size_t*) b_ptr);
-  return (b < a) - (b > a);
-}
-
 void xnn_normalize_reduction(
     size_t* num_reduction_axes_ptr,
     size_t* reduction_axes,
