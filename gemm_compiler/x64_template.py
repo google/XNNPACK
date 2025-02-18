@@ -177,10 +177,10 @@ class X64(base_architecture.BaseArchitecture):
 BEGIN_FUNCTION {function_name}
 
       .intel_syntax noprefix
-      # Free up GP registers.
       # Save register arguments for tail call to msan annotation helper.
       push rdi
       push rsi
+      # Free up GP registers.
       push rbx
       push rbp
       push r15
