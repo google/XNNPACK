@@ -991,8 +991,6 @@ def generate_test_cases(ukernel, primary_tile, incremental_tile, channel_tile,
   _, test_name = ukernel.split("_", 1)
   _, datatype, ukernel_type, _ = ukernel.split("_", 3)
   test_args = [ukernel]
-  if not isa:
-    test_args.append("ArgMaxPoolMicrokernelTester::Variant::Scalar")
   channel_scaled_tile = channel_tile
   if vector_tile:
     ctype = {"f16": "uint16_t", "f32": "float"}[datatype]
