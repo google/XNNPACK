@@ -8,7 +8,7 @@
 //
 // Auto-generated file. Do not edit!
 //   Specification: test/pf32-gemm-minmax.yaml
-//   Generator: tools/generate-gemm-test.py
+//   Generator: ./tools/generate-gemm-test.py
 
 #include <cstddef>
 #include <cstdint>
@@ -277,4 +277,30 @@ std::vector<GemmTestParams> CreateTests1(
 
   #endif  // XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
+
+
+#if XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
+  INSTANTIATE_TEST_SUITE_P(
+      PF32_GEMM_MINMAX_32X32__NEONSME, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/1,
+          /*adj_k_block=*/1,
+          /*mr=*/32, /*nr=*/32, /*kr=*/1, /*sr=*/1,
+          /*mr_packed=*/32,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test_PF32(xnn_pf32_gemm_minmax_ukernel_32x32__neonsme,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_f32_weights_and_biases,
+                        xnn_packed_stride_f32_weights_and_biases);
+          },
+          []() {
+            TEST_REQUIRES_ARM_NEON_SME;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+#endif  // XNN_ENABLE_ARM_SME && XNN_ARCH_ARM64
 
