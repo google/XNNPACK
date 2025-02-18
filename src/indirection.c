@@ -131,26 +131,23 @@ void xnn_indirection_init_deconv2d(
 }
 
 void xnn_indirection_init_subconv2d(
-  xnn_operator_t op,
   size_t output_tile_size,
-  uint32_t log2_element_size)
+  const void** indirection_buffer,
+  struct subconvolution_params* subconvolution_params,
+  const void* input,
+  const size_t input_pixel_stride,
+  const void* zero,
+  const size_t input_height,
+  const size_t input_width,
+  const size_t output_height,
+  const size_t output_width,
+  const size_t kernel_height,
+  const size_t kernel_width,
+  const size_t stride_height,
+  const size_t stride_width,
+  const size_t padding_top,
+  const size_t padding_left)
 {
-  const void** indirection_buffer                     = op->indirection_buffer;
-  struct subconvolution_params* subconvolution_params = op->subconvolution_buffer;
-  const void* input                                   = op->input;
-  const size_t input_pixel_stride                     = op->input_pixel_stride << log2_element_size;
-  const void* zero                                    = op->zero_buffer;
-  const size_t input_height                           = op->input_height;
-  const size_t input_width                            = op->input_width;
-  const size_t output_height                          = op->output_height;
-  const size_t output_width                           = op->output_width;
-  const size_t kernel_height                          = op->kernel_height;
-  const size_t kernel_width                           = op->kernel_width;
-  const size_t stride_height                          = op->stride_height;
-  const size_t stride_width                           = op->stride_width;
-  const size_t padding_top                            = op->padding_top;
-  const size_t padding_left                           = op->padding_left;
-
   const size_t modulo_padding_top = padding_top % stride_height;
   const size_t modulo_padding_left = padding_left % stride_width;
   for (size_t offset_y = 0; offset_y < stride_height; offset_y++) {

@@ -123,9 +123,22 @@ XNN_INTERNAL void xnn_indirection_init_deconv2d(
   size_t padding_left);
 
 XNN_INTERNAL void xnn_indirection_init_subconv2d(
-  xnn_operator_t op,
   size_t output_tile_size,
-  uint32_t log2_element_size);
+  const void** indirection_buffer,
+  struct subconvolution_params* subconvolution_params,
+  const void* input,
+  size_t input_pixel_stride,
+  const void* zero,
+  size_t input_height,
+  size_t input_width,
+  size_t output_height,
+  size_t output_width,
+  size_t kernel_height,
+  size_t kernel_width,
+  size_t stride_height,
+  size_t stride_width,
+  size_t padding_top,
+  size_t padding_left);
 
 XNN_INTERNAL void xnn_indirection_init_maxpool2d(
   const void** indirection_buffer,

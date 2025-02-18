@@ -1562,7 +1562,16 @@ static enum xnn_status reshape_subconv2d_path(
     // Set a dummy input first, the actual input offset is calculated in setup when we have the input pointer.
     // This offset must be aligned properly because inputs and input offsets need to be aligned.
     deconvolution_op->input = (void*) ((uintptr_t) deconvolution_op->zero_buffer + XNN_ALLOCATION_ALIGNMENT);
-    xnn_indirection_init_subconv2d(deconvolution_op, mr, log2_input_element_size);
+    xnn_indirection_init_subconv2d(
+      mr, deconvolution_op->indirection_buffer,
+      deconvolution_op->subconvolution_buffer, deconvolution_op->input,
+      deconvolution_op->input_pixel_stride << log2_input_element_size,
+      deconvolution_op->zero_buffer, deconvolution_op->input_height,
+      deconvolution_op->input_width, deconvolution_op->output_height,
+      deconvolution_op->output_width, deconvolution_op->kernel_height,
+      deconvolution_op->kernel_width, deconvolution_op->stride_height,
+      deconvolution_op->stride_width, deconvolution_op->padding_top,
+      deconvolution_op->padding_left);
 
     deconvolution_op->last_input = deconvolution_op->input;
     deconvolution_op->last_input_height = input_height;
