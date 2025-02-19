@@ -341,6 +341,8 @@ IF(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
   # Test files have many sections, increase the limit. See
   # https://learn.microsoft.com/en-us/cpp/build/reference/bigobj-increase-number-of-sections-in-dot-obj-file.
   ADD_COMPILE_OPTIONS("/bigobj")
+  # Our float16 datatypes have constructors in C++ and not in C, which prompts a warning in MSVC
+  ADD_COMPILE_OPTIONS("/wd4190")
 ENDIF()
 
 IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
