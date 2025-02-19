@@ -38,7 +38,7 @@ void f16_rsum(
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> input(
       rows * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   xnnpack::Buffer<xnn_float16> output(rows);
-  std::iota(input.begin(), input.end(), 1);
+  std::iota(input.begin(), input.end(), 1.0f);
 
   // Prepare parameters.
   xnn_f16_scale_params params;
@@ -71,7 +71,7 @@ void f16_f32acc_rsum(
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> input(
       rows * channels + XNN_EXTRA_BYTES / sizeof(xnn_float16));
   xnnpack::Buffer<float> output(rows);
-  std::iota(input.begin(), input.end(), 1);
+  std::iota(input.begin(), input.end(), 1.0f);
 
   // Prepare parameters.
   xnn_f16_f32acc_scale_params params;
@@ -104,7 +104,7 @@ void f32_rsum(
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> input(
       rows * channels + XNN_EXTRA_BYTES / sizeof(float));
   xnnpack::Buffer<float> output(rows);
-  std::iota(input.begin(), input.end(), 1);
+  std::iota(input.begin(), input.end(), 1.0f);
 
   // Prepare parameters.
   xnn_f32_scale_params params;
