@@ -18,8 +18,8 @@ ENDIF()
 # LINT.IfChange
 INCLUDE(ExternalProject)
 ExternalProject_Add(googlebenchmark
-  URL https://github.com/google/benchmark/archive/4a805f9f0f468bd4d499d060a1a1c6bd5d6b6b73.zip
-  URL_HASH SHA256=a3f2e783628cee5b75166cb02af43fd1220479553c397ba4a35abd1d19d19ad3
+  URL https://github.com/google/benchmark/archive/8d4fdd6e6e003867045e0bb3473b5b423818e4b7.zip
+  URL_HASH SHA256=28c7cac12cc25d87d3dcc8c5fb7d1bd0971b41a599a5c4787f8742cb39ca47db
   SOURCE_DIR "${CMAKE_BINARY_DIR}/googlebenchmark-source"
   BINARY_DIR "${CMAKE_BINARY_DIR}/googlebenchmark"
   CONFIGURE_COMMAND ""
