@@ -2910,6 +2910,21 @@ static void init_qdu8_f32_qc8w_gemm_config(void) {
     const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
     assert(hardware_config != NULL);
     (void) hardware_config;  // May be unused.
+    #if XNN_ENABLE_AVX512VNNI && XNN_ARCH_X86_64 && !XNN_PLATFORM_WINDOWS
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512vnni) {
+        qdu8_f32_qc8w_gemm_config.arch = xnn_arch_x86_avx512vnni;
+        qdu8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(1)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc8w_gemm_minmax_ukernel_1x64c4__asm_amd64_avx512vnni);
+        qdu8_f32_qc8w_gemm_config.minmax.dqgemm[XNN_MR_TO_INDEX(5)] = xnn_init_hmp_dqgemm_ukernel((xnn_dqgemm_ukernel_fn) xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x64c4__asm_amd64_avx512vnni);
+        qdu8_f32_qc8w_gemm_config.init.f32 = xnn_init_f32_minmax_scalar_params;
+        qdu8_f32_qc8w_gemm_config.pack_weights_and_biases = NULL;  // Override the default packing function.
+        qdu8_f32_qc8w_gemm_config.packed_stride_weights_and_biases = NULL;  // Override the default packing function.
+        qdu8_f32_qc8w_gemm_config.pack_gemm_gio = (xnn_packw_gemm_gio_ukernel_fn) xnn_pack_qs8_gemm_gio_w;
+        qdu8_f32_qc8w_gemm_config.pack_gemm_goi = (xnn_packw_gemm_goi_ukernel_fn) xnn_pack_qs8_gemm_goi_w;
+        qdu8_f32_qc8w_gemm_config.mr = 5;
+        qdu8_f32_qc8w_gemm_config.nr = 64;
+        qdu8_f32_qc8w_gemm_config.log2_kr = 2;
+      } else
+    #endif
     #if XNN_ENABLE_AVX512VNNI
       if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512vnni) {
         qdu8_f32_qc8w_gemm_config.arch = xnn_arch_x86_avx512vnni;
