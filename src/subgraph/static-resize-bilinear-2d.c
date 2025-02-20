@@ -45,53 +45,19 @@ static enum xnn_status create_resize_bilinear_operator(
   const struct xnn_value *input_value = &values[input_id];
 
   if (input_value->layout == xnn_layout_type_nchw) {
-    switch (input_value->datatype) {
-      case xnn_datatype_fp16:
-        status = xnn_create_resize_bilinear2d_nchw_f16(
-          output_height, output_width,
-          node->flags,
-          &opdata->operator_objects[0]);
-        break;
-      case xnn_datatype_fp32:
-        status = xnn_create_resize_bilinear2d_nchw_f32(
-          output_height, output_width,
-          node->flags,
-          &opdata->operator_objects[0]);
-        break;
-      default:
-        XNN_UNREACHABLE;
-    }
+    status = xnn_create_resize_bilinear2d_nchw(
+      input_value->datatype,
+      output_height, output_width,
+      node->flags,
+      &opdata->operator_objects[0]);
   } else {
     assert(values[input_id].layout == xnn_layout_type_nhwc);
     assert(values[output_id].layout == xnn_layout_type_nhwc);
-    switch (input_value->datatype) {
-      case xnn_datatype_fp16:
-        status = xnn_create_resize_bilinear2d_nhwc_f16(
-          output_height, output_width,
-          node->flags,
-          &opdata->operator_objects[0]);
-        break;
-      case xnn_datatype_fp32:
-        status = xnn_create_resize_bilinear2d_nhwc_f32(
-          output_height, output_width,
-          node->flags,
-          &opdata->operator_objects[0]);
-        break;
-      case xnn_datatype_qint8:
-        status = xnn_create_resize_bilinear2d_nhwc_s8(
-          output_height, output_width,
-          node->flags,
-          &opdata->operator_objects[0]);
-        break;
-      case xnn_datatype_quint8:
-        status = xnn_create_resize_bilinear2d_nhwc_u8(
-          output_height, output_width,
-          node->flags,
-          &opdata->operator_objects[0]);
-        break;
-      default:
-        XNN_UNREACHABLE;
-    }
+    status = xnn_create_resize_bilinear2d_nhwc(
+      input_value->datatype,
+      output_height, output_width,
+      node->flags,
+      &opdata->operator_objects[0]);
   }
   return status;
 }
@@ -112,8 +78,8 @@ static enum xnn_status reshape_resize_bilinear_operator(
   enum xnn_status status = xnn_status_invalid_state;
   const size_t old_workspace_size = opdata->workspace_size;
   switch (opdata->operator_objects[0]->type) {
-    case xnn_operator_type_resize_bilinear_nchw_f16:
-      status = xnn_reshape_resize_bilinear2d_nchw_f16(
+    case xnn_operator_type_resize_bilinear_nchw:
+      status = xnn_reshape_resize_bilinear2d_nchw(
         opdata->operator_objects[0],
         batch_size,
         input_height,
@@ -123,58 +89,8 @@ static enum xnn_status reshape_resize_bilinear_operator(
         channel_dim,
         threadpool);
       break;
-    case xnn_operator_type_resize_bilinear_nchw_f32:
-      status = xnn_reshape_resize_bilinear2d_nchw_f32(
-        opdata->operator_objects[0],
-        batch_size,
-        input_height,
-        input_width,
-        channel_dim,
-        channel_dim,
-        channel_dim,
-        threadpool);
-      break;
-    case xnn_operator_type_resize_bilinear_nhwc_f16:
-      status = xnn_reshape_resize_bilinear2d_nhwc_f16(
-        opdata->operator_objects[0],
-        batch_size,
-        input_height,
-        input_width,
-        channel_dim,
-        channel_dim,
-        channel_dim,
-        &opdata->workspace_size,
-        &opdata->workspace_alignment,
-        threadpool);
-      break;
-    case xnn_operator_type_resize_bilinear_nhwc_f32:
-      status = xnn_reshape_resize_bilinear2d_nhwc_f32(
-        opdata->operator_objects[0],
-        batch_size,
-        input_height,
-        input_width,
-        channel_dim,
-        channel_dim,
-        channel_dim,
-        &opdata->workspace_size,
-        &opdata->workspace_alignment,
-        threadpool);
-      break;
-    case xnn_operator_type_resize_bilinear_nhwc_s8:
-      status = xnn_reshape_resize_bilinear2d_nhwc_s8(
-        opdata->operator_objects[0],
-        batch_size,
-        input_height,
-        input_width,
-        channel_dim,
-        channel_dim,
-        channel_dim,
-        &opdata->workspace_size,
-        &opdata->workspace_alignment,
-        threadpool);
-      break;
-    case xnn_operator_type_resize_bilinear_nhwc_u8:
-      status = xnn_reshape_resize_bilinear2d_nhwc_u8(
+    case xnn_operator_type_resize_bilinear_nhwc:
+      status = xnn_reshape_resize_bilinear2d_nhwc(
         opdata->operator_objects[0],
         batch_size,
         input_height,
@@ -235,41 +151,14 @@ static enum xnn_status setup_resize_bilinear_operator(
   assert(output_data != NULL);
 
   switch (opdata->operator_objects[0]->type) {
-    case xnn_operator_type_resize_bilinear_nchw_f16:
-      return xnn_setup_resize_bilinear2d_nchw_f16(
+    case xnn_operator_type_resize_bilinear_nchw:
+      return xnn_setup_resize_bilinear2d_nchw(
         opdata->operator_objects[0],
         input_data,
         output_data);
       break;
-    case xnn_operator_type_resize_bilinear_nchw_f32:
-      return xnn_setup_resize_bilinear2d_nchw_f32(
-        opdata->operator_objects[0],
-        input_data,
-        output_data);
-      break;
-    case xnn_operator_type_resize_bilinear_nhwc_f16:
-      return xnn_setup_resize_bilinear2d_nhwc_f16(
-        opdata->operator_objects[0],
-        opdata->workspace,
-        input_data,
-        output_data);
-      break;
-    case xnn_operator_type_resize_bilinear_nhwc_f32:
-      return xnn_setup_resize_bilinear2d_nhwc_f32(
-        opdata->operator_objects[0],
-        opdata->workspace,
-        input_data,
-        output_data);
-      break;
-    case xnn_operator_type_resize_bilinear_nhwc_s8:
-      return xnn_setup_resize_bilinear2d_nhwc_s8(
-        opdata->operator_objects[0],
-        opdata->workspace,
-        input_data,
-        output_data);
-      break;
-    case xnn_operator_type_resize_bilinear_nhwc_u8:
-      return xnn_setup_resize_bilinear2d_nhwc_u8(
+    case xnn_operator_type_resize_bilinear_nhwc:
+      return xnn_setup_resize_bilinear2d_nhwc(
         opdata->operator_objects[0],
         opdata->workspace,
         input_data,

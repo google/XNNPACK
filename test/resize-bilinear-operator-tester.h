@@ -287,7 +287,8 @@ class ResizeBilinearOperatorTester {
       if (transient_indirection_buffer()) {
         flags |= XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
       }
-      const xnn_status status = xnn_create_resize_bilinear2d_nhwc_f16(
+      const xnn_status status = xnn_create_resize_bilinear2d_nhwc(
+          xnn_datatype_fp16,
           output_height(), output_width(), flags,
           &resize_bilinear_op);
       if (status == xnn_status_unsupported_hardware) {
@@ -302,7 +303,7 @@ class ResizeBilinearOperatorTester {
       size_t workspace_size = transient_indirection_buffer() ? 0 : SIZE_MAX;
       size_t workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
-        xnn_reshape_resize_bilinear2d_nhwc_f16(
+        xnn_reshape_resize_bilinear2d_nhwc(
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
           channels(), input_pixel_stride(), output_pixel_stride(),
@@ -314,14 +315,14 @@ class ResizeBilinearOperatorTester {
         ASSERT_NE(workspace_size, 0);
         ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
         ASSERT_EQ(xnn_status_success,
-          xnn_setup_resize_bilinear2d_nhwc_f16(
+          xnn_setup_resize_bilinear2d_nhwc(
             resize_bilinear_op,
             workspace.data(), input.data(), output.data()));
       } else {
         ASSERT_EQ(workspace_size, 0);
         ASSERT_EQ(workspace_alignment, 1);
         ASSERT_EQ(xnn_status_success,
-          xnn_setup_resize_bilinear2d_nhwc_f16(
+          xnn_setup_resize_bilinear2d_nhwc(
             resize_bilinear_op,
             /*workspace=*/nullptr, input.data(), output.data()));
       }
@@ -399,7 +400,8 @@ class ResizeBilinearOperatorTester {
         flags |= XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
       }
       ASSERT_EQ(xnn_status_success,
-        xnn_create_resize_bilinear2d_nhwc_f32(
+        xnn_create_resize_bilinear2d_nhwc(
+            xnn_datatype_fp32,
           output_height(), output_width(), flags,
           &resize_bilinear_op));
       ASSERT_NE(nullptr, resize_bilinear_op);
@@ -410,7 +412,7 @@ class ResizeBilinearOperatorTester {
       size_t workspace_size = transient_indirection_buffer() ? 0 : SIZE_MAX;
       size_t workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
-        xnn_reshape_resize_bilinear2d_nhwc_f32(
+        xnn_reshape_resize_bilinear2d_nhwc(
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
           channels(), input_pixel_stride(), output_pixel_stride(),
@@ -423,14 +425,14 @@ class ResizeBilinearOperatorTester {
         ASSERT_NE(workspace_size, 0);
         ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
         ASSERT_EQ(xnn_status_success,
-          xnn_setup_resize_bilinear2d_nhwc_f32(
+          xnn_setup_resize_bilinear2d_nhwc(
             resize_bilinear_op,
             workspace.data(), input.data(), output.data()));
       } else {
         ASSERT_EQ(workspace_size, 0);
         ASSERT_EQ(workspace_alignment, 1);
         ASSERT_EQ(xnn_status_success,
-          xnn_setup_resize_bilinear2d_nhwc_f32(
+          xnn_setup_resize_bilinear2d_nhwc(
             resize_bilinear_op,
             /*workspace=*/nullptr, input.data(), output.data()));
       }
@@ -508,7 +510,8 @@ class ResizeBilinearOperatorTester {
         flags |= XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
       }
       ASSERT_EQ(xnn_status_success,
-        xnn_create_resize_bilinear2d_nhwc_s8(
+        xnn_create_resize_bilinear2d_nhwc(
+            xnn_datatype_qint8,
           output_height(), output_width(), flags,
           &resize_bilinear_op));
       ASSERT_NE(nullptr, resize_bilinear_op);
@@ -519,7 +522,7 @@ class ResizeBilinearOperatorTester {
       size_t workspace_size = transient_indirection_buffer() ? 0 : SIZE_MAX;
       size_t workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
-        xnn_reshape_resize_bilinear2d_nhwc_s8(
+        xnn_reshape_resize_bilinear2d_nhwc(
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
           channels(), input_pixel_stride(), output_pixel_stride(),
@@ -532,14 +535,14 @@ class ResizeBilinearOperatorTester {
         ASSERT_NE(workspace_size, 0);
         ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
         ASSERT_EQ(xnn_status_success,
-          xnn_setup_resize_bilinear2d_nhwc_s8(
+          xnn_setup_resize_bilinear2d_nhwc(
             resize_bilinear_op,
             workspace.data(), input.data(), output.data()));
       } else {
         ASSERT_EQ(workspace_size, 0);
         ASSERT_EQ(workspace_alignment, 1);
         ASSERT_EQ(xnn_status_success,
-          xnn_setup_resize_bilinear2d_nhwc_s8(
+          xnn_setup_resize_bilinear2d_nhwc(
             resize_bilinear_op,
             /*workspace=*/nullptr, input.data(), output.data()));
       }
@@ -618,7 +621,8 @@ class ResizeBilinearOperatorTester {
         flags |= XNN_FLAG_TRANSIENT_INDIRECTION_BUFFER;
       }
       ASSERT_EQ(xnn_status_success,
-        xnn_create_resize_bilinear2d_nhwc_u8(
+        xnn_create_resize_bilinear2d_nhwc(
+            xnn_datatype_quint8,
           output_height(), output_width(), flags,
           &resize_bilinear_op));
       ASSERT_NE(nullptr, resize_bilinear_op);
@@ -629,7 +633,7 @@ class ResizeBilinearOperatorTester {
       size_t workspace_size = transient_indirection_buffer() ? 0 : SIZE_MAX;
       size_t workspace_alignment = SIZE_MAX;
       ASSERT_EQ(xnn_status_success,
-        xnn_reshape_resize_bilinear2d_nhwc_u8(
+        xnn_reshape_resize_bilinear2d_nhwc(
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
           channels(), input_pixel_stride(), output_pixel_stride(),
@@ -642,14 +646,14 @@ class ResizeBilinearOperatorTester {
         ASSERT_NE(workspace_size, 0);
         ASSERT_EQ(workspace_alignment, XNN_ALLOCATION_ALIGNMENT);
         ASSERT_EQ(xnn_status_success,
-          xnn_setup_resize_bilinear2d_nhwc_u8(
+          xnn_setup_resize_bilinear2d_nhwc(
             resize_bilinear_op,
             workspace.data(), input.data(), output.data()));
       } else {
         ASSERT_EQ(workspace_size, 0);
         ASSERT_EQ(workspace_alignment, 1);
         ASSERT_EQ(xnn_status_success,
-          xnn_setup_resize_bilinear2d_nhwc_u8(
+          xnn_setup_resize_bilinear2d_nhwc(
             resize_bilinear_op,
             /*workspace=*/nullptr, input.data(), output.data()));
       }
@@ -720,7 +724,8 @@ class ResizeBilinearOperatorTester {
       ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
       xnn_operator_t resize_bilinear_op = nullptr;
 
-      const xnn_status status = xnn_create_resize_bilinear2d_nchw_f16(
+      const xnn_status status = xnn_create_resize_bilinear2d_nchw(
+          xnn_datatype_fp16,
           output_height(), output_width(),
           (align_corners() ? XNN_FLAG_ALIGN_CORNERS : 0) | (tf_legacy_mode() ? XNN_FLAG_TENSORFLOW_LEGACY_MODE : 0),
           &resize_bilinear_op);
@@ -734,14 +739,14 @@ class ResizeBilinearOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_resize_bilinear_op(resize_bilinear_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_reshape_resize_bilinear2d_nchw_f16(
+        xnn_reshape_resize_bilinear2d_nchw(
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
           channels(), input_pixel_stride(), output_pixel_stride(),
           /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_resize_bilinear2d_nchw_f16(
+        xnn_setup_resize_bilinear2d_nchw(
           resize_bilinear_op,
           input.data(), output.data()));
 
@@ -811,7 +816,8 @@ class ResizeBilinearOperatorTester {
       xnn_operator_t resize_bilinear_op = nullptr;
 
       const xnn_status status =
-        xnn_create_resize_bilinear2d_nchw_f32(
+        xnn_create_resize_bilinear2d_nchw(
+          xnn_datatype_fp32,
           output_height(), output_width(),
           (align_corners() ? XNN_FLAG_ALIGN_CORNERS : 0) | (tf_legacy_mode() ? XNN_FLAG_TENSORFLOW_LEGACY_MODE : 0),
           &resize_bilinear_op);
@@ -824,14 +830,14 @@ class ResizeBilinearOperatorTester {
       std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_resize_bilinear_op(resize_bilinear_op, xnn_delete_operator);
 
       ASSERT_EQ(xnn_status_success,
-        xnn_reshape_resize_bilinear2d_nchw_f32(
+        xnn_reshape_resize_bilinear2d_nchw(
           resize_bilinear_op,
           batch_size(), input_height(), input_width(),
           channels(), input_pixel_stride(), output_pixel_stride(),
           /*threadpool=*/nullptr));
 
       ASSERT_EQ(xnn_status_success,
-        xnn_setup_resize_bilinear2d_nchw_f32(
+        xnn_setup_resize_bilinear2d_nchw(
           resize_bilinear_op,
           input.data(), output.data()));
 

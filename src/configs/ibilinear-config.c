@@ -9,6 +9,7 @@
 #include "xnnpack/common.h"
 #include "xnnpack/config.h"
 #include "xnnpack/ibilinear.h"
+#include "xnnpack/indirection.h"
 #include "xnnpack/init-once.h"
 #include "xnnpack/microfnptr.h"
 
@@ -45,6 +46,10 @@ static void init_f16_ibilinear_config(void) {
       f16_ibilinear_config.pixel_tile = 1;
     }
   #endif
+  f16_ibilinear_config.log2_data_element_size = XNN_LOG2_SIZEOF_HALF;
+  f16_ibilinear_config.log2_weight_element_size = XNN_LOG2_SIZEOF_HALF;
+  f16_ibilinear_config.indirection_init =
+      (xnn_indirection_init_resize_bilinear2d_hwc_fn) xnn_indirection_init_resize_bilinear2d_hwc_f16;
 }
 
 static void init_f32_ibilinear_config(void) {
@@ -74,6 +79,10 @@ static void init_f32_ibilinear_config(void) {
     f32_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_f32_ibilinear_ukernel__scalar_c2;
     f32_ibilinear_config.pixel_tile = 1;
   #endif
+  f32_ibilinear_config.log2_data_element_size = XNN_LOG2_SIZEOF_FLOAT;
+  f32_ibilinear_config.log2_weight_element_size = XNN_LOG2_SIZEOF_FLOAT;
+  f32_ibilinear_config.indirection_init =
+      (xnn_indirection_init_resize_bilinear2d_hwc_fn) xnn_indirection_init_resize_bilinear2d_hwc_f32;
 }
 
 static void init_s8_ibilinear_config(void) {
@@ -107,6 +116,10 @@ static void init_s8_ibilinear_config(void) {
     s8_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_s8_ibilinear_ukernel__scalar_c1;
     s8_ibilinear_config.pixel_tile = 1;
   #endif
+  s8_ibilinear_config.log2_data_element_size = XNN_LOG2_SIZEOF_INT8_T;
+  s8_ibilinear_config.log2_weight_element_size = XNN_LOG2_SIZEOF_INT16_T;
+  s8_ibilinear_config.indirection_init =
+      (xnn_indirection_init_resize_bilinear2d_hwc_fn) xnn_indirection_init_resize_bilinear2d_hwc_q11;
 }
 
 static void init_u8_ibilinear_config(void) {
@@ -140,6 +153,10 @@ static void init_u8_ibilinear_config(void) {
     u8_ibilinear_config.ukernel = (xnn_ibilinear_ukernel_fn) xnn_u8_ibilinear_ukernel__scalar_c1;
     u8_ibilinear_config.pixel_tile = 1;
   #endif
+  u8_ibilinear_config.log2_data_element_size = XNN_LOG2_SIZEOF_UINT8_T;
+  u8_ibilinear_config.log2_weight_element_size = XNN_LOG2_SIZEOF_INT16_T;
+  u8_ibilinear_config.indirection_init =
+      (xnn_indirection_init_resize_bilinear2d_hwc_fn) xnn_indirection_init_resize_bilinear2d_hwc_q11;
 }
 
 const struct xnn_ibilinear_config* xnn_init_f16_ibilinear_config() {
