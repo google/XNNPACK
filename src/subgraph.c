@@ -1626,8 +1626,20 @@ void xnn_subgraph_optimize_dynamic_quantization_ops(xnn_subgraph_t subgraph) {
             original_config = xnn_init_qd8_f16_qc4w_gemm_config();
             unsigned_config = xnn_init_qdu8_f16_qc4w_gemm_config();
           } else if (weights_type == xnn_weights_type_qc8w) {
-            original_config = xnn_init_qd8_f16_qc8w_gemm_config();
-            unsigned_config = xnn_init_qdu8_f16_qc8w_gemm_config();
+            switch (consumer_type) {
+              case xnn_consumer_type_batch_mat_mul:
+              case xnn_consumer_type_fully_connected:
+                original_config = xnn_init_qd8_f16_qc8w_gemm_config();
+                unsigned_config = xnn_init_qdu8_f16_qc8w_gemm_config();
+                break;
+              case xnn_consumer_type_convolution_2d:
+              case xnn_consumer_type_deconvolution:
+                original_config = xnn_init_qd8_f16_qc8w_igemm_config();
+                unsigned_config = xnn_init_qdu8_f16_qc8w_gemm_config();
+                break;
+              default:
+                XNN_UNREACHABLE;
+            }
           }
         }
         bool convert_to_qu8 = false;
