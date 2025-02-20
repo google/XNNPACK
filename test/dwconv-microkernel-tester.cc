@@ -972,7 +972,7 @@ void DWConvMicrokernelTester::Test(
   xnnpack::Buffer<xnn_float16> bias(channels());
   xnnpack::Buffer<xnn_float16, XNN_ALLOCATION_ALIGNMENT> packed_weights(
       (kernel_tile() + 1) * packed_channels());
-  xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0);
+  xnnpack::Buffer<xnn_float16> zero(channels() + XNN_EXTRA_BYTES / sizeof(xnn_float16), 0.0f);
   xnnpack::Buffer<xnn_float16> output((width() - 1) * output_stride() + channels());
   xnnpack::Buffer<float> output_ref(width() * channels());
 
@@ -984,7 +984,7 @@ void DWConvMicrokernelTester::Test(
     std::generate(bias.begin(), bias.end(),
                   [&]() { return f32dist(rng); });
 
-    std::fill(packed_weights.begin(), packed_weights.end(), 0);
+    std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
     xnn_pack_f16_dwconv_ghw_w(
         kernel_tile(), 0, 0, kernel_tile(), 1, channels(), channel_tile(),
         channel_tile(), channel_tile(),
@@ -1101,7 +1101,7 @@ void DWConvMicrokernelTester::Test(
     std::generate(bias.begin(), bias.end(),
                   [&]() { return f32dist(rng); });
 
-    std::fill(packed_weights.begin(), packed_weights.end(), 0);
+    std::fill(packed_weights.begin(), packed_weights.end(), 0.0f);
     xnn_pack_f16_dwconv_ghw_w(
         first_pass_tile(), middle_pass_tile(), last_pass_tile(), kernel_size(),
         1, channels(), channel_tile(), channel_subtile(), channel_round(),

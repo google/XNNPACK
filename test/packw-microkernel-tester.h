@@ -349,7 +349,7 @@ class PackWMicrokernelTester {
     std::fill(packed_w_ref.begin(), packed_w_ref.end(), pad_value);
 
     // Mandate zero-padding of weights to packed_k() in K dimension.
-    std::fill(padded_weights.begin(), padded_weights.end(), 0);
+    std::fill(padded_weights.begin(), padded_weights.end(), 0.0f);
     for (size_t gid = 0; gid < g(); gid++) {
       for (size_t i = 0; i < n(); i++) {
         for (size_t j = 0; j < k(); j++) {

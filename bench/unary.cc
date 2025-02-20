@@ -163,7 +163,8 @@ static void benchmark_unary_operator(benchmark::State& state,
 
   xnnpack::Buffer<In> input(batch_size + XNN_EXTRA_BYTES / sizeof(In));
   xnnpack::Buffer<Out> output(batch_size);
-  std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
+  std::generate(input.begin(), input.end(),
+                [&]() { return static_cast<In>(f32dist(rng)); });
 
   xnn_status status = xnn_initialize(nullptr /* allocator */);
   if (status != xnn_status_success) {

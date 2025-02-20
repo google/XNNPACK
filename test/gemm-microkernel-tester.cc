@@ -1316,7 +1316,7 @@ void GemmMicrokernelTester::Test(
       /* bias */ packed_n() * sizeof(float));
 
   xnnpack::Buffer<xnn_float16> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * nr() + (n() - 1) % nr() + 1);
-  xnnpack::Buffer<float> c_ref(m() * n(), 0);
+  xnnpack::Buffer<float> c_ref(m() * n());
 
   for (size_t iteration = 0; iteration < kIterations; iteration++) {
     std::generate(input.begin(), input.end(), std::ref(f32rng));
@@ -1377,7 +1377,7 @@ void GemmMicrokernelTester::Test(
       (void*) start);
 
     // Compute 32-bit results and output quantization arguments.
-    std::fill(c_ref.begin(), c_ref.end(), 0);
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
         float kfsum = 0.0;
@@ -1473,7 +1473,7 @@ void GemmMicrokernelTester::Test(
       packed_n() * (sizeof(int32_t) + sizeof(float) * 2));
   xnnpack::Buffer<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * nr() + (n() - 1) % nr() + 1);
   xnnpack::Buffer<int32_t> acc(m() * n());
-  xnnpack::Buffer<float> c_ref(m() * n(), 0);
+  xnnpack::Buffer<float> c_ref(m() * n());
 
   for (size_t iteration = 0; iteration < kIterations; iteration++) {
     std::generate(input.begin(), input.end(), std::ref(f32rng));
@@ -1526,7 +1526,7 @@ void GemmMicrokernelTester::Test(
       (void*) ((uintptr_t) packed_w.data() + nr() * (ks() * packed_k_bytes + 2 * sizeof(float))));
 
     // Compute 32-bit results and output quantization arguments.
-    std::fill(c_ref.begin(), c_ref.end(), 0);
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
         int32_t ksum = 0;
@@ -1625,7 +1625,7 @@ void GemmMicrokernelTester::Test(
       /* bias */ packed_n() * sizeof(float));
 
   xnnpack::Buffer<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * nr() + (n() - 1) % nr() + 1);
-  xnnpack::Buffer<float> c_ref(m() * n(), 0);
+  xnnpack::Buffer<float> c_ref(m() * n());
 
   for (size_t iteration = 0; iteration < 1 /* kIterations */; iteration++) {
     std::generate(input.begin(), input.end(), std::ref(f32rng));
@@ -1685,7 +1685,7 @@ void GemmMicrokernelTester::Test(
       (void*) start);
 
     // Compute 32-bit results and output quantization arguments.
-    std::fill(c_ref.begin(), c_ref.end(), 0);
+    std::fill(c_ref.begin(), c_ref.end(), 0.0f);
     for (size_t m_index = 0; m_index < m(); m_index++) {
       for (size_t n_index = 0; n_index < n(); n_index++) {
         float kfsum = 0.0;
@@ -2589,7 +2589,7 @@ void GemmMicrokernelTester::Test(
     std::generate(bias.begin(), bias.end(), [&] { return f32rng(rng); });
     std::fill(c_ref.begin(), c_ref.end(), 0.0f);
 
-    std::fill(packed_w.begin(), packed_w.end(), 0);
+    std::fill(packed_w.begin(), packed_w.end(), 0.0f);
     pack(/*g=*/1, n(), k(), nr(), kr(), sr(),
          b.data(),
          bias.data(), /*scale=*/nullptr,
@@ -2669,7 +2669,7 @@ void GemmMicrokernelTester::Test(
     std::generate(bias.begin(), bias.end(), [&] { return f32rng(rng); });
     std::fill(c_ref.begin(), c_ref.end(), 0.0f);
 
-    std::fill(packed_w.begin(), packed_w.end(), 0);
+    std::fill(packed_w.begin(), packed_w.end(), 0.0f);
     pack(/*g=*/1, n(), k(), nr(), kr(), sr(),
          reinterpret_cast<const uint16_t*>(b.data()),
          reinterpret_cast<const uint16_t*>(bias.data()), /*scale=*/nullptr,
@@ -2749,7 +2749,7 @@ void GemmMicrokernelTester::Test(
     std::generate(bias.begin(), bias.end(), f32rng);
     std::fill(c_ref.begin(), c_ref.end(), 0.0f);
 
-    std::fill(packed_w.begin(), packed_w.end(), 0);
+    std::fill(packed_w.begin(), packed_w.end(), 0.0f);
     pack(/*g=*/1, n(), k(), nr(), kr(), sr(),
          reinterpret_cast<const uint16_t*>(b.data()),
          reinterpret_cast<const uint16_t*>(bias.data()),

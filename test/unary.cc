@@ -83,7 +83,8 @@ TEST_P(UnaryTest, matches_operator_api) {
   std::generate(dims.begin(), dims.end(), [&]() { return dim_dist(rng_); });
 
   size_t size =
-      std::accumulate(dims.begin(), dims.end(), 1, std::multiplies<size_t>());
+      std::accumulate(dims.begin(), dims.end(), static_cast<size_t>(1),
+                      std::multiplies<size_t>());
   size_t channels = dims.empty() ? 1 : dims.back();
   size_t batch_size = size / channels;
 

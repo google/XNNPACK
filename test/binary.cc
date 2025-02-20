@@ -183,9 +183,8 @@ void MatchesOperatorApi(xnn_datatype datatype, xnn_binary_operator binary_op) {
       assert(false);
       break;
   }
-  std::uniform_real_distribution<double> dist(datatype_min, datatype_max);
-  randomize_buffer(datatype, rng, dist, input0);
-  randomize_buffer(datatype, rng, dist, input1);
+  randomize_buffer(datatype, rng, datatype_min, datatype_max, input0);
+  randomize_buffer(datatype, rng, datatype_min, datatype_max, input1);
 
   ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
 

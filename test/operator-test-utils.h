@@ -13,38 +13,52 @@
 
 namespace xnnpack {
 
+template <typename T, typename Buffer>
+void randomize_int_buffer(xnn_datatype datatype,
+                          xnnpack::ReplicableRandomDevice& rng, double min,
+                          double max, Buffer& buf) {
+  std::uniform_int_distribution<int> dist(static_cast<int>(min),
+                                              static_cast<int>(max));
+  const auto f = [&]() { return static_cast<T>(dist(rng)); };
+  std::generate(reinterpret_cast<T*>(buf.begin()),
+                reinterpret_cast<T*>(buf.end()), f);
+}
+
+template <typename T, typename Buffer>
+void randomize_float_buffer(xnn_datatype datatype,
+                          xnnpack::ReplicableRandomDevice& rng, double min,
+                          double max, Buffer& buf) {
+  std::uniform_real_distribution<float> dist(static_cast<float>(min),
+                                              static_cast<float>(max));
+  const auto f = [&]() { return dist(rng); };
+  std::generate(reinterpret_cast<T*>(buf.begin()),
+                reinterpret_cast<T*>(buf.end()), f);
+}
+
 // Given ann xnnpack::Buffer<char> type, initialize it with
 // the given datatype using the given RNG and distribution.
 template <typename Buffer>
 void randomize_buffer(xnn_datatype datatype,
-                      xnnpack::ReplicableRandomDevice& rng,
-                      std::uniform_real_distribution<double>& dist,
-                      Buffer& buf) {
-  const auto f = [&]() { return dist(rng); };
+                      xnnpack::ReplicableRandomDevice& rng, double min,
+                      double max, Buffer& buf) {
   switch (datatype) {
     case xnn_datatype_quint8:
-      std::generate(reinterpret_cast<uint8_t*>(buf.begin()),
-                    reinterpret_cast<uint8_t*>(buf.end()), f);
+      randomize_int_buffer<uint8_t>(datatype, rng, min, max, buf);
       break;
     case xnn_datatype_qint8:
-      std::generate(reinterpret_cast<int8_t*>(buf.begin()),
-                    reinterpret_cast<int8_t*>(buf.end()), f);
+      randomize_int_buffer<int8_t>(datatype, rng, min, max, buf);
       break;
     case xnn_datatype_int32:
-      std::generate(reinterpret_cast<int32_t*>(buf.begin()),
-                    reinterpret_cast<int32_t*>(buf.end()), f);
+      randomize_int_buffer<int32_t>(datatype, rng, min, max, buf);
       break;
     case xnn_datatype_fp16:
-      std::generate(reinterpret_cast<xnn_float16*>(buf.begin()),
-                    reinterpret_cast<xnn_float16*>(buf.end()), f);
+      randomize_float_buffer<xnn_float16>(datatype, rng, min, max, buf);
       break;
     case xnn_datatype_bf16:
-      std::generate(reinterpret_cast<xnn_bfloat16*>(buf.begin()),
-                    reinterpret_cast<xnn_bfloat16*>(buf.end()), f);
+      randomize_float_buffer<xnn_bfloat16>(datatype, rng, min, max, buf);
       break;
     case xnn_datatype_fp32:
-      std::generate(reinterpret_cast<float*>(buf.begin()),
-                    reinterpret_cast<float*>(buf.end()), f);
+      randomize_float_buffer<float>(datatype, rng, min, max, buf);
       break;
     default:
       assert(false);
