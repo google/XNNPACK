@@ -101,6 +101,11 @@ XNN_DWCONV_UNIPASS(0, xnn_qs8_dwconv_minmax_fp32_ukernel_25p2c__wasm_fmagic, 2, 
 XNN_DWCONV_UNIPASS(0, xnn_qs8_dwconv_minmax_fp32_ukernel_25p4c__wasm_fmagic, 4, false, 4, 25, int8_t, void, union xnn_qs8_conv_minmax_params, xnn_init_qs8_conv_minmax_fp32_scalar_params)
 #endif  // XNN_ARCH_WASM || XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
+#if XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+XNN_DWCONV_UNIPASS(0, xnn_qs8_dwconv_minmax_fp32_ukernel_9p8vc__rvv, 8, false, 8 * (xnn_init_hardware_config()->vlenb / sizeof(int32_t)), 9, int8_t, void, union xnn_qs8_conv_minmax_params, xnn_init_qs8_conv_minmax_fp32_scalar_params)
+XNN_DWCONV_UNIPASS(0, xnn_qs8_dwconv_minmax_fp32_ukernel_25p8vc__rvv, 8, false, 8 * (xnn_init_hardware_config()->vlenb / sizeof(int32_t)), 25, int8_t, void, union xnn_qs8_conv_minmax_params, xnn_init_qs8_conv_minmax_fp32_scalar_params)
+#endif // XNN_ARCH_RISCV && XNN_ENABLE_RISCV_VECTOR
+
 XNN_DWCONV_UNIPASS(0, xnn_qs8_dwconv_minmax_fp32_ukernel_9p1c__scalar_fmagic, 1, false, 1, 9, int8_t, void, union xnn_qs8_conv_minmax_params, xnn_init_qs8_conv_minmax_fp32_scalar_params)
 XNN_DWCONV_UNIPASS(0, xnn_qs8_dwconv_minmax_fp32_ukernel_9p1c__scalar_imagic, 1, false, 1, 9, int8_t, void, union xnn_qs8_conv_minmax_params, xnn_init_qs8_conv_minmax_fp32_scalar_params)
 XNN_DWCONV_UNIPASS(0, xnn_qs8_dwconv_minmax_fp32_ukernel_9p1c__scalar_lrintf, 1, false, 1, 9, int8_t, void, union xnn_qs8_conv_minmax_params, xnn_init_qs8_conv_minmax_fp32_scalar_params)
