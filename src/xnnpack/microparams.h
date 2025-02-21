@@ -146,6 +146,19 @@ struct xnn_u8_minmax_params {
   } scalar;
 };
 
+// VPReLU: used by VPRELU microkernels.
+
+union xnn_qs8_vprelu_scalar_params {
+  struct {
+    int32_t input_zero_point;
+    int32_t slope_zero_point;
+    int32_t output_zero_point;
+    float positive_multiplier;
+    float negative_multiplier;
+    int32_t output_min;
+    int32_t output_max;
+  } scalar;
+};
 
 // Conv w. Min+Max: used by quantized GEMM/IGEMM/DWCONV microkernels with MINMAX activation.
 struct xnn_qd8_quantization_params {
