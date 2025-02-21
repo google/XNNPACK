@@ -3344,6 +3344,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*mr=*/1, /*nr=*/4 * xnn_init_hardware_config()->vlenb / sizeof(int32_t), /*kr=*/1, /*sr=*/1,
         /*is_igemm=*/true,
         /*unsigned_inputs=*/false,
+        /*planes=*/1,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4v__rvv,
                       xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
@@ -3365,6 +3366,7 @@ INSTANTIATE_TEST_SUITE_P(
         /*mr=*/4, /*nr=*/4 * xnn_init_hardware_config()->vlenb / sizeof(int32_t), /*kr=*/1, /*sr=*/1,
         /*is_igemm=*/true,
         /*unsigned_inputs=*/false,
+        /*planes=*/1,
         [](GemmMicrokernelTester& tester) {
           tester.Test(xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_4x4v__rvv,
                       xnn_init_qs8_qc8w_conv_minmax_fp32_scalar_params,
