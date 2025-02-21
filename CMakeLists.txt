@@ -1312,6 +1312,27 @@ IF(XNNPACK_BUILD_TESTS)
     TARGET_LINK_LIBRARIES(packq-microkernel-tester PRIVATE kleidiai)
   ENDIF()
 
+  SET(MICROKERNEL_ARGMAXPOOL_UNIT_TESTS
+      f32-argmaxpool-unipass
+      f32-argmaxpool-multipass)
+  FOREACH(TEST ${MICROKERNEL_ARGMAXPOOL_UNIT_TESTS})
+    ADD_EXECUTABLE(${TEST}-test test/${TEST}.cc)
+    TARGET_INCLUDE_DIRECTORIES(${TEST}-test PRIVATE include src test)
+    TARGET_LINK_LIBRARIES(${TEST}-test PRIVATE
+        GTest::gmock
+        GTest::gtest
+        GTest::gtest_main
+        hardware-config
+        logging
+        microkernels-all
+        microparams-init
+        next-prime
+        pthreadpool
+    )
+    ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
+    SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
+  ENDFOREACH()
+
   IF(XNNPACK_BUILD_LIBRARY)
     # ---[ Build size tests
     ADD_EXECUTABLE(subgraph-size-test test/subgraph-size.c)
@@ -1474,7 +1495,6 @@ IF(XNNPACK_BUILD_TESTS)
       f16-spmm-minmax
       f16-vcmul
       f16-vmulcaddc-minmax
-      f32-argmaxpool
       f32-conv-hwc
       f32-conv-hwc2chw
       f32-ibilinear
@@ -1539,8 +1559,8 @@ IF(XNNPACK_BUILD_TESTS)
   SHARD_TEST(avgpool-minmax-test 10)
   SHARD_TEST(maxpool-minmax-test 10)
   IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
-    SHARD_TEST(f32-argmaxpool-test 10)
-    SHARD_TEST(f32-rdsum-test 10)
+    SHARD_TEST(f32-argmaxpool-unipass-test 10)
+    SHARD_TEST(f32-argmaxpool-multipass-test 10)
   ENDIF()
 
   SET(MICROKERNEL_DWCONV_UNIT_TESTS
