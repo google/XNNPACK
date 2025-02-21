@@ -671,3 +671,13 @@ xnnpack_benchmark(
     tags = xnnpack_slow_benchmark_tags() + ["nowin32"],
     deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
 )
+
+xnnpack_benchmark(
+    name = "softmax_bench",
+    srcs = [
+        "softmax.cc",
+    ],
+    copts = xnnpack_optional_tflite_copts(),
+    tags = ["nowin32"],
+    deps = OPERATOR_BENCHMARK_DEPS + xnnpack_optional_tflite_deps(),
+)
