@@ -165,7 +165,7 @@ static void init_f32_dwconv_config(void) {
         f32_dwconv_config[3].middle_tile = 8;
         f32_dwconv_config[3].last_tile = 9;
       #else
-        f32_dwconv_config[3].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_25p8c__neon_acc2;
+        f32_dwconv_config[3].minmax.unipass = (xnn_dwconv_unipass_ukernel_fn) xnn_f32_dwconv_minmax_ukernel_25p8c__neon;
         f32_dwconv_config[3].init.f32 = xnn_init_f32_minmax_scalar_params;
         f32_dwconv_config[3].channel_tile = 8;
         f32_dwconv_config[3].channel_subtile = 8;
