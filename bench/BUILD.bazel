@@ -665,6 +665,12 @@ xnnpack_benchmark(
 )
 
 xnnpack_benchmark(
+    name = "resize_bilinear_nhwc_bench",
+    srcs = ["resize-bilinear-nhwc.cc"],
+    deps = OPERATOR_BENCHMARK_DEPS,
+)
+
+xnnpack_benchmark(
     name = "scaled_dot_product_attention_bench",
     srcs = ["scaled-dot-product-attention.cc"],
     copts = xnnpack_optional_tflite_copts(),
