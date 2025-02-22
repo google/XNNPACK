@@ -14,24 +14,23 @@
 #include "dwconv.h"
 #include "utils.h"
 #include "xnnpack.h"
+#include "xnnpack/buffer.h"
 #include "xnnpack/common.h"
 #include "xnnpack/dwconv.h"
+#include "xnnpack/hardware-config.h"
 #include "xnnpack/indirection.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microkernel-utils.h"
 #include "xnnpack/microparams-init.h"
 #include "xnnpack/pack.h"
-#include "xnnpack/buffer.h"
 #include <benchmark/benchmark.h>
 
-static void f16_dwconv(benchmark::State& state,
-  xnn_f16_dwconv_minmax_unipass_ukernel_fn dwconv,
-  xnn_init_f16_minmax_params_fn init_params,
-  uint32_t channel_tile, uint32_t primary_tile,
-  benchmark::utils::IsaCheckFunction isa_check = nullptr)
-{
-  if (isa_check != nullptr && !isa_check(state)) {
+static void bench_impl(uint64_t arch_flags, benchmark::State& state,
+                       xnn_f16_dwconv_minmax_unipass_ukernel_fn dwconv,
+                       xnn_init_f16_minmax_params_fn init_params,
+                       uint32_t channel_tile, uint32_t primary_tile) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -148,18 +147,13 @@ static void f16_dwconv(benchmark::State& state,
     benchmark::Counter::kIsRate);
 }
 
-static void f16_dwconv(benchmark::State& state,
-  xnn_f16_dwconv_minmax_multipass_ukernel_fn dwconv,
-  xnn_init_f16_minmax_params_fn init_params,
-  uint32_t first_pass_tile,
-  uint32_t middle_pass_tile,
-  uint32_t last_pass_tile,
-  uint32_t channel_tile,
-  uint32_t channel_subtile,
-  uint32_t channel_round,
-  benchmark::utils::IsaCheckFunction isa_check = nullptr)
-{
-  if (isa_check != nullptr && !isa_check(state)) {
+static void bench_impl(uint64_t arch_flags, benchmark::State& state,
+                       xnn_f16_dwconv_minmax_multipass_ukernel_fn dwconv,
+                       xnn_init_f16_minmax_params_fn init_params,
+                       uint32_t first_pass_tile, uint32_t middle_pass_tile,
+                       uint32_t last_pass_tile, uint32_t channel_tile,
+                       uint32_t channel_subtile, uint32_t channel_round) {
+  if (!benchmark::utils::CheckArchFlags(state, arch_flags)) {
     return;
   }
 
@@ -287,494 +281,28 @@ static void f16_dwconv(benchmark::State& state,
     benchmark::Counter::kIsRate);
 }
 
-#if XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-  static void f16_dwconv_4p8c__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(state,
-      xnn_f16_dwconv_minmax_ukernel_4p8c__neonfp16arith_acc2,
-      xnn_init_f16_minmax_scalar_params,
-      8, 4, benchmark::utils::CheckNEONFP16ARITH);
-  }
+#define XNN_DWCONV_UNIPASS(arch_flags, ukernel, c_block, is_pipelined, cr, kr, \
+                           datatype, weights_type, params_type, init_params)   \
+  static void BM_##ukernel(benchmark::State& state, const char* net) {         \
+    bench_impl(arch_flags, state, ukernel, init_params, cr, kr);               \
+  }                                                                            \
+  BENCHMARK_DWCONV(BM_##ukernel);
 
-  static void f16_dwconv_4p8c__neonfp16arith(benchmark::State& state, const char* net) {
-    f16_dwconv(state,
-      xnn_f16_dwconv_minmax_ukernel_4p8c__neonfp16arith,
-      xnn_init_f16_minmax_scalar_params,
-      8, 4, benchmark::utils::CheckNEONFP16ARITH);
-  }
+#define XNN_DWCONV_MULTIPASS(                                               \
+    arch_flags, ukernel, first_pass_tile, middle_pass_tile, last_pass_tile, \
+    channel_tile, channel_subtile, channel_round, datatype, weights_type,   \
+    buffer_type, params_type, init_params)                                  \
+  static void BM_##ukernel(benchmark::State& state, const char* net) {      \
+    bench_impl(arch_flags, state, ukernel, init_params, first_pass_tile,    \
+               middle_pass_tile, last_pass_tile, channel_tile,              \
+               channel_subtile, channel_round);                             \
+  }                                                                         \
+  BENCHMARK_DWCONV(BM_##ukernel);
 
-  static void f16_dwconv_9p8c__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(state,
-      xnn_f16_dwconv_minmax_ukernel_9p8c__neonfp16arith_acc2,
-      xnn_init_f16_minmax_scalar_params,
-      8, 9, benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  static void f16_dwconv_9p8c__neonfp16arith(benchmark::State& state, const char* net) {
-    f16_dwconv(state,
-      xnn_f16_dwconv_minmax_ukernel_9p8c__neonfp16arith,
-      xnn_init_f16_minmax_scalar_params,
-      8, 9, benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  static void f16_dwconv_25p8c__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(state,
-      xnn_f16_dwconv_minmax_ukernel_25p8c__neonfp16arith_acc2,
-      xnn_init_f16_minmax_scalar_params,
-      8, 25, benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  static void f16_dwconv_25p8c__neonfp16arith(benchmark::State& state, const char* net) {
-    f16_dwconv(state,
-      xnn_f16_dwconv_minmax_ukernel_25p8c__neonfp16arith,
-      xnn_init_f16_minmax_scalar_params,
-      8, 25, benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  static void f16_dwconv_4p16c__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(state,
-      xnn_f16_dwconv_minmax_ukernel_4p16c__neonfp16arith_acc2,
-      xnn_init_f16_minmax_scalar_params,
-      16, 4, benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  static void f16_dwconv_4p16c__neonfp16arith(benchmark::State& state, const char* net) {
-    f16_dwconv(state,
-      xnn_f16_dwconv_minmax_ukernel_4p16c__neonfp16arith,
-      xnn_init_f16_minmax_scalar_params,
-      16, 4, benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  static void f16_dwconv_9p16c__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(state,
-      xnn_f16_dwconv_minmax_ukernel_9p16c__neonfp16arith_acc2,
-      xnn_init_f16_minmax_scalar_params,
-      16, 9, benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  static void f16_dwconv_9p16c__neonfp16arith(benchmark::State& state, const char* net) {
-    f16_dwconv(state,
-      xnn_f16_dwconv_minmax_ukernel_9p16c__neonfp16arith,
-      xnn_init_f16_minmax_scalar_params,
-      16, 9, benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  static void f16_dwconv_25p16c__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(state,
-      xnn_f16_dwconv_minmax_ukernel_25p16c__neonfp16arith_acc2,
-      xnn_init_f16_minmax_scalar_params,
-      16, 25, benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  static void f16_dwconv_25p16c__neonfp16arith(benchmark::State& state, const char* net) {
-    f16_dwconv(state,
-      xnn_f16_dwconv_minmax_ukernel_25p16c__neonfp16arith,
-      xnn_init_f16_minmax_scalar_params,
-      16, 25, benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  static void f16_dwconv_4p32c__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(state,
-      xnn_f16_dwconv_minmax_ukernel_4p32c__neonfp16arith_acc2,
-      xnn_init_f16_minmax_scalar_params,
-      32, 4, benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  static void f16_dwconv_4p32c__neonfp16arith(benchmark::State& state, const char* net) {
-    f16_dwconv(state,
-      xnn_f16_dwconv_minmax_ukernel_4p32c__neonfp16arith,
-      xnn_init_f16_minmax_scalar_params,
-      32, 4, benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  static void f16_dwconv_9p32c__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(state,
-      xnn_f16_dwconv_minmax_ukernel_9p32c__neonfp16arith_acc2,
-      xnn_init_f16_minmax_scalar_params,
-      32, 9, benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  static void f16_dwconv_9p32c__neonfp16arith(benchmark::State& state, const char* net) {
-    f16_dwconv(state,
-      xnn_f16_dwconv_minmax_ukernel_9p32c__neonfp16arith,
-      xnn_init_f16_minmax_scalar_params,
-      32, 9, benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  static void f16_dwconv_25p32c__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(state,
-      xnn_f16_dwconv_minmax_ukernel_25p32c__neonfp16arith_acc2,
-      xnn_init_f16_minmax_scalar_params,
-      32, 25, benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  static void f16_dwconv_25p32c__neonfp16arith(benchmark::State& state, const char* net) {
-    f16_dwconv(state,
-      xnn_f16_dwconv_minmax_ukernel_25p32c__neonfp16arith,
-      xnn_init_f16_minmax_scalar_params,
-      32, 25, benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  static void f16_dwconv_5f5m5l8c8s4r__neonfp16arith(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_5f5m5l8c8s4r__neonfp16arith, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/5, /*middle_pass_tile=*/5, /*last_pass_tile=*/5,
-      /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_dwconv_5f5m5l8c8s4r__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_5f5m5l8c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/5, /*middle_pass_tile=*/5, /*last_pass_tile=*/5,
-      /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_dwconv_5f5m5l16c8s4r__neonfp16arith(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_5f5m5l16c8s4r__neonfp16arith, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/5, /*middle_pass_tile=*/5, /*last_pass_tile=*/5,
-      /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_dwconv_5f5m5l16c8s4r__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_5f5m5l16c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/5, /*middle_pass_tile=*/5, /*last_pass_tile=*/5,
-      /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_dwconv_5f5m5l32c8s4r__neonfp16arith(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_5f5m5l32c8s4r__neonfp16arith, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/5, /*middle_pass_tile=*/5, /*last_pass_tile=*/5,
-      /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_dwconv_5f5m5l32c8s4r__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_5f5m5l32c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/5, /*middle_pass_tile=*/5, /*last_pass_tile=*/5,
-      /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  static void f16_dwconv_6f6m7l8c8s4r__neonfp16arith(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_6f6m7l8c8s4r__neonfp16arith, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/6, /*middle_pass_tile=*/6, /*last_pass_tile=*/7,
-      /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_dwconv_6f6m7l8c8s4r__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_6f6m7l8c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/6, /*middle_pass_tile=*/6, /*last_pass_tile=*/7,
-      /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_dwconv_6f6m7l16c8s4r__neonfp16arith(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_6f6m7l16c8s4r__neonfp16arith, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/6, /*middle_pass_tile=*/6, /*last_pass_tile=*/7,
-      /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_dwconv_6f6m7l16c8s4r__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_6f6m7l16c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/6, /*middle_pass_tile=*/6, /*last_pass_tile=*/7,
-      /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_dwconv_6f6m7l32c8s4r__neonfp16arith(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_6f6m7l32c8s4r__neonfp16arith, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/6, /*middle_pass_tile=*/6, /*last_pass_tile=*/7,
-      /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_dwconv_6f6m7l32c8s4r__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_6f6m7l32c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/6, /*middle_pass_tile=*/6, /*last_pass_tile=*/7,
-      /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  static void f16_dwconv_8f8m9l8c8s4r__neonfp16arith(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_8f8m9l8c8s4r__neonfp16arith, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/8, /*middle_pass_tile=*/8, /*last_pass_tile=*/9,
-      /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_dwconv_8f8m9l8c8s4r__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_8f8m9l8c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/8, /*middle_pass_tile=*/8, /*last_pass_tile=*/9,
-      /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_dwconv_8f8m9l16c8s4r__neonfp16arith(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_8f8m9l16c8s4r__neonfp16arith, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/8, /*middle_pass_tile=*/8, /*last_pass_tile=*/9,
-      /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_dwconv_8f8m9l16c8s4r__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_8f8m9l16c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/8, /*middle_pass_tile=*/8, /*last_pass_tile=*/9,
-      /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_dwconv_8f8m9l32c8s4r__neonfp16arith(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_8f8m9l32c8s4r__neonfp16arith, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/8, /*middle_pass_tile=*/8, /*last_pass_tile=*/9,
-      /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
-  }
-  static void f16_dwconv_8f8m9l32c8s4r__neonfp16arith_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_8f8m9l32c8s4r__neonfp16arith_acc2, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/8, /*middle_pass_tile=*/8, /*last_pass_tile=*/9,
-      /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckNEONFP16ARITH);
-  }
-
-  BENCHMARK_DWCONV(f16_dwconv_4p8c__neonfp16arith_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_4p8c__neonfp16arith)
-  BENCHMARK_DWCONV(f16_dwconv_9p8c__neonfp16arith_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_9p8c__neonfp16arith)
-  BENCHMARK_DWCONV(f16_dwconv_25p8c__neonfp16arith_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_25p8c__neonfp16arith)
-  BENCHMARK_DWCONV(f16_dwconv_4p16c__neonfp16arith_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_4p16c__neonfp16arith)
-  BENCHMARK_DWCONV(f16_dwconv_9p16c__neonfp16arith_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_9p16c__neonfp16arith)
-  BENCHMARK_DWCONV(f16_dwconv_25p16c__neonfp16arith_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_25p16c__neonfp16arith)
-  BENCHMARK_DWCONV(f16_dwconv_4p32c__neonfp16arith_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_4p32c__neonfp16arith)
-  BENCHMARK_DWCONV(f16_dwconv_9p32c__neonfp16arith_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_9p32c__neonfp16arith)
-  BENCHMARK_DWCONV(f16_dwconv_25p32c__neonfp16arith_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_25p32c__neonfp16arith)
-
-  BENCHMARK_DWCONV(f16_dwconv_5f5m5l8c8s4r__neonfp16arith)
-  BENCHMARK_DWCONV(f16_dwconv_5f5m5l8c8s4r__neonfp16arith_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_5f5m5l16c8s4r__neonfp16arith)
-  BENCHMARK_DWCONV(f16_dwconv_5f5m5l16c8s4r__neonfp16arith_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_5f5m5l32c8s4r__neonfp16arith)
-  BENCHMARK_DWCONV(f16_dwconv_5f5m5l32c8s4r__neonfp16arith_acc2)
-
-  BENCHMARK_DWCONV(f16_dwconv_6f6m7l8c8s4r__neonfp16arith)
-  BENCHMARK_DWCONV(f16_dwconv_6f6m7l8c8s4r__neonfp16arith_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_6f6m7l16c8s4r__neonfp16arith)
-  BENCHMARK_DWCONV(f16_dwconv_6f6m7l16c8s4r__neonfp16arith_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_6f6m7l32c8s4r__neonfp16arith)
-  BENCHMARK_DWCONV(f16_dwconv_6f6m7l32c8s4r__neonfp16arith_acc2)
-
-  BENCHMARK_DWCONV(f16_dwconv_8f8m9l8c8s4r__neonfp16arith)
-  BENCHMARK_DWCONV(f16_dwconv_8f8m9l8c8s4r__neonfp16arith_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_8f8m9l16c8s4r__neonfp16arith)
-  BENCHMARK_DWCONV(f16_dwconv_8f8m9l16c8s4r__neonfp16arith_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_8f8m9l32c8s4r__neonfp16arith)
-  BENCHMARK_DWCONV(f16_dwconv_8f8m9l32c8s4r__neonfp16arith_acc2)
-#endif  // XNN_ENABLE_ARM_FP16_VECTOR && (XNN_ARCH_ARM || XNN_ARCH_ARM64)
-
-
-#if XNN_ARCH_X86 || XNN_ARCH_X86_64
-  static void f16_dwconv_25p8c__fma3(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_25p8c__fma3, xnn_init_f16_minmax_scalar_params,
-      /*channel_tile=*/8, /*primary_tile=*/25, /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_25p8c__fma3_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_25p8c__fma3_acc2, xnn_init_f16_minmax_scalar_params,
-      /*channel_tile=*/8, /*primary_tile=*/25, /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_25p16c__fma3(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_25p16c__fma3, xnn_init_f16_minmax_scalar_params,
-      /*channel_tile=*/16, /*primary_tile=*/25, /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_25p16c__fma3_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_25p16c__fma3_acc2, xnn_init_f16_minmax_scalar_params,
-      /*channel_tile=*/16, /*primary_tile=*/25, /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_25p32c__fma3(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_25p32c__fma3, xnn_init_f16_minmax_scalar_params,
-      /*channel_tile=*/32, /*primary_tile=*/25, /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_25p32c__fma3_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_25p32c__fma3_acc2, xnn_init_f16_minmax_scalar_params,
-      /*channel_tile=*/32, /*primary_tile=*/25, /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-
-  static void f16_dwconv_5f5m5l8c8s4r__fma3(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_5f5m5l8c8s4r__fma3, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/5, /*middle_pass_tile=*/5, /*last_pass_tile=*/5,
-      /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_5f5m5l8c8s4r__fma3_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_5f5m5l8c8s4r__fma3_acc2, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/5, /*middle_pass_tile=*/5, /*last_pass_tile=*/5,
-      /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_5f5m5l16c8s4r__fma3(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_5f5m5l16c8s4r__fma3, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/5, /*middle_pass_tile=*/5, /*last_pass_tile=*/5,
-      /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_5f5m5l16c8s4r__fma3_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_5f5m5l16c8s4r__fma3_acc2, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/5, /*middle_pass_tile=*/5, /*last_pass_tile=*/5,
-      /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_5f5m5l32c8s4r__fma3(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_5f5m5l32c8s4r__fma3, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/5, /*middle_pass_tile=*/5, /*last_pass_tile=*/5,
-      /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_5f5m5l32c8s4r__fma3_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_5f5m5l32c8s4r__fma3_acc2, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/5, /*middle_pass_tile=*/5, /*last_pass_tile=*/5,
-      /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-
-  static void f16_dwconv_6f6m7l8c8s4r__fma3(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_6f6m7l8c8s4r__fma3, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/6, /*middle_pass_tile=*/6, /*last_pass_tile=*/7,
-      /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_6f6m7l8c8s4r__fma3_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_6f6m7l8c8s4r__fma3_acc2, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/6, /*middle_pass_tile=*/6, /*last_pass_tile=*/7,
-      /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_6f6m7l16c8s4r__fma3(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_6f6m7l16c8s4r__fma3, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/6, /*middle_pass_tile=*/6, /*last_pass_tile=*/7,
-      /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_6f6m7l16c8s4r__fma3_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_6f6m7l16c8s4r__fma3_acc2, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/6, /*middle_pass_tile=*/6, /*last_pass_tile=*/7,
-      /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_6f6m7l32c8s4r__fma3(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_6f6m7l32c8s4r__fma3, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/6, /*middle_pass_tile=*/6, /*last_pass_tile=*/7,
-      /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_6f6m7l32c8s4r__fma3_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_6f6m7l32c8s4r__fma3_acc2, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/6, /*middle_pass_tile=*/6, /*last_pass_tile=*/7,
-      /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-
-  static void f16_dwconv_8f8m9l8c8s4r__fma3(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_8f8m9l8c8s4r__fma3, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/8, /*middle_pass_tile=*/8, /*last_pass_tile=*/9,
-      /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_8f8m9l8c8s4r__fma3_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_8f8m9l8c8s4r__fma3_acc2, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/8, /*middle_pass_tile=*/8, /*last_pass_tile=*/9,
-      /*channel_tile=*/8, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_8f8m9l16c8s4r__fma3(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_8f8m9l16c8s4r__fma3, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/8, /*middle_pass_tile=*/8, /*last_pass_tile=*/9,
-      /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_8f8m9l16c8s4r__fma3_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_8f8m9l16c8s4r__fma3_acc2, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/8, /*middle_pass_tile=*/8, /*last_pass_tile=*/9,
-      /*channel_tile=*/16, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_8f8m9l32c8s4r__fma3(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_8f8m9l32c8s4r__fma3, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/8, /*middle_pass_tile=*/8, /*last_pass_tile=*/9,
-      /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-  static void f16_dwconv_8f8m9l32c8s4r__fma3_acc2(benchmark::State& state, const char* net) {
-    f16_dwconv(
-      state, xnn_f16_dwconv_minmax_ukernel_8f8m9l32c8s4r__fma3_acc2, xnn_init_f16_minmax_scalar_params,
-      /*first_pass_tile=*/8, /*middle_pass_tile=*/8, /*last_pass_tile=*/9,
-      /*channel_tile=*/32, /*channel_subtile=*/8, /*channel_round=*/4,
-      /*isa_check=*/benchmark::utils::CheckFMA3);
-  }
-
-  BENCHMARK_DWCONV(f16_dwconv_25p8c__fma3)
-  BENCHMARK_DWCONV(f16_dwconv_25p8c__fma3_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_25p16c__fma3)
-  BENCHMARK_DWCONV(f16_dwconv_25p16c__fma3_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_25p32c__fma3)
-  BENCHMARK_DWCONV(f16_dwconv_25p32c__fma3_acc2)
-
-  BENCHMARK_DWCONV(f16_dwconv_5f5m5l8c8s4r__fma3)
-  BENCHMARK_DWCONV(f16_dwconv_5f5m5l8c8s4r__fma3_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_5f5m5l16c8s4r__fma3)
-  BENCHMARK_DWCONV(f16_dwconv_5f5m5l16c8s4r__fma3_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_5f5m5l32c8s4r__fma3)
-  BENCHMARK_DWCONV(f16_dwconv_5f5m5l32c8s4r__fma3_acc2)
-
-  BENCHMARK_DWCONV(f16_dwconv_6f6m7l8c8s4r__fma3)
-  BENCHMARK_DWCONV(f16_dwconv_6f6m7l8c8s4r__fma3_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_6f6m7l16c8s4r__fma3)
-  BENCHMARK_DWCONV(f16_dwconv_6f6m7l16c8s4r__fma3_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_6f6m7l32c8s4r__fma3)
-  BENCHMARK_DWCONV(f16_dwconv_6f6m7l32c8s4r__fma3_acc2)
-
-  BENCHMARK_DWCONV(f16_dwconv_8f8m9l8c8s4r__fma3)
-  BENCHMARK_DWCONV(f16_dwconv_8f8m9l8c8s4r__fma3_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_8f8m9l16c8s4r__fma3)
-  BENCHMARK_DWCONV(f16_dwconv_8f8m9l16c8s4r__fma3_acc2)
-  BENCHMARK_DWCONV(f16_dwconv_8f8m9l32c8s4r__fma3)
-  BENCHMARK_DWCONV(f16_dwconv_8f8m9l32c8s4r__fma3_acc2)
-
-#endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64
+// #include "f16-dwconv/f16-dwconv-unipass.h"
+// #include "f16-dwconv/f16-dwconv-multipass.h"
+#include "f16-dwconv/f16-dwconv-minmax-multipass.h"
+#include "f16-dwconv/f16-dwconv-minmax-unipass.h"
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();
