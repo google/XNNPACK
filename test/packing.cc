@@ -4214,7 +4214,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_GHW_W, one_middle_pass_channel_subtile_rounded) {
   // c rounded to channel_subtile is 8, so we will have 2 channel_tile loops in first and middle pass.
 
   std::vector<int32_t> b(c);
-  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1, 2, 3, 4, 5, 6]
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1, 2, 3, 4, 5, 6]
   std::vector<int8_t> k(c * h * w);  // k = [7, 8, // first 2x2 kernel
                                     //      9, 10,
                                     //      11, 12, // second 2x2 kernel
@@ -4429,7 +4429,7 @@ TEST(PACK_QS8_MULTIPASS_DWCONV_HWG_W, one_middle_pass_tile) {
   const size_t cr = 2;
 
   std::vector<int32_t> b(c);
-  std::iota(b.begin(), b.end(), 0.0f);  // b = [0, 1]
+  std::iota(b.begin(), b.end(), 0);  // b = [0, 1]
   std::vector<int8_t> k(c * h * w);  // k = [2, 3,
                                     //      4, 5,
                                     //      6, 7,

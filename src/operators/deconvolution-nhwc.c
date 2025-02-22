@@ -1047,7 +1047,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_qdu8_f32_qc8w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* deconvolution_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f32_qc8w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f32_qc8w_igemm_config();
   return create_deconvolution2d_nhwc_qx8_f32_qc8w(output_padding_top, output_padding_right,
                                                   output_padding_bottom, output_padding_left,
                                                   kernel_height, kernel_width,

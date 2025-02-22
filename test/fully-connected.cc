@@ -1416,9 +1416,12 @@ TEST_F(FullyConnectedTestBF16F32, matches_operator_api) {
   // }); std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng);
   // });
   int counter = 0;
-  std::generate(input.begin(), input.end(), [&]() { return counter++ % 10; });
-  std::generate(kernel.begin(), kernel.end(), [&]() { return counter++ % 10; });
-  std::generate(bias.begin(), bias.end(), [&]() { return counter++ % 10; });
+  std::generate(input.begin(), input.end(),
+                [&]() { return static_cast<float>(counter++ % 10); });
+  std::generate(kernel.begin(), kernel.end(),
+                [&]() { return static_cast<float>(counter++ % 10); });
+  std::generate(bias.begin(), bias.end(),
+                [&]() { return static_cast<float>(counter++ % 10); });
 
   // Call operator API.
   const xnn_status status = xnn_create_fully_connected_nc_bf16_f32(
@@ -3607,8 +3610,9 @@ TEST_F(FullyConnectedTestQD8F32QC4W,
   // 2nd inference: The dq-params should be properly allocated to handle a
   // resize without memory retrigger
   input_dims[0] += 2;
-  size_t batch_size2 = std::accumulate(input_dims.begin(), input_dims.end() - 1,
-                                       1, std::multiplies<size_t>());
+  size_t batch_size2 =
+      std::accumulate(input_dims.begin(), input_dims.end() - 1,
+                      static_cast<size_t>(1), std::multiplies<size_t>());
   xnnpack::Buffer<float> convert_input2(batch_size2 * input_channels +
                                         XNN_EXTRA_BYTES / sizeof(float));
   std::generate(convert_input2.begin(), convert_input2.end(),
@@ -3629,7 +3633,8 @@ TEST_F(FullyConnectedTestQD8F32QC4W,
   // retrigger
   input_dims[0] += 2;  // +4 total
   size_t batch_size3 = std::accumulate(input_dims.begin(), input_dims.end() - 1,
-                                       1, std::multiplies<size_t>());
+                                       static_cast<size_t>(1),
+                                       std::multiplies<size_t>());
   xnnpack::Buffer<float> convert_input3(batch_size3 * input_channels +
                                         XNN_EXTRA_BYTES / sizeof(float));
   std::generate(convert_input3.begin(), convert_input3.end(),

@@ -33,6 +33,8 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   // Scales must be positive.
   auto f32rng = std::bind(std::uniform_real_distribution<float>(0.01f, +1.0f),
                           std::ref(rng));
+  auto i8rng = std::bind(std::uniform_int_distribution<int>(-127, 127),
+                          std::ref(rng));
 
   // External inputs and outputs.
   uint32_t input_id = XNN_INVALID_VALUE_ID;
@@ -83,7 +85,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   std::generate(weights.value_scale.begin(), weights.value_scale.end(),
                 std::ref(f32rng));
   std::generate(weights.value_data.begin(), weights.value_data.end(),
-                std::ref(f32rng));
+                std::ref(i8rng));
   status = xnn_define_channelwise_quantized_tensor_value(
       subgraph, xnn_datatype_qcint8, weights.value_scale.data(),
       value_dims.size(), value_dims.size() - 2, value_dims.data(),
@@ -100,7 +102,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   std::generate(weights.query_scale.begin(), weights.query_scale.end(),
                 std::ref(f32rng));
   std::generate(weights.query_data.begin(), weights.query_data.end(),
-                std::ref(f32rng));
+                std::ref(i8rng));
   status = xnn_define_channelwise_quantized_tensor_value(
       subgraph, xnn_datatype_qcint8, weights.query_scale.data(),
       query_dims.size(), query_dims.size() - 2, query_dims.data(),
@@ -117,7 +119,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   std::generate(weights.key_scale.begin(), weights.key_scale.end(),
                 std::ref(f32rng));
   std::generate(weights.key_data.begin(), weights.key_data.end(),
-                std::ref(f32rng));
+                std::ref(i8rng));
   status = xnn_define_channelwise_quantized_tensor_value(
       subgraph, xnn_datatype_qcint8, weights.key_scale.data(), key_dims.size(),
       key_dims.size() - 2, key_dims.data(), weights.key_data.data(),
@@ -311,7 +313,7 @@ xnn_subgraph_t QD8Attention(size_t batch_size, size_t seq_len,
   std::generate(weights.post_proj_scale.begin(), weights.post_proj_scale.end(),
                 std::ref(f32rng));
   std::generate(weights.post_proj_data.begin(), weights.post_proj_data.end(),
-                std::ref(f32rng));
+                std::ref(i8rng));
   status = xnn_define_channelwise_quantized_tensor_value(
       subgraph, xnn_datatype_qcint8, weights.post_proj_scale.data(),
       post_proj_dims.size(), post_proj_dims.size() - 2, post_proj_dims.data(),

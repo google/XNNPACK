@@ -987,6 +987,53 @@
 #endif  // XNN_ENABLE_ARM_DOTPROD && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
 
 
+#if XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
+  static void qd8_f16_qc8w_gemm_minmax_ukernel_1x8__asm_aarch32_neonfp16arith_ld64_2(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x8__asm_aarch32_neonfp16arith_ld64_2,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/1, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckNEONFP16ARITH);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc8w_gemm_minmax_ukernel_1x8__asm_aarch32_neonfp16arith_ld64_2)
+
+  static void qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16arith_ld64_2(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16arith_ld64_2,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/2, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckNEONFP16ARITH);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16arith_ld64_2)
+
+  static void qd8_f16_qc8w_gemm_minmax_ukernel_3x8__asm_aarch32_neonfp16arith_ld64_2(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc8w_gemm_minmax_ukernel_3x8__asm_aarch32_neonfp16arith_ld64_2,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/3, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckNEONFP16ARITH);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc8w_gemm_minmax_ukernel_3x8__asm_aarch32_neonfp16arith_ld64_2)
+
+  static void qd8_f16_qc8w_gemm_minmax_ukernel_4x8__asm_aarch32_neonfp16arith_ld64_2(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_qd8_f16_qc8w_gemm_minmax_ukernel_4x8__asm_aarch32_neonfp16arith_ld64_2,
+      xnn_init_f16_minmax_scalar_params,
+      xnn_pack_qs8_gemm_goi_w,
+      /*mr=*/4, /*nr=*/8, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckNEONFP16ARITH);
+  }
+
+  BENCHMARK_GEMM(qd8_f16_qc8w_gemm_minmax_ukernel_4x8__asm_aarch32_neonfp16arith_ld64_2)
+#endif  // XNN_ENABLE_ARM_FP16_VECTOR && XNN_ARCH_ARM && XNN_ENABLE_ASSEMBLY
+
+
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();
 #endif

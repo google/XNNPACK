@@ -73,3 +73,14 @@ def generate_qd8_f32_qc8w_gemm_microkernels():
             f'qd8-f32-qc8w-gemm-{mr}x{nr}-minmax-asm-aarch32-neonmlal-ld{decrement}.S',
         ),
     )
+
+  for mr in range(1, 5):
+    generate.generate_gemm_microkernel(
+        M=mr,
+        N=nr,
+        isa=neonmlal_aarch32_template.NeonMlalF16(unroll),
+        output_file=os.path.join(
+            output_base,
+            f'qd8-f16-qc8w-gemm-{mr}x{nr}-minmax-asm-aarch32-neonfp16arith-ld{decrement}.S',
+        ),
+    )

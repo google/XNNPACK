@@ -277,6 +277,12 @@ ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "Clang")
   ENDIF()
 ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
   SET(XNNPACK_ENABLE_AVX512BF16 OFF)
+  IF(MSVC_VERSION LESS_EQUAL 1941)
+    # /vlen option not supported
+    SET(XNNPACK_ENABLE_AVX256SKX OFF)
+    SET(XNNPACK_ENABLE_AVX256VNNI OFF)
+    SET(XNNPACK_ENABLE_AVX256VNNIGFNI OFF)
+  ENDIF()
 ENDIF()
 OPTION(XNNPACK_ENABLE_HVX "Build XNNPACK with Hexagon HVX micro-kernels" ON)
 OPTION(XNNPACK_ENABLE_KLEIDIAI "Use KleidiAI GEMM microkernels for Arm" ON)
@@ -341,6 +347,8 @@ IF(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
   # Test files have many sections, increase the limit. See
   # https://learn.microsoft.com/en-us/cpp/build/reference/bigobj-increase-number-of-sections-in-dot-obj-file.
   ADD_COMPILE_OPTIONS("/bigobj")
+  # Our float16 datatypes have constructors in C++ and not in C, which prompts a warning in MSVC
+  ADD_COMPILE_OPTIONS("/wd4190")
 ENDIF()
 
 IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

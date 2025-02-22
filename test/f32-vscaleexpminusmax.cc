@@ -63,8 +63,6 @@ public:
     xnnpack::Buffer<float> x(elements() + XNN_EXTRA_BYTES / sizeof(float));
     xnnpack::Buffer<float> y(elements());
     xnnpack::Buffer<double> y_ref(elements());
-    // TODO(b/372792254): This is hiding a possible msan bug in the microkernels tested here.
-    std::fill(y.begin(), y.end(), 0.0f);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
       std::generate(x.begin(), x.end(), std::ref(f32rng));
 

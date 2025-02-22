@@ -885,6 +885,18 @@ typedef void (*xnn_u8_ibilinear_ukernel_fn)(
     uint8_t* output,
     size_t output_increment);
 
+// BILINEAR: Direct BILINEAR resampling
+
+typedef void (*xnn_bilinear_ukernel_fn)(
+    size_t output_width,
+    size_t output_height,
+    size_t channels,
+    const void* input,
+    size_t input_stride,
+    void* output,
+    size_t output_stride,
+    const void* params);
+
 // AVGPOOL: AVeraGe POOLing single-pass
 
 typedef void (*xnn_avgpool_unipass_ukernel_fn)(
@@ -2314,6 +2326,18 @@ typedef size_t (*xnn_packed_stride_weights_and_biases_fn)(
 typedef void (*xnn_indirection_init_resize_bilinear2d_hwc_fn)(
   size_t output_y_start,
   size_t output_y_end,
+  size_t input_pixel_stride,
+  size_t input_height,
+  size_t input_width,
+  size_t output_height,
+  size_t output_width,
+  const void* input,
+  const void** indirection_buffer,
+  void* packed_weights,
+  bool align_corners,
+  bool tensorflow_legacy);
+
+typedef void (*xnn_indirection_init_resize_bilinear2d_chw_fn)(
   size_t input_pixel_stride,
   size_t input_height,
   size_t input_width,

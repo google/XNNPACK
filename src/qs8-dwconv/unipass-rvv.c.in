@@ -1,0 +1,114 @@
+// Copyright 2025 Microchip
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert CHANNEL_TILE in ["m4", "m8"]
+$LMUL = int(CHANNEL_TILE[1])
+$LMUL2 = LMUL>>1
+$LMUL4 = LMUL>>2
+$assert KERNEL_TILE >= 2
+$assert REQUANTIZATION in ["FP32"]
+$assert DATATYPE in ["QC8", "QS8", "QU8"]
+#include <assert.h>
+#include <riscv_vector.h>
+#include "xnnpack/dwconv.h"
+
+$DATATYPE_SPEC = {"QS8": "qs8", "QC8": "qs8_qc8w", "QU8": "qu8"}[DATATYPE]
+$PARAMS_STRUCT = REQUANTIZATION.lower() + "_scalar"
+$PARAMS_TYPE = "union xnn_qs8_qc8w_conv_minmax_params" if DATATYPE == "QC8" else "union xnn_%s_conv_minmax_params" % DATATYPE.lower()
+$XINT8_T = "uint8_t" if DATATYPE == "QU8" else "int8_t"
+
+void xnn_${DATATYPE_SPEC}_dwconv_minmax_${REQUANTIZATION.lower()}_ukernel_${KERNEL_TILE}p${LMUL}vc__rvv(
+    size_t channels,
+    size_t output_width,
+    const ${XINT8_T}** input,
+    const void* weights,
+    ${XINT8_T}* output,
+    intptr_t input_stride,
+    size_t output_increment,
+    size_t input_offset,
+    const ${XINT8_T}* zero,
+    const ${PARAMS_TYPE} params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(channels != 0);
+  assert(output_width != 0);
+
+  $if REQUANTIZATION == "FP32":
+    $if DATATYPE != "QC8":
+      const float vscale = params->${PARAMS_STRUCT}.scale;
+    const float voutput_min_less_zero_point = (int32_t) params->${PARAMS_STRUCT}.output_min - (int32_t) params->${PARAMS_STRUCT}.output_zero_point;
+    const float voutput_max_less_zero_point = (int32_t) params->${PARAMS_STRUCT}.output_max - (int32_t) params->${PARAMS_STRUCT}.output_zero_point;
+    const int16_t voutput_zero_point = params->${PARAMS_STRUCT}.output_zero_point;
+  $if DATATYPE == "QU8":
+    const int32_t vkernel_zero_point = params->${PARAMS_STRUCT}.kernel_zero_point;
+
+  do {
+    const ${XINT8_T}* i[${KERNEL_TILE}];
+    $for K in range(KERNEL_TILE):
+      i[${K}] = input[${K}];
+      assert(i[${K}] != NULL);
+      if XNN_UNPREDICTABLE(i[${K}] != zero) {
+        i[${K}] = (const ${XINT8_T}*) ((uintptr_t) i[${K}] + input_offset);
+      }
+    input = (const ${XINT8_T}**) ((uintptr_t) input + input_stride);
+
+    size_t c = channels;
+    const void* w = weights;
+    const size_t vlmax = __riscv_vsetvlmax_e32m${LMUL}();
+    size_t vl;
+
+    do {
+      vl = __riscv_vsetvl_e32m${LMUL}(c);
+      // load bias to vacc
+      vint32m${LMUL}_t vacc = __riscv_vle32_v_i32m${LMUL}(w, vl);
+      w = (const void*) ((uintptr_t) w + vlmax * sizeof(int32_t));
+
+      for (size_t k = 0; k < ${KERNEL_TILE}; ++k) {
+        $if DATATYPE != "QU8":
+          vint8m${LMUL4}_t vi = __riscv_vle8_v_i8m${LMUL4}(i[k], vl);
+          vint8m${LMUL4}_t vk = __riscv_vle8_v_i8m${LMUL4}((const int8_t*) w, vl);
+        $else:
+          vuint8m${LMUL4}_t vi = __riscv_vle8_v_u8m${LMUL4}(i[k], vl);
+          vuint8m${LMUL4}_t vk = __riscv_vle8_v_u8m${LMUL4}((const uint8_t*) w, vl);
+        w = (const void*) ((uintptr_t) w + vlmax * sizeof(${XINT8_T}));
+
+        i[k] += vlmax;
+        $if DATATYPE != "QU8":
+          vint16m${LMUL2}_t vtmp16 =  __riscv_vwmul_vv_i16m${LMUL2}(vi, vk, vl);
+          vacc =  __riscv_vwadd_wv_i32m${LMUL}(vacc, vtmp16, vl);
+        $else:
+          vint32m${LMUL}_t vk32 = __riscv_vreinterpret_v_u32m${LMUL}_i32m${LMUL}(__riscv_vzext_vf4_u32m${LMUL}(vk, vl));
+          vint32m${LMUL}_t vi32 = __riscv_vreinterpret_v_u32m${LMUL}_i32m${LMUL}(__riscv_vzext_vf4_u32m${LMUL}(vi, vl));
+          vk32 = __riscv_vsub_vx_i32m${LMUL}(vk32, vkernel_zero_point, vl);
+          vacc = __riscv_vmacc_vv_i32m${LMUL}(vacc, vi32, vk32, vl);
+      }
+
+      $if REQUANTIZATION == "FP32":
+        vfloat32m${LMUL}_t vfpacc = __riscv_vfcvt_f_x_v_f32m${LMUL}(vacc, vl);
+
+        $if DATATYPE == "QC8":
+          vfloat32m${LMUL}_t vscale = __riscv_vle32_v_f32m${LMUL}(w, vl);
+          w = (const void*) ((const float*) w + vl);
+          vfpacc = __riscv_vfmul_vv_f32m${LMUL}(vfpacc, vscale, vl);
+        $else:
+          vfpacc = __riscv_vfmul_vf_f32m${LMUL}(vfpacc, vscale, vl);
+
+        vfpacc = __riscv_vfmax_vf_f32m${LMUL}(vfpacc, voutput_min_less_zero_point, vl);
+        vfpacc = __riscv_vfmin_vf_f32m${LMUL}(vfpacc, voutput_max_less_zero_point, vl);
+
+        vint16m${LMUL2}_t vout16 = __riscv_vfncvt_x(vfpacc, vl);
+        vout16 = __riscv_vadd_vx_i16m${LMUL2}(vout16, voutput_zero_point, vl);
+        vint8m${LMUL4}_t vout8 = __riscv_vncvt_x_x_w_i8m${LMUL4}(vout16, vl);
+        $if DATATYPE != "QU8":
+          __riscv_vse8_v_i8m${LMUL4}(output, vout8, vl);
+        $else:
+          __riscv_vse8_v_u8m${LMUL4}(output, __riscv_vreinterpret_v_i8m${LMUL4}_u8m${LMUL4}(vout8), vl);
+
+      output += vl;
+      c -= vl;
+    } while(c != 0);
+    output = (${XINT8_T}*) ((uintptr_t) output + output_increment);
+  } while (--output_width != 0);
+}
+ 

@@ -447,7 +447,7 @@ class FullyConnectedOperatorTester {
       }
 
       // Compute reference results, without renormalization.
-      std::fill(output_ref.begin(), output_ref.end(), 0);
+      std::fill(output_ref.begin(), output_ref.end(), 0.0f);
 
       // TODO: Not supported right now.
       assert (transpose_weights() == false);
@@ -1786,7 +1786,7 @@ class FullyConnectedOperatorTester {
             batch_size(),
             /*threadpool=*/nullptr));
 
-        xnnpack::Buffer<xnn_float16> output2(output.size(), UINT16_C(0xDEAD));
+        xnnpack::Buffer<xnn_float16> output2(output.size());
         ASSERT_EQ(xnn_status_success,
           xnn_setup_fully_connected_nc_qd8_f16_qc8w(
             fully_connected_op2,

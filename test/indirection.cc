@@ -168,7 +168,7 @@ class IndirectionTester {
         kernel_size + (output_width - 1) * step_width * kernel_height_;
 
     input_ = xnnpack::Buffer<float>(channels_ * input_height_ * input_width_);
-    std::iota(input_.begin(), input_.end(), 0);
+    std::iota(input_.begin(), input_.end(), 0.0f);
     zero_buffer_ = xnnpack::Buffer<float>(channels_, 0.0f);
 
     const size_t indirect_top_height = divide_round_up(padding_height_ / 2, subsampling_);

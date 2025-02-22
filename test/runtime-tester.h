@@ -107,7 +107,8 @@ class RuntimeTester : public SubgraphTester {
     EXPECT_EQ(status, xnn_status_success);
     size_t num_elements = NumElements(dims);
     xnnpack::Buffer<char> input(num_elements * sizeof(float) + XNN_EXTRA_BYTES * sizeof(char));
-    std::generate(input.begin(), input.end(), [&]() { return f32dist(rng_); });
+    float* data = reinterpret_cast<float*>(input.data());
+    std::generate(data, data + num_elements, [&]() { return f32dist(rng_); });
     external_tensors_[external_id] = std::move(input);
   }
 

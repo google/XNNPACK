@@ -23,20 +23,39 @@
 #include "xnnpack/params.h"
 #include "pthreadpool.h"
 
-enum xnn_status create_resize_bilinear2d_nchw(
+static const struct xnn_ibilinear_chw_config* get_ibilinear_nchw_config(enum xnn_datatype datatype)
+{
+  switch (datatype) {
+    case xnn_datatype_fp16:
+      return xnn_init_f16_ibilinear_chw_config();
+    case xnn_datatype_fp32:
+      return xnn_init_f32_ibilinear_chw_config();
+    default:
+      return NULL;
+  }
+}
+
+enum xnn_status xnn_create_resize_bilinear2d_nchw(
+    enum xnn_datatype datatype,
     size_t output_height,
     size_t output_width,
     uint32_t flags,
-    enum xnn_operator_type operator_type,
-    const struct xnn_ibilinear_chw_config* ibilinear_chw_config,
     xnn_operator_t* resize_op_out)
 {
+  const struct xnn_ibilinear_chw_config* ibilinear_chw_config =
+      get_ibilinear_nchw_config(datatype);
+  if (ibilinear_chw_config == NULL || ibilinear_chw_config->ukernel == NULL) {
+    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
+                  xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw));
+    return xnn_status_unsupported_hardware;
+  }
+
   xnn_operator_t resize_op = NULL;
   enum xnn_status status = xnn_status_uninitialized;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to create %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(operator_type));
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw));
     goto error;
   }
 
@@ -45,14 +64,14 @@ enum xnn_status create_resize_bilinear2d_nchw(
   if (output_width == 0 || output_height == 0) {
     xnn_log_error(
       "failed to reshape %s operator with %zux%zu output: output dimensions must be non-zero",
-      xnn_operator_type_to_string(operator_type), output_width, output_height);
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw), output_width, output_height);
     goto error;
   }
 
   if (max(output_width, output_height) >= (1L << 24)) {
     xnn_log_error(
       "failed to reshape %s operator with %zux%zu output: output dimensions must be below 2**24",
-      xnn_operator_type_to_string(operator_type), output_width, output_height);
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw), output_width, output_height);
     goto error;
   }
 
@@ -62,14 +81,14 @@ enum xnn_status create_resize_bilinear2d_nchw(
   if (resize_op == NULL) {
     xnn_log_error(
       "failed to allocate %zu bytes for %s operator descriptor",
-      sizeof(struct xnn_operator), xnn_operator_type_to_string(operator_type));
+      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw));
     goto error;
   }
 
   resize_op->output_height = output_height;
   resize_op->output_width = output_width;
 
-  resize_op->type = operator_type;
+  resize_op->type = xnn_operator_type_resize_bilinear_nchw;
   resize_op->flags = flags;
   resize_op->ibilinear_chw_config = ibilinear_chw_config;
 
@@ -83,67 +102,19 @@ error:
   return status;
 }
 
-enum xnn_status xnn_create_resize_bilinear2d_nchw_f16(
-    size_t output_height,
-    size_t output_width,
-    uint32_t flags,
-    xnn_operator_t* resize_op_out)
-{
-  const struct xnn_ibilinear_chw_config* ibilinear_chw_config = xnn_init_f16_ibilinear_chw_config();
-  if (ibilinear_chw_config == NULL) {
-    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
-                  xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw_f16));
-    return xnn_status_unsupported_hardware;
-  }
-
-  return create_resize_bilinear2d_nchw(
-    output_height,
-    output_width,
-    flags,
-    xnn_operator_type_resize_bilinear_nchw_f16,
-    ibilinear_chw_config,
-    resize_op_out);
-}
-
-enum xnn_status xnn_create_resize_bilinear2d_nchw_f32(
-    size_t output_height,
-    size_t output_width,
-    uint32_t flags,
-    xnn_operator_t* resize_op_out)
-{
-  const struct xnn_ibilinear_chw_config* ibilinear_chw_config = xnn_init_f32_ibilinear_chw_config();
-  if (ibilinear_chw_config == NULL) {
-    xnn_log_error("failed to create %s operator: unsupported hardware configuration",
-                  xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw_f32));
-    return xnn_status_unsupported_hardware;
-  }
-
-  return create_resize_bilinear2d_nchw(
-    output_height,
-    output_width,
-    flags,
-    xnn_operator_type_resize_bilinear_nchw_f32,
-    ibilinear_chw_config,
-    resize_op_out);
-}
-
-static enum xnn_status reshape_resize_bilinear2d_nchw(
+enum xnn_status xnn_reshape_resize_bilinear2d_nchw(
     xnn_operator_t resize_op,
-    enum xnn_operator_type expected_operator_type,
     size_t batch_size,
     size_t input_height,
     size_t input_width,
     size_t channels,
     size_t input_pixel_stride,
     size_t output_pixel_stride,
-    uint32_t log2_data_element_size,
-    uint32_t log2_weight_element_size,
-    xnn_indirection_init_resize_bilinear2d_chw_fn indirection_init,
     pthreadpool_t threadpool)
 {
-  if (resize_op->type != expected_operator_type) {
+  if (resize_op->type != xnn_operator_type_resize_bilinear_nchw) {
     xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw),
       xnn_operator_type_to_string(resize_op->type));
     return xnn_status_invalid_parameter;
   }
@@ -151,28 +122,28 @@ static enum xnn_status reshape_resize_bilinear2d_nchw(
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(expected_operator_type));
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw));
     return xnn_status_uninitialized;
   }
 
   if (input_width <= 1 || input_height <= 1) {
     xnn_log_error(
       "failed to reshape %s operator with %zux%zu input: input dimensions must be greater than 1",
-      xnn_operator_type_to_string(expected_operator_type), input_width, input_height);
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw), input_width, input_height);
     return xnn_status_invalid_parameter;
   }
 
   if (max(input_width, input_height) >= (1L << 24)) {
     xnn_log_error(
       "failed to reshape %s operator with %zux%zu input: input dimensions must be below 2**24",
-      xnn_operator_type_to_string(expected_operator_type), input_width, input_height);
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw), input_width, input_height);
     return xnn_status_unsupported_parameter;
   }
 
   if (channels == 0) {
     xnn_log_error(
       "failed to create %s operator with %zu channels: number of channels must be non-zero",
-      xnn_operator_type_to_string(expected_operator_type), channels);
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw), channels);
     return xnn_status_invalid_parameter;
   }
 
@@ -180,7 +151,7 @@ static enum xnn_status reshape_resize_bilinear2d_nchw(
     xnn_log_error(
       "failed to create %s operator with input pixel stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(expected_operator_type), input_pixel_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw), input_pixel_stride, channels);
     return xnn_status_invalid_parameter;
   }
 
@@ -188,7 +159,7 @@ static enum xnn_status reshape_resize_bilinear2d_nchw(
     xnn_log_error(
       "failed to create %s operator with output pixel stride of %zu: "
       "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(expected_operator_type), output_pixel_stride, channels);
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw), output_pixel_stride, channels);
     return xnn_status_invalid_parameter;
   }
 
@@ -197,6 +168,8 @@ static enum xnn_status reshape_resize_bilinear2d_nchw(
     return xnn_status_success;
   }
 
+  const size_t log2_data_element_size = resize_op->ibilinear_chw_config->log2_data_element_size;
+  const size_t log2_weight_element_size = resize_op->ibilinear_chw_config->log2_weight_element_size;
   const size_t output_height = resize_op->output_height;
   const size_t output_width = resize_op->output_width;
   if (output_height * output_width != resize_op->last_output_height * resize_op->last_output_width) {
@@ -207,12 +180,12 @@ static enum xnn_status reshape_resize_bilinear2d_nchw(
     if (indirection_buffer == NULL) {
       xnn_log_error(
         "failed to allocate %zu bytes for %s operator indirection buffer",
-        indirection_buffer_size, xnn_operator_type_to_string(expected_operator_type));
+        indirection_buffer_size, xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw));
       return xnn_status_out_of_memory;
     }
     resize_op->indirection_buffer = indirection_buffer;
     xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
-      indirection_buffer_size, xnn_operator_type_to_string(expected_operator_type));
+      indirection_buffer_size, xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw));
 
     // Note: packed weights must be SIMD-aligned, so we can't use xnn_reallocate_memory
     xnn_release_simd_memory(resize_op->packed_weights.pointer);
@@ -220,7 +193,7 @@ static enum xnn_status reshape_resize_bilinear2d_nchw(
     if (resize_op->packed_weights.pointer == NULL) {
       xnn_log_error(
         "failed to allocate %zu bytes for %s operator packed weights",
-        packed_weights_size, xnn_operator_type_to_string(expected_operator_type));
+        packed_weights_size, xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw));
       return xnn_status_out_of_memory;
     }
   }
@@ -234,7 +207,7 @@ static enum xnn_status reshape_resize_bilinear2d_nchw(
     const uint32_t flags = resize_op->flags;
     // Set a dummy input first, the actual input offset is calculated in setup when we have the input pointer.
     void* dummy_input = (void*) XNN_ALLOCATION_ALIGNMENT;
-    indirection_init(
+    resize_op->ibilinear_chw_config->indirection_init(
         input_pixel_stride_in_bytes,
         input_height, input_width,
         output_height, output_width,
@@ -287,65 +260,14 @@ static enum xnn_status reshape_resize_bilinear2d_nchw(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_reshape_resize_bilinear2d_nchw_f16(
+enum xnn_status xnn_setup_resize_bilinear2d_nchw(
     xnn_operator_t resize_op,
-    size_t batch_size,
-    size_t input_height,
-    size_t input_width,
-    size_t channels,
-    size_t input_pixel_stride,
-    size_t output_pixel_stride,
-    pthreadpool_t threadpool)
-{
-  return reshape_resize_bilinear2d_nchw(
-    resize_op,
-    xnn_operator_type_resize_bilinear_nchw_f16,
-    batch_size,
-    input_height,
-    input_width,
-    channels,
-    input_pixel_stride,
-    output_pixel_stride,
-    /*log2_data_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_HALF,
-    (xnn_indirection_init_resize_bilinear2d_chw_fn) xnn_indirection_init_resize_bilinear2d_chw_f16,
-    threadpool);
-}
-
-enum xnn_status xnn_reshape_resize_bilinear2d_nchw_f32(
-    xnn_operator_t resize_op,
-    size_t batch_size,
-    size_t input_height,
-    size_t input_width,
-    size_t channels,
-    size_t input_pixel_stride,
-    size_t output_pixel_stride,
-    pthreadpool_t threadpool)
-{
-  return reshape_resize_bilinear2d_nchw(
-    resize_op,
-    xnn_operator_type_resize_bilinear_nchw_f32,
-    batch_size,
-    input_height,
-    input_width,
-    channels,
-    input_pixel_stride,
-    output_pixel_stride,
-    /*log2_data_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_FLOAT,
-    (xnn_indirection_init_resize_bilinear2d_chw_fn) xnn_indirection_init_resize_bilinear2d_chw_f32,
-    threadpool);
-}
-
-static enum xnn_status setup_resize_bilinear2d_nchw(
-    xnn_operator_t resize_op,
-    enum xnn_operator_type expected_operator_type,
     const void* input,
     void* output)
 {
-  if (resize_op->type != expected_operator_type) {
+  if (resize_op->type != xnn_operator_type_resize_bilinear_nchw) {
     xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
+      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nchw),
       xnn_operator_type_to_string(resize_op->type));
     return xnn_status_invalid_parameter;
   }
@@ -372,28 +294,4 @@ static enum xnn_status setup_resize_bilinear2d_nchw(
   resize_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
-}
-
-enum xnn_status xnn_setup_resize_bilinear2d_nchw_f16(
-    xnn_operator_t resize_op,
-    const void* input,
-    void* output)
-{
-  return setup_resize_bilinear2d_nchw(
-    resize_op,
-    xnn_operator_type_resize_bilinear_nchw_f16,
-    input,
-    output);
-}
-
-enum xnn_status xnn_setup_resize_bilinear2d_nchw_f32(
-    xnn_operator_t resize_op,
-    const float* input,
-    float* output)
-{
-  return setup_resize_bilinear2d_nchw(
-    resize_op,
-    xnn_operator_type_resize_bilinear_nchw_f32,
-    input,
-    output);
 }

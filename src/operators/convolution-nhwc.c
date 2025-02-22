@@ -858,7 +858,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qd8_f16_qc8w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f16_qc8w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_qd8_f16_qc8w_igemm_config();
   return create_convolution2d_nhwc_qx8_f16_qc8w(input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
                                                     kernel_height, kernel_width, subsampling_height, subsampling_width, dilation_height, dilation_width,
                                                     groups, group_input_channels, group_output_channels, input_channel_stride, output_channel_stride,
@@ -1059,7 +1059,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_qdu8_f32_qc8w(
     xnn_weights_cache_t weights_cache,
     xnn_operator_t* convolution_op_out)
 {
-  const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f32_qc8w_gemm_config();
+  const struct xnn_gemm_config* gemm_config = xnn_init_qdu8_f32_qc8w_igemm_config();
   return create_convolution2d_nhwc_qx8_f32_qc8w(input_padding_top,
                                                 input_padding_right,
                                                 input_padding_bottom,

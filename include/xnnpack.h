@@ -4314,13 +4314,14 @@ enum xnn_status xnn_setup_reduce_nd(
     const void* input,
     void* output);
 
-enum xnn_status xnn_create_resize_bilinear2d_nchw_f32(
+enum xnn_status xnn_create_resize_bilinear2d_nchw(
+  enum xnn_datatype datatype,
   size_t output_height,
   size_t output_width,
   uint32_t flags,
   xnn_operator_t* resize_op_out);
 
-enum xnn_status xnn_reshape_resize_bilinear2d_nchw_f32(
+enum xnn_status xnn_reshape_resize_bilinear2d_nchw(
   xnn_operator_t resize_op,
   size_t batch_size,
   size_t input_height,
@@ -4330,39 +4331,19 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nchw_f32(
   size_t output_pixel_stride,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_setup_resize_bilinear2d_nchw_f32(
-  xnn_operator_t resize_op,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_create_resize_bilinear2d_nchw_f16(
-  size_t output_height,
-  size_t output_width,
-  uint32_t flags,
-  xnn_operator_t* resize_op_out);
-
-enum xnn_status xnn_reshape_resize_bilinear2d_nchw_f16(
-  xnn_operator_t resize_op,
-  size_t batch_size,
-  size_t input_height,
-  size_t input_width,
-  size_t channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_resize_bilinear2d_nchw_f16(
+enum xnn_status xnn_setup_resize_bilinear2d_nchw(
   xnn_operator_t resize_op,
   const void* input,
   void* output);
 
-enum xnn_status xnn_create_resize_bilinear2d_nhwc_f16(
+enum xnn_status xnn_create_resize_bilinear2d_nhwc(
+  enum xnn_datatype datatype,
   size_t output_height,
   size_t output_width,
   uint32_t flags,
   xnn_operator_t* resize_op_out);
 
-enum xnn_status xnn_reshape_resize_bilinear2d_nhwc_f16(
+enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
   xnn_operator_t resize_op,
   size_t batch_size,
   size_t input_height,
@@ -4374,83 +4355,11 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc_f16(
   size_t* workspace_alignment,
   pthreadpool_t threadpool);
 
-enum xnn_status xnn_setup_resize_bilinear2d_nhwc_f16(
+enum xnn_status xnn_setup_resize_bilinear2d_nhwc(
   xnn_operator_t resize_op,
   void* workspace,
   const void* input,
   void* output);
-
-enum xnn_status xnn_create_resize_bilinear2d_nhwc_f32(
-  size_t output_height,
-  size_t output_width,
-  uint32_t flags,
-  xnn_operator_t* resize_op_out);
-
-enum xnn_status xnn_reshape_resize_bilinear2d_nhwc_f32(
-  xnn_operator_t resize_op,
-  size_t batch_size,
-  size_t input_height,
-  size_t input_width,
-  size_t channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_resize_bilinear2d_nhwc_f32(
-  xnn_operator_t resize_op,
-  void* workspace,
-  const float* input,
-  float* output);
-
-enum xnn_status xnn_create_resize_bilinear2d_nhwc_s8(
-  size_t output_height,
-  size_t output_width,
-  uint32_t flags,
-  xnn_operator_t* resize_op_out);
-
-enum xnn_status xnn_reshape_resize_bilinear2d_nhwc_s8(
-  xnn_operator_t resize_op,
-  size_t batch_size,
-  size_t input_height,
-  size_t input_width,
-  size_t channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
-  size_t* workspace_size,
-  size_t* workspace,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_resize_bilinear2d_nhwc_s8(
-  xnn_operator_t resize_op,
-  void* workspace,
-  const int8_t* input,
-  int8_t* output);
-
-enum xnn_status xnn_create_resize_bilinear2d_nhwc_u8(
-  size_t output_height,
-  size_t output_width,
-  uint32_t flags,
-  xnn_operator_t* resize_op_out);
-
-enum xnn_status xnn_reshape_resize_bilinear2d_nhwc_u8(
-  xnn_operator_t resize_op,
-  size_t batch_size,
-  size_t input_height,
-  size_t input_width,
-  size_t channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
-  pthreadpool_t threadpool);
-
-enum xnn_status xnn_setup_resize_bilinear2d_nhwc_u8(
-  xnn_operator_t resize_op,
-  void* workspace,
-  const uint8_t* input,
-  uint8_t* output);
 
 enum xnn_status xnn_create_rope_nthc_f16(
   uint32_t flags,

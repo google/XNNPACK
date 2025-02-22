@@ -144,7 +144,7 @@ class TransposeOperatorTester {
     }
     ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
     xnn_operator_t transpose_op = nullptr;
-    std::iota(input.begin(), input.end(), 0);
+    std::iota(input.begin(), input.end(), 0.0f);
 
     ASSERT_EQ(xnn_status_success,
               xnn_create_transpose_nd_x16(0, &transpose_op));
@@ -185,7 +185,7 @@ class TransposeOperatorTester {
       input_stride[i - 1] = input_stride[i] * shape_[i];
       output_stride[i - 1] = output_stride[i] * shape_[perm()[i]];
     }
-    std::iota(input.begin(), input.end(), 0);
+    std::iota(input.begin(), input.end(), 0.0f);
 
     // Call transpose eager API
     ASSERT_EQ(xnn_status_success,

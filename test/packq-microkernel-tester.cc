@@ -31,7 +31,7 @@ void PackQMicrokernelTester::Test(xnn_x8_packq_f32qp8_ukernel_fn packq) const {
   xnnpack::Buffer<int8_t, XNN_ALLOCATION_ALIGNMENT> packed_w_ref(packed_size);
 
   // Populate the input and output data.
-  std::iota(input.begin(), input.end(), 0);
+  std::iota(input.begin(), input.end(), 0.0f);
   // TODO(b/372820266): Remove these fill calls that hide uninitialized memory bugs.
   std::fill(packed_w.begin(), packed_w.end(), INT8_C(0x12));
   std::fill(packed_w_ref.begin(), packed_w_ref.end(), INT8_C(0x7B));

@@ -312,7 +312,6 @@ class BinaryElementwiseOperatorTester {
     MinMaxLow limits = DatatypeMinMaxLow(datatype());
 
     xnnpack::ReplicableRandomDevice rng;
-    std::uniform_real_distribution<double> dist(limits.min, limits.max);
 
     // Compute generalized shapes.
     std::array<size_t, XNN_MAX_TENSOR_DIMS> input1_dims;
@@ -358,8 +357,8 @@ class BinaryElementwiseOperatorTester {
     xnnpack::Buffer<T> input2(XNN_EXTRA_BYTES + num_input2_elements());
     xnnpack::Buffer<T> output(num_output_elements);
     for (size_t iteration = 0; iteration < iterations(); iteration++) {
-      xnnpack::randomize_buffer(datatype(), rng, dist, input1);
-      xnnpack::randomize_buffer(datatype(), rng, dist, input2);
+      xnnpack::randomize_buffer(datatype(), rng, limits.min, limits.max, input1);
+      xnnpack::randomize_buffer(datatype(), rng, limits.min, limits.max, input2);
 
       if (mode == RunMode::kCreateReshapeRun) {
         // Create, setup, run, and destroy a binary elementwise operator.

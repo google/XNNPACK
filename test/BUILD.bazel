@@ -994,6 +994,7 @@ xnnpack_unit_test(
         "qd8-f32-qc8w-igemm-minmax-2.cc",
         "qd8-f32-qc8w-igemm-minmax-3.cc",
     ],
+    shard_count = 5,
     deps = MICROKERNEL_TEST_DEPS + [
         ":gemm_microkernel_tester",
     ],

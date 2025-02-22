@@ -110,6 +110,17 @@ class NeonMlal(isa.Aarch32):
     }
     return w_asm
 
+  def load_min_max(self):
+    minmax_reg = self.minmax_reg()
+    qmin_0 = int(self.min_register()) * 2
+    qmin_1 = int(self.min_register()) * 2 + 1
+    qmax_0 = int(self.max_register()) * 2
+    qmax_1 = int(self.max_register()) * 2 + 1
+    ret = f'vld1.32 {{d{qmin_0}[], d{qmin_1}[]}}, [{minmax_reg}]!\n'
+    ret += f'vld1.32 {{d{qmax_0}[], d{qmax_1}[]}}, [{minmax_reg}]\n'
+    ret += f'sub {minmax_reg}, {minmax_reg}, #4\n'
+    return ret
+
   def dequantize(self, M, N, W):
     accumulators = self.acc_registers()
     ret = '\n# Convert from int32 to float.\n'
@@ -148,15 +159,8 @@ class NeonMlal(isa.Aarch32):
         ret += 'vmul.f32 q{ACC}, q{ACC}, q{SCALE}\n'.format(
             ACC=accumulators[mr * 2 + nr], SCALE=self.a_registers(nr)
         )
-    minmax_reg = self.minmax_reg()
-    qmin_0 = int(self.min_register()) * 2
-    qmin_1 = int(self.min_register()) * 2 + 1
-    qmax_0 = int(self.max_register()) * 2
-    qmax_1 = int(self.max_register()) * 2 + 1
     ret += '# Load min/max into registers.\n'
-    ret += f'vld1.32 {{d{qmin_0}[], d{qmin_1}[]}}, [{minmax_reg}]!\n'
-    ret += f'vld1.32 {{d{qmax_0}[], d{qmax_1}[]}}, [{minmax_reg}]\n'
-    ret += f'sub {minmax_reg}, {minmax_reg}, #4\n'
+    ret += self.load_min_max()
     ret += '# Add bias.\n'
     for nr in range(N):
       for mr in range(M):
@@ -300,3 +304,102 @@ class NeonMlal(isa.Aarch32):
   def clamp_max(self, reg, prefix):
     min_reg = self.min_register()
     return f'vmax.f32 q{reg}, q{reg}, q{min_reg}\n'
+
+class NeonMlalF16(NeonMlal):
+  def store(
+      self,
+      M,
+      N,
+  ):
+    accumulators = self.acc_registers()
+    cm_registers = self.cm_registers()
+    nc_reg = self.nc_register()
+    nc_lo = self.register_map_byte(nc_reg)
+    N_COUNT = N // self.n_step()
+    asm_string = """
+      # Check whether full or partial store.
+      cmp {nc}, #{n_step}
+      blo tail_{N_2}\n""".format(n_step=N, N_2=N // 2, nc=nc_reg)
+    for mr in range(M):
+      for nr in range(N_COUNT):
+        asm_string += """vst1.16  d{ACC_0}, [{c_reg}]!\n""".format(
+            ACC_0=int(accumulators[mr * 2 + nr]) * 2,
+            c_reg=cm_registers[mr],
+        )
+
+    for mr in range(0, M):
+      AM_PTR = self.am_registers()[mr]
+      kc_register = self.kc_register()
+      asm_string += f'sub {AM_PTR}, {AM_PTR}, {kc_register}\n'
+    CHECK = """
+      sub {nc}, {nc}, #{n_step}
+      bne outer_loop
+      b return\n""".format(n_step=N, nc=nc_reg)
+    asm_string += CHECK
+    N = N // 2
+    if N * 2 > self.n_step():
+      asm_string += """
+\ntail_4:
+      tst {nc_lo}, #4
+      beq tail_2\n""".format(nc_lo=nc_lo)
+      for mr in range(0, M):
+        asm_string += 'vst1.16  {{d{ACC}}}, [{c_reg}]!\n'.format(
+            ACC=int(accumulators[mr * 2]) * 2, c_reg=cm_registers[mr]
+        )
+      for mr in range(0, M):
+        asm_string += 'vmov  d{ACC0}, d{ACC1}\n'.format(
+            ACC0=int(accumulators[mr * 2]) * 2, ACC1=int(accumulators[mr * 2 + 1]) * 2
+        )
+    asm_string += """
+\ntail_2:
+      tst {nc_lo}, #2
+      beq tail_1\n""".format(nc_lo=nc_lo)
+    for mr in range(0, M):
+      asm_string += 'vst1.32  {{d{ACC}[0]}}, [{c_reg}]!\n'.format(
+          ACC=int(accumulators[mr * 2]) * 2, c_reg=cm_registers[mr]
+      )
+    for mr in range(0, M):
+      asm_string += ' vext.8 d{ACC}, d{ACC}, d{ACC_1}, #4\n'.format(
+          ACC=int(accumulators[mr * 2]) * 2,
+          ACC_1=int(accumulators[mr * 2]) * 2 + 1,
+      )
+    asm_string += """
+\ntail_1:
+      tst {nc_lo}, #1
+      beq return\n""".format(nc_lo=nc_lo)
+    for mr in range(0, M):
+      asm_string += 'vst1.16  {{d{ACC}[0]}}, [{c_reg}]\n'.format(
+          ACC=int(accumulators[mr * 2]) * 2, c_reg=cm_registers[mr]
+      )
+
+    return asm_string
+
+  def isa(self):
+    return 'neonfp16arith'
+
+  def function_name(self, M, N, isa):
+    LD = self.unroll_factor * 32
+    return f'xnn_qd8_f16_qc8w_gemm_minmax_ukernel_{M}x{N}__asm_aarch32_{isa}_ld{LD}_2\n'
+
+  def clamp_min(self, reg, prefix):
+    max_reg = int(self.max_register()) * 2
+    reg_0 = reg
+    reg_1 = int(reg) * 2
+    asm_string = f'vcvt.f16.f32 d{reg_1}, q{reg_0}\n'
+    asm_string += f'vmin.f16 d{reg_1}, d{reg_1}, d{max_reg}\n'
+    return asm_string
+
+  def clamp_max(self, reg, prefix):
+    min_reg = int(self.min_register()) * 2
+    reg = int(reg) * 2
+    return f'vmax.f16 d{reg}, d{reg}, d{min_reg}\n'
+
+  def load_min_max(self):
+    minmax_reg = self.minmax_reg()
+    min_reg = int(self.min_register()) * 2
+    max_reg = int(self.max_register()) * 2
+    ret =  f'vld1.32 {{d{max_reg}[0]}}, [{minmax_reg}]\n'
+    ret += f'vdup.16 d{min_reg}, d{max_reg}[0]\n'
+    ret += f'vdup.16 d{max_reg}, d{max_reg}[1]\n'
+    return ret
+

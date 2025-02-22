@@ -343,14 +343,13 @@ class PackWMicrokernelTester {
         g() * (packed_n() * packed_k() + packed_n()));
     xnnpack::Buffer<xnn_float16> packed_w_ref(g() * (packed_n() * packed_k() + packed_n()));
 
-    const xnn_float16 pad_value = std::max(sr(), kr()) == 1 ? UINT16_C(0xDEAD) : 0;
-    std::iota(weights.begin(), weights.end(), UINT16_C(0x0001));
-    std::iota(bias.begin(), bias.end(), UINT16_C(0x8000));
-    std::fill(packed_w.begin(), packed_w.end(), UINT16_C(0xBEEF));
+    const xnn_float16 pad_value = xnn_float16_from_bits(std::max(sr(), kr()) == 1 ? UINT16_C(0xDEAD) : 0);
+    std::iota(weights.begin(), weights.end(), 1.0f);
+    std::iota(bias.begin(), bias.end(), 0.5f);
     std::fill(packed_w_ref.begin(), packed_w_ref.end(), pad_value);
 
     // Mandate zero-padding of weights to packed_k() in K dimension.
-    std::fill(padded_weights.begin(), padded_weights.end(), 0);
+    std::fill(padded_weights.begin(), padded_weights.end(), 0.0f);
     for (size_t gid = 0; gid < g(); gid++) {
       for (size_t i = 0; i < n(); i++) {
         for (size_t j = 0; j < k(); j++) {
@@ -371,8 +370,8 @@ class PackWMicrokernelTester {
 
     // Call optimized micro-kernel.
     packw(g(), n(), k(), nr(), kr(), sr(),
-          reinterpret_cast<const uint16_t*>(weights.data()), 
-          reinterpret_cast<const uint16_t*>(bias_data), /*scale=*/nullptr, 
+          reinterpret_cast<const uint16_t*>(weights.data()),
+          reinterpret_cast<const uint16_t*>(bias_data), /*scale=*/nullptr,
           reinterpret_cast<uint16_t*>(packed_w.data()),
       /*extra_bytes=*/0, /*params=*/nullptr);
 

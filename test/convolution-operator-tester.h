@@ -1021,7 +1021,7 @@ class ConvolutionOperatorTester {
         std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)>
             auto_convolution_op(convolution_op2, xnn_delete_operator);
 
-        xnnpack::Buffer<xnn_float16> output2(output.size(), UINT16_C(0xDEAD));
+        xnnpack::Buffer<xnn_float16> output2(output.size());
         size_t workspace_size = SIZE_MAX;
         size_t workspace_alignment = SIZE_MAX;
         ASSERT_EQ(xnn_status_success,

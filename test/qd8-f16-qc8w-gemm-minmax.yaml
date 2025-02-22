@@ -192,6 +192,22 @@
   init: xnn_init_f16_minmax_scalar_params
   pack: xnn_pack_qs8_gemm_goi_w
   k-block: 8
+- name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x8__asm_aarch32_neonfp16arith_ld64_2
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 8
+- name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16arith_ld64_2
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 8
+- name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_3x8__asm_aarch32_neonfp16arith_ld64_2
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 8
+- name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_4x8__asm_aarch32_neonfp16arith_ld64_2
+  init: xnn_init_f16_minmax_scalar_params
+  pack: xnn_pack_qs8_gemm_goi_w
+  k-block: 8
 
 # x86 AVX256 VNNI
 - name: xnn_qd8_f16_qc8w_gemm_minmax_ukernel_1x8c8__avx256vnni

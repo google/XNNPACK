@@ -409,6 +409,7 @@ xnnpack_cc_library(
         ":common",
         ":config_hdrs",
         ":hardware_config",
+        ":indirection",
         ":init_once",
         ":logging",
         ":math",
