@@ -23,7 +23,6 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-avgpool/f32-avgpool-9p8x-minmax-scalar-c1.c
   src/f32-avgpool/f32-avgpool-9x-minmax-scalar-c1.c
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-scalar-1x1.c
-  src/f32-dwconv/gen/f32-dwconv-2f2m2l4c1s1r-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p1c-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p1c-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p1c-minmax-scalar-acc2.c
@@ -32,6 +31,8 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-9p1c-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p1c-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p1c-scalar-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-25p2c-minmax-scalar-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-25p2c-scalar-acc2.c
   src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-scalar-2x1-acc2.c
   src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-scalar-4x1.c
   src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3s2p1-minmax-scalar-1x1-acc2.c
@@ -277,6 +278,7 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-2f2m2l1c1s1r-minmax-scalar.c
   src/f32-dwconv/gen/f32-dwconv-2f2m2l1c1s1r-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-2f2m2l1c1s1r-scalar.c
+  src/f32-dwconv/gen/f32-dwconv-2f2m2l4c1s1r-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-2f2m2l4c1s1r-minmax-scalar.c
   src/f32-dwconv/gen/f32-dwconv-2f2m2l4c1s1r-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-2f2m2l4c1s1r-scalar.c
@@ -314,9 +316,7 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-9p2c-scalar.c
   src/f32-dwconv/gen/f32-dwconv-25p1c-minmax-scalar.c
   src/f32-dwconv/gen/f32-dwconv-25p1c-scalar.c
-  src/f32-dwconv/gen/f32-dwconv-25p2c-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p2c-minmax-scalar.c
-  src/f32-dwconv/gen/f32-dwconv-25p2c-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p2c-scalar.c
   src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-scalar-1x1-acc2.c
   src/f32-dwconv2d-chw/gen/f32-dwconv2d-chw-3x3p1-minmax-scalar-1x1-acc3.c
