@@ -195,6 +195,7 @@ xnnpack_cxx_library(
         "f16-simd-" + arch + ".cc",
     ],
     copts = xnnpack_simd_copts_for_arch(arch),
+    features = ["-use_header_modules"],
     deps = [
         ":replicable_random_device",
         "//:buffer",
