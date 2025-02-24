@@ -11,12 +11,10 @@
 #include <limits>     // For std::numeric_limits.
 #include <memory>     // For std::unique_ptr.
 #include <random>     // For std::uniform_real_distribution.
-#include <vector>     // For std::vector.
 
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/buffer.h"
-#include "xnnpack/internal.h"
 #include "xnnpack/math.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator-utils.h"
