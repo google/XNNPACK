@@ -19,10 +19,6 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-avgpool/f32-avgpool-9x-minmax-wasmsimd-arm-c4.c
   src/f32-avgpool/f32-avgpool-9x-minmax-wasmsimd-x86-c4.c
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-wasmsimd-2x2.c
-  src/f32-dwconv/gen/f32-dwconv-3f3m3l4c4s4r-minmax-wasmsimd-arm.c
-  src/f32-dwconv/gen/f32-dwconv-3f3m3l4c4s4r-wasmsimd.c
-  src/f32-dwconv/gen/f32-dwconv-3f3m3l8c4s4r-minmax-wasmsimd-x86.c
-  src/f32-dwconv/gen/f32-dwconv-3f3m3l8c4s4r-wasmsimd.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmsimd-arm.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-wasmsimd.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-wasmsimd-x86.c
@@ -31,8 +27,6 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-4p4c-wasmsimd.c
   src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-wasmsimd-x86.c
   src/f32-dwconv/gen/f32-dwconv-4p8c-wasmsimd.c
-  src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-minmax-wasmsimd-arm.c
-  src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-wasmsimd.c
   src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-wasmsimd-arm.c
   src/f32-dwconv/gen/f32-dwconv-9p4c-wasmsimd.c
   src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-wasmsimd-x86.c
@@ -232,13 +226,17 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmsimd-int32-u24.c
   src/f16-f32-vcvt/gen/f16-f32-vcvt-wasmsimd-int32-u32.c
   src/f32-dwconv/gen/f32-dwconv-3f3m3l4c4s4r-minmax-wasmsimd-arm-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-3f3m3l4c4s4r-minmax-wasmsimd-arm.c
   src/f32-dwconv/gen/f32-dwconv-3f3m3l4c4s4r-minmax-wasmsimd-x86-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3f3m3l4c4s4r-minmax-wasmsimd-x86.c
   src/f32-dwconv/gen/f32-dwconv-3f3m3l4c4s4r-wasmsimd-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-3f3m3l4c4s4r-wasmsimd.c
   src/f32-dwconv/gen/f32-dwconv-3f3m3l8c4s4r-minmax-wasmsimd-arm-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3f3m3l8c4s4r-minmax-wasmsimd-arm.c
   src/f32-dwconv/gen/f32-dwconv-3f3m3l8c4s4r-minmax-wasmsimd-x86-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-3f3m3l8c4s4r-minmax-wasmsimd-x86.c
   src/f32-dwconv/gen/f32-dwconv-3f3m3l8c4s4r-wasmsimd-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-3f3m3l8c4s4r-wasmsimd.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmsimd-arm-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmsimd-x86-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmsimd-x86.c
@@ -252,9 +250,11 @@ SET(NON_PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-wasmsimd-arm.c
   src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-wasmsimd-x86-acc2.c
   src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-minmax-wasmsimd-arm-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-minmax-wasmsimd-arm.c
   src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-minmax-wasmsimd-x86-acc2.c
   src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-minmax-wasmsimd-x86.c
   src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-wasmsimd-acc2.c
+  src/f32-dwconv/gen/f32-dwconv-5f5m5l4c4s4r-wasmsimd.c
   src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-wasmsimd-arm-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-wasmsimd-x86-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p4c-minmax-wasmsimd-x86.c

@@ -14,7 +14,6 @@ SET(PROD_WASM_MICROKERNEL_SRCS
   src/f32-avgpool/f32-avgpool-9x-minmax-wasm-c1.c
   src/f32-dwconv/gen/f32-dwconv-3p1c-minmax-wasm-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p1c-minmax-wasm-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-5f5m5l1c1s1r-minmax-wasm-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p1c-minmax-wasm-acc2.c
   src/f32-dwconv/gen/f32-dwconv-25p1c-minmax-wasm-acc2.c
   src/f32-gemm/gen/f32-gemm-1x4-minmax-wasm.c
@@ -90,6 +89,7 @@ SET(NON_PROD_WASM_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-4p1c-minmax-wasm.c
   src/f32-dwconv/gen/f32-dwconv-4p2c-minmax-wasm-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p2c-minmax-wasm.c
+  src/f32-dwconv/gen/f32-dwconv-5f5m5l1c1s1r-minmax-wasm-acc2.c
   src/f32-dwconv/gen/f32-dwconv-5f5m5l1c1s1r-minmax-wasm.c
   src/f32-dwconv/gen/f32-dwconv-6f6m7l1c1s1r-minmax-wasm-acc2.c
   src/f32-dwconv/gen/f32-dwconv-6f6m7l1c1s1r-minmax-wasm.c
