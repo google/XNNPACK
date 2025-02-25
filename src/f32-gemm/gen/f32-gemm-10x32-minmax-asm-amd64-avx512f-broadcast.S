@@ -151,7 +151,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_10x32__asm_amd64_avx512f_broadcast
       mov [rsp + 160], rax
       mov [rsp + 168], r13
 
-outer_loop:
+.outer_loop:
       # Initialize k counter.
       mov r11, 0
       # Read a pointers from stack into GP registers.
@@ -189,7 +189,7 @@ outer_loop:
       vmovaps zmm30, zmm21
       add r9, 128
 
-inner_loop:
+.inner_loop:
       vmovaps  zmm7, [r9 + 0]
       vmovaps  zmm8, [r9 + 64]
       add r9, 128
@@ -226,8 +226,8 @@ inner_loop:
 
       add r11, 4
       cmp rdx, r11
-      jne inner_loop
-inner_loop_end:
+      jne .inner_loop
+.inner_loop_end:
       # Min/max clamping.
       vminps  zmm11, zmm1, zmm11
       vminps  zmm12, zmm1, zmm12
@@ -284,7 +284,7 @@ inner_loop_end:
 
       # Check whether full or partial store.
       cmp rsi, 32
-      jl tail
+      jl .tail
 
       vmovups  [rcx], zmm11
       vmovups  [rcx + 64], zmm21
@@ -330,10 +330,10 @@ inner_loop_end:
       mov [rsp + 168], r8
 
       sub rsi, 32
-      jne outer_loop
-      jmp return
+      jne .outer_loop
+      jmp .return
 
-tail:
+.tail:
       mov r11, -1
       shlx r11, r11, rsi
       not r11
@@ -361,7 +361,7 @@ tail:
       vmovups  ZMMWORD PTR [r8]{k1}, zmm20
       vmovups  ZMMWORD PTR [r8 + 64]{k2}, zmm30
 
-return:
+.return:
       add rsp, 256
       mov r13, [rsp]
       mov rsp, r13

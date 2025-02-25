@@ -49,7 +49,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_4x16c4__asm_aarch64_neondot_
       csel  x11, x10, x11, LO
       csel  x15, x14, x15, LO
 
-outer_loop:
+.outer_loop:
       # Initialize k counter.
       mov x20, x2
       # Initialize accumulators with k_sum * input zero point.
@@ -76,10 +76,10 @@ outer_loop:
 
       # Are there at least 16 bytes?
       cmp x20, 16
-      blt inner_loop_tail
+      blt .inner_loop_tail
       sub x20, x20, 16
 
-inner_loop:
+.inner_loop:
       ldr q2, [x3], 16
       ldr q3, [x9], 16
       ldr q4, [x10], 16
@@ -173,13 +173,13 @@ inner_loop:
       sdot  v26.4s, v9.16b, v4.4b[3]
       sdot  v27.4s, v9.16b, v5.4b[3]
       subs x20, x20, 16
-      bhs inner_loop
+      bhs .inner_loop
 
       add x20, x20, 16
       cmp x20, 4
-      blt inner_loop_end
+      blt .inner_loop_end
 
-inner_loop_tail:
+.inner_loop_tail:
       ldr s2, [x3], 4
       ldr s3, [x9], 4
       ldr s4, [x10], 4
@@ -207,9 +207,9 @@ inner_loop_tail:
       sdot  v26.4s, v9.16b, v4.4b[0]
       sdot  v27.4s, v9.16b, v5.4b[0]
       subs x20, x20, 4
-      bne inner_loop_tail
+      bne .inner_loop_tail
 
-inner_loop_end:
+.inner_loop_end:
 
       # Convert from int32 to float.
       scvtf v12.4s, v12.4s, #4
@@ -323,7 +323,7 @@ inner_loop_end:
 
       # Check whether full or partial store.
       cmp x1, 16
-      b.lo tail_8
+      b.lo .tail_8
       stp  q12, q16, [x6], 32
       stp  q20, q24, [x6], 32
       stp  q13, q17, [x13], 32
@@ -338,11 +338,11 @@ inner_loop_end:
       sub x11, x11, x2
 
       sub x1, x1, 16
-      b.ne outer_loop
-      b return
+      b.ne .outer_loop
+      b .return
 
-tail_8:
-      tbz w1, 3, tail_4
+.tail_8:
+      tbz w1, 3, .tail_4
       stp  q12, q16, [x6], 32
       stp  q13, q17, [x13], 32
       stp  q14, q18, [x14], 32
@@ -357,8 +357,8 @@ tail_8:
       mov  v19.16b, v27.16b
 
 
-tail_4:
-      tbz w1, 2, tail_2
+.tail_4:
+      tbz w1, 2, .tail_2
       str  q12, [x6], 16
       str  q13, [x13], 16
       str  q14, [x14], 16
@@ -369,8 +369,8 @@ tail_4:
       mov  v15.16b, v19.16b
 
 
-tail_2:
-      tbz w1, 1, tail_1
+.tail_2:
+      tbz w1, 1, .tail_1
       str  d12, [x6], 8
       str  d13, [x13], 8
       str  d14, [x14], 8
@@ -381,14 +381,14 @@ tail_2:
       dup d15, v15.d[1]
 
 
-tail_1:
-      tbz w1, 0, return
+.tail_1:
+      tbz w1, 0, .return
       str  s12, [x6]
       str  s13, [x13]
       str  s14, [x14]
       str  s15, [x15]
 
-return:
+.return:
       # Restore the callee saved GP registers.
       ldp x19, x20, [sp, -64]
       ldp x21, x22, [sp, -48]

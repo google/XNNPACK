@@ -41,7 +41,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_3x8c4__asm_aarch64_neondot_l
       csel  x10, x9, x10, LS
       csel  x14, x13, x14, LS
 
-outer_loop:
+.outer_loop:
       # Initialize k counter.
       mov x20, x2
       # Initialize accumulators with k_sum * input zero point.
@@ -56,7 +56,7 @@ outer_loop:
       mul v17.4s, v3.4s, v11.s[0]
       add x5, x5, 32
 
-inner_loop:
+.inner_loop:
       ldr s2, [x3], 4
       ldr s3, [x9], 4
       ldr s4, [x10], 4
@@ -68,9 +68,9 @@ inner_loop:
       sdot  v16.4s, v7.16b, v3.4b[0]
       sdot  v17.4s, v7.16b, v4.4b[0]
       subs x20, x20, 4
-      bne inner_loop
+      bne .inner_loop
 
-inner_loop_end:
+.inner_loop_end:
 
       # Convert from int32 to float.
       scvtf v12.4s, v12.4s
@@ -122,7 +122,7 @@ inner_loop_end:
 
       # Check whether full or partial store.
       cmp x1, 8
-      b.lo tail_4
+      b.lo .tail_4
       stp  q12, q15, [x6], 32
       stp  q13, q16, [x13], 32
       stp  q14, q17, [x14], 32
@@ -131,11 +131,11 @@ inner_loop_end:
       sub x10, x10, x2
 
       sub x1, x1, 8
-      b.ne outer_loop
-      b return
+      b.ne .outer_loop
+      b .return
 
-tail_4:
-      tbz w1, 2, tail_2
+.tail_4:
+      tbz w1, 2, .tail_2
       str  q12, [x6], 16
       str  q13, [x13], 16
       str  q14, [x14], 16
@@ -144,8 +144,8 @@ tail_4:
       mov  v14.16b, v17.16b
 
 
-tail_2:
-      tbz w1, 1, tail_1
+.tail_2:
+      tbz w1, 1, .tail_1
       str  d12, [x6], 8
       str  d13, [x13], 8
       str  d14, [x14], 8
@@ -154,13 +154,13 @@ tail_2:
       dup d14, v14.d[1]
 
 
-tail_1:
-      tbz w1, 0, return
+.tail_1:
+      tbz w1, 0, .return
       str  s12, [x6]
       str  s13, [x13]
       str  s14, [x14]
 
-return:
+.return:
       # Restore the callee saved GP registers.
       ldp x19, x20, [sp, -64]
       ldp x21, x22, [sp, -48]

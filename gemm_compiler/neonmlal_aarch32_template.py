@@ -205,7 +205,7 @@ class NeonMlal(isa.Aarch32):
 
     ret += """
     # jump to epilogue if lower than 8
-    blo epilogue
+    blo .epilogue
     """
     ret += f'\n# Load {M} As and B0\n'
     for l in self.weights_asm()['loop']:
@@ -235,7 +235,7 @@ class NeonMlal(isa.Aarch32):
     asm_string = """
       # Check whether full or partial store.
       cmp {nc}, #{n_step}
-      blo tail_{N_2}\n""".format(n_step=N, N_2=N // 2, nc=nc_reg)
+      blo .tail_{N_2}\n""".format(n_step=N, N_2=N // 2, nc=nc_reg)
     for mr in range(M):
       for nr in range(N_COUNT):
         asm_string += """vst1.32  {{d{ACC_0}, d{ACC_1}}}, [{c_reg}]!\n""".format(
@@ -250,15 +250,15 @@ class NeonMlal(isa.Aarch32):
       asm_string += f'sub {AM_PTR}, {AM_PTR}, {kc_register}\n'
     CHECK = """
       sub {nc}, {nc}, #{n_step}
-      bne outer_loop
-      b return\n""".format(n_step=N, nc=nc_reg)
+      bne .outer_loop
+      b .return\n""".format(n_step=N, nc=nc_reg)
     asm_string += CHECK
     N = N // 2
     if N * 2 > self.n_step():
       asm_string += """
-\ntail_4:
+\n.tail_4:
       tst {nc_lo}, #4
-      beq tail_2\n""".format(nc_lo=nc_lo)
+      beq .tail_2\n""".format(nc_lo=nc_lo)
       for mr in range(0, M):
         asm_string += 'vst1.32  {{q{ACC}}}, [{c_reg}]!\n'.format(
             ACC=accumulators[mr * 2], c_reg=cm_registers[mr]
@@ -268,9 +268,9 @@ class NeonMlal(isa.Aarch32):
             ACC0=accumulators[mr * 2], ACC1=accumulators[mr * 2 + 1]
         )
     asm_string += """
-\ntail_2:
+\n.tail_2:
       tst {nc_lo}, #2
-      beq tail_1\n""".format(nc_lo=nc_lo)
+      beq .tail_1\n""".format(nc_lo=nc_lo)
     for mr in range(0, M):
       asm_string += 'vst1.32  d{ACC}, [{c_reg}]!\n'.format(
           ACC=int(accumulators[mr * 2]) * 2, c_reg=cm_registers[mr]
@@ -281,9 +281,9 @@ class NeonMlal(isa.Aarch32):
           ACC_1=int(accumulators[mr * 2]) * 2 + 1,
       )
     asm_string += """
-\ntail_1:
+\n.tail_1:
       tst {nc_lo}, #1
-      beq return\n""".format(nc_lo=nc_lo)
+      beq .return\n""".format(nc_lo=nc_lo)
     for mr in range(0, M):
       asm_string += 'vst1.32  {{d{ACC}[0]}}, [{c_reg}]\n'.format(
           ACC=int(accumulators[mr * 2]) * 2, c_reg=cm_registers[mr]
@@ -319,7 +319,7 @@ class NeonMlalF16(NeonMlal):
     asm_string = """
       # Check whether full or partial store.
       cmp {nc}, #{n_step}
-      blo tail_{N_2}\n""".format(n_step=N, N_2=N // 2, nc=nc_reg)
+      blo .tail_{N_2}\n""".format(n_step=N, N_2=N // 2, nc=nc_reg)
     for mr in range(M):
       for nr in range(N_COUNT):
         asm_string += """vst1.16  d{ACC_0}, [{c_reg}]!\n""".format(
@@ -333,15 +333,15 @@ class NeonMlalF16(NeonMlal):
       asm_string += f'sub {AM_PTR}, {AM_PTR}, {kc_register}\n'
     CHECK = """
       sub {nc}, {nc}, #{n_step}
-      bne outer_loop
-      b return\n""".format(n_step=N, nc=nc_reg)
+      bne .outer_loop
+      b .return\n""".format(n_step=N, nc=nc_reg)
     asm_string += CHECK
     N = N // 2
     if N * 2 > self.n_step():
       asm_string += """
-\ntail_4:
+\n.tail_4:
       tst {nc_lo}, #4
-      beq tail_2\n""".format(nc_lo=nc_lo)
+      beq .tail_2\n""".format(nc_lo=nc_lo)
       for mr in range(0, M):
         asm_string += 'vst1.16  {{d{ACC}}}, [{c_reg}]!\n'.format(
             ACC=int(accumulators[mr * 2]) * 2, c_reg=cm_registers[mr]
@@ -351,9 +351,9 @@ class NeonMlalF16(NeonMlal):
             ACC0=int(accumulators[mr * 2]) * 2, ACC1=int(accumulators[mr * 2 + 1]) * 2
         )
     asm_string += """
-\ntail_2:
+\n.tail_2:
       tst {nc_lo}, #2
-      beq tail_1\n""".format(nc_lo=nc_lo)
+      beq .tail_1\n""".format(nc_lo=nc_lo)
     for mr in range(0, M):
       asm_string += 'vst1.32  {{d{ACC}[0]}}, [{c_reg}]!\n'.format(
           ACC=int(accumulators[mr * 2]) * 2, c_reg=cm_registers[mr]
@@ -364,9 +364,9 @@ class NeonMlalF16(NeonMlal):
           ACC_1=int(accumulators[mr * 2]) * 2 + 1,
       )
     asm_string += """
-\ntail_1:
+\n.tail_1:
       tst {nc_lo}, #1
-      beq return\n""".format(nc_lo=nc_lo)
+      beq .return\n""".format(nc_lo=nc_lo)
     for mr in range(0, M):
       asm_string += 'vst1.16  {{d{ACC}[0]}}, [{c_reg}]\n'.format(
           ACC=int(accumulators[mr * 2]) * 2, c_reg=cm_registers[mr]

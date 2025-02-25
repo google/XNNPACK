@@ -81,7 +81,7 @@ class Fma3(arch.X64):
     N_COUNT = N // N_STEP
     asm_string = """
     cmp {nc}, {n_step}
-    jl tail_{N_2}
+    jl .tail_{N_2}
     """.format(n_step=N, N_2=N // 2, nc=nc_reg)
     for mr in range(0, M):
       asm_string += 'vmovups  [{c_reg}], y{ACC}\n'.format(
@@ -105,9 +105,9 @@ class Fma3(arch.X64):
     N = N // 2
     if N * 2 > N_STEP:
       asm_string += """
-      tail_{N}:
+      .tail_{N}:
       test {nc_lo}, {N}
-      jz tail_{N_2}\n""".format(N=N, N_2=N // 2, nc_lo=nc_lo)
+      jz .tail_{N_2}\n""".format(N=N, N_2=N // 2, nc_lo=nc_lo)
       for mr in range(0, M):
         asm_string += 'vmovups  [{c_reg}], y{ACC}\n'.format(
             ACC=accumulators[mr], c_reg=cm_registers[mr]
@@ -129,9 +129,9 @@ class Fma3(arch.X64):
             cn_stride=cn_stride_reg, cm=cm_registers[mr]
         )
     asm_string += """
-tail_4:
+..tail_d:
     test {nc_lo}, 4
-    jz tail_2\n""".format(nc_lo=nc_lo)
+    jz ..tail_d\n""".format(nc_lo=nc_lo)
     for mr in range(0, M):
       asm_string += 'vmovups  [{c_reg}], x{ACC}\n'.format(
           ACC=accumulators[mr], c_reg=cm_registers[mr]
@@ -143,9 +143,9 @@ tail_4:
           ACC=accumulators[mr]
       )
     asm_string += """
-tail_2:
+..tail_d:
     test {nc_lo}, 2
-    jz tail_1\n""".format(nc_lo=nc_lo)
+    jz ..tail_d\n""".format(nc_lo=nc_lo)
     for mr in range(0, M):
       asm_string += 'vmovlps  QWORD PTR [{c_reg}], x{ACC}\n'.format(
           ACC=accumulators[mr], c_reg=cm_registers[mr]
@@ -157,9 +157,9 @@ tail_2:
           ACC=accumulators[mr]
       )
     asm_string += """
-tail_1:
+..tail_d:
     test {nc_lo}, 1
-    jz return\n""".format(nc_lo=nc_lo)
+    jz .return\n""".format(nc_lo=nc_lo)
     for mr in range(0, M):
       asm_string += 'vmovss  DWORD PTR [{c_reg}], x{ACC}\n'.format(
           ACC=accumulators[mr], c_reg=cm_registers[mr]

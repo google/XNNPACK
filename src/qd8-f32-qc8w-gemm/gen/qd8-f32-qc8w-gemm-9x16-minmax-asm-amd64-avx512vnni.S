@@ -177,7 +177,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_9x16c4__asm_amd64_avx512vnni
       vpbroadcastd zmm6, edi
       vmovaps zmmword ptr [rsp + 704], zmm6
 
-outer_loop:
+.outer_loop:
       # Initialize k counter.
       mov r11, 0
       # Read a pointers from stack into GP registers.
@@ -204,7 +204,7 @@ outer_loop:
       vpmulld zmm20, zmm6, ZMMWORD PTR [rsp + 704]
       add r9, 64
 
-inner_loop:
+.inner_loop:
       vmovaps  zmm6, [r9 + 0]
       add r9, 64
       vpbroadcastd zmm2, [rcx + r11]
@@ -228,8 +228,8 @@ inner_loop:
 
       add r11, 4
       cmp rdx, r11
-      jne inner_loop
-inner_loop_end:
+      jne .inner_loop
+.inner_loop_end:
 
       # Convert from int32 to float.
       vcvtdq2ps zmm5, zmm5
@@ -298,7 +298,7 @@ inner_loop_end:
 
       # Check whether full or partial store.
       cmp rsi, 16
-      jl tail
+      jl .tail
 
       vmovups  [rcx], zmm5
       vmovups  [rax], zmm12
@@ -331,10 +331,10 @@ inner_loop_end:
       mov [rsp + 152], rbp
 
       sub rsi, 16
-      jne outer_loop
-      jmp return
+      jne .outer_loop
+      jmp .return
 
-tail:
+.tail:
       mov r11, -1
       shlx r11, r11, rsi
       not r11
@@ -349,7 +349,7 @@ tail:
       vmovups  ZMMWORD PTR [rbx]{k1}, zmm19
       vmovups  ZMMWORD PTR [rbp]{k1}, zmm20
 
-return:
+.return:
       add rsp, 768
       mov r13, [rsp]
       mov rsp, r13

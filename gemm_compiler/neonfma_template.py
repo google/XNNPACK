@@ -171,7 +171,7 @@ class NeonFma(arch.Aarch64):
     asm_string = """
       # Check whether full or partial store.
       cmp {nc}, {n_step}
-      b.lo tail_{N_2}\n""".format(n_step=N, N_2=N // 2, nc=nc_reg)
+      b.lo .tail_{N_2}\n""".format(n_step=N, N_2=N // 2, nc=nc_reg)
     for mr in range(0, M):
       asm_string += 'stp  q{ACC}, q{ACC_1}, [{c_reg}], 32\n'.format(
           ACC=accumulators[mr],
@@ -196,15 +196,15 @@ class NeonFma(arch.Aarch64):
       asm_string += f'sub {AM_PTR}, {AM_PTR}, {kc_register}\n'
     CHECK = """
       sub {nc}, {nc}, {n_step}
-      b.ne outer_loop
-      b return""".format(n_step=N, nc=nc_reg)
+      b.ne .outer_loop
+      b .return""".format(n_step=N, nc=nc_reg)
     asm_string += CHECK
     N = N // 2
     if N * 2 > self.n_step():
       if N == 8:
         asm_string += """
-\ntail_8:
-      tbz {nc_lo}, 3, tail_4\n""".format(nc_lo=nc_lo)
+\n.tail_8:
+      tbz {nc_lo}, 3, .tail_4\n""".format(nc_lo=nc_lo)
         for mr in range(0, M):
           asm_string += 'stp  q{ACC}, q{ACC_1}, [{c_reg}], 32\n'.format(
               ACC=accumulators[mr],
@@ -219,8 +219,8 @@ class NeonFma(arch.Aarch64):
               ACC0=accumulators[mr + M], ACC1=accumulators[mr + 3 * M]
           )
       asm_string += """
-\ntail_4:
-      tbz {nc_lo}, 2, tail_2\n""".format(nc_lo=nc_lo)
+\n.tail_4:
+      tbz {nc_lo}, 2, .tail_2\n""".format(nc_lo=nc_lo)
       for mr in range(0, M):
         asm_string += 'str  q{ACC}, [{c_reg}], 16\n'.format(
             ACC=accumulators[mr], c_reg=cm_registers[mr]
@@ -230,8 +230,8 @@ class NeonFma(arch.Aarch64):
             ACC0=accumulators[mr], ACC1=accumulators[mr + M]
         )
     asm_string += """
-\ntail_2:
-      tbz {nc_lo}, 1, tail_1\n""".format(nc_lo=nc_lo)
+\n.tail_2:
+      tbz {nc_lo}, 1, .tail_1\n""".format(nc_lo=nc_lo)
     for mr in range(0, M):
       asm_string += 'str  d{ACC}, [{c_reg}], 8\n'.format(
           ACC=accumulators[mr], c_reg=cm_registers[mr]
@@ -239,8 +239,8 @@ class NeonFma(arch.Aarch64):
     for mr in range(0, M):
       asm_string += 'dup d{ACC}, v{ACC}.d[1]\n'.format(ACC=accumulators[mr])
     asm_string += """
-\ntail_1:
-      tbz {nc_lo}, 0, return\n""".format(nc_lo=nc_lo)
+\n.tail_1:
+      tbz {nc_lo}, 0, .return\n""".format(nc_lo=nc_lo)
     for mr in range(0, M):
       asm_string += 'str  s{ACC}, [{c_reg}]\n'.format(
           ACC=accumulators[mr], c_reg=cm_registers[mr]

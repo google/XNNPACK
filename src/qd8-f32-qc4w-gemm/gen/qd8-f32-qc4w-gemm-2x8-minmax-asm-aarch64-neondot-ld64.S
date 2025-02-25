@@ -39,7 +39,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc4w_gemm_minmax_ukernel_2x8c4__asm_aarch64_neondot_l
       csel  x9, x3, x9, LO
       csel  x13, x6, x13, LO
 
-outer_loop:
+.outer_loop:
       # Initialize k counter.
       mov x20, x2
       # Initialize accumulators with k_sum * input zero point.
@@ -53,10 +53,10 @@ outer_loop:
 
       # Are there at least 8 bytes?
       cmp x20, 8
-      blt inner_loop_tail
+      blt .inner_loop_tail
       sub x20, x20, 8
 
-inner_loop:
+.inner_loop:
       ldr d2, [x3], 8
       ldr d3, [x9], 8
       ldr q29, [x5], 16
@@ -74,13 +74,13 @@ inner_loop:
       sdot  v14.4s, v7.16b, v2.4b[1]
       sdot  v15.4s, v7.16b, v3.4b[1]
       subs x20, x20, 8
-      bhs inner_loop
+      bhs .inner_loop
 
       add x20, x20, 8
       cmp x20, 4
-      blt inner_loop_end
+      blt .inner_loop_end
 
-inner_loop_tail:
+.inner_loop_tail:
       ldr s2, [x3], 4
       ldr s3, [x9], 4
       ldr q29, [x5], 16
@@ -91,9 +91,9 @@ inner_loop_tail:
       sdot  v14.4s, v7.16b, v2.4b[0]
       sdot  v15.4s, v7.16b, v3.4b[0]
       subs x20, x20, 4
-      bne inner_loop_tail
+      bne .inner_loop_tail
 
-inner_loop_end:
+.inner_loop_end:
 
       # Convert from int32 to float.
       scvtf v12.4s, v12.4s, #4
@@ -133,38 +133,38 @@ inner_loop_end:
 
       # Check whether full or partial store.
       cmp x1, 8
-      b.lo tail_4
+      b.lo .tail_4
       stp  q12, q14, [x6], 32
       stp  q13, q15, [x13], 32
       sub x3, x3, x2
       sub x9, x9, x2
 
       sub x1, x1, 8
-      b.ne outer_loop
-      b return
+      b.ne .outer_loop
+      b .return
 
-tail_4:
-      tbz w1, 2, tail_2
+.tail_4:
+      tbz w1, 2, .tail_2
       str  q12, [x6], 16
       str  q13, [x13], 16
       mov  v12.16b, v14.16b
       mov  v13.16b, v15.16b
 
 
-tail_2:
-      tbz w1, 1, tail_1
+.tail_2:
+      tbz w1, 1, .tail_1
       str  d12, [x6], 8
       str  d13, [x13], 8
       dup d12, v12.d[1]
       dup d13, v13.d[1]
 
 
-tail_1:
-      tbz w1, 0, return
+.tail_1:
+      tbz w1, 0, .return
       str  s12, [x6]
       str  s13, [x13]
 
-return:
+.return:
       # Restore the callee saved GP registers.
       ldp x19, x20, [sp, -64]
       ldp x21, x22, [sp, -48]

@@ -91,7 +91,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_4x16c2__asm_amd64_avx512f_broadcast
       mov r11, 0x5555
       kmovw k3, r11d
 
-outer_loop:
+.outer_loop:
       # Initialize k counter.
       mov r11, 0
       vmovaps  zmm7, [r9 + 0]
@@ -109,9 +109,9 @@ outer_loop:
 
       # Are there at least 8 bytes?
       cmp rdx, 8
-      js inner_loop_tail
+      js .inner_loop_tail
 
-inner_loop:
+.inner_loop:
       vmovaps  zmm7, [r9 + 0]
       vmovaps  zmm8, [r9 + 64]
       add r9, 128
@@ -130,7 +130,7 @@ inner_loop:
 
       add r11, 8
       cmp rdx, r11
-      jne inner_loop
+      jne .inner_loop
 
       # Store nc_register.
       mov [rsp + 96], rsi
@@ -139,9 +139,9 @@ inner_loop:
       # Check if channels are odd.
       test rsi, rsi
       mov rsi, [rsp + 96]
-      jz inner_loop_end
+      jz .inner_loop_end
 
-inner_loop_tail:
+.inner_loop_tail:
       vmovaps  zmm7, [r9 + 0]
       vmovaps  zmm8, [r9 + 64]
       add r9, 128
@@ -157,7 +157,7 @@ inner_loop_tail:
       vbroadcastsd zmm5, QWORD PTR [r14 + r11]
       vfmadd231ps  zmm14{k3}, zmm5, zmm7
       vfmadd231ps  zmm18{k3}, zmm5, zmm8
-inner_loop_end:
+.inner_loop_end:
       vpsrlq zmm7, zmm11, 32
       vaddps zmm11, zmm11, zmm7
       vpsrlq zmm7, zmm12, 32
@@ -191,7 +191,7 @@ inner_loop_end:
 
       # Check whether full or partial store.
       cmp rsi, 16
-      jl tail
+      jl .tail
 
       vmovups  [r10], zmm11
       vmovups  [r13], zmm12
@@ -203,10 +203,10 @@ inner_loop_end:
       add rbp, 64
 
       sub rsi, 16
-      jne outer_loop
-      jmp return
+      jne .outer_loop
+      jmp .return
 
-tail:
+.tail:
       mov r11, -1
       shlx r11, r11, rsi
       not r11
@@ -216,7 +216,7 @@ tail:
       vmovups  ZMMWORD PTR [rbx]{k1}, zmm13
       vmovups  ZMMWORD PTR [rbp]{k1}, zmm14
 
-return:
+.return:
       add rsp, 128
       mov r13, [rsp]
       mov rsp, r13

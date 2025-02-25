@@ -38,7 +38,7 @@ class Avx512Bf16(isa.Avx512F):
     asm_string += """
       # Are there at least 4 bytes?
       cmp rdx, 4
-      js inner_loop_tail\n"""
+      js .inner_loop_tail\n"""
 
     return asm_string
 
@@ -68,9 +68,9 @@ class Avx512Bf16(isa.Avx512F):
       # Check if channels are odd.
       test {nc_register}, {nc_register}
       mov {nc_register}, [rsp + {nc_offset}]
-      jz inner_loop_end
+      jz .inner_loop_end
 
-      inner_loop_tail:\n"""
+      .inner_loop_tail:\n"""
     if M > self.max_M_before_spilling():
       asm_string += self.inner_loop_spill_gp(M=M, N=N, tail=True)
     else:

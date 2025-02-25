@@ -342,7 +342,7 @@ BEGIN_FUNCTION {function_name}
     return f'mov {reg}, [rsp + {offset}]\n'
 
   def epilogue(self, M, N, isa):
-    restore_stack = '\nreturn:\n'
+    restore_stack = '\n.return:\n'
     if isa.stack_size(M) != 0:
       restore_stack += 'add rsp, {stack_ptr_sub}\n'.format(
           stack_ptr_sub=isa.stack_size(M)
@@ -388,13 +388,13 @@ END_FUNCTION {function_name}.dfsan
     return ''
 
   def inner_loop(self, M, N):
-    asm_string = '\ninner_loop:\n'
+    asm_string = '\n.inner_loop:\n'
     if M > self.max_M_before_spilling():
       asm_string += self.inner_loop_spill_gp(M, N)
     else:
       asm_string += self.inner_loop_small_M_N(M, N)
     # loop counter
-    asm_string += self.cmp_k_and_jump_if_less(label='inner_loop')
+    asm_string += self.cmp_k_and_jump_if_less(label='.inner_loop')
     asm_string += self.inner_loop_tail(M, N)
 
     return asm_string

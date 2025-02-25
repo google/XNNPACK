@@ -181,7 +181,7 @@ class Avx512F(isa.Fma3):
     asm_string += """
       # Check whether full or partial store.
       cmp {nc}, {n_step}
-      jl tail\n""".format(n_step=N, N_2=N // 2, nc=nc_reg)
+      jl .tail\n""".format(n_step=N, N_2=N // 2, nc=nc_reg)
     for mr in range(0, M):
       asm_string += """
       vmovups  [{c_reg}], z{ACC}""".format(
@@ -207,11 +207,11 @@ class Avx512F(isa.Fma3):
         asm_string += POP_C.format(C_REG=cm_registers[mr], offset=sp_offset)
     CHECK = """
       sub {nc}, {n_step}
-      jne outer_loop
-      jmp return\n""".format(n_step=N, nc=nc_reg)
+      jne .outer_loop
+      jmp .return\n""".format(n_step=N, nc=nc_reg)
     asm_string += CHECK
 
-    asm_string += '\ntail:'
+    asm_string += '\n.tail:'
     if N == 64:
       asm_string += """
       mov {tmp1}, -1
@@ -396,7 +396,7 @@ class Avx512FC(Avx512F):
     asm_string += f"""
       # Are there at least {c} bytes?
       cmp rdx, {c}
-      js inner_loop_tail\n"""
+      js .inner_loop_tail\n"""
 
     return asm_string
 
@@ -416,9 +416,9 @@ class Avx512FC(Avx512F):
       # Check if channels are odd.
       test {nc_register}, {nc_register}
       mov {nc_register}, [rsp + {nc_offset}]
-      jz inner_loop_end
+      jz .inner_loop_end
 
-      inner_loop_tail:\n"""
+      .inner_loop_tail:\n"""
     if M > self.max_M_before_spilling():
       asm_string += self.inner_loop_spill_gp(M=M, N=N, tail=True)
     else:

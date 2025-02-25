@@ -39,14 +39,14 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x16__asm_amd64_avx512f_broadcast
       # Allocate some space on the stack.
       sub rsp, 128
 
-outer_loop:
+.outer_loop:
       # Initialize k counter.
       mov r11, 0
       # Initialize accumulators with the biases.
       vmovaps  zmm11, [r9 + 0]
       add r9, 64
 
-inner_loop:
+.inner_loop:
       vmovaps  zmm7, [r9 + 0]
       add r9, 64
       vbroadcastss zmm2, DWORD PTR [rcx + r11]
@@ -54,31 +54,31 @@ inner_loop:
 
       add r11, 4
       cmp rdx, r11
-      jne inner_loop
-inner_loop_end:
+      jne .inner_loop
+.inner_loop_end:
       # Min/max clamping.
       vminps  zmm11, zmm1, zmm11
       vmaxps  zmm11, zmm0, zmm11
 
       # Check whether full or partial store.
       cmp rsi, 16
-      jl tail
+      jl .tail
 
       vmovups  [r10], zmm11
       add r10, 64
 
       sub rsi, 16
-      jne outer_loop
-      jmp return
+      jne .outer_loop
+      jmp .return
 
-tail:
+.tail:
       mov r11, -1
       shlx r11, r11, rsi
       not r11
       kmovw k1, r11d
       vmovups  ZMMWORD PTR [r10]{k1}, zmm11
 
-return:
+.return:
       add rsp, 128
       mov r13, [rsp]
       mov rsp, r13

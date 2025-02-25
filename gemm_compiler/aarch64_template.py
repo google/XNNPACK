@@ -158,10 +158,10 @@ BEGIN_FUNCTION {function_name}
       k_register = self.k_register()
       asm_string += f'\n# Are there at least {DECREMENT} bytes?\n'
       asm_string += f'cmp {k_register}, {DECREMENT}\n'
-      asm_string += f'blt inner_loop_tail\n'
+      asm_string += f'blt .inner_loop_tail\n'
       asm_string += f'sub {k_register}, {k_register}, {DECREMENT}\n'
 
-    asm_string += '\ninner_loop:\n'
+    asm_string += '\n.inner_loop:\n'
     decrement = 4 * self.unroll_factor
     if 'before' in self.input_asm():
       asm_string += self.input_asm()['before']
@@ -179,7 +179,7 @@ BEGIN_FUNCTION {function_name}
     # weights
     if 'before' in self.weights_asm():
       asm_string += self.weights_asm()['before']
-    inner_loop_label = 'inner_loop'
+    inner_loop_label = '.inner_loop'
     if self.unroll_factor > 1:
       for u in range(self.unroll_factor):
         asm_string += self.do_loop(M, N, u)
@@ -191,9 +191,9 @@ BEGIN_FUNCTION {function_name}
       asm_string += f"""
       add x20, x20, {decrement}
       cmp x20, 4
-      blt inner_loop_end
-      \ninner_loop_tail:\n"""
-      inner_loop_label = 'inner_loop_tail'
+      blt .inner_loop_end
+      \n.inner_loop_tail:\n"""
+      inner_loop_label = '.inner_loop_tail'
 
     for mr in range(0, M):
       for l in self.base_input_asm()['loop']:
@@ -258,7 +258,7 @@ BEGIN_FUNCTION {function_name}
 
   def epilogue(self, M, N, isa):
     restore_stack = """
-return:
+.return:
       # Restore the callee saved GP registers.
       ldp x19, x20, [sp, -64]
       ldp x21, x22, [sp, -48]
