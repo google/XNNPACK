@@ -61,6 +61,7 @@ SET(PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-vclamp/gen/f16-vclamp-neonfp16arith-u16.c
   src/f16-vcmul/gen/f16-vcmul-neonfp16arith-u16.c
   src/f16-velu/gen/f16-velu-neonfp16arith-rr1-p3-u16.c
+  src/f16-vgelu/gen/f16-vgelu-neonfp16arith-rational-6-4-div.c
   src/f16-vhswish/gen/f16-vhswish-neonfp16arith-u16.c
   src/f16-vlrelu/gen/f16-vlrelu-neonfp16arith-u16.c
   src/f16-vmulcaddc/gen/f16-vmulcaddc-c8-minmax-neonfp16arith-2x.c

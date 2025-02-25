@@ -301,7 +301,7 @@ static void benchmark_tflite_unary_operator(
 
   flatbuffers::FlatBufferBuilder builder;
   const flatbuffers::Offset<tflite::OperatorCode> operator_code =
-      CreateOperatorCode(builder, op_code);
+      CreateOperatorCode(builder, 0, 0, 1, op_code);
 
   const std::array<flatbuffers::Offset<tflite::Buffer>, 1> buffers{{
       tflite::CreateBuffer(builder, builder.CreateVector({})),

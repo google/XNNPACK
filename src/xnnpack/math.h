@@ -500,9 +500,7 @@ XNN_INLINE static uint16_t math_cvt_bf16_fp32(float x) {
 #define XNN_HAVE_FLOAT16 1
 #endif
 
-#if (defined(__aarch64__) && !defined(_MSC_VER)) &&     \
-    ((defined(__clang__) && (__clang_major__ >= 15)) || \
-     (XNN_GNUC_ACTUAL >= 13)) &&                        \
+#if ((XNN_ARCH_ARM || XNN_ARCH_ARM64) && !defined(_MSC_VER)) && \
     defined(__ARM_FEATURE_FP16_SCALAR_ARITHMETIC)
 #define XNN_HAVE_FLOAT16 1
 #endif

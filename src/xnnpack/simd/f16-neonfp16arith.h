@@ -22,11 +22,17 @@ typedef float16x8_t xnn_simd_f16_t;
 
 #define XNN_SIMD_CONST_F16(var, val) const float16x8_t var = vdupq_n_f16(val);
 
-#define XNN_SIMD_CONST_F16_FROM_FLOAT(var, val) \
-  const float16x8_t var = vdupq_n_f16(xnn_float16_from_float(val));
-
 #define XNN_SIMD_CONST_F16_FROM_INT16(var, val) \
-  const float16x8_t var = vreinterpretq_f16_u16(vdupq_n_u16(val));
+  const float16x8_t var = vreinterpretq_f16_u16(vdupq_n_u16(val))
+
+#if XNN_HAVE_FLOAT16
+#define XNN_SIMD_CONST_F16_FROM_FLOAT(var, val) \
+  const float16x8_t var = vdupq_n_f16(xnn_float16_from_float(val))
+#else
+#define XNN_SIMD_CONST_F16_FROM_FLOAT(var, val) \
+  XNN_SIMD_CONST_F16_FROM_INT16(                \
+      var, xnn_float16_to_bits(xnn_float16_from_float(val)))
+#endif  // XNN_HAVE_FLOAT16
 
 // Whether or not this architecture has native fused multiply-add support.
 #if __ARM_FEATURE_FMA
@@ -51,7 +57,9 @@ typedef float16x8_t xnn_simd_f16_t;
 #include "xnnpack/simd/f16-generic-functions.h"
 
 // Arithmetic operations.
-static XNN_INLINE xnn_simd_f16_t xnn_zero_f16() { return vdupq_n_f16(0.f); }
+static XNN_INLINE xnn_simd_f16_t xnn_zero_f16() {
+  return vreinterpretq_f16_u16(vdupq_n_u16(0));
+}
 
 static XNN_INLINE xnn_simd_f16_t xnn_add_f16(xnn_simd_f16_t a,
                                              xnn_simd_f16_t b) {
@@ -170,28 +178,31 @@ static XNN_INLINE xnn_simd_f16_t xnn_getexp_f16(xnn_simd_f16_t a) {
 }
 
 // Load/store operations.
+//
+// Note that since MSVC doesn't support the `vld1q_f16` and `vst1q_f16`
+// intrinsics, we convert to `u16` for load/store.
 static XNN_INLINE xnn_simd_f16_t xnn_loadu_f16(const xnn_float16 *ptr) {
-  return vld1q_f16((const __fp16 *)ptr);
+  return vreinterpretq_f16_u16(vld1q_u16((const uint16_t *)ptr));
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_load_f16(const xnn_float16 *ptr) {
-  return vld1q_f16((const __fp16 *)ptr);
+  return vreinterpretq_f16_u16(vld1q_u16((const uint16_t *)ptr));
 }
 
 static XNN_INLINE void xnn_storeu_f16(xnn_float16 *ptr, xnn_simd_f16_t v) {
-  vst1q_f16((__fp16 *)ptr, v);
+  vst1q_u16((uint16_t *)ptr, vreinterpretq_u16_f16(v));
 }
 
 static XNN_INLINE void xnn_store_f16(xnn_float16 *ptr, xnn_simd_f16_t v) {
-  vst1q_f16((__fp16 *)ptr, v);
+  vst1q_u16((uint16_t *)ptr, vreinterpretq_u16_f16(v));
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_set1_f16(xnn_float16 v) {
-  return vld1q_dup_f16((const __fp16 *)&v);
+  return vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t *)&v));
 }
 
 static XNN_INLINE xnn_simd_f16_t xnn_set1_or_load_f16(const xnn_float16 *v) {
-  return vld1q_dup_f16((const __fp16 *)v);
+  return vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t *)v));
 }
 
 // Tail load/store operations.
@@ -199,7 +210,7 @@ static XNN_INLINE xnn_simd_f16_t
 xnn_load_tail_f16(const xnn_float16 *input, size_t num_elements) XNN_OOB_READS {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_f16);
-  return vld1q_f16((const __fp16 *)input);
+  return vreinterpretq_f16_u16(vld1q_u16((const uint16_t *)input));
 }
 
 static XNN_INLINE void xnn_store_tail_f16(xnn_float16 *output, xnn_simd_f16_t v,
@@ -209,7 +220,7 @@ static XNN_INLINE void xnn_store_tail_f16(xnn_float16 *output, xnn_simd_f16_t v,
 
   float16x4_t v_low = vget_low_f16(v);
   if (num_elements & 4) {
-    vst1_f16((__fp16 *)output, v_low);
+    vst1_u16((uint16_t *)output, vreinterpret_u16_f16(v_low));
     output += 4;
     v_low = vget_high_f16(v);
   }
@@ -219,7 +230,7 @@ static XNN_INLINE void xnn_store_tail_f16(xnn_float16 *output, xnn_simd_f16_t v,
     v_low = vext_f16(v_low, v_low, 2);
   }
   if (num_elements & 1) {
-    vst1_lane_f16((__fp16 *)output, v_low, 0);
+    vst1_lane_u16((uint16_t *)output, vreinterpret_u16_f16(v_low), 0);
   }
 }
 
