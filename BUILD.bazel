@@ -562,7 +562,12 @@ xnnpack_cc_library(
 xnnpack_cxx_library(
     name = "buffer",
     hdrs = ["src/xnnpack/buffer.h"],
-    deps = [":datatype"],
+    deps = [
+        ":common",
+        ":datatype",
+        ":math",
+        ":xnnpack_h",
+    ],
 )
 
 xnnpack_cc_library(

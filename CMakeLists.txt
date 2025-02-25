@@ -1390,6 +1390,7 @@ IF(XNNPACK_BUILD_TESTS)
         average-pooling-2d-reshape
         batch-matrix-multiply
         binary
+        buffer
         concatenate2
         concatenate3
         concatenate4
@@ -1415,7 +1416,6 @@ IF(XNNPACK_BUILD_TESTS)
         static-reshape
         static-resize-bilinear-2d
         static-transpose
-        transpose-reshape
         unary
         unpooling-2d)
     FOREACH(TEST ${LIBRARY_SUBGRAPH_UNIT_TESTS})

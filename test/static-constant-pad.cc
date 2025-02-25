@@ -3,596 +3,93 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#include <algorithm>  // For std::generate, std::shuffle.
-#include <array>      // For std::array.
-#include <cstddef>  // For size_t.
+#include <cstddef>
 #include <cstdint>
-#include <memory>  // For std::unique_ptr.
-#include <numeric>
-#include <random>  // For std::uniform_real_distribution.
-#include <vector>  // For std::vector.
+#include <vector>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "xnnpack.h"
 #include "xnnpack/buffer.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/math.h"
-#include "xnnpack/node-type.h"
-#include "xnnpack/operator.h"
-#include "xnnpack/requantization.h"
-#include "xnnpack/subgraph.h"
-#include "subgraph-unary-tester.h"
-#include "runtime-flags.h"
-
-using StaticConstantPadTestInt8 = UnaryTest<int8_t>;
-using StaticConstantPadTestUint8 = UnaryTest<uint8_t>;
-using StaticConstantPadTestF16 = UnaryTest<xnn_float16>;
-using StaticConstantPadTestF32 = UnaryTest<float>;
-
-TEST_F(StaticConstantPadTestInt8, define)
-{
-  const int32_t zero_point = i8dist(rng);
-  const float scale = scale_dist(rng);
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> pre_paddings;
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> post_paddings;
-  std::fill(pre_paddings.begin(), pre_paddings.begin() + dims.size(), dim_dist(rng));
-  std::fill(post_paddings.begin(), post_paddings.begin() + dims.size(), dim_dist(rng));
-  float padding_value = f32dist(rng);
-  uint32_t quantized_padding_value = xnn_qs8_quantize(padding_value, scale, zero_point);
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, zero_point, scale, dims.size(), dims.data(), nullptr, 0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, zero_point, scale, dims.size(), dims.data(), nullptr, 1,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_static_constant_pad(
-      subgraph, pre_paddings.data(), post_paddings.data(), padding_value, input_id, output_id, /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_static_constant_pad);
-  for (size_t i = 0; i < dims.size(); i++) {
-    ASSERT_EQ(node->params.static_pad.pre_paddings[i], pre_paddings[i]);
-    ASSERT_EQ(node->params.static_pad.post_paddings[i], post_paddings[i]);
-  }
-  ASSERT_EQ(node->params.static_pad.padding_value, quantized_padding_value);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
-
-TEST_F(StaticConstantPadTestUint8, define)
-{
-  const int32_t zero_point = u8dist(rng);
-  const float scale = scale_dist(rng);
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> pre_paddings;
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> post_paddings;
-  std::fill(pre_paddings.begin(), pre_paddings.begin() + dims.size(), dim_dist(rng));
-  std::fill(post_paddings.begin(), post_paddings.begin() + dims.size(), dim_dist(rng));
-  float padding_value = f32dist(rng);
-  uint32_t quantized_padding_value = xnn_qu8_quantize(padding_value, scale, zero_point);
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, zero_point, scale, dims.size(), dims.data(), nullptr, 0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, zero_point, scale, dims.size(), dims.data(), nullptr, 1,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_static_constant_pad(
-      subgraph, pre_paddings.data(), post_paddings.data(), padding_value, input_id, output_id, /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_static_constant_pad);
-  for (size_t i = 0; i < dims.size(); i++) {
-    ASSERT_EQ(node->params.static_pad.pre_paddings[i], pre_paddings[i]);
-    ASSERT_EQ(node->params.static_pad.post_paddings[i], post_paddings[i]);
-  }
-  ASSERT_EQ(node->params.static_pad.padding_value, quantized_padding_value);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
-
-TEST_F(StaticConstantPadTestF16, define)
-{
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> pre_paddings;
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> post_paddings;
-  std::fill(pre_paddings.begin(), pre_paddings.begin() + dims.size(), dim_dist(rng));
-  std::fill(post_paddings.begin(), post_paddings.begin() + dims.size(), dim_dist(rng));
-  union {
-    xnn_float16 padding_value;
-    uint16_t padding_value_as_bits;
-  };
-  padding_value = static_cast<xnn_float16>(f32dist(rng));
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, dims.size(), dims.data(), nullptr, 0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, dims.size(), dims.data(), nullptr, 1,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_static_constant_pad(
-      subgraph, pre_paddings.data(), post_paddings.data(), padding_value, input_id, output_id, /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_static_constant_pad);
-  for (size_t i = 0; i < dims.size(); i++) {
-    ASSERT_EQ(node->params.static_pad.pre_paddings[i], pre_paddings[i]);
-    ASSERT_EQ(node->params.static_pad.post_paddings[i], post_paddings[i]);
-  }
-  ASSERT_EQ(node->params.static_pad.padding_value, padding_value_as_bits);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
-
-TEST_F(StaticConstantPadTestF32, define)
-{
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> pre_paddings;
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> post_paddings;
-  std::fill(pre_paddings.begin(), pre_paddings.begin() + dims.size(), dim_dist(rng));
-  std::fill(post_paddings.begin(), post_paddings.begin() + dims.size(), dim_dist(rng));
-  float padding_value = f32dist(rng);
-  uint32_t padding_value_as_bits = float_as_uint32(padding_value);
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, 0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, 1,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_static_constant_pad(
-      subgraph, pre_paddings.data(), post_paddings.data(), padding_value, input_id, output_id, /*flags=*/0));
-
-  ASSERT_EQ(subgraph->num_nodes, 1);
-  const struct xnn_node* node = &subgraph->nodes[0];
-  ASSERT_EQ(node->type, xnn_node_type_static_constant_pad);
-  for (size_t i = 0; i < dims.size(); i++) {
-    ASSERT_EQ(node->params.static_pad.pre_paddings[i], pre_paddings[i]);
-    ASSERT_EQ(node->params.static_pad.post_paddings[i], post_paddings[i]);
-  }
-  ASSERT_EQ(node->params.static_pad.padding_value, padding_value_as_bits);
-  ASSERT_EQ(node->num_inputs, 1);
-  ASSERT_EQ(node->inputs[0], input_id);
-  ASSERT_EQ(node->num_outputs, 1);
-  ASSERT_EQ(node->outputs[0], output_id);
-  ASSERT_EQ(node->flags, 0);
-}
-
-TEST_F(StaticConstantPadTestInt8, matches_operator_api)
-{
-  const int32_t zero_point = i8dist(rng);
-  const float scale = scale_dist(rng);
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> pre_paddings;
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> post_paddings;
-  std::fill(pre_paddings.begin(), pre_paddings.begin() + dims.size(), dim_dist(rng));
-  std::fill(post_paddings.begin(), post_paddings.begin() + dims.size(), dim_dist(rng));
-  float padding_value = f32dist(rng);
-  uint32_t quantized_padding_value = xnn_qs8_quantize(padding_value, scale, zero_point);
-  std::vector<size_t> output_dims = dims;
-  for (size_t i = 0; i < dims.size(); i++) {
-    output_dims[i] = pre_paddings[i] + output_dims[i] + post_paddings[i];
-  }
-  // Output sizes
-  operator_output = xnnpack::Buffer<int8_t>(NumElements(output_dims));
-  subgraph_output = xnnpack::Buffer<int8_t>(operator_output.size());
-
-  std::iota(input.begin(), input.end(), 0);
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_constant_pad_nd_x8(&quantized_padding_value, /*flags=*/0, &op);
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_reshape_constant_pad_nd_x8(
-      op, dims.size(), dims.data(), pre_paddings.data(), post_paddings.data(), /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_constant_pad_nd_x8(op, input.data(), operator_output.data()));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_qint8, zero_point, scale, dims.size(), dims.data(), nullptr, 0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_quantized_tensor_value(
-      subgraph, xnn_datatype_qint8, zero_point, scale, output_dims.size(), output_dims.data(), nullptr, 1,
-      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_static_constant_pad(
-      subgraph, pre_paddings.data(), post_paddings.data(), padding_value, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  ASSERT_EQ(subgraph_output, operator_output);
-}
-
-TEST_F(StaticConstantPadTestUint8, matches_operator_api)
-{
-  const int32_t zero_point = u8dist(rng);
-  const float scale = scale_dist(rng);
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> pre_paddings;
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> post_paddings;
-  std::fill(pre_paddings.begin(), pre_paddings.begin() + dims.size(), dim_dist(rng));
-  std::fill(post_paddings.begin(), post_paddings.begin() + dims.size(), dim_dist(rng));
-  float padding_value = f32dist(rng);
-  uint32_t quantized_padding_value = xnn_qu8_quantize(padding_value, scale, zero_point);
-  std::vector<size_t> output_dims = dims;
-  for (size_t i = 0; i < dims.size(); i++) {
-    output_dims[i] = pre_paddings[i] + output_dims[i] + post_paddings[i];
-  }
-  // Output sizes
-  operator_output = xnnpack::Buffer<uint8_t>(NumElements(output_dims));
-  subgraph_output = xnnpack::Buffer<uint8_t>(operator_output.size());
-
-  std::iota(input.begin(), input.end(), 0);
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_constant_pad_nd_x8(&quantized_padding_value, /*flags=*/0, &op);
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_reshape_constant_pad_nd_x8(
-      op, dims.size(), dims.data(), pre_paddings.data(), post_paddings.data(), /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_constant_pad_nd_x8(op, input.data(), operator_output.data()));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_quantized_tensor_value(
-                          subgraph, xnn_datatype_quint8, zero_point, scale, dims.size(), dims.data(), nullptr, 0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_quantized_tensor_value(
-      subgraph, xnn_datatype_quint8, zero_point, scale, output_dims.size(), output_dims.data(), nullptr, 1,
-      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_static_constant_pad(
-      subgraph, pre_paddings.data(), post_paddings.data(), padding_value, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  ASSERT_EQ(subgraph_output, operator_output);
-}
-
-TEST_F(StaticConstantPadTestF16, matches_operator_api)
-{
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> pre_paddings;
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> post_paddings;
-  std::fill(pre_paddings.begin(), pre_paddings.begin() + dims.size(), dim_dist(rng));
-  std::fill(post_paddings.begin(), post_paddings.begin() + dims.size(), dim_dist(rng));
-  float padding_value = f32dist(rng);
-  xnn_float16 padding_value_half = static_cast<xnn_float16>(padding_value);
-  std::vector<size_t> output_dims = dims;
-  for (size_t i = 0; i < dims.size(); i++) {
-    output_dims[i] = pre_paddings[i] + output_dims[i] + post_paddings[i];
-  }
-  // Output sizes
-  operator_output = xnnpack::Buffer<xnn_float16>(NumElements(output_dims));
-  subgraph_output = xnnpack::Buffer<xnn_float16>(operator_output.size());
-
-  std::iota(input.begin(), input.end(), 0.0f);
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_constant_pad_nd_x16(&padding_value_half, /*flags=*/0, &op);
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_reshape_constant_pad_nd_x16(
-      op, dims.size(), dims.data(), pre_paddings.data(), post_paddings.data(), /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_constant_pad_nd_x16(op, input.data(), operator_output.data()));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp16, dims.size(), dims.data(), nullptr, 0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp16, output_dims.size(), output_dims.data(), nullptr, 1,
-      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_static_constant_pad(
-      subgraph, pre_paddings.data(), post_paddings.data(), padding_value, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  ASSERT_EQ(subgraph_output, operator_output);
-}
-
-TEST_F(StaticConstantPadTestF32, matches_operator_api)
-{
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> pre_paddings;
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> post_paddings;
-  std::fill(pre_paddings.begin(), pre_paddings.begin() + dims.size(), dim_dist(rng));
-  std::fill(post_paddings.begin(), post_paddings.begin() + dims.size(), dim_dist(rng));
-  float padding_value = f32dist(rng);
-  uint32_t padding_value_as_u32 = float_as_uint32(padding_value);
-  std::vector<size_t> output_dims = dims;
-  for (size_t i = 0; i < dims.size(); i++) {
-    output_dims[i] = pre_paddings[i] + output_dims[i] + post_paddings[i];
-  }
-  // Output sizes
-  operator_output = xnnpack::Buffer<float>(NumElements(output_dims));
-  subgraph_output = xnnpack::Buffer<float>(operator_output.size());
-
-  std::iota(input.begin(), input.end(), 0.0f);
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  // Call operator API.
-  xnn_operator_t op = nullptr;
-  const xnn_status status = xnn_create_constant_pad_nd_x32(&padding_value_as_u32, /*flags=*/0, &op);
-  if (status == xnn_status_unsupported_hardware) {
-    GTEST_SKIP();
-  }
-  ASSERT_EQ(xnn_status_success, status);
-  ASSERT_NE(nullptr, op);
-  std::unique_ptr<xnn_operator, decltype(&xnn_delete_operator)> auto_op(op, xnn_delete_operator);
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_reshape_constant_pad_nd_x32(
-      op, dims.size(), dims.data(), pre_paddings.data(), post_paddings.data(), /*threadpool=*/nullptr));
-  ASSERT_EQ(xnn_status_success, xnn_setup_constant_pad_nd_x32(op, input.data(), operator_output.data()));
-  ASSERT_EQ(xnn_status_success, xnn_run_operator(op, /*threadpool=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, 0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr, 1,
-      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_static_constant_pad(
-      subgraph, pre_paddings.data(), post_paddings.data(), padding_value, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  ASSERT_EQ(subgraph_output, operator_output);
-}
-
-TEST_F(StaticConstantPadTestF32, reshape_output)
-{
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> pre_paddings;
-  std::array<size_t, XNN_MAX_TENSOR_DIMS> post_paddings;
-  std::fill(pre_paddings.begin(), pre_paddings.begin() + dims.size(), dim_dist(rng));
-  std::fill(post_paddings.begin(), post_paddings.begin() + dims.size(), dim_dist(rng));
-  float padding_value = f32dist(rng);
-  std::vector<size_t> output_dims = dims;
-  for (size_t i = 0; i < dims.size(); i++) {
-    output_dims[i] = pre_paddings[i] + output_dims[i] + post_paddings[i];
-  }
-  subgraph_output = xnnpack::Buffer<float>(NumElements(output_dims));
-
-  std::iota(input.begin(), input.end(), 0.0f);
-
-  ASSERT_EQ(xnn_status_success, xnn_initialize(/*allocator=*/nullptr));
-
-  // Call subgraph API.
-  xnn_subgraph_t subgraph = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_subgraph(/*external_value_ids=*/2, /*flags=*/0, &subgraph));
-  std::unique_ptr<xnn_subgraph, decltype(&xnn_delete_subgraph)> auto_subgraph(subgraph, xnn_delete_subgraph);
-
-  input_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success, xnn_define_tensor_value(
-                          subgraph, xnn_datatype_fp32, dims.size(), dims.data(), nullptr, 0,
-                          /*flags=*/XNN_VALUE_FLAG_EXTERNAL_INPUT, &input_id));
-  ASSERT_NE(input_id, XNN_INVALID_NODE_ID);
-
-  output_id = XNN_INVALID_NODE_ID;
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_tensor_value(
-      subgraph, xnn_datatype_fp32, output_dims.size(), output_dims.data(), nullptr, 1,
-      /*flags=*/XNN_VALUE_FLAG_EXTERNAL_OUTPUT, &output_id));
-  ASSERT_NE(output_id, XNN_INVALID_NODE_ID);
-
-  ASSERT_EQ(
-    xnn_status_success,
-    xnn_define_static_constant_pad(
-      subgraph, pre_paddings.data(), post_paddings.data(), padding_value, input_id, output_id, /*flags=*/0));
-
-  xnn_runtime_t runtime = nullptr;
-  ASSERT_EQ(xnn_status_success, xnn_create_runtime_v3(subgraph, nullptr, nullptr, xnn_test_runtime_flags(), &runtime));
-  ASSERT_NE(nullptr, runtime);
-  std::unique_ptr<xnn_runtime, decltype(&xnn_delete_runtime)> auto_runtime(runtime, xnn_delete_runtime);
-  std::array<xnn_external_value, 2> external = {
-    xnn_external_value{input_id, input.data()}, xnn_external_value{output_id, subgraph_output.data()}};
-  ASSERT_EQ(xnn_status_success, xnn_setup_runtime(runtime, external.size(), external.data()));
-  ASSERT_EQ(xnn_status_success, xnn_invoke_runtime(runtime));
-
-  if (!dims.empty()) {
-    dims[0] += 2;
-    ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, dims.size(), dims.data()));
-    ASSERT_EQ(xnn_status_success, xnn_reshape_runtime(runtime));
-    const struct xnn_node* node = &subgraph->nodes[0];
-    const xnn_shape* output_shape = &runtime->values[node->outputs[0]].shape;
-    for (size_t i = 0; i < output_shape->num_dims; ++i) {
-      ASSERT_EQ(output_shape->dim[i], dims[i] + pre_paddings[i] + post_paddings[i]);
-    }
-
-    dims[0] -= 1;
-    ASSERT_EQ(xnn_status_success, xnn_reshape_external_value(runtime, input_id, dims.size(), dims.data()));
-    ASSERT_EQ(node->reshape(&runtime->opdata[0], runtime->values, runtime->num_values, /*threadpool=*/nullptr), xnn_status_success);
-    for (size_t i = 0; i < output_shape->num_dims; ++i) {
-      ASSERT_EQ(output_shape->dim[i], dims[i] + pre_paddings[i] + post_paddings[i]);
+#include "replicable_random_device.h"
+#include "subgraph-tester.h"
+
+namespace xnnpack {
+
+template <typename T>
+void TestImpl(size_t rank) {
+  ReplicableRandomDevice rng;
+
+  ASSERT_EQ(xnn_status_success, xnn_initialize(nullptr /* allocator */));
+
+  for (int iters = 0; iters < 100; ++iters) {
+    std::vector<size_t> pre_padding = random_shape(rng, rank, 0, 3);
+    std::vector<size_t> post_padding = random_shape(rng, rank, 0, 3);
+    float pad_value = 1.0f;
+
+    xnn_quantization_params quantization =
+        random_quantization(xnn_datatype_of<T>(), rng);
+
+    // Define subgraph
+    SubgraphTester subgraph(2);
+    subgraph.AddInputTensor(rank, xnn_datatype_of<T>(), quantization, 0)
+        .AddOutputTensor(rank, xnn_datatype_of<T>(), quantization, 1)
+        .AddConstantPad(pre_padding, post_padding, pad_value, 0, 1)
+        .CreateRuntime();
+
+    for (int reshape = 0; reshape < 2; ++reshape) {
+      std::vector<size_t> shape = random_shape(rng, rank);
+
+      Tensor<T> input(shape, PaddingBytes{XNN_EXTRA_BYTES});
+      DatatypeGenerator<T> generator(quantization);
+      input.generate([&]() { return generator(rng); });
+
+      std::vector<size_t> output_shape(shape);
+      for (size_t i = 0; i < rank; ++i) {
+        output_shape[i] += pre_padding[i] + post_padding[i];
+      }
+      Tensor<T> output(output_shape);
+
+      subgraph.ReshapeExternalTensor(shape, input.data(), 0)
+          .ReshapeExternalTensor(output_shape, output.data(), 1)
+          .ReshapeRuntime()
+          .SetupRuntime()
+          .InvokeRuntime();
+
+      // Make the expected output: fill a buffer with padding, and then copy
+      // the unpadded area from the input.
+      Tensor<T> expected(output_shape);
+      expected.fill(quantize<T>(pad_value, quantization));
+      expected.crop_padding(pre_padding, post_padding).assign(input);
+
+      // Verify results.
+      ASSERT_THAT(output, testing::ElementsAreArray(expected));
     }
   }
 }
+
+template <typename T>
+class ConstantPad : public ::testing::TestWithParam<int> {};
+
+using ConstantPadQS8 = ConstantPad<quantized<int8_t>>;
+using ConstantPadQU8 = ConstantPad<quantized<uint8_t>>;
+using ConstantPadF16 = ConstantPad<xnn_float16>;
+using ConstantPadBF16 = ConstantPad<xnn_bfloat16>;
+using ConstantPadF32 = ConstantPad<float>;
+
+TEST_P(ConstantPadQS8, test) { TestImpl<quantized<int8_t>>(GetParam()); }
+TEST_P(ConstantPadQU8, test) { TestImpl<quantized<uint8_t>>(GetParam()); }
+TEST_P(ConstantPadF16, test) { TestImpl<xnn_float16>(GetParam()); }
+TEST_P(ConstantPadBF16, test) { TestImpl<xnn_bfloat16>(GetParam()); }
+TEST_P(ConstantPadF32, test) { TestImpl<float>(GetParam()); }
+
+auto rank_params = testing::Range(1, XNN_MAX_TENSOR_DIMS);
+INSTANTIATE_TEST_SUITE_P(ConstantPad, ConstantPadQS8, rank_params);
+INSTANTIATE_TEST_SUITE_P(ConstantPad, ConstantPadQU8, rank_params);
+INSTANTIATE_TEST_SUITE_P(ConstantPad, ConstantPadF16, rank_params);
+INSTANTIATE_TEST_SUITE_P(ConstantPad, ConstantPadBF16, rank_params);
+INSTANTIATE_TEST_SUITE_P(ConstantPad, ConstantPadF32, rank_params);
+
+}  // namespace xnnpack
