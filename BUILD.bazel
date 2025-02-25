@@ -992,6 +992,7 @@ xnnpack_cc_library(
         ":common",
         ":datatype",
         ":fp16",
+        ":hardware_config",
         ":indirection",
         ":internal",
         ":logging",

@@ -21,6 +21,7 @@
 #include "xnnpack/compute.h"
 #include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
+#include "xnnpack/hardware-config.h"
 #include "xnnpack/indirection.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
@@ -2230,6 +2231,8 @@ static enum xnn_status reshape_igemm(
 static enum xnn_status reshape_dwconv(
     xnn_operator_t convolution_op,
     uint32_t log2_input_element_size,
+    uint32_t log2_filter_element_size,
+    uint32_t extra_weights_elements_size,
     uint32_t log2_accumulator_element_size,
     uint32_t log2_output_element_size,
     size_t* workspace_size,
@@ -2330,6 +2333,7 @@ static enum xnn_status reshape_dwconv(
     }
   }
 
+  const size_t primary_tile = convolution_op->ukernel.dwconv.primary_tile;
   const size_t groups = convolution_op->groups;
   int32_t extra_input_advanced = is_unipass ? 0 : tile_size - convolution_op->ukernel.dwconv.last_tile;
   convolution_op->context.dwconv.dwconv = (struct dwconv_context) {
@@ -2338,14 +2342,17 @@ static enum xnn_status reshape_dwconv(
       .indirect_input_width_stride = (kernel_height * step_width - extra_input_advanced) * sizeof(void*),
       .indirect_input_height_stride = step_height * sizeof(void*),
       .input_batch_stride = (input_height * input_width * convolution_op->input_pixel_stride) << log2_input_element_size,
+      .input_channel_stride = 1 << log2_input_element_size,
       .packed_weights = packed_weights(convolution_op),
+      .weights_channel_stride = (primary_tile << log2_filter_element_size) + extra_weights_elements_size,
       .output_batch_stride = (output_height * output_width * convolution_op->output_pixel_stride) << log2_output_element_size,
       .output_height_stride = (output_width * convolution_op->output_pixel_stride) << log2_output_element_size,
+      .output_pixel_stride = convolution_op->output_pixel_stride << log2_output_element_size,
+      .output_channel_stride = 1 << log2_output_element_size,
       .output_height = output_height,
       .output_width = output_width,
       .groups = groups,
       .zero = convolution_op->zero_buffer,
-      .output_increment = (convolution_op->output_pixel_stride - groups) << log2_output_element_size,
   };
   memcpy(&convolution_op->context.dwconv.dwconv.params, &convolution_op->params, sizeof(convolution_op->context.dwconv.dwconv.params));
 
@@ -2354,9 +2361,18 @@ static enum xnn_status reshape_dwconv(
   convolution_op->compute[dwconv_compute_index].range[1] = output_height;
   convolution_op->state = xnn_run_state_needs_setup;
 
+  const size_t channel_tile = convolution_op->ukernel.dwconv.channel_tile;
   if (is_unipass) {
-    convolution_op->compute[dwconv_compute_index].type = xnn_parallelization_type_2d;
-    convolution_op->compute[dwconv_compute_index].task_2d = (pthreadpool_task_2d_t) xnn_compute_dwconv_unipass;
+    // Be defensive against bogus hardware_config cache size info, assume the L1 cache is at least 32KB.
+    const size_t cache_size = max(32768, xnn_init_hardware_config()->l1_data_cache_bytes / 2);
+    const size_t output_working_set_per_channel =
+        (primary_tile << log2_input_element_size) + (primary_tile << log2_filter_element_size) + extra_weights_elements_size + (1 << log2_output_element_size);
+    const size_t tile_size = divide_round_up(cache_size / output_working_set_per_channel, channel_tile) * channel_tile;
+
+    convolution_op->compute[dwconv_compute_index].range[2] = groups;
+    convolution_op->compute[dwconv_compute_index].tile[0] = max(tile_size, channel_tile);
+    convolution_op->compute[dwconv_compute_index].type = xnn_parallelization_type_3d_tile_1d;
+    convolution_op->compute[dwconv_compute_index].task_3d_tile_1d = (pthreadpool_task_3d_tile_1d_t) xnn_compute_dwconv_unipass;
     convolution_op->context.dwconv.dwconv.unipass_ukernel = convolution_op->ukernel.dwconv.unipass_fn;
   } else {
     const size_t buffer_size =
@@ -2525,7 +2541,7 @@ static enum xnn_status reshape_convolution2d_nhwc(
     case xnn_microkernel_type_dwconv:
       return reshape_dwconv(
           convolution_op,
-          log2_input_element_size, log2_accumulator_element_size, log2_output_element_size,
+          log2_input_element_size, log2_filter_element_size, extra_weights_elements_size, log2_accumulator_element_size, log2_output_element_size,
           workspace_size, workspace_alignment, num_threads);
     case xnn_microkernel_type_vmulcaddc:
       return reshape_vmulcaddc(

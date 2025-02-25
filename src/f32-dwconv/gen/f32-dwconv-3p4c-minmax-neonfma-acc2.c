@@ -31,98 +31,83 @@ void xnn_f32_dwconv_minmax_ukernel_3p4c__neonfma_acc2(
 
   const float32x4_t vmax = vdupq_n_f32(params->scalar.max);
   const float32x4_t vmin = vdupq_n_f32(params->scalar.min);
-  // Supertile chosen to be ~L1 cache size for sizeof(**input) + sizeof(*weights) + sizeof(*output).
-  for (size_t co = 0; co < channels; co += 684) {
-    size_t channel_supertile = 684;
-    if (co + channel_supertile > channels) {
-      channel_supertile = channels - co;
+  do {
+    const float* i0 = input[0];
+    assert(i0 != NULL);
+    if XNN_UNPREDICTABLE(i0 != zero) {
+      i0 = (const float*) ((uintptr_t) i0 + input_offset);
     }
-    float* o = output + co;
-    const float** input_co = input;
-    size_t ow = output_width;
-    // output_increment assumes we process `channels` at a time. Fix it.
-    size_t oi = output_increment + (channels - channel_supertile) * sizeof(float);
-    do {
-      const float* i0 = input_co[0];
-      assert(i0 != NULL);
-      if XNN_UNPREDICTABLE(i0 != zero) {
-        i0 += co;
-        i0 = (const float*) ((uintptr_t) i0 + input_offset);
+    const float* i1 = input[1];
+    assert(i1 != NULL);
+    if XNN_UNPREDICTABLE(i1 != zero) {
+      i1 = (const float*) ((uintptr_t) i1 + input_offset);
+    }
+    const float* i2 = input[2];
+    assert(i2 != NULL);
+    if XNN_UNPREDICTABLE(i2 != zero) {
+      i2 = (const float*) ((uintptr_t) i2 + input_offset);
+    }
+
+    input = (const float**) ((uintptr_t) input + input_stride);
+
+    size_t c = channels;
+    const float* w = weights;
+    for (; c >= 4; c -= 4) {
+      float32x4_t vacc0123p0 = vld1q_f32(w); w += 4;
+
+
+      const float32x4_t vi0x0123 = vld1q_f32(i0); i0 += 4;
+      const float32x4_t vk0x0123 = vld1q_f32(w); w += 4;
+      vacc0123p0 = vfmaq_f32(vacc0123p0, vi0x0123, vk0x0123);
+
+      const float32x4_t vi1x0123 = vld1q_f32(i1); i1 += 4;
+      const float32x4_t vk1x0123 = vld1q_f32(w); w += 4;
+      float32x4_t vacc0123p1 = vmulq_f32(vi1x0123, vk1x0123);
+
+      const float32x4_t vi2x0123 = vld1q_f32(i2); i2 += 4;
+      const float32x4_t vk2x0123 = vld1q_f32(w); w += 4;
+      vacc0123p0 = vfmaq_f32(vacc0123p0, vi2x0123, vk2x0123);
+
+      // Add up all accumulators to vacc0123p0
+      vacc0123p0 = vaddq_f32(vacc0123p0, vacc0123p1);
+
+      float32x4_t vacc0123 = vmaxq_f32(vacc0123p0, vmin);
+      vacc0123 = vminq_f32(vacc0123, vmax);
+
+      vst1q_f32(output, vacc0123); output += 4;
+    }
+    if XNN_UNLIKELY(c != 0) {
+      float32x4_t vacc0123p0 = vld1q_f32(w); w += 4;
+
+
+      const float32x4_t vi0x0123 = vld1q_f32(i0);
+      const float32x4_t vk0x0123 = vld1q_f32(w); w += 4;
+      vacc0123p0 = vfmaq_f32(vacc0123p0, vi0x0123, vk0x0123);
+
+      const float32x4_t vi1x0123 = vld1q_f32(i1);
+      const float32x4_t vk1x0123 = vld1q_f32(w); w += 4;
+      float32x4_t vacc0123p1 = vmulq_f32(vi1x0123, vk1x0123);
+
+      const float32x4_t vi2x0123 = vld1q_f32(i2);
+      const float32x4_t vk2x0123 = vld1q_f32(w); w += 4;
+      vacc0123p0 = vfmaq_f32(vacc0123p0, vi2x0123, vk2x0123);
+
+      // Add up all accumulators to vacc0123p0
+      vacc0123p0 = vaddq_f32(vacc0123p0, vacc0123p1);
+
+      float32x4_t vacc0123 = vmaxq_f32(vacc0123p0, vmin);
+      vacc0123 = vminq_f32(vacc0123, vmax);
+
+      float32x2_t vacc01 = vget_low_f32(vacc0123);
+      if (c & 2) {
+        vst1_f32(output, vacc01); output += 2;
+        vacc01 = vget_high_f32(vacc0123);
       }
-      const float* i1 = input_co[1];
-      assert(i1 != NULL);
-      if XNN_UNPREDICTABLE(i1 != zero) {
-        i1 += co;
-        i1 = (const float*) ((uintptr_t) i1 + input_offset);
+      if (c & 1) {
+        vst1_lane_f32(output, vacc01, 0); output += 1;
       }
-      const float* i2 = input_co[2];
-      assert(i2 != NULL);
-      if XNN_UNPREDICTABLE(i2 != zero) {
-        i2 += co;
-        i2 = (const float*) ((uintptr_t) i2 + input_offset);
-      }
+    }
 
-      input_co = (const float**) ((uintptr_t) input_co + input_stride);
-
-      size_t c = channel_supertile;
-      const float* w = weights + co * 4;
-      for (; c >= 4; c -= 4) {
-        float32x4_t vacc0123p0 = vld1q_f32(w); w += 4;
-
-
-        const float32x4_t vi0x0123 = vld1q_f32(i0); i0 += 4;
-        const float32x4_t vk0x0123 = vld1q_f32(w); w += 4;
-        vacc0123p0 = vfmaq_f32(vacc0123p0, vi0x0123, vk0x0123);
-
-        const float32x4_t vi1x0123 = vld1q_f32(i1); i1 += 4;
-        const float32x4_t vk1x0123 = vld1q_f32(w); w += 4;
-        float32x4_t vacc0123p1 = vmulq_f32(vi1x0123, vk1x0123);
-
-        const float32x4_t vi2x0123 = vld1q_f32(i2); i2 += 4;
-        const float32x4_t vk2x0123 = vld1q_f32(w); w += 4;
-        vacc0123p0 = vfmaq_f32(vacc0123p0, vi2x0123, vk2x0123);
-
-        // Add up all accumulators to vacc0123p0
-        vacc0123p0 = vaddq_f32(vacc0123p0, vacc0123p1);
-
-        float32x4_t vacc0123 = vmaxq_f32(vacc0123p0, vmin);
-        vacc0123 = vminq_f32(vacc0123, vmax);
-
-        vst1q_f32(o, vacc0123); o += 4;
-      }
-      if XNN_UNLIKELY(c != 0) {
-        float32x4_t vacc0123p0 = vld1q_f32(w); w += 4;
-
-
-        const float32x4_t vi0x0123 = vld1q_f32(i0);
-        const float32x4_t vk0x0123 = vld1q_f32(w); w += 4;
-        vacc0123p0 = vfmaq_f32(vacc0123p0, vi0x0123, vk0x0123);
-
-        const float32x4_t vi1x0123 = vld1q_f32(i1);
-        const float32x4_t vk1x0123 = vld1q_f32(w); w += 4;
-        float32x4_t vacc0123p1 = vmulq_f32(vi1x0123, vk1x0123);
-
-        const float32x4_t vi2x0123 = vld1q_f32(i2);
-        const float32x4_t vk2x0123 = vld1q_f32(w); w += 4;
-        vacc0123p0 = vfmaq_f32(vacc0123p0, vi2x0123, vk2x0123);
-
-        // Add up all accumulators to vacc0123p0
-        vacc0123p0 = vaddq_f32(vacc0123p0, vacc0123p1);
-
-        float32x4_t vacc0123 = vmaxq_f32(vacc0123p0, vmin);
-        vacc0123 = vminq_f32(vacc0123, vmax);
-
-        float32x2_t vacc01 = vget_low_f32(vacc0123);
-        if (c & 2) {
-          vst1_f32(o, vacc01); o += 2;
-          vacc01 = vget_high_f32(vacc0123);
-        }
-        if (c & 1) {
-          vst1_lane_f32(o, vacc01, 0); o += 1;
-        }
-      }
-
-      o = (float*) ((uintptr_t) o + oi);
-    } while (--ow != 0);
-  }
+    output = (float*) ((uintptr_t) output + output_increment);
+  } while (--output_width != 0);
 }

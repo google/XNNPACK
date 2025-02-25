@@ -816,15 +816,18 @@ struct dwconv_context {
   size_t indirect_input_height_stride;
   size_t input_offset;
   size_t input_batch_stride;
+  size_t input_channel_stride;
   const void* packed_weights;
+  size_t weights_channel_stride;
   void* output;
   size_t output_batch_stride;
   size_t output_height_stride;
+  size_t output_pixel_stride;
+  size_t output_channel_stride;
   size_t output_height;
   size_t output_width;
   size_t groups;
   const void* zero;
-  size_t output_increment;
   union {
     union xnn_qs8_conv_minmax_params qs8;
     union xnn_qu8_conv_minmax_params qu8;
@@ -849,7 +852,9 @@ struct dwconv_context {
   XNN_PRIVATE void xnn_compute_dwconv_unipass(
       const struct dwconv_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
-      size_t output_y);
+      size_t output_y,
+      size_t output_c_start,
+      size_t output_c_tile);
   XNN_PRIVATE void xnn_compute_dwconv_multipass(
       const struct dwconv_context context[restrict XNN_MIN_ELEMENTS(1)],
       size_t batch_index,
