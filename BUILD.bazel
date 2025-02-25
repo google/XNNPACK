@@ -59,7 +59,6 @@ exports_files(["preamble.js.lds"])
 
 MICROKERNEL_DEFS = [
     "src/f16-avgpool/f16-avgpool-minmax.h",
-    "src/f16-dwconv/f16-dwconv-minmax-multipass.h",
     "src/f16-dwconv/f16-dwconv-minmax-unipass.h",
     "src/f16-f32-vcvt/f16-f32-vcvt.h",
     "src/f16-maxpool/f16-maxpool-minmax.h",
@@ -104,9 +103,7 @@ MICROKERNEL_DEFS = [
     "src/f16-vsqrt/f16-vsqrt.h",
     "src/f16-vtanh/f16-vtanh.h",
     "src/f32-avgpool/f32-avgpool-minmax.h",
-    "src/f32-dwconv/f32-dwconv-minmax-multipass.h",
     "src/f32-dwconv/f32-dwconv-minmax-unipass.h",
-    "src/f32-dwconv/f32-dwconv-multipass.h",
     "src/f32-dwconv/f32-dwconv-unipass.h",
     "src/f32-f16-vcvt/f32-f16-vcvt.h",
     "src/f32-maxpool/f32-maxpool-minmax.h",
@@ -159,15 +156,12 @@ MICROKERNEL_DEFS = [
     "src/f32-vsqr/f32-vsqr.h",
     "src/f32-vsqrt/f32-vsqrt.h",
     "src/f32-vtanh/f32-vtanh.h",
-    "src/qs8-dwconv/qs8-dwconv-minmax-multipass-fp32.h",
-    "src/qs8-dwconv/qs8-dwconv-minmax-multipass-rndnu.h",
     "src/qs8-dwconv/qs8-dwconv-minmax-unipass-fp32.h",
     "src/qs8-dwconv/qs8-dwconv-minmax-unipass-rndnu.h",
     "src/qs8-f16-vcvt/qs8-f16-vcvt.h",
     "src/qs8-f32-vcvt/qs8-f32-vcvt.h",
     "src/qs8-packw/qs8-packw.h",
     "src/qs8-qc4w-packw/qs8-qc4w-packw.h",
-    "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-multipass-fp32.h",
     "src/qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-unipass-fp32.h",
     "src/qs8-vadd/qs8-vadd-minmax.h",
     "src/qs8-vaddc/qs8-vaddc-minmax.h",
@@ -178,8 +172,6 @@ MICROKERNEL_DEFS = [
     "src/qs8-vmulc/qs8-vmulc-minmax-fp32.h",
     "src/qs8-vmulc/qs8-vmulc-minmax-rndnu.h",
     "src/qu8-avgpool/qu8-avgpool-minmax.h",
-    "src/qu8-dwconv/qu8-dwconv-minmax-multipass-fp32.h",
-    "src/qu8-dwconv/qu8-dwconv-minmax-multipass-rndnu.h",
     "src/qu8-dwconv/qu8-dwconv-minmax-unipass-fp32.h",
     "src/qu8-dwconv/qu8-dwconv-minmax-unipass-rndnu.h",
     "src/qu8-f32-vcvt/qu8-f32-vcvt.h",
@@ -1552,18 +1544,6 @@ config_setting(
     define_values = {"xnn_enable_gemm_m_specialization": "false"},
 )
 
-# Enables usage of DWCONV multipass kernels.
-config_setting(
-    name = "xnn_enable_dwconv_multipass_explicit_true",
-    define_values = {"xnn_enable_dwconv_multipass": "true"},
-)
-
-# Disables usage of DWCONV multipass kernels.
-config_setting(
-    name = "xnn_enable_dwconv_multipass_explicit_false",
-    define_values = {"xnn_enable_dwconv_multipass": "false"},
-)
-
 # Enables usage of WASM SIMD AVX-256 revectorization kernels.
 config_setting(
     name = "xnn_enable_wasm_revectorize_explicit_true",
@@ -2133,22 +2113,6 @@ alias(
         ":xnn_enable_gemm_m_specialization_explicit_true": ":xnn_enable_gemm_m_specialization_explicit_true",
         ":xnn_enable_gemm_m_specialization_explicit_false": ":xnn_enable_gemm_m_specialization_explicit_true",
         "//conditions:default": ":gemm_m_specialization_enabled_by_default",
-    }),
-)
-
-selects.config_setting_group(
-    name = "dwconv_multipass_enabled_by_default",
-    match_any = [
-        "//conditions:default",
-    ],
-)
-
-alias(
-    name = "dwconv_multipass_enabled",
-    actual = select({
-        ":xnn_enable_dwconv_multipass_explicit_true": ":xnn_enable_dwconv_multipass_explicit_true",
-        ":xnn_enable_dwconv_multipass_explicit_false": ":xnn_enable_dwconv_multipass_explicit_true",
-        "//conditions:default": ":dwconv_multipass_enabled_by_default",
     }),
 )
 

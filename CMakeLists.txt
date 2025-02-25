@@ -53,7 +53,6 @@ ENDIF()
 OPTION(XNNPACK_ENABLE_MEMOPT "Build XNNPACK with optimized memory allocation scheme" ON)
 OPTION(XNNPACK_ENABLE_SPARSE "Build XNNPACK with graph rewriting for sparse inference" ON)
 OPTION(XNNPACK_ENABLE_GEMM_M_SPECIALIZATION "Build XNNPACK with support for selecting microkernel with different MR" ON)
-OPTION(XNNPACK_ENABLE_DWCONV_MULTIPASS "Build XNNPACK with DWCONV multipass microkernels enabled" OFF)
 OPTION(XNNPACK_BUILD_LIBRARY "Build XNNPACK library" ON)
 OPTION(XNNPACK_BUILD_TESTS "Build XNNPACK unit tests" ON)
 OPTION(XNNPACK_BUILD_ALL_MICROKERNELS "Builds all XNNPACK Microkernels" ON)
@@ -327,7 +326,6 @@ ADD_COMPILE_DEFINITIONS("XNN_ENABLE_ASSEMBLY=$<BOOL:${XNNPACK_ENABLE_ASSEMBLY}>"
 ADD_COMPILE_DEFINITIONS("XNN_ENABLE_MEMOPT=$<BOOL:${XNNPACK_ENABLE_MEMOPT}>")
 ADD_COMPILE_DEFINITIONS("XNN_ENABLE_SPARSE=$<BOOL:${XNNPACK_ENABLE_SPARSE}>")
 ADD_COMPILE_DEFINITIONS("XNN_ENABLE_GEMM_M_SPECIALIZATION=$<BOOL:${XNNPACK_ENABLE_GEMM_M_SPECIALIZATION}>")
-ADD_COMPILE_DEFINITIONS("XNN_ENABLE_DWCONV_MULTIPASS=$<BOOL:${XNNPACK_ENABLE_DWCONV_MULTIPASS}>")
 ADD_COMPILE_DEFINITIONS("XNN_ENABLE_HVX=$<BOOL:${XNNPACK_ENABLE_HVX}>")
 ADD_COMPILE_DEFINITIONS("XNN_ENABLE_KLEIDIAI=$<BOOL:${XNNPACK_ENABLE_KLEIDIAI}>")
 
@@ -1558,22 +1556,14 @@ IF(XNNPACK_BUILD_TESTS)
   ENDIF()
 
   SET(MICROKERNEL_DWCONV_UNIT_TESTS
-      f16-dwconv-minmax-multipass
       f16-dwconv-minmax-unipass
       f16-dwconv2d-chw
-      f32-dwconv-minmax-multipass
       f32-dwconv-minmax-unipass
-      f32-dwconv-multipass
       f32-dwconv-unipass
       f32-dwconv2d-chw
-      qs8-dwconv-minmax-multipass-fp32
-      qs8-dwconv-minmax-multipass-rndnu
       qs8-dwconv-minmax-unipass-fp32
       qs8-dwconv-minmax-unipass-rndnu
-      qs8-qc8w-dwconv-minmax-multipass-fp32
       qs8-qc8w-dwconv-minmax-unipass-fp32
-      qu8-dwconv-minmax-multipass-fp32
-      qu8-dwconv-minmax-multipass-rndnu
       qu8-dwconv-minmax-unipass-fp32
       qu8-dwconv-minmax-unipass-rndnu)
   FOREACH(TEST ${MICROKERNEL_DWCONV_UNIT_TESTS})
@@ -1593,12 +1583,8 @@ IF(XNNPACK_BUILD_TESTS)
     ADD_TEST(NAME ${TEST}-test COMMAND ${TEST}-test)
     SET_TARGET_PROPERTIES(${TEST}-test PROPERTIES CXX_EXTENSIONS YES)
   ENDFOREACH()
-  SHARD_TEST(f16-dwconv-minmax-multipass-test 10)
   SHARD_TEST(qs8-dwconv-minmax-unipass-fp32-test 10)
   SHARD_TEST(qs8-qc8w-dwconv-minmax-unipass-fp32-test 10)
-  SHARD_TEST(qu8-dwconv-minmax-multipass-fp32-test 10)
-  SHARD_TEST(qs8-dwconv-minmax-multipass-fp32-test 10)
-  SHARD_TEST(qs8-qc8w-dwconv-minmax-multipass-fp32-test 10)
 
   SET(MICROKERNEL_GEMM_UNIT_TESTS
       bf16-gemm-minmax

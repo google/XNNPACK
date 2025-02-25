@@ -37,19 +37,11 @@ struct xnn_ukernel_conv2d {
 };
 
 struct xnn_ukernel_dwconv {
-  union {
-    xnn_dwconv_unipass_ukernel_fn unipass_fn;
-    xnn_dwconv_multipass_ukernel_fn multipass_fn;
-  };
+  xnn_dwconv_unipass_ukernel_fn unipass_fn;
   uint8_t channel_round;
   uint8_t channel_subtile;
   uint8_t channel_tile;
   uint8_t primary_tile;
-  uint8_t middle_tile;
-  uint8_t last_tile;
-  // For unipass, tile_size == primary_tile, otherwise it is calculated based on
-  // how many pass the middle_tile runs.
-  size_t tile_size;
 };
 
 // Direct 2D Depthwise Convolution

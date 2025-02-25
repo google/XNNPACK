@@ -836,12 +836,7 @@ struct dwconv_context {
   } params;
   union {
     xnn_dwconv_unipass_ukernel_fn unipass_ukernel;
-    xnn_dwconv_multipass_ukernel_fn multipass_ukernel;
   };
-  size_t buffer_size;
-  void* multipass_buffer;
-  // Offset into workspace denoting area usable by multipass buffer.
-  size_t multipass_buffer_offset;
 };
 
 #ifndef __cplusplus
@@ -855,15 +850,6 @@ struct dwconv_context {
       size_t output_y,
       size_t output_c_start,
       size_t output_c_tile);
-  XNN_PRIVATE void xnn_compute_dwconv_multipass(
-      const struct dwconv_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index,
-      size_t output_y);
-  XNN_PRIVATE void xnn_compute_dwconv_multipass_with_thread(
-      const struct dwconv_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t thread_index,
-      size_t batch_index,
-      size_t output_y);
 #endif
 
 struct dwconv2d_context {

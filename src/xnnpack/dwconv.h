@@ -41,31 +41,6 @@ extern "C" {
 #include "qu8-dwconv/qu8-dwconv-minmax-unipass-rndnu.h"
 #undef XNN_DWCONV_UNIPASS
 
-
-#define XNN_DWCONV_MULTIPASS(arch_flags, fn_name, first_pass_tile, middle_pass_tile, last_pass_tile, channel_tile, channel_subtile, channel_round, datatype, weights_type, buffer_type, params_type, init_fn) \
-  XNN_INTERNAL void fn_name(                                   \
-    size_t channels,                                           \
-    size_t output_width,                                       \
-    const datatype** input,                                       \
-    const weights_type* weights,                                      \
-    datatype* output,                                             \
-    intptr_t input_stride,                                     \
-    size_t output_increment,                                   \
-    size_t input_offset,                                       \
-    const datatype* zero,                                         \
-    size_t kernel_size,                                        \
-    buffer_type* buffer,                                             \
-    const params_type params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-#include "f16-dwconv/f16-dwconv-minmax-multipass.h"
-#include "f32-dwconv/f32-dwconv-minmax-multipass.h"
-#include "f32-dwconv/f32-dwconv-multipass.h"
-#include "qs8-dwconv/qs8-dwconv-minmax-multipass-fp32.h"
-#include "qs8-dwconv/qs8-dwconv-minmax-multipass-rndnu.h"
-#include "qs8-qc8w-dwconv/qs8-qc8w-dwconv-minmax-multipass-fp32.h"
-#include "qu8-dwconv/qu8-dwconv-minmax-multipass-fp32.h"
-#include "qu8-dwconv/qu8-dwconv-minmax-multipass-rndnu.h"
-#undef XNN_DWCONV_MULTIPASS
-
 #define DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(fn_name) \
   XNN_INTERNAL void fn_name(                                      \
     size_t input_height,                                          \
