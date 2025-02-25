@@ -29,7 +29,7 @@ void xnn_f32_dwconv_minmax_ukernel_3p16c__avx(
   assert(channels != 0);
   assert(output_width != 0);
 
-  static const int32_t mask_table[14] = {-1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0};
+  static const int32_t mask_table[16] = {-1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0};
 
   const __m256 vmin = _mm256_set1_ps(params->scalar.min);
   const __m256 vmax = _mm256_set1_ps(params->scalar.max);
@@ -132,7 +132,7 @@ void xnn_f32_dwconv_minmax_ukernel_3p16c__avx(
     if XNN_UNLIKELY(c != 0) {
       assert(c >= 1);
       assert(c <= 7);
-      const __m256i vmask = _mm256_loadu_si256((const __m256i*) &mask_table[7 - c]);
+      const __m256i vmask = _mm256_loadu_si256((const __m256i*) &mask_table[8 - c]);
 
       __m256 vacc01234567p0 = _mm256_load_ps(w);
 
@@ -152,21 +152,8 @@ void xnn_f32_dwconv_minmax_ukernel_3p16c__avx(
       __m256 vacc01234567 = _mm256_max_ps(vmin, vacc01234567p0);
       vacc01234567 = _mm256_min_ps(vmax, vacc01234567);
 
-      __m128 vacc0123 = _mm256_castps256_ps128(vacc01234567);
-      if (c & 4) {
-        _mm_storeu_ps(output, vacc0123);
-        vacc0123 = _mm256_extractf128_ps(vacc01234567, 1);
-        output += 4;
-      }
-      if (c & 2) {
-        _mm_storel_pi((__m64*) output, vacc0123);
-        vacc0123 = _mm_movehl_ps(vacc0123, vacc0123);
-        output += 2;
-      }
-      if (c & 1) {
-        _mm_store_ss(output, vacc0123);
-        output += 1;
-      }
+      _mm256_maskstore_ps(output, vmask, vacc01234567);
+      output += c;
     }
 
     output = (float*) ((uintptr_t) output + output_increment);
