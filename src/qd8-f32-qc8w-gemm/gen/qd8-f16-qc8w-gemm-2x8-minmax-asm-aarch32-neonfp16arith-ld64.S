@@ -42,7 +42,7 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16ari
       movlo  r7, r3
       movlo  r4, r6
 
-.outer_loop:
+.Louter_loop:
       # Initialize k counter.
       subs r0, r2, #8
       vld1.32 {q6, q7}, [r5]!
@@ -53,7 +53,7 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16ari
       vmul.s32 q11, q7, d9[0]
 
       # jump to epilogue if lower than 8
-      blo .epilogue
+      blo .Lepilogue
 
       # Load 2 As and B0
       vld1.8 d12, [r5]!
@@ -62,9 +62,9 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16ari
 
       # Are there at least 8 bytes?
       subs r0, r0, #8
-      blo .final_iteration
+      blo .Lfinal_iteration
 
-.inner_loop:
+.Linner_loop:
       vmovl.s8 q6, d12
       vmovl.s8 q0, d0
       vmovl.s8 q1, d2
@@ -118,9 +118,9 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16ari
       vmlal.s16  q9, d15, d1[3]
       vmlal.s16  q11, d15, d3[3]
       subs r0, r0, #8
-      bhs .inner_loop
+      bhs .Linner_loop
 
-.final_iteration:
+.Lfinal_iteration:
       vmovl.s8 q6, d12
       vmovl.s8 q0, d0
       vmovl.s8 q1, d2
@@ -171,9 +171,9 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16ari
       vmlal.s16  q9, d15, d1[3]
       vmlal.s16  q11, d15, d3[3]
       adds r0, r0, #8
-      bne .epilogue
+      bne .Lepilogue
 
-.inner_loop_end:
+.Linner_loop_end:
 
       # Convert from int32 to float.
       vcvt.f32.s32 q8, q8
@@ -221,7 +221,7 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16ari
 
       # Check whether full or partial store.
       cmp r1, #8
-      blo .tail_4
+      blo .Ltail_4
       vst1.16  d16, [r6]!
       vst1.16  d18, [r6]!
       vst1.16  d20, [r4]!
@@ -230,35 +230,35 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16ari
       sub r7, r7, r2
 
       sub r1, r1, #8
-      bne .outer_loop
-      b .return
+      bne .Louter_loop
+      b .Lreturn
 
 
-.tail_4:
+.Ltail_4:
       tst r1, #4
-      beq .tail_2
+      beq .Ltail_2
       vst1.16  {d16}, [r6]!
       vst1.16  {d20}, [r4]!
       vmov  d16, d18
       vmov  d20, d22
 
 
-.tail_2:
+.Ltail_2:
       tst r1, #2
-      beq .tail_1
+      beq .Ltail_1
       vst1.32  {d16[0]}, [r6]!
       vst1.32  {d20[0]}, [r4]!
       vext.8 d16, d16, d17, #4
       vext.8 d20, d20, d21, #4
 
 
-.tail_1:
+.Ltail_1:
       tst r1, #1
-      beq .return
+      beq .Lreturn
       vst1.16  {d16[0]}, [r6]
       vst1.16  {d20[0]}, [r4]
 
-.return:
+.Lreturn:
       # Restore callee saved q4-q7 registers.
       vpop       {d8-d15}
 
@@ -267,7 +267,7 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16ari
 
       bx lr
 
-.epilogue:
+.Lepilogue:
       and r0, r0, #7
 
       # Load 2 As and B0
@@ -284,14 +284,14 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16ari
       vmlal.s16  q9, d13, d0[0]
       vmlal.s16  q11, d13, d2[0]
       cmp r0, #2
-      blo .inner_loop_end
+      blo .Linner_loop_end
       vld1.8 d12, [r5]!
       vmovl.s8 q6, d12
       vmlal.s16  q8, d12, d0[1]
       vmlal.s16  q10, d12, d2[1]
       vmlal.s16  q9, d13, d0[1]
       vmlal.s16  q11, d13, d2[1]
-      beq .inner_loop_end
+      beq .Linner_loop_end
       vld1.8 d12, [r5]!
       vmovl.s8 q6, d12
       vmlal.s16  q8, d12, d0[2]
@@ -299,14 +299,14 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16ari
       vmlal.s16  q9, d13, d0[2]
       vmlal.s16  q11, d13, d2[2]
       cmp r0, #4
-      blo .inner_loop_end
+      blo .Linner_loop_end
       vld1.8 d12, [r5]!
       vmovl.s8 q6, d12
       vmlal.s16  q8, d12, d0[3]
       vmlal.s16  q10, d12, d2[3]
       vmlal.s16  q9, d13, d0[3]
       vmlal.s16  q11, d13, d2[3]
-      beq .inner_loop_end
+      beq .Linner_loop_end
       vld1.8 d12, [r5]!
       vmovl.s8 q6, d12
       vmlal.s16  q8, d12, d1[0]
@@ -314,20 +314,20 @@ BEGIN_FUNCTION xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16ari
       vmlal.s16  q9, d13, d1[0]
       vmlal.s16  q11, d13, d3[0]
       cmp r0, #6
-      blo .inner_loop_end
+      blo .Linner_loop_end
       vld1.8 d12, [r5]!
       vmovl.s8 q6, d12
       vmlal.s16  q8, d12, d1[1]
       vmlal.s16  q10, d12, d3[1]
       vmlal.s16  q9, d13, d1[1]
       vmlal.s16  q11, d13, d3[1]
-      beq .inner_loop_end
+      beq .Linner_loop_end
       vld1.8 d12, [r5]!
       vmovl.s8 q6, d12
       vmlal.s16  q8, d12, d1[2]
       vmlal.s16  q10, d12, d3[2]
       vmlal.s16  q9, d13, d1[2]
       vmlal.s16  q11, d13, d3[2]
-      b .inner_loop_end
+      b .Linner_loop_end
 
 END_FUNCTION xnn_qd8_f16_qc8w_gemm_minmax_ukernel_2x8__asm_aarch32_neonfp16arith_ld64_2

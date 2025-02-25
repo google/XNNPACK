@@ -38,7 +38,7 @@ def generate_gemm_microkernel(
   asm_string += isa.outer_loop_prepare(M=M, N=num_horizontal_registers)
 
   ## the outer loop label
-  asm_string += '\n.outer_loop:\n'
+  asm_string += '\n.Louter_loop:\n'
   asm_string += '# Initialize k counter.\n'
   asm_string += isa.initialize_k_register(k_register)
 
@@ -54,7 +54,7 @@ def generate_gemm_microkernel(
   ## inner loop
   asm_string += isa.inner_loop(M, N)
 
-  asm_string += '.inner_loop_end:\n'
+  asm_string += '.Linner_loop_end:\n'
   asm_string += isa.dequantize(M=M, N=num_horizontal_registers, W=w_ptr_reg)
 
   ## min/max clamping

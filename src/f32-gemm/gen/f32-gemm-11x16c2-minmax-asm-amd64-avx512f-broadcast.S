@@ -188,7 +188,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_11x16c2__asm_amd64_avx512f_broadcast
       mov r11, 0x5555
       kmovw k3, r11d
 
-.outer_loop:
+.Louter_loop:
       # Initialize k counter.
       mov r11, 0
       # Read a pointers from stack into GP registers.
@@ -233,9 +233,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_11x16c2__asm_amd64_avx512f_broadcast
 
       # Are there at least 8 bytes?
       cmp rdx, 8
-      js .inner_loop_tail
+      js .Linner_loop_tail
 
-.inner_loop:
+.Linner_loop:
       vmovaps  zmm7, [r9 + 0]
       vmovaps  zmm8, [r9 + 64]
       add r9, 128
@@ -275,7 +275,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_11x16c2__asm_amd64_avx512f_broadcast
 
       add r11, 8
       cmp rdx, r11
-      jne .inner_loop
+      jne .Linner_loop
 
       # Store nc_register.
       mov [rsp + 208], rsi
@@ -284,9 +284,9 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_11x16c2__asm_amd64_avx512f_broadcast
       # Check if channels are odd.
       test rsi, rsi
       mov rsi, [rsp + 208]
-      jz .inner_loop_end
+      jz .Linner_loop_end
 
-.inner_loop_tail:
+.Linner_loop_tail:
       vmovaps  zmm7, [r9 + 0]
       vmovaps  zmm8, [r9 + 64]
       add r9, 128
@@ -323,7 +323,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_11x16c2__asm_amd64_avx512f_broadcast
       vbroadcastsd zmm2, QWORD PTR [rdi + r11]
       vfmadd231ps  zmm21{k3}, zmm2, zmm7
       vfmadd231ps  zmm10{k3}, zmm2, zmm8
-.inner_loop_end:
+.Linner_loop_end:
       vpsrlq zmm7, zmm11, 32
       vaddps zmm11, zmm11, zmm7
       vpsrlq zmm7, zmm12, 32
@@ -419,7 +419,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_11x16c2__asm_amd64_avx512f_broadcast
 
       # Check whether full or partial store.
       cmp rsi, 16
-      jl .tail
+      jl .Ltail
 
       vmovups  [rcx], zmm11
       vmovups  [rax], zmm12
@@ -458,10 +458,10 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_11x16c2__asm_amd64_avx512f_broadcast
       mov [rsp + 184], rdi
 
       sub rsi, 16
-      jne .outer_loop
-      jmp .return
+      jne .Louter_loop
+      jmp .Lreturn
 
-.tail:
+.Ltail:
       mov r11, -1
       shlx r11, r11, rsi
       not r11
@@ -478,7 +478,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_11x16c2__asm_amd64_avx512f_broadcast
       vmovups  ZMMWORD PTR [r8]{k1}, zmm20
       vmovups  ZMMWORD PTR [rdi]{k1}, zmm21
 
-.return:
+.Lreturn:
       add rsp, 256
       mov r13, [rsp]
       mov rsp, r13

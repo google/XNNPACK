@@ -48,7 +48,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_2x64__asm_amd64_avx512f_broadcast
       cmovle rax, rcx
       cmovle r13, r10
 
-.outer_loop:
+.Louter_loop:
       # Initialize k counter.
       mov r11, 0
       # Initialize accumulators with the biases.
@@ -62,7 +62,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_2x64__asm_amd64_avx512f_broadcast
       vmovaps zmm18, zmm17
       add r9, 256
 
-.inner_loop:
+.Linner_loop:
       vmovaps  zmm7, [r9 + 0]
       vmovaps  zmm8, [r9 + 64]
       vmovaps  zmm9, [r9 + 128]
@@ -81,8 +81,8 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_2x64__asm_amd64_avx512f_broadcast
 
       add r11, 4
       cmp rdx, r11
-      jne .inner_loop
-.inner_loop_end:
+      jne .Linner_loop
+.Linner_loop_end:
       # Min/max clamping.
       vminps  zmm11, zmm1, zmm11
       vminps  zmm12, zmm1, zmm12
@@ -103,7 +103,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_2x64__asm_amd64_avx512f_broadcast
 
       # Check whether full or partial store.
       cmp rsi, 64
-      jl .tail
+      jl .Ltail
 
       vmovups  [r10], zmm11
       vmovups  [r10 + 64], zmm13
@@ -117,10 +117,10 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_2x64__asm_amd64_avx512f_broadcast
       add r13, 256
 
       sub rsi, 64
-      jne .outer_loop
-      jmp .return
+      jne .Louter_loop
+      jmp .Lreturn
 
-.tail:
+.Ltail:
       mov r11, -1
       shlx r11, r11, rsi
       not r11
@@ -141,7 +141,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_2x64__asm_amd64_avx512f_broadcast
       vmovups  ZMMWORD PTR [r13 + 128]{k3}, zmm16
       vmovups  ZMMWORD PTR [r13 + 192]{k4}, zmm18
 
-.return:
+.Lreturn:
       add rsp, 128
       mov r13, [rsp]
       mov rsp, r13

@@ -198,14 +198,14 @@ class Aarch32(arm.Arm):
     k_register = self.k_register()
     asm_string += f"""\n# Are there at least {k_unroll} bytes?
       subs r0, r0, #8
-      blo .final_iteration\n"""
+      blo .Lfinal_iteration\n"""
 
-    asm_string += '\n.inner_loop:\n'
+    asm_string += '\n.Linner_loop:\n'
 
     # weights
     if 'before' in self.weights_asm():
       asm_string += self.weights_asm()['before']
-    inner_loop_label = '.inner_loop'
+    inner_loop_label = '.Linner_loop'
     k_unroll = self.k_unroll()
     asm_string += self.extend_inputs_and_weights(M)
 
@@ -219,12 +219,12 @@ class Aarch32(arm.Arm):
     )
     # The final iteration, which is identical except that it does not load the
     # As and Bs for the next iteration.
-    asm_string += '\n.final_iteration:\n'
+    asm_string += '\n.Lfinal_iteration:\n'
     asm_string += self.extend_inputs_and_weights(M)
     for k in range(k_unroll):
       asm_string += self.do_loop(M, N, k, k_unroll, True)
     asm_string += 'adds r0, r0, #8\n'
-    asm_string += 'bne .epilogue\n'
+    asm_string += 'bne .Lepilogue\n'
 
     asm_string += '\n'
 
@@ -293,7 +293,7 @@ class Aarch32(arm.Arm):
 
   def epilogue(self, M, N, isa):
     asm_string = """
-.return:
+.Lreturn:
       # Restore callee saved q4-q7 registers.
       vpop       {{d8-d15}}
 
@@ -327,7 +327,7 @@ END_FUNCTION {function_name}""".format(
        epilogue.
     """
     k_register = self.k_register()
-    asm_string = '\n.epilogue:\n'
+    asm_string = '\n.Lepilogue:\n'
     asm_string += f'and {k_register}, {k_register}, #7\n'
     asm_string += f'\n# Load {M} As and B0\n'
     # change this to input & weight's asm.
@@ -342,7 +342,7 @@ END_FUNCTION {function_name}""".format(
     k_unroll = self.k_unroll() - 1
     for k in range(k_unroll):
       asm_string += self.epilogue_iteration(M, N, k, k_unroll)
-    asm_string += 'b .inner_loop_end\n'
+    asm_string += 'b .Linner_loop_end\n'
     return asm_string
 
   def epilogue_iteration(self, M, N, k, iterations):
@@ -385,9 +385,9 @@ END_FUNCTION {function_name}""".format(
         k_register = self.k_register()
         k_val = k + 2
         asm_string += f'cmp {k_register}, #{k_val}\n'
-        asm_string += f'blo .inner_loop_end\n'
+        asm_string += f'blo .Linner_loop_end\n'
     else:
-      asm_string += f'beq .inner_loop_end\n'
+      asm_string += f'beq .Linner_loop_end\n'
 
     return asm_string
 

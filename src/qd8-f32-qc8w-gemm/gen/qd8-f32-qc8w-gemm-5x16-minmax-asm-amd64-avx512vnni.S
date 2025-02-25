@@ -101,7 +101,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x16c4__asm_amd64_avx512vnni
       vpbroadcastd zmm6, edi
       vmovaps zmmword ptr [rsp + 384], zmm6
 
-.outer_loop:
+.Louter_loop:
       # Initialize k counter.
       mov r11, 0
       # Initialize accumulators with k_sum * input zero point.
@@ -113,7 +113,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x16c4__asm_amd64_avx512vnni
       vpmulld zmm16, zmm6, ZMMWORD PTR [rsp + 384]
       add r9, 64
 
-.inner_loop:
+.Linner_loop:
       vmovaps  zmm6, [r9 + 0]
       add r9, 64
       vpbroadcastd zmm2, [rcx + r11]
@@ -129,8 +129,8 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x16c4__asm_amd64_avx512vnni
 
       add r11, 4
       cmp rdx, r11
-      jne .inner_loop
-.inner_loop_end:
+      jne .Linner_loop
+.Linner_loop_end:
 
       # Convert from int32 to float.
       vcvtdq2ps zmm5, zmm5
@@ -168,7 +168,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x16c4__asm_amd64_avx512vnni
 
       # Check whether full or partial store.
       cmp rsi, 16
-      jl .tail
+      jl .Ltail
 
       vmovups  [r10], zmm5
       vmovups  [r13], zmm12
@@ -182,10 +182,10 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x16c4__asm_amd64_avx512vnni
       add r8, 64
 
       sub rsi, 16
-      jne .outer_loop
-      jmp .return
+      jne .Louter_loop
+      jmp .Lreturn
 
-.tail:
+.Ltail:
       mov r11, -1
       shlx r11, r11, rsi
       not r11
@@ -196,7 +196,7 @@ BEGIN_FUNCTION xnn_qd8_f32_qc8w_gemm_minmax_ukernel_5x16c4__asm_amd64_avx512vnni
       vmovups  ZMMWORD PTR [rbp]{k1}, zmm15
       vmovups  ZMMWORD PTR [r8]{k1}, zmm16
 
-.return:
+.Lreturn:
       add rsp, 448
       mov r13, [rsp]
       mov rsp, r13
