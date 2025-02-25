@@ -20,6 +20,7 @@ load(
     "xnnpack_simd_s16_archs",
     "xnnpack_simd_s32_archs",
     "xnnpack_simd_s8_archs",
+    "xnnpack_simd_tags_for_arch",
 )
 
 MICROKERNEL_TEST_DEPS = [
@@ -180,6 +181,7 @@ xnnpack_cxx_library(
         "f32-simd-" + arch + ".cc",
     ],
     copts = xnnpack_simd_copts_for_arch(arch),
+    tags = xnnpack_simd_tags_for_arch(arch),
     deps = [
         ":replicable_random_device",
         "//:buffer",
@@ -196,6 +198,7 @@ xnnpack_cxx_library(
     ],
     copts = xnnpack_simd_copts_for_arch(arch),
     features = ["-use_header_modules"],
+    tags = xnnpack_simd_tags_for_arch(arch),
     deps = [
         ":replicable_random_device",
         "//:buffer",

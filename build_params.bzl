@@ -264,14 +264,27 @@ _XNNPACK_SIMD_ARCH_COPT_MAPPING = {
         "//build_config:aarch64": ["-march=armv8.2-a+fp16"],
         "//conditions:default": [],
     }),
-    "scalar": [],
     "sse2": xnnpack_select_if("//build_config:x86", ["-msse2"]),
     "sse41": xnnpack_select_if("//build_config:x86", ["-msse4.1"]),
-    "wasmsimd": [],
+}
+
+_XNNPACK_SIMD_ARCH_TAGS_MAPPING = {
+    "avx": ["requires-mac-arch:intel"],
+    "avx2": ["requires-mac-arch:intel"],
+    "avx512f": ["requires-mac-arch:intel"],
+    "avx512skx": ["requires-mac-arch:intel"],
+    "fma3": ["requires-mac-arch:intel"],
+    "neon": ["requires-mac-arch:silicon"],
+    "neonfp16arith": ["requires-mac-arch:silicon"],
+    "sse2": ["requires-mac-arch:intel"],
+    "sse41": ["requires-mac-arch:intel"],
 }
 
 def xnnpack_simd_copts_for_arch(arch):
-    return _XNNPACK_SIMD_ARCH_COPT_MAPPING[arch]
+    return _XNNPACK_SIMD_ARCH_COPT_MAPPING.get(arch, [])
+
+def xnnpack_simd_tags_for_arch(arch):
+    return _XNNPACK_SIMD_ARCH_TAGS_MAPPING.get(arch, [])
 
 def xnnpack_simd_f32_archs():
     return ["avx", "avx2", "avx512f", "fma3", "hvx", "neon", "scalar", "sse2", "wasmsimd"]
