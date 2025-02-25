@@ -32,60 +32,106 @@ void xnn_f16_dwconv_minmax_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__neonfp16arit
   uint16_t* output = (uint16_t*) output_ptr;
   const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.min));
   const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.max));
-  do {
-    $for K in range(KERNEL_TILE):
-      const uint16_t* i${K} = (const uint16_t*) input[${K}];
-      assert(i${K} != NULL);
-      if XNN_UNPREDICTABLE(i${K} != (const uint16_t*) zero) {
-        i${K} = (const uint16_t*) ((uintptr_t) i${K} + input_offset);
-      }
 
-    input = (const xnn_float16**) ((uintptr_t) input + input_stride);
-
-    size_t c = channels;
-    const uint16_t* w = (const uint16_t*) weights;
-    for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
-      $for C in range(0, CHANNEL_TILE, 8):
-        float16x8_t vacc${ABC[C:C+8]}p0 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
-
-      $for K in range(KERNEL_TILE):
-
-        $for C in range(0, CHANNEL_TILE, 8):
-          const float16x8_t vi${K}x${ABC[C:C+8]} = vreinterpretq_f16_u16(vld1q_u16(i${K})); i${K} += 8;
-        $for C in range(0, CHANNEL_TILE, 8):
-          const float16x8_t vk${K}x${ABC[C:C+8]} = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
-        $for C in range(0, CHANNEL_TILE, 8):
-          $if 1 <= K < ACCUMULATORS:
-            float16x8_t vacc${ABC[C:C+8]}p${K} = vmulq_f16(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
-          $else:
-            vacc${ABC[C:C+8]}p${K % ACCUMULATORS} = vfmaq_f16(vacc${ABC[C:C+8]}p${K % ACCUMULATORS}, vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
-
-      $if ACCUMULATORS > 1:
-        // Add up all accumulators to vacc${ABC[0:CHANNEL_TILE]}p0
-        $ACC_STEP = 1
-        $while ACC_STEP < ACCUMULATORS:
-          $for A in range(0, ACCUMULATORS, ACC_STEP * 2):
-            $if A + ACC_STEP < ACCUMULATORS:
-              $for C in range(0, CHANNEL_TILE, 8):
-                vacc${ABC[C:C+8]}p${A} = vaddq_f16(vacc${ABC[C:C+8]}p${A}, vacc${ABC[C:C+8]}p${A + ACC_STEP});
-          $ACC_STEP *= 2
-
-      $for C in range(0, CHANNEL_TILE, 8):
-        float16x8_t vacc${ABC[C:C+8]} = vmaxq_f16(vacc${ABC[C:C+8]}p0, vmin);
-      $for C in range(0, CHANNEL_TILE, 8):
-        vacc${ABC[C:C+8]} = vminq_f16(vacc${ABC[C:C+8]}, vmax);
-
-      $for C in range(0, CHANNEL_TILE, 8):
-        vst1q_u16(output, vreinterpretq_u16_f16(vacc${ABC[C:C+8]})); output += 8;
+  // Supertile chosen to be ~L1 cache size for sizeof(**input) + sizeof(*weights) + sizeof(*output).
+  $CHANNEL_SUPERTILE = (((4096 // KERNEL_TILE) + CHANNEL_TILE - 1) // CHANNEL_TILE) * CHANNEL_TILE;
+  for (size_t co = 0; co < channels; co += ${CHANNEL_SUPERTILE}) {
+    size_t channel_supertile = ${CHANNEL_SUPERTILE};
+    if (co + channel_supertile > channels) {
+      channel_supertile = channels - co;
     }
-    $if CHANNEL_TILE > 8:
-      for (; c >= 8; c -= 8) {
-        float16x8_t vacc01234567p0 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+    uint16_t* o = output + co;
+    const xnn_float16** input_co = input;
+    size_t ow = output_width;
+    // output_increment assumes we process `channels` at a time. Fix it.
+    size_t oi = output_increment + (channels - channel_supertile) * sizeof(xnn_float16);
+    do {
+      $for K in range(KERNEL_TILE):
+        const uint16_t* i${K} = (const uint16_t*) input_co[${K}];
+        assert(i${K} != NULL);
+        if XNN_UNPREDICTABLE(i${K} != (const uint16_t*) zero) {
+          i${K} += co;
+          i${K} = (const uint16_t*) ((uintptr_t) i${K} + input_offset);
+        }
+
+      input_co = (const xnn_float16**) ((uintptr_t) input_co + input_stride);
+
+      size_t c = channel_supertile;
+      const uint16_t* w = (const uint16_t*) weights + co * ${(KERNEL_TILE + 1)};
+      for (; c >= ${CHANNEL_TILE}; c -= ${CHANNEL_TILE}) {
+        $for C in range(0, CHANNEL_TILE, 8):
+          float16x8_t vacc${ABC[C:C+8]}p0 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
 
         $for K in range(KERNEL_TILE):
 
-          const float16x8_t vi${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(i${K})); i${K} += 8;
-          const float16x8_t vk${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(w + ${(K + 1) * CHANNEL_TILE - 8}));
+          $for C in range(0, CHANNEL_TILE, 8):
+            const float16x8_t vi${K}x${ABC[C:C+8]} = vreinterpretq_f16_u16(vld1q_u16(i${K})); i${K} += 8;
+          $for C in range(0, CHANNEL_TILE, 8):
+            const float16x8_t vk${K}x${ABC[C:C+8]} = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+          $for C in range(0, CHANNEL_TILE, 8):
+            $if 1 <= K < ACCUMULATORS:
+              float16x8_t vacc${ABC[C:C+8]}p${K} = vmulq_f16(vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
+            $else:
+              vacc${ABC[C:C+8]}p${K % ACCUMULATORS} = vfmaq_f16(vacc${ABC[C:C+8]}p${K % ACCUMULATORS}, vi${K}x${ABC[C:C+8]}, vk${K}x${ABC[C:C+8]});
+
+        $if ACCUMULATORS > 1:
+          // Add up all accumulators to vacc${ABC[0:CHANNEL_TILE]}p0
+          $ACC_STEP = 1
+          $while ACC_STEP < ACCUMULATORS:
+            $for A in range(0, ACCUMULATORS, ACC_STEP * 2):
+              $if A + ACC_STEP < ACCUMULATORS:
+                $for C in range(0, CHANNEL_TILE, 8):
+                  vacc${ABC[C:C+8]}p${A} = vaddq_f16(vacc${ABC[C:C+8]}p${A}, vacc${ABC[C:C+8]}p${A + ACC_STEP});
+            $ACC_STEP *= 2
+
+        $for C in range(0, CHANNEL_TILE, 8):
+          float16x8_t vacc${ABC[C:C+8]} = vmaxq_f16(vacc${ABC[C:C+8]}p0, vmin);
+        $for C in range(0, CHANNEL_TILE, 8):
+          vacc${ABC[C:C+8]} = vminq_f16(vacc${ABC[C:C+8]}, vmax);
+
+        $for C in range(0, CHANNEL_TILE, 8):
+          vst1q_u16(o, vreinterpretq_u16_f16(vacc${ABC[C:C+8]})); o += 8;
+      }
+      $if CHANNEL_TILE > 8:
+        for (; c >= 8; c -= 8) {
+          float16x8_t vacc01234567p0 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+
+          $for K in range(KERNEL_TILE):
+
+            const float16x8_t vi${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(i${K})); i${K} += 8;
+            const float16x8_t vk${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(w + ${(K + 1) * CHANNEL_TILE - 8}));
+            $if 1 <= K < ACCUMULATORS:
+              float16x8_t vacc01234567p${K} = vmulq_f16(vi${K}x01234567, vk${K}x01234567);
+            $else:
+              vacc01234567p${K % ACCUMULATORS} = vfmaq_f16(vacc01234567p${K % ACCUMULATORS}, vi${K}x01234567, vk${K}x01234567);
+
+          $if ACCUMULATORS > 1:
+            // Add up all accumulators to vacc01234567p0
+            $ACC_STEP = 1
+            $while ACC_STEP < ACCUMULATORS:
+              $for A in range(0, ACCUMULATORS, ACC_STEP * 2):
+                $if A + ACC_STEP < ACCUMULATORS:
+                  vacc01234567p${A} = vaddq_f16(vacc01234567p${A}, vacc01234567p${A + ACC_STEP});
+              $ACC_STEP *= 2
+
+          float16x8_t vacc01234567 = vmaxq_f16(vacc01234567p0, vmin);
+          vacc01234567 = vminq_f16(vacc01234567, vmax);
+
+          vst1q_u16((uint16_t*) o, vreinterpretq_u16_f16(vacc01234567)); o += 8;
+        }
+      if XNN_UNLIKELY(c != 0) {
+        $if CHANNEL_TILE == 8:
+          float16x8_t vacc01234567p0 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+        $else:
+          float16x8_t vacc01234567p0 = vreinterpretq_f16_u16(vld1q_u16(w));
+
+        $for K in range(KERNEL_TILE):
+
+          const float16x8_t vi${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(i${K}));
+          $if CHANNEL_TILE == 8:
+            const float16x8_t vk${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+          $else:
+            const float16x8_t vk${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(w + ${(K + 1) * CHANNEL_TILE}));
           $if 1 <= K < ACCUMULATORS:
             float16x8_t vacc01234567p${K} = vmulq_f16(vi${K}x01234567, vk${K}x01234567);
           $else:
@@ -103,52 +149,21 @@ void xnn_f16_dwconv_minmax_ukernel_${KERNEL_TILE}p${CHANNEL_TILE}c__neonfp16arit
         float16x8_t vacc01234567 = vmaxq_f16(vacc01234567p0, vmin);
         vacc01234567 = vminq_f16(vacc01234567, vmax);
 
-        vst1q_u16((uint16_t*) output, vreinterpretq_u16_f16(vacc01234567)); output += 8;
+        float16x4_t vacc0123 = vget_low_f16(vacc01234567);
+        if (c & 4) {
+          vst1_u16((uint16_t*) o, vreinterpret_u16_f16(vacc0123)); o += 4;
+          vacc0123 = vget_high_f16(vacc01234567);
+        }
+        if (c & 2) {
+          vst1_lane_u32((void*) o, vreinterpret_u32_f16(vacc0123), 0); o += 2;
+          vacc0123 = vext_f16(vacc0123, vacc0123, 2);
+        }
+        if (c & 1) {
+          vst1_lane_u16((uint16_t*) o, vreinterpret_u16_f16(vacc0123), 0); o += 1;
+        }
       }
-    if XNN_UNLIKELY(c != 0) {
-      $if CHANNEL_TILE == 8:
-        float16x8_t vacc01234567p0 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
-      $else:
-        float16x8_t vacc01234567p0 = vreinterpretq_f16_u16(vld1q_u16(w));
 
-      $for K in range(KERNEL_TILE):
-
-        const float16x8_t vi${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(i${K}));
-        $if CHANNEL_TILE == 8:
-          const float16x8_t vk${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
-        $else:
-          const float16x8_t vk${K}x01234567 = vreinterpretq_f16_u16(vld1q_u16(w + ${(K + 1) * CHANNEL_TILE}));
-        $if 1 <= K < ACCUMULATORS:
-          float16x8_t vacc01234567p${K} = vmulq_f16(vi${K}x01234567, vk${K}x01234567);
-        $else:
-          vacc01234567p${K % ACCUMULATORS} = vfmaq_f16(vacc01234567p${K % ACCUMULATORS}, vi${K}x01234567, vk${K}x01234567);
-
-      $if ACCUMULATORS > 1:
-        // Add up all accumulators to vacc01234567p0
-        $ACC_STEP = 1
-        $while ACC_STEP < ACCUMULATORS:
-          $for A in range(0, ACCUMULATORS, ACC_STEP * 2):
-            $if A + ACC_STEP < ACCUMULATORS:
-              vacc01234567p${A} = vaddq_f16(vacc01234567p${A}, vacc01234567p${A + ACC_STEP});
-          $ACC_STEP *= 2
-
-      float16x8_t vacc01234567 = vmaxq_f16(vacc01234567p0, vmin);
-      vacc01234567 = vminq_f16(vacc01234567, vmax);
-
-      float16x4_t vacc0123 = vget_low_f16(vacc01234567);
-      if (c & 4) {
-        vst1_u16((uint16_t*) output, vreinterpret_u16_f16(vacc0123)); output += 4;
-        vacc0123 = vget_high_f16(vacc01234567);
-      }
-      if (c & 2) {
-        vst1_lane_u32((void*) output, vreinterpret_u32_f16(vacc0123), 0); output += 2;
-        vacc0123 = vext_f16(vacc0123, vacc0123, 2);
-      }
-      if (c & 1) {
-        vst1_lane_u16((uint16_t*) output, vreinterpret_u16_f16(vacc0123), 0); output += 1;
-      }
-    }
-
-    output = (uint16_t*) ((uintptr_t) output + output_increment);
-  } while (--output_width != 0);
+      o = (uint16_t*) ((uintptr_t) o + oi);
+    } while (--ow != 0);
+  }
 }

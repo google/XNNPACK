@@ -32,87 +32,103 @@ void xnn_f16_dwconv_minmax_ukernel_3p8c__neonfp16arith_acc2(
   uint16_t* output = (uint16_t*) output_ptr;
   const float16x8_t vmin = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.min));
   const float16x8_t vmax = vreinterpretq_f16_u16(vld1q_dup_u16((const uint16_t*) &params->scalar.max));
-  do {
-    const uint16_t* i0 = (const uint16_t*) input[0];
-    assert(i0 != NULL);
-    if XNN_UNPREDICTABLE(i0 != (const uint16_t*) zero) {
-      i0 = (const uint16_t*) ((uintptr_t) i0 + input_offset);
+
+  // Supertile chosen to be ~L1 cache size for sizeof(**input) + sizeof(*weights) + sizeof(*output).
+  for (size_t co = 0; co < channels; co += 1368) {
+    size_t channel_supertile = 1368;
+    if (co + channel_supertile > channels) {
+      channel_supertile = channels - co;
     }
-    const uint16_t* i1 = (const uint16_t*) input[1];
-    assert(i1 != NULL);
-    if XNN_UNPREDICTABLE(i1 != (const uint16_t*) zero) {
-      i1 = (const uint16_t*) ((uintptr_t) i1 + input_offset);
-    }
-    const uint16_t* i2 = (const uint16_t*) input[2];
-    assert(i2 != NULL);
-    if XNN_UNPREDICTABLE(i2 != (const uint16_t*) zero) {
-      i2 = (const uint16_t*) ((uintptr_t) i2 + input_offset);
-    }
-
-    input = (const xnn_float16**) ((uintptr_t) input + input_stride);
-
-    size_t c = channels;
-    const uint16_t* w = (const uint16_t*) weights;
-    for (; c >= 8; c -= 8) {
-      float16x8_t vacc01234567p0 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
-
-
-      const float16x8_t vi0x01234567 = vreinterpretq_f16_u16(vld1q_u16(i0)); i0 += 8;
-      const float16x8_t vk0x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
-      vacc01234567p0 = vfmaq_f16(vacc01234567p0, vi0x01234567, vk0x01234567);
-
-      const float16x8_t vi1x01234567 = vreinterpretq_f16_u16(vld1q_u16(i1)); i1 += 8;
-      const float16x8_t vk1x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
-      float16x8_t vacc01234567p1 = vmulq_f16(vi1x01234567, vk1x01234567);
-
-      const float16x8_t vi2x01234567 = vreinterpretq_f16_u16(vld1q_u16(i2)); i2 += 8;
-      const float16x8_t vk2x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
-      vacc01234567p0 = vfmaq_f16(vacc01234567p0, vi2x01234567, vk2x01234567);
-
-      // Add up all accumulators to vacc01234567p0
-      vacc01234567p0 = vaddq_f16(vacc01234567p0, vacc01234567p1);
-
-      float16x8_t vacc01234567 = vmaxq_f16(vacc01234567p0, vmin);
-      vacc01234567 = vminq_f16(vacc01234567, vmax);
-
-      vst1q_u16(output, vreinterpretq_u16_f16(vacc01234567)); output += 8;
-    }
-    if XNN_UNLIKELY(c != 0) {
-      float16x8_t vacc01234567p0 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
-
-
-      const float16x8_t vi0x01234567 = vreinterpretq_f16_u16(vld1q_u16(i0));
-      const float16x8_t vk0x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
-      vacc01234567p0 = vfmaq_f16(vacc01234567p0, vi0x01234567, vk0x01234567);
-
-      const float16x8_t vi1x01234567 = vreinterpretq_f16_u16(vld1q_u16(i1));
-      const float16x8_t vk1x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
-      float16x8_t vacc01234567p1 = vmulq_f16(vi1x01234567, vk1x01234567);
-
-      const float16x8_t vi2x01234567 = vreinterpretq_f16_u16(vld1q_u16(i2));
-      const float16x8_t vk2x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
-      vacc01234567p0 = vfmaq_f16(vacc01234567p0, vi2x01234567, vk2x01234567);
-
-      // Add up all accumulators to vacc01234567p0
-      vacc01234567p0 = vaddq_f16(vacc01234567p0, vacc01234567p1);
-
-      float16x8_t vacc01234567 = vmaxq_f16(vacc01234567p0, vmin);
-      vacc01234567 = vminq_f16(vacc01234567, vmax);
-
-      float16x4_t vacc0123 = vget_low_f16(vacc01234567);
-      if (c & 4) {
-        vst1_u16((uint16_t*) output, vreinterpret_u16_f16(vacc0123)); output += 4;
-        vacc0123 = vget_high_f16(vacc01234567);
+    uint16_t* o = output + co;
+    const xnn_float16** input_co = input;
+    size_t ow = output_width;
+    // output_increment assumes we process `channels` at a time. Fix it.
+    size_t oi = output_increment + (channels - channel_supertile) * sizeof(xnn_float16);
+    do {
+      const uint16_t* i0 = (const uint16_t*) input_co[0];
+      assert(i0 != NULL);
+      if XNN_UNPREDICTABLE(i0 != (const uint16_t*) zero) {
+        i0 += co;
+        i0 = (const uint16_t*) ((uintptr_t) i0 + input_offset);
       }
-      if (c & 2) {
-        vst1_lane_u32((void*) output, vreinterpret_u32_f16(vacc0123), 0); output += 2;
-        vacc0123 = vext_f16(vacc0123, vacc0123, 2);
+      const uint16_t* i1 = (const uint16_t*) input_co[1];
+      assert(i1 != NULL);
+      if XNN_UNPREDICTABLE(i1 != (const uint16_t*) zero) {
+        i1 += co;
+        i1 = (const uint16_t*) ((uintptr_t) i1 + input_offset);
       }
-      if (c & 1) {
-        vst1_lane_u16((uint16_t*) output, vreinterpret_u16_f16(vacc0123), 0); output += 1;
+      const uint16_t* i2 = (const uint16_t*) input_co[2];
+      assert(i2 != NULL);
+      if XNN_UNPREDICTABLE(i2 != (const uint16_t*) zero) {
+        i2 += co;
+        i2 = (const uint16_t*) ((uintptr_t) i2 + input_offset);
       }
-    }
 
-    output = (uint16_t*) ((uintptr_t) output + output_increment);
-  } while (--output_width != 0);
+      input_co = (const xnn_float16**) ((uintptr_t) input_co + input_stride);
+
+      size_t c = channel_supertile;
+      const uint16_t* w = (const uint16_t*) weights + co * 4;
+      for (; c >= 8; c -= 8) {
+        float16x8_t vacc01234567p0 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+
+
+        const float16x8_t vi0x01234567 = vreinterpretq_f16_u16(vld1q_u16(i0)); i0 += 8;
+        const float16x8_t vk0x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+        vacc01234567p0 = vfmaq_f16(vacc01234567p0, vi0x01234567, vk0x01234567);
+
+        const float16x8_t vi1x01234567 = vreinterpretq_f16_u16(vld1q_u16(i1)); i1 += 8;
+        const float16x8_t vk1x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+        float16x8_t vacc01234567p1 = vmulq_f16(vi1x01234567, vk1x01234567);
+
+        const float16x8_t vi2x01234567 = vreinterpretq_f16_u16(vld1q_u16(i2)); i2 += 8;
+        const float16x8_t vk2x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+        vacc01234567p0 = vfmaq_f16(vacc01234567p0, vi2x01234567, vk2x01234567);
+
+        // Add up all accumulators to vacc01234567p0
+        vacc01234567p0 = vaddq_f16(vacc01234567p0, vacc01234567p1);
+
+        float16x8_t vacc01234567 = vmaxq_f16(vacc01234567p0, vmin);
+        vacc01234567 = vminq_f16(vacc01234567, vmax);
+
+        vst1q_u16(o, vreinterpretq_u16_f16(vacc01234567)); o += 8;
+      }
+      if XNN_UNLIKELY(c != 0) {
+        float16x8_t vacc01234567p0 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+
+
+        const float16x8_t vi0x01234567 = vreinterpretq_f16_u16(vld1q_u16(i0));
+        const float16x8_t vk0x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+        vacc01234567p0 = vfmaq_f16(vacc01234567p0, vi0x01234567, vk0x01234567);
+
+        const float16x8_t vi1x01234567 = vreinterpretq_f16_u16(vld1q_u16(i1));
+        const float16x8_t vk1x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+        float16x8_t vacc01234567p1 = vmulq_f16(vi1x01234567, vk1x01234567);
+
+        const float16x8_t vi2x01234567 = vreinterpretq_f16_u16(vld1q_u16(i2));
+        const float16x8_t vk2x01234567 = vreinterpretq_f16_u16(vld1q_u16(w)); w += 8;
+        vacc01234567p0 = vfmaq_f16(vacc01234567p0, vi2x01234567, vk2x01234567);
+
+        // Add up all accumulators to vacc01234567p0
+        vacc01234567p0 = vaddq_f16(vacc01234567p0, vacc01234567p1);
+
+        float16x8_t vacc01234567 = vmaxq_f16(vacc01234567p0, vmin);
+        vacc01234567 = vminq_f16(vacc01234567, vmax);
+
+        float16x4_t vacc0123 = vget_low_f16(vacc01234567);
+        if (c & 4) {
+          vst1_u16((uint16_t*) o, vreinterpret_u16_f16(vacc0123)); o += 4;
+          vacc0123 = vget_high_f16(vacc01234567);
+        }
+        if (c & 2) {
+          vst1_lane_u32((void*) o, vreinterpret_u32_f16(vacc0123), 0); o += 2;
+          vacc0123 = vext_f16(vacc0123, vacc0123, 2);
+        }
+        if (c & 1) {
+          vst1_lane_u16((uint16_t*) o, vreinterpret_u16_f16(vacc0123), 0); o += 1;
+        }
+      }
+
+      o = (uint16_t*) ((uintptr_t) o + oi);
+    } while (--ow != 0);
+  }
 }
