@@ -88,6 +88,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-spmm/gen/f32-spmm-8x1-minmax-scalar.c
   src/f32-spmm/gen/f32-spmm-8x2-minmax-scalar.c
   src/f32-spmm/gen/f32-spmm-8x4-minmax-scalar.c
+  src/f32-vapproxgelu/gen/f32-vapproxgelu-scalar-rational-12-10-div.c
   src/f32-vbinary/gen/f32-vadd-scalar-u8.c
   src/f32-vbinary/gen/f32-vaddc-scalar-u8.c
   src/f32-vbinary/gen/f32-vdiv-scalar-u2.c
@@ -412,6 +413,7 @@ SET(NON_PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-spmm/gen/f32-spmm-4x1-minmax-scalar-pipelined.c
   src/f32-spmm/gen/f32-spmm-4x1-minmax-scalar.c
   src/f32-spmm/gen/f32-spmm-8x1-minmax-scalar-pipelined.c
+  src/f32-vapproxgelu/gen/f32-vapproxgelu-scalar.c
   src/f32-vbinary/gen/f32-vadd-scalar-u1.c
   src/f32-vbinary/gen/f32-vadd-scalar-u2.c
   src/f32-vbinary/gen/f32-vadd-scalar-u4.c

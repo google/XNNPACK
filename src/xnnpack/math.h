@@ -31,6 +31,11 @@
   #undef max
 #endif
 
+// Some useful constants that may not be defined.
+#ifndef M_PI
+#define M_PI 3.141592653589793238462643383280 /* pi */
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

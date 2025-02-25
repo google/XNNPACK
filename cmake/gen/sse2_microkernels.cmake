@@ -20,6 +20,7 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/f32-qs8-vcvt/gen/f32-qs8-vcvt-sse2-u32.c
   src/f32-qu8-vcvt/gen/f32-qu8-vcvt-sse2-u32.c
   src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-sse2-rr2-p5-u16-acc2.c
+  src/f32-vapproxgelu/gen/f32-vapproxgelu-sse2-rational-12-10-div.c
   src/f32-vbinary/gen/f32-vprelu-sse2-u8.c
   src/f32-vbinary/gen/f32-vpreluc-sse2-u8.c
   src/f32-vbinary/gen/f32-vrpreluc-sse2-u8.c

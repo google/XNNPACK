@@ -235,6 +235,33 @@ struct GELU : public UnaryOpInfo {
   Interval Domain(xnn_datatype) const override { return {-10.0f, 10.0f}; }
 };
 
+struct ApproxGELU : public UnaryOpInfo {
+  float ReferenceImpl(float x, const xnn_unary_params&) const override {
+    return x * 0.5f *
+           (1.0f +
+            std::tanh(std::sqrt(2.0f / M_PI) * x * (1 + 0.044715f * x * x)));
+  }
+
+  float Tolerance(float y_ref, xnn_datatype datatype) const override {
+    switch (datatype) {
+      case xnn_datatype_fp32:
+        return TolMixed(y_ref, 10 * std::numeric_limits<float>::epsilon(),
+                        5 * std::numeric_limits<float>::epsilon());
+      case xnn_datatype_fp16:
+        return TolMixed(y_ref, 10 * 9.77e-04, 5 * 9.77e-04);
+      case xnn_datatype_bf16:
+        return TolMixed(y_ref, 10 * 7.8125e-3, 5 * 7.8125e-3);
+      case xnn_datatype_qint8:
+      case xnn_datatype_quint8:
+        return 1;
+      default:
+        XNN_UNREACHABLE;
+    }
+  }
+
+  Interval Domain(xnn_datatype) const override { return {-10.0f, 10.0f}; }
+};
+
 struct HardSwish : public UnaryOpInfo {
   float ReferenceImpl(float x, const xnn_unary_params&) const override {
     return (x / 6.0) * std::max(std::min(x + 3.0, 6.0), 0.0);

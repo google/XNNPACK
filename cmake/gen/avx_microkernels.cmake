@@ -34,6 +34,7 @@ SET(PROD_AVX_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rmax-avx-u32-acc4.c
   src/f32-rminmax/gen/f32-rminmax-avx-u32-acc4.c
   src/f32-rsum/gen/f32-rsum-avx-u32-acc4.c
+  src/f32-vapproxgelu/gen/f32-vapproxgelu-avx-rational-12-10-div.c
   src/f32-vbinary/gen/f32-vadd-avx-u16.c
   src/f32-vbinary/gen/f32-vaddc-avx-u16.c
   src/f32-vbinary/gen/f32-vdiv-avx-u16.c

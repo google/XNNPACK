@@ -44,6 +44,7 @@ PROD_NEON_MICROKERNEL_SRCS = [
     "src/f32-rminmax/gen/f32-rminmax-neon-u16-acc4.c",
     "src/f32-rsum/gen/f32-rsum-neon-u16-acc4.c",
     "src/f32-spmm/gen/f32-spmm-32x1-minmax-neon.c",
+    "src/f32-vapproxgelu/gen/f32-vapproxgelu-neon-rational-12-10-div.c",
     "src/f32-vbinary/gen/f32-vadd-neon-u8.c",
     "src/f32-vbinary/gen/f32-vaddc-neon-u8.c",
     "src/f32-vbinary/gen/f32-vmax-neon-u8.c",

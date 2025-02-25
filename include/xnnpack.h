@@ -490,11 +490,20 @@ enum xnn_status xnn_define_dynamically_quantized_tensor_value(
 /// Type of unary operation
 enum xnn_unary_operator {
   xnn_unary_invalid = -1,
-  xnn_unary_convert,
-  xnn_unary_clamp,
   xnn_unary_abs,
+  // This is a GELU approximation that mimics the approximation:
+  //
+  //   0.5 * x * (1 + tanh(sqrt(2/π) * (x + 0.044715 * x^3)))
+  //
+  // which differs sufficiently from the exact GELU (`xnn_unary_gelu` below) to
+  // cause problems in some models. Note that both the approximation and the
+  // exact GELU use the same order rational approximation polynomials and are
+  // therefore both equally fast.
+  xnn_unary_approxgelu,
   xnn_unary_bankers_rounding,
   xnn_unary_ceiling,
+  xnn_unary_clamp,
+  xnn_unary_convert,
   xnn_unary_elu,
   xnn_unary_exp,
   xnn_unary_floor,
@@ -503,19 +512,19 @@ enum xnn_unary_operator {
   xnn_unary_leaky_relu,
   xnn_unary_log,
   xnn_unary_negate,
-  xnn_unary_sigmoid,
-  xnn_unary_square,
-  xnn_unary_square_root,
   xnn_unary_reciprocal_square_root,
+  xnn_unary_sigmoid,
+  xnn_unary_square_root,
+  xnn_unary_square,
   xnn_unary_tanh,
   // The following operators are experimental and may be removed.
-  xnn_unary_cube_root,
-  xnn_unary_cosine,
-  xnn_unary_sine,
-  xnn_unary_count_leading_zeros,
   xnn_unary_bitwise_not,
+  xnn_unary_cosine,
+  xnn_unary_count_leading_zeros,
+  xnn_unary_cube_root,
   xnn_unary_popcount,
   xnn_unary_sign,
+  xnn_unary_sine,
 };
 
 /// Parameters for xnn_define_unary

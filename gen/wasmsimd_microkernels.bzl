@@ -103,6 +103,7 @@ PROD_WASMSIMD_MICROKERNEL_SRCS = [
     "src/f32-rsum/gen/f32-rsum-wasmsimd-u16-acc4.c",
     "src/f32-spmm/gen/f32-spmm-32x1-minmax-wasmsimd-arm.c",
     "src/f32-spmm/gen/f32-spmm-32x1-minmax-wasmsimd-x86.c",
+    "src/f32-vapproxgelu/gen/f32-vapproxgelu-wasmsimd-rational-12-10-div.c",
     "src/f32-vbinary/gen/f32-vadd-wasmsimd-u16.c",
     "src/f32-vbinary/gen/f32-vaddc-wasmsimd-u16.c",
     "src/f32-vbinary/gen/f32-vdiv-wasmsimd-u16.c",

@@ -10,12 +10,11 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <functional>
-#include <limits>
 #include <type_traits>
 
 #include "xnnpack.h"
 #include "xnnpack/config-types.h"
+#include "xnnpack/datatype.h"
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
@@ -269,6 +268,16 @@ struct GELUOp {
 
   T operator()(T x) const {
     return static_cast<T>((x / 2) * (1 + std::erf(x * std::sqrt(2) / 2)));
+  }
+};
+
+template <typename T>
+struct ApproxGELUOp {
+  explicit ApproxGELUOp(const xnn_unary_uparams*) {}
+
+  T operator()(T x) const {
+    return static_cast<T>((x / 2) * (1 + std::tanh(std::sqrt(2.0 / M_PI) * x *
+                                                   (1 + 0.044715 * x * x))));
   }
 };
 
@@ -541,6 +550,8 @@ const xnn_unary_elementwise_config* get_config(xnn_unary_operator op,
       DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, RoundDownOp);
     case xnn_unary_gelu:
       DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, GELUOp);
+    case xnn_unary_approxgelu:
+      DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, ApproxGELUOp);
     case xnn_unary_hardswish:
       DISPATCH_OPERATOR_FOR_REAL_DATATYPE(datatype, HardSwishOp);
     case xnn_unary_leaky_relu:

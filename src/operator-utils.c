@@ -182,6 +182,8 @@ const char* xnn_unary_operator_to_string(enum xnn_unary_operator op)
   switch (op) {
     case xnn_unary_abs:
       return "abs";
+    case xnn_unary_approxgelu:
+      return "approx_gelu";
     case xnn_unary_bankers_rounding:
       return "bankers_rounding";
     case xnn_unary_ceiling:

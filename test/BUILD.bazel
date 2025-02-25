@@ -280,6 +280,7 @@ xnnpack_cxx_library(
     "f16_vsqrt",
     "f16_vtanh",
     "f32_vabs",
+    "f32_vapproxgelu",
     "f32_vclamp",
     "f32_velu",
     "f32_vexp",

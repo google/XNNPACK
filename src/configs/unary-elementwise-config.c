@@ -5,11 +5,11 @@
 
 #include <assert.h>
 #include <stddef.h>
-#include "xnnpack/config-types.h"
-#include "xnnpack/hardware-config.h"
 
 #include "xnnpack/common.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/config.h"
+#include "xnnpack/hardware-config.h"
 #include "xnnpack/init-once.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams-init.h"
@@ -40,6 +40,7 @@ static struct xnn_unary_elementwise_config f32_abs_config = {0};
 static struct xnn_unary_elementwise_config f32_clamp_config = {0};
 static struct xnn_unary_elementwise_config f32_elu_config = {0};
 static struct xnn_unary_elementwise_config f32_exp_config = {0};
+static struct xnn_unary_elementwise_config f32_approxgelu_config = {0};
 static struct xnn_unary_elementwise_config f32_gelu_config = {0};
 static struct xnn_unary_elementwise_config f32_hswish_config = {0};
 static struct xnn_unary_elementwise_config f32_log_config = {0};
@@ -91,6 +92,7 @@ XNN_INIT_ONCE_GUARD(f16_to_qs8_cvt);
 XNN_INIT_ONCE_GUARD(f16_to_f32_cvt);
 XNN_INIT_ONCE_GUARD(f16_to_qu8_cvt);
 XNN_INIT_ONCE_GUARD(f32_abs);
+XNN_INIT_ONCE_GUARD(f32_approxgelu);
 XNN_INIT_ONCE_GUARD(f32_clamp);
 XNN_INIT_ONCE_GUARD(f32_elu);
 XNN_INIT_ONCE_GUARD(f32_exp);
@@ -733,6 +735,47 @@ static void init_f32_gelu_config(void) {
     f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u1;
   #else
     f32_gelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vgelu_ukernel__scalar_rational_12_10_div_u1;
+  #endif
+}
+
+static void init_f32_approxgelu_config(void) {
+  #if XNN_ARCH_ARM
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    if (hardware_config->use_arm_neon) {
+      if (hardware_config->use_arm_neon_fma) {
+        f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__neon_rational_12_10_div_u8;
+      } else {
+        f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__neon_rational_12_10_div_u8;
+      }
+    } else if (!XNN_PLATFORM_MOBILE) {
+      f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__neon_rational_12_10_div_u8;
+    }
+  #elif XNN_ARCH_ARM64
+    f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__neon_rational_12_10_div_u8;
+  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
+    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+    assert(hardware_config != NULL);
+    #if XNN_ENABLE_AVX512F
+      if (!XNN_PLATFORM_MOBILE && hardware_config->use_x86_avx512f) {
+        f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__avx512f_rational_12_10_nr_u32;
+      } else
+    #endif
+    if (hardware_config->use_x86_fma3) {
+      f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__fma3_rational_12_10_div_u16;
+    } else if (hardware_config->use_x86_avx) {
+      f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__avx_rational_12_10_div_u16;
+    } else {
+      f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__sse2_rational_12_10_div_u12;
+    }
+  #elif XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
+    f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__wasmsimd_rational_12_10_div_u12;
+  #elif XNN_ARCH_WASM
+    f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__scalar_rational_12_10_div_u1;
+  #elif XNN_ARCH_RISCV
+    f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__scalar_rational_12_10_div_u1;
+  #else
+    f32_approxgelu_config.ukernel = (xnn_vunary_ukernel_fn) xnn_f32_vapproxgelu_ukernel__scalar_rational_12_10_div_u1;
   #endif
 }
 
@@ -2194,6 +2237,15 @@ const struct xnn_unary_elementwise_config* xnn_init_f32_gelu_config() {
   }
   XNN_INIT_ONCE(f32_gelu);
   return &f32_gelu_config;
+}
+
+const struct xnn_unary_elementwise_config* xnn_init_f32_approxgelu_config() {
+  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
+  if (hardware_config == NULL) {
+    return NULL;
+  }
+  XNN_INIT_ONCE(f32_approxgelu);
+  return &f32_approxgelu_config;
 }
 
 const struct xnn_unary_elementwise_config* xnn_init_f32_hswish_config() {

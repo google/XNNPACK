@@ -81,6 +81,7 @@ extern "C" {
                                 datatype, params_type, init_params)           \
   DECLARE_F32_UKERNEL_FUNCTION(fn_name, params_type);
 #include "f32-vabs/f32-vabs.h"
+#include "f32-vapproxgelu/f32-vapproxgelu.h"
 #include "f32-vclamp/f32-vclamp.h"
 #include "f32-velu/f32-velu.h"
 #include "f32-vexp/f32-vexp.h"

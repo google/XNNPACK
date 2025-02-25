@@ -35,6 +35,7 @@ PROD_FMA3_MICROKERNEL_SRCS = [
     "src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x16-minmax-fma3-broadcast.c",
     "src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x16-minmax-fma3-broadcast.c",
     "src/f32-qc8w-gemm/gen/f32-qc8w-gemm-5x16-minmax-fma3-broadcast.c",
+    "src/f32-vapproxgelu/gen/f32-vapproxgelu-fma3-rational-12-10-div.c",
     "src/f32-vcmul/gen/f32-vcmul-fma3-u16.c",
     "src/f32-vgelu/gen/f32-vgelu-fma3-rational-12-10-div.c",
     "src/f32-vhswish/gen/f32-vhswish-fma3-u16.c",
