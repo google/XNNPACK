@@ -8,7 +8,6 @@ Auto-generated file. Do not edit!
 PROD_AVX512F_MICROKERNEL_SRCS = [
     "src/f32-dwconv/gen/f32-dwconv-3p16c-minmax-avx512f.c",
     "src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-avx512f.c",
-    "src/f32-dwconv/gen/f32-dwconv-5f5m5l32c16s1r-minmax-avx512f.c",
     "src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-avx512f.c",
     "src/f32-dwconv/gen/f32-dwconv-25p16c-minmax-avx512f.c",
     "src/f32-gemm/gen/f32-gemm-1x16-minmax-avx512f-broadcast.c",
@@ -80,6 +79,7 @@ NON_PROD_AVX512F_MICROKERNEL_SRCS = [
     "src/f32-dwconv/gen/f32-dwconv-5f5m5l16c16s1r-minmax-avx512f-acc2.c",
     "src/f32-dwconv/gen/f32-dwconv-5f5m5l16c16s1r-minmax-avx512f.c",
     "src/f32-dwconv/gen/f32-dwconv-5f5m5l32c16s1r-minmax-avx512f-acc2.c",
+    "src/f32-dwconv/gen/f32-dwconv-5f5m5l32c16s1r-minmax-avx512f.c",
     "src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-avx512f-acc2.c",
     "src/f32-dwconv/gen/f32-dwconv-9p32c-minmax-avx512f-acc2.c",
     "src/f32-dwconv/gen/f32-dwconv-9p32c-minmax-avx512f.c",
