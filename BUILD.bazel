@@ -66,6 +66,7 @@ MICROKERNEL_DEFS = [
     "src/f16-qu8-vcvt/f16-qu8-vcvt.h",
     "src/f16-qs8-vcvt/f16-qs8-vcvt.h",
     "src/f16-vabs/f16-vabs.h",
+    "src/f16-vapproxgelu/f16-vapproxgelu.h",
     "src/f16-vbinary/f16-vadd.h",
     "src/f16-vbinary/f16-vaddc.h",
     "src/f16-vbinary/f16-vcmul.h",

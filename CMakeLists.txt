@@ -1781,6 +1781,7 @@ IF(XNNPACK_BUILD_TESTS)
 
   SET(MICROKERNEL_VUNARY_TESTS
       f16-vabs
+      f16-vapproxgelu
       f16-vclamp
       f16-velu
       f16-vgelu

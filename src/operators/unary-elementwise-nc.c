@@ -142,6 +142,8 @@ static const struct xnn_unary_elementwise_config* get_config(
     switch (op_type) {
       case xnn_unary_abs:
         return xnn_init_f16_abs_config();
+      case xnn_unary_approxgelu:
+        return xnn_init_f16_approxgelu_config();
       case xnn_unary_bankers_rounding:
         return xnn_init_f16_rndne_config();
       case xnn_unary_ceiling:

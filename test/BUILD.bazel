@@ -264,6 +264,7 @@ xnnpack_cxx_library(
     deps = MICROKERNEL_TEST_DEPS + [":vunary_microkernel_tester"],
 ) for kernel in [
     "f16_vabs",
+    "f16_vapproxgelu",
     "f16_vclamp",
     "f16_velu",
     "f16_vgelu",
