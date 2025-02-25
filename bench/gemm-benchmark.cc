@@ -848,6 +848,15 @@ void GEMMBenchmark(benchmark::State& state,
   gemm_config.nr = static_cast<uint8_t>(nr);
   gemm_config.log2_kr = static_cast<uint8_t>(31 - math_clz_nonzero_u32(kr));
   gemm_config.log2_sr = static_cast<uint8_t>(31 - math_clz_nonzero_u32(sr));
+  
+  // Get the LHS packing config.
+  const struct xnn_pack_lh_config* pack_lh_config =
+      xnn_init_x32_pack_lh_config();
+  
+  if(pack_lh_config == nullptr)
+  {
+    return;
+  }
 
   const size_t packed_w_stride =
       packed_stride(&gemm_config, kc, /*unused_block_size=*/0, /*k_stride=*/kc,
@@ -864,14 +873,14 @@ void GEMMBenchmark(benchmark::State& state,
       packed_w_size * num_buffers / sizeof(float));
 
   // Pack the left-hand operand.
-  const size_t input_packed_size =
-      xnn_x32_pack_lh_size__neonsme2(mc, kc, mr_packed, kr, sr);
+  const size_t input_packed_size = pack_lh_config->size_fn(mc, kc, mr_packed, kr, sr);
+  
   xnnpack::Buffer<float, XNN_ALLOCATION_ALIGNMENT> input_packed(
       input_packed_size / sizeof(float));
-  xnn_x32_pack_lh_ukernel__neonsme2(mc, kc, mr_packed, kr, sr,
-                                    /*m_idx_start=*/0, a.data(),
-                                    /*lhs_stride=*/kc * sizeof(float),
-                                    input_packed.data());
+  pack_lh_config->ukernel(mc, kc, mr_packed, kr, sr,
+                          /*m_idx_start=*/0, a.data(),
+                          /*lhs_stride=*/kc * sizeof(float),
+                          input_packed.data());
 
   // RHS packing
   xnnpack::Buffer<float> kernel_scale(nc, 1.0f);
@@ -913,7 +922,7 @@ void GEMMBenchmark(benchmark::State& state,
         const uint32_t mb = min(mc - m, mr);
         gemm(mb, nc, kc,
              input_packed.data() +
-                 xnn_x32_pack_lh_offset__neonsme2(m, kc, mr_packed, kr, sr),
+                 pack_lh_config->offset_fn(m, kc, mr_packed, kr, sr),
              w.data() + packed_w_size / sizeof(float) * buffer_index,
              c.data() + (buffer_index * mc + m) * nc, nc * sizeof(float),
              sizeof(float), &minmax_params);
