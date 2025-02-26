@@ -15,8 +15,11 @@
 #include <initializer_list>
 #include <limits>
 #include <memory>
+#include <numeric>
 #include <random>
+#include <sstream>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "xnnpack.h"
@@ -225,6 +228,10 @@ class Tensor {
     begin_ = data_->begin();
     end_ = data_->end();
   }
+  template <size_t N>
+  explicit Tensor(const std::array<size_t, N>& extents,
+                  PaddingBytes extra_bytes = {0})
+      : Tensor(index_type(extents.begin(), extents.end()), extra_bytes) {}
   Tensor& operator=(const Tensor& other) = default;
   Tensor& operator=(Tensor&& other) = default;
 
@@ -234,6 +241,10 @@ class Tensor {
   bool is_contiguous() const {
     size_t stride = 1;
     for (size_t i = rank(); i > 0; --i) {
+      if (extents_[i - 1] == 1) {
+        // We don't care about the stride of extent 1 dimensions.
+        continue;
+      }
       if (strides_[i - 1] != stride) {
         return false;
       }
@@ -246,6 +257,12 @@ class Tensor {
   const index_type& strides() const { return strides_; }
   size_t extent(size_t dim) const { return extents_[dim]; }
   size_t stride(size_t dim) const { return strides_[dim]; }
+
+  // This is a dangerous function, use carefully.
+  void set_shape(index_type extents, index_type strides) {
+    extents_ = std::move(extents);
+    strides_ = std::move(strides);
+  }
 
   size_t rank() const { return extents_.size(); }
   bool empty() const { return begin_ >= end_; }
@@ -420,11 +437,14 @@ class Tensor {
   }
 
   // Compute the offset of an index from the pointer to element 0.
+  // This allows broadcasting by according to numpy rules. The last index of
+  // `indices` corresponds to the last dimension of this tensor. Missing
+  // dimensions are treated as stride 0.
   size_t flat_offset(const index_type& indices) const {
-    assert(indices.size() == rank());
     size_t result = 0;
+    assert(indices.size() >= rank());
     for (size_t i = 0; i < rank(); ++i) {
-      result += strides_[i] * indices[i];
+      result += strides_[i] * indices[i + indices.size() - rank()];
     }
     return result;
   }
@@ -439,14 +459,30 @@ class Tensor {
 // Generate a random shape of the given rank, where each dim is in [min_dim,
 // max_dim].
 template <typename Rng>
-std::vector<size_t> random_shape(Rng& rng, size_t rank, size_t min_dim = 1,
-                                 size_t max_dim = 9) {
+std::vector<size_t> random_shape(Rng& rng, size_t rank, size_t min_dim,
+                                 size_t max_dim) {
   std::uniform_int_distribution<size_t> dim_dist(min_dim, max_dim);
   std::vector<size_t> shape(rank);
   for (size_t i = 0; i < rank; ++i) {
     shape[i] = dim_dist(rng);
   }
   return shape;
+}
+
+template <typename Rng>
+std::vector<size_t> random_shape(Rng& rng, size_t rank) {
+  return random_shape(rng, rank, 1, 9);
+}
+
+template <typename Rng>
+std::vector<size_t> random_shape(Rng& rng, size_t min_dim, size_t max_dim) {
+  std::uniform_int_distribution<size_t> rank_dist(0, XNN_MAX_TENSOR_DIMS - 1);
+  return random_shape(rng, rank_dist(rng), min_dim, max_dim);
+}
+
+template <typename Rng>
+std::vector<size_t> random_shape(Rng& rng) {
+  return random_shape(rng, 1, 9);
 }
 
 // Generate random quantization parameters for a given datatype.
@@ -475,6 +511,17 @@ T quantize(float value, const xnn_quantization_params& params) {
   const float max = NumericLimits<Unwrapped>::max();
   return static_cast<T>(std::lrintf(
       std::max(std::min(value / params.scale + params.zero_point, max), min)));
+}
+
+// Convert a floating point value to an "idealized" quantized value, still
+// represented as a float.
+inline float fake_quantize(float value, const xnn_quantization_params& params) {
+  return std::round(value / params.scale + params.zero_point);
+}
+
+template <typename T>
+float dequantize(T x, xnn_quantization_params params) {
+  return dequantize(x, params.scale, params.zero_point);
 }
 
 // Make a generator of random values of a datatype T, suitable for use with
@@ -519,6 +566,109 @@ class DatatypeGenerator<quantized<T>> {
   }
 };
 
-};  // namespace xnnpack
+namespace internal {
+
+class IndexIterator {
+  std::vector<size_t> extents_;
+  std::vector<size_t> i_;
+
+ public:
+  static IndexIterator make_end(std::vector<size_t> extents) {
+    IndexIterator result;
+    result.extents_ = std::move(extents);
+    if (result.extents_.empty()) {
+      // This is a bit of a hack. For rank 0 shapes, we need a way of separating
+      // "begin" from "end". We call "begin" {}, which is the rank 0 index.
+      // "end" is {1}.
+      result.i_ = {1};
+    } else {
+      // The "end" iterator is when we reach one past the end of the first
+      // dimension, and the rest of the dimensions are 0.
+      result.i_ = std::vector<size_t>(result.extents_.size(), 0);
+      result.i_.front() = result.extents_.front();
+    }
+    return result;
+  }
+  static IndexIterator make_begin(std::vector<size_t> extents) {
+    size_t size =
+        std::accumulate(extents.begin(), extents.end(), static_cast<size_t>(1),
+                        std::multiplies<size_t>());
+    if (size == 0) {
+      return make_end(extents);
+    }
+    IndexIterator result;
+    result.extents_ = std::move(extents);
+    result.i_ = std::vector<size_t>(result.extents_.size(), 0);
+    return result;
+  }
+
+  IndexIterator& operator++() {
+    if (i_.empty()) {
+      i_.push_back(1);
+    } else {
+      i_.back() += 1;
+      for (size_t d = i_.size() - 1; d > 0; --d) {
+        if (i_[d] >= extents_[d]) {
+          ++i_[d - 1];
+          i_[d] = 0;
+        } else {
+          break;
+        }
+      }
+    }
+    return *this;
+  }
+
+  IndexIterator operator++(int) {
+    IndexIterator result = *this;
+    ++(*this);
+    return result;
+  }
+
+  const std::vector<size_t>& operator*() const { return i_; }
+  const std::vector<size_t>* operator->() const { return &i_; }
+
+  bool operator!=(const IndexIterator& other) const { return i_ != other.i_; }
+};
+
+class IndexRange {
+  IndexIterator begin_;
+  IndexIterator end_;
+
+ public:
+  using value_type = std::vector<size_t>;
+
+  IndexRange(IndexIterator begin, IndexIterator end)
+      : begin_(std::move(begin)), end_(std::move(end)) {}
+
+  const IndexIterator& begin() const { return begin_; }
+  const IndexIterator& end() const { return end_; }
+};
+
+}  // namespace internal
+
+// Enumerate the indices in a multidimensional range [0, extents)
+// This is very inefficient, it is intended for use in tests, where a more
+// efficient approach would result in calling ASSERT_* in another function.
+inline internal::IndexRange EnumerateIndices(
+    const std::vector<size_t>& extents) {
+  return internal::IndexRange(internal::IndexIterator::make_begin(extents),
+                              internal::IndexIterator::make_end(extents));
+}
+
+inline std::string index_to_string(const std::vector<size_t>& v) {
+  std::stringstream ss;
+  ss << "{";
+  for (size_t i = 0; i < v.size(); i++) {
+    ss << v[i];
+    if (i + 1 < v.size()) {
+      ss << ", ";
+    }
+  }
+  ss << "}";
+  return ss.str();
+}
+
+}  // namespace xnnpack
 
 #endif  // __XNNPACK_TEST_BUFFER_H_

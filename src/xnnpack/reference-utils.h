@@ -11,6 +11,7 @@
 #include <limits>
 
 #include "xnnpack/datatype.h"
+#include "xnnpack.h"
 
 namespace xnnpack {
 
