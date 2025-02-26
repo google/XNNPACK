@@ -7,6 +7,7 @@ Auto-generated file. Do not edit!
 
 PROD_RVV_MICROKERNEL_SRCS = [
     "src/f32-argmaxpool/f32-argmaxpool-9p8x-rvv-u1v.c",
+    "src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x2v-rvv-2x2.c",
     "src/f32-dwconv/gen/f32-dwconv-3p8vc-minmax-rvv.c",
     "src/f32-dwconv/gen/f32-dwconv-3p8vc-rvv.c",
     "src/f32-dwconv/gen/f32-dwconv-4p8vc-minmax-rvv.c",
@@ -97,6 +98,8 @@ PROD_RVV_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_RVV_MICROKERNEL_SRCS = [
+    "src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x2v-rvv-1x1.c",
+    "src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x2v-rvv-2x1.c",
     "src/f32-gemm/gen/f32-gemm-1x4v-relu-rvv.c",
     "src/f32-gemm/gen/f32-gemm-1x4v-rvv.c",
     "src/f32-gemm/gen/f32-gemm-7x4v-relu-rvv.c",
