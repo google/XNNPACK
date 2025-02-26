@@ -6,8 +6,7 @@ Auto-generated file. Do not edit!
 """
 
 PROD_NEONFP16ARITH_MICROKERNEL_SRCS = [
-    "src/f16-avgpool/f16-avgpool-9p8x-minmax-neonfp16arith-c8.c",
-    "src/f16-avgpool/f16-avgpool-9x-minmax-neonfp16arith-c8.c",
+    "src/f16-avgpool/gen/f16-avgpool-9p-minmax-neonfp16arith.c",
     "src/f16-conv-hwc2chw/f16-conv-hwc2chw-3x3s2p1c3x4-neonfp16arith-2x2.c",
     "src/f16-dwconv/gen/f16-dwconv-3p16c-minmax-neonfp16arith.c",
     "src/f16-dwconv/gen/f16-dwconv-4p16c-minmax-neonfp16arith.c",
@@ -31,8 +30,7 @@ PROD_NEONFP16ARITH_MICROKERNEL_SRCS = [
     "src/f16-igemm/gen/f16-igemm-6x8-minmax-neonfp16arith-ld64.c",
     "src/f16-igemm/gen/f16-igemm-6x16-minmax-neonfp16arith-ld64.c",
     "src/f16-maxpool/f16-maxpool-9p8x-minmax-neonfp16arith-c8.c",
-    "src/f16-pavgpool/f16-pavgpool-9p8x-minmax-neonfp16arith-c8.c",
-    "src/f16-pavgpool/f16-pavgpool-9x-minmax-neonfp16arith-c8.c",
+    "src/f16-pavgpool/gen/f16-pavgpool-9p-minmax-neonfp16arith.c",
     "src/f16-qs8-vcvt/gen/f16-qs8-vcvt-neonfp16arith-u32.c",
     "src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-neonfp16arith-rr2-p2-u32.c",
     "src/f16-rminmax/gen/f16-rmax-neonfp16arith-u32-acc4.c",

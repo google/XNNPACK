@@ -4,11 +4,15 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-################################ RISC-V Vector ################################
-tools/xngen src/f32-avgpool/rvv_9x.c.in -D LMUL=1 -o src/f32-avgpool/gen/f32-avgpool-9x-minmax-rvv-c1v.c &
-tools/xngen src/f32-avgpool/rvv_9x.c.in -D LMUL=2 -o src/f32-avgpool/gen/f32-avgpool-9x-minmax-rvv-c2v.c &
+##################################### SIMD #####################################
+tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=scalar -D PIXELWISE=0 -D SIMD_SIZE=1 -o src/f32-avgpool/gen/f32-avgpool-9p-minmax-scalar-u1.c &
+tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=sse2 -D PIXELWISE=0 -D SIMD_SIZE=4 -o src/f32-avgpool/gen/f32-avgpool-9p-minmax-sse2-u4.c &
+tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=wasmsimd -D PIXELWISE=0 -D SIMD_SIZE=4 -o src/f32-avgpool/gen/f32-avgpool-9p-minmax-wasmsimd-u4.c &
+tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=neon -D PIXELWISE=0 -D SIMD_SIZE=4 -o src/f32-avgpool/gen/f32-avgpool-9p-minmax-neon-u4.c &
 
-tools/xngen src/f32-avgpool/rvv_9p8x.c.in -D LMUL=1 -o src/f32-avgpool/gen/f32-avgpool-9p8x-minmax-rvv-c1v.c &
-tools/xngen src/f32-avgpool/rvv_9p8x.c.in -D LMUL=2 -o src/f32-avgpool/gen/f32-avgpool-9p8x-minmax-rvv-c2v.c &
+tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=scalar -D PIXELWISE=1 -D SIMD_SIZE=1 -o src/f32-pavgpool/gen/f32-pavgpool-9p-minmax-scalar-u4.c &
+tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=sse2 -D PIXELWISE=1 -D SIMD_SIZE=4 -o src/f32-pavgpool/gen/f32-pavgpool-9p-minmax-sse2-u4.c &
+tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=wasmsimd -D PIXELWISE=1 -D SIMD_SIZE=4 -o src/f32-pavgpool/gen/f32-pavgpool-9p-minmax-wasmsimd-u4.c &
+tools/xngen src/f32-avgpool/avgpool.c.in -D ARCH=neon -D PIXELWISE=1 -D SIMD_SIZE=4 -o src/f32-pavgpool/gen/f32-pavgpool-9p-minmax-neon-u4.c &
 
 wait

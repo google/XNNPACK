@@ -213,6 +213,24 @@ xnn_load_tail_f16(const xnn_float16 *input, size_t num_elements) XNN_OOB_READS {
   return vreinterpretq_f16_u16(vld1q_u16((const uint16_t *)input));
 }
 
+static xnn_simd_f16_t xnn_load_tail_safe_f16(const xnn_float16 *input, size_t num_elements) {
+  assert(num_elements > 0);
+  assert(num_elements < xnn_simd_size_f16);
+
+  XNN_ALIGN(16) xnn_float16 padded[8];
+  xnn_float16* dst = padded;
+  switch (num_elements) {
+  case 7: *dst++ = *input++;
+  case 6: *dst++ = *input++;
+  case 5: *dst++ = *input++;
+  case 4: *dst++ = *input++;
+  case 3: *dst++ = *input++;
+  case 2: *dst++ = *input++;
+  default: *dst++ = *input++;
+  }
+  return vreinterpretq_f16_u16(vld1q_u16((const uint16_t *) &padded[0]));
+}
+
 static XNN_INLINE void xnn_store_tail_f16(xnn_float16 *output, xnn_simd_f16_t v,
                                           size_t num_elements) {
   assert(num_elements > 0);
