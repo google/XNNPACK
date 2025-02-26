@@ -4,15 +4,18 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-from gemm_compiler import arm_template as arm
+import abc
+
+from gemm_compiler import arm_template
 
 
-class Aarch64(arm.Arm):
+class Aarch64(arm_template.Arm):
   """All non SIMD features for aarch64."""
 
-  def __init__(self):
-    self.decrement = 4
+  def __init__(self, m: int, n: int):
     self.unroll_factor = 1
+    super().__init__(m, n)
+    self.decrement = 4
 
   def astride_register(self):
     return 'x4'
@@ -78,12 +81,15 @@ class Aarch64(arm.Arm):
   def register_map_dword(self, reg):
     return reg.replace('x', 'q')
 
-  def function_name(self, M, N, isa):
-    LD = self.unroll_factor * 32
-    return f'xnn_f32_gemm_minmax_ukernel_{M}x{N}__asm_aarch64_{isa}_ld{LD}_2'
+  def function_name(self):
+    ld = self.unroll_factor * 32
+    return (
+        f'xnn_f32_gemm_minmax_ukernel_{self.m}x{self.n * self.n_step()}'
+        + f'__asm_aarch64_{self.isa()}_ld{ld}_2'
+    )
 
-  def header(self, M, N, prefix, isa):
-    HEADER = """// Copyright 2025 Google LLC
+  def header(self):
+    header = """// Copyright 2025 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -109,64 +115,73 @@ BEGIN_FUNCTION {function_name}
 
       # Load min/max values.
       ld2r {{v0.4s, v1.4s}}, [x13]
-""".format(
-        function_name=self.function_name(M, N, isa)
-    )
-    HEADER += self.quantization_params(M)
-    return HEADER
+""".format(function_name=self.function_name())
+    header += self.quantization_params()
+    return header
 
   def jump_to_label(self, label):
     return f'b {label}\n'
 
-  def read_a_registers(self, M):
+  def read_a_registers(self):
     return ''
 
-  def do_loop(self, M, N, pos):
-    N_COUNT = N // self.n_step()
+  @abc.abstractmethod
+  def w_registers(self) -> list[str]:
+    raise NotImplementedError
+
+  @abc.abstractmethod
+  def weights_asm(self) -> dict[str, list[str]]:
+    raise NotImplementedError
+
+  def do_loop(self, pos):
     asm_string = ''
     for l in self.weights_asm()['loop_2']:
-      for nr in range(0, N_COUNT - 1, 2):
+      for nr in range(0, self.n - 1, 2):
         asm_string += l.format(
             W_ptr=self.w_ptr_register(),
             W=self.w_registers()[nr],
             W_1=self.w_registers()[nr + 1],
             offset=self.register_bytes() * nr,
-            w_step=self.register_bytes() * N_COUNT,
+            w_step=self.register_bytes() * self.n,
             mask=self.mask_register(),
             tmp_W=self.tmp_w_register(),
         )
     if 'after' in self.weights_asm():
-      asm_string += self.weights_asm()['after'].format(
-          W=self.w_ptr_register(), w_step=self.register_bytes() * N_COUNT
+      asm_string += ''.join(self.weights_asm()['after']).format(
+          W=self.w_ptr_register(), w_step=self.register_bytes() * self.n
       )
 
     for l in self.compute_asm()['loop']:
-      for nr in range(0, N_COUNT):
-        for mr in range(0, M):
+      for nr in range(0, self.n):
+        for mr in range(0, self.m):
           asm_string += l.format(
               W=self.w_registers()[nr],
               A=self.a_registers(mr),
-              ACC=self.acc_registers()[M * nr + mr],
+              ACC=self.acc_registers()[self.m * nr + mr],
               POS=pos,
           )
     return asm_string
 
-  def inner_loop(self, M, N):
+  @abc.abstractmethod
+  def base_input_asm(self) -> dict[str, list[str]]:
+    raise NotImplementedError
+
+  def inner_loop(self):
     asm_string = ''
     if self.unroll_factor > 1:
-      DECREMENT = self.unroll_factor * 4
+      decrement = self.unroll_factor * 4
       k_register = self.k_register()
-      asm_string += f'\n# Are there at least {DECREMENT} bytes?\n'
-      asm_string += f'cmp {k_register}, {DECREMENT}\n'
-      asm_string += f'blt .Linner_loop_tail\n'
-      asm_string += f'sub {k_register}, {k_register}, {DECREMENT}\n'
+      asm_string += f'\n# Are there at least {decrement} bytes?\n'
+      asm_string += f'cmp {k_register}, {decrement}\n'
+      asm_string += 'blt .Linner_loop_tail\n'
+      asm_string += f'sub {k_register}, {k_register}, {decrement}\n'
 
     asm_string += '\n.Linner_loop:\n'
     decrement = 4 * self.unroll_factor
     if 'before' in self.input_asm():
       asm_string += self.input_asm()['before']
     if self.unroll_factor > 1:
-      for mr in range(0, M):
+      for mr in range(0, self.m):
         for l in self.input_asm()['loop']:
           asm_string += l.format(
               AM_ptr=self.am_registers()[mr],
@@ -182,7 +197,7 @@ BEGIN_FUNCTION {function_name}
     inner_loop_label = '.Linner_loop'
     if self.unroll_factor > 1:
       for u in range(self.unroll_factor):
-        asm_string += self.do_loop(M, N, u)
+        asm_string += self.do_loop(u)
       # loop counter
       asm_string += self.cmp_k_and_jump_if_less(
           label=inner_loop_label, decrement=decrement, cond='bhs'
@@ -195,14 +210,14 @@ BEGIN_FUNCTION {function_name}
       \n.Linner_loop_tail:\n"""
       inner_loop_label = '.Linner_loop_tail'
 
-    for mr in range(0, M):
+    for mr in range(0, self.m):
       for l in self.base_input_asm()['loop']:
         asm_string += l.format(
             AM_ptr=self.am_registers()[mr],
             AM=self.a_registers(mr),
             a_offset=self.k_register(),
         )
-    asm_string += self.do_loop(M, N, 0)
+    asm_string += self.do_loop(0)
     # loop counter
     asm_string += self.cmp_k_and_jump_if_less(
         label=inner_loop_label, decrement=4, cond='bne'
@@ -211,9 +226,7 @@ BEGIN_FUNCTION {function_name}
 
     return asm_string
 
-  def clamp_inputs_and_outputs(
-      self, M, labels, input_registers, output_registers
-  ):
+  def clamp_inputs_and_outputs(self, labels, input_registers, output_registers):
     clamping = {
         'clamp': """
       cmp {mr_reg}, {M}
@@ -223,9 +236,9 @@ BEGIN_FUNCTION {function_name}
       csel  {CM_2}, {CM_1}, {CM_2}, LS\n""",
     }
     ret = ''
-    outer = M
+    outer = self.m
     # clamp a & c
-    end_index = M if (M % 2 == 1) else M - 1
+    end_index = self.m if (self.m % 2 == 1) else self.m - 1
     for mr in range(2, end_index, 2):
       ret += clamping['clamp'].format(
           mr_reg=self.mr_register(),
@@ -237,7 +250,7 @@ BEGIN_FUNCTION {function_name}
           CM_2=output_registers[mr],
           M=mr,
       )
-    if end_index != M:
+    if end_index != self.m:
       ret += """
       cmp {mr_reg}, {M}
       csel  {AM_1}, {AM_0}, {AM_1}, LO
@@ -252,11 +265,10 @@ BEGIN_FUNCTION {function_name}
 
     return ret, outer
 
-  def initialize_k_register(self, reg):
-    kc_register = self.kc_register()
-    return f'mov {reg}, {kc_register}\n'
+  def initialize_k_register(self):
+    return f'mov {self.k_register()}, {self.kc_register()}\n'
 
-  def epilogue(self, M, N, isa):
+  def epilogue(self):
     restore_stack = """
 .Lreturn:
       # Restore the callee saved GP registers.
@@ -272,7 +284,5 @@ BEGIN_FUNCTION {function_name}
       ldp d14, d15, [sp, -80]
       ret
 END_FUNCTION {function_name}
-""".format(
-        M=M, N=N, function_name=isa.function_name(M, N, isa.isa())
-    )
+""".format(function_name=self.function_name())
     return restore_stack

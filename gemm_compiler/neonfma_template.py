@@ -4,16 +4,14 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-import math
-
-from gemm_compiler import aarch64_template as arch
-
-"""All SIMD features for Aarch64 neondot."""
+from gemm_compiler import aarch64_template
 
 
-class NeonFma(arch.Aarch64):
+class NeonFma(aarch64_template.Aarch64):
+  """All SIMD features for Aarch64 neondot."""
 
-  def __init__(self, unroll_factor):
+  def __init__(self, m: int, n: int, unroll_factor: int):
+    super().__init__(m, n)
     self.unroll_factor = unroll_factor
     self.decrement = 4 * unroll_factor
 
@@ -115,36 +113,35 @@ class NeonFma(arch.Aarch64):
     }
     return c_asm
 
-  def init_accumulators(self, M, N):
+  def init_accumulators(self):
     ret = '\n# Initialize accumulators with the biases.\n'
     accumulators = self.acc_registers()
-    W = self.w_ptr_register()
+    w_ptr = self.w_ptr_register()
     single_bias = 'ldr q{ACC}, [{W}, {offset}]\n'
     pair_bias = 'ldp q{ACC}, q{ACC_1}, [{W}, {offset}]\n'
 
-    for nr in range(0, N - 1, 2):
+    for nr in range(0, self.n - 1, 2):
       ret += pair_bias.format(
-          W=W,
-          ACC=accumulators[nr * M],
-          ACC_1=accumulators[nr * M + M],
+          W=w_ptr,
+          ACC=accumulators[nr * self.m],
+          ACC_1=accumulators[nr * self.m + self.m],
           offset=self.register_bytes() * nr,
       )
-    if N % 2 != 0:
+    if self.n % 2 != 0:
       ret += single_bias.format(
-          W=W,
-          ACC=accumulators[(N - 1) * M],
-          offset=self.register_bytes() * (N - 1),
+          W=w_ptr,
+          ACC=accumulators[(self.n - 1) * self.m],
+          offset=self.register_bytes() * (self.n - 1),
       )
-    for nr in range(0, N):
-      for mr in range(1, M):
+    for nr in range(0, self.n):
+      for mr in range(1, self.m):
         ret += self.copy_simd_register(
             prefix=self.prefix(),
-            src=accumulators[M * nr],
-            dst=accumulators[M * nr + mr],
+            src=accumulators[self.m * nr],
+            dst=accumulators[self.m * nr + mr],
         )
 
-    num_horizontal_registers = int(N / self.n_step())
-    ret += self.increment_ptr(ptr=W, step=self.register_bytes() * N)
+    ret += self.increment_ptr(ptr=w_ptr, step=self.register_bytes() * self.n)
     return ret
 
   def copy_simd_register(self, prefix, src, dst):
@@ -158,90 +155,86 @@ class NeonFma(arch.Aarch64):
     min_reg = self.min_register()
     return f'fmax  {prefix}{reg}.4s, {min_reg}.4s, {prefix}{reg}.4s\n'
 
-  def store(
-      self,
-      M,
-      N,
-  ):
+  def store(self):
     accumulators = self.acc_registers()
     cm_registers = self.cm_registers()
     nc_reg = self.nc_register()
     nc_lo = self.register_map_byte(nc_reg)
-    N_COUNT = N // self.n_step()
+    nc = self.n * self.n_step()
     asm_string = """
       # Check whether full or partial store.
       cmp {nc}, {n_step}
-      b.lo .Ltail_{N_2}\n""".format(n_step=N, N_2=N // 2, nc=nc_reg)
-    for mr in range(0, M):
+      b.lo .Ltail_{N_2}\n""".format(n_step=nc, N_2=nc // 2, nc=nc_reg)
+    for mr in range(0, self.m):
       asm_string += 'stp  q{ACC}, q{ACC_1}, [{c_reg}], 32\n'.format(
           ACC=accumulators[mr],
-          ACC_1=accumulators[M + mr],
+          ACC_1=accumulators[self.m + mr],
           c_reg=cm_registers[mr],
       )
-      for nr in range(2, N_COUNT - 1, 2):
+      for _ in range(2, self.n - 1, 2):
         asm_string += 'stp  q{ACC}, q{ACC_1}, [{c_reg}], 32\n'.format(
-            ACC=accumulators[M * 2 + mr],
-            ACC_1=accumulators[M * 3 + mr],
+            ACC=accumulators[self.m * 2 + mr],
+            ACC_1=accumulators[self.m * 3 + mr],
             c_reg=cm_registers[mr],
         )
-      if N_COUNT % 2 != 0:
+      if self.n % 2 != 0:
         asm_string += 'str  q{ACC}, [{c_reg}], 16\n'.format(
-            ACC=accumulators[M * 2 + mr],
+            ACC=accumulators[self.m * 2 + mr],
             c_reg=cm_registers[mr],
         )
 
-    for mr in range(0, M):
-      AM_PTR = self.am_registers()[mr]
+    for mr in range(0, self.m):
+      am_ptr = self.am_registers()[mr]
       kc_register = self.kc_register()
-      asm_string += f'sub {AM_PTR}, {AM_PTR}, {kc_register}\n'
-    CHECK = """
+      asm_string += f'sub {am_ptr}, {am_ptr}, {kc_register}\n'
+    check = """
       sub {nc}, {nc}, {n_step}
       b.ne .Louter_loop
-      b .Lreturn""".format(n_step=N, nc=nc_reg)
-    asm_string += CHECK
-    N = N // 2
-    if N * 2 > self.n_step():
-      if N == 8:
+      b .Lreturn""".format(n_step=nc, nc=nc_reg)
+    asm_string += check
+    nc = nc // 2
+    if nc * 2 > self.n_step():
+      if nc == 8:
         asm_string += """
 \n.Ltail_8:
       tbz {nc_lo}, 3, .Ltail_4\n""".format(nc_lo=nc_lo)
-        for mr in range(0, M):
+        for mr in range(0, self.m):
           asm_string += 'stp  q{ACC}, q{ACC_1}, [{c_reg}], 32\n'.format(
               ACC=accumulators[mr],
-              ACC_1=accumulators[mr + M],
+              ACC_1=accumulators[mr + self.m],
               c_reg=cm_registers[mr],
           )
-        for mr in range(0, M):
+        for mr in range(0, self.m):
           asm_string += 'mov  v{ACC0}.16b, v{ACC1}.16b\n'.format(
-              ACC0=accumulators[mr], ACC1=accumulators[mr + 2 * M]
+              ACC0=accumulators[mr], ACC1=accumulators[mr + 2 * self.m]
           )
           asm_string += 'mov  v{ACC0}.16b, v{ACC1}.16b\n'.format(
-              ACC0=accumulators[mr + M], ACC1=accumulators[mr + 3 * M]
+              ACC0=accumulators[mr + self.m], ACC1=accumulators[mr + 3 * self.m]
           )
       asm_string += """
 \n.Ltail_4:
       tbz {nc_lo}, 2, .Ltail_2\n""".format(nc_lo=nc_lo)
-      for mr in range(0, M):
+      for mr in range(0, self.m):
         asm_string += 'str  q{ACC}, [{c_reg}], 16\n'.format(
             ACC=accumulators[mr], c_reg=cm_registers[mr]
         )
-      for mr in range(0, M):
+      for mr in range(0, self.m):
         asm_string += 'mov  v{ACC0}.16b, v{ACC1}.16b\n'.format(
-            ACC0=accumulators[mr], ACC1=accumulators[mr + M]
+            ACC0=accumulators[mr], ACC1=accumulators[mr + self.m]
         )
     asm_string += """
 \n.Ltail_2:
       tbz {nc_lo}, 1, .Ltail_1\n""".format(nc_lo=nc_lo)
-    for mr in range(0, M):
+    for mr in range(0, self.m):
       asm_string += 'str  d{ACC}, [{c_reg}], 8\n'.format(
           ACC=accumulators[mr], c_reg=cm_registers[mr]
       )
-    for mr in range(0, M):
+    for mr in range(0, self.m):
       asm_string += 'dup d{ACC}, v{ACC}.d[1]\n'.format(ACC=accumulators[mr])
     asm_string += """
 \n.Ltail_1:
       tbz {nc_lo}, 0, .Lreturn\n""".format(nc_lo=nc_lo)
-    for mr in range(0, M):
+    for mr in range(0, self.m):
       asm_string += 'str  s{ACC}, [{c_reg}]\n'.format(
           ACC=accumulators[mr], c_reg=cm_registers[mr]
       )
