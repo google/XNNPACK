@@ -12,7 +12,6 @@ XNN_ENUM_ITEM_0(xnn_operator_type_invalid, "Invalid")
 XNN_ENUM_ITEM(xnn_operator_type_argmax_pooling_nhwc_f32, "ArgMax Pooling (NHWC, F32)")
 XNN_ENUM_ITEM(xnn_operator_type_average_pooling_nhwc_f16, "Average Pooling (NHWC, F16)")
 XNN_ENUM_ITEM(xnn_operator_type_average_pooling_nhwc_f32, "Average Pooling (NHWC, F32)")
-XNN_ENUM_ITEM(xnn_operator_type_average_pooling_nhwc_qu8, "Average Pooling (NHWC, QU8)")
 XNN_ENUM_ITEM(xnn_operator_type_batch_matrix_multiply_nc_f16, "Batch Matrix Multiply (NC, F16)")
 XNN_ENUM_ITEM(xnn_operator_type_batch_matrix_multiply_nc_pf16,
               "Batch Matrix Multiply (NC, PF16)")

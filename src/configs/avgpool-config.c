@@ -15,11 +15,9 @@
 
 static struct xnn_avgpool_config f16_avgpool_config = {0};
 static struct xnn_avgpool_config f32_avgpool_config = {0};
-static struct xnn_avgpool_config qu8_avgpool_config = {0};
 
 XNN_INIT_ONCE_GUARD(f16_avgpool);
 XNN_INIT_ONCE_GUARD(f32_avgpool);
-XNN_INIT_ONCE_GUARD(qu8_avgpool);
 
 static void init_f16_avgpool_config(void) {
   #if XNN_ARCH_ARM && XNN_ENABLE_ARM_FP16_VECTOR && XNN_ENABLE_ARM_FP16_SCALAR
@@ -133,49 +131,6 @@ static void init_f32_avgpool_config(void) {
   #endif
 }
 
-static void init_qu8_avgpool_config(void) {
-  #if XNN_ARCH_ARM
-    const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-    assert(hardware_config != NULL);
-    if (hardware_config->use_arm_neon) {
-      qu8_avgpool_config.unipass = (xnn_avgpool_unipass_ukernel_fn) xnn_qu8_avgpool_minmax_fp32_ukernel_9x__neon_c8;
-      qu8_avgpool_config.multipass = (xnn_avgpool_multipass_ukernel_fn) xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8;
-      qu8_avgpool_config.init.qu8 = xnn_init_qu8_avgpool_minmax_fp32_scalar_params;
-      qu8_avgpool_config.primary_tile = 9;
-      qu8_avgpool_config.incremental_tile = 8;
-      qu8_avgpool_config.channel_tile = 8;
-    } else if (!XNN_PLATFORM_MOBILE) {
-      qu8_avgpool_config.unipass = (xnn_avgpool_unipass_ukernel_fn) xnn_qu8_avgpool_minmax_fp32_ukernel_9x__scalar_imagic_c1;
-      qu8_avgpool_config.multipass = (xnn_avgpool_multipass_ukernel_fn) xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1;
-      qu8_avgpool_config.init.qu8 = xnn_init_qu8_avgpool_minmax_fp32_scalar_params;
-      qu8_avgpool_config.primary_tile = 9;
-      qu8_avgpool_config.incremental_tile = 8;
-      qu8_avgpool_config.channel_tile = 1;
-    }
-  #elif XNN_ARCH_ARM64
-    qu8_avgpool_config.unipass = (xnn_avgpool_unipass_ukernel_fn) xnn_qu8_avgpool_minmax_fp32_ukernel_9x__neon_c8;
-    qu8_avgpool_config.multipass = (xnn_avgpool_multipass_ukernel_fn) xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__neon_c8;
-    qu8_avgpool_config.init.qu8 = xnn_init_qu8_avgpool_minmax_fp32_scalar_params;
-    qu8_avgpool_config.primary_tile = 9;
-    qu8_avgpool_config.incremental_tile = 8;
-    qu8_avgpool_config.channel_tile = 8;
-  #elif XNN_ARCH_X86 || XNN_ARCH_X86_64
-    qu8_avgpool_config.unipass = (xnn_avgpool_unipass_ukernel_fn) xnn_qu8_avgpool_minmax_fp32_ukernel_9x__sse2_c8;
-    qu8_avgpool_config.multipass = (xnn_avgpool_multipass_ukernel_fn) xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__sse2_c8;
-    qu8_avgpool_config.init.qu8 = xnn_init_qu8_avgpool_minmax_fp32_scalar_params;
-    qu8_avgpool_config.primary_tile = 9;
-    qu8_avgpool_config.incremental_tile = 8;
-    qu8_avgpool_config.channel_tile = 8;
-  #else
-    qu8_avgpool_config.unipass = (xnn_avgpool_unipass_ukernel_fn) xnn_qu8_avgpool_minmax_fp32_ukernel_9x__scalar_imagic_c1;
-    qu8_avgpool_config.multipass = (xnn_avgpool_multipass_ukernel_fn) xnn_qu8_avgpool_minmax_fp32_ukernel_9p8x__scalar_imagic_c1;
-    qu8_avgpool_config.init.qu8 = xnn_init_qu8_avgpool_minmax_fp32_scalar_params;
-    qu8_avgpool_config.primary_tile = 9;
-    qu8_avgpool_config.incremental_tile = 8;
-    qu8_avgpool_config.channel_tile = 1;
-  #endif
-}
-
 const struct xnn_avgpool_config* xnn_init_f16_avgpool_config() {
   const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
   if (hardware_config == NULL || !xnn_is_f16_compatible_config(hardware_config)) {
@@ -192,13 +147,4 @@ const struct xnn_avgpool_config* xnn_init_f32_avgpool_config() {
   }
   XNN_INIT_ONCE(f32_avgpool);
   return &f32_avgpool_config;
-}
-
-const struct xnn_avgpool_config* xnn_init_qu8_avgpool_config() {
-  const struct xnn_hardware_config* hardware_config = xnn_init_hardware_config();
-  if (hardware_config == NULL) {
-    return NULL;
-  }
-  XNN_INIT_ONCE(qu8_avgpool);
-  return &qu8_avgpool_config;
 }

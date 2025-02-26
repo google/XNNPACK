@@ -429,19 +429,6 @@ struct xnn_reduce_params {
   };
 };
 
-// AvgPool w. Min+Max.
-
-struct xnn_qu8_avgpool_minmax_params {
-  struct {
-    int32_t init_bias;
-    float scale;
-    int16_t output_zero_point;
-    int16_t output_min;
-    int16_t output_max;
-  } fp32_scalar;
-};
-
-
 // Cvt (Convert): used by VCVT microkernels.
 
 struct xnn_f16_qs8_cvt_params {

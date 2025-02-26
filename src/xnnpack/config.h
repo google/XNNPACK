@@ -126,7 +126,6 @@ XNN_INTERNAL const struct xnn_xx_pad_config* xnn_init_xx_pad_config();
 
 XNN_INTERNAL const struct xnn_avgpool_config* xnn_init_f16_avgpool_config();
 XNN_INTERNAL const struct xnn_avgpool_config* xnn_init_f32_avgpool_config();
-XNN_INTERNAL const struct xnn_avgpool_config* xnn_init_qu8_avgpool_config();
 
 XNN_INTERNAL const struct xnn_pavgpool_config* xnn_init_f16_pavgpool_config();
 XNN_INTERNAL const struct xnn_pavgpool_config* xnn_init_f32_pavgpool_config();

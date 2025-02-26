@@ -190,8 +190,6 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qs8-vlrelu/gen/qs8-vlrelu-scalar-select-u4.c
   src/qs8-vmul/gen/qs8-vmul-minmax-fp32-scalar-u4.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-fp32-scalar-u4.c
-  src/qu8-avgpool/qu8-avgpool-9p8x-minmax-fp32-scalar-imagic-c1.c
-  src/qu8-avgpool/qu8-avgpool-9x-minmax-fp32-scalar-imagic-c1.c
   src/qu8-dwconv/gen/qu8-dwconv-9p1c-minmax-fp32-scalar-fmagic.c
   src/qu8-dwconv/gen/qu8-dwconv-9p2c-minmax-fp32-scalar-imagic.c
   src/qu8-dwconv/gen/qu8-dwconv-9p2c-minmax-fp32-scalar-lrintf.c

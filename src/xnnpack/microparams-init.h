@@ -126,19 +126,6 @@ XNN_INTERNAL void xnn_init_qs8_to_qs8_qc8w_scale_fp32_params(
   const float scale[XNN_MIN_ELEMENTS(1)],
   void* packed_w);
 
-XNN_INTERNAL size_t xnn_init_qu8_avgpool_minmax_fp32_scalar_params(
-  struct xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int32_t bias,
-  float scale,
-  uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max);
-
-XNN_INTERNAL void xnn_update_qu8_avgpool_minmax_fp32_scalar_params(
-  struct xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int32_t bias,
-  float scale);
-
 XNN_INTERNAL size_t xnn_init_f16_scale_scalar_params(
   struct xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)],
   xnn_float16 scale);

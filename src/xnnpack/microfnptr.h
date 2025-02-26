@@ -833,18 +833,6 @@ typedef void (*xnn_f32_avgpool_minmax_unipass_ukernel_fn)(
     size_t output_increment,
     const struct xnn_f32_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
-typedef void (*xnn_qu8_avgpool_minmax_unipass_ukernel_fn)(
-    size_t output_pixels,
-    size_t kernel_elements,
-    size_t channels,
-    const uint8_t** input,
-    size_t input_offset,
-    const uint8_t* zero,
-    uint8_t* output,
-    size_t input_increment,
-    size_t output_increment,
-    const struct xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
 // AVGPOOL: AVeraGe POOLing multi-pass
 
 typedef void (*xnn_avgpool_multipass_ukernel_fn)(
@@ -885,19 +873,6 @@ typedef void (*xnn_f32_avgpool_minmax_multipass_ukernel_fn)(
     size_t input_increment,
     size_t output_increment,
     const struct xnn_f32_scaleminmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
-
-typedef void (*xnn_qu8_avgpool_minmax_multipass_ukernel_fn)(
-    size_t output_pixels,
-    size_t kernel_elements,
-    size_t channels,
-    const uint8_t** input,
-    size_t input_offset,
-    const uint8_t* zero,
-    int32_t* buffer,
-    uint8_t* output,
-    size_t input_increment,
-    size_t output_increment,
-    const struct xnn_qu8_avgpool_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 // PAVGPOOL: Pixelwise AVeraGe POOLing single-pass
 
@@ -2018,19 +1993,6 @@ typedef size_t (*xnn_init_qu8_conv_minmax_params_fn)(
 
 typedef size_t (*xnn_init_qs8_rsum_params_fn)(
   struct xnn_qs8_rsum_params params[XNN_MIN_ELEMENTS(1)]);
-
-typedef size_t (*xnn_init_qu8_avgpool_minmax_params_fn)(
-  struct xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int32_t bias,
-  float scale,
-  uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max);
-
-typedef void (*xnn_update_qu8_avgpool_minmax_params_fn)(
-  struct xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int32_t bias,
-  float scale);
 
 typedef size_t (*xnn_init_qs8_add_minmax_params_fn)(
   struct xnn_qs8_add_minmax_params params[XNN_MIN_ELEMENTS(1)],

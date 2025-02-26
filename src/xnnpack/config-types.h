@@ -82,7 +82,6 @@ struct xnn_avgpool_config {
   union {
     xnn_init_f16_scaleminmax_params_fn f16;
     xnn_init_f32_scaleminmax_params_fn f32;
-    xnn_init_qu8_avgpool_minmax_params_fn qu8;
   } init;
   // Number of rows in a primary tile.
   // Unipass micro-kernel must be called with this number of rows, or fewer.

@@ -543,37 +543,6 @@ void xnn_init_blockwise_scale_bf16_params(
   }
 }
 
-size_t xnn_init_qu8_avgpool_minmax_fp32_scalar_params(
-  struct xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int32_t init_bias,
-  float scale,
-  uint8_t output_zero_point,
-  uint8_t output_min,
-  uint8_t output_max)
-{
-  assert(scale >= 0x1.0p-32f);
-  assert(scale < 256.0f);
-
-  params->fp32_scalar.init_bias = init_bias;
-  params->fp32_scalar.scale = scale;
-  params->fp32_scalar.output_zero_point = output_zero_point;
-  params->fp32_scalar.output_min = output_min;
-  params->fp32_scalar.output_max = output_max;
-  return sizeof(params->fp32_scalar);
-}
-
-void xnn_update_qu8_avgpool_minmax_fp32_scalar_params(
-  struct xnn_qu8_avgpool_minmax_params params[XNN_MIN_ELEMENTS(1)],
-  int32_t init_bias,
-  float scale)
-{
-  assert(scale >= 0x1.0p-32f);
-  assert(scale < 256.0f);
-
-  params->fp32_scalar.init_bias = init_bias;
-  params->fp32_scalar.scale = scale;
-}
-
 size_t xnn_init_f16_scale_scalar_params(
   struct xnn_f16_scale_params params[XNN_MIN_ELEMENTS(1)],
   xnn_float16 scale)

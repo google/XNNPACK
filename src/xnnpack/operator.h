@@ -242,7 +242,6 @@ struct xnn_operator {
     union xnn_qs8_conv_minmax_params qs8_conv_minmax;
     union xnn_qs8_qc8w_conv_minmax_params qs8_qc8w_conv_minmax;
     union xnn_qu8_conv_minmax_params qu8_conv_minmax;
-    struct xnn_qu8_avgpool_minmax_params qu8_avgpool;
     struct xnn_s8_minmax_params s8_minmax;
     struct xnn_s32_default_params s32_default;
     struct xnn_u8_minmax_params u8_minmax;

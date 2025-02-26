@@ -51,17 +51,6 @@ const XnnTestParam xnn_test_params[] = {
 #undef XNN_UKERNEL_MULTIPASS
 #undef XNN_UKERNEL_UNIPASS
 
-#define XNN_UKERNEL_MULTIPASS(arch_flags, ukernel, requantize, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, init_params) \
-  { #ukernel, AvgPoolMicrokernelTester::Kernel{ukernel, init_params, requantize}, arch_flags, channel_tile, channel_scaled_tile, primary_tile, incremental_tile },
-
-#define XNN_UKERNEL_UNIPASS(arch_flags, ukernel, requantize, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, init_params) \
-  { #ukernel, AvgPoolMicrokernelTester::Kernel{ukernel, init_params, requantize}, arch_flags, channel_tile, channel_scaled_tile, primary_tile, incremental_tile },
-
-#include "qu8-avgpool/qu8-avgpool-minmax.h"
-
-#undef XNN_UKERNEL_MULTIPASS
-#undef XNN_UKERNEL_UNIPASS
-
 };
 
 
