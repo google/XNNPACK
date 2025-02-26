@@ -43,16 +43,16 @@
 
 #endif  // XNN_ENABLE_KLEIDIAI
 
-// Templates ignore __attribute__((aligned(x))) when deducing types, so we need
-// to make a wrapper struct that pretends to be an int32_t.
 struct unaligned_int32_t {
-  XNN_UNALIGNED int32_t value;
+  char value[sizeof(int32_t)];
 
-  // NOLINTNEXTLINE: emulating __attribute__((__aligned__(x))) int32_t.
-  XNN_INLINE unaligned_int32_t(int32_t value) : value(value) {}
+  XNN_INLINE unaligned_int32_t(int32_t v) { memcpy(value, &v, sizeof(v)); }
 
-  // NOLINTNEXTLINE: emulating __attribute__((__aligned__(x))) int32_t.
-  XNN_INLINE operator int32_t() const { return value; }
+  XNN_INLINE operator int32_t() const {
+    int32_t v;
+    memcpy(&v, value, sizeof(v));
+    return v;
+  }
 };
 
 template <typename Src, typename Dst>
