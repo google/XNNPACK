@@ -214,6 +214,7 @@ xnnpack_cxx_library(
         "s16-simd-" + arch + ".cc",
     ],
     copts = xnnpack_simd_copts_for_arch(arch),
+    tags = ["simd_wrapper_test"],
     deps = [
         ":replicable_random_device",
         "//:buffer",
@@ -229,6 +230,7 @@ xnnpack_cxx_library(
         "s32-simd-" + arch + ".cc",
     ],
     copts = xnnpack_simd_copts_for_arch(arch),
+    tags = ["simd_wrapper_test"],
     deps = [
         ":replicable_random_device",
         "//:buffer",
@@ -244,6 +246,7 @@ xnnpack_cxx_library(
         "s8-simd-" + arch + ".cc",
     ],
     copts = xnnpack_simd_copts_for_arch(arch),
+    tags = ["simd_wrapper_test"],
     deps = [
         ":replicable_random_device",
         "//:buffer",
