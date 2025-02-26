@@ -21,8 +21,7 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-argmaxpool/f32-argmaxpool-4x-scalar-c1.c
   src/f32-argmaxpool/f32-argmaxpool-9p8x-scalar-c1.c
   src/f32-argmaxpool/f32-argmaxpool-9x-scalar-c1.c
-  src/f32-avgpool/f32-avgpool-9p8x-minmax-scalar-c1.c
-  src/f32-avgpool/f32-avgpool-9x-minmax-scalar-c1.c
+  src/f32-avgpool/gen/f32-avgpool-9p-minmax-scalar-u1.c
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-scalar-1x1.c
   src/f32-dwconv/gen/f32-dwconv-3p1c-minmax-scalar-acc2.c
   src/f32-dwconv/gen/f32-dwconv-3p1c-scalar-acc2.c
@@ -68,9 +67,8 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-4x4-minmax-scalar.c
   src/f32-igemm/gen/f32-igemm-4x4-relu-scalar.c
   src/f32-igemm/gen/f32-igemm-4x4-scalar.c
-  src/f32-maxpool/f32-maxpool-9p8x-minmax-scalar-c1.c
-  src/f32-pavgpool/f32-pavgpool-9p8x-minmax-scalar-c1.c
-  src/f32-pavgpool/f32-pavgpool-9x-minmax-scalar-c1.c
+  src/f32-maxpool/gen/f32-maxpool-9p-minmax-scalar-u1.c
+  src/f32-pavgpool/gen/f32-pavgpool-9p-minmax-scalar-u4.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x4-minmax-scalar.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x4-minmax-scalar.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x4-minmax-scalar.c
@@ -219,11 +217,11 @@ SET(PROD_SCALAR_MICROKERNEL_SRCS
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-scalar-u4.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-scalar-u4.c
   src/s8-ibilinear/gen/s8-ibilinear-scalar-c1.c
-  src/s8-maxpool/s8-maxpool-9p8x-minmax-scalar-c1.c
+  src/s8-maxpool/gen/s8-maxpool-9p-minmax-scalar-u1.c
   src/s8-vclamp/s8-vclamp-scalar-u4.c
   src/u8-ibilinear/gen/u8-ibilinear-scalar-c1.c
   src/u8-lut32norm/u8-lut32norm-scalar.c
-  src/u8-maxpool/u8-maxpool-9p8x-minmax-scalar-c1.c
+  src/u8-maxpool/gen/u8-maxpool-9p-minmax-scalar-u1.c
   src/u8-rmax/u8-rmax-scalar-u2.c
   src/u8-vclamp/u8-vclamp-scalar-u4.c
   src/x8-lut/gen/x8-lut-scalar-u4.c

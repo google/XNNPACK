@@ -60,7 +60,7 @@ SET(PROD_SSE41_MICROKERNEL_SRCS
   src/qu8-vmul/gen/qu8-vmul-minmax-fp32-sse41-mul16-ld64-u16.c
   src/qu8-vmulc/gen/qu8-vmulc-minmax-fp32-sse41-mul16-ld64-u16.c
   src/s8-ibilinear/gen/s8-ibilinear-sse41-c16.c
-  src/s8-maxpool/s8-maxpool-9p8x-minmax-sse41-c16.c
+  src/s8-maxpool/gen/s8-maxpool-9p-minmax-sse41-u16.c
   src/s8-vclamp/s8-vclamp-sse41-u64.c
   src/u8-ibilinear/gen/u8-ibilinear-sse41-c16.c)
 
