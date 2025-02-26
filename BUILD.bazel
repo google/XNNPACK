@@ -909,12 +909,13 @@ xnnpack_cc_library(
         "src/xnnpack/operator.h",
     ],
     deps = [
-        ":allocator",
-        ":cache",
+        ":common",
         ":compute_h",
         ":microkernel_type",
+        ":microparams",
         ":operator_type",
         ":params",
+        ":xnnpack_h",
         "@pthreadpool",
     ],
 )
@@ -1027,6 +1028,16 @@ xnnpack_cc_library(
         "src/xnnpack/subgraph.h",
     ],
     compatible_with = [],
+    deps = [
+        ":allocation_type",
+        ":common",
+        ":config_hdrs",
+        ":math",
+        ":microkernels_h",
+        ":node_type",
+        ":xnnpack_h",
+        "@pthreadpool",
+    ],
 )
 
 xnnpack_cc_library(

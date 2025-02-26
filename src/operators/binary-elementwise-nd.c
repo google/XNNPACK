@@ -208,6 +208,7 @@ static enum xnn_status init_binary_elementwise_nd(
       xnn_datatype_log2_size_bytes(datatype);
 
   op->type = xnn_operator_type_binary_elementwise;
+  op->binary_elementwise.op_type = type;
   op->flags = flags;
 
   op->state = xnn_run_state_invalid;

@@ -3,14 +3,14 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_OPERATOR_UTILS_H_
+#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_OPERATOR_UTILS_H_
 
 #include <stddef.h>
 #include <stdint.h>
 
 #include "xnnpack/common.h"
 #include "xnnpack/operator.h"
-#include "xnnpack/params.h"
 
 static inline bool use_weights_cache(struct xnn_operator* op) {
   return op->weights_cache != NULL;
@@ -70,6 +70,10 @@ XNN_INTERNAL enum xnn_status xnn_destroy_operator(xnn_operator_t op);
 XNN_INTERNAL const char* xnn_unary_operator_to_string(enum xnn_unary_operator op);
 XNN_INTERNAL const char* xnn_binary_operator_to_string(enum xnn_binary_operator op);
 
+XNN_INTERNAL const char* xnn_operator_type_to_string_v2(xnn_operator_t op);
+
 #ifdef __cplusplus
 }
 #endif
+
+#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_OPERATOR_UTILS_H_

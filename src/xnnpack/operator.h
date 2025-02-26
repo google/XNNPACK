@@ -208,11 +208,13 @@ struct xnn_operator {
   union {
     struct {
       uint32_t log2_element_size;
+      enum xnn_binary_operator op_type;
     } binary_elementwise;
     struct {
       uint8_t num_nonbatch_dims;
       uint8_t log2_input_size;
       uint8_t log2_output_size;
+      enum xnn_unary_operator op_type;
     } unary_elementwise;
     struct {
       uint32_t log2_data_element_size;
