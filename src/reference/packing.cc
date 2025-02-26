@@ -33,6 +33,14 @@
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qs4cxs1s0.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi8cxp_qsi8cx_neon.h"
+
+  #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxps1s0_qsu4cxs1s0_neon.h"
+  #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme.h"
+  #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0.h"
+  #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4cxp_qs4cxs1s0.h"
+  #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0.h"
+  #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qs4cxs1s0.h"
+
 #endif  // XNN_ENABLE_KLEIDIAI
 
 // Templates ignore __attribute__((aligned(x))) when deducing types, so we need
@@ -1836,6 +1844,57 @@ void xnn_pack_qu8_weights_and_biases(
 }
 
 #if XNN_ENABLE_KLEIDIAI
+size_t xnn_packed_stride_kai_qs4_weights_and_biases_sme(
+    const struct xnn_gemm_config* gemm_config, size_t k, size_t unused_k_stride,
+    size_t unused_block_size,                   //
+    size_t extra_bytes) {
+  const uint32_t nr = gemm_config->nr;
+  const uint32_t kr = gemm_config->nr;
+  const uint32_t sr = gemm_config->nr;
+  size_t ret_val =
+      kai_get_rhs_packed_stride_rhs_pack_nxk_qsi4cxps1s0_qsu4cxs1s0_neon(k, nr, kr, sr)/
+      kai_get_n_step_rhs_pack_nxk_qsi4cxps1s0_qsu4cxs1s0_neon(nr);
+  return ret_val;
+}
+
+void xnn_pack_kai_qs4_weights_and_biases_sme(
+    uint32_t flags, const struct xnn_gemm_config* gemm_config,
+    size_t input_channels, size_t output_channels, size_t groups,
+    size_t unused_block_size, size_t k_stride, const void* accumulator_init,
+    const void* weights,
+    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
+    size_t extra_data0_element_size,
+    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
+    size_t extra_data1_element_size, void* packed_weights_ptr,
+    const void* params) {
+  const uint32_t nr = gemm_config->nr;
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  const struct xnn_qs8_qc4w_packing_params* xnn_params =
+      reinterpret_cast<const struct xnn_qs8_qc4w_packing_params*>(params);
+
+  struct kai_rhs_pack_nxk_qsi4cxps1s0_qsu4cxs1s0_neon_params  kai_params;
+  kai_params.lhs_zero_point = xnn_params->input_zero_point;
+  kai_params.rhs_zero_point = xnn_params->kernel_zero_point;
+
+  bool free_accumulator_init = false;
+  if (extra_data0 == nullptr) {
+    extra_data0 = calloc(output_channels, sizeof(float));
+    free_accumulator_init = true;
+  }
+  kai_run_rhs_pack_nxk_qsi4cxps1s0_qsu4cxs1s0_neon(
+      groups, output_channels, input_channels, nr, kr, sr,
+      /*rhs=*/reinterpret_cast<const uint8_t*>(weights),
+      /*bias=*/reinterpret_cast<const float*>(extra_data0),
+      /*scale=*/reinterpret_cast<const float*>(extra_data1),
+      /*rhs_packed=*/packed_weights_ptr,
+      /*extra_bytes=*/0,
+      &kai_params);
+  if (free_accumulator_init) {
+    free((void*) extra_data0);
+  }
+}
+
 size_t xnn_packed_stride_kai_qs4_weights_and_biases(
     const struct xnn_gemm_config* gemm_config, size_t k,
     size_t unused_block_size, size_t unused_k_stride, size_t extra_bytes) {
