@@ -54,7 +54,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4v__rvv(
     nc = nc - vl;
 
     vint32m4_t vacc0 = __riscv_vle32_v_i32m4((const int32_t*)w, vl);
-    w = (const void*) (const int32_t*) w + nr;
+    w = (const void*) ((const int32_t*) w + nr);
 
     size_t p = ks;
     do {
@@ -71,7 +71,7 @@ void xnn_qs8_qc8w_igemm_minmax_fp32_ukernel_1x4v__rvv(
 
         const vint8m1_t vb = __riscv_vle8_v_i8m1((const int8_t*) w, vl);
         const vint32m4_t vb0 = __riscv_vsext_vf4(vb, vl);
- 
+
         w = (const void*) ((const int8_t*) w + nr);
 
         vacc0 = __riscv_vmacc_vx_i32m4(vacc0, va0, vb0, vl);

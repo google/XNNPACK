@@ -3,6 +3,7 @@
 //   Generator: tools/xngen
 //
 // Copyright 2024 SiFive, Inc.
+// Copyright 2024 Microchip
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
@@ -79,6 +80,7 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_8x4v__rvv(
 
   const size_t nr = __riscv_vsetvlmax_e32m4();
   size_t vl = nr;
+
   do {
     if XNN_UNLIKELY(nc < nr) {
       vl = __riscv_vsetvl_e32m4(nc);
@@ -86,7 +88,6 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_8x4v__rvv(
     nc = nc - vl;
 
     vint32m4_t vksum = __riscv_vle32_v_i32m4((const int32_t*)w, vl);
-    w = (const int32_t*) w + nr;
     const int32_t vinput_zero_point0 = quantization_params[0].zero_point;
     const int32_t vinput_zero_point1 = quantization_params[1].zero_point;
     const int32_t vinput_zero_point2 = quantization_params[2].zero_point;
@@ -103,39 +104,37 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_8x4v__rvv(
     vint32m4_t vacc5 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point5, vl);
     vint32m4_t vacc6 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point6, vl);
     vint32m4_t vacc7 = __riscv_vmul_vx_i32m4(vksum, vinput_zero_point7, vl);
+ 
+    w = (const int32_t*) w + nr;
 
     size_t k = kc;
     do {
-      const int8_t va0 = *a0++;
-      const int8_t va1 = *a1++;
-      const int8_t va2 = *a2++;
-      const int8_t va3 = *a3++;
-      const int8_t va4 = *a4++;
-      const int8_t va5 = *a5++;
-      const int8_t va6 = *a6++;
-      const int8_t va7 = *a7++;
+      const int32_t va0 = (int32_t) *a0++;
+      const int32_t va1 = (int32_t) *a1++;
+      const int32_t va2 = (int32_t) *a2++;
+      const int32_t va3 = (int32_t) *a3++;
+      const int32_t va4 = (int32_t) *a4++;
+      const int32_t va5 = (int32_t) *a5++;
+      const int32_t va6 = (int32_t) *a6++;
+      const int32_t va7 = (int32_t) *a7++;
+
       const vint8m1_t vb = __riscv_vle8_v_i8m1((const int8_t*) w, vl);
+      const vint32m4_t vb0 = __riscv_vsext_vf4(vb, vl);
+
       w = (const int8_t*) w + nr;
 
-      vint16m2_t va0b = __riscv_vwmul_vx_i16m2(vb, va0, vl);
-      vacc0 = __riscv_vwadd_wv_i32m4(vacc0, va0b, vl);
-      vint16m2_t va1b = __riscv_vwmul_vx_i16m2(vb, va1, vl);
-      vacc1 = __riscv_vwadd_wv_i32m4(vacc1, va1b, vl);
-      vint16m2_t va2b = __riscv_vwmul_vx_i16m2(vb, va2, vl);
-      vacc2 = __riscv_vwadd_wv_i32m4(vacc2, va2b, vl);
-      vint16m2_t va3b = __riscv_vwmul_vx_i16m2(vb, va3, vl);
-      vacc3 = __riscv_vwadd_wv_i32m4(vacc3, va3b, vl);
-      vint16m2_t va4b = __riscv_vwmul_vx_i16m2(vb, va4, vl);
-      vacc4 = __riscv_vwadd_wv_i32m4(vacc4, va4b, vl);
-      vint16m2_t va5b = __riscv_vwmul_vx_i16m2(vb, va5, vl);
-      vacc5 = __riscv_vwadd_wv_i32m4(vacc5, va5b, vl);
-      vint16m2_t va6b = __riscv_vwmul_vx_i16m2(vb, va6, vl);
-      vacc6 = __riscv_vwadd_wv_i32m4(vacc6, va6b, vl);
-      vint16m2_t va7b = __riscv_vwmul_vx_i16m2(vb, va7, vl);
-      vacc7 = __riscv_vwadd_wv_i32m4(vacc7, va7b, vl);
+      vacc0 = __riscv_vmacc_vx_i32m4(vacc0, va0, vb0, vl);
+      vacc1 = __riscv_vmacc_vx_i32m4(vacc1, va1, vb0, vl);
+      vacc2 = __riscv_vmacc_vx_i32m4(vacc2, va2, vb0, vl);
+      vacc3 = __riscv_vmacc_vx_i32m4(vacc3, va3, vb0, vl);
+      vacc4 = __riscv_vmacc_vx_i32m4(vacc4, va4, vb0, vl);
+      vacc5 = __riscv_vmacc_vx_i32m4(vacc5, va5, vb0, vl);
+      vacc6 = __riscv_vmacc_vx_i32m4(vacc6, va6, vb0, vl);
+      vacc7 = __riscv_vmacc_vx_i32m4(vacc7, va7, vb0, vl);
 
       k -= sizeof(int8_t);
     } while (k != 0);
+ 
     // i32 -> f32
     vfloat32m4_t vout0 = __riscv_vfcvt_f_x_v_f32m4(vacc0, vl);
     vfloat32m4_t vout1 = __riscv_vfcvt_f_x_v_f32m4(vacc1, vl);
@@ -231,5 +230,6 @@ void xnn_qd8_f32_qc8w_gemm_minmax_ukernel_8x4v__rvv(
     a5 = (const int8_t*) ((uintptr_t) a5 - kc);
     a6 = (const int8_t*) ((uintptr_t) a6 - kc);
     a7 = (const int8_t*) ((uintptr_t) a7 - kc);
+
   } while (nc != 0);
 }

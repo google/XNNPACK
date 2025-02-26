@@ -4,7 +4,7 @@
 // LICENSE file in the root directory of this source tree.
 
 $assert DATATYPE in ["QD8", "QC4"] or REQUANTIZATION in ["FP32"]
-$assert DATATYPE in ["QC8", "QD8", "QC4", "QU8", "QS8"] 
+$assert DATATYPE in ["QC8", "QD8", "QC4", "QU8", "QS8"]
 $assert MR >= 1
 $assert NR in ["m4", "m8"]
 #include <assert.h>
@@ -102,7 +102,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT
       vint32${OUT_LMUL}_t vacc0 = __riscv_vle32_v_i32${OUT_LMUL}((const int32_t*)w, vl);
       $for M in range(1, MR):
         vint32${OUT_LMUL}_t vacc${M} = vacc0;
-    w = (const void*) (const int32_t*) w + nr;
+    w = (const void*) ((const int32_t*) w + nr);
 
     size_t p = ks;
     do {
@@ -131,7 +131,7 @@ void xnn_${DATATYPE_SPEC}_igemm_minmax${REQUANTIZATION_SPEC}_ukernel_${MR}x${OUT
         $else:
           const vint8${IN_LMUL}_t vb = __riscv_vle8_v_i8${IN_LMUL}((const int8_t*) w, vl);
           const vint32${OUT_LMUL}_t vb0 = __riscv_vsext_vf4(vb, vl);
- 
+
         w = (const void*) ((const ${XINT8_T}*) w + nr);
 
         $for M in range(MR):
