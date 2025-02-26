@@ -11,6 +11,7 @@
 
 SET(PROD_AVX512FP16_MICROKERNEL_SRCS
   src/f16-rminmax/gen/f16-rmax-avx512fp16-u128-acc4.c
+  src/f16-rminmax/gen/f16-rmin-avx512fp16-u128-acc4.c
   src/f16-rminmax/gen/f16-rminmax-avx512fp16-u128-acc4.c
   src/f16-vbinary/gen/f16-vadd-avx512fp16-u64.c
   src/f16-vbinary/gen/f16-vaddc-avx512fp16-u64.c
@@ -65,7 +66,6 @@ SET(NON_PROD_AVX512FP16_MICROKERNEL_SRCS
   src/f16-rminmax/gen/f16-rmin-avx512fp16-u64-acc2.c
   src/f16-rminmax/gen/f16-rmin-avx512fp16-u96-acc3.c
   src/f16-rminmax/gen/f16-rmin-avx512fp16-u128-acc2.c
-  src/f16-rminmax/gen/f16-rmin-avx512fp16-u128-acc4.c
   src/f16-rminmax/gen/f16-rminmax-avx512fp16-u32.c
   src/f16-rminmax/gen/f16-rminmax-avx512fp16-u64-acc2.c
   src/f16-rminmax/gen/f16-rminmax-avx512fp16-u96-acc3.c
