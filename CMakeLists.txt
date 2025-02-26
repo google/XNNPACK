@@ -1406,13 +1406,13 @@ IF(XNNPACK_BUILD_TESTS)
         max-pooling-2d
         reshape-helpers
         scaled-dot-product-attention
-        static-slice
         softmax
         space-to-depth-2d
         static-constant-pad
         static-reduce
         static-reshape
         static-resize-bilinear-2d
+        static-slice
         static-transpose
         unary
         unpooling-2d)
@@ -1434,6 +1434,7 @@ IF(XNNPACK_BUILD_TESTS)
     ENDFOREACH()
     IF(XNNPACK_TARGET_PROCESSOR MATCHES "^riscv")
       SHARD_TEST(static-reduce-test 20)
+      SHARD_TEST(static-slice-test 20)
     ENDIF()
 
     SET(LIBRARY_SUBGRAPH_CONVOLUTION_UNIT_TESTS
