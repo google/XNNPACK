@@ -42,6 +42,7 @@ SET(PROD_NEONFP16ARITH_MICROKERNEL_SRCS
   src/f16-rminmax/gen/f16-rmax-neonfp16arith-u32-acc4.c
   src/f16-rminmax/gen/f16-rminmax-neonfp16arith-u32-acc4.c
   src/f16-spmm/gen/f16-spmm-32x1-minmax-neonfp16arith-pipelined.c
+  src/f16-vapproxgelu/gen/f16-vapproxgelu-neonfp16arith-rational-6-4-div.c
   src/f16-vbinary/gen/f16-vadd-neonfp16arith-u16.c
   src/f16-vbinary/gen/f16-vaddc-neonfp16arith-u16.c
   src/f16-vbinary/gen/f16-vmax-neonfp16arith-u16.c

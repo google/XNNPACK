@@ -51,6 +51,7 @@ XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_qu8_vadd_confi
 XNN_INTERNAL const struct xnn_binary_elementwise_config* xnn_init_qu8_vmul_config();
 
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_abs_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_approxgelu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_clamp_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_elu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_gelu_config();
@@ -71,8 +72,7 @@ XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_to_f32_cvt_
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_to_qs8_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f16_to_qu8_cvt_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_abs_config();
-XNN_INTERNAL const struct xnn_unary_elementwise_config*
-xnn_init_f32_approxgelu_config();
+XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_approxgelu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_clamp_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_elu_config();
 XNN_INTERNAL const struct xnn_unary_elementwise_config* xnn_init_f32_exp_config();

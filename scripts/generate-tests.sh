@@ -135,6 +135,7 @@ tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b -
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel qu8-vmulc-minmax-rndnu --output test/qu8-vmulc-minmax-rndnu.cc &
 
 ### Tests for VUnary micro-kernels
+tools/generate-vunary-test.py --ukernel f16-vapproxgelu --output test/f16-vapproxgelu.cc &
 tools/generate-vunary-test.py --ukernel f16-vclamp --output test/f16-vclamp.cc &
 tools/generate-vunary-test.py --ukernel f16-velu --output test/f16-velu.cc &
 tools/generate-vunary-test.py --ukernel f16-vgelu --output test/f16-vgelu.cc &
@@ -151,9 +152,9 @@ tools/generate-vunary-test.py --ukernel f16-vsqrt --output test/f16-vsqrt.cc &
 tools/generate-vunary-test.py --ukernel f16-vtanh --output test/f16-vtanh.cc &
 
 tools/generate-vunary-test.py --ukernel f32-vabs --output test/f32-vabs.cc &
+tools/generate-vunary-test.py --ukernel f32-vapproxgelu --output test/f32-vapproxgelu.cc &
 tools/generate-vunary-test.py --ukernel f32-vclamp --output test/f32-vclamp.cc &
 tools/generate-vunary-test.py --ukernel f32-velu --output test/f32-velu.cc &
-tools/generate-vunary-test.py --ukernel f32-vapproxgelu --output test/f32-vapproxgelu.cc &
 tools/generate-vunary-test.py --ukernel f32-vgelu --output test/f32-vgelu.cc &
 tools/generate-vunary-test.py --ukernel f32-vexp --output test/f32-vexp.cc &
 tools/generate-vunary-test.py --ukernel f32-vlog --output test/f32-vlog.cc &
