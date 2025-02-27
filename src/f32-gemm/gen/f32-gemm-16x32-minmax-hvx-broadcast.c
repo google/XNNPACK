@@ -33,6 +33,8 @@ void xnn_f32_gemm_minmax_ukernel_16x32__hvx_broadcast(
   assert(w != NULL);
   assert(c != NULL);
 
+  XNN_SIMD_CONST_F32(vmin, params->scalar.min);
+  XNN_SIMD_CONST_F32(vmax, params->scalar.max);
   const float* a0 = a;
   float* c0 = c;
   const float* a1 = (const float*) ((uintptr_t) a0 + a_stride);
@@ -147,37 +149,37 @@ void xnn_f32_gemm_minmax_ukernel_16x32__hvx_broadcast(
 
     size_t k = kc;
     do {
-      XNN_SIMD_CONST_F32(va0, (*(uint32_t *)a0));
+      XNN_SIMD_CONST_F32(va0, *(uint32_t *)a0);
       a0 += 1;
-      XNN_SIMD_CONST_F32(va1, (*(uint32_t *)a1));
+      XNN_SIMD_CONST_F32(va1, *(uint32_t *)a1);
       a1 += 1;
-      XNN_SIMD_CONST_F32(va2, (*(uint32_t *)a2));
+      XNN_SIMD_CONST_F32(va2, *(uint32_t *)a2);
       a2 += 1;
-      XNN_SIMD_CONST_F32(va3, (*(uint32_t *)a3));
+      XNN_SIMD_CONST_F32(va3, *(uint32_t *)a3);
       a3 += 1;
-      XNN_SIMD_CONST_F32(va4, (*(uint32_t *)a4));
+      XNN_SIMD_CONST_F32(va4, *(uint32_t *)a4);
       a4 += 1;
-      XNN_SIMD_CONST_F32(va5, (*(uint32_t *)a5));
+      XNN_SIMD_CONST_F32(va5, *(uint32_t *)a5);
       a5 += 1;
-      XNN_SIMD_CONST_F32(va6, (*(uint32_t *)a6));
+      XNN_SIMD_CONST_F32(va6, *(uint32_t *)a6);
       a6 += 1;
-      XNN_SIMD_CONST_F32(va7, (*(uint32_t *)a7));
+      XNN_SIMD_CONST_F32(va7, *(uint32_t *)a7);
       a7 += 1;
-      XNN_SIMD_CONST_F32(va8, (*(uint32_t *)a8));
+      XNN_SIMD_CONST_F32(va8, *(uint32_t *)a8);
       a8 += 1;
-      XNN_SIMD_CONST_F32(va9, (*(uint32_t *)a9));
+      XNN_SIMD_CONST_F32(va9, *(uint32_t *)a9);
       a9 += 1;
-      XNN_SIMD_CONST_F32(va10, (*(uint32_t *)a10));
+      XNN_SIMD_CONST_F32(va10, *(uint32_t *)a10);
       a10 += 1;
-      XNN_SIMD_CONST_F32(va11, (*(uint32_t *)a11));
+      XNN_SIMD_CONST_F32(va11, *(uint32_t *)a11);
       a11 += 1;
-      XNN_SIMD_CONST_F32(va12, (*(uint32_t *)a12));
+      XNN_SIMD_CONST_F32(va12, *(uint32_t *)a12);
       a12 += 1;
-      XNN_SIMD_CONST_F32(va13, (*(uint32_t *)a13));
+      XNN_SIMD_CONST_F32(va13, *(uint32_t *)a13);
       a13 += 1;
-      XNN_SIMD_CONST_F32(va14, (*(uint32_t *)a14));
+      XNN_SIMD_CONST_F32(va14, *(uint32_t *)a14);
       a14 += 1;
-      XNN_SIMD_CONST_F32(va15, (*(uint32_t *)a15));
+      XNN_SIMD_CONST_F32(va15, *(uint32_t *)a15);
       a15 += 1;
 
       const HVX_Vector vb0 = *((const HVX_Vector *)(w));
@@ -203,7 +205,7 @@ void xnn_f32_gemm_minmax_ukernel_16x32__hvx_broadcast(
       k -= sizeof(float);
     } while (k != 0);
 
-    XNN_SIMD_CONST_F32(vmin, params->scalar.min);
+    // clamp results with min & max
     vacc0x0 = Q6_Vw_vmax_VwVw(vmin, vacc0x0);
     vacc1x0 = Q6_Vw_vmax_VwVw(vmin, vacc1x0);
     vacc2x0 = Q6_Vw_vmax_VwVw(vmin, vacc2x0);
@@ -221,7 +223,6 @@ void xnn_f32_gemm_minmax_ukernel_16x32__hvx_broadcast(
     vacc14x0 = Q6_Vw_vmax_VwVw(vmin, vacc14x0);
     vacc15x0 = Q6_Vw_vmax_VwVw(vmin, vacc15x0);
 
-    XNN_SIMD_CONST_F32(vmax, params->scalar.max);
     vacc0x0 = Q6_Vw_vmin_VwVw(vmax, vacc0x0);
     vacc1x0 = Q6_Vw_vmin_VwVw(vmax, vacc1x0);
     vacc2x0 = Q6_Vw_vmin_VwVw(vmax, vacc2x0);
@@ -238,7 +239,6 @@ void xnn_f32_gemm_minmax_ukernel_16x32__hvx_broadcast(
     vacc13x0 = Q6_Vw_vmin_VwVw(vmax, vacc13x0);
     vacc14x0 = Q6_Vw_vmin_VwVw(vmax, vacc14x0);
     vacc15x0 = Q6_Vw_vmin_VwVw(vmax, vacc15x0);
-
     if XNN_LIKELY(nc >= 32) {
       *((HVX_UVector *)c0) = vacc0x0;
       c0 = (float*) ((uintptr_t) c0 + cn_stride);

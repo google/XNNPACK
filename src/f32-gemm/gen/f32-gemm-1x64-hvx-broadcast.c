@@ -12,7 +12,7 @@
 
 #include "xnnpack/gemm.h"
 
-void xnn_f32_gemm_minmax_ukernel_1x32__hvx_broadcast(
+void xnn_f32_gemm_ukernel_1x64__hvx_broadcast(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -22,7 +22,7 @@ void xnn_f32_gemm_minmax_ukernel_1x32__hvx_broadcast(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_default_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 1);
@@ -33,14 +33,13 @@ void xnn_f32_gemm_minmax_ukernel_1x32__hvx_broadcast(
   assert(w != NULL);
   assert(c != NULL);
 
-  XNN_SIMD_CONST_F32(vmin, params->scalar.min);
-  XNN_SIMD_CONST_F32(vmax, params->scalar.max);
   const float* a0 = a;
   float* c0 = c;
 
   do {
     HVX_Vector vacc0x0 = xnn_load_f32(w + 0);
-    w += 32;
+    HVX_Vector vacc0x1 = xnn_load_f32(w + 32);
+    w += 64;
 
     size_t k = kc;
     do {
@@ -48,25 +47,32 @@ void xnn_f32_gemm_minmax_ukernel_1x32__hvx_broadcast(
       a0 += 1;
 
       const HVX_Vector vb0 = *((const HVX_Vector *)(w));
-      w += 32;
+      const HVX_Vector vb1 = *((const HVX_Vector *)(w + 32));
+      w += 64;
 
       vacc0x0 = xnn_fmadd_qf32(va0, vb0, vacc0x0);
+      vacc0x1 = xnn_fmadd_qf32(va0, vb1, vacc0x1);
 
       k -= sizeof(float);
     } while (k != 0);
 
-    // clamp results with min & max
-    vacc0x0 = Q6_Vw_vmax_VwVw(vmin, vacc0x0);
-
-    vacc0x0 = Q6_Vw_vmin_VwVw(vmax, vacc0x0);
-    if XNN_LIKELY(nc >= 32) {
+    if XNN_LIKELY(nc >= 64) {
       *((HVX_UVector *)c0) = vacc0x0;
+      *((HVX_UVector *)(c0 + 32)) = vacc0x1;
       c0 = (float*) ((uintptr_t) c0 + cn_stride);
 
       a0 = (const float*) ((uintptr_t) a0 - kc);
 
-      nc -= 32;
+      nc -= 64;
     } else {
+      if (nc & 32) {
+        *((HVX_UVector *)c0) = vacc0x0;
+
+        vacc0x0 = vacc0x1;
+
+        c0 += 32;
+        nc ^= 32;
+      }
       xnn_store_tail_f32(c0, vacc0x0, nc);
       nc = 0;
     }
