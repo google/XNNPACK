@@ -10,8 +10,6 @@
 
 
 SET(PROD_SSE_MICROKERNEL_SRCS
-  src/f32-avgpool/f32-avgpool-9p8x-minmax-sse-c4.c
-  src/f32-avgpool/f32-avgpool-9x-minmax-sse-c4.c
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-sse-2x2.c
   src/f32-dwconv/gen/f32-dwconv-3p8c-minmax-sse.c
   src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-sse.c
@@ -30,8 +28,6 @@ SET(PROD_SSE_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-4x2c4-minmax-sse.c
   src/f32-igemm/gen/f32-igemm-4x8-minmax-sse-load1.c
   src/f32-maxpool/f32-maxpool-9p8x-minmax-sse-c4.c
-  src/f32-pavgpool/f32-pavgpool-9p8x-minmax-sse-c4.c
-  src/f32-pavgpool/f32-pavgpool-9x-minmax-sse-c4.c
   src/f32-rdsum/gen/f32-rdsum-7p7x-minmax-sse-c16.c
   src/f32-rminmax/gen/f32-rmax-sse-u16-acc4.c
   src/f32-rminmax/gen/f32-rminmax-sse-u16-acc4.c

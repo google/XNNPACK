@@ -14,10 +14,7 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-argmaxpool/f32-argmaxpool-4x-wasmsimd-c4.c
   src/f32-argmaxpool/f32-argmaxpool-9p8x-wasmsimd-c4.c
   src/f32-argmaxpool/f32-argmaxpool-9x-wasmsimd-c4.c
-  src/f32-avgpool/f32-avgpool-9p8x-minmax-wasmsimd-arm-c4.c
-  src/f32-avgpool/f32-avgpool-9p8x-minmax-wasmsimd-x86-c4.c
-  src/f32-avgpool/f32-avgpool-9x-minmax-wasmsimd-arm-c4.c
-  src/f32-avgpool/f32-avgpool-9x-minmax-wasmsimd-x86-c4.c
+  src/f32-avgpool/gen/f32-avgpool-9p-minmax-wasmsimd-u4.c
   src/f32-conv-hwc2chw/f32-conv-hwc2chw-3x3s2p1c3x4-wasmsimd-2x2.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-minmax-wasmsimd-arm.c
   src/f32-dwconv/gen/f32-dwconv-3p4c-wasmsimd.c
@@ -84,10 +81,7 @@ SET(PROD_WASMSIMD_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-5x8-wasmsimd-splat.c
   src/f32-maxpool/f32-maxpool-9p8x-minmax-wasmsimd-arm-c4.c
   src/f32-maxpool/f32-maxpool-9p8x-minmax-wasmsimd-x86-c4.c
-  src/f32-pavgpool/f32-pavgpool-9p8x-minmax-wasmsimd-arm-c4.c
-  src/f32-pavgpool/f32-pavgpool-9p8x-minmax-wasmsimd-x86-c4.c
-  src/f32-pavgpool/f32-pavgpool-9x-minmax-wasmsimd-arm-c4.c
-  src/f32-pavgpool/f32-pavgpool-9x-minmax-wasmsimd-x86-c4.c
+  src/f32-pavgpool/gen/f32-pavgpool-9p-minmax-wasmsimd-u4.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-arm-splat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-minmax-wasmsimd-x86-splat.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x8-relu-wasmsimd-splat.c

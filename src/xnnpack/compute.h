@@ -1005,29 +1005,12 @@ struct average_pooling_context {
     struct xnn_f16_scaleminmax_params f16;
     struct xnn_f32_scaleminmax_params f32;
   } params;
-  union {
-    xnn_avgpool_unipass_ukernel_fn unipass_ukernel;
-    xnn_avgpool_multipass_ukernel_fn multipass_ukernel;
-  };
-  size_t multipass_batch_stride;
-  size_t multipass_pixel_stride;
-  void* multipass_buffer;
+  xnn_avgpool_unipass_ukernel_fn unipass_ukernel;
 };
 
 #ifndef __cplusplus
   XNN_PRIVATE void xnn_compute_average_pooling_unipass(
       const struct average_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index,
-      size_t output_y);
-
-  XNN_PRIVATE void xnn_compute_average_pooling_multipass(
-      const struct average_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index,
-      size_t output_y);
-
-  XNN_PRIVATE void xnn_compute_average_pooling_multipass_with_thread(
-      const struct average_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t thread_index,
       size_t batch_index,
       size_t output_y);
 #endif
@@ -1056,32 +1039,15 @@ struct pixelwise_average_pooling_context {
   size_t input_increment;
   size_t output_increment;
   union {
-    struct xnn_f16_minmax_params f16;
-    struct xnn_f32_minmax_params f32;
+    struct xnn_f16_scaleminmax_params f16;
+    struct xnn_f32_scaleminmax_params f32;
   } params;
-  union {
-    xnn_pavgpool_unipass_ukernel_fn unipass_ukernel;
-    xnn_pavgpool_multipass_ukernel_fn multipass_ukernel;
-  };
-  size_t multipass_batch_stride;
-  size_t multipass_pixel_stride;
-  void* multipass_buffer;
+  xnn_pavgpool_unipass_ukernel_fn unipass_ukernel;
 };
 
 #ifndef __cplusplus
   XNN_PRIVATE void xnn_compute_pixelwise_average_pooling_unipass(
       const struct pixelwise_average_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index,
-      size_t output_y);
-
-  XNN_PRIVATE void xnn_compute_pixelwise_average_pooling_multipass(
-      const struct pixelwise_average_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t batch_index,
-      size_t output_y);
-
-  XNN_PRIVATE void xnn_compute_pixelwise_average_pooling_multipass_with_thread(
-      const struct pixelwise_average_pooling_context context[restrict XNN_MIN_ELEMENTS(1)],
-      size_t thread_index,
       size_t batch_index,
       size_t output_y);
 #endif
