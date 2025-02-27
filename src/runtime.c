@@ -36,6 +36,7 @@
 #include "xnnpack/microkernel-type.h"
 #include "xnnpack/node-type.h"
 #include "xnnpack/operator-type.h"
+#include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/params.h"
 #include "xnnpack/subgraph.h"
@@ -999,7 +1000,8 @@ enum xnn_status xnn_get_runtime_profiling_info(xnn_runtime_t runtime,
     case xnn_profile_info_operator_name:
       for (size_t i = 0; i < runtime->num_ops; ++i) {
         if (opdata[i].operator_objects[0] != NULL) {
-          const char* op_name = xnn_operator_type_to_string(opdata[i].operator_objects[0]->type);
+          const char* op_name =
+              xnn_operator_type_to_string_v2(opdata[i].operator_objects[0]);
           size_t op_name_len = strlen(op_name) + 1;
           if (opdata[i].operator_objects[0]->ukernel.type != xnn_microkernel_type_default ) {
             op_name_len += strlen(xnn_microkernel_type_to_string(opdata[i].operator_objects[0]->ukernel.type)) + 1;
@@ -1014,7 +1016,8 @@ enum xnn_status xnn_get_runtime_profiling_info(xnn_runtime_t runtime,
         char* name_out = (char*) param_value;
         for (size_t i = 0; i < runtime->num_ops; ++i) {
           if (opdata[i].operator_objects[0] != NULL) {
-            const char* op_name = xnn_operator_type_to_string(opdata[i].operator_objects[0]->type);
+            const char* op_name =
+                xnn_operator_type_to_string_v2(opdata[i].operator_objects[0]);
             size_t op_name_len = strlen(op_name) + 1;
             if (opdata[i].operator_objects[0]->ukernel.type != xnn_microkernel_type_default ) {
               const char* ukernel_type = xnn_microkernel_type_to_string(opdata[i].operator_objects[0]->ukernel.type);

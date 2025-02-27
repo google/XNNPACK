@@ -44,10 +44,6 @@ def xnnpack_configurable_defines():
         ["XNN_ENABLE_MEMOPT=1"],
         ["XNN_ENABLE_MEMOPT=1"],
     ) + xnnpack_select_if(
-        ":dwconv_multipass_enabled",
-        ["XNN_ENABLE_DWCONV_MULTIPASS=1"],
-        ["XNN_ENABLE_DWCONV_MULTIPASS=0"],
-    ) + xnnpack_select_if(
         ":gemm_m_specialization_enabled",
         ["XNN_ENABLE_GEMM_M_SPECIALIZATION=1"],
         ["XNN_ENABLE_GEMM_M_SPECIALIZATION=0"],
@@ -264,14 +260,12 @@ _XNNPACK_SIMD_ARCH_COPT_MAPPING = {
         "//build_config:aarch64": ["-march=armv8.2-a+fp16"],
         "//conditions:default": [],
     }),
-    "scalar": [],
     "sse2": xnnpack_select_if("//build_config:x86", ["-msse2"]),
     "sse41": xnnpack_select_if("//build_config:x86", ["-msse4.1"]),
-    "wasmsimd": [],
 }
 
 def xnnpack_simd_copts_for_arch(arch):
-    return _XNNPACK_SIMD_ARCH_COPT_MAPPING[arch]
+    return _XNNPACK_SIMD_ARCH_COPT_MAPPING.get(arch, [])
 
 def xnnpack_simd_f32_archs():
     return ["avx", "avx2", "avx512f", "fma3", "hvx", "neon", "scalar", "sse2", "wasmsimd"]

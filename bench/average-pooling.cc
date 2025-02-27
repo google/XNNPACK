@@ -29,96 +29,6 @@
 #endif  // BENCHMARK_TENSORFLOW_LITE
 #include "utils.h"
 
-static void xnnpack_average_pooling_qu8(benchmark::State& state, const char* net) {
-  const size_t batch_size = state.range(0);
-  const size_t input_height = state.range(1);
-  const size_t input_width = state.range(2);
-  const size_t pooling_size = state.range(3);
-  const size_t padding_size = state.range(4);
-  const size_t stride = state.range(5);
-  const size_t channels = state.range(6);
-
-  std::random_device random_device;
-  auto rng = std::mt19937(random_device());
-
-  const size_t output_height = (2 * padding_size + input_height - pooling_size) / stride + 1;
-  const size_t output_width = (2 * padding_size + input_width - pooling_size) / stride + 1;
-
-  xnnpack::Buffer<uint8_t> input(batch_size * input_height * input_width * channels + XNN_EXTRA_BYTES / sizeof(uint8_t));
-  xnnpack::fill_uniform_random_bits(input.data(), input.size(), rng);
-  xnnpack::Buffer<uint8_t> output(batch_size * output_height * output_width * channels);
-
-  xnn_status status = xnn_initialize(nullptr /* allocator */);
-  if (status != xnn_status_success) {
-    state.SkipWithError("failed to initialize XNNPACK");
-    return;
-  }
-
-  xnn_operator_t pooling_op = nullptr;
-  status = xnn_create_average_pooling2d_nhwc_qu8(
-    padding_size, padding_size, padding_size, padding_size,
-    pooling_size, pooling_size,
-    stride, stride,
-    127 /* input zero point */, 0.75f /* input scale */,
-    127 /* output zero point */, 1.25f /* output scale */,
-    0, 255,
-    0 /* flags */, &pooling_op);
-  if (status != xnn_status_success) {
-    state.SkipWithError("failed to create Average Pooling operator");
-    return;
-  }
-
-  size_t workspace_size = 0;
-  size_t workspace_alignment = 0;
-  status = xnn_reshape_average_pooling2d_nhwc_qu8(
-    pooling_op,
-    batch_size, input_height, input_width,
-    channels, /*input_pixel_stride=*/channels, /*output_pixel_stride=*/channels,
-    &workspace_size, &workspace_alignment,
-    /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
-    /*threadpool=*/nullptr);
-  if (status != xnn_status_success) {
-    state.SkipWithError("failed to reshape Average Pooling operator");
-    return;
-  }
-
-  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
-
-  status = xnn_setup_average_pooling2d_nhwc_qu8(
-    pooling_op,
-    workspace.data(),
-    input.data(), output.data());
-  if (status != xnn_status_success) {
-    state.SkipWithError("failed to setup Average Pooling operator");
-    return;
-  }
-
-  for (auto _ : state) {
-    status = xnn_run_operator(pooling_op, /*threadpool=*/nullptr);
-    if (status != xnn_status_success) {
-      state.SkipWithError("failed to run Average Pooling operator");
-      return;
-    }
-  }
-
-  status = xnn_delete_operator(pooling_op);
-  if (status != xnn_status_success) {
-    state.SkipWithError("failed to delete Average Pooling operator");
-    return;
-  }
-  pooling_op = nullptr;
-
-  const uint64_t cpu_frequency = benchmark::utils::GetCurrentCpuFrequency();
-  if (cpu_frequency != 0) {
-    state.counters["cpufreq"] = cpu_frequency;
-  }
-
-  state.counters["bytes"] = benchmark::Counter(
-    uint64_t(state.iterations()) *
-      batch_size * (input_height * input_width + output_height * output_width) * channels * sizeof(uint8_t),
-    benchmark::Counter::kIsRate);
-}
-
 static void xnnpack_average_pooling_f32(benchmark::State& state, const char* net) {
   const size_t batch_size = state.range(0);
   const size_t input_height = state.range(1);
@@ -425,13 +335,6 @@ BENCHMARK_CAPTURE(tflite_average_pooling_f32, shufflenet_v1_g3, "ShuffleNet v1 (
 BENCHMARK_CAPTURE(tflite_average_pooling_f32, shufflenet_v1_g4, "ShuffleNet v1 (4 groups)")->Apply(ShuffleNetV1G4)->UseRealTime();
 BENCHMARK_CAPTURE(tflite_average_pooling_f32, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)")->Apply(ShuffleNetV1G8)->UseRealTime();
 #endif  // BENCHMARK_TENSORFLOW_LITE
-
-BENCHMARK_CAPTURE(xnnpack_average_pooling_qu8, imagenet, "ImageNet")->Apply(ImageNet)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_average_pooling_qu8, shufflenet_v1_g1, "ShuffleNet v1 (1 group)")->Apply(ShuffleNetV1G1)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_average_pooling_qu8, shufflenet_v1_g2, "ShuffleNet v1 (2 groups)")->Apply(ShuffleNetV1G2)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_average_pooling_qu8, shufflenet_v1_g3, "ShuffleNet v1 (3 groups)")->Apply(ShuffleNetV1G3)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_average_pooling_qu8, shufflenet_v1_g4, "ShuffleNet v1 (4 groups)")->Apply(ShuffleNetV1G4)->UseRealTime();
-BENCHMARK_CAPTURE(xnnpack_average_pooling_qu8, shufflenet_v1_g8, "ShuffleNet v1 (8 groups)")->Apply(ShuffleNetV1G8)->UseRealTime();
 
 #ifndef XNNPACK_BENCHMARK_NO_MAIN
 XNN_BENCHMARK_MAIN();

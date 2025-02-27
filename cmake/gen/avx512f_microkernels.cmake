@@ -27,6 +27,7 @@ SET(PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rmax-avx512f-u64-acc4.c
   src/f32-rminmax/gen/f32-rminmax-avx512f-u64-acc4.c
   src/f32-rsum/gen/f32-rsum-avx512f-u64-acc4.c
+  src/f32-vapproxgelu/gen/f32-vapproxgelu-avx512f-rational-12-10-nr.c
   src/f32-vbinary/gen/f32-vadd-avx512f-u32.c
   src/f32-vbinary/gen/f32-vaddc-avx512f-u32.c
   src/f32-vbinary/gen/f32-vdiv-avx512f-u32.c
@@ -79,10 +80,6 @@ SET(NON_PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-avx512f-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p32c-minmax-avx512f-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p32c-minmax-avx512f.c
-  src/f32-dwconv/gen/f32-dwconv-5f5m5l16c16s1r-minmax-avx512f-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-5f5m5l16c16s1r-minmax-avx512f.c
-  src/f32-dwconv/gen/f32-dwconv-5f5m5l32c16s1r-minmax-avx512f-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-5f5m5l32c16s1r-minmax-avx512f.c
   src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-avx512f-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p32c-minmax-avx512f-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p32c-minmax-avx512f.c
@@ -198,6 +195,7 @@ SET(NON_PROD_AVX512F_MICROKERNEL_SRCS
   src/f32-rsum/gen/f32-rsum-avx512f-u32-acc2.c
   src/f32-rsum/gen/f32-rsum-avx512f-u48-acc3.c
   src/f32-rsum/gen/f32-rsum-avx512f-u64-acc2.c
+  src/f32-vapproxgelu/gen/f32-vapproxgelu-avx512f-rational-12-10-div.c
   src/f32-vbinary/gen/f32-vadd-avx512f-u16.c
   src/f32-vbinary/gen/f32-vaddc-avx512f-u16.c
   src/f32-vbinary/gen/f32-vdiv-avx512f-u16.c

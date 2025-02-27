@@ -24,7 +24,7 @@ void xnn_f16_dwconv2d_chw_ukernel_5x5p2__neonfp16arith_1x8_acc3(
     const xnn_float16* zero,
     xnn_float16* output,
     uint32_t padding_top,
-    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(input_height != 0);
   assert(input_width != 0);

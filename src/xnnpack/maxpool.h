@@ -29,7 +29,7 @@ extern "C" {
       xnn_float16* output,                                                                                     \
       size_t input_increment,                                                                                           \
       size_t output_increment,                                                                                          \
-      const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 #include "f16-maxpool/f16-maxpool-minmax.h"
 
@@ -45,7 +45,7 @@ extern "C" {
       float* output,                                                                                                    \
       size_t input_increment,                                                                                           \
       size_t output_increment,                                                                                          \
-      const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 #include "f32-maxpool/f32-maxpool-minmax.h"
 

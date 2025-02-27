@@ -19,7 +19,7 @@ void xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x8c16s2__aarch64_neondot(
     size_t m, size_t n, size_t k, const void* lhs_packed,
     const void* rhs_packed, float* dst, size_t dst_stride_row,
     size_t dst_stride_col,
-    union xnn_f32_minmax_params
+    struct xnn_f32_minmax_params
         minmax_params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]) {
 #if XNN_ENABLE_KLEIDIAI
   kai_run_matmul_clamp_f32_qai8dxp1x8_qsi4cxp8x8_1x8x32_neon_dotprod(

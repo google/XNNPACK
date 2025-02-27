@@ -119,91 +119,6 @@ enum xnn_status create_average_pooling2d_nhwc(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_create_average_pooling2d_nhwc_qu8(
-    uint32_t input_padding_top,
-    uint32_t input_padding_right,
-    uint32_t input_padding_bottom,
-    uint32_t input_padding_left,
-    uint32_t pooling_height,
-    uint32_t pooling_width,
-    uint32_t stride_height,
-    uint32_t stride_width,
-    uint8_t input_zero_point,
-    float input_scale,
-    uint8_t output_zero_point,
-    float output_scale,
-    uint8_t output_min,
-    uint8_t output_max,
-    uint32_t flags,
-    xnn_operator_t* average_pooling_op_out)
-{
-  xnn_operator_t average_pooling_op = NULL;
-  enum xnn_status status = xnn_status_out_of_memory;
-
-  average_pooling_op = xnn_allocate_zero_simd_memory(sizeof(struct xnn_operator));
-  if (average_pooling_op == NULL) {
-    xnn_log_error(
-      "failed to allocate %zu bytes for %s operator descriptor",
-      sizeof(struct xnn_operator), xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_qu8));
-    goto error;
-  }
-
-  status = create_average_pooling2d_nhwc(input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
-                                         pooling_height, pooling_width, stride_height, stride_width,
-                                         output_min, output_max, flags,
-                                         xnn_operator_type_average_pooling_nhwc_qu8,
-                                         average_pooling_op);
-  if (status != xnn_status_success) {
-    goto error;
-  }
-
-  status = xnn_status_unsupported_parameter;
-  const float input_output_scale = input_scale / output_scale;
-  if (input_output_scale < 0x1.0p-8f || input_output_scale >= 0x1.0p+8f) {
-    xnn_log_error(
-      "failed to create %s operator with %.7g input scale and %.7g output scale: "
-      "input-to-output scale ratio (%.7f) must be in [2**-8, 2**8) range",
-      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_qu8),
-      input_scale, output_scale, input_output_scale);
-    goto error;
-  }
-
-  const uint32_t pooling_size = pooling_height * pooling_width;
-  if (pooling_size >= 16777216) {
-    xnn_log_error(
-      "failed to create %s operator with %"PRIu32" (%" PRIu32 "x%" PRIu32 ") pooling elements: "
-      "the number of elements in the pooling area must be below 2**24",
-      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_qu8),
-      pooling_size, pooling_width, pooling_height);
-    goto error;
-  }
-
-  average_pooling_op->input_zero_point = (int32_t) (uint32_t) input_zero_point;
-  average_pooling_op->input_scale = input_scale;
-  average_pooling_op->output_scale = output_scale;
-
-  const struct xnn_avgpool_config* avgpool_config = xnn_init_qu8_avgpool_config();
-  assert(avgpool_config != NULL);
-  average_pooling_op->avgpool_config = avgpool_config;
-
-  // Number of rows read in the AVGPOOL micro-kernel.
-  const size_t avgpool_nrows =
-    round_up(doz(pooling_size, avgpool_config->primary_tile), avgpool_config->incremental_tile) + avgpool_config->primary_tile;
-  const float requantization_scale = input_scale / (output_scale * (float) pooling_size);
-  avgpool_config->init.qu8(&average_pooling_op->params.qu8_avgpool,
-    (int32_t) -((uint32_t) input_zero_point * (uint32_t) avgpool_nrows),
-    requantization_scale, output_zero_point, output_min, output_max);
-
-  average_pooling_op->ukernel.type = xnn_microkernel_type_average_pooling;
-
-  *average_pooling_op_out = average_pooling_op;
-  return xnn_status_success;
-
-error:
-  xnn_delete_operator(average_pooling_op);
-  return status;
-}
-
 enum xnn_status xnn_create_average_pooling2d_nhwc_f16(
     uint32_t input_padding_top,
     uint32_t input_padding_right,
@@ -699,47 +614,6 @@ static enum xnn_status reshape_average_pooling2d(
   return xnn_status_success;
 }
 
-enum xnn_status xnn_reshape_average_pooling2d_nhwc_qu8(
-  xnn_operator_t average_pooling_op,
-  size_t batch_size,
-  size_t input_height,
-  size_t input_width,
-  size_t channels,
-  size_t input_pixel_stride,
-  size_t output_pixel_stride,
-  size_t* workspace_size,
-  size_t* workspace_alignment,
-  size_t* output_height_out,
-  size_t* output_width_out,
-  pthreadpool_t threadpool)
-{
-  if (average_pooling_op->type != xnn_operator_type_average_pooling_nhwc_qu8) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_qu8),
-      xnn_operator_type_to_string(average_pooling_op->type));
-    return xnn_status_invalid_parameter;
-  }
-
-  assert(average_pooling_op->ukernel.type == xnn_microkernel_type_average_pooling);
-
-  return reshape_average_pooling2d(
-    average_pooling_op,
-    batch_size, input_height, input_width, channels, input_pixel_stride, output_pixel_stride,
-    workspace_size, workspace_alignment,
-    /*log2_data_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    /*log2_weight_element_size=*/XNN_LOG2_SIZEOF_UINT8_T,
-    /*log2_accumulator_element_size=*/XNN_LOG2_SIZEOF_INT32_T,
-    NULL /* indirection_init_pavgpool2d */,
-    average_pooling_op->avgpool_config,
-    NULL /* no PAVGPOOL micro-kernel */,
-    &average_pooling_op->params.qu8_avgpool,
-    sizeof(average_pooling_op->params.qu8_avgpool),
-    output_height_out, output_width_out,
-    threadpool,
-    xnn_operator_type_average_pooling_nhwc_qu8,
-    false /* pixelwise not supported */);
-}
-
 enum xnn_status xnn_reshape_average_pooling2d_nhwc_f16(
   xnn_operator_t average_pooling_op,
   size_t batch_size,
@@ -884,27 +758,6 @@ static enum xnn_status setup_average_pooling2d(
   average_pooling_op->state = xnn_run_state_ready;
 
   return xnn_status_success;
-}
-
-enum xnn_status xnn_setup_average_pooling2d_nhwc_qu8(
-    xnn_operator_t average_pooling_op,
-    void* workspace,
-    const uint8_t* input,
-    uint8_t* output)
-{
-  if (average_pooling_op->type != xnn_operator_type_average_pooling_nhwc_qu8) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_qu8),
-      xnn_operator_type_to_string(average_pooling_op->type));
-    return xnn_status_invalid_parameter;
-  }
-
-  assert(average_pooling_op->ukernel.type == xnn_microkernel_type_average_pooling);
-
-  return setup_average_pooling2d(
-    average_pooling_op,
-    workspace,
-    input, output);
 }
 
 enum xnn_status xnn_setup_average_pooling2d_nhwc_f16(

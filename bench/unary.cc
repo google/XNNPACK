@@ -231,6 +231,8 @@ tflite::BuiltinOperator xnn_unary_operator_to_tflite(xnn_unary_operator op) {
       return tflite::BuiltinOperator_STABLEHLO_CLAMP;
     case xnn_unary_abs:
       return tflite::BuiltinOperator_ABS;
+    case xnn_unary_approxgelu:
+      return tflite::BuiltinOperator_GELU;
     case xnn_unary_bankers_rounding:
       return tflite::BuiltinOperator_ROUND;
     case xnn_unary_ceiling:
@@ -301,7 +303,7 @@ static void benchmark_tflite_unary_operator(
 
   flatbuffers::FlatBufferBuilder builder;
   const flatbuffers::Offset<tflite::OperatorCode> operator_code =
-      CreateOperatorCode(builder, op_code);
+      CreateOperatorCode(builder, 0, 0, 1, op_code);
 
   const std::array<flatbuffers::Offset<tflite::Buffer>, 1> buffers{{
       tflite::CreateBuffer(builder, builder.CreateVector({})),
@@ -501,10 +503,13 @@ static void benchmark_tflite_convert(benchmark::State& state) {
   BENCHMARK_OP_TYPE(op, qs8, xnnpack::quantized<int8_t>) \
   BENCHMARK_OP_TYPE(op, qu8, xnnpack::quantized<uint8_t>)
 
-BENCHMARK_OP(clamp);
 BENCHMARK_OP(abs);
+BENCHMARK_OP(approxgelu);
 BENCHMARK_OP(bankers_rounding);
 BENCHMARK_OP(ceiling);
+BENCHMARK_OP(clamp);
+BENCHMARK_OP(cosine);
+BENCHMARK_OP(cube_root);
 BENCHMARK_OP(elu);
 BENCHMARK_OP(exp);
 BENCHMARK_OP(floor);
@@ -513,14 +518,12 @@ BENCHMARK_OP(hardswish);
 BENCHMARK_OP(leaky_relu);
 BENCHMARK_OP(log);
 BENCHMARK_OP(negate);
-BENCHMARK_OP(sigmoid);
-BENCHMARK_OP(square);
-BENCHMARK_OP(square_root);
 BENCHMARK_OP(reciprocal_square_root);
-BENCHMARK_OP(tanh);
-BENCHMARK_OP(cube_root);
-BENCHMARK_OP(cosine);
+BENCHMARK_OP(sigmoid);
 BENCHMARK_OP(sine);
+BENCHMARK_OP(square_root);
+BENCHMARK_OP(square);
+BENCHMARK_OP(tanh);
 // Missing in TFlite?
 // BENCHMARK_OP(count_leading_zeros);
 // BENCHMARK_OP(bitwise_not);

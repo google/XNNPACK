@@ -39,7 +39,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x64__asm_amd64_avx512f_broadcast
       # Allocate some space on the stack.
       sub rsp, 128
 
-outer_loop:
+.Louter_loop:
       # Initialize k counter.
       mov r11, 0
       # Initialize accumulators with the biases.
@@ -49,7 +49,7 @@ outer_loop:
       vmovaps  zmm14, [r9 + 192]
       add r9, 256
 
-inner_loop:
+.Linner_loop:
       vmovaps  zmm7, [r9 + 0]
       vmovaps  zmm8, [r9 + 64]
       vmovaps  zmm9, [r9 + 128]
@@ -63,8 +63,8 @@ inner_loop:
 
       add r11, 4
       cmp rdx, r11
-      jne inner_loop
-inner_loop_end:
+      jne .Linner_loop
+.Linner_loop_end:
       # Min/max clamping.
       vminps  zmm11, zmm1, zmm11
       vminps  zmm12, zmm1, zmm12
@@ -77,7 +77,7 @@ inner_loop_end:
 
       # Check whether full or partial store.
       cmp rsi, 64
-      jl tail
+      jl .Ltail
 
       vmovups  [r10], zmm11
       vmovups  [r10 + 64], zmm12
@@ -86,10 +86,10 @@ inner_loop_end:
       add r10, 256
 
       sub rsi, 64
-      jne outer_loop
-      jmp return
+      jne .Louter_loop
+      jmp .Lreturn
 
-tail:
+.Ltail:
       mov r11, -1
       shlx r11, r11, rsi
       not r11
@@ -106,7 +106,7 @@ tail:
       vmovups  ZMMWORD PTR [r10 + 128]{k3}, zmm13
       vmovups  ZMMWORD PTR [r10 + 192]{k4}, zmm14
 
-return:
+.Lreturn:
       add rsp, 128
       mov r13, [rsp]
       mov rsp, r13
@@ -135,3 +135,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_1x64__asm_amd64_avx512f_broadcast.dfs
       ret
 END_FUNCTION xnn_f32_gemm_minmax_ukernel_1x64__asm_amd64_avx512f_broadcast.dfsan
       #endif
+
+      #ifdef __ELF__
+      .section .note.GNU-stack, "", @progbits
+      #endif  // __ELF__

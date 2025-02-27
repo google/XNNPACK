@@ -1138,59 +1138,24 @@ void xnn_compute_dwconv_indirection(
 void xnn_compute_dwconv_unipass(
     const struct dwconv_context context[restrict XNN_MIN_ELEMENTS(1)],
     size_t batch_index,
-    size_t output_y)
+    size_t output_y,
+    size_t output_c_start,
+    size_t output_c_tile)
 {
   const void** indirect_input =
     (const void**) ((uintptr_t) context->indirect_input + output_y * context->indirect_input_height_stride);
-  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
+  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride + output_c_start * context->input_channel_stride;
   void* output = (void*) ((uintptr_t) context->output +
-    batch_index * context->output_batch_stride + output_y * context->output_height_stride);
+    batch_index * context->output_batch_stride + output_y * context->output_height_stride + output_c_start * context->output_channel_stride);
+  void* weights = (void*) ((uintptr_t) context->packed_weights + output_c_start * context->weights_channel_stride);
+  const size_t output_increment = context->output_pixel_stride - output_c_tile * context->output_channel_stride;
 
   context->unipass_ukernel(
-    context->groups, context->output_width,
-    indirect_input, context->packed_weights, output,
-    context->indirect_input_width_stride, context->output_increment,
+    output_c_tile, context->output_width,
+    indirect_input, weights, output,
+    context->indirect_input_width_stride, output_increment,
     input_offset, context->zero,
     &context->params);
-}
-
-void xnn_compute_dwconv_multipass(
-    const struct dwconv_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t batch_index,
-    size_t output_y)
-{
-  const void** indirect_input =
-    (const void**) ((uintptr_t) context->indirect_input + output_y * context->indirect_input_height_stride);
-  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
-  void* output = (void*) ((uintptr_t) context->output +
-    batch_index * context->output_batch_stride + output_y * context->output_height_stride);
-  void* multipass_buffer =
-      (void*) ((uintptr_t) context->multipass_buffer + (batch_index * context->output_height + output_y) *
-               context->buffer_size);
-
-  context->multipass_ukernel(
-    context->groups, context->output_width, indirect_input, context->packed_weights, output,
-    context->indirect_input_width_stride, context->output_increment, input_offset, context->zero, context->kernel_size,
-    multipass_buffer, &context->params);
-}
-
-void xnn_compute_dwconv_multipass_with_thread(
-    const struct dwconv_context context[restrict XNN_MIN_ELEMENTS(1)],
-    size_t thread_index,
-    size_t batch_index,
-    size_t output_y)
-{
-  const void** indirect_input =
-    (const void**) ((uintptr_t) context->indirect_input + output_y * context->indirect_input_height_stride);
-  const size_t input_offset = context->input_offset + batch_index * context->input_batch_stride;
-  void* output = (void*) ((uintptr_t) context->output +
-    batch_index * context->output_batch_stride + output_y * context->output_height_stride);
-  void* multipass_buffer = (void*) ((uintptr_t) context->multipass_buffer + thread_index * context->buffer_size);
-
-  context->multipass_ukernel(
-    context->groups, context->output_width, indirect_input, context->packed_weights, output,
-    context->indirect_input_width_stride, context->output_increment, input_offset, context->zero, context->kernel_size,
-    multipass_buffer, &context->params);
 }
 
 void xnn_compute_dwconv2d_chw(

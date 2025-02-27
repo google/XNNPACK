@@ -128,7 +128,7 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f16(
     goto error;
   }
 
-  union xnn_f16_minmax_params minmax_params;
+  struct xnn_f16_minmax_params minmax_params;
   if XNN_LIKELY(gemm_config->init.f16 != NULL) {
     gemm_config->init.f16(&minmax_params, xnn_float16_from_float(-INFINITY), xnn_float16_from_float(INFINITY));
   }
@@ -238,7 +238,7 @@ enum xnn_status xnn_create_scaled_dot_product_attention_nhtc_f32(
     goto error;
   }
 
-  union xnn_f32_minmax_params minmax_params;
+  struct xnn_f32_minmax_params minmax_params;
   if XNN_LIKELY(gemm_config->init.f32 != NULL) {
     gemm_config->init.f32(&minmax_params, -INFINITY , INFINITY);
   }

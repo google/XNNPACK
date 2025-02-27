@@ -82,7 +82,6 @@ struct xnn_avgpool_config {
   union {
     xnn_init_f16_scaleminmax_params_fn f16;
     xnn_init_f32_scaleminmax_params_fn f32;
-    xnn_init_qu8_avgpool_minmax_params_fn qu8;
   } init;
   // Number of rows in a primary tile.
   // Unipass micro-kernel must be called with this number of rows, or fewer.
@@ -125,7 +124,6 @@ struct xnn_pavgpool_config {
 
 union xnn_dwconv_ukernel {
   xnn_dwconv_unipass_ukernel_fn unipass;
-  xnn_dwconv_multipass_ukernel_fn multipass;
 };
 
 struct xnn_dwconv_config {
@@ -147,11 +145,6 @@ struct xnn_dwconv_config {
   uint8_t channel_round;
   // Number of elements in the tile. For multipass, this is the tile size for first pass.
   uint8_t primary_tile;
-  // Tile size for middle pass. Middle pass can be run multiple times. Will be zero for unipass, non-zero and not
-  // greater than last_tile for multipass.
-  uint8_t middle_tile;
-  // Tile size for last pass. Will be zero for unipass, non-zero for multipass.
-  uint8_t last_tile;
 };
 
 // Bilinear interpolation (2D).

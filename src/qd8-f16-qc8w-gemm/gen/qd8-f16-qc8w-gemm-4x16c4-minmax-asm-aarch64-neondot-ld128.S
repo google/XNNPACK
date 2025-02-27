@@ -20,7 +20,7 @@
 #     int8_t* restrict c,        x6
 #     size_t cm_stride,          x7
 #     size_t cn_stride,          [sp] -> x12
-#     const union xnn_f16_minmax_params *params,  [sp + 8]  -> x11
+#     const struct xnn_f16_minmax_params *params,  [sp + 8]  -> x11
 #     const struct xnn_qd8_quantization_params *quantization_params) [sp + 16] -> x16
 
 # params structure is 8 bytes

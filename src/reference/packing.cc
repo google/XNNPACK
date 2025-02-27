@@ -33,18 +33,26 @@
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qs4cxs1s0.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi8cxp_qsi8cx_neon.h"
+
+  #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxps1s0_qsu4cxs1s0_neon.h"
+  #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme.h"
+  #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0.h"
+  #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi4cxp_qs4cxs1s0.h"
+  #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0.h"
+  #include "kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qs4cxs1s0.h"
+
 #endif  // XNN_ENABLE_KLEIDIAI
 
-// Templates ignore __attribute__((aligned(x))) when deducing types, so we need
-// to make a wrapper struct that pretends to be an int32_t.
 struct unaligned_int32_t {
-  XNN_UNALIGNED int32_t value;
+  char value[sizeof(int32_t)];
 
-  // NOLINTNEXTLINE: emulating __attribute__((__aligned__(x))) int32_t.
-  XNN_INLINE unaligned_int32_t(int32_t value) : value(value) {}
+  XNN_INLINE unaligned_int32_t(int32_t v) { memcpy(value, &v, sizeof(v)); }
 
-  // NOLINTNEXTLINE: emulating __attribute__((__aligned__(x))) int32_t.
-  XNN_INLINE operator int32_t() const { return value; }
+  XNN_INLINE operator int32_t() const {
+    int32_t v;
+    memcpy(&v, value, sizeof(v));
+    return v;
+  }
 };
 
 template <typename Src, typename Dst>
@@ -1836,6 +1844,57 @@ void xnn_pack_qu8_weights_and_biases(
 }
 
 #if XNN_ENABLE_KLEIDIAI
+size_t xnn_packed_stride_kai_qs4_weights_and_biases_sme(
+    const struct xnn_gemm_config* gemm_config, size_t k, size_t unused_k_stride,
+    size_t unused_block_size,                   //
+    size_t extra_bytes) {
+  const uint32_t nr = gemm_config->nr;
+  const uint32_t kr = gemm_config->nr;
+  const uint32_t sr = gemm_config->nr;
+  size_t ret_val =
+      kai_get_rhs_packed_stride_rhs_pack_nxk_qsi4cxps1s0_qsu4cxs1s0_neon(k, nr, kr, sr)/
+      kai_get_n_step_rhs_pack_nxk_qsi4cxps1s0_qsu4cxs1s0_neon(nr);
+  return ret_val;
+}
+
+void xnn_pack_kai_qs4_weights_and_biases_sme(
+    uint32_t flags, const struct xnn_gemm_config* gemm_config,
+    size_t input_channels, size_t output_channels, size_t groups,
+    size_t unused_block_size, size_t k_stride, const void* accumulator_init,
+    const void* weights,
+    xnn_init_scale_params_fn init_extra_data0_fn, const void* extra_data0,
+    size_t extra_data0_element_size,
+    xnn_init_scale_params_fn init_extra_data1_fn, const void* extra_data1,
+    size_t extra_data1_element_size, void* packed_weights_ptr,
+    const void* params) {
+  const uint32_t nr = gemm_config->nr;
+  const uint32_t kr = UINT32_C(1) << gemm_config->log2_kr;
+  const uint32_t sr = UINT32_C(1) << gemm_config->log2_sr;
+  const struct xnn_qs8_qc4w_packing_params* xnn_params =
+      reinterpret_cast<const struct xnn_qs8_qc4w_packing_params*>(params);
+
+  struct kai_rhs_pack_nxk_qsi4cxps1s0_qsu4cxs1s0_neon_params  kai_params;
+  kai_params.lhs_zero_point = xnn_params->input_zero_point;
+  kai_params.rhs_zero_point = xnn_params->kernel_zero_point;
+
+  bool free_accumulator_init = false;
+  if (extra_data0 == nullptr) {
+    extra_data0 = calloc(output_channels, sizeof(float));
+    free_accumulator_init = true;
+  }
+  kai_run_rhs_pack_nxk_qsi4cxps1s0_qsu4cxs1s0_neon(
+      groups, output_channels, input_channels, nr, kr, sr,
+      /*rhs=*/reinterpret_cast<const uint8_t*>(weights),
+      /*bias=*/reinterpret_cast<const float*>(extra_data0),
+      /*scale=*/reinterpret_cast<const float*>(extra_data1),
+      /*rhs_packed=*/packed_weights_ptr,
+      /*extra_bytes=*/0,
+      &kai_params);
+  if (free_accumulator_init) {
+    free((void*) extra_data0);
+  }
+}
+
 size_t xnn_packed_stride_kai_qs4_weights_and_biases(
     const struct xnn_gemm_config* gemm_config, size_t k,
     size_t unused_block_size, size_t unused_k_stride, size_t extra_bytes) {
@@ -3204,7 +3263,7 @@ inline static void advance_x_y(size_t h, size_t* x, size_t* y) {
 }
 
 void xnn_pack_f32_dwconv_ghw_w(
-    size_t first_pass_tile, size_t middle_pass_tile, size_t last_pass_tile,
+    size_t primary_tile,
     size_t h, size_t w, size_t c, size_t channel_tile, size_t channel_subtile,
     size_t channel_round, const float* k, const float* b, const void* scale,
     float* packed_weights, size_t per_tile_extra_bytes,
@@ -3212,21 +3271,11 @@ void xnn_pack_f32_dwconv_ghw_w(
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
-  if (middle_pass_tile == 0) {
-    // Uni-pass DWCONV.
-    assert(last_pass_tile == 0);
-  } else {
-    // Multi-pass DWCONV.
-    assert(kernel_size > first_pass_tile);
-  }
+  assert(kernel_size <= primary_tile);
 
   // Stores the x and y index that should be processed next.
-  size_t processed_x = 0;
-  size_t processed_y = 0;
   size_t x = 0;
   size_t y = 0;
-  // First and middle pass packs in sizes of channel_tile to tiled_c, then in
-  // sizes of channel_subtile.
   const size_t tiled_c =
       round_down_po2(round_up_po2(c, channel_round), channel_tile);
 
@@ -3240,9 +3289,7 @@ void xnn_pack_f32_dwconv_ghw_w(
 
       x = 0;
       y = 0;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
+      for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
           const float kv =
@@ -3252,8 +3299,7 @@ void xnn_pack_f32_dwconv_ghw_w(
         packed_weights += channel_tile - cr_block_size;
         advance_x_y(h, &x, &y);
       }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
-      packed_weights += doz(first_pass_tile, kernel_size) * cr_block_size;
+      packed_weights += (primary_tile - kernel_size) * cr_block_size;
     }
 
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
@@ -3263,101 +3309,6 @@ void xnn_pack_f32_dwconv_ghw_w(
 
       x = 0;
       y = 0;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const float kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_subtile - cr_block_size;
-        advance_x_y(h, &x, &y);
-      }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
-      packed_weights += doz(first_pass_tile, kernel_size) * cr_block_size;
-    }
-  }
-
-  if (kernel_size <= first_pass_tile) {
-    return;
-  }
-
-  kernel_size -= first_pass_tile;
-
-  processed_x = x;
-  processed_y = y;
-
-  // Middle pass. (kernel_size / middle_pass_tile) blocks, within each block is
-  // middle_pass_tile * cr weights.
-  for (; kernel_size > last_pass_tile; kernel_size -= middle_pass_tile) {
-    assert(kernel_size >= middle_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const float kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_tile - cr_block_size;
-        advance_x_y(h, &x, &y);
-      }
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const float kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_subtile - cr_block_size;
-        advance_x_y(h, &x, &y);
-      }
-    }
-    processed_x = x;
-    processed_y = y;
-  }
-
-  // Last pass.
-  {
-    assert(kernel_size <= last_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < round_down_po2(c, channel_tile);
-         cr_block_start += channel_tile) {
-      // Last pass does not pack to rounded c, since it handles remainder.
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const float kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_tile - cr_block_size;
-        advance_x_y(h, &x, &y);
-      }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
-      packed_weights += (last_pass_tile - kernel_size) * channel_tile;
-      packed_weights =
-          (float*)((uintptr_t)packed_weights + per_tile_extra_bytes);
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      // Last pass does not pack to rounded c, since it handles remainder.
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
       for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
@@ -3368,16 +3319,13 @@ void xnn_pack_f32_dwconv_ghw_w(
         packed_weights += channel_subtile - cr_block_size;
         advance_x_y(h, &x, &y);
       }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
-      packed_weights += (last_pass_tile - kernel_size) * channel_subtile;
-      packed_weights =
-          (float*)((uintptr_t)packed_weights + per_subtile_extra_bytes);
+      packed_weights += (primary_tile - kernel_size) * cr_block_size;
     }
   }
 }
 
 void xnn_pack_f16_dwconv_ghw_w(
-    size_t first_pass_tile, size_t middle_pass_tile, size_t last_pass_tile,
+    size_t primary_tile,
     size_t h, size_t w, size_t c, size_t channel_tile, size_t channel_subtile,
     size_t channel_round, const uint16_t* k, const uint16_t* b,
     const void* scale, uint16_t* packed_weights, size_t per_tile_extra_bytes,
@@ -3385,21 +3333,11 @@ void xnn_pack_f16_dwconv_ghw_w(
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
-  if (middle_pass_tile == 0) {
-    // Uni-pass DWCONV.
-    assert(last_pass_tile == 0);
-  } else {
-    // Multi-pass DWCONV.
-    assert(kernel_size > first_pass_tile);
-  }
 
   // Stores the x and y index that should be processed next.
-  size_t processed_x = 0;
-  size_t processed_y = 0;
   size_t x = 0;
   size_t y = 0;
-  // First and middle pass packs in sizes of channel_tile to tiled_c, then in
-  // sizes of channel_subtile.
+  // Pack in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
   const size_t tiled_c =
       round_down_po2(round_up_po2(c, channel_round), channel_tile);
 
@@ -3413,9 +3351,7 @@ void xnn_pack_f16_dwconv_ghw_w(
 
       x = 0;
       y = 0;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
+      for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
           const uint16_t kv =
@@ -3425,8 +3361,7 @@ void xnn_pack_f16_dwconv_ghw_w(
         packed_weights += channel_tile - cr_block_size;
         advance_x_y(h, &x, &y);
       }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
-      packed_weights += doz(first_pass_tile, kernel_size) * cr_block_size;
+      packed_weights += (primary_tile - kernel_size) * cr_block_size;
     }
 
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
@@ -3436,101 +3371,6 @@ void xnn_pack_f16_dwconv_ghw_w(
 
       x = 0;
       y = 0;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint16_t kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_subtile - cr_block_size;
-        advance_x_y(h, &x, &y);
-      }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
-      packed_weights += doz(first_pass_tile, kernel_size) * cr_block_size;
-    }
-  }
-
-  if (kernel_size <= first_pass_tile) {
-    return;
-  }
-
-  kernel_size -= first_pass_tile;
-
-  processed_x = x;
-  processed_y = y;
-
-  // Middle pass. (kernel_size / middle_pass_tile) blocks, within each block is
-  // middle_pass_tile * cr weights.
-  for (; kernel_size > last_pass_tile; kernel_size -= middle_pass_tile) {
-    assert(kernel_size >= middle_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint16_t kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_tile - cr_block_size;
-        advance_x_y(h, &x, &y);
-      }
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint16_t kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_subtile - cr_block_size;
-        advance_x_y(h, &x, &y);
-      }
-    }
-    processed_x = x;
-    processed_y = y;
-  }
-
-  // Last pass.
-  {
-    assert(kernel_size <= last_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < round_down_po2(c, channel_tile);
-         cr_block_start += channel_tile) {
-      // Last pass does not pack to rounded c, since it handles remainder.
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint16_t kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_tile - cr_block_size;
-        advance_x_y(h, &x, &y);
-      }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
-      packed_weights += (last_pass_tile - kernel_size) * channel_tile;
-      packed_weights =
-          (uint16_t*)((uintptr_t)packed_weights + per_tile_extra_bytes);
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      // Last pass does not pack to rounded c, since it handles remainder.
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
       for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
@@ -3541,16 +3381,13 @@ void xnn_pack_f16_dwconv_ghw_w(
         packed_weights += channel_subtile - cr_block_size;
         advance_x_y(h, &x, &y);
       }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
-      packed_weights += (last_pass_tile - kernel_size) * channel_subtile;
-      packed_weights =
-          (uint16_t*)((uintptr_t)packed_weights + per_subtile_extra_bytes);
+      packed_weights += (primary_tile - kernel_size) * cr_block_size;
     }
   }
 }
 
 void xnn_pack_f32_to_f16_dwconv_ghw_w(
-    size_t first_pass_tile, size_t middle_pass_tile, size_t last_pass_tile,
+    size_t primary_tile,
     size_t h, size_t w, size_t c, size_t channel_tile, size_t channel_subtile,
     size_t channel_round, const float* k, const float* b, const void* scale,
     xnn_float16* packed_weights, size_t per_tile_extra_bytes,
@@ -3558,21 +3395,11 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
-  if (middle_pass_tile == 0) {
-    // Uni-pass DWCONV.
-    assert(last_pass_tile == 0);
-  } else {
-    // Multi-pass DWCONV.
-    assert(kernel_size > first_pass_tile);
-  }
 
   // Stores the x and y index that should be processed next.
-  size_t processed_x = 0;
-  size_t processed_y = 0;
   size_t x = 0;
   size_t y = 0;
-  // First and middle pass packs in sizes of channel_tile to tiled_c, then in
-  // sizes of channel_subtile.
+  // Pack in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
   const size_t tiled_c =
       round_down_po2(round_up_po2(c, channel_round), channel_tile);
 
@@ -3586,9 +3413,7 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
 
       x = 0;
       y = 0;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
+      for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
           const xnn_float16 kv = xnn_float16_from_float(
@@ -3598,8 +3423,7 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
         packed_weights += channel_tile - cr_block_size;
         advance_x_y(h, &x, &y);
       }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
-      packed_weights += doz(first_pass_tile, kernel_size) * cr_block_size;
+      packed_weights += (primary_tile - kernel_size) * cr_block_size;
     }
 
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
@@ -3609,101 +3433,6 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
 
       x = 0;
       y = 0;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const xnn_float16 kv = xnn_float16_from_float(
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_subtile - cr_block_size;
-        advance_x_y(h, &x, &y);
-      }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
-      packed_weights += doz(first_pass_tile, kernel_size) * cr_block_size;
-    }
-  }
-
-  if (kernel_size <= first_pass_tile) {
-    return;
-  }
-
-  kernel_size -= first_pass_tile;
-
-  processed_x = x;
-  processed_y = y;
-
-  // Middle pass. (kernel_size / middle_pass_tile) blocks, within each block is
-  // middle_pass_tile * cr weights.
-  for (; kernel_size > last_pass_tile; kernel_size -= middle_pass_tile) {
-    assert(kernel_size >= middle_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const xnn_float16 kv = xnn_float16_from_float(
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_tile - cr_block_size;
-        advance_x_y(h, &x, &y);
-      }
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const xnn_float16 kv = xnn_float16_from_float(
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_subtile - cr_block_size;
-        advance_x_y(h, &x, &y);
-      }
-    }
-    processed_x = x;
-    processed_y = y;
-  }
-
-  // Last pass.
-  {
-    assert(kernel_size <= last_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < round_down_po2(c, channel_tile);
-         cr_block_start += channel_tile) {
-      // Last pass does not pack to rounded c, since it handles remainder.
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const xnn_float16 kv = xnn_float16_from_float(
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x]);
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_tile - cr_block_size;
-        advance_x_y(h, &x, &y);
-      }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
-      packed_weights += (last_pass_tile - kernel_size) * channel_tile;
-      packed_weights =
-          (xnn_float16*)((uintptr_t)packed_weights + per_tile_extra_bytes);
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      // Last pass does not pack to rounded c, since it handles remainder.
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
       for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
@@ -3714,16 +3443,12 @@ void xnn_pack_f32_to_f16_dwconv_ghw_w(
         packed_weights += channel_subtile - cr_block_size;
         advance_x_y(h, &x, &y);
       }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
-      packed_weights += (last_pass_tile - kernel_size) * channel_subtile;
-      packed_weights =
-          (xnn_float16*)((uintptr_t)packed_weights + per_subtile_extra_bytes);
+      packed_weights += (primary_tile - kernel_size) * cr_block_size;
     }
   }
 }
 
-void xnn_pack_qu8_dwconv_ghw_w(size_t first_pass_tile, size_t middle_pass_tile,
-                               size_t last_pass_tile, size_t h, size_t w,
+void xnn_pack_qu8_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
                                size_t c, size_t channel_tile,
                                size_t channel_subtile, size_t channel_round,
                                const uint8_t* k, const int32_t* b,
@@ -3734,24 +3459,14 @@ void xnn_pack_qu8_dwconv_ghw_w(size_t first_pass_tile, size_t middle_pass_tile,
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
-  if (middle_pass_tile == 0) {
-    // Uni-pass DWCONV.
-    assert(last_pass_tile == 0);
-  } else {
-    // Multi-pass DWCONV.
-    assert(kernel_size > first_pass_tile);
-  }
 
   const int32_t izp = (int32_t)params->input_zero_point;
   const int32_t boff =
       (int32_t)h * (int32_t)w * izp * (int32_t)params->kernel_zero_point;
   // Stores the x and y index that should be processed next.
-  size_t processed_x = 0;
-  size_t processed_y = 0;
   size_t x = 0;
   size_t y = 0;
-  // First and middle pass packs in sizes of channel_tile to tiled_c, then in
-  // sizes of channel_subtile.
+  // Pack in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
   const size_t tiled_c =
       round_down_po2(round_up_po2(c, channel_round), channel_tile);
 
@@ -3782,9 +3497,7 @@ void xnn_pack_qu8_dwconv_ghw_w(size_t first_pass_tile, size_t middle_pass_tile,
 
       x = 0;
       y = 0;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
+      for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
           const uint8_t kv =
@@ -3797,10 +3510,9 @@ void xnn_pack_qu8_dwconv_ghw_w(size_t first_pass_tile, size_t middle_pass_tile,
                     (channel_tile - cr_block_size) * sizeof(uint8_t));
         advance_x_y(h, &x, &y);
       }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
       packed_weights =
           (void*)((uintptr_t)packed_weights +
-                  doz(first_pass_tile, kernel_size) * cr_block_size);
+                  (primary_tile - kernel_size) * cr_block_size);
     }
 
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
@@ -3827,116 +3539,6 @@ void xnn_pack_qu8_dwconv_ghw_w(size_t first_pass_tile, size_t middle_pass_tile,
 
       x = 0;
       y = 0;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint8_t kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *((uint8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(uint8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_subtile - cr_block_size) * sizeof(uint8_t));
-        advance_x_y(h, &x, &y);
-      }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
-      packed_weights =
-          (void*)((uintptr_t)packed_weights +
-                  doz(first_pass_tile, kernel_size) * cr_block_size);
-    }
-  }
-
-  if (kernel_size <= first_pass_tile) {
-    return;
-  }
-
-  kernel_size -= first_pass_tile;
-
-  processed_x = x;
-  processed_y = y;
-
-  // Middle pass. (kernel_size / middle_pass_tile) blocks, within each block is
-  // middle_pass_tile * cr weights.
-  for (; kernel_size > last_pass_tile; kernel_size -= middle_pass_tile) {
-    assert(kernel_size >= middle_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint8_t kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *((uint8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(uint8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_tile - cr_block_size) * sizeof(uint8_t));
-        advance_x_y(h, &x, &y);
-      }
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint8_t kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *((uint8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(uint8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_subtile - cr_block_size) * sizeof(uint8_t));
-        advance_x_y(h, &x, &y);
-      }
-    }
-    processed_x = x;
-    processed_y = y;
-  }
-
-  // Last pass.
-  {
-    assert(kernel_size <= last_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < round_down_po2(c, channel_tile);
-         cr_block_start += channel_tile) {
-      // Last pass does not pack to rounded c, since it handles remainder.
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint8_t kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *((uint8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(uint8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_tile - cr_block_size) * sizeof(uint8_t));
-        advance_x_y(h, &x, &y);
-      }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
-      packed_weights = (void*)((uintptr_t)packed_weights +
-                               (last_pass_tile - kernel_size) * channel_tile);
-      packed_weights =
-          (void*)((uintptr_t)packed_weights + per_tile_extra_bytes);
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      // Last pass does not pack to rounded c, since it handles remainder.
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
       for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
@@ -3950,19 +3552,15 @@ void xnn_pack_qu8_dwconv_ghw_w(size_t first_pass_tile, size_t middle_pass_tile,
                     (channel_subtile - cr_block_size) * sizeof(uint8_t));
         advance_x_y(h, &x, &y);
       }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights =
           (void*)((uintptr_t)packed_weights +
-                  (last_pass_tile - kernel_size) * channel_subtile);
-      packed_weights =
-          (void*)((uintptr_t)packed_weights + per_subtile_extra_bytes);
+                  (primary_tile - kernel_size) * cr_block_size);
     }
   }
 }
 
 XNN_DISABLE_ALIGNMENT_SAN
-void xnn_pack_qs8_dwconv_ghw_w(size_t first_pass_tile, size_t middle_pass_tile,
-                               size_t last_pass_tile, size_t h, size_t w,
+void xnn_pack_qs8_dwconv_ghw_w(size_t primary_tile, size_t h, size_t w,
                                size_t c, size_t channel_tile,
                                size_t channel_subtile, size_t channel_round,
                                const int8_t* k, const int32_t* b,
@@ -3973,22 +3571,12 @@ void xnn_pack_qs8_dwconv_ghw_w(size_t first_pass_tile, size_t middle_pass_tile,
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
-  if (middle_pass_tile == 0) {
-    // Uni-pass DWCONV.
-    assert(last_pass_tile == 0);
-  } else {
-    // Multi-pass DWCONV.
-    assert(kernel_size > first_pass_tile);
-  }
 
   const uint32_t izp = (uint32_t)params->input_zero_point;
   // Stores the x and y index that should be processed next.
-  size_t processed_x = 0;
-  size_t processed_y = 0;
   size_t x = 0;
   size_t y = 0;
-  // First and middle pass packs in sizes of channel_tile to tiled_c, then in
-  // sizes of channel_subtile.
+  // Pack in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
   const size_t tiled_c =
       round_down_po2(round_up_po2(c, channel_round), channel_tile);
 
@@ -4017,9 +3605,7 @@ void xnn_pack_qs8_dwconv_ghw_w(size_t first_pass_tile, size_t middle_pass_tile,
 
       x = 0;
       y = 0;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
+      for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
           const int8_t kv =
@@ -4032,15 +3618,12 @@ void xnn_pack_qs8_dwconv_ghw_w(size_t first_pass_tile, size_t middle_pass_tile,
                     (channel_tile - cr_block_size) * sizeof(int8_t));
         advance_x_y(h, &x, &y);
       }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
       packed_weights =
           (void*)((uintptr_t)packed_weights +
-                  doz(first_pass_tile, kernel_size) * cr_block_size);
-      // If unipass and QC8, we need to pack extra bytes for scale values here.
-      if (middle_pass_tile == 0) {
-        packed_weights =
-            (void*)((uintptr_t)packed_weights + per_tile_extra_bytes);
-      }
+                  (primary_tile - kernel_size) * cr_block_size);
+      // We need to pack extra bytes for scale values here.
+      packed_weights =
+          (void*)((uintptr_t)packed_weights + per_tile_extra_bytes);
     }
 
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
@@ -4065,121 +3648,6 @@ void xnn_pack_qs8_dwconv_ghw_w(size_t first_pass_tile, size_t middle_pass_tile,
 
       x = 0;
       y = 0;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const int8_t kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *((int8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(int8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_subtile - cr_block_size) * sizeof(int8_t));
-        advance_x_y(h, &x, &y);
-      }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
-      packed_weights =
-          (void*)((uintptr_t)packed_weights +
-                  doz(first_pass_tile, kernel_size) * cr_block_size);
-      // If unipass and QC8, we need to pack extra bytes for scale values here.
-      if (middle_pass_tile == 0) {
-        packed_weights =
-            (void*)((uintptr_t)packed_weights + per_subtile_extra_bytes);
-      }
-    }
-  }
-
-  if (kernel_size <= first_pass_tile) {
-    return;
-  }
-
-  kernel_size -= first_pass_tile;
-
-  processed_x = x;
-  processed_y = y;
-
-  // Middle pass. (kernel_size / middle_pass_tile) blocks, within each block is
-  // middle_pass_tile * cr weights.
-  for (; kernel_size > last_pass_tile; kernel_size -= middle_pass_tile) {
-    assert(kernel_size >= middle_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const int8_t kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *((int8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(int8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_tile - cr_block_size) * sizeof(int8_t));
-        advance_x_y(h, &x, &y);
-      }
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const int8_t kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *((int8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(int8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_subtile - cr_block_size) * sizeof(int8_t));
-        advance_x_y(h, &x, &y);
-      }
-    }
-    processed_x = x;
-    processed_y = y;
-  }
-
-  // Last pass.
-  {
-    assert(kernel_size <= last_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < round_down_po2(c, channel_tile);
-         cr_block_start += channel_tile) {
-      // Last pass does not pack to rounded c, since it handles remainder.
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const int8_t kv =
-              k[((cr_block_start + cr_block_offset) * h + y) * w + x];
-          *((int8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(int8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_tile - cr_block_size) * sizeof(int8_t));
-        advance_x_y(h, &x, &y);
-      }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
-      packed_weights = (void*)((uintptr_t)packed_weights +
-                               (last_pass_tile - kernel_size) * channel_tile);
-      packed_weights =
-          (void*)((uintptr_t)packed_weights + per_tile_extra_bytes);
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      // Last pass does not pack to rounded c, since it handles remainder.
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
       for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
@@ -4193,10 +3661,10 @@ void xnn_pack_qs8_dwconv_ghw_w(size_t first_pass_tile, size_t middle_pass_tile,
                     (channel_subtile - cr_block_size) * sizeof(int8_t));
         advance_x_y(h, &x, &y);
       }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights =
           (void*)((uintptr_t)packed_weights +
-                  (last_pass_tile - kernel_size) * channel_subtile);
+                  (primary_tile - kernel_size) * cr_block_size);
+      // We need to pack extra bytes for scale values here.
       packed_weights =
           (void*)((uintptr_t)packed_weights + per_subtile_extra_bytes);
     }
@@ -4204,7 +3672,7 @@ void xnn_pack_qs8_dwconv_ghw_w(size_t first_pass_tile, size_t middle_pass_tile,
 }
 
 void xnn_pack_f32_dwconv_hwg_w(
-    size_t first_pass_tile, size_t middle_pass_tile, size_t last_pass_tile,
+    size_t primary_tile,
     size_t h, size_t w, size_t c, size_t channel_tile, size_t channel_subtile,
     size_t channel_round, const float* k, const float* b, const void* scale,
     float* packed_weights, size_t per_tile_extra_bytes,
@@ -4212,21 +3680,13 @@ void xnn_pack_f32_dwconv_hwg_w(
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
-  if (middle_pass_tile == 0) {
-    // Uni-pass DWCONV.
-    assert(last_pass_tile == 0);
-  } else {
-    // Multi-pass DWCONV.
-    assert(kernel_size > first_pass_tile);
-  }
 
   // Stores the x and y index that should be processed next.
   size_t processed_x = 0;
   size_t processed_y = 0;
   size_t x = 0;
   size_t y = 0;
-  // First and middle pass packs in sizes of channel_tile to tiled_c, then in
-  // sizes of channel_subtile.
+  // Pack in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
   const size_t tiled_c =
       round_down_po2(round_up_po2(c, channel_round), channel_tile);
 
@@ -4240,9 +3700,7 @@ void xnn_pack_f32_dwconv_hwg_w(
 
       x = processed_x;
       y = processed_y;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
+      for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
           const float kv =
@@ -4255,8 +3713,7 @@ void xnn_pack_f32_dwconv_hwg_w(
           x++;
         }
       }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
-      packed_weights += doz(first_pass_tile, kernel_size) * cr_block_size;
+      packed_weights += (primary_tile - kernel_size) * cr_block_size;
     }
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
@@ -4265,111 +3722,6 @@ void xnn_pack_f32_dwconv_hwg_w(
 
       x = processed_x;
       y = processed_y;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const float kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_subtile - cr_block_size;
-        if (++y == h) {
-          y = 0;
-          x++;
-        }
-      }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
-      packed_weights += doz(first_pass_tile, kernel_size) * cr_block_size;
-    }
-  }
-
-  if (kernel_size <= first_pass_tile) {
-    return;
-  }
-
-  kernel_size -= first_pass_tile;
-
-  processed_x = x;
-  processed_y = y;
-
-  // Middle pass. (kernel_size / middle_pass_tile) blocks, within each block is
-  // middle_pass_tile * cr weights.
-  for (; kernel_size > last_pass_tile; kernel_size -= middle_pass_tile) {
-    assert(kernel_size >= middle_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const float kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_tile - cr_block_size;
-        if (++y == h) {
-          y = 0;
-          x++;
-        }
-      }
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const float kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_subtile - cr_block_size;
-        if (++y == h) {
-          y = 0;
-          x++;
-        }
-      }
-    }
-    processed_x = x;
-    processed_y = y;
-  }
-
-  // Last pass.
-  {
-    assert(kernel_size <= last_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < round_down_po2(c, channel_tile);
-         cr_block_start += channel_tile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const float kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_tile - cr_block_size;
-        if (++y == h) {
-          y = 0;
-          x++;
-        }
-      }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
-      packed_weights += (last_pass_tile - kernel_size) * channel_tile;
-      packed_weights =
-          (float*)((uintptr_t)packed_weights + per_tile_extra_bytes);
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
       for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
@@ -4383,16 +3735,13 @@ void xnn_pack_f32_dwconv_hwg_w(
           x++;
         }
       }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
-      packed_weights += (last_pass_tile - kernel_size) * channel_subtile;
-      packed_weights =
-          (float*)((uintptr_t)packed_weights + per_subtile_extra_bytes);
+      packed_weights += (primary_tile - kernel_size) * cr_block_size;
     }
   }
 }
 
 void xnn_pack_f16_dwconv_hwg_w(
-    size_t first_pass_tile, size_t middle_pass_tile, size_t last_pass_tile,
+    size_t primary_tile,
     size_t h, size_t w, size_t c, size_t channel_tile, size_t channel_subtile,
     size_t channel_round, const uint16_t* k, const uint16_t* b,
     const void* scale, uint16_t* packed_weights, size_t per_tile_extra_bytes,
@@ -4400,21 +3749,13 @@ void xnn_pack_f16_dwconv_hwg_w(
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
-  if (middle_pass_tile == 0) {
-    // Uni-pass DWCONV.
-    assert(last_pass_tile == 0);
-  } else {
-    // Multi-pass DWCONV.
-    assert(kernel_size > first_pass_tile);
-  }
 
   // Stores the x and y index that should be processed next.
   size_t processed_x = 0;
   size_t processed_y = 0;
   size_t x = 0;
   size_t y = 0;
-  // First and middle pass packs in sizes of channel_tile to tiled_c, then in
-  // sizes of channel_subtile.
+  // Pack in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
   const size_t tiled_c =
       round_down_po2(round_up_po2(c, channel_round), channel_tile);
 
@@ -4428,9 +3769,7 @@ void xnn_pack_f16_dwconv_hwg_w(
 
       x = processed_x;
       y = processed_y;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
+      for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
           const uint16_t kv =
@@ -4443,8 +3782,7 @@ void xnn_pack_f16_dwconv_hwg_w(
           x++;
         }
       }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
-      packed_weights += doz(first_pass_tile, kernel_size) * cr_block_size;
+      packed_weights += (primary_tile - kernel_size) * cr_block_size;
     }
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
@@ -4453,111 +3791,6 @@ void xnn_pack_f16_dwconv_hwg_w(
 
       x = processed_x;
       y = processed_y;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint16_t kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_subtile - cr_block_size;
-        if (++y == h) {
-          y = 0;
-          x++;
-        }
-      }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
-      packed_weights += doz(first_pass_tile, kernel_size) * cr_block_size;
-    }
-  }
-
-  if (kernel_size <= first_pass_tile) {
-    return;
-  }
-
-  kernel_size -= first_pass_tile;
-
-  processed_x = x;
-  processed_y = y;
-
-  // Middle pass. (kernel_size / middle_pass_tile) blocks, within each block is
-  // middle_pass_tile * cr weights.
-  for (; kernel_size > last_pass_tile; kernel_size -= middle_pass_tile) {
-    assert(kernel_size >= middle_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint16_t kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_tile - cr_block_size;
-        if (++y == h) {
-          y = 0;
-          x++;
-        }
-      }
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint16_t kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_subtile - cr_block_size;
-        if (++y == h) {
-          y = 0;
-          x++;
-        }
-      }
-    }
-    processed_x = x;
-    processed_y = y;
-  }
-
-  // Last pass.
-  {
-    assert(kernel_size <= last_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < round_down_po2(c, channel_tile);
-         cr_block_start += channel_tile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint16_t kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_tile - cr_block_size;
-        if (++y == h) {
-          y = 0;
-          x++;
-        }
-      }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
-      packed_weights += (last_pass_tile - kernel_size) * channel_tile;
-      packed_weights =
-          (uint16_t*)((uintptr_t)packed_weights + per_tile_extra_bytes);
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
       for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
@@ -4571,16 +3804,13 @@ void xnn_pack_f16_dwconv_hwg_w(
           x++;
         }
       }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
-      packed_weights += (last_pass_tile - kernel_size) * channel_subtile;
-      packed_weights =
-          (uint16_t*)((uintptr_t)packed_weights + per_subtile_extra_bytes);
+      packed_weights += (primary_tile - kernel_size) * cr_block_size;
     }
   }
 }
 
 void xnn_pack_f32_to_f16_dwconv_hwg_w(
-    size_t first_pass_tile, size_t middle_pass_tile, size_t last_pass_tile,
+    size_t primary_tile,
     size_t h, size_t w, size_t c, size_t channel_tile, size_t channel_subtile,
     size_t channel_round, const float* k, const float* b, const void* scale,
     xnn_float16* packed_weights, size_t per_tile_extra_bytes,
@@ -4588,21 +3818,13 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
-  if (middle_pass_tile == 0) {
-    // Uni-pass DWCONV.
-    assert(last_pass_tile == 0);
-  } else {
-    // Multi-pass DWCONV.
-    assert(kernel_size > first_pass_tile);
-  }
 
   // Stores the x and y index that should be processed next.
   size_t processed_x = 0;
   size_t processed_y = 0;
   size_t x = 0;
   size_t y = 0;
-  // First and middle pass packs in sizes of channel_tile to tiled_c, then in
-  // sizes of channel_subtile.
+  // Pack in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
   const size_t tiled_c =
       round_down_po2(round_up_po2(c, channel_round), channel_tile);
 
@@ -4616,9 +3838,7 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
 
       x = processed_x;
       y = processed_y;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
+      for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
           const xnn_float16 kv = xnn_float16_from_float(
@@ -4631,8 +3851,8 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
           x++;
         }
       }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
-      packed_weights += doz(first_pass_tile, kernel_size) * cr_block_size;
+      // And make sure to skip weights if kernel_size < primary_tile.
+      packed_weights += (primary_tile - kernel_size) * cr_block_size;
     }
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
       const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
@@ -4641,111 +3861,6 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
 
       x = processed_x;
       y = processed_y;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const xnn_float16 kv = xnn_float16_from_float(
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_subtile - cr_block_size;
-        if (++y == h) {
-          y = 0;
-          x++;
-        }
-      }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
-      packed_weights += doz(first_pass_tile, kernel_size) * cr_block_size;
-    }
-  }
-
-  if (kernel_size <= first_pass_tile) {
-    return;
-  }
-
-  kernel_size -= first_pass_tile;
-
-  processed_x = x;
-  processed_y = y;
-
-  // Middle pass. (kernel_size / middle_pass_tile) blocks, within each block is
-  // middle_pass_tile * cr weights.
-  for (; kernel_size > last_pass_tile; kernel_size -= middle_pass_tile) {
-    assert(kernel_size >= middle_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const xnn_float16 kv = xnn_float16_from_float(
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_tile - cr_block_size;
-        if (++y == h) {
-          y = 0;
-          x++;
-        }
-      }
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const xnn_float16 kv = xnn_float16_from_float(
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_subtile - cr_block_size;
-        if (++y == h) {
-          y = 0;
-          x++;
-        }
-      }
-    }
-    processed_x = x;
-    processed_y = y;
-  }
-
-  // Last pass.
-  {
-    assert(kernel_size <= last_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < round_down_po2(c, channel_tile);
-         cr_block_start += channel_tile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const xnn_float16 kv = xnn_float16_from_float(
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)]);
-          *packed_weights++ = kv;
-        }
-        packed_weights += channel_tile - cr_block_size;
-        if (++y == h) {
-          y = 0;
-          x++;
-        }
-      }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
-      packed_weights += (last_pass_tile - kernel_size) * channel_tile;
-      packed_weights =
-          (xnn_float16*)((uintptr_t)packed_weights + per_tile_extra_bytes);
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
       for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
@@ -4759,16 +3874,12 @@ void xnn_pack_f32_to_f16_dwconv_hwg_w(
           x++;
         }
       }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
-      packed_weights += (last_pass_tile - kernel_size) * channel_subtile;
-      packed_weights =
-          (xnn_float16*)((uintptr_t)packed_weights + per_subtile_extra_bytes);
+      packed_weights += (primary_tile - kernel_size) * cr_block_size;
     }
   }
 }
 
-void xnn_pack_qu8_dwconv_hwg_w(size_t first_pass_tile, size_t middle_pass_tile,
-                               size_t last_pass_tile, size_t h, size_t w,
+void xnn_pack_qu8_dwconv_hwg_w(size_t primary_tile, size_t h, size_t w,
                                size_t c, size_t channel_tile,
                                size_t channel_subtile, size_t channel_round,
                                const uint8_t* k, const int32_t* b,
@@ -4779,24 +3890,14 @@ void xnn_pack_qu8_dwconv_hwg_w(size_t first_pass_tile, size_t middle_pass_tile,
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
-  if (middle_pass_tile == 0) {
-    // Uni-pass DWCONV.
-    assert(last_pass_tile == 0);
-  } else {
-    // Multi-pass DWCONV.
-    assert(kernel_size > first_pass_tile);
-  }
 
   const int32_t izp = (int32_t)params->input_zero_point;
   const int32_t boff =
       (int32_t)h * (int32_t)w * izp * (int32_t)params->kernel_zero_point;
   // Stores the x and y index that should be processed next.
-  size_t processed_x = 0;
-  size_t processed_y = 0;
   size_t x = 0;
   size_t y = 0;
-  // First and middle pass packs in sizes of channel_tile to tiled_c, then in
-  // sizes of channel_subtile.
+  // Pack in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
   const size_t tiled_c =
       round_down_po2(round_up_po2(c, channel_round), channel_tile);
 
@@ -4827,9 +3928,7 @@ void xnn_pack_qu8_dwconv_hwg_w(size_t first_pass_tile, size_t middle_pass_tile,
 
       x = 0;
       y = 0;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
+      for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
           const uint8_t kv =
@@ -4842,10 +3941,9 @@ void xnn_pack_qu8_dwconv_hwg_w(size_t first_pass_tile, size_t middle_pass_tile,
                     (channel_tile - cr_block_size) * sizeof(uint8_t));
         advance_x_y(h, &x, &y);
       }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
       packed_weights =
           (void*)((uintptr_t)packed_weights +
-                  doz(first_pass_tile, kernel_size) * cr_block_size);
+                  (primary_tile - kernel_size) * cr_block_size);
     }
 
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
@@ -4872,116 +3970,6 @@ void xnn_pack_qu8_dwconv_hwg_w(size_t first_pass_tile, size_t middle_pass_tile,
 
       x = 0;
       y = 0;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint8_t kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *((uint8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(uint8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_subtile - cr_block_size) * sizeof(uint8_t));
-        advance_x_y(h, &x, &y);
-      }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
-      packed_weights =
-          (void*)((uintptr_t)packed_weights +
-                  doz(first_pass_tile, kernel_size) * cr_block_size);
-    }
-  }
-
-  if (kernel_size <= first_pass_tile) {
-    return;
-  }
-
-  kernel_size -= first_pass_tile;
-
-  processed_x = x;
-  processed_y = y;
-
-  // Middle pass. (kernel_size / middle_pass_tile) blocks, within each block is
-  // middle_pass_tile * cr weights.
-  for (; kernel_size > last_pass_tile; kernel_size -= middle_pass_tile) {
-    assert(kernel_size >= middle_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint8_t kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *((uint8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(uint8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_tile - cr_block_size) * sizeof(uint8_t));
-        advance_x_y(h, &x, &y);
-      }
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint8_t kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *((uint8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(uint8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_subtile - cr_block_size) * sizeof(uint8_t));
-        advance_x_y(h, &x, &y);
-      }
-    }
-    processed_x = x;
-    processed_y = y;
-  }
-
-  // Last pass.
-  {
-    assert(kernel_size <= last_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < round_down_po2(c, channel_tile);
-         cr_block_start += channel_tile) {
-      // Last pass does not pack to rounded c, since it handles remainder.
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const uint8_t kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *((uint8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(uint8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_tile - cr_block_size) * sizeof(uint8_t));
-        advance_x_y(h, &x, &y);
-      }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
-      packed_weights = (void*)((uintptr_t)packed_weights +
-                               (last_pass_tile - kernel_size) * channel_tile);
-      packed_weights =
-          (void*)((uintptr_t)packed_weights + per_tile_extra_bytes);
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      // Last pass does not pack to rounded c, since it handles remainder.
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
       for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
@@ -4995,19 +3983,15 @@ void xnn_pack_qu8_dwconv_hwg_w(size_t first_pass_tile, size_t middle_pass_tile,
                     (channel_subtile - cr_block_size) * sizeof(uint8_t));
         advance_x_y(h, &x, &y);
       }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights =
           (void*)((uintptr_t)packed_weights +
-                  (last_pass_tile - kernel_size) * channel_subtile);
-      packed_weights =
-          (void*)((uintptr_t)packed_weights + per_subtile_extra_bytes);
+                  (primary_tile - kernel_size) * cr_block_size);
     }
   }
 }
 
 XNN_DISABLE_ALIGNMENT_SAN
-void xnn_pack_qs8_dwconv_hwg_w(size_t first_pass_tile, size_t middle_pass_tile,
-                               size_t last_pass_tile, size_t h, size_t w,
+void xnn_pack_qs8_dwconv_hwg_w(size_t primary_tile, size_t h, size_t w,
                                size_t c, size_t channel_tile,
                                size_t channel_subtile, size_t channel_round,
                                const int8_t* k, const int32_t* b,
@@ -5018,22 +4002,12 @@ void xnn_pack_qs8_dwconv_hwg_w(size_t first_pass_tile, size_t middle_pass_tile,
   assert(k != nullptr);
   assert(packed_weights != nullptr);
   size_t kernel_size = h * w;
-  if (middle_pass_tile == 0) {
-    // Uni-pass DWCONV.
-    assert(last_pass_tile == 0);
-  } else {
-    // Multi-pass DWCONV.
-    assert(kernel_size > first_pass_tile);
-  }
 
   const uint32_t izp = (uint32_t)params->input_zero_point;
   // Stores the x and y index that should be processed next.
-  size_t processed_x = 0;
-  size_t processed_y = 0;
   size_t x = 0;
   size_t y = 0;
-  // First and middle pass packs in sizes of channel_tile to tiled_c, then in
-  // sizes of channel_subtile.
+  // Pack in sizes of channel_tile to tiled_c, then in sizes of channel_subtile.
   const size_t tiled_c =
       round_down_po2(round_up_po2(c, channel_round), channel_tile);
 
@@ -5062,9 +4036,7 @@ void xnn_pack_qs8_dwconv_hwg_w(size_t first_pass_tile, size_t middle_pass_tile,
 
       x = 0;
       y = 0;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
+      for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
           const int8_t kv =
@@ -5077,15 +4049,12 @@ void xnn_pack_qs8_dwconv_hwg_w(size_t first_pass_tile, size_t middle_pass_tile,
                     (channel_tile - cr_block_size) * sizeof(int8_t));
         advance_x_y(h, &x, &y);
       }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
       packed_weights =
           (void*)((uintptr_t)packed_weights +
-                  doz(first_pass_tile, kernel_size) * cr_block_size);
-      // If unipass and QC8, we need to pack extra bytes for scale values here.
-      if (middle_pass_tile == 0) {
-        packed_weights =
-            (void*)((uintptr_t)packed_weights + per_tile_extra_bytes);
-      }
+                  (primary_tile - kernel_size) * cr_block_size);
+      // We need to pack extra bytes for scale values here.
+      packed_weights =
+          (void*)((uintptr_t)packed_weights + per_tile_extra_bytes);
     }
 
     for (; cr_block_start < c; cr_block_start += channel_subtile) {
@@ -5110,121 +4079,6 @@ void xnn_pack_qs8_dwconv_hwg_w(size_t first_pass_tile, size_t middle_pass_tile,
 
       x = 0;
       y = 0;
-      // kernel_size can be less than the first_pass_tile, in this case, pack up
-      // to the smaller of the two.
-      for (size_t i = 0; i < min(first_pass_tile, kernel_size); i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const int8_t kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *((int8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(int8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_subtile - cr_block_size) * sizeof(int8_t));
-        advance_x_y(h, &x, &y);
-      }
-      // And make sure to skip weights if kernel_size < first_pass_tile.
-      packed_weights =
-          (void*)((uintptr_t)packed_weights +
-                  doz(first_pass_tile, kernel_size) * cr_block_size);
-      // If unipass and QC8, we need to pack extra bytes for scale values here.
-      if (middle_pass_tile == 0) {
-        packed_weights =
-            (void*)((uintptr_t)packed_weights + per_subtile_extra_bytes);
-      }
-    }
-  }
-
-  if (kernel_size <= first_pass_tile) {
-    return;
-  }
-
-  kernel_size -= first_pass_tile;
-
-  processed_x = x;
-  processed_y = y;
-
-  // Middle pass. (kernel_size / middle_pass_tile) blocks, within each block is
-  // middle_pass_tile * cr weights.
-  for (; kernel_size > last_pass_tile; kernel_size -= middle_pass_tile) {
-    assert(kernel_size >= middle_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < tiled_c; cr_block_start += channel_tile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const int8_t kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *((int8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(int8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_tile - cr_block_size) * sizeof(int8_t));
-        advance_x_y(h, &x, &y);
-      }
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
-      for (size_t j = 0; j < middle_pass_tile; j++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const int8_t kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *((int8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(int8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_subtile - cr_block_size) * sizeof(int8_t));
-        advance_x_y(h, &x, &y);
-      }
-    }
-    processed_x = x;
-    processed_y = y;
-  }
-
-  // Last pass.
-  {
-    assert(kernel_size <= last_pass_tile);
-    size_t cr_block_start = 0;
-    for (; cr_block_start < round_down_po2(c, channel_tile);
-         cr_block_start += channel_tile) {
-      // Last pass does not pack to rounded c, since it handles remainder.
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_tile);
-      for (size_t i = 0; i < kernel_size; i++) {
-        for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
-             cr_block_offset++) {
-          const int8_t kv =
-              k[(y * w + x) * c + (cr_block_start + cr_block_offset)];
-          *((int8_t*)packed_weights) = kv;
-          packed_weights = (void*)((uintptr_t)packed_weights + sizeof(int8_t));
-        }
-        packed_weights =
-            (void*)((uintptr_t)packed_weights +
-                    (channel_tile - cr_block_size) * sizeof(int8_t));
-        advance_x_y(h, &x, &y);
-      }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
-      packed_weights = (void*)((uintptr_t)packed_weights +
-                               (last_pass_tile - kernel_size) * channel_tile);
-      packed_weights =
-          (void*)((uintptr_t)packed_weights + per_tile_extra_bytes);
-    }
-    for (; cr_block_start < c; cr_block_start += channel_subtile) {
-      // Last pass does not pack to rounded c, since it handles remainder.
-      x = processed_x;
-      y = processed_y;
-      const size_t cr_block_size = min(c - cr_block_start, channel_subtile);
       for (size_t i = 0; i < kernel_size; i++) {
         for (size_t cr_block_offset = 0; cr_block_offset < cr_block_size;
              cr_block_offset++) {
@@ -5238,10 +4092,10 @@ void xnn_pack_qs8_dwconv_hwg_w(size_t first_pass_tile, size_t middle_pass_tile,
                     (channel_subtile - cr_block_size) * sizeof(int8_t));
         advance_x_y(h, &x, &y);
       }
-      // Pad so that we can always read last_pass_tile weights in the last pass.
       packed_weights =
           (void*)((uintptr_t)packed_weights +
-                  (last_pass_tile - kernel_size) * channel_subtile);
+                  (primary_tile - kernel_size) * cr_block_size);
+      // We need to pack extra bytes for scale values here.
       packed_weights =
           (void*)((uintptr_t)packed_weights + per_subtile_extra_bytes);
     }

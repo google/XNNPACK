@@ -451,3 +451,56 @@ std::vector<GemmTestParams> CreateTests1(
   #endif  // XNN_ENABLE_KLEIDIAI
 #endif  // XNN_ENABLE_ARM_I8MM && XNN_ARCH_ARM64
 
+
+#if XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
+  #if XNN_ENABLE_KLEIDIAI
+  INSTANTIATE_TEST_SUITE_P(
+      QP8_F32_QC4W_GEMM_MINMAX_1X128C4__NEONSME2, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/4,
+          /*adj_k_block=*/4,
+          /*mr=*/1, /*nr=*/128, /*kr=*/4, /*sr=*/1,
+          /*mr_packed=*/1,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_1x128c4__neonsme2,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_kai_qs4_weights_and_biases_sme,
+                        xnn_packed_stride_kai_qs4_weights_and_biases_sme);
+          },
+          []() {
+            TEST_REQUIRES_ARM_NEON_SME2;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+
+  INSTANTIATE_TEST_SUITE_P(
+      QP8_F32_QC4W_GEMM_MINMAX_32X128C4__NEONSME2, GemmTest,
+      testing::ValuesIn(CreateTests1(
+          /*k_block=*/4,
+          /*adj_k_block=*/4,
+          /*mr=*/32, /*nr=*/128, /*kr=*/4, /*sr=*/1,
+          /*mr_packed=*/32,
+          /*is_igemm=*/false,
+          /*unsigned_inputs=*/false,
+          /*planes=*/1,
+          [](GemmMicrokernelTester& tester) {
+            tester.Test(xnn_qp8_f32_qc4w_gemm_minmax_ukernel_32x128c4__neonsme2,
+                        xnn_init_f32_minmax_scalar_params,
+                        xnn_pack_kai_qs4_weights_and_biases_sme,
+                        xnn_packed_stride_kai_qs4_weights_and_biases_sme);
+          },
+          []() {
+            TEST_REQUIRES_ARM_NEON_SME2;
+          })),
+      [](const testing::TestParamInfo<GemmTest::ParamType>& info) {
+        return info.param.test_name;
+      });
+
+  #endif  // XNN_ENABLE_KLEIDIAI
+#endif  // XNN_ENABLE_ARM_SME2 && XNN_ARCH_ARM64
+

@@ -145,7 +145,7 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_9x32c2__asm_amd64_avx512bf16_bro
       and rdx, 0xFFFFFFFFFFFFFFFD
       mov [rsp + 168], r11
 
-outer_loop:
+.Louter_loop:
       # Initialize k counter.
       mov r11, 0
       # Read a pointers from stack into GP registers.
@@ -182,9 +182,9 @@ outer_loop:
 
       # Are there at least 4 bytes?
       cmp rdx, 4
-      js inner_loop_tail
+      js .Linner_loop_tail
 
-inner_loop:
+.Linner_loop:
       vmovaps  zmm7, [r9 + 0]
       vmovaps  zmm8, [r9 + 64]
       add r9, 128
@@ -218,7 +218,7 @@ inner_loop:
 
       add r11, 4
       cmp rdx, r11
-      jne inner_loop
+      jne .Linner_loop
 
       # Store nc_register.
       mov [rsp + 176], rsi
@@ -227,9 +227,9 @@ inner_loop:
       # Check if channels are odd.
       test rsi, rsi
       mov rsi, [rsp + 176]
-      jz inner_loop_end
+      jz .Linner_loop_end
 
-inner_loop_tail:
+.Linner_loop_tail:
       vmovaps  zmm7, [r9 + 0]
       vmovaps  zmm8, [r9 + 64]
       add r9, 128
@@ -314,7 +314,7 @@ inner_loop_tail:
       vpsrad zmm2, zmm2, 16
       vdpbf16ps  zmm28, zmm2, zmm8
 
-inner_loop_end:
+.Linner_loop_end:
       # Min/max clamping.
       vminps  zmm11, zmm1, zmm11
       vminps  zmm12, zmm1, zmm12
@@ -366,7 +366,7 @@ inner_loop_end:
 
       # Check whether full or partial store.
       cmp rsi, 32
-      jl tail
+      jl .Ltail
 
       vmovups  [rcx], zmm11
       vmovups  [rcx + 64], zmm20
@@ -408,10 +408,10 @@ inner_loop_end:
       mov [rsp + 152], rbp
 
       sub rsi, 32
-      jne outer_loop
-      jmp return
+      jne .Louter_loop
+      jmp .Lreturn
 
-tail:
+.Ltail:
       mov r11, -1
       shlx r11, r11, rsi
       not r11
@@ -437,7 +437,7 @@ tail:
       vmovups  ZMMWORD PTR [rbp]{k1}, zmm19
       vmovups  ZMMWORD PTR [rbp + 64]{k2}, zmm28
 
-return:
+.Lreturn:
       add rsp, 256
       mov r13, [rsp]
       mov rsp, r13
@@ -466,3 +466,7 @@ BEGIN_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_9x32c2__asm_amd64_avx512bf16_bro
       ret
 END_FUNCTION xnn_bf16_f32_gemm_minmax_ukernel_9x32c2__asm_amd64_avx512bf16_broadcast.dfsan
       #endif
+
+      #ifdef __ELF__
+      .section .note.GNU-stack, "", @progbits
+      #endif  // __ELF__

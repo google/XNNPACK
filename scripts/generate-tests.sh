@@ -135,6 +135,7 @@ tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b -
 tools/generate-vbinary-test.py --tester VBinaryMicrokernelTester --broadcast_b --ukernel qu8-vmulc-minmax-rndnu --output test/qu8-vmulc-minmax-rndnu.cc &
 
 ### Tests for VUnary micro-kernels
+tools/generate-vunary-test.py --ukernel f16-vapproxgelu --output test/f16-vapproxgelu.cc &
 tools/generate-vunary-test.py --ukernel f16-vclamp --output test/f16-vclamp.cc &
 tools/generate-vunary-test.py --ukernel f16-velu --output test/f16-velu.cc &
 tools/generate-vunary-test.py --ukernel f16-vgelu --output test/f16-vgelu.cc &
@@ -151,6 +152,7 @@ tools/generate-vunary-test.py --ukernel f16-vsqrt --output test/f16-vsqrt.cc &
 tools/generate-vunary-test.py --ukernel f16-vtanh --output test/f16-vtanh.cc &
 
 tools/generate-vunary-test.py --ukernel f32-vabs --output test/f32-vabs.cc &
+tools/generate-vunary-test.py --ukernel f32-vapproxgelu --output test/f32-vapproxgelu.cc &
 tools/generate-vunary-test.py --ukernel f32-vclamp --output test/f32-vclamp.cc &
 tools/generate-vunary-test.py --ukernel f32-velu --output test/f32-velu.cc &
 tools/generate-vunary-test.py --ukernel f32-vgelu --output test/f32-vgelu.cc &
@@ -211,12 +213,9 @@ tools/generate-conv-hwc2chw-test.py --spec test/f32-conv-hwc2chw.yaml --output t
 
 ### Tests for DWConv micro-kernels
 tools/generate-dwconv-unipass-test.py --ukernel f16-dwconv-minmax-unipass --output test/f16-dwconv-minmax-unipass.cc &
-tools/generate-dwconv-multipass-test.py --ukernel f16-dwconv-minmax-multipass --output test/f16-dwconv-minmax-multipass.cc &
 
 tools/generate-dwconv-unipass-test.py --ukernel f32-dwconv-unipass --output test/f32-dwconv-unipass.cc &
 tools/generate-dwconv-unipass-test.py --ukernel f32-dwconv-minmax-unipass --output test/f32-dwconv-minmax-unipass.cc &
-tools/generate-dwconv-multipass-test.py --ukernel f32-dwconv-multipass --output test/f32-dwconv-multipass.cc &
-tools/generate-dwconv-multipass-test.py --ukernel f32-dwconv-minmax-multipass --output test/f32-dwconv-minmax-multipass.cc &
 
 tools/generate-dwconv-unipass-test.py --ukernel qs8-qc8w-dwconv-minmax-unipass-fp32 --output test/qs8-qc8w-dwconv-minmax-unipass-fp32.cc &
 tools/generate-dwconv-unipass-test.py --ukernel qs8-dwconv-minmax-unipass-fp32 --output test/qs8-dwconv-minmax-unipass-fp32.cc &
@@ -224,13 +223,6 @@ tools/generate-dwconv-unipass-test.py --ukernel qu8-dwconv-minmax-unipass-fp32 -
 
 tools/generate-dwconv-unipass-test.py --ukernel qs8-dwconv-minmax-unipass-rndnu --output test/qs8-dwconv-minmax-unipass-rndnu.cc &
 tools/generate-dwconv-unipass-test.py --ukernel qu8-dwconv-minmax-unipass-rndnu --output test/qu8-dwconv-minmax-unipass-rndnu.cc &
-
-tools/generate-dwconv-multipass-test.py --ukernel qs8-qc8w-dwconv-minmax-multipass-fp32 --output test/qs8-qc8w-dwconv-minmax-multipass-fp32.cc &
-tools/generate-dwconv-multipass-test.py --ukernel qs8-dwconv-minmax-multipass-fp32 --output test/qs8-dwconv-minmax-multipass-fp32.cc &
-tools/generate-dwconv-multipass-test.py --ukernel qu8-dwconv-minmax-multipass-fp32 --output test/qu8-dwconv-minmax-multipass-fp32.cc &
-
-tools/generate-dwconv-multipass-test.py --ukernel qs8-dwconv-minmax-multipass-rndnu --output test/qs8-dwconv-minmax-multipass-rndnu.cc &
-tools/generate-dwconv-multipass-test.py --ukernel qu8-dwconv-minmax-multipass-rndnu --output test/qu8-dwconv-minmax-multipass-rndnu.cc &
 
 ### Tests for DWConv CHW layout micro-kernels
 tools/generate-dwconv2d-chw-test.py --spec test/f16-dwconv2d-chw.yaml --output test/f16-dwconv2d-chw.cc &
@@ -269,7 +261,7 @@ tools/xngen test/f32-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIM
 tools/xngen test/f32-simd.cc.in -D ARCH=hvx -D ARCH_MACRO=XNN_ARCH_HEXAGON -D TEST_REQUIRES=TEST_REQUIRES_HVX -o test/f32-simd-hvx.cc &
 
 tools/xngen test/f16-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/f16-simd-scalar.cc &
-tools/xngen test/f16-simd.cc.in -D ARCH=neonfp16arith -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES=TEST_REQUIRES_ARM_FP16_ARITH -o test/f16-simd-neonfp16arith.cc &
+tools/xngen test/f16-simd.cc.in -D ARCH=neonfp16arith -D ARCH_MACRO=XNN_ARCH_ARM64 -D TEST_REQUIRES=TEST_REQUIRES_ARM_FP16_ARITH -o test/f16-simd-neonfp16arith.cc &
 
 tools/xngen test/s16-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/s16-simd-scalar.cc &
 tools/xngen test/s16-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES=TEST_REQUIRES_ARM_NEON -o test/s16-simd-neon.cc &

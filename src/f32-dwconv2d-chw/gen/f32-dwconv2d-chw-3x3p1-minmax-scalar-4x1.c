@@ -21,7 +21,7 @@ void xnn_f32_dwconv2d_chw_ukernel_3x3p1__scalar_4x1(
     const float* zero,
     float* output,
     uint32_t padding_top,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(input_height != 0);
   assert(input_width != 0);

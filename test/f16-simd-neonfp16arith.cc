@@ -10,7 +10,7 @@
 // This header needs to go first for the arch test macros.
 #include "xnnpack/common.h"
 
-#if XNN_ARCH_ARM || XNN_ARCH_ARM64
+#if XNN_ARCH_ARM64
 
 #include <algorithm>
 #include <cmath>
@@ -582,4 +582,4 @@ TEST_F(F16SimdNEONFP16ARITHTest, StoreTail) {
 
 }  // namespace xnnpack
 
-#endif  // XNN_ARCH_ARM || XNN_ARCH_ARM64
+#endif  // XNN_ARCH_ARM64

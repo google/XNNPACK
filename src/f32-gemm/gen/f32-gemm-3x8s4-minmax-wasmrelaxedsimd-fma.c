@@ -24,7 +24,7 @@ void xnn_f32_gemm_minmax_ukernel_3x8s4__wasmrelaxedsimd_fma(
     float* restrict c,
     size_t cm_stride,
     size_t cn_stride,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 3);

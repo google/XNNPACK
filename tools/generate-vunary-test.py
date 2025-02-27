@@ -33,6 +33,7 @@ parser.set_defaults(defines=list())
 
 OP_TYPES = {
     "vabs": "Abs",
+    "vapproxgelu": "ApproxGELU",
     "vclamp": "Clamp",
     "velu": "ELU",
     "vexp": "Exp",
@@ -44,8 +45,8 @@ OP_TYPES = {
     "vrelu": "ReLU",
     "vrndd": "RoundDown",
     "vrndne": "RoundToNearestEven",
-    "vrndz": "RoundTowardsZero",
     "vrndu": "RoundUp",
+    "vrndz": "RoundTowardsZero",
     "vrsqrt": "ReciprocalSquareRoot",
     "vsigmoid": "Sigmoid",
     "vsqr": "Square",
@@ -77,6 +78,12 @@ SPECIAL_VALUES_F32 = {
         1,  # Error margin in ULP.
     ),
     "GELU": (
+        3,  # Number of elements.
+        "{-6.0f, 6.0f, 0.0f}",  # Inputs.
+        "{0.0f, 6.0f, 0.0f}",  # Expected outputs.
+        1,  # Error margin in ULP.
+    ),
+    "ApproxGELU": (
         3,  # Number of elements.
         "{-6.0f, 6.0f, 0.0f}",  # Inputs.
         "{0.0f, 6.0f, 0.0f}",  # Expected outputs.

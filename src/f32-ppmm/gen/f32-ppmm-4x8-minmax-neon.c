@@ -24,7 +24,7 @@ void xnn_f32_ppmm_minmax_ukernel_4x8__neon(
   float* restrict c,
   size_t cm_stride,
   size_t cn_stride,
-  const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+  const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mr != 0);
   assert(mr <= 4);

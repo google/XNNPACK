@@ -12,6 +12,7 @@ const UnaryOpInfo* GetUnaryOpInfo(xnn_unary_operator op) {
   static Convert convert;
   static ELU elu;
   static Exp exp;
+  static ApproxGELU approxgelu;
   static GELU gelu;
   static HardSwish hardswish;
   static LeakyReLU leaky_relu;
@@ -36,6 +37,8 @@ const UnaryOpInfo* GetUnaryOpInfo(xnn_unary_operator op) {
   switch (op) {
     case xnn_unary_abs:
       return &abs;
+    case xnn_unary_approxgelu:
+      return &approxgelu;
     case xnn_unary_bankers_rounding:
       return &bankers_rounding;
     case xnn_unary_ceiling:

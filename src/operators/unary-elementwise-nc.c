@@ -142,6 +142,8 @@ static const struct xnn_unary_elementwise_config* get_config(
     switch (op_type) {
       case xnn_unary_abs:
         return xnn_init_f16_abs_config();
+      case xnn_unary_approxgelu:
+        return xnn_init_f16_approxgelu_config();
       case xnn_unary_bankers_rounding:
         return xnn_init_f16_rndne_config();
       case xnn_unary_ceiling:
@@ -177,6 +179,8 @@ static const struct xnn_unary_elementwise_config* get_config(
     switch (op_type) {
       case xnn_unary_abs:
         return xnn_init_f32_abs_config();
+      case xnn_unary_approxgelu:
+        return xnn_init_f32_approxgelu_config();
       case xnn_unary_bankers_rounding:
         return xnn_init_f32_rndne_config();
       case xnn_unary_ceiling:
@@ -229,6 +233,7 @@ static enum xnn_status init_op(
   op->flags = flags;
   op->unary_elementwise.log2_input_size = xnn_datatype_log2_size_bytes(input_datatype);
   op->unary_elementwise.log2_output_size = xnn_datatype_log2_size_bytes(output_datatype);
+  op->unary_elementwise.op_type = op_type;
 
   const struct xnn_unary_elementwise_config* config = get_config(op_type, input_datatype, output_datatype, input_quantization, output_quantization);
   if (config) {

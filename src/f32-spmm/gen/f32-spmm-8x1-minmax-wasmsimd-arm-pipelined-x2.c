@@ -23,7 +23,7 @@ void xnn_f32_spmm_minmax_ukernel_8x1__wasmsimd_arm_pipelined_x2(
     const uint32_t* nidx_nnzmap,
     float* output,
     size_t output_stride,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(mc != 0);
   assert(mc % sizeof(float) == 0);

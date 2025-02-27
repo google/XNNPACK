@@ -556,6 +556,32 @@ XNN_INTERNAL void xnn_pack_kai_qs4_weights_and_biases(
     void* packed_weights_ptr,                      //
     const void* params);
 
+XNN_INTERNAL void xnn_pack_kai_qs4_weights_and_biases_sme(
+    uint32_t flags,                                //
+    const struct xnn_gemm_config* gemm_config,     //
+    size_t input_channels,                         //
+    size_t output_channels,                        //
+    size_t groups,                                 //
+    size_t unused_block_size,                      //
+    size_t k_stride,                               //
+    const void* accumulator_init,                  //
+    const void* weights,                           //
+    xnn_init_scale_params_fn init_extra_data0_fn,  //
+    const void* extra_data0,                       //
+    size_t extra_data0_element_size,               //
+    xnn_init_scale_params_fn init_extra_data1_fn,  //
+    const void* extra_data1,                       //
+    size_t extra_data1_element_size,               //
+    void* packed_weights_ptr,                      //
+    const void* params);
+
+XNN_INTERNAL size_t xnn_packed_stride_kai_qs4_weights_and_biases_sme(
+    const struct xnn_gemm_config* gemm_config,  //
+    size_t k,                                   //
+    size_t unused_block_size,                   //
+    size_t k_stride,                            //
+    size_t extra_bytes);
+
 XNN_INTERNAL size_t xnn_packed_stride_kai_qs4_weights_and_biases(
     const struct xnn_gemm_config* gemm_config,  //
     size_t k,                                   //
@@ -1129,20 +1155,10 @@ XNN_INTERNAL void xnn_pack_qu8_deconv_goki_w(
   struct subconvolution_params* subconv_params,
   const struct xnn_qu8_packing_params* params);
 
-// DWCONV packing functions. middle_pass_tile and last_pass_tile is 0 for unipass.
-// Pack weights and bias such that:
-// 1. First block has biases and first_pass_tile weights
-// 2. Within this block, we have biases, then weights, in channel_tile, then in channel_subtiles.
-// 3. Second block has middle_pass_tile weights, in channel_tile, then in channel_subtiles.
-// 4. Last block has last_pass_tile weights, in channel_tile, then in channel_subtiles.
-// The first and middle pass of the microkernel runs as many channel_tile as possible, so the number of channel_tile
-// tiles is round_up_po2(channels, channel_round)/channel_tile. We use channel_round because rounding to channel_subtile
-// might exceed the padding that we have.
+// DWCONV packing functions.
 
 typedef void (*xnn_pack_dwconv_ghw_w_fn)(
-  size_t first_pass_tile,
-  size_t middle_pass_tile,
-  size_t last_pass_tile,
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1159,9 +1175,7 @@ typedef void (*xnn_pack_dwconv_ghw_w_fn)(
 
 // Weights layout is channels/(g)roups, (h)eight, (w)idth.
 XNN_INTERNAL void xnn_pack_f32_dwconv_ghw_w(
-  size_t first_pass_tile,
-  size_t middle_pass_tile,
-  size_t last_pass_tile,
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1177,9 +1191,7 @@ XNN_INTERNAL void xnn_pack_f32_dwconv_ghw_w(
   const void* params);
 
 XNN_INTERNAL void xnn_pack_f16_dwconv_ghw_w(
-  size_t first_pass_tile,
-  size_t middle_pass_tile,
-  size_t last_pass_tile,
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1195,9 +1207,7 @@ XNN_INTERNAL void xnn_pack_f16_dwconv_ghw_w(
   const void* params);
 
 XNN_INTERNAL void xnn_pack_f32_to_f16_dwconv_ghw_w(
-  size_t first_pass_tile,
-  size_t middle_pass_tile,
-  size_t last_pass_tile,
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1213,9 +1223,7 @@ XNN_INTERNAL void xnn_pack_f32_to_f16_dwconv_ghw_w(
   const void* params);
 
 XNN_INTERNAL void xnn_pack_qs8_dwconv_ghw_w(
-  size_t first_pass_tile,
-  size_t middle_pass_tile,
-  size_t last_pass_tile,
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1231,9 +1239,7 @@ XNN_INTERNAL void xnn_pack_qs8_dwconv_ghw_w(
   const struct xnn_qs8_packing_params* params);
 
 XNN_INTERNAL void xnn_pack_qu8_dwconv_ghw_w(
-  size_t first_pass_tile,
-  size_t middle_pass_tile,
-  size_t last_pass_tile,
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1249,9 +1255,7 @@ XNN_INTERNAL void xnn_pack_qu8_dwconv_ghw_w(
   const struct xnn_qu8_packing_params* params);
 
 typedef void (*xnn_pack_dwconv_hwg_w_fn)(
-  size_t first_pass_tile,
-  size_t middle_pass_tile,
-  size_t last_pass_tile,
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1268,9 +1272,7 @@ typedef void (*xnn_pack_dwconv_hwg_w_fn)(
 
 // Weights layout is (h)eight, (w)idth, channels/(g)roups.
 XNN_INTERNAL void xnn_pack_f32_dwconv_hwg_w(
-  size_t first_pass_tile,
-  size_t middle_pass_tile,
-  size_t last_pass_tile,
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1286,9 +1288,7 @@ XNN_INTERNAL void xnn_pack_f32_dwconv_hwg_w(
   const void* params);
 
 XNN_INTERNAL void xnn_pack_f16_dwconv_hwg_w(
-  size_t first_pass_tile,
-  size_t middle_pass_tile,
-  size_t last_pass_tile,
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1304,9 +1304,7 @@ XNN_INTERNAL void xnn_pack_f16_dwconv_hwg_w(
   const void* params);
 
 XNN_INTERNAL void xnn_pack_f32_to_f16_dwconv_hwg_w(
-  size_t first_pass_tile,
-  size_t middle_pass_tile,
-  size_t last_pass_tile,
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1322,9 +1320,7 @@ XNN_INTERNAL void xnn_pack_f32_to_f16_dwconv_hwg_w(
   const void* params);
 
 XNN_INTERNAL void xnn_pack_qs8_dwconv_hwg_w(
-  size_t first_pass_tile,
-  size_t middle_pass_tile,
-  size_t last_pass_tile,
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,
@@ -1340,9 +1336,7 @@ XNN_INTERNAL void xnn_pack_qs8_dwconv_hwg_w(
   const struct xnn_qs8_packing_params* params);
 
 XNN_INTERNAL void xnn_pack_qu8_dwconv_hwg_w(
-  size_t first_pass_tile,
-  size_t middle_pass_tile,
-  size_t last_pass_tile,
+  size_t primary_tile,
   size_t h,
   size_t w,
   size_t c,

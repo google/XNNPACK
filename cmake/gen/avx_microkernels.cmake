@@ -34,6 +34,7 @@ SET(PROD_AVX_MICROKERNEL_SRCS
   src/f32-rminmax/gen/f32-rmax-avx-u32-acc4.c
   src/f32-rminmax/gen/f32-rminmax-avx-u32-acc4.c
   src/f32-rsum/gen/f32-rsum-avx-u32-acc4.c
+  src/f32-vapproxgelu/gen/f32-vapproxgelu-avx-rational-12-10-div.c
   src/f32-vbinary/gen/f32-vadd-avx-u16.c
   src/f32-vbinary/gen/f32-vaddc-avx-u16.c
   src/f32-vbinary/gen/f32-vdiv-avx-u16.c
@@ -126,18 +127,6 @@ SET(NON_PROD_AVX_MICROKERNEL_SRCS
   src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-avx-acc2.c
   src/f32-dwconv/gen/f32-dwconv-4p8c-minmax-avx.c
   src/f32-dwconv/gen/f32-dwconv-4p16c-minmax-avx-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-5f5m5l8c8s4r-minmax-avx-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-5f5m5l8c8s4r-minmax-avx.c
-  src/f32-dwconv/gen/f32-dwconv-5f5m5l16c8s4r-minmax-avx-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-5f5m5l16c8s4r-minmax-avx.c
-  src/f32-dwconv/gen/f32-dwconv-6f6m7l8c8s4r-minmax-avx-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-6f6m7l8c8s4r-minmax-avx.c
-  src/f32-dwconv/gen/f32-dwconv-6f6m7l16c8s4r-minmax-avx-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-6f6m7l16c8s4r-minmax-avx.c
-  src/f32-dwconv/gen/f32-dwconv-8f8m9l8c8s4r-minmax-avx-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-8f8m9l8c8s4r-minmax-avx.c
-  src/f32-dwconv/gen/f32-dwconv-8f8m9l16c8s4r-minmax-avx-acc2.c
-  src/f32-dwconv/gen/f32-dwconv-8f8m9l16c8s4r-minmax-avx.c
   src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-avx-acc2.c
   src/f32-dwconv/gen/f32-dwconv-9p8c-minmax-avx.c
   src/f32-dwconv/gen/f32-dwconv-9p16c-minmax-avx-acc2.c
@@ -291,12 +280,6 @@ SET(NON_PROD_AVX_MICROKERNEL_SRCS
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-3x4c8-minmax-avx-ld128.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x4c8-minmax-avx-ld64.c
   src/qd8-f32-qc8w-igemm/gen/qd8-f32-qc8w-igemm-4x4c8-minmax-avx-ld128.c
-  src/qs8-dwconv/gen/qs8-dwconv-5f5m5l8c4s4r-minmax-fp32-avx-mul32.c
-  src/qs8-dwconv/gen/qs8-dwconv-5f5m5l16c4s4r-minmax-fp32-avx-mul32.c
-  src/qs8-dwconv/gen/qs8-dwconv-6f6m7l8c4s4r-minmax-fp32-avx-mul32.c
-  src/qs8-dwconv/gen/qs8-dwconv-6f6m7l16c4s4r-minmax-fp32-avx-mul32.c
-  src/qs8-dwconv/gen/qs8-dwconv-8f8m9l8c4s4r-minmax-fp32-avx-mul32.c
-  src/qs8-dwconv/gen/qs8-dwconv-8f8m9l16c4s4r-minmax-fp32-avx-mul32.c
   src/qs8-dwconv/gen/qs8-dwconv-9p8c-minmax-fp32-avx-mul16-add16.c
   src/qs8-dwconv/gen/qs8-dwconv-9p8c-minmax-fp32-avx-mul16.c
   src/qs8-dwconv/gen/qs8-dwconv-9p8c-minmax-fp32-avx-mul32.c
@@ -310,12 +293,6 @@ SET(NON_PROD_AVX_MICROKERNEL_SRCS
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-avx-u8.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-avx-u16.c
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-avx-u24.c
-  src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-5f5m5l8c4s4r-minmax-fp32-avx-mul32.c
-  src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-5f5m5l16c4s4r-minmax-fp32-avx-mul32.c
-  src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-6f6m7l8c4s4r-minmax-fp32-avx-mul32.c
-  src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-6f6m7l16c4s4r-minmax-fp32-avx-mul32.c
-  src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-8f8m9l8c4s4r-minmax-fp32-avx-mul32.c
-  src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-8f8m9l16c4s4r-minmax-fp32-avx-mul32.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-9p8c-minmax-fp32-avx-mul16-add16.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-9p8c-minmax-fp32-avx-mul16.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-9p8c-minmax-fp32-avx-mul32.c
@@ -386,12 +363,6 @@ SET(NON_PROD_AVX_MICROKERNEL_SRCS
   src/qs8-vlrelu/gen/qs8-vlrelu-avx-u16.c
   src/qs8-vmul/gen/qs8-vmul-minmax-fp32-avx-mul16-ld64-u8.c
   src/qs8-vmulc/gen/qs8-vmulc-minmax-fp32-avx-mul16-ld64-u8.c
-  src/qu8-dwconv/gen/qu8-dwconv-5f5m5l8c4s4r-minmax-fp32-avx-mul32.c
-  src/qu8-dwconv/gen/qu8-dwconv-5f5m5l16c4s4r-minmax-fp32-avx-mul32.c
-  src/qu8-dwconv/gen/qu8-dwconv-6f6m7l8c4s4r-minmax-fp32-avx-mul32.c
-  src/qu8-dwconv/gen/qu8-dwconv-6f6m7l16c4s4r-minmax-fp32-avx-mul32.c
-  src/qu8-dwconv/gen/qu8-dwconv-8f8m9l8c4s4r-minmax-fp32-avx-mul32.c
-  src/qu8-dwconv/gen/qu8-dwconv-8f8m9l16c4s4r-minmax-fp32-avx-mul32.c
   src/qu8-dwconv/gen/qu8-dwconv-9p8c-minmax-fp32-avx-mul16.c
   src/qu8-dwconv/gen/qu8-dwconv-9p8c-minmax-fp32-avx-mul32.c
   src/qu8-dwconv/gen/qu8-dwconv-9p16c-minmax-fp32-avx-mul32.c

@@ -62,7 +62,7 @@ BEGIN_FUNCTION xnn_f32_gemm_minmax_ukernel_8x8__asm_aarch64_neonfma_ld32_2
       csel  x25, x22, x25, LO
       csel  x26, x24, x26, LO
 
-outer_loop:
+.Louter_loop:
       # Initialize k counter.
       mov x20, x2
 
@@ -84,7 +84,7 @@ outer_loop:
       mov v26.16b, v19.16b
       add x5, x5, 32
 
-inner_loop:
+.Linner_loop:
       ldr s2, [x3], 4
       ldr s3, [x9], 4
       ldr s4, [x10], 4
@@ -111,9 +111,9 @@ inner_loop:
       fmla  v25.4s, v8.4s, v29.s[0]
       fmla  v26.4s, v8.4s, v30.s[0]
       subs x20, x20, 4
-      bne inner_loop
+      bne .Linner_loop
 
-inner_loop_end:
+.Linner_loop_end:
       # Min/max clamping.
       fmin  v11.4s, v1.4s, v11.4s
       fmin  v12.4s, v1.4s, v12.4s
@@ -150,7 +150,7 @@ inner_loop_end:
 
       # Check whether full or partial store.
       cmp x1, 8
-      b.lo tail_4
+      b.lo .Ltail_4
       stp  q11, q19, [x6], 32
       stp  q12, q20, [x13], 32
       stp  q13, q21, [x14], 32
@@ -169,11 +169,11 @@ inner_loop_end:
       sub x25, x25, x2
 
       sub x1, x1, 8
-      b.ne outer_loop
-      b return
+      b.ne .Louter_loop
+      b .Lreturn
 
-tail_4:
-      tbz w1, 2, tail_2
+.Ltail_4:
+      tbz w1, 2, .Ltail_2
       str  q11, [x6], 16
       str  q12, [x13], 16
       str  q13, [x14], 16
@@ -192,8 +192,8 @@ tail_4:
       mov  v18.16b, v26.16b
 
 
-tail_2:
-      tbz w1, 1, tail_1
+.Ltail_2:
+      tbz w1, 1, .Ltail_1
       str  d11, [x6], 8
       str  d12, [x13], 8
       str  d13, [x14], 8
@@ -212,8 +212,8 @@ tail_2:
       dup d18, v18.d[1]
 
 
-tail_1:
-      tbz w1, 0, return
+.Ltail_1:
+      tbz w1, 0, .Lreturn
       str  s11, [x6]
       str  s12, [x13]
       str  s13, [x14]
@@ -223,7 +223,7 @@ tail_1:
       str  s17, [x24]
       str  s18, [x26]
 
-return:
+.Lreturn:
       # Restore the callee saved GP registers.
       ldp x19, x20, [sp, -64]
       ldp x21, x22, [sp, -48]

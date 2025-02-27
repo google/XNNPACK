@@ -60,6 +60,7 @@ SET(NON_PROD_HVX_MICROKERNEL_SRCS
   src/f32-spmm/gen/f32-spmm-128x1-minmax-hvx-x2.c
   src/f32-spmm/gen/f32-spmm-128x1-minmax-hvx-x4.c
   src/f32-spmm/gen/f32-spmm-128x1-minmax-hvx.c
+  src/f32-vapproxgelu/gen/f32-vapproxgelu-hvx-rational-12-10-div.c
   src/f32-vbinary/gen/f32-vadd-hvx-u32.c
   src/f32-vbinary/gen/f32-vadd-hvx-u64.c
   src/f32-vbinary/gen/f32-vadd-hvx-u128.c

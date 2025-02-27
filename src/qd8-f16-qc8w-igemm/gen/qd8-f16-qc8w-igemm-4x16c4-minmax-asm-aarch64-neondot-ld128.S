@@ -23,7 +23,7 @@
 #     size_t a_offset,                   [sp + 8] -> x8
 #     const int8_t* zero,                [sp + 16] -> x12
 #     const int8_t* zero_data,             [sp + 24] -> x19
-#     const union xnn_f16_minmax_params *params,  [sp + 32]  -> x11
+#     const struct xnn_f16_minmax_params *params,  [sp + 32]  -> x11
 #     const struct xnn_qd8_quantization_params *quantization_params) [sp + 40] -> x16
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.

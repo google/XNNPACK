@@ -4,15 +4,15 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-from gemm_compiler import avx512f_template as isa
-
-"""All SIMD features for avx512f."""
+from gemm_compiler import avx512f_template
 
 
-class Avx512Bf16(isa.Avx512F):
+class Avx512Bf16(avx512f_template.Avx512F):
+  """All SIMD features for avx512f."""
 
-  def __init__(self):
-    self.c = 2
+  @property
+  def c(self) -> int:
+    return 2
 
   def isa(self):
     return 'avx512bf16'
@@ -30,22 +30,25 @@ class Avx512Bf16(isa.Avx512F):
     }
     return c_asm
 
-  def function_name(self, M, N, isa):
-    return f'xnn_bf16_f32_gemm_minmax_ukernel_{M}x{N}c2__asm_amd64_{isa}_broadcast'
+  def function_name(self):
+    return (
+        f'xnn_bf16_f32_gemm_minmax_ukernel_{self.m}x{self.n * self.n_step()}'
+        + f'c2__asm_amd64_{self.isa()}_broadcast'
+    )
 
-  def init_accumulators(self, M, N):
-    asm_string = super().init_accumulators(M, N)
+  def init_accumulators(self):
+    asm_string = super().init_accumulators()
     asm_string += """
       # Are there at least 4 bytes?
       cmp rdx, 4
-      js inner_loop_tail\n"""
+      js .Linner_loop_tail\n"""
 
     return asm_string
 
-  def outer_loop_prepare(self, M, N):
+  def outer_loop_prepare(self):
     k_register = self.k_register()
     kc_register = self.kc_register()
-    offset = M * 16 + self.c_ptr_stack_offset()
+    offset = self.m * 16 + self.c_ptr_stack_offset()
     kmask = self.k_mask()
     asm_string = f"""
       # Copy k and flip bit.
@@ -55,10 +58,9 @@ class Avx512Bf16(isa.Avx512F):
       mov [rsp + {offset}], {k_register}\n"""
     return asm_string
 
-  def inner_loop_tail(self, M, N):
-    k_register = self.k_register()
+  def inner_loop_tail(self):
     nc_register = self.nc_register()
-    offset = M * 16 + self.c_ptr_stack_offset()
+    offset = self.m * 16 + self.c_ptr_stack_offset()
     nc_offset = offset + 8
     asm_string = f"""
       # Store nc_register.
@@ -68,17 +70,17 @@ class Avx512Bf16(isa.Avx512F):
       # Check if channels are odd.
       test {nc_register}, {nc_register}
       mov {nc_register}, [rsp + {nc_offset}]
-      jz inner_loop_end
+      jz .Linner_loop_end
 
-      inner_loop_tail:\n"""
-    if M > self.max_M_before_spilling():
-      asm_string += self.inner_loop_spill_gp(M=M, N=N, tail=True)
+      .Linner_loop_tail:\n"""
+    if self.m > self.max_m_before_spilling():
+      asm_string += self.inner_loop_spill_gp(tail=True)
     else:
-      asm_string += self.inner_loop_small_M_N(M=M, N=N, tail=True)
+      asm_string += self.inner_loop_small_M_N(tail=True)
     return asm_string
 
   def element_size(self):
     return 2
 
   def k_mask(self):
-    return "0xFFFFFFFFFFFFFFFD"
+    return '0xFFFFFFFFFFFFFFFD'
