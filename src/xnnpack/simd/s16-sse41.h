@@ -22,9 +22,24 @@ typedef __m128i xnn_simd_s16_t;
 #define xnn_simd_bytes_s16 (xnn_simd_size_s16 * sizeof(int16_t))
 
 #define XNN_SIMD_CONST_S16(var, val) \
-  const xnn_simd_s16_t v16 = _mm_set1_epi16(val);
+  const xnn_simd_s16_t var = _mm_set1_epi16(val);
 
 // Arithmetic operations.
+
+static XNN_INLINE xnn_simd_s16_t xnn_min_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return _mm_min_epi16(a, b);
+}
+
+static XNN_INLINE xnn_simd_s16_t xnn_max_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return _mm_max_epi16(a, b);
+}
+
+static XNN_INLINE xnn_simd_s16_t xnn_signcomplement_s16(xnn_simd_s16_t x) {
+  XNN_SIMD_CONST_S16(nonsign_mask, 0x7FFF);
+  return _mm_xor_si128(_mm_and_si128(x, nonsign_mask), _mm_srai_epi16(x, 15));
+}
 
 // Load/store operations.
 

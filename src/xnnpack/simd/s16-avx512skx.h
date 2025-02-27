@@ -13,8 +13,6 @@
 #include <stdint.h>
 
 #include "xnnpack/common.h"
-#include "xnnpack/intrinsics-polyfill.h"
-#include "xnnpack/unaligned.h"
 
 // SIMD vector type for s16 using AVX512SKX.
 typedef __m512i xnn_simd_s16_t;
@@ -23,9 +21,26 @@ typedef __m512i xnn_simd_s16_t;
 #define xnn_simd_bytes_s16 (xnn_simd_size_s16 * sizeof(int16))
 
 #define XNN_SIMD_CONST_S16(var, val) \
-  const xnn_simd_s16 var = _mm_set1_epi16(val);
+  const xnn_simd_s16_t var = _mm512_set1_epi16(val);
 
 // Arithmetic operations.
+
+static XNN_INLINE xnn_simd_s16_t xnn_min_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return _mm512_min_epi16(a, b);
+}
+
+static XNN_INLINE xnn_simd_s16_t xnn_max_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return _mm512_max_epi16(a, b);
+}
+
+static XNN_INLINE xnn_simd_s16_t xnn_signcomplement_s16(xnn_simd_s16_t x) {
+  XNN_SIMD_CONST_S16(nonsign_mask, 0x7FFF);
+  return _mm512_xor_si512(_mm512_and_si512(x, nonsign_mask),
+                          _mm512_srai_epi16(x, 15));
+}
+
 
 // Load/store operations.
 
@@ -56,10 +71,12 @@ static XNN_INLINE xnn_simd_s16_t xnn_set1_or_load_s16_t(const int16_t* v) {
 // Tail load/store operations.
 
 static XNN_INLINE xnn_simd_s16_t
-xnn_load_tail_s16_t(const int16_t* input, size_t num_elements) XNN_OOB_READS {
+xnn_load_tail_s16(const int16_t* input, size_t num_elements) {
   assert(num_elements > 0);
-  assert(num_elements <= xnn_simd_size_s16);
-  return _mm512_loadu_epi16(input);
+  assert(num_elements < xnn_simd_size_s16);
+  const __mmask32 vmask =
+      _cvtu32_mask32((uint32_t)((UINT32_C(1) << num_elements) - UINT32_C(1)));
+  return _mm512_maskz_loadu_epi16(vmask, input);
 }
 
 static XNN_INLINE void xnn_store_tail_s16(int16_t* output, xnn_simd_s16_t v,

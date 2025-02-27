@@ -25,9 +25,26 @@ typedef __m256i xnn_simd_s16_t;
   const xnn_simd_s16_t var = _mm256_set1_epi16(val);
 
 // Mask table used for masked load/store operations.
-static const int32_t mask_table_avx_s32[14] = {-1, -1, -1, -1, -1, -1, -1,
-                                               0,  0,  0,  0,  0,  0,  0};
+static const int32_t mask_table_avx_s16[30] = {
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    0,  0,  0,  0,  0,  0,  0, 0,  0,  0,  0,  0,  0,  0, 0};
 // Arithmetic operations.
+
+static XNN_INLINE xnn_simd_s16_t xnn_min_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return _mm256_min_epi16(a, b);
+}
+
+static XNN_INLINE xnn_simd_s16_t xnn_max_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return _mm256_max_epi16(a, b);
+}
+
+static XNN_INLINE xnn_simd_s16_t xnn_signcomplement_s16(xnn_simd_s16_t x) {
+  XNN_SIMD_CONST_S16(nonsign_mask, 0x7FFF);
+  return _mm256_xor_si256(_mm256_and_si256(x, nonsign_mask),
+                          _mm256_srai_epi16(x, 15));
+}
 
 // Load/store operations.
 
@@ -66,7 +83,7 @@ xnn_load_tail_s16(const int16_t* input, size_t num_elements) XNN_OOB_READS {
   assert(num_elements > 0);
   assert(num_elements < xnn_simd_size_s16);
   const __m256i vmask = _mm256_loadu_si256(
-      (const __m256i*) ((uintptr_t) mask_table_avx_s32[7 ^ (num_elements>>1)]));
+      (const __m256i*)(&mask_table_avx_s16[15] - num_elements));
   return _mm256_maskload_epi32((const int32_t*) input, vmask);
 }
 

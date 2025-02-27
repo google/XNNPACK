@@ -12,6 +12,7 @@
 #include <stdint.h>
 
 #include "xnnpack/common.h"
+#include "xnnpack/math.h"
 
 
 // SIMD vector type for s16 using SCALAR.
@@ -25,6 +26,21 @@ typedef int16_t xnn_simd_s16_t;
 
 // Arithmetic operations.
 
+static XNN_INLINE xnn_simd_s16_t xnn_min_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return a < b ? a : b;
+}
+
+static XNN_INLINE xnn_simd_s16_t xnn_max_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return a < b ? b : a;
+}
+
+static XNN_INLINE xnn_simd_s16_t xnn_signcomplement_s16(xnn_simd_s16_t x) {
+  return math_signcomplement_f16((uint16_t) x);
+}
+
+// Load/store operations.
 static XNN_INLINE xnn_simd_s16_t xnn_loadu_s16(const int16_t *ptr) { return *ptr; }
 
 static XNN_INLINE xnn_simd_s16_t xnn_load_s16(const int16_t *ptr) { return *ptr; }

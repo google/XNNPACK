@@ -24,6 +24,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "xnnpack/isa-checks.h"
+#include "xnnpack/math.h"
 #include "xnnpack/simd/s16-sse41.h"
 #include "replicable_random_device.h"
 
@@ -45,6 +46,47 @@ class S16SimdSSE41Test : public ::testing::Test {
   std::vector<int16_t> output_;
 };
 
+TEST_F(S16SimdSSE41Test, Min) {
+  const xnn_simd_s16_t a = xnn_loadu_s16(inputs_.data());
+  const xnn_simd_s16_t b = xnn_loadu_s16(inputs_.data() + xnn_simd_size_s16);
+  const xnn_simd_s16_t res = xnn_min_s16(a, b);
+  xnn_storeu_s16(output_.data(), res);
+  for (size_t k = 0; k < xnn_simd_size_s16; k++) {
+    ASSERT_EQ(output_[k], std::min<int16_t>(inputs_[k], inputs_[k + xnn_simd_size_s16]));
+  }
+}
+
+TEST_F(S16SimdSSE41Test, Max) {
+  const xnn_simd_s16_t a = xnn_loadu_s16(inputs_.data());
+  const xnn_simd_s16_t b = xnn_loadu_s16(inputs_.data() + xnn_simd_size_s16);
+  const xnn_simd_s16_t res = xnn_max_s16(a, b);
+  xnn_storeu_s16(output_.data(), res);
+  for (size_t k = 0; k < xnn_simd_size_s16; k++) {
+    ASSERT_EQ(output_[k], std::max<int16_t>(inputs_[k], inputs_[k + xnn_simd_size_s16]));
+  }
+}
+
+TEST_F(S16SimdSSE41Test, SignComplement) {
+  const xnn_simd_s16_t a = xnn_loadu_s16(inputs_.data());
+  const xnn_simd_s16_t res = xnn_signcomplement_s16(a);
+  xnn_storeu_s16(output_.data(), res);
+  for (size_t k = 0; k < xnn_simd_size_s16; k++) {
+    ASSERT_EQ(output_[k], math_signcomplement_f16((uint16_t) inputs_[k]));
+  }
+}
+
+TEST_F(S16SimdSSE41Test, LoadTail) {
+  for (size_t num_elements = 1; num_elements < xnn_simd_size_s16;
+      num_elements++) {
+    const xnn_simd_s16_t a = xnn_load_tail_s16(inputs_.data(), num_elements);
+    xnn_storeu_s16(output_.data(), a);
+    for (size_t k = 0; k < num_elements; k++) {
+      ASSERT_EQ(output_[k], inputs_[k]) << " " << k;
+    }
+    // The rest of the lanes are undefined.
+  }
+}
+
 TEST_F(S16SimdSSE41Test, StoreTail) {
   const xnn_simd_s16_t a = xnn_loadu_s16(inputs_.data());
   for (size_t num_elements = 1; num_elements < xnn_simd_size_s16;
@@ -58,6 +100,7 @@ TEST_F(S16SimdSSE41Test, StoreTail) {
     }
   }
 }
+
 }  // namespace xnnpack
 
 #endif  // XNN_ARCH_X86 || XNN_ARCH_X86_64

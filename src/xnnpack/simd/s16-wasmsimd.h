@@ -13,7 +13,6 @@
 #include <wasm_simd128.h>
 
 #include "xnnpack/common.h"
-#include "xnnpack/unaligned.h"
 
 // SIMD vector type for s16 using WASMSIMD.
 typedef v128_t xnn_simd_s16_t;
@@ -25,6 +24,21 @@ typedef v128_t xnn_simd_s16_t;
   const xnn_simd_s16_t var = wasm_i16x8_splat(val);
 
 // Arithmetic operations.
+
+static XNN_INLINE xnn_simd_s16_t xnn_min_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return wasm_i16x8_min(a, b);
+}
+
+static XNN_INLINE xnn_simd_s16_t xnn_max_s16(xnn_simd_s16_t a,
+                                             xnn_simd_s16_t b) {
+  return wasm_i16x8_max(a, b);
+}
+
+static XNN_INLINE xnn_simd_s16_t xnn_signcomplement_s16(xnn_simd_s16_t x) {
+  XNN_SIMD_CONST_S16(nonsign_mask, 0x7FFF);
+  return wasm_v128_xor(wasm_v128_and(x, nonsign_mask), wasm_i16x8_shr(x, 15));
+}
 
 // Load/store operations.
 
