@@ -6,7 +6,8 @@
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-#pragma once
+#ifndef THIRD_PARTY_XNNPACK_SRC_XNNPACK_OPERATOR_H_
+#define THIRD_PARTY_XNNPACK_SRC_XNNPACK_OPERATOR_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -14,6 +15,7 @@
 #include "xnnpack.h"
 #include "xnnpack/common.h"
 #include "xnnpack/compute.h"
+#include "xnnpack/config-types.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microkernel-type.h"
 #include "xnnpack/microparams.h"
@@ -391,8 +393,11 @@ XNN_INTERNAL enum xnn_status xnn_run_operator_with_index(
   size_t operator_object_index,
   pthreadpool_t threadpool);
 
-XNN_INTERNAL enum xnn_operator_type xnn_reduce_operator_to_operator_type(enum xnn_reduce_operator op);
+XNN_INTERNAL enum xnn_operator_type xnn_reduce_operator_to_operator_type(
+    enum xnn_reduce_operator type);
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif
+
+#endif  // THIRD_PARTY_XNNPACK_SRC_XNNPACK_OPERATOR_H_

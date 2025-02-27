@@ -35,7 +35,7 @@ static enum xnn_status check_op_type(xnn_operator_t op,
         "failed to setup operator: operator type mismatch (expected %s, got "
         "%s)",
         xnn_operator_type_to_string(expected_type),
-        xnn_operator_type_to_string(op->type));
+        xnn_operator_type_to_string_v2(op));
     return xnn_status_invalid_parameter;
   }
   return xnn_status_success;
@@ -50,9 +50,8 @@ static enum xnn_status init_lut_op(
   const int lookup_table_elements = 256;
   op->lookup_table = xnn_allocate_simd_memory(lookup_table_elements * sizeof(uint8_t));
   if (op->lookup_table == NULL) {
-    xnn_log_error(
-      "failed to allocate %s operator lookup table",
-      xnn_operator_type_to_string(op->type));
+    xnn_log_error("failed to allocate %s operator lookup table",
+                  xnn_operator_type_to_string_v2(op));
     return xnn_status_out_of_memory;
   }
 
@@ -332,17 +331,17 @@ enum xnn_status xnn_reshape_unary_elementwise_nc(
 
   if (input_stride < channels) {
     xnn_log_error(
-      "failed to create %s operator with input element stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(op->type), input_stride, channels);
+        "failed to create %s operator with input element stride of %zu: "
+        "stride must be at least as large as the number of channels (%zu)",
+        xnn_operator_type_to_string_v2(op), input_stride, channels);
     return xnn_status_invalid_parameter;
   }
 
   if (output_stride < channels) {
     xnn_log_error(
-      "failed to create %s operator with output element stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(op->type), output_stride, channels);
+        "failed to create %s operator with output element stride of %zu: "
+        "stride must be at least as large as the number of channels (%zu)",
+        xnn_operator_type_to_string_v2(op), output_stride, channels);
     return xnn_status_invalid_parameter;
   }
 
@@ -430,8 +429,8 @@ enum xnn_status xnn_setup_unary_elementwise_nc(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.
@@ -597,9 +596,11 @@ static enum xnn_status reshape_unary_elementwise_nc(
     pthreadpool_t threadpool)
 {
   if (unary_elementwise_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(unary_elementwise_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(unary_elementwise_op));
     return xnn_status_invalid_parameter;
   }
   unary_elementwise_op->state = xnn_run_state_invalid;
@@ -611,17 +612,19 @@ static enum xnn_status reshape_unary_elementwise_nc(
 
   if (input_stride < channels) {
     xnn_log_error(
-      "failed to create %s operator with input element stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(unary_elementwise_op->type), input_stride, channels);
+        "failed to create %s operator with input element stride of %zu: "
+        "stride must be at least as large as the number of channels (%zu)",
+        xnn_operator_type_to_string_v2(unary_elementwise_op), input_stride,
+        channels);
     return xnn_status_invalid_parameter;
   }
 
   if (output_stride < channels) {
     xnn_log_error(
-      "failed to create %s operator with output element stride of %zu: "
-      "stride must be at least as large as the number of channels (%zu)",
-      xnn_operator_type_to_string(unary_elementwise_op->type), output_stride, channels);
+        "failed to create %s operator with output element stride of %zu: "
+        "stride must be at least as large as the number of channels (%zu)",
+        xnn_operator_type_to_string_v2(unary_elementwise_op), output_stride,
+        channels);
     return xnn_status_invalid_parameter;
   }
 
@@ -677,9 +680,11 @@ static enum xnn_status setup_unary_elementwise_nc(
     void* output)
 {
   if (unary_elementwise_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(unary_elementwise_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(unary_elementwise_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -688,8 +693,8 @@ static enum xnn_status setup_unary_elementwise_nc(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(unary_elementwise_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(unary_elementwise_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.
@@ -860,9 +865,11 @@ enum xnn_status reshape_convert_nc_f16_qx8(
     pthreadpool_t threadpool)
 {
   if (convert_op->type != expected_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_type),
-      xnn_operator_type_to_string(convert_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_type),
+        xnn_operator_type_to_string_v2(convert_op));
     return xnn_status_invalid_parameter;
   }
   convert_op->state = xnn_run_state_invalid;
@@ -918,9 +925,11 @@ enum xnn_status reshape_convert_nc_f32_qx8(
     pthreadpool_t threadpool)
 {
   if (convert_op->type != expected_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_type),
-      xnn_operator_type_to_string(convert_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_type),
+        xnn_operator_type_to_string_v2(convert_op));
     return xnn_status_invalid_parameter;
   }
   convert_op->state = xnn_run_state_invalid;
@@ -1020,7 +1029,7 @@ enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,  //
         "failed to setup operator: operator type mismatch (expected %s, got "
         "%s)",
         xnn_operator_type_to_string(xnn_operator_type_convert_nc_f32_qp8),
-        xnn_operator_type_to_string(convert_op->type));
+        xnn_operator_type_to_string_v2(convert_op));
     return xnn_status_invalid_parameter;
   }
   convert_op->state = xnn_run_state_invalid;
@@ -1035,7 +1044,7 @@ enum xnn_status xnn_reshape_convert_nc_f32_qp8(xnn_operator_t convert_op,  //
   const struct xnn_gemm_config* gemm_config = convert_op->gemm_config;
   if (gemm_config == NULL) {
     xnn_log_error("failed to setup %s operator: No GEMM config provided.",
-                  xnn_operator_type_to_string(convert_op->type));
+                  xnn_operator_type_to_string_v2(convert_op));
     return xnn_status_invalid_parameter;
   }
   const uint32_t mr_packed = batch_size == 1          ? 1
@@ -1131,9 +1140,11 @@ enum xnn_status setup_convert_nc_f16_qx8(
   struct xnn_quantization_params* quantization_params)
 {
   if (convert_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(convert_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(convert_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -1142,8 +1153,8 @@ enum xnn_status setup_convert_nc_f16_qx8(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(convert_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(convert_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.
@@ -1168,9 +1179,11 @@ enum xnn_status setup_convert_nc_f32_qx8(
   struct xnn_quantization_params* quantization_params)
 {
   if (convert_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(convert_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(convert_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -1179,8 +1192,8 @@ enum xnn_status setup_convert_nc_f32_qx8(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(convert_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(convert_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.
@@ -1249,7 +1262,7 @@ enum xnn_status xnn_setup_convert_nc_f32_qp8(xnn_operator_t convert_op,
     case xnn_run_state_invalid:
       xnn_log_error(
           "failed to setup %s operator: operator has not been reshaped yet",
-          xnn_operator_type_to_string(convert_op->type));
+          xnn_operator_type_to_string_v2(convert_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.

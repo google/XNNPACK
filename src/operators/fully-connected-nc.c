@@ -2259,16 +2259,18 @@ static enum xnn_status reshape_fully_connected_nc(
   pthreadpool_t threadpool)
 {
   if (fully_connected_op->type != expected_operator_type) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(fully_connected_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(fully_connected_op));
     return xnn_status_invalid_parameter;
   }
   fully_connected_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(fully_connected_op->type));
+                  xnn_operator_type_to_string_v2(fully_connected_op));
     return xnn_status_uninitialized;
   }
 
@@ -2878,9 +2880,11 @@ static enum xnn_status setup_fully_connected_nc(
   const void* quantization_params)
 {
   if (fully_connected_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(fully_connected_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(fully_connected_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -2896,8 +2900,8 @@ static enum xnn_status setup_fully_connected_nc(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(fully_connected_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(fully_connected_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.

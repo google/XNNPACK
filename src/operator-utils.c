@@ -339,8 +339,8 @@ const char* xnn_operator_type_to_string_v2(xnn_operator_t op) {
         return "Shift Right Logical (ND)";
       case xnn_binary_shift_right_arithmetic:
         return "Shift Right Arithmetic (ND)";
-      default:
-        XNN_UNREACHABLE;
+      case xnn_binary_invalid:
+        return "Invalid Binary Op";
     }
   } else if (op->type == xnn_operator_type_unary_elementwise) {
     switch (op->unary_elementwise.op_type) {
@@ -396,8 +396,8 @@ const char* xnn_operator_type_to_string_v2(xnn_operator_t op) {
         return "Population Count (NC)";
       case xnn_unary_sign:
         return "Sign (NC)";
-      default:
-        XNN_UNREACHABLE;
+      case xnn_unary_invalid:
+        return "Invalid Unary Op";
     }
   }
   return xnn_operator_type_to_string(op->type);

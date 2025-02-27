@@ -22,6 +22,7 @@
 #include "xnnpack/microkernel-utils.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/operator-type.h"
+#include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/packq.h"
 #include "xnnpack/params.h"
@@ -321,46 +322,56 @@ static enum xnn_status reshape_dynamic_fully_connected_nc(
     pthreadpool_t threadpool)
 {
   if (dynamic_fully_connected_op->type != expected_operator_type) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(dynamic_fully_connected_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
     return xnn_status_invalid_parameter;
   }
   dynamic_fully_connected_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(dynamic_fully_connected_op->type));
+                  xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
     return xnn_status_uninitialized;
   }
 
   if (input_channels == 0) {
     xnn_log_error(
-      "failed to reshape %s operator with %zu input channels: number of channels must be non-zero",
-      xnn_operator_type_to_string(dynamic_fully_connected_op->type), input_channels);
+        "failed to reshape %s operator with %zu input channels: number of "
+        "channels must be non-zero",
+        xnn_operator_type_to_string_v2(dynamic_fully_connected_op),
+        input_channels);
     return xnn_status_invalid_parameter;
   }
 
   if (output_channels == 0) {
     xnn_log_error(
-      "failed to reshape %s operator with %zu output channels: number of channels must be non-zero",
-      xnn_operator_type_to_string(dynamic_fully_connected_op->type), output_channels);
+        "failed to reshape %s operator with %zu output channels: number of "
+        "channels must be non-zero",
+        xnn_operator_type_to_string_v2(dynamic_fully_connected_op),
+        output_channels);
     return xnn_status_invalid_parameter;
   }
 
   if (input_stride < input_channels) {
     xnn_log_error(
-      "failed to reshape %s operator with input element stride of %zu: "
-      "stride must be at least as large as the number of input channels (%zu)",
-      xnn_operator_type_to_string(dynamic_fully_connected_op->type), input_stride, input_channels);
+        "failed to reshape %s operator with input element stride of %zu: "
+        "stride must be at least as large as the number of input channels "
+        "(%zu)",
+        xnn_operator_type_to_string_v2(dynamic_fully_connected_op),
+        input_stride, input_channels);
     return xnn_status_invalid_parameter;
   }
 
   if (output_stride < output_channels) {
     xnn_log_error(
-      "failed to reshape %s operator with output element stride of %zu: "
-      "stride must be at least as large as the number of output channels (%zu)",
-      xnn_operator_type_to_string(dynamic_fully_connected_op->type), output_stride, output_channels);
+        "failed to reshape %s operator with output element stride of %zu: "
+        "stride must be at least as large as the number of output channels "
+        "(%zu)",
+        xnn_operator_type_to_string_v2(dynamic_fully_connected_op),
+        output_stride, output_channels);
     return xnn_status_invalid_parameter;
   }
 
@@ -669,9 +680,11 @@ static enum xnn_status setup_dynamic_fully_connected_nc(
   void* output)
 {
   if (dynamic_fully_connected_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(dynamic_fully_connected_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -680,8 +693,8 @@ static enum xnn_status setup_dynamic_fully_connected_nc(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(dynamic_fully_connected_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(dynamic_fully_connected_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.

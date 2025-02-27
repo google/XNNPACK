@@ -35,7 +35,6 @@
 #include "xnnpack/memory.h"
 #include "xnnpack/microkernel-type.h"
 #include "xnnpack/node-type.h"
-#include "xnnpack/operator-type.h"
 #include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/params.h"
@@ -771,12 +770,14 @@ enum xnn_status xnn_reshape_runtime(
     }
     assert(opdata->reshape != NULL);
     xnn_log_debug("reshaping operator %u (%s)", opdata_id,
-                  xnn_operator_type_to_string(opdata->operator_objects[0]->type));
+                  xnn_operator_type_to_string_v2(opdata->operator_objects[0]));
     enum xnn_status status = opdata->reshape(opdata, runtime->values, runtime->num_values, runtime->threadpool);
     if (status == xnn_status_reallocation_required) {
       reallocation_required = true;
     } else if (status != xnn_status_success) {
-      xnn_log_error("Operator #%u: %s failed reshape", opdata_id, xnn_operator_type_to_string(opdata->operator_objects[0]->type));
+      xnn_log_error(
+          "Operator #%u: %s failed reshape", opdata_id,
+          xnn_operator_type_to_string_v2(opdata->operator_objects[0]));
       return status;
     }
   }

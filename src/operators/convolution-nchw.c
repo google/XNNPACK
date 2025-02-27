@@ -1005,23 +1005,27 @@ static enum xnn_status reshape_convolution2d_nchw(
   pthreadpool_t threadpool)
 {
   if (convolution_op->type != expected_operator_type) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(convolution_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(convolution_op));
     return xnn_status_invalid_parameter;
   }
   convolution_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(convolution_op->type));
+                  xnn_operator_type_to_string_v2(convolution_op));
     return xnn_status_uninitialized;
   }
 
   if (input_width == 0 || input_height == 0) {
     xnn_log_error(
-      "failed to reshape %s operator with %zux%zu input: input dimensions must be non-zero",
-      xnn_operator_type_to_string(convolution_op->type), input_width, input_height);
+        "failed to reshape %s operator with %zux%zu input: input dimensions "
+        "must be non-zero",
+        xnn_operator_type_to_string_v2(convolution_op), input_width,
+        input_height);
     return xnn_status_invalid_parameter;
   }
 
@@ -1077,8 +1081,9 @@ static enum xnn_status reshape_convolution2d_nchw(
         const int64_t increment = (int64_t) diff * input_size;
         if ((int64_t) (int32_t) increment != increment) {
           xnn_log_error(
-            "failed to reshape %s operator with sparse kernel representation: input increment exceeds int32_t range",
-            xnn_operator_type_to_string(convolution_op->type));
+              "failed to reshape %s operator with sparse kernel "
+              "representation: input increment exceeds int32_t range",
+              xnn_operator_type_to_string_v2(convolution_op));
           return xnn_status_unsupported_parameter;
         }
         input_increments[i] = (int32_t) increment;
@@ -1123,8 +1128,9 @@ static enum xnn_status reshape_convolution2d_nchw(
       convolution_op->zero_buffer = xnn_allocate_zero_simd_memory(zero_size);
       if (convolution_op->zero_buffer == NULL) {
         xnn_log_error(
-          "failed to allocate %zu bytes for %s operator zero padding",
-          sizeof(struct xnn_operator), xnn_operator_type_to_string(convolution_op->type));
+            "failed to allocate %zu bytes for %s operator zero padding",
+            sizeof(struct xnn_operator),
+            xnn_operator_type_to_string_v2(convolution_op));
         return xnn_status_out_of_memory;
       }
 
@@ -1171,8 +1177,9 @@ static enum xnn_status reshape_convolution2d_nchw(
       convolution_op->zero_buffer = xnn_allocate_zero_simd_memory(zero_size);
       if (convolution_op->zero_buffer == NULL) {
         xnn_log_error(
-          "failed to allocate %zu bytes for %s operator zero padding",
-          sizeof(struct xnn_operator), xnn_operator_type_to_string(convolution_op->type));
+            "failed to allocate %zu bytes for %s operator zero padding",
+            sizeof(struct xnn_operator),
+            xnn_operator_type_to_string_v2(convolution_op));
         return xnn_status_out_of_memory;
       }
 
@@ -1258,9 +1265,11 @@ static enum xnn_status setup_convolution2d_nchw(
   void* output)
 {
   if (convolution_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(convolution_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(convolution_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -1275,8 +1284,8 @@ static enum xnn_status setup_convolution2d_nchw(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(convolution_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(convolution_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.

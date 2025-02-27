@@ -25,6 +25,7 @@
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/operator-type.h"
+#include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/params.h"
 #include "pthreadpool.h"
@@ -126,9 +127,11 @@ enum xnn_status xnn_reshape_softmax_nc_qu8(
     pthreadpool_t threadpool)
 {
   if (softmax_op->type != xnn_operator_type_softmax_nc_qu8) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_softmax_nc_qu8),
-      xnn_operator_type_to_string(softmax_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_softmax_nc_qu8),
+        xnn_operator_type_to_string_v2(softmax_op));
     return xnn_status_invalid_parameter;
   }
   softmax_op->state = xnn_run_state_invalid;
@@ -202,9 +205,11 @@ enum xnn_status xnn_setup_softmax_nc_qu8(
     uint8_t* output)
 {
   if (softmax_op->type != xnn_operator_type_softmax_nc_qu8) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_softmax_nc_qu8),
-      xnn_operator_type_to_string(softmax_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_softmax_nc_qu8),
+        xnn_operator_type_to_string_v2(softmax_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -213,8 +218,8 @@ enum xnn_status xnn_setup_softmax_nc_qu8(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(softmax_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(softmax_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.
@@ -372,9 +377,11 @@ static enum xnn_status reshape_softmax_nc_floating_point(
     return xnn_status_unsupported_hardware;
   }
   if (softmax_op->type != expected_operator_type) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(softmax_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(softmax_op));
     return xnn_status_invalid_parameter;
   }
   softmax_op->state = xnn_run_state_invalid;
@@ -450,9 +457,11 @@ static enum xnn_status setup_softmax_nc_floating_point(
     void* output)
 {
   if (softmax_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(softmax_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(softmax_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -461,8 +470,8 @@ static enum xnn_status setup_softmax_nc_floating_point(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(softmax_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(softmax_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.

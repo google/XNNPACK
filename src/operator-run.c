@@ -23,6 +23,7 @@
 #include "xnnpack/microkernel-type.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/operator-type.h"
+#include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/packq.h"
 #include "xnnpack/quantization.h"
@@ -2960,20 +2961,21 @@ enum xnn_status xnn_run_operator_with_index(
       return xnn_status_invalid_state;
     case xnn_run_state_ready:
       xnn_log_debug("running operator %zu:%zu (%s %s)", opdata_index,
-                    operator_object_index,
-                    xnn_operator_type_to_string(op->type),
+                    operator_object_index, xnn_operator_type_to_string_v2(op),
                     xnn_microkernel_type_to_string(op->ukernel.type));
       break;
     case xnn_run_state_skip:
       xnn_log_debug("skip running operator %zu:%zu (%s %s)", opdata_index,
-                    operator_object_index,
-                    xnn_operator_type_to_string(op->type),
+                    operator_object_index, xnn_operator_type_to_string_v2(op),
                     xnn_microkernel_type_to_string(op->ukernel.type));
       return xnn_status_success;
     case xnn_run_state_needs_setup:
       xnn_log_error(
-        "failed to run operator %zu:%zu (%s %s): operator has been reshaped but not yet setup", opdata_index,
-        operator_object_index, xnn_operator_type_to_string(op->type), xnn_microkernel_type_to_string(op->ukernel.type));
+          "failed to run operator %zu:%zu (%s %s): operator has been reshaped "
+          "but not yet setup",
+          opdata_index, operator_object_index,
+          xnn_operator_type_to_string_v2(op),
+          xnn_microkernel_type_to_string(op->ukernel.type));
       return xnn_status_invalid_state;
   }
 

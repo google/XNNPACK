@@ -17,9 +17,11 @@
 #include "xnnpack/config.h"
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
+#include "xnnpack/microfnptr.h"
 #include "xnnpack/microkernel-type.h"
 #include "xnnpack/microparams.h"
 #include "xnnpack/operator-type.h"
+#include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/params.h"
 #include "pthreadpool.h"
@@ -369,16 +371,18 @@ static enum xnn_status reshape_scaled_dot_product_attention_nhtc(
   pthreadpool_t threadpool)
 {
   if (attention_op->type != expected_operator_type) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(attention_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(attention_op));
     return xnn_status_invalid_parameter;
   }
   attention_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(attention_op->type));
+                  xnn_operator_type_to_string_v2(attention_op));
     return xnn_status_uninitialized;
   }
 
@@ -704,9 +708,10 @@ static enum xnn_status setup_scaled_dot_product_attention_nhtc(
 {
   if (attention_op->type != expected_operator_type) {
     xnn_log_error(
-        "failed to setup operator: operator type mismatch (expected %s, got %s)",
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
         xnn_operator_type_to_string(expected_operator_type),
-        xnn_operator_type_to_string(attention_op->type));
+        xnn_operator_type_to_string_v2(attention_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -715,8 +720,8 @@ static enum xnn_status setup_scaled_dot_product_attention_nhtc(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(attention_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(attention_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.

@@ -17,6 +17,7 @@
 #include "xnnpack/config.h"
 #include "xnnpack/log.h"
 #include "xnnpack/operator-type.h"
+#include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/params.h"
 #include "pthreadpool.h"
@@ -131,18 +132,21 @@ static enum xnn_status reshape_constant_pad_nd(
     pthreadpool_t threadpool)
 {
   if (constant_pad_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(constant_pad_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(constant_pad_op));
     return xnn_status_invalid_parameter;
   }
   constant_pad_op->state = xnn_run_state_invalid;
 
   if (num_dims > XNN_MAX_TENSOR_DIMS) {
     xnn_log_error(
-      "failed to setup %s operator with %zu dimensions in input shape: "
-      "the number of input dimensions must not exceed %d",
-      xnn_operator_type_to_string(constant_pad_op->type), num_dims, XNN_MAX_TENSOR_DIMS);
+        "failed to setup %s operator with %zu dimensions in input shape: "
+        "the number of input dimensions must not exceed %d",
+        xnn_operator_type_to_string_v2(constant_pad_op), num_dims,
+        XNN_MAX_TENSOR_DIMS);
     return xnn_status_unsupported_parameter;
   }
 
@@ -188,7 +192,7 @@ static enum xnn_status reshape_constant_pad_nd(
   }
   if (output_size == 0) {
     xnn_log_debug("skipping %s operator: output size is zero",
-                  xnn_operator_type_to_string(constant_pad_op->type));
+                  xnn_operator_type_to_string_v2(constant_pad_op));
     constant_pad_op->state = xnn_run_state_skip;
     return xnn_status_success;
   }
@@ -284,9 +288,11 @@ static enum xnn_status setup_constant_pad_nd(
     void* output)
 {
   if (constant_pad_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(constant_pad_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(constant_pad_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -295,8 +301,8 @@ static enum xnn_status setup_constant_pad_nd(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(constant_pad_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(constant_pad_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.

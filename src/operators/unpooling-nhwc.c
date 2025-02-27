@@ -141,9 +141,11 @@ enum xnn_status xnn_reshape_unpooling2d_nhwc_x32(
   pthreadpool_t threadpool)
 {
   if (unpooling_op->type != xnn_operator_type_unpooling_nhwc_x32) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32),
-      xnn_operator_type_to_string(unpooling_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32),
+        xnn_operator_type_to_string_v2(unpooling_op));
     return xnn_status_invalid_parameter;
   }
   unpooling_op->state = xnn_run_state_invalid;
@@ -266,9 +268,11 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
     void* output)
 {
   if (unpooling_op->type != xnn_operator_type_unpooling_nhwc_x32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32),
-      xnn_operator_type_to_string(unpooling_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_unpooling_nhwc_x32),
+        xnn_operator_type_to_string_v2(unpooling_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -277,8 +281,8 @@ enum xnn_status xnn_setup_unpooling2d_nhwc_x32(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(unpooling_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(unpooling_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.

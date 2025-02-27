@@ -20,6 +20,7 @@
 #include "xnnpack/log.h"
 #include "xnnpack/math.h"
 #include "xnnpack/operator-type.h"
+#include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/params.h"
 #include "pthreadpool.h"
@@ -151,9 +152,11 @@ enum xnn_status xnn_reshape_argmax_pooling2d_nhwc_f32(
     pthreadpool_t threadpool)
 {
   if (argmax_pooling_op->type != xnn_operator_type_argmax_pooling_nhwc_f32) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32),
-      xnn_operator_type_to_string(argmax_pooling_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32),
+        xnn_operator_type_to_string_v2(argmax_pooling_op));
     return xnn_status_invalid_parameter;
   }
   argmax_pooling_op->state = xnn_run_state_invalid;
@@ -332,9 +335,11 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
     uint32_t* index)
 {
   if (argmax_pooling_op->type != xnn_operator_type_argmax_pooling_nhwc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32),
-      xnn_operator_type_to_string(argmax_pooling_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_argmax_pooling_nhwc_f32),
+        xnn_operator_type_to_string_v2(argmax_pooling_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -343,8 +348,8 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(argmax_pooling_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(argmax_pooling_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.
@@ -359,9 +364,8 @@ enum xnn_status xnn_setup_argmax_pooling2d_nhwc_f32(
   argmax_pooling_op->context.argmax_pooling.index = index;
 
   if ((argmax_pooling_op->context.argmax_pooling.accumulation_buffer_size != 0) && workspace == NULL) {
-    xnn_log_error(
-        "failed to setup %s operator: workspace is NULL",
-        xnn_operator_type_to_string(argmax_pooling_op->type));
+    xnn_log_error("failed to setup %s operator: workspace is NULL",
+                  xnn_operator_type_to_string_v2(argmax_pooling_op));
   }
   argmax_pooling_op->context.argmax_pooling.multipass_buffer = workspace;
 

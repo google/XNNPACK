@@ -1260,13 +1260,15 @@ static enum xnn_status reshape_conv_path(
     const void** indirection_buffer = (const void**) xnn_reallocate_memory(deconvolution_op->indirection_buffer, indirection_buffer_size);
     if (indirection_buffer == NULL) {
       xnn_log_error(
-        "failed to allocate %zu bytes for %s operator indirection buffer",
-        indirection_buffer_size, xnn_operator_type_to_string(deconvolution_op->type));
+          "failed to allocate %zu bytes for %s operator indirection buffer",
+          indirection_buffer_size,
+          xnn_operator_type_to_string_v2(deconvolution_op));
       return xnn_status_out_of_memory;
     }
     deconvolution_op->indirection_buffer = indirection_buffer;
     xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
-      indirection_buffer_size, xnn_operator_type_to_string(deconvolution_op->type));
+                  indirection_buffer_size,
+                  xnn_operator_type_to_string_v2(deconvolution_op));
 
     // Set a dummy input first, the actual input offset is calculated in setup when we have the input pointer.
     // This offset must be aligned properly because inputs and input offsets need to be aligned.
@@ -1551,13 +1553,15 @@ static enum xnn_status reshape_subconv2d_path(
       (const void**) xnn_reallocate_memory(deconvolution_op->indirection_buffer, indirection_buffer_size);
     if (indirection_buffer == NULL) {
       xnn_log_error(
-        "failed to allocate %zu bytes for %s operator indirection buffer",
-        indirection_buffer_size, xnn_operator_type_to_string(deconvolution_op->type));
+          "failed to allocate %zu bytes for %s operator indirection buffer",
+          indirection_buffer_size,
+          xnn_operator_type_to_string_v2(deconvolution_op));
       return xnn_status_out_of_memory;
     }
     deconvolution_op->indirection_buffer = indirection_buffer;
     xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
-                  indirection_buffer_size, xnn_operator_type_to_string(deconvolution_op->type));
+                  indirection_buffer_size,
+                  xnn_operator_type_to_string_v2(deconvolution_op));
 
     // Set a dummy input first, the actual input offset is calculated in setup when we have the input pointer.
     // This offset must be aligned properly because inputs and input offsets need to be aligned.
@@ -1682,30 +1686,36 @@ static enum xnn_status reshape_deconvolution2d_nhwc(
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(deconvolution_op->type));
+                  xnn_operator_type_to_string_v2(deconvolution_op));
     return xnn_status_uninitialized;
   }
 
   if (input_width == 0 || input_height == 0) {
     xnn_log_error(
-      "failed to reshape %s operator with %zux%zu input: input dimensions must be non-zero",
-      xnn_operator_type_to_string(deconvolution_op->type), input_width, input_height);
+        "failed to reshape %s operator with %zux%zu input: input dimensions "
+        "must be non-zero",
+        xnn_operator_type_to_string_v2(deconvolution_op), input_width,
+        input_height);
     return xnn_status_invalid_parameter;
   }
 
   if (adjustment_height >= deconvolution_op->stride_height) {
     xnn_log_error(
-      "failed to reshape %s operator with %" PRIu32 " height adjustment: "
-      "height adjustment must be smaller than height stride (%" PRIu32 ")",
-      xnn_operator_type_to_string(deconvolution_op->type), adjustment_height, deconvolution_op->stride_height);
+        "failed to reshape %s operator with %" PRIu32
+        " height adjustment: "
+        "height adjustment must be smaller than height stride (%" PRIu32 ")",
+        xnn_operator_type_to_string_v2(deconvolution_op), adjustment_height,
+        deconvolution_op->stride_height);
     return xnn_status_invalid_parameter;
   }
 
   if (adjustment_width >= deconvolution_op->stride_width) {
-    xnn_log_error(
-      "failed to reshape %s operator with %" PRIu32 " width adjustment: "
-      "width adjustment must be smaller than width stride (%" PRIu32 ")",
-      xnn_operator_type_to_string(deconvolution_op->type), adjustment_width, deconvolution_op->stride_width);
+    xnn_log_error("failed to reshape %s operator with %" PRIu32
+                  " width adjustment: "
+                  "width adjustment must be smaller than width stride (%" PRIu32
+                  ")",
+                  xnn_operator_type_to_string_v2(deconvolution_op),
+                  adjustment_width, deconvolution_op->stride_width);
     return xnn_status_invalid_parameter;
   }
 
@@ -1766,9 +1776,11 @@ enum xnn_status xnn_reshape_deconvolution2d_nhwc_qs8(
   pthreadpool_t threadpool)
 {
   if (deconvolution_op->type != xnn_operator_type_deconvolution_nhwc_qs8) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_qs8),
-      xnn_operator_type_to_string(deconvolution_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_qs8),
+        xnn_operator_type_to_string_v2(deconvolution_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -1798,9 +1810,12 @@ enum xnn_status xnn_reshape_deconvolution2d_nhwc_qs8_qc8w(
   pthreadpool_t threadpool)
 {
   if (deconvolution_op->type != xnn_operator_type_deconvolution_nhwc_qs8_qc8w) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_qs8_qc8w),
-      xnn_operator_type_to_string(deconvolution_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(
+            xnn_operator_type_deconvolution_nhwc_qs8_qc8w),
+        xnn_operator_type_to_string_v2(deconvolution_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -1830,9 +1845,11 @@ enum xnn_status xnn_reshape_deconvolution2d_nhwc_qu8(
   pthreadpool_t threadpool)
 {
   if (deconvolution_op->type != xnn_operator_type_deconvolution_nhwc_qu8) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_qu8),
-      xnn_operator_type_to_string(deconvolution_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_qu8),
+        xnn_operator_type_to_string_v2(deconvolution_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -1862,9 +1879,11 @@ enum xnn_status xnn_reshape_deconvolution2d_nhwc_f16(
   pthreadpool_t threadpool)
 {
   if (deconvolution_op->type != xnn_operator_type_deconvolution_nhwc_f16) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f16),
-      xnn_operator_type_to_string(deconvolution_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f16),
+        xnn_operator_type_to_string_v2(deconvolution_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -1895,9 +1914,11 @@ enum xnn_status reshape_deconvolution2d_nhwc_qx8_f32_qc8w(
   pthreadpool_t threadpool)
 {
   if (deconvolution_op->type != expected_operator_type) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(deconvolution_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(deconvolution_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -1973,9 +1994,11 @@ enum xnn_status xnn_reshape_deconvolution2d_nhwc_f32(
   pthreadpool_t threadpool)
 {
   if (deconvolution_op->type != xnn_operator_type_deconvolution_nhwc_f32) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32),
-      xnn_operator_type_to_string(deconvolution_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_deconvolution_nhwc_f32),
+        xnn_operator_type_to_string_v2(deconvolution_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -2049,9 +2072,11 @@ static enum xnn_status setup_deconvolution2d_nhwc(
   void* output)
 {
   if (deconvolution_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(deconvolution_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(deconvolution_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -2066,8 +2091,8 @@ static enum xnn_status setup_deconvolution2d_nhwc(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(deconvolution_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(deconvolution_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.

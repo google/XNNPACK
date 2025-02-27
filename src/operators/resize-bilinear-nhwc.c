@@ -20,6 +20,7 @@
 #include "xnnpack/math.h"
 #include "xnnpack/microfnptr.h"
 #include "xnnpack/operator-type.h"
+#include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/params.h"
 #include "pthreadpool.h"
@@ -110,30 +111,34 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
     pthreadpool_t threadpool)
 {
   if (resize_op->type != xnn_operator_type_resize_bilinear_nhwc) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc),
-      xnn_operator_type_to_string(resize_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc),
+        xnn_operator_type_to_string_v2(resize_op));
     return xnn_status_invalid_parameter;
   }
   resize_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(resize_op->type));
+                  xnn_operator_type_to_string_v2(resize_op));
     return xnn_status_uninitialized;
   }
 
   if (input_width == 0 || input_height == 0) {
     xnn_log_error(
-      "failed to reshape %s operator with %zux%zu input: input dimensions must be non-zero",
-      xnn_operator_type_to_string(resize_op->type), input_width, input_height);
+        "failed to reshape %s operator with %zux%zu input: input dimensions "
+        "must be non-zero",
+        xnn_operator_type_to_string_v2(resize_op), input_width, input_height);
     return xnn_status_invalid_parameter;
   }
 
   if (max(input_width, input_height) >= 16777216) {
     xnn_log_error(
-      "failed to reshape %s operator with %zux%zu input: input dimensions must be below 2**24",
-      xnn_operator_type_to_string(resize_op->type), input_width, input_height);
+        "failed to reshape %s operator with %zux%zu input: input dimensions "
+        "must be below 2**24",
+        xnn_operator_type_to_string_v2(resize_op), input_width, input_height);
     return xnn_status_unsupported_parameter;
   }
 
@@ -212,21 +217,22 @@ enum xnn_status xnn_reshape_resize_bilinear2d_nhwc(
       const void** indirection_buffer = (const void**) xnn_reallocate_memory(resize_op->indirection_buffer, indirection_buffer_size);
       if (indirection_buffer == NULL) {
         xnn_log_error(
-          "failed to allocate %zu bytes for %s operator indirection buffer",
-          indirection_buffer_size, xnn_operator_type_to_string(resize_op->type));
+            "failed to allocate %zu bytes for %s operator indirection buffer",
+            indirection_buffer_size, xnn_operator_type_to_string_v2(resize_op));
         return xnn_status_out_of_memory;
       }
       resize_op->indirection_buffer = indirection_buffer;
       xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
-        indirection_buffer_size, xnn_operator_type_to_string(resize_op->type));
+                    indirection_buffer_size,
+                    xnn_operator_type_to_string_v2(resize_op));
 
       // Note: packed weights must be SIMD-aligned, so we can't use xnn_reallocate_memory
       xnn_release_simd_memory(resize_op->packed_weights.pointer);
       resize_op->packed_weights.pointer = xnn_allocate_simd_memory(packed_weights_size);
       if (resize_op->packed_weights.pointer == NULL) {
         xnn_log_error(
-          "failed to allocate %zu bytes for %s operator packed weights",
-          packed_weights_size, xnn_operator_type_to_string(resize_op->type));
+            "failed to allocate %zu bytes for %s operator packed weights",
+            packed_weights_size, xnn_operator_type_to_string_v2(resize_op));
         return xnn_status_out_of_memory;
       }
     }
@@ -302,9 +308,11 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc(
     void* output)
 {
   if (resize_op->type != xnn_operator_type_resize_bilinear_nhwc) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc),
-      xnn_operator_type_to_string(resize_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_resize_bilinear_nhwc),
+        xnn_operator_type_to_string_v2(resize_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -313,8 +321,8 @@ enum xnn_status xnn_setup_resize_bilinear2d_nhwc(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(resize_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(resize_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.

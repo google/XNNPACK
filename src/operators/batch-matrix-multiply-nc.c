@@ -261,13 +261,13 @@ enum xnn_status create_batch_matrix_multiply_nc_fx_const_weights(
       xnn_log_error(
           "failed to allocate %zu bytes for %s operator packed weights",
           packed_size,
-          xnn_operator_type_to_string(batch_matrix_multiply_op->type));
+          xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
       return xnn_status_out_of_memory;
     }
     xnn_log_debug(
         "allocated %zu bytes for packed weights in %s operator (ptr=%p)",
         aligned_size,
-        xnn_operator_type_to_string(batch_matrix_multiply_op->type),
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op),
         packed_data);
 
     // Pack the weights.
@@ -455,13 +455,13 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
       xnn_log_error(
           "failed to allocate %zu bytes for %s operator packed weights",
           packed_size,
-          xnn_operator_type_to_string(batch_matrix_multiply_op->type));
+          xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
       return xnn_status_out_of_memory;
     }
     xnn_log_debug(
         "allocated %zu bytes for packed weights in %s operator (ptr=%p)",
         aligned_size,
-        xnn_operator_type_to_string(batch_matrix_multiply_op->type),
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op),
         packed_data);
 
     if (gemm_config->pack_weights_and_biases) {
@@ -576,14 +576,14 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
         "failed to setup operator: operator type mismatch (expected %s, got "
         "%s)",
         xnn_operator_type_to_string(expected_operator_type),
-        xnn_operator_type_to_string(batch_matrix_multiply_op->type));
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
     return xnn_status_invalid_parameter;
   }
   batch_matrix_multiply_op->state = xnn_run_state_invalid;
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to setup %s operator: XNNPACK is not initialized",
-                  xnn_operator_type_to_string(batch_matrix_multiply_op->type));
+                  xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
     return xnn_status_uninitialized;
   }
 
@@ -591,7 +591,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
     xnn_log_error(
         "failed to reshape %s operator with %zu rows: number of rows must be "
         "non-zero",
-        xnn_operator_type_to_string(batch_matrix_multiply_op->type), m);
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op), m);
     return xnn_status_invalid_parameter;
   }
 
@@ -599,7 +599,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
     xnn_log_error(
         "failed to reshape %s operator with %zu columns: number of columns "
         "must be non-zero",
-        xnn_operator_type_to_string(batch_matrix_multiply_op->type), k);
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op), k);
     return xnn_status_invalid_parameter;
   }
 
@@ -607,7 +607,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
     xnn_log_error(
         "failed to reshape %s operator with %zu columns: number of columns "
         "must be non-zero",
-        xnn_operator_type_to_string(batch_matrix_multiply_op->type), n);
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op), n);
     return xnn_status_invalid_parameter;
   }
 
@@ -645,7 +645,7 @@ static enum xnn_status reshape_batch_matrix_multiply_nc(
           "failed to reshape %s operator with incompatible %i-th batch "
           "dimensions %zu and %zu: batch dimensions must be equal or "
           "broadcastable",
-          xnn_operator_type_to_string(batch_matrix_multiply_op->type), k,
+          xnn_operator_type_to_string_v2(batch_matrix_multiply_op), k,
           batch_dims_a[k], batch_dims_b[k]);
       return xnn_status_invalid_parameter;
     }
@@ -1045,7 +1045,7 @@ static enum xnn_status setup_batch_matrix_multiply_nc(
         "failed to setup operator: operator type mismatch (expected %s, got "
         "%s)",
         xnn_operator_type_to_string(expected_operator_type),
-        xnn_operator_type_to_string(batch_matrix_multiply_op->type));
+        xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -1055,7 +1055,7 @@ static enum xnn_status setup_batch_matrix_multiply_nc(
     case xnn_run_state_invalid:
       xnn_log_error(
           "failed to setup %s operator: operator has not been reshaped yet",
-          xnn_operator_type_to_string(batch_matrix_multiply_op->type));
+          xnn_operator_type_to_string_v2(batch_matrix_multiply_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.

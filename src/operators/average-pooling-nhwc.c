@@ -354,14 +354,16 @@ static enum xnn_status reshape_average_pooling2d(
 
   if ((xnn_params.init_flags & XNN_INIT_FLAG_XNNPACK) == 0) {
     xnn_log_error("failed to reshape %s operator: XNNPACK is not initialized",
-      xnn_operator_type_to_string(average_pooling_op->type));
+                  xnn_operator_type_to_string_v2(average_pooling_op));
     return xnn_status_uninitialized;
   }
 
   if (input_width == 0 || input_height == 0) {
     xnn_log_error(
-      "failed to reshape %s operator with %zux%zu input: input dimensions must be non-zero",
-      xnn_operator_type_to_string(average_pooling_op->type), input_width, input_height);
+        "failed to reshape %s operator with %zux%zu input: input dimensions "
+        "must be non-zero",
+        xnn_operator_type_to_string_v2(average_pooling_op), input_width,
+        input_height);
     return xnn_status_invalid_parameter;
   }
 
@@ -433,13 +435,16 @@ static enum xnn_status reshape_average_pooling2d(
     const void** indirection_buffer =
       (const void**) xnn_reallocate_memory(average_pooling_op->indirection_buffer, indirection_buffer_size);
     if (indirection_buffer == NULL) {
-      xnn_log_error("failed to allocate %zu bytes for %s operator indirection buffer",
-        indirection_buffer_size, xnn_operator_type_to_string(average_pooling_op->type));
+      xnn_log_error(
+          "failed to allocate %zu bytes for %s operator indirection buffer",
+          indirection_buffer_size,
+          xnn_operator_type_to_string_v2(average_pooling_op));
       return xnn_status_out_of_memory;
     }
     average_pooling_op->indirection_buffer = indirection_buffer;
     xnn_log_debug("allocated %zu bytes for indirection buffer in %s operator",
-      indirection_buffer_size, xnn_operator_type_to_string(average_pooling_op->type));
+                  indirection_buffer_size,
+                  xnn_operator_type_to_string_v2(average_pooling_op));
 
     // Set a dummy input first, the actual input offset is calculated in setup when we have the input pointer.
     // This offset must be aligned properly because inputs and input offsets need to be aligned.
@@ -478,13 +483,16 @@ static enum xnn_status reshape_average_pooling2d(
       const size_t pixelwise_buffer_size = (output_height * output_width) << log2_weight_element_size;
       void* pixelwise_buffer = xnn_reallocate_memory(average_pooling_op->pixelwise_buffer, pixelwise_buffer_size);
       if (pixelwise_buffer == NULL) {
-        xnn_log_error("failed to allocate %zu bytes for %s operator pixelwise buffer",
-          pixelwise_buffer_size, xnn_operator_type_to_string(average_pooling_op->type));
+        xnn_log_error(
+            "failed to allocate %zu bytes for %s operator pixelwise buffer",
+            pixelwise_buffer_size,
+            xnn_operator_type_to_string_v2(average_pooling_op));
         return xnn_status_out_of_memory;
       }
       average_pooling_op->pixelwise_buffer = pixelwise_buffer;
       xnn_log_debug("allocated %zu bytes for pixelwise buffer in %s operator",
-        pixelwise_buffer_size, xnn_operator_type_to_string(average_pooling_op->type));
+                    pixelwise_buffer_size,
+                    xnn_operator_type_to_string_v2(average_pooling_op));
 
       indirection_init_pavgpool2d(
         input_height, input_width,
@@ -629,9 +637,11 @@ enum xnn_status xnn_reshape_average_pooling2d_nhwc_f16(
   pthreadpool_t threadpool)
 {
   if (average_pooling_op->type != xnn_operator_type_average_pooling_nhwc_f16) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f16),
-      xnn_operator_type_to_string(average_pooling_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f16),
+        xnn_operator_type_to_string_v2(average_pooling_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -673,9 +683,11 @@ enum xnn_status xnn_reshape_average_pooling2d_nhwc_f32(
   pthreadpool_t threadpool)
 {
   if (average_pooling_op->type != xnn_operator_type_average_pooling_nhwc_f32) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32),
-      xnn_operator_type_to_string(average_pooling_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32),
+        xnn_operator_type_to_string_v2(average_pooling_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -717,8 +729,8 @@ static enum xnn_status setup_average_pooling2d(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(average_pooling_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(average_pooling_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.
@@ -736,9 +748,11 @@ static enum xnn_status setup_average_pooling2d(
 
     if (average_pooling_op->context.pixelwise_average_pooling.multipass_pixel_stride != 0 && workspace == NULL) {
       xnn_log_error(
-          "failed to setup %s operator: workspace of size %zu required but workspace is NULL",
-          xnn_operator_type_to_string(average_pooling_op->type),
-          average_pooling_op->context.pixelwise_average_pooling.multipass_pixel_stride);
+          "failed to setup %s operator: workspace of size %zu required but "
+          "workspace is NULL",
+          xnn_operator_type_to_string_v2(average_pooling_op),
+          average_pooling_op->context.pixelwise_average_pooling
+              .multipass_pixel_stride);
     }
     average_pooling_op->context.pixelwise_average_pooling.multipass_buffer = workspace;
   } else {
@@ -749,8 +763,9 @@ static enum xnn_status setup_average_pooling2d(
 
     if (average_pooling_op->context.average_pooling.multipass_pixel_stride != 0 && workspace == NULL) {
       xnn_log_error(
-          "failed to setup %s operator: workspace of size %zu required but workspace is NULL",
-          xnn_operator_type_to_string(average_pooling_op->type),
+          "failed to setup %s operator: workspace of size %zu required but "
+          "workspace is NULL",
+          xnn_operator_type_to_string_v2(average_pooling_op),
           average_pooling_op->context.average_pooling.multipass_pixel_stride);
     }
     average_pooling_op->context.average_pooling.multipass_buffer = workspace;
@@ -767,9 +782,11 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f16(
     void* output)
 {
   if (average_pooling_op->type != xnn_operator_type_average_pooling_nhwc_f16) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f16),
-      xnn_operator_type_to_string(average_pooling_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f16),
+        xnn_operator_type_to_string_v2(average_pooling_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -789,9 +806,11 @@ enum xnn_status xnn_setup_average_pooling2d_nhwc_f32(
     float* output)
 {
   if (average_pooling_op->type != xnn_operator_type_average_pooling_nhwc_f32) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32),
-      xnn_operator_type_to_string(average_pooling_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(xnn_operator_type_average_pooling_nhwc_f32),
+        xnn_operator_type_to_string_v2(average_pooling_op));
     return xnn_status_invalid_parameter;
   }
 

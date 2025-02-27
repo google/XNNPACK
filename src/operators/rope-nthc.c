@@ -17,6 +17,7 @@
 #include "xnnpack/config.h"
 #include "xnnpack/log.h"
 #include "xnnpack/operator-type.h"
+#include "xnnpack/operator-utils.h"
 #include "xnnpack/operator.h"
 #include "xnnpack/params.h"
 #include "pthreadpool.h"
@@ -110,38 +111,44 @@ static enum xnn_status reshape_rope_nthc(
     size_t num_threads)
 {
   if (rope_op->type != expected_operator_type) {
-    xnn_log_error("failed to reshape operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(rope_op->type));
+    xnn_log_error(
+        "failed to reshape operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(rope_op));
     return xnn_status_invalid_parameter;
   }
   rope_op->state = xnn_run_state_invalid;
 
   if (tokens == 0) {
     xnn_log_error(
-      "failed to reshape %s operator with %zu tokens: number of tokens must be non-zero",
-      xnn_operator_type_to_string(rope_op->type), tokens);
+        "failed to reshape %s operator with %zu tokens: number of tokens must "
+        "be non-zero",
+        xnn_operator_type_to_string_v2(rope_op), tokens);
     return xnn_status_invalid_parameter;
   }
 
   if (heads == 0) {
     xnn_log_error(
-      "failed to reshape %s operator with %zu heads: number of heads must be non-zero",
-      xnn_operator_type_to_string(rope_op->type), heads);
+        "failed to reshape %s operator with %zu heads: number of heads must be "
+        "non-zero",
+        xnn_operator_type_to_string_v2(rope_op), heads);
     return xnn_status_invalid_parameter;
   }
 
   if (channels == 0) {
     xnn_log_error(
-      "failed to reshape %s operator with %zu channels: number of channels must be non-zero",
-      xnn_operator_type_to_string(rope_op->type), channels);
+        "failed to reshape %s operator with %zu channels: number of channels "
+        "must be non-zero",
+        xnn_operator_type_to_string_v2(rope_op), channels);
     return xnn_status_invalid_parameter;
   }
 
   if (channels % 2 != 0) {
     xnn_log_error(
-      "failed to reshape %s operator with %zu channels: odd number of channels is not supported",
-      xnn_operator_type_to_string(rope_op->type), channels);
+        "failed to reshape %s operator with %zu channels: odd number of "
+        "channels is not supported",
+        xnn_operator_type_to_string_v2(rope_op), channels);
     return xnn_status_unsupported_parameter;
   }
 
@@ -210,9 +217,11 @@ static enum xnn_status setup_rope_nthc(
     void* output)
 {
   if (rope_op->type != expected_operator_type) {
-    xnn_log_error("failed to setup operator: operator type mismatch (expected %s, got %s)",
-      xnn_operator_type_to_string(expected_operator_type),
-      xnn_operator_type_to_string(rope_op->type));
+    xnn_log_error(
+        "failed to setup operator: operator type mismatch (expected %s, got "
+        "%s)",
+        xnn_operator_type_to_string(expected_operator_type),
+        xnn_operator_type_to_string_v2(rope_op));
     return xnn_status_invalid_parameter;
   }
 
@@ -221,8 +230,8 @@ static enum xnn_status setup_rope_nthc(
       return xnn_status_success;
     case xnn_run_state_invalid:
       xnn_log_error(
-        "failed to setup %s operator: operator has not been reshaped yet",
-        xnn_operator_type_to_string(rope_op->type));
+          "failed to setup %s operator: operator has not been reshaped yet",
+          xnn_operator_type_to_string_v2(rope_op));
       return xnn_status_invalid_state;
     case xnn_run_state_needs_setup:
       // Operator has been reshaped, but not setup, continue with setup.
