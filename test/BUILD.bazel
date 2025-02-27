@@ -1608,6 +1608,7 @@ xnnpack_unit_test(
     srcs = [
         "%s.cc" % operator.replace("_", "-"),
     ],
+    shard_count = 5,
     deps = [
         ":replicable_random_device",
         ":runtime_flags",
