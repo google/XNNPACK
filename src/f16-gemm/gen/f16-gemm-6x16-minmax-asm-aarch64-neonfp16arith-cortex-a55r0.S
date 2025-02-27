@@ -19,7 +19,7 @@
 #     void* restrict c,          x6
 #     size_t cm_stride,         x7
 #     size_t cn_stride,         [sp] -> (x0)
-#     const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
+#     const struct xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])  [sp + 8] -> (x8)
 
 # d8-d15, x19-x30 need to be preserved if used. x18 is reserved by the OS.
 

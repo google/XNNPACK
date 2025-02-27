@@ -282,7 +282,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f32(
       xnn_operator_type_to_string(xnn_operator_type_max_pooling_nhwc_f32));
     return xnn_status_unsupported_hardware;
   }
-  union xnn_f32_minmax_params params;
+  struct xnn_f32_minmax_params params;
   maxpool_config->init.f32(&params, output_min, output_max);
   return create_max_pooling2d_nhwc(
     input_padding_top, input_padding_right, input_padding_bottom, input_padding_left,
@@ -344,7 +344,7 @@ enum xnn_status xnn_create_max_pooling2d_nhwc_f16(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f16_minmax_params params;
+  struct xnn_f16_minmax_params params;
   if (maxpool_config->init.f16 != NULL) {
     maxpool_config->init.f16(&params, output_min_as_half, output_max_as_half);
   }

@@ -50,7 +50,7 @@ extern "C" {
     const float* zero,                                            \
     float* output,                                                \
     uint32_t padding_top,                                         \
-    const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv2d_chw_ukernel_3x3p1__aarch64_neonfma_1x4)
 DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv2d_chw_ukernel_3x3p1__aarch64_neonfma_1x4_acc2)
@@ -403,7 +403,7 @@ DECLARE_F32_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f32_dwconv2d_chw_ukernel_5x
     const xnn_float16* zero,                             \
     xnn_float16* output,                                 \
     uint32_t padding_top,                                         \
-    const union xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+    const struct xnn_f16_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F16_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8)
 DECLARE_F16_DWCONV2D_CHW_MINMAX_UKERNEL_FUNCTION(xnn_f16_dwconv2d_chw_ukernel_3x3p1__neonfp16arith_1x8_acc2)

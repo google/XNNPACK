@@ -18,7 +18,7 @@ void xnn_f32_pavgpool_minmax_ukernel_9x__rvv_c1v(
     float* output,
     size_t input_increment,
     size_t output_increment,
-    const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+    const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
 {
   assert(output_pixels != 0);
   assert(kernel_elements != 0);

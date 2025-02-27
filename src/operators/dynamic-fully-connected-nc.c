@@ -148,7 +148,7 @@ enum xnn_status create_dynamic_fully_connected_nc_f16(
     return xnn_status_invalid_parameter;
   }
 
-  union xnn_f16_minmax_params params;
+  struct xnn_f16_minmax_params params;
   if XNN_LIKELY(gemm_config->init.f16 != NULL) {
     gemm_config->init.f16(&params, fp16_output_min, fp16_output_max);
   }
@@ -232,13 +232,13 @@ enum xnn_status create_dynamic_fully_connected_nc_f32(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f32_minmax_params params;
+  struct xnn_f32_minmax_params params;
   if XNN_LIKELY(gemm_config->init.f32 != NULL) {
     gemm_config->init.f32(&params, output_min, output_max);
   }
 
   const struct gemm_fused_ukernels* gemm_nr2_ukernels = NULL;
-  union xnn_f32_minmax_params params2;
+  struct xnn_f32_minmax_params params2;
   if (gemm_nr2_config != NULL) {
     gemm_nr2_ukernels = &gemm_nr2_config->minmax;
     if (linear_activation && gemm_nr2_config->linear.gemm[gemm_nr2_config->mr-1].function[XNN_UARCH_DEFAULT] != NULL) {

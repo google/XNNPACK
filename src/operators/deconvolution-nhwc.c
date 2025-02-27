@@ -857,7 +857,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f16(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f16_minmax_params params;
+  struct xnn_f16_minmax_params params;
   if XNN_LIKELY(gemm_config->init.f16 != NULL) {
     gemm_config->init.f16(&params, output_min_as_half, output_max_as_half);
   }
@@ -947,7 +947,7 @@ enum xnn_status create_deconvolution2d_nhwc_qx8_f32_qc8w(
 
   assert(gemm_config != NULL);
 
-  union xnn_f32_minmax_params params;
+  struct xnn_f32_minmax_params params;
   if XNN_LIKELY(gemm_config->init.f32 != NULL) {
     gemm_config->init.f32(&params, output_min, output_max);
   }
@@ -1134,7 +1134,7 @@ enum xnn_status xnn_create_deconvolution2d_nhwc_f32(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f32_minmax_params params;
+  struct xnn_f32_minmax_params params;
   if XNN_LIKELY(gemm_config->init.f32 != NULL) {
     gemm_config->init.f32(&params, output_min, output_max);
   }

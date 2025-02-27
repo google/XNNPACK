@@ -64,7 +64,7 @@ extern "C" {
       float* output,                                                    \
       size_t input_increment,                                           \
       size_t output_increment,                                          \
-      const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 #define XNN_UKERNEL_UNIPASS(arch_flags, ukernel, channel_tile, channel_scaled_tile, primary_tile, incremental_tile, init_params) \
   XNN_INTERNAL void ukernel(                                          \
@@ -78,7 +78,7 @@ extern "C" {
       float* output,                                                  \
       size_t input_increment,                                         \
       size_t output_increment,                                        \
-      const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 #include "f32-pavgpool/f32-pavgpool-minmax.h"
 

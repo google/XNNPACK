@@ -20,7 +20,7 @@ void xnn_f16_vclamp_ukernel__f16c_u8(
     size_t batch,
     const xnn_float16* restrict input,
     xnn_float16* restrict output,
-    const union xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+    const struct xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(batch != 0);
   assert(batch % sizeof(uint16_t) == 0);

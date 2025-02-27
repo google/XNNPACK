@@ -26,7 +26,7 @@ extern "C" {
       float* c,                                    \
       size_t cm_stride,                            \
       size_t cn_stride,                            \
-      const union xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
+      const struct xnn_f32_minmax_params params[XNN_RESTRICT XNN_MIN_ELEMENTS(1)]);
 
 DECLARE_F32_PPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_ppmm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a75)
 DECLARE_F32_PPMM_MINMAX_UKERNEL_FUNCTION(xnn_f32_ppmm_minmax_ukernel_4x8__asm_aarch64_neonfma_cortex_a75_prfm)

@@ -745,7 +745,7 @@ enum xnn_status create_convolution2d_nhwc_qx8_f16_qc8w(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f16_minmax_params gemm_params;
+  struct xnn_f16_minmax_params gemm_params;
   if XNN_LIKELY(gemm_config->init.f16 != NULL) {
     gemm_config->init.f16(&gemm_params, fp16_output_min, fp16_output_max);
   }
@@ -909,7 +909,7 @@ enum xnn_status create_convolution2d_nhwc_qx8_f32_qc8w(
 
   assert(gemm_config != NULL);
 
-  union xnn_f32_minmax_params gemm_params;
+  struct xnn_f32_minmax_params gemm_params;
   if XNN_LIKELY(gemm_config->init.f32 != NULL) {
     gemm_config->init.f32(&gemm_params, output_min, output_max);
   }
@@ -1554,7 +1554,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f16_minmax_params gemm_params;
+  struct xnn_f16_minmax_params gemm_params;
   if XNN_LIKELY(gemm_config->init.f16 != NULL) {
     gemm_config->init.f16(&gemm_params, fp16_output_min, fp16_output_max);
   }
@@ -1566,7 +1566,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f16_minmax_params dwconv_params;
+  struct xnn_f16_minmax_params dwconv_params;
   const struct xnn_dwconv_config* dwconv_ukernel =
     find_dwconv_ukernel(kernel_height * kernel_width, dwconv_config, XNN_MAX_F16_DWCONV_UKERNELS);
   if XNN_LIKELY(dwconv_ukernel != NULL) {
@@ -1580,7 +1580,7 @@ enum xnn_status xnn_create_convolution2d_nhwc_f16(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f16_minmax_params vmulcaddc_params;
+  struct xnn_f16_minmax_params vmulcaddc_params;
   if XNN_LIKELY(vmulcaddc_config->init.f16 != NULL) {
     vmulcaddc_config->init.f16(&vmulcaddc_params, fp16_output_min, fp16_output_max);
   }
@@ -1689,7 +1689,7 @@ enum xnn_status create_convolution2d_nhwc_f32(
   const bool linear_activation = (output_max == INFINITY) && (output_min == -output_max);
   const bool relu_activation = (output_max == INFINITY) && (output_min == 0.0f);
 
-  union xnn_f32_minmax_params gemm_params;
+  struct xnn_f32_minmax_params gemm_params;
   if XNN_LIKELY(gemm_config->init.f32 != NULL) {
     gemm_config->init.f32(&gemm_params, output_min, output_max);
   }
@@ -1701,7 +1701,7 @@ enum xnn_status create_convolution2d_nhwc_f32(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f32_minmax_params dwconv_params;
+  struct xnn_f32_minmax_params dwconv_params;
   const struct xnn_dwconv_config* dwconv_ukernel =
     find_dwconv_ukernel(kernel_height * kernel_width, dwconv_config, XNN_MAX_F32_DWCONV_UKERNELS);
   if XNN_LIKELY(dwconv_ukernel != NULL) {
@@ -1715,7 +1715,7 @@ enum xnn_status create_convolution2d_nhwc_f32(
     return xnn_status_unsupported_hardware;
   }
 
-  union xnn_f32_minmax_params vmulcaddc_params;
+  struct xnn_f32_minmax_params vmulcaddc_params;
   if XNN_LIKELY(vmulcaddc_config->init.f32 != NULL) {
     vmulcaddc_config->init.f32(&vmulcaddc_params, output_min, output_max);
   }

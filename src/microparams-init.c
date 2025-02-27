@@ -617,7 +617,7 @@ size_t xnn_init_bf16_minmax_scalar_params(
 }
 
 size_t xnn_init_f16_minmax_scalar_params(
-  union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
   xnn_float16 min,
   xnn_float16 max)
 {
@@ -653,7 +653,7 @@ size_t xnn_init_f16_qb4w_minmax_scalar_params(
 }
 
 size_t xnn_init_f32_minmax_scalar_params(
-  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float output_min,
   float output_max)
 {
@@ -873,7 +873,7 @@ size_t xnn_init_u8_minmax_scalar_params(
 }
 
 size_t xnn_init_f16_minmax_binary_params(
-    union xnn_f16_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
+    struct xnn_f16_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
     const struct xnn_quantization_params* a_quantization,
     const struct xnn_quantization_params* b_quantization,
     const struct xnn_quantization_params* output_quantization) {
@@ -883,7 +883,7 @@ size_t xnn_init_f16_minmax_binary_params(
 }
 
 size_t xnn_init_f32_minmax_binary_params(
-    union xnn_f32_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
+    struct xnn_f32_minmax_params uparams[XNN_MIN_ELEMENTS(1)],
     const struct xnn_quantization_params* a_quantization,
     const struct xnn_quantization_params* b_quantization,
     const struct xnn_quantization_params* output_quantization) {

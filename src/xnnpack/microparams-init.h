@@ -193,12 +193,12 @@ XNN_INTERNAL size_t xnn_init_bf16_minmax_scalar_params(
 
 
 XNN_INTERNAL size_t xnn_init_f16_minmax_scalar_params(
-  union xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f16_minmax_params params[XNN_MIN_ELEMENTS(1)],
   xnn_float16 output_min,
   xnn_float16 output_max);
 
 XNN_INTERNAL size_t xnn_init_f32_minmax_scalar_params(
-  union xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
+  struct xnn_f32_minmax_params params[XNN_MIN_ELEMENTS(1)],
   float output_min,
   float output_max);
 

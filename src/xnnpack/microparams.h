@@ -87,14 +87,14 @@ struct xnn_bf16_minmax_params {
   } scalar;
 };
 
-union xnn_f16_minmax_params {
+struct xnn_f16_minmax_params {
   struct {
     xnn_float16 min;
     xnn_float16 max;
   } scalar;
 };
 
-union xnn_f32_minmax_params {
+struct xnn_f32_minmax_params {
   struct {
     float min;
     float max;
@@ -393,8 +393,8 @@ union xnn_binary_uparams {
   struct xnn_qu8_add_minmax_params qu8_addsub;
   union xnn_qs8_mul_minmax_params qs8_mul;
   union xnn_qu8_mul_minmax_params qu8_mul;
-  union xnn_f16_minmax_params f16;
-  union xnn_f32_minmax_params f32;
+  struct xnn_f16_minmax_params f16;
+  struct xnn_f32_minmax_params f32;
   struct xnn_binary_reference_params reference;
 };
 
@@ -589,8 +589,8 @@ union xnn_unary_uparams {
   struct xnn_f32_lrelu_params f32_lrelu;
   struct xnn_qs8_lrelu_params qs8_lrelu;
   struct xnn_qu8_lrelu_params qu8_lrelu;
-  union xnn_f32_minmax_params f32_minmax;
-  union xnn_f16_minmax_params f16_minmax;
+  struct xnn_f32_minmax_params f32_minmax;
+  struct xnn_f16_minmax_params f16_minmax;
   struct xnn_s8_minmax_params s8_minmax;
   struct xnn_u8_minmax_params u8_minmax;
   struct xnn_unary_reference_params reference;

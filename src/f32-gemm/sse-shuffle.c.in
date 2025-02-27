@@ -42,7 +42,7 @@ void xnn_${DATATYPE_SPEC}_gemm${"inc" if INC else ""}_minmax_ukernel_${MR}x${NR}
     $if DATATYPE == "QC4":
       const struct xnn_f32_qc4w_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
     $else:
-      const union xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
+      const struct xnn_f32_minmax_params params[restrict XNN_MIN_ELEMENTS(1)]) XNN_OOB_READS
 {
   assert(mr != 0);
   assert(mr <= ${MR});

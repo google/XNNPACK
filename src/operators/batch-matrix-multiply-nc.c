@@ -111,7 +111,7 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_f16(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f16_minmax_params params;
+  struct xnn_f16_minmax_params params;
   if XNN_LIKELY (gemm_config->init.f16 != NULL) {
     gemm_config->init.f16(&params, xnn_float16_from_float(-INFINITY),
                           xnn_float16_from_float(INFINITY));
@@ -140,7 +140,7 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_pf16(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f16_minmax_params params;
+  struct xnn_f16_minmax_params params;
   if XNN_LIKELY (gemm_config->init.f16 != NULL) {
     gemm_config->init.f16(&params, xnn_float16_from_float(-INFINITY),
                           xnn_float16_from_float(INFINITY));
@@ -169,7 +169,7 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_f32(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f32_minmax_params params;
+  struct xnn_f32_minmax_params params;
   if XNN_LIKELY (gemm_config->init.f32 != NULL) {
     gemm_config->init.f32(&params, -INFINITY, INFINITY);
   }
@@ -197,7 +197,7 @@ enum xnn_status xnn_create_batch_matrix_multiply_nc_pf32(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f32_minmax_params params;
+  struct xnn_f32_minmax_params params;
   if XNN_LIKELY (gemm_config->init.f32 != NULL) {
     gemm_config->init.f32(&params, -INFINITY, INFINITY);
   }
@@ -399,7 +399,7 @@ enum xnn_status create_batch_matrix_multiply_nc_qx8_f32_qc8w(
     gemm_ukernels = &gemm_config->linear;
   }
 
-  union xnn_f32_minmax_params params;
+  struct xnn_f32_minmax_params params;
   if XNN_LIKELY (gemm_config->init.f32 != NULL) {
     gemm_config->init.f32(&params, -INFINITY, INFINITY);
   }
