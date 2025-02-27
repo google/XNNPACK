@@ -10,15 +10,15 @@
   // Keep this line indented to avoid it being pulled out of the #ifdef when the
   // sources are amalgamated.
   #include "kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi4cxp/kai_matmul_clamp_f32_qai8dxp1vlx8_qsi4cxp4vlx8_1vlx4vl_sme2_mopa.h"
+
+  size_t xnn_qp8_f32_qc4w_gemm_minmax_ukernel_32x128c4__neonsme2_get_mr() {
+    return kai_get_mr_matmul_clamp_f32_qai8dxp1vlx8_qsi4cxp4vlx8_1vlx4vl_sme2_mopa();
+  }
+
+  size_t xnn_qp8_f32_qc4w_gemm_minmax_ukernel_32x128c4__neonsme2_get_nr() {
+    return kai_get_nr_matmul_clamp_f32_qai8dxp1vlx8_qsi4cxp4vlx8_1vlx4vl_sme2_mopa();
+  }
 #endif  // XNN_ENABLE_KLEIDIAI
-
-size_t xnn_qp8_f32_qc4w_gemm_minmax_ukernel_32x128c4__neonsme2_get_mr() {
-  return kai_get_mr_matmul_clamp_f32_qai8dxp1vlx8_qsi4cxp4vlx8_1vlx4vl_sme2_mopa();
-}
-
-size_t xnn_qp8_f32_qc4w_gemm_minmax_ukernel_32x128c4__neonsme2_get_nr() {
-  return kai_get_nr_matmul_clamp_f32_qai8dxp1vlx8_qsi4cxp4vlx8_1vlx4vl_sme2_mopa();
-}
 
 
 // Wraps the `kai_run_matmul_clamp_f32_qai8dxp1vlx8_qsi4cxp4vlx8_1vlx4vl_sme2_mopa`
