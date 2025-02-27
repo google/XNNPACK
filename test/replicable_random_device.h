@@ -11,10 +11,50 @@
 #include <string>
 
 #include <gtest/gtest.h>
+#include "xnnpack/common.h"
 
 namespace xnnpack {
 
+// On `riscv`, which is usually emulated, use a weaker, yet much faster, random
+// number generator.
+#if XNN_ARCH_RISCV
+#include <cstdint>
+
+class Xoshiro128Plus {
+ public:
+  typedef uint64_t result_type;
+
+  explicit Xoshiro128Plus(uint64_t s1) : state_{s1, 0} {}
+
+  uint64_t operator()() {
+    uint64_t s1 = state_[0];
+    uint64_t s0 = state_[1];
+    uint64_t result = s0 + s1;
+    state_[0] = s0;
+    s1 ^= s1 << 23;
+    state_[1] = s1 ^ s0 ^ (s1 >> 18) ^ (s0 >> 5);
+    return result;
+  }
+
+  void discard(size_t count) {
+    while (count--) {
+      (*this)();
+    }
+  }
+  static constexpr uint64_t min() { return 0; }
+  static constexpr uint64_t max() { return ~0; }
+
+ private:
+  static uint64_t rotl(const uint64_t x, int k) {
+    return (x << k) | (x >> (64 - k));
+  }
+  uint64_t state_[2];
+};
+
+using BaseRandomDevice = Xoshiro128Plus;
+#else
 using BaseRandomDevice = std::mt19937;
+#endif  // XNN_ARCH_RISCV
 
 // Wraps `std::mt19937` such that on construction, the random generator is
 // seeded with the underlying `UnitTest`'s random seed, which can be coerced on
