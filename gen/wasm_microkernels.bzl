@@ -6,8 +6,6 @@ Auto-generated file. Do not edit!
 """
 
 PROD_WASM_MICROKERNEL_SRCS = [
-    "src/f32-avgpool/f32-avgpool-9p8x-minmax-wasm-c1.c",
-    "src/f32-avgpool/f32-avgpool-9x-minmax-wasm-c1.c",
     "src/f32-dwconv/gen/f32-dwconv-3p1c-minmax-wasm-acc2.c",
     "src/f32-dwconv/gen/f32-dwconv-4p1c-minmax-wasm-acc2.c",
     "src/f32-dwconv/gen/f32-dwconv-9p1c-minmax-wasm-acc2.c",
@@ -23,8 +21,6 @@ PROD_WASM_MICROKERNEL_SRCS = [
     "src/f32-igemm/gen/f32-igemm-4x4-minmax-wasm.c",
     "src/f32-igemm/gen/f32-igemm-4x4-relu-wasm.c",
     "src/f32-maxpool/f32-maxpool-9p8x-minmax-wasm-c1.c",
-    "src/f32-pavgpool/f32-pavgpool-9p8x-minmax-wasm-c1.c",
-    "src/f32-pavgpool/f32-pavgpool-9x-minmax-wasm-c1.c",
     "src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x4-minmax-wasm.c",
     "src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x4-minmax-wasm.c",
     "src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x4-minmax-wasm.c",

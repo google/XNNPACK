@@ -67,13 +67,10 @@ static void xnnpack_average_pooling_f32(benchmark::State& state, const char* net
     return;
   }
 
-  size_t workspace_size = 0;
-  size_t workspace_alignment = 0;
   status = xnn_reshape_average_pooling2d_nhwc_f32(
     pooling_op,
     batch_size, input_height, input_width,
     channels, /*input_pixel_stride=*/channels, /*output_pixel_stride=*/channels,
-    &workspace_size, &workspace_alignment,
     /*output_height_out=*/nullptr, /*output_width_out=*/nullptr,
     /*threadpool=*/nullptr);
   if (status != xnn_status_success) {
@@ -81,11 +78,8 @@ static void xnnpack_average_pooling_f32(benchmark::State& state, const char* net
     return;
   }
 
-  xnnpack::Buffer<char, XNN_ALLOCATION_ALIGNMENT> workspace(workspace_size);
-
   status = xnn_setup_average_pooling2d_nhwc_f32(
     pooling_op,
-    workspace.data(),
     input.data(), output.data());
   if (status != xnn_status_success) {
     state.SkipWithError("failed to setup Average Pooling operator");

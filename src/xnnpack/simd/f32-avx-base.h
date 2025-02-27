@@ -160,6 +160,11 @@ static XNN_INLINE xnn_simd_f32_t xnn_load_tail_f32(const float* input,
   return _mm256_maskload_ps(input, vmask);
 }
 
+static XNN_INLINE xnn_simd_f32_t xnn_load_tail_safe_f32(const float* input,
+                                                        size_t num_elements) {
+  return xnn_load_tail_f32(input, num_elements);
+}
+
 static XNN_INLINE void xnn_store_tail_f32(float* output, xnn_simd_f32_t v,
                                           size_t num_elements) {
   assert(num_elements > 0);

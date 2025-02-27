@@ -9,15 +9,11 @@ PROD_RVV_MICROKERNEL_SRCS = [
     "src/f32-argmaxpool/f32-argmaxpool-4x-rvv-u1v.c",
     "src/f32-argmaxpool/f32-argmaxpool-9p8x-rvv-u1v.c",
     "src/f32-argmaxpool/f32-argmaxpool-9x-rvv-u1v.c",
-    "src/f32-avgpool/gen/f32-avgpool-9p8x-minmax-rvv-c2v.c",
-    "src/f32-avgpool/gen/f32-avgpool-9x-minmax-rvv-c2v.c",
     "src/f32-gemm/gen/f32-gemm-1x4v-minmax-rvv.c",
     "src/f32-gemm/gen/f32-gemm-7x4v-minmax-rvv.c",
     "src/f32-igemm/gen/f32-igemm-1x4v-minmax-rvv.c",
     "src/f32-igemm/gen/f32-igemm-7x4v-minmax-rvv.c",
     "src/f32-maxpool/gen/f32-maxpool-9p8x-minmax-rvv-c2v.c",
-    "src/f32-pavgpool/f32-pavgpool-9p8x-minmax-rvv-c1v.c",
-    "src/f32-pavgpool/f32-pavgpool-9x-minmax-rvv-c1v.c",
     "src/f32-qs8-vcvt/gen/f32-qs8-vcvt-rvv-u2v.c",
     "src/f32-qu8-vcvt/gen/f32-qu8-vcvt-rvv-u2v.c",
     "src/f32-raddstoreexpminusmax/gen/f32-raddstoreexpminusmax-rvv-rr2-p6-u4v.c",
@@ -77,8 +73,6 @@ PROD_RVV_MICROKERNEL_SRCS = [
 ]
 
 NON_PROD_RVV_MICROKERNEL_SRCS = [
-    "src/f32-avgpool/gen/f32-avgpool-9p8x-minmax-rvv-c1v.c",
-    "src/f32-avgpool/gen/f32-avgpool-9x-minmax-rvv-c1v.c",
     "src/f32-gemm/gen/f32-gemm-1x4v-relu-rvv.c",
     "src/f32-gemm/gen/f32-gemm-1x4v-rvv.c",
     "src/f32-gemm/gen/f32-gemm-7x4v-relu-rvv.c",

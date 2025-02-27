@@ -312,7 +312,6 @@ xnnpack_cc_library(
     deps = [
         ":common",
         ":config_hdrs",
-        ":fp16",
         ":math",
         ":memory",
         ":microparams",

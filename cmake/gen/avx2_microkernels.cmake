@@ -14,8 +14,6 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/f16-f32acc-gemm/gen/f16-f32acc-gemm-4x16-minmax-avx2-broadcast.c
   src/f16-f32acc-igemm/gen/f16-f32acc-igemm-1x16-minmax-avx2-broadcast.c
   src/f16-f32acc-igemm/gen/f16-f32acc-igemm-4x16-minmax-avx2-broadcast.c
-  src/f16-pavgpool/f16-pavgpool-9p8x-minmax-avx2-c8.c
-  src/f16-pavgpool/f16-pavgpool-9x-minmax-avx2-c8.c
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u32.c
   src/f16-velu/gen/f16-velu-avx2-rr1-p3-u16.c
   src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-rcp-u32.c
