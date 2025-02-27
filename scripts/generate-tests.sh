@@ -279,5 +279,13 @@ tools/xngen test/s32-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIM
 tools/xngen test/s32-simd.cc.in -D ARCH=hvx -D ARCH_MACRO="XNN_ENABLE_HVX && XNN_ARCH_HEXAGON" -D TEST_REQUIRES=TEST_REQUIRES_HVX -o test/s32-simd-hvx.cc &
 
 tools/xngen test/s8-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/s8-simd-scalar.cc &
+tools/xngen test/s8-simd.cc.in -D ARCH=sse41 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_SSE41 -o test/s8-simd-sse41.cc &
+tools/xngen test/s8-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES=TEST_REQUIRES_ARM_NEON -o test/s8-simd-neon.cc &
+tools/xngen test/s8-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/s8-simd-wasmsimd.cc &
+
+tools/xngen test/u8-simd.cc.in -D ARCH=scalar -D ARCH_MACRO="" -D TEST_REQUIRES="" -o test/u8-simd-scalar.cc &
+tools/xngen test/u8-simd.cc.in -D ARCH=sse2 -D ARCH_MACRO="XNN_ARCH_X86 || XNN_ARCH_X86_64" -D TEST_REQUIRES=TEST_REQUIRES_X86_SSE2 -o test/u8-simd-sse2.cc &
+tools/xngen test/u8-simd.cc.in -D ARCH=neon -D ARCH_MACRO="XNN_ARCH_ARM || XNN_ARCH_ARM64" -D TEST_REQUIRES=TEST_REQUIRES_ARM_NEON -o test/u8-simd-neon.cc &
+tools/xngen test/u8-simd.cc.in -D ARCH=wasmsimd -D ARCH_MACRO="XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD" -D TEST_REQUIRES="" -o test/u8-simd-wasmsimd.cc &
 
 wait

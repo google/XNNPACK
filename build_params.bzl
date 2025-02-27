@@ -280,7 +280,10 @@ def xnnpack_simd_s32_archs():
     return ["avx2", "avx512f", "neon", "scalar", "sse41", "hvx", "wasmsimd"]
 
 def xnnpack_simd_s8_archs():
-    return ["scalar"]
+    return ["scalar", "sse41", "neon", "wasmsimd"]
+
+def xnnpack_simd_u8_archs():
+    return ["scalar", "sse2", "neon", "wasmsimd"]
 
 def xnnpack_archs():
     return XNNPACK_PARAMS_FOR_ARCH.keys()

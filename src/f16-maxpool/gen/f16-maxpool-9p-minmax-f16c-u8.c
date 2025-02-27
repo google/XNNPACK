@@ -1,0 +1,233 @@
+// Auto-generated file. Do not edit!
+//   Template: src/f16-maxpool/f16c.c.in
+//   Generator: tools/xngen
+//
+// Copyright 2024 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+#include <assert.h>
+#include <stddef.h>
+
+#include <immintrin.h>
+
+#include "xnnpack/common.h"
+#include "xnnpack/intrinsics-polyfill.h"
+#include "xnnpack/microparams.h"
+
+static void xnn_store_tail_f16(uint16_t* o, __m128i vh, size_t c) {
+  assert(c > 0);
+  assert(c < 8);
+  if (c & 4) {
+    _mm_storel_epi64((__m128i*) o, vh);
+    vh = _mm_unpackhi_epi64(vh, vh);
+    o += 4;
+  }
+  if (c & 2) {
+    _mm_storeu_si32(o, vh);
+    vh = _mm_srli_epi64(vh, 32);
+    o += 2;
+  }
+  if (c & 1) {
+    *o = (uint16_t) _mm_extract_epi16(vh, 0);
+  }
+}
+
+static __m128i xnn_load_tail_safe_f16(const uint16_t* i, size_t c) {
+  assert(c > 0);
+  assert(c < 8);
+
+  XNN_ALIGN(16) uint16_t padded[8];
+  uint16_t* dst = padded;
+  switch (c) {
+  case 7: *dst++ = *i++;
+  case 6: *dst++ = *i++;
+  case 5: *dst++ = *i++;
+  case 4: *dst++ = *i++;
+  case 3: *dst++ = *i++;
+  case 2: *dst++ = *i++;
+  default: *dst++ = *i++;
+  }
+  return _mm_load_si128((const __m128i*) padded);
+}
+
+void xnn_f16_maxpool_minmax_ukernel_9p__f16c_u8(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
+    const xnn_float16** input,
+    size_t input_offset,
+    xnn_float16* output,
+    size_t input_increment,
+    size_t output_increment,
+    const struct xnn_f16_minmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(output_pixels != 0);
+  assert(channels != 0);
+
+  const __m256 vmin = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.min));
+  const __m256 vmax = _mm256_cvtph_ps(_mm_set1_epi16(*(const uint16_t*) &params->scalar.max));
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+
+  do {
+    const uint16_t** i = (const uint16_t**) input;
+
+    // First pass: load the inputs, store the max pool in the output.
+    const uint16_t* i0 = *i++;
+    const uint16_t* i1 = 1 < kernel_elements ? *i++ : i0;
+    const uint16_t* i2 = 2 < kernel_elements ? *i++ : i0;
+    const uint16_t* i3 = 3 < kernel_elements ? *i++ : i0;
+    const uint16_t* i4 = 4 < kernel_elements ? *i++ : i0;
+    const uint16_t* i5 = 5 < kernel_elements ? *i++ : i0;
+    const uint16_t* i6 = 6 < kernel_elements ? *i++ : i0;
+    const uint16_t* i7 = 7 < kernel_elements ? *i++ : i0;
+    const uint16_t* i8 = 8 < kernel_elements ? *i++ : i0;
+    i0 = (const uint16_t*) ((uintptr_t) i0 + input_offset);
+    i1 = (const uint16_t*) ((uintptr_t) i1 + input_offset);
+    i2 = (const uint16_t*) ((uintptr_t) i2 + input_offset);
+    i3 = (const uint16_t*) ((uintptr_t) i3 + input_offset);
+    i4 = (const uint16_t*) ((uintptr_t) i4 + input_offset);
+    i5 = (const uint16_t*) ((uintptr_t) i5 + input_offset);
+    i6 = (const uint16_t*) ((uintptr_t) i6 + input_offset);
+    i7 = (const uint16_t*) ((uintptr_t) i7 + input_offset);
+    i8 = (const uint16_t*) ((uintptr_t) i8 + input_offset);
+
+    uint16_t* o = (uint16_t*) output;
+    size_t c = channels;
+    for (; c >= 8; c -= 8) {
+      const __m256 vi0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0)); i0 += 8;
+      const __m256 vi1 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i1)); i1 += 8;
+      const __m256 vi2 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i2)); i2 += 8;
+      const __m256 vi3 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i3)); i3 += 8;
+      const __m256 vi4 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i4)); i4 += 8;
+      const __m256 vi5 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i5)); i5 += 8;
+      const __m256 vi6 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i6)); i6 += 8;
+      const __m256 vi7 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i7)); i7 += 8;
+      const __m256 vi8 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i8)); i8 += 8;
+
+      const __m256 vmax018 = _mm256_max_ps(_mm256_max_ps(vi0, vi1), vi8);
+      const __m256 vmax23 = _mm256_max_ps(vi2, vi3);
+      const __m256 vmax45 = _mm256_max_ps(vi4, vi5);
+      const __m256 vmax67 = _mm256_max_ps(vi6, vi7);
+
+      const __m256 vmax2345 = _mm256_max_ps(vmax23, vmax45);
+      const __m256 vmax01678 = _mm256_max_ps(vmax018, vmax67);
+      __m256 vacc = _mm256_max_ps(vmax2345, vmax01678);
+
+      vacc = _mm256_max_ps(vacc, vmin);
+      vacc = _mm256_min_ps(vacc, vmax);
+
+      _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT)); o += 8;
+    }
+    if (c > 0) {
+      const __m256 vi0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0));
+      const __m256 vi1 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i1));
+      const __m256 vi2 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i2));
+      const __m256 vi3 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i3));
+      const __m256 vi4 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i4));
+      const __m256 vi5 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i5));
+      const __m256 vi6 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i6));
+      const __m256 vi7 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i7));
+      const __m256 vi8 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i8));
+
+      const __m256 vmax018 = _mm256_max_ps(_mm256_max_ps(vi0, vi1), vi8);
+      const __m256 vmax23 = _mm256_max_ps(vi2, vi3);
+      const __m256 vmax45 = _mm256_max_ps(vi4, vi5);
+      const __m256 vmax67 = _mm256_max_ps(vi6, vi7);
+
+      const __m256 vmax2345 = _mm256_max_ps(vmax23, vmax45);
+      const __m256 vmax01678 = _mm256_max_ps(vmax018, vmax67);
+      __m256 vacc = _mm256_max_ps(vmax2345, vmax01678);
+
+      vacc = _mm256_max_ps(vacc, vmin);
+      vacc = _mm256_min_ps(vacc, vmax);
+
+      xnn_store_tail_f16(o, _mm256_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT), c); o += c;
+    }
+
+    // Passes 1 - n: Max more inputs to the output.
+    o = (uint16_t*) output;
+    for (ptrdiff_t k = (ptrdiff_t) kernel_elements - 9; k > 0; k -= 9) {
+      const uint16_t* i0 = *i++;
+      const uint16_t* i1 = 1 < k ? *i++ : i0;
+      const uint16_t* i2 = 2 < k ? *i++ : i0;
+      const uint16_t* i3 = 3 < k ? *i++ : i0;
+      const uint16_t* i4 = 4 < k ? *i++ : i0;
+      const uint16_t* i5 = 5 < k ? *i++ : i0;
+      const uint16_t* i6 = 6 < k ? *i++ : i0;
+      const uint16_t* i7 = 7 < k ? *i++ : i0;
+      const uint16_t* i8 = 8 < k ? *i++ : i0;
+      i0 = (const uint16_t*) ((uintptr_t) i0 + input_offset);
+      i1 = (const uint16_t*) ((uintptr_t) i1 + input_offset);
+      i2 = (const uint16_t*) ((uintptr_t) i2 + input_offset);
+      i3 = (const uint16_t*) ((uintptr_t) i3 + input_offset);
+      i4 = (const uint16_t*) ((uintptr_t) i4 + input_offset);
+      i5 = (const uint16_t*) ((uintptr_t) i5 + input_offset);
+      i6 = (const uint16_t*) ((uintptr_t) i6 + input_offset);
+      i7 = (const uint16_t*) ((uintptr_t) i7 + input_offset);
+      i8 = (const uint16_t*) ((uintptr_t) i8 + input_offset);
+
+      uint16_t* o = (uint16_t*) output;
+      size_t c = channels;
+      for (; c >= 8; c -= 8) {
+        const __m256 vi0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0)); i0 += 8;
+        const __m256 vi1 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i1)); i1 += 8;
+        const __m256 vi2 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i2)); i2 += 8;
+        const __m256 vi3 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i3)); i3 += 8;
+        const __m256 vi4 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i4)); i4 += 8;
+        const __m256 vi5 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i5)); i5 += 8;
+        const __m256 vi6 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i6)); i6 += 8;
+        const __m256 vi7 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i7)); i7 += 8;
+        const __m256 vi8 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i8)); i8 += 8;
+        const __m256 vprev = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) o));
+
+        const __m256 vmax018 = _mm256_max_ps(_mm256_max_ps(vi0, vi1), vi8);
+        const __m256 vmax23 = _mm256_max_ps(vi2, vi3);
+        const __m256 vmax45 = _mm256_max_ps(vi4, vi5);
+        const __m256 vmax67 = _mm256_max_ps(vi6, vi7);
+
+        const __m256 vmax2345 = _mm256_max_ps(vmax23, vmax45);
+        const __m256 vmax01678 = _mm256_max_ps(vmax018, vmax67);
+        const __m256 vmax012345678 = _mm256_max_ps(vmax2345, vmax01678);
+
+        __m256 vacc = _mm256_max_ps(vprev, vmax012345678);
+
+        vacc = _mm256_min_ps(vacc, vmax);
+
+        _mm_storeu_si128((__m128i*) o, _mm256_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT)); o += 8;
+      }
+      if (c > 0) {
+        const __m256 vi0 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i0));
+        const __m256 vi1 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i1));
+        const __m256 vi2 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i2));
+        const __m256 vi3 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i3));
+        const __m256 vi4 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i4));
+        const __m256 vi5 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i5));
+        const __m256 vi6 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i6));
+        const __m256 vi7 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i7));
+        const __m256 vi8 = _mm256_cvtph_ps(_mm_loadu_si128((const __m128i*) i8));
+        const __m256 vprev = _mm256_cvtph_ps(xnn_load_tail_safe_f16(o, c));
+
+        const __m256 vmax018 = _mm256_max_ps(_mm256_max_ps(vi0, vi1), vi8);
+        const __m256 vmax23 = _mm256_max_ps(vi2, vi3);
+        const __m256 vmax45 = _mm256_max_ps(vi4, vi5);
+        const __m256 vmax67 = _mm256_max_ps(vi6, vi7);
+
+        const __m256 vmax2345 = _mm256_max_ps(vmax23, vmax45);
+        const __m256 vmax01678 = _mm256_max_ps(vmax018, vmax67);
+        const __m256 vmax012345678 = _mm256_max_ps(vmax2345, vmax01678);
+
+        __m256 vacc = _mm256_max_ps(vprev, vmax012345678);
+
+        vacc = _mm256_min_ps(vacc, vmax);
+
+        xnn_store_tail_f16(o, _mm256_cvtps_ph(vacc, _MM_FROUND_TO_NEAREST_INT), c);
+      }
+    }
+
+    input = (const xnn_float16**) ((uintptr_t) input + input_increment);
+    output = (xnn_float16*) ((uintptr_t) output + output_increment);
+  } while (--output_pixels != 0);
+}

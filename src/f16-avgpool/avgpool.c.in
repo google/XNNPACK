@@ -1,0 +1,157 @@
+// Copyright 2025 Google LLC
+//
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree.
+
+$assert(SIMD_SIZE > 0)
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "xnnpack/simd/f16-${ARCH}.h"
+
+#include "xnnpack/common.h"
+#include "xnnpack/microparams.h"
+
+void xnn_f16_${"p" if PIXELWISE else ""}avgpool_minmax_ukernel_9p__${ARCH}_u${SIMD_SIZE}(
+    size_t output_pixels,
+    size_t kernel_elements,
+    size_t channels,
+    const xnn_float16** input,
+    size_t input_offset,
+    const xnn_float16* zero,
+    $if PIXELWISE:
+      const xnn_float16* multiplier,
+    xnn_float16* output,
+    size_t input_increment,
+    size_t output_increment,
+    const struct xnn_f16_scaleminmax_params params[restrict XNN_MIN_ELEMENTS(1)])
+{
+  assert(output_pixels != 0);
+  assert(channels != 0);
+
+  const xnn_simd_f16_t vmin = xnn_set1_f16(params->scalar.min);
+  const xnn_simd_f16_t vmax = xnn_set1_f16(params->scalar.max);
+  XNN_FORCE_REALIZATION(vmin);
+  XNN_FORCE_REALIZATION(vmax);
+  $if not PIXELWISE:
+    const xnn_simd_f16_t vscale = xnn_set1_f16(params->scalar.scale);
+    XNN_FORCE_REALIZATION(vscale);
+
+  do {
+    // Start with the previous output as the zero buffer.
+    const xnn_float16* prev_output = zero;
+
+    const xnn_float16** i = input;
+
+    // Passes 0 - n-1: load the output, add 9 inputs.
+    size_t k = kernel_elements;
+    for (; k > 9; k -= 9) {
+      $for K in range(9):
+        const xnn_float16* i${K} = *i++;
+        assert(i${K} != NULL);
+        if XNN_UNPREDICTABLE(i${K} != zero) {
+          i${K} = (const xnn_float16*) ((uintptr_t) i${K} + input_offset);
+        }
+
+      xnn_float16* o = output;
+      size_t c = channels;
+      for (; c >= ${SIMD_SIZE}; c -= ${SIMD_SIZE}) {
+        $for K in range(9):
+          const xnn_simd_f16_t vi${K} = xnn_loadu_f16(i${K}); i${K} += ${SIMD_SIZE};
+        const xnn_simd_f16_t vprev = xnn_loadu_f16(prev_output); prev_output += ${SIMD_SIZE};
+
+        const xnn_simd_f16_t vsum018 = xnn_add_f16(xnn_add_f16(vi0, vi1), vi8);
+        const xnn_simd_f16_t vsum23 = xnn_add_f16(vi2, vi3);
+        const xnn_simd_f16_t vsum45 = xnn_add_f16(vi4, vi5);
+        const xnn_simd_f16_t vsum67 = xnn_add_f16(vi6, vi7);
+
+        const xnn_simd_f16_t vsum2345 = xnn_add_f16(vsum23, vsum45);
+        const xnn_simd_f16_t vsum01678 = xnn_add_f16(vsum018, vsum67);
+        const xnn_simd_f16_t vsum012345678 = xnn_add_f16(vsum2345, vsum01678);
+        const xnn_simd_f16_t vacc = xnn_add_f16(vprev, vsum012345678);
+        xnn_storeu_f16(o, vacc); o += ${SIMD_SIZE};
+      }
+      $if SIMD_SIZE > 1:
+        if (c > 0) {
+          $for K in range(9):
+            const xnn_simd_f16_t vi${K} = xnn_load_tail_f16(i${K}, c);
+          const xnn_simd_f16_t vprev = xnn_load_tail_safe_f16(prev_output, c);
+
+          const xnn_simd_f16_t vsum018 = xnn_add_f16(xnn_add_f16(vi0, vi1), vi8);
+          const xnn_simd_f16_t vsum23 = xnn_add_f16(vi2, vi3);
+          const xnn_simd_f16_t vsum45 = xnn_add_f16(vi4, vi5);
+          const xnn_simd_f16_t vsum67 = xnn_add_f16(vi6, vi7);
+
+          const xnn_simd_f16_t vsum2345 = xnn_add_f16(vsum23, vsum45);
+          const xnn_simd_f16_t vsum01678 = xnn_add_f16(vsum018, vsum67);
+          const xnn_simd_f16_t vsum012345678 = xnn_add_f16(vsum2345, vsum01678);
+          const xnn_simd_f16_t vacc = xnn_add_f16(vprev, vsum012345678);
+          xnn_store_tail_f16(o, vacc, c);
+        }
+
+      // Subsequent passes read from the previous output.
+      prev_output = output;
+    }
+
+    // Final pass: load the output, add remaining kernel elements, apply scaling/min/max
+    $for K in range(9):
+      const xnn_float16* i${K} = ${K} < k ? *i++ : zero;
+      assert(i${K} != NULL);
+      if XNN_UNPREDICTABLE(i${K} != zero) {
+        i${K} = (const xnn_float16*) ((uintptr_t) i${K} + input_offset);
+      }
+
+    $if PIXELWISE:
+      xnn_simd_f16_t vscale = xnn_set1_f16(*multiplier++);
+    size_t c = channels;
+    for (; c >= ${SIMD_SIZE}; c -= ${SIMD_SIZE}) {
+      $for K in range(9):
+        const xnn_simd_f16_t vi${K} = xnn_loadu_f16(i${K}); i${K} += ${SIMD_SIZE};
+      const xnn_simd_f16_t vprev = xnn_loadu_f16(prev_output); prev_output += ${SIMD_SIZE};
+
+      const xnn_simd_f16_t vsum018 = xnn_add_f16(xnn_add_f16(vi0, vi1), vi8);
+      const xnn_simd_f16_t vsum23 = xnn_add_f16(vi2, vi3);
+      const xnn_simd_f16_t vsum45 = xnn_add_f16(vi4, vi5);
+      const xnn_simd_f16_t vsum67 = xnn_add_f16(vi6, vi7);
+
+      const xnn_simd_f16_t vsum2345 = xnn_add_f16(vsum23, vsum45);
+      const xnn_simd_f16_t vsum01678 = xnn_add_f16(vsum018, vsum67);
+      const xnn_simd_f16_t vsum012345678 = xnn_add_f16(vsum2345, vsum01678);
+
+      xnn_simd_f16_t vacc = xnn_add_f16(vprev, vsum012345678);
+
+      vacc = xnn_mul_f16(vacc, vscale);
+      vacc = xnn_max_f16(vacc, vmin);
+      vacc = xnn_min_f16(vacc, vmax);
+
+      xnn_storeu_f16(output, vacc); output += ${SIMD_SIZE};
+    }
+    $if SIMD_SIZE > 1:
+      if (c > 0) {
+        $for K in range(9):
+          const xnn_simd_f16_t vi${K} = xnn_load_tail_f16(i${K}, c);
+        const xnn_simd_f16_t vprev = xnn_load_tail_safe_f16(prev_output, c);
+
+        const xnn_simd_f16_t vsum018 = xnn_add_f16(xnn_add_f16(vi0, vi1), vi8);
+        const xnn_simd_f16_t vsum23 = xnn_add_f16(vi2, vi3);
+        const xnn_simd_f16_t vsum45 = xnn_add_f16(vi4, vi5);
+        const xnn_simd_f16_t vsum67 = xnn_add_f16(vi6, vi7);
+
+        const xnn_simd_f16_t vsum2345 = xnn_add_f16(vsum23, vsum45);
+        const xnn_simd_f16_t vsum01678 = xnn_add_f16(vsum018, vsum67);
+        const xnn_simd_f16_t vsum012345678 = xnn_add_f16(vsum2345, vsum01678);
+
+        xnn_simd_f16_t vacc = xnn_add_f16(vprev, vsum012345678);
+
+        vacc = xnn_mul_f16(vacc, vscale);
+        vacc = xnn_max_f16(vacc, vmin);
+        vacc = xnn_min_f16(vacc, vmax);
+
+        xnn_store_tail_f16(output, vacc, c); output += c;
+      }
+
+    input = (const xnn_float16**) ((uintptr_t) input + input_increment);
+    output = (xnn_float16*) ((uintptr_t) output + output_increment);
+  } while (--output_pixels != 0);
+}
