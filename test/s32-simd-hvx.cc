@@ -55,6 +55,36 @@ TEST_F(S32SimdHVXTest, Mul) {
   }
 }
 
+TEST_F(S32SimdHVXTest, Sub) {
+  const xnn_simd_s32_t a = xnn_loadu_s32(inputs_.data());
+  const xnn_simd_s32_t b = xnn_loadu_s32(inputs_.data() + xnn_simd_size_s32);
+  const xnn_simd_s32_t res = xnn_sub_s32(a, b);
+  xnn_storeu_s32(output_.data(), res);
+  for (size_t k = 0; k < xnn_simd_size_s32; k++) {
+    ASSERT_EQ(output_[k], inputs_[k] - inputs_[k + xnn_simd_size_s32]);
+  }
+}
+
+TEST_F(S32SimdHVXTest, Min) {
+  const xnn_simd_s32_t a = xnn_loadu_s32(inputs_.data());
+  const xnn_simd_s32_t b = xnn_loadu_s32(inputs_.data() + xnn_simd_size_s32);
+  const xnn_simd_s32_t res = xnn_min_s32(a, b);
+  xnn_storeu_s32(output_.data(), res);
+  for (size_t k = 0; k < xnn_simd_size_s32; k++) {
+    ASSERT_EQ(output_[k], std::min(inputs_[k], inputs_[k + xnn_simd_size_s32]));
+  }
+}
+
+TEST_F(S32SimdHVXTest, Max) {
+  const xnn_simd_s32_t a = xnn_loadu_s32(inputs_.data());
+  const xnn_simd_s32_t b = xnn_loadu_s32(inputs_.data() + xnn_simd_size_s32);
+  const xnn_simd_s32_t res = xnn_max_s32(a, b);
+  xnn_storeu_s32(output_.data(), res);
+  for (size_t k = 0; k < xnn_simd_size_s32; k++) {
+    ASSERT_EQ(output_[k], std::max(inputs_[k], inputs_[k + xnn_simd_size_s32]));
+  }
+}
+
 TEST_F(S32SimdHVXTest, StoreTail) {
   const xnn_simd_s32_t a = xnn_loadu_s32(inputs_.data());
   for (size_t num_elements = 1; num_elements < xnn_simd_size_s32;
