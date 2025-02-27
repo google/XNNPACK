@@ -1411,10 +1411,6 @@ TEST_F(FullyConnectedTestBF16F32, matches_operator_api) {
 
   xnn_operator_t op = nullptr;
 
-  // std::generate(input.begin(), input.end(), [&]() { return f32dist(rng); });
-  // std::generate(kernel.begin(), kernel.end(), [&]() { return f32dist(rng);
-  // }); std::generate(bias.begin(), bias.end(), [&]() { return f32dist(rng);
-  // });
   int counter = 0;
   std::generate(input.begin(), input.end(),
                 [&]() { return static_cast<float>(counter++ % 10); });
