@@ -20,6 +20,7 @@ load(
     "xnnpack_simd_s16_archs",
     "xnnpack_simd_s32_archs",
     "xnnpack_simd_s8_archs",
+    "xnnpack_simd_u8_archs",
 )
 
 MICROKERNEL_TEST_DEPS = [
@@ -174,6 +175,15 @@ xnnpack_cxx_library(
 #)
 
 ######################### Unit tests for simd wrappers #########################
+SIMD_TEST_DEPS = [
+    ":replicable_random_device",
+    "//:buffer",
+    "//:common",
+    "//:isa_checks",
+    "//:math",
+    "//:microkernels_h",
+]
+
 [xnnpack_unit_test(
     name = "f32_simd_" + arch + "_test",
     srcs = [
@@ -181,13 +191,7 @@ xnnpack_cxx_library(
     ],
     copts = xnnpack_simd_copts_for_arch(arch),
     tags = ["simd_wrapper_test"],
-    deps = [
-        ":replicable_random_device",
-        "//:buffer",
-        "//:common",
-        "//:isa_checks",
-        "//:microkernels_h",
-    ],
+    deps = SIMD_TEST_DEPS,
 ) for arch in xnnpack_simd_f32_archs()]
 
 [xnnpack_unit_test(
@@ -198,14 +202,7 @@ xnnpack_cxx_library(
     copts = xnnpack_simd_copts_for_arch(arch),
     features = ["-use_header_modules"],
     tags = ["simd_wrapper_test"],
-    deps = [
-        ":replicable_random_device",
-        "//:buffer",
-        "//:common",
-        "//:isa_checks",
-        "//:math",
-        "//:microkernels_h",
-    ],
+    deps = SIMD_TEST_DEPS,
 ) for arch in xnnpack_simd_f16_archs()]
 
 [xnnpack_unit_test(
@@ -215,13 +212,7 @@ xnnpack_cxx_library(
     ],
     copts = xnnpack_simd_copts_for_arch(arch),
     tags = ["simd_wrapper_test"],
-    deps = [
-        ":replicable_random_device",
-        "//:buffer",
-        "//:common",
-        "//:isa_checks",
-        "//:microkernels_h",
-    ],
+    deps = SIMD_TEST_DEPS,
 ) for arch in xnnpack_simd_s16_archs()]
 
 [xnnpack_unit_test(
@@ -231,13 +222,7 @@ xnnpack_cxx_library(
     ],
     copts = xnnpack_simd_copts_for_arch(arch),
     tags = ["simd_wrapper_test"],
-    deps = [
-        ":replicable_random_device",
-        "//:buffer",
-        "//:common",
-        "//:isa_checks",
-        "//:microkernels_h",
-    ],
+    deps = SIMD_TEST_DEPS,
 ) for arch in xnnpack_simd_s32_archs()]
 
 [xnnpack_unit_test(
@@ -247,14 +232,18 @@ xnnpack_cxx_library(
     ],
     copts = xnnpack_simd_copts_for_arch(arch),
     tags = ["simd_wrapper_test"],
-    deps = [
-        ":replicable_random_device",
-        "//:buffer",
-        "//:common",
-        "//:isa_checks",
-        "//:microkernels_h",
-    ],
+    deps = SIMD_TEST_DEPS,
 ) for arch in xnnpack_simd_s8_archs()]
+
+[xnnpack_unit_test(
+    name = "u8_simd_" + arch + "_test",
+    srcs = [
+        "u8-simd-" + arch + ".cc",
+    ],
+    copts = xnnpack_simd_copts_for_arch(arch),
+    tags = ["simd_wrapper_test"],
+    deps = SIMD_TEST_DEPS,
+) for arch in xnnpack_simd_u8_archs()]
 
 ######################### Unit tests for micro-kernels #########################
 

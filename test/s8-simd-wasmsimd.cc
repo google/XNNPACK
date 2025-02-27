@@ -1,15 +1,17 @@
+// Auto-generated file. Do not edit!
+//   Template: test/s8-simd.cc.in
+//   Generator: tools/xngen
+//
 // Copyright 2024 Google LLC
 //
 // This source code is licensed under the BSD-style license found in the
 // LICENSE file in the root directory of this source tree.
 
-$TESTNAME = f"S8Simd{ARCH.upper()}Test"
 
-$if ARCH_MACRO:
-  // This header needs to go first for the arch test macros.
-  #include "xnnpack/common.h"
+// This header needs to go first for the arch test macros.
+#include "xnnpack/common.h"
 
-  #if ${ARCH_MACRO}
+#if XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD
 
 #include <algorithm>
 #include <cmath>
@@ -22,16 +24,14 @@ $if ARCH_MACRO:
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "xnnpack/isa-checks.h"
-#include "xnnpack/simd/s8-${ARCH}.h"
+#include "xnnpack/simd/s8-wasmsimd.h"
 #include "replicable_random_device.h"
 
 namespace xnnpack {
 
-class ${TESTNAME} : public ::testing::Test {
+class S8SimdWASMSIMDTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    $if TEST_REQUIRES:
-      ${TEST_REQUIRES};
     inputs_.resize(3 * xnn_simd_size_s8);
     output_.resize(xnn_simd_size_s8);
     std::uniform_int_distribution<int8_t> s8(-100, 100);
@@ -44,7 +44,7 @@ class ${TESTNAME} : public ::testing::Test {
   std::vector<int8_t> output_;
 };
 
-TEST_F(${TESTNAME}, Add) {
+TEST_F(S8SimdWASMSIMDTest, Add) {
   const xnn_simd_s8_t a = xnn_loadu_s8(inputs_.data());
   const xnn_simd_s8_t b = xnn_loadu_s8(inputs_.data() + xnn_simd_size_s8);
   const xnn_simd_s8_t res = xnn_add_s8(a, b);
@@ -54,7 +54,7 @@ TEST_F(${TESTNAME}, Add) {
   }
 }
 
-TEST_F(${TESTNAME}, Min) {
+TEST_F(S8SimdWASMSIMDTest, Min) {
   const xnn_simd_s8_t a = xnn_loadu_s8(inputs_.data());
   const xnn_simd_s8_t b = xnn_loadu_s8(inputs_.data() + xnn_simd_size_s8);
   const xnn_simd_s8_t res = xnn_min_s8(a, b);
@@ -64,7 +64,7 @@ TEST_F(${TESTNAME}, Min) {
   }
 }
 
-TEST_F(${TESTNAME}, Max) {
+TEST_F(S8SimdWASMSIMDTest, Max) {
   const xnn_simd_s8_t a = xnn_loadu_s8(inputs_.data());
   const xnn_simd_s8_t b = xnn_loadu_s8(inputs_.data() + xnn_simd_size_s8);
   const xnn_simd_s8_t res = xnn_max_s8(a, b);
@@ -74,7 +74,7 @@ TEST_F(${TESTNAME}, Max) {
   }
 }
 
-TEST_F(${TESTNAME}, StoreTail) {
+TEST_F(S8SimdWASMSIMDTest, StoreTail) {
   const xnn_simd_s8_t a = xnn_loadu_s8(inputs_.data());
   for (size_t num_elements = 1; num_elements < xnn_simd_size_s8;
       num_elements++) {
@@ -89,5 +89,4 @@ TEST_F(${TESTNAME}, StoreTail) {
 }
 }  // namespace xnnpack
 
-$if ARCH_MACRO:
-  #endif  // ${ARCH_MACRO}
+#endif  // XNN_ARCH_WASMSIMD || XNN_ARCH_WASMRELAXEDSIMD

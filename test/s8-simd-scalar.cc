@@ -50,6 +50,26 @@ TEST_F(S8SimdSCALARTest, Add) {
   }
 }
 
+TEST_F(S8SimdSCALARTest, Min) {
+  const xnn_simd_s8_t a = xnn_loadu_s8(inputs_.data());
+  const xnn_simd_s8_t b = xnn_loadu_s8(inputs_.data() + xnn_simd_size_s8);
+  const xnn_simd_s8_t res = xnn_min_s8(a, b);
+  xnn_storeu_s8(output_.data(), res);
+  for (size_t k = 0; k < xnn_simd_size_s8; k++) {
+    ASSERT_EQ(output_[k], std::min<int8_t>(inputs_[k], inputs_[k + xnn_simd_size_s8]));
+  }
+}
+
+TEST_F(S8SimdSCALARTest, Max) {
+  const xnn_simd_s8_t a = xnn_loadu_s8(inputs_.data());
+  const xnn_simd_s8_t b = xnn_loadu_s8(inputs_.data() + xnn_simd_size_s8);
+  const xnn_simd_s8_t res = xnn_max_s8(a, b);
+  xnn_storeu_s8(output_.data(), res);
+  for (size_t k = 0; k < xnn_simd_size_s8; k++) {
+    ASSERT_EQ(output_[k], std::max<int8_t>(inputs_[k], inputs_[k + xnn_simd_size_s8]));
+  }
+}
+
 TEST_F(S8SimdSCALARTest, StoreTail) {
   const xnn_simd_s8_t a = xnn_loadu_s8(inputs_.data());
   for (size_t num_elements = 1; num_elements < xnn_simd_size_s8;
